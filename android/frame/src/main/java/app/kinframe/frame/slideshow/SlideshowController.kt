@@ -65,6 +65,12 @@ data class Stage(
     val startProgress: Float = 0f,
 )
 
+/**
+ * Immediate feedback for rotate / fill on the frame: the slide on screen turns or rescales right away while the
+ * sharp version renders (seconds on the RK3126), then cross-fades into it.
+ */
+data class AdjustPreview(val slideKey: String, val rotation: Float, val scale: Float)
+
 sealed interface EmptyState {
     data object NoPhotos : EmptyState
     data object AllHidden : EmptyState
@@ -332,6 +338,7 @@ class SlideshowController(private val c: FrameController) {
         shownAt = SystemClock.elapsedRealtime()
         val st = _stage.value
         if (st.outgoing != null) _stage.value = st.copy(outgoing = null)
+        if (_preview.value != null && _preview.value?.slideKey != st.incoming?.key) _preview.value = null
         prefetch()
         val p = st.incoming?.placement ?: return
         if (p.isVideo && settings.video.autoplay && st.incoming.image != null) startVideo(p)
@@ -548,9 +555,43 @@ class SlideshowController(private val c: FrameController) {
         navLock.withLock {
             val slide = if (group.size > 1 && group.size == inc.tiles.size) obtainGroup(group) else obtain(p)
             val st = _stage.value
-            _stage.value = Stage(null, slide, st.seq + 1, TransitionKind.Cut, 0, 1)
-            transitionRunning = false
+            if (_preview.value?.slideKey == st.incoming?.key && slide.key != st.incoming?.key) {
+                // The previewed slide fades into the sharp one (the preview is cleared when that is done).
+                transitionRunning = true
+                _stage.value = Stage(st.incoming, slide, st.seq + 1, TransitionKind.Crossfade, ADJUST_FADE_MS, 1, st.holdMs)
+            } else {
+                _stage.value = Stage(null, slide, st.seq + 1, TransitionKind.Cut, 0, 1)
+                transitionRunning = false
+            }
         }
+    }
+
+    private val _preview = MutableStateFlow<AdjustPreview?>(null)
+    val preview: StateFlow<AdjustPreview?> = _preview
+
+    /** A quarter turn clockwise, shown at once: the turned screen fits inside the screen until the render lands. */
+    fun previewRotate() {
+        val inc = _stage.value.incoming?.takeIf { it.tiles.isEmpty() } ?: return
+        val prev = _preview.value?.takeIf { it.slideKey == inc.key }
+        val rotation = (prev?.rotation ?: 0f) + 90f
+        val quarter = ((rotation / 90f).toInt() % 2) != 0
+        val turnFit = if (screenW > 0 && screenH > 0) minOf(screenW.toFloat() / screenH, screenH.toFloat() / screenW) else 1f
+        val fitScale = (prev?.scale ?: 1f) / (if (((prev?.rotation ?: 0f) / 90f).toInt() % 2 != 0) turnFit else 1f)
+        _preview.value = AdjustPreview(inc.key, rotation, fitScale * (if (quarter) turnFit else 1f))
+    }
+
+    /**
+     * Fill / whole photo, shown at once: the slide scales to the size the photo will have, so filling pushes the
+     * bands out and the whole photo shrinks the crop to its final size, before the sharp render fades in.
+     */
+    fun previewFit(fill: Boolean) {
+        val inc = _stage.value.incoming?.takeIf { it.tiles.isEmpty() } ?: return
+        val a = aspect(inc.placement) ?: return
+        if (screenW <= 0 || screenH <= 0) return
+        val big = maxOf(screenW / a, screenH.toFloat())
+        val small = minOf(screenW / a, screenH.toFloat())
+        val prev = _preview.value?.takeIf { it.slideKey == inc.key }
+        _preview.value = AdjustPreview(inc.key, prev?.rotation ?: 0f, (prev?.scale ?: 1f) * if (fill) big / small else small / big)
     }
 
     // ------------------------------------------------------------------ video
@@ -726,6 +767,7 @@ class SlideshowController(private val c: FrameController) {
     }
 
     companion object {
+        const val ADJUST_FADE_MS = 350
         private const val TAG = "KinSlideshow"
         /** Crossfade between a live photo's clip and its still. */
         const val LIVE_FADE_MS = 400L

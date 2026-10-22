@@ -313,6 +313,7 @@ fun SlideshowScreen(c: FrameController) {
                 ),
         ) {
             val dir = stage.direction
+            val preview by ss.preview.collectAsState()
             neighbor?.let { nb ->
                 key(nb.key) {
                     SlideLayer(nb) { translationX = dragX() + neighborDir * wPx }
@@ -344,6 +345,11 @@ fun SlideshowScreen(c: FrameController) {
                             translationX = -dir * wPx * progress.value
                         }
                     }
+                    // Rotate / fill feedback while the sharp version renders (see AdjustPreview).
+                    val pv = preview?.takeIf { it.slideKey == slide.key }
+                    val pvRotation by animateFloatAsState(pv?.rotation ?: 0f, tween(300, easing = FastOutSlowInEasing), label = "pvRot")
+                    val pvScale by animateFloatAsState(pv?.scale ?: 1f, tween(300, easing = FastOutSlowInEasing), label = "pvScale")
+                    val captionAlpha by animateFloatAsState(if (pv != null) 0f else 1f, tween(200), label = "pvCaption")
                     SlideLayer(slide) {
                         place()
                         if (kb != null) {
@@ -353,9 +359,13 @@ fun SlideshowScreen(c: FrameController) {
                             translationX += kb.xAt(t) * wPx
                             translationY = kb.yAt(t) * hPx
                         }
+                        if (pvRotation != 0f || pvScale != 1f) {
+                            rotationZ = pvRotation
+                            scaleX *= pvScale; scaleY *= pvScale
+                        }
                     }
                     if (incoming) Box(Modifier.fillMaxSize().graphicsLayer { translationX = dragX() }) { VideoLayer(c, slide, wPx, hPx) }
-                    CaptionLayer(slide, hPx, place)
+                    CaptionLayer(slide, hPx) { place(); alpha *= captionAlpha }
                 }
             }
             TextureWarmup(c)
@@ -419,8 +429,8 @@ fun SlideshowScreen(c: FrameController) {
                 }
             },
             // The menu stays open, so a photo that is a quarter turn off can be turned again right away.
-            onRotate = { p -> scope.launch { c.session.value?.outbox?.adjust(p.id, turn = true) } },
-            onFit = { p, fill -> scope.launch { c.session.value?.outbox?.adjust(p.id, fit = if (fill) "fill" else "fit") } },
+            onRotate = { p -> ss.previewRotate(); scope.launch { c.session.value?.outbox?.adjust(p.id, turn = true) } },
+            onFit = { p, fill -> ss.previewFit(fill); scope.launch { c.session.value?.outbox?.adjust(p.id, fit = if (fill) "fill" else "fit") } },
             onPower = { menuOpen = false; powerOpen = true },
             onSettings = { menuOpen = false; c.openSettings() },
             onCalendar = { menuOpen = false; c.calendar.openCalendar() },
