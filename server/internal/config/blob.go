@@ -135,4 +135,3 @@ func (c BlobConfig) OpenBackend(ctx context.Context, backend string) (blob.Store
 	}
 	return nil, fmt.Errorf("unknown blob backend %q (want fs or s3)", backend)
 }
-

@@ -38,8 +38,8 @@ type CentreFocal struct{}
 func (CentreFocal) Focal(context.Context, string) (float64, float64) { return 0.5, 0.5 }
 
 type Worker struct {
-	Store   *store.Store
-	Blob    blob.Store
+	Store *store.Store
+	Blob  blob.Store
 	// Scratch is a local directory for intermediate files; vips and ffmpeg
 	// need real files, so masters are downloaded here when the store is
 	// remote. Every job removes its own directory, also on failure.
