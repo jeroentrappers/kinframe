@@ -1,0 +1,3063 @@
+components:
+    parameters:
+        Cursor:
+            in: query
+            name: cursor
+            schema:
+                type: string
+        EndpointId:
+            in: path
+            name: endpointId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        FrameId:
+            in: path
+            name: frameId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        IdempotencyKey:
+            in: header
+            name: Idempotency-Key
+            schema:
+                maxLength: 64
+                type: string
+        IfMatch:
+            description: Quoted version, e.g. "7"
+            in: header
+            name: If-Match
+            required: true
+            schema:
+                type: string
+        InviteToken:
+            in: path
+            name: token
+            required: true
+            schema:
+                maxLength: 64
+                minLength: 22
+                type: string
+        ItemId:
+            in: path
+            name: itemId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        Limit:
+            in: query
+            name: limit
+            schema:
+                default: 50
+                maximum: 200
+                minimum: 1
+                type: integer
+        PlacementId:
+            in: path
+            name: placementId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+        UserId:
+            in: path
+            name: userId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
+    responses:
+        Problem:
+            content:
+                application/problem+json:
+                    schema:
+                        $ref: '#/components/schemas/Problem'
+            description: Error (RFC 9457)
+    schemas:
+        Album:
+            properties:
+                cover_placement_id:
+                    $ref: '#/components/schemas/Id'
+                id:
+                    $ref: '#/components/schemas/Id'
+                name:
+                    type: string
+                placement_count:
+                    type: integer
+                placement_ids:
+                    description: Ordered.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
+                schedule:
+                    description: Play this album automatically between dates each year (e.g. December).
+                    nullable: true
+                    properties:
+                        from_month_day:
+                            pattern: ^[0-9]{2}-[0-9]{2}$
+                            type: string
+                        to_month_day:
+                            pattern: ^[0-9]{2}-[0-9]{2}$
+                            type: string
+                    type: object
+                version:
+                    type: integer
+            required:
+                - id
+                - name
+                - version
+                - placement_count
+            type: object
+        AlbumWrite:
+            properties:
+                cover_placement_id:
+                    $ref: '#/components/schemas/Id'
+                name:
+                    maxLength: 60
+                    minLength: 1
+                    type: string
+                placement_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
+                schedule:
+                    description: Play this album automatically between dates each year (e.g. December).
+                    nullable: true
+                    properties:
+                        from_month_day:
+                            pattern: ^[0-9]{2}-[0-9]{2}$
+                            type: string
+                        to_month_day:
+                            pattern: ^[0-9]{2}-[0-9]{2}$
+                            type: string
+                    type: object
+            type: object
+        Change:
+            discriminator:
+                propertyName: type
+            properties:
+                album:
+                    $ref: '#/components/schemas/Album'
+                frame:
+                    properties:
+                        location:
+                            nullable: true
+                            type: string
+                        name:
+                            type: string
+                        owner_name:
+                            type: string
+                    type: object
+                id:
+                    $ref: '#/components/schemas/Id'
+                member:
+                    properties:
+                        avatar_url:
+                            nullable: true
+                            type: string
+                        display_name:
+                            type: string
+                        role:
+                            $ref: '#/components/schemas/Role'
+                        user_id:
+                            $ref: '#/components/schemas/Id'
+                    type: object
+                placement:
+                    allOf:
+                        - $ref: '#/components/schemas/Placement'
+                        - properties:
+                            media:
+                                description: Frame rendition to download (present on placement.upsert when status is ready).
+                                properties:
+                                    bytes:
+                                        type: integer
+                                    height:
+                                        type: integer
+                                    mime:
+                                        example: image/webp
+                                        type: string
+                                    poster_url:
+                                        format: uri
+                                        nullable: true
+                                        type: string
+                                    sha256:
+                                        type: string
+                                    url:
+                                        format: uri
+                                        type: string
+                                    width:
+                                        type: integer
+                                type: object
+                          type: object
+                seq:
+                    type: integer
+                settings:
+                    $ref: '#/components/schemas/FrameSettings'
+                type:
+                    enum:
+                        - placement.upsert
+                        - placement.remove
+                        - settings
+                        - album.upsert
+                        - album.remove
+                        - member.upsert
+                        - member.remove
+                        - frame
+                        - weather
+                        - reset
+                    type: string
+                weather:
+                    properties:
+                        current:
+                            properties:
+                                code:
+                                    description: WMO weather code
+                                    type: integer
+                                is_day:
+                                    type: boolean
+                                temp_c:
+                                    type: number
+                            type: object
+                        daily:
+                            items:
+                                properties:
+                                    code:
+                                        type: integer
+                                    date:
+                                        format: date
+                                        type: string
+                                    max_c:
+                                        type: number
+                                    min_c:
+                                        type: number
+                                type: object
+                            type: array
+                        fetched_at:
+                            format: date-time
+                            type: string
+                    type: object
+            required:
+                - seq
+                - type
+            type: object
+        CommandResult:
+            properties:
+                error_code:
+                    nullable: true
+                    type: string
+                ok:
+                    type: boolean
+            required:
+                - ok
+            type: object
+        DeviceEnroll:
+            properties:
+                app:
+                    properties:
+                        channel:
+                            default: stable
+                            enum:
+                                - stable
+                                - beta
+                            type: string
+                        version:
+                            type: string
+                        version_code:
+                            type: integer
+                    required:
+                        - version
+                        - version_code
+                    type: object
+                hardware:
+                    properties:
+                        abis:
+                            items:
+                                type: string
+                            type: array
+                        android_sdk:
+                            example: 23
+                            type: integer
+                        board:
+                            example: rk312x
+                            type: string
+                        brand:
+                            example: denver
+                            type: string
+                        capabilities:
+                            properties:
+                                accelerometer:
+                                    type: boolean
+                                battery:
+                                    type: boolean
+                                light_sensor:
+                                    type: boolean
+                                motion_sensor:
+                                    type: boolean
+                                root:
+                                    type: boolean
+                                sd_card:
+                                    type: boolean
+                                speaker:
+                                    type: boolean
+                                usb_host:
+                                    type: boolean
+                            type: object
+                        max_video_decode:
+                            $ref: '#/components/schemas/Screen'
+                        model:
+                            example: PFF_1024
+                            type: string
+                        ram_mb:
+                            type: integer
+                        storage_total_bytes:
+                            type: integer
+                    required:
+                        - model
+                    type: object
+                locale:
+                    type: string
+                screen:
+                    $ref: '#/components/schemas/Screen'
+                timezone:
+                    type: string
+            required:
+                - hardware
+                - screen
+                - app
+            type: object
+        DeviceState:
+            properties:
+                claimed:
+                    type: boolean
+                device_id:
+                    $ref: '#/components/schemas/Id'
+                frame_id:
+                    nullable: true
+                    type: string
+                frame_name:
+                    nullable: true
+                    type: string
+                latest_seq:
+                    type: integer
+                owner_name:
+                    nullable: true
+                    type: string
+                server_time:
+                    format: date-time
+                    type: string
+            required:
+                - device_id
+                - claimed
+                - latest_seq
+            type: object
+        Discovery:
+            properties:
+                api:
+                    format: uri
+                    type: string
+                auth:
+                    properties:
+                        api_resource:
+                            type: string
+                        issuer:
+                            format: uri
+                            type: string
+                        mobile_client_id:
+                            type: string
+                        web_client_id:
+                            type: string
+                    required:
+                        - issuer
+                        - mobile_client_id
+                        - web_client_id
+                        - api_resource
+                    type: object
+                dev_auth:
+                    default: false
+                    description: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
+                    type: boolean
+                limits:
+                    $ref: '#/components/schemas/Limits'
+                name:
+                    type: string
+                version:
+                    type: string
+                web:
+                    format: uri
+                    type: string
+            required:
+                - name
+                - version
+                - api
+                - auth
+                - limits
+            type: object
+        Fit:
+            enum:
+                - fill
+                - fit
+            type: string
+        FocalPoint:
+            description: Relative to the master rendition, 0..1 from top-left.
+            properties:
+                x:
+                    maximum: 1
+                    minimum: 0
+                    type: number
+                "y":
+                    maximum: 1
+                    minimum: 0
+                    type: number
+            required:
+                - x
+                - "y"
+            type: object
+        Frame:
+            allOf:
+                - $ref: '#/components/schemas/FrameSummary'
+                - properties:
+                    approve_joins_on_frame:
+                        type: boolean
+                    created_at:
+                        format: date-time
+                        type: string
+                    default_permissions:
+                        $ref: '#/components/schemas/Permissions'
+                    invite_requires_approval:
+                        type: boolean
+                    member_count:
+                        type: integer
+                    moderation:
+                        type: boolean
+                    placement_count:
+                        type: integer
+                  type: object
+        FrameCode:
+            properties:
+                claimed:
+                    description: false while the frame has no owner
+                    type: boolean
+                code:
+                    pattern: ^[0-9]{8}$
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                join_url:
+                    format: uri
+                    type: string
+            required:
+                - code
+                - expires_at
+                - join_url
+            type: object
+        FrameCommand:
+            properties:
+                placement_id:
+                    $ref: '#/components/schemas/Id'
+                type:
+                    enum:
+                        - sleep
+                        - wake
+                        - restart
+                        - next
+                        - previous
+                        - show_placement
+                        - sync_now
+                        - identify
+                    type: string
+            required:
+                - type
+            type: object
+        FrameHealth:
+            properties:
+                last_heartbeat:
+                    $ref: '#/components/schemas/Heartbeat'
+                last_seen_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                last_unclean_shutdown_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                online:
+                    type: boolean
+            type: object
+        FrameSettings:
+            description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
+            properties:
+                display:
+                    properties:
+                        brightness:
+                            default: 204
+                            maximum: 255
+                            minimum: 15
+                            type: integer
+                        brightness_mode:
+                            default: manual
+                            enum:
+                                - manual
+                                - schedule
+                                - sun
+                                - sensor
+                            type: string
+                        brightness_schedule:
+                            items:
+                                properties:
+                                    at:
+                                        pattern: ^[0-2][0-9]:[0-5][0-9]$
+                                        type: string
+                                    brightness:
+                                        maximum: 255
+                                        minimum: 15
+                                        type: integer
+                                type: object
+                            type: array
+                        motion_timeout_min:
+                            default: 30
+                            nullable: true
+                            type: integer
+                        sleep_schedules:
+                            items:
+                                $ref: '#/components/schemas/SleepSchedule'
+                            type: array
+                        text_scale:
+                            default: 1
+                            enum:
+                                - 1
+                                - 1.15
+                                - 1.3
+                            type: number
+                    type: object
+                kiosk:
+                    properties:
+                        allow_remove_members_on_frame:
+                            default: true
+                            type: boolean
+                        owner_pin_set:
+                            readOnly: true
+                            type: boolean
+                    type: object
+                locale:
+                    properties:
+                        first_day_of_week:
+                            default: mon
+                            enum:
+                                - mon
+                                - sun
+                                - sat
+                            type: string
+                        language:
+                            default: en
+                            type: string
+                        temperature_unit:
+                            default: c
+                            enum:
+                                - c
+                                - f
+                            type: string
+                        timezone:
+                            default: Europe/Brussels
+                            type: string
+                    type: object
+                location:
+                    description: Used for weather and sun-based brightness. Set by owner/admin.
+                    nullable: true
+                    properties:
+                        lat:
+                            type: number
+                        lon:
+                            type: number
+                        name:
+                            type: string
+                    type: object
+                notifications:
+                    properties:
+                        sound:
+                            default: true
+                            type: boolean
+                        volume:
+                            default: 40
+                            maximum: 100
+                            minimum: 0
+                            type: integer
+                    type: object
+                slideshow:
+                    properties:
+                        album_id:
+                            description: null = all photos
+                            nullable: true
+                            type: string
+                        background:
+                            default: blur
+                            enum:
+                                - blur
+                                - black
+                                - palette
+                            type: string
+                        caption_date:
+                            default: received
+                            enum:
+                                - taken
+                                - received
+                                - none
+                            type: string
+                        collage:
+                            default: false
+                            type: boolean
+                        collage_max:
+                            default: 3
+                            maximum: 6
+                            minimum: 2
+                            type: integer
+                        fill:
+                            default: true
+                            type: boolean
+                        interval_s:
+                            default: 30
+                            maximum: 86400
+                            minimum: 2
+                            type: integer
+                        on_this_day:
+                            default: false
+                            type: boolean
+                        order:
+                            default: received
+                            enum:
+                                - received
+                                - taken
+                                - shuffle
+                            type: string
+                        pair_portraits:
+                            default: true
+                            type: boolean
+                        reverse:
+                            default: false
+                            type: boolean
+                        transition:
+                            default: crossfade
+                            enum:
+                                - crossfade
+                                - slide
+                                - kenburns
+                            type: string
+                        transition_ms:
+                            default: 800
+                            maximum: 3000
+                            minimum: 200
+                            type: integer
+                    type: object
+                version:
+                    type: integer
+                video:
+                    properties:
+                        auto_mute_min:
+                            default: null
+                            nullable: true
+                            type: integer
+                        autoplay:
+                            default: true
+                            type: boolean
+                        playback:
+                            default: once_hold
+                            enum:
+                                - loop
+                                - once_hold
+                                - once_advance
+                            type: string
+                        volume:
+                            default: 60
+                            maximum: 100
+                            minimum: 0
+                            type: integer
+                    type: object
+                widgets:
+                    properties:
+                        avatar:
+                            default: true
+                            type: boolean
+                        caption:
+                            default: true
+                            type: boolean
+                        clock:
+                            default: true
+                            type: boolean
+                        clock_24h:
+                            default: true
+                            type: boolean
+                        date:
+                            default: true
+                            type: boolean
+                        weather:
+                            default: false
+                            type: boolean
+                    type: object
+            required:
+                - version
+            type: object
+        FrameSettingsPatch:
+            description: RFC 7396 merge patch of FrameSettings (any subset; arrays are replaced whole).
+            type: object
+        FrameSummary:
+            properties:
+                app_version:
+                    nullable: true
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                last_seen_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                location:
+                    nullable: true
+                    type: string
+                name:
+                    type: string
+                needs_update:
+                    type: boolean
+                online:
+                    type: boolean
+                owner_name:
+                    type: string
+                permissions:
+                    $ref: '#/components/schemas/Permissions'
+                role:
+                    $ref: '#/components/schemas/Role'
+                screen:
+                    $ref: '#/components/schemas/Screen'
+            required:
+                - id
+                - name
+                - role
+                - permissions
+                - online
+            type: object
+        Heartbeat:
+            properties:
+                android_sdk:
+                    type: integer
+                app_version:
+                    type: string
+                app_version_code:
+                    type: integer
+                cache_bytes:
+                    type: integer
+                crash_count_24h:
+                    type: integer
+                last_shutdown_clean:
+                    type: boolean
+                local_time:
+                    format: date-time
+                    type: string
+                placements_cached:
+                    type: integer
+                placements_missing:
+                    type: integer
+                screen_state:
+                    enum:
+                        - "on"
+                        - "off"
+                        - dimmed
+                        - sleeping
+                    type: string
+                storage_free_bytes:
+                    type: integer
+                storage_total_bytes:
+                    type: integer
+                timezone:
+                    example: Europe/Brussels
+                    type: string
+                uptime_s:
+                    type: integer
+                wifi_link_mbps:
+                    nullable: true
+                    type: integer
+                wifi_rssi_dbm:
+                    nullable: true
+                    type: integer
+                wifi_ssid:
+                    nullable: true
+                    type: string
+            required:
+                - app_version
+                - uptime_s
+            type: object
+        Id:
+            description: UUIDv7
+            format: uuid
+            type: string
+        Invite:
+            properties:
+                created_by_name:
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                max_uses:
+                    nullable: true
+                    type: integer
+                note:
+                    nullable: true
+                    type: string
+                token:
+                    type: string
+                url:
+                    format: uri
+                    type: string
+                uses:
+                    type: integer
+            required:
+                - id
+                - token
+                - url
+                - expires_at
+            type: object
+        InvitePreview:
+            properties:
+                already_member:
+                    type: boolean
+                frame_location:
+                    nullable: true
+                    type: string
+                frame_name:
+                    type: string
+                invited_by_name:
+                    type: string
+                owner_name:
+                    type: string
+                requires_approval:
+                    type: boolean
+            required:
+                - frame_name
+                - invited_by_name
+                - requires_approval
+            type: object
+        Item:
+            properties:
+                caption:
+                    nullable: true
+                    type: string
+                caption_edited:
+                    type: boolean
+                captured_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                duration_ms:
+                    nullable: true
+                    type: integer
+                failure_code:
+                    nullable: true
+                    type: string
+                fit:
+                    $ref: '#/components/schemas/Fit'
+                focal_point:
+                    $ref: '#/components/schemas/FocalPoint'
+                has_audio:
+                    nullable: true
+                    type: boolean
+                height:
+                    type: integer
+                id:
+                    $ref: '#/components/schemas/Id'
+                kind:
+                    $ref: '#/components/schemas/MediaKind'
+                place_name:
+                    nullable: true
+                    type: string
+                sender_id:
+                    $ref: '#/components/schemas/Id'
+                sender_name:
+                    type: string
+                status:
+                    enum:
+                        - processing
+                        - ready
+                        - failed
+                    type: string
+                thumb_url:
+                    description: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
+                    format: uri
+                    nullable: true
+                    type: string
+                width:
+                    type: integer
+            required:
+                - id
+                - kind
+                - status
+                - sender_id
+                - created_at
+            type: object
+        JoinRequest:
+            properties:
+                created_at:
+                    format: date-time
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                invited_by_name:
+                    nullable: true
+                    type: string
+                note:
+                    nullable: true
+                    type: string
+                user:
+                    properties:
+                        avatar_url:
+                            nullable: true
+                            type: string
+                        display_name:
+                            type: string
+                        id:
+                            $ref: '#/components/schemas/Id'
+                    type: object
+                via:
+                    enum:
+                        - frame_code
+                        - invite
+                    type: string
+            required:
+                - id
+                - user
+                - via
+                - created_at
+            type: object
+        Limits:
+            properties:
+                max_items_per_send:
+                    default: 200
+                    type: integer
+                max_upload_bytes:
+                    default: 2147483648
+                    type: integer
+                max_video_seconds:
+                    default: 300
+                    type: integer
+                trash_retention_days:
+                    default: 30
+                    type: integer
+            required:
+                - max_items_per_send
+                - max_video_seconds
+                - max_upload_bytes
+            type: object
+        MediaKind:
+            enum:
+                - photo
+                - video
+            type: string
+        Member:
+            properties:
+                avatar_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                display_name:
+                    type: string
+                joined_at:
+                    format: date-time
+                    type: string
+                last_sent_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                permissions:
+                    $ref: '#/components/schemas/Permissions'
+                role:
+                    $ref: '#/components/schemas/Role'
+                user_id:
+                    $ref: '#/components/schemas/Id'
+            required:
+                - user_id
+                - display_name
+                - role
+                - permissions
+            type: object
+        Permissions:
+            properties:
+                change_settings:
+                    type: boolean
+                invite:
+                    type: boolean
+                manage_library:
+                    type: boolean
+                see_library:
+                    type: boolean
+                send:
+                    type: boolean
+            type: object
+        Placement:
+            properties:
+                album_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    type: array
+                delivered_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                fit_override:
+                    allOf:
+                        - $ref: '#/components/schemas/Fit'
+                    nullable: true
+                focal_override:
+                    allOf:
+                        - $ref: '#/components/schemas/FocalPoint'
+                    nullable: true
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                hidden:
+                    type: boolean
+                id:
+                    $ref: '#/components/schemas/Id'
+                item:
+                    $ref: '#/components/schemas/Item'
+                pending_moderation:
+                    type: boolean
+                reaction:
+                    allOf:
+                        - $ref: '#/components/schemas/Reaction'
+                    nullable: true
+                received_at:
+                    format: date-time
+                    type: string
+                replies:
+                    items:
+                        properties:
+                            at:
+                                format: date-time
+                                type: string
+                            preset:
+                                $ref: '#/components/schemas/ReplyPreset'
+                        type: object
+                    type: array
+                rotation:
+                    enum:
+                        - 0
+                        - 90
+                        - 180
+                        - 270
+                    type: integer
+                seen_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                status:
+                    $ref: '#/components/schemas/PlacementStatus'
+                trashed:
+                    type: boolean
+                trashed_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+            required:
+                - id
+                - frame_id
+                - item
+                - status
+                - hidden
+                - trashed
+            type: object
+        PlacementStatus:
+            enum:
+                - pending
+                - ready
+                - delivered
+                - seen
+                - failed
+                - removed
+            type: string
+        Problem:
+            properties:
+                code:
+                    $ref: '#/components/schemas/ProblemCode'
+                detail:
+                    type: string
+                errors:
+                    description: Field-level validation errors (422)
+                    items:
+                        properties:
+                            code:
+                                type: string
+                            field:
+                                type: string
+                        type: object
+                    type: array
+                status:
+                    type: integer
+                title:
+                    type: string
+                type:
+                    format: uri
+                    type: string
+            required:
+                - type
+                - title
+                - status
+                - code
+            type: object
+        ProblemCode:
+            enum:
+                - unauthorized
+                - token_expired
+                - device_revoked
+                - forbidden
+                - missing_permission
+                - not_found
+                - code_invalid
+                - code_expired
+                - invite_invalid
+                - invite_expired
+                - already_member
+                - validation_failed
+                - too_many_items
+                - video_too_long
+                - upload_too_large
+                - upload_not_found
+                - unsupported_media
+                - corrupt_media
+                - version_conflict
+                - frame_offline
+                - command_timeout
+                - owner_cannot_leave
+                - rate_limited
+                - app_update_required
+                - server_error
+            type: string
+        PushEndpoint:
+            allOf:
+                - $ref: '#/components/schemas/PushEndpointCreate'
+                - properties:
+                    created_at:
+                        format: date-time
+                        type: string
+                    id:
+                        $ref: '#/components/schemas/Id'
+                  required:
+                    - id
+                    - created_at
+                  type: object
+        PushEndpointCreate:
+            properties:
+                device_name:
+                    maxLength: 60
+                    type: string
+                endpoint:
+                    description: UnifiedPush/WebPush URL
+                    or FCM/APNs token: null
+                    type: string
+                kind:
+                    enum:
+                        - unifiedpush
+                        - fcm
+                        - apns
+                        - webpush
+                    type: string
+                locale:
+                    type: string
+                webpush_keys:
+                    properties:
+                        auth:
+                            type: string
+                        p256dh:
+                            type: string
+                    type: object
+            required:
+                - kind
+                - endpoint
+            type: object
+        Reaction:
+            enum:
+                - love
+                - laugh
+                - wow
+                - sad
+            type: string
+        RedeemResult:
+            properties:
+                frame:
+                    $ref: '#/components/schemas/FrameSummary'
+                join_request_id:
+                    $ref: '#/components/schemas/Id'
+                status:
+                    enum:
+                        - claimed
+                        - joined
+                        - pending
+                        - already_member
+                    type: string
+            required:
+                - status
+                - frame
+            type: object
+        ReplyPreset:
+            enum:
+                - beautiful
+                - call_me
+                - miss_you
+                - thanks
+            type: string
+        Role:
+            enum:
+                - owner
+                - admin
+                - member
+            type: string
+        Screen:
+            properties:
+                density_dpi:
+                    type: integer
+                height:
+                    example: 800
+                    type: integer
+                orientation:
+                    enum:
+                        - landscape
+                        - portrait
+                    type: string
+                width:
+                    example: 1280
+                    type: integer
+            required:
+                - width
+                - height
+            type: object
+        Send:
+            properties:
+                created_at:
+                    format: date-time
+                    type: string
+                frames:
+                    description: Per-frame delivery for this send.
+                    items:
+                        properties:
+                            frame_id:
+                                $ref: '#/components/schemas/Id'
+                            frame_name:
+                                type: string
+                            online:
+                                type: boolean
+                            placements:
+                                items:
+                                    properties:
+                                        item_id:
+                                            $ref: '#/components/schemas/Id'
+                                        placement_id:
+                                            $ref: '#/components/schemas/Id'
+                                        reaction:
+                                            allOf:
+                                                - $ref: '#/components/schemas/Reaction'
+                                            nullable: true
+                                        replies:
+                                            items:
+                                                $ref: '#/components/schemas/ReplyPreset'
+                                            type: array
+                                        status:
+                                            $ref: '#/components/schemas/PlacementStatus'
+                                    required:
+                                        - placement_id
+                                        - item_id
+                                        - status
+                                    type: object
+                                type: array
+                        required:
+                            - frame_id
+                            - frame_name
+                            - placements
+                        type: object
+                    type: array
+                id:
+                    $ref: '#/components/schemas/Id'
+                items:
+                    items:
+                        $ref: '#/components/schemas/Item'
+                    type: array
+                summary:
+                    properties:
+                        delivered:
+                            type: integer
+                        failed:
+                            type: integer
+                        pending:
+                            type: integer
+                        processing:
+                            type: integer
+                        seen:
+                            type: integer
+                    type: object
+            required:
+                - id
+                - created_at
+                - items
+                - frames
+            type: object
+        SendCreate:
+            properties:
+                frame_ids:
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    minItems: 1
+                    type: array
+                items:
+                    items:
+                        properties:
+                            caption:
+                                maxLength: 280
+                                nullable: true
+                                type: string
+                            captured_at:
+                                description: Client hint used when the file has no metadata.
+                                format: date-time
+                                nullable: true
+                                type: string
+                            fit:
+                                $ref: '#/components/schemas/Fit'
+                            focal_point:
+                                $ref: '#/components/schemas/FocalPoint'
+                            include_audio:
+                                default: true
+                                type: boolean
+                            trim:
+                                description: Videos only.
+                                properties:
+                                    end_ms:
+                                        minimum: 1
+                                        type: integer
+                                    start_ms:
+                                        minimum: 0
+                                        type: integer
+                                type: object
+                            upload_id:
+                                description: tus upload id
+                                or an existing item id when the server reported a duplicate: null
+                                type: string
+                        required:
+                            - upload_id
+                        type: object
+                    minItems: 1
+                    type: array
+            required:
+                - frame_ids
+                - items
+            type: object
+        SleepSchedule:
+            properties:
+                days:
+                    items:
+                        enum:
+                            - mon
+                            - tue
+                            - wed
+                            - thu
+                            - fri
+                            - sat
+                            - sun
+                        type: string
+                    type: array
+                enabled:
+                    type: boolean
+                id:
+                    $ref: '#/components/schemas/Id'
+                mode:
+                    default: "off"
+                    enum:
+                        - "off"
+                        - dim
+                    type: string
+                sleep_at:
+                    example: "23:00"
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+                wake_at:
+                    example: "07:00"
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+            required:
+                - id
+                - sleep_at
+                - wake_at
+                - days
+                - enabled
+            type: object
+        User:
+            properties:
+                avatar_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                display_name:
+                    type: string
+                email:
+                    nullable: true
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                is_operator:
+                    type: boolean
+                locale:
+                    nullable: true
+                    type: string
+                share_location_names:
+                    type: boolean
+            required:
+                - id
+                - display_name
+            type: object
+    securitySchemes:
+        deviceAuth:
+            bearerFormat: JWT
+            description: Device access token from /v1/devices/token.
+            scheme: bearer
+            type: http
+        userAuth:
+            description: Logto access token for the API resource. The issuer comes from discovery.
+            flows:
+                authorizationCode:
+                    authorizationUrl: https://auth.kinframe.appmire.be/oidc/auth
+                    scopes:
+                        kinframe:operate: Operator access
+                    tokenUrl: https://auth.kinframe.appmire.be/oidc/token
+            type: oauth2
+info:
+    description: |
+        Machine-readable contract for the kinframe server. Concepts, flows, websockets,
+        tus uploads and the change feed are described in docs/api/README.md.
+    license:
+        identifier: AGPL-3.0-or-later
+        name: AGPL-3.0-or-later
+    summary: Family photo frames, self-hosted.
+    title: kinframe API
+    version: 1.0.0-draft
+openapi: 3.0.3
+paths:
+    /.well-known/kinframe:
+        get:
+            operationId: getDiscovery
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Discovery'
+                    description: Server discovery document
+            security: []
+            tags:
+                - discovery
+    /dev/token:
+        post:
+            description: |
+                Development servers only (discovery `dev_auth: true`); 404 otherwise. Issues a user access token signed by the
+                server itself so web and app development works without Logto. The server refuses to start with dev auth
+                enabled when KINFRAME_ENV=production.
+            operationId: devToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                email:
+                                    format: email
+                                    type: string
+                                name:
+                                    type: string
+                            required:
+                                - email
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    access_token:
+                                        type: string
+                                    expires_in:
+                                        type: integer
+                                required:
+                                    - access_token
+                                    - expires_in
+                                type: object
+                    description: Token
+                "404":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - dev
+    /v1/device/acks:
+        post:
+            operationId: deviceAck
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                delivered:
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    maxItems: 500
+                                    type: array
+                                seen:
+                                    items:
+                                        properties:
+                                            at:
+                                                format: date-time
+                                                type: string
+                                            placement_id:
+                                                $ref: '#/components/schemas/Id'
+                                        required:
+                                            - placement_id
+                                            - at
+                                        type: object
+                                    maxItems: 500
+                                    type: array
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Recorded
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/changes:
+        get:
+            operationId: deviceGetChanges
+            parameters:
+                - in: query
+                  name: since
+                  required: true
+                  schema:
+                    minimum: 0
+                    type: integer
+                - in: query
+                  name: limit
+                  schema:
+                    default: 500
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    changes:
+                                        items:
+                                            $ref: '#/components/schemas/Change'
+                                        type: array
+                                    has_more:
+                                        type: boolean
+                                    next_seq:
+                                        type: integer
+                                required:
+                                    - changes
+                                    - next_seq
+                                    - has_more
+                                type: object
+                    description: Ordered changes after `since`
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/code:
+        post:
+            description: Get (or re-get) the active frame code. Same code until it expires.
+            operationId: deviceGetCode
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameCode'
+                    description: Code
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/heartbeat:
+        post:
+            operationId: deviceHeartbeat
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Heartbeat'
+                required: true
+            responses:
+                "204":
+                    description: Recorded
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/imports:
+        post:
+            description: |
+                Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
+                Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+            operationId: deviceImport
+            parameters:
+                - in: header
+                  name: X-Filename
+                  required: true
+                  schema:
+                    type: string
+                - in: header
+                  name: X-Captured-At
+                  schema:
+                    format: date-time
+                    type: string
+            requestBody:
+                content:
+                    application/octet-stream:
+                        schema:
+                            format: binary
+                            type: string
+                required: true
+            responses:
+                "202":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Placement'
+                    description: Accepted; a placement.upsert change follows
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/join-requests/{requestId}:
+        post:
+            operationId: deviceDecideJoin
+            parameters:
+                - in: path
+                  name: requestId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                decision:
+                                    enum:
+                                        - approve
+                                        - deny
+                                    type: string
+                            required:
+                                - decision
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Decided
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/media/{placementId}:
+        get:
+            description: The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match.
+            operationId: deviceGetMedia
+            parameters:
+                - $ref: '#/components/parameters/PlacementId'
+                - in: query
+                  name: variant
+                  schema:
+                    default: display
+                    enum:
+                        - display
+                        - poster
+                        - avatar
+                    type: string
+            responses:
+                "200":
+                    description: Bytes
+                "206":
+                    description: Partial bytes
+                "304":
+                    description: Not modified
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/members/{userId}:
+        delete:
+            description: Remove a member from the frame itself (allowed unless the owner disabled it in settings). Cannot remove the owner.
+            operationId: deviceRemoveMember
+            parameters:
+                - $ref: '#/components/parameters/UserId'
+                - in: query
+                  name: remove_items
+                  schema:
+                    default: false
+                    type: boolean
+            responses:
+                "204":
+                    description: Removed
+                "403":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/placements/{placementId}:
+        patch:
+            description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+            operationId: devicePatchPlacement
+            parameters:
+                - $ref: '#/components/parameters/PlacementId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                fit:
+                                    $ref: '#/components/schemas/Fit'
+                                focal_point:
+                                    $ref: '#/components/schemas/FocalPoint'
+                                hidden:
+                                    type: boolean
+                                rotation:
+                                    enum:
+                                        - 0
+                                        - 90
+                                        - 180
+                                        - 270
+                                    type: integer
+                                trashed:
+                                    type: boolean
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Placement'
+                    description: Updated
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/placements/{placementId}/reaction:
+        put:
+            operationId: deviceSetReaction
+            parameters:
+                - $ref: '#/components/parameters/PlacementId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                reaction:
+                                    allOf:
+                                        - $ref: '#/components/schemas/Reaction'
+                                    nullable: true
+                            required:
+                                - reaction
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Stored
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/placements/{placementId}/replies:
+        post:
+            operationId: deviceSendReply
+            parameters:
+                - $ref: '#/components/parameters/PlacementId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                preset:
+                                    $ref: '#/components/schemas/ReplyPreset'
+                            required:
+                                - preset
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Sent
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/settings:
+        patch:
+            description: Settings changed locally on the frame. Same semantics as updateFrameSettings.
+            operationId: devicePatchSettings
+            parameters:
+                - $ref: '#/components/parameters/IfMatch'
+            requestBody:
+                content:
+                    application/merge-patch+json:
+                        schema:
+                            $ref: '#/components/schemas/FrameSettingsPatch'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameSettings'
+                    description: Updated
+                "412":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/state:
+        get:
+            description: Whether the frame is claimed, its identity and the latest change seq. Used after boot and on the setup screen.
+            operationId: deviceGetState
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/DeviceState'
+                    description: State
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/devices/enroll:
+        post:
+            description: Called once by a fresh frame. Rate-limited per IP.
+            operationId: enrollDevice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/DeviceEnroll'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    device_id:
+                                        $ref: '#/components/schemas/Id'
+                                    device_secret:
+                                        base64url. Shown only once.: null
+                                        description: 256-bit random
+                                        type: string
+                                required:
+                                    - device_id
+                                    - device_secret
+                                type: object
+                    description: Enrolled
+                "429":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - devices
+    /v1/devices/token:
+        post:
+            operationId: deviceToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                device_id:
+                                    $ref: '#/components/schemas/Id'
+                                device_secret:
+                                    type: string
+                            required:
+                                - device_id
+                                - device_secret
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    access_token:
+                                        type: string
+                                    expires_in:
+                                        description: seconds
+                                        type: integer
+                                required:
+                                    - access_token
+                                    - expires_in
+                                type: object
+                    description: Short-lived device access token
+                "401":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - devices
+    /v1/frames:
+        get:
+            description: Frames the caller is a member of (any role).
+            operationId: listMyFrames
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/FrameSummary'
+                                type: array
+                    description: Frames
+            tags:
+                - frames
+    /v1/frames/{frameId}:
+        delete:
+            description: Owner only. Revokes the device credential and deletes all placements on this frame.
+            operationId: removeFrame
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+        get:
+            operationId: getFrame
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Frame'
+                    description: Frame
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        patch:
+            description: Owner or admin.
+            operationId: updateFrame
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                approve_joins_on_frame:
+                                    type: boolean
+                                default_permissions:
+                                    $ref: '#/components/schemas/Permissions'
+                                invite_requires_approval:
+                                    type: boolean
+                                location:
+                                    maxLength: 40
+                                    type: string
+                                moderation:
+                                    description: New placements need approval by owner/admin before showing.
+                                    type: boolean
+                                name:
+                                    maxLength: 40
+                                    minLength: 1
+                                    type: string
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Frame'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/{frameId}/albums:
+        get:
+            operationId: listAlbums
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Album'
+                                type: array
+                    description: Albums
+            tags:
+                - albums
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            operationId: createAlbum
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AlbumWrite'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Album'
+                    description: Created
+            tags:
+                - albums
+    /v1/frames/{frameId}/albums/{albumId}:
+        delete:
+            description: Placements stay on the frame.
+            operationId: deleteAlbum
+            responses:
+                "204":
+                    description: Deleted
+            tags:
+                - albums
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+            - in: path
+              name: albumId
+              required: true
+              schema:
+                $ref: '#/components/schemas/Id'
+        patch:
+            operationId: updateAlbum
+            parameters:
+                - $ref: '#/components/parameters/IfMatch'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AlbumWrite'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Album'
+                    description: Updated
+                "412":
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - albums
+    /v1/frames/{frameId}/commands:
+        post:
+            description: Delivered over the device websocket only; never queued.
+            operationId: sendFrameCommand
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/FrameCommand'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CommandResult'
+                    description: Executed by the frame
+                "409":
+                    $ref: '#/components/responses/Problem'
+                "504":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/{frameId}/health:
+        get:
+            description: Owner, admin, or members with change_settings.
+            operationId: getFrameHealth
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameHealth'
+                    description: Latest heartbeat and connectivity
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/{frameId}/invites:
+        get:
+            operationId: listInvites
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Invite'
+                                type: array
+                    description: Active invites created by the caller (owner/admin see all)
+            tags:
+                - invites
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            operationId: createInvite
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                expires_in_hours:
+                                    default: 168
+                                    maximum: 720
+                                    minimum: 1
+                                    type: integer
+                                max_uses:
+                                    description: null = unlimited
+                                    minimum: 1
+                                    nullable: true
+                                    type: integer
+                                note:
+                                    description: Shown to the owner when approving.
+                                    maxLength: 80
+                                    type: string
+                            type: object
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Invite'
+                    description: Created
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - invites
+    /v1/frames/{frameId}/invites/{inviteId}:
+        delete:
+            operationId: revokeInvite
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - in: path
+                  name: inviteId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            responses:
+                "204":
+                    description: Revoked
+            tags:
+                - invites
+    /v1/frames/{frameId}/join-requests:
+        get:
+            operationId: listJoinRequests
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/JoinRequest'
+                                type: array
+                    description: Pending requests
+            tags:
+                - members
+    /v1/frames/{frameId}/join-requests/{requestId}/{decision}:
+        post:
+            operationId: decideJoinRequest
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - in: path
+                  name: requestId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - in: path
+                  name: decision
+                  required: true
+                  schema:
+                    enum:
+                        - approve
+                        - deny
+                    type: string
+            responses:
+                "204":
+                    description: Decided
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - members
+    /v1/frames/{frameId}/leave:
+        post:
+            description: Remove your own membership. The owner must transfer ownership first.
+            operationId: leaveFrame
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                remove_my_items:
+                                    default: false
+                                    type: boolean
+                            type: object
+            responses:
+                "204":
+                    description: Left
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/{frameId}/members:
+        get:
+            operationId: listMembers
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Member'
+                                type: array
+                    description: Members
+            tags:
+                - members
+    /v1/frames/{frameId}/members/{userId}:
+        delete:
+            operationId: removeMember
+            parameters:
+                - in: query
+                  name: remove_items
+                  schema:
+                    default: false
+                    type: boolean
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - members
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+            - $ref: '#/components/parameters/UserId'
+        patch:
+            description: Owner or admin. Admins cannot change the owner or other admins' role.
+            operationId: updateMember
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                permissions:
+                                    $ref: '#/components/schemas/Permissions'
+                                role:
+                                    enum:
+                                        - admin
+                                        - member
+                                    type: string
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Member'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - members
+    /v1/frames/{frameId}/placements:
+        get:
+            description: Everything on the frame (needs see_library), or only the caller's own placements otherwise.
+            operationId: listPlacements
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - $ref: '#/components/parameters/Cursor'
+                - $ref: '#/components/parameters/Limit'
+                - in: query
+                  name: visibility
+                  schema:
+                    default: visible
+                    enum:
+                        - visible
+                        - hidden
+                        - trashed
+                        - pending_moderation
+                        - all
+                    type: string
+                - in: query
+                  name: sender_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - in: query
+                  name: kind
+                  schema:
+                    $ref: '#/components/schemas/MediaKind'
+                - in: query
+                  name: album_id
+                  schema:
+                    $ref: '#/components/schemas/Id'
+                - in: query
+                  name: sort
+                  schema:
+                    default: received_desc
+                    enum:
+                        - received_desc
+                        - received_asc
+                        - taken_desc
+                        - taken_asc
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    counts:
+                                        properties:
+                                            hidden:
+                                                type: integer
+                                            photos:
+                                                type: integer
+                                            trashed:
+                                                type: integer
+                                            videos:
+                                                type: integer
+                                        type: object
+                                    next_cursor:
+                                        nullable: true
+                                        type: string
+                                    placements:
+                                        items:
+                                            $ref: '#/components/schemas/Placement'
+                                        type: array
+                                required:
+                                    - placements
+                                    - next_cursor
+                                    - counts
+                                type: object
+                    description: Page
+            tags:
+                - library
+    /v1/frames/{frameId}/placements/{placementId}:
+        delete:
+            description: Permanent removal (skips trash).
+            operationId: purgePlacement
+            responses:
+                "204":
+                    description: Purged
+            tags:
+                - library
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+            - $ref: '#/components/parameters/PlacementId'
+        patch:
+            description: Sender of the item, or manage_library.
+            operationId: updatePlacement
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                approved:
+                                    description: Moderation decision (owner/admin).
+                                    type: boolean
+                                hidden:
+                                    type: boolean
+                                trashed:
+                                    description: true moves to trash (30 days)
+                                    false restores.: null
+                                    type: boolean
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Placement'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - library
+    /v1/frames/{frameId}/placements:bulk:
+        post:
+            operationId: bulkUpdatePlacements
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                action:
+                                    enum:
+                                        - hide
+                                        - unhide
+                                        - trash
+                                        - restore
+                                        - purge
+                                        - add_to_album
+                                        - remove_from_album
+                                    type: string
+                                album_id:
+                                    $ref: '#/components/schemas/Id'
+                                placement_ids:
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    maxItems: 1000
+                                    minItems: 1
+                                    type: array
+                            required:
+                                - placement_ids
+                                - action
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    failed:
+                                        items:
+                                            properties:
+                                                code:
+                                                    $ref: '#/components/schemas/ProblemCode'
+                                                id:
+                                                    $ref: '#/components/schemas/Id'
+                                            type: object
+                                        type: array
+                                    ok:
+                                        items:
+                                            $ref: '#/components/schemas/Id'
+                                        type: array
+                                type: object
+                    description: Per-id outcome
+            tags:
+                - library
+    /v1/frames/{frameId}/replace-device:
+        post:
+            description: |
+                Owner only. "Move to new frame": attach a freshly enrolled, unclaimed device (identified by the code it shows)
+                to this frame. The old device credential is revoked; the new device syncs everything.
+            operationId: replaceDevice
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                code:
+                                    pattern: ^[0-9]{8}$
+                                    type: string
+                            required:
+                                - code
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Frame'
+                    description: Replaced
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/{frameId}/settings:
+        get:
+            operationId: getFrameSettings
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameSettings'
+                    description: Settings
+            tags:
+                - settings
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        patch:
+            description: JSON merge patch (RFC 7396) of FrameSettings. Requires If-Match.
+            operationId: updateFrameSettings
+            parameters:
+                - $ref: '#/components/parameters/IfMatch'
+            requestBody:
+                content:
+                    application/merge-patch+json:
+                        schema:
+                            $ref: '#/components/schemas/FrameSettingsPatch'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameSettings'
+                    description: Updated
+                "412":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - settings
+    /v1/frames/{frameId}/transfer:
+        post:
+            description: Owner only. The previous owner becomes admin.
+            operationId: transferOwnership
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                user_id:
+                                    $ref: '#/components/schemas/Id'
+                            required:
+                                - user_id
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Transferred
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/frames/redeem:
+        post:
+            description: Claim an unowned frame or join an owned one with the code shown on the frame. See README §5.1.
+            operationId: redeemFrameCode
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                code:
+                                    pattern: ^[0-9]{8}$
+                                    type: string
+                            required:
+                                - code
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RedeemResult'
+                    description: Result
+                "404":
+                    $ref: '#/components/responses/Problem'
+                "410":
+                    $ref: '#/components/responses/Problem'
+                "429":
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - frames
+    /v1/invites/{token}:
+        get:
+            description: Requires sign-in so invite tokens can't be enumerated anonymously.
+            operationId: previewInvite
+            parameters:
+                - $ref: '#/components/parameters/InviteToken'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/InvitePreview'
+                    description: Preview
+                "404":
+                    $ref: '#/components/responses/Problem'
+                "410":
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - invites
+    /v1/invites/{token}/accept:
+        post:
+            operationId: acceptInvite
+            parameters:
+                - $ref: '#/components/parameters/InviteToken'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RedeemResult'
+                    description: Result
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - invites
+    /v1/items/{itemId}:
+        parameters:
+            - $ref: '#/components/parameters/ItemId'
+        patch:
+            description: Sender, or a manager of every frame the item is on. Changes propagate to all placements and show "edited".
+            operationId: updateItem
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                caption:
+                                    maxLength: 280
+                                    nullable: true
+                                    type: string
+                                fit:
+                                    $ref: '#/components/schemas/Fit'
+                                focal_point:
+                                    $ref: '#/components/schemas/FocalPoint'
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Item'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - sends
+    /v1/items/{itemId}/media/{variant}:
+        get:
+            description: Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
+            operationId: getItemMedia
+            parameters:
+                - $ref: '#/components/parameters/ItemId'
+                - in: path
+                  name: variant
+                  required: true
+                  schema:
+                    enum:
+                        - thumb_256
+                        - thumb_512
+                        - master
+                        - poster
+                    type: string
+            responses:
+                "302":
+                    description: Redirect to signed media URL
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - sends
+    /v1/me:
+        delete:
+            description: Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+            operationId: deleteMe
+            parameters:
+                - description: Also remove everything this user sent from all frames.
+                  in: query
+                  name: remove_items
+                  required: true
+                  schema:
+                    type: boolean
+            responses:
+                "204":
+                    description: Deleted
+                "409":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - me
+        get:
+            operationId: getMe
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                    description: Current user
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - me
+        patch:
+            operationId: updateMe
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                display_name:
+                                    maxLength: 40
+                                    minLength: 1
+                                    type: string
+                                locale:
+                                    example: nl-BE
+                                    type: string
+                                share_location_names:
+                                    type: boolean
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - me
+    /v1/me/avatar:
+        delete:
+            operationId: deleteAvatar
+            responses:
+                "204":
+                    description: Removed
+            tags:
+                - me
+        put:
+            operationId: putAvatar
+            requestBody:
+                content:
+                    image/jpeg:
+                        schema:
+                            format: binary
+                            type: string
+                    image/png:
+                        schema:
+                            format: binary
+                            type: string
+                    image/webp:
+                        schema:
+                            format: binary
+                            type: string
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+                    description: Stored (server crops to 256x256)
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - me
+    /v1/me/push-endpoints:
+        get:
+            operationId: listPushEndpoints
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/PushEndpoint'
+                                type: array
+                    description: Registered endpoints
+            tags:
+                - me
+        post:
+            description: Idempotent on (kind, endpoint).
+            operationId: registerPushEndpoint
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PushEndpointCreate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PushEndpoint'
+                    description: Registered
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - me
+    /v1/me/push-endpoints/{endpointId}:
+        delete:
+            operationId: deletePushEndpoint
+            parameters:
+                - $ref: '#/components/parameters/EndpointId'
+            responses:
+                "204":
+                    description: Removed
+            tags:
+                - me
+    /v1/operator/limits:
+        get:
+            operationId: operatorGetLimits
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Limits'
+                    description: Limits
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+        put:
+            operationId: operatorSetLimits
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/Limits'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Limits'
+                    description: Updated
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/stats:
+        get:
+            operationId: operatorStats
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    frames:
+                                        type: integer
+                                    frames_online:
+                                        type: integer
+                                    items:
+                                        type: integer
+                                    processing_queue:
+                                        type: integer
+                                    storage_bytes:
+                                        type: integer
+                                    users:
+                                        type: integer
+                                type: object
+                    description: Server statistics
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/sends:
+        get:
+            description: The caller's sent history across all devices, newest first.
+            operationId: listMySends
+            parameters:
+                - $ref: '#/components/parameters/Cursor'
+                - $ref: '#/components/parameters/Limit'
+                - in: query
+                  name: state
+                  schema:
+                    default: all
+                    enum:
+                        - ongoing
+                        - delivered
+                        - all
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    next_cursor:
+                                        nullable: true
+                                        type: string
+                                    sends:
+                                        items:
+                                            $ref: '#/components/schemas/Send'
+                                        type: array
+                                required:
+                                    - sends
+                                    - next_cursor
+                                type: object
+                    description: Page of sends
+            tags:
+                - sends
+        post:
+            operationId: createSend
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/SendCreate'
+                required: true
+            responses:
+                "202":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Send'
+                    description: Accepted; processing
+                "400":
+                    $ref: '#/components/responses/Problem'
+                "403":
+                    $ref: '#/components/responses/Problem'
+                "422":
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - sends
+    /v1/sends/{sendId}:
+        delete:
+            description: Removes all placements of this send from all frames (sender only). Never needs a frame to be online.
+            operationId: unsend
+            responses:
+                "204":
+                    description: Unsent
+            tags:
+                - sends
+        get:
+            operationId: getSend
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Send'
+                    description: Send with per-frame placement status
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - sends
+        parameters:
+            - in: path
+              name: sendId
+              required: true
+              schema:
+                $ref: '#/components/schemas/Id'
+    /v1/sends/{sendId}/forward:
+        post:
+            description: Place the same items on additional frames.
+            operationId: forwardSend
+            parameters:
+                - in: path
+                  name: sendId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                frame_ids:
+                                    items:
+                                        $ref: '#/components/schemas/Id'
+                                    minItems: 1
+                                    type: array
+                            required:
+                                - frame_ids
+                            type: object
+                required: true
+            responses:
+                "202":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Send'
+                    description: Accepted
+            tags:
+                - sends
+    /v1/uploads:
+        post:
+            description: |
+                tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
+                Upload-Metadata keys: filename, filetype, sha256 (optional).
+            operationId: tusCreateUpload
+            parameters:
+                - in: header
+                  name: Tus-Resumable
+                  required: true
+                  schema:
+                    type: string
+                - in: header
+                  name: Upload-Length
+                  required: true
+                  schema:
+                    type: integer
+                - in: header
+                  name: Upload-Metadata
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "201":
+                    description: Created; Location header holds the upload URL. If sha256 matches an existing item of the caller, `Kinframe-Existing-Item` header carries its id and the client may skip uploading.
+                "413":
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - sends
+security:
+    - userAuth: []
+servers:
+    - description: Default hosted server
+      url: https://kinframe.appmire.be
+    - description: Local development
+      url: http://localhost:8110
+tags:
+    - name: discovery
+    - name: me
+    - name: frames
+    - name: members
+    - name: invites
+    - name: sends
+    - name: library
+    - name: albums
+    - name: settings
+    - description: Frame enrollment and token exchange (unauthenticated or secret-based).
+      name: devices
+    - description: Endpoints called by the frame itself (device token).
+      name: device
+    - name: operator
+    - description: Development-only helpers; absent in production.
+      name: dev

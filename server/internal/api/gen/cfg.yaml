@@ -1,0 +1,17 @@
+# oapi-codegen configuration. Input is docs/api/openapi.yaml after tools/specprep.
+package: gen
+output: internal/api/gen/api.gen.go
+generate:
+  std-http-server: true
+  strict-server: true
+  models: true
+output-options:
+  skip-prune: true
+  # Hand-written in internal/api: tus (tusd library), binary media, multi-type avatar upload.
+  exclude-operation-ids:
+    - tusCreateUpload
+    - putAvatar
+    - deviceGetMedia
+    - getItemMedia
+    # Only mounted in dev auth mode.
+    - devToken

@@ -1,0 +1,64 @@
+# kinframe DEVELOPMENT stack. Throwaway credentials, bound to 127.0.0.1 only.
+# Never use this file (or these passwords) for a real deployment.
+#
+#   docker compose -f deploy/compose/docker-compose.dev.yml up -d                     # Postgres only
+#   docker compose -f deploy/compose/docker-compose.dev.yml --profile logto up -d     # + Logto
+#   docker compose -f deploy/compose/docker-compose.dev.yml --profile server up -d    # + server in Docker (dev auth)
+#
+# The server itself usually runs on the host: `cd server && make run`.
+name: kinframe-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: kinframe
+      POSTGRES_PASSWORD: kinframe-dev # dev only
+      POSTGRES_DB: kinframe
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./dev-initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kinframe"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Optional: real OIDC. Dev auth mode (KINFRAME_DEV_AUTH=1) works without it.
+  logto:
+    image: svhd/logto:1.43.0
+    profiles: [logto]
+    depends_on:
+      postgres: { condition: service_healthy }
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    environment:
+      TRUST_PROXY_HEADER: "1"
+      DB_URL: postgres://logto:logto-dev@postgres:5432/logto # dev only
+      ENDPOINT: http://localhost:8111
+      ADMIN_ENDPOINT: http://localhost:8112
+    ports:
+      - "127.0.0.1:8111:3001"
+      - "127.0.0.1:8112:3002"
+
+  server:
+    build: ../../server
+    profiles: [server]
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      KINFRAME_ENV: development
+      KINFRAME_DEV_AUTH: "1"
+      KINFRAME_PUBLIC_URL: http://localhost:8110
+      KINFRAME_DATABASE_URL: postgres://kinframe:kinframe-dev@postgres:5432/kinframe?sslmode=disable
+      KINFRAME_LOG_LEVEL: debug
+      KINFRAME_LOG_FORMAT: text
+    ports:
+      - "127.0.0.1:8110:8110"
+    volumes:
+      - serverdata:/data
+
+volumes:
+  pgdata:
+  serverdata:
