@@ -145,7 +145,7 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 			}
 		}
 		if req.Params.RemoveItems {
-			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1)`, u.ID); err != nil {
+			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1) OR p.shared_by_user_id = $1`, u.ID); err != nil {
 				return err
 			}
 		}

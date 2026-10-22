@@ -132,6 +132,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Gallery | Grid, multi-select, sort, filter by sender/type/source/visibility | Same on the frame. The same library is also browsable in app and web for members with *see library*. | P |
 | Albums | Frame-local only | **Server-side albums**, editable from frame, app and web. An album can be shown on several frames. | P |
 | Storage | Warn below 256 MB, refuse below 128 MB, no auto-delete | The frame cache is managed automatically. Least-recently-shown items are evicted from the frame when space runs low and re-downloaded on demand. The owner sees storage in the app. Nothing is lost because the server keeps everything. | P |
+| Share to another frame | None | From a frame's library (single or multi-select) or the sent history: **"Share to another frame"** puts the same photos on other frames you can send to, without uploading again (the server reuses the stored media). Needs *see library* on the source (or being the sender) and *send* on the target; the target's moderation applies and frames that already have it are skipped. The original sender keeps the credit and hears about reactions; frames show "Anna · shared by Ben". Undo, the target's owner/admins, the sharer and the original sender's unsend can remove it again. | + |
 
 ### 4.7 Frame: power, sleep, brightness, presence
 

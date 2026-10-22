@@ -216,6 +216,8 @@ data class SendPlacement(
     val status: String = PlacementStatus.PENDING,
     val reaction: String? = null,
     val replies: List<String> = emptyList(),
+    /** Another member shared this item to the frame. */
+    val sharedByName: String? = null,
 )
 
 @Serializable
@@ -262,6 +264,14 @@ data class BulkFailure(val id: String, val code: String? = null)
 
 @Serializable
 data class BulkResult(val ok: List<String> = emptyList(), val failed: List<BulkFailure> = emptyList())
+
+/** A source placement × target frame that was not shared (`already_on_frame`). */
+@Serializable
+data class ShareSkip(val placementId: String, val frameId: String, val reason: String = "already_on_frame", val existingPlacementId: String? = null)
+
+/** `POST /frames/{id}/placements:share`: the placements created on the targets, and what was skipped. */
+@Serializable
+data class ShareResult(val placements: List<Placement> = emptyList(), val skipped: List<ShareSkip> = emptyList())
 
 object BulkAction {
     const val HIDE = "hide"

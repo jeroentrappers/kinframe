@@ -451,7 +451,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Place the same items on additional frames. */
+        /**
+         * @description Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+         *     renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+         */
         post: operations["forwardSend"];
         delete?: never;
         options?: never;
@@ -543,6 +546,41 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["bulkUpdatePlacements"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/placements:share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+         *     "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+         *     a frame rendition is only made when the target's screen size has none yet.
+         *
+         *     - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+         *       `see_library` there or be the item's sender (or the member who shared it there).
+         *     - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+         *       (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+         *       placements may be shared per request.
+         *     - A target that already holds the item is skipped and reported in `skipped`.
+         *     - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+         *       and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+         *     - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+         *       other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+         *     - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+         *       already have the selection.
+         *     - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+         */
+        post: operations["sharePlacements"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1758,6 +1796,22 @@ export interface components {
             /** Format: date-time */
             received_at?: string;
             album_ids?: components["schemas"]["Id"][];
+            /** @description The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards. */
+            shared_by_user_id?: components["schemas"]["Id"] | null;
+            /** @description Display name of `shared_by_user_id`. Frames show "Sender · shared by Name". */
+            shared_by_name?: string | null;
+        };
+        ShareResult: {
+            /** @description The placements created on the target frames (empty for a dry run). */
+            placements: components["schemas"]["Placement"][];
+            /** @description Source placement × target frame pairs that were not shared. */
+            skipped: {
+                placement_id: components["schemas"]["Id"];
+                frame_id: components["schemas"]["Id"];
+                /** @enum {string} */
+                reason: "already_on_frame";
+                existing_placement_id?: components["schemas"]["Id"];
+            }[];
         };
         Send: {
             id: components["schemas"]["Id"];
@@ -1775,6 +1829,8 @@ export interface components {
                     status: components["schemas"]["PlacementStatus"];
                     reaction?: components["schemas"]["Reaction"] | null;
                     replies?: components["schemas"]["ReplyPreset"][];
+                    /** @description Set when another member shared this item to the frame. */
+                    shared_by_name?: string | null;
                 }[];
             }[];
             summary?: {
@@ -3672,6 +3728,42 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    sharePlacements: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    placement_ids: components["schemas"]["Id"][];
+                    frame_ids: components["schemas"]["Id"][];
+                    /** @default false */
+                    dry_run?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Created placements and skipped targets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareResult"];
+                };
+            };
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
         };
     };
     listAlbums: {

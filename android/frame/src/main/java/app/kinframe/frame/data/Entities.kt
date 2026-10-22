@@ -60,6 +60,8 @@ data class PlacementEntity(
     val motionLocalFile: String? = null,
     @ColumnInfo(defaultValue = "0") val motionAttempts: Int = 0,
     @ColumnInfo(defaultValue = "0") val motionNextAttemptAt: Long = 0,
+    /** The member who shared this photo here from another frame; the caption reads "sender · shared by X". */
+    val sharedByName: String? = null,
 ) {
     /** A Live/Motion Photo: shown as a photo, its clip plays over it when downloaded. */
     val isLive: Boolean get() = kind == "live"

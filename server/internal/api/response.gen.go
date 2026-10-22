@@ -76,6 +76,7 @@ func (r Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error        
 func (r Response) VisitSendEventToFrameResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitSetCountdownResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitSyncCalendarResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitTestCalendarResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error      { return r.write(w) }

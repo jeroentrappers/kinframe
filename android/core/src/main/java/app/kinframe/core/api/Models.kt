@@ -226,6 +226,9 @@ data class Placement(
     val replies: List<PlacementReply> = emptyList(),
     val media: PlacementMedia? = null,
     val motion: PlacementMotion? = null,
+    /** Set when a member shared this placement from another frame's library (README §5.3); the item keeps its sender. */
+    val sharedByUserId: String? = null,
+    val sharedByName: String? = null,
 )
 
 @Serializable

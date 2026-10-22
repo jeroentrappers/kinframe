@@ -89,7 +89,8 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
   server stores a **master rendition** only, never the original (see `docs/spec/product-spec.md` §8).
 - **Placement**: an item on a specific frame. Delivery state (`pending → ready → delivered → seen`), visibility
   (`hidden`), trash and the frame's reaction are per placement. One send to three frames creates one item and three
-  placements.
+  placements. A placement **shared** from another frame's library points at the same item and records who shared it
+  (`shared_by_user_id`), so sharing never copies media (§5.3).
 - **Permissions** per membership:
 
   | Permission | Allows |
@@ -224,6 +225,30 @@ A **live item** is a still plus a short motion clip (≤ 10 s; longer clips are 
   at 8 Mbps, AAC-LC 96 kbps, faststart.
 - `thumb_256` and `thumb_512`: square, centred on the focal point, WebP q75.
 - A poster image for each video.
+
+**Sharing between frames**
+
+`POST /v1/frames/{frameId}/placements:share` with `{placement_ids, frame_ids, dry_run?}` (and `Idempotency-Key`)
+puts photos from one frame's library on other frames without a new upload.
+
+- Who: the caller needs `see_library` on the source frame (or is the item's sender, or shared it there) and `send` on
+  every target. Sources must be live, not trashed and not awaiting moderation. Validation is all-or-nothing.
+- Storage: each new placement references the **same item** (same media, master, thumbnails). The target gets a
+  `frame_<w>x<h>` rendition only if no frame with that screen size has one yet; otherwise the existing one is reused.
+- Duplicates: a target that already holds the item is skipped and reported in `skipped` (`already_on_frame`).
+  `dry_run: true` returns only `skipped`, so a frame picker can show which frames already have the selection.
+- Moderation and limits are the target's: `pending_moderation` unless the caller manages it, at most
+  `limits.max_items_per_send` placements per request.
+- Credit: the item keeps its original sender; the placement adds `shared_by_user_id` and `shared_by_name`
+  (also in the sender's history, `Send.frames[].placements[].shared_by_name`). Frames show "Anna · shared by Ben".
+- Afterwards it behaves like any placement: delivery states, change feed, reactions and replies. The **original
+  sender** gets reaction and reply notifications and sees the new frame in their history; the **sharer** gets the
+  `delivered` push once everything they shared to a frame has arrived.
+- Removal: the original sender's unsend removes shared placements too. Owners and admins of a target hide, trash or
+  purge them as usual. The sharer may hide, trash or purge the placements they created (clients undo a share with
+  `placements:bulk` `purge`).
+- `POST /v1/sends/{id}/forward` (the sender placing a whole send on more frames) uses the same code path, without
+  `shared_by`.
 
 ### 5.4 Frame synchronization (the change feed)
 
@@ -467,6 +492,7 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `send.updated` | `send` (summary) | Processing, delivered or seen counts changed |
 | `reaction` | `placement_id`, `frame_id`, `reaction`, `by_frame_name` | New or changed reaction |
 | `reply` | `placement_id`, `frame_id`, `preset` | Quick reply from a frame |
+| `share.delivered` | `frame_id`, `frame_name` | Everything the user shared to that frame (`sharePlacements`) arrived |
 | `frame.status` | `frame_id`, `online`, `last_seen_at` | Frame connectivity |
 | `join_request` | `frame_id`, `request` | Approval needed (owner/admin) |
 | `membership.updated` | `frame_id` | Role or permissions changed |
@@ -483,6 +509,8 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`). Endpoints the
   push service reports as gone (404/410) are deleted by the server.
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
+  Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)
+  once everything they shared to a frame has arrived.
 
 ## 7. Versioning
 

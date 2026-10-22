@@ -47,6 +47,17 @@ class SyncEngineTest : SyncTestBase() {
     }
 
     @Test
+    fun sharedPlacementKeepsWhoSharedIt() = runBlocking {
+        fake.pages[0] = page(2, false,
+            up(1, placement("p1", byteArrayOf(1), extra = ""","shared_by_user_id":"u2","shared_by_name":"Ben"""")),
+            up(2, placement("p2", byteArrayOf(2))))
+        engine.pull()
+        assertEquals("Ann", db.placements().get("p1")!!.senderName)
+        assertEquals("Ben", db.placements().get("p1")!!.sharedByName)
+        assertNull(db.placements().get("p2")!!.sharedByName)
+    }
+
+    @Test
     fun weatherIsPersistedAndClearedByNull() = runBlocking {
         val weather = """{"fetched_at":"2026-10-22T12:05:00Z","location":{"name":"Gent"},"current":{"temp_c":14.6,"code":2,"is_day":true},"daily":[]}"""
         fake.pages[0] = page(1, false, """{"seq":1,"type":"weather","weather":$weather}""")

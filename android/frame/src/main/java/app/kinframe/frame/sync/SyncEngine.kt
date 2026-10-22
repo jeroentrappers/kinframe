@@ -138,6 +138,7 @@ class SyncEngine(
             status = p.status,
             senderId = item.senderId,
             senderName = item.senderName,
+            sharedByName = p.sharedByName,
             caption = item.caption,
             captionEdited = item.captionEdited,
             capturedAt = parseTime(item.capturedAt),

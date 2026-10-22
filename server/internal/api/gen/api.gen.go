@@ -1105,6 +1105,21 @@ func (e ScreenOrientation) Valid() bool {
 	}
 }
 
+// Defines values for ShareResultSkippedReason.
+const (
+	AlreadyOnFrame ShareResultSkippedReason = "already_on_frame"
+)
+
+// Valid indicates whether the value is a known member of the ShareResultSkippedReason enum.
+func (e ShareResultSkippedReason) Valid() bool {
+	switch e {
+	case AlreadyOnFrame:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SleepScheduleDays.
 const (
 	SleepScheduleDaysFri SleepScheduleDays = "fri"
@@ -1773,11 +1788,17 @@ type Change struct {
 			At     *time.Time   `json:"at,omitempty"`
 			Preset *ReplyPreset `json:"preset,omitempty"`
 		} `json:"replies,omitempty"`
-		Rotation  *ChangePlacementRotation `json:"rotation,omitempty"`
-		SeenAt    *time.Time               `json:"seen_at,omitempty"`
-		Status    PlacementStatus          `json:"status"`
-		Trashed   bool                     `json:"trashed"`
-		TrashedAt *time.Time               `json:"trashed_at,omitempty"`
+		Rotation *ChangePlacementRotation `json:"rotation,omitempty"`
+		SeenAt   *time.Time               `json:"seen_at,omitempty"`
+
+		// SharedByName Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+		SharedByName *string `json:"shared_by_name,omitempty"`
+
+		// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+		SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
+		Status         PlacementStatus `json:"status"`
+		Trashed        bool            `json:"trashed"`
+		TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
 	} `json:"placement,omitempty"`
 	Seq int `json:"seq"`
 
@@ -2463,11 +2484,17 @@ type Placement struct {
 		At     *time.Time   `json:"at,omitempty"`
 		Preset *ReplyPreset `json:"preset,omitempty"`
 	} `json:"replies,omitempty"`
-	Rotation  *PlacementRotation `json:"rotation,omitempty"`
-	SeenAt    *time.Time         `json:"seen_at,omitempty"`
-	Status    PlacementStatus    `json:"status"`
-	Trashed   bool               `json:"trashed"`
-	TrashedAt *time.Time         `json:"trashed_at,omitempty"`
+	Rotation *PlacementRotation `json:"rotation,omitempty"`
+	SeenAt   *time.Time         `json:"seen_at,omitempty"`
+
+	// SharedByName Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+	SharedByName *string `json:"shared_by_name,omitempty"`
+
+	// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+	SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
+	Status         PlacementStatus `json:"status"`
+	Trashed        bool            `json:"trashed"`
+	TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
 }
 
 // PlacementRotation defines model for Placement.Rotation.
@@ -2583,10 +2610,13 @@ type Send struct {
 			ItemId Id `json:"item_id"`
 
 			// PlacementId UUIDv7
-			PlacementId Id              `json:"placement_id"`
-			Reaction    *Reaction       `json:"reaction,omitempty"`
-			Replies     *[]ReplyPreset  `json:"replies,omitempty"`
-			Status      PlacementStatus `json:"status"`
+			PlacementId Id             `json:"placement_id"`
+			Reaction    *Reaction      `json:"reaction,omitempty"`
+			Replies     *[]ReplyPreset `json:"replies,omitempty"`
+
+			// SharedByName Set when another member shared this item to the frame.
+			SharedByName *string         `json:"shared_by_name,omitempty"`
+			Status       PlacementStatus `json:"status"`
 		} `json:"placements"`
 	} `json:"frames"`
 
@@ -2647,6 +2677,28 @@ type SendCreate struct {
 		Width *int `json:"width,omitempty"`
 	} `json:"items"`
 }
+
+// ShareResult defines model for ShareResult.
+type ShareResult struct {
+	// Placements The placements created on the target frames (empty for a dry run).
+	Placements []Placement `json:"placements"`
+
+	// Skipped Source placement × target frame pairs that were not shared.
+	Skipped []struct {
+		// ExistingPlacementId UUIDv7
+		ExistingPlacementId *Id `json:"existing_placement_id,omitempty"`
+
+		// FrameId UUIDv7
+		FrameId Id `json:"frame_id"`
+
+		// PlacementId UUIDv7
+		PlacementId Id                       `json:"placement_id"`
+		Reason      ShareResultSkippedReason `json:"reason"`
+	} `json:"skipped"`
+}
+
+// ShareResultSkippedReason defines model for ShareResult.Skipped.Reason.
+type ShareResultSkippedReason string
 
 // SleepSchedule defines model for SleepSchedule.
 type SleepSchedule struct {
@@ -3098,6 +3150,18 @@ type BulkUpdatePlacementsJSONBody struct {
 // BulkUpdatePlacementsJSONBodyAction defines parameters for BulkUpdatePlacements.
 type BulkUpdatePlacementsJSONBodyAction string
 
+// SharePlacementsJSONBody defines parameters for SharePlacements.
+type SharePlacementsJSONBody struct {
+	DryRun       *bool `json:"dry_run,omitempty"`
+	FrameIds     []Id  `json:"frame_ids"`
+	PlacementIds []Id  `json:"placement_ids"`
+}
+
+// SharePlacementsParams defines parameters for SharePlacements.
+type SharePlacementsParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
 // ReplaceDeviceJSONBody defines parameters for ReplaceDevice.
 type ReplaceDeviceJSONBody struct {
 	Code string `json:"code"`
@@ -3242,6 +3306,9 @@ type UpdatePlacementJSONRequestBody UpdatePlacementJSONBody
 
 // BulkUpdatePlacementsJSONRequestBody defines body for BulkUpdatePlacements for application/json ContentType.
 type BulkUpdatePlacementsJSONRequestBody BulkUpdatePlacementsJSONBody
+
+// SharePlacementsJSONRequestBody defines body for SharePlacements for application/json ContentType.
+type SharePlacementsJSONRequestBody SharePlacementsJSONBody
 
 // ReplaceDeviceJSONRequestBody defines body for ReplaceDevice for application/json ContentType.
 type ReplaceDeviceJSONRequestBody ReplaceDeviceJSONBody
@@ -3449,6 +3516,9 @@ type ServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/placements:bulk)
 	BulkUpdatePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/placements:share)
+	SharePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params SharePlacementsParams)
 
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -5384,6 +5454,56 @@ func (siw *ServerInterfaceWrapper) BulkUpdatePlacements(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
+// SharePlacements operation middleware
+func (siw *ServerInterfaceWrapper) SharePlacements(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SharePlacementsParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SharePlacements(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ReplaceDevice operation middleware
 func (siw *ServerInterfaceWrapper) ReplaceDevice(w http.ResponseWriter, r *http.Request) {
 
@@ -6292,6 +6412,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.PurgePlacement)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.UpdatePlacement)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:bulk", wrapper.BulkUpdatePlacements)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:share", wrapper.SharePlacements)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/replace-device", wrapper.ReplaceDevice)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
@@ -8235,6 +8356,74 @@ func (response BulkUpdatePlacements200JSONResponse) VisitBulkUpdatePlacementsRes
 	return err
 }
 
+type SharePlacementsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  SharePlacementsParams
+	Body    *SharePlacementsJSONRequestBody
+}
+
+type SharePlacementsResponseObject interface {
+	VisitSharePlacementsResponse(w http.ResponseWriter) error
+}
+
+type SharePlacements200JSONResponse ShareResult
+
+func (response SharePlacements200JSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements403ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SharePlacements403ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements404ApplicationProblemPlusJSONResponse Problem
+
+func (response SharePlacements404ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements422ApplicationProblemPlusJSONResponse Problem
+
+func (response SharePlacements422ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ReplaceDeviceRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *ReplaceDeviceJSONRequestBody
@@ -9371,6 +9560,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/placements:bulk)
 	BulkUpdatePlacements(ctx context.Context, request BulkUpdatePlacementsRequestObject) (BulkUpdatePlacementsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/placements:share)
+	SharePlacements(ctx context.Context, request SharePlacementsRequestObject) (SharePlacementsResponseObject, error)
 
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(ctx context.Context, request ReplaceDeviceRequestObject) (ReplaceDeviceResponseObject, error)
@@ -11172,6 +11364,40 @@ func (sh *strictHandler) BulkUpdatePlacements(w http.ResponseWriter, r *http.Req
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(BulkUpdatePlacementsResponseObject); ok {
 		if err := validResponse.VisitBulkUpdatePlacementsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SharePlacements operation middleware
+func (sh *strictHandler) SharePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params SharePlacementsParams) {
+	var request SharePlacementsRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body SharePlacementsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SharePlacements(ctx, request.(SharePlacementsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SharePlacements")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SharePlacementsResponseObject); ok {
+		if err := validResponse.VisitSharePlacementsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

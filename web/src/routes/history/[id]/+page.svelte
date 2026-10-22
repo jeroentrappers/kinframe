@@ -11,6 +11,9 @@
 	import Icon from '$components/Icon.svelte';
 	import PushOffer from '$components/PushOffer.svelte';
 	import { push } from '$lib/push.svelte';
+	import { can, frames } from '$lib/frames.svelte';
+	import { shareSource } from '$lib/share';
+	import ShareDialog from '$components/ShareDialog.svelte';
 	import ReactionChips from '$components/ReactionChips.svelte';
 	import StagePill from '$components/StagePill.svelte';
 	import Thumb from '$components/Thumb.svelte';
@@ -34,6 +37,26 @@
 			(s) => (send = s)
 		);
 	});
+
+	// ---- share to another frame (from a frame that still has the photos)
+	let shareOpen = $state(false);
+	let shareFrom = $state<{ frameId: string; placementIds: string[] } | null>(null);
+	$effect(() => void frames.load());
+
+	function sourceFor(itemIds: string[]) {
+		if (!send) return null;
+		const src = shareSource(send.frames, itemIds);
+		// Only offered when there is another frame you can send to.
+		return src && frames.list.some((f) => f.id !== src.frameId && can(f, 'send')) ? src : null;
+	}
+	const readyIds = $derived(send ? send.items.filter((i) => i.status !== 'failed').map((i) => i.id) : []);
+	const sendSource = $derived(frames.loaded ? sourceFor(readyIds) : null);
+
+	function share(src: { frameId: string; placementIds: string[] } | null) {
+		if (!src) return;
+		shareFrom = src;
+		shareOpen = true;
+	}
 
 	const deliveries = $derived(send ? frameDeliveries(send) : []);
 	const kinds = $derived(send ? kindCounts(send.items) : { photos: 0, videos: 0 });
@@ -138,6 +161,9 @@
 				<p class="lede">{t('detail.sentAt', { when: formatDateTime(send.created_at, i18n.tag) })}</p>
 			</div>
 			<div class="row-wrap head-actions">
+				{#if sendSource}
+					<button class="btn" onclick={() => share(sendSource)}><Icon name="share" size={18} />{t('share.action')}</button>
+				{/if}
 				{#if tvFrame}
 					<button class="btn" onclick={() => (tvOpen = true)}><Icon name="tv" size={18} />{t('tv.show')}</button>
 				{/if}
@@ -218,6 +244,14 @@
 								<button class="btn btn-ghost btn-sm" onclick={() => startEdit(item)} aria-label={t('detail.editCaptionN', { n: i + 1 })}>
 									<Icon name="edit" size={16} />{t('common.edit')}
 								</button>
+								{#if frames.loaded && send.items.length > 1 && item.status !== 'failed'}
+									{@const src = sourceFor([item.id])}
+									{#if src}
+										<button class="btn btn-ghost btn-sm" onclick={() => share(src)} aria-label={`${t('share.action')} (${i + 1})`}>
+											<Icon name="share" size={16} />{t('share.actionShort')}
+										</button>
+									{/if}
+								{/if}
 							</div>
 						{/if}
 						<ul class="per-frame" role="list">
@@ -227,6 +261,9 @@
 										<span class="pf-name">{row.frame}</span>
 										<StagePill stage={stageOf(row.p.status, item.status)} />
 										<ReactionChips reactions={[row.p.reaction]} replies={(row.p.replies ?? []) as ReplyPreset[]} />
+										{#if row.p.shared_by_name}
+											<span class="shared-by"><Icon name="share" size={13} />{t('share.sharedBy', { name: row.p.shared_by_name })}</span>
+										{/if}
 									</li>
 								{/if}
 							{/each}
@@ -237,6 +274,10 @@
 		</ul>
 	{/if}
 </div>
+
+{#if shareFrom}
+	<ShareDialog bind:open={shareOpen} frameId={shareFrom.frameId} placementIds={shareFrom.placementIds} />
+{/if}
 
 <style>
 	.narrow {
@@ -357,6 +398,16 @@
 		align-items: center;
 		gap: var(--s-2);
 		flex-wrap: wrap;
+	}
+	.shared-by {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 0.8rem;
+		color: var(--text-muted);
+	}
+	.head-actions {
+		gap: var(--s-2);
 	}
 	.pf-name {
 		font-size: 0.86rem;

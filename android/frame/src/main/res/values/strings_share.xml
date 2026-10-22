@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A photo another member shared from a different frame: the sender keeps the credit (README §5.3). -->
+<resources>
+    <!-- Caption line: sender, then who shared it here. Names are bidi-isolated by the app. -->
+    <string name="caption_shared_by">%1$s · shared by %2$s</string>
+</resources>

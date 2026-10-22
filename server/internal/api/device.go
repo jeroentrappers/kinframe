@@ -550,6 +550,7 @@ func (s *Server) DeviceAck(ctx context.Context, req gen.DeviceAckRequestObject) 
 		return nil, err
 	}
 	s.placementsChanged(ctx, changes, s.deliveredPushes(ctx, f, changes))
+	s.sharedDeliveredPushes(ctx, f, changes)
 	return noContent(), nil
 }
 

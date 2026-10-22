@@ -82,6 +82,11 @@ import app.kinframe.family.ui.frame.FrameSettingsViewModel
 import app.kinframe.family.ui.frame.LibraryEvent
 import app.kinframe.family.ui.frame.LibraryTab
 import app.kinframe.family.ui.frame.LibraryViewModel
+import app.kinframe.family.ui.share.ShareEvent
+import app.kinframe.family.ui.share.ShareSheet
+import app.kinframe.family.ui.share.ShareSource
+import app.kinframe.family.ui.share.ShareViewModel
+import app.kinframe.family.ui.share.Sharing
 import app.kinframe.family.ui.frame.SettingsEvent
 import app.kinframe.family.ui.frame.SettingsTab
 import app.kinframe.family.ui.frames.AddFrameScreen
@@ -219,6 +224,19 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         )
     }
     val history: HistoryViewModel = viewModel(key = "history-$k") { HistoryViewModel(api, graph.live.events, graph.sent) }
+    // "Share to another frame" from the library and the history: one picker sheet for the whole app.
+    val share: ShareViewModel = viewModel(key = "share-$k") { ShareViewModel(api) }
+    val shareState by share.state.collectAsStateWithLifecycle()
+    LaunchedEffect(share) {
+        share.events.collect { e ->
+            when (e) {
+                is ShareEvent.Shared -> toaster.show(res.getString(R.string.share_done, e.frames.joinToString(", ")), res.getString(R.string.common_undo), e.undo)
+                ShareEvent.NothingNew -> toaster.show(res.getString(R.string.share_nothing_new))
+                ShareEvent.Undone -> toaster.show(res.getString(R.string.share_undone))
+                is ShareEvent.Error -> toaster.show(res.getString(e.message))
+            }
+        }
+    }
 
     BackHandler(enabled = nav.stack.size > 1 || nav.tab != Route.Frames) { if (!nav.pop()) nav.selectTab(Route.Frames) }
 
@@ -303,6 +321,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                     Box(Modifier.fillMaxSize().padding(pad)) {
                         Screen(graph, app, ready, nav, frames, composer, history, pick)
                     }
+                    ShareSheet(shareState, share::toggle, share::confirm, share::dismiss, share::retry)
                 }
             }
         }
@@ -409,7 +428,13 @@ private fun Screen(
                     }
                 }
             }
-            SendDetailScreen(s, { nav.pop() }, { vm.load() }, vm::startEdit, vm::onCaption, vm::saveCaption, vm::cancelEdit, vm::unsend)
+            val share: ShareViewModel = viewModel(key = "share-${System.identityHashCode(api)}") { ShareViewModel(api) }
+            val fs by frames.state.collectAsStateWithLifecycle()
+            val send = (s.send as? Load.Ready)?.value
+            val source = send?.let { Sharing.source(it, it.items.filter { i -> i.status != "failed" }.map { i -> i.id }) }
+            val canShare = source != null && Sharing.targets((fs.frames as? Load.Ready)?.value.orEmpty(), source.frameId).isNotEmpty()
+            SendDetailScreen(s, { nav.pop() }, { vm.load() }, vm::startEdit, vm::onCaption, vm::saveCaption, vm::cancelEdit, vm::unsend,
+                onShare = if (canShare && send != null) { ids -> Sharing.source(send, ids)?.let(share::open) } else null)
         }
         is Route.FrameDetail -> FrameDetailRoute(graph, api, r, nav, frames, composer, ready)
     }
@@ -480,9 +505,14 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     }
                 }
             }
+            val share: ShareViewModel = viewModel(key = "share-${System.identityHashCode(api)}") { ShareViewModel(api) }
+            LaunchedEffect(share, lib) { share.events.collect { if (it is ShareEvent.Shared) lib.clearSelection() } }
+            val fs by frames.state.collectAsStateWithLifecycle()
+            val canShare = Sharing.targets((fs.frames as? Load.Ready)?.value.orEmpty(), r.frameId).isNotEmpty()
             (s.frame as? Load.Ready)?.value?.let { f ->
                 app.kinframe.family.ui.frame.LibraryTab(f, ls, ready.server.limits.trashRetentionDays, lib::setTab, lib::toggle, lib::selectAll, lib::clearSelection,
-                    { lib.act(it) }, lib::loadMore, lib::load)
+                    { lib.act(it) }, lib::loadMore, lib::load,
+                    onShare = if (canShare) ({ share.open(ShareSource(r.frameId, ls.selected.toList())) }) else null)
             }
         },
         settings = {

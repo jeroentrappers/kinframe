@@ -201,6 +201,8 @@ func (s *Server) placementJSON(p *store.PlacementRow) gen.Placement {
 		SeenAt:            p.SeenAt,
 		ReceivedAt:        ptr(p.ReceivedAt),
 		AlbumIds:          ptr(p.AlbumIDs),
+		SharedByUserId:    p.SharedByUserID,
+		SharedByName:      p.SharedByName,
 	}
 	if p.RemovedAt != nil {
 		out.Status = "removed"
