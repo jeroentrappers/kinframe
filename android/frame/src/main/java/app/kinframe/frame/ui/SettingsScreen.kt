@@ -112,9 +112,11 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
                 LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
+                RemovableSection(c)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
@@ -126,7 +128,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
 }
 
 @Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
+internal fun SectionCard(title: String, content: @Composable () -> Unit) {
     KinCard(Modifier.fillMaxWidth().widthIn(max = 1000.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             Text(title, style = Kin.type.title)
@@ -136,7 +138,7 @@ private fun SectionCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Labeled(label: String, content: @Composable () -> Unit) {
+internal fun Labeled(label: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(label, style = Kin.type.label, color = Kin.colors.inkSoft)
         content()
@@ -305,7 +307,7 @@ private fun SleepSection(s: FrameSettings, patch: (JsonObject) -> Unit) {
 }
 
 @Composable
-private fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
+internal fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
     Labeled(label) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             StepButton(KinIcons.Minus, onMinus)
@@ -323,13 +325,31 @@ private fun StepButton(icon: androidx.compose.ui.graphics.vector.ImageVector, on
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().clip(CircleShape).clickable { onChange(!checked) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Kin.type.body, modifier = Modifier.weight(1f))
         Switch(
             checked, onChange,
             colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
         )
+    }
+}
+
+/** SD card and USB stick (product spec 4.10): opens the storage panel when one is in the frame. */
+@Composable
+private fun RemovableSection(c: FrameController) {
+    val volumes by c.removable.volumes.collectAsState()
+    val v = volumes.firstOrNull()
+    SectionCard(stringResource(R.string.settings_removable)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Storage, null, tint = if (v != null) Kin.colors.sage else Kin.colors.inkFaint)
+            Text(
+                if (v == null) stringResource(R.string.settings_removable_none)
+                else v.label ?: stringResource(if (v.kind == app.kinframe.frame.removable.Volume.Kind.Usb) R.string.removable_card_usb_title else R.string.removable_card_sd_title),
+                style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.weight(1f).padding(horizontal = 14.dp),
+            )
+            if (v != null) KinButton(stringResource(R.string.removable_card_open), { c.removable.open() }, style = KinButtonStyle.Secondary)
+        }
     }
 }
 

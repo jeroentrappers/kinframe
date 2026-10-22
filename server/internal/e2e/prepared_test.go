@@ -61,6 +61,20 @@ func (e *env) mediaOf(itemID string, motion bool) mediaRow {
 	return r
 }
 
+func (e *env) renditions(itemID string, motion bool) int {
+	e.t.Helper()
+	col := "media_id"
+	if motion {
+		col = "motion_media_id"
+	}
+	var n int
+	if err := e.app.Pool.QueryRow(context.Background(), `SELECT count(*) FROM renditions r JOIN items i ON r.media_id = i.`+col+`
+		WHERE i.id = $1`, itemID).Scan(&n); err != nil {
+		e.t.Fatal(err)
+	}
+	return n
+}
+
 func (e *env) reusedRenditions(itemID string, motion bool) int {
 	e.t.Helper()
 	col := "media_id"
@@ -323,11 +337,12 @@ func TestLivePhotos(t *testing.T) {
 	if still2.pipeline != "prepared" {
 		t.Fatalf("motion photo still: %+v", still2)
 	}
-	eventually(t, 60e9, "split clip processed", func() bool {
-		return e.mediaOf(it["id"].(string), true).sha != ""
+	// The master is stored before its frame renditions: wait for the rendition
+	// itself. The split clip conforms and fits the frame: served from the master.
+	eventually(t, 60e9, "split clip rendition", func() bool {
+		return e.renditions(it["id"].(string), true) > 0
 	})
-	// The split clip conforms and fits the frame: served from the master.
-	if e.reusedRenditions(it["id"].(string), true) != 1 {
+	if e.mediaOf(it["id"].(string), true).pipeline != "prepared" || e.reusedRenditions(it["id"].(string), true) != 1 {
 		t.Fatal("motion rendition was transcoded")
 	}
 	master := e.itemMedia(u, it["id"].(string), "master")

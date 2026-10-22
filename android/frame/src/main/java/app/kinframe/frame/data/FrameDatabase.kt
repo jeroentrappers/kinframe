@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -32,6 +32,13 @@ abstract class FrameDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "frame.db"
+
+        /** v5: the merged calendar (`sync_state.calendarJson`). */
+        val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN calendarJson TEXT DEFAULT NULL")
+            }
+        }
 
         /** v4: Live/Motion Photo clips (`placement.motion`). */
         val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
@@ -68,7 +75,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

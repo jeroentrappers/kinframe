@@ -60,6 +60,8 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))
 	mux.Handle("GET /v1/device/update", s.deviceAuth(http.HandlerFunc(s.deviceCheckUpdate)))
 	mux.Handle("GET /v1/device/update/apk/{versionCode}", s.deviceAuth(http.HandlerFunc(s.deviceGetUpdateApk)))
+	mux.Handle("GET /v1/device/invitations/{invitationId}/photo", s.deviceAuth(http.HandlerFunc(s.deviceGetInvitationPhoto)))
+	mux.Handle("GET /v1/frames/{frameId}/events/{invitationId}/photo", user(http.HandlerFunc(s.getEventInvitationPhoto)))
 	mux.HandleFunc("GET /v1/ws", s.userWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
 	mux.HandleFunc("GET /avatars/{user}/{file}", s.avatarFile)
@@ -104,7 +106,7 @@ func (s *Server) authenticate(next http.Handler) http.Handler {
 	user, device := s.userAuth(next), s.deviceAuth(next)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case strings.HasPrefix(r.URL.Path, "/v1/devices/"):
+		case strings.HasPrefix(r.URL.Path, "/v1/devices/"), tvPublicPath(r):
 			next.ServeHTTP(w, r)
 		case strings.HasPrefix(r.URL.Path, "/v1/device/"):
 			device.ServeHTTP(w, r)

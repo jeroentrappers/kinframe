@@ -146,7 +146,7 @@ func TestRewriteTransport(t *testing.T) {
 func TestWriteOutputIdempotent(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "sub", "logto.json")
 	b := &Bootstrapper{cfg: &Config{OutputFile: path}, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
-	lf := config.LogtoFile{Issuer: "https://auth.example.org/oidc", WebClientID: "w", MobileClientID: "m", APIResource: "https://k.example.org/v1"}
+	lf := config.LogtoFile{Issuer: "https://auth.example.org/oidc", WebClientID: "w", MobileClientID: "m", DesktopClientID: "d", APIResource: "https://k.example.org/v1"}
 	if err := b.writeOutput(lf); err != nil {
 		t.Fatal(err)
 	}

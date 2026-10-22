@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -354,6 +357,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "weather", "weather": w})
+		case store.FeedCalendar:
+			c, err := s.frameCalendar(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if c == nil && snapshot {
+				continue
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "calendar", "calendar": c})
 		case store.FeedFrame:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,
@@ -721,7 +733,8 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 	if err != nil {
 		return nil, err
 	}
-	n, err := io.Copy(out, io.LimitReader(req.Body, maxImportBytes+1))
+	hasher := sha256.New()
+	n, err := io.Copy(io.MultiWriter(out, hasher), io.LimitReader(req.Body, maxImportBytes+1))
 	if cerr := out.Close(); err == nil {
 		err = cerr
 	}
@@ -734,17 +747,31 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		cleanup()
 		return nil, problem.New(problem.UploadTooLarge, "imports are limited to 512 MiB")
 	}
+	sha := hex.EncodeToString(hasher.Sum(nil))
+	// The same file again (a re-import, or a restore from a kinframe export of
+	// this frame): return what the frame already has.
+	if dup, err := s.st.PlacementOfFile(ctx, f.ID, sha); err == nil {
+		cleanup()
+		return ok(s.placementJSON(dup)), nil
+	} else if err != store.ErrNotFound {
+		cleanup()
+		return nil, err
+	}
 	kind, mime, err := media.Sniff(path)
 	if err != nil {
 		cleanup()
 		return nil, problem.New(problem.UnsupportedMedia, "")
 	}
+	var caption *string
+	if c := req.Params.Caption; c != nil && strings.TrimSpace(*c) != "" {
+		caption = ptr(strings.TrimSpace(*c))
+	}
 	mediaID, itemID, placementID := store.NewID(), store.NewID(), store.NewID()
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
-		if err := tx.CreateMedia(ctx, store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true}); err != nil {
+		if err := tx.CreateMedia(ctx, store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true, SourceSHA256: &sha}); err != nil {
 			return err
 		}
-		if err := tx.CreateItem(ctx, store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, CapturedHint: req.Params.XCapturedAt}); err != nil {
+		if err := tx.CreateItem(ctx, store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, Caption: caption, CapturedHint: req.Params.XCapturedAt}); err != nil {
 			return err
 		}
 		if err := tx.CreatePlacement(ctx, store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending"}); err != nil {
@@ -761,6 +788,20 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		return nil, err
 	}
 	return accepted(s.placementJSON(row)), nil
+}
+
+// DeviceImportCheck reports which file hashes the frame already has, so an
+// import from SD/USB can skip duplicates before uploading them.
+func (s *Server) DeviceImportCheck(ctx context.Context, req gen.DeviceImportCheckRequestObject) (gen.DeviceImportCheckResponseObject, error) {
+	f, err := s.deviceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	known, err := s.st.KnownFileHashes(ctx, f.ID, req.Body.Sha256)
+	if err != nil {
+		return nil, err
+	}
+	return ok(map[string]any{"known": known}), nil
 }
 
 // placementIDs are the ids a push about a placement carries (README §6.3).

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Ma</string>
+    <string name="calendar_tomorrow">Holnap</string>
+    <string name="calendar_view_month">Hónap</string>
+    <string name="calendar_view_week">Hét</string>
+    <string name="calendar_view_four_day">4 nap</string>
+    <string name="calendar_week_number">%1$d. hét</string>
+    <string name="calendar_previous">Előző</string>
+    <string name="calendar_next">Következő</string>
+    <string name="calendar_sync_now">Szinkronizálás most</string>
+    <string name="calendar_syncing">Szinkronizálás…</string>
+    <string name="calendar_close">Naptár bezárása</string>
+    <string name="calendar_all_day">Egész nap</string>
+    <string name="calendar_received">Kapott események</string>
+    <string name="calendar_nothing">Nincs semmi tervezve</string>
+    <string name="calendar_nothing_today">Ma már nincs más tervezve</string>
+    <string name="calendar_empty_title">Még nincs naptár</string>
+    <string name="calendar_empty_body">Adj hozzá egy családi naptárt a kinframe appban vagy weboldalon, a képkeret Naptárak részében. Itt akárhány naptár megjeleníthető együtt.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">vége: %1$s</string>
+    <string name="calendar_from">kezdés: %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d további</item>
+        <item quantity="other">+%d további</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Ma</string>
+    <string name="countdown_tomorrow">Holnap</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d nap</item>
+        <item quantity="other">%d nap</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">%d nap múlva</item>
+        <item quantity="other">%d nap múlva</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Küldte: %1$s</string>
+    <string name="event_repeats">Ismétlődik</string>
+    <string name="event_countdown">Visszaszámlálás eddig</string>
+    <string name="event_countdown_hint">A diavetítésen és a naptár tetején</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s küldött neked egy eseményt</string>
+    <string name="invitation_body">Hozzáadod a képkeret naptárához?</string>
+    <string name="invitation_accept">Hozzáadás a naptárhoz</string>
+    <string name="invitation_decline">Elutasítás</string>
+    <string name="invitation_later">Most nem</string>
+    <string name="invitation_pill_one">Esemény tőle: %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d eseménymeghívó</item>
+        <item quantity="other">%d eseménymeghívó</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Naptár</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Naptár</string>
+    <string name="settings_calendar_open">Naptár megnyitása</string>
+    <string name="settings_calendar_view">Naptárnézet</string>
+    <string name="settings_calendar_start_today">Kezdés a mai nappal</string>
+    <string name="settings_calendar_fade_past">Elmúlt események halványítása</string>
+    <string name="settings_calendar_week_numbers">Hetek sorszáma</string>
+    <string name="settings_calendar_sidebar">Naptár a fotók mellett</string>
+    <string name="settings_calendar_countdowns">Visszaszámlálások a diavetítésen</string>
+    <string name="settings_calendar_timed">Naptár megjelenítése megadott időpontokban</string>
+    <string name="settings_calendar_timed_from">Kezdete</string>
+    <string name="settings_calendar_timed_to">Vége</string>
+    <string name="settings_calendar_timed_add">Időpont hozzáadása</string>
+    <string name="settings_calendar_timed_remove">Eltávolítás</string>
+    <string name="settings_calendar_sources">Naptárak ezen a képkereten</string>
+    <string name="settings_calendar_sources_hint">A naptárakat a kinframe appban vagy weboldalon lehet hozzáadni és kezelni.</string>
+    <string name="calendar_status_ok">Naprakész</string>
+    <string name="calendar_status_syncing">Szinkronizálás…</string>
+    <string name="calendar_status_failed">Nem sikerült szinkronizálni</string>
+    <string name="calendar_status_auth_failed">Bejelentkezés szükséges</string>
+    <string name="calendar_status_disabled">Kikapcsolva</string>
+</resources>

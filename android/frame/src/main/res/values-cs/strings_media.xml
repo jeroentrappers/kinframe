@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Klepnutím přehrajete</string>
+    <string name="settings_live_photos">Živé fotky</string>
+    <string name="live_photos_on">Přehrát při zobrazení</string>
+    <string name="live_photos_tap">Přehrát po klepnutí</string>
+    <string name="live_photos_off">Jen fotka</string>
+</resources>

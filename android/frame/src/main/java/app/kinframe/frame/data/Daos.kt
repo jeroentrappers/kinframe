@@ -27,6 +27,9 @@ interface PlacementDao {
     @Query("SELECT * FROM placements")
     fun observeAll(): Flow<List<PlacementEntity>>
 
+    @Query("SELECT COUNT(*) FROM placements")
+    fun observeCount(): Flow<Int>
+
     @Query("SELECT COUNT(*) FROM placements WHERE mediaSha256 = :sha AND localFile IS NOT NULL")
     suspend fun countUsingSha(sha: String): Int
 

@@ -37,8 +37,11 @@ type Config struct {
 	OIDCAudience   string
 	OIDCJWKSURL    string
 	MobileClientID string
-	WebClientID    string
-	DevAuth        bool
+	// DesktopClientID is the Logto Native app of the desktop client; empty on
+	// servers bootstrapped before it existed.
+	DesktopClientID string
+	WebClientID     string
+	DevAuth         bool
 	// LogtoConfigFile is where `bootstrap-logto` writes the Logto client
 	// settings; values from it fill in OIDC settings not set in the env.
 	LogtoConfigFile string
@@ -77,6 +80,13 @@ type Config struct {
 	WeatherURL     string
 	GeocodingURL   string
 	WeatherRefresh time.Duration
+
+	// Calendars (README §5.8). CalendarSync is the interval between syncs of
+	// a source; SecretsKey (optional) encrypts stored calendar credentials,
+	// else a key derived from SigningKey is used.
+	CalendarEnabled bool
+	CalendarSync    time.Duration
+	SecretsKey      []byte
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -135,6 +145,7 @@ func load(get func(string) string) (*Config, error) {
 		OIDCIssuer:         strings.TrimRight(env("KINFRAME_OIDC_ISSUER", ""), "/"),
 		OIDCJWKSURL:        env("KINFRAME_OIDC_JWKS_URL", ""),
 		MobileClientID:     env("KINFRAME_OIDC_MOBILE_CLIENT_ID", ""),
+		DesktopClientID:    env("KINFRAME_OIDC_DESKTOP_CLIENT_ID", ""),
 		WebClientID:        env("KINFRAME_OIDC_WEB_CLIENT_ID", ""),
 		DevAuth:            boolv("KINFRAME_DEV_AUTH"),
 		TrustProxy:         boolv("KINFRAME_TRUST_PROXY"),
@@ -170,6 +181,20 @@ func load(get func(string) string) (*Config, error) {
 	case "0", "off", "false", "no":
 		c.WeatherURL, c.GeocodingURL = "", ""
 	}
+	c.CalendarSync = time.Duration(intv("KINFRAME_CALENDAR_SYNC_MINUTES", 15)) * time.Minute
+	c.CalendarEnabled = true
+	switch strings.ToLower(env("KINFRAME_CALENDAR", "on")) {
+	case "0", "off", "false", "no":
+		c.CalendarEnabled = false
+	}
+	if c.CalendarSync < 5*time.Minute {
+		errs = append(errs, errors.New("KINFRAME_CALENDAR_SYNC_MINUTES must be at least 5"))
+	}
+	if sk, err := parseKey(env("KINFRAME_SECRETS_KEY", "")); err != nil {
+		errs = append(errs, fmt.Errorf("KINFRAME_SECRETS_KEY: %w", err))
+	} else {
+		c.SecretsKey = sk
+	}
 	if c.WeatherRefresh < 15*time.Minute {
 		errs = append(errs, errors.New("KINFRAME_WEATHER_REFRESH_MINUTES must be at least 15"))
 	}
@@ -194,6 +219,7 @@ func load(get func(string) string) (*Config, error) {
 		c.OIDCIssuer = cmp.Or(c.OIDCIssuer, strings.TrimRight(lf.Issuer, "/"))
 		c.WebClientID = cmp.Or(c.WebClientID, lf.WebClientID)
 		c.MobileClientID = cmp.Or(c.MobileClientID, lf.MobileClientID)
+		c.DesktopClientID = cmp.Or(c.DesktopClientID, lf.DesktopClientID)
 		c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", lf.APIResource)
 	}
 	c.OIDCAudience = cmp.Or(c.OIDCAudience, env("KINFRAME_OIDC_AUDIENCE", c.APIURL()))
@@ -269,10 +295,11 @@ func load(get func(string) string) (*Config, error) {
 // LogtoFile is the Logto client configuration written by `bootstrap-logto`
 // and served in discovery (/.well-known/kinframe).
 type LogtoFile struct {
-	Issuer         string `json:"issuer"`
-	WebClientID    string `json:"web_client_id"`
-	MobileClientID string `json:"mobile_client_id"`
-	APIResource    string `json:"api_resource"`
+	Issuer          string `json:"issuer"`
+	WebClientID     string `json:"web_client_id"`
+	MobileClientID  string `json:"mobile_client_id"`
+	DesktopClientID string `json:"desktop_client_id,omitempty"`
+	APIResource     string `json:"api_resource"`
 }
 
 // DefaultLogtoConfigFile is the bootstrap output location inside the data dir.

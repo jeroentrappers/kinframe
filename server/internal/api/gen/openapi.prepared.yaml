@@ -1,5 +1,11 @@
 components:
     parameters:
+        CalendarId:
+            in: path
+            name: calendarId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
         Cursor:
             in: query
             name: cursor
@@ -11,6 +17,12 @@ components:
             required: true
             schema:
                 $ref: '#/components/schemas/Id'
+        EventId:
+            in: path
+            name: eventId
+            required: true
+            schema:
+                $ref: '#/components/schemas/CalendarEventId'
         FrameId:
             in: path
             name: frameId
@@ -30,6 +42,12 @@ components:
             required: true
             schema:
                 type: string
+        InvitationId:
+            in: path
+            name: invitationId
+            required: true
+            schema:
+                $ref: '#/components/schemas/Id'
         InviteToken:
             in: path
             name: token
@@ -130,12 +148,391 @@ components:
                             type: string
                     type: object
             type: object
+        Calendar:
+            description: |
+                Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+                list, deduplicated across sources by UID and start, sorted by start.
+            properties:
+                countdowns:
+                    description: Marked events that have not passed yet, nearest first.
+                    items:
+                        $ref: '#/components/schemas/Countdown'
+                    type: array
+                events:
+                    items:
+                        $ref: '#/components/schemas/CalendarEvent'
+                    type: array
+                generated_at:
+                    format: date-time
+                    type: string
+                sources:
+                    items:
+                        $ref: '#/components/schemas/CalendarSourceInfo'
+                    type: array
+                timezone:
+                    description: The frame's time zone (`locale.timezone`), used for the window and all-day events.
+                    example: Europe/Brussels
+                    type: string
+                window:
+                    properties:
+                        from:
+                            format: date
+                            type: string
+                        to:
+                            description: Inclusive.
+                            format: date
+                            type: string
+                    required:
+                        - from
+                        - to
+                    type: object
+            required:
+                - generated_at
+                - timezone
+                - window
+                - sources
+                - events
+                - countdowns
+            type: object
+        CalendarColor:
+            description: |
+                Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+                everywhere).
+            enum:
+                - coral
+                - tangerine
+                - amber
+                - olive
+                - mint
+                - sage
+                - teal
+                - sky
+                - ocean
+                - lavender
+                - plum
+                - rose
+            type: string
+        CalendarEvent:
+            description: |
+                One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+                all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+            properties:
+                all_day:
+                    type: boolean
+                countdown:
+                    type: boolean
+                end_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                end_date:
+                    format: date
+                    nullable: true
+                    type: string
+                has_photo:
+                    type: boolean
+                id:
+                    $ref: '#/components/schemas/CalendarEventId'
+                invitation_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    description: Received events only; the photo is at `/v1/device/invitations/{id}/photo`.
+                    nullable: true
+                location:
+                    maxLength: 200
+                    nullable: true
+                    type: string
+                notes:
+                    maxLength: 500
+                    nullable: true
+                    type: string
+                photo_placement:
+                    allOf:
+                        - $ref: '#/components/schemas/EventPhotoPlacement'
+                    nullable: true
+                recurring:
+                    type: boolean
+                sender_name:
+                    description: Received events only.
+                    nullable: true
+                    type: string
+                source_id:
+                    $ref: '#/components/schemas/Id'
+                start_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                start_date:
+                    format: date
+                    nullable: true
+                    type: string
+                title:
+                    maxLength: 200
+                    type: string
+            required:
+                - id
+                - source_id
+                - title
+                - all_day
+            type: object
+        CalendarEventId:
+            description: Stable id of one event occurrence (a hash of source, UID and occurrence start).
+            pattern: ^[A-Za-z0-9_-]{8,64}$
+            type: string
+        CalendarSchedule:
+            description: Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight.
+            properties:
+                days:
+                    items:
+                        enum:
+                            - mon
+                            - tue
+                            - wed
+                            - thu
+                            - fri
+                            - sat
+                            - sun
+                        type: string
+                    type: array
+                enabled:
+                    type: boolean
+                from:
+                    example: "07:00"
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                to:
+                    example: "09:00"
+                    pattern: ^[0-2][0-9]:[0-5][0-9]$
+                    type: string
+            required:
+                - id
+                - from
+                - to
+                - days
+                - enabled
+            type: object
+        CalendarSource:
+            properties:
+                color:
+                    $ref: '#/components/schemas/CalendarColor'
+                created_at:
+                    format: date-time
+                    type: string
+                enabled:
+                    type: boolean
+                event_count:
+                    description: Events of this source in the frame's window.
+                    type: integer
+                has_password:
+                    type: boolean
+                id:
+                    $ref: '#/components/schemas/Id'
+                kind:
+                    $ref: '#/components/schemas/CalendarSourceKind'
+                last_attempt_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                last_error:
+                    description: Short reason of the last failed sync (English).
+                    nullable: true
+                    type: string
+                last_synced_at:
+                    description: Last successful sync.
+                    format: date-time
+                    nullable: true
+                    type: string
+                name:
+                    description: 'Display name. Empty for the local calendar until renamed: clients show "Received events".'
+                    type: string
+                next_sync_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                status:
+                    $ref: '#/components/schemas/CalendarSyncStatus'
+                url_hint:
+                    description: Redacted URL for display. Null for `local`.
+                    example: https://calendar.google.com/…/basic.ics
+                    nullable: true
+                    type: string
+                username:
+                    description: CalDAV only.
+                    nullable: true
+                    type: string
+            required:
+                - id
+                - kind
+                - name
+                - color
+                - enabled
+                - status
+            type: object
+        CalendarSourceCreate:
+            properties:
+                calendar_url:
+                    description: 'CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`.'
+                    maxLength: 2048
+                    type: string
+                color:
+                    $ref: '#/components/schemas/CalendarColor'
+                enabled:
+                    default: true
+                    type: boolean
+                kind:
+                    enum:
+                        - ics
+                        - caldav
+                    type: string
+                name:
+                    description: Defaults to the calendar's own name
+                    else the host.: null
+                    maxLength: 60
+                    type: string
+                password:
+                    description: CalDAV only; use an app-specific password.
+                    maxLength: 500
+                    type: string
+                    writeOnly: true
+                url:
+                    description: '`https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.'
+                    maxLength: 2048
+                    minLength: 8
+                    type: string
+                username:
+                    description: CalDAV only.
+                    maxLength: 200
+                    type: string
+            required:
+                - kind
+                - url
+            type: object
+        CalendarSourceInfo:
+            properties:
+                color:
+                    $ref: '#/components/schemas/CalendarColor'
+                id:
+                    $ref: '#/components/schemas/Id'
+                kind:
+                    $ref: '#/components/schemas/CalendarSourceKind'
+                last_synced_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                name:
+                    type: string
+                status:
+                    $ref: '#/components/schemas/CalendarSyncStatus'
+            required:
+                - id
+                - kind
+                - name
+                - color
+                - status
+            type: object
+        CalendarSourceKind:
+            description: '`ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame''s received-events calendar.'
+            enum:
+                - ics
+                - caldav
+                - local
+            type: string
+        CalendarSourceUpdate:
+            properties:
+                calendar_url:
+                    maxLength: 2048
+                    type: string
+                color:
+                    $ref: '#/components/schemas/CalendarColor'
+                enabled:
+                    type: boolean
+                name:
+                    maxLength: 60
+                    type: string
+                password:
+                    maxLength: 500
+                    type: string
+                    writeOnly: true
+                url:
+                    maxLength: 2048
+                    minLength: 8
+                    type: string
+                username:
+                    maxLength: 200
+                    type: string
+            type: object
+        CalendarSyncStatus:
+            description: '`syncing` before the first sync and while one runs; `disabled` when the source is turned off.'
+            enum:
+                - ok
+                - syncing
+                - failed
+                - auth_failed
+                - disabled
+            type: string
+        CalendarTestResult:
+            properties:
+                calendar_name:
+                    description: The calendar's own name
+                    if it has one.: null
+                    nullable: true
+                    type: string
+                calendars:
+                    description: CalDAV only. Calendars on the account that hold events.
+                    items:
+                        properties:
+                            color:
+                                as a hint.: null
+                                description: The server's colour (hex)
+                                nullable: true
+                                type: string
+                            name:
+                                type: string
+                            url:
+                                type: string
+                        required:
+                            - url
+                            - name
+                        type: object
+                    type: array
+                error:
+                    nullable: true
+                    type: string
+                event_count:
+                    description: Events in the next 30 days.
+                    nullable: true
+                    type: integer
+                ok:
+                    type: boolean
+                status:
+                    enum:
+                        - ok
+                        - failed
+                        - auth_failed
+                    type: string
+            required:
+                - ok
+                - status
+            type: object
+        CalendarView:
+            allOf:
+                - $ref: '#/components/schemas/Calendar'
+                - properties:
+                    weather:
+                        $ref: '#/components/schemas/Weather'
+                  type: object
         Change:
             discriminator:
                 propertyName: type
             properties:
                 album:
                     $ref: '#/components/schemas/Album'
+                calendar:
+                    allOf:
+                        - $ref: '#/components/schemas/Calendar'
+                    nullable: true
                 frame:
                     properties:
                         location:
@@ -227,6 +624,7 @@ components:
                         - member.remove
                         - frame
                         - weather
+                        - calendar
                         - reset
                     type: string
                 weather:
@@ -244,6 +642,35 @@ components:
                     type: boolean
             required:
                 - ok
+            type: object
+        Countdown:
+            description: A marked event, even when it lies outside the window.
+            properties:
+                all_day:
+                    type: boolean
+                color:
+                    $ref: '#/components/schemas/CalendarColor'
+                event_id:
+                    $ref: '#/components/schemas/CalendarEventId'
+                source_id:
+                    allOf:
+                        - $ref: '#/components/schemas/Id'
+                    nullable: true
+                start_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                start_date:
+                    format: date
+                    nullable: true
+                    type: string
+                title:
+                    type: string
+            required:
+                - event_id
+                - title
+                - all_day
+                - color
             type: object
         DeviceEnroll:
             properties:
@@ -354,6 +781,11 @@ components:
                     properties:
                         api_resource:
                             type: string
+                        desktop_client_id:
+                            description: |
+                                Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+                                (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+                            type: string
                         issuer:
                             format: uri
                             type: string
@@ -367,6 +799,10 @@ components:
                         - web_client_id
                         - api_resource
                     type: object
+                calendar:
+                    default: false
+                    description: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+                    type: boolean
                 dev_auth:
                     default: false
                     description: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
@@ -397,6 +833,113 @@ components:
                 - auth
                 - limits
             type: object
+        EventInvitation:
+            properties:
+                all_day:
+                    type: boolean
+                created_at:
+                    format: date-time
+                    type: string
+                decided_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                end_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                end_date:
+                    format: date
+                    nullable: true
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                has_photo:
+                    type: boolean
+                id:
+                    $ref: '#/components/schemas/Id'
+                location:
+                    nullable: true
+                    type: string
+                notes:
+                    nullable: true
+                    type: string
+                photo_placement:
+                    $ref: '#/components/schemas/EventPhotoPlacement'
+                sender_id:
+                    $ref: '#/components/schemas/Id'
+                sender_name:
+                    type: string
+                start_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                start_date:
+                    format: date
+                    nullable: true
+                    type: string
+                status:
+                    enum:
+                        - pending
+                        - accepted
+                        - declined
+                        - withdrawn
+                    type: string
+                title:
+                    type: string
+            required:
+                - id
+                - frame_id
+                - sender_id
+                - sender_name
+                - status
+                - title
+                - all_day
+                - has_photo
+                - created_at
+            type: object
+        EventInvitationCreate:
+            description: Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`).
+            properties:
+                all_day:
+                    default: false
+                    type: boolean
+                end_at:
+                    format: date-time
+                    type: string
+                end_date:
+                    format: date
+                    type: string
+                location:
+                    maxLength: 200
+                    type: string
+                notes:
+                    maxLength: 2000
+                    type: string
+                photo_placement:
+                    $ref: '#/components/schemas/EventPhotoPlacement'
+                photo_upload_id:
+                    description: A finished tus upload holding an image.
+                    type: string
+                start_at:
+                    format: date-time
+                    type: string
+                start_date:
+                    format: date
+                    type: string
+                title:
+                    maxLength: 200
+                    minLength: 1
+                    type: string
+            required:
+                - title
+            type: object
+        EventPhotoPlacement:
+            description: '`top`: the photo above the event details. `background`: the photo fills the card behind them.'
+            enum:
+                - top
+                - background
+            type: string
         Fit:
             enum:
                 - fill
@@ -492,6 +1035,44 @@ components:
         FrameSettings:
             description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
             properties:
+                calendar:
+                    description: Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
+                    properties:
+                        fade_past:
+                            default: true
+                            type: boolean
+                        future_days:
+                            default: 30
+                            description: Sync window after today.
+                            maximum: 365
+                            minimum: 7
+                            type: integer
+                        past_days:
+                            default: 30
+                            description: Sync window before today.
+                            maximum: 365
+                            minimum: 1
+                            type: integer
+                        start_on_today:
+                            default: true
+                            description: Week and 4-day views start on today rather than the first day of the week.
+                            type: boolean
+                        timed_views:
+                            description: 'Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day.'
+                            items:
+                                $ref: '#/components/schemas/CalendarSchedule'
+                            type: array
+                        view:
+                            default: week
+                            enum:
+                                - four_day
+                                - week
+                                - month
+                            type: string
+                        week_numbers:
+                            default: false
+                            type: boolean
+                    type: object
                 display:
                     properties:
                         brightness:
@@ -729,6 +1310,10 @@ components:
                         avatar:
                             default: true
                             type: boolean
+                        calendar_sidebar:
+                            default: false
+                            description: 'Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).'
+                            type: boolean
                         caption:
                             default: true
                             type: boolean
@@ -737,6 +1322,10 @@ components:
                             type: boolean
                         clock_24h:
                             default: true
+                            type: boolean
+                        countdowns:
+                            default: true
+                            description: Countdown widgets on the slideshow (the nearest three).
                             type: boolean
                         date:
                             default: true
@@ -1340,6 +1929,7 @@ components:
                 - code_expired
                 - invite_invalid
                 - invite_expired
+                - link_expired
                 - already_member
                 - validation_failed
                 - too_many_items
@@ -1356,6 +1946,7 @@ components:
                 - app_update_required
                 - upstream_unavailable
                 - feature_disabled
+                - already_decided
                 - server_error
             type: string
         PushEndpoint:
@@ -1640,6 +2231,170 @@ components:
                 - wake_at
                 - days
                 - enabled
+            type: object
+        TvLink:
+            properties:
+                album_id:
+                    format: uuid
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                created_by_name:
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                id:
+                    $ref: '#/components/schemas/Id'
+                interval_seconds:
+                    type: integer
+                kind:
+                    allOf:
+                        - $ref: '#/components/schemas/MediaKind'
+                    nullable: true
+                placement_count:
+                    description: Size of a fixed selection; null for album/library links.
+                    nullable: true
+                    type: integer
+                purpose:
+                    enum:
+                        - tv
+                        - cast
+                    type: string
+                token:
+                    type: string
+                url:
+                    description: 'The TV page: <public URL>/tv/<frameId>?t=<token>'
+                    format: uri
+                    type: string
+            required:
+                - id
+                - frame_id
+                - token
+                - url
+                - purpose
+                - interval_seconds
+                - expires_at
+                - created_at
+            type: object
+        TvLinkCreate:
+            properties:
+                album_id:
+                    description: Only this album.
+                    format: uuid
+                    nullable: true
+                    type: string
+                expires_in_hours:
+                    default: 12
+                    maximum: 168
+                    minimum: 1
+                    type: integer
+                interval_seconds:
+                    default: 10
+                    maximum: 600
+                    minimum: 3
+                    type: integer
+                kind:
+                    $ref: '#/components/schemas/MediaKind'
+                placement_ids:
+                    description: Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 500
+                    type: array
+                purpose:
+                    default: tv
+                    description: Informational; cast links are short-lived.
+                    enum:
+                        - tv
+                        - cast
+                    type: string
+            type: object
+        TvSlide:
+            properties:
+                caption:
+                    nullable: true
+                    type: string
+                captured_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                duration_ms:
+                    nullable: true
+                    type: integer
+                height:
+                    type: integer
+                kind:
+                    $ref: '#/components/schemas/MediaKind'
+                mime:
+                    description: e.g. image/webp or video/mp4
+                    type: string
+                placement_id:
+                    $ref: '#/components/schemas/Id'
+                poster_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                received_at:
+                    format: date-time
+                    type: string
+                sender_name:
+                    type: string
+                thumb_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                url:
+                    description: Absolute signed URL of the master rendition (Range supported).
+                    format: uri
+                    type: string
+                width:
+                    type: integer
+            required:
+                - placement_id
+                - kind
+                - url
+                - mime
+                - sender_name
+                - received_at
+                - width
+                - height
+            type: object
+        TvSlideshow:
+            properties:
+                album_name:
+                    nullable: true
+                    type: string
+                expires_at:
+                    description: When the link itself stops working.
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                frame_name:
+                    type: string
+                interval_seconds:
+                    type: integer
+                refresh_after:
+                    description: Refetch before the media URLs expire.
+                    format: date-time
+                    type: string
+                slides:
+                    items:
+                        $ref: '#/components/schemas/TvSlide'
+                    maxItems: 500
+                    type: array
+            required:
+                - frame_id
+                - frame_name
+                - interval_seconds
+                - expires_at
+                - refresh_after
+                - slides
             type: object
         User:
             properties:
@@ -1930,6 +2685,17 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/calendar/sync:
+        post:
+            description: '"Sync now" on the frame: the server re-syncs all of the frame''s calendar sources. A `calendar` change follows when something changed.'
+            operationId: deviceSyncCalendars
+            responses:
+                "202":
+                    description: Sync started
+            security:
+                - deviceAuth: []
+            tags:
+                - device
     /v1/device/changes:
         get:
             operationId: deviceGetChanges
@@ -1986,6 +2752,30 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/countdowns/{eventId}:
+        delete:
+            operationId: deviceClearCountdown
+            responses:
+                "204":
+                    description: Unmarked
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+        parameters:
+            - $ref: '#/components/parameters/EventId'
+        put:
+            description: The countdown toggle in the frame's event details. A `calendar` change follows.
+            operationId: deviceSetCountdown
+            responses:
+                "204":
+                    description: Marked
+                "404":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
     /v1/device/heartbeat:
         post:
             operationId: deviceHeartbeat
@@ -2007,6 +2797,8 @@ paths:
             description: |
                 Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
                 Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+                The server hashes the body: if this frame already has a live placement of the same file (source, master or
+                rendition sha256), nothing is created and the existing placement is returned with `200`.
             operationId: deviceImport
             parameters:
                 - in: header
@@ -2019,6 +2811,12 @@ paths:
                   schema:
                     format: date-time
                     type: string
+                - description: Caption to restore (e.g. from a kinframe export manifest).
+                  in: query
+                  name: caption
+                  schema:
+                    maxLength: 280
+                    type: string
             requestBody:
                 content:
                     application/octet-stream:
@@ -2027,12 +2825,131 @@ paths:
                             type: string
                 required: true
             responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Placement'
+                    description: Duplicate; the frame already has this file
                 "202":
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Placement'
                     description: Accepted; a placement.upsert change follows
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/imports/check:
+        post:
+            description: |
+                Which of these file hashes this frame already has (a live placement whose source, master or frame
+                rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading.
+            operationId: deviceImportCheck
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                sha256:
+                                    items:
+                                        pattern: ^[0-9a-f]{64}$
+                                        type: string
+                                    maxItems: 500
+                                    type: array
+                            required:
+                                - sha256
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    known:
+                                        items:
+                                            type: string
+                                        type: array
+                                required:
+                                    - known
+                                type: object
+                    description: The known subset
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/invitations:
+        get:
+            description: |
+                Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+                after syncing and after an `event_invitation` websocket message, like join requests.
+            operationId: deviceListInvitations
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/EventInvitation'
+                                type: array
+                    description: Pending invitations
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/invitations/{invitationId}:
+        post:
+            description: Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before.
+            operationId: deviceDecideInvitation
+            parameters:
+                - $ref: '#/components/parameters/InvitationId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                decision:
+                                    enum:
+                                        - accept
+                                        - decline
+                                    type: string
+                            required:
+                                - decision
+                            type: object
+                required: true
+            responses:
+                "204":
+                    description: Decided
+                "409":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/invitations/{invitationId}/photo:
+        get:
+            description: The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match.
+            operationId: deviceGetInvitationPhoto
+            parameters:
+                - $ref: '#/components/parameters/InvitationId'
+            responses:
+                "200":
+                    content:
+                        image/webp:
+                            schema:
+                                format: binary
+                                type: string
+                    description: Photo
+                "304":
+                    description: Not modified
+                "404":
+                    $ref: '#/components/responses/Problem'
             security:
                 - deviceAuth: []
             tags:
@@ -2555,6 +3472,157 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - albums
+    /v1/frames/{frameId}/calendar:
+        get:
+            description: |
+                Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+                `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+                day.
+            operationId: getFrameCalendar
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CalendarView'
+                    description: Merged calendar
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/calendars:
+        get:
+            description: The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number.
+            operationId: listCalendars
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/CalendarSource'
+                                type: array
+                    description: Sources in display order; the local received-events calendar (if any) comes first.
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            description: |
+                Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+                result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+                `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+                several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+            operationId: createCalendar
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CalendarSourceCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CalendarSource'
+                    description: Created
+                "422":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/calendars/{calendarId}:
+        delete:
+            description: |
+                Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+                calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+            operationId: deleteCalendar
+            responses:
+                "204":
+                    description: Removed
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+            - $ref: '#/components/parameters/CalendarId'
+        patch:
+            description: |
+                Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+                are kept. Changing the URL or credentials syncs right away.
+            operationId: updateCalendar
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CalendarSourceUpdate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CalendarSource'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/calendars/{calendarId}/sync:
+        post:
+            description: 'Sync now (needs change_settings). Returns at once with `status: syncing`.'
+            operationId: syncCalendar
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - $ref: '#/components/parameters/CalendarId'
+            responses:
+                "202":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CalendarSource'
+                    description: Sync started
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/calendars:test:
+        post:
+            description: |
+                Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+                `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+                `ok: false` with `status` and `error` when the calendar cannot be read.
+            operationId: testCalendar
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CalendarSourceCreate'
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/CalendarTestResult'
+                    description: Outcome
+                "429":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
     /v1/frames/{frameId}/commands:
         post:
             description: Delivered over the device websocket only; never queued.
@@ -2582,6 +3650,114 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - frames
+    /v1/frames/{frameId}/countdowns/{eventId}:
+        delete:
+            operationId: clearCountdown
+            responses:
+                "204":
+                    description: Unmarked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+            - $ref: '#/components/parameters/EventId'
+        put:
+            description: |
+                Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+                Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+                frame's calendar.
+            operationId: setCountdown
+            responses:
+                "204":
+                    description: Marked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/events:
+        get:
+            description: Events sent to this frame, newest first. Senders see their own; owner and admin see all.
+            operationId: listEventInvitations
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/EventInvitation'
+                                type: array
+                    description: Invitations
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            description: |
+                Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+                accepted events go to the frame's local received-events calendar. The sender gets an
+                `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+                new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+            operationId: sendEventToFrame
+            parameters:
+                - $ref: '#/components/parameters/IdempotencyKey'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/EventInvitationCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/EventInvitation'
+                    description: Sent
+                "422":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/events/{invitationId}:
+        delete:
+            description: The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise.
+            operationId: withdrawEventInvitation
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - $ref: '#/components/parameters/InvitationId'
+            responses:
+                "204":
+                    description: Withdrawn
+                "409":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
+    /v1/frames/{frameId}/events/{invitationId}/photo:
+        get:
+            description: The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none.
+            operationId: getEventInvitationPhoto
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - $ref: '#/components/parameters/InvitationId'
+            responses:
+                "200":
+                    content:
+                        image/webp:
+                            schema:
+                                format: binary
+                                type: string
+                    description: Photo
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - calendar
     /v1/frames/{frameId}/health:
         get:
             description: Owner, admin, or members with change_settings.
@@ -3064,6 +4240,66 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - frames
+    /v1/frames/{frameId}/tv-links:
+        get:
+            description: Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+            operationId: listTvLinks
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/TvLink'
+                                type: array
+                    description: Active TV links
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            description: |
+                Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+                (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+                one of the caller's own placements (e.g. "Show on TV" from History).
+            operationId: createTvLink
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TvLinkCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TvLink'
+                    description: Created
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
+    /v1/frames/{frameId}/tv-links/{linkId}:
+        delete:
+            description: Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+            operationId: revokeTvLink
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - in: path
+                  name: linkId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            responses:
+                "204":
+                    description: Revoked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
     /v1/frames/redeem:
         post:
             description: Claim an unowned frame or join an owned one with the code shown on the frame. See README §5.1.
@@ -3577,6 +4813,34 @@ paths:
                     description: Accepted
             tags:
                 - sends
+    /v1/tv/{token}:
+        get:
+            description: |
+                No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+                rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+                expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+                `410 link_expired` once the link has expired.
+            operationId: getTvSlideshow
+            parameters:
+                - in: path
+                  name: token
+                  required: true
+                  schema:
+                    maxLength: 64
+                    minLength: 22
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TvSlideshow'
+                    description: Slideshow
+                default:
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - tv
     /v1/uploads:
         post:
             description: |
@@ -3625,8 +4889,12 @@ tags:
     - name: library
     - name: albums
     - name: settings
+    - description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
+      name: tv
     - description: Place search and weather. Data by Open-Meteo.com (CC BY 4.0), fetched and cached by the server.
       name: weather
+    - description: Calendars synced by the server (ICS/webcal, CalDAV), events sent to frames, and countdowns.
+      name: calendar
     - description: Frame enrollment and token exchange (unauthenticated or secret-based).
       name: devices
     - description: Endpoints called by the frame itself (device token).

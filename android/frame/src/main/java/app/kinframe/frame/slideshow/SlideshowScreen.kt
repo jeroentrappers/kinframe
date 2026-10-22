@@ -37,7 +37,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import app.kinframe.frame.calendar.CalendarIcons
+import app.kinframe.frame.calendar.CalendarLayer
+import app.kinframe.frame.calendar.CalendarSidebar
+import app.kinframe.frame.calendar.CountdownWidgets
+import app.kinframe.frame.calendar.InvitationsPill
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -138,8 +144,18 @@ fun SlideshowScreen(c: FrameController) {
     LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
     val joinCard = joinFocused != null
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard) {
-        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard
+    // Calendar (product spec 4.9): full-screen view, details, invitation card, hybrid sidebar and countdowns.
+    val calendarOpen by c.calendar.open.collectAsState()
+    val calendarData by c.calendar.data.collectAsState()
+    val eventDetail by c.calendar.detail.collectAsState()
+    val invitation by c.calendar.focused.collectAsState()
+    val invitations by c.calendar.invitations.collectAsState()
+    val calendarBusy = calendarOpen || eventDetail != null || invitation != null
+    val storageOpen by c.removable.panelOpen.collectAsState()
+    // The calendar shows the forecast whenever the frame has fresh weather.
+    val calendarWeather = weatherDoc?.takeIf { settings.location != null && !it.isStale(nowMs) }
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -155,9 +171,22 @@ fun SlideshowScreen(c: FrameController) {
     // No full-screen background here: on the Mali-400 every full-screen fill costs fill rate during the fade.
     // The slides are opaque; black is drawn only when there is nothing else.
     BoxWithConstraints(Modifier.fillMaxSize()) {
+        // Hybrid view: the calendar takes a side panel (landscape) or a bottom panel (portrait) and the slideshow
+        // simply renders smaller beside it; nothing is blended over the photo.
+        val landscape = maxWidth > maxHeight
+        val hybrid = settings.widgets.calendarSidebar && calendarData != null
+        val panel = when {
+            !hybrid -> 0.dp
+            landscape -> (maxWidth * 0.3f).coerceIn(340.dp, 420.dp)
+            else -> (maxHeight * 0.28f).coerceIn(300.dp, 380.dp)
+        }
+        val photoW = if (landscape) maxWidth - panel else maxWidth
+        val photoH = if (landscape) maxHeight else maxHeight - panel
+        val density = LocalDensity.current
+        Box(Modifier.size(photoW, photoH)) {
         if (stage.incoming == null && empty == null) Box(Modifier.fillMaxSize().background(Color.Black))
-        val wPx = constraints.maxWidth
-        val hPx = constraints.maxHeight
+        val wPx = with(density) { photoW.roundToPx() }
+        val hPx = with(density) { photoH.roundToPx() }
         LaunchedEffect(wPx, hPx) { ss.setScreenSize(wPx, hPx) }
 
         // A fresh Animatable per stage, created in the same composition that introduces the incoming slide, so its very
@@ -296,13 +325,35 @@ fun SlideshowScreen(c: FrameController) {
             c, nowMs, settings.widgets.clock, settings.widgets.date, settings.widgets.clock24h, weather, settings.locale.temperatureUnit,
             onPaper = stage.incoming == null && empty != null,
             onWeatherClick = { menuOpen = false; forecastOpen = true },
+            onClockClick = { menuOpen = false; c.calendar.openCalendar() },
         )
+        if (settings.widgets.countdowns && !menuOpen) {
+            val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
+            val paper = stage.incoming == null && empty != null
+            CountdownWidgets(
+                items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(),
+                onPaper = paper, onClick = { c.calendar.openCalendar() },
+                // Top corner on photos; on the paper empty state the clock has the top corner.
+                modifier = if (paper) Modifier.align(Alignment.BottomEnd).padding(bottom = 28.dp, end = 40.dp)
+                else Modifier.align(Alignment.TopEnd).padding(top = 28.dp, end = 40.dp),
+            )
+        }
+        }
+        if (hybrid) {
+            CalendarSidebar(
+                calendarData, calendarWeather, nowMs, c.calendar.zone, settings.widgets.clock24h, settings.locale.temperatureUnit, landscape,
+                onOpen = { c.calendar.openCalendar() }, onEvent = { c.calendar.showEvent(it) },
+                modifier = if (landscape) Modifier.align(Alignment.CenterEnd).width(panel).fillMaxHeight() else Modifier.align(Alignment.BottomCenter).height(panel).fillMaxWidth(),
+            )
+        }
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
         LiveMark(c, hidden = menuOpen, Modifier.align(Alignment.TopEnd))
         VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
+            app.kinframe.frame.removable.RemovableSlideshowCards(c, hidden = menuOpen || joinCard || settingsOpen)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
+            InvitationsPill(if (menuOpen || calendarBusy || joinCard) emptyList() else invitations, Modifier) { c.calendar.reopen() }
         }
 
         burst?.let { (r, at) -> key(burstSeq) { ReactionBurst(r, at) { burst = null } } }
@@ -328,6 +379,7 @@ fun SlideshowScreen(c: FrameController) {
             },
             onPower = { menuOpen = false; powerOpen = true },
             onSettings = { menuOpen = false; c.openSettings() },
+            onCalendar = { menuOpen = false; c.calendar.openCalendar() },
             notificationCount = joinPending.size,
             onNotifications = { menuOpen = false; notificationsOpen = true },
         )
@@ -357,12 +409,14 @@ fun SlideshowScreen(c: FrameController) {
             onClose = { notificationsOpen = false },
         )
         JoinRequestLayer(c, sync?.frameName ?: stringResource(R.string.frame_default_name))
+        CalendarLayer(c, nowMs, calendarWeather)
 
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
         AnimatedVisibility(settingsOpen, enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 12 }, exit = fadeOut(tween(200))) {
             SettingsScreen(c, onClose = { c.closeSettings() })
         }
+        app.kinframe.frame.removable.RemovableHost(c)
 
         IdentifyOverlay(c)
         SleepOverlay(c)
@@ -495,12 +549,13 @@ private fun ClockWidget(
     unit: String,
     onPaper: Boolean,
     onWeatherClick: () -> Unit,
+    onClockClick: () -> Unit,
 ) {
     val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
     CornerWidgets(
         clock = if (showClock) Format.clock(now, c.g.clock.zone, h24, locale) else null,
         date = if (showDate) Format.longDate(now, c.g.clock.zone, locale) else null,
-        weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onWeatherClick = onWeatherClick,
+        weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onClockClick = onClockClick, onWeatherClick = onWeatherClick,
     )
 }
 
@@ -672,6 +727,7 @@ private fun QuickMenu(
     onDelete: (PlacementEntity) -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    onCalendar: () -> Unit,
     notificationCount: Int,
     onNotifications: () -> Unit,
 ) {
@@ -698,6 +754,7 @@ private fun QuickMenu(
         onDelete = { p?.let(onDelete) },
         onPower = onPower,
         onSettings = onSettings,
+        onCalendar = onCalendar,
         notificationCount = notificationCount,
         onNotifications = onNotifications,
     )
@@ -719,6 +776,7 @@ internal fun QuickMenuContent(
     onDelete: () -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    onCalendar: () -> Unit = {},
     notificationCount: Int = 0,
     onNotifications: () -> Unit = {},
 ) {
@@ -739,6 +797,8 @@ internal fun QuickMenuContent(
                         )
                     }
                 }
+                RoundAction(CalendarIcons.Calendar, stringResource(R.string.menu_calendar)) { onTouch(); onCalendar() }
+                Spacer(Modifier.size(14.dp))
                 Box {
                     RoundAction(KinIcons.Bell, stringResource(R.string.menu_notifications)) { onTouch(); onNotifications() }
                     if (notificationCount > 0) {

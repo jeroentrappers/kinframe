@@ -256,6 +256,7 @@ object ChangeType {
     const val MEMBER_REMOVE = "member.remove"
     const val FRAME = "frame"
     const val WEATHER = "weather"
+    const val CALENDAR = "calendar"
     const val RESET = "reset"
 }
 
@@ -270,6 +271,8 @@ data class Change(
     val member: ChangeMember? = null,
     val frame: ChangeFrame? = null,
     val weather: JsonObject? = null,
+    /** The merged calendar ([FrameCalendar]); null means "drop your calendar". */
+    val calendar: JsonObject? = null,
 )
 
 @Serializable
@@ -384,3 +387,12 @@ object ReplyPreset {
     const val MISS_YOU = "miss_you"
     const val THANKS = "thanks"
 }
+
+/** Result of `POST /device/imports`: the placement, and whether the frame already had this file (`200`, not `202`). */
+data class ImportResult(val placement: Placement, val duplicate: Boolean)
+
+@Serializable
+data class ImportCheckRequest(val sha256: List<String>)
+
+@Serializable
+data class ImportCheckResponse(val known: List<String> = emptyList())

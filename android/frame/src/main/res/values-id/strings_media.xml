@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Ketuk untuk memutar</string>
+    <string name="settings_live_photos">Foto Live</string>
+    <string name="live_photos_on">Putar saat ditampilkan</string>
+    <string name="live_photos_tap">Putar saat diketuk</string>
+    <string name="live_photos_off">Hanya foto</string>
+</resources>

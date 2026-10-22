@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Koledar na celem zaslonu -->
+    <string name="calendar_today">Danes</string>
+    <string name="calendar_tomorrow">Jutri</string>
+    <string name="calendar_view_month">Mesec</string>
+    <string name="calendar_view_week">Teden</string>
+    <string name="calendar_view_four_day">4 dnevi</string>
+    <string name="calendar_week_number">Teden %1$d</string>
+    <string name="calendar_previous">Nazaj</string>
+    <string name="calendar_next">Naprej</string>
+    <string name="calendar_sync_now">Sinhroniziraj zdaj</string>
+    <string name="calendar_syncing">Sinhroniziranje…</string>
+    <string name="calendar_close">Zapri koledar</string>
+    <string name="calendar_all_day">Ves dan</string>
+    <string name="calendar_received">Prejeti dogodki</string>
+    <string name="calendar_nothing">Nič načrtovanega</string>
+    <string name="calendar_nothing_today">Danes ni načrtovanega nič več</string>
+    <string name="calendar_empty_title">Še ni koledarjev</string>
+    <string name="calendar_empty_body">Družinski koledar dodajte v aplikaciji ali na spletnem mestu kinframe, pod Koledarji tega okvirja. Tukaj lahko skupaj prikažete poljubno število koledarjev.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">do %1$s</string>
+    <string name="calendar_from">od %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d več</item>
+        <item quantity="two">+%d več</item>
+        <item quantity="few">+%d več</item>
+        <item quantity="other">+%d več</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Odštevanja -->
+    <string name="countdown_today">Danes</string>
+    <string name="countdown_tomorrow">Jutri</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d dan</item>
+        <item quantity="two">%d dneva</item>
+        <item quantity="few">%d dnevi</item>
+        <item quantity="other">%d dni</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">čez %d dan</item>
+        <item quantity="two">čez %d dneva</item>
+        <item quantity="few">čez %d dni</item>
+        <item quantity="other">čez %d dni</item>
+    </plurals>
+
+    <!-- Podrobnosti dogodka -->
+    <string name="event_sent_by">Pošiljatelj: %1$s</string>
+    <string name="event_repeats">Ponavlja se</string>
+    <string name="event_countdown">Odštevaj do tega dogodka</string>
+    <string name="event_countdown_hint">V diaprojekciji in na vrhu koledarja</string>
+
+    <!-- Povabila -->
+    <string name="invitation_title">%1$s vam pošilja dogodek</string>
+    <string name="invitation_body">Ga želite dodati v koledar tega okvirja?</string>
+    <string name="invitation_accept">Dodaj v koledar</string>
+    <string name="invitation_decline">Zavrni</string>
+    <string name="invitation_later">Ne zdaj</string>
+    <string name="invitation_pill_one">Dogodek od: %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d povabilo</item>
+        <item quantity="two">%d povabili</item>
+        <item quantity="few">%d povabila</item>
+        <item quantity="other">%d povabil</item>
+    </plurals>
+
+    <!-- Hitri meni -->
+    <string name="menu_calendar">Koledar</string>
+
+    <!-- Nastavitve -->
+    <string name="settings_calendar">Koledar</string>
+    <string name="settings_calendar_open">Odpri koledar</string>
+    <string name="settings_calendar_view">Pogled koledarja</string>
+    <string name="settings_calendar_start_today">Začni z današnjim dnem</string>
+    <string name="settings_calendar_fade_past">Zatemni pretekle dogodke</string>
+    <string name="settings_calendar_week_numbers">Številke tednov</string>
+    <string name="settings_calendar_sidebar">Koledar ob fotografijah</string>
+    <string name="settings_calendar_countdowns">Odštevanja v diaprojekciji</string>
+    <string name="settings_calendar_timed">Prikaži koledar ob določenih urah</string>
+    <string name="settings_calendar_timed_from">Od</string>
+    <string name="settings_calendar_timed_to">Do</string>
+    <string name="settings_calendar_timed_add">Dodaj čas</string>
+    <string name="settings_calendar_timed_remove">Odstrani</string>
+    <string name="settings_calendar_sources">Koledarji na tem okvirju</string>
+    <string name="settings_calendar_sources_hint">Koledarje dodajate in upravljate v aplikaciji ali na spletnem mestu kinframe.</string>
+    <string name="calendar_status_ok">Posodobljeno</string>
+    <string name="calendar_status_syncing">Sinhroniziranje…</string>
+    <string name="calendar_status_failed">Sinhronizacija ni uspela</string>
+    <string name="calendar_status_auth_failed">Potrebna je prijava</string>
+    <string name="calendar_status_disabled">Izklopljeno</string>
+</resources>

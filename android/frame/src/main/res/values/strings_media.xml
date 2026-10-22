@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Strings for Live/Motion Photos. English and Dutch only for now; the other languages follow in a translation pass. -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+<!-- Strings for Live/Motion Photos. Translated into every supported language. -->
+<resources>
     <string name="live_badge">Live</string>
     <string name="live_tap_hint">Tap to play</string>
     <string name="settings_live_photos">Live photos</string>

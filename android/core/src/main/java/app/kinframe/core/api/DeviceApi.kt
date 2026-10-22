@@ -15,7 +15,13 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
 import okhttp3.Response
+import okio.BufferedSink
+import okio.source
+import java.io.File
 
 /** Fetches and validates a server's discovery document (`GET /.well-known/kinframe`). */
 class DiscoveryClient(private val http: OkHttpClient) {
@@ -173,6 +179,32 @@ class DeviceApi(
         )
     }.expectOk()
 
+    // ------------------------------------------------------------------ calendar (README §5.8)
+
+    /** `GET /device/invitations`: events sent to the frame, waiting for accept or decline (oldest first). */
+    suspend fun invitations(): List<EventInvitation> = authed { url(endpoint("device/invitations")).get() }
+        .decode(kotlinx.serialization.builtins.ListSerializer(EventInvitation.serializer()))
+
+    /** `POST /device/invitations/{id}`: final; `409 already_decided` when it was decided or withdrawn before. */
+    suspend fun decideInvitation(invitationId: String, accept: Boolean) = authed {
+        url(endpoint("device/invitations/$invitationId")).post(
+            KinJson.encodeToString(JsonObject.serializer(), buildJsonObject { put("decision", JsonPrimitive(if (accept) "accept" else "decline")) })
+                .toRequestBody(JSON_MEDIA),
+        )
+    }.expectOk()
+
+    /** The invitation's photo (WebP); fetch it with [media]. */
+    fun invitationPhotoUrl(invitationId: String): HttpUrl = endpoint("device/invitations/$invitationId/photo")
+
+    /** `PUT` / `DELETE /device/countdowns/{eventId}`: the countdown toggle in the event details. */
+    suspend fun setCountdown(eventId: String, on: Boolean) = authed {
+        val u = url(endpoint("device/countdowns/$eventId"))
+        if (on) u.put(ByteArray(0).toRequestBody(null)) else u.delete()
+    }.expectOk()
+
+    /** `POST /device/calendar/sync`: "Sync now" for all of the frame's calendars (the server does the work). */
+    suspend fun syncCalendars() = authed { url(endpoint("device/calendar/sync")).post(ByteArray(0).toRequestBody(null)) }.expectOk()
+
     /**
      * `GET /device/update`: the newest release for [channel] (null = the frame's setting) that is newer than this
      * app, skipping [skip]; null when up to date (204).
@@ -186,6 +218,38 @@ class DeviceApi(
         if (r.code == 204) return@use null
         if (!r.isSuccessful) r.throwForStatus()
         KinJson.decodeFromString(FrameUpdate.serializer(), r.body.string())
+    }
+
+    /**
+     * `POST /device/imports`: uploads one file from SD/USB so it joins the library (the frame is the sender). The
+     * body streams from [file]; [onProgress] gets the bytes sent so far. `200` means the frame already had the file.
+     */
+    suspend fun importFile(
+        file: File,
+        filename: String,
+        mime: String?,
+        capturedAt: String? = null,
+        caption: String? = null,
+        onProgress: ((Long) -> Unit)? = null,
+    ): ImportResult = authed {
+        val u = endpoint("device/imports").newBuilder().apply {
+            if (!caption.isNullOrBlank()) addQueryParameter("caption", caption.take(280))
+        }.build()
+        url(u).header("X-Filename", asciiHeader(filename)).apply { if (capturedAt != null) header("X-Captured-At", capturedAt) }
+            .post(FileBody(file, (mime ?: "application/octet-stream").toMediaTypeOrNull(), onProgress))
+    }.use { r ->
+        if (!r.isSuccessful) r.throwForStatus()
+        ImportResult(KinJson.decodeFromString(Placement.serializer(), r.body.string()), duplicate = r.code == 200)
+    }
+
+    /** `POST /device/imports/check`: which of these sha256 hashes the frame already has (asked in batches of 500). */
+    suspend fun importCheck(hashes: Collection<String>): Set<String> {
+        val out = HashSet<String>()
+        for (chunk in hashes.map { it.lowercase() }.distinct().chunked(500)) {
+            out += authed { url(endpoint("device/imports/check")).post(body(ImportCheckRequest(chunk), ImportCheckRequest.serializer())) }
+                .decode(ImportCheckResponse.serializer()).known.map { it.lowercase() }
+        }
+        return out
     }
 
     /**
@@ -224,5 +288,28 @@ class DeviceApi(
 
     companion object {
         const val REFRESH_MARGIN_MS = 5 * 60 * 1000L
+
+        /** Header values must be ASCII in OkHttp: keep printable ASCII, replace the rest. */
+        fun asciiHeader(v: String): String =
+            v.map { if (it in ' '..'~') it else '_' }.joinToString("").trim().ifEmpty { "import" }
+    }
+}
+
+/** Streams a file as a request body (repeatable, so a token refresh can resend it), reporting bytes written. */
+private class FileBody(private val file: File, private val type: MediaType?, private val onProgress: ((Long) -> Unit)?) : RequestBody() {
+    override fun contentType(): MediaType? = type
+    override fun contentLength(): Long = file.length()
+    override fun writeTo(sink: BufferedSink) {
+        file.source().use { src ->
+            var total = 0L
+            val buf = okio.Buffer()
+            while (true) {
+                val n = src.read(buf, 64 * 1024L)
+                if (n == -1L) break
+                sink.write(buf, n)
+                total += n
+                onProgress?.invoke(total)
+            }
+        }
     }
 }

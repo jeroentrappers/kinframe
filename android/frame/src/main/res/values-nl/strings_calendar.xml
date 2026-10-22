@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Volledige kalender -->
+    <string name="calendar_today">Vandaag</string>
+    <string name="calendar_tomorrow">Morgen</string>
+    <string name="calendar_view_month">Maand</string>
+    <string name="calendar_view_week">Week</string>
+    <string name="calendar_view_four_day">4 dagen</string>
+    <string name="calendar_week_number">Week %1$d</string>
+    <string name="calendar_previous">Vorige</string>
+    <string name="calendar_next">Volgende</string>
+    <string name="calendar_sync_now">Nu synchroniseren</string>
+    <string name="calendar_syncing">Synchroniseren…</string>
+    <string name="calendar_close">Kalender sluiten</string>
+    <string name="calendar_all_day">Hele dag</string>
+    <string name="calendar_received">Ontvangen afspraken</string>
+    <string name="calendar_nothing">Niets gepland</string>
+    <string name="calendar_nothing_today">Vandaag verder niets gepland</string>
+    <string name="calendar_empty_title">Nog geen kalenders</string>
+    <string name="calendar_empty_body">Voeg een gezinskalender toe in de kinframe-app of op de website, bij Kalenders van deze fotolijst. Je kunt hier zoveel kalenders samen tonen als je wilt.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">tot %1$s</string>
+    <string name="calendar_from">vanaf %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d meer</item>
+        <item quantity="other">+%d meer</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Aftellen -->
+    <string name="countdown_today">Vandaag</string>
+    <string name="countdown_tomorrow">Morgen</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d dag</item>
+        <item quantity="other">%d dagen</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">over %d dag</item>
+        <item quantity="other">over %d dagen</item>
+    </plurals>
+
+    <!-- Details van een afspraak -->
+    <string name="event_sent_by">Gestuurd door %1$s</string>
+    <string name="event_repeats">Herhaalt</string>
+    <string name="event_countdown">Aftellen naar deze afspraak</string>
+    <string name="event_countdown_hint">Op de diavoorstelling en bovenaan de kalender</string>
+
+    <!-- Uitnodigingen -->
+    <string name="invitation_title">%1$s stuurde je een afspraak</string>
+    <string name="invitation_body">Toevoegen aan de kalender van deze fotolijst?</string>
+    <string name="invitation_accept">Toevoegen</string>
+    <string name="invitation_decline">Weigeren</string>
+    <string name="invitation_later">Niet nu</string>
+    <string name="invitation_pill_one">Afspraak van %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d uitnodiging</item>
+        <item quantity="other">%d uitnodigingen</item>
+    </plurals>
+
+    <!-- Snelmenu -->
+    <string name="menu_calendar">Kalender</string>
+
+    <!-- Instellingen -->
+    <string name="settings_calendar">Kalender</string>
+    <string name="settings_calendar_open">Kalender openen</string>
+    <string name="settings_calendar_view">Kalenderweergave</string>
+    <string name="settings_calendar_start_today">Beginnen bij vandaag</string>
+    <string name="settings_calendar_fade_past">Voorbije afspraken vervagen</string>
+    <string name="settings_calendar_week_numbers">Weeknummers</string>
+    <string name="settings_calendar_sidebar">Kalender naast de foto\'s</string>
+    <string name="settings_calendar_countdowns">Aftellen op de diavoorstelling</string>
+    <string name="settings_calendar_timed">Kalender tonen op vaste tijden</string>
+    <string name="settings_calendar_timed_from">Van</string>
+    <string name="settings_calendar_timed_to">Tot</string>
+    <string name="settings_calendar_timed_add">Tijd toevoegen</string>
+    <string name="settings_calendar_timed_remove">Verwijderen</string>
+    <string name="settings_calendar_sources">Kalenders op deze fotolijst</string>
+    <string name="settings_calendar_sources_hint">Kalenders voeg je toe en beheer je in de kinframe-app of op de website.</string>
+    <string name="calendar_status_ok">Bijgewerkt</string>
+    <string name="calendar_status_syncing">Synchroniseren…</string>
+    <string name="calendar_status_failed">Synchroniseren mislukt</string>
+    <string name="calendar_status_auth_failed">Opnieuw aanmelden nodig</string>
+    <string name="calendar_status_disabled">Uitgeschakeld</string>
+</resources>

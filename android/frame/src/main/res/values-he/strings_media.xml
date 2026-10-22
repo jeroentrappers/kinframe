@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">הקישו להפעלה</string>
+    <string name="settings_live_photos">תמונות חיות</string>
+    <string name="live_photos_on">הפעלה בהצגה</string>
+    <string name="live_photos_tap">הפעלה בהקשה</string>
+    <string name="live_photos_off">תמונה בלבד</string>
+</resources>

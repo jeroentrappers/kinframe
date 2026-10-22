@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">आज</string>
+    <string name="calendar_tomorrow">कल</string>
+    <string name="calendar_view_month">महीना</string>
+    <string name="calendar_view_week">हफ़्ता</string>
+    <string name="calendar_view_four_day">4 दिन</string>
+    <string name="calendar_week_number">हफ़्ता %1$d</string>
+    <string name="calendar_previous">पिछला</string>
+    <string name="calendar_next">अगला</string>
+    <string name="calendar_sync_now">अभी सिंक करें</string>
+    <string name="calendar_syncing">सिंक हो रहा है…</string>
+    <string name="calendar_close">कैलेंडर बंद करें</string>
+    <string name="calendar_all_day">पूरे दिन</string>
+    <string name="calendar_received">मिले हुए इवेंट</string>
+    <string name="calendar_nothing">कुछ तय नहीं है</string>
+    <string name="calendar_nothing_today">आज और कुछ तय नहीं है</string>
+    <string name="calendar_empty_title">अभी कोई कैलेंडर नहीं</string>
+    <string name="calendar_empty_body">kinframe ऐप या वेबसाइट में फ़्रेम के कैलेंडर सेक्शन से परिवार का कैलेंडर जोड़ें। यहां कितने भी कैलेंडर एक साथ दिखाए जा सकते हैं।</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">%1$s तक</string>
+    <string name="calendar_from">%1$s से</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d और</item>
+        <item quantity="other">+%d और</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">आज</string>
+    <string name="countdown_tomorrow">कल</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d दिन</item>
+        <item quantity="other">%d दिन</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">%d दिन में</item>
+        <item quantity="other">%d दिन में</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">%1$s ने भेजा</string>
+    <string name="event_repeats">दोहराता है</string>
+    <string name="event_countdown">इसकी उलटी गिनती करें</string>
+    <string name="event_countdown_hint">स्लाइडशो पर और कैलेंडर में सबसे ऊपर</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s ने आपको एक इवेंट भेजा</string>
+    <string name="invitation_body">इसे इस फ़्रेम के कैलेंडर में जोड़ें?</string>
+    <string name="invitation_accept">कैलेंडर में जोड़ें</string>
+    <string name="invitation_decline">मना करें</string>
+    <string name="invitation_later">अभी नहीं</string>
+    <string name="invitation_pill_one">%1$s से इवेंट</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d इवेंट न्योता</item>
+        <item quantity="other">%d इवेंट न्योते</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">कैलेंडर</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">कैलेंडर</string>
+    <string name="settings_calendar_open">कैलेंडर खोलें</string>
+    <string name="settings_calendar_view">कैलेंडर व्यू</string>
+    <string name="settings_calendar_start_today">आज से शुरू करें</string>
+    <string name="settings_calendar_fade_past">बीते इवेंट हल्के दिखाएं</string>
+    <string name="settings_calendar_week_numbers">हफ़्तों की संख्या</string>
+    <string name="settings_calendar_sidebar">फ़ोटो के बगल में कैलेंडर</string>
+    <string name="settings_calendar_countdowns">स्लाइडशो पर उलटी गिनती</string>
+    <string name="settings_calendar_timed">तय समय पर कैलेंडर दिखाएं</string>
+    <string name="settings_calendar_timed_from">से</string>
+    <string name="settings_calendar_timed_to">तक</string>
+    <string name="settings_calendar_timed_add">समय जोड़ें</string>
+    <string name="settings_calendar_timed_remove">हटाएं</string>
+    <string name="settings_calendar_sources">इस फ़्रेम पर कैलेंडर</string>
+    <string name="settings_calendar_sources_hint">कैलेंडर kinframe ऐप या वेबसाइट से जोड़े और मैनेज किए जाते हैं।</string>
+    <string name="calendar_status_ok">अप टू डेट</string>
+    <string name="calendar_status_syncing">सिंक हो रहा है…</string>
+    <string name="calendar_status_failed">सिंक नहीं हो सका</string>
+    <string name="calendar_status_auth_failed">साइन इन ज़रूरी है</string>
+    <string name="calendar_status_disabled">बंद</string>
+</resources>

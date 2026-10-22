@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=kinframe
+GenericName=Photo frame sender
+GenericName[nl]=Foto's naar je fotokader
+Comment=Send photos and whole folders to your family's photo frames
+Comment[nl]=Stuur foto's en hele mappen naar de fotokaders van je familie
+Categories=Graphics;Photography;
+Keywords=photo;frame;kinframe;
+Exec={{exec}} %F
+Icon={{icon}}
+Terminal=false
+StartupWMClass=app.kinframe.desktop
+MimeType=image/jpeg;image/png;image/webp;image/heic;image/heif;image/gif;video/mp4;video/quicktime;video/x-m4v;video/3gpp;video/x-matroska;video/webm;inode/directory;
