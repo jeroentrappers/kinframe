@@ -477,7 +477,7 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	mediaID, kind := p.MediaID, p.Kind
 	if variant == "motion" {
 		if !p.IsLive() {
-			problem.Write(w, r, problem.New(problem.NotFound, "not a live photo"))
+			problem.Write(w, r, problem.New(problem.NotFound, "not available (yet)"))
 			return
 		}
 		mediaID, kind = *p.MotionMediaID, string(media.Video)
