@@ -109,7 +109,7 @@
 	}
 	.sun {
 		position: absolute;
-		right: 18%;
+		inset-inline-end: 18%;
 		top: 18%;
 		width: 16%;
 		aspect-ratio: 1;
@@ -128,7 +128,7 @@
 	.live-badge {
 		position: absolute;
 		top: 10px;
-		right: 10px;
+		inset-inline-end: 10px;
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;

@@ -286,7 +286,7 @@
 	}
 	.dur {
 		position: absolute;
-		right: 6px;
+		inset-inline-end: 6px;
 		bottom: 6px;
 		padding: 1px 7px;
 		border-radius: var(--r-full);

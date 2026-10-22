@@ -217,3 +217,43 @@ for (const vp of VIEWPORTS) {
 		});
 	}
 }
+
+// Languages that stress the layout: right to left (Arabic, Hebrew), CJK, long German and Russian words.
+for (const locale of ['ar', 'he', 'ja', 'de', 'ru'] as const) {
+	for (const vp of VIEWPORTS) {
+		test(`localized ${locale} ${vp.tag}`, async ({ page }) => {
+			test.setTimeout(60_000);
+			await page.setViewportSize(vp.viewport);
+			await page.addInitScript((l) => localStorage.setItem('kinframe.locale', l), locale);
+			const st = richState();
+			await mockApi(page, st);
+			const n = (s: string) => `l10n-${locale}-${vp.tag}-${s}`;
+			const oma = st.frames[0]!;
+			await page.goto('/');
+			await page.locator('#dev-email').waitFor();
+			await shot(page, n('01-landing'));
+			await page.locator('#dev-email').fill('jeroen@example.org');
+			await page.locator('form button[type=submit]').click();
+			await page.waitForURL(/\/frames$/);
+			await page.getByText('Oma’s frame').first().waitFor();
+			await shot(page, n('02-frames'));
+			await page.goto('/send');
+			await page.getByTestId('file-input').setInputFiles([
+				{ name: 'a.png', mimeType: 'image/png', buffer: await gradientPng(480, 320, 0) },
+				{ name: 'b.png', mimeType: 'image/png', buffer: await gradientPng(320, 480, 40) }
+			]);
+			await shot(page, n('04-send'));
+			await page.goto('/history');
+			await page.waitForLoadState('networkidle');
+			await shot(page, n('06-history'));
+			for (const [tab, name] of [['', '07-frame-overview'], ['?tab=library', '08-frame-library'], ['?tab=people', '09-frame-people'], ['?tab=settings', '10-frame-settings']] as const) {
+				await page.goto(`/frames/${oma.id}${tab}`);
+				await page.waitForLoadState('networkidle');
+				await shot(page, n(name));
+			}
+			await page.goto('/settings');
+			await page.waitForLoadState('networkidle');
+			await shot(page, n('12-settings'));
+		});
+	}
+}

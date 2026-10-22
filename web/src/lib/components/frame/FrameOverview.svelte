@@ -228,7 +228,7 @@
 						<li>
 							<Icon name="clock" size={18} />
 							<span class="h-label">{t('health.uptime')}</span>
-							<span class="h-val num">{hb ? formatUptime(hb.uptime_s) : '–'}</span>
+							<span class="h-val num">{hb ? formatUptime(hb.uptime_s, i18n.tag) : '–'}</span>
 						</li>
 						<li>
 							<Icon name="info" size={18} />
@@ -401,10 +401,10 @@
 		color: var(--text);
 		font-weight: 600;
 		font-size: 0.9rem;
-		text-align: right;
+		text-align: end;
 	}
 	.bar-row {
-		padding-left: 28px;
+		padding-inline-start: 28px;
 	}
 	.bar-row .progress {
 		flex: 1;

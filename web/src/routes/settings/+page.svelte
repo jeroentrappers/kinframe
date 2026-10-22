@@ -64,7 +64,7 @@
 
 	async function saveLocale(l: string) {
 		try {
-			auth.me = await call(api.PATCH('/v1/me', { body: { locale: l === 'nl' ? 'nl-BE' : 'en' } }));
+			auth.me = await call(api.PATCH('/v1/me', { body: { locale: l } }));
 		} catch {
 			/* the UI already switched; the server copy is only for push texts */
 		}

@@ -298,7 +298,7 @@
 	.pick {
 		position: absolute;
 		top: 6px;
-		left: 6px;
+		inset-inline-start: 6px;
 		width: 26px;
 		height: 26px;
 		border-radius: 50%;
@@ -330,7 +330,7 @@
 	.tag {
 		position: absolute;
 		bottom: 6px;
-		right: 6px;
+		inset-inline-end: 6px;
 		padding: 1px 7px;
 		border-radius: var(--r-full);
 		background: var(--warn-soft);

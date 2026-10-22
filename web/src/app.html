@@ -9,6 +9,13 @@
 		<meta name="description" content="Send photos and videos to the family's photo frames." />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
 		<title>kinframe</title>
+		<script>
+			// Right-to-left before the first paint (the app sets lang/dir properly once it starts).
+			try {
+				var l = localStorage.getItem('kinframe.locale') || navigator.language || '';
+				if (/^(ar|he|iw)(-|$)/i.test(l)) document.documentElement.dir = 'rtl';
+			} catch (e) {}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

@@ -5,7 +5,7 @@
 	import { can, canManage, frames } from '$lib/frames.svelte';
 	import { live } from '$lib/live.svelte';
 	import { problemMessage } from '$lib/problem';
-	import { t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { i18n, t, type MessageKey } from '$lib/i18n/index.svelte';
 	import Icon, { type IconName } from '$components/Icon.svelte';
 	import OnlineStatus from '$components/OnlineStatus.svelte';
 	import RoleBadge from '$components/RoleBadge.svelte';
@@ -68,7 +68,10 @@
 	}
 
 	function onTabKey(e: KeyboardEvent, index: number) {
-		const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+		// Tabs run right to left in Arabic and Hebrew, so the arrow keys follow the reading direction.
+		const forward = i18n.dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+		const back = i18n.dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+		const dir = e.key === forward ? 1 : e.key === back ? -1 : 0;
 		if (!dir) return;
 		e.preventDefault();
 		const next = tabs[(index + dir + tabs.length) % tabs.length]!;
@@ -192,7 +195,7 @@
 			display: none;
 		}
 		.tabs button {
-			padding: 0 12px;
+			padding: 0 10px; /* long labels (German, Russian) still fit on a phone */
 		}
 	}
 	.panel {
