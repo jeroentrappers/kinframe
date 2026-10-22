@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SD-kaart en USB-stick: exporteren, importeren, automatische back-up en herstellen (productspec 4.10). -->
+<resources>
+    <string name="pin_reason_storage">om de SD-kaart of USB-stick te gebruiken</string>
+
+    <!-- Card on the slideshow -->
+    <string name="removable_card_sd_title">SD-kaart geplaatst</string>
+    <string name="removable_card_usb_title">USB-stick aangesloten</string>
+    <string name="removable_card_body">Kopieer de foto\'s van deze fotolijst erop, of voeg er foto\'s van toe.</string>
+    <string name="removable_card_open">Openen</string>
+    <string name="removable_backing_up_pill">Back-up maken… %1$d%%</string>
+
+    <!-- Panel -->
+    <string name="removable_title_sd">SD-kaart</string>
+    <string name="removable_title_usb">USB-stick</string>
+    <string name="removable_free">%1$s vrij van %2$s</string>
+    <string name="removable_export_title">Exporteren</string>
+    <string name="removable_export_body">Kopieer alle foto\'s en video\'s op deze fotolijst naar de stick, met bijschriften en datums, in een map kinframe-export.</string>
+    <string name="removable_export_action">Exporteren</string>
+    <string name="removable_import_title">Importeren</string>
+    <string name="removable_import_body">Voeg foto\'s en video\'s van de stick toe. Ze gaan naar de bibliotheek van de familie, zodat iedereen ze ziet.</string>
+    <string name="removable_import_action">Foto\'s kiezen</string>
+    <string name="removable_auto_title">Automatisch back-up maken</string>
+    <string name="removable_auto_body">Nieuwe foto\'s worden gekopieerd naar een stick met de naam KINFRAME, of met een map kinframe-backup, zolang die in de fotolijst zit.</string>
+    <string name="removable_last_backup">Laatste back-up %s</string>
+    <string name="removable_never_backed_up">Nog geen back-up</string>
+    <string name="removable_eject">Uitwerpen</string>
+    <string name="removable_safe_remove_hint">Wacht tot het lampje van de stick niet meer knippert voor je hem eruit haalt.</string>
+    <string name="removable_done">Klaar</string>
+    <string name="removable_allow_access">Toegang geven</string>
+
+    <!-- Export progress and result -->
+    <string name="export_progress_title">Exporteren…</string>
+    <string name="backup_progress_title">Back-up maken…</string>
+    <string name="export_progress_count">%1$d van %2$d</string>
+    <string name="export_progress_bytes">%1$s van %2$s</string>
+    <string name="export_progress_hint">Je kunt de fotolijst gewoon gebruiken. Laat de stick erin tot dit klaar is.</string>
+    <string name="export_done_title">Export klaar</string>
+    <string name="backup_done_title">Back-up klaar</string>
+    <plurals name="export_done_copied">
+        <item quantity="one">%d foto of video gekopieerd.</item>
+        <item quantity="other">%d foto\'s en video\'s gekopieerd.</item>
+    </plurals>
+    <plurals name="export_done_kept">
+        <item quantity="one">%d stond al op de stick.</item>
+        <item quantity="other">%d stonden al op de stick.</item>
+    </plurals>
+    <plurals name="export_skipped_not_on_frame">
+        <item quantity="one">%d staat nu niet op de fotolijst en is overgeslagen.</item>
+        <item quantity="other">%d staan nu niet op de fotolijst en zijn overgeslagen.</item>
+    </plurals>
+    <plurals name="export_skipped_fat32">
+        <item quantity="one">%d video is groter dan 4 GB; dat past niet op een FAT32-stick.</item>
+        <item quantity="other">%d video\'s zijn groter dan 4 GB; dat past niet op een FAT32-stick.</item>
+    </plurals>
+    <plurals name="export_skipped_failed">
+        <item quantity="one">%d kon niet worden geschreven.</item>
+        <item quantity="other">%d konden niet worden geschreven.</item>
+    </plurals>
+    <string name="export_done_where">Opgeslagen in %s</string>
+    <string name="export_app_folder_note">Android laat kinframe op deze stick alleen in zijn eigen map schrijven. Geef toegang om in de hoofdmap op te slaan.</string>
+
+    <!-- Import picker -->
+    <string name="import_title">Kies foto\'s om te importeren</string>
+    <string name="restore_title">Herstellen uit een kinframe-export</string>
+    <string name="import_select_all">Alles selecteren</string>
+    <string name="import_select_none">Niets selecteren</string>
+    <string name="import_sort_date">Nieuwste eerst</string>
+    <string name="import_sort_name">Op naam</string>
+    <plurals name="import_selected">
+        <item quantity="one">%d geselecteerd</item>
+        <item quantity="other">%d geselecteerd</item>
+    </plurals>
+    <plurals name="import_action">
+        <item quantity="one">%d importeren</item>
+        <item quantity="other">%d importeren</item>
+    </plurals>
+    <plurals name="restore_action_count">
+        <item quantity="one">%d herstellen</item>
+        <item quantity="other">%d herstellen</item>
+    </plurals>
+    <string name="import_scanning">Foto\'s zoeken…</string>
+
+    <!-- Import progress and result -->
+    <string name="import_progress_title">Importeren…</string>
+    <string name="restore_progress_title">Herstellen…</string>
+    <string name="import_progress_hint">Foto\'s gaan eerst naar de server van je familie en komen dan terug naar de fotolijst.</string>
+    <string name="import_done_title">Import klaar</string>
+    <string name="restore_done_title">Herstel klaar</string>
+    <plurals name="import_done_imported">
+        <item quantity="one">%d toegevoegd aan de bibliotheek.</item>
+        <item quantity="other">%d toegevoegd aan de bibliotheek.</item>
+    </plurals>
+    <plurals name="import_done_duplicates">
+        <item quantity="one">%d stond er al en is overgeslagen.</item>
+        <item quantity="other">%d stonden er al en zijn overgeslagen.</item>
+    </plurals>
+    <plurals name="import_done_too_large">
+        <item quantity="one">%d is groter dan 512 MB en is overgeslagen.</item>
+        <item quantity="other">%d zijn groter dan 512 MB en zijn overgeslagen.</item>
+    </plurals>
+    <plurals name="import_done_failed">
+        <item quantity="one">%d kon niet worden geüpload. Probeer het later opnieuw.</item>
+        <item quantity="other">%d konden niet worden geüpload. Probeer het later opnieuw.</item>
+    </plurals>
+
+    <!-- Restore offer -->
+    <string name="restore_card_title">Foto\'s herstellen?</string>
+    <plurals name="restore_card_body">
+        <item quantity="one">Op deze stick staat een kinframe-export met %d foto of video. Toevoegen aan deze fotolijst?</item>
+        <item quantity="other">Op deze stick staat een kinframe-export met %d foto\'s en video\'s. Toevoegen aan deze fotolijst?</item>
+    </plurals>
+    <string name="restore_card_from">Van “%s”</string>
+    <string name="restore_action">Herstellen</string>
+    <string name="restore_not_now">Niet nu</string>
+
+    <!-- Problems -->
+    <string name="problem_no_write_access_title">Kan niet op deze stick schrijven</string>
+    <string name="problem_no_write_access_body">Android laat kinframe hier niet schrijven. Geef toegang tot de stick, of formatteer hem als FAT32 op een computer.</string>
+    <string name="problem_no_space_title">Niet genoeg ruimte op de stick</string>
+    <string name="problem_no_space_body">De export heeft %1$s nodig, maar er is maar %2$s vrij.</string>
+    <string name="problem_write_failed_title">Schrijven gestopt</string>
+    <string name="problem_write_failed_body">De stick neemt geen bestanden meer aan. Kijk of hij niet vol, beveiligd of los zit en probeer het opnieuw.</string>
+    <string name="problem_nothing_to_export_title">Nog niets om te exporteren</string>
+    <string name="problem_nothing_to_export_body">Foto\'s kun je exporteren zodra ze op de fotolijst staan.</string>
+    <string name="problem_no_permission_title">Toegang tot opslag nodig</string>
+    <string name="problem_no_permission_body">Geef kinframe toegang tot de SD-kaart of USB-stick en probeer het opnieuw.</string>
+    <string name="problem_offline_title">Maak verbinding met wifi om te importeren</string>
+    <string name="problem_offline_body">Geïmporteerde foto\'s gaan eerst naar de server van je familie, dus de fotolijst moet online zijn.</string>
+    <string name="problem_nothing_found_title">Geen foto\'s gevonden</string>
+    <string name="problem_nothing_found_body">kinframe zoekt naar JPEG-, PNG-, WebP-, HEIC-, MP4- en 3GP-bestanden op de stick.</string>
+    <string name="problem_read_failed_title">Er ging iets mis</string>
+    <string name="problem_read_failed_body">De stick kon niet worden gelezen. Haal hem eruit, steek hem er opnieuw in en probeer het nog eens.</string>
+
+    <!-- Settings -->
+    <string name="settings_removable">SD-kaart en USB-stick</string>
+    <string name="settings_removable_none">Plaats een SD-kaart of USB-stick om foto\'s te exporteren, importeren of er een back-up van te maken.</string>
+</resources>

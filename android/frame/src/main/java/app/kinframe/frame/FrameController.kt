@@ -92,6 +92,9 @@ class FrameController(val g: FrameGraph) {
         }.stateIn(scope, SharingStarted.Eagerly, null)
     }
 
+    /** SD card and USB stick: export, import, automatic backup, restore (product spec 4.10). */
+    val removable by lazy { app.kinframe.frame.removable.RemovableStorage(this) }
+
     val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
 
     /** Frame name shown by the `identify` command (null = hidden). */
@@ -144,6 +147,7 @@ class FrameController(val g: FrameGraph) {
             }
             reportStateChanges()
             update.start()
+            removable.start()
             scope.launch {
                 delay(30_000)
                 while (true) {
@@ -249,6 +253,8 @@ class FrameController(val g: FrameGraph) {
         g.prefs.claimed = true
         startSession()
         _screen.value = AppScreen.Slideshow
+        // A freshly set-up frame may have a kinframe export on a stick waiting to be restored.
+        scope.launch { removable.refreshRestoreOffer() }
     }
 
     /** Remote commands (README §5.6). Returns null on success or an error code. */

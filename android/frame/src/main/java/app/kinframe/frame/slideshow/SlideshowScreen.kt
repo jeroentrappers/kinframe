@@ -133,8 +133,9 @@ fun SlideshowScreen(c: FrameController) {
     LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
     val joinCard = joinFocused != null
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard) {
-        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard
+    val storageOpen by c.removable.panelOpen.collectAsState()
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, storageOpen) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || storageOpen
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -232,6 +233,7 @@ fun SlideshowScreen(c: FrameController) {
         VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
+            app.kinframe.frame.removable.RemovableSlideshowCards(c, hidden = menuOpen || joinCard || settingsOpen)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
         }
 
@@ -293,6 +295,7 @@ fun SlideshowScreen(c: FrameController) {
         AnimatedVisibility(settingsOpen, enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 12 }, exit = fadeOut(tween(200))) {
             SettingsScreen(c, onClose = { c.closeSettings() })
         }
+        app.kinframe.frame.removable.RemovableHost(c)
 
         IdentifyOverlay(c)
         SleepOverlay(c)

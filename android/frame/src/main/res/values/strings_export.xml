@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SD card and USB stick: export, import, automatic backup and restore (product spec 4.10). -->
+<resources>
+    <string name="pin_reason_storage">to use the SD card or USB stick</string>
+
+    <!-- Card on the slideshow -->
+    <string name="removable_card_sd_title">SD card inserted</string>
+    <string name="removable_card_usb_title">USB stick connected</string>
+    <string name="removable_card_body">Copy this frame\'s photos onto it, or add photos from it.</string>
+    <string name="removable_card_open">Open</string>
+    <string name="removable_backing_up_pill">Backing up… %1$d%%</string>
+
+    <!-- Panel -->
+    <string name="removable_title_sd">SD card</string>
+    <string name="removable_title_usb">USB stick</string>
+    <string name="removable_free">%1$s free of %2$s</string>
+    <string name="removable_export_title">Export</string>
+    <string name="removable_export_body">Copy every photo and video on this frame to the stick, with captions and dates, in a kinframe-export folder.</string>
+    <string name="removable_export_action">Export</string>
+    <string name="removable_import_title">Import</string>
+    <string name="removable_import_body">Add photos and videos from the stick. They go to the family\'s library, so everyone sees them.</string>
+    <string name="removable_import_action">Choose photos</string>
+    <string name="removable_auto_title">Back up automatically</string>
+    <string name="removable_auto_body">New photos are copied to a stick named KINFRAME, or to one with a kinframe-backup folder, whenever it is in the frame.</string>
+    <string name="removable_last_backup">Last backup %s</string>
+    <string name="removable_never_backed_up">Not backed up yet</string>
+    <string name="removable_eject">Eject</string>
+    <string name="removable_safe_remove_hint">Wait until the stick\'s light stops blinking before you take it out.</string>
+    <string name="removable_done">Done</string>
+    <string name="removable_allow_access">Allow access</string>
+
+    <!-- Export progress and result -->
+    <string name="export_progress_title">Exporting…</string>
+    <string name="backup_progress_title">Backing up…</string>
+    <string name="export_progress_count">%1$d of %2$d</string>
+    <string name="export_progress_bytes">%1$s of %2$s</string>
+    <string name="export_progress_hint">You can keep using the frame. Leave the stick in until this is finished.</string>
+    <string name="export_done_title">Export finished</string>
+    <string name="backup_done_title">Backup finished</string>
+    <plurals name="export_done_copied">
+        <item quantity="one">%d photo or video copied.</item>
+        <item quantity="other">%d photos and videos copied.</item>
+    </plurals>
+    <plurals name="export_done_kept">
+        <item quantity="one">%d was already on the stick.</item>
+        <item quantity="other">%d were already on the stick.</item>
+    </plurals>
+    <plurals name="export_skipped_not_on_frame">
+        <item quantity="one">%d isn\'t stored on the frame right now, so it was left out.</item>
+        <item quantity="other">%d aren\'t stored on the frame right now, so they were left out.</item>
+    </plurals>
+    <plurals name="export_skipped_fat32">
+        <item quantity="one">%d video is larger than 4 GB, which a FAT32 stick can\'t hold.</item>
+        <item quantity="other">%d videos are larger than 4 GB, which a FAT32 stick can\'t hold.</item>
+    </plurals>
+    <plurals name="export_skipped_failed">
+        <item quantity="one">%d couldn\'t be written.</item>
+        <item quantity="other">%d couldn\'t be written.</item>
+    </plurals>
+    <string name="export_done_where">Saved in %s</string>
+    <string name="export_app_folder_note">Android only lets kinframe write in its own folder on this stick. Allow access to save in the main folder instead.</string>
+
+    <!-- Import picker -->
+    <string name="import_title">Choose photos to import</string>
+    <string name="restore_title">Restore from a kinframe export</string>
+    <string name="import_select_all">Select all</string>
+    <string name="import_select_none">Select none</string>
+    <string name="import_sort_date">Newest first</string>
+    <string name="import_sort_name">By name</string>
+    <plurals name="import_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="import_action">
+        <item quantity="one">Import %d</item>
+        <item quantity="other">Import %d</item>
+    </plurals>
+    <plurals name="restore_action_count">
+        <item quantity="one">Restore %d</item>
+        <item quantity="other">Restore %d</item>
+    </plurals>
+    <string name="import_scanning">Looking for photos…</string>
+
+    <!-- Import progress and result -->
+    <string name="import_progress_title">Importing…</string>
+    <string name="restore_progress_title">Restoring…</string>
+    <string name="import_progress_hint">Photos go to your family\'s server first, then come back to the frame.</string>
+    <string name="import_done_title">Import finished</string>
+    <string name="restore_done_title">Restore finished</string>
+    <plurals name="import_done_imported">
+        <item quantity="one">%d added to the library.</item>
+        <item quantity="other">%d added to the library.</item>
+    </plurals>
+    <plurals name="import_done_duplicates">
+        <item quantity="one">%d was already there and was skipped.</item>
+        <item quantity="other">%d were already there and were skipped.</item>
+    </plurals>
+    <plurals name="import_done_too_large">
+        <item quantity="one">%d is larger than 512 MB and was skipped.</item>
+        <item quantity="other">%d are larger than 512 MB and were skipped.</item>
+    </plurals>
+    <plurals name="import_done_failed">
+        <item quantity="one">%d couldn\'t be uploaded. Try again later.</item>
+        <item quantity="other">%d couldn\'t be uploaded. Try again later.</item>
+    </plurals>
+
+    <!-- Restore offer -->
+    <string name="restore_card_title">Restore photos?</string>
+    <plurals name="restore_card_body">
+        <item quantity="one">This stick holds a kinframe export with %d photo or video. Add it to this frame?</item>
+        <item quantity="other">This stick holds a kinframe export with %d photos and videos. Add them to this frame?</item>
+    </plurals>
+    <string name="restore_card_from">From “%s”</string>
+    <string name="restore_action">Restore</string>
+    <string name="restore_not_now">Not now</string>
+
+    <!-- Problems -->
+    <string name="problem_no_write_access_title">Can\'t write to this stick</string>
+    <string name="problem_no_write_access_body">Android doesn\'t let kinframe write here. Allow access to the stick, or format it as FAT32 on a computer.</string>
+    <string name="problem_no_space_title">Not enough room on the stick</string>
+    <string name="problem_no_space_body">The export needs %1$s, but only %2$s is free.</string>
+    <string name="problem_write_failed_title">Writing stopped</string>
+    <string name="problem_write_failed_body">The stick stopped accepting files. Check that it isn\'t full, locked or loose, then try again.</string>
+    <string name="problem_nothing_to_export_title">Nothing to export yet</string>
+    <string name="problem_nothing_to_export_body">Photos can be exported once they are on the frame.</string>
+    <string name="problem_no_permission_title">Storage access needed</string>
+    <string name="problem_no_permission_body">Allow kinframe to use the SD card or USB stick, then try again.</string>
+    <string name="problem_offline_title">Connect to Wi-Fi to import</string>
+    <string name="problem_offline_body">Imported photos go to your family\'s server first, so the frame needs to be online.</string>
+    <string name="problem_nothing_found_title">No photos found</string>
+    <string name="problem_nothing_found_body">kinframe looks for JPEG, PNG, WebP, HEIC, MP4 and 3GP files on the stick.</string>
+    <string name="problem_read_failed_title">Something went wrong</string>
+    <string name="problem_read_failed_body">The stick couldn\'t be read. Take it out, put it back in and try again.</string>
+
+    <!-- Settings -->
+    <string name="settings_removable">SD card and USB stick</string>
+    <string name="settings_removable_none">Insert an SD card or USB stick to export, import or back up photos.</string>
+</resources>
