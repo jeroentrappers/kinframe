@@ -317,3 +317,12 @@ object ProblemCode {
     const val RATE_LIMITED = "rate_limited"
     const val APP_UPDATE_REQUIRED = "app_update_required"
 }
+
+/** Result of `POST /device/imports`: the placement, and whether the frame already had this file (`200`, not `202`). */
+data class ImportResult(val placement: Placement, val duplicate: Boolean)
+
+@Serializable
+data class ImportCheckRequest(val sha256: List<String>)
+
+@Serializable
+data class ImportCheckResponse(val known: List<String> = emptyList())
