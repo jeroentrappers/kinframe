@@ -179,7 +179,7 @@ fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard
         }
         if (o.state != OutboxState.FAILED) {
             val frac = p?.fraction ?: (o.uploadedBytes.toFloat() / o.totalBytes.coerceAtLeast(1))
-            LinearProgressIndicator(progress = { frac }, modifier = Modifier.fillMaxWidth().clip(CircleShape), color = c.accent, trackColor = c.line)
+            LinearProgressIndicator(progress = { frac }, modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape), color = c.accent, trackColor = c.line, drawStopIndicator = {})
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PrimaryButton(stringResource(R.string.outbox_retry), onRetry, icon = KinIcons.Refresh)

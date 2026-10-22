@@ -117,7 +117,7 @@ fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit) {
             .clickable(role = Role.Button, onClickLabel = stringResource(R.string.frames_open, frame.name), onClick = onOpen),
     ) {
         Box(
-            Modifier.fillMaxWidth().aspectRatio(16f / 7f)
+            Modifier.fillMaxWidth().aspectRatio(16f / 6.5f)
                 .background(Brush.radialGradient(listOf(a, b), radius = 900f).let { if (c.isDark) Brush.linearGradient(listOf(a.copy(alpha = 0.55f), b.copy(alpha = 0.55f))) else it })
                 .semantics { contentDescription = status },
             contentAlignment = Alignment.Center,
