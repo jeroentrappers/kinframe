@@ -25,12 +25,22 @@ func init() {
 	settingsSchema = doc.Components.Schemas["FrameSettings"].Value
 }
 
-// settingsDoc renders the stored settings with their version.
-func settingsDoc(f *store.Frame) json.RawMessage {
+// settingsDoc renders the stored settings with their version, as people see them
+// (without the owner PIN hash).
+func settingsDoc(f *store.Frame) json.RawMessage { return renderSettings(f, false) }
+
+// deviceSettingsDoc renders the settings for the frame itself, including the owner PIN hash.
+func deviceSettingsDoc(f *store.Frame) json.RawMessage { return renderSettings(f, true) }
+
+func renderSettings(f *store.Frame, forDevice bool) json.RawMessage {
 	var m map[string]any
 	_ = json.Unmarshal(f.Settings, &m)
 	if m == nil {
 		m = map[string]any{}
+	}
+	settings.DerivePinSet(m)
+	if !forDevice {
+		settings.StripPinHash(m)
 	}
 	m["version"] = f.SettingsVersion
 	b, _ := json.Marshal(m)
@@ -48,10 +58,20 @@ func parseIfMatch(v string) (int, error) {
 
 // patchSettings applies a merge patch. A stale If-Match is accepted when none
 // of the patched fields changed since that version; otherwise 412.
-func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch string, patch map[string]any) (json.RawMessage, error) {
+func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch string, patch map[string]any, actor settings.PinActor) (json.RawMessage, error) {
 	base, err := parseIfMatch(ifMatch)
 	if err != nil {
 		return nil, err
+	}
+	if err := settings.ApplyPinRules(patch, actor); err != nil {
+		if err == settings.ErrPinOwnerOnly {
+			return nil, problem.New(problem.Forbidden, "%s", err.Error())
+		}
+		return nil, problem.Validation("kiosk.owner_pin", "pattern", err.Error())
+	}
+	render := settingsDoc
+	if actor == settings.ActorDevice {
+		render = deviceSettingsDoc
 	}
 	settings.Sanitize(patch)
 	paths := settings.LeafPaths(patch)
@@ -66,7 +86,7 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 			return p
 		}
 		if len(paths) == 0 {
-			out = settingsDoc(f)
+			out = render(f)
 			return nil
 		}
 		var doc map[string]any
@@ -74,6 +94,7 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 			return err
 		}
 		doc = settings.MergePatch(doc, patch)
+		settings.DerivePinSet(doc)
 		if err := validateSettings(doc); err != nil {
 			return err
 		}
@@ -96,7 +117,7 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 			return err
 		}
 		f.Settings, f.SettingsVersion = raw, version
-		out = settingsDoc(f)
+		out = render(f)
 		return nil
 	})
 	if err == nil && s.weather != nil && touchesWeather(paths) {
@@ -170,7 +191,11 @@ func (s *Server) UpdateFrameSettings(ctx context.Context, req gen.UpdateFrameSet
 	if err := requirePerm(m, m.Effective().ChangeSettings, "change_settings"); err != nil {
 		return nil, err
 	}
-	doc, err := s.patchSettings(ctx, req.FrameId, req.Params.IfMatch, *req.Body)
+	actor := settings.ActorOther
+	if m.Role == "owner" {
+		actor = settings.ActorOwner
+	}
+	doc, err := s.patchSettings(ctx, req.FrameId, req.Params.IfMatch, *req.Body, actor)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +207,7 @@ func (s *Server) DevicePatchSettings(ctx context.Context, req gen.DevicePatchSet
 	if err != nil {
 		return nil, err
 	}
-	doc, err := s.patchSettings(ctx, f.ID, req.Params.IfMatch, *req.Body)
+	doc, err := s.patchSettings(ctx, f.ID, req.Params.IfMatch, *req.Body, settings.ActorDevice)
 	if err != nil {
 		return nil, err
 	}

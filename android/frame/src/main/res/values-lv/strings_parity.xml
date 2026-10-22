@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Īpašnieka PIN kods -->
+    <string name="pin_enter_title">Ievadiet īpašnieka PIN kodu</string>
+    <string name="pin_reason_settings">lai atvērtu iestatījumus</string>
+    <string name="pin_reason_exit">lai izietu no kinframe</string>
+    <string name="pin_reason_wifi">lai mainītu Wi-Fi</string>
+    <string name="pin_reason_power_off">lai izslēgtu rāmi</string>
+    <string name="pin_reason_restart">lai restartētu rāmi</string>
+    <string name="pin_reason_server">lai mainītu serveri</string>
+    <string name="pin_reason_reset">lai atiestatītu rāmi</string>
+    <string name="pin_checking">Pārbauda…</string>
+    <string name="pin_wrong">Nepareizs PIN kods.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="zero">Nepareizs PIN kods. Līdz īsai pauzei atlikuši %d mēģinājumi.</item>
+        <item quantity="one">Nepareizs PIN kods. Līdz īsai pauzei atlicis %d mēģinājums.</item>
+        <item quantity="other">Nepareizs PIN kods. Līdz īsai pauzei atlikuši %d mēģinājumi.</item>
+    </plurals>
+    <string name="pin_locked">Pārāk daudz nepareizu mēģinājumu. Mēģiniet vēlreiz pēc %s.</string>
+    <string name="pin_forgot">Aizmirsāt PIN kodu? Rāmja īpašnieks to var noņemt kinframe lietotnē, šī rāmja iestatījumos.</string>
+    <string name="pin_new_title">Izvēlieties PIN kodu</string>
+    <string name="pin_new_body">4 līdz 6 cipari. To prasīs, lai atvērtu iestatījumus, izslēgtu rāmi vai mainītu Wi-Fi.</string>
+    <string name="pin_confirm_title">Ievadiet PIN kodu vēlreiz</string>
+    <string name="pin_confirm_body">Lai būtu droši.</string>
+    <string name="pin_mismatch">PIN kodi nesakrita. Izvēlieties vēlreiz.</string>
+    <string name="pin_key_delete">Dzēst</string>
+    <string name="pin_key_ok">Labi</string>
+    <string name="settings_pin">Īpašnieka PIN kods</string>
+    <string name="settings_pin_off">Izslēgts. Iestatījumus var atvērt jebkurš.</string>
+    <string name="settings_pin_on">Ieslēgts. Iestatījumi, barošana un Wi-Fi prasa PIN kodu.</string>
+    <string name="settings_pin_set">Iestatīt PIN kodu</string>
+    <string name="settings_pin_change">Mainīt PIN kodu</string>
+    <string name="settings_pin_remove">Noņemt PIN kodu</string>
+    <!-- Pievienošanās pieprasījumi un paziņojumi -->
+    <string name="join_someone">Kāds</string>
+    <string name="join_title">%1$s vēlas pievienoties</string>
+    <string name="join_body_code">%1$s ievadīja rāmja „%2$s” kodu. Ja atļausiet, %1$s varēs sūtīt fotoattēlus uz šo rāmi.</string>
+    <string name="join_body_invited">%1$s uzaicināja %3$s uz rāmi „%2$s”. Ja atļausiet, %3$s varēs sūtīt fotoattēlus uz šo rāmi.</string>
+    <string name="join_invited_by">Uzaicināja: %s</string>
+    <string name="join_allow">Atļaut</string>
+    <string name="join_deny">Neatļaut</string>
+    <string name="join_later">Ne tagad</string>
+    <string name="join_later_hint">Pieprasījums paliks izvēlnes sadaļā „Paziņojumi”.</string>
+    <string name="join_pill_one">%s vēlas pievienoties</string>
+    <plurals name="join_pill_many">
+        <item quantity="zero">%d cilvēki vēlas pievienoties</item>
+        <item quantity="one">%d cilvēks vēlas pievienoties</item>
+        <item quantity="other">%d cilvēki vēlas pievienoties</item>
+    </plurals>
+    <string name="notifications_title">Paziņojumi</string>
+    <string name="notifications_empty">Viss apskatīts</string>
+    <string name="notifications_empty_body">Nekas jūs negaida.</string>
+    <string name="menu_notifications">Paziņojumi</string>
+    <string name="action_close">Aizvērt</string>
+    <!-- Statusa kartītes slaidrādē -->
+    <string name="status_card_offline_title">Nav interneta savienojuma</string>
+    <string name="status_card_offline_body">Rāmī esošie fotoattēli turpina rādīties. Jaunie pienāks, tiklīdz savienojums atjaunosies.</string>
+    <string name="status_card_server_title">Nevar sasniegt fotoattēlu serveri</string>
+    <string name="status_card_server_body">Wi-Fi darbojas, bet serveris neatbild. Jaunie fotoattēli pienāks, kad tas atkal darbosies.</string>
+    <string name="status_card_portal_title">Šis Wi-Fi prasa pierakstīties</string>
+    <string name="status_card_portal_body">Atveriet tīkla pierakstīšanās lapu, lai rāmis tiktu tiešsaistē.</string>
+    <string name="status_card_portal_action">Pierakstīties</string>
+    <string name="status_card_storage_title">Rāmis ir gandrīz pilns</string>
+    <string name="status_card_storage_body">Vecāki fotoattēli tika noņemti no rāmja, lai atbrīvotu vietu; tie droši paliek serverī. Jaunie fotoattēli var gaidīt, līdz būs vieta.</string>
+    <string name="portal_title">Pierakstīšanās Wi-Fi tīklā</string>
+    <string name="portal_body">Tas aizvērsies pats, tiklīdz rāmis būs tiešsaistē.</string>
+    <!-- Iestatīšana: laika josla un atjauninājums -->
+    <string name="setup_tz_title">Kurā laika joslā atrodas rāmis?</string>
+    <string name="setup_tz_body">Lai pulkstenis, datums un nakts grafiks būtu pareizi.</string>
+    <string name="setup_tz_suggested">Ieteiktā</string>
+    <string name="setup_tz_all">Visas laika joslas</string>
+    <string name="tz_region_europe">Eiropa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Āzija</string>
+    <string name="tz_region_africa">Āfrika</string>
+    <string name="tz_region_australia">Austrālija</string>
+    <string name="tz_region_pacific">Klusais okeāns</string>
+    <string name="tz_region_atlantic">Atlantijas okeāns</string>
+    <string name="tz_region_indian">Indijas okeāns</string>
+    <string name="tz_region_antarctica">Antarktida</string>
+    <string name="setup_update_checking">Meklē jaunāku versiju…</string>
+    <string name="setup_update_checking_body">Pirms sākat, rāmis pārliecinās, ka tajā ir jaunākā kinframe versija.</string>
+    <string name="setup_update_downloading">Lejupielādē versiju %s</string>
+    <string name="setup_update_downloading_body">Tūlīt pēc tam tā tiks instalēta. Varat to izlaist; rāmis atjaunināsies vēlāk pats.</string>
+    <string name="setup_update_installing">Instalē versiju %s</string>
+    <string name="setup_update_installing_body">Rāmis drīz pats restartēsies un turpinās iestatīšanu no vietas, kur palikāt.</string>
+    <string name="setup_update_current">kinframe ir atjaunināta</string>
+    <string name="setup_update_current_body">Uz pēdējo soli.</string>
+    <string name="setup_update_failed">Neizdevās pārbaudīt atjauninājumus</string>
+    <string name="setup_update_failed_body">Nekas: rāmis vēlāk pārbaudīs vēlreiz un atjauninās pats.</string>
+    <string name="setup_update_skip">Pagaidām izlaist</string>
+    <!-- Slaidrādes opcijas -->
+    <plurals name="on_this_day_years">
+        <item quantity="zero">Šodien pirms %d gadiem</item>
+        <item quantity="one">Šodien pirms %d gada</item>
+        <item quantity="other">Šodien pirms %d gadiem</item>
+    </plurals>
+    <string name="transition_kenburns">Lēna tālummaiņa</string>
+    <string name="settings_collage">Vairāki fotoattēli reizē (kolāža)</string>
+    <string name="settings_collage_max">Fotoattēli ekrānā</string>
+    <string name="settings_pair_portraits">Rādīt divus vertikālus fotoattēlus blakus</string>
+    <string name="settings_on_this_day">Rādīt šīs dienas atmiņas no iepriekšējiem gadiem</string>
+    <string name="settings_video">Video</string>
+    <string name="settings_video_autoplay">Atskaņot video automātiski</string>
+    <string name="settings_video_playback">Pēc video</string>
+    <string name="video_once_hold">Atskaņot vienreiz, tad gaidīt</string>
+    <string name="video_loop">Atkārtot nepārtraukti</string>
+    <string name="video_once_advance">Atskaņot vienreiz, tad tālāk</string>
+    <string name="settings_video_volume">Video skaļums</string>
+    <string name="settings_video_auto_mute">Izslēgt skaņu, ja neviens nav pieskāries rāmim</string>
+    <string name="video_auto_mute_off">Nekad</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

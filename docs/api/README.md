@@ -285,7 +285,7 @@ exponential back-off from 1 s up to 60 s, with ±20 % jitter.
 | S→F | `changes` | `latest_seq` | Hint only. The frame calls `/device/changes`. |
 | S→F | `command` | `id`, `command_type`, `args` | Remote command. |
 | S→F | `claimed` | `owner_name` | Leave the setup or code screen. |
-| S→F | `join_request` | `request` | Show Allow/Deny. |
+| S→F | `join_request` | `request` | Show Allow/Deny. Requests still pending (e.g. sent while the frame was offline) come from `GET /v1/device/join-requests`. |
 | S→F | `revoked` | — | Wipe credential, back to setup. Followed by close `4401`. |
 | F→S | `state` | `screen: on/off/dimmed`, `showing_placement_id`, `brightness`, `volume` | Sent on change, at most every 2 s. |
 | F→S | `command_result` | `id`, `ok`, `error_code` | Result of a command. |

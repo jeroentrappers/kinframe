@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Add meg a tulajdonosi PIN-kódot</string>
+    <string name="pin_reason_settings">a beállítások megnyitásához</string>
+    <string name="pin_reason_exit">a kinframe bezárásához</string>
+    <string name="pin_reason_wifi">a Wi-Fi módosításához</string>
+    <string name="pin_reason_power_off">a képkeret kikapcsolásához</string>
+    <string name="pin_reason_restart">a képkeret újraindításához</string>
+    <string name="pin_reason_server">a szerver módosításához</string>
+    <string name="pin_reason_reset">a képkeret visszaállításához</string>
+    <string name="pin_checking">Ellenőrzés…</string>
+    <string name="pin_wrong">Ez nem a PIN-kód.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Ez nem a PIN-kód. Még %d próbálkozás a rövid szünet előtt.</item>
+        <item quantity="other">Ez nem a PIN-kód. Még %d próbálkozás a rövid szünet előtt.</item>
+    </plurals>
+    <string name="pin_locked">Túl sok hibás próbálkozás. Próbáld újra ennyi idő múlva: %s.</string>
+    <string name="pin_forgot">Elfelejtetted a PIN-kódot? A képkeret tulajdonosa eltávolíthatja a kinframe appban, a képkeret beállításainál.</string>
+    <string name="pin_new_title">Válassz PIN-kódot</string>
+    <string name="pin_new_body">4–6 számjegy. A beállítások megnyitásához, a képkeret kikapcsolásához és a Wi-Fi módosításához kell majd.</string>
+    <string name="pin_confirm_title">Add meg újra a PIN-kódot</string>
+    <string name="pin_confirm_body">Csak a biztonság kedvéért.</string>
+    <string name="pin_mismatch">A PIN-kódok nem egyeznek. Válassz újra.</string>
+    <string name="pin_key_delete">Törlés</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Tulajdonosi PIN-kód</string>
+    <string name="settings_pin_off">Ki. Bárki megnyithatja a beállításokat a képkeretnél.</string>
+    <string name="settings_pin_on">Be. A beállítások, a kikapcsolás és a Wi-Fi PIN-kódot kér.</string>
+    <string name="settings_pin_set">PIN-kód beállítása</string>
+    <string name="settings_pin_change">PIN-kód módosítása</string>
+    <string name="settings_pin_remove">PIN-kód eltávolítása</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Valaki</string>
+    <string name="join_title">%1$s csatlakozna</string>
+    <string name="join_body_code">%1$s beírta ennek a képkeretnek a kódját: „%2$s”. Ha engedélyezed, %1$s fotókat küldhet erre a képkeretre.</string>
+    <string name="join_body_invited">%3$s meghívót kapott ide: „%2$s” (meghívó: %1$s). Ha engedélyezed, %3$s fotókat küldhet erre a képkeretre.</string>
+    <string name="join_invited_by">Meghívó: %s</string>
+    <string name="join_allow">Engedélyezés</string>
+    <string name="join_deny">Elutasítás</string>
+    <string name="join_later">Most nem</string>
+    <string name="join_later_hint">Megmarad a menü értesítései között.</string>
+    <string name="join_pill_one">%s csatlakozna</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d személy csatlakozna</item>
+        <item quantity="other">%d személy csatlakozna</item>
+    </plurals>
+    <string name="notifications_title">Értesítések</string>
+    <string name="notifications_empty">Nincs új értesítés</string>
+    <string name="notifications_empty_body">Semmi sem vár rád.</string>
+    <string name="menu_notifications">Értesítések</string>
+    <string name="action_close">Bezárás</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Nincs internetkapcsolat</string>
+    <string name="status_card_offline_body">A képkereten lévő fotók továbbra is mennek. Az újak megérkeznek, amint újra van kapcsolat.</string>
+    <string name="status_card_server_title">A fotószerver nem érhető el</string>
+    <string name="status_card_server_body">A Wi-Fi működik, de a szerver nem válaszol. Az új fotók megérkeznek, amint újra elérhető.</string>
+    <string name="status_card_portal_title">Ez a Wi-Fi bejelentkezést kér</string>
+    <string name="status_card_portal_body">Nyisd meg a hálózat bejelentkezési oldalát, hogy a képkeret csatlakozzon az internethez.</string>
+    <string name="status_card_portal_action">Bejelentkezés</string>
+    <string name="status_card_storage_title">A képkeret majdnem megtelt</string>
+    <string name="status_card_storage_body">A régebbi fotók lekerültek a képkeretről, hogy legyen hely; a szerveren biztonságban maradnak. Az új fotók várhatnak, amíg lesz hely.</string>
+    <string name="portal_title">Bejelentkezés a Wi-Fi-be</string>
+    <string name="portal_body">Ez magától bezárul, amint a képkeret online lesz.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Melyik időzónában van a képkeret?</string>
+    <string name="setup_tz_body">Hogy az óra, a dátum és az éjszakai időzítés pontos legyen.</string>
+    <string name="setup_tz_suggested">Javasolt</string>
+    <string name="setup_tz_all">Összes időzóna</string>
+    <string name="tz_region_europe">Európa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Ázsia</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Ausztrália</string>
+    <string name="tz_region_pacific">Csendes-óceán</string>
+    <string name="tz_region_atlantic">Atlanti-óceán</string>
+    <string name="tz_region_indian">Indiai-óceán</string>
+    <string name="tz_region_antarctica">Antarktisz</string>
+    <string name="setup_update_checking">Újabb verzió keresése…</string>
+    <string name="setup_update_checking_body">A képkeret kezdés előtt ellenőrzi, hogy a legújabb kinframe fut-e rajta.</string>
+    <string name="setup_update_downloading">%s verzió letöltése</string>
+    <string name="setup_update_downloading_body">Utána rögtön települ. Ezt kihagyhatod; a képkeret később magától frissül.</string>
+    <string name="setup_update_installing">%s verzió telepítése</string>
+    <string name="setup_update_installing_body">A képkeret mindjárt magától újraindul, és ott folytatja a beállítást, ahol abbahagytad.</string>
+    <string name="setup_update_current">A kinframe naprakész</string>
+    <string name="setup_update_current_body">Jöhet az utolsó lépés.</string>
+    <string name="setup_update_failed">Nem sikerült frissítést keresni</string>
+    <string name="setup_update_failed_body">Semmi gond: a képkeret később újra megnézi, és magától frissül.</string>
+    <string name="setup_update_skip">Most kihagyom</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Ma %d éve</item>
+        <item quantity="other">Ma %d éve</item>
+    </plurals>
+    <string name="transition_kenburns">Lassú nagyítás</string>
+    <string name="settings_collage">Több fotó egyszerre (kollázs)</string>
+    <string name="settings_collage_max">Fotók képernyőnként</string>
+    <string name="settings_pair_portraits">Két álló fotó egymás mellett</string>
+    <string name="settings_on_this_day">Emlékek erről a napról a korábbi évekből</string>
+    <string name="settings_video">Videók</string>
+    <string name="settings_video_autoplay">Videók automatikus lejátszása</string>
+    <string name="settings_video_playback">Videó után</string>
+    <string name="video_once_hold">Egyszer lejátszás, majd várakozás</string>
+    <string name="video_loop">Folyamatos ismétlés</string>
+    <string name="video_once_advance">Egyszer lejátszás, majd tovább</string>
+    <string name="settings_video_volume">Videók hangereje</string>
+    <string name="settings_video_auto_mute">Némítás, ha senki sem érintette a képkeretet ennyi ideig:</string>
+    <string name="video_auto_mute_off">Soha</string>
+    <string name="video_auto_mute_min">%d perc</string>
+</resources>

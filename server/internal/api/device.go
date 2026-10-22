@@ -313,7 +313,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				"user_id": m.UserID, "display_name": m.DisplayName, "avatar_url": s.avatarURL(m.AvatarKey), "role": m.Role,
 			}})
 		case store.FeedSettings:
-			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": settingsDoc(f)})
+			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": deviceSettingsDoc(f)})
 		case store.FeedWeather:
 			w, err := s.frameWeather(ctx, f)
 			if err != nil {
@@ -611,6 +611,22 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 		}
 	}
 	return noContent(), nil
+}
+
+func (s *Server) DeviceListJoinRequests(ctx context.Context, req gen.DeviceListJoinRequestsRequestObject) (gen.DeviceListJoinRequestsResponseObject, error) {
+	f, err := s.deviceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	jrs, err := s.st.ListPendingJoinRequests(ctx, f.ID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.JoinRequest, len(jrs))
+	for i := range jrs {
+		out[i] = s.joinRequestJSON(&jrs[i])
+	}
+	return ok(out), nil
 }
 
 func (s *Server) DeviceDecideJoin(ctx context.Context, req gen.DeviceDecideJoinRequestObject) (gen.DeviceDecideJoinResponseObject, error) {

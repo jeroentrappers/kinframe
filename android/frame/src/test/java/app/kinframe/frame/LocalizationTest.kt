@@ -22,8 +22,11 @@ class LocalizationTest {
         val arrays: Map<String, Int>,
     )
 
-    private fun parse(dir: String): Strings {
-        val file = File(res, "$dir/strings.xml")
+    /** Every strings*.xml file in values/ (features may keep their strings in a file of their own). */
+    private val stringFiles = res.resolve("values").list()!!.filter { it.startsWith("strings") && it.endsWith(".xml") }.sorted()
+
+    private fun parse(dir: String, name: String = "strings.xml"): Strings {
+        val file = File(res, "$dir/$name")
         assertTrue("missing $file", file.isFile)
         val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
         fun elements(tag: String) = doc.getElementsByTagName(tag).let { nl -> (0 until nl.length).map { nl.item(it) as Element } }
@@ -85,11 +88,11 @@ class LocalizationTest {
     private fun dirOf(code: String) = if ('-' in code) code.split('-').let { (l, r) -> "values-$l-r$r" } else "values-$code"
 
     @Test fun everyLanguageHasEveryString() {
-        val en = parse("values")
         val problems = mutableListOf<String>()
-        for (lang in Locales.supported.map { it.code }.filter { it != "en" }) {
-            val dir = dirOf(lang)
-            val t = parse(dir)
+        for (name in stringFiles) for (lang in Locales.supported.map { it.code }.filter { it != "en" }) {
+            val en = parse("values", name)
+            val dir = "${dirOf(lang)}/$name"
+            val t = parse(dirOf(lang), name)
             for ((name, text) in en.strings) {
                 val tr = t.strings[name]
                 when {
@@ -112,11 +115,11 @@ class LocalizationTest {
 
     @Test fun legacyCodeCopiesAreIdentical() {
         // Android 6 resolves Hebrew and Indonesian only through the old codes iw / in.
-        for ((modern, legacy) in listOf("he" to "iw", "id" to "in")) {
+        for (name in stringFiles) for ((modern, legacy) in listOf("he" to "iw", "id" to "in")) {
             assertEquals(
-                "values-$legacy must be a copy of values-$modern",
-                File(res, "values-$modern/strings.xml").readText(),
-                File(res, "values-$legacy/strings.xml").readText(),
+                "values-$legacy/$name must be a copy of values-$modern/$name",
+                File(res, "values-$modern/$name").readText(),
+                File(res, "values-$legacy/$name").readText(),
             )
         }
     }

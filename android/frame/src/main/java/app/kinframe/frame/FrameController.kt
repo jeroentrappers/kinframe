@@ -5,7 +5,17 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import app.kinframe.core.api.Heartbeat
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.PinHashDto
 import app.kinframe.frame.data.SyncStateEntity
+import app.kinframe.frame.join.JoinRequests
+import app.kinframe.frame.kiosk.OwnerGate
+import app.kinframe.frame.kiosk.OwnerPin
+import app.kinframe.frame.kiosk.PinAttempts
+import app.kinframe.frame.storage.StorageManager
+import app.kinframe.frame.system.CaptivePortal
+import app.kinframe.frame.ui.FrameStatus
+import app.kinframe.frame.ui.FrameStatuses
 import app.kinframe.frame.schedule.DisplayController
 import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
@@ -27,9 +37,10 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.put
 import java.time.Instant
@@ -62,6 +73,28 @@ class FrameController(val g: FrameGraph) {
     val slideshow by lazy { SlideshowController(this) }
     val power = PowerActions(this)
     val update = UpdateManager(this)
+    val gate = OwnerGate(
+        pinHash = { g.settings.settings.value.kiosk.ownerPinHash },
+        attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
+    )
+
+    /** Frees space by evicting least-recently-shown renditions (product spec 4.6). */
+    val storage: StorageManager by lazy {
+        StorageManager(g.db, g.media, protectedIds = { withContext(Dispatchers.Main) { slideshow.protectedIds() } }, now = { g.clock.nowMs() })
+    }
+
+    /** Captive-portal detection (product spec 4.8) and whether its sign-in page is open. */
+    val portal = CaptivePortal(g.http, { CaptivePortal.probeFor(g.prefs.serverUrl ?: BuildConfig.DEFAULT_SERVER) }, g.network)
+    val portalOpen = MutableStateFlow(false)
+
+    /** What the slideshow's status card should say, if anything. */
+    val frameStatus: StateFlow<FrameStatus?> by lazy {
+        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status) { conn, login, st, net ->
+            FrameStatuses.of(conn, net.connected, login != null, st.level)
+        }.stateIn(scope, SharingStarted.Eagerly, null)
+    }
+
+    val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
 
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
@@ -94,6 +127,7 @@ class FrameController(val g: FrameGraph) {
                 return@launch
             }
             display.start()
+            portal.start(scope, suspicious = { connection.value == FrameSession.Connection.ServerUnreachable })
             when {
                 g.crashGuard.inCrashLoop -> _screen.value = AppScreen.Recovery
                 g.credentials.load() != null && g.prefs.claimed -> {
@@ -110,8 +144,18 @@ class FrameController(val g: FrameGraph) {
             scope.launch {
                 g.settings.raw.map { serverLanguageOf(it) }.distinctUntilChanged().collect { onServerLanguage(it) }
             }
+            scope.launch {
+                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online -> if (online) joins.refresh() }
+            }
             reportStateChanges()
             update.start()
+            scope.launch {
+                delay(30_000)
+                while (true) {
+                    runCatching { storage.ensureSpace() }.onFailure { Log.w(TAG, "storage check", it) }
+                    delay(15 * 60_000L)
+                }
+            }
         }
     }
 
@@ -172,6 +216,7 @@ class FrameController(val g: FrameGraph) {
 
     private fun applyTimezone() {
         val tz = runCatching { g.settings.explicitTimezone()?.let { ZoneId.of(it) } }.getOrNull()
+            ?: runCatching { g.prefs.timezone?.let { ZoneId.of(it) } }.getOrNull()
         g.clock.zone = tz ?: ZoneId.systemDefault()
     }
 
@@ -194,7 +239,9 @@ class FrameController(val g: FrameGraph) {
 
     fun startSession() {
         if (_session.value != null) return
-        val s = FrameSession(g.http, g.api, g.db, g.media, g.clock, g.network, scope, events)
+        val s = FrameSession(g.http, g.api, g.db, g.media, g.clock, g.network, scope, events, makeRoom = { storage.ensureSpace(it) })
+        storage.onQueueChanged = { s.downloader.kick() }
+        s.downloader.onStored = { scope.launch { storage.ensureSpace() } }
         _session.value = s
         s.start()
         scope.launch(Dispatchers.IO) { runCatching { s.sync.garbageCollect() } }
@@ -222,6 +269,12 @@ class FrameController(val g: FrameGraph) {
 
         override fun onPulled(result: app.kinframe.frame.sync.SyncEngine.PullResult) {
             if (result.newItems > 0) scope.launch { display.onNewPhotos() }
+            // A decision made in the app shows up as a membership change: drop the card here too.
+            if (joins.pending.value.isNotEmpty()) joins.refresh()
+        }
+
+        override fun onJoinRequest(request: JsonObject) {
+            scope.launch { joins.onEvent(request) }
         }
     }
 
@@ -230,6 +283,7 @@ class FrameController(val g: FrameGraph) {
         Log.w(TAG, "device credential revoked: wiping and returning to setup")
         stopSession()
         slideshow.reset()
+        joins.clear()
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()
@@ -280,6 +334,7 @@ class FrameController(val g: FrameGraph) {
         g.network.refresh()
         val n = g.network.status.value
         val placements = runCatching { g.db.placements().countCached() to g.db.placements().countMissing() }.getOrNull()
+        val evicted = runCatching { g.db.placements().countEvicted() }.getOrNull()
         val (updateState, updateError) = update.heartbeatState()
         return Heartbeat(
             appVersion = BuildConfig.VERSION_NAME,
@@ -294,6 +349,8 @@ class FrameController(val g: FrameGraph) {
             cacheBytes = g.media.usedBytes(),
             placementsCached = placements?.first,
             placementsMissing = placements?.second,
+            placementsEvicted = evicted,
+            storageState = storage.state.value.level.name.lowercase(),
             screenState = display.screenStateName(),
             lastShutdownClean = g.sessionMarker.lastShutdownClean,
             crashCount24h = g.crashGuard.crashCount24h(),
@@ -329,25 +386,34 @@ class FrameController(val g: FrameGraph) {
         }
     }
 
-    /** Leaves the kiosk to the Android settings. The owner PIN gate (later task) plugs into [OwnerGate]. */
+    /** Leaves the kiosk to the Android settings (owner PIN when set). */
     fun openAndroidSettings(activity: android.app.Activity) {
-        OwnerGate.authorize(activity, OwnerGate.Reason.ExitKiosk) {
+        gate.authorize(OwnerGate.Reason.ExitKiosk) {
             activity.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }
 
-    companion object { private const val TAG = "KinFrame" }
-}
+    /** Opens frame settings (owner PIN when set). */
+    fun openSettings() = gate.authorize(OwnerGate.Reason.OpenSettings) { settingsOpen.value = true }
 
-/**
- * Hook for the owner PIN (product spec §5 Security: "the user cannot leave the app without an owner PIN or adb").
- * v0.1 grants immediately; the PIN screen is a later task.
- */
-object OwnerGate {
-    enum class Reason { ExitKiosk, ChangeServer, FactoryReset }
-
-    fun authorize(activity: android.app.Activity, reason: Reason, onGranted: () -> Unit) {
-        Log.i("KinOwnerGate", "authorize $reason (no PIN configured)")
-        onGranted()
+    fun closeSettings() {
+        settingsOpen.value = false
+        gate.lock()
     }
+
+    /**
+     * Sets ([pin]) or removes (null) the owner PIN at the frame. Only the salted hash leaves this function: it goes
+     * into the settings document through the outbox, so it applies at once, offline too. Returns false without a session.
+     */
+    suspend fun setOwnerPin(pin: String?): Boolean {
+        val outbox = session.value?.outbox ?: return false
+        val hash = pin?.let { withContext(Dispatchers.Default) { OwnerPin.hash(it) } }
+        val value = hash?.let { KinJson.encodeToJsonElement(PinHashDto.serializer(), it) } ?: JsonNull
+        outbox.settingsPatch(buildJsonObject { put("kiosk", buildJsonObject { put("owner_pin_hash", value) }) })
+        g.prefs.pinAttempts.failures = 0
+        g.prefs.pinAttempts.lockedUntil = 0
+        return true
+    }
+
+    companion object { private const val TAG = "KinFrame" }
 }

@@ -99,7 +99,7 @@ object DeviceInfo {
             java.io.File("/sys/class/power_supply").list()?.isNotEmpty() == true
     }
 
-    fun enrollRequest(context: Context, root: Boolean): DeviceEnroll {
+    fun enrollRequest(context: Context, root: Boolean, timezone: String? = null): DeviceEnroll {
         val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val mi = ActivityManager.MemoryInfo().also { am.getMemoryInfo(it) }
         val stat = StatFs(Environment.getDataDirectory().absolutePath)
@@ -118,7 +118,8 @@ object DeviceInfo {
             screen = screen(context),
             app = DeviceAppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
             locale = app.kinframe.frame.Locales.effective(context),
-            timezone = TimeZone.getDefault().id,
+            // The zone picked in the setup wizard seeds the frame's `locale.timezone` setting on the server.
+            timezone = timezone ?: TimeZone.getDefault().id,
         )
     }
 

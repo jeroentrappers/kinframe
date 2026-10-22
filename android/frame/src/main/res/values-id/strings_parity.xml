@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Masukkan PIN pemilik</string>
+    <string name="pin_reason_settings">untuk membuka setelan</string>
+    <string name="pin_reason_exit">untuk keluar dari kinframe</string>
+    <string name="pin_reason_wifi">untuk mengganti Wi-Fi</string>
+    <string name="pin_reason_power_off">untuk mematikan bingkai</string>
+    <string name="pin_reason_restart">untuk memulai ulang bingkai</string>
+    <string name="pin_reason_server">untuk mengganti server</string>
+    <string name="pin_reason_reset">untuk mereset bingkai</string>
+    <string name="pin_checking">Memeriksa…</string>
+    <string name="pin_wrong">PIN salah.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="other">PIN salah. Sisa %d percobaan sebelum jeda singkat.</item>
+    </plurals>
+    <string name="pin_locked">Terlalu banyak percobaan salah. Coba lagi dalam %s.</string>
+    <string name="pin_forgot">Lupa PIN? Pemilik bingkai dapat menghapusnya di aplikasi kinframe, di setelan bingkai ini.</string>
+    <string name="pin_new_title">Pilih PIN</string>
+    <string name="pin_new_body">4 sampai 6 angka. PIN akan diminta untuk membuka setelan, mematikan bingkai, atau mengganti Wi-Fi.</string>
+    <string name="pin_confirm_title">Masukkan PIN lagi</string>
+    <string name="pin_confirm_body">Sekadar memastikan.</string>
+    <string name="pin_mismatch">PIN tidak cocok. Pilih lagi.</string>
+    <string name="pin_key_delete">Hapus</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN pemilik</string>
+    <string name="settings_pin_off">Nonaktif. Siapa pun di dekat bingkai dapat membuka setelan.</string>
+    <string name="settings_pin_on">Aktif. Setelan, daya, dan Wi-Fi meminta PIN.</string>
+    <string name="settings_pin_set">Buat PIN</string>
+    <string name="settings_pin_change">Ubah PIN</string>
+    <string name="settings_pin_remove">Hapus PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Seseorang</string>
+    <string name="join_title">%1$s ingin bergabung</string>
+    <string name="join_body_code">%1$s memasukkan kode %2$s. Jika Anda mengizinkan, %1$s dapat mengirim foto ke bingkai ini.</string>
+    <string name="join_body_invited">%1$s mengundang %3$s ke %2$s. Jika Anda mengizinkan, %3$s dapat mengirim foto ke bingkai ini.</string>
+    <string name="join_invited_by">Diundang oleh %s</string>
+    <string name="join_allow">Izinkan</string>
+    <string name="join_deny">Jangan izinkan</string>
+    <string name="join_later">Nanti saja</string>
+    <string name="join_later_hint">Permintaan tetap ada di notifikasi pada menu.</string>
+    <string name="join_pill_one">%s ingin bergabung</string>
+    <plurals name="join_pill_many">
+        <item quantity="other">%d orang ingin bergabung</item>
+    </plurals>
+    <string name="notifications_title">Notifikasi</string>
+    <string name="notifications_empty">Semua sudah dilihat</string>
+    <string name="notifications_empty_body">Tidak ada yang menunggu Anda.</string>
+    <string name="menu_notifications">Notifikasi</string>
+    <string name="action_close">Tutup</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Tidak ada koneksi internet</string>
+    <string name="status_card_offline_body">Foto di bingkai tetap diputar. Foto baru masuk begitu bingkai online lagi.</string>
+    <string name="status_card_server_title">Tidak dapat menjangkau server foto</string>
+    <string name="status_card_server_body">Wi-Fi berfungsi, tetapi server tidak merespons. Foto baru masuk saat server aktif lagi.</string>
+    <string name="status_card_portal_title">Wi-Fi ini meminta Anda login</string>
+    <string name="status_card_portal_body">Buka halaman login jaringan agar bingkai bisa online.</string>
+    <string name="status_card_portal_action">Login</string>
+    <string name="status_card_storage_title">Bingkai hampir penuh</string>
+    <string name="status_card_storage_body">Foto lama dihapus dari bingkai untuk memberi ruang; foto tersebut tetap aman di server. Foto baru mungkin menunggu sampai ada ruang.</string>
+    <string name="portal_title">Login ke Wi-Fi</string>
+    <string name="portal_body">Halaman ini tertutup sendiri setelah bingkai online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Bingkai ada di zona waktu mana?</string>
+    <string name="setup_tz_body">Agar jam, tanggal, dan jadwal malam tepat.</string>
+    <string name="setup_tz_suggested">Disarankan</string>
+    <string name="setup_tz_all">Semua zona waktu</string>
+    <string name="tz_region_europe">Eropa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pasifik</string>
+    <string name="tz_region_atlantic">Atlantik</string>
+    <string name="tz_region_indian">Samudra Hindia</string>
+    <string name="tz_region_antarctica">Antarktika</string>
+    <string name="setup_update_checking">Mencari versi yang lebih baru…</string>
+    <string name="setup_update_checking_body">Bingkai memastikan kinframe versi terbaru terpasang sebelum Anda mulai.</string>
+    <string name="setup_update_downloading">Mendownload versi %s</string>
+    <string name="setup_update_downloading_body">Setelah itu langsung dipasang. Anda dapat melewatinya; bingkai akan mengupdate sendiri nanti.</string>
+    <string name="setup_update_installing">Memasang versi %s</string>
+    <string name="setup_update_installing_body">Bingkai akan memulai ulang sendiri sebentar lagi dan melanjutkan penyiapan dari langkah terakhir.</string>
+    <string name="setup_update_current">kinframe sudah versi terbaru</string>
+    <string name="setup_update_current_body">Lanjut ke langkah terakhir.</string>
+    <string name="setup_update_failed">Tidak dapat memeriksa update</string>
+    <string name="setup_update_failed_body">Tidak masalah: bingkai akan memeriksa lagi nanti dan mengupdate sendiri.</string>
+    <string name="setup_update_skip">Lewati dulu</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="other">Hari ini, %d tahun lalu</item>
+    </plurals>
+    <string name="transition_kenburns">Zoom perlahan</string>
+    <string name="settings_collage">Beberapa foto sekaligus (kolase)</string>
+    <string name="settings_collage_max">Foto per layar</string>
+    <string name="settings_pair_portraits">Tampilkan dua foto potret berdampingan</string>
+    <string name="settings_on_this_day">Tampilkan kenangan hari ini dari tahun-tahun sebelumnya</string>
+    <string name="settings_video">Video</string>
+    <string name="settings_video_autoplay">Putar video otomatis</string>
+    <string name="settings_video_playback">Setelah video</string>
+    <string name="video_once_hold">Putar sekali, lalu tunggu</string>
+    <string name="video_loop">Ulangi terus</string>
+    <string name="video_once_advance">Putar sekali, lalu lanjut</string>
+    <string name="settings_video_volume">Volume video</string>
+    <string name="settings_video_auto_mute">Bisukan jika bingkai tidak disentuh selama</string>
+    <string name="video_auto_mute_off">Tidak pernah</string>
+    <string name="video_auto_mute_min">%d mnt</string>
+</resources>

@@ -55,11 +55,15 @@ const fail = (msg) => problems.push(msg);
 
 async function check(lang) {
 	const ints = integerCategories(lang === 'zh-CN' || lang === 'zh-TW' ? 'zh' : lang);
-	// --- Android
-	const enA = parseAndroid(join(root, 'android/frame/src/main/res/values/strings.xml'));
+	// --- Android: every strings*.xml in values/ needs a translated file of the same name.
+	const res = join(root, 'android/frame/src/main/res');
+	const stringFiles = readdirSync(join(res, 'values')).filter((n) => /^strings.*\.xml$/.test(n));
 	const dirs = [androidDir(lang), androidAliases[lang]].filter(Boolean);
-	for (const d of dirs) {
-		const f = join(root, 'android/frame/src/main/res', d, 'strings.xml');
+	for (const file of stringFiles)
+	for (const d0 of dirs) {
+		const enA = parseAndroid(join(res, 'values', file));
+		const d = `${d0}/${file}`;
+		const f = join(res, d0, file);
 		if (!existsSync(f)) { fail(`android ${d}: missing`); continue; }
 		const a = parseAndroid(f);
 		for (const k of Object.keys(enA.strings)) {
@@ -80,8 +84,10 @@ async function check(lang) {
 		for (const k of Object.keys(enA.arrays)) if (a.arrays[k]?.length !== enA.arrays[k].length) fail(`android ${d}: array ${k} length`);
 	}
 	if (dirs.length === 2) {
-		const [x, y] = dirs.map((d) => join(root, 'android/frame/src/main/res', d, 'strings.xml'));
-		if (existsSync(x) && existsSync(y) && readFileSync(x, 'utf8') !== readFileSync(y, 'utf8')) fail(`android ${dirs[1]} must be an identical copy of ${dirs[0]}`);
+		for (const file of stringFiles) {
+			const [x, y] = dirs.map((d) => join(res, d, file));
+			if (existsSync(x) && existsSync(y) && readFileSync(x, 'utf8') !== readFileSync(y, 'utf8')) fail(`android ${dirs[1]}/${file} must be an identical copy of ${dirs[0]}/${file}`);
+		}
 	}
 
 	// --- Web

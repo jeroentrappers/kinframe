@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Enter the owner PIN</string>
+    <string name="pin_reason_settings">to open settings</string>
+    <string name="pin_reason_exit">to leave kinframe</string>
+    <string name="pin_reason_wifi">to change Wi-Fi</string>
+    <string name="pin_reason_power_off">to turn the frame off</string>
+    <string name="pin_reason_restart">to restart the frame</string>
+    <string name="pin_reason_server">to change the server</string>
+    <string name="pin_reason_reset">to reset the frame</string>
+    <string name="pin_checking">Checking…</string>
+    <string name="pin_wrong">That\'s not the PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">That\'s not the PIN. %d more try before a short pause.</item>
+        <item quantity="other">That\'s not the PIN. %d more tries before a short pause.</item>
+    </plurals>
+    <string name="pin_locked">Too many wrong tries. Try again in %s.</string>
+    <string name="pin_forgot">Forgot the PIN? The frame\'s owner can remove it in the kinframe app, under this frame\'s settings.</string>
+    <string name="pin_new_title">Choose a PIN</string>
+    <string name="pin_new_body">4 to 6 digits. It will be asked to open settings, turn the frame off or change Wi-Fi.</string>
+    <string name="pin_confirm_title">Enter the PIN again</string>
+    <string name="pin_confirm_body">Just to be sure.</string>
+    <string name="pin_mismatch">The PINs didn\'t match. Choose one again.</string>
+    <string name="pin_key_delete">Delete</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Owner PIN</string>
+    <string name="settings_pin_off">Off. Anyone at the frame can open settings.</string>
+    <string name="settings_pin_on">On. Settings, power and Wi-Fi ask for the PIN.</string>
+    <string name="settings_pin_set">Set a PIN</string>
+    <string name="settings_pin_change">Change PIN</string>
+    <string name="settings_pin_remove">Remove PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Someone</string>
+    <string name="join_title">%1$s would like to join</string>
+    <string name="join_body_code">%1$s entered the code of %2$s. If you allow it, %1$s can send photos to this frame.</string>
+    <string name="join_body_invited">%1$s invited %3$s to %2$s. If you allow it, %3$s can send photos to this frame.</string>
+    <string name="join_invited_by">Invited by %s</string>
+    <string name="join_allow">Allow</string>
+    <string name="join_deny">Don\'t allow</string>
+    <string name="join_later">Not now</string>
+    <string name="join_later_hint">It stays under notifications in the menu.</string>
+    <string name="join_pill_one">%s would like to join</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d person would like to join</item>
+        <item quantity="other">%d people would like to join</item>
+    </plurals>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">All caught up</string>
+    <string name="notifications_empty_body">Nothing is waiting for you.</string>
+    <string name="menu_notifications">Notifications</string>
+    <string name="action_close">Close</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">No internet connection</string>
+    <string name="status_card_offline_body">The photos on the frame keep playing. New ones arrive as soon as it is back online.</string>
+    <string name="status_card_server_title">Can\'t reach the photo server</string>
+    <string name="status_card_server_body">The Wi-Fi works, but the server doesn\'t answer. New photos arrive when it\'s back.</string>
+    <string name="status_card_portal_title">This Wi-Fi asks you to sign in</string>
+    <string name="status_card_portal_body">Open the network\'s sign-in page to get the frame online.</string>
+    <string name="status_card_portal_action">Sign in</string>
+    <string name="status_card_storage_title">The frame is almost full</string>
+    <string name="status_card_storage_body">Older photos were taken off the frame to make room; they stay safe on the server. New photos may wait until there is space.</string>
+    <string name="portal_title">Sign in to the Wi-Fi</string>
+    <string name="portal_body">This closes by itself once the frame is online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Which time zone is the frame in?</string>
+    <string name="setup_tz_body">So the clock, the date and the night-time schedule are right.</string>
+    <string name="setup_tz_suggested">Suggested</string>
+    <string name="setup_tz_all">All time zones</string>
+    <string name="tz_region_europe">Europe</string>
+    <string name="tz_region_america">Americas</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">Africa</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacific</string>
+    <string name="tz_region_atlantic">Atlantic</string>
+    <string name="tz_region_indian">Indian Ocean</string>
+    <string name="tz_region_antarctica">Antarctica</string>
+    <string name="setup_update_checking">Looking for a newer version…</string>
+    <string name="setup_update_checking_body">The frame makes sure it runs the latest kinframe before you start.</string>
+    <string name="setup_update_downloading">Downloading version %s</string>
+    <string name="setup_update_downloading_body">It installs right after. You can skip this; the frame then updates itself later.</string>
+    <string name="setup_update_installing">Installing version %s</string>
+    <string name="setup_update_installing_body">The frame restarts by itself in a moment and continues setup where you left off.</string>
+    <string name="setup_update_current">kinframe is up to date</string>
+    <string name="setup_update_current_body">On to the last step.</string>
+    <string name="setup_update_failed">Couldn\'t check for updates</string>
+    <string name="setup_update_failed_body">No problem: the frame looks again later and updates itself.</string>
+    <string name="setup_update_skip">Skip for now</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">%d year ago today</item>
+        <item quantity="other">%d years ago today</item>
+    </plurals>
+    <string name="transition_kenburns">Slow zoom</string>
+    <string name="settings_collage">Several photos at once (collage)</string>
+    <string name="settings_collage_max">Photos per screen</string>
+    <string name="settings_pair_portraits">Show two portrait photos side by side</string>
+    <string name="settings_on_this_day">Show memories from this day in earlier years</string>
+    <string name="settings_video">Videos</string>
+    <string name="settings_video_autoplay">Play videos automatically</string>
+    <string name="settings_video_playback">After a video</string>
+    <string name="video_once_hold">Play once, then wait</string>
+    <string name="video_loop">Keep repeating</string>
+    <string name="video_once_advance">Play once, then move on</string>
+    <string name="settings_video_volume">Video volume</string>
+    <string name="settings_video_auto_mute">Mute when nobody touched the frame for</string>
+    <string name="video_auto_mute_off">Never</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

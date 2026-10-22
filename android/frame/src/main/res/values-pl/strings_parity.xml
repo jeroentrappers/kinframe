@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Wpisz PIN właściciela</string>
+    <string name="pin_reason_settings">aby otworzyć ustawienia</string>
+    <string name="pin_reason_exit">aby zamknąć kinframe</string>
+    <string name="pin_reason_wifi">aby zmienić Wi-Fi</string>
+    <string name="pin_reason_power_off">aby wyłączyć ramkę</string>
+    <string name="pin_reason_restart">aby ponownie uruchomić ramkę</string>
+    <string name="pin_reason_server">aby zmienić serwer</string>
+    <string name="pin_reason_reset">aby zresetować ramkę</string>
+    <string name="pin_checking">Sprawdzanie…</string>
+    <string name="pin_wrong">To nie jest ten PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">To nie jest ten PIN. Została %d próba przed krótką przerwą.</item>
+        <item quantity="few">To nie jest ten PIN. Zostały %d próby przed krótką przerwą.</item>
+        <item quantity="many">To nie jest ten PIN. Zostało %d prób przed krótką przerwą.</item>
+        <item quantity="other">To nie jest ten PIN. Zostało %d próby przed krótką przerwą.</item>
+    </plurals>
+    <string name="pin_locked">Za dużo błędnych prób. Spróbuj ponownie za %s.</string>
+    <string name="pin_forgot">Nie pamiętasz PIN-u? Właściciel ramki może go usunąć w aplikacji kinframe, w ustawieniach tej ramki.</string>
+    <string name="pin_new_title">Wybierz PIN</string>
+    <string name="pin_new_body">Od 4 do 6 cyfr. Będzie potrzebny, aby otworzyć ustawienia, wyłączyć ramkę lub zmienić Wi-Fi.</string>
+    <string name="pin_confirm_title">Wpisz PIN jeszcze raz</string>
+    <string name="pin_confirm_body">Tak dla pewności.</string>
+    <string name="pin_mismatch">PIN-y się nie zgadzają. Wybierz PIN jeszcze raz.</string>
+    <string name="pin_key_delete">Usuń</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN właściciela</string>
+    <string name="settings_pin_off">Wyłączony. Każdy przy ramce może otworzyć ustawienia.</string>
+    <string name="settings_pin_on">Włączony. Ustawienia, zasilanie i Wi-Fi wymagają PIN-u.</string>
+    <string name="settings_pin_set">Ustaw PIN</string>
+    <string name="settings_pin_change">Zmień PIN</string>
+    <string name="settings_pin_remove">Usuń PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Ktoś</string>
+    <string name="join_title">%1$s chce dołączyć</string>
+    <string name="join_body_code">%1$s chce dołączyć za pomocą kodu ramki „%2$s”. Jeśli się zgodzisz, %1$s może wysyłać zdjęcia do tej ramki.</string>
+    <string name="join_body_invited">%3$s ma zaproszenie od %1$s do ramki „%2$s”. Jeśli się zgodzisz, %3$s może wysyłać zdjęcia do tej ramki.</string>
+    <string name="join_invited_by">Zaproszenie od: %s</string>
+    <string name="join_allow">Zezwól</string>
+    <string name="join_deny">Nie zezwalaj</string>
+    <string name="join_later">Nie teraz</string>
+    <string name="join_later_hint">Zostanie w powiadomieniach w menu.</string>
+    <string name="join_pill_one">%s chce dołączyć</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d osoba chce dołączyć</item>
+        <item quantity="few">%d osoby chcą dołączyć</item>
+        <item quantity="many">%d osób chce dołączyć</item>
+        <item quantity="other">%d osoby chce dołączyć</item>
+    </plurals>
+    <string name="notifications_title">Powiadomienia</string>
+    <string name="notifications_empty">Wszystko przejrzane</string>
+    <string name="notifications_empty_body">Nic na ciebie nie czeka.</string>
+    <string name="menu_notifications">Powiadomienia</string>
+    <string name="action_close">Zamknij</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Brak połączenia z internetem</string>
+    <string name="status_card_offline_body">Zdjęcia w ramce są nadal wyświetlane. Nowe pojawią się, gdy tylko ramka znów będzie online.</string>
+    <string name="status_card_server_title">Brak połączenia z serwerem zdjęć</string>
+    <string name="status_card_server_body">Wi-Fi działa, ale serwer nie odpowiada. Nowe zdjęcia pojawią się, gdy wróci.</string>
+    <string name="status_card_portal_title">Ta sieć Wi-Fi wymaga logowania</string>
+    <string name="status_card_portal_body">Otwórz stronę logowania sieci, aby połączyć ramkę z internetem.</string>
+    <string name="status_card_portal_action">Zaloguj się</string>
+    <string name="status_card_storage_title">Pamięć ramki jest prawie pełna</string>
+    <string name="status_card_storage_body">Starsze zdjęcia zostały usunięte z ramki, aby zwolnić miejsce; są bezpieczne na serwerze. Nowe zdjęcia mogą poczekać, aż będzie miejsce.</string>
+    <string name="portal_title">Zaloguj się do Wi-Fi</string>
+    <string name="portal_body">To okno zamknie się samo, gdy ramka będzie online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">W jakiej strefie czasowej jest ramka?</string>
+    <string name="setup_tz_body">Aby zegar, data i harmonogram nocny były prawidłowe.</string>
+    <string name="setup_tz_suggested">Sugerowane</string>
+    <string name="setup_tz_all">Wszystkie strefy czasowe</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Ameryka</string>
+    <string name="tz_region_asia">Azja</string>
+    <string name="tz_region_africa">Afryka</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacyfik</string>
+    <string name="tz_region_atlantic">Atlantyk</string>
+    <string name="tz_region_indian">Ocean Indyjski</string>
+    <string name="tz_region_antarctica">Antarktyda</string>
+    <string name="setup_update_checking">Szukanie nowszej wersji…</string>
+    <string name="setup_update_checking_body">Ramka sprawdza, czy ma najnowszą wersję kinframe, zanim zaczniesz.</string>
+    <string name="setup_update_downloading">Pobieranie wersji %s</string>
+    <string name="setup_update_downloading_body">Instalacja nastąpi zaraz potem. Możesz to pominąć; ramka zaktualizuje się później sama.</string>
+    <string name="setup_update_installing">Instalowanie wersji %s</string>
+    <string name="setup_update_installing_body">Za chwilę ramka uruchomi się ponownie i będzie kontynuować konfigurację od miejsca, w którym skończono.</string>
+    <string name="setup_update_current">kinframe jest aktualny</string>
+    <string name="setup_update_current_body">Przejdźmy do ostatniego kroku.</string>
+    <string name="setup_update_failed">Nie udało się sprawdzić aktualizacji</string>
+    <string name="setup_update_failed_body">Nic nie szkodzi: ramka sprawdzi to później i zaktualizuje się sama.</string>
+    <string name="setup_update_skip">Na razie pomiń</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Tego dnia %d rok temu</item>
+        <item quantity="few">Tego dnia %d lata temu</item>
+        <item quantity="many">Tego dnia %d lat temu</item>
+        <item quantity="other">Tego dnia %d roku temu</item>
+    </plurals>
+    <string name="transition_kenburns">Powolne przybliżanie</string>
+    <string name="settings_collage">Kilka zdjęć naraz (kolaż)</string>
+    <string name="settings_collage_max">Zdjęć na ekranie</string>
+    <string name="settings_pair_portraits">Pokazuj dwa pionowe zdjęcia obok siebie</string>
+    <string name="settings_on_this_day">Pokazuj wspomnienia z tego dnia w poprzednich latach</string>
+    <string name="settings_video">Filmy</string>
+    <string name="settings_video_autoplay">Odtwarzaj filmy automatycznie</string>
+    <string name="settings_video_playback">Po filmie</string>
+    <string name="video_once_hold">Odtwórz raz i czekaj</string>
+    <string name="video_loop">Powtarzaj w kółko</string>
+    <string name="video_once_advance">Odtwórz raz i przejdź dalej</string>
+    <string name="settings_video_volume">Głośność filmów</string>
+    <string name="settings_video_auto_mute">Wycisz, gdy nikt nie dotykał ramki przez</string>
+    <string name="video_auto_mute_off">Nigdy</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

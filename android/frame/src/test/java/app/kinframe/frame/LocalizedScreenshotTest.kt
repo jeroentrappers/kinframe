@@ -22,6 +22,8 @@ import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinButton
 import app.kinframe.core.design.KinIcons
 import app.kinframe.core.design.KinframeTheme
+import app.kinframe.frame.kiosk.PinMessage
+import app.kinframe.frame.kiosk.PinPad
 import app.kinframe.frame.setup.CelebrateStep
 import app.kinframe.frame.setup.CodeReadyContent
 import app.kinframe.frame.setup.LanguageStepContent
@@ -96,7 +98,7 @@ class LocalizedScreenshotTest {
         QuickMenuContent(
             visible = true, compact = false, frameName = "Maximiliaan", status = stringResource(R.string.status_online, "Woonkamer-5G"),
             wifiIcon = KinIcons.Wifi, hasPhoto = true, reaction = "love",
-            onTouch = {}, onReact = {}, onHide = {}, onDelete = {}, onPower = {}, onSettings = {},
+            onTouch = {}, onReact = {}, onHide = {}, onDelete = {}, onPower = {}, onSettings = {}, notificationCount = 2,
         )
         Box(Modifier.fillMaxSize().padding(top = 120.dp), contentAlignment = Alignment.TopCenter) { NewPhotosPillContent(3) {} }
         Box(Modifier.fillMaxSize().padding(bottom = 24.dp), contentAlignment = Alignment.BottomCenter) {
@@ -107,6 +109,15 @@ class LocalizedScreenshotTest {
     @Test fun powerDialog() = each("power_dialog") {
         Photo()
         PowerDialogContent({}, {}, {}, {})
+    }
+
+    @Test fun ownerPin() = each("owner_pin") {
+        Photo()
+        PinPad(
+            title = stringResource(R.string.pin_enter_title), subtitle = stringResource(R.string.pin_reason_settings),
+            entered = 2, message = PinMessage.Wrong(2), hint = stringResource(R.string.pin_forgot),
+            onDigit = {}, onBackspace = {}, onSubmit = {}, onCancel = {},
+        )
     }
 
     @Test fun emptyDownloading() = each("empty_downloading") {

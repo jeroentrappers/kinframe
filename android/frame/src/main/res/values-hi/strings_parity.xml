@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">मालिक का PIN डालें</string>
+    <string name="pin_reason_settings">सेटिंग खोलने के लिए</string>
+    <string name="pin_reason_exit">kinframe से बाहर निकलने के लिए</string>
+    <string name="pin_reason_wifi">वाई-फ़ाई बदलने के लिए</string>
+    <string name="pin_reason_power_off">फ़्रेम बंद करने के लिए</string>
+    <string name="pin_reason_restart">फ़्रेम फिर से चालू करने के लिए</string>
+    <string name="pin_reason_server">सर्वर बदलने के लिए</string>
+    <string name="pin_reason_reset">फ़्रेम रीसेट करने के लिए</string>
+    <string name="pin_checking">जांच हो रही है…</string>
+    <string name="pin_wrong">यह PIN सही नहीं है।</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">यह PIN सही नहीं है। थोड़ा रुकने से पहले %d कोशिश और बची है।</item>
+        <item quantity="other">यह PIN सही नहीं है। थोड़ा रुकने से पहले %d कोशिशें और बची हैं।</item>
+    </plurals>
+    <string name="pin_locked">बहुत ज़्यादा गलत कोशिशें। %s बाद फिर कोशिश करें।</string>
+    <string name="pin_forgot">PIN भूल गए? फ़्रेम का मालिक इसे kinframe ऐप में, इस फ़्रेम की सेटिंग में जाकर हटा सकता है।</string>
+    <string name="pin_new_title">PIN चुनें</string>
+    <string name="pin_new_body">4 से 6 अंक। सेटिंग खोलने, फ़्रेम बंद करने या वाई-फ़ाई बदलने पर यह पूछा जाएगा।</string>
+    <string name="pin_confirm_title">PIN फिर से डालें</string>
+    <string name="pin_confirm_body">बस पक्का करने के लिए।</string>
+    <string name="pin_mismatch">दोनों PIN मेल नहीं खाए। फिर से चुनें।</string>
+    <string name="pin_key_delete">मिटाएं</string>
+    <string name="pin_key_ok">ठीक है</string>
+    <string name="settings_pin">मालिक का PIN</string>
+    <string name="settings_pin_off">बंद। फ़्रेम के पास कोई भी सेटिंग खोल सकता है।</string>
+    <string name="settings_pin_on">चालू। सेटिंग, पावर और वाई-फ़ाई के लिए PIN पूछा जाता है।</string>
+    <string name="settings_pin_set">PIN सेट करें</string>
+    <string name="settings_pin_change">PIN बदलें</string>
+    <string name="settings_pin_remove">PIN हटाएं</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">कोई</string>
+    <string name="join_title">%1$s जुड़ना चाहते हैं</string>
+    <string name="join_body_code">%1$s ने %2$s का कोड डाला है। अगर आप अनुमति देते हैं, तो %1$s इस फ़्रेम पर फ़ोटो भेज सकेंगे।</string>
+    <string name="join_body_invited">%1$s ने %3$s को %2$s में न्योता दिया है। अगर आप अनुमति देते हैं, तो %3$s इस फ़्रेम पर फ़ोटो भेज सकेंगे।</string>
+    <string name="join_invited_by">%s का न्योता</string>
+    <string name="join_allow">अनुमति दें</string>
+    <string name="join_deny">अनुमति न दें</string>
+    <string name="join_later">अभी नहीं</string>
+    <string name="join_later_hint">यह मेन्यू में सूचनाओं में बना रहेगा।</string>
+    <string name="join_pill_one">%s जुड़ना चाहते हैं</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d व्यक्ति जुड़ना चाहता है</item>
+        <item quantity="other">%d लोग जुड़ना चाहते हैं</item>
+    </plurals>
+    <string name="notifications_title">सूचनाएं</string>
+    <string name="notifications_empty">सब देख लिया</string>
+    <string name="notifications_empty_body">आपके लिए कुछ भी बाकी नहीं है।</string>
+    <string name="menu_notifications">सूचनाएं</string>
+    <string name="action_close">बंद करें</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">इंटरनेट कनेक्शन नहीं है</string>
+    <string name="status_card_offline_body">फ़्रेम पर मौजूद फ़ोटो चलती रहेंगी। ऑनलाइन होते ही नई फ़ोटो आ जाएंगी।</string>
+    <string name="status_card_server_title">फ़ोटो सर्वर तक नहीं पहुंच पा रहे</string>
+    <string name="status_card_server_body">वाई-फ़ाई चल रहा है, लेकिन सर्वर जवाब नहीं दे रहा। उसके वापस आने पर नई फ़ोटो आ जाएंगी।</string>
+    <string name="status_card_portal_title">यह वाई-फ़ाई साइन इन मांग रहा है</string>
+    <string name="status_card_portal_body">फ़्रेम को ऑनलाइन लाने के लिए नेटवर्क का साइन-इन पेज खोलें।</string>
+    <string name="status_card_portal_action">साइन इन करें</string>
+    <string name="status_card_storage_title">फ़्रेम लगभग भर गया है</string>
+    <string name="status_card_storage_body">जगह बनाने के लिए पुरानी फ़ोटो फ़्रेम से हटा दी गईं; वे सर्वर पर सुरक्षित हैं। जगह होने तक नई फ़ोटो इंतज़ार कर सकती हैं।</string>
+    <string name="portal_title">वाई-फ़ाई में साइन इन करें</string>
+    <string name="portal_body">फ़्रेम ऑनलाइन होते ही यह अपने-आप बंद हो जाएगा।</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">फ़्रेम किस टाइम ज़ोन में है?</string>
+    <string name="setup_tz_body">ताकि घड़ी, तारीख और रात का शेड्यूल सही रहें।</string>
+    <string name="setup_tz_suggested">सुझाया गया</string>
+    <string name="setup_tz_all">सभी टाइम ज़ोन</string>
+    <string name="tz_region_europe">यूरोप</string>
+    <string name="tz_region_america">अमेरिका महाद्वीप</string>
+    <string name="tz_region_asia">एशिया</string>
+    <string name="tz_region_africa">अफ़्रीका</string>
+    <string name="tz_region_australia">ऑस्ट्रेलिया</string>
+    <string name="tz_region_pacific">प्रशांत</string>
+    <string name="tz_region_atlantic">अटलांटिक</string>
+    <string name="tz_region_indian">हिंद महासागर</string>
+    <string name="tz_region_antarctica">अंटार्कटिका</string>
+    <string name="setup_update_checking">नया वर्शन खोजा जा रहा है…</string>
+    <string name="setup_update_checking_body">शुरू करने से पहले फ़्रेम पक्का करता है कि उसमें kinframe का नया वर्शन है।</string>
+    <string name="setup_update_downloading">वर्शन %s डाउनलोड हो रहा है</string>
+    <string name="setup_update_downloading_body">इसके बाद यह तुरंत इंस्टॉल होगा। आप इसे छोड़ सकते हैं; फ़्रेम बाद में अपने-आप अपडेट हो जाएगा।</string>
+    <string name="setup_update_installing">वर्शन %s इंस्टॉल हो रहा है</string>
+    <string name="setup_update_installing_body">फ़्रेम कुछ ही पल में अपने-आप फिर से चालू होगा और सेटअप वहीं से जारी रखेगा।</string>
+    <string name="setup_update_current">kinframe अप-टू-डेट है</string>
+    <string name="setup_update_current_body">अब आखिरी चरण।</string>
+    <string name="setup_update_failed">अपडेट की जांच नहीं हो सकी</string>
+    <string name="setup_update_failed_body">कोई बात नहीं: फ़्रेम बाद में फिर देखेगा और अपने-आप अपडेट हो जाएगा।</string>
+    <string name="setup_update_skip">अभी छोड़ें</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">आज से %d साल पहले</item>
+        <item quantity="other">आज से %d साल पहले</item>
+    </plurals>
+    <string name="transition_kenburns">धीमा ज़ूम</string>
+    <string name="settings_collage">एक साथ कई फ़ोटो (कोलाज)</string>
+    <string name="settings_collage_max">हर स्क्रीन पर फ़ोटो</string>
+    <string name="settings_pair_portraits">दो पोर्ट्रेट फ़ोटो साथ-साथ दिखाएं</string>
+    <string name="settings_on_this_day">पिछले सालों में आज के दिन की यादें दिखाएं</string>
+    <string name="settings_video">वीडियो</string>
+    <string name="settings_video_autoplay">वीडियो अपने-आप चलाएं</string>
+    <string name="settings_video_playback">वीडियो के बाद</string>
+    <string name="video_once_hold">एक बार चलाकर रुकें</string>
+    <string name="video_loop">बार-बार चलाएं</string>
+    <string name="video_once_advance">एक बार चलाकर आगे बढ़ें</string>
+    <string name="settings_video_volume">वीडियो की आवाज़</string>
+    <string name="settings_video_auto_mute">म्यूट करें, अगर किसी ने फ़्रेम को इतनी देर नहीं छुआ</string>
+    <string name="video_auto_mute_off">कभी नहीं</string>
+    <string name="video_auto_mute_min">%d मिनट</string>
+</resources>

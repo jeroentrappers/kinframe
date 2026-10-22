@@ -75,6 +75,13 @@ object KinIcons {
     val Image by lazy { line("image", "M4 5h16v14H4z", "M4 16l5-5 4 4 3-3 4 4", "M15.5 8.5h0.01") }
     val Lock by lazy { line("lock", "M6 11h12v9H6z", "M8.5 11V8a3.5 3.5 0 0 1 7 0v3") }
     val Smile by lazy { line("smile", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M8.5 14a4.5 4.5 0 0 0 7 0", "M9 9.5h0.01", "M15 9.5h0.01") }
+    val Backspace by lazy { line("backspace", "M9 5h11v14H9l-6-7z", "M12.5 9.5l5 5", "M17.5 9.5l-5 5") }
+    val Bell by lazy { line("bell", "M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z", "M10 20.5a2.2 2.2 0 0 0 4 0") }
+    val UserPlus by lazy { line("userPlus", "M10 11a3.5 3.5 0 1 0 0-7a3.5 3.5 0 1 0 0 7z", "M3.5 20a6.5 6.5 0 0 1 13 0", "M19 8v6", "M16 11h6") }
+    val Storage by lazy { line("storage", "M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z", "M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6", "M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3") }
+    val Clock by lazy { line("clock", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M12 7v5l3.5 2") }
+    val Download by lazy { line("download", "M12 4v11", "M7 10.5l5 5 5-5", "M5 20h14") }
+    val Login by lazy { line("login", "M14 4h5v16h-5", "M3 12h11", "M10 8l4 4-4 4") }
 }
 
 /** Tinted icon with a default size. */

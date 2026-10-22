@@ -34,14 +34,15 @@ import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
+import app.kinframe.frame.kiosk.OwnerGate
 import kotlinx.coroutines.launch
 
 /** Power menu (product spec 4.7): sleep now, restart, power off. */
 @Composable
 fun PowerDialog(c: FrameController, onDismiss: () -> Unit) = PowerDialogContent(
     onSleep = { c.display.sleepNow() },
-    onRestart = { c.scope.launch { c.power.restart() } },
-    onPowerOff = { c.scope.launch { c.power.powerOff() } },
+    onRestart = { c.gate.authorize(OwnerGate.Reason.Restart) { c.scope.launch { c.power.restart() } } },
+    onPowerOff = { c.gate.authorize(OwnerGate.Reason.PowerOff) { c.scope.launch { c.power.powerOff() } } },
     onDismiss = onDismiss,
 )
 

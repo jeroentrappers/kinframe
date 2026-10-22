@@ -256,6 +256,10 @@ data class Heartbeat(
     val cacheBytes: Long? = null,
     val placementsCached: Int? = null,
     val placementsMissing: Int? = null,
+    /** Removed from the cache to free space; downloaded again when they are about to show. */
+    val placementsEvicted: Int? = null,
+    /** `ok`, `low` (evicting) or `critical` (nothing left to evict). */
+    val storageState: String? = null,
     val screenState: String? = null,
     val lastShutdownClean: Boolean? = null,
     val crashCount24h: Int? = null,
@@ -279,6 +283,20 @@ data class FrameUpdate(
     val publishedAt: String? = null,
     val prerelease: Boolean = false,
 )
+
+/** `JoinRequest`: someone wants to join a frame whose owner asked to approve joins on the frame. */
+@Serializable
+data class JoinRequest(
+    val id: String,
+    val user: JoinRequestUser = JoinRequestUser(),
+    val via: String = "frame_code",
+    val invitedByName: String? = null,
+    val note: String? = null,
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class JoinRequestUser(val id: String? = null, val displayName: String? = null, val avatarUrl: String? = null)
 
 @Serializable
 data class Problem(
