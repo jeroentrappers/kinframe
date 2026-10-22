@@ -418,6 +418,12 @@ func (s *Server) spa() http.Handler {
 					if strings.HasPrefix(p, "/_app/immutable/") {
 						w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 					}
+					if strings.HasPrefix(p, "/fonts/") {
+						// Logto's sign-in page (another origin) loads the
+						// display font from here; browsers need CORS for fonts.
+						w.Header().Set("Access-Control-Allow-Origin", "*")
+						w.Header().Set("Cache-Control", "public, max-age=604800")
+					}
 					files.ServeHTTP(w, r)
 					return
 				}

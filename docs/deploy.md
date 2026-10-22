@@ -30,7 +30,7 @@ checks they're free before the first deploy.
 | `postgres` | `postgres:17-alpine` | Databases `kinframe` and `logto`, each with its own role. Not exposed. |
 | `minio` (optional, `kinframe_minio: true`) | `pgsty/silo:RELEASE.2026-10-18T00-00-00Z` | S3-compatible object store for media, volume `miniodata`, only on the compose network. Console on `127.0.0.1:<kinframe_minio_console_port>` when that is set (default: not exposed). See [Media storage](#media-storage-s3). |
 | `minio-bootstrap` | same image, `minio-bootstrap.sh` | One-shot, idempotent: private bucket, a policy limited to that bucket, and the `kinframe_s3_access_key` user with it. The server only gets that user, never the root credentials. |
-| `logto-bootstrap` | `kinframe-server` image, `bootstrap-logto` command | One-shot job, idempotent (a re-run changes nothing). Uses Logto's Management API to create the API resource (`https://<domain>/v1`, 1 h tokens, scope `kinframe:operate`), the `kinframe-operator` role, the SPA app `kinframe web` (redirect `https://<domain>/callback`, post-logout `https://<domain>/`, CORS origin `https://<domain>`), one native app `kinframe app` for Android and iOS (redirects `app.kinframe:/callback` and `https://<domain>/app/callback`, post-logout `app.kinframe:/logout` and `https://<domain>/app/logout`), the SMTP email connector, the sign-in experience (email one-time codes, passkeys, name asked at sign-up, browser language) and custom access-token claims (`name`, `email`). It writes the client IDs to `/data/logto.json`, which the server reads at start and serves in `/.well-known/kinframe`. **On a fresh Logto it also creates the console admin account**: Logto grants admin to the first account registered in the console, so bootstrap must run before the console is reachable. See [First deploy](#first-deploy-logto-bootstrap). |
+| `logto-bootstrap` | `kinframe-server` image, `bootstrap-logto` command | One-shot job, idempotent (a re-run changes nothing). Uses Logto's Management API to create the API resource (`https://<domain>/v1`, 1 h tokens, scope `kinframe:operate`), the `kinframe-operator` role, the SPA app `kinframe web` (redirect `https://<domain>/callback`, post-logout `https://<domain>/`, CORS origin `https://<domain>`), one native app `kinframe app` for Android and iOS (redirects `app.kinframe:/callback` and `https://<domain>/app/callback`, post-logout `app.kinframe:/logout` and `https://<domain>/app/logout`), the SMTP email connector, the sign-in experience (email one-time codes, passkeys, name asked at sign-up, browser language, social sign-in buttons for the configured providers, kinframe branding — see [Social sign-in](#social-sign-in)) and custom access-token claims (`name`, `email`). It writes the client IDs to `/data/logto.json`, which the server reads at start and serves in `/.well-known/kinframe`. **On a fresh Logto it also creates the console admin account**: Logto grants admin to the first account registered in the console, so bootstrap must run before the console is reachable. See [First deploy](#first-deploy-logto-bootstrap). |
 
 ### First deploy: Logto bootstrap
 
@@ -88,6 +88,144 @@ credentials; it creates a new app and prints the new secret. If Logto's ENDPOINT
 the job: it updates redirect URIs and creates the new API resource (the old one is left in place).
 
 No manual console steps are needed. The console is only for looking around and for changes beyond this setup.
+
+### Social sign-in
+
+Next to email codes and passkeys, Logto's sign-in page can offer **Apple, Google, Microsoft, Facebook and GitHub**, in
+that order. Each provider is off until its credentials are in the vault; `bootstrap-logto` then creates the Logto
+social connector and adds the button. Nothing is configured in the Logto console.
+
+| Provider | Ansible variables (vault) | Logto connector | Callback / redirect URL to register |
+|---|---|---|---|
+| Apple | `kinframe_social_apple_client_id` (Services ID) | `apple-universal` | `https://auth.kinframe.appmire.be/callback/apple` |
+| Google | `kinframe_social_google_client_id` / `_secret` | `google-universal` | `https://auth.kinframe.appmire.be/callback/google` |
+| Microsoft | `kinframe_social_microsoft_client_id` / `_secret` (`_tenant`, default `common`) | `azuread-universal` | `https://auth.kinframe.appmire.be/callback/microsoft` |
+| Facebook (Meta) | `kinframe_social_facebook_client_id` / `_secret` | `facebook-universal` | `https://auth.kinframe.appmire.be/callback/facebook` |
+| GitHub | `kinframe_social_github_client_id` / `_secret` | `github-universal` | `https://auth.kinframe.appmire.be/callback/github` |
+
+For another deployment replace `auth.kinframe.appmire.be` with its `logto_domain`. The pattern is Logto's:
+`<Logto ENDPOINT>/callback/<connector instance ID>`; the bootstrap gives each connector a fixed ID (`apple`, `google`,
+`microsoft`, `facebook`, `github`) so the URL is known before the first run (it is also logged when the connector is
+created). A connector added by hand in the console has a random ID and therefore a different callback URL; the
+bootstrap adopts such a connector and logs its URL.
+
+The variables reach the bootstrap job only (`bootstrap.env`, mode 0600) and the play fails if a provider has an ID
+without a secret. Re-running the play updates a connector whose values changed. Emptying a provider's variables
+leaves its connector and button in place; set `kinframe_social_remove_unconfigured: true` to have the next run delete
+the connectors of unset providers. Only identity scopes are requested: Google `openid profile email`, Apple
+`name email`, Microsoft Graph `User.Read` (Logto's connector fixes this one), Facebook `email,public_profile`, GitHub
+`read:user user:email`.
+
+**Accounts and email linking.** A first social sign-in whose provider reports a *verified* email that already has a
+kinframe (Logto) account is linked to that account and signs in, so someone who signed up with an email code and later
+taps "Continue with Google" with the same address lands in the same account. This is Logto's
+`socialSignIn.automaticAccountLinking` (OSS 1.43 has it; `kinframe_social_link_by_email: false` makes Logto ask
+"link to the existing account?" instead). What counts as verified is decided by each connector: Google only passes
+`email_verified` addresses, Apple the address in its signed ID token, GitHub the public or primary verified address,
+Facebook the address Meta has confirmed. **Microsoft's email is not used**: Graph's `mail` attribute is not verified
+(any Entra tenant admin can set it, the "nOAuth" problem), so the bootstrap sets the connector's `disableEmailSync`.
+Microsoft users, like anyone whose provider gives no email (GitHub without a verified address, Apple after the first
+authorization), are asked for an email and confirm it with a code before the account is created. If that address
+already has an account, Logto 1.43 does not merge it (not tested end-to-end, it needs a real Microsoft account); such
+users keep signing in with the email code. Apple "Hide My Email" addresses (`…@privaterelay.appleid.com`) never match
+an existing account, so they create a separate one.
+
+The name asked at sign-up comes from the provider when it has one (Logto copies it into the new account, so the
+"Tell us about yourself" step is skipped); otherwise that step asks for it. The access-token customizer reads the
+account's `name` and primary email, so social accounts carry both claims like email-code accounts.
+
+**App Store guideline 4.8 (Login Services).** An iOS app that offers third-party or social login must also offer an
+equivalent option that limits data to name and email, lets people keep their email private and does no ad tracking;
+Sign in with Apple is the accepted way to meet it. Because the family app signs in through this Logto page (in an
+`ASWebAuthenticationSession`), configure Apple whenever any other social provider is on for an iOS release. Apple is
+listed first on purpose.
+
+#### Registering the providers
+
+**Apple** (Apple Developer account of the **Appmire** team, by an Account Holder or Admin):
+1. Certificates, Identifiers & Profiles → Identifiers → the kinframe iOS App ID: enable the **Sign in with Apple**
+   capability (as primary App ID).
+2. Identifiers → **+** → **Services IDs** → description "kinframe", identifier e.g. `app.kinframe.signin`. This
+   identifier is `kinframe_social_apple_client_id`.
+3. Open the Services ID, tick **Sign in with Apple** → Configure: primary App ID = the kinframe app; **Domains and
+   Subdomains** `auth.kinframe.appmire.be`; **Return URLs** `https://auth.kinframe.appmire.be/callback/apple`. Save,
+   Continue, Save.
+4. No key is needed. Logto's Apple connector uses Apple's `code id_token` form-post flow and verifies the ID token with
+   Apple's public keys; it never calls Apple's token endpoint, so it needs no client-secret JWT, no Sign in with Apple
+   key (`.p8`), Key ID or Team ID. (Should a future connector need them: the Team ID is the Appmire team's Team ID
+   under Membership details in the Apple Developer account. Don't put a literal ID in this repo.) If
+   `KINFRAME_SOCIAL_APPLE_TEAM_ID`, `_KEY_ID`, `_PRIVATE_KEY` or `_CLIENT_SECRET` are set, the bootstrap ignores them
+   and logs a warning.
+5. Email relay: people who choose "Hide My Email" get a `@privaterelay.appleid.com` address. Apple only forwards mail
+   to it from registered senders, so register the SMTP sender (the domain and the `kinframe_smtp_from` address, with
+   SPF passing) under Certificates, Identifiers & Profiles → Services → **Sign in with Apple for Email Communication**;
+   otherwise their sign-in codes and kinframe emails are dropped.
+6. Apple sends the name and email only on the very first authorization. If a test account was authorized before the
+   connector worked, remove kinframe under Apple ID → Sign-In & Security → Sign in with Apple and try again.
+
+**Google** (Google Cloud console, Google Auth Platform):
+1. Create (or pick) a project. **Branding**: app name "kinframe", support email, logo, home page
+   `https://kinframe.appmire.be`, privacy policy link, authorized domain `appmire.be`.
+2. **Audience**: External. **Data access**: only `openid`, `.../auth/userinfo.email`, `.../auth/userinfo.profile`
+   (non-sensitive scopes).
+3. **Clients** → Create client → Web application: authorized JavaScript origin `https://auth.kinframe.appmire.be`,
+   authorized redirect URI `https://auth.kinframe.appmire.be/callback/google`. The client ID and secret go to the vault.
+4. Gotcha: while the app's publishing status is **Testing**, only the listed **test users** (up to 100) can sign in.
+   Add the family's addresses as test users meanwhile, then **Publish app**.
+   With only non-sensitive scopes there is no security assessment, but showing the logo and app name on the consent
+   screen needs brand verification (a few business days; the domain must be verified in Search Console).
+
+**Microsoft** (Microsoft Entra admin center → App registrations → New registration):
+1. Name "kinframe"; **Supported account types: "Accounts in any organizational directory and personal Microsoft
+   accounts"** (that is what tenant `common` needs; a single-tenant app with `common` fails at sign-in).
+2. Redirect URI: platform **Web**, `https://auth.kinframe.appmire.be/callback/microsoft`.
+3. The **Application (client) ID** is `kinframe_social_microsoft_client_id`. Certificates & secrets → New client secret:
+   its **Value** (not the Secret ID) is `kinframe_social_microsoft_client_secret`. Secrets expire (at most 24 months):
+   put the expiry date in the calendar and rotate by updating the vault and re-running the play.
+4. API permissions: the default delegated Microsoft Graph `User.Read` is all that is needed; no admin consent.
+5. Gotchas: without **publisher verification** (a Microsoft Partner Network ID for Appmire) the consent screen shows
+   "unverified", and some work tenants block user consent to unverified multi-tenant apps; personal accounts are not
+   affected. `kinframe_social_microsoft_tenant: consumers` restricts to personal accounts, `organizations` to work and
+   school accounts.
+
+**Facebook / Meta** (developers.facebook.com, a Meta developer account in Appmire's business portfolio):
+1. Create app → use case **"Authenticate and request data from users with Facebook Login"**.
+2. Facebook Login → Settings: Client OAuth login and Web OAuth login on, Enforce HTTPS on, **Valid OAuth Redirect
+   URIs** `https://auth.kinframe.appmire.be/callback/facebook`.
+3. App settings → Basic: App ID (`kinframe_social_facebook_client_id`), App secret (`_secret`), app domain
+   `appmire.be`, privacy policy URL, **user data deletion** instructions URL, icon and category.
+4. Use case permissions: `email` and `public_profile` only.
+5. Gotchas: in **Development** mode only people with a role on the app (admins, developers, testers) can sign in.
+   Switching to **Live** needs the privacy policy and data deletion URLs; `email` and `public_profile` need Advanced
+   Access, which Meta normally grants without App Review but can make conditional on **Business Verification** of
+   Appmire (check App Review → Permissions and features). Meta also asks for a yearly data use checkup.
+6. Instagram: there is no consumer "Sign in with Instagram" any more. The Instagram Basic Display API was shut down
+   on 4 December 2024; the remaining Instagram APIs are for business and creator accounts and are not a login for
+   families. Facebook Login is the Meta option.
+
+**GitHub** (Settings → Developer settings → **OAuth Apps** → New OAuth App; under the Appmire organization if it
+should not belong to a person):
+1. Application name "kinframe", homepage `https://kinframe.appmire.be`, **Authorization callback URL**
+   `https://auth.kinframe.appmire.be/callback/github`.
+2. Generate a client secret. Client ID and secret go to the vault. Works immediately, no review. (Use an OAuth App,
+   not a GitHub App.)
+
+Then re-run the play. The bootstrap log lists every created connector with its callback URL.
+
+### Sign-in page branding
+
+`bootstrap-logto` also gives Logto's sign-in pages the kinframe look (`kinframe_logto_branding: true`, the default):
+the wordmark logo for light and dark (`https://kinframe.appmire.be/logo-light.svg` / `logo-dark.svg`), the favicon,
+the terracotta primary colour (`#a7471e`, dark mode `#f09a6d`, from `web/src/app.css`), dark mode following the
+system setting, and custom CSS kept in the repo as `server/internal/logtoboot/signin.css` (paper background, card,
+pill buttons, inputs, Fraunces headings loaded from `https://kinframe.appmire.be/fonts/`, focus rings). Edit the CSS
+there and re-run the play; changes made in the console's Sign-in experience → Branding tab are overwritten on the next
+run, or set `kinframe_logto_branding: false` to manage the look in the console.
+
+There are no terms or privacy links on the sign-up page until `kinframe_terms_url` / `kinframe_privacy_url` are set
+(Google, Meta and Apple want a privacy policy URL in their registrations anyway). Logto OSS refuses to hide its
+"Powered by Logto" footer (a Logto Cloud feature), so the CSS only tones it down. Browser tab titles are Logto's step
+titles ("Sign in to your account"); the favicon is kinframe's.
 
 ### Media storage (S3)
 
