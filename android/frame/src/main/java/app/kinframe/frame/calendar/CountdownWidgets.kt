@@ -66,13 +66,24 @@ private fun CountdownTile(c: CountdownItem, today: LocalDate, onPaper: Boolean) 
     ) {
         Box(Modifier.size(10.dp).clip(CircleShape).background(if (onPaper) sw.strong else sw.onDark))
         if (days >= 2) {
+            // "%d days" as one translated phrase (plural agreement per language), with the number set large.
+            val phrase = pluralStringResource(R.plurals.countdown_days, days, days)
+            val number = remember(phrase) { Regex("""\p{Nd}+""").find(phrase)?.range }
             Text(
-                "$days", style = Kin.type.title.copy(fontSize = 28.sp, lineHeight = 30.sp, fontWeight = FontWeight.Medium, shadow = shadow), color = ink,
+                remember(phrase, ink, soft) {
+                    androidx.compose.ui.text.buildAnnotatedString {
+                        append(phrase)
+                        addStyle(androidx.compose.ui.text.SpanStyle(color = soft), 0, phrase.length)
+                        if (number != null) {
+                            addStyle(
+                                androidx.compose.ui.text.SpanStyle(fontSize = 28.sp, fontWeight = FontWeight.Medium, color = ink),
+                                number.first, number.last + 1,
+                            )
+                        }
+                    }
+                },
+                style = Kin.type.caption.copy(lineHeight = 30.sp, shadow = shadow),
                 modifier = Modifier.padding(start = 12.dp),
-            )
-            Text(
-                pluralStringResource(R.plurals.countdown_days, days), style = Kin.type.caption.copy(shadow = shadow), color = soft,
-                modifier = Modifier.padding(start = 5.dp, top = 6.dp),
             )
         } else {
             Text(

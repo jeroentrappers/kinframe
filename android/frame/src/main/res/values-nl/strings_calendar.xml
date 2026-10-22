@@ -31,8 +31,8 @@
     <string name="countdown_today">Vandaag</string>
     <string name="countdown_tomorrow">Morgen</string>
     <plurals name="countdown_days">
-        <item quantity="one">dag</item>
-        <item quantity="other">dagen</item>
+        <item quantity="one">%d dag</item>
+        <item quantity="other">%d dagen</item>
     </plurals>
     <plurals name="countdown_in_days">
         <item quantity="one">over %d dag</item>

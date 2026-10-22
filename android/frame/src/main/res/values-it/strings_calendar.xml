@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Oggi</string>
+    <string name="calendar_tomorrow">Domani</string>
+    <string name="calendar_view_month">Mese</string>
+    <string name="calendar_view_week">Settimana</string>
+    <string name="calendar_view_four_day">4 giorni</string>
+    <string name="calendar_week_number">Settimana %1$d</string>
+    <string name="calendar_previous">Precedente</string>
+    <string name="calendar_next">Successivo</string>
+    <string name="calendar_sync_now">Sincronizza ora</string>
+    <string name="calendar_syncing">Sincronizzazione…</string>
+    <string name="calendar_close">Chiudi calendario</string>
+    <string name="calendar_all_day">Tutto il giorno</string>
+    <string name="calendar_received">Eventi ricevuti</string>
+    <string name="calendar_nothing">Niente in programma</string>
+    <string name="calendar_nothing_today">Nient’altro in programma oggi</string>
+    <string name="calendar_empty_title">Ancora nessun calendario</string>
+    <string name="calendar_empty_body">Aggiungi un calendario di famiglia dall’app o dal sito di kinframe, nei calendari della cornice. Qui puoi mostrare insieme tutti i calendari che vuoi.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">fino alle %1$s</string>
+    <string name="calendar_from">dalle %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d altro</item>
+        <item quantity="many">+%d di altri</item>
+        <item quantity="other">+%d altri</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Oggi</string>
+    <string name="countdown_tomorrow">Domani</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d giorno</item>
+        <item quantity="many">%d giorni</item>
+        <item quantity="other">%d giorni</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">tra %d giorno</item>
+        <item quantity="many">tra %d di giorni</item>
+        <item quantity="other">tra %d giorni</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Inviato da %1$s</string>
+    <string name="event_repeats">Si ripete</string>
+    <string name="event_countdown">Mostra il conto alla rovescia</string>
+    <string name="event_countdown_hint">Nella presentazione e in cima al calendario</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s ti ha inviato un evento</string>
+    <string name="invitation_body">Aggiungerlo al calendario di questa cornice?</string>
+    <string name="invitation_accept">Aggiungi al calendario</string>
+    <string name="invitation_decline">Rifiuta</string>
+    <string name="invitation_later">Non ora</string>
+    <string name="invitation_pill_one">Evento da %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d invito a un evento</item>
+        <item quantity="many">%d di inviti a eventi</item>
+        <item quantity="other">%d inviti a eventi</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Calendario</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Calendario</string>
+    <string name="settings_calendar_open">Apri calendario</string>
+    <string name="settings_calendar_view">Vista calendario</string>
+    <string name="settings_calendar_start_today">Inizia da oggi</string>
+    <string name="settings_calendar_fade_past">Attenua gli eventi passati</string>
+    <string name="settings_calendar_week_numbers">Numeri delle settimane</string>
+    <string name="settings_calendar_sidebar">Calendario accanto alle foto</string>
+    <string name="settings_calendar_countdowns">Conti alla rovescia nella presentazione</string>
+    <string name="settings_calendar_timed">Mostra il calendario a orari fissi</string>
+    <string name="settings_calendar_timed_from">Dalle</string>
+    <string name="settings_calendar_timed_to">Alle</string>
+    <string name="settings_calendar_timed_add">Aggiungi un orario</string>
+    <string name="settings_calendar_timed_remove">Rimuovi</string>
+    <string name="settings_calendar_sources">Calendari su questa cornice</string>
+    <string name="settings_calendar_sources_hint">I calendari si aggiungono e si gestiscono dall’app o dal sito di kinframe.</string>
+    <string name="calendar_status_ok">Aggiornato</string>
+    <string name="calendar_status_syncing">Sincronizzazione…</string>
+    <string name="calendar_status_failed">Sincronizzazione non riuscita</string>
+    <string name="calendar_status_auth_failed">Accesso necessario</string>
+    <string name="calendar_status_disabled">Disattivato</string>
+</resources>

@@ -31,8 +31,8 @@
     <string name="countdown_today">Today</string>
     <string name="countdown_tomorrow">Tomorrow</string>
     <plurals name="countdown_days">
-        <item quantity="one">day</item>
-        <item quantity="other">days</item>
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
     </plurals>
     <plurals name="countdown_in_days">
         <item quantity="one">in %d day</item>
