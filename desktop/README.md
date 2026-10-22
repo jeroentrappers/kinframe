@@ -88,6 +88,9 @@ If the account still has the server's placeholder name, the app takes the ID tok
 
 1. **Pick or drop** folders and files. Folders are scanned recursively (hidden folders, `@eaDir`, `__MACOSX` are
    skipped) for jpg, jpeg, png, webp, heic/heif, gif, mp4, mov, m4v, 3gp, mkv and webm.
+   Dropping onto a frame (a card on the Frames tab, or a frame in the preview's "Send to" list) picks only that
+   frame; dropping anywhere else picks the usual frames. winit reports no pointer position during a drag, so a drop
+   is matched to a frame by the first pointer position after it (waiting up to 300 ms, else a normal drop).
 2. Files are **dated** from EXIF `DateTimeOriginal` (+ `OffsetTimeOriginal`), the QuickTime `mvhd` creation time,
    or the file time, and **sorted oldest first** so a trip arrives in order.
 3. A **preview grid** (thumbnails decoded in the background with EXIF orientation, only for what's on screen) lets

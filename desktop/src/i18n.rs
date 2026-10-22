@@ -155,6 +155,7 @@ mod tests {
             include_str!("ui/welcome.rs"),
             include_str!("ui/frames.rs"),
             include_str!("ui/import.rs"),
+            include_str!("ui/drop.rs"),
             include_str!("ui/history.rs"),
             include_str!("engine.rs"),
         ];

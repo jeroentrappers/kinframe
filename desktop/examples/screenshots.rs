@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use egui::{Theme, vec2};
 use egui_kittest::Harness;
+use egui_kittest::kittest::Queryable;
 use kinframe_desktop::i18n::{self, Lang};
 use kinframe_desktop::ui::{App, demo};
 
@@ -52,6 +53,15 @@ fn main() {
                 },
                 None,
             );
+        if screen == demo::Screen::FramesDrop {
+            harness.run_steps(2);
+            let card = harness.get_by_label("Oma's frame").rect().center();
+            harness.input_mut().hovered_files = vec![egui::HoveredFile {
+                path: Some("/demo/Summer in Zeeland".into()),
+                mime: String::new(),
+            }];
+            harness.hover_at(card);
+        }
         harness.run_steps(6);
         let full = harness.render().expect("render");
         // The harness wraps the UI in a panel with an 8 pt margin; the real window has none.

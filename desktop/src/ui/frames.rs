@@ -2,6 +2,7 @@
 
 use egui::{Align, Key, Layout, Margin, RichText, Ui, vec2};
 
+use super::drop;
 use super::theme::{self, palette};
 use super::widgets::*;
 use super::{App, RedeemState, Tab, relative_time};
@@ -16,7 +17,9 @@ impl App {
                 ui.horizontal(|ui| {
                     ui.vertical(|ui| {
                         title(ui, t("frames.title"));
-                        if self.frames_loaded {
+                        if self.files_hovered && self.frames.iter().any(|f| f.can_send()) {
+                            muted(ui, t("frames.dropHint"));
+                        } else if self.frames_loaded {
                             muted(
                                 ui,
                                 tn("frames.summary", self.frames.len() as u64, &[("online", &online)]),
@@ -87,7 +90,7 @@ impl App {
 
     fn frame_card(&mut self, ui: &mut Ui, f: &FrameSummary, w: f32) {
         let p = palette(ui.ctx());
-        card(ui).show(ui, |ui| {
+        let card = card(ui).show(ui, |ui| {
             ui.set_width(w - 40.0);
             ui.set_min_height(118.0);
             ui.horizontal(|ui| {
@@ -139,6 +142,17 @@ impl App {
                 faint(ui, t("frames.cannotSend"));
             }
         });
+        let rect = card.response.rect;
+        if !f.can_send() {
+            if self.files_hovered {
+                drop::paint_card_disabled(ui, rect);
+            }
+            return;
+        }
+        self.add_drop_target(&f.id, rect, ui.clip_rect());
+        if self.files_hovered {
+            drop::paint_card_target(ui, rect, &f.name, self.drop_hot.as_deref() == Some(&f.id));
+        }
     }
 
     fn add_frame_card(&mut self, ui: &mut Ui) {
