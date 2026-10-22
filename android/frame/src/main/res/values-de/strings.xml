@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Bilderrahmen</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Zurück</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_continue">Weiter</string>
+    <string name="action_try_again">Erneut versuchen</string>
+    <string name="action_undo">Rückgängig</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Willkommen bei kinframe</string>
+    <string name="setup_language_body">Wähle die Sprache für diesen Rahmen.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Mit WLAN verbinden</string>
+    <string name="setup_wifi_body">Der Rahmen braucht WLAN, um Fotos zu empfangen. Sind sie einmal da, laufen sie auch ohne Verbindung.</string>
+    <string name="wifi_connected_to">Verbunden mit %1$s</string>
+    <string name="wifi_network">WLAN</string>
+    <string name="wifi_not_connected">Nicht verbunden</string>
+    <string name="wifi_not_connected_hint">Wähle ein Netzwerk, um fortzufahren.</string>
+    <string name="wifi_no_internet">Verbunden, aber noch kein Internet</string>
+    <string name="wifi_signal">Signal: %1$s</string>
+    <string name="wifi_open_settings">WLAN-Einstellungen</string>
+    <string name="wifi_networks">Netzwerke in der Nähe</string>
+    <string name="wifi_scanning">Suche nach Netzwerken…</string>
+    <string name="wifi_permission_body">Damit Netzwerke hier erscheinen, braucht Android die Berechtigung, nach WLAN zu suchen.</string>
+    <string name="wifi_show_networks">Netzwerke anzeigen</string>
+    <string name="wifi_password">Passwort</string>
+    <string name="wifi_join">Verbinden</string>
+    <string name="signal_0">sehr schwach</string>
+    <string name="signal_1">schwach</string>
+    <string name="signal_2">mittel</string>
+    <string name="signal_3">gut</string>
+    <string name="signal_4">sehr gut</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Server wählen</string>
+    <string name="setup_server_body">Fotos laufen über einen kinframe-Server. Nutze den kostenlosen kinframe-Server oder einen, den deine Familie betreibt.</string>
+    <string name="server_default_body">Kostenlos und Open Source. Empfohlen.</string>
+    <string name="server_custom">Eigenen Server nutzen</string>
+    <string name="server_custom_body">Für Familien, die kinframe selbst hosten.</string>
+    <string name="server_address">Serveradresse</string>
+    <string name="server_check">Server prüfen</string>
+    <string name="server_checking">Server wird geprüft…</string>
+    <string name="server_version">Version %1$s</string>
+    <string name="server_insecure">nicht verschlüsselt</string>
+    <string name="server_error_invalid">Das sieht nicht nach einer Webadresse aus. Versuch etwas wie https://frames.example.org.</string>
+    <string name="server_error_unreachable">Dieser Server ist nicht erreichbar. Prüfe die Adresse und ob der Rahmen online ist.</string>
+    <string name="server_error_not_kinframe">Dieser Server hat geantwortet, ist aber kein kinframe-Server.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Dein Rahmen wird vorbereitet…</string>
+    <string name="enroll_body">Das dauert ein paar Sekunden.</string>
+    <string name="enroll_failed_title">Der Rahmen konnte sich nicht anmelden</string>
+    <string name="enroll_failed_body">Antwort des Servers: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Verbinde diesen Rahmen mit deiner Familie</string>
+    <string name="code_step1">Öffne die kinframe-App oder %1$s im Browser</string>
+    <string name="code_step2">Wähle „Rahmen hinzufügen“</string>
+    <string name="code_step3">Gib diesen Code ein oder scanne den QR-Code</string>
+    <string name="code_valid_for">Gültig für %1$s</string>
+    <string name="code_waiting">Warte darauf, dass jemand den Code eingibt</string>
+    <string name="code_offline_title">Der Rahmen ist offline</string>
+    <string name="code_offline_body">Für einen Rahmencode braucht es eine Internetverbindung. Prüfe das WLAN.</string>
+    <string name="code_error_title">Kein Rahmencode erhalten</string>
+    <string name="code_error_body">Der Server hat nicht geantwortet. Der Rahmen versucht es weiter.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Verbunden mit %1$s</string>
+    <string name="celebrate_title_anon">Verbunden</string>
+    <string name="celebrate_body">Fotos, die an diesen Rahmen gesendet werden, erscheinen hier in Sekunden.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d Std. %2$d Min.</string>
+    <string name="duration_min">%1$d Min.</string>
+    <string name="date_today">Heute</string>
+    <string name="date_yesterday">Gestern</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">vor %d Tag</item>
+        <item quantity="other">vor %d Tagen</item>
+    </plurals>
+    <string name="interval_s">%1$d Sek.</string>
+    <string name="interval_min">%1$d Min.</string>
+    <string name="interval_h">%1$d Std.</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">bearbeitet</string>
+    <string name="unable_photo">Dieses Foto kann nicht angezeigt werden</string>
+    <string name="unable_video">Dieses Video kann nicht abgespielt werden. Bitte den Absender, es noch einmal zu senden.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d neues Foto</item>
+        <item quantity="other">%d neue Fotos</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Server nicht erreichbar</string>
+    <string name="identify_this_is">Das ist</string>
+    <string name="snack_hidden">Foto ausgeblendet</string>
+    <string name="snack_deleted">Foto gelöscht</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_power">Ein/Aus</string>
+    <string name="menu_hide">Ausblenden</string>
+    <string name="menu_delete">Löschen</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Noch keine Fotos</string>
+    <string name="empty_body">Fotos und Videos, die über die kinframe-App oder -Website gesendet werden, erscheinen hier in Sekunden.</string>
+    <string name="empty_code_title">Familie mit diesem Code hinzufügen</string>
+    <string name="empty_code_body">Gib ihn in der kinframe-App ein oder scanne den QR-Code.</string>
+    <string name="empty_hidden_title">Alle Fotos sind ausgeblendet</string>
+    <string name="empty_hidden_body">Ausgeblendete Fotos bleiben in der Mediathek. Über die kinframe-App kannst du sie wieder anzeigen.</string>
+    <string name="empty_downloading_title">Fotos sind unterwegs</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d Foto wird heruntergeladen.</item>
+        <item quantity="other">%d Fotos werden heruntergeladen.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Ein/Aus</string>
+    <string name="power_sleep">Ruhemodus</string>
+    <string name="power_sleep_body">Bildschirm aus, bis du ihn berührst.</string>
+    <string name="power_restart">Neu starten</string>
+    <string name="power_restart_body">Den Rahmen neu starten.</string>
+    <string name="power_off">Ausschalten</string>
+    <string name="power_off_body">Sicher herunterfahren, bevor du den Stecker ziehst.</string>
+    <string name="shutting_down_title">Wird heruntergefahren…</string>
+    <string name="restarting_title">Wird neu gestartet…</string>
+    <string name="shutting_down_body">Alles wird sicher gespeichert.</string>
+    <string name="safe_title">Du kannst den Stecker jetzt ziehen</string>
+    <string name="safe_body">Alles ist gespeichert. Um den Rahmen wieder zu nutzen, drücke die Ein/Aus-Taste oder steck ihn wieder ein.</string>
+    <string name="safe_body_noroot">kinframe hat alles gespeichert. Du kannst den Stecker jetzt ziehen.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe hatte Probleme beim Anzeigen der Fotos</string>
+    <string name="recovery_body">Die App wurde mehrmals hintereinander unerwartet beendet. Versuch es erneut oder lösche die heruntergeladenen Fotos. Sie werden neu vom Server geladen, nichts geht verloren.</string>
+    <string name="recovery_clear">Heruntergeladene Fotos löschen</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_slideshow">Diashow</string>
+    <string name="settings_interval">Jedes Foto zeigen für</string>
+    <string name="settings_transition">Übergang</string>
+    <string name="transition_crossfade">Überblenden</string>
+    <string name="transition_slide">Schieben</string>
+    <string name="settings_order">Reihenfolge</string>
+    <string name="order_received">Zuletzt empfangen</string>
+    <string name="order_taken">Aufnahmedatum</string>
+    <string name="order_shuffle">Zufällig</string>
+    <string name="settings_reverse">Älteste zuerst</string>
+    <string name="settings_fill">Fotogröße</string>
+    <string name="fill_fill">Bildschirm füllen</string>
+    <string name="fill_fit">Ganzes Foto zeigen</string>
+    <string name="settings_display">Bildschirm</string>
+    <string name="settings_brightness">Helligkeit</string>
+    <string name="settings_brightness_mode">Automatische Helligkeit</string>
+    <string name="brightness_manual">Fest</string>
+    <string name="brightness_sun">Nach der Sonne</string>
+    <string name="settings_sleep">Ruhemodus</string>
+    <string name="settings_sleep_enabled">Bildschirm nachts ausschalten</string>
+    <string name="settings_sleep_at">Ruhe ab</string>
+    <string name="settings_wake_at">Aufwachen um</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">und %d weiterer Zeitplan, verwaltet in der kinframe-App</item>
+        <item quantity="other">und %d weitere Zeitpläne, verwaltet in der kinframe-App</item>
+    </plurals>
+    <string name="settings_about">Dieser Rahmen</string>
+    <string name="about_frame">Name</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">WLAN</string>
+    <string name="about_version">App-Version</string>
+    <string name="about_android_settings">Android-Einstellungen</string>
+    <string name="settings_updates">Updates</string>
+    <string name="updates_channel">Kanal</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Beta (neue Versionen früher testen)</string>
+    <string name="updates_check">Nach Updates suchen</string>
+    <string name="updates_install_now">Jetzt installieren</string>
+    <string name="updates_checking">Suche nach Updates…</string>
+    <string name="updates_up_to_date">Dieser Rahmen ist auf dem neuesten Stand.</string>
+    <string name="updates_downloading">Version %1$s wird geladen… %2$d %%</string>
+    <string name="updates_waiting">Version %1$s ist bereit. Sie wird installiert, wenn niemand den Rahmen benutzt.</string>
+    <string name="updates_installing">Version %1$s wird installiert. Der Rahmen startet gleich neu.</string>
+    <string name="updates_failed">Das Update hat nicht geklappt. Der Rahmen versucht es später erneut.</string>
+    <string name="update_notice_updated">Auf Version %1$s aktualisiert</string>
+    <string name="update_notice_rolled_back">Die neue Version hatte Probleme, deshalb ist der Rahmen zur vorherigen zurückgekehrt.</string>
+    <string name="update_notice_needs_user">Ein Update ist bereit. Tippe auf „Installieren“, um fortzufahren.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Vorhersage anzeigen</string>
+    <string name="weather_close">Schließen</string>
+    <string name="weather_now">Jetzt</string>
+    <string name="weather_today">Heute</string>
+    <string name="weather_feels_like">Gefühlt %1$s</string>
+    <string name="weather_high_low">H %1$s · T %2$s</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_humidity">Luftfeuchtigkeit</string>
+    <string name="weather_sunrise">Sonnenaufgang</string>
+    <string name="weather_sunset">Sonnenuntergang</string>
+    <string name="weather_next_hours">Nächste 24 Stunden</string>
+    <string name="weather_next_days">7-Tage-Vorhersage</string>
+    <string name="weather_updated">Aktualisiert %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NO</item>
+        <item>O</item>
+        <item>SO</item>
+        <item>S</item>
+        <item>SW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="wmo_clear_day">Sonnig</string>
+    <string name="wmo_clear_night">Klar</string>
+    <string name="wmo_mainly_clear_day">Überwiegend sonnig</string>
+    <string name="wmo_mainly_clear_night">Überwiegend klar</string>
+    <string name="wmo_partly_cloudy">Teilweise bewölkt</string>
+    <string name="wmo_overcast">Bewölkt</string>
+    <string name="wmo_fog">Nebel</string>
+    <string name="wmo_rime_fog">Gefrierender Nebel</string>
+    <string name="wmo_drizzle_light">Leichter Nieselregen</string>
+    <string name="wmo_drizzle">Nieselregen</string>
+    <string name="wmo_drizzle_dense">Starker Nieselregen</string>
+    <string name="wmo_freezing_drizzle">Gefrierender Nieselregen</string>
+    <string name="wmo_rain_light">Leichter Regen</string>
+    <string name="wmo_rain">Regen</string>
+    <string name="wmo_rain_heavy">Starker Regen</string>
+    <string name="wmo_freezing_rain">Gefrierender Regen</string>
+    <string name="wmo_snow_light">Leichter Schneefall</string>
+    <string name="wmo_snow">Schnee</string>
+    <string name="wmo_snow_heavy">Starker Schneefall</string>
+    <string name="wmo_snow_grains">Schneegriesel</string>
+    <string name="wmo_showers_light">Leichte Schauer</string>
+    <string name="wmo_showers">Schauer</string>
+    <string name="wmo_showers_violent">Starke Schauer</string>
+    <string name="wmo_snow_showers_light">Leichte Schneeschauer</string>
+    <string name="wmo_snow_showers">Schneeschauer</string>
+    <string name="wmo_thunderstorm">Gewitter</string>
+    <string name="wmo_thunderstorm_hail">Gewitter mit Hagel</string>
+</resources>

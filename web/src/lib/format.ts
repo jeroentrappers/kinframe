@@ -43,6 +43,11 @@ export function formatBytes(bytes: number, locale = 'en'): string {
 		i++;
 	}
 	const digits = i === 0 || v >= 100 ? 0 : 1;
+	if (!locale.startsWith('en')) {
+		// The language's own unit names, digits and order ("15,7 kB", "١٥٫٧ ك.ب.").
+		const unit = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte'][i]!;
+		return new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: digits }).format(v);
+	}
 	return `${new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(v)} ${units[i]}`;
 }
 
@@ -58,10 +63,11 @@ export function formatDuration(seconds: number): string {
 }
 
 /** Interval in seconds → short label: 30 → "30 s", 300 → "5 min", 3600 → "1 h", 86400 → "24 h". */
-export function formatInterval(seconds: number): string {
-	if (seconds < 60) return `${seconds} s`;
-	if (seconds < 3600) return `${Math.round(seconds / 60)} min`;
-	return `${Math.round(seconds / 3600)} h`;
+export function formatInterval(seconds: number, locale?: string): string {
+	const [n, unit] = seconds < 60 ? [seconds, 'second'] : seconds < 3600 ? [Math.round(seconds / 60), 'minute'] : [Math.round(seconds / 3600), 'hour'];
+	// With a locale, the language's own short units and digits ("30 Sek.", "٣٠ ث").
+	if (locale) return new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'short' }).format(n);
+	return `${n} ${unit === 'second' ? 's' : unit === 'minute' ? 'min' : 'h'}`;
 }
 
 const RELATIVE_STEPS: [Intl.RelativeTimeFormatUnit, number][] = [
@@ -140,10 +146,16 @@ export function signalBars(rssi: number | null | undefined): number {
 	return 0;
 }
 
-export function formatUptime(seconds: number): string {
+export function formatUptime(seconds: number, locale?: string): string {
 	const d = Math.floor(seconds / 86400);
 	const h = Math.floor((seconds % 86400) / 3600);
 	const m = Math.floor((seconds % 3600) / 60);
+	// Intl.DurationFormat gives "3 дн. 4 ч" / "3 日 4 時間"; older browsers keep the compact English form.
+	const DF = (Intl as unknown as { DurationFormat?: new (l?: string, o?: object) => { format(d: object): string } }).DurationFormat;
+	if (locale && DF) {
+		const parts = d > 0 ? { days: d, hours: h } : h > 0 ? { hours: h, minutes: m } : { minutes: m };
+		return new DF(locale, { style: 'short' }).format(parts);
+	}
 	if (d > 0) return `${d}d ${h}h`;
 	if (h > 0) return `${h}h ${m}m`;
 	return `${m}m`;

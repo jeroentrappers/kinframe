@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Nhập mã PIN của chủ sở hữu</string>
+    <string name="pin_reason_settings">để mở cài đặt</string>
+    <string name="pin_reason_exit">để thoát kinframe</string>
+    <string name="pin_reason_wifi">để đổi Wi-Fi</string>
+    <string name="pin_reason_power_off">để tắt khung ảnh</string>
+    <string name="pin_reason_restart">để khởi động lại khung ảnh</string>
+    <string name="pin_reason_server">để đổi máy chủ</string>
+    <string name="pin_reason_reset">để đặt lại khung ảnh</string>
+    <string name="pin_checking">Đang kiểm tra…</string>
+    <string name="pin_wrong">Mã PIN không đúng.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="other">Mã PIN không đúng. Còn %d lần thử trước khi phải chờ một chút.</item>
+    </plurals>
+    <string name="pin_locked">Sai quá nhiều lần. Hãy thử lại sau %s.</string>
+    <string name="pin_forgot">Quên mã PIN? Chủ sở hữu khung ảnh có thể xóa mã này trong ứng dụng kinframe, ở phần cài đặt của khung ảnh này.</string>
+    <string name="pin_new_title">Chọn mã PIN</string>
+    <string name="pin_new_body">Từ 4 đến 6 chữ số. Mã sẽ được hỏi khi mở cài đặt, tắt khung ảnh hoặc đổi Wi-Fi.</string>
+    <string name="pin_confirm_title">Nhập lại mã PIN</string>
+    <string name="pin_confirm_body">Chỉ để chắc chắn.</string>
+    <string name="pin_mismatch">Hai mã PIN không khớp. Hãy chọn lại.</string>
+    <string name="pin_key_delete">Xóa</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Mã PIN chủ sở hữu</string>
+    <string name="settings_pin_off">Tắt. Ai ở cạnh khung ảnh cũng mở được cài đặt.</string>
+    <string name="settings_pin_on">Bật. Cài đặt, nguồn và Wi-Fi sẽ hỏi mã PIN.</string>
+    <string name="settings_pin_set">Đặt mã PIN</string>
+    <string name="settings_pin_change">Đổi mã PIN</string>
+    <string name="settings_pin_remove">Xóa mã PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Một người</string>
+    <string name="join_title">%1$s muốn tham gia</string>
+    <string name="join_body_code">%1$s đã nhập mã của %2$s. Nếu bạn cho phép, %1$s có thể gửi ảnh tới khung ảnh này.</string>
+    <string name="join_body_invited">%1$s đã mời %3$s vào %2$s. Nếu bạn cho phép, %3$s có thể gửi ảnh tới khung ảnh này.</string>
+    <string name="join_invited_by">Được %s mời</string>
+    <string name="join_allow">Cho phép</string>
+    <string name="join_deny">Không cho phép</string>
+    <string name="join_later">Để sau</string>
+    <string name="join_later_hint">Yêu cầu vẫn nằm trong mục thông báo ở menu.</string>
+    <string name="join_pill_one">%s muốn tham gia</string>
+    <plurals name="join_pill_many">
+        <item quantity="other">%d người muốn tham gia</item>
+    </plurals>
+    <string name="notifications_title">Thông báo</string>
+    <string name="notifications_empty">Đã xem hết</string>
+    <string name="notifications_empty_body">Không có gì đang chờ bạn.</string>
+    <string name="menu_notifications">Thông báo</string>
+    <string name="action_close">Đóng</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Không có kết nối Internet</string>
+    <string name="status_card_offline_body">Ảnh trên khung ảnh vẫn tiếp tục phát. Ảnh mới sẽ về ngay khi có mạng trở lại.</string>
+    <string name="status_card_server_title">Không kết nối được máy chủ ảnh</string>
+    <string name="status_card_server_body">Wi-Fi vẫn hoạt động nhưng máy chủ không phản hồi. Ảnh mới sẽ về khi máy chủ hoạt động lại.</string>
+    <string name="status_card_portal_title">Wi-Fi này yêu cầu đăng nhập</string>
+    <string name="status_card_portal_body">Mở trang đăng nhập của mạng để khung ảnh kết nối Internet.</string>
+    <string name="status_card_portal_action">Đăng nhập</string>
+    <string name="status_card_storage_title">Khung ảnh sắp đầy</string>
+    <string name="status_card_storage_body">Một số ảnh cũ đã được gỡ khỏi khung ảnh để có chỗ trống; ảnh vẫn an toàn trên máy chủ. Ảnh mới có thể phải chờ đến khi có chỗ.</string>
+    <string name="portal_title">Đăng nhập Wi-Fi</string>
+    <string name="portal_body">Trang này tự đóng khi khung ảnh đã có mạng.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Khung ảnh ở múi giờ nào?</string>
+    <string name="setup_tz_body">Để đồng hồ, ngày tháng và lịch ban đêm luôn đúng.</string>
+    <string name="setup_tz_suggested">Gợi ý</string>
+    <string name="setup_tz_all">Tất cả múi giờ</string>
+    <string name="tz_region_europe">Châu Âu</string>
+    <string name="tz_region_america">Châu Mỹ</string>
+    <string name="tz_region_asia">Châu Á</string>
+    <string name="tz_region_africa">Châu Phi</string>
+    <string name="tz_region_australia">Úc</string>
+    <string name="tz_region_pacific">Thái Bình Dương</string>
+    <string name="tz_region_atlantic">Đại Tây Dương</string>
+    <string name="tz_region_indian">Ấn Độ Dương</string>
+    <string name="tz_region_antarctica">Châu Nam Cực</string>
+    <string name="setup_update_checking">Đang tìm phiên bản mới hơn…</string>
+    <string name="setup_update_checking_body">Khung ảnh kiểm tra để chắc chắn đang chạy kinframe mới nhất trước khi bạn bắt đầu.</string>
+    <string name="setup_update_downloading">Đang tải xuống phiên bản %s</string>
+    <string name="setup_update_downloading_body">Phiên bản này sẽ được cài ngay sau đó. Bạn có thể bỏ qua; khung ảnh sẽ tự cập nhật sau.</string>
+    <string name="setup_update_installing">Đang cài phiên bản %s</string>
+    <string name="setup_update_installing_body">Khung ảnh sẽ tự khởi động lại trong giây lát và tiếp tục thiết lập từ chỗ bạn đã dừng.</string>
+    <string name="setup_update_current">kinframe đã là bản mới nhất</string>
+    <string name="setup_update_current_body">Sang bước cuối cùng.</string>
+    <string name="setup_update_failed">Không kiểm tra được bản cập nhật</string>
+    <string name="setup_update_failed_body">Không sao: khung ảnh sẽ kiểm tra lại sau và tự cập nhật.</string>
+    <string name="setup_update_skip">Bỏ qua lúc này</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="other">Ngày này %d năm trước</item>
+    </plurals>
+    <string name="transition_kenburns">Thu phóng chậm</string>
+    <string name="settings_collage">Nhiều ảnh cùng lúc (ghép ảnh)</string>
+    <string name="settings_collage_max">Số ảnh mỗi màn hình</string>
+    <string name="settings_pair_portraits">Hiện hai ảnh dọc cạnh nhau</string>
+    <string name="settings_on_this_day">Hiện kỷ niệm ngày này trong những năm trước</string>
+    <string name="settings_video">Video</string>
+    <string name="settings_video_autoplay">Tự động phát video</string>
+    <string name="settings_video_playback">Sau khi phát video</string>
+    <string name="video_once_hold">Phát một lần rồi dừng</string>
+    <string name="video_loop">Lặp lại liên tục</string>
+    <string name="video_once_advance">Phát một lần rồi chuyển tiếp</string>
+    <string name="settings_video_volume">Âm lượng video</string>
+    <string name="settings_video_auto_mute">Tắt tiếng khi không ai chạm vào khung ảnh trong</string>
+    <string name="video_auto_mute_off">Không bao giờ</string>
+    <string name="video_auto_mute_min">%d phút</string>
+</resources>

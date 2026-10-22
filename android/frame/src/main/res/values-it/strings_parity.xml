@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Inserisci il PIN del proprietario</string>
+    <string name="pin_reason_settings">per aprire le impostazioni</string>
+    <string name="pin_reason_exit">per uscire da kinframe</string>
+    <string name="pin_reason_wifi">per cambiare Wi-Fi</string>
+    <string name="pin_reason_power_off">per spegnere la cornice</string>
+    <string name="pin_reason_restart">per riavviare la cornice</string>
+    <string name="pin_reason_server">per cambiare server</string>
+    <string name="pin_reason_reset">per ripristinare la cornice</string>
+    <string name="pin_checking">Verifica…</string>
+    <string name="pin_wrong">Il PIN non è corretto.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Il PIN non è corretto. Ancora %d tentativo prima di una breve pausa.</item>
+        <item quantity="many">Il PIN non è corretto. Ancora %d di tentativi prima di una breve pausa.</item>
+        <item quantity="other">Il PIN non è corretto. Ancora %d tentativi prima di una breve pausa.</item>
+    </plurals>
+    <string name="pin_locked">Troppi tentativi errati. Riprova tra %s.</string>
+    <string name="pin_forgot">Hai dimenticato il PIN? Il proprietario della cornice può rimuoverlo nell’app kinframe, nelle impostazioni di questa cornice.</string>
+    <string name="pin_new_title">Scegli un PIN</string>
+    <string name="pin_new_body">Da 4 a 6 cifre. Verrà chiesto per aprire le impostazioni, spegnere la cornice o cambiare Wi-Fi.</string>
+    <string name="pin_confirm_title">Inserisci di nuovo il PIN</string>
+    <string name="pin_confirm_body">Solo per sicurezza.</string>
+    <string name="pin_mismatch">I PIN non corrispondono. Scegline di nuovo uno.</string>
+    <string name="pin_key_delete">Cancella</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN del proprietario</string>
+    <string name="settings_pin_off">Disattivato. Chiunque può aprire le impostazioni.</string>
+    <string name="settings_pin_on">Attivo. Impostazioni, alimentazione e Wi-Fi chiedono il PIN.</string>
+    <string name="settings_pin_set">Imposta un PIN</string>
+    <string name="settings_pin_change">Cambia PIN</string>
+    <string name="settings_pin_remove">Rimuovi PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Qualcuno</string>
+    <string name="join_title">%1$s vorrebbe unirsi</string>
+    <string name="join_body_code">%1$s ha inserito il codice di %2$s. Se lo consenti, %1$s potrà inviare foto a questa cornice.</string>
+    <string name="join_body_invited">%1$s ha invitato %3$s in %2$s. Se lo consenti, %3$s potrà inviare foto a questa cornice.</string>
+    <string name="join_invited_by">Invitato da %s</string>
+    <string name="join_allow">Consenti</string>
+    <string name="join_deny">Non consentire</string>
+    <string name="join_later">Non ora</string>
+    <string name="join_later_hint">Resta nelle notifiche del menu.</string>
+    <string name="join_pill_one">%s vorrebbe unirsi</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d persona vorrebbe unirsi</item>
+        <item quantity="many">%d di persone vorrebbero unirsi</item>
+        <item quantity="other">%d persone vorrebbero unirsi</item>
+    </plurals>
+    <string name="notifications_title">Notifiche</string>
+    <string name="notifications_empty">Sei in pari</string>
+    <string name="notifications_empty_body">Non c’è niente in attesa.</string>
+    <string name="menu_notifications">Notifiche</string>
+    <string name="action_close">Chiudi</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Nessuna connessione a internet</string>
+    <string name="status_card_offline_body">Le foto sulla cornice continuano a scorrere. Quelle nuove arrivano appena torna online.</string>
+    <string name="status_card_server_title">Server delle foto non raggiungibile</string>
+    <string name="status_card_server_body">Il Wi-Fi funziona, ma il server non risponde. Le nuove foto arriveranno quando tornerà disponibile.</string>
+    <string name="status_card_portal_title">Questo Wi-Fi richiede l’accesso</string>
+    <string name="status_card_portal_body">Apri la pagina di accesso della rete per portare online la cornice.</string>
+    <string name="status_card_portal_action">Accedi</string>
+    <string name="status_card_storage_title">La cornice è quasi piena</string>
+    <string name="status_card_storage_body">Alcune foto meno recenti sono state tolte dalla cornice per fare spazio; restano al sicuro sul server. Le nuove foto potrebbero attendere finché non c’è spazio.</string>
+    <string name="portal_title">Accedi al Wi-Fi</string>
+    <string name="portal_body">Si chiude da sola quando la cornice è online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">In quale fuso orario si trova la cornice?</string>
+    <string name="setup_tz_body">Così l’orologio, la data e la programmazione notturna sono corretti.</string>
+    <string name="setup_tz_suggested">Suggerito</string>
+    <string name="setup_tz_all">Tutti i fusi orari</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Americhe</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">Africa</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacifico</string>
+    <string name="tz_region_atlantic">Atlantico</string>
+    <string name="tz_region_indian">Oceano Indiano</string>
+    <string name="tz_region_antarctica">Antartide</string>
+    <string name="setup_update_checking">Ricerca di una versione più recente…</string>
+    <string name="setup_update_checking_body">La cornice si assicura di avere l’ultima versione di kinframe prima di iniziare.</string>
+    <string name="setup_update_downloading">Download della versione %s</string>
+    <string name="setup_update_downloading_body">Si installa subito dopo. Puoi saltare questo passaggio: la cornice si aggiornerà più tardi.</string>
+    <string name="setup_update_installing">Installazione della versione %s</string>
+    <string name="setup_update_installing_body">Tra poco la cornice si riavvia da sola e riprende la configurazione da dove eri rimasto.</string>
+    <string name="setup_update_current">kinframe è aggiornato</string>
+    <string name="setup_update_current_body">Passiamo all’ultimo passaggio.</string>
+    <string name="setup_update_failed">Impossibile cercare aggiornamenti</string>
+    <string name="setup_update_failed_body">Nessun problema: la cornice riproverà più tardi e si aggiornerà da sola.</string>
+    <string name="setup_update_skip">Salta per ora</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">%d anno fa, oggi</item>
+        <item quantity="many">%d di anni fa, oggi</item>
+        <item quantity="other">%d anni fa, oggi</item>
+    </plurals>
+    <string name="transition_kenburns">Zoom lento</string>
+    <string name="settings_collage">Più foto insieme (collage)</string>
+    <string name="settings_collage_max">Foto per schermata</string>
+    <string name="settings_pair_portraits">Mostra due foto verticali affiancate</string>
+    <string name="settings_on_this_day">Mostra i ricordi di questo giorno negli anni passati</string>
+    <string name="settings_video">Video</string>
+    <string name="settings_video_autoplay">Riproduci i video automaticamente</string>
+    <string name="settings_video_playback">Dopo un video</string>
+    <string name="video_once_hold">Riproduci una volta, poi attendi</string>
+    <string name="video_loop">Ripeti di continuo</string>
+    <string name="video_once_advance">Riproduci una volta, poi vai avanti</string>
+    <string name="settings_video_volume">Volume dei video</string>
+    <string name="settings_video_auto_mute">Disattiva l’audio se nessuno tocca la cornice da</string>
+    <string name="video_auto_mute_off">Mai</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

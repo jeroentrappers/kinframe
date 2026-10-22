@@ -1,0 +1,14 @@
+{
+ "footer": "此驗證碼將在 10 分鐘後失效。如果你沒有提出這項要求，請忽略這封電子郵件。",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "你的 kinframe 登入驗證碼：{{code}}", "intro": "你好：\n\n請使用以下驗證碼登入 kinframe："},
+  "Register": {"subject": "你的 kinframe 註冊驗證碼：{{code}}", "intro": "歡迎使用 kinframe！\n\n請使用以下驗證碼完成帳戶建立："},
+  "ForgotPassword": {"subject": "你的 kinframe 帳戶復原驗證碼：{{code}}", "intro": "你好：\n\n請使用以下驗證碼復原你的 kinframe 帳戶："},
+  "Generic": {"subject": "你的 kinframe 驗證碼：{{code}}", "intro": "你好：\n\n你的 kinframe 驗證碼是："},
+  "BindNewIdentifier": {"subject": "確認你在 kinframe 的新電子郵件地址：{{code}}", "intro": "你好：\n\n請使用以下驗證碼確認你 kinframe 帳戶的新電子郵件地址："},
+  "UserPermissionValidation": {"subject": "你的 kinframe 驗證碼：{{code}}", "intro": "你好：\n\n變更你的 kinframe 帳戶前，請使用以下驗證碼確認是你本人："},
+  "MfaVerification": {"subject": "你的 kinframe 驗證碼：{{code}}", "intro": "你好：\n\n請使用以下驗證碼完成 kinframe 登入："},
+  "BindMfa": {"subject": "你的 kinframe 驗證碼：{{code}}", "intro": "你好：\n\n請使用以下驗證碼為 kinframe 啟用兩步驟驗證："}
+ }
+}

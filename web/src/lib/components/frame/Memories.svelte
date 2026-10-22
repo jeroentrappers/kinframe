@@ -110,7 +110,7 @@
 	}
 	.years {
 		position: absolute;
-		left: 6px;
+		inset-inline-start: 6px;
 		bottom: 6px;
 		padding: 2px 8px;
 		border-radius: var(--r-full);

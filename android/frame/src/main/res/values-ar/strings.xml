@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">إطار الصور</string>
+
+    <!-- Common actions -->
+    <string name="action_back">رجوع</string>
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_continue">متابعة</string>
+    <string name="action_try_again">إعادة المحاولة</string>
+    <string name="action_undo">تراجع</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">مرحبًا بك في kinframe</string>
+    <string name="setup_language_body">اختر لغة هذا الإطار.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">الاتصال بشبكة Wi-Fi</string>
+    <string name="setup_wifi_body">يحتاج الإطار إلى Wi-Fi لاستلام الصور. وبعد وصولها، تُعرض أيضًا دون اتصال.</string>
+    <string name="wifi_connected_to">متصل بـ %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">غير متصل</string>
+    <string name="wifi_not_connected_hint">اختر شبكة للمتابعة.</string>
+    <string name="wifi_no_internet">متصل، لكن لا يوجد إنترنت بعد</string>
+    <string name="wifi_signal">الإشارة: %1$s</string>
+    <string name="wifi_open_settings">إعدادات Wi-Fi</string>
+    <string name="wifi_networks">الشبكات القريبة</string>
+    <string name="wifi_scanning">جارٍ البحث عن شبكات…</string>
+    <string name="wifi_permission_body">لعرض الشبكات هنا، يحتاج Android إلى إذن بالبحث عن شبكات Wi-Fi.</string>
+    <string name="wifi_show_networks">عرض الشبكات</string>
+    <string name="wifi_password">كلمة المرور</string>
+    <string name="wifi_join">اتصال</string>
+    <string name="signal_0">ضعيفة جدًا</string>
+    <string name="signal_1">ضعيفة</string>
+    <string name="signal_2">مقبولة</string>
+    <string name="signal_3">جيدة</string>
+    <string name="signal_4">ممتازة</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">اختر خادمًا</string>
+    <string name="setup_server_body">تنتقل الصور عبر خادم kinframe. استخدم خادم kinframe المجاني، أو خادمًا تديره عائلتك.</string>
+    <string name="server_default_body">مجاني ومفتوح المصدر. موصى به.</string>
+    <string name="server_custom">استخدام خادمك الخاص</string>
+    <string name="server_custom_body">للعائلات التي تستضيف kinframe بنفسها.</string>
+    <string name="server_address">عنوان الخادم</string>
+    <string name="server_check">فحص الخادم</string>
+    <string name="server_checking">جارٍ فحص الخادم…</string>
+    <string name="server_version">الإصدار %1$s</string>
+    <string name="server_insecure">غير مشفّر</string>
+    <string name="server_error_invalid">لا يبدو هذا عنوان ويب. جرّب مثلًا https://frames.example.org.</string>
+    <string name="server_error_unreachable">تعذّر الوصول إلى هذا الخادم. تحقّق من العنوان ومن أن الإطار متصل بالإنترنت.</string>
+    <string name="server_error_not_kinframe">استجاب هذا الخادم، لكنه ليس خادم kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">جارٍ تجهيز إطارك…</string>
+    <string name="enroll_body">يستغرق هذا بضع ثوانٍ.</string>
+    <string name="enroll_failed_title">تعذّر تسجيل الإطار</string>
+    <string name="enroll_failed_body">ردّ الخادم: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">اربط هذا الإطار بعائلتك</string>
+    <string name="code_step1">افتح تطبيق kinframe، أو %1$s في المتصفح</string>
+    <string name="code_step2">اختر «إضافة إطار»</string>
+    <string name="code_step3">أدخل هذا الرمز، أو امسح رمز QR</string>
+    <string name="code_valid_for">صالح لمدة %1$s</string>
+    <string name="code_waiting">في انتظار أن يُدخل أحدٌ الرمز</string>
+    <string name="code_offline_title">الإطار غير متصل</string>
+    <string name="code_offline_body">يحتاج رمز الإطار إلى اتصال بالإنترنت. تحقّق من Wi-Fi.</string>
+    <string name="code_error_title">تعذّر الحصول على رمز الإطار</string>
+    <string name="code_error_body">لم يستجب الخادم. سيواصل الإطار المحاولة.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">متصل بـ %1$s</string>
+    <string name="celebrate_title_anon">تم الاتصال</string>
+    <string name="celebrate_body">ستظهر هنا الصور المرسلة إلى هذا الإطار خلال ثوانٍ.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d س %2$d د</string>
+    <string name="duration_min">%1$d د</string>
+    <string name="date_today">اليوم</string>
+    <string name="date_yesterday">أمس</string>
+    <plurals name="date_days_ago">
+        <item quantity="zero">قبل %d يوم</item>
+        <item quantity="one">قبل يوم واحد</item>
+        <item quantity="two">قبل %d يوم</item>
+        <item quantity="few">قبل %d أيام</item>
+        <item quantity="many">قبل %d يومًا</item>
+        <item quantity="other">قبل %d يوم</item>
+    </plurals>
+    <string name="interval_s">%1$d ث</string>
+    <string name="interval_min">%1$d د</string>
+    <string name="interval_h">%1$d س</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">معدَّل</string>
+    <string name="unable_photo">تعذّر عرض هذه الصورة</string>
+    <string name="unable_video">تعذّر تشغيل هذا الفيديو. اطلب من المرسل إرساله مرة أخرى.</string>
+    <plurals name="new_photos">
+        <item quantity="zero">%d صورة جديدة</item>
+        <item quantity="one">صورة جديدة</item>
+        <item quantity="two">%d صورة جديدة</item>
+        <item quantity="few">%d صور جديدة</item>
+        <item quantity="many">%d صورة جديدة</item>
+        <item quantity="other">%d صورة جديدة</item>
+    </plurals>
+    <string name="status_offline">غير متصل</string>
+    <string name="status_online">متصل · %1$s</string>
+    <string name="status_server_unreachable">تعذّر الوصول إلى الخادم</string>
+    <string name="identify_this_is">هذا هو</string>
+    <string name="snack_hidden">تم إخفاء الصورة</string>
+    <string name="snack_deleted">تم حذف الصورة</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_power">التشغيل</string>
+    <string name="menu_hide">إخفاء</string>
+    <string name="menu_delete">حذف</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">لا توجد صور بعد</string>
+    <string name="empty_body">تظهر هنا خلال ثوانٍ الصور والفيديوهات المرسلة من تطبيق kinframe أو موقعه.</string>
+    <string name="empty_code_title">أضف العائلة بهذا الرمز</string>
+    <string name="empty_code_body">أدخله في تطبيق kinframe، أو امسح رمز QR.</string>
+    <string name="empty_hidden_title">جميع الصور مخفية</string>
+    <string name="empty_hidden_body">تبقى الصور المخفية في المكتبة. يمكنك إظهارها مجددًا من تطبيق kinframe.</string>
+    <string name="empty_downloading_title">الصور في الطريق</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="zero">جارٍ تنزيل %d صورة.</item>
+        <item quantity="one">جارٍ تنزيل صورة واحدة.</item>
+        <item quantity="two">جارٍ تنزيل %d صورة.</item>
+        <item quantity="few">جارٍ تنزيل %d صور.</item>
+        <item quantity="many">جارٍ تنزيل %d صورة.</item>
+        <item quantity="other">جارٍ تنزيل %d صورة.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">التشغيل</string>
+    <string name="power_sleep">سكون</string>
+    <string name="power_sleep_body">تنطفئ الشاشة حتى تلمسها.</string>
+    <string name="power_restart">إعادة التشغيل</string>
+    <string name="power_restart_body">تشغيل الإطار من جديد.</string>
+    <string name="power_off">إيقاف التشغيل</string>
+    <string name="power_off_body">أوقفه بأمان قبل فصل الكهرباء.</string>
+    <string name="shutting_down_title">جارٍ إيقاف التشغيل…</string>
+    <string name="restarting_title">جارٍ إعادة التشغيل…</string>
+    <string name="shutting_down_body">جارٍ حفظ كل شيء بأمان.</string>
+    <string name="safe_title">يمكنك الآن فصل الكهرباء بأمان</string>
+    <string name="safe_body">تم حفظ كل شيء. لاستخدام الإطار مجددًا، اضغط زر التشغيل أو أعد توصيله بالكهرباء.</string>
+    <string name="safe_body_noroot">حفظ kinframe كل شيء. يمكنك فصل الإطار عن الكهرباء الآن.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">واجه kinframe مشكلة في عرض الصور</string>
+    <string name="recovery_body">توقّف التطبيق فجأة عدة مرات متتالية. أعد المحاولة، أو امسح الصور التي تم تنزيلها. سيُعاد تنزيلها من الخادم، ولن يضيع شيء.</string>
+    <string name="recovery_clear">مسح الصور التي تم تنزيلها</string>
+
+    <!-- Settings -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_slideshow">عرض الشرائح</string>
+    <string name="settings_interval">مدة عرض كل صورة</string>
+    <string name="settings_transition">الانتقال</string>
+    <string name="transition_crossfade">تلاشٍ</string>
+    <string name="transition_slide">انزلاق</string>
+    <string name="settings_order">الترتيب</string>
+    <string name="order_received">الأحدث استلامًا</string>
+    <string name="order_taken">تاريخ الالتقاط</string>
+    <string name="order_shuffle">عشوائي</string>
+    <string name="settings_reverse">الأقدم أولًا</string>
+    <string name="settings_fill">حجم الصورة</string>
+    <string name="fill_fill">ملء الشاشة</string>
+    <string name="fill_fit">عرض الصورة كاملة</string>
+    <string name="settings_display">الشاشة</string>
+    <string name="settings_brightness">السطوع</string>
+    <string name="settings_brightness_mode">السطوع التلقائي</string>
+    <string name="brightness_manual">ثابت</string>
+    <string name="brightness_sun">حسب الشمس</string>
+    <string name="settings_sleep">السكون</string>
+    <string name="settings_sleep_enabled">إطفاء الشاشة ليلًا</string>
+    <string name="settings_sleep_at">السكون عند</string>
+    <string name="settings_wake_at">الاستيقاظ عند</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="zero">و%d جدول آخر، تتم إدارته من تطبيق kinframe</item>
+        <item quantity="one">وجدول آخر، تتم إدارته من تطبيق kinframe</item>
+        <item quantity="two">و%d جدول آخر، تتم إدارتها من تطبيق kinframe</item>
+        <item quantity="few">و%d جداول أخرى، تتم إدارتها من تطبيق kinframe</item>
+        <item quantity="many">و%d جدولًا آخر، تتم إدارتها من تطبيق kinframe</item>
+        <item quantity="other">و%d جدول آخر، تتم إدارتها من تطبيق kinframe</item>
+    </plurals>
+    <string name="settings_about">هذا الإطار</string>
+    <string name="about_frame">الاسم</string>
+    <string name="about_server">الخادم</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">إصدار التطبيق</string>
+    <string name="about_android_settings">إعدادات Android</string>
+    <string name="settings_updates">التحديثات</string>
+    <string name="updates_channel">القناة</string>
+    <string name="updates_channel_stable">مستقرة</string>
+    <string name="updates_channel_beta">تجريبية (جرّب الإصدارات الجديدة مبكرًا)</string>
+    <string name="updates_check">البحث عن تحديث</string>
+    <string name="updates_install_now">التثبيت الآن</string>
+    <string name="updates_checking">جارٍ البحث عن تحديثات…</string>
+    <string name="updates_up_to_date">هذا الإطار محدَّث.</string>
+    <string name="updates_downloading">جارٍ تنزيل الإصدار %1$s… %2$d%%</string>
+    <string name="updates_waiting">الإصدار %1$s جاهز. سيُثبَّت عندما لا يستخدم أحدٌ الإطار.</string>
+    <string name="updates_installing">جارٍ تثبيت الإصدار %1$s. سيُعاد تشغيل الإطار بعد لحظات.</string>
+    <string name="updates_failed">لم ينجح التحديث. سيحاول الإطار مجددًا لاحقًا.</string>
+    <string name="update_notice_updated">تم التحديث إلى الإصدار %1$s</string>
+    <string name="update_notice_rolled_back">واجه الإصدار الجديد مشكلات، لذا عاد الإطار إلى الإصدار السابق.</string>
+    <string name="update_notice_needs_user">يوجد تحديث جاهز. انقر على «تثبيت» للمتابعة.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">عرض توقعات الطقس</string>
+    <string name="weather_close">إغلاق</string>
+    <string name="weather_now">الآن</string>
+    <string name="weather_today">اليوم</string>
+    <string name="weather_feels_like">الإحساس %1$s</string>
+    <string name="weather_high_low">العظمى %1$s · الصغرى %2$s</string>
+    <string name="weather_wind">الرياح</string>
+    <string name="weather_humidity">الرطوبة</string>
+    <string name="weather_sunrise">الشروق</string>
+    <string name="weather_sunset">الغروب</string>
+    <string name="weather_next_hours">الساعات الـ 24 القادمة</string>
+    <string name="weather_next_days">توقعات 7 أيام</string>
+    <string name="weather_updated">آخر تحديث %1$s</string>
+    <string-array name="weather_compass">
+        <item>ش</item>
+        <item>شق</item>
+        <item>ق</item>
+        <item>جق</item>
+        <item>ج</item>
+        <item>جغ</item>
+        <item>غ</item>
+        <item>شغ</item>
+    </string-array>
+    <string name="wmo_clear_day">مشمس</string>
+    <string name="wmo_clear_night">صافٍ</string>
+    <string name="wmo_mainly_clear_day">مشمس غالبًا</string>
+    <string name="wmo_mainly_clear_night">صافٍ غالبًا</string>
+    <string name="wmo_partly_cloudy">غائم جزئيًا</string>
+    <string name="wmo_overcast">غائم</string>
+    <string name="wmo_fog">ضباب</string>
+    <string name="wmo_rime_fog">ضباب متجمّد</string>
+    <string name="wmo_drizzle_light">رذاذ خفيف</string>
+    <string name="wmo_drizzle">رذاذ</string>
+    <string name="wmo_drizzle_dense">رذاذ كثيف</string>
+    <string name="wmo_freezing_drizzle">رذاذ متجمّد</string>
+    <string name="wmo_rain_light">أمطار خفيفة</string>
+    <string name="wmo_rain">أمطار</string>
+    <string name="wmo_rain_heavy">أمطار غزيرة</string>
+    <string name="wmo_freezing_rain">أمطار متجمّدة</string>
+    <string name="wmo_snow_light">ثلوج خفيفة</string>
+    <string name="wmo_snow">ثلوج</string>
+    <string name="wmo_snow_heavy">ثلوج كثيفة</string>
+    <string name="wmo_snow_grains">حبيبات ثلجية</string>
+    <string name="wmo_showers_light">زخات خفيفة</string>
+    <string name="wmo_showers">زخات مطر</string>
+    <string name="wmo_showers_violent">زخات غزيرة</string>
+    <string name="wmo_snow_showers_light">زخات ثلج خفيفة</string>
+    <string name="wmo_snow_showers">زخات ثلج</string>
+    <string name="wmo_thunderstorm">عاصفة رعدية</string>
+    <string name="wmo_thunderstorm_hail">عاصفة رعدية مع برد</string>
+</resources>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Фоторамка</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Скасувати</string>
+    <string name="action_continue">Далі</string>
+    <string name="action_try_again">Повторити</string>
+    <string name="action_undo">Відмінити</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Вітаємо в kinframe</string>
+    <string name="setup_language_body">Виберіть мову для цієї рамки.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Підключіться до Wi-Fi</string>
+    <string name="setup_wifi_body">Рамці потрібен Wi-Fi, щоб отримувати фото. Отримані фото показуються й без підключення.</string>
+    <string name="wifi_connected_to">Підключено до %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Немає підключення</string>
+    <string name="wifi_not_connected_hint">Виберіть мережу, щоб продовжити.</string>
+    <string name="wifi_no_internet">Підключено, але інтернету ще немає</string>
+    <string name="wifi_signal">Сигнал: %1$s</string>
+    <string name="wifi_open_settings">Налаштування Wi-Fi</string>
+    <string name="wifi_networks">Мережі поблизу</string>
+    <string name="wifi_scanning">Пошук мереж…</string>
+    <string name="wifi_permission_body">Щоб показати тут список мереж, Android потрібен дозвіл на пошук Wi-Fi.</string>
+    <string name="wifi_show_networks">Показати мережі</string>
+    <string name="wifi_password">Пароль</string>
+    <string name="wifi_join">Підключити</string>
+    <string name="signal_0">дуже слабкий</string>
+    <string name="signal_1">слабкий</string>
+    <string name="signal_2">середній</string>
+    <string name="signal_3">добрий</string>
+    <string name="signal_4">відмінний</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Виберіть сервер</string>
+    <string name="setup_server_body">Фото передаються через сервер kinframe. Використовуйте безкоштовний сервер kinframe або сервер вашої родини.</string>
+    <string name="server_default_body">Безкоштовно й з відкритим кодом. Рекомендовано.</string>
+    <string name="server_custom">Власний сервер</string>
+    <string name="server_custom_body">Для родин, які мають власний сервер kinframe.</string>
+    <string name="server_address">Адреса сервера</string>
+    <string name="server_check">Перевірити сервер</string>
+    <string name="server_checking">Перевірка сервера…</string>
+    <string name="server_version">версія %1$s</string>
+    <string name="server_insecure">без шифрування</string>
+    <string name="server_error_invalid">Це не схоже на вебадресу. Спробуйте, наприклад, https://frames.example.org.</string>
+    <string name="server_error_unreachable">Не вдалося зв’язатися із сервером. Перевірте адресу та підключення рамки до інтернету.</string>
+    <string name="server_error_not_kinframe">Сервер відповів, але це не сервер kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Підготовка рамки…</string>
+    <string name="enroll_body">Це займе кілька секунд.</string>
+    <string name="enroll_failed_title">Не вдалося зареєструвати рамку</string>
+    <string name="enroll_failed_body">Відповідь сервера: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Підключіть рамку до родини</string>
+    <string name="code_step1">Відкрийте застосунок kinframe або %1$s у браузері</string>
+    <string name="code_step2">Виберіть «Додати рамку»</string>
+    <string name="code_step3">Введіть цей код або відскануйте QR-код</string>
+    <string name="code_valid_for">Дійсний ще %1$s</string>
+    <string name="code_waiting">Чекаємо, поки хтось введе код</string>
+    <string name="code_offline_title">Рамка не в мережі</string>
+    <string name="code_offline_body">Для коду рамки потрібен інтернет. Перевірте Wi-Fi.</string>
+    <string name="code_error_title">Не вдалося отримати код рамки</string>
+    <string name="code_error_body">Сервер не відповів. Рамка продовжує спроби.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Підключено до %1$s</string>
+    <string name="celebrate_title_anon">Підключено</string>
+    <string name="celebrate_body">Фото, надіслані на цю рамку, з’являться тут за кілька секунд.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d год %2$d хв</string>
+    <string name="duration_min">%1$d хв</string>
+    <string name="date_today">Сьогодні</string>
+    <string name="date_yesterday">Учора</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d день тому</item>
+        <item quantity="few">%d дні тому</item>
+        <item quantity="many">%d днів тому</item>
+        <item quantity="other">%d дня тому</item>
+    </plurals>
+    <string name="interval_s">%1$d с</string>
+    <string name="interval_min">%1$d хв</string>
+    <string name="interval_h">%1$d год</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">змінено</string>
+    <string name="unable_photo">Не вдається показати це фото</string>
+    <string name="unable_video">Не вдається відтворити це відео. Попросіть відправника надіслати його ще раз.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d нове фото</item>
+        <item quantity="few">%d нові фото</item>
+        <item quantity="many">%d нових фото</item>
+        <item quantity="other">%d нового фото</item>
+    </plurals>
+    <string name="status_offline">Не в мережі</string>
+    <string name="status_online">У мережі · %1$s</string>
+    <string name="status_server_unreachable">Сервер недоступний</string>
+    <string name="identify_this_is">Це</string>
+    <string name="snack_hidden">Фото приховано</string>
+    <string name="snack_deleted">Фото видалено</string>
+    <string name="menu_settings">Налаштування</string>
+    <string name="menu_power">Живлення</string>
+    <string name="menu_hide">Приховати</string>
+    <string name="menu_delete">Видалити</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Фото ще немає</string>
+    <string name="empty_body">Фото й відео, надіслані через застосунок або сайт kinframe, з’являться тут за кілька секунд.</string>
+    <string name="empty_code_title">Додайте родину за цим кодом</string>
+    <string name="empty_code_body">Введіть його в застосунку kinframe або відскануйте QR-код.</string>
+    <string name="empty_hidden_title">Усі фото приховано</string>
+    <string name="empty_hidden_body">Приховані фото залишаються в бібліотеці. Їх можна знову показати в застосунку kinframe.</string>
+    <string name="empty_downloading_title">Фото вже в дорозі</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Завантажується %d фото.</item>
+        <item quantity="few">Завантажуються %d фото.</item>
+        <item quantity="many">Завантажується %d фото.</item>
+        <item quantity="other">Завантажується %d фото.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Живлення</string>
+    <string name="power_sleep">Сон</string>
+    <string name="power_sleep_body">Екран вимкнеться до дотику.</string>
+    <string name="power_restart">Перезапуск</string>
+    <string name="power_restart_body">Перезапустити рамку.</string>
+    <string name="power_off">Вимкнути</string>
+    <string name="power_off_body">Безпечно вимкнути перед від’єднанням від мережі.</string>
+    <string name="shutting_down_title">Вимкнення…</string>
+    <string name="restarting_title">Перезапуск…</string>
+    <string name="shutting_down_body">Усе зберігається.</string>
+    <string name="safe_title">Тепер рамку можна від’єднати</string>
+    <string name="safe_body">Усе збережено. Щоб знову ввімкнути рамку, натисніть кнопку живлення або підключіть її до мережі.</string>
+    <string name="safe_body_noroot">kinframe усе зберіг. Тепер рамку можна від’єднати від мережі.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">У kinframe не виходить показувати фото</string>
+    <string name="recovery_body">Застосунок кілька разів поспіль неочікувано закрився. Спробуйте ще раз або видаліть завантажені фото. Вони завантажаться із сервера знову, нічого не втратиться.</string>
+    <string name="recovery_clear">Видалити завантажені фото</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Налаштування</string>
+    <string name="settings_language">Мова</string>
+    <string name="settings_slideshow">Слайд-шоу</string>
+    <string name="settings_interval">Показувати кожне фото</string>
+    <string name="settings_transition">Перехід</string>
+    <string name="transition_crossfade">Згасання</string>
+    <string name="transition_slide">Зсув</string>
+    <string name="settings_order">Порядок</string>
+    <string name="order_received">Спочатку нові</string>
+    <string name="order_taken">За датою зйомки</string>
+    <string name="order_shuffle">Упереміш</string>
+    <string name="settings_reverse">Спочатку старі</string>
+    <string name="settings_fill">Розмір фото</string>
+    <string name="fill_fill">Заповнити екран</string>
+    <string name="fill_fit">Показати фото повністю</string>
+    <string name="settings_display">Екран</string>
+    <string name="settings_brightness">Яскравість</string>
+    <string name="settings_brightness_mode">Автояскравість</string>
+    <string name="brightness_manual">Стала</string>
+    <string name="brightness_sun">За сонцем</string>
+    <string name="settings_sleep">Сон</string>
+    <string name="settings_sleep_enabled">Вимикати екран уночі</string>
+    <string name="settings_sleep_at">Засинати о</string>
+    <string name="settings_wake_at">Прокидатися о</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">і ще %d розклад у застосунку kinframe</item>
+        <item quantity="few">і ще %d розклади в застосунку kinframe</item>
+        <item quantity="many">і ще %d розкладів у застосунку kinframe</item>
+        <item quantity="other">і ще %d розкладу в застосунку kinframe</item>
+    </plurals>
+    <string name="settings_about">Ця рамка</string>
+    <string name="about_frame">Назва</string>
+    <string name="about_server">Сервер</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Версія застосунку</string>
+    <string name="about_android_settings">Налаштування Android</string>
+    <string name="settings_updates">Оновлення</string>
+    <string name="updates_channel">Канал</string>
+    <string name="updates_channel_stable">Стабільний</string>
+    <string name="updates_channel_beta">Бета (нові версії раніше)</string>
+    <string name="updates_check">Перевірити оновлення</string>
+    <string name="updates_install_now">Установити</string>
+    <string name="updates_checking">Перевірка оновлень…</string>
+    <string name="updates_up_to_date">Рамка оновлена.</string>
+    <string name="updates_downloading">Завантаження версії %1$s… %2$d%%</string>
+    <string name="updates_waiting">Версія %1$s готова. Вона встановиться, коли рамкою ніхто не користуватиметься.</string>
+    <string name="updates_installing">Установлення версії %1$s. Рамка скоро перезапуститься.</string>
+    <string name="updates_failed">Оновити не вдалося. Рамка спробує пізніше.</string>
+    <string name="update_notice_updated">Оновлено до версії %1$s</string>
+    <string name="update_notice_rolled_back">У новій версії були проблеми, тому рамка повернулася до попередньої.</string>
+    <string name="update_notice_needs_user">Оновлення готове. Натисніть «Установити», щоб продовжити.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">Показати прогноз</string>
+    <string name="weather_close">Закрити</string>
+    <string name="weather_now">Зараз</string>
+    <string name="weather_today">Сьогодні</string>
+    <string name="weather_feels_like">Відчувається як %1$s</string>
+    <string name="weather_high_low">Макс. %1$s · мін. %2$s</string>
+    <string name="weather_wind">Вітер</string>
+    <string name="weather_humidity">Вологість</string>
+    <string name="weather_sunrise">Схід сонця</string>
+    <string name="weather_sunset">Захід сонця</string>
+    <string name="weather_next_hours">Найближчі 24 години</string>
+    <string name="weather_next_days">Прогноз на 7 днів</string>
+    <string name="weather_updated">Оновлено %1$s</string>
+    <string-array name="weather_compass">
+        <item>Пн</item>
+        <item>ПнСх</item>
+        <item>Сх</item>
+        <item>ПдСх</item>
+        <item>Пд</item>
+        <item>ПдЗх</item>
+        <item>Зх</item>
+        <item>ПнЗх</item>
+    </string-array>
+    <string name="wmo_clear_day">Сонячно</string>
+    <string name="wmo_clear_night">Ясно</string>
+    <string name="wmo_mainly_clear_day">Переважно сонячно</string>
+    <string name="wmo_mainly_clear_night">Переважно ясно</string>
+    <string name="wmo_partly_cloudy">Мінлива хмарність</string>
+    <string name="wmo_overcast">Хмарно</string>
+    <string name="wmo_fog">Туман</string>
+    <string name="wmo_rime_fog">Крижаний туман</string>
+    <string name="wmo_drizzle_light">Слабка мряка</string>
+    <string name="wmo_drizzle">Мряка</string>
+    <string name="wmo_drizzle_dense">Сильна мряка</string>
+    <string name="wmo_freezing_drizzle">Крижана мряка</string>
+    <string name="wmo_rain_light">Невеликий дощ</string>
+    <string name="wmo_rain">Дощ</string>
+    <string name="wmo_rain_heavy">Сильний дощ</string>
+    <string name="wmo_freezing_rain">Крижаний дощ</string>
+    <string name="wmo_snow_light">Невеликий сніг</string>
+    <string name="wmo_snow">Сніг</string>
+    <string name="wmo_snow_heavy">Сильний сніг</string>
+    <string name="wmo_snow_grains">Снігова крупа</string>
+    <string name="wmo_showers_light">Невелика злива</string>
+    <string name="wmo_showers">Злива</string>
+    <string name="wmo_showers_violent">Сильна злива</string>
+    <string name="wmo_snow_showers_light">Невеликий снігопад</string>
+    <string name="wmo_snow_showers">Снігопад</string>
+    <string name="wmo_thunderstorm">Гроза</string>
+    <string name="wmo_thunderstorm_hail">Гроза з градом</string>
+</resources>

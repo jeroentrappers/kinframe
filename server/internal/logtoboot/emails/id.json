@@ -1,0 +1,14 @@
+{
+ "footer": "Kode ini kedaluwarsa dalam 10 menit. Jika Anda tidak memintanya, abaikan saja email ini.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Kode login kinframe Anda: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk login ke kinframe:"},
+  "Register": {"subject": "Kode pendaftaran kinframe Anda: {{code}}", "intro": "Selamat datang di kinframe!\n\nGunakan kode ini untuk menyelesaikan pembuatan akun Anda:"},
+  "ForgotPassword": {"subject": "Kode pemulihan akun kinframe Anda: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk memulihkan akun kinframe Anda:"},
+  "Generic": {"subject": "Kode verifikasi kinframe Anda: {{code}}", "intro": "Halo,\n\nKode verifikasi kinframe Anda adalah:"},
+  "BindNewIdentifier": {"subject": "Konfirmasi email baru Anda untuk kinframe: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk mengonfirmasi alamat email baru akun kinframe Anda:"},
+  "UserPermissionValidation": {"subject": "Kode verifikasi kinframe Anda: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk memastikan bahwa ini memang Anda sebelum mengubah akun kinframe:"},
+  "MfaVerification": {"subject": "Kode verifikasi kinframe Anda: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk menyelesaikan login ke kinframe:"},
+  "BindMfa": {"subject": "Kode verifikasi kinframe Anda: {{code}}", "intro": "Halo,\n\nGunakan kode ini untuk mengaktifkan verifikasi dua langkah untuk kinframe:"}
+ }
+}

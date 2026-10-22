@@ -1,0 +1,14 @@
+{
+ "footer": "Код действует 10 минут. Если вы его не запрашивали, просто проигнорируйте это письмо.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Ваш код для входа в kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы войти в kinframe:"},
+  "Register": {"subject": "Ваш код для регистрации в kinframe: {{code}}", "intro": "Добро пожаловать в kinframe!\n\nВведите этот код, чтобы завершить создание аккаунта:"},
+  "ForgotPassword": {"subject": "Ваш код для восстановления аккаунта kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы восстановить аккаунт kinframe:"},
+  "Generic": {"subject": "Ваш код подтверждения kinframe: {{code}}", "intro": "Здравствуйте!\n\nВаш код подтверждения kinframe:"},
+  "BindNewIdentifier": {"subject": "Подтвердите новый адрес почты для kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы подтвердить новый адрес эл. почты для аккаунта kinframe:"},
+  "UserPermissionValidation": {"subject": "Ваш код подтверждения kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы подтвердить, что это вы, прежде чем изменить аккаунт kinframe:"},
+  "MfaVerification": {"subject": "Ваш код подтверждения kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы завершить вход в kinframe:"},
+  "BindMfa": {"subject": "Ваш код подтверждения kinframe: {{code}}", "intro": "Здравствуйте!\n\nВведите этот код, чтобы включить двухэтапную проверку в kinframe:"}
+ }
+}

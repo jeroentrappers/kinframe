@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Indtast ejerens pinkode</string>
+    <string name="pin_reason_settings">for at åbne indstillinger</string>
+    <string name="pin_reason_exit">for at lukke kinframe</string>
+    <string name="pin_reason_wifi">for at ændre wi-fi</string>
+    <string name="pin_reason_power_off">for at slukke rammen</string>
+    <string name="pin_reason_restart">for at genstarte rammen</string>
+    <string name="pin_reason_server">for at skifte server</string>
+    <string name="pin_reason_reset">for at nulstille rammen</string>
+    <string name="pin_checking">Tjekker…</string>
+    <string name="pin_wrong">Det er ikke pinkoden.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Det er ikke pinkoden. %d forsøg mere før en kort pause.</item>
+        <item quantity="other">Det er ikke pinkoden. %d forsøg mere før en kort pause.</item>
+    </plurals>
+    <string name="pin_locked">For mange forkerte forsøg. Prøv igen om %s.</string>
+    <string name="pin_forgot">Glemt pinkoden? Rammens ejer kan fjerne den i kinframe-appen under denne rammes indstillinger.</string>
+    <string name="pin_new_title">Vælg en pinkode</string>
+    <string name="pin_new_body">4 til 6 cifre. Den skal bruges for at åbne indstillinger, slukke rammen eller ændre wi-fi.</string>
+    <string name="pin_confirm_title">Indtast pinkoden igen</string>
+    <string name="pin_confirm_body">Bare for en sikkerheds skyld.</string>
+    <string name="pin_mismatch">Pinkoderne var ikke ens. Vælg en igen.</string>
+    <string name="pin_key_delete">Slet</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Ejerens pinkode</string>
+    <string name="settings_pin_off">Fra. Alle ved rammen kan åbne indstillinger.</string>
+    <string name="settings_pin_on">Til. Indstillinger, strøm og wi-fi kræver pinkoden.</string>
+    <string name="settings_pin_set">Vælg en pinkode</string>
+    <string name="settings_pin_change">Skift pinkode</string>
+    <string name="settings_pin_remove">Fjern pinkode</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">En person</string>
+    <string name="join_title">%1$s vil gerne være med</string>
+    <string name="join_body_code">%1$s har indtastet koden til %2$s. Hvis du tillader det, kan %1$s sende billeder til denne ramme.</string>
+    <string name="join_body_invited">%1$s har inviteret %3$s til %2$s. Hvis du tillader det, kan %3$s sende billeder til denne ramme.</string>
+    <string name="join_invited_by">Inviteret af %s</string>
+    <string name="join_allow">Tillad</string>
+    <string name="join_deny">Tillad ikke</string>
+    <string name="join_later">Ikke nu</string>
+    <string name="join_later_hint">Den ligger under notifikationer i menuen.</string>
+    <string name="join_pill_one">%s vil gerne være med</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d person vil gerne være med</item>
+        <item quantity="other">%d personer vil gerne være med</item>
+    </plurals>
+    <string name="notifications_title">Notifikationer</string>
+    <string name="notifications_empty">Du er helt opdateret</string>
+    <string name="notifications_empty_body">Der venter ikke noget på dig.</string>
+    <string name="menu_notifications">Notifikationer</string>
+    <string name="action_close">Luk</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Ingen internetforbindelse</string>
+    <string name="status_card_offline_body">Billederne på rammen bliver ved med at køre. Nye kommer, så snart den er online igen.</string>
+    <string name="status_card_server_title">Kan ikke nå billedserveren</string>
+    <string name="status_card_server_body">Wi-fi virker, men serveren svarer ikke. Nye billeder kommer, når den er tilbage.</string>
+    <string name="status_card_portal_title">Dette wi-fi kræver, at du logger ind</string>
+    <string name="status_card_portal_body">Åbn netværkets login-side for at få rammen online.</string>
+    <string name="status_card_portal_action">Log ind</string>
+    <string name="status_card_storage_title">Rammen er næsten fuld</string>
+    <string name="status_card_storage_body">Ældre billeder er fjernet fra rammen for at gøre plads; de er stadig i sikkerhed på serveren. Nye billeder venter måske, til der er plads.</string>
+    <string name="portal_title">Log ind på wi-fi</string>
+    <string name="portal_body">Det lukker af sig selv, når rammen er online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Hvilken tidszone står rammen i?</string>
+    <string name="setup_tz_body">Så uret, datoen og dvaletiden passer.</string>
+    <string name="setup_tz_suggested">Foreslået</string>
+    <string name="setup_tz_all">Alle tidszoner</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Asien</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australien</string>
+    <string name="tz_region_pacific">Stillehavet</string>
+    <string name="tz_region_atlantic">Atlanterhavet</string>
+    <string name="tz_region_indian">Det Indiske Ocean</string>
+    <string name="tz_region_antarctica">Antarktis</string>
+    <string name="setup_update_checking">Søger efter en nyere version…</string>
+    <string name="setup_update_checking_body">Rammen sørger for at køre den nyeste kinframe, før du går i gang.</string>
+    <string name="setup_update_downloading">Henter version %s</string>
+    <string name="setup_update_downloading_body">Den installeres lige bagefter. Du kan springe det over; så opdaterer rammen sig selv senere.</string>
+    <string name="setup_update_installing">Installerer version %s</string>
+    <string name="setup_update_installing_body">Rammen genstarter om lidt af sig selv og fortsætter opsætningen, hvor du slap.</string>
+    <string name="setup_update_current">kinframe er opdateret</string>
+    <string name="setup_update_current_body">Videre til sidste trin.</string>
+    <string name="setup_update_failed">Kunne ikke søge efter opdateringer</string>
+    <string name="setup_update_failed_body">Intet problem: Rammen kigger igen senere og opdaterer sig selv.</string>
+    <string name="setup_update_skip">Spring over indtil videre</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">I dag for %d år siden</item>
+        <item quantity="other">I dag for %d år siden</item>
+    </plurals>
+    <string name="transition_kenburns">Langsom zoom</string>
+    <string name="settings_collage">Flere billeder ad gangen (collage)</string>
+    <string name="settings_collage_max">Billeder pr. skærm</string>
+    <string name="settings_pair_portraits">Vis to stående billeder side om side</string>
+    <string name="settings_on_this_day">Vis minder fra denne dag i tidligere år</string>
+    <string name="settings_video">Videoer</string>
+    <string name="settings_video_autoplay">Afspil videoer automatisk</string>
+    <string name="settings_video_playback">Efter en video</string>
+    <string name="video_once_hold">Afspil én gang, og vent så</string>
+    <string name="video_loop">Gentag hele tiden</string>
+    <string name="video_once_advance">Afspil én gang, og gå så videre</string>
+    <string name="settings_video_volume">Lydstyrke for video</string>
+    <string name="settings_video_auto_mute">Slå lyden fra, når ingen har rørt rammen i</string>
+    <string name="video_auto_mute_off">Aldrig</string>
+    <string name="video_auto_mute_min">%d min.</string>
+</resources>

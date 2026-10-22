@@ -18,8 +18,9 @@ import androidx.compose.ui.unit.dp
  * material-icons-extended artifact on 1 GB frames.
  */
 object KinIcons {
-    private fun line(name: String, vararg d: String, filled: Boolean = false): ImageVector {
-        val b = ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f)
+    // autoMirror: directional icons (back, forward, undo) flip in right-to-left languages (Arabic, Hebrew).
+    private fun line(name: String, vararg d: String, filled: Boolean = false, autoMirror: Boolean = false): ImageVector {
+        val b = ImageVector.Builder(name, 24.dp, 24.dp, 24f, 24f, autoMirror = autoMirror)
         d.forEach { path ->
             b.addPath(
                 pathData = PathParser().parsePathString(path).toNodes(),
@@ -41,8 +42,8 @@ object KinIcons {
 
     val Close by lazy { line("close", "M6 6L18 18M18 6L6 18") }
     val Check by lazy { line("check", "M5 12.5l4.5 4.5L19 7.5") }
-    val ChevronLeft by lazy { line("chevronLeft", "M15 5l-7 7 7 7") }
-    val ChevronRight by lazy { line("chevronRight", "M9 5l7 7-7 7") }
+    val ChevronLeft by lazy { line("chevronLeft", "M15 5l-7 7 7 7", autoMirror = true) }
+    val ChevronRight by lazy { line("chevronRight", "M9 5l7 7-7 7", autoMirror = true) }
     val Plus by lazy { line("plus", "M12 5v14M5 12h14") }
     val Minus by lazy { line("minus", "M5 12h14") }
     val Power by lazy { line("power", "M12 3v8", "M6.3 6.3a8 8 0 1 0 11.4 0") }
@@ -67,7 +68,7 @@ object KinIcons {
     }
     val Heart by lazy { line("heart", HEART) }
     val HeartFilled by lazy { line("heartFilled", HEART, filled = true) }
-    val Undo by lazy { line("undo", "M9 14L4 9l5-5", "M4 9h10.5a5.5 5.5 0 0 1 0 11H11") }
+    val Undo by lazy { line("undo", "M9 14L4 9l5-5", "M4 9h10.5a5.5 5.5 0 0 1 0 11H11", autoMirror = true) }
     val Globe by lazy { line("globe", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M3 12h18", "M12 3a14 14 0 0 1 0 18", "M12 3a14 14 0 0 0 0 18") }
     val Server by lazy { line("server", "M4 4h16v6H4z", "M4 14h16v6H4z", "M8 7h0.01", "M8 17h0.01") }
     val Info by lazy { line("info", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M12 11v6", "M12 7.5h0.01") }

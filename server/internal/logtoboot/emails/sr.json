@@ -1,0 +1,14 @@
+{
+ "footer": "Код истиче за 10 минута. Ако га нисте тражили, можете занемарити овај имејл.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Ваш kinframe код за пријаву: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте се пријавили на kinframe:"},
+  "Register": {"subject": "Ваш kinframe код за регистрацију: {{code}}", "intro": "Добро дошли у kinframe!\n\nКористите овај код да бисте завршили отварање налога:"},
+  "ForgotPassword": {"subject": "Ваш kinframe код за опоравак налога: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте опоравили свој kinframe налог:"},
+  "Generic": {"subject": "Ваш kinframe код за потврду: {{code}}", "intro": "Здраво,\n\nВаш kinframe код за потврду је:"},
+  "BindNewIdentifier": {"subject": "Потврдите нови имејл за kinframe: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте потврдили нову имејл адресу за свој kinframe налог:"},
+  "UserPermissionValidation": {"subject": "Ваш kinframe код за потврду: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте потврдили да сте то ви пре измене kinframe налога:"},
+  "MfaVerification": {"subject": "Ваш kinframe код за потврду: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте завршили пријаву на kinframe:"},
+  "BindMfa": {"subject": "Ваш kinframe код за потврду: {{code}}", "intro": "Здраво,\n\nКористите овај код да бисте укључили потврду у два корака за kinframe:"}
+ }
+}

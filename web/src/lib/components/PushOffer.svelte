@@ -64,6 +64,6 @@
 	.o-actions {
 		display: flex;
 		gap: 6px;
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 </style>

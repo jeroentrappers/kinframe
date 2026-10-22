@@ -245,7 +245,8 @@ func TestImportsAndFailures(t *testing.T) {
 	png := mediatest.JPEG(800, 600, 0, "", false)
 	imp := e.expect(req{method: "POST", path: "/v1/device/imports", token: d.token, raw: png,
 		header: map[string]string{"Content-Type": "application/octet-stream", "X-Filename": "DSC0001.JPG"}}, 202).m(t)
-	if dig(imp, "item", "sender_name") != "Ingrid's frame" {
+	// The harness enrols frames in Dutch, so the default name is Dutch too.
+	if dig(imp, "item", "sender_name") != "Fotolijst van Ingrid" {
 		t.Fatalf("import: %v", imp)
 	}
 	eventually(t, 30*time.Second, "import processed", func() bool {

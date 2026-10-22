@@ -424,6 +424,8 @@ export const en = {
 	'settingsForm.celsius': '°C',
 	'settingsForm.fahrenheit': '°F',
 	'settingsForm.weatherCredit': 'Weather data by Open-Meteo.com',
+	'settingsForm.frameLanguage': 'Frame language',
+	'settingsForm.frameLanguageHint': 'The language of the menus and messages on the frame itself.',
 	'location.search': 'Find a town or city',
 	'location.placeholder': 'e.g. Gent',
 	'location.results': 'Places',

@@ -1,0 +1,14 @@
+{
+ "footer": "O código expira em 10 minutos. Se você não pediu este código, pode ignorar este e-mail.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Seu código de acesso ao kinframe: {{code}}", "intro": "Olá,\n\nUse este código para entrar no kinframe:"},
+  "Register": {"subject": "Seu código de cadastro no kinframe: {{code}}", "intro": "Boas-vindas ao kinframe!\n\nUse este código para concluir a criação da sua conta:"},
+  "ForgotPassword": {"subject": "Seu código de recuperação da conta kinframe: {{code}}", "intro": "Olá,\n\nUse este código para recuperar sua conta do kinframe:"},
+  "Generic": {"subject": "Seu código de verificação do kinframe: {{code}}", "intro": "Olá,\n\nSeu código de verificação do kinframe é:"},
+  "BindNewIdentifier": {"subject": "Confirme seu novo e-mail no kinframe: {{code}}", "intro": "Olá,\n\nUse este código para confirmar o novo endereço de e-mail da sua conta do kinframe:"},
+  "UserPermissionValidation": {"subject": "Seu código de verificação do kinframe: {{code}}", "intro": "Olá,\n\nUse este código para confirmar que é você antes de alterar sua conta do kinframe:"},
+  "MfaVerification": {"subject": "Seu código de verificação do kinframe: {{code}}", "intro": "Olá,\n\nUse este código para concluir o acesso ao kinframe:"},
+  "BindMfa": {"subject": "Seu código de verificação do kinframe: {{code}}", "intro": "Olá,\n\nUse este código para ativar a verificação em duas etapas no kinframe:"}
+ }
+}

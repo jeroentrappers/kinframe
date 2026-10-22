@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Introduce el PIN del propietario</string>
+    <string name="pin_reason_settings">para abrir los ajustes</string>
+    <string name="pin_reason_exit">para salir de kinframe</string>
+    <string name="pin_reason_wifi">para cambiar el Wi-Fi</string>
+    <string name="pin_reason_power_off">para apagar el marco</string>
+    <string name="pin_reason_restart">para reiniciar el marco</string>
+    <string name="pin_reason_server">para cambiar el servidor</string>
+    <string name="pin_reason_reset">para restablecer el marco</string>
+    <string name="pin_checking">Comprobando…</string>
+    <string name="pin_wrong">Ese no es el PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Ese no es el PIN. Te queda %d intento antes de una breve pausa.</item>
+        <item quantity="many">Ese no es el PIN. Te quedan %d de intentos antes de una breve pausa.</item>
+        <item quantity="other">Ese no es el PIN. Te quedan %d intentos antes de una breve pausa.</item>
+    </plurals>
+    <string name="pin_locked">Demasiados intentos fallidos. Vuelve a intentarlo en %s.</string>
+    <string name="pin_forgot">¿Has olvidado el PIN? El propietario del marco puede quitarlo en la app kinframe, en los ajustes de este marco.</string>
+    <string name="pin_new_title">Elige un PIN</string>
+    <string name="pin_new_body">De 4 a 6 dígitos. Se pedirá para abrir los ajustes, apagar el marco o cambiar el Wi-Fi.</string>
+    <string name="pin_confirm_title">Vuelve a introducir el PIN</string>
+    <string name="pin_confirm_body">Solo para asegurarnos.</string>
+    <string name="pin_mismatch">Los PIN no coinciden. Elige uno de nuevo.</string>
+    <string name="pin_key_delete">Borrar</string>
+    <string name="pin_key_ok">Aceptar</string>
+    <string name="settings_pin">PIN del propietario</string>
+    <string name="settings_pin_off">Desactivado. Cualquiera puede abrir los ajustes.</string>
+    <string name="settings_pin_on">Activado. Ajustes, apagado y Wi-Fi piden el PIN.</string>
+    <string name="settings_pin_set">Establecer un PIN</string>
+    <string name="settings_pin_change">Cambiar PIN</string>
+    <string name="settings_pin_remove">Quitar PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Alguien</string>
+    <string name="join_title">%1$s quiere unirse</string>
+    <string name="join_body_code">%1$s ha introducido el código de %2$s. Si lo permites, %1$s podrá enviar fotos a este marco.</string>
+    <string name="join_body_invited">%1$s ha invitado a %3$s a %2$s. Si lo permites, %3$s podrá enviar fotos a este marco.</string>
+    <string name="join_invited_by">Invitado por %s</string>
+    <string name="join_allow">Permitir</string>
+    <string name="join_deny">No permitir</string>
+    <string name="join_later">Ahora no</string>
+    <string name="join_later_hint">Seguirá en las notificaciones del menú.</string>
+    <string name="join_pill_one">%s quiere unirse</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d persona quiere unirse</item>
+        <item quantity="many">%d de personas quieren unirse</item>
+        <item quantity="other">%d personas quieren unirse</item>
+    </plurals>
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_empty">Todo al día</string>
+    <string name="notifications_empty_body">No hay nada pendiente.</string>
+    <string name="menu_notifications">Notificaciones</string>
+    <string name="action_close">Cerrar</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Sin conexión a internet</string>
+    <string name="status_card_offline_body">Las fotos del marco se siguen mostrando. Las nuevas llegarán en cuanto vuelva la conexión.</string>
+    <string name="status_card_server_title">No se puede conectar con el servidor de fotos</string>
+    <string name="status_card_server_body">El Wi-Fi funciona, pero el servidor no responde. Las fotos nuevas llegarán cuando vuelva.</string>
+    <string name="status_card_portal_title">Este Wi-Fi pide iniciar sesión</string>
+    <string name="status_card_portal_body">Abre la página de inicio de sesión de la red para conectar el marco.</string>
+    <string name="status_card_portal_action">Iniciar sesión</string>
+    <string name="status_card_storage_title">El marco está casi lleno</string>
+    <string name="status_card_storage_body">Se han quitado fotos antiguas del marco para hacer sitio; siguen a salvo en el servidor. Puede que las fotos nuevas esperen hasta que haya espacio.</string>
+    <string name="portal_title">Inicia sesión en el Wi-Fi</string>
+    <string name="portal_body">Se cerrará sola cuando el marco tenga conexión.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">¿En qué zona horaria está el marco?</string>
+    <string name="setup_tz_body">Para que el reloj, la fecha y el horario nocturno sean correctos.</string>
+    <string name="setup_tz_suggested">Sugerida</string>
+    <string name="setup_tz_all">Todas las zonas horarias</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">América</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">África</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacífico</string>
+    <string name="tz_region_atlantic">Atlántico</string>
+    <string name="tz_region_indian">Océano Índico</string>
+    <string name="tz_region_antarctica">Antártida</string>
+    <string name="setup_update_checking">Buscando una versión más reciente…</string>
+    <string name="setup_update_checking_body">El marco comprueba que tiene la última versión de kinframe antes de empezar.</string>
+    <string name="setup_update_downloading">Descargando la versión %s</string>
+    <string name="setup_update_downloading_body">Se instala justo después. Puedes saltar este paso; el marco se actualizará más tarde.</string>
+    <string name="setup_update_installing">Instalando la versión %s</string>
+    <string name="setup_update_installing_body">En un momento el marco se reinicia solo y sigue la configuración donde la dejaste.</string>
+    <string name="setup_update_current">kinframe está actualizado</string>
+    <string name="setup_update_current_body">Vamos al último paso.</string>
+    <string name="setup_update_failed">No se han podido buscar actualizaciones</string>
+    <string name="setup_update_failed_body">No pasa nada: el marco lo volverá a intentar más tarde y se actualizará solo.</string>
+    <string name="setup_update_skip">Omitir por ahora</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Hoy hace %d año</item>
+        <item quantity="many">Hoy hace %d de años</item>
+        <item quantity="other">Hoy hace %d años</item>
+    </plurals>
+    <string name="transition_kenburns">Zoom lento</string>
+    <string name="settings_collage">Varias fotos a la vez (collage)</string>
+    <string name="settings_collage_max">Fotos por pantalla</string>
+    <string name="settings_pair_portraits">Mostrar dos fotos verticales juntas</string>
+    <string name="settings_on_this_day">Mostrar recuerdos de este día en años anteriores</string>
+    <string name="settings_video">Vídeos</string>
+    <string name="settings_video_autoplay">Reproducir vídeos automáticamente</string>
+    <string name="settings_video_playback">Después de un vídeo</string>
+    <string name="video_once_hold">Reproducir una vez y esperar</string>
+    <string name="video_loop">Repetir sin parar</string>
+    <string name="video_once_advance">Reproducir una vez y pasar al siguiente</string>
+    <string name="settings_video_volume">Volumen de los vídeos</string>
+    <string name="settings_video_auto_mute">Silenciar si nadie ha tocado el marco durante</string>
+    <string name="video_auto_mute_off">Nunca</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

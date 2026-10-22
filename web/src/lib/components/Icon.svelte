@@ -68,6 +68,9 @@
 	} as const;
 
 	export type IconName = keyof typeof ICONS;
+
+	/** Directional icons that flip in right-to-left languages (Arabic, Hebrew). */
+	const MIRRORED: ReadonlySet<IconName> = new Set<IconName>(['chevronLeft', 'chevronRight', 'logout', 'send', 'prev', 'next']);
 </script>
 
 <script lang="ts">
@@ -82,6 +85,7 @@
 
 <svg
 	class="icon {cls}"
+	class:mirror={MIRRORED.has(name)}
 	width={size}
 	height={size}
 	viewBox="0 0 24 24"
@@ -103,5 +107,8 @@
 		flex: none;
 		display: inline-block;
 		vertical-align: middle;
+	}
+	:global([dir='rtl']) .mirror {
+		transform: scaleX(-1);
 	}
 </style>

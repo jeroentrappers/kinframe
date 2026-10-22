@@ -1,0 +1,14 @@
+{
+ "footer": "Il codice scade tra 10 minuti. Se non l’hai richiesto, puoi ignorare questa email.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Il tuo codice di accesso a kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per accedere a kinframe:"},
+  "Register": {"subject": "Il tuo codice di registrazione a kinframe: {{code}}", "intro": "Ti diamo il benvenuto in kinframe!\n\nUsa questo codice per completare la creazione del tuo account:"},
+  "ForgotPassword": {"subject": "Il tuo codice di recupero dell’account kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per recuperare il tuo account kinframe:"},
+  "Generic": {"subject": "Il tuo codice di verifica kinframe: {{code}}", "intro": "Ciao,\n\nil tuo codice di verifica kinframe è:"},
+  "BindNewIdentifier": {"subject": "Conferma la tua nuova email per kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per confermare il nuovo indirizzo email del tuo account kinframe:"},
+  "UserPermissionValidation": {"subject": "Il tuo codice di verifica kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per confermare che sei tu prima di modificare il tuo account kinframe:"},
+  "MfaVerification": {"subject": "Il tuo codice di verifica kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per completare l’accesso a kinframe:"},
+  "BindMfa": {"subject": "Il tuo codice di verifica kinframe: {{code}}", "intro": "Ciao,\n\nusa questo codice per attivare la verifica in due passaggi su kinframe:"}
+ }
+}

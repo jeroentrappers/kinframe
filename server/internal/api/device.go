@@ -344,7 +344,7 @@ func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentT
 			s.writeError(w, r, err)
 			return
 		}
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	defer obj.Close()
@@ -422,7 +422,7 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	d := deviceFrom(ctx)
 	pid, err := uuid.Parse(r.PathValue("placementId"))
 	if err != nil || d.FrameID == nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	p, err := s.st.GetPlacementRow(ctx, s.st.Q(), pid, d.FrameID)
@@ -433,19 +433,19 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	variant := r.URL.Query().Get("variant")
 	if variant == "avatar" {
 		if p.SenderAvatarKey == nil {
-			problem.Write(w, problem.New(problem.NotFound, "sender has no avatar"))
+			problem.Write(w, r, problem.New(problem.NotFound, "sender has no avatar"))
 			return
 		}
 		s.serveBlob(w, r, *p.SenderAvatarKey, "image/webp", "", "private, max-age=86400")
 		return
 	}
 	if variant != "" && variant != "display" && variant != "poster" {
-		problem.Write(w, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
 	rend, err := s.st.GetRendition(ctx, p.MediaID, worker.Variant(p.Kind, deviceTarget(d)))
 	if err == store.ErrNotFound {
-		problem.Write(w, problem.New(problem.NotFound, "rendition not ready"))
+		problem.Write(w, r, problem.New(problem.NotFound, "rendition not ready"))
 		return
 	}
 	if err != nil {
@@ -454,7 +454,7 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	}
 	if variant == "poster" {
 		if rend.PosterKey == nil {
-			problem.Write(w, problem.New(problem.NotFound, "no poster"))
+			problem.Write(w, r, problem.New(problem.NotFound, "no poster"))
 			return
 		}
 		s.serveBlob(w, r, *rend.PosterKey, "image/webp", "", "private, max-age=86400")

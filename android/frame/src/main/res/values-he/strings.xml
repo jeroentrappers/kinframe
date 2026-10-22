@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">מסגרת תמונות</string>
+
+    <!-- Common actions -->
+    <string name="action_back">חזרה</string>
+    <string name="action_cancel">ביטול</string>
+    <string name="action_continue">המשך</string>
+    <string name="action_try_again">ניסיון חוזר</string>
+    <string name="action_undo">ביטול פעולה</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">ברוכים הבאים ל-kinframe</string>
+    <string name="setup_language_body">בחירת השפה של המסגרת הזו.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">חיבור ל-Wi-Fi</string>
+    <string name="setup_wifi_body">המסגרת צריכה Wi-Fi כדי לקבל תמונות. אחרי שהן מגיעות, הן מוצגות גם בלי חיבור.</string>
+    <string name="wifi_connected_to">מחובר אל %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">לא מחובר</string>
+    <string name="wifi_not_connected_hint">יש לבחור רשת כדי להמשיך.</string>
+    <string name="wifi_no_internet">מחובר, אבל עדיין אין אינטרנט</string>
+    <string name="wifi_signal">אות: %1$s</string>
+    <string name="wifi_open_settings">הגדרות Wi-Fi</string>
+    <string name="wifi_networks">רשתות בסביבה</string>
+    <string name="wifi_scanning">מחפש רשתות…</string>
+    <string name="wifi_permission_body">כדי להציג כאן רשתות, Android צריכה הרשאה לסרוק רשתות Wi-Fi.</string>
+    <string name="wifi_show_networks">הצגת רשתות</string>
+    <string name="wifi_password">סיסמה</string>
+    <string name="wifi_join">התחברות</string>
+    <string name="signal_0">חלש מאוד</string>
+    <string name="signal_1">חלש</string>
+    <string name="signal_2">סביר</string>
+    <string name="signal_3">טוב</string>
+    <string name="signal_4">מצוין</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">בחירת שרת</string>
+    <string name="setup_server_body">התמונות עוברות דרך שרת kinframe. אפשר להשתמש בשרת kinframe החינמי, או בשרת שהמשפחה מפעילה.</string>
+    <string name="server_default_body">חינמי ובקוד פתוח. מומלץ.</string>
+    <string name="server_custom">שימוש בשרת משלכם</string>
+    <string name="server_custom_body">למשפחות שמארחות את kinframe בעצמן.</string>
+    <string name="server_address">כתובת השרת</string>
+    <string name="server_check">בדיקת השרת</string>
+    <string name="server_checking">בודק את השרת…</string>
+    <string name="server_version">גרסה %1$s</string>
+    <string name="server_insecure">לא מוצפן</string>
+    <string name="server_error_invalid">זו לא נראית כמו כתובת אינטרנט. אפשר לנסות משהו כמו https://frames.example.org.</string>
+    <string name="server_error_unreachable">אין גישה לשרת הזה. יש לבדוק את הכתובת ושהמסגרת מחוברת לרשת.</string>
+    <string name="server_error_not_kinframe">השרת ענה, אבל הוא לא שרת kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">מכינים את המסגרת…</string>
+    <string name="enroll_body">זה לוקח כמה שניות.</string>
+    <string name="enroll_failed_title">רישום המסגרת נכשל</string>
+    <string name="enroll_failed_body">תשובת השרת: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">חיבור המסגרת למשפחה</string>
+    <string name="code_step1">לפתוח את אפליקציית kinframe, או את %1$s בדפדפן</string>
+    <string name="code_step2">לבחור באפשרות הוספת מסגרת</string>
+    <string name="code_step3">להזין את הקוד הזה, או לסרוק את קוד ה-QR</string>
+    <string name="code_valid_for">בתוקף למשך %1$s</string>
+    <string name="code_waiting">ממתין שמישהו יזין את הקוד</string>
+    <string name="code_offline_title">המסגרת לא מחוברת</string>
+    <string name="code_offline_body">קוד מסגרת דורש חיבור לאינטרנט. יש לבדוק את ה-Wi-Fi.</string>
+    <string name="code_error_title">לא ניתן לקבל קוד מסגרת</string>
+    <string name="code_error_body">השרת לא ענה. המסגרת ממשיכה לנסות.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">מחובר אל %1$s</string>
+    <string name="celebrate_title_anon">מחובר</string>
+    <string name="celebrate_body">תמונות שנשלחות למסגרת הזו יופיעו כאן תוך שניות.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d שע׳ %2$d דק׳</string>
+    <string name="duration_min">%1$d דק׳</string>
+    <string name="date_today">היום</string>
+    <string name="date_yesterday">אתמול</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">לפני יום אחד</item>
+        <item quantity="two">לפני %d ימים</item>
+        <item quantity="other">לפני %d ימים</item>
+    </plurals>
+    <string name="interval_s">%1$d שנ׳</string>
+    <string name="interval_min">%1$d דק׳</string>
+    <string name="interval_h">%1$d שע׳</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">נערך</string>
+    <string name="unable_photo">לא ניתן להציג את התמונה הזו</string>
+    <string name="unable_video">לא ניתן להפעיל את הסרטון הזה. אפשר לבקש מהשולח לשלוח אותו שוב.</string>
+    <plurals name="new_photos">
+        <item quantity="one">תמונה חדשה אחת</item>
+        <item quantity="two">%d תמונות חדשות</item>
+        <item quantity="other">%d תמונות חדשות</item>
+    </plurals>
+    <string name="status_offline">לא מחובר</string>
+    <string name="status_online">מחובר · %1$s</string>
+    <string name="status_server_unreachable">אין גישה לשרת</string>
+    <string name="identify_this_is">זו המסגרת</string>
+    <string name="snack_hidden">התמונה הוסתרה</string>
+    <string name="snack_deleted">התמונה נמחקה</string>
+    <string name="menu_settings">הגדרות</string>
+    <string name="menu_power">הפעלה</string>
+    <string name="menu_hide">הסתרה</string>
+    <string name="menu_delete">מחיקה</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">עדיין אין תמונות</string>
+    <string name="empty_body">תמונות וסרטונים שנשלחים מהאפליקציה או מהאתר של kinframe יופיעו כאן תוך שניות.</string>
+    <string name="empty_code_title">הוספת המשפחה עם הקוד הזה</string>
+    <string name="empty_code_body">אפשר להזין אותו באפליקציית kinframe, או לסרוק את קוד ה-QR.</string>
+    <string name="empty_hidden_title">כל התמונות מוסתרות</string>
+    <string name="empty_hidden_body">תמונות מוסתרות נשארות בספרייה. אפשר להציג אותן שוב מאפליקציית kinframe.</string>
+    <string name="empty_downloading_title">התמונות בדרך</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">תמונה אחת בהורדה.</item>
+        <item quantity="two">%d תמונות בהורדה.</item>
+        <item quantity="other">%d תמונות בהורדה.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">הפעלה</string>
+    <string name="power_sleep">שינה</string>
+    <string name="power_sleep_body">המסך כבוי עד שנוגעים בו.</string>
+    <string name="power_restart">הפעלה מחדש</string>
+    <string name="power_restart_body">הפעלת המסגרת מחדש.</string>
+    <string name="power_off">כיבוי</string>
+    <string name="power_off_body">כיבוי בטוח לפני ניתוק מהחשמל.</string>
+    <string name="shutting_down_title">מכבה…</string>
+    <string name="restarting_title">מפעיל מחדש…</string>
+    <string name="shutting_down_body">הכול נשמר בבטחה.</string>
+    <string name="safe_title">עכשיו אפשר לנתק מהחשמל</string>
+    <string name="safe_body">הכול נשמר. כדי להשתמש במסגרת שוב, יש ללחוץ על לחצן ההפעלה או לחבר אותה שוב לחשמל.</string>
+    <string name="safe_body_noroot">kinframe שמרה הכול. עכשיו אפשר לנתק את המסגרת מהחשמל.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">ל-kinframe הייתה בעיה בהצגת התמונות</string>
+    <string name="recovery_body">היא נעצרה באופן לא צפוי כמה פעמים ברצף. אפשר לנסות שוב, או לנקות את התמונות שהורדו. הן יורדו שוב מהשרת, שום דבר לא הולך לאיבוד.</string>
+    <string name="recovery_clear">ניקוי התמונות שהורדו</string>
+
+    <!-- Settings -->
+    <string name="settings_title">הגדרות</string>
+    <string name="settings_language">שפה</string>
+    <string name="settings_slideshow">מצגת</string>
+    <string name="settings_interval">משך הצגת כל תמונה</string>
+    <string name="settings_transition">מעבר</string>
+    <string name="transition_crossfade">עמעום</string>
+    <string name="transition_slide">החלקה</string>
+    <string name="settings_order">סדר</string>
+    <string name="order_received">החדשות ביותר שהתקבלו</string>
+    <string name="order_taken">תאריך הצילום</string>
+    <string name="order_shuffle">ערבוב</string>
+    <string name="settings_reverse">הישנות קודם</string>
+    <string name="settings_fill">גודל התמונה</string>
+    <string name="fill_fill">מילוי המסך</string>
+    <string name="fill_fit">הצגת התמונה כולה</string>
+    <string name="settings_display">מסך</string>
+    <string name="settings_brightness">בהירות</string>
+    <string name="settings_brightness_mode">בהירות אוטומטית</string>
+    <string name="brightness_manual">קבועה</string>
+    <string name="brightness_sun">לפי השמש</string>
+    <string name="settings_sleep">שינה</string>
+    <string name="settings_sleep_enabled">כיבוי המסך בלילה</string>
+    <string name="settings_sleep_at">שינה בשעה</string>
+    <string name="settings_wake_at">התעוררות בשעה</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">ועוד לוח זמנים אחד, שמנוהל באפליקציית kinframe</item>
+        <item quantity="two">ועוד %d לוחות זמנים, שמנוהלים באפליקציית kinframe</item>
+        <item quantity="other">ועוד %d לוחות זמנים, שמנוהלים באפליקציית kinframe</item>
+    </plurals>
+    <string name="settings_about">המסגרת הזו</string>
+    <string name="about_frame">שם</string>
+    <string name="about_server">שרת</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">גרסת האפליקציה</string>
+    <string name="about_android_settings">הגדרות Android</string>
+    <string name="settings_updates">עדכונים</string>
+    <string name="updates_channel">ערוץ</string>
+    <string name="updates_channel_stable">יציב</string>
+    <string name="updates_channel_beta">בטא (גרסאות חדשות מוקדם יותר)</string>
+    <string name="updates_check">בדיקת עדכונים</string>
+    <string name="updates_install_now">התקנה עכשיו</string>
+    <string name="updates_checking">מחפש עדכונים…</string>
+    <string name="updates_up_to_date">המסגרת מעודכנת.</string>
+    <string name="updates_downloading">מוריד את גרסה %1$s… %2$d%%</string>
+    <string name="updates_waiting">גרסה %1$s מוכנה. היא תותקן כשאף אחד לא משתמש במסגרת.</string>
+    <string name="updates_installing">מתקין את גרסה %1$s. המסגרת תופעל מחדש בעוד רגע.</string>
+    <string name="updates_failed">העדכון נכשל. המסגרת תנסה שוב מאוחר יותר.</string>
+    <string name="update_notice_updated">עודכן לגרסה %1$s</string>
+    <string name="update_notice_rolled_back">בגרסה החדשה היו בעיות, ולכן המסגרת חזרה לגרסה הקודמת.</string>
+    <string name="update_notice_needs_user">עדכון מוכן. יש להקיש על התקנה כדי להמשיך.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">הצגת התחזית</string>
+    <string name="weather_close">סגירה</string>
+    <string name="weather_now">עכשיו</string>
+    <string name="weather_today">היום</string>
+    <string name="weather_feels_like">מרגיש כמו %1$s</string>
+    <string name="weather_high_low">מקס׳ %1$s · מינ׳ %2$s</string>
+    <string name="weather_wind">רוח</string>
+    <string name="weather_humidity">לחות</string>
+    <string name="weather_sunrise">זריחה</string>
+    <string name="weather_sunset">שקיעה</string>
+    <string name="weather_next_hours">24 השעות הבאות</string>
+    <string name="weather_next_days">תחזית ל-7 ימים</string>
+    <string name="weather_updated">עודכן %1$s</string>
+    <string-array name="weather_compass">
+        <item>צ</item>
+        <item>צ-מז</item>
+        <item>מז</item>
+        <item>ד-מז</item>
+        <item>ד</item>
+        <item>ד-מע</item>
+        <item>מע</item>
+        <item>צ-מע</item>
+    </string-array>
+    <string name="wmo_clear_day">שמשי</string>
+    <string name="wmo_clear_night">בהיר</string>
+    <string name="wmo_mainly_clear_day">שמשי ברובו</string>
+    <string name="wmo_mainly_clear_night">בהיר ברובו</string>
+    <string name="wmo_partly_cloudy">מעונן חלקית</string>
+    <string name="wmo_overcast">מעונן</string>
+    <string name="wmo_fog">ערפל</string>
+    <string name="wmo_rime_fog">ערפל קפוא</string>
+    <string name="wmo_drizzle_light">טפטוף קל</string>
+    <string name="wmo_drizzle">טפטוף</string>
+    <string name="wmo_drizzle_dense">טפטוף כבד</string>
+    <string name="wmo_freezing_drizzle">טפטוף קפוא</string>
+    <string name="wmo_rain_light">גשם קל</string>
+    <string name="wmo_rain">גשם</string>
+    <string name="wmo_rain_heavy">גשם כבד</string>
+    <string name="wmo_freezing_rain">גשם קפוא</string>
+    <string name="wmo_snow_light">שלג קל</string>
+    <string name="wmo_snow">שלג</string>
+    <string name="wmo_snow_heavy">שלג כבד</string>
+    <string name="wmo_snow_grains">גרגרי שלג</string>
+    <string name="wmo_showers_light">ממטרים קלים</string>
+    <string name="wmo_showers">ממטרים</string>
+    <string name="wmo_showers_violent">ממטרים עזים</string>
+    <string name="wmo_snow_showers_light">ממטרי שלג קלים</string>
+    <string name="wmo_snow_showers">ממטרי שלג</string>
+    <string name="wmo_thunderstorm">סופת רעמים</string>
+    <string name="wmo_thunderstorm_hail">סופת רעמים עם ברד</string>
+</resources>

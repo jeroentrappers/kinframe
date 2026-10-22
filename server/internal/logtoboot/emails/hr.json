@@ -1,0 +1,14 @@
+{
+ "footer": "Kôd istječe za 10 minuta. Ako ga niste zatražili, možete zanemariti ovu poruku e-pošte.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Vaš kôd za prijavu u kinframe: {{code}}", "intro": "Pozdrav,\n\novim se kôdom prijavite u kinframe:"},
+  "Register": {"subject": "Vaš kôd za registraciju u kinframe: {{code}}", "intro": "Dobro došli u kinframe!\n\nOvim kôdom dovršite izradu računa:"},
+  "ForgotPassword": {"subject": "Vaš kôd za oporavak kinframe računa: {{code}}", "intro": "Pozdrav,\n\novim kôdom oporavite svoj kinframe račun:"},
+  "Generic": {"subject": "Vaš kinframe kôd za potvrdu: {{code}}", "intro": "Pozdrav,\n\nvaš kinframe kôd za potvrdu je:"},
+  "BindNewIdentifier": {"subject": "Potvrdite novu adresu e-pošte za kinframe: {{code}}", "intro": "Pozdrav,\n\novim kôdom potvrdite novu adresu e-pošte za svoj kinframe račun:"},
+  "UserPermissionValidation": {"subject": "Vaš kinframe kôd za potvrdu: {{code}}", "intro": "Pozdrav,\n\novim kôdom potvrdite da ste to vi prije promjene kinframe računa:"},
+  "MfaVerification": {"subject": "Vaš kinframe kôd za potvrdu: {{code}}", "intro": "Pozdrav,\n\novim kôdom dovršite prijavu u kinframe:"},
+  "BindMfa": {"subject": "Vaš kinframe kôd za potvrdu: {{code}}", "intro": "Pozdrav,\n\novim kôdom uključite potvrdu u dva koraka za kinframe:"}
+ }
+}

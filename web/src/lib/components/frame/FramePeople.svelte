@@ -487,7 +487,7 @@
 	}
 	@media (max-width: 520px) {
 		.perm-panel {
-			padding-left: 0;
+			padding-inline-start: 0;
 		}
 	}
 	.perm-panel .btn {
@@ -545,7 +545,7 @@
 		margin-bottom: 4px;
 	}
 	.you {
-		margin-left: 0.35em;
+		margin-inline-start: 0.35em;
 		font-weight: 500;
 	}
 	.inv-icon {

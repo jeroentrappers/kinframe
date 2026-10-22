@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- קוד PIN של הבעלים -->
+    <string name="pin_enter_title">יש להזין את קוד ה-PIN של הבעלים</string>
+    <string name="pin_reason_settings">כדי לפתוח את ההגדרות</string>
+    <string name="pin_reason_exit">כדי לצאת מ-kinframe</string>
+    <string name="pin_reason_wifi">כדי לשנות את ה-Wi-Fi</string>
+    <string name="pin_reason_power_off">כדי לכבות את המסגרת</string>
+    <string name="pin_reason_restart">כדי להפעיל את המסגרת מחדש</string>
+    <string name="pin_reason_server">כדי לשנות את השרת</string>
+    <string name="pin_reason_reset">כדי לאפס את המסגרת</string>
+    <string name="pin_checking">בבדיקה…</string>
+    <string name="pin_wrong">קוד ה-PIN שגוי.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">קוד ה-PIN שגוי. נשאר עוד ניסיון אחד לפני הפסקה קצרה.</item>
+        <item quantity="two">קוד ה-PIN שגוי. נשארו עוד %d ניסיונות לפני הפסקה קצרה.</item>
+        <item quantity="other">קוד ה-PIN שגוי. נשארו עוד %d ניסיונות לפני הפסקה קצרה.</item>
+    </plurals>
+    <string name="pin_locked">יותר מדי ניסיונות שגויים. אפשר לנסות שוב בעוד %s.</string>
+    <string name="pin_forgot">שכחת את קוד ה-PIN? הבעלים של המסגרת יכולים להסיר אותו באפליקציית kinframe, בהגדרות של המסגרת הזו.</string>
+    <string name="pin_new_title">בחירת קוד PIN</string>
+    <string name="pin_new_body">4 עד 6 ספרות. הקוד יידרש כדי לפתוח את ההגדרות, לכבות את המסגרת או לשנות את ה-Wi-Fi.</string>
+    <string name="pin_confirm_title">יש להזין שוב את קוד ה-PIN</string>
+    <string name="pin_confirm_body">רק כדי לוודא.</string>
+    <string name="pin_mismatch">הקודים לא תאמו. יש לבחור קוד שוב.</string>
+    <string name="pin_key_delete">מחיקה</string>
+    <string name="pin_key_ok">אישור</string>
+    <string name="settings_pin">קוד PIN של הבעלים</string>
+    <string name="settings_pin_off">כבוי. כל מי שליד המסגרת יכול לפתוח את ההגדרות.</string>
+    <string name="settings_pin_on">פעיל. הגדרות, הפעלה ו-Wi-Fi דורשים את קוד ה-PIN.</string>
+    <string name="settings_pin_set">הגדרת קוד PIN</string>
+    <string name="settings_pin_change">שינוי קוד PIN</string>
+    <string name="settings_pin_remove">הסרת קוד PIN</string>
+    <!-- בקשות הצטרפות והתראות -->
+    <string name="join_someone">מישהו</string>
+    <string name="join_title">%1$s רוצה להצטרף</string>
+    <string name="join_body_code">הקוד של המסגרת \"%2$s\" הוזן על ידי %1$s. באישור הבקשה, תתאפשר ל-%1$s שליחת תמונות למסגרת הזו.</string>
+    <string name="join_body_invited">הזמנה ל-%3$s למסגרת \"%2$s\" נשלחה על ידי %1$s. באישור הבקשה, תתאפשר ל-%3$s שליחת תמונות למסגרת הזו.</string>
+    <string name="join_invited_by">הזמנה מאת %s</string>
+    <string name="join_allow">אישור</string>
+    <string name="join_deny">דחייה</string>
+    <string name="join_later">לא עכשיו</string>
+    <string name="join_later_hint">הבקשה תישאר בהתראות שבתפריט.</string>
+    <string name="join_pill_one">%s רוצה להצטרף</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">אדם אחד רוצה להצטרף</item>
+        <item quantity="two">%d אנשים רוצים להצטרף</item>
+        <item quantity="other">%d אנשים רוצים להצטרף</item>
+    </plurals>
+    <string name="notifications_title">התראות</string>
+    <string name="notifications_empty">אין חדש</string>
+    <string name="notifications_empty_body">שום דבר לא ממתין.</string>
+    <string name="menu_notifications">התראות</string>
+    <string name="action_close">סגירה</string>
+    <!-- כרטיסי מצב במצגת -->
+    <string name="status_card_offline_title">אין חיבור לאינטרנט</string>
+    <string name="status_card_offline_body">התמונות שבמסגרת ממשיכות להתחלף. תמונות חדשות יגיעו ברגע שהחיבור יחזור.</string>
+    <string name="status_card_server_title">אין גישה לשרת התמונות</string>
+    <string name="status_card_server_body">ה-Wi-Fi עובד, אבל השרת לא עונה. תמונות חדשות יגיעו כשהוא יחזור.</string>
+    <string name="status_card_portal_title">רשת ה-Wi-Fi הזו דורשת התחברות</string>
+    <string name="status_card_portal_body">יש לפתוח את דף ההתחברות של הרשת כדי לחבר את המסגרת.</string>
+    <string name="status_card_portal_action">התחברות</string>
+    <string name="status_card_storage_title">המסגרת כמעט מלאה</string>
+    <string name="status_card_storage_body">תמונות ישנות הוסרו מהמסגרת כדי לפנות מקום; הן נשמרות בבטחה בשרת. תמונות חדשות אולי ימתינו עד שיתפנה מקום.</string>
+    <string name="portal_title">התחברות ל-Wi-Fi</string>
+    <string name="portal_body">החלון ייסגר מעצמו כשהמסגרת תתחבר.</string>
+    <!-- הגדרה: אזור זמן ועדכון -->
+    <string name="setup_tz_title">באיזה אזור זמן נמצאת המסגרת?</string>
+    <string name="setup_tz_body">כדי שהשעה, התאריך ותזמון הלילה יהיו נכונים.</string>
+    <string name="setup_tz_suggested">מוצע</string>
+    <string name="setup_tz_all">כל אזורי הזמן</string>
+    <string name="tz_region_europe">אירופה</string>
+    <string name="tz_region_america">אמריקה</string>
+    <string name="tz_region_asia">אסיה</string>
+    <string name="tz_region_africa">אפריקה</string>
+    <string name="tz_region_australia">אוסטרליה</string>
+    <string name="tz_region_pacific">האוקיינוס השקט</string>
+    <string name="tz_region_atlantic">האוקיינוס האטלנטי</string>
+    <string name="tz_region_indian">האוקיינוס ההודי</string>
+    <string name="tz_region_antarctica">אנטארקטיקה</string>
+    <string name="setup_update_checking">חיפוש גרסה חדשה יותר…</string>
+    <string name="setup_update_checking_body">המסגרת מוודאת שהיא מריצה את הגרסה האחרונה של kinframe לפני שמתחילים.</string>
+    <string name="setup_update_downloading">הורדת גרסה %s</string>
+    <string name="setup_update_downloading_body">ההתקנה תתחיל מיד אחר כך. אפשר לדלג; המסגרת תתעדכן בעצמה מאוחר יותר.</string>
+    <string name="setup_update_installing">התקנת גרסה %s</string>
+    <string name="setup_update_installing_body">המסגרת תופעל מחדש בעוד רגע ותמשיך בהגדרה מאותה נקודה.</string>
+    <string name="setup_update_current">kinframe מעודכנת</string>
+    <string name="setup_update_current_body">ממשיכים לשלב האחרון.</string>
+    <string name="setup_update_failed">לא ניתן לבדוק אם יש עדכונים</string>
+    <string name="setup_update_failed_body">אין בעיה: המסגרת תבדוק שוב מאוחר יותר ותתעדכן בעצמה.</string>
+    <string name="setup_update_skip">דילוג בינתיים</string>
+    <!-- אפשרויות מצגת -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">היום לפני שנה</item>
+        <item quantity="two">היום לפני %d שנים</item>
+        <item quantity="other">היום לפני %d שנים</item>
+    </plurals>
+    <string name="transition_kenburns">זום איטי</string>
+    <string name="settings_collage">כמה תמונות יחד (קולאז׳)</string>
+    <string name="settings_collage_max">תמונות בכל מסך</string>
+    <string name="settings_pair_portraits">הצגת שתי תמונות לאורך זו לצד זו</string>
+    <string name="settings_on_this_day">הצגת זיכרונות מהיום הזה בשנים קודמות</string>
+    <string name="settings_video">סרטונים</string>
+    <string name="settings_video_autoplay">הפעלה אוטומטית של סרטונים</string>
+    <string name="settings_video_playback">אחרי סרטון</string>
+    <string name="video_once_hold">הפעלה פעם אחת ואז המתנה</string>
+    <string name="video_loop">הפעלה חוזרת ברצף</string>
+    <string name="video_once_advance">הפעלה פעם אחת ואז מעבר הלאה</string>
+    <string name="settings_video_volume">עוצמת קול של סרטונים</string>
+    <string name="settings_video_auto_mute">השתקה כשאף אחד לא נגע במסגרת במשך</string>
+    <string name="video_auto_mute_off">אף פעם</string>
+    <string name="video_auto_mute_min">%d דק׳</string>
+</resources>

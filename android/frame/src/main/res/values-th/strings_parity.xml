@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">ป้อน PIN ของเจ้าของ</string>
+    <string name="pin_reason_settings">เพื่อเปิดการตั้งค่า</string>
+    <string name="pin_reason_exit">เพื่อออกจาก kinframe</string>
+    <string name="pin_reason_wifi">เพื่อเปลี่ยน Wi-Fi</string>
+    <string name="pin_reason_power_off">เพื่อปิดกรอบรูป</string>
+    <string name="pin_reason_restart">เพื่อเริ่มกรอบรูปใหม่</string>
+    <string name="pin_reason_server">เพื่อเปลี่ยนเซิร์ฟเวอร์</string>
+    <string name="pin_reason_reset">เพื่อรีเซ็ตกรอบรูป</string>
+    <string name="pin_checking">กำลังตรวจสอบ…</string>
+    <string name="pin_wrong">PIN ไม่ถูกต้อง</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="other">PIN ไม่ถูกต้อง ลองได้อีก %d ครั้งก่อนต้องรอสักครู่</item>
+    </plurals>
+    <string name="pin_locked">ป้อนผิดหลายครั้งเกินไป ลองอีกครั้งใน %s</string>
+    <string name="pin_forgot">ลืม PIN ใช่ไหม เจ้าของกรอบรูปลบ PIN ได้ในแอป kinframe ที่การตั้งค่าของกรอบรูปนี้</string>
+    <string name="pin_new_title">ตั้ง PIN</string>
+    <string name="pin_new_body">ตัวเลข 4 ถึง 6 หลัก จะถูกถามเมื่อเปิดการตั้งค่า ปิดกรอบรูป หรือเปลี่ยน Wi-Fi</string>
+    <string name="pin_confirm_title">ป้อน PIN อีกครั้ง</string>
+    <string name="pin_confirm_body">เพื่อความแน่ใจ</string>
+    <string name="pin_mismatch">PIN ไม่ตรงกัน ตั้งใหม่อีกครั้ง</string>
+    <string name="pin_key_delete">ลบ</string>
+    <string name="pin_key_ok">ตกลง</string>
+    <string name="settings_pin">PIN ของเจ้าของ</string>
+    <string name="settings_pin_off">ปิดอยู่ ใครก็เปิดการตั้งค่าที่กรอบรูปได้</string>
+    <string name="settings_pin_on">เปิดอยู่ การตั้งค่า การเปิดปิดเครื่อง และ Wi-Fi จะถาม PIN</string>
+    <string name="settings_pin_set">ตั้ง PIN</string>
+    <string name="settings_pin_change">เปลี่ยน PIN</string>
+    <string name="settings_pin_remove">ลบ PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">มีคน</string>
+    <string name="join_title">%1$s ขอเข้าร่วม</string>
+    <string name="join_body_code">%1$s ป้อนรหัสของ %2$s หากคุณอนุญาต %1$s จะส่งรูปมายังกรอบรูปนี้ได้</string>
+    <string name="join_body_invited">%1$s เชิญ %3$s เข้าร่วม %2$s หากคุณอนุญาต %3$s จะส่งรูปมายังกรอบรูปนี้ได้</string>
+    <string name="join_invited_by">เชิญโดย %s</string>
+    <string name="join_allow">อนุญาต</string>
+    <string name="join_deny">ไม่อนุญาต</string>
+    <string name="join_later">ไว้ทีหลัง</string>
+    <string name="join_later_hint">คำขอจะยังอยู่ในการแจ้งเตือนในเมนู</string>
+    <string name="join_pill_one">%s ขอเข้าร่วม</string>
+    <plurals name="join_pill_many">
+        <item quantity="other">%d คนขอเข้าร่วม</item>
+    </plurals>
+    <string name="notifications_title">การแจ้งเตือน</string>
+    <string name="notifications_empty">ดูครบหมดแล้ว</string>
+    <string name="notifications_empty_body">ไม่มีอะไรรอคุณอยู่</string>
+    <string name="menu_notifications">การแจ้งเตือน</string>
+    <string name="action_close">ปิด</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">ไม่มีการเชื่อมต่ออินเทอร์เน็ต</string>
+    <string name="status_card_offline_body">รูปที่อยู่ในกรอบรูปยังเล่นต่อไป รูปใหม่จะมาถึงทันทีที่กลับมาออนไลน์</string>
+    <string name="status_card_server_title">ติดต่อเซิร์ฟเวอร์รูปไม่ได้</string>
+    <string name="status_card_server_body">Wi-Fi ใช้งานได้ แต่เซิร์ฟเวอร์ไม่ตอบสนอง รูปใหม่จะมาถึงเมื่อเซิร์ฟเวอร์กลับมา</string>
+    <string name="status_card_portal_title">Wi-Fi นี้ต้องให้ลงชื่อเข้าใช้</string>
+    <string name="status_card_portal_body">เปิดหน้าลงชื่อเข้าใช้ของเครือข่ายเพื่อให้กรอบรูปออนไลน์</string>
+    <string name="status_card_portal_action">ลงชื่อเข้าใช้</string>
+    <string name="status_card_storage_title">กรอบรูปใกล้เต็มแล้ว</string>
+    <string name="status_card_storage_body">รูปเก่าบางส่วนถูกนำออกจากกรอบรูปเพื่อเพิ่มพื้นที่ แต่ยังปลอดภัยอยู่บนเซิร์ฟเวอร์ รูปใหม่อาจต้องรอจนกว่าจะมีพื้นที่</string>
+    <string name="portal_title">ลงชื่อเข้าใช้ Wi-Fi</string>
+    <string name="portal_body">หน้านี้จะปิดเองเมื่อกรอบรูปออนไลน์แล้ว</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">กรอบรูปอยู่ในเขตเวลาใด</string>
+    <string name="setup_tz_body">เพื่อให้นาฬิกา วันที่ และตารางเวลากลางคืนถูกต้อง</string>
+    <string name="setup_tz_suggested">แนะนำ</string>
+    <string name="setup_tz_all">เขตเวลาทั้งหมด</string>
+    <string name="tz_region_europe">ยุโรป</string>
+    <string name="tz_region_america">ทวีปอเมริกา</string>
+    <string name="tz_region_asia">เอเชีย</string>
+    <string name="tz_region_africa">แอฟริกา</string>
+    <string name="tz_region_australia">ออสเตรเลีย</string>
+    <string name="tz_region_pacific">แปซิฟิก</string>
+    <string name="tz_region_atlantic">แอตแลนติก</string>
+    <string name="tz_region_indian">มหาสมุทรอินเดีย</string>
+    <string name="tz_region_antarctica">แอนตาร์กติกา</string>
+    <string name="setup_update_checking">กำลังหาเวอร์ชันใหม่…</string>
+    <string name="setup_update_checking_body">กรอบรูปจะตรวจให้แน่ใจว่าใช้ kinframe เวอร์ชันล่าสุดก่อนเริ่มต้น</string>
+    <string name="setup_update_downloading">กำลังดาวน์โหลดเวอร์ชัน %s</string>
+    <string name="setup_update_downloading_body">จะติดตั้งทันทีหลังจากนั้น คุณข้ามขั้นตอนนี้ได้ แล้วกรอบรูปจะอัปเดตเองภายหลัง</string>
+    <string name="setup_update_installing">กำลังติดตั้งเวอร์ชัน %s</string>
+    <string name="setup_update_installing_body">กรอบรูปจะเริ่มใหม่เองในอีกสักครู่ และตั้งค่าต่อจากจุดเดิม</string>
+    <string name="setup_update_current">kinframe เป็นเวอร์ชันล่าสุดแล้ว</string>
+    <string name="setup_update_current_body">ไปยังขั้นตอนสุดท้าย</string>
+    <string name="setup_update_failed">ตรวจหาอัปเดตไม่ได้</string>
+    <string name="setup_update_failed_body">ไม่เป็นไร กรอบรูปจะตรวจอีกครั้งภายหลังและอัปเดตเอง</string>
+    <string name="setup_update_skip">ข้ามไปก่อน</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="other">วันนี้เมื่อ %d ปีก่อน</item>
+    </plurals>
+    <string name="transition_kenburns">ซูมช้าๆ</string>
+    <string name="settings_collage">หลายรูปพร้อมกัน (คอลลาจ)</string>
+    <string name="settings_collage_max">จำนวนรูปต่อหน้าจอ</string>
+    <string name="settings_pair_portraits">แสดงรูปแนวตั้งสองรูปคู่กัน</string>
+    <string name="settings_on_this_day">แสดงความทรงจำของวันนี้ในปีก่อนๆ</string>
+    <string name="settings_video">วิดีโอ</string>
+    <string name="settings_video_autoplay">เล่นวิดีโออัตโนมัติ</string>
+    <string name="settings_video_playback">หลังจบวิดีโอ</string>
+    <string name="video_once_hold">เล่นครั้งเดียวแล้วรอ</string>
+    <string name="video_loop">เล่นซ้ำไปเรื่อยๆ</string>
+    <string name="video_once_advance">เล่นครั้งเดียวแล้วไปต่อ</string>
+    <string name="settings_video_volume">ระดับเสียงวิดีโอ</string>
+    <string name="settings_video_auto_mute">ปิดเสียงเมื่อไม่มีใครแตะกรอบรูปนาน</string>
+    <string name="video_auto_mute_off">ไม่เลย</string>
+    <string name="video_auto_mute_min">%d นาที</string>
+</resources>

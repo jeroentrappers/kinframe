@@ -171,7 +171,7 @@ func (s *Server) tusRoutes() http.Handler {
 				s.tus.PostFile(w, r)
 				return
 			}
-			problem.Write(w, problem.New(problem.NotFound, "").WithStatus(http.StatusMethodNotAllowed))
+			problem.Write(w, r, problem.New(problem.NotFound, "").WithStatus(http.StatusMethodNotAllowed))
 			return
 		}
 		up, err := s.st.GetUpload(r.Context(), s.st.Q(), id)
@@ -181,7 +181,7 @@ func (s *Server) tusRoutes() http.Handler {
 				return
 			}
 			w.Header().Set("Tus-Resumable", "1.0.0")
-			problem.Write(w, problem.New(problem.UploadNotFound, "").WithStatus(http.StatusNotFound))
+			problem.Write(w, r, problem.New(problem.UploadNotFound, "").WithStatus(http.StatusNotFound))
 			return
 		}
 		if up.ConsumedAt == nil {
@@ -199,7 +199,7 @@ func (s *Server) tusRoutes() http.Handler {
 		case http.MethodDelete:
 			s.tus.DelFile(w, r)
 		default:
-			problem.Write(w, problem.New(problem.NotFound, "").WithStatus(http.StatusMethodNotAllowed))
+			problem.Write(w, r, problem.New(problem.NotFound, "").WithStatus(http.StatusMethodNotAllowed))
 		}
 	}))
 	// Advertise the expiration extension (enforced by the upload janitor).

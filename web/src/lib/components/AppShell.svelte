@@ -95,7 +95,7 @@
 	.desktop-nav {
 		display: none;
 		gap: 2px;
-		margin-left: var(--s-4);
+		margin-inline-start: var(--s-4);
 	}
 	.desktop-nav a {
 		display: inline-flex;
