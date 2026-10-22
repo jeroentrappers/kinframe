@@ -119,11 +119,10 @@ func TestWeatherConfig(t *testing.T) {
 
 func TestAppleAppIDs(t *testing.T) {
 	base := map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1", "KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32), "KINFRAME_DATA_DIR": t.TempDir()}
-	load1 := func(v string) []string {
+	load1 := func(extra map[string]string) []string {
 		t.Helper()
-		env := map[string]string{"KINFRAME_APPLE_APP_IDS": v}
 		c, err := load(func(k string) string {
-			if x, ok := env[k]; ok {
+			if x, ok := extra[k]; ok {
 				return x
 			}
 			return base[k]
@@ -131,15 +130,15 @@ func TestAppleAppIDs(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		return c.AppleAppIDs
+		return c.AppleAppIDs()
 	}
-	if got := load1(""); len(got) != 1 || got[0] != DefaultAppleAppID {
-		t.Fatalf("default = %v", got)
+	if got := load1(nil); got != nil {
+		t.Fatalf("no team = %v", got)
 	}
-	if got := load1(" A.b.c , ,D.e.f "); len(got) != 2 || got[0] != "A.b.c" || got[1] != "D.e.f" {
-		t.Fatalf("list = %v", got)
+	if got := load1(map[string]string{"KINFRAME_APPLE_TEAM_ID": "ABCDE12345"}); len(got) != 1 || got[0] != "ABCDE12345.app.kinframe.family" {
+		t.Fatalf("team = %v", got)
 	}
-	if got := load1("off"); got != nil {
-		t.Fatalf("off = %v", got)
+	if got := load1(map[string]string{"KINFRAME_APPLE_TEAM_ID": "ABCDE12345", "KINFRAME_APPLE_BUNDLE_ID": "org.example.frames"}); got[0] != "ABCDE12345.org.example.frames" {
+		t.Fatalf("bundle = %v", got)
 	}
 }

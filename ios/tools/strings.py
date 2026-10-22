@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds KinframeKit/Resources/Localizable.xcstrings from the web catalogs (web/src/lib/i18n/{en,nl}.ts) plus the
+"""Builds KinframeKit/Resources/Localizable.xcstrings from the web catalogs (web/src/lib/i18n/en.ts, catalogs/nl.ts) plus the
 iOS-only strings in KinframeKit/Resources/ios-strings.json, so the apps share the web app's wording.
 
 Keys, {placeholders} and .one/.other plural keys are kept exactly as on the web. Run after changing either source:
@@ -27,7 +27,7 @@ def parse_ts(path: Path) -> dict:
 
 
 def main() -> int:
-    web = {lang: parse_ts(WEB / f"{lang}.ts") for lang in LANGS}
+    web = {lang: parse_ts(WEB / f"{lang}.ts" if lang == "en" else WEB / "catalogs" / f"{lang}.ts") for lang in LANGS}
     ios = json.loads((RES / "ios-strings.json").read_text(encoding="utf-8"))
     strings = {}
     for key in sorted(set(web["en"]) | set(ios)):

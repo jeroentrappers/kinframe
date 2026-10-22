@@ -19,6 +19,7 @@
 		26600A5C56593CA1D6146FE5 /* ios-strings.json in Resources */ = {isa = PBXBuildFile; fileRef = F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */; };
 		296F26AEB7FFEF5A4724F3D8 /* Tus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B1C9C678F32A644068D20FB /* Tus.swift */; };
 		302DB100309D35A18429E343 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
+		32026BE44AAFB4EC2623EB1B /* HistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F267B5F96C70904A64F27F7 /* HistoryModel.swift */; };
 		341A1DF5A59817073AE3E1B5 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
 		39FA7495F1680355C89C78CF /* AddFrameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15775F535C5777340E31FC52 /* AddFrameModel.swift */; };
 		3BD763E2913E184F95CFE943 /* Types+Operations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */; };
@@ -175,6 +176,7 @@
 		83C213A483FF05045B58A478 /* ServerSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSignIn.swift; sourceTree = "<group>"; };
 		8420C512CD5E11E9785C7181 /* KinframeShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KinframeShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B1C9C678F32A644068D20FB /* Tus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tus.swift; sourceTree = "<group>"; };
+		8F267B5F96C70904A64F27F7 /* HistoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryModel.swift; sourceTree = "<group>"; };
 		9269194C06CBB80AC1BE86E0 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistrar.swift; sourceTree = "<group>"; };
 		92716D11006FEFDA7298A9A8 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		93993AAB7D50559BF46380E5 /* ItemEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemEditorSheet.swift; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 		AF42100EEAEA2F25F27F7AFB /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		B217416F0E56EE8EB3F2B4DC /* Kinframe.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kinframe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B280F2554010A1BAEF855D98 /* KinframeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KinframeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B3A0A4551FE36F447D579235 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		B68564A9DE041D7F48543CE1 /* Delivery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Delivery.swift; sourceTree = "<group>"; };
 		B76DDBD3388B06C515D1CE58 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		C014E862C884180FF6184437 /* Outbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Outbox.swift; sourceTree = "<group>"; };
@@ -292,6 +295,7 @@
 				68C9C0F8EC4D4CBC1DF6DC7A /* App */,
 				66DD1B49EED53B5F816A6CB8 /* Components */,
 				413071551E1954CCAF46186C /* Frames */,
+				8DD9893B95B69B948C81D6E8 /* History */,
 				812083E2CBB2521212647459 /* Onboarding */,
 				FE8493271A66B02022D9FF39 /* Resources */,
 				8D74BC7318A2C93301F43FD4 /* Send */,
@@ -428,6 +432,22 @@
 			path = Send;
 			sourceTree = "<group>";
 		};
+		8DD9893B95B69B948C81D6E8 /* History */ = {
+			isa = PBXGroup;
+			children = (
+				8F267B5F96C70904A64F27F7 /* HistoryModel.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		969D162A63C1423293F8D8FD /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				B3A0A4551FE36F447D579235 /* Signing.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		CF3C1DB7038CF04238CBEAAA /* KinframeKit */ = {
 			isa = PBXGroup;
 			children = (
@@ -445,6 +465,7 @@
 		D8E8EF183C8F276EAB6C7E6A = {
 			isa = PBXGroup;
 			children = (
+				969D162A63C1423293F8D8FD /* Config */,
 				4BB2A5CDC9DC2E9E0BEE536F /* Kinframe */,
 				CF3C1DB7038CF04238CBEAAA /* KinframeKit */,
 				5D850D11837E783E55F4D405 /* KinframeShare */,
@@ -575,19 +596,19 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					21754D8BB1D4D7E463768693 = {
-						DevelopmentTeam = TEAMID;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					7981D887B2158929896AD7E3 = {
-						DevelopmentTeam = TEAMID;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					883A68CF0554FFDAD7BA84BC = {
-						DevelopmentTeam = TEAMID;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					C04FB9D14F4D79DC93E5135A = {
-						DevelopmentTeam = TEAMID;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -689,6 +710,7 @@
 				663F3AE52103E378AB8241FB /* ComposeTab.swift in Sources */,
 				97848E2821FF067839B727D4 /* DebugLaunch.swift in Sources */,
 				676DB1C397AE009508C0B6DC /* FramesTab.swift in Sources */,
+				32026BE44AAFB4EC2623EB1B /* HistoryModel.swift in Sources */,
 				A7EFD5CFA75D8B5E17C340C0 /* ItemEditorSheet.swift in Sources */,
 				074309A78F28B248F62FA26B /* KinframeApp.swift in Sources */,
 				4164E1F0C325408BE8330B0B /* OnboardingFlow.swift in Sources */,
@@ -813,6 +835,7 @@
 		};
 		525917A97D4EAF5B09D51C9E /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B3A0A4551FE36F447D579235 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -848,7 +871,6 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = TEAMID;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -879,6 +901,7 @@
 		};
 		7169C652DC2BE28D766A5B4F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B3A0A4551FE36F447D579235 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -914,7 +937,6 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = TEAMID;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;

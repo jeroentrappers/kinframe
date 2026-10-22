@@ -73,10 +73,11 @@ type Config struct {
 	FrameReleasesDir      string // optional drop-in directory of APKs
 	FrameReleasesInterval time.Duration
 
-	// AppleAppIDs are the iOS apps (<team id>.<bundle id>) allowed to open this
-	// server's join and invite links as Universal Links. Empty disables
-	// /.well-known/apple-app-site-association.
-	AppleAppIDs []string
+	// Apple Developer Team ID and bundle id of the iOS family app, for
+	// /.well-known/apple-app-site-association (Universal Links for join and
+	// invite links). An empty team ID disables the file.
+	AppleTeamID   string
+	AppleBundleID string
 
 	// Weather (Open-Meteo). Empty WeatherURL disables weather and /v1/geocode.
 	WeatherURL     string
@@ -168,7 +169,8 @@ func load(get func(string) string) (*Config, error) {
 		FrameReleasesDir:      env("KINFRAME_FRAME_RELEASES_DIR", ""),
 		FrameReleasesInterval: time.Duration(intv("KINFRAME_FRAME_RELEASES_POLL_MINUTES", 30)) * time.Minute,
 	}
-	c.AppleAppIDs = appleAppIDs(env("KINFRAME_APPLE_APP_IDS", DefaultAppleAppID))
+	c.AppleTeamID = env("KINFRAME_APPLE_TEAM_ID", "")
+	c.AppleBundleID = env("KINFRAME_APPLE_BUNDLE_ID", "app.kinframe.family")
 	c.WeatherURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_URL", "https://api.open-meteo.com"), "/")
 	c.GeocodingURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com"), "/")
 	c.WeatherRefresh = time.Duration(intv("KINFRAME_WEATHER_REFRESH_MINUTES", 30)) * time.Minute
@@ -272,22 +274,13 @@ func load(get func(string) string) (*Config, error) {
 	return c, nil
 }
 
-// DefaultAppleAppID is the kinframe iOS family app as published by the project.
-const DefaultAppleAppID = "TEAMID.app.kinframe.family"
-
-// appleAppIDs parses a comma-separated list; "off" (or "none", "-") disables.
-func appleAppIDs(v string) []string {
-	switch strings.ToLower(v) {
-	case "off", "none", "-":
+// AppleAppIDs lists the iOS apps allowed to open this server's links, or nil
+// when no team is configured.
+func (c *Config) AppleAppIDs() []string {
+	if c.AppleTeamID == "" || c.AppleBundleID == "" {
 		return nil
 	}
-	var ids []string
-	for _, id := range strings.Split(v, ",") {
-		if id = strings.TrimSpace(id); id != "" {
-			ids = append(ids, id)
-		}
-	}
-	return ids
+	return []string{c.AppleTeamID + "." + c.AppleBundleID}
 }
 
 // LogtoFile is the Logto client configuration written by `bootstrap-logto`

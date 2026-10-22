@@ -443,6 +443,1060 @@
         }
       }
     },
+    "albums.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toevoegen"
+          }
+        }
+      }
+    },
+    "albums.addShort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album"
+          }
+        }
+      }
+    },
+    "albums.addTitle.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add {count} photo to an album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto aan een album toevoegen"
+          }
+        }
+      }
+    },
+    "albums.addTitle.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add {count} photos to an album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s aan een album toevoegen"
+          }
+        }
+      }
+    },
+    "albums.addToAlbum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add to album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aan album toevoegen"
+          }
+        }
+      }
+    },
+    "albums.added.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photo added to “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto toegevoegd aan “{name}”"
+          }
+        }
+      }
+    },
+    "albums.added.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos added to “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s toegevoegd aan “{name}”"
+          }
+        }
+      }
+    },
+    "albums.all": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle foto’s"
+          }
+        }
+      }
+    },
+    "albums.arrange": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Change the order"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgorde aanpassen"
+          }
+        }
+      }
+    },
+    "albums.arrangeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag the handles to change the order, or focus one and use the arrow keys."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep de handvatten om de volgorde te wijzigen, of selecteer er een en gebruik de pijltjestoetsen."
+          }
+        }
+      }
+    },
+    "albums.conflict": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Someone else changed this album just now. We loaded the latest version; please try again."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iemand anders heeft dit album net gewijzigd. We hebben de nieuwste versie geladen; probeer het opnieuw."
+          }
+        }
+      }
+    },
+    "albums.count.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto"
+          }
+        }
+      }
+    },
+    "albums.count.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s"
+          }
+        }
+      }
+    },
+    "albums.cover": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cover"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omslag"
+          }
+        }
+      }
+    },
+    "albums.coverSet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cover updated"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Omslag aangepast"
+          }
+        }
+      }
+    },
+    "albums.create": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album maken"
+          }
+        }
+      }
+    },
+    "albums.created": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album “{name}” created"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album “{name}” gemaakt"
+          }
+        }
+      }
+    },
+    "albums.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album verwijderen"
+          }
+        }
+      }
+    },
+    "albums.deleteBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The album goes away. Its photos stay on the frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het album verdwijnt. De foto’s blijven op de fotolijst."
+          }
+        }
+      }
+    },
+    "albums.deleteBodyPlaying": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The album goes away and the frame goes back to showing all photos. The photos themselves stay on the frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het album verdwijnt en de fotolijst toont weer alle foto’s. De foto’s zelf blijven op de fotolijst."
+          }
+        }
+      }
+    },
+    "albums.deleteConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete “{name}”?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“{name}” verwijderen?"
+          }
+        }
+      }
+    },
+    "albums.deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album “{name}” deleted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album “{name}” verwijderd"
+          }
+        }
+      }
+    },
+    "albums.emptyBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select photos under “All photos” and choose “Add to album”."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecteer foto’s bij “Alle foto’s” en kies “Aan album toevoegen”."
+          }
+        }
+      }
+    },
+    "albums.emptyTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This album is empty"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit album is leeg"
+          }
+        }
+      }
+    },
+    "albums.from": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Van"
+          }
+        }
+      }
+    },
+    "albums.fromDay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf dag"
+          }
+        }
+      }
+    },
+    "albums.fromMonth": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From month"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf maand"
+          }
+        }
+      }
+    },
+    "albums.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums"
+          }
+        }
+      }
+    },
+    "albums.makeCover": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use as cover"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als omslag gebruiken"
+          }
+        }
+      }
+    },
+    "albums.moveItem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move photo {n} of {total}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto {n} van {total} verplaatsen"
+          }
+        }
+      }
+    },
+    "albums.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naam van het album"
+          }
+        }
+      }
+    },
+    "albums.namePlaceholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Summer holiday, Christmas, …"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zomervakantie, Kerstmis, …"
+          }
+        }
+      }
+    },
+    "albums.new": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuw album"
+          }
+        }
+      }
+    },
+    "albums.newHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums live on the frame. Add photos to it from the library."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albums horen bij de fotolijst. Voeg er foto’s aan toe vanuit de bibliotheek."
+          }
+        }
+      }
+    },
+    "albums.newTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuw album"
+          }
+        }
+      }
+    },
+    "albums.nowPlaying": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} now plays “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} speelt nu “{name}”"
+          }
+        }
+      }
+    },
+    "albums.orderSaved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order saved"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgorde bewaard"
+          }
+        }
+      }
+    },
+    "albums.pick": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies een album"
+          }
+        }
+      }
+    },
+    "albums.pickPhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s kiezen"
+          }
+        }
+      }
+    },
+    "albums.play": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play on frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspelen op de fotolijst"
+          }
+        }
+      }
+    },
+    "albums.playingAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} shows all photos again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} toont weer alle foto’s"
+          }
+        }
+      }
+    },
+    "albums.playingBadge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing on the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speelt op de fotolijst"
+          }
+        }
+      }
+    },
+    "albums.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove from album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uit album halen"
+          }
+        }
+      }
+    },
+    "albums.removed.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photo removed from “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto uit “{name}” gehaald"
+          }
+        }
+      }
+    },
+    "albums.removed.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos removed from “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s uit “{name}” gehaald"
+          }
+        }
+      }
+    },
+    "albums.rename": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naam wijzigen"
+          }
+        }
+      }
+    },
+    "albums.renameTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rename album"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album hernoemen"
+          }
+        }
+      }
+    },
+    "albums.saveOrder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save order"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgorde bewaren"
+          }
+        }
+      }
+    },
+    "albums.schedule": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planning"
+          }
+        }
+      }
+    },
+    "albums.scheduleBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame plays this album by itself on these days every year, then goes back to its usual photos."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De fotolijst speelt dit album elk jaar vanzelf op deze dagen en gaat daarna terug naar de gewone foto’s."
+          }
+        }
+      }
+    },
+    "albums.scheduleCleared": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule removed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Planning verwijderd"
+          }
+        }
+      }
+    },
+    "albums.scheduleOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play automatically every year"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elk jaar automatisch afspelen"
+          }
+        }
+      }
+    },
+    "albums.scheduleSaved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays every year from {from} until {to}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speelt elk jaar van {from} tot en met {to}"
+          }
+        }
+      }
+    },
+    "albums.scheduleShort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{from} – {to}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{from} – {to}"
+          }
+        }
+      }
+    },
+    "albums.scheduleSummary": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays from {from} until {to}, every year."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speelt van {from} tot en met {to}, elk jaar."
+          }
+        }
+      }
+    },
+    "albums.scheduleTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedule “{name}”"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“{name}” plannen"
+          }
+        }
+      }
+    },
+    "albums.scheduleWraps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That runs over New Year."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dat loopt over Nieuwjaar heen."
+          }
+        }
+      }
+    },
+    "albums.scheduled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays on a schedule"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speelt volgens planning"
+          }
+        }
+      }
+    },
+    "albums.stopPlaying": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show all photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle foto’s tonen"
+          }
+        }
+      }
+    },
+    "albums.to": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot en met"
+          }
+        }
+      }
+    },
+    "albums.toDay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot en met dag"
+          }
+        }
+      }
+    },
+    "albums.toMonth": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until month"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot en met maand"
+          }
+        }
+      }
+    },
     "boot.unreachableBody": {
       "extractionState": "manual",
       "localizations": {
@@ -3911,6 +4965,23 @@
         }
       }
     },
+    "library.taken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Genomen {when}"
+          }
+        }
+      }
+    },
     "library.trash": {
       "extractionState": "manual",
       "localizations": {
@@ -4217,6 +5288,91 @@
         }
       }
     },
+    "memories.subtitle.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photo taken on {date} in earlier years"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto genomen op {date} in vorige jaren"
+          }
+        }
+      }
+    },
+    "memories.subtitle.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} photos taken on {date} in earlier years"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} foto’s genomen op {date} in vorige jaren"
+          }
+        }
+      }
+    },
+    "memories.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On this day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op deze dag"
+          }
+        }
+      }
+    },
+    "memories.yearsAgo.one": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} year ago"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} jaar geleden"
+          }
+        }
+      }
+    },
+    "memories.yearsAgo.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} years ago"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{count} jaar geleden"
+          }
+        }
+      }
+    },
     "nav.frames": {
       "extractionState": "manual",
       "localizations": {
@@ -4298,6 +5454,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Instellingen"
+          }
+        }
+      }
+    },
+    "overview.dangerTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave or remove"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vertrekken of verwijderen"
           }
         }
       }
@@ -4489,6 +5662,40 @@
         }
       }
     },
+    "overview.ownerLeaveBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To leave, first choose who takes over as owner. Removing the frame disconnects it for everyone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Om te vertrekken kies je eerst wie de nieuwe eigenaar wordt. Een fotolijst verwijderen koppelt hem los voor iedereen."
+          }
+        }
+      }
+    },
+    "overview.ownership": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ownership and device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigendom en toestel"
+          }
+        }
+      }
+    },
     "overview.photos": {
       "extractionState": "manual",
       "localizations": {
@@ -4642,6 +5849,40 @@
         }
       }
     },
+    "overview.replaceBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Got a new frame? Move everything to it with the code it shows."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een nieuwe fotolijst? Zet alles erop met de code die hij toont."
+          }
+        }
+      }
+    },
+    "overview.replaceButton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verhuizen"
+          }
+        }
+      }
+    },
     "overview.screen": {
       "extractionState": "manual",
       "localizations": {
@@ -4672,6 +5913,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toegevoegd"
+          }
+        }
+      }
+    },
+    "overview.transferBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hand the frame to someone else. You stay on as an admin."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef de fotolijst aan iemand anders. Jij blijft beheerder."
+          }
+        }
+      }
+    },
+    "overview.transferButton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overdragen"
           }
         }
       }
@@ -5080,6 +6355,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je uitnodigingslink is klaar"
+          }
+        }
+      }
+    },
+    "people.makeOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenaar maken"
           }
         }
       }
@@ -6172,6 +7464,227 @@
         }
       }
     },
+    "push.blocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are blocked. You can allow them in your browser’s site settings."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen zijn geblokkeerd. Je kunt ze toestaan in de site-instellingen van je browser."
+          }
+        }
+      }
+    },
+    "push.blockedHelp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your browser blocks notifications for this site. Allow them in the site settings (the icon next to the address), then come back here."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je browser blokkeert meldingen voor deze site. Sta ze toe in de site-instellingen (het icoon naast het adres) en kom dan hier terug."
+          }
+        }
+      }
+    },
+    "push.disabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are off on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen staan uit op dit toestel"
+          }
+        }
+      }
+    },
+    "push.enabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are on"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen staan aan"
+          }
+        }
+      }
+    },
+    "push.notNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet nu"
+          }
+        }
+      }
+    },
+    "push.offerBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get a notification when your photos reach the frame and when they react, even when kinframe is closed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krijg een melding als je foto’s op de fotolijst aankomen en als ze reageren, ook als kinframe dicht is."
+          }
+        }
+      }
+    },
+    "push.offerTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Want to know when it arrives?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wil je weten wanneer het aankomt?"
+          }
+        }
+      }
+    },
+    "push.serverOff": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are turned off on this server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen staan uit op deze server."
+          }
+        }
+      }
+    },
+    "push.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen"
+          }
+        }
+      }
+    },
+    "push.toggle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen op dit toestel"
+          }
+        }
+      }
+    },
+    "push.toggleHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When photos arrive, when someone reacts or replies, and when someone wants to join a frame you manage. Only while kinframe isn’t open."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als foto’s aankomen, als iemand reageert of antwoordt, en als iemand lid wil worden van een fotolijst die jij beheert. Alleen als kinframe niet open staat."
+          }
+        }
+      }
+    },
+    "push.turnOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aanzetten"
+          }
+        }
+      }
+    },
+    "push.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser can’t show notifications. On an iPhone, add kinframe to your home screen first."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze browser kan geen meldingen tonen. Op een iPhone zet je kinframe eerst op je beginscherm."
+          }
+        }
+      }
+    },
     "reaction.laugh": {
       "extractionState": "manual",
       "localizations": {
@@ -6236,6 +7749,193 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wauw"
+          }
+        }
+      }
+    },
+    "replace.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos, albums, settings and people all move over. Nobody needs to touch the old frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s, albums, instellingen en mensen gaan allemaal mee. Niemand hoeft de oude fotolijst aan te raken."
+          }
+        }
+      }
+    },
+    "replace.codeLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code on the new frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code op de nieuwe fotolijst"
+          }
+        }
+      }
+    },
+    "replace.do": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to this frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar deze fotolijst verhuizen"
+          }
+        }
+      }
+    },
+    "replace.doneBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new frame is now {name}. It’s downloading the photos and will start the slideshow by itself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De nieuwe fotolijst is nu {name}. Hij downloadt de foto’s en start de diavoorstelling vanzelf."
+          }
+        }
+      }
+    },
+    "replace.doneTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All moved"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles verhuisd"
+          }
+        }
+      }
+    },
+    "replace.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move to a new frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar een nieuwe fotolijst verhuizen"
+          }
+        }
+      }
+    },
+    "replace.step1": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch on the new frame and follow its setup until it shows a code."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zet de nieuwe fotolijst aan en volg de installatie tot hij een code toont."
+          }
+        }
+      }
+    },
+    "replace.step2": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type that code below."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Typ die code hieronder."
+          }
+        }
+      }
+    },
+    "replace.step3": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new frame becomes {name} and downloads everything."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De nieuwe fotolijst wordt {name} en downloadt alles."
+          }
+        }
+      }
+    },
+    "replace.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move {name} to a new frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} naar een nieuwe fotolijst verhuizen"
+          }
+        }
+      }
+    },
+    "replace.warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The old frame stops working right away and goes back to its setup screen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De oude fotolijst stopt meteen en gaat terug naar zijn installatiescherm."
           }
         }
       }
@@ -7736,6 +9436,23 @@
         }
       }
     },
+    "settingsForm.allPhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle foto’s"
+          }
+        }
+      }
+    },
     "settingsForm.background": {
       "extractionState": "manual",
       "localizations": {
@@ -7991,6 +9708,40 @@
         }
       }
     },
+    "settingsForm.frameLanguage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frame language"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taal van het kader"
+          }
+        }
+      }
+    },
+    "settingsForm.frameLanguageHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The language of the menus and messages on the frame itself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De taal van de menu’s en berichten op het kader zelf."
+          }
+        }
+      }
+    },
     "settingsForm.interval": {
       "extractionState": "manual",
       "localizations": {
@@ -8127,6 +9878,40 @@
         }
       }
     },
+    "settingsForm.onThisDay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On this day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op deze dag"
+          }
+        }
+      }
+    },
+    "settingsForm.onThisDayHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now and then, show photos taken on today’s date in earlier years."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Af en toe foto’s tonen die op de datum van vandaag in vorige jaren genomen zijn."
+          }
+        }
+      }
+    },
     "settingsForm.order": {
       "extractionState": "manual",
       "localizations": {
@@ -8191,6 +9976,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Op datum van opname"
+          }
+        }
+      }
+    },
+    "settingsForm.playAlbum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show on the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonen op de fotolijst"
+          }
+        }
+      }
+    },
+    "settingsForm.playAlbumHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduled albums still take over on their days."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geplande albums nemen op hun dagen nog steeds over."
           }
         }
       }
@@ -8326,7 +10145,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Het huidige weer naast de klok. Tik erop op de fotolijst voor de verwachting."
+            "value": "Het huidige weer naast de klok. Tik erop op het kader voor de verwachting."
           }
         }
       }
@@ -8513,7 +10332,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Waar de fotolijst staat. Voor het weer en om het scherm na zonsondergang te dimmen."
+            "value": "Waar het kader staat. Voor het weer en om het scherm na zonsondergang te dimmen."
           }
         }
       }
@@ -8633,6 +10452,550 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekeken"
+          }
+        }
+      }
+    },
+    "transfer.alsoLeave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave the frame afterwards"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daarna de fotolijst verlaten"
+          }
+        }
+      }
+    },
+    "transfer.back": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terug"
+          }
+        }
+      }
+    },
+    "transfer.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The new owner can do everything, including removing the frame. Admins already manage it, so they’re usually the best choice."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De nieuwe eigenaar kan alles, ook de fotolijst verwijderen. Beheerders doen al veel, dus zij zijn meestal de beste keuze."
+          }
+        }
+      }
+    },
+    "transfer.confirmTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Make {name} the owner?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} eigenaar maken?"
+          }
+        }
+      }
+    },
+    "transfer.continue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continue"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verder"
+          }
+        }
+      }
+    },
+    "transfer.do": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer ownership"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigendom overdragen"
+          }
+        }
+      }
+    },
+    "transfer.doLeave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer and leave"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overdragen en vertrekken"
+          }
+        }
+      }
+    },
+    "transfer.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is now the owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is nu de eigenaar"
+          }
+        }
+      }
+    },
+    "transfer.doneLeft": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} now owns {frame}. You left the frame."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is nu eigenaar van {frame}. Jij hebt de fotolijst verlaten."
+          }
+        }
+      }
+    },
+    "transfer.factAdmin": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You stay on the frame as an admin."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jij blijft op de fotolijst als beheerder."
+          }
+        }
+      }
+    },
+    "transfer.factLeave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You leave the frame right after."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jij verlaat de fotolijst meteen daarna."
+          }
+        }
+      }
+    },
+    "transfer.factOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} becomes the owner of {frame}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} wordt eigenaar van {frame}."
+          }
+        }
+      }
+    },
+    "transfer.factUndo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only {name} can give ownership back."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen {name} kan het eigendom teruggeven."
+          }
+        }
+      }
+    },
+    "transfer.leaveBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A frame always has an owner. Choose who takes over before you leave."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een fotolijst heeft altijd een eigenaar. Kies wie het overneemt voor je vertrekt."
+          }
+        }
+      }
+    },
+    "transfer.leaveTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} verlaten"
+          }
+        }
+      }
+    },
+    "transfer.noOne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There’s nobody else on this frame yet. Invite someone first, then make them the owner."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is nog niemand anders op deze fotolijst. Nodig eerst iemand uit en maak die dan eigenaar."
+          }
+        }
+      }
+    },
+    "transfer.noOneLeave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’re the only one on this frame. Invite someone to take over, or remove the frame instead."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent de enige op deze fotolijst. Nodig iemand uit om het over te nemen, of verwijder de fotolijst."
+          }
+        }
+      }
+    },
+    "transfer.pick": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe eigenaar"
+          }
+        }
+      }
+    },
+    "transfer.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer ownership"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigendom overdragen"
+          }
+        }
+      }
+    },
+    "trim.audioOffHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The video is sent without sound."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De video wordt zonder geluid verstuurd."
+          }
+        }
+      }
+    },
+    "trim.audioOnHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame plays the sound, unless it’s muted there."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De fotolijst speelt het geluid af, tenzij hij daar gedempt staat."
+          }
+        }
+      }
+    },
+    "trim.endLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End of the part to send"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einde van het stuk dat je verstuurt"
+          }
+        }
+      }
+    },
+    "trim.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag the handles to choose the part to send. At least {min} seconds."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep de handvatten om het stuk te kiezen dat je verstuurt. Minstens {min} seconden."
+          }
+        }
+      }
+    },
+    "trim.hintTooLong": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This video is longer than {max}, so only the selected part is sent. Drag to choose which part (at least {min} seconds)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze video is langer dan {max}, dus alleen het gekozen stuk wordt verstuurd. Sleep om te kiezen welk stuk (minstens {min} seconden)."
+          }
+        }
+      }
+    },
+    "trim.includeAudio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Include sound"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met geluid"
+          }
+        }
+      }
+    },
+    "trim.length": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{length} of {total}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{length} van {total}"
+          }
+        }
+      }
+    },
+    "trim.pause": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pauzeren"
+          }
+        }
+      }
+    },
+    "trim.play": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play the selected part"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekozen stuk afspelen"
+          }
+        }
+      }
+    },
+    "trim.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep the whole video"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hele video houden"
+          }
+        }
+      }
+    },
+    "trim.startLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start of the part to send"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begin van het stuk dat je verstuurt"
+          }
+        }
+      }
+    },
+    "trim.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trim video"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video inkorten"
+          }
+        }
+      }
+    },
+    "trim.trimmedTo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trimmed to {length}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingekort tot {length}"
           }
         }
       }

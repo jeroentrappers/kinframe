@@ -9,9 +9,12 @@ options:
   developmentLanguage: en
   groupSortPosition: top
 
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+
 settings:
   base:
-    DEVELOPMENT_TEAM: TEAMID
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
