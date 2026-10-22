@@ -1,8 +1,12 @@
 # Handoff: kinframe iOS family app
 
 This is the brief for building the native iOS family app. It is written for a fresh Claude Code session on a Mac
-(mini4: macOS 27, Xcode 26.1.1, iOS 26.1 simulator, signing identity "Apple Development: Jeroen Trappers
-(YH8JF6NXAW)"). Read it fully before starting.
+(mini4: macOS 27, Xcode 26.1.1, iOS 26.1 simulator). Read it fully before starting.
+
+**Apple team: Appmire.** The app is published under the **Appmire** Apple Developer team, not Secutec or bpost. The
+certificates currently on mini4 belong to other teams (Secutec `3WBW3LE88P`, an expired bpost one), so don't use them.
+Until the Appmire team is added to Xcode on mini4, build for the simulator only (no signing needed). The Team ID is a
+build setting (`DEVELOPMENT_TEAM`, set in one place such as an `.xcconfig`), never hard-coded elsewhere.
 
 ## Standing rules (non-negotiable)
 
@@ -46,7 +50,7 @@ Read these, in this order:
 - **Deployment target: iOS 17.** That covers older family iPhones; the current simulator is 26.1.
 - **Xcode project** at `ios/Kinframe.xcodeproj` with app target **Kinframe** (bundle id `app.kinframe.family`) and a
   **Share Extension** target (bundle id `app.kinframe.family.share`). They share data through an App Group
-  `group.app.kinframe.family`. Signing team: YH8JF6NXAW (automatic signing; don't commit profiles).
+  `group.app.kinframe.family`. Signing team: the **Appmire** team via `DEVELOPMENT_TEAM` in an `.xcconfig` (automatic signing; don't commit profiles).
 - **API client:** Apple's `swift-openapi-generator` + `swift-openapi-urlsession`, generated from
   `docs/api/openapi.yaml`. Use a build plugin, or check in the generated code with a script to regenerate it.
   - If the generator chokes on OpenAPI 3.1 features, mirror the server's `server/tools/specprep` approach: rewrite a
@@ -125,7 +129,7 @@ Read these, in this order:
    - until then, rely on the websocket while the app is open
 
 **Universal Links** need the server to serve `/.well-known/apple-app-site-association` for the app id
-`YH8JF6NXAW.app.kinframe.family`. Add that to the Go server: a small handler, configurable via env, with a test, in
+`<AppmireTeamID>.app.kinframe.family` (Team ID from config, e.g. `KINFRAME_APPLE_TEAM_ID`). Add that to the Go server: a small handler, configurable via env, with a test, in
 the same PR.
 
 ## Quality bar and verification
