@@ -98,12 +98,14 @@ struct ComposeTab: View {
                     await add(files)
                     if let caption = UserDefaults.standard.string(forKey: "kfCaption") { model.applyCaptionToAll(caption) }
                     if UserDefaults.standard.bool(forKey: "kfAutoSend") { send() }
+                    if UserDefaults.standard.bool(forKey: "kfEditFirst") { editing = model.drafts.first?.id }
                 }
             }
             #endif
         }
         .onChange(of: app.composeFrameIds) { preselect() }
         .onChange(of: app.frames) { preselect() }
+        .onChange(of: app.framesLoaded) { preselect() }
         .onChange(of: sendingJob.flatMap { app.outbox.job($0)?.state }) { _, state in
             if case .sent(let sendId) = state {
                 finished(sendId)
@@ -300,6 +302,8 @@ struct ComposeTab: View {
     // MARK: Actions
 
     private func preselect() {
+        // Wait for the frame list: until then the wanted frames can't be checked.
+        guard app.framesLoaded else { return }
         if !app.composeFrameIds.isEmpty {
             model.frameIds = app.composeFrameIds.filter { id in sendable.contains { $0.id == id } }
             app.composeFrameIds = []

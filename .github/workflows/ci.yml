@@ -90,6 +90,33 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=desktop --project=phone
 
+  ios:
+    name: iOS (build + unit tests)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select the newest Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | grep -v beta | sort -V | tail -1)
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+      - uses: actions/cache@v4
+        with:
+          path: ios/.spm
+          key: spm-${{ hashFiles('ios/Kinframe.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+      - name: Build and run unit tests (simulator, no signing)
+        run: |
+          device=$(xcrun simctl list devices available | grep -oE 'iPhone [0-9]+( Pro)?' | sort -V | tail -1)
+          echo "Simulator: $device"
+          xcodebuild -project Kinframe.xcodeproj -scheme Kinframe \
+            -destination "platform=iOS Simulator,name=$device" \
+            -clonedSourcePackagesDirPath .spm \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
   publish:
     name: Publish server image
     if: github.event_name == 'push'
