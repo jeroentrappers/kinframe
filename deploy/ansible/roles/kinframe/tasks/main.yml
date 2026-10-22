@@ -12,6 +12,7 @@
       - kinframe_signing_key is defined and kinframe_signing_key | length >= 43
       - kinframe_smtp_host is defined and kinframe_smtp_password is defined
       - logto_admin_password is defined and logto_admin_password | length >= 8
+      - logto_admin_username is match('^[A-Za-z_][A-Za-z0-9_]*$')   # Logto's username rule
     fail_msg: Set the domains and the secrets (see defaults/main.yml).
     quiet: true
 
@@ -96,13 +97,22 @@
     chdir: "{{ kinframe_dir }}"
   register: bootstrap
   changed_when: "'nothing changed' not in (bootstrap.stdout + bootstrap.stderr)"
+  failed_when: false   # judged below, so the error is visible despite no_log
   no_log: true
 
-- name: Bootstrap summary
+- name: Bootstrap output (credentials filtered out)
   ansible.builtin.debug:
     msg: >-
       {{ (bootstrap.stdout_lines + bootstrap.stderr_lines)
-         | reject('search', 'M2M_SECRET|M2M_ID|PASSWORD') | select('search', 'msg=|level=') | list }}
+         | reject('search', 'M2M_SECRET|M2M_ID|PASSWORD')
+         | reject('search', '^ Container ')
+         | list }}
+
+- name: Bootstrap succeeded
+  ansible.builtin.assert:
+    that: bootstrap.rc == 0
+    fail_msg: bootstrap-logto failed (exit {{ bootstrap.rc }}); see the output above.
+    quiet: true
 
 - name: Start or update the kinframe server
   ansible.builtin.command:

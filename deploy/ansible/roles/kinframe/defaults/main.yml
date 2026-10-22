@@ -25,7 +25,7 @@ logto_admin_port: 8112
 kinframe_server_name: kinframe     # shown in the apps before sign-in
 
 # Logto console admin, created by bootstrap-logto on the first run (password from the vault).
-logto_admin_username: kinframe-admin
+logto_admin_username: kinframe_admin   # Logto usernames: letters, digits, underscore; no hyphens
 # Accounts that get the kinframe-operator role (they must have signed up first; re-run the play after).
 kinframe_operator_emails: []
 kinframe_log_level: info
