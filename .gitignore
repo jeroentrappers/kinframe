@@ -1,0 +1,25 @@
+# Build output
+build/
+dist/
+.gradle/
+local.properties
+*.apk
+*.aab
+*.keystore
+!**/debug.keystore.example
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Secrets
+.env
+.env.*
+!.env.example
+.vault-pass
+
+# Never commit clean-room research material
+*.dex
+decompiled/

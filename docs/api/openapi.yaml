@@ -1,0 +1,1677 @@
+openapi: 3.1.0
+info:
+  title: kinframe API
+  version: 1.0.0-draft
+  summary: Family photo frames, self-hosted.
+  description: |
+    Machine-readable contract for the kinframe server. Concepts, flows, websockets,
+    tus uploads and the change feed are described in docs/api/README.md.
+  license:
+    name: AGPL-3.0-or-later
+    identifier: AGPL-3.0-or-later
+servers:
+  - url: https://kinframe.appmire.be
+    description: Default hosted server
+  - url: http://localhost:8110
+    description: Local development
+
+security:
+  - userAuth: []
+
+tags:
+  - name: discovery
+  - name: me
+  - name: frames
+  - name: members
+  - name: invites
+  - name: sends
+  - name: library
+  - name: albums
+  - name: settings
+  - name: devices
+    description: Frame enrollment and token exchange (unauthenticated or secret-based).
+  - name: device
+    description: Endpoints called by the frame itself (device token).
+  - name: operator
+
+paths:
+  /.well-known/kinframe:
+    get:
+      tags: [discovery]
+      operationId: getDiscovery
+      security: []
+      responses:
+        '200':
+          description: Server discovery document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Discovery' }
+
+  # ---------------------------------------------------------------- me
+  /v1/me:
+    get:
+      tags: [me]
+      operationId: getMe
+      responses:
+        '200': { description: Current user, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [me]
+      operationId: updateMe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name: { type: string, minLength: 1, maxLength: 40 }
+                share_location_names: { type: boolean }
+                locale: { type: string, examples: [nl-BE] }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [me]
+      operationId: deleteMe
+      description: Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+      parameters:
+        - name: remove_items
+          in: query
+          required: true
+          description: Also remove everything this user sent from all frames.
+          schema: { type: boolean }
+      responses:
+        '204': { description: Deleted }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/avatar:
+    put:
+      tags: [me]
+      operationId: putAvatar
+      requestBody:
+        required: true
+        content:
+          image/jpeg: { schema: { type: string, contentMediaType: image/jpeg } }
+          image/png: { schema: { type: string, contentMediaType: image/png } }
+          image/webp: { schema: { type: string, contentMediaType: image/webp } }
+      responses:
+        '200': { description: Stored (server crops to 256x256), content: { application/json: { schema: { $ref: '#/components/schemas/User' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [me]
+      operationId: deleteAvatar
+      responses:
+        '204': { description: Removed }
+
+  /v1/me/push-endpoints:
+    get:
+      tags: [me]
+      operationId: listPushEndpoints
+      responses:
+        '200':
+          description: Registered endpoints
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/PushEndpoint' } }
+    post:
+      tags: [me]
+      operationId: registerPushEndpoint
+      description: Idempotent on (kind, endpoint).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/PushEndpointCreate' } } }
+      responses:
+        '200': { description: Registered, content: { application/json: { schema: { $ref: '#/components/schemas/PushEndpoint' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/push-endpoints/{endpointId}:
+    delete:
+      tags: [me]
+      operationId: deletePushEndpoint
+      parameters: [ { $ref: '#/components/parameters/EndpointId' } ]
+      responses:
+        '204': { description: Removed }
+
+  # ---------------------------------------------------------------- frames
+  /v1/frames:
+    get:
+      tags: [frames]
+      operationId: listMyFrames
+      description: Frames the caller is a member of (any role).
+      responses:
+        '200':
+          description: Frames
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/FrameSummary' } }
+
+  /v1/frames/redeem:
+    post:
+      tags: [frames]
+      operationId: redeemFrameCode
+      description: Claim an unowned frame or join an owned one with the code shown on the frame. See README §5.1.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, pattern: '^[0-9]{8}$' }
+      responses:
+        '200':
+          description: Result
+          content: { application/json: { schema: { $ref: '#/components/schemas/RedeemResult' } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '410': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [frames]
+      operationId: getFrame
+      responses:
+        '200': { description: Frame, content: { application/json: { schema: { $ref: '#/components/schemas/Frame' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [frames]
+      operationId: updateFrame
+      description: Owner or admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, minLength: 1, maxLength: 40 }
+                location: { type: string, maxLength: 40 }
+                default_permissions: { $ref: '#/components/schemas/Permissions' }
+                approve_joins_on_frame: { type: boolean }
+                invite_requires_approval: { type: boolean }
+                moderation: { type: boolean, description: New placements need approval by owner/admin before showing. }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Frame' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [frames]
+      operationId: removeFrame
+      description: Owner only. Revokes the device credential and deletes all placements on this frame.
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/leave:
+    post:
+      tags: [frames]
+      operationId: leaveFrame
+      description: Remove your own membership. The owner must transfer ownership first.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                remove_my_items: { type: boolean, default: false }
+      responses:
+        '204': { description: Left }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/transfer:
+    post:
+      tags: [frames]
+      operationId: transferOwnership
+      description: Owner only. The previous owner becomes admin.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { $ref: '#/components/schemas/Id' }
+      responses:
+        '204': { description: Transferred }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/replace-device:
+    post:
+      tags: [frames]
+      operationId: replaceDevice
+      description: |
+        Owner only. "Move to new frame": attach a freshly enrolled, unclaimed device (identified by the code it shows)
+        to this frame. The old device credential is revoked; the new device syncs everything.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, pattern: '^[0-9]{8}$' }
+      responses:
+        '200': { description: Replaced, content: { application/json: { schema: { $ref: '#/components/schemas/Frame' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/health:
+    get:
+      tags: [frames]
+      operationId: getFrameHealth
+      description: Owner, admin, or members with change_settings.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      responses:
+        '200': { description: Latest heartbeat and connectivity, content: { application/json: { schema: { $ref: '#/components/schemas/FrameHealth' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/commands:
+    post:
+      tags: [frames]
+      operationId: sendFrameCommand
+      description: Delivered over the device websocket only; never queued.
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/FrameCommand' } } }
+      responses:
+        '200': { description: Executed by the frame, content: { application/json: { schema: { $ref: '#/components/schemas/CommandResult' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '504': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- members
+  /v1/frames/{frameId}/members:
+    get:
+      tags: [members]
+      operationId: listMembers
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      responses:
+        '200':
+          description: Members
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Member' } } } }
+
+  /v1/frames/{frameId}/members/{userId}:
+    parameters:
+      - { $ref: '#/components/parameters/FrameId' }
+      - { $ref: '#/components/parameters/UserId' }
+    patch:
+      tags: [members]
+      operationId: updateMember
+      description: Owner or admin. Admins cannot change the owner or other admins' role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [admin, member] }
+                permissions: { $ref: '#/components/schemas/Permissions' }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Member' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [members]
+      operationId: removeMember
+      parameters:
+        - name: remove_items
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/join-requests:
+    get:
+      tags: [members]
+      operationId: listJoinRequests
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      responses:
+        '200':
+          description: Pending requests
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/JoinRequest' } } } }
+
+  /v1/frames/{frameId}/join-requests/{requestId}/{decision}:
+    post:
+      tags: [members]
+      operationId: decideJoinRequest
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { name: requestId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: decision, in: path, required: true, schema: { type: string, enum: [approve, deny] } }
+      responses:
+        '204': { description: Decided }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- invites
+  /v1/frames/{frameId}/invites:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [invites]
+      operationId: listInvites
+      responses:
+        '200':
+          description: Active invites created by the caller (owner/admin see all)
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Invite' } } } }
+    post:
+      tags: [invites]
+      operationId: createInvite
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                max_uses: { type: [integer, 'null'], minimum: 1, description: null = unlimited }
+                expires_in_hours: { type: integer, minimum: 1, maximum: 720, default: 168 }
+                note: { type: string, maxLength: 80, description: Shown to the owner when approving. }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Invite' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/invites/{inviteId}:
+    delete:
+      tags: [invites]
+      operationId: revokeInvite
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { name: inviteId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '204': { description: Revoked }
+
+  /v1/invites/{token}:
+    get:
+      tags: [invites]
+      operationId: previewInvite
+      description: Requires sign-in so invite tokens can't be enumerated anonymously.
+      parameters: [ { $ref: '#/components/parameters/InviteToken' } ]
+      responses:
+        '200': { description: Preview, content: { application/json: { schema: { $ref: '#/components/schemas/InvitePreview' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '410': { $ref: '#/components/responses/Problem' }
+
+  /v1/invites/{token}/accept:
+    post:
+      tags: [invites]
+      operationId: acceptInvite
+      parameters: [ { $ref: '#/components/parameters/InviteToken' } ]
+      responses:
+        '200': { description: Result, content: { application/json: { schema: { $ref: '#/components/schemas/RedeemResult' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- sends
+  /v1/uploads:
+    post:
+      tags: [sends]
+      operationId: tusCreateUpload
+      description: |
+        tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
+        Upload-Metadata keys: filename, filetype, sha256 (optional).
+      parameters:
+        - { name: Tus-Resumable, in: header, required: true, schema: { type: string, const: 1.0.0 } }
+        - { name: Upload-Length, in: header, required: true, schema: { type: integer } }
+        - { name: Upload-Metadata, in: header, required: true, schema: { type: string } }
+      responses:
+        '201':
+          description: Created; Location header holds the upload URL. If sha256 matches an existing item of the caller, `Kinframe-Existing-Item` header carries its id and the client may skip uploading.
+        '413': { $ref: '#/components/responses/Problem' }
+
+  /v1/sends:
+    get:
+      tags: [sends]
+      operationId: listMySends
+      description: The caller's sent history across all devices, newest first.
+      parameters:
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+        - name: state
+          in: query
+          schema: { type: string, enum: [ongoing, delivered, all], default: all }
+      responses:
+        '200':
+          description: Page of sends
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [sends, next_cursor]
+                properties:
+                  sends: { type: array, items: { $ref: '#/components/schemas/Send' } }
+                  next_cursor: { type: [string, 'null'] }
+    post:
+      tags: [sends]
+      operationId: createSend
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/SendCreate' } } }
+      responses:
+        '202': { description: Accepted; processing, content: { application/json: { schema: { $ref: '#/components/schemas/Send' } } } }
+        '400': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+
+  /v1/sends/{sendId}:
+    parameters: [ { name: sendId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
+    get:
+      tags: [sends]
+      operationId: getSend
+      responses:
+        '200': { description: Send with per-frame placement status, content: { application/json: { schema: { $ref: '#/components/schemas/Send' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [sends]
+      operationId: unsend
+      description: Removes all placements of this send from all frames (sender only). Never needs a frame to be online.
+      responses:
+        '204': { description: Unsent }
+
+  /v1/sends/{sendId}/forward:
+    post:
+      tags: [sends]
+      operationId: forwardSend
+      description: Place the same items on additional frames.
+      parameters: [ { name: sendId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [frame_ids]
+              properties:
+                frame_ids: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '202': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/Send' } } } }
+
+  /v1/items/{itemId}:
+    parameters: [ { $ref: '#/components/parameters/ItemId' } ]
+    patch:
+      tags: [sends]
+      operationId: updateItem
+      description: Sender, or a manager of every frame the item is on. Changes propagate to all placements and show "edited".
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                caption: { type: [string, 'null'], maxLength: 280 }
+                focal_point: { $ref: '#/components/schemas/FocalPoint' }
+                fit: { $ref: '#/components/schemas/Fit' }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Item' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/items/{itemId}/media/{variant}:
+    get:
+      tags: [sends]
+      operationId: getItemMedia
+      description: Thumbnails and the master rendition for app/web. Supports Range and ETag; responds 302 to a short-lived signed URL.
+      parameters:
+        - { $ref: '#/components/parameters/ItemId' }
+        - name: variant
+          in: path
+          required: true
+          schema: { type: string, enum: [thumb_256, thumb_512, master, poster] }
+      responses:
+        '302': { description: Redirect to signed media URL }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- library
+  /v1/frames/{frameId}/placements:
+    get:
+      tags: [library]
+      operationId: listPlacements
+      description: Everything on the frame (needs see_library), or only the caller's own placements otherwise.
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+        - { name: visibility, in: query, schema: { type: string, enum: [visible, hidden, trashed, pending_moderation, all], default: visible } }
+        - { name: sender_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: kind, in: query, schema: { $ref: '#/components/schemas/MediaKind' } }
+        - { name: album_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - { name: sort, in: query, schema: { type: string, enum: [received_desc, received_asc, taken_desc, taken_asc], default: received_desc } }
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [placements, next_cursor, counts]
+                properties:
+                  placements: { type: array, items: { $ref: '#/components/schemas/Placement' } }
+                  next_cursor: { type: [string, 'null'] }
+                  counts:
+                    type: object
+                    properties:
+                      photos: { type: integer }
+                      videos: { type: integer }
+                      hidden: { type: integer }
+                      trashed: { type: integer }
+
+  /v1/frames/{frameId}/placements/{placementId}:
+    parameters:
+      - { $ref: '#/components/parameters/FrameId' }
+      - { $ref: '#/components/parameters/PlacementId' }
+    patch:
+      tags: [library]
+      operationId: updatePlacement
+      description: Sender of the item, or manage_library.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hidden: { type: boolean }
+                trashed: { type: boolean, description: true moves to trash (30 days), false restores. }
+                approved: { type: boolean, description: Moderation decision (owner/admin). }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [library]
+      operationId: purgePlacement
+      description: Permanent removal (skips trash).
+      responses:
+        '204': { description: Purged }
+
+  /v1/frames/{frameId}/placements:bulk:
+    post:
+      tags: [library]
+      operationId: bulkUpdatePlacements
+      parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [placement_ids, action]
+              properties:
+                placement_ids: { type: array, minItems: 1, maxItems: 1000, items: { $ref: '#/components/schemas/Id' } }
+                action: { type: string, enum: [hide, unhide, trash, restore, purge, add_to_album, remove_from_album] }
+                album_id: { $ref: '#/components/schemas/Id' }
+      responses:
+        '200':
+          description: Per-id outcome
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: array, items: { $ref: '#/components/schemas/Id' } }
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { $ref: '#/components/schemas/Id' }
+                        code: { $ref: '#/components/schemas/ProblemCode' }
+
+  # ---------------------------------------------------------------- albums
+  /v1/frames/{frameId}/albums:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [albums]
+      operationId: listAlbums
+      responses:
+        '200':
+          description: Albums
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Album' } } } }
+    post:
+      tags: [albums]
+      operationId: createAlbum
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AlbumWrite' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Album' } } } }
+
+  /v1/frames/{frameId}/albums/{albumId}:
+    parameters:
+      - { $ref: '#/components/parameters/FrameId' }
+      - { name: albumId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    patch:
+      tags: [albums]
+      operationId: updateAlbum
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AlbumWrite' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Album' } } } }
+        '412': { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [albums]
+      operationId: deleteAlbum
+      description: Placements stay on the frame.
+      responses:
+        '204': { description: Deleted }
+
+  # ---------------------------------------------------------------- settings
+  /v1/frames/{frameId}/settings:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [settings]
+      operationId: getFrameSettings
+      responses:
+        '200': { description: Settings, content: { application/json: { schema: { $ref: '#/components/schemas/FrameSettings' } } } }
+    patch:
+      tags: [settings]
+      operationId: updateFrameSettings
+      description: JSON merge patch (RFC 7396) of FrameSettings. Requires If-Match.
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody:
+        required: true
+        content: { application/merge-patch+json: { schema: { $ref: '#/components/schemas/FrameSettingsPatch' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/FrameSettings' } } } }
+        '412': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- devices (enrollment)
+  /v1/devices/enroll:
+    post:
+      tags: [devices]
+      operationId: enrollDevice
+      security: []
+      description: Called once by a fresh frame. Rate-limited per IP.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DeviceEnroll' } } }
+      responses:
+        '201':
+          description: Enrolled
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [device_id, device_secret]
+                properties:
+                  device_id: { $ref: '#/components/schemas/Id' }
+                  device_secret: { type: string, description: 256-bit random, base64url. Shown only once. }
+        '429': { $ref: '#/components/responses/Problem' }
+
+  /v1/devices/token:
+    post:
+      tags: [devices]
+      operationId: deviceToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [device_id, device_secret]
+              properties:
+                device_id: { $ref: '#/components/schemas/Id' }
+                device_secret: { type: string }
+      responses:
+        '200':
+          description: Short-lived device access token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, expires_in]
+                properties:
+                  access_token: { type: string }
+                  expires_in: { type: integer, description: seconds }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- device (frame-side)
+  /v1/device/state:
+    get:
+      tags: [device]
+      operationId: deviceGetState
+      security: [ { deviceAuth: [] } ]
+      description: Whether the frame is claimed, its identity and the latest change seq. Used after boot and on the setup screen.
+      responses:
+        '200': { description: State, content: { application/json: { schema: { $ref: '#/components/schemas/DeviceState' } } } }
+
+  /v1/device/code:
+    post:
+      tags: [device]
+      operationId: deviceGetCode
+      security: [ { deviceAuth: [] } ]
+      description: Get (or re-get) the active frame code. Same code until it expires.
+      responses:
+        '200': { description: Code, content: { application/json: { schema: { $ref: '#/components/schemas/FrameCode' } } } }
+
+  /v1/device/changes:
+    get:
+      tags: [device]
+      operationId: deviceGetChanges
+      security: [ { deviceAuth: [] } ]
+      parameters:
+        - { name: since, in: query, required: true, schema: { type: integer, minimum: 0 } }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000, default: 500 } }
+      responses:
+        '200':
+          description: Ordered changes after `since`
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [changes, next_seq, has_more]
+                properties:
+                  changes: { type: array, items: { $ref: '#/components/schemas/Change' } }
+                  next_seq: { type: integer }
+                  has_more: { type: boolean }
+
+  /v1/device/media/{placementId}:
+    get:
+      tags: [device]
+      operationId: deviceGetMedia
+      security: [ { deviceAuth: [] } ]
+      description: The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match.
+      parameters:
+        - { $ref: '#/components/parameters/PlacementId' }
+        - { name: variant, in: query, schema: { type: string, enum: [display, poster, avatar], default: display } }
+      responses:
+        '200': { description: Bytes }
+        '206': { description: Partial bytes }
+        '304': { description: Not modified }
+
+  /v1/device/acks:
+    post:
+      tags: [device]
+      operationId: deviceAck
+      security: [ { deviceAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delivered: { type: array, maxItems: 500, items: { $ref: '#/components/schemas/Id' } }
+                seen:
+                  type: array
+                  maxItems: 500
+                  items:
+                    type: object
+                    required: [placement_id, at]
+                    properties:
+                      placement_id: { $ref: '#/components/schemas/Id' }
+                      at: { type: string, format: date-time }
+      responses:
+        '204': { description: Recorded }
+
+  /v1/device/heartbeat:
+    post:
+      tags: [device]
+      operationId: deviceHeartbeat
+      security: [ { deviceAuth: [] } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Heartbeat' } } }
+      responses:
+        '204': { description: Recorded }
+
+  /v1/device/settings:
+    patch:
+      tags: [device]
+      operationId: devicePatchSettings
+      security: [ { deviceAuth: [] } ]
+      description: Settings changed locally on the frame. Same semantics as updateFrameSettings.
+      parameters: [ { $ref: '#/components/parameters/IfMatch' } ]
+      requestBody:
+        required: true
+        content: { application/merge-patch+json: { schema: { $ref: '#/components/schemas/FrameSettingsPatch' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/FrameSettings' } } } }
+        '412': { $ref: '#/components/responses/Problem' }
+
+  /v1/device/placements/{placementId}:
+    patch:
+      tags: [device]
+      operationId: devicePatchPlacement
+      security: [ { deviceAuth: [] } ]
+      description: Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
+      parameters: [ { $ref: '#/components/parameters/PlacementId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                hidden: { type: boolean }
+                trashed: { type: boolean }
+                fit: { $ref: '#/components/schemas/Fit' }
+                focal_point: { $ref: '#/components/schemas/FocalPoint' }
+                rotation: { type: integer, enum: [0, 90, 180, 270] }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
+
+  /v1/device/placements/{placementId}/reaction:
+    put:
+      tags: [device]
+      operationId: deviceSetReaction
+      security: [ { deviceAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/PlacementId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reaction]
+              properties:
+                reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
+      responses:
+        '204': { description: Stored }
+
+  /v1/device/placements/{placementId}/replies:
+    post:
+      tags: [device]
+      operationId: deviceSendReply
+      security: [ { deviceAuth: [] } ]
+      parameters: [ { $ref: '#/components/parameters/PlacementId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [preset]
+              properties:
+                preset: { $ref: '#/components/schemas/ReplyPreset' }
+      responses:
+        '204': { description: Sent }
+
+  /v1/device/join-requests/{requestId}:
+    post:
+      tags: [device]
+      operationId: deviceDecideJoin
+      security: [ { deviceAuth: [] } ]
+      parameters: [ { name: requestId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, deny] }
+      responses:
+        '204': { description: Decided }
+
+  /v1/device/members/{userId}:
+    delete:
+      tags: [device]
+      operationId: deviceRemoveMember
+      security: [ { deviceAuth: [] } ]
+      description: Remove a member from the frame itself (allowed unless the owner disabled it in settings). Cannot remove the owner.
+      parameters:
+        - { $ref: '#/components/parameters/UserId' }
+        - { name: remove_items, in: query, schema: { type: boolean, default: false } }
+      responses:
+        '204': { description: Removed }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /v1/device/imports:
+    post:
+      tags: [device]
+      operationId: deviceImport
+      security: [ { deviceAuth: [] } ]
+      description: |
+        Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
+        Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+      parameters:
+        - { name: X-Filename, in: header, required: true, schema: { type: string } }
+        - { name: X-Captured-At, in: header, schema: { type: string, format: date-time } }
+      requestBody:
+        required: true
+        content:
+          application/octet-stream: { schema: { type: string, contentMediaType: application/octet-stream } }
+      responses:
+        '202': { description: Accepted; a placement.upsert change follows, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
+
+  # ---------------------------------------------------------------- operator
+  /v1/operator/stats:
+    get:
+      tags: [operator]
+      operationId: operatorStats
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      responses:
+        '200':
+          description: Server statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users: { type: integer }
+                  frames: { type: integer }
+                  frames_online: { type: integer }
+                  items: { type: integer }
+                  storage_bytes: { type: integer }
+                  processing_queue: { type: integer }
+
+  /v1/operator/limits:
+    get:
+      tags: [operator]
+      operationId: operatorGetLimits
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      responses:
+        '200': { description: Limits, content: { application/json: { schema: { $ref: '#/components/schemas/Limits' } } } }
+    put:
+      tags: [operator]
+      operationId: operatorSetLimits
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/Limits' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/Limits' } } } }
+
+components:
+  securitySchemes:
+    userAuth:
+      type: oauth2
+      description: Logto access token for the API resource. The issuer comes from discovery.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.kinframe.appmire.be/oidc/auth
+          tokenUrl: https://auth.kinframe.appmire.be/oidc/token
+          scopes:
+            kinframe:operate: Operator access
+    deviceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Device access token from /v1/devices/token.
+
+  parameters:
+    FrameId: { name: frameId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    UserId: { name: userId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    ItemId: { name: itemId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    PlacementId: { name: placementId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    EndpointId: { name: endpointId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    InviteToken: { name: token, in: path, required: true, schema: { type: string, minLength: 22, maxLength: 64 } }
+    Cursor: { name: cursor, in: query, schema: { type: string } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, schema: { type: string, maxLength: 64 } }
+    IfMatch: { name: If-Match, in: header, required: true, description: 'Quoted version, e.g. "7"', schema: { type: string } }
+
+  responses:
+    Problem:
+      description: Error (RFC 9457)
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+
+  schemas:
+    Id:
+      type: string
+      format: uuid
+      description: UUIDv7
+
+    Problem:
+      type: object
+      required: [type, title, status, code]
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        code: { $ref: '#/components/schemas/ProblemCode' }
+        detail: { type: string }
+        errors:
+          type: array
+          description: Field-level validation errors (422)
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              code: { type: string }
+
+    ProblemCode:
+      type: string
+      enum:
+        - unauthorized
+        - token_expired
+        - device_revoked
+        - forbidden
+        - missing_permission
+        - not_found
+        - code_invalid
+        - code_expired
+        - invite_invalid
+        - invite_expired
+        - already_member
+        - validation_failed
+        - too_many_items
+        - video_too_long
+        - upload_too_large
+        - upload_not_found
+        - unsupported_media
+        - corrupt_media
+        - version_conflict
+        - frame_offline
+        - command_timeout
+        - owner_cannot_leave
+        - rate_limited
+        - app_update_required
+        - server_error
+
+    Discovery:
+      type: object
+      required: [name, version, api, auth, limits]
+      properties:
+        name: { type: string }
+        version: { type: string }
+        api: { type: string, format: uri }
+        web: { type: string, format: uri }
+        auth:
+          type: object
+          required: [issuer, mobile_client_id, web_client_id, api_resource]
+          properties:
+            issuer: { type: string, format: uri }
+            mobile_client_id: { type: string }
+            web_client_id: { type: string }
+            api_resource: { type: string }
+        limits: { $ref: '#/components/schemas/Limits' }
+
+    Limits:
+      type: object
+      required: [max_items_per_send, max_video_seconds, max_upload_bytes]
+      properties:
+        max_items_per_send: { type: integer, default: 200 }
+        max_video_seconds: { type: integer, default: 300 }
+        max_upload_bytes: { type: integer, default: 2147483648 }
+        trash_retention_days: { type: integer, default: 30 }
+
+    User:
+      type: object
+      required: [id, display_name]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        display_name: { type: string }
+        email: { type: [string, 'null'] }
+        avatar_url: { type: [string, 'null'], format: uri }
+        share_location_names: { type: boolean }
+        locale: { type: [string, 'null'] }
+        is_operator: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    PushEndpointCreate:
+      type: object
+      required: [kind, endpoint]
+      properties:
+        kind: { type: string, enum: [unifiedpush, fcm, apns, webpush] }
+        endpoint: { type: string, description: UnifiedPush/WebPush URL, or FCM/APNs token }
+        webpush_keys:
+          type: object
+          properties:
+            p256dh: { type: string }
+            auth: { type: string }
+        device_name: { type: string, maxLength: 60 }
+        locale: { type: string }
+
+    PushEndpoint:
+      allOf:
+        - $ref: '#/components/schemas/PushEndpointCreate'
+        - type: object
+          required: [id, created_at]
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+            created_at: { type: string, format: date-time }
+
+    Role:
+      type: string
+      enum: [owner, admin, member]
+
+    Permissions:
+      type: object
+      properties:
+        send: { type: boolean }
+        invite: { type: boolean }
+        see_library: { type: boolean }
+        manage_library: { type: boolean }
+        change_settings: { type: boolean }
+
+    FrameSummary:
+      type: object
+      required: [id, name, role, permissions, online]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        name: { type: string }
+        location: { type: [string, 'null'] }
+        owner_name: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        permissions: { $ref: '#/components/schemas/Permissions' }
+        online: { type: boolean }
+        last_seen_at: { type: [string, 'null'], format: date-time }
+        screen: { $ref: '#/components/schemas/Screen' }
+        app_version: { type: [string, 'null'] }
+        needs_update: { type: boolean }
+
+    Frame:
+      allOf:
+        - $ref: '#/components/schemas/FrameSummary'
+        - type: object
+          properties:
+            default_permissions: { $ref: '#/components/schemas/Permissions' }
+            approve_joins_on_frame: { type: boolean }
+            invite_requires_approval: { type: boolean }
+            moderation: { type: boolean }
+            member_count: { type: integer }
+            placement_count: { type: integer }
+            created_at: { type: string, format: date-time }
+
+    Screen:
+      type: object
+      required: [width, height]
+      properties:
+        width: { type: integer, examples: [1280] }
+        height: { type: integer, examples: [800] }
+        density_dpi: { type: integer }
+        orientation: { type: string, enum: [landscape, portrait] }
+
+    FrameHealth:
+      type: object
+      properties:
+        online: { type: boolean }
+        last_seen_at: { type: [string, 'null'], format: date-time }
+        last_heartbeat: { $ref: '#/components/schemas/Heartbeat' }
+        last_unclean_shutdown_at: { type: [string, 'null'], format: date-time }
+
+    Heartbeat:
+      type: object
+      required: [app_version, uptime_s]
+      properties:
+        app_version: { type: string }
+        app_version_code: { type: integer }
+        android_sdk: { type: integer }
+        uptime_s: { type: integer }
+        wifi_ssid: { type: [string, 'null'] }
+        wifi_rssi_dbm: { type: [integer, 'null'] }
+        wifi_link_mbps: { type: [integer, 'null'] }
+        storage_free_bytes: { type: integer }
+        storage_total_bytes: { type: integer }
+        cache_bytes: { type: integer }
+        placements_cached: { type: integer }
+        placements_missing: { type: integer }
+        screen_state: { type: string, enum: ['on', 'off', dimmed, sleeping] }
+        last_shutdown_clean: { type: boolean }
+        crash_count_24h: { type: integer }
+        local_time: { type: string, format: date-time }
+        timezone: { type: string, examples: [Europe/Brussels] }
+
+    FrameCommand:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [sleep, wake, restart, next, previous, show_placement, sync_now, identify] }
+        placement_id: { $ref: '#/components/schemas/Id' }
+
+    CommandResult:
+      type: object
+      required: [ok]
+      properties:
+        ok: { type: boolean }
+        error_code: { type: [string, 'null'] }
+
+    RedeemResult:
+      type: object
+      required: [status, frame]
+      properties:
+        status: { type: string, enum: [claimed, joined, pending, already_member] }
+        frame: { $ref: '#/components/schemas/FrameSummary' }
+        join_request_id: { $ref: '#/components/schemas/Id' }
+
+    Member:
+      type: object
+      required: [user_id, display_name, role, permissions]
+      properties:
+        user_id: { $ref: '#/components/schemas/Id' }
+        display_name: { type: string }
+        avatar_url: { type: [string, 'null'], format: uri }
+        role: { $ref: '#/components/schemas/Role' }
+        permissions: { $ref: '#/components/schemas/Permissions' }
+        joined_at: { type: string, format: date-time }
+        last_sent_at: { type: [string, 'null'], format: date-time }
+
+    JoinRequest:
+      type: object
+      required: [id, user, via, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        user:
+          type: object
+          properties:
+            id: { $ref: '#/components/schemas/Id' }
+            display_name: { type: string }
+            avatar_url: { type: [string, 'null'] }
+        via: { type: string, enum: [frame_code, invite] }
+        invited_by_name: { type: [string, 'null'] }
+        note: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+
+    Invite:
+      type: object
+      required: [id, token, url, expires_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        token: { type: string }
+        url: { type: string, format: uri }
+        created_by_name: { type: string }
+        max_uses: { type: [integer, 'null'] }
+        uses: { type: integer }
+        note: { type: [string, 'null'] }
+        expires_at: { type: string, format: date-time }
+
+    InvitePreview:
+      type: object
+      required: [frame_name, invited_by_name, requires_approval]
+      properties:
+        frame_name: { type: string }
+        frame_location: { type: [string, 'null'] }
+        owner_name: { type: string }
+        invited_by_name: { type: string }
+        requires_approval: { type: boolean }
+        already_member: { type: boolean }
+
+    FrameCode:
+      type: object
+      required: [code, expires_at, join_url]
+      properties:
+        code: { type: string, pattern: '^[0-9]{8}$' }
+        expires_at: { type: string, format: date-time }
+        join_url: { type: string, format: uri }
+        claimed: { type: boolean, description: false while the frame has no owner }
+
+    MediaKind:
+      type: string
+      enum: [photo, video]
+
+    Fit:
+      type: string
+      enum: [fill, fit]
+
+    FocalPoint:
+      type: object
+      description: Relative to the master rendition, 0..1 from top-left.
+      required: [x, y]
+      properties:
+        x: { type: number, minimum: 0, maximum: 1 }
+        y: { type: number, minimum: 0, maximum: 1 }
+
+    Reaction:
+      type: string
+      enum: [love, laugh, wow, sad]
+
+    ReplyPreset:
+      type: string
+      enum: [beautiful, call_me, miss_you, thanks]
+
+    SendCreate:
+      type: object
+      required: [frame_ids, items]
+      properties:
+        frame_ids: { type: array, minItems: 1, items: { $ref: '#/components/schemas/Id' } }
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [upload_id]
+            properties:
+              upload_id: { type: string, description: tus upload id, or an existing item id when the server reported a duplicate }
+              caption: { type: [string, 'null'], maxLength: 280 }
+              focal_point: { $ref: '#/components/schemas/FocalPoint' }
+              fit: { $ref: '#/components/schemas/Fit' }
+              trim:
+                type: object
+                description: Videos only.
+                properties:
+                  start_ms: { type: integer, minimum: 0 }
+                  end_ms: { type: integer, minimum: 1 }
+              include_audio: { type: boolean, default: true }
+              captured_at: { type: [string, 'null'], format: date-time, description: Client hint used when the file has no metadata. }
+
+    Item:
+      type: object
+      required: [id, kind, status, sender_id, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/MediaKind' }
+        status: { type: string, enum: [processing, ready, failed] }
+        failure_code: { type: [string, 'null'] }
+        sender_id: { $ref: '#/components/schemas/Id' }
+        sender_name: { type: string }
+        caption: { type: [string, 'null'] }
+        caption_edited: { type: boolean }
+        focal_point: { $ref: '#/components/schemas/FocalPoint' }
+        fit: { $ref: '#/components/schemas/Fit' }
+        width: { type: integer }
+        height: { type: integer }
+        duration_ms: { type: [integer, 'null'] }
+        has_audio: { type: [boolean, 'null'] }
+        captured_at: { type: [string, 'null'], format: date-time }
+        place_name: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        thumb_url: { type: [string, 'null'], format: uri }
+
+    PlacementStatus:
+      type: string
+      enum: [pending, ready, delivered, seen, failed, removed]
+
+    Placement:
+      type: object
+      required: [id, frame_id, item, status, hidden, trashed]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        item: { $ref: '#/components/schemas/Item' }
+        status: { $ref: '#/components/schemas/PlacementStatus' }
+        hidden: { type: boolean }
+        trashed: { type: boolean }
+        trashed_at: { type: [string, 'null'], format: date-time }
+        pending_moderation: { type: boolean }
+        fit_override: { oneOf: [ { $ref: '#/components/schemas/Fit' }, { type: 'null' } ] }
+        focal_override: { oneOf: [ { $ref: '#/components/schemas/FocalPoint' }, { type: 'null' } ] }
+        rotation: { type: integer, enum: [0, 90, 180, 270] }
+        reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
+        replies:
+          type: array
+          items:
+            type: object
+            properties:
+              preset: { $ref: '#/components/schemas/ReplyPreset' }
+              at: { type: string, format: date-time }
+        delivered_at: { type: [string, 'null'], format: date-time }
+        seen_at: { type: [string, 'null'], format: date-time }
+        received_at: { type: string, format: date-time }
+        album_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+
+    Send:
+      type: object
+      required: [id, created_at, items, frames]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        created_at: { type: string, format: date-time }
+        items: { type: array, items: { $ref: '#/components/schemas/Item' } }
+        frames:
+          type: array
+          description: Per-frame delivery for this send.
+          items:
+            type: object
+            required: [frame_id, frame_name, placements]
+            properties:
+              frame_id: { $ref: '#/components/schemas/Id' }
+              frame_name: { type: string }
+              online: { type: boolean }
+              placements:
+                type: array
+                items:
+                  type: object
+                  required: [placement_id, item_id, status]
+                  properties:
+                    placement_id: { $ref: '#/components/schemas/Id' }
+                    item_id: { $ref: '#/components/schemas/Id' }
+                    status: { $ref: '#/components/schemas/PlacementStatus' }
+                    reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
+                    replies: { type: array, items: { $ref: '#/components/schemas/ReplyPreset' } }
+        summary:
+          type: object
+          properties:
+            processing: { type: integer }
+            pending: { type: integer }
+            delivered: { type: integer }
+            seen: { type: integer }
+            failed: { type: integer }
+
+    Album:
+      type: object
+      required: [id, name, version, placement_count]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        name: { type: string }
+        version: { type: integer }
+        placement_count: { type: integer }
+        cover_placement_id: { $ref: '#/components/schemas/Id' }
+        placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' }, description: Ordered. }
+        schedule:
+          type: [object, 'null']
+          description: Play this album automatically between dates each year (e.g. December).
+          properties:
+            from_month_day: { type: string, pattern: '^[0-9]{2}-[0-9]{2}$' }
+            to_month_day: { type: string, pattern: '^[0-9]{2}-[0-9]{2}$' }
+
+    AlbumWrite:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
+        placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        cover_placement_id: { $ref: '#/components/schemas/Id' }
+        schedule: { $ref: '#/components/schemas/Album/properties/schedule' }
+
+    SleepSchedule:
+      type: object
+      required: [id, sleep_at, wake_at, days, enabled]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        sleep_at: { type: string, pattern: '^[0-2][0-9]:[0-5][0-9]$', examples: ['23:00'] }
+        wake_at: { type: string, pattern: '^[0-2][0-9]:[0-5][0-9]$', examples: ['07:00'] }
+        days:
+          type: array
+          items: { type: string, enum: [mon, tue, wed, thu, fri, sat, sun] }
+        enabled: { type: boolean }
+        mode: { type: string, enum: ['off', dim], default: 'off' }
+
+    FrameSettings:
+      type: object
+      description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
+      required: [version]
+      properties:
+        version: { type: integer }
+        slideshow:
+          type: object
+          properties:
+            interval_s: { type: integer, minimum: 2, maximum: 86400, default: 30 }
+            transition: { type: string, enum: [crossfade, slide, kenburns], default: crossfade }
+            transition_ms: { type: integer, minimum: 200, maximum: 3000, default: 800 }
+            order: { type: string, enum: [received, taken, shuffle], default: received }
+            reverse: { type: boolean, default: false }
+            caption_date: { type: string, enum: [taken, received, none], default: received }
+            fill: { type: boolean, default: true }
+            background: { type: string, enum: [blur, black, palette], default: blur }
+            pair_portraits: { type: boolean, default: true }
+            collage: { type: boolean, default: false }
+            collage_max: { type: integer, minimum: 2, maximum: 6, default: 3 }
+            album_id: { type: [string, 'null'], description: null = all photos }
+            on_this_day: { type: boolean, default: false }
+        widgets:
+          type: object
+          properties:
+            caption: { type: boolean, default: true }
+            avatar: { type: boolean, default: true }
+            clock: { type: boolean, default: true }
+            date: { type: boolean, default: true }
+            weather: { type: boolean, default: false }
+            clock_24h: { type: boolean, default: true }
+        video:
+          type: object
+          properties:
+            autoplay: { type: boolean, default: true }
+            playback: { type: string, enum: [loop, once_hold, once_advance], default: once_hold }
+            volume: { type: integer, minimum: 0, maximum: 100, default: 60 }
+            auto_mute_min: { type: [integer, 'null'], default: null }
+        display:
+          type: object
+          properties:
+            brightness: { type: integer, minimum: 15, maximum: 255, default: 204 }
+            brightness_mode: { type: string, enum: [manual, schedule, sun, sensor], default: manual }
+            brightness_schedule:
+              type: array
+              items:
+                type: object
+                properties:
+                  at: { type: string, pattern: '^[0-2][0-9]:[0-5][0-9]$' }
+                  brightness: { type: integer, minimum: 15, maximum: 255 }
+            sleep_schedules:
+              type: array
+              items: { $ref: '#/components/schemas/SleepSchedule' }
+            motion_timeout_min: { type: [integer, 'null'], default: 30 }
+            text_scale: { type: number, enum: [1.0, 1.15, 1.3], default: 1.0 }
+        locale:
+          type: object
+          properties:
+            language: { type: string, default: en }
+            timezone: { type: string, default: Europe/Brussels }
+            temperature_unit: { type: string, enum: [c, f], default: c }
+            first_day_of_week: { type: string, enum: [mon, sun, sat], default: mon }
+        location:
+          type: [object, 'null']
+          description: Used for weather and sun-based brightness. Set by owner/admin.
+          properties:
+            name: { type: string }
+            lat: { type: number }
+            lon: { type: number }
+        notifications:
+          type: object
+          properties:
+            sound: { type: boolean, default: true }
+            volume: { type: integer, minimum: 0, maximum: 100, default: 40 }
+        kiosk:
+          type: object
+          properties:
+            allow_remove_members_on_frame: { type: boolean, default: true }
+            owner_pin_set: { type: boolean, readOnly: true }
+
+    FrameSettingsPatch:
+      description: RFC 7396 merge patch of FrameSettings (any subset; arrays are replaced whole).
+      type: object
+
+    DeviceEnroll:
+      type: object
+      required: [hardware, screen, app]
+      properties:
+        hardware:
+          type: object
+          required: [model]
+          properties:
+            brand: { type: string, examples: [denver] }
+            model: { type: string, examples: [PFF_1024] }
+            board: { type: string, examples: [rk312x] }
+            android_sdk: { type: integer, examples: [23] }
+            abis: { type: array, items: { type: string } }
+            ram_mb: { type: integer }
+            storage_total_bytes: { type: integer }
+            max_video_decode: { $ref: '#/components/schemas/Screen' }
+            capabilities:
+              type: object
+              properties:
+                light_sensor: { type: boolean }
+                motion_sensor: { type: boolean }
+                accelerometer: { type: boolean }
+                battery: { type: boolean }
+                speaker: { type: boolean }
+                sd_card: { type: boolean }
+                usb_host: { type: boolean }
+                root: { type: boolean }
+        screen: { $ref: '#/components/schemas/Screen' }
+        app:
+          type: object
+          required: [version, version_code]
+          properties:
+            version: { type: string }
+            version_code: { type: integer }
+            channel: { type: string, enum: [stable, beta], default: stable }
+        locale: { type: string }
+        timezone: { type: string }
+
+    DeviceState:
+      type: object
+      required: [device_id, claimed, latest_seq]
+      properties:
+        device_id: { $ref: '#/components/schemas/Id' }
+        claimed: { type: boolean }
+        frame_id: { type: [string, 'null'] }
+        frame_name: { type: [string, 'null'] }
+        owner_name: { type: [string, 'null'] }
+        latest_seq: { type: integer }
+        server_time: { type: string, format: date-time }
+
+    Change:
+      type: object
+      required: [seq, type]
+      discriminator: { propertyName: type }
+      properties:
+        seq: { type: integer }
+        type:
+          type: string
+          enum: [placement.upsert, placement.remove, settings, album.upsert, album.remove, member.upsert, member.remove, frame, weather, reset]
+        placement:
+          allOf:
+            - $ref: '#/components/schemas/Placement'
+            - type: object
+              properties:
+                media:
+                  type: object
+                  description: Frame rendition to download (present on placement.upsert when status is ready).
+                  properties:
+                    url: { type: string, format: uri }
+                    sha256: { type: string }
+                    bytes: { type: integer }
+                    mime: { type: string, examples: [image/webp, video/mp4] }
+                    width: { type: integer }
+                    height: { type: integer }
+                    poster_url: { type: [string, 'null'], format: uri }
+        id: { $ref: '#/components/schemas/Id' }
+        settings: { $ref: '#/components/schemas/FrameSettings' }
+        album: { $ref: '#/components/schemas/Album' }
+        member:
+          type: object
+          properties:
+            user_id: { $ref: '#/components/schemas/Id' }
+            display_name: { type: string }
+            avatar_url: { type: [string, 'null'] }
+            role: { $ref: '#/components/schemas/Role' }
+        frame:
+          type: object
+          properties:
+            name: { type: string }
+            location: { type: [string, 'null'] }
+            owner_name: { type: string }
+        weather:
+          type: object
+          properties:
+            fetched_at: { type: string, format: date-time }
+            current:
+              type: object
+              properties:
+                temp_c: { type: number }
+                code: { type: integer, description: WMO weather code }
+                is_day: { type: boolean }
+            daily:
+              type: array
+              items:
+                type: object
+                properties:
+                  date: { type: string, format: date }
+                  min_c: { type: number }
+                  max_c: { type: number }
+                  code: { type: integer }

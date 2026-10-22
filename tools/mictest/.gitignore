@@ -1,0 +1,4 @@
+build/
+mictest.apk
+debug.keystore
+mictest.apk.idsig
