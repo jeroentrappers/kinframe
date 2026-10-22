@@ -106,6 +106,9 @@
     <string name="menu_power">Напајање</string>
     <string name="menu_hide">Сакриј</string>
     <string name="menu_delete">Избриши</string>
+    <string name="menu_add_someone">Додај некога</string>
+    <string name="add_someone_title">Додајте некога у овај оквир</string>
+    <string name="back_to_kinframe">Назад на kinframe</string>
     <string name="menu_rotate">Ротирај</string>
 
     <!-- Empty states -->

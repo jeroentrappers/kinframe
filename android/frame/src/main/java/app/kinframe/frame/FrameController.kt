@@ -410,6 +410,7 @@ class FrameController(val g: FrameGraph) {
     fun openAndroidSettings(activity: android.app.Activity) {
         gate.authorize(OwnerGate.Reason.ExitKiosk) {
             activity.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            app.kinframe.frame.system.ReturnButton.show(activity)
         }
     }
 

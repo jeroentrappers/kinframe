@@ -102,6 +102,9 @@
     <string name="menu_power">電源</string>
     <string name="menu_hide">非表示</string>
     <string name="menu_delete">削除</string>
+    <string name="menu_add_someone">メンバーを追加</string>
+    <string name="add_someone_title">このフレームにメンバーを追加</string>
+    <string name="back_to_kinframe">kinframe に戻る</string>
     <string name="menu_rotate">回転</string>
 
     <!-- Empty states -->

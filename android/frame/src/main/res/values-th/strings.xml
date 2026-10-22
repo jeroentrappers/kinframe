@@ -102,6 +102,9 @@
     <string name="menu_power">พลังงาน</string>
     <string name="menu_hide">ซ่อน</string>
     <string name="menu_delete">ลบ</string>
+    <string name="menu_add_someone">เพิ่มบุคคล</string>
+    <string name="add_someone_title">เพิ่มบุคคลในกรอบรูปนี้</string>
+    <string name="back_to_kinframe">กลับไปที่ kinframe</string>
     <string name="menu_rotate">หมุน</string>
 
     <!-- Empty states -->

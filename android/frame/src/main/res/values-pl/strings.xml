@@ -108,6 +108,9 @@
     <string name="menu_power">Zasilanie</string>
     <string name="menu_hide">Ukryj</string>
     <string name="menu_delete">Usuń</string>
+    <string name="menu_add_someone">Dodaj kogoś</string>
+    <string name="add_someone_title">Dodaj kogoś do tej ramki</string>
+    <string name="back_to_kinframe">Wróć do kinframe</string>
     <string name="menu_rotate">Obróć</string>
 
     <!-- Empty states -->

@@ -106,6 +106,9 @@
     <string name="menu_power">Alimentare</string>
     <string name="menu_hide">Ascundeți</string>
     <string name="menu_delete">Ștergeți</string>
+    <string name="menu_add_someone">Adaugă pe cineva</string>
+    <string name="add_someone_title">Adaugă pe cineva la această ramă</string>
+    <string name="back_to_kinframe">Înapoi la kinframe</string>
     <string name="menu_rotate">Rotește</string>
 
     <!-- Empty states -->

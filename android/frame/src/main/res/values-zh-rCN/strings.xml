@@ -102,6 +102,9 @@
     <string name="menu_power">电源</string>
     <string name="menu_hide">隐藏</string>
     <string name="menu_delete">删除</string>
+    <string name="menu_add_someone">添加成员</string>
+    <string name="add_someone_title">为此相框添加成员</string>
+    <string name="back_to_kinframe">返回 kinframe</string>
     <string name="menu_rotate">旋转</string>
 
     <!-- Empty states -->

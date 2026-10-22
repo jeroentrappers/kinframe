@@ -104,6 +104,9 @@
     <string name="menu_power">Ström</string>
     <string name="menu_hide">Dölj</string>
     <string name="menu_delete">Radera</string>
+    <string name="menu_add_someone">Lägg till någon</string>
+    <string name="add_someone_title">Lägg till någon i den här ramen</string>
+    <string name="back_to_kinframe">Tillbaka till kinframe</string>
     <string name="menu_rotate">Rotera</string>
 
     <!-- Tomma lägen -->

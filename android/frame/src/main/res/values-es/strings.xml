@@ -106,6 +106,9 @@
     <string name="menu_power">Apagado</string>
     <string name="menu_hide">Ocultar</string>
     <string name="menu_delete">Eliminar</string>
+    <string name="menu_add_someone">Añadir a alguien</string>
+    <string name="add_someone_title">Añade a alguien a este marco</string>
+    <string name="back_to_kinframe">Volver a kinframe</string>
     <string name="menu_rotate">Girar</string>
 
     <!-- Empty states -->

@@ -106,6 +106,9 @@
     <string name="menu_power">Alimentation</string>
     <string name="menu_hide">Masquer</string>
     <string name="menu_delete">Supprimer</string>
+    <string name="menu_add_someone">Ajouter quelqu’un</string>
+    <string name="add_someone_title">Ajouter quelqu’un à ce cadre</string>
+    <string name="back_to_kinframe">Retour à kinframe</string>
     <string name="menu_rotate">Pivoter</string>
 
     <!-- Empty states -->

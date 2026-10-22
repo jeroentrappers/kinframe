@@ -106,6 +106,9 @@
     <string name="menu_power">Alimentazione</string>
     <string name="menu_hide">Nascondi</string>
     <string name="menu_delete">Elimina</string>
+    <string name="menu_add_someone">Aggiungi qualcuno</string>
+    <string name="add_someone_title">Aggiungi qualcuno a questa cornice</string>
+    <string name="back_to_kinframe">Torna a kinframe</string>
     <string name="menu_rotate">Ruota</string>
 
     <!-- Empty states -->

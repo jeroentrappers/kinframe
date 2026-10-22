@@ -104,6 +104,9 @@
     <string name="menu_power">Kikapcsolás</string>
     <string name="menu_hide">Elrejtés</string>
     <string name="menu_delete">Törlés</string>
+    <string name="menu_add_someone">Valaki hozzáadása</string>
+    <string name="add_someone_title">Valaki hozzáadása ehhez a kerethez</string>
+    <string name="back_to_kinframe">Vissza a kinframe-hez</string>
     <string name="menu_rotate">Forgatás</string>
 
     <!-- Empty states -->

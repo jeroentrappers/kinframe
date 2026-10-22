@@ -102,6 +102,9 @@
     <string name="menu_power">電源</string>
     <string name="menu_hide">隱藏</string>
     <string name="menu_delete">刪除</string>
+    <string name="menu_add_someone">新增成員</string>
+    <string name="add_someone_title">為此相框新增成員</string>
+    <string name="back_to_kinframe">返回 kinframe</string>
     <string name="menu_rotate">旋轉</string>
 
     <!-- Empty states -->

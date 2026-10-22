@@ -108,6 +108,9 @@
     <string name="menu_power">Питание</string>
     <string name="menu_hide">Скрыть</string>
     <string name="menu_delete">Удалить</string>
+    <string name="menu_add_someone">Добавить человека</string>
+    <string name="add_someone_title">Добавьте человека в эту рамку</string>
+    <string name="back_to_kinframe">Назад в kinframe</string>
     <string name="menu_rotate">Повернуть</string>
 
     <!-- Empty states -->

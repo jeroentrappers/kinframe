@@ -95,6 +95,9 @@
     <string name="menu_power">Aan/uit</string>
     <string name="menu_hide">Verbergen</string>
     <string name="menu_delete">Verwijderen</string>
+    <string name="menu_add_someone">Iemand toevoegen</string>
+    <string name="add_someone_title">Iemand toevoegen aan deze fotolijst</string>
+    <string name="back_to_kinframe">Terug naar kinframe</string>
     <string name="menu_rotate">Draaien</string>
 
     <string name="empty_title">Nog geen foto\'s</string>

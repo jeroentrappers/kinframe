@@ -139,6 +139,7 @@ fun SlideshowScreen(c: FrameController) {
     var snack by remember { mutableStateOf<Snack?>(null) }
     var forecastOpen by remember { mutableStateOf(false) }
     var notificationsOpen by remember { mutableStateOf(false) }
+    var addSomeoneOpen by remember { mutableStateOf(false) }
     val joinPending by c.joins.pending.collectAsState()
     val joinFocused by c.joins.focused.collectAsState()
     val sync by c.syncState.collectAsState()
@@ -159,8 +160,9 @@ fun SlideshowScreen(c: FrameController) {
     val storageOpen by c.removable.panelOpen.collectAsState()
     // The calendar shows the forecast whenever the frame has fresh weather.
     val calendarWeather = weatherDoc?.takeIf { settings.location != null && !it.isStale(nowMs) }
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen) {
-        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen, addSomeoneOpen) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen ||
+            addSomeoneOpen
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -436,6 +438,7 @@ fun SlideshowScreen(c: FrameController) {
             onCalendar = { menuOpen = false; c.calendar.openCalendar() },
             notificationCount = joinPending.size,
             onNotifications = { menuOpen = false; notificationsOpen = true },
+            onAddSomeone = { menuOpen = false; addSomeoneOpen = true },
         )
 
         snack?.let { s ->
@@ -462,6 +465,7 @@ fun SlideshowScreen(c: FrameController) {
             onAllow = { c.joins.decide(it, approve = true) }, onDeny = { c.joins.decide(it, approve = false) },
             onClose = { notificationsOpen = false },
         )
+        app.kinframe.frame.join.AddSomeoneOverlay(c, addSomeoneOpen, joinPending.size) { addSomeoneOpen = false }
         JoinRequestLayer(c, sync?.frameName ?: stringResource(R.string.frame_default_name))
         CalendarLayer(c, nowMs, calendarWeather)
 
@@ -802,6 +806,7 @@ private fun QuickMenu(
     onCalendar: () -> Unit,
     notificationCount: Int,
     onNotifications: () -> Unit,
+    onAddSomeone: () -> Unit,
 ) {
     val current by c.slideshow.current.collectAsState()
     val stage by c.slideshow.stage.collectAsState()
@@ -837,6 +842,7 @@ private fun QuickMenu(
         onCalendar = onCalendar,
         notificationCount = notificationCount,
         onNotifications = onNotifications,
+        onAddSomeone = onAddSomeone,
     )
 }
 
@@ -865,6 +871,7 @@ internal fun QuickMenuContent(
     onCalendar: () -> Unit = {},
     notificationCount: Int = 0,
     onNotifications: () -> Unit = {},
+    onAddSomeone: () -> Unit = {},
 ) {
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(visible, Modifier.align(Alignment.TopCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { -it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { -it / 2 }) {
@@ -883,6 +890,8 @@ internal fun QuickMenuContent(
                         )
                     }
                 }
+                RoundAction(KinIcons.UserPlus, stringResource(R.string.menu_add_someone)) { onTouch(); onAddSomeone() }
+                Spacer(Modifier.size(14.dp))
                 RoundAction(CalendarIcons.Calendar, stringResource(R.string.menu_calendar)) { onTouch(); onCalendar() }
                 Spacer(Modifier.size(14.dp))
                 Box {

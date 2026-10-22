@@ -104,6 +104,9 @@
     <string name="menu_power">Virta</string>
     <string name="menu_hide">Piilota</string>
     <string name="menu_delete">Poista</string>
+    <string name="menu_add_someone">Lisää henkilö</string>
+    <string name="add_someone_title">Lisää joku tähän kehykseen</string>
+    <string name="back_to_kinframe">Takaisin kinframeen</string>
     <string name="menu_rotate">Kierrä</string>
 
     <!-- Tyhjät näkymät -->

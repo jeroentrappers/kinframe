@@ -104,6 +104,9 @@
     <string name="menu_power">Ein/Aus</string>
     <string name="menu_hide">Ausblenden</string>
     <string name="menu_delete">Löschen</string>
+    <string name="menu_add_someone">Jemanden hinzufügen</string>
+    <string name="add_someone_title">Jemanden zu diesem Rahmen hinzufügen</string>
+    <string name="back_to_kinframe">Zurück zu kinframe</string>
     <string name="menu_rotate">Drehen</string>
 
     <!-- Empty states -->

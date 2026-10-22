@@ -106,6 +106,9 @@
     <string name="menu_power">Energia</string>
     <string name="menu_hide">Ocultar</string>
     <string name="menu_delete">Excluir</string>
+    <string name="menu_add_someone">Adicionar alguém</string>
+    <string name="add_someone_title">Adicionar alguém a esta moldura</string>
+    <string name="back_to_kinframe">Voltar ao kinframe</string>
     <string name="menu_rotate">Girar</string>
 
     <!-- Empty states -->

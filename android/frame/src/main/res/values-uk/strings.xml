@@ -108,6 +108,9 @@
     <string name="menu_power">Живлення</string>
     <string name="menu_hide">Приховати</string>
     <string name="menu_delete">Видалити</string>
+    <string name="menu_add_someone">Додати людину</string>
+    <string name="add_someone_title">Додайте людину до цієї рамки</string>
+    <string name="back_to_kinframe">Назад до kinframe</string>
     <string name="menu_rotate">Повернути</string>
 
     <!-- Empty states -->

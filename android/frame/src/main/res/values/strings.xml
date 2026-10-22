@@ -105,6 +105,9 @@
     <string name="menu_power">Power</string>
     <string name="menu_hide">Hide</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_add_someone">Add someone</string>
+    <string name="add_someone_title">Add someone to this frame</string>
+    <string name="back_to_kinframe">Back to kinframe</string>
     <string name="menu_rotate">Rotate</string>
 
     <!-- Empty states -->
