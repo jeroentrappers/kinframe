@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Koppints a lejátszáshoz</string>
+    <string name="settings_live_photos">Élő fotók</string>
+    <string name="live_photos_on">Lejátszás megjelenítéskor</string>
+    <string name="live_photos_tap">Lejátszás koppintásra</string>
+    <string name="live_photos_off">Csak fotó</string>
+</resources>

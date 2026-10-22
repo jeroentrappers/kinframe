@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Bakstelėkite, kad paleistumėte</string>
+    <string name="settings_live_photos">Gyvos nuotraukos</string>
+    <string name="live_photos_on">Leisti rodant</string>
+    <string name="live_photos_tap">Leisti bakstelėjus</string>
+    <string name="live_photos_off">Tik nuotrauka</string>
+</resources>
