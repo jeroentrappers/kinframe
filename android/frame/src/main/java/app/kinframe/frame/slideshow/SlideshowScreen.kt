@@ -327,8 +327,10 @@ fun SlideshowScreen(c: FrameController) {
                     val motion = remember { Animatable(0f) }
                     if (kb != null) {
                         val hold = stage.holdMs
-                        val ms = hold.coerceIn(1_000, KenBurns.MAX_DURATION_MS).toInt()
-                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(ms, easing = LinearEasing)) }
+                        // Time in segments (see KenBurns), at a constant pace from the fade-in until well past the fade-out:
+                        // the camera never stops while the photo is visible.
+                        val ms = (hold + 15_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                        LaunchedEffect(Unit) { motion.animateTo(ms.toFloat() / KenBurns.SEGMENT_MS, tween(ms, easing = LinearEasing)) }
                     }
                     // Where the transition and the finger put the slide; Ken Burns adds its motion to the photo only.
                     val place: GraphicsLayerScope.() -> Unit = {
