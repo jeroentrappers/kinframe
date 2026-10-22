@@ -34,8 +34,19 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
   progress, duplicate detection and uploads that resume after a restart. See `desktop/README.md`.
 - **Server**: Go, PostgreSQL, Logto for accounts. One `docker compose up` to self-host.
 
-## License
+## Licensing
 
-AGPL-3.0-or-later. See `LICENSE`.
+kinframe is dual-licensed.
 
-Frameo is a trademark of its respective owner. kinframe is not affiliated with or endorsed by Frameo.
+- **Open source: AGPL-3.0-or-later** (see `LICENSE`). Free to use, change and self-host. If you distribute kinframe,
+  or run a modified version as a service for others, you must make the complete source of your version available
+  under the same license.
+- **Commercial license**, from Appmire CommV. For manufacturers and companies that want to ship kinframe in their
+  own frames or run it for their customers without the AGPL's obligations: under their own brand, without
+  publishing their changes, with support and updates. Contact jeroen@appmire.be.
+
+Contributions are welcome under the [Contributor License Agreement](CLA.md), which keeps both options possible;
+see `CONTRIBUTING.md`.
+
+The kinframe name and logo are not covered by either license. Frameo is a trademark of its respective owner;
+kinframe is not affiliated with or endorsed by Frameo.
