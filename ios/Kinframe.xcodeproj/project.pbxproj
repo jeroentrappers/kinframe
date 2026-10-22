@@ -1,0 +1,963 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		015DF7CE1605D6E62D0025C3 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
+		030077F0FD939083591AFE73 /* Types+Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167B694AC1ADC1EBE4343C2A /* Types+Components.swift */; };
+		04FBC4CE68BC48FB9A349299 /* Types+Components+Responses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 601421FDB8EAF592FDE562E8 /* Types+Components+Responses.swift */; };
+		0E319531F8CEAE0EE79F2B08 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC296D5E58C89E0E3EF39E75 /* ShareViewController.swift */; };
+		1A0A800957271F400B380788 /* Discovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5418B2798C13F1DFA42C1A4 /* Discovery.swift */; };
+		26600A5C56593CA1D6146FE5 /* ios-strings.json in Resources */ = {isa = PBXBuildFile; fileRef = F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */; };
+		302DB100309D35A18429E343 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
+		341A1DF5A59817073AE3E1B5 /* KinframeKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; };
+		3BD763E2913E184F95CFE943 /* Types+Operations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */; };
+		3E2FBC308BA3ECA5AF0C0D03 /* KinframeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B20BC1219658313B723E4F0 /* KinframeApp.swift */; };
+		50ADC4CA7A08D7B9AA8EDD52 /* KinframeShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8420C512CD5E11E9785C7181 /* KinframeShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		58ED3D7CE9CBD7F20972C5FA /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8FD22B50391273A796A542 /* AppGroup.swift */; };
+		5D6C2A6FAC01929C85A0BCA2 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95307A70F7BF8FCDDF979816 /* Models.swift */; };
+		5E1019AFF427927E9F944048 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = D816333C87146CF3E60C5244 /* OpenAPIURLSession */; };
+		6127C986C7C56375C566256A /* KinframeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		615D2BEBB369D7189320B5A0 /* JSONValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6867343EC25D6F75D31E284B /* JSONValue.swift */; };
+		6DCAFBA322F7523C85AA8698 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76DDBD3388B06C515D1CE58 /* L10n.swift */; };
+		72A321321C2E2F8AD4736C9B /* KinframeKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DE8CD09A02084E881578698C /* KinframeKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		92F2657134DB285A68B0C2CF /* Delivery.swift in Sources */ = {isa = PBXBuildFile; fileRef = B68564A9DE041D7F48543CE1 /* Delivery.swift */; };
+		98F0A39DF3A2B99CAE5E845D /* LogtoClient in Frameworks */ = {isa = PBXBuildFile; productRef = 18865B310341BDAAE07B316B /* LogtoClient */; };
+		9E9167CAAB99B75EBE643466 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91B8AD88307A8BFADE6FBDB /* API.swift */; };
+		B066DFC91CFCDE4AB74BF4CD /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35668FDF550D4D325BC1916 /* Client.swift */; };
+		B12A47CF3243D1DDD9ADE4AC /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF42100EEAEA2F25F27F7AFB /* APIError.swift */; };
+		B2A77D8083ABE3FAACFC1EE8 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F01B545429317EC51B291C /* Format.swift */; };
+		B304A6B005C57907355F25F8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DC63A6F9266761D56C683A1 /* Assets.xcassets */; };
+		B7A0822ED5441F5C997AA802 /* FormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F61810B48E7A43B0E15485F /* FormatTests.swift */; };
+		B8AC03707D1F46C76723E128 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92716D11006FEFDA7298A9A8 /* Types.swift */; };
+		BC8F40198C9CDD239DF6F68B /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5810E97DA1CD4A7D0A3539B0 /* Localizable.xcstrings */; };
+		DF144CDA419275D4B86288E5 /* ComposeRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D9DF6CD9D75158079385D0C /* ComposeRules.swift */; };
+		E47CFE459FA435EB434745E5 /* DeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21FAFB345F3139690C2D96E5 /* DeepLink.swift */; };
+		E820CB7C433EF279DBF0E77D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E28EFE78058A2D5D4CC79 /* AuthService.swift */; };
+		E8F357D8EC336FA96911843A /* Types+Components+Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1B4B58F91BA1271161EEC6 /* Types+Components+Parameters.swift */; };
+		EF9D7C1B5655433944604940 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 940029789BBFBA9CB5DD5B2D /* OpenAPIRuntime */; };
+		F165C6F0749BC31F5BE18B92 /* Types+Components+RequestBodies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC72FF8B988F92A0186CCEEE /* Types+Components+RequestBodies.swift */; };
+		F218ED9D0AB0620171F030B4 /* Types+Components+Headers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11DB13FCB892D4D646303B0B /* Types+Components+Headers.swift */; };
+		F9093C7282F5D25E5BEDB757 /* Types+Components+Schemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6053E8207E3B4E2EC68B0182 /* Types+Components+Schemas.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		412511C47B91761F52BB0065 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7981D887B2158929896AD7E3;
+			remoteInfo = KinframeKit;
+		};
+		696382A517ED8905D8FF8AEC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 21754D8BB1D4D7E463768693;
+			remoteInfo = KinframeShare;
+		};
+		A59BE3B0C75138F4F79E5608 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C04FB9D14F4D79DC93E5135A;
+			remoteInfo = Kinframe;
+		};
+		B287EEAE87E3DD50C9AC68FC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7981D887B2158929896AD7E3;
+			remoteInfo = KinframeKit;
+		};
+		F7DDC487F0ADF34734FE364E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7981D887B2158929896AD7E3;
+			remoteInfo = KinframeKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		308056B155E70609C71F9394 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				50ADC4CA7A08D7B9AA8EDD52 /* KinframeShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		42CF9BC9C1A18B059E15A6E7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				72A321321C2E2F8AD4736C9B /* KinframeKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7DC2B40B271D5CBDB7B8501F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				6127C986C7C56375C566256A /* KinframeKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0A1B4B58F91BA1271161EEC6 /* Types+Components+Parameters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components+Parameters.swift"; sourceTree = "<group>"; };
+		0B20BC1219658313B723E4F0 /* KinframeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KinframeApp.swift; sourceTree = "<group>"; };
+		0C58DA7A258760622EC6D2A1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		11DB13FCB892D4D646303B0B /* Types+Components+Headers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components+Headers.swift"; sourceTree = "<group>"; };
+		167B694AC1ADC1EBE4343C2A /* Types+Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components.swift"; sourceTree = "<group>"; };
+		1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Operations.swift"; sourceTree = "<group>"; };
+		21FAFB345F3139690C2D96E5 /* DeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLink.swift; sourceTree = "<group>"; };
+		395E28EFE78058A2D5D4CC79 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		3F61810B48E7A43B0E15485F /* FormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatTests.swift; sourceTree = "<group>"; };
+		5810E97DA1CD4A7D0A3539B0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		5DC63A6F9266761D56C683A1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		601421FDB8EAF592FDE562E8 /* Types+Components+Responses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components+Responses.swift"; sourceTree = "<group>"; };
+		6053E8207E3B4E2EC68B0182 /* Types+Components+Schemas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components+Schemas.swift"; sourceTree = "<group>"; };
+		6867343EC25D6F75D31E284B /* JSONValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONValue.swift; sourceTree = "<group>"; };
+		6D9DF6CD9D75158079385D0C /* ComposeRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeRules.swift; sourceTree = "<group>"; };
+		75A57290E2DCC144619A1A20 /* KinframeShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KinframeShare.entitlements; sourceTree = "<group>"; };
+		7F8FD22B50391273A796A542 /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		8420C512CD5E11E9785C7181 /* KinframeShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KinframeShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		92716D11006FEFDA7298A9A8 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		95307A70F7BF8FCDDF979816 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		98ED649A616D0EDBFD9246ED /* Kinframe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kinframe.entitlements; sourceTree = "<group>"; };
+		A5F01B545429317EC51B291C /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
+		AF42100EEAEA2F25F27F7AFB /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		B217416F0E56EE8EB3F2B4DC /* Kinframe.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kinframe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B280F2554010A1BAEF855D98 /* KinframeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KinframeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B68564A9DE041D7F48543CE1 /* Delivery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Delivery.swift; sourceTree = "<group>"; };
+		B76DDBD3388B06C515D1CE58 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		C35668FDF550D4D325BC1916 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
+		C5418B2798C13F1DFA42C1A4 /* Discovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Discovery.swift; sourceTree = "<group>"; };
+		CC296D5E58C89E0E3EF39E75 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		DC72FF8B988F92A0186CCEEE /* Types+Components+RequestBodies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components+RequestBodies.swift"; sourceTree = "<group>"; };
+		DE8CD09A02084E881578698C /* KinframeKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KinframeKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8D237386B8585BE08CD47D3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E91B8AD88307A8BFADE6FBDB /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings.json"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		02907C0967F187744EB79177 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EF9D7C1B5655433944604940 /* OpenAPIRuntime in Frameworks */,
+				5E1019AFF427927E9F944048 /* OpenAPIURLSession in Frameworks */,
+				98F0A39DF3A2B99CAE5E845D /* LogtoClient in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		23CC4835643D8A47E2711868 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				302DB100309D35A18429E343 /* KinframeKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D707DFCCD201554931BEA395 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				341A1DF5A59817073AE3E1B5 /* KinframeKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EFC21B4C17555FCB9C421A24 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				015DF7CE1605D6E62D0025C3 /* KinframeKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04B5B3C96ABD683AC2AC1D41 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				61E44CE38A2EDADF2157937B /* Generated */,
+				E91B8AD88307A8BFADE6FBDB /* API.swift */,
+				AF42100EEAEA2F25F27F7AFB /* APIError.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		0BB4B8C48531DEBE796886A7 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */,
+				5810E97DA1CD4A7D0A3539B0 /* Localizable.xcstrings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		4BB2A5CDC9DC2E9E0BEE536F /* Kinframe */ = {
+			isa = PBXGroup;
+			children = (
+				FE8493271A66B02022D9FF39 /* Resources */,
+				E8D237386B8585BE08CD47D3 /* Info.plist */,
+				98ED649A616D0EDBFD9246ED /* Kinframe.entitlements */,
+				0B20BC1219658313B723E4F0 /* KinframeApp.swift */,
+			);
+			path = Kinframe;
+			sourceTree = "<group>";
+		};
+		5D850D11837E783E55F4D405 /* KinframeShare */ = {
+			isa = PBXGroup;
+			children = (
+				0C58DA7A258760622EC6D2A1 /* Info.plist */,
+				75A57290E2DCC144619A1A20 /* KinframeShare.entitlements */,
+				CC296D5E58C89E0E3EF39E75 /* ShareViewController.swift */,
+			);
+			path = KinframeShare;
+			sourceTree = "<group>";
+		};
+		61E44CE38A2EDADF2157937B /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				C35668FDF550D4D325BC1916 /* Client.swift */,
+				92716D11006FEFDA7298A9A8 /* Types.swift */,
+				167B694AC1ADC1EBE4343C2A /* Types+Components.swift */,
+				11DB13FCB892D4D646303B0B /* Types+Components+Headers.swift */,
+				0A1B4B58F91BA1271161EEC6 /* Types+Components+Parameters.swift */,
+				DC72FF8B988F92A0186CCEEE /* Types+Components+RequestBodies.swift */,
+				601421FDB8EAF592FDE562E8 /* Types+Components+Responses.swift */,
+				6053E8207E3B4E2EC68B0182 /* Types+Components+Schemas.swift */,
+				1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */,
+			);
+			path = Generated;
+			sourceTree = "<group>";
+		};
+		6705CD1BCCFD05C10D1A0C48 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B217416F0E56EE8EB3F2B4DC /* Kinframe.app */,
+				DE8CD09A02084E881578698C /* KinframeKit.framework */,
+				8420C512CD5E11E9785C7181 /* KinframeShare.appex */,
+				B280F2554010A1BAEF855D98 /* KinframeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		73DC71F01FAE411C8213E7E6 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				395E28EFE78058A2D5D4CC79 /* AuthService.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		846AC148263B7621B7E6E7D7 /* KinframeTests */ = {
+			isa = PBXGroup;
+			children = (
+				3F61810B48E7A43B0E15485F /* FormatTests.swift */,
+			);
+			path = KinframeTests;
+			sourceTree = "<group>";
+		};
+		CF3C1DB7038CF04238CBEAAA /* KinframeKit */ = {
+			isa = PBXGroup;
+			children = (
+				04B5B3C96ABD683AC2AC1D41 /* API */,
+				73DC71F01FAE411C8213E7E6 /* Auth */,
+				FA0D2C73FD645DCD39582A2D /* Core */,
+				0BB4B8C48531DEBE796886A7 /* Resources */,
+			);
+			path = KinframeKit;
+			sourceTree = "<group>";
+		};
+		D8E8EF183C8F276EAB6C7E6A = {
+			isa = PBXGroup;
+			children = (
+				4BB2A5CDC9DC2E9E0BEE536F /* Kinframe */,
+				CF3C1DB7038CF04238CBEAAA /* KinframeKit */,
+				5D850D11837E783E55F4D405 /* KinframeShare */,
+				846AC148263B7621B7E6E7D7 /* KinframeTests */,
+				6705CD1BCCFD05C10D1A0C48 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FA0D2C73FD645DCD39582A2D /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				7F8FD22B50391273A796A542 /* AppGroup.swift */,
+				6D9DF6CD9D75158079385D0C /* ComposeRules.swift */,
+				21FAFB345F3139690C2D96E5 /* DeepLink.swift */,
+				B68564A9DE041D7F48543CE1 /* Delivery.swift */,
+				C5418B2798C13F1DFA42C1A4 /* Discovery.swift */,
+				A5F01B545429317EC51B291C /* Format.swift */,
+				6867343EC25D6F75D31E284B /* JSONValue.swift */,
+				B76DDBD3388B06C515D1CE58 /* L10n.swift */,
+				95307A70F7BF8FCDDF979816 /* Models.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		FE8493271A66B02022D9FF39 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				5DC63A6F9266761D56C683A1 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		21754D8BB1D4D7E463768693 /* KinframeShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 171DAB6EE491DB06971F73C8 /* Build configuration list for PBXNativeTarget "KinframeShare" */;
+			buildPhases = (
+				8A09D202C7948E60C35CE74A /* Sources */,
+				23CC4835643D8A47E2711868 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1EF5B76828CDA0B4A3BF28E1 /* PBXTargetDependency */,
+			);
+			name = KinframeShare;
+			packageProductDependencies = (
+			);
+			productName = KinframeShare;
+			productReference = 8420C512CD5E11E9785C7181 /* KinframeShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		7981D887B2158929896AD7E3 /* KinframeKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DBA4F21E1CEABFAD0A78D5C2 /* Build configuration list for PBXNativeTarget "KinframeKit" */;
+			buildPhases = (
+				22739FC1C4B1694DA8D738E0 /* Sources */,
+				02143535D7AF2ECC871A71B2 /* Resources */,
+				02907C0967F187744EB79177 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KinframeKit;
+			packageProductDependencies = (
+				940029789BBFBA9CB5DD5B2D /* OpenAPIRuntime */,
+				D816333C87146CF3E60C5244 /* OpenAPIURLSession */,
+				18865B310341BDAAE07B316B /* LogtoClient */,
+			);
+			productName = KinframeKit;
+			productReference = DE8CD09A02084E881578698C /* KinframeKit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		883A68CF0554FFDAD7BA84BC /* KinframeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 121D135922213ECEF2AC477A /* Build configuration list for PBXNativeTarget "KinframeTests" */;
+			buildPhases = (
+				A92BD58E49B472A722631616 /* Sources */,
+				EFC21B4C17555FCB9C421A24 /* Frameworks */,
+				7DC2B40B271D5CBDB7B8501F /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E719474BA82F3B1B4C15B6E8 /* PBXTargetDependency */,
+				886294473438B1E0AAE89795 /* PBXTargetDependency */,
+			);
+			name = KinframeTests;
+			packageProductDependencies = (
+			);
+			productName = KinframeTests;
+			productReference = B280F2554010A1BAEF855D98 /* KinframeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C04FB9D14F4D79DC93E5135A /* Kinframe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 568534611760D3547BDD9A88 /* Build configuration list for PBXNativeTarget "Kinframe" */;
+			buildPhases = (
+				581581C71CBEC342E4BA544A /* Sources */,
+				22AB344EF49B44DDC7A03644 /* Resources */,
+				D707DFCCD201554931BEA395 /* Frameworks */,
+				308056B155E70609C71F9394 /* Embed Foundation Extensions */,
+				42CF9BC9C1A18B059E15A6E7 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51D81278BE349EED29B4C4EC /* PBXTargetDependency */,
+				9738CC57E83D16CE274292F2 /* PBXTargetDependency */,
+			);
+			name = Kinframe;
+			packageProductDependencies = (
+			);
+			productName = Kinframe;
+			productReference = B217416F0E56EE8EB3F2B4DC /* Kinframe.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9FBD6C77D6BF03BEB18DE869 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					21754D8BB1D4D7E463768693 = {
+						DevelopmentTeam = TEAMID;
+						ProvisioningStyle = Automatic;
+					};
+					7981D887B2158929896AD7E3 = {
+						DevelopmentTeam = TEAMID;
+						ProvisioningStyle = Automatic;
+					};
+					883A68CF0554FFDAD7BA84BC = {
+						DevelopmentTeam = TEAMID;
+						ProvisioningStyle = Automatic;
+					};
+					C04FB9D14F4D79DC93E5135A = {
+						DevelopmentTeam = TEAMID;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = C817FD8DF2283968F799F354 /* Build configuration list for PBXProject "Kinframe" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				nl,
+			);
+			mainGroup = D8E8EF183C8F276EAB6C7E6A;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				980E15EA13C128DFD972FBD2 /* XCRemoteSwiftPackageReference "swift" */,
+				38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
+				6DF1AEA7389F9BF2FC5258A9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6705CD1BCCFD05C10D1A0C48 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C04FB9D14F4D79DC93E5135A /* Kinframe */,
+				7981D887B2158929896AD7E3 /* KinframeKit */,
+				21754D8BB1D4D7E463768693 /* KinframeShare */,
+				883A68CF0554FFDAD7BA84BC /* KinframeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		02143535D7AF2ECC871A71B2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC8F40198C9CDD239DF6F68B /* Localizable.xcstrings in Resources */,
+				26600A5C56593CA1D6146FE5 /* ios-strings.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22AB344EF49B44DDC7A03644 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B304A6B005C57907355F25F8 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		22739FC1C4B1694DA8D738E0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E9167CAAB99B75EBE643466 /* API.swift in Sources */,
+				B12A47CF3243D1DDD9ADE4AC /* APIError.swift in Sources */,
+				58ED3D7CE9CBD7F20972C5FA /* AppGroup.swift in Sources */,
+				E820CB7C433EF279DBF0E77D /* AuthService.swift in Sources */,
+				B066DFC91CFCDE4AB74BF4CD /* Client.swift in Sources */,
+				DF144CDA419275D4B86288E5 /* ComposeRules.swift in Sources */,
+				E47CFE459FA435EB434745E5 /* DeepLink.swift in Sources */,
+				92F2657134DB285A68B0C2CF /* Delivery.swift in Sources */,
+				1A0A800957271F400B380788 /* Discovery.swift in Sources */,
+				B2A77D8083ABE3FAACFC1EE8 /* Format.swift in Sources */,
+				615D2BEBB369D7189320B5A0 /* JSONValue.swift in Sources */,
+				6DCAFBA322F7523C85AA8698 /* L10n.swift in Sources */,
+				5D6C2A6FAC01929C85A0BCA2 /* Models.swift in Sources */,
+				F218ED9D0AB0620171F030B4 /* Types+Components+Headers.swift in Sources */,
+				E8F357D8EC336FA96911843A /* Types+Components+Parameters.swift in Sources */,
+				F165C6F0749BC31F5BE18B92 /* Types+Components+RequestBodies.swift in Sources */,
+				04FBC4CE68BC48FB9A349299 /* Types+Components+Responses.swift in Sources */,
+				F9093C7282F5D25E5BEDB757 /* Types+Components+Schemas.swift in Sources */,
+				030077F0FD939083591AFE73 /* Types+Components.swift in Sources */,
+				3BD763E2913E184F95CFE943 /* Types+Operations.swift in Sources */,
+				B8AC03707D1F46C76723E128 /* Types.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		581581C71CBEC342E4BA544A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E2FBC308BA3ECA5AF0C0D03 /* KinframeApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A09D202C7948E60C35CE74A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E319531F8CEAE0EE79F2B08 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A92BD58E49B472A722631616 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7A0822ED5441F5C997AA802 /* FormatTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EF5B76828CDA0B4A3BF28E1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7981D887B2158929896AD7E3 /* KinframeKit */;
+			targetProxy = B287EEAE87E3DD50C9AC68FC /* PBXContainerItemProxy */;
+		};
+		51D81278BE349EED29B4C4EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7981D887B2158929896AD7E3 /* KinframeKit */;
+			targetProxy = 412511C47B91761F52BB0065 /* PBXContainerItemProxy */;
+		};
+		886294473438B1E0AAE89795 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7981D887B2158929896AD7E3 /* KinframeKit */;
+			targetProxy = F7DDC487F0ADF34734FE364E /* PBXContainerItemProxy */;
+		};
+		9738CC57E83D16CE274292F2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 21754D8BB1D4D7E463768693 /* KinframeShare */;
+			targetProxy = 696382A517ED8905D8FF8AEC /* PBXContainerItemProxy */;
+		};
+		E719474BA82F3B1B4C15B6E8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C04FB9D14F4D79DC93E5135A /* Kinframe */;
+			targetProxy = A59BE3B0C75138F4F79E5608 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		11742A3E64E23D282ECC5227 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.kit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		3FDCDFD3FD69221935D11778 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Kinframe/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family;
+				PRODUCT_NAME = Kinframe;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4C6F28400FA222964C05CB9D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				INFOPLIST_FILE = KinframeShare/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.share;
+				PRODUCT_NAME = KinframeShare;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		525917A97D4EAF5B09D51C9E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = TEAMID;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				KINFRAME_APNS_ENABLED = NO;
+				KINFRAME_APP_GROUP = group.app.kinframe.family;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		7169C652DC2BE28D766A5B4F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = TEAMID;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				KINFRAME_APNS_ENABLED = NO;
+				KINFRAME_APP_GROUP = group.app.kinframe.family;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		725F02AE3EDD1B6AF9CD3431 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				INFOPLIST_FILE = KinframeShare/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.share;
+				PRODUCT_NAME = KinframeShare;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		74A5A7C963E3C46D588D68FB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_IDENTITY = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.kit;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		B7EE1EEB83EF08A63A1CF5B8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kinframe.app/Kinframe";
+			};
+			name = Release;
+		};
+		DE8E0AA62108728CB05D7294 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Kinframe/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family;
+				PRODUCT_NAME = Kinframe;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E19F129915A587570E937E88 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Kinframe.app/Kinframe";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		121D135922213ECEF2AC477A /* Build configuration list for PBXNativeTarget "KinframeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E19F129915A587570E937E88 /* Debug */,
+				B7EE1EEB83EF08A63A1CF5B8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		171DAB6EE491DB06971F73C8 /* Build configuration list for PBXNativeTarget "KinframeShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				725F02AE3EDD1B6AF9CD3431 /* Debug */,
+				4C6F28400FA222964C05CB9D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		568534611760D3547BDD9A88 /* Build configuration list for PBXNativeTarget "Kinframe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3FDCDFD3FD69221935D11778 /* Debug */,
+				DE8E0AA62108728CB05D7294 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C817FD8DF2283968F799F354 /* Build configuration list for PBXProject "Kinframe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7169C652DC2BE28D766A5B4F /* Debug */,
+				525917A97D4EAF5B09D51C9E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DBA4F21E1CEABFAD0A78D5C2 /* Build configuration list for PBXNativeTarget "KinframeKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11742A3E64E23D282ECC5227 /* Debug */,
+				74A5A7C963E3C46D588D68FB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-runtime";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.8.0;
+			};
+		};
+		6DF1AEA7389F9BF2FC5258A9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-urlsession";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+		980E15EA13C128DFD972FBD2 /* XCRemoteSwiftPackageReference "swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/logto-io/swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		18865B310341BDAAE07B316B /* LogtoClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 980E15EA13C128DFD972FBD2 /* XCRemoteSwiftPackageReference "swift" */;
+			productName = LogtoClient;
+		};
+		940029789BBFBA9CB5DD5B2D /* OpenAPIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 38B95C30236A306489F00AA4 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
+			productName = OpenAPIRuntime;
+		};
+		D816333C87146CF3E60C5244 /* OpenAPIURLSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6DF1AEA7389F9BF2FC5258A9 /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */;
+			productName = OpenAPIURLSession;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 9FBD6C77D6BF03BEB18DE869 /* Project object */;
+}
