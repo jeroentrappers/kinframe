@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -33,12 +33,20 @@ abstract class FrameDatabase : RoomDatabase() {
     companion object {
         const val NAME = "frame.db"
 
+        /** v2: storage eviction (`placements.evictedAt`). */
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN evictedAt INTEGER DEFAULT NULL")
+            }
+        }
+
         fun open(context: Context): FrameDatabase =
             Room.databaseBuilder(context, FrameDatabase::class.java, NAME)
                 // WAL even on low-RAM devices (Room would pick TRUNCATE there): crash-safe and lets the
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
+                .addMigrations(MIGRATION_1_2)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

@@ -50,4 +50,16 @@
     <string name="notifications_empty_body">Er wacht niets op je.</string>
     <string name="menu_notifications">Meldingen</string>
     <string name="action_close">Sluiten</string>
+    <!-- Statuskaarten op de diavoorstelling -->
+    <string name="status_card_offline_title">Geen internetverbinding</string>
+    <string name="status_card_offline_body">De foto\'s op de fotolijst blijven spelen. Nieuwe komen binnen zodra hij weer online is.</string>
+    <string name="status_card_server_title">De fotoserver is niet bereikbaar</string>
+    <string name="status_card_server_body">De wifi werkt, maar de server antwoordt niet. Nieuwe foto\'s komen binnen zodra hij terug is.</string>
+    <string name="status_card_portal_title">Deze wifi vraagt om aan te melden</string>
+    <string name="status_card_portal_body">Open de aanmeldpagina van het netwerk om de fotolijst online te krijgen.</string>
+    <string name="status_card_portal_action">Aanmelden</string>
+    <string name="status_card_storage_title">De fotolijst is bijna vol</string>
+    <string name="status_card_storage_body">Oudere foto\'s zijn van de fotolijst gehaald om plaats te maken; ze blijven veilig op de server. Nieuwe foto\'s wachten misschien tot er plaats is.</string>
+    <string name="portal_title">Aanmelden bij de wifi</string>
+    <string name="portal_body">Dit sluit vanzelf zodra de fotolijst online is.</string>
 </resources>

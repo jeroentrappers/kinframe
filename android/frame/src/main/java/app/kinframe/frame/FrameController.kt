@@ -12,6 +12,10 @@ import app.kinframe.frame.join.JoinRequests
 import app.kinframe.frame.kiosk.OwnerGate
 import app.kinframe.frame.kiosk.OwnerPin
 import app.kinframe.frame.kiosk.PinAttempts
+import app.kinframe.frame.storage.StorageManager
+import app.kinframe.frame.system.CaptivePortal
+import app.kinframe.frame.ui.FrameStatus
+import app.kinframe.frame.ui.FrameStatuses
 import app.kinframe.frame.schedule.DisplayController
 import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
@@ -72,6 +76,22 @@ class FrameController(val g: FrameGraph) {
         attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
     )
 
+    /** Frees space by evicting least-recently-shown renditions (product spec 4.6). */
+    val storage: StorageManager by lazy {
+        StorageManager(g.db, g.media, protectedIds = { withContext(Dispatchers.Main) { slideshow.protectedIds() } }, now = { g.clock.nowMs() })
+    }
+
+    /** Captive-portal detection (product spec 4.8) and whether its sign-in page is open. */
+    val portal = CaptivePortal(g.http, { CaptivePortal.probeFor(g.prefs.serverUrl ?: BuildConfig.DEFAULT_SERVER) }, g.network)
+    val portalOpen = MutableStateFlow(false)
+
+    /** What the slideshow's status card should say, if anything. */
+    val frameStatus: StateFlow<FrameStatus?> by lazy {
+        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status) { conn, login, st, net ->
+            FrameStatuses.of(conn, net.connected, login != null, st.level)
+        }.stateIn(scope, SharingStarted.Eagerly, null)
+    }
+
     val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
 
     /** Frame name shown by the `identify` command (null = hidden). */
@@ -105,6 +125,7 @@ class FrameController(val g: FrameGraph) {
                 return@launch
             }
             display.start()
+            portal.start(scope, suspicious = { connection.value == FrameSession.Connection.ServerUnreachable })
             when {
                 g.crashGuard.inCrashLoop -> _screen.value = AppScreen.Recovery
                 g.credentials.load() != null && g.prefs.claimed -> {
@@ -123,6 +144,13 @@ class FrameController(val g: FrameGraph) {
             }
             reportStateChanges()
             update.start()
+            scope.launch {
+                delay(30_000)
+                while (true) {
+                    runCatching { storage.ensureSpace() }.onFailure { Log.w(TAG, "storage check", it) }
+                    delay(15 * 60_000L)
+                }
+            }
         }
     }
 
@@ -160,7 +188,9 @@ class FrameController(val g: FrameGraph) {
 
     fun startSession() {
         if (_session.value != null) return
-        val s = FrameSession(g.http, g.api, g.db, g.media, g.clock, g.network, scope, events)
+        val s = FrameSession(g.http, g.api, g.db, g.media, g.clock, g.network, scope, events, makeRoom = { storage.ensureSpace(it) })
+        storage.onQueueChanged = { s.downloader.kick() }
+        s.downloader.onStored = { scope.launch { storage.ensureSpace() } }
         _session.value = s
         s.start()
         scope.launch(Dispatchers.IO) { runCatching { s.sync.garbageCollect() } }
@@ -253,6 +283,7 @@ class FrameController(val g: FrameGraph) {
         g.network.refresh()
         val n = g.network.status.value
         val placements = runCatching { g.db.placements().countCached() to g.db.placements().countMissing() }.getOrNull()
+        val evicted = runCatching { g.db.placements().countEvicted() }.getOrNull()
         val (updateState, updateError) = update.heartbeatState()
         return Heartbeat(
             appVersion = BuildConfig.VERSION_NAME,
@@ -267,6 +298,8 @@ class FrameController(val g: FrameGraph) {
             cacheBytes = g.media.usedBytes(),
             placementsCached = placements?.first,
             placementsMissing = placements?.second,
+            placementsEvicted = evicted,
+            storageState = storage.state.value.level.name.lowercase(),
             screenState = display.screenStateName(),
             lastShutdownClean = g.sessionMarker.lastShutdownClean,
             crashCount24h = g.crashGuard.crashCount24h(),

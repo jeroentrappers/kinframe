@@ -40,6 +40,8 @@ fun FrameRoot(c: FrameController) {
             }
         }
         UpdateNotice(c.update)
+        val portalOpen by c.portalOpen.collectAsState()
+        if (portalOpen) CaptivePortalScreen(c)
         OwnerPinPrompt(c)
     }
 }

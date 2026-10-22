@@ -51,4 +51,16 @@
     <string name="notifications_empty_body">Nothing is waiting for you.</string>
     <string name="menu_notifications">Notifications</string>
     <string name="action_close">Close</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">No internet connection</string>
+    <string name="status_card_offline_body">The photos on the frame keep playing. New ones arrive as soon as it is back online.</string>
+    <string name="status_card_server_title">Can\'t reach the photo server</string>
+    <string name="status_card_server_body">The Wi-Fi works, but the server doesn\'t answer. New photos arrive when it\'s back.</string>
+    <string name="status_card_portal_title">This Wi-Fi asks you to sign in</string>
+    <string name="status_card_portal_body">Open the network\'s sign-in page to get the frame online.</string>
+    <string name="status_card_portal_action">Sign in</string>
+    <string name="status_card_storage_title">The frame is almost full</string>
+    <string name="status_card_storage_body">Older photos were taken off the frame to make room; they stay safe on the server. New photos may wait until there is space.</string>
+    <string name="portal_title">Sign in to the Wi-Fi</string>
+    <string name="portal_body">This closes by itself once the frame is online.</string>
 </resources>

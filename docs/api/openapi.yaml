@@ -1352,6 +1352,13 @@ components:
         cache_bytes: { type: integer }
         placements_cached: { type: integer }
         placements_missing: { type: integer }
+        placements_evicted:
+          type: integer
+          description: Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+        storage_state:
+          type: string
+          enum: [ok, low, critical]
+          description: '`low`: below the frame''s low-water mark, evicting. `critical`: nearly full with nothing left to evict.'
         screen_state: { type: string, enum: ['on', 'off', dimmed, sleeping] }
         last_shutdown_clean: { type: boolean }
         crash_count_24h: { type: integer }

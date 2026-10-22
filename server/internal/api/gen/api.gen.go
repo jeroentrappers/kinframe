@@ -388,6 +388,27 @@ func (e HeartbeatScreenState) Valid() bool {
 	}
 }
 
+// Defines values for HeartbeatStorageState.
+const (
+	Critical HeartbeatStorageState = "critical"
+	Low      HeartbeatStorageState = "low"
+	Ok       HeartbeatStorageState = "ok"
+)
+
+// Valid indicates whether the value is a known member of the HeartbeatStorageState enum.
+func (e HeartbeatStorageState) Valid() bool {
+	switch e {
+	case Critical:
+		return true
+	case Low:
+		return true
+	case Ok:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for HeartbeatUpdateState.
 const (
 	HeartbeatUpdateStateDownloading HeartbeatUpdateState = "downloading"
@@ -1505,13 +1526,19 @@ type Heartbeat struct {
 	LastShutdownClean *bool  `json:"last_shutdown_clean,omitempty"`
 
 	// LastUpdateError Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`
-	LastUpdateError   *string               `json:"last_update_error,omitempty"`
-	LocalTime         *time.Time            `json:"local_time,omitempty"`
-	PlacementsCached  *int                  `json:"placements_cached,omitempty"`
+	LastUpdateError  *string    `json:"last_update_error,omitempty"`
+	LocalTime        *time.Time `json:"local_time,omitempty"`
+	PlacementsCached *int       `json:"placements_cached,omitempty"`
+
+	// PlacementsEvicted Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+	PlacementsEvicted *int                  `json:"placements_evicted,omitempty"`
 	PlacementsMissing *int                  `json:"placements_missing,omitempty"`
 	ScreenState       *HeartbeatScreenState `json:"screen_state,omitempty"`
 	StorageFreeBytes  *int                  `json:"storage_free_bytes,omitempty"`
-	StorageTotalBytes *int                  `json:"storage_total_bytes,omitempty"`
+
+	// StorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+	StorageState      *HeartbeatStorageState `json:"storage_state,omitempty"`
+	StorageTotalBytes *int                   `json:"storage_total_bytes,omitempty"`
 
 	// Timezone Example: Europe/Brussels
 	Timezone *string `json:"timezone,omitempty"`
@@ -1529,6 +1556,9 @@ type Heartbeat struct {
 
 // HeartbeatScreenState defines model for Heartbeat.ScreenState.
 type HeartbeatScreenState string
+
+// HeartbeatStorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+type HeartbeatStorageState string
 
 // HeartbeatUpdateState Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
 // `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is

@@ -88,6 +88,8 @@ class SlideshowController(private val c: FrameController) {
     val paused = MutableStateFlow(false)
 
     private var playable: Map<String, PlacementEntity> = emptyMap()
+    /** Visible items whose file was evicted to free space: in the playlist, downloaded again just before they show. */
+    private var onDemand: Set<String> = emptySet()
     private var settings = FrameSettings.DEFAULT
     private var screenW = 0
     private var screenH = 0
@@ -138,6 +140,8 @@ class SlideshowController(private val c: FrameController) {
         val skipped = g.crashGuard.skippedItems()
         val visible = all.filter { it.isVisible }
         playable = visible.filter { it.localFile != null && it.id !in skipped }.associateBy { it.id }
+        val evicted = visible.filter { it.localFile == null && it.evictedAt != null && it.id !in skipped }
+        onDemand = evicted.mapTo(HashSet()) { it.id }
         _empty.value = when {
             playable.isNotEmpty() -> null
             all.isEmpty() -> EmptyState.NoPhotos
@@ -145,7 +149,7 @@ class SlideshowController(private val c: FrameController) {
             else -> EmptyState.Downloading(visible.size)
         }
         playlist.update(
-            playable.values.map { PlaylistEntry(it.id, it.receivedAt, it.capturedAt, it.isNew) },
+            (playable.values + evicted).map { PlaylistEntry(it.id, it.receivedAt, it.capturedAt, it.isNew) },
             PlayOrder.of(s.slideshow.order), s.slideshow.reverse,
         )
         if (playlist.current == null) playlist.restore(g.prefs.playlistCurrent)
@@ -222,7 +226,14 @@ class SlideshowController(private val c: FrameController) {
         if (screenW == 0 || stopped) return
         if (navLock.isLocked && !manual) return
         navLock.withLock {
-            val id = (if (direction > 0) playlist.next() else playlist.previous()) ?: return
+            var id = (if (direction > 0) playlist.next() else playlist.previous()) ?: return
+            // Evicted items are fetched again in the background; show the next one that is here meanwhile.
+            var tries = 0
+            while (id !in playable && tries++ < playlist.size) {
+                if (id in onDemand) c.storage.requestOnDemand(id)
+                id = (if (direction > 0) playlist.next() else playlist.previous()) ?: return
+            }
+            if (id !in playable) return
             val kind = when {
                 fade -> TransitionKind.Crossfade
                 manual -> TransitionKind.Slide
@@ -333,12 +344,23 @@ class SlideshowController(private val c: FrameController) {
     private fun renderKey(p: PlacementEntity) =
         "${p.id}|${p.localFile}|${p.fit}|${p.focalX}|${p.focalY}|${p.rotation}|${settings.slideshow.fill}|${settings.slideshow.background}|${screenW}x$screenH"
 
+    /** Items whose files must not be evicted: on screen now, fading out, or up next. */
+    fun protectedIds(): Set<String> = buildSet {
+        val st = _stage.value
+        st.incoming?.placement?.id?.let(::add)
+        st.outgoing?.placement?.id?.let(::add)
+        _prepared.value?.placement?.id?.let(::add)
+        playlist.peekNext()?.let(::add)
+        playlist.current?.let(::add)
+    }
+
     /** The pre-rendered next slide; the UI draws it into a 1-px box so its texture is uploaded before the fade. */
     private val _prepared = MutableStateFlow<Slide?>(null)
     val prepared: StateFlow<Slide?> = _prepared
 
     private fun prefetch() {
         val nextId = playlist.peekNext() ?: return
+        if (nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
         val p = playable[nextId] ?: return
         c.scope.launch {
             delay(1_200) // after the running transition

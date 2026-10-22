@@ -256,6 +256,10 @@ data class Heartbeat(
     val cacheBytes: Long? = null,
     val placementsCached: Int? = null,
     val placementsMissing: Int? = null,
+    /** Removed from the cache to free space; downloaded again when they are about to show. */
+    val placementsEvicted: Int? = null,
+    /** `ok`, `low` (evicting) or `critical` (nothing left to evict). */
+    val storageState: String? = null,
     val screenState: String? = null,
     val lastShutdownClean: Boolean? = null,
     val crashCount24h: Int? = null,

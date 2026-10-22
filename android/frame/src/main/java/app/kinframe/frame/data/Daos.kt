@@ -32,7 +32,7 @@ interface PlacementDao {
 
     @Query(
         """SELECT * FROM placements
-           WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0
+           WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0 AND evictedAt IS NULL
              AND status IN ('ready','delivered','seen') AND nextAttemptAt <= :now
            ORDER BY receivedAt DESC LIMIT :limit""",
     )
@@ -40,16 +40,27 @@ interface PlacementDao {
 
     @Query(
         """SELECT MIN(nextAttemptAt) FROM placements
-           WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0
+           WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0 AND evictedAt IS NULL
              AND status IN ('ready','delivered','seen')""",
     )
     suspend fun earliestRetry(): Long?
 
-    @Query("UPDATE placements SET localFile = :file, storedAt = :at, downloadAttempts = 0, lastError = NULL WHERE id = :id")
+    @Query("UPDATE placements SET localFile = :file, storedAt = :at, downloadAttempts = 0, lastError = NULL, evictedAt = NULL WHERE id = :id")
     suspend fun markStored(id: String, file: String, at: Long)
 
-    @Query("UPDATE placements SET localFile = :file, storedAt = :at, downloadAttempts = 0, lastError = NULL WHERE mediaSha256 = :sha AND localFile IS NULL")
+    @Query("UPDATE placements SET localFile = :file, storedAt = :at, downloadAttempts = 0, lastError = NULL, evictedAt = NULL WHERE mediaSha256 = :sha AND localFile IS NULL")
     suspend fun markStoredBySha(sha: String, file: String, at: Long): Int
+
+    /** Storage eviction: forget the file for every placement using it. */
+    @Query("UPDATE placements SET localFile = NULL, storedAt = NULL, evictedAt = :at WHERE localFile = :file")
+    suspend fun evict(file: String, at: Long): Int
+
+    /** Re-download on demand: put an evicted placement back in the download queue, first in line. */
+    @Query("UPDATE placements SET evictedAt = NULL, nextAttemptAt = 0, downloadAttempts = 0 WHERE id = :id AND evictedAt IS NOT NULL AND localFile IS NULL")
+    suspend fun unevict(id: String): Int
+
+    @Query("SELECT COUNT(*) FROM placements WHERE evictedAt IS NOT NULL AND localFile IS NULL")
+    suspend fun countEvicted(): Int
 
     @Query("SELECT id FROM placements WHERE mediaSha256 = :sha")
     suspend fun idsWithSha(sha: String): List<String>
@@ -81,7 +92,7 @@ interface PlacementDao {
     @Query("SELECT COUNT(*) FROM placements WHERE localFile IS NOT NULL")
     suspend fun countCached(): Int
 
-    @Query("SELECT COUNT(*) FROM placements WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0 AND status IN ('ready','delivered','seen')")
+    @Query("SELECT COUNT(*) FROM placements WHERE localFile IS NULL AND mediaUrl IS NOT NULL AND trashed = 0 AND evictedAt IS NULL AND status IN ('ready','delivered','seen')")
     suspend fun countMissing(): Int
 }
 
@@ -108,6 +119,8 @@ interface AckDao {
     @Query("SELECT * FROM acks ORDER BY id LIMIT :limit") suspend fun batch(limit: Int): List<AckEntity>
     @Query("DELETE FROM acks WHERE id IN (:ids)") suspend fun delete(ids: List<Long>)
     @Query("SELECT COUNT(*) FROM acks") suspend fun count(): Int
+    /** Placements with an ack still to send: their files are never evicted. */
+    @Query("SELECT DISTINCT placementId FROM acks") suspend fun placementIds(): List<String>
     @Query("DELETE FROM acks") suspend fun deleteAll()
 }
 

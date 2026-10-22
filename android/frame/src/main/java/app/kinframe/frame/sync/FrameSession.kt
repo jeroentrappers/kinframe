@@ -48,6 +48,7 @@ class FrameSession(
     private val network: NetworkMonitor,
     parent: CoroutineScope,
     private val events: Events,
+    makeRoom: suspend (Long) -> Boolean = { false },
 ) {
     interface Events {
         fun onClaimed(ownerName: String?)
@@ -65,7 +66,7 @@ class FrameSession(
     val acks = AckQueue(db, clock::nowMs)
     val outbox = Outbox(db, clock::nowMs)
     val sync = SyncEngine(api, db, media, clock::nowMs)
-    val downloader = Downloader(api, db, media, acks, clock::nowMs)
+    val downloader = Downloader(api, db, media, acks, clock::nowMs, makeRoom = makeRoom)
     private val pullRequests = Channel<Unit>(Channel.CONFLATED)
 
     private val _connection = MutableStateFlow(Connection.Connecting)

@@ -89,6 +89,9 @@ import app.kinframe.frame.join.rememberJoinAvatars
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.ui.Format
+import app.kinframe.frame.ui.FrameStatus
+import app.kinframe.frame.ui.FrameStatusCard
+import app.kinframe.frame.ui.FrameStatuses
 import app.kinframe.frame.ui.PowerDialog
 import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
@@ -210,7 +213,7 @@ fun SlideshowScreen(c: FrameController) {
         )
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            ConnectionPill(c, Modifier, hidden = menuOpen)
+            StatusArea(c, hidden = menuOpen || joinCard)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
         }
 
@@ -417,21 +420,27 @@ private fun NewPhotosPill(c: FrameController, modifier: Modifier) {
     }
 }
 
+/** One calm, dismissible status card (offline, server unreachable, captive portal, storage full). */
 @Composable
-private fun ConnectionPill(c: FrameController, modifier: Modifier, hidden: Boolean) {
-    val conn by c.connection.collectAsState()
-    // Only after a minute, so short blips don't flash a warning.
-    var show by remember { mutableStateOf(false) }
-    LaunchedEffect(conn) {
-        show = false
-        if (conn == FrameSession.Connection.Offline || conn == FrameSession.Connection.ServerUnreachable) { delay(60_000); show = true }
+private fun StatusArea(c: FrameController, hidden: Boolean) {
+    val status by c.frameStatus.collectAsState()
+    var shown by remember { mutableStateOf<FrameStatus?>(null) }
+    LaunchedEffect(status) {
+        shown = null
+        delay(FrameStatuses.delayMs(status))
+        shown = status
     }
-    AnimatedVisibility(show && !hidden, modifier, enter = fadeIn(), exit = fadeOut()) {
-        StatusPill(
-            stringResource(if (conn == FrameSession.Connection.Offline) R.string.status_offline else R.string.status_server_unreachable),
-            leading = { KinIcon(KinIcons.WifiOff, null, tint = Color.White, size = 18.dp) },
-        )
+    var dismissed by remember { mutableStateOf<Pair<FrameStatus, Long>?>(null) }
+    val now = System.currentTimeMillis()
+    val visible = shown?.takeIf { s ->
+        val d = dismissed
+        d == null || d.first != s || (s == FrameStatus.StorageCritical && now - d.second > FrameStatuses.STORAGE_SNOOZE_MS)
     }
+    FrameStatusCard(
+        if (hidden) null else visible,
+        onDismiss = { dismissed = shown?.let { it to System.currentTimeMillis() } },
+        onAction = { c.portalOpen.value = true },
+    )
 }
 
 @Composable

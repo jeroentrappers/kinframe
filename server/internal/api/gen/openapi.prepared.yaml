@@ -809,6 +809,9 @@ components:
                     type: string
                 placements_cached:
                     type: integer
+                placements_evicted:
+                    description: Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+                    type: integer
                 placements_missing:
                     type: integer
                 screen_state:
@@ -820,6 +823,13 @@ components:
                     type: string
                 storage_free_bytes:
                     type: integer
+                storage_state:
+                    description: '`low`: below the frame''s low-water mark, evicting. `critical`: nearly full with nothing left to evict.'
+                    enum:
+                        - ok
+                        - low
+                        - critical
+                    type: string
                 storage_total_bytes:
                     type: integer
                 timezone:

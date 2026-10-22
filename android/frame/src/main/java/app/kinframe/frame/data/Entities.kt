@@ -44,6 +44,8 @@ data class PlacementEntity(
     val lastShownAt: Long? = null,
     /** Arrived while the frame was running and not shown yet: plays first (new-photo experience). */
     val isNew: Boolean = false,
+    /** The file was removed to free space (least recently shown); downloaded again only when it is about to show. */
+    val evictedAt: Long? = null,
 ) {
     val isVideo: Boolean get() = kind == "video"
     val isDeliverable: Boolean get() = status == "ready" || status == "delivered" || status == "seen"
