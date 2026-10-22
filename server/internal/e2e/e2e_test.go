@@ -19,7 +19,10 @@ import (
 // and check the sender sees delivery and the reaction.
 func TestSendLoop(t *testing.T) {
 	requireMedia(t)
-	e := newEnv(t)
+	sendLoop(t, newEnv(t))
+}
+
+func sendLoop(t *testing.T, e *env) {
 
 	// Discovery works without auth.
 	disc := e.get("/.well-known/kinframe", "").m(t)

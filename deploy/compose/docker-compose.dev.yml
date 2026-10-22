@@ -4,6 +4,7 @@
 #   docker compose -f deploy/compose/docker-compose.dev.yml up -d                     # Postgres only
 #   docker compose -f deploy/compose/docker-compose.dev.yml --profile logto up -d     # + Logto
 #   docker compose -f deploy/compose/docker-compose.dev.yml --profile server up -d    # + server in Docker (dev auth)
+#   docker compose -f deploy/compose/docker-compose.dev.yml --profile s3 up -d        # + S3 object store for media
 #
 # The server itself usually runs on the host: `cd server && make run`.
 name: kinframe-dev
@@ -42,6 +43,28 @@ services:
       - "127.0.0.1:8111:3001"
       - "127.0.0.1:8112:3002"
 
+  # Optional: S3 media storage (Silo, the maintained MinIO fork). Run the server with
+  #   KINFRAME_BLOB_BACKEND=s3 KINFRAME_S3_ENDPOINT=http://127.0.0.1:9100 KINFRAME_S3_PATH_STYLE=true \
+  #   KINFRAME_S3_BUCKET=kinframe KINFRAME_S3_ACCESS_KEY=kinframe-dev KINFRAME_S3_SECRET_KEY=kinframe-dev-secret
+  # (the bucket is created on first start). Console: http://127.0.0.1:9101.
+  minio:
+    image: pgsty/silo:RELEASE.2026-10-18T00-00-00Z
+    profiles: [s3]
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: kinframe-dev
+      MINIO_ROOT_PASSWORD: kinframe-dev-secret # dev only
+    ports:
+      - "127.0.0.1:9100:9000"
+      - "127.0.0.1:9101:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
   server:
     build: ../../server
     profiles: [server]
@@ -62,3 +85,4 @@ services:
 volumes:
   pgdata:
   serverdata:
+  miniodata:

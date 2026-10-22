@@ -3,6 +3,7 @@
 package app
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
-	"github.com/jeroentrappers/kinframe/server/internal/blob"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
@@ -70,10 +70,21 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	if missing := tools.Missing(); len(missing) > 0 {
 		log.Warn("media tools not found; uploads cannot be processed", "missing", missing)
 	}
-	store := blob.Local{Root: filepath.Join(cfg.DataDir, "media")}
-	if err := os.MkdirAll(store.Root, 0o750); err != nil {
+	cfg.Blob.Backend = cmp.Or(cfg.Blob.Backend, config.BlobFS)
+	cfg.Blob.FSRoot = cmp.Or(cfg.Blob.FSRoot, filepath.Join(cfg.DataDir, "media"))
+	openCtx, cancelOpen := context.WithTimeout(context.Background(), 30*time.Second)
+	store, err := cfg.Blob.Open(openCtx)
+	cancelOpen()
+	if err != nil {
+		return nil, fmt.Errorf("blob store (%s): %w", cfg.Blob.Backend, err)
+	}
+	// Scratch space for the media pipeline and avatar processing. Next to
+	// the fs store (same volume), so finished files are renamed into place.
+	scratch := filepath.Join(cfg.DataDir, "tmp")
+	if err := os.MkdirAll(scratch, 0o750); err != nil {
 		return nil, err
 	}
+	log.Info("blob store", "backend", store.Backend(), "media_redirect", cmp.Or(cfg.Blob.MediaRedirect, "off"))
 
 	verifiers := auth.MultiVerifier{}
 	if cfg.OIDCIssuer != "" {
@@ -116,7 +127,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx})
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx})
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +136,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 		return nil, err
 	}
 	w := &worker.Worker{
-		Store: st, Blob: store, Tools: tools, Log: log.With("component", "worker"), Events: srv, Workers: cfg.Workers,
+		Store: st, Blob: store, Scratch: scratch, Tools: tools, Log: log.With("component", "worker"), Events: srv, Workers: cfg.Workers,
 		MaxVideoMS:   func(ctx context.Context) int { return srv.Limits(ctx).MaxVideoSeconds * 1000 },
 		RemoveSource: srv.RemoveUpload,
 	}
@@ -210,6 +221,10 @@ func (a *App) Maintain(ctx context.Context) {
 	if err := a.Store.PruneIdempotency(ctx); err != nil {
 		log.Error("prune idempotency keys", "err", err)
 	}
+	// Scratch directories left behind by a crash (normal runs remove their own).
+	if n := pruneScratch(filepath.Join(a.Cfg.DataDir, "tmp"), 6*time.Hour); n > 0 {
+		log.Info("removed stale scratch files", "count", n)
+	}
 }
 
 func (a *App) maintain(ctx context.Context) {
@@ -232,4 +247,23 @@ type quietOnCancel struct {
 
 func (q *quietOnCancel) Enabled(c context.Context, l slog.Level) bool {
 	return q.ctx.Err() == nil && q.Handler.Enabled(c, l)
+}
+
+// pruneScratch removes entries of dir older than age and returns how many.
+func pruneScratch(dir string, age time.Duration) int {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0
+	}
+	n := 0
+	for _, e := range entries {
+		info, err := e.Info()
+		if err != nil || time.Since(info.ModTime()) < age {
+			continue
+		}
+		if os.RemoveAll(filepath.Join(dir, e.Name())) == nil {
+			n++
+		}
+	}
+	return n
 }
