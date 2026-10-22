@@ -71,6 +71,8 @@ const sl: Catalog = {
 	'frames.add': 'Dodaj okvir',
 	'frames.open': 'Odpri okvir {name}',
 	'frames.needsUpdate': 'Za ta okvir čaka posodobitev',
+	'frames.dropTo': 'Spustite za pošiljanje v okvir {name}',
+	'frames.dropHint': 'Spustite jih na okvir, da jih pošljete vanj',
 	'frames.emptyTitle': 'Dodajte svoj prvi okvir',
 	'frames.emptyBody':
 		'Vsak kinframe na zaslonu prikazuje 8-mestno kodo. Vnesite jo tukaj, da nastavite nov okvir ali se pridružite družinskemu.',

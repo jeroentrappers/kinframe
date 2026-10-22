@@ -68,6 +68,8 @@ const he: Catalog = {
 	'frames.add': 'הוספת מסגרת',
 	'frames.open': 'פתיחת {name}',
 	'frames.needsUpdate': 'עדכון ממתין למסגרת הזו',
+	'frames.dropTo': 'שחררו כדי לשלוח אל {name}',
+	'frames.dropHint': 'שחררו אותם על מסגרת כדי לשלוח אותם אליה',
 	'frames.emptyTitle': 'הוספת המסגרת הראשונה',
 	'frames.emptyBody':
 		'כל kinframe מציגה על המסך קוד בן 8 ספרות. אפשר להזין אותו כאן כדי להגדיר מסגרת חדשה או להצטרף למסגרת של המשפחה.',

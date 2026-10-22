@@ -70,6 +70,8 @@ const vi: Catalog = {
 	'frames.add': 'Thêm khung ảnh',
 	'frames.open': 'Mở {name}',
 	'frames.needsUpdate': 'Có bản cập nhật đang chờ cho khung ảnh này',
+	'frames.dropTo': 'Thả để gửi đến {name}',
+	'frames.dropHint': 'Thả lên một khung ảnh để gửi đến khung đó',
 	'frames.emptyTitle': 'Thêm khung ảnh đầu tiên',
 	'frames.emptyBody':
 		'Mỗi kinframe hiện một mã 8 chữ số trên màn hình. Nhập mã ở đây để thiết lập khung ảnh mới hoặc tham gia khung ảnh của gia đình.',

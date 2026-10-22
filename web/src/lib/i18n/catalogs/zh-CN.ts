@@ -70,6 +70,8 @@ const zhCN: Catalog = {
 	'frames.add': '添加相框',
 	'frames.open': '打开 {name}',
 	'frames.needsUpdate': '这台相框有待安装的更新',
+	'frames.dropTo': '松开即可发送到 {name}',
+	'frames.dropHint': '拖到某台相框上松开，即可发送到那台相框',
 	'frames.emptyTitle': '添加你的第一台相框',
 	'frames.emptyBody': '每台 kinframe 相框的屏幕上都会显示一个 8 位数代码。在这里输入代码，即可设置新相框或加入家人的相框。',
 	'frames.emptyCta': '添加你的第一台相框',

@@ -68,6 +68,8 @@ const es: Catalog = {
 	'frames.add': 'Añadir un marco',
 	'frames.open': 'Abrir {name}',
 	'frames.needsUpdate': 'Hay una actualización pendiente para este marco',
+	'frames.dropTo': 'Suelta para enviar a {name}',
+	'frames.dropHint': 'Suéltalos sobre un marco para enviarlos allí',
 	'frames.emptyTitle': 'Añade tu primer marco',
 	'frames.emptyBody':
 		'Cada kinframe muestra un código de 8 cifras en pantalla. Introdúcelo aquí para configurar un marco nuevo o unirte al de tu familia.',

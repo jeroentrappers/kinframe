@@ -71,6 +71,8 @@ const lv: Catalog = {
 	'frames.add': 'Pievienot rāmi',
 	'frames.open': 'Atvērt {name}',
 	'frames.needsUpdate': 'Šim rāmim gaida atjauninājums',
+	'frames.dropTo': 'Atlaidiet, lai nosūtītu uz rāmi {name}',
+	'frames.dropHint': 'Atlaidiet tos uz rāmja, lai nosūtītu uz to',
 	'frames.emptyTitle': 'Pievienojiet savu pirmo rāmi',
 	'frames.emptyBody':
 		'Katrs kinframe ekrānā rāda 8 ciparu kodu. Ievadiet to šeit, lai iestatītu jaunu rāmi vai pievienotos kādam ģimenes rāmim.',

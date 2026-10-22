@@ -70,6 +70,8 @@ const zhTW: Catalog = {
 	'frames.add': '新增相框',
 	'frames.open': '開啟 {name}',
 	'frames.needsUpdate': '這台相框有待安裝的更新',
+	'frames.dropTo': '放開即可傳送到 {name}',
+	'frames.dropHint': '拖曳到某台相框上放開，即可傳送到那台相框',
 	'frames.emptyTitle': '新增你的第一台相框',
 	'frames.emptyBody': '每台 kinframe 相框的螢幕上都會顯示一組 8 位數代碼。在這裡輸入代碼，即可設定新相框，或加入家人的相框。',
 	'frames.emptyCta': '新增你的第一台相框',

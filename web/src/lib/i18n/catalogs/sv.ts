@@ -67,6 +67,8 @@ const sv: Catalog = {
 	'frames.add': 'Lägg till fotoram',
 	'frames.open': 'Öppna {name}',
 	'frames.needsUpdate': 'En uppdatering väntar på den här fotoramen',
+	'frames.dropTo': 'Släpp för att skicka till {name}',
+	'frames.dropHint': 'Släpp dem på en fotoram för att skicka dem dit',
 	'frames.emptyTitle': 'Lägg till din första fotoram',
 	'frames.emptyBody':
 		'Varje kinframe visar en 8-siffrig kod på skärmen. Ange den här för att konfigurera en ny fotoram eller gå med i en från familjen.',

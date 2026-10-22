@@ -70,6 +70,8 @@ const id: Catalog = {
 	'frames.add': 'Tambahkan bingkai',
 	'frames.open': 'Buka {name}',
 	'frames.needsUpdate': 'Ada update yang menunggu untuk bingkai ini',
+	'frames.dropTo': 'Lepas untuk mengirim ke {name}',
+	'frames.dropHint': 'Lepas di atas bingkai untuk mengirimnya ke sana',
 	'frames.emptyTitle': 'Tambahkan bingkai pertama Anda',
 	'frames.emptyBody':
 		'Setiap kinframe menampilkan kode 8 digit di layarnya. Masukkan di sini untuk menyiapkan bingkai baru atau bergabung dengan bingkai keluarga.',

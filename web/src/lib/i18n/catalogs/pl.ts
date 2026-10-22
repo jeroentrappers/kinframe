@@ -71,6 +71,8 @@ const pl: Catalog = {
 	'frames.add': 'Dodaj ramkę',
 	'frames.open': 'Otwórz {name}',
 	'frames.needsUpdate': 'Na tę ramkę czeka aktualizacja',
+	'frames.dropTo': 'Upuść, aby wysłać do ramki {name}',
+	'frames.dropHint': 'Upuść je na ramkę, aby je do niej wysłać',
 	'frames.emptyTitle': 'Dodaj pierwszą ramkę',
 	'frames.emptyBody':
 		'Każda ramka kinframe pokazuje na ekranie 8-cyfrowy kod. Wpisz go tutaj, aby skonfigurować nową ramkę lub dołączyć do ramki rodziny.',

@@ -67,6 +67,8 @@ const nb: Catalog = {
 	'frames.add': 'Legg til fotoramme',
 	'frames.open': 'Åpne {name}',
 	'frames.needsUpdate': 'En oppdatering venter på denne fotorammen',
+	'frames.dropTo': 'Slipp for å sende til {name}',
+	'frames.dropHint': 'Slipp dem på en fotoramme for å sende dem dit',
 	'frames.emptyTitle': 'Legg til din første fotoramme',
 	'frames.emptyBody':
 		'Hver kinframe viser en 8-sifret kode på skjermen. Skriv den inn her for å sette opp en ny fotoramme eller bli med i en fra familien.',
