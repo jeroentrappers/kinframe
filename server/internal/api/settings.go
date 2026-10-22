@@ -123,6 +123,9 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 	if err == nil && s.weather != nil && touchesWeather(paths) {
 		s.weather.Kick(frameID)
 	}
+	if err == nil && s.calendar != nil && touchesCalendar(paths) {
+		s.calendar.RebuildLater(frameID)
+	}
 	return out, err
 }
 
@@ -130,6 +133,16 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 func touchesWeather(paths []string) bool {
 	for _, p := range paths {
 		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" {
+			return true
+		}
+	}
+	return false
+}
+
+// touchesCalendar reports whether a settings patch may move a frame's calendar window or zone.
+func touchesCalendar(paths []string) bool {
+	for _, p := range paths {
+		if p == "calendar" || p == "calendar.past_days" || p == "calendar.future_days" || p == "locale" || p == "locale.timezone" {
 			return true
 		}
 	}

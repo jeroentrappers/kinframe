@@ -19,6 +19,174 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for CalendarColor.
+const (
+	Amber     CalendarColor = "amber"
+	Coral     CalendarColor = "coral"
+	Lavender  CalendarColor = "lavender"
+	Mint      CalendarColor = "mint"
+	Ocean     CalendarColor = "ocean"
+	Olive     CalendarColor = "olive"
+	Plum      CalendarColor = "plum"
+	Rose      CalendarColor = "rose"
+	Sage      CalendarColor = "sage"
+	Sky       CalendarColor = "sky"
+	Tangerine CalendarColor = "tangerine"
+	Teal      CalendarColor = "teal"
+)
+
+// Valid indicates whether the value is a known member of the CalendarColor enum.
+func (e CalendarColor) Valid() bool {
+	switch e {
+	case Amber:
+		return true
+	case Coral:
+		return true
+	case Lavender:
+		return true
+	case Mint:
+		return true
+	case Ocean:
+		return true
+	case Olive:
+		return true
+	case Plum:
+		return true
+	case Rose:
+		return true
+	case Sage:
+		return true
+	case Sky:
+		return true
+	case Tangerine:
+		return true
+	case Teal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarScheduleDays.
+const (
+	CalendarScheduleDaysFri CalendarScheduleDays = "fri"
+	CalendarScheduleDaysMon CalendarScheduleDays = "mon"
+	CalendarScheduleDaysSat CalendarScheduleDays = "sat"
+	CalendarScheduleDaysSun CalendarScheduleDays = "sun"
+	CalendarScheduleDaysThu CalendarScheduleDays = "thu"
+	CalendarScheduleDaysTue CalendarScheduleDays = "tue"
+	CalendarScheduleDaysWed CalendarScheduleDays = "wed"
+)
+
+// Valid indicates whether the value is a known member of the CalendarScheduleDays enum.
+func (e CalendarScheduleDays) Valid() bool {
+	switch e {
+	case CalendarScheduleDaysFri:
+		return true
+	case CalendarScheduleDaysMon:
+		return true
+	case CalendarScheduleDaysSat:
+		return true
+	case CalendarScheduleDaysSun:
+		return true
+	case CalendarScheduleDaysThu:
+		return true
+	case CalendarScheduleDaysTue:
+		return true
+	case CalendarScheduleDaysWed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSourceCreateKind.
+const (
+	CalendarSourceCreateKindCaldav CalendarSourceCreateKind = "caldav"
+	CalendarSourceCreateKindIcs    CalendarSourceCreateKind = "ics"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSourceCreateKind enum.
+func (e CalendarSourceCreateKind) Valid() bool {
+	switch e {
+	case CalendarSourceCreateKindCaldav:
+		return true
+	case CalendarSourceCreateKindIcs:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSourceKind.
+const (
+	CalendarSourceKindCaldav CalendarSourceKind = "caldav"
+	CalendarSourceKindIcs    CalendarSourceKind = "ics"
+	CalendarSourceKindLocal  CalendarSourceKind = "local"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSourceKind enum.
+func (e CalendarSourceKind) Valid() bool {
+	switch e {
+	case CalendarSourceKindCaldav:
+		return true
+	case CalendarSourceKindIcs:
+		return true
+	case CalendarSourceKindLocal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSyncStatus.
+const (
+	CalendarSyncStatusAuthFailed CalendarSyncStatus = "auth_failed"
+	CalendarSyncStatusDisabled   CalendarSyncStatus = "disabled"
+	CalendarSyncStatusFailed     CalendarSyncStatus = "failed"
+	CalendarSyncStatusOk         CalendarSyncStatus = "ok"
+	CalendarSyncStatusSyncing    CalendarSyncStatus = "syncing"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSyncStatus enum.
+func (e CalendarSyncStatus) Valid() bool {
+	switch e {
+	case CalendarSyncStatusAuthFailed:
+		return true
+	case CalendarSyncStatusDisabled:
+		return true
+	case CalendarSyncStatusFailed:
+		return true
+	case CalendarSyncStatusOk:
+		return true
+	case CalendarSyncStatusSyncing:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarTestResultStatus.
+const (
+	CalendarTestResultStatusAuthFailed CalendarTestResultStatus = "auth_failed"
+	CalendarTestResultStatusFailed     CalendarTestResultStatus = "failed"
+	CalendarTestResultStatusOk         CalendarTestResultStatus = "ok"
+)
+
+// Valid indicates whether the value is a known member of the CalendarTestResultStatus enum.
+func (e CalendarTestResultStatus) Valid() bool {
+	switch e {
+	case CalendarTestResultStatusAuthFailed:
+		return true
+	case CalendarTestResultStatusFailed:
+		return true
+	case CalendarTestResultStatusOk:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ChangePlacementRotation.
 const (
 	ChangePlacementRotationN0   ChangePlacementRotation = 0
@@ -47,6 +215,7 @@ func (e ChangePlacementRotation) Valid() bool {
 const (
 	ChangeTypeAlbumRemove     ChangeType = "album.remove"
 	ChangeTypeAlbumUpsert     ChangeType = "album.upsert"
+	ChangeTypeCalendar        ChangeType = "calendar"
 	ChangeTypeFrame           ChangeType = "frame"
 	ChangeTypeMemberRemove    ChangeType = "member.remove"
 	ChangeTypeMemberUpsert    ChangeType = "member.upsert"
@@ -63,6 +232,8 @@ func (e ChangeType) Valid() bool {
 	case ChangeTypeAlbumRemove:
 		return true
 	case ChangeTypeAlbumUpsert:
+		return true
+	case ChangeTypeCalendar:
 		return true
 	case ChangeTypeFrame:
 		return true
@@ -97,6 +268,48 @@ func (e DeviceEnrollAppChannel) Valid() bool {
 	case DeviceEnrollAppChannelBeta:
 		return true
 	case DeviceEnrollAppChannelStable:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EventInvitationStatus.
+const (
+	EventInvitationStatusAccepted  EventInvitationStatus = "accepted"
+	EventInvitationStatusDeclined  EventInvitationStatus = "declined"
+	EventInvitationStatusPending   EventInvitationStatus = "pending"
+	EventInvitationStatusWithdrawn EventInvitationStatus = "withdrawn"
+)
+
+// Valid indicates whether the value is a known member of the EventInvitationStatus enum.
+func (e EventInvitationStatus) Valid() bool {
+	switch e {
+	case EventInvitationStatusAccepted:
+		return true
+	case EventInvitationStatusDeclined:
+		return true
+	case EventInvitationStatusPending:
+		return true
+	case EventInvitationStatusWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EventPhotoPlacement.
+const (
+	Background EventPhotoPlacement = "background"
+	Top        EventPhotoPlacement = "top"
+)
+
+// Valid indicates whether the value is a known member of the EventPhotoPlacement enum.
+func (e EventPhotoPlacement) Valid() bool {
+	switch e {
+	case Background:
+		return true
+	case Top:
 		return true
 	default:
 		return false
@@ -151,6 +364,27 @@ func (e FrameCommandType) Valid() bool {
 	case SyncNow:
 		return true
 	case Wake:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsCalendarView.
+const (
+	FourDay FrameSettingsCalendarView = "four_day"
+	Month   FrameSettingsCalendarView = "month"
+	Week    FrameSettingsCalendarView = "week"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsCalendarView enum.
+func (e FrameSettingsCalendarView) Valid() bool {
+	switch e {
+	case FourDay:
+		return true
+	case Month:
+		return true
+	case Week:
 		return true
 	default:
 		return false
@@ -390,19 +624,19 @@ func (e HeartbeatScreenState) Valid() bool {
 
 // Defines values for HeartbeatStorageState.
 const (
-	Critical HeartbeatStorageState = "critical"
-	Low      HeartbeatStorageState = "low"
-	Ok       HeartbeatStorageState = "ok"
+	HeartbeatStorageStateCritical HeartbeatStorageState = "critical"
+	HeartbeatStorageStateLow      HeartbeatStorageState = "low"
+	HeartbeatStorageStateOk       HeartbeatStorageState = "ok"
 )
 
 // Valid indicates whether the value is a known member of the HeartbeatStorageState enum.
 func (e HeartbeatStorageState) Valid() bool {
 	switch e {
-	case Critical:
+	case HeartbeatStorageStateCritical:
 		return true
-	case Low:
+	case HeartbeatStorageStateLow:
 		return true
-	case Ok:
+	case HeartbeatStorageStateOk:
 		return true
 	default:
 		return false
@@ -573,6 +807,7 @@ func (e PlacementStatus) Valid() bool {
 
 // Defines values for ProblemCode.
 const (
+	ProblemCodeAlreadyDecided      ProblemCode = "already_decided"
 	ProblemCodeAlreadyMember       ProblemCode = "already_member"
 	ProblemCodeAppUpdateRequired   ProblemCode = "app_update_required"
 	ProblemCodeCodeExpired         ProblemCode = "code_expired"
@@ -605,6 +840,8 @@ const (
 // Valid indicates whether the value is a known member of the ProblemCode enum.
 func (e ProblemCode) Valid() bool {
 	switch e {
+	case ProblemCodeAlreadyDecided:
+		return true
 	case ProblemCodeAlreadyMember:
 		return true
 	case ProblemCodeAppUpdateRequired:
@@ -919,6 +1156,24 @@ func (e WeatherUnitsWindSpeed) Valid() bool {
 	}
 }
 
+// Defines values for DeviceDecideInvitationJSONBodyDecision.
+const (
+	Accept  DeviceDecideInvitationJSONBodyDecision = "accept"
+	Decline DeviceDecideInvitationJSONBodyDecision = "decline"
+)
+
+// Valid indicates whether the value is a known member of the DeviceDecideInvitationJSONBodyDecision enum.
+func (e DeviceDecideInvitationJSONBodyDecision) Valid() bool {
+	switch e {
+	case Accept:
+		return true
+	case Decline:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for DeviceDecideJoinJSONBodyDecision.
 const (
 	DeviceDecideJoinJSONBodyDecisionApprove DeviceDecideJoinJSONBodyDecision = "approve"
@@ -1137,10 +1392,242 @@ type AlbumWrite struct {
 	} `json:"schedule,omitempty"`
 }
 
+// Calendar Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+// list, deduplicated across sources by UID and start, sorted by start.
+type Calendar struct {
+	// Countdowns Marked events that have not passed yet, nearest first.
+	Countdowns  []Countdown          `json:"countdowns"`
+	Events      []CalendarEvent      `json:"events"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	Sources     []CalendarSourceInfo `json:"sources"`
+
+	// Timezone The frame's time zone (`locale.timezone`), used for the window and all-day events.
+	//
+	// Example: Europe/Brussels
+	Timezone string `json:"timezone"`
+	Window   struct {
+		From openapi_types.Date `json:"from"`
+
+		// To Inclusive.
+		To openapi_types.Date `json:"to"`
+	} `json:"window"`
+}
+
+// CalendarColor Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+// everywhere).
+type CalendarColor string
+
+// CalendarEvent One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+// all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+type CalendarEvent struct {
+	AllDay    bool                `json:"all_day"`
+	Countdown *bool               `json:"countdown,omitempty"`
+	EndAt     *time.Time          `json:"end_at,omitempty"`
+	EndDate   *openapi_types.Date `json:"end_date,omitempty"`
+	HasPhoto  *bool               `json:"has_photo,omitempty"`
+
+	// Id Stable id of one event occurrence (a hash of source, UID and occurrence start).
+	Id CalendarEventId `json:"id"`
+
+	// InvitationId Received events only; the photo is at `/v1/device/invitations/{id}/photo`.
+	InvitationId   *Id                  `json:"invitation_id,omitempty"`
+	Location       *string              `json:"location,omitempty"`
+	Notes          *string              `json:"notes,omitempty"`
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+	Recurring      *bool                `json:"recurring,omitempty"`
+
+	// SenderName Received events only.
+	SenderName *string `json:"sender_name,omitempty"`
+
+	// SourceId UUIDv7
+	SourceId  Id                  `json:"source_id"`
+	StartAt   *time.Time          `json:"start_at,omitempty"`
+	StartDate *openapi_types.Date `json:"start_date,omitempty"`
+	Title     string              `json:"title"`
+}
+
+// CalendarEventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+type CalendarEventId = string
+
+// CalendarSchedule Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight.
+type CalendarSchedule struct {
+	Days    []CalendarScheduleDays `json:"days"`
+	Enabled bool                   `json:"enabled"`
+
+	// From Example: 07:00
+	From string `json:"from"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// To Example: 09:00
+	To string `json:"to"`
+}
+
+// CalendarScheduleDays defines model for CalendarSchedule.Days.
+type CalendarScheduleDays string
+
+// CalendarSource defines model for CalendarSource.
+type CalendarSource struct {
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color     CalendarColor `json:"color"`
+	CreatedAt *time.Time    `json:"created_at,omitempty"`
+	Enabled   bool          `json:"enabled"`
+
+	// EventCount Events of this source in the frame's window.
+	EventCount  *int  `json:"event_count,omitempty"`
+	HasPassword *bool `json:"has_password,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+	Kind          CalendarSourceKind `json:"kind"`
+	LastAttemptAt *time.Time         `json:"last_attempt_at,omitempty"`
+
+	// LastError Short reason of the last failed sync (English).
+	LastError *string `json:"last_error,omitempty"`
+
+	// LastSyncedAt Last successful sync.
+	LastSyncedAt *time.Time `json:"last_synced_at,omitempty"`
+
+	// Name Display name. Empty for the local calendar until renamed: clients show "Received events".
+	Name       string     `json:"name"`
+	NextSyncAt *time.Time `json:"next_sync_at,omitempty"`
+
+	// Status `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+	Status CalendarSyncStatus `json:"status"`
+
+	// UrlHint Redacted URL for display. Null for `local`.
+	//
+	// Example: https://calendar.google.com/…/basic.ics
+	UrlHint *string `json:"url_hint,omitempty"`
+
+	// Username CalDAV only.
+	Username *string `json:"username,omitempty"`
+}
+
+// CalendarSourceCreate defines model for CalendarSourceCreate.
+type CalendarSourceCreate struct {
+	// CalendarUrl CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`.
+	CalendarUrl *string `json:"calendar_url,omitempty"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color   *CalendarColor           `json:"color,omitempty"`
+	Enabled *bool                    `json:"enabled,omitempty"`
+	Kind    CalendarSourceCreateKind `json:"kind"`
+
+	// Name Defaults to the calendar's own name
+	Name *string `json:"name,omitempty"`
+
+	// Password CalDAV only; use an app-specific password.
+	Password *string `json:"password,omitempty"`
+
+	// Url `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.
+	Url string `json:"url"`
+
+	// Username CalDAV only.
+	Username *string `json:"username,omitempty"`
+}
+
+// CalendarSourceCreateKind defines model for CalendarSourceCreate.Kind.
+type CalendarSourceCreateKind string
+
+// CalendarSourceInfo defines model for CalendarSourceInfo.
+type CalendarSourceInfo struct {
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color CalendarColor `json:"color"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+	Kind         CalendarSourceKind `json:"kind"`
+	LastSyncedAt *time.Time         `json:"last_synced_at,omitempty"`
+	Name         string             `json:"name"`
+
+	// Status `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+	Status CalendarSyncStatus `json:"status"`
+}
+
+// CalendarSourceKind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+type CalendarSourceKind string
+
+// CalendarSourceUpdate defines model for CalendarSourceUpdate.
+type CalendarSourceUpdate struct {
+	CalendarUrl *string `json:"calendar_url,omitempty"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color    *CalendarColor `json:"color,omitempty"`
+	Enabled  *bool          `json:"enabled,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Password *string        `json:"password,omitempty"`
+	Url      *string        `json:"url,omitempty"`
+	Username *string        `json:"username,omitempty"`
+}
+
+// CalendarSyncStatus `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+type CalendarSyncStatus string
+
+// CalendarTestResult defines model for CalendarTestResult.
+type CalendarTestResult struct {
+	// CalendarName The calendar's own name
+	CalendarName *string `json:"calendar_name,omitempty"`
+
+	// Calendars CalDAV only. Calendars on the account that hold events.
+	Calendars *[]struct {
+		// Color The server's colour (hex)
+		Color *string `json:"color,omitempty"`
+		Name  string  `json:"name"`
+		Url   string  `json:"url"`
+	} `json:"calendars,omitempty"`
+	Error *string `json:"error,omitempty"`
+
+	// EventCount Events in the next 30 days.
+	EventCount *int                     `json:"event_count,omitempty"`
+	Ok         bool                     `json:"ok"`
+	Status     CalendarTestResultStatus `json:"status"`
+}
+
+// CalendarTestResultStatus defines model for CalendarTestResult.Status.
+type CalendarTestResultStatus string
+
+// CalendarView defines model for CalendarView.
+type CalendarView struct {
+	// Countdowns Marked events that have not passed yet, nearest first.
+	Countdowns  []Countdown          `json:"countdowns"`
+	Events      []CalendarEvent      `json:"events"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	Sources     []CalendarSourceInfo `json:"sources"`
+
+	// Timezone The frame's time zone (`locale.timezone`), used for the window and all-day events.
+	//
+	// Example: Europe/Brussels
+	Timezone string `json:"timezone"`
+
+	// Weather Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
+	// removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
+	// Values are always metric (°C, km/h, mm); clients convert for `locale.temperature_unit`. Local times carry the
+	// location's UTC offset. Data by Open-Meteo.com (CC BY 4.0); clients showing it must credit "Weather data by
+	// Open-Meteo.com".
+	Weather *Weather `json:"weather,omitempty"`
+	Window  struct {
+		From openapi_types.Date `json:"from"`
+
+		// To Inclusive.
+		To openapi_types.Date `json:"to"`
+	} `json:"window"`
+}
+
 // Change defines model for Change.
 type Change struct {
-	Album *Album `json:"album,omitempty"`
-	Frame *struct {
+	Album    *Album    `json:"album,omitempty"`
+	Calendar *Calendar `json:"calendar,omitempty"`
+	Frame    *struct {
 		Location  *string `json:"location,omitempty"`
 		Name      *string `json:"name,omitempty"`
 		OwnerName *string `json:"owner_name,omitempty"`
@@ -1221,6 +1708,22 @@ type CommandResult struct {
 	Ok        bool    `json:"ok"`
 }
 
+// Countdown A marked event, even when it lies outside the window.
+type Countdown struct {
+	AllDay bool `json:"all_day"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color CalendarColor `json:"color"`
+
+	// EventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+	EventId   CalendarEventId     `json:"event_id"`
+	SourceId  *Id                 `json:"source_id,omitempty"`
+	StartAt   *time.Time          `json:"start_at,omitempty"`
+	StartDate *openapi_types.Date `json:"start_date,omitempty"`
+	Title     string              `json:"title"`
+}
+
 // DeviceEnroll defines model for DeviceEnroll.
 type DeviceEnroll struct {
 	App struct {
@@ -1287,6 +1790,9 @@ type Discovery struct {
 		WebClientId    string `json:"web_client_id"`
 	} `json:"auth"`
 
+	// Calendar True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+	Calendar *bool `json:"calendar,omitempty"`
+
 	// DevAuth True only on development servers running dev auth mode (POST /dev/token). Never true in production.
 	DevAuth *bool  `json:"dev_auth,omitempty"`
 	Limits  Limits `json:"limits"`
@@ -1301,6 +1807,59 @@ type Discovery struct {
 	// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
 	WebpushPublicKey *string `json:"webpush_public_key,omitempty"`
 }
+
+// EventInvitation defines model for EventInvitation.
+type EventInvitation struct {
+	AllDay    bool                `json:"all_day"`
+	CreatedAt time.Time           `json:"created_at"`
+	DecidedAt *time.Time          `json:"decided_at,omitempty"`
+	EndAt     *time.Time          `json:"end_at,omitempty"`
+	EndDate   *openapi_types.Date `json:"end_date,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId  Id   `json:"frame_id"`
+	HasPhoto bool `json:"has_photo"`
+
+	// Id UUIDv7
+	Id       Id      `json:"id"`
+	Location *string `json:"location,omitempty"`
+	Notes    *string `json:"notes,omitempty"`
+
+	// PhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+
+	// SenderId UUIDv7
+	SenderId   Id                    `json:"sender_id"`
+	SenderName string                `json:"sender_name"`
+	StartAt    *time.Time            `json:"start_at,omitempty"`
+	StartDate  *openapi_types.Date   `json:"start_date,omitempty"`
+	Status     EventInvitationStatus `json:"status"`
+	Title      string                `json:"title"`
+}
+
+// EventInvitationStatus defines model for EventInvitation.Status.
+type EventInvitationStatus string
+
+// EventInvitationCreate Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`).
+type EventInvitationCreate struct {
+	AllDay   *bool               `json:"all_day,omitempty"`
+	EndAt    *time.Time          `json:"end_at,omitempty"`
+	EndDate  *openapi_types.Date `json:"end_date,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Notes    *string             `json:"notes,omitempty"`
+
+	// PhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+
+	// PhotoUploadId A finished tus upload holding an image.
+	PhotoUploadId *string             `json:"photo_upload_id,omitempty"`
+	StartAt       *time.Time          `json:"start_at,omitempty"`
+	StartDate     *openapi_types.Date `json:"start_date,omitempty"`
+	Title         string              `json:"title"`
+}
+
+// EventPhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+type EventPhotoPlacement string
 
 // Fit defines model for Fit.
 type Fit string
@@ -1364,6 +1923,24 @@ type FrameHealth struct {
 
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
 type FrameSettings struct {
+	// Calendar Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
+	Calendar *struct {
+		FadePast *bool `json:"fade_past,omitempty"`
+
+		// FutureDays Sync window after today.
+		FutureDays *int `json:"future_days,omitempty"`
+
+		// PastDays Sync window before today.
+		PastDays *int `json:"past_days,omitempty"`
+
+		// StartOnToday Week and 4-day views start on today rather than the first day of the week.
+		StartOnToday *bool `json:"start_on_today,omitempty"`
+
+		// TimedViews Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day.
+		TimedViews  *[]CalendarSchedule        `json:"timed_views,omitempty"`
+		View        *FrameSettingsCalendarView `json:"view,omitempty"`
+		WeekNumbers *bool                      `json:"week_numbers,omitempty"`
+	} `json:"calendar,omitempty"`
 	Display *struct {
 		Brightness         *int                                `json:"brightness,omitempty"`
 		BrightnessMode     *FrameSettingsDisplayBrightnessMode `json:"brightness_mode,omitempty"`
@@ -1435,16 +2012,25 @@ type FrameSettings struct {
 		Volume      *int                        `json:"volume,omitempty"`
 	} `json:"video,omitempty"`
 	Widgets *struct {
-		Avatar   *bool `json:"avatar,omitempty"`
-		Caption  *bool `json:"caption,omitempty"`
-		Clock    *bool `json:"clock,omitempty"`
-		Clock24h *bool `json:"clock_24h,omitempty"`
-		Date     *bool `json:"date,omitempty"`
+		Avatar *bool `json:"avatar,omitempty"`
+
+		// CalendarSidebar Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+		CalendarSidebar *bool `json:"calendar_sidebar,omitempty"`
+		Caption         *bool `json:"caption,omitempty"`
+		Clock           *bool `json:"clock,omitempty"`
+		Clock24h        *bool `json:"clock_24h,omitempty"`
+
+		// Countdowns Countdown widgets on the slideshow (the nearest three).
+		Countdowns *bool `json:"countdowns,omitempty"`
+		Date       *bool `json:"date,omitempty"`
 
 		// Weather Current weather widget; needs `location`.
 		Weather *bool `json:"weather,omitempty"`
 	} `json:"widgets,omitempty"`
 }
+
+// FrameSettingsCalendarView defines model for FrameSettings.Calendar.View.
+type FrameSettingsCalendarView string
 
 // FrameSettingsDisplayBrightnessMode defines model for FrameSettings.Display.BrightnessMode.
 type FrameSettingsDisplayBrightnessMode string
@@ -2021,11 +2607,17 @@ type WeatherUnitsTemperature string
 // WeatherUnitsWindSpeed defines model for Weather.Units.WindSpeed.
 type WeatherUnitsWindSpeed string
 
+// CalendarId UUIDv7
+type CalendarId = Id
+
 // Cursor defines model for Cursor.
 type Cursor = string
 
 // EndpointId UUIDv7
 type EndpointId = Id
+
+// EventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+type EventId = CalendarEventId
 
 // FrameId UUIDv7
 type FrameId = Id
@@ -2035,6 +2627,9 @@ type IdempotencyKey = string
 
 // IfMatch defines model for IfMatch.
 type IfMatch = string
+
+// InvitationId UUIDv7
+type InvitationId = Id
 
 // InviteToken defines model for InviteToken.
 type InviteToken = string
@@ -2073,6 +2668,14 @@ type DeviceImportParams struct {
 	XFilename   string     `json:"X-Filename"`
 	XCapturedAt *time.Time `json:"X-Captured-At,omitempty"`
 }
+
+// DeviceDecideInvitationJSONBody defines parameters for DeviceDecideInvitation.
+type DeviceDecideInvitationJSONBody struct {
+	Decision DeviceDecideInvitationJSONBodyDecision `json:"decision"`
+}
+
+// DeviceDecideInvitationJSONBodyDecision defines parameters for DeviceDecideInvitation.
+type DeviceDecideInvitationJSONBodyDecision string
 
 // DeviceDecideJoinJSONBody defines parameters for DeviceDecideJoin.
 type DeviceDecideJoinJSONBody struct {
@@ -2150,6 +2753,16 @@ type UpdateFrameJSONBody struct {
 type UpdateAlbumParams struct {
 	// IfMatch Quoted version, e.g. "7"
 	IfMatch IfMatch `json:"If-Match"`
+}
+
+// CreateCalendarParams defines parameters for CreateCalendar.
+type CreateCalendarParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// SendEventToFrameParams defines parameters for SendEventToFrame.
+type SendEventToFrameParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateInviteJSONBody defines parameters for CreateInvite.
@@ -2309,6 +2922,9 @@ type DeviceAckJSONRequestBody DeviceAckJSONBody
 // DeviceHeartbeatJSONRequestBody defines body for DeviceHeartbeat for application/json ContentType.
 type DeviceHeartbeatJSONRequestBody = Heartbeat
 
+// DeviceDecideInvitationJSONRequestBody defines body for DeviceDecideInvitation for application/json ContentType.
+type DeviceDecideInvitationJSONRequestBody DeviceDecideInvitationJSONBody
+
 // DeviceDecideJoinJSONRequestBody defines body for DeviceDecideJoin for application/json ContentType.
 type DeviceDecideJoinJSONRequestBody DeviceDecideJoinJSONBody
 
@@ -2342,8 +2958,20 @@ type CreateAlbumJSONRequestBody = AlbumWrite
 // UpdateAlbumJSONRequestBody defines body for UpdateAlbum for application/json ContentType.
 type UpdateAlbumJSONRequestBody = AlbumWrite
 
+// CreateCalendarJSONRequestBody defines body for CreateCalendar for application/json ContentType.
+type CreateCalendarJSONRequestBody = CalendarSourceCreate
+
+// UpdateCalendarJSONRequestBody defines body for UpdateCalendar for application/json ContentType.
+type UpdateCalendarJSONRequestBody = CalendarSourceUpdate
+
+// TestCalendarJSONRequestBody defines body for TestCalendar for application/json ContentType.
+type TestCalendarJSONRequestBody = CalendarSourceCreate
+
 // SendFrameCommandJSONRequestBody defines body for SendFrameCommand for application/json ContentType.
 type SendFrameCommandJSONRequestBody = FrameCommand
+
+// SendEventToFrameJSONRequestBody defines body for SendEventToFrame for application/json ContentType.
+type SendEventToFrameJSONRequestBody = EventInvitationCreate
 
 // CreateInviteJSONRequestBody defines body for CreateInvite for application/json ContentType.
 type CreateInviteJSONRequestBody CreateInviteJSONBody
@@ -2396,17 +3024,32 @@ type ServerInterface interface {
 	// (POST /v1/device/acks)
 	DeviceAck(w http.ResponseWriter, r *http.Request)
 
+	// (POST /v1/device/calendar/sync)
+	DeviceSyncCalendars(w http.ResponseWriter, r *http.Request)
+
 	// (GET /v1/device/changes)
 	DeviceGetChanges(w http.ResponseWriter, r *http.Request, params DeviceGetChangesParams)
 
 	// (POST /v1/device/code)
 	DeviceGetCode(w http.ResponseWriter, r *http.Request)
 
+	// (DELETE /v1/device/countdowns/{eventId})
+	DeviceClearCountdown(w http.ResponseWriter, r *http.Request, eventId EventId)
+
+	// (PUT /v1/device/countdowns/{eventId})
+	DeviceSetCountdown(w http.ResponseWriter, r *http.Request, eventId EventId)
+
 	// (POST /v1/device/heartbeat)
 	DeviceHeartbeat(w http.ResponseWriter, r *http.Request)
 
 	// (POST /v1/device/imports)
 	DeviceImport(w http.ResponseWriter, r *http.Request, params DeviceImportParams)
+
+	// (GET /v1/device/invitations)
+	DeviceListInvitations(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/device/invitations/{invitationId})
+	DeviceDecideInvitation(w http.ResponseWriter, r *http.Request, invitationId InvitationId)
 
 	// (GET /v1/device/join-requests)
 	DeviceListJoinRequests(w http.ResponseWriter, r *http.Request)
@@ -2465,8 +3108,44 @@ type ServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id, params UpdateAlbumParams)
 
+	// (GET /v1/frames/{frameId}/calendar)
+	GetFrameCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (GET /v1/frames/{frameId}/calendars)
+	ListCalendars(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/calendars)
+	CreateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateCalendarParams)
+
+	// (DELETE /v1/frames/{frameId}/calendars/{calendarId})
+	DeleteCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (PATCH /v1/frames/{frameId}/calendars/{calendarId})
+	UpdateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (POST /v1/frames/{frameId}/calendars/{calendarId}/sync)
+	SyncCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (POST /v1/frames/{frameId}/calendars:test)
+	TestCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (POST /v1/frames/{frameId}/commands)
 	SendFrameCommand(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (DELETE /v1/frames/{frameId}/countdowns/{eventId})
+	ClearCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId)
+
+	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
+	SetCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId)
+
+	// (GET /v1/frames/{frameId}/events)
+	ListEventInvitations(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/events)
+	SendEventToFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params SendEventToFrameParams)
+
+	// (DELETE /v1/frames/{frameId}/events/{invitationId})
+	WithdrawEventInvitation(w http.ResponseWriter, r *http.Request, frameId FrameId, invitationId InvitationId)
 
 	// (GET /v1/frames/{frameId}/health)
 	GetFrameHealth(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -2617,6 +3296,20 @@ func (siw *ServerInterfaceWrapper) DeviceAck(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
+// DeviceSyncCalendars operation middleware
+func (siw *ServerInterfaceWrapper) DeviceSyncCalendars(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceSyncCalendars(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // DeviceGetChanges operation middleware
 func (siw *ServerInterfaceWrapper) DeviceGetChanges(w http.ResponseWriter, r *http.Request) {
 
@@ -2668,6 +3361,58 @@ func (siw *ServerInterfaceWrapper) DeviceGetCode(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceGetCode(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceClearCountdown operation middleware
+func (siw *ServerInterfaceWrapper) DeviceClearCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceClearCountdown(w, r, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceSetCountdown operation middleware
+func (siw *ServerInterfaceWrapper) DeviceSetCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceSetCountdown(w, r, eventId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2746,6 +3491,46 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceListInvitations operation middleware
+func (siw *ServerInterfaceWrapper) DeviceListInvitations(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceListInvitations(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceDecideInvitation operation middleware
+func (siw *ServerInterfaceWrapper) DeviceDecideInvitation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "invitationId" -------------
+	var invitationId InvitationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "invitationId", r.PathValue("invitationId"), &invitationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "invitationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceDecideInvitation(w, r, invitationId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3285,6 +4070,239 @@ func (siw *ServerInterfaceWrapper) UpdateAlbum(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// GetFrameCalendar operation middleware
+func (siw *ServerInterfaceWrapper) GetFrameCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFrameCalendar(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListCalendars operation middleware
+func (siw *ServerInterfaceWrapper) ListCalendars(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListCalendars(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateCalendar operation middleware
+func (siw *ServerInterfaceWrapper) CreateCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateCalendarParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateCalendar(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteCalendar operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateCalendar operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SyncCalendar operation middleware
+func (siw *ServerInterfaceWrapper) SyncCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SyncCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TestCalendar operation middleware
+func (siw *ServerInterfaceWrapper) TestCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TestCalendar(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // SendFrameCommand operation middleware
 func (siw *ServerInterfaceWrapper) SendFrameCommand(w http.ResponseWriter, r *http.Request) {
 
@@ -3302,6 +4320,187 @@ func (siw *ServerInterfaceWrapper) SendFrameCommand(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.SendFrameCommand(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ClearCountdown operation middleware
+func (siw *ServerInterfaceWrapper) ClearCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ClearCountdown(w, r, frameId, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetCountdown operation middleware
+func (siw *ServerInterfaceWrapper) SetCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetCountdown(w, r, frameId, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListEventInvitations operation middleware
+func (siw *ServerInterfaceWrapper) ListEventInvitations(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListEventInvitations(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SendEventToFrame operation middleware
+func (siw *ServerInterfaceWrapper) SendEventToFrame(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SendEventToFrameParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SendEventToFrame(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// WithdrawEventInvitation operation middleware
+func (siw *ServerInterfaceWrapper) WithdrawEventInvitation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "invitationId" -------------
+	var invitationId InvitationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "invitationId", r.PathValue("invitationId"), &invitationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "invitationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.WithdrawEventInvitation(w, r, frameId, invitationId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4625,10 +5824,15 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/.well-known/kinframe", wrapper.GetDiscovery)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/acks", wrapper.DeviceAck)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/calendar/sync", wrapper.DeviceSyncCalendars)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/changes", wrapper.DeviceGetChanges)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/code", wrapper.DeviceGetCode)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/countdowns/{eventId}", wrapper.DeviceClearCountdown)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/countdowns/{eventId}", wrapper.DeviceSetCountdown)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/heartbeat", wrapper.DeviceHeartbeat)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports", wrapper.DeviceImport)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/invitations", wrapper.DeviceListInvitations)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/invitations/{invitationId}", wrapper.DeviceDecideInvitation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/join-requests/{requestId}", wrapper.DeviceDecideJoin)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/members/{userId}", wrapper.DeviceRemoveMember)
@@ -4647,7 +5851,19 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/albums", wrapper.CreateAlbum)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.DeleteAlbum)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.UpdateAlbum)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendar", wrapper.GetFrameCalendar)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.ListCalendars)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.CreateCalendar)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}", wrapper.DeleteCalendar)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}", wrapper.UpdateCalendar)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}/sync", wrapper.SyncCalendar)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars:test", wrapper.TestCalendar)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/commands", wrapper.SendFrameCommand)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.ClearCountdown)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.SetCountdown)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.ListEventInvitations)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.SendEventToFrame)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/events/{invitationId}", wrapper.WithdrawEventInvitation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/health", wrapper.GetFrameHealth)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/invites", wrapper.ListInvites)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/invites", wrapper.CreateInvite)
@@ -4729,6 +5945,21 @@ func (response DeviceAck204Response) VisitDeviceAckResponse(w http.ResponseWrite
 	return nil
 }
 
+type DeviceSyncCalendarsRequestObject struct {
+}
+
+type DeviceSyncCalendarsResponseObject interface {
+	VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error
+}
+
+type DeviceSyncCalendars202Response struct {
+}
+
+func (response DeviceSyncCalendars202Response) VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(202)
+	return nil
+}
+
 type DeviceGetChangesRequestObject struct {
 	Params DeviceGetChangesParams
 }
@@ -4776,6 +6007,54 @@ func (response DeviceGetCode200JSONResponse) VisitDeviceGetCodeResponse(w http.R
 	return err
 }
 
+type DeviceClearCountdownRequestObject struct {
+	EventId EventId `json:"eventId"`
+}
+
+type DeviceClearCountdownResponseObject interface {
+	VisitDeviceClearCountdownResponse(w http.ResponseWriter) error
+}
+
+type DeviceClearCountdown204Response struct {
+}
+
+func (response DeviceClearCountdown204Response) VisitDeviceClearCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceSetCountdownRequestObject struct {
+	EventId EventId `json:"eventId"`
+}
+
+type DeviceSetCountdownResponseObject interface {
+	VisitDeviceSetCountdownResponse(w http.ResponseWriter) error
+}
+
+type DeviceSetCountdown204Response struct {
+}
+
+func (response DeviceSetCountdown204Response) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceSetCountdown404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DeviceSetCountdown404ApplicationProblemPlusJSONResponse) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type DeviceHeartbeatRequestObject struct {
 	Body *DeviceHeartbeatJSONRequestBody
 }
@@ -4811,6 +6090,60 @@ func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceListInvitationsRequestObject struct {
+}
+
+type DeviceListInvitationsResponseObject interface {
+	VisitDeviceListInvitationsResponse(w http.ResponseWriter) error
+}
+
+type DeviceListInvitations200JSONResponse []EventInvitation
+
+func (response DeviceListInvitations200JSONResponse) VisitDeviceListInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceDecideInvitationRequestObject struct {
+	InvitationId InvitationId `json:"invitationId"`
+	Body         *DeviceDecideInvitationJSONRequestBody
+}
+
+type DeviceDecideInvitationResponseObject interface {
+	VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error
+}
+
+type DeviceDecideInvitation204Response struct {
+}
+
+func (response DeviceDecideInvitation204Response) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceDecideInvitation409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DeviceDecideInvitation409ApplicationProblemPlusJSONResponse) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -5393,6 +6726,312 @@ func (response UpdateAlbum412ApplicationProblemPlusJSONResponse) VisitUpdateAlbu
 	return err
 }
 
+type GetFrameCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type GetFrameCalendarResponseObject interface {
+	VisitGetFrameCalendarResponse(w http.ResponseWriter) error
+}
+
+type GetFrameCalendar200JSONResponse CalendarView
+
+func (response GetFrameCalendar200JSONResponse) VisitGetFrameCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFrameCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFrameCalendardefaultApplicationProblemPlusJSONResponse) VisitGetFrameCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCalendarsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListCalendarsResponseObject interface {
+	VisitListCalendarsResponse(w http.ResponseWriter) error
+}
+
+type ListCalendars200JSONResponse []CalendarSource
+
+func (response ListCalendars200JSONResponse) VisitListCalendarsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCalendarsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListCalendarsdefaultApplicationProblemPlusJSONResponse) VisitListCalendarsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  CreateCalendarParams
+	Body    *CreateCalendarJSONRequestBody
+}
+
+type CreateCalendarResponseObject interface {
+	VisitCreateCalendarResponse(w http.ResponseWriter) error
+}
+
+type CreateCalendar201JSONResponse CalendarSource
+
+func (response CreateCalendar201JSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendar422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateCalendar422ApplicationProblemPlusJSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateCalendardefaultApplicationProblemPlusJSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+}
+
+type DeleteCalendarResponseObject interface {
+	VisitDeleteCalendarResponse(w http.ResponseWriter) error
+}
+
+type DeleteCalendar204Response struct {
+}
+
+func (response DeleteCalendar204Response) VisitDeleteCalendarResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteCalendardefaultApplicationProblemPlusJSONResponse) VisitDeleteCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+	Body       *UpdateCalendarJSONRequestBody
+}
+
+type UpdateCalendarResponseObject interface {
+	VisitUpdateCalendarResponse(w http.ResponseWriter) error
+}
+
+type UpdateCalendar200JSONResponse CalendarSource
+
+func (response UpdateCalendar200JSONResponse) VisitUpdateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCalendardefaultApplicationProblemPlusJSONResponse) VisitUpdateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+}
+
+type SyncCalendarResponseObject interface {
+	VisitSyncCalendarResponse(w http.ResponseWriter) error
+}
+
+type SyncCalendar202JSONResponse CalendarSource
+
+func (response SyncCalendar202JSONResponse) VisitSyncCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SyncCalendardefaultApplicationProblemPlusJSONResponse) VisitSyncCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *TestCalendarJSONRequestBody
+}
+
+type TestCalendarResponseObject interface {
+	VisitTestCalendarResponse(w http.ResponseWriter) error
+}
+
+type TestCalendar200JSONResponse CalendarTestResult
+
+func (response TestCalendar200JSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendar429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response TestCalendar429ApplicationProblemPlusJSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TestCalendardefaultApplicationProblemPlusJSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type SendFrameCommandRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *SendFrameCommandJSONRequestBody
@@ -5452,6 +7091,220 @@ type SendFrameCommanddefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response SendFrameCommanddefaultApplicationProblemPlusJSONResponse) VisitSendFrameCommandResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ClearCountdownRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	EventId EventId `json:"eventId"`
+}
+
+type ClearCountdownResponseObject interface {
+	VisitClearCountdownResponse(w http.ResponseWriter) error
+}
+
+type ClearCountdown204Response struct {
+}
+
+func (response ClearCountdown204Response) VisitClearCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ClearCountdowndefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ClearCountdowndefaultApplicationProblemPlusJSONResponse) VisitClearCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetCountdownRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	EventId EventId `json:"eventId"`
+}
+
+type SetCountdownResponseObject interface {
+	VisitSetCountdownResponse(w http.ResponseWriter) error
+}
+
+type SetCountdown204Response struct {
+}
+
+func (response SetCountdown204Response) VisitSetCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type SetCountdowndefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetCountdowndefaultApplicationProblemPlusJSONResponse) VisitSetCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEventInvitationsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListEventInvitationsResponseObject interface {
+	VisitListEventInvitationsResponse(w http.ResponseWriter) error
+}
+
+type ListEventInvitations200JSONResponse []EventInvitation
+
+func (response ListEventInvitations200JSONResponse) VisitListEventInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEventInvitationsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListEventInvitationsdefaultApplicationProblemPlusJSONResponse) VisitListEventInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFrameRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  SendEventToFrameParams
+	Body    *SendEventToFrameJSONRequestBody
+}
+
+type SendEventToFrameResponseObject interface {
+	VisitSendEventToFrameResponse(w http.ResponseWriter) error
+}
+
+type SendEventToFrame201JSONResponse EventInvitation
+
+func (response SendEventToFrame201JSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFrame422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SendEventToFrame422ApplicationProblemPlusJSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFramedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SendEventToFramedefaultApplicationProblemPlusJSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type WithdrawEventInvitationRequestObject struct {
+	FrameId      FrameId      `json:"frameId"`
+	InvitationId InvitationId `json:"invitationId"`
+}
+
+type WithdrawEventInvitationResponseObject interface {
+	VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error
+}
+
+type WithdrawEventInvitation204Response struct {
+}
+
+func (response WithdrawEventInvitation204Response) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type WithdrawEventInvitation409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response WithdrawEventInvitation409ApplicationProblemPlusJSONResponse) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type WithdrawEventInvitationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response WithdrawEventInvitationdefaultApplicationProblemPlusJSONResponse) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -6698,17 +8551,32 @@ type StrictServerInterface interface {
 	// (POST /v1/device/acks)
 	DeviceAck(ctx context.Context, request DeviceAckRequestObject) (DeviceAckResponseObject, error)
 
+	// (POST /v1/device/calendar/sync)
+	DeviceSyncCalendars(ctx context.Context, request DeviceSyncCalendarsRequestObject) (DeviceSyncCalendarsResponseObject, error)
+
 	// (GET /v1/device/changes)
 	DeviceGetChanges(ctx context.Context, request DeviceGetChangesRequestObject) (DeviceGetChangesResponseObject, error)
 
 	// (POST /v1/device/code)
 	DeviceGetCode(ctx context.Context, request DeviceGetCodeRequestObject) (DeviceGetCodeResponseObject, error)
 
+	// (DELETE /v1/device/countdowns/{eventId})
+	DeviceClearCountdown(ctx context.Context, request DeviceClearCountdownRequestObject) (DeviceClearCountdownResponseObject, error)
+
+	// (PUT /v1/device/countdowns/{eventId})
+	DeviceSetCountdown(ctx context.Context, request DeviceSetCountdownRequestObject) (DeviceSetCountdownResponseObject, error)
+
 	// (POST /v1/device/heartbeat)
 	DeviceHeartbeat(ctx context.Context, request DeviceHeartbeatRequestObject) (DeviceHeartbeatResponseObject, error)
 
 	// (POST /v1/device/imports)
 	DeviceImport(ctx context.Context, request DeviceImportRequestObject) (DeviceImportResponseObject, error)
+
+	// (GET /v1/device/invitations)
+	DeviceListInvitations(ctx context.Context, request DeviceListInvitationsRequestObject) (DeviceListInvitationsResponseObject, error)
+
+	// (POST /v1/device/invitations/{invitationId})
+	DeviceDecideInvitation(ctx context.Context, request DeviceDecideInvitationRequestObject) (DeviceDecideInvitationResponseObject, error)
 
 	// (GET /v1/device/join-requests)
 	DeviceListJoinRequests(ctx context.Context, request DeviceListJoinRequestsRequestObject) (DeviceListJoinRequestsResponseObject, error)
@@ -6767,8 +8635,44 @@ type StrictServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(ctx context.Context, request UpdateAlbumRequestObject) (UpdateAlbumResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/calendar)
+	GetFrameCalendar(ctx context.Context, request GetFrameCalendarRequestObject) (GetFrameCalendarResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/calendars)
+	ListCalendars(ctx context.Context, request ListCalendarsRequestObject) (ListCalendarsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars)
+	CreateCalendar(ctx context.Context, request CreateCalendarRequestObject) (CreateCalendarResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/calendars/{calendarId})
+	DeleteCalendar(ctx context.Context, request DeleteCalendarRequestObject) (DeleteCalendarResponseObject, error)
+
+	// (PATCH /v1/frames/{frameId}/calendars/{calendarId})
+	UpdateCalendar(ctx context.Context, request UpdateCalendarRequestObject) (UpdateCalendarResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars/{calendarId}/sync)
+	SyncCalendar(ctx context.Context, request SyncCalendarRequestObject) (SyncCalendarResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars:test)
+	TestCalendar(ctx context.Context, request TestCalendarRequestObject) (TestCalendarResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/commands)
 	SendFrameCommand(ctx context.Context, request SendFrameCommandRequestObject) (SendFrameCommandResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/countdowns/{eventId})
+	ClearCountdown(ctx context.Context, request ClearCountdownRequestObject) (ClearCountdownResponseObject, error)
+
+	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
+	SetCountdown(ctx context.Context, request SetCountdownRequestObject) (SetCountdownResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/events)
+	ListEventInvitations(ctx context.Context, request ListEventInvitationsRequestObject) (ListEventInvitationsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/events)
+	SendEventToFrame(ctx context.Context, request SendEventToFrameRequestObject) (SendEventToFrameResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/events/{invitationId})
+	WithdrawEventInvitation(ctx context.Context, request WithdrawEventInvitationRequestObject) (WithdrawEventInvitationResponseObject, error)
 
 	// (GET /v1/frames/{frameId}/health)
 	GetFrameHealth(ctx context.Context, request GetFrameHealthRequestObject) (GetFrameHealthResponseObject, error)
@@ -6976,6 +8880,30 @@ func (sh *strictHandler) DeviceAck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeviceSyncCalendars operation middleware
+func (sh *strictHandler) DeviceSyncCalendars(w http.ResponseWriter, r *http.Request) {
+	var request DeviceSyncCalendarsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceSyncCalendars(ctx, request.(DeviceSyncCalendarsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceSyncCalendars")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceSyncCalendarsResponseObject); ok {
+		if err := validResponse.VisitDeviceSyncCalendarsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // DeviceGetChanges operation middleware
 func (sh *strictHandler) DeviceGetChanges(w http.ResponseWriter, r *http.Request, params DeviceGetChangesParams) {
 	var request DeviceGetChangesRequestObject
@@ -7019,6 +8947,58 @@ func (sh *strictHandler) DeviceGetCode(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceGetCodeResponseObject); ok {
 		if err := validResponse.VisitDeviceGetCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceClearCountdown operation middleware
+func (sh *strictHandler) DeviceClearCountdown(w http.ResponseWriter, r *http.Request, eventId EventId) {
+	var request DeviceClearCountdownRequestObject
+
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceClearCountdown(ctx, request.(DeviceClearCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceClearCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceClearCountdownResponseObject); ok {
+		if err := validResponse.VisitDeviceClearCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceSetCountdown operation middleware
+func (sh *strictHandler) DeviceSetCountdown(w http.ResponseWriter, r *http.Request, eventId EventId) {
+	var request DeviceSetCountdownRequestObject
+
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceSetCountdown(ctx, request.(DeviceSetCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceSetCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceSetCountdownResponseObject); ok {
+		if err := validResponse.VisitDeviceSetCountdownResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7078,6 +9058,63 @@ func (sh *strictHandler) DeviceImport(w http.ResponseWriter, r *http.Request, pa
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceImportResponseObject); ok {
 		if err := validResponse.VisitDeviceImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceListInvitations operation middleware
+func (sh *strictHandler) DeviceListInvitations(w http.ResponseWriter, r *http.Request) {
+	var request DeviceListInvitationsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceListInvitations(ctx, request.(DeviceListInvitationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceListInvitations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceListInvitationsResponseObject); ok {
+		if err := validResponse.VisitDeviceListInvitationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceDecideInvitation operation middleware
+func (sh *strictHandler) DeviceDecideInvitation(w http.ResponseWriter, r *http.Request, invitationId InvitationId) {
+	var request DeviceDecideInvitationRequestObject
+
+	request.InvitationId = invitationId
+
+	var body DeviceDecideInvitationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceDecideInvitation(ctx, request.(DeviceDecideInvitationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceDecideInvitation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceDecideInvitationResponseObject); ok {
+		if err := validResponse.VisitDeviceDecideInvitationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7650,6 +9687,213 @@ func (sh *strictHandler) UpdateAlbum(w http.ResponseWriter, r *http.Request, fra
 	}
 }
 
+// GetFrameCalendar operation middleware
+func (sh *strictHandler) GetFrameCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request GetFrameCalendarRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFrameCalendar(ctx, request.(GetFrameCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFrameCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFrameCalendarResponseObject); ok {
+		if err := validResponse.VisitGetFrameCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListCalendars operation middleware
+func (sh *strictHandler) ListCalendars(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListCalendarsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListCalendars(ctx, request.(ListCalendarsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListCalendars")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListCalendarsResponseObject); ok {
+		if err := validResponse.VisitListCalendarsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateCalendar operation middleware
+func (sh *strictHandler) CreateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateCalendarParams) {
+	var request CreateCalendarRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body CreateCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateCalendar(ctx, request.(CreateCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateCalendarResponseObject); ok {
+		if err := validResponse.VisitCreateCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteCalendar operation middleware
+func (sh *strictHandler) DeleteCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request DeleteCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteCalendar(ctx, request.(DeleteCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCalendarResponseObject); ok {
+		if err := validResponse.VisitDeleteCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateCalendar operation middleware
+func (sh *strictHandler) UpdateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request UpdateCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	var body UpdateCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateCalendar(ctx, request.(UpdateCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCalendarResponseObject); ok {
+		if err := validResponse.VisitUpdateCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SyncCalendar operation middleware
+func (sh *strictHandler) SyncCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request SyncCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SyncCalendar(ctx, request.(SyncCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SyncCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SyncCalendarResponseObject); ok {
+		if err := validResponse.VisitSyncCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TestCalendar operation middleware
+func (sh *strictHandler) TestCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request TestCalendarRequestObject
+
+	request.FrameId = frameId
+
+	var body TestCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TestCalendar(ctx, request.(TestCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TestCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TestCalendarResponseObject); ok {
+		if err := validResponse.VisitTestCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // SendFrameCommand operation middleware
 func (sh *strictHandler) SendFrameCommand(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request SendFrameCommandRequestObject
@@ -7676,6 +9920,147 @@ func (sh *strictHandler) SendFrameCommand(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(SendFrameCommandResponseObject); ok {
 		if err := validResponse.VisitSendFrameCommandResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ClearCountdown operation middleware
+func (sh *strictHandler) ClearCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId) {
+	var request ClearCountdownRequestObject
+
+	request.FrameId = frameId
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ClearCountdown(ctx, request.(ClearCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ClearCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ClearCountdownResponseObject); ok {
+		if err := validResponse.VisitClearCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetCountdown operation middleware
+func (sh *strictHandler) SetCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId) {
+	var request SetCountdownRequestObject
+
+	request.FrameId = frameId
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetCountdown(ctx, request.(SetCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetCountdownResponseObject); ok {
+		if err := validResponse.VisitSetCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListEventInvitations operation middleware
+func (sh *strictHandler) ListEventInvitations(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListEventInvitationsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListEventInvitations(ctx, request.(ListEventInvitationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListEventInvitations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListEventInvitationsResponseObject); ok {
+		if err := validResponse.VisitListEventInvitationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SendEventToFrame operation middleware
+func (sh *strictHandler) SendEventToFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params SendEventToFrameParams) {
+	var request SendEventToFrameRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body SendEventToFrameJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SendEventToFrame(ctx, request.(SendEventToFrameRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SendEventToFrame")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SendEventToFrameResponseObject); ok {
+		if err := validResponse.VisitSendEventToFrameResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// WithdrawEventInvitation operation middleware
+func (sh *strictHandler) WithdrawEventInvitation(w http.ResponseWriter, r *http.Request, frameId FrameId, invitationId InvitationId) {
+	var request WithdrawEventInvitationRequestObject
+
+	request.FrameId = frameId
+	request.InvitationId = invitationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.WithdrawEventInvitation(ctx, request.(WithdrawEventInvitationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "WithdrawEventInvitation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(WithdrawEventInvitationResponseObject); ok {
+		if err := validResponse.VisitWithdrawEventInvitationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

@@ -19,6 +19,7 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/calendar"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
@@ -43,6 +44,8 @@ type App struct {
 	Releases *releases.Mirror
 	// Weather fetches Open-Meteo weather for frames; nil when disabled.
 	Weather *weather.Service
+	// Calendar syncs frames' calendars; nil when disabled.
+	Calendar *calendar.Service
 }
 
 // New connects to the database, applies migrations and builds the app.
@@ -127,7 +130,22 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx})
+	var cal *calendar.Service
+	if cfg.CalendarEnabled {
+		sealer, err := calendar.NewSealer(cfg.SecretsKey, cfg.SigningKey)
+		if err != nil {
+			return nil, fmt.Errorf("calendar secrets: %w", err)
+		}
+		cal = &calendar.Service{
+			Store: st, Sealer: sealer, Log: log.With("component", "calendar"),
+			Interval: cfg.CalendarSync, Jitter: 3 * time.Minute,
+			Fetcher: &calendar.Fetcher{
+				UserAgent: "kinframe/" + cfg.Version + " (+https://github.com/jeroentrappers/kinframe)",
+				HTTP:      &http.Client{Timeout: 30 * time.Second},
+			},
+		}
+	}
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal})
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +161,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
-	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx}, nil
+	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal}, nil
 }
 
 // RunBackground starts the media workers and the maintenance loop.
@@ -159,6 +177,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	if a.Weather != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Weather.Run(ctx) }()
+	}
+	if a.Calendar != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Calendar.Run(ctx) }()
 	}
 	return &wg
 }
