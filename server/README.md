@@ -97,6 +97,21 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
 | `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
+| `KINFRAME_CALENDAR` | `on` | `off` disables calendar sync, sent events and countdowns (discovery `calendar: false`) |
+| `KINFRAME_CALENDAR_SYNC_MINUTES` | `15` | Interval between syncs of each ICS/CalDAV source (minimum 5); up to 3 min jitter, back-off to 2 h on errors |
+| `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords (AES-256-GCM). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
+
+### Calendars
+
+`internal/calendar` syncs each frame's calendar sources on the server (README §5.8 of the API docs): ICS/webcal links
+with `If-None-Match`/`If-Modified-Since`, and CalDAV (`/.well-known/caldav` → principal → calendar home → a
+`calendar-query` REPORT limited to the frame's window). Documents are parsed with go-ical and recurrences expanded
+with rrule-go in the event's own wall clock (RRULE, RDATE, EXDATE, RECURRENCE-ID overrides, IANA/Windows/VTIMEZONE
+zones), so DST changes never shift a series. The last fetched document is kept gzipped, so a moving window (every
+midnight, or a settings change) re-expands without a refetch. Each frame's sources are merged into one `calendar`
+change, emitted only when what the frame shows changed. Frames never contact calendar servers. The server fetches
+whatever URL a member with `change_settings` enters, including LAN addresses (a Nextcloud next to the server is a
+normal setup), so only give that permission to people you trust.
 
 ## Media storage
 
