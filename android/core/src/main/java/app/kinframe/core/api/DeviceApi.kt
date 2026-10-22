@@ -173,6 +173,32 @@ class DeviceApi(
         )
     }.expectOk()
 
+    // ------------------------------------------------------------------ calendar (README §5.8)
+
+    /** `GET /device/invitations`: events sent to the frame, waiting for accept or decline (oldest first). */
+    suspend fun invitations(): List<EventInvitation> = authed { url(endpoint("device/invitations")).get() }
+        .decode(kotlinx.serialization.builtins.ListSerializer(EventInvitation.serializer()))
+
+    /** `POST /device/invitations/{id}`: final; `409 already_decided` when it was decided or withdrawn before. */
+    suspend fun decideInvitation(invitationId: String, accept: Boolean) = authed {
+        url(endpoint("device/invitations/$invitationId")).post(
+            KinJson.encodeToString(JsonObject.serializer(), buildJsonObject { put("decision", JsonPrimitive(if (accept) "accept" else "decline")) })
+                .toRequestBody(JSON_MEDIA),
+        )
+    }.expectOk()
+
+    /** The invitation's photo (WebP); fetch it with [media]. */
+    fun invitationPhotoUrl(invitationId: String): HttpUrl = endpoint("device/invitations/$invitationId/photo")
+
+    /** `PUT` / `DELETE /device/countdowns/{eventId}`: the countdown toggle in the event details. */
+    suspend fun setCountdown(eventId: String, on: Boolean) = authed {
+        val u = url(endpoint("device/countdowns/$eventId"))
+        if (on) u.put(ByteArray(0).toRequestBody(null)) else u.delete()
+    }.expectOk()
+
+    /** `POST /device/calendar/sync`: "Sync now" for all of the frame's calendars (the server does the work). */
+    suspend fun syncCalendars() = authed { url(endpoint("device/calendar/sync")).post(ByteArray(0).toRequestBody(null)) }.expectOk()
+
     /**
      * `GET /device/update`: the newest release for [channel] (null = the frame's setting) that is newer than this
      * app, skipping [skip]; null when up to date (204).

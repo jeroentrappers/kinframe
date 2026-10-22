@@ -24,6 +24,7 @@ data class FrameSettings(
     val notifications: NotificationSettings = NotificationSettings(),
     val kiosk: KioskSettings = KioskSettings(),
     val updates: UpdateSettings = UpdateSettings(),
+    val calendar: CalendarSettings = CalendarSettings(),
 ) {
     companion object {
         val DEFAULT = FrameSettings()
@@ -58,6 +59,10 @@ data class WidgetSettings(
     val date: Boolean = true,
     val weather: Boolean = false,
     val clock24h: Boolean = true,
+    /** Hybrid view: today and upcoming events beside the slideshow. */
+    val calendarSidebar: Boolean = false,
+    /** Countdown widgets on the slideshow (the nearest three). */
+    val countdowns: Boolean = true,
 )
 
 @Serializable
@@ -76,6 +81,29 @@ data class SleepScheduleDto(
     val days: List<String> = listOf("mon", "tue", "wed", "thu", "fri", "sat", "sun"),
     val enabled: Boolean = true,
     val mode: String = "off",
+)
+
+/** Calendar timed view schedule: same shape as [SleepScheduleDto], with `from`/`to`. */
+@Serializable
+data class CalendarScheduleDto(
+    val id: String = "",
+    val from: String = "07:00",
+    val to: String = "09:00",
+    val days: List<String> = listOf("mon", "tue", "wed", "thu", "fri", "sat", "sun"),
+    val enabled: Boolean = true,
+)
+
+/** Full-screen calendar options (`FrameSettings.calendar`). The first day of the week is `locale.first_day_of_week`. */
+@Serializable
+data class CalendarSettings(
+    /** `four_day`, `week` or `month`. */
+    val view: String = "week",
+    val startOnToday: Boolean = true,
+    val fadePast: Boolean = true,
+    val weekNumbers: Boolean = false,
+    val pastDays: Int = 30,
+    val futureDays: Int = 30,
+    val timedViews: List<CalendarScheduleDto> = emptyList(),
 )
 
 @Serializable
