@@ -134,6 +134,7 @@ data class Item(
     val id: String,
     val kind: String = MediaKind.PHOTO,
     val status: String? = null,
+    val failureCode: String? = null,
     val senderId: String? = null,
     val senderName: String? = null,
     val caption: String? = null,
