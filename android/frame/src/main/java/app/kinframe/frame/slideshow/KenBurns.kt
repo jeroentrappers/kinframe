@@ -9,7 +9,7 @@ import kotlin.math.abs
  * Budget: the slide is already one screen-sized bitmap (one texture). The motion is a `graphicsLayer` scale and
  * translation of that texture, so each frame the Mali-400 draws one textured quad (two during the cross-fade):
  * about 1 M (2 M) fragments at 1280 × 800, far below its fill rate, and nothing is decoded or re-rendered. The zoom
- * stays at most 10 %, so upscaling softness stays invisible from a few steps away, and the scale never drops below
+ * stays at most 18 %, so upscaling softness stays unnoticeable from a few steps away, and the scale never drops below
  * 1, so no edge of the photo ever shows.
  */
 object KenBurns {
@@ -27,8 +27,11 @@ object KenBurns {
         fun yAt(t: Float) = lerp(startY, endY, ease(t))
     }
 
-    const val MIN_ZOOM = 1.04f
-    const val MAX_ZOOM = 1.10f
+    const val MIN_ZOOM = 1.10f
+    const val MAX_ZOOM = 1.18f
+
+    /** The motion runs at most this long, then rests: spread over a 30 s interval it was too slow to notice. */
+    const val MAX_DURATION_MS = 15_000L
 
     /**
      * Deterministic parameters for a placement: the same photo always moves the same way (stable across restarts,

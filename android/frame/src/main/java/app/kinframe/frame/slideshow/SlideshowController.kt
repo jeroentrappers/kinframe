@@ -34,12 +34,14 @@ data class Slide(
     val placement: PlacementEntity,
     val image: ImageBitmap?,
     val key: String,
-    /** Videos only: the caption as a bottom strip, drawn above the playing video. */
+    /** Videos, live photos and [captionSeparate] slides: the caption as a bottom strip, drawn above the slide. */
     val captionStrip: ImageBitmap? = null,
     /** Collages and smart pairs: every photo and its cell ([placement] is the first one). Empty for one photo. */
     val tiles: List<Tile> = emptyList(),
     /** Ken Burns motion while this slide is on screen, or null. */
     val kenBurns: KenBurns.Params? = null,
+    /** The caption is not in [image] but only in [captionStrip], so Ken Burns zooms the photo and not the text. */
+    val captionSeparate: Boolean = false,
 ) {
     val ids: List<String> get() = if (tiles.isEmpty()) listOf(placement.id) else tiles.map { it.placement.id }
 }
@@ -70,7 +72,11 @@ sealed interface EmptyState {
 }
 
 /** What the player shows: a video slide, or ([live]) the clip of a Live/Motion Photo over its still. */
-data class VideoState(val placementId: String, val file: File, val visible: Boolean = false, val live: Boolean = false)
+data class VideoState(
+    val placementId: String, val file: File, val visible: Boolean = false, val live: Boolean = false,
+    /** Paused and hidden while a swipe drags the slide: its still moves with the finger, not a playing texture. */
+    val held: Boolean = false,
+)
 
 /**
  * Drives the slideshow: playlist, timing, pre-decoding the next slide at screen size, video playback (Media3),
@@ -135,7 +141,7 @@ class SlideshowController(private val c: FrameController) {
         timerJob = c.scope.launch { timerLoop() }
         c.scope.launch {
             c.display.mode.map { it == ScreenMode.Asleep }.distinctUntilChanged().collect { asleep ->
-                if (asleep) player?.pause() else if (_video.value != null && !videoEnded) player?.play()
+                if (asleep) player?.pause() else if (_video.value?.held == false && !videoEnded) player?.play()
             }
         }
     }
@@ -464,7 +470,8 @@ class SlideshowController(private val c: FrameController) {
 
     private suspend fun obtain(p: PlacementEntity): Slide {
         val caption = captionSpec(p)
-        val key = renderKey(p) + "|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.rightInsetDp}" }
+        val separate = caption != null && !p.isVideo && settings.slideshow.transition == "kenburns"
+        val key = renderKey(p) + "|$separate|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.rightInsetDp}" }
         cache[key]?.let { return it }
         val slide = withContext(renderDispatcher) {
             val file = g.media.file(p.localFile ?: "")
@@ -476,10 +483,10 @@ class SlideshowController(private val c: FrameController) {
                 caption = caption,
                 density = g.app.resources.displayMetrics.density,
             )
-            // Videos and live photos: the caption stays readable above the playing clip.
-            val strip = if (p.isVideo || p.isLive) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
+            // Videos and live photos: the caption stays readable above the playing clip. Ken Burns: it stays still.
+            val strip = if (p.isVideo || p.isLive || separate) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
             val bmp: Bitmap? = try {
-                renderer.render(request)
+                renderer.render(if (separate) request.copy(caption = null) else request)
             } catch (e: OutOfMemoryError) {
                 Log.e(TAG, "OOM rendering ${p.id}")
                 cache.clear(); System.gc(); null
@@ -487,7 +494,7 @@ class SlideshowController(private val c: FrameController) {
                 Log.w(TAG, "cannot render ${p.id}: ${e.message}")
                 null
             }
-            Slide(p, bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, strip?.asImageBitmap())
+            Slide(p, bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, strip?.asImageBitmap(), captionSeparate = separate && strip != null)
         }
         cache[key] = slide
         // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.
@@ -589,6 +596,17 @@ class SlideshowController(private val c: FrameController) {
                 if (_video.value?.placementId == p.id) videoEnded = true
             }
         }
+    }
+
+    /**
+     * A swipe starts ([hold]) or springs back. Dragging a playing TextureView costs the RK3126 a frame each time, so
+     * the clip pauses and the slide's still (its first frame) follows the finger instead; it resumes on spring-back.
+     */
+    fun holdVideo(hold: Boolean) {
+        val v = _video.value ?: return
+        if (hold == v.held) return
+        _video.value = v.copy(held = hold)
+        if (hold) player?.pause() else if (!videoEnded && c.display.mode.value != ScreenMode.Asleep) player?.play()
     }
 
     private fun stopVideo() {

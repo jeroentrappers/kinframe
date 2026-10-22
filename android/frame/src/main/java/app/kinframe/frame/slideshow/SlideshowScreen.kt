@@ -68,6 +68,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -266,6 +267,7 @@ fun SlideshowScreen(c: FrameController) {
                         followedBefore = false
                         dragAnim?.cancel()
                         dragValue = 0f
+                        ss.holdVideo(true)
                     },
                     onDrag = { dx ->
                         if (dragSeq == currentSeq) {
@@ -293,6 +295,7 @@ fun SlideshowScreen(c: FrameController) {
                                     if (currentSeq == seqAtRelease) {
                                         animate(dragValue, 0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { v, _ -> dragValue = v }
                                         dragSeq = -1L
+                                        ss.holdVideo(false)
                                     }
                                 }
                             }
@@ -303,6 +306,7 @@ fun SlideshowScreen(c: FrameController) {
                             else -> springDrag(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) {
                                 dragSeq = -1L
                                 neighborDir = 0
+                                ss.holdVideo(false)
                             }
                         }
                     },
@@ -312,6 +316,7 @@ fun SlideshowScreen(c: FrameController) {
             neighbor?.let { nb ->
                 key(nb.key) {
                     SlideLayer(nb) { translationX = dragX() + neighborDir * wPx }
+                    CaptionLayer(nb, hPx) { translationX = dragX() + neighborDir * wPx }
                 }
             }
             // One call site for both layers, so a slide keeps its state (its Ken Burns motion) when it becomes the
@@ -322,9 +327,11 @@ fun SlideshowScreen(c: FrameController) {
                     val motion = remember { Animatable(0f) }
                     if (kb != null) {
                         val hold = stage.holdMs
-                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(hold.coerceIn(1_000, Int.MAX_VALUE.toLong()).toInt(), easing = LinearEasing)) }
+                        val ms = hold.coerceIn(1_000, KenBurns.MAX_DURATION_MS).toInt()
+                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(ms, easing = LinearEasing)) }
                     }
-                    SlideLayer(slide) {
+                    // Where the transition and the finger put the slide; Ken Burns adds its motion to the photo only.
+                    val place: GraphicsLayerScope.() -> Unit = {
                         if (incoming) {
                             when (stage.kind) {
                                 TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + dragX()
@@ -334,6 +341,9 @@ fun SlideshowScreen(c: FrameController) {
                         } else if (stage.kind == TransitionKind.Slide) {
                             translationX = -dir * wPx * progress.value
                         }
+                    }
+                    SlideLayer(slide) {
+                        place()
                         if (kb != null) {
                             // One scaled textured quad per frame: within the Mali-400 budget (see KenBurns).
                             val t = motion.value
@@ -343,6 +353,7 @@ fun SlideshowScreen(c: FrameController) {
                         }
                     }
                     if (incoming) Box(Modifier.fillMaxSize().graphicsLayer { translationX = dragX() }) { VideoLayer(c, slide, wPx, hPx) }
+                    CaptionLayer(slide, hPx, place)
                 }
             }
             TextureWarmup(c)
@@ -489,7 +500,7 @@ private fun TextureWarmup(c: FrameController) {
 }
 
 @Composable
-private fun SlideLayer(slide: Slide, layer: androidx.compose.ui.graphics.GraphicsLayerScope.() -> Unit) {
+private fun SlideLayer(slide: Slide, layer: GraphicsLayerScope.() -> Unit) {
     val img = slide.image
     if (img != null) {
         Canvas(
@@ -511,12 +522,25 @@ private fun SlideLayer(slide: Slide, layer: androidx.compose.ui.graphics.Graphic
     }
 }
 
+/** A [Slide.captionSeparate] caption, above the photo: it moves with the slide but does not zoom with Ken Burns. */
+@Composable
+private fun CaptionLayer(slide: Slide, hPx: Int, layer: GraphicsLayerScope.() -> Unit) {
+    val strip = slide.captionStrip
+    if (!slide.captionSeparate || strip == null) return
+    Canvas(
+        Modifier.fillMaxSize().graphicsLayer {
+            compositingStrategy = CompositingStrategy.ModulateAlpha
+            layer()
+        },
+    ) { drawImage(strip, topLeft = Offset(0f, (hPx - strip.height).toFloat())) }
+}
+
 @Composable
 private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
     val p = slide.placement
     val video by c.slideshow.video.collectAsState()
     val v = video
-    if (v == null || v.placementId != p.id) return
+    if (v == null || v.placementId != p.id || v.held) return
     val alpha by animateFloatAsState(if (v.visible) 1f else 0f, tween(if (v.live) SlideshowController.LIVE_FADE_MS.toInt() else 250), label = "video")
     val settings by c.g.settings.settings.collectAsState()
     val vw = p.width ?: wPx
@@ -538,7 +562,7 @@ private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
                 .size(with(d) { dw.toDp() }, with(d) { dh.toDp() })
                 .graphicsLayer { this.alpha = alpha },
         )
-        slide.captionStrip?.let { strip ->
+        slide.captionStrip?.takeIf { !slide.captionSeparate }?.let { strip ->
             Canvas(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha; compositingStrategy = CompositingStrategy.ModulateAlpha }) {
                 drawImage(strip, topLeft = Offset(0f, (hPx - strip.height).toFloat()))
             }
