@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Nádhera!",
   "push.preset.call_me": "Zavolaj mi",
   "push.preset.miss_you": "Chýbaš mi",
-  "push.preset.thanks": "Ďakujem!"
+  "push.preset.thanks": "Ďakujem!",
+  "problem.already_decided": "Na toto už bolo odpovedané",
+  "push.event_accepted.title": "Udalosť prijatá",
+  "push.event_accepted.body": "{frame}: „{title}“ pridané do kalendára",
+  "push.event_declined.title": "Udalosť odmietnutá",
+  "push.event_declined.body": "{frame}: „{title}“ odmietnuté"
  },
  "details": {
   "admins cannot change other admins": "správcovia nemôžu meniť iných správcov",
@@ -116,6 +121,32 @@
   "web app not built": "webová aplikácia nie je zostavená",
   "you already own this frame": "tento rámik už vlastníte",
   "you can't send to frame %s": "do rámika %s nemôžete posielať",
-  "on_this_day must be a month and day, MM-DD": "on_this_day musí byť mesiac a deň, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day musí byť mesiac a deň, MM-DD",
+  "a calendar needs a name": "kalendár musí mať názov",
+  "a title of 1 to 200 characters is required": "vyžaduje sa názov s dĺžkou 1 až 200 znakov",
+  "all-day events need a start date": "celodenné udalosti potrebujú dátum začiatku",
+  "at most 200 characters": "najviac 200 znakov",
+  "at most 2000 characters": "najviac 2000 znakov",
+  "at most 60 characters": "najviac 60 znakov",
+  "calendar not found": "kalendár sa nenašiel",
+  "calendars are turned off on this server": "kalendáre sú na tomto serveri vypnuté",
+  "enter the link again": "zadajte odkaz znova",
+  "event not found": "udalosť sa nenašla",
+  "event not found in the frame's calendar": "udalosť sa v kalendári rámika nenašla",
+  "events can last at most a year": "udalosť môže trvať najviac rok",
+  "invitation not found": "pozvánka sa nenašla",
+  "must be ics or caldav": "musí byť ics alebo caldav",
+  "not a palette colour": "nie je to farba z palety",
+  "only for CalDAV": "len pre CalDAV",
+  "photo not found": "fotka sa nenašla",
+  "the end is before the start": "koniec je pred začiatkom",
+  "the frame already answered": "rámik už odpovedal",
+  "the photo could not be read": "fotku sa nepodarilo prečítať",
+  "the photo must be an image": "fotka musí byť obrázok",
+  "the received-events calendar has no link": "kalendár prijatých udalostí nemá odkaz",
+  "this invitation was already answered or withdrawn": "na túto pozvánku už bolo odpovedané alebo bola stiahnutá",
+  "timed events can last at most 31 days": "udalosti s časom môžu trvať najviac 31 dní",
+  "timed events need a start and an end": "udalosti s časom potrebujú začiatok a koniec",
+  "upload not found, incomplete or already used": "nahraný súbor sa nenašiel, je neúplný alebo už bol použitý"
  }
 }

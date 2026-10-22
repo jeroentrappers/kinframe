@@ -36,6 +36,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.Auth.WebClientId = s.cfg.WebClientID
 	d.DevAuth = ptr(s.dev != nil)
 	d.Weather = ptr(s.weather != nil)
+	d.Calendar = ptr(s.calendar != nil)
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
 	}

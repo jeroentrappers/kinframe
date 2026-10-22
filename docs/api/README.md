@@ -242,10 +242,11 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `member.upsert` / `member.remove` | Display info only: name, avatar URL |
   | `frame` | Name, location, owner name |
   | `weather` | Current conditions and forecast, when enabled (below), or `weather: null` |
+  | `calendar` | The frame's merged calendar (§5.8), or `calendar: null` when it has none |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
-  every frame with `settings.location` set and `widgets.weather` on. Frames never call third parties.
+  every frame with `settings.location` set and `widgets.weather` or `widgets.calendar_sidebar` on (the calendar shows the forecast per day). Frames never call third parties.
   - Payload: `fetched_at`, `location {name, lat, lon}` (from the frame's settings), `timezone`, `utc_offset_seconds`,
     `units`, `current` (`temp_c`, `apparent_c`, `code` = WMO weather code, `is_day`, `wind_kmh`, `wind_dir_deg`,
     `humidity_pct`, `precip_mm`), `hourly` (the next 24 h from the current hour: `time`, `temp_c`, `code`, `is_day`,
@@ -318,7 +319,86 @@ GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirro
   reinstalls the previous APK (`pm install -r -d`, root only), skips that version code from then on and reports
   `update_state: rolled_back` in the heartbeat.
 
-### 5.8 Showing a frame on a TV
+### 5.8 Calendars
+
+Calendars are synced **by the server**, never by the frame, and there is no limit on the number of calendars per
+frame. Management needs `change_settings`; sending an event needs `send`.
+
+**Sources** (`/v1/frames/{id}/calendars`)
+- `ics`: any ICS/iCal link, including `webcal://` (fetched as `https://`). This covers the "secret address" links of
+  Google Calendar, iCloud (public calendar), Outlook/Microsoft 365 ("publish calendar") and Yahoo.
+- `caldav`: a CalDAV server with username and app password (Nextcloud, Fastmail, iCloud with an app-specific
+  password, Radicale, …). The URL may be the server, the account or a calendar. `POST …/calendars:test` lists the
+  account's calendars; the client creates one source per chosen calendar (`calendar_url`).
+- `local`: the frame's **received events** calendar holding accepted invitations. It is created with the first
+  accepted invitation. Its `name` is empty until renamed; clients show "Received events" with a heart.
+- Every source has a display `name`, a `color` from the palette below and `enabled`. The URL, username and
+  password are encrypted at rest (AES-256-GCM). The key is `KINFRAME_SECRETS_KEY` (32+ bytes, hex or base64) or,
+  when unset, derived from `KINFRAME_SIGNING_KEY` with HKDF-SHA256. Rotating that key makes stored credentials
+  unreadable: affected sources go to `auth_failed` until the URL or password is entered again. Responses only carry
+  a redacted `url_hint`.
+
+**Sync**
+- Every 15 minutes (`KINFRAME_CALENDAR_SYNC_MINUTES`) plus up to 3 minutes of jitter, right after a source is added
+  or changed, on "Sync now" (`POST …/calendars/{cid}/sync`) and when the frame asks (`POST /v1/device/calendar/sync`,
+  e.g. from its menu or a `sync_now` command).
+- ICS requests send `If-None-Match`/`If-Modified-Since`; a `304` keeps the stored copy. Responses are capped at 10 MiB.
+- Failures back off from 1 minute, doubling up to 2 hours. Status per source: `syncing`, `ok`, `failed` (with
+  `last_error`), `auth_failed` (HTTP 401/403 or unreadable stored credentials) or `disabled`.
+- The window is `calendar.past_days` before and `calendar.future_days` after today in the frame's time zone
+  (default ±30 days). Recurrence rules are expanded on the server (RRULE, RDATE, EXDATE, and overrides with
+  RECURRENCE-ID; cancelled occurrences are dropped). Time zones come from IANA names, common Windows names and
+  embedded VTIMEZONE definitions; floating times use the frame's time zone.
+
+**The `calendar` change** (schema `Calendar`)
+- `generated_at`, `timezone`, `window {from, to}`, `sources` (id, kind, name, color, status, last_synced_at),
+  `events` and `countdowns`.
+- `events` merges every enabled source into one list sorted by start. An event that appears in several sources
+  (same UID and start) is kept once, from the first source in display order. Each event keeps its `source_id`;
+  clients colour it from that source. Timed events carry `start_at`/`end_at` in UTC; all-day events carry
+  `start_date`/`end_date` (inclusive). `recurring` marks occurrences of a series.
+- Event ids are stable per occurrence, so countdowns and the frame's UI state survive re-syncs.
+- `countdowns` are the marked events that have not passed yet (nearest first, also beyond the window). Mark them
+  with `PUT /v1/frames/{id}/countdowns/{eventId}` or, on the frame, `PUT /v1/device/countdowns/{eventId}`. Frames
+  show the nearest three as slideshow widgets.
+- A new change is emitted only when the content changed (ignoring `generated_at`), and once a day as the window
+  moves. `calendar: null` means "drop your calendar" (the last source was removed); snapshots omit it.
+- `GET /v1/frames/{id}/calendar` returns the same payload plus the frame's `weather`, for a read-only preview.
+
+**Sending an event** (`POST /v1/frames/{id}/events`)
+- Title, all-day or start/end, location, notes and an optional photo (a tus upload, stored as WebP of at most
+  1280 px) shown on `top` of the card or as its `background`.
+- The frame gets a websocket `event_invitation` message (and re-reads `GET /v1/device/invitations` on connect). It
+  shows an invitation card with Accept and Decline: `POST /v1/device/invitations/{iid} {decision}`. The decision
+  is final. Accepted events go into the received-events calendar (a `calendar` change follows).
+- The sender gets `event_invitation.decided` over the websocket, or a push, and sees the status in
+  `GET /v1/frames/{id}/events`. A pending invitation can be withdrawn with `DELETE`.
+
+**Calendar settings** (`FrameSettings.calendar`, `widgets.calendar_sidebar`, `widgets.countdowns`)
+- `view` (`four_day`, `week`, `month`), `start_on_today`, `fade_past`, `week_numbers`, `past_days`,
+  `future_days` and `timed_views`: schedules (same shape as sleep schedules, with `from`/`to`) during which the
+  frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00.
+
+**Palette** (`CalendarColor`). Light is for light backgrounds (event fills on the paper style), dark for dark ones.
+
+| Key | Light | Dark |
+|---|---|---|
+| `coral` | `#E5726A` | `#F0958E` |
+| `tangerine` | `#EE8F4F` | `#F4AE7E` |
+| `amber` | `#DDA731` | `#E9C26A` |
+| `olive` | `#9AA63E` | `#BBC575` |
+| `mint` | `#4FB28A` | `#82CDAE` |
+| `sage` | `#7F9C77` | `#A8C0A1` |
+| `teal` | `#349E9A` | `#6EC1BD` |
+| `sky` | `#4F9FDF` | `#87BFEB` |
+| `ocean` | `#4767C8` | `#8197DD` |
+| `lavender` | `#8E7BD0` | `#B3A6E2` |
+| `plum` | `#AC5F9F` | `#CA92C1` |
+| `rose` | `#DA6C92` | `#E79AB5` |
+
+New sources get the first colour not yet used on the frame, in this order.
+
+### 5.9 Showing a frame on a TV
 
 Product spec 4.11 (Google Cast / DLNA). The library is shown on a TV through a **TV link**: a short-lived,
 revocable share token.
@@ -344,7 +424,7 @@ revocable share token.
   - The fallback is the TV page link (with QR) for a smart-TV browser.
   - Single videos can also use the Remote Playback API.
 
-### 5.9 Import and backup from SD/USB on the frame
+### 5.10 Import and backup from SD/USB on the frame
 
 - `POST /v1/device/imports/check {sha256: […]}` returns the hashes the frame already has: a live placement whose
   source, master or frame rendition hash matches. The frame skips those before uploading.
@@ -369,6 +449,7 @@ exponential back-off from 1 s up to 60 s, with ±20 % jitter.
 | S→F | `command` | `id`, `command_type`, `args` | Remote command. |
 | S→F | `claimed` | `owner_name` | Leave the setup or code screen. |
 | S→F | `join_request` | `request` | Show Allow/Deny. Requests still pending (e.g. sent while the frame was offline) come from `GET /v1/device/join-requests`. |
+| S→F | `event_invitation` | `invitation` | An event was sent to the frame: show the invitation card. Pending ones also come from `GET /v1/device/invitations`. |
 | S→F | `revoked` | — | Wipe credential, back to setup. Followed by close `4401`. |
 | F→S | `state` | `screen: on/off/dimmed`, `showing_placement_id`, `brightness`, `volume` | Sent on change, at most every 2 s. |
 | F→S | `command_result` | `id`, `ok`, `error_code` | Result of a command. |
@@ -389,6 +470,7 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `frame.status` | `frame_id`, `online`, `last_seen_at` | Frame connectivity |
 | `join_request` | `frame_id`, `request` | Approval needed (owner/admin) |
 | `membership.updated` | `frame_id` | Role or permissions changed |
+| `event_invitation.decided` | `frame_id`, `invitation` | The frame accepted or declined an event you sent |
 
 ### 6.3 Push
 

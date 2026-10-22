@@ -357,6 +357,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "weather", "weather": w})
+		case store.FeedCalendar:
+			c, err := s.frameCalendar(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if c == nil && snapshot {
+				continue
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "calendar", "calendar": c})
 		case store.FeedFrame:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,

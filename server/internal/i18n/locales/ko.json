@@ -47,7 +47,12 @@
   "push.preset.beautiful": "정말 예쁘다!",
   "push.preset.call_me": "전화해 줘",
   "push.preset.miss_you": "보고 싶어",
-  "push.preset.thanks": "고마워!"
+  "push.preset.thanks": "고마워!",
+  "problem.already_decided": "이미 응답한 항목이에요",
+  "push.event_accepted.title": "일정 수락됨",
+  "push.event_accepted.body": "{frame}에서 ‘{title}’ 일정을 캘린더에 추가했어요",
+  "push.event_declined.title": "일정 거절됨",
+  "push.event_declined.body": "{frame}에서 ‘{title}’ 일정을 거절했어요"
  },
  "details": {
   "admins cannot change other admins": "관리자는 다른 관리자를 변경할 수 없어요",
@@ -116,6 +121,32 @@
   "web app not built": "웹 앱이 빌드되지 않았어요",
   "you already own this frame": "이미 이 액자의 소유자예요",
   "you can't send to frame %s": "%s 액자로 보낼 수 없어요",
-  "on_this_day must be a month and day, MM-DD": "on_this_day는 월과 일(MM-DD) 형식이어야 해요"
+  "on_this_day must be a month and day, MM-DD": "on_this_day는 월과 일(MM-DD) 형식이어야 해요",
+  "a calendar needs a name": "캘린더 이름이 필요해요",
+  "a title of 1 to 200 characters is required": "1~200자의 제목이 필요해요",
+  "all-day events need a start date": "종일 일정에는 시작 날짜가 필요해요",
+  "at most 200 characters": "최대 200자까지 입력할 수 있어요",
+  "at most 2000 characters": "최대 2000자까지 입력할 수 있어요",
+  "at most 60 characters": "최대 60자까지 입력할 수 있어요",
+  "calendar not found": "캘린더를 찾을 수 없어요",
+  "calendars are turned off on this server": "이 서버에서는 캘린더가 꺼져 있어요",
+  "enter the link again": "링크를 다시 입력하세요",
+  "event not found": "일정을 찾을 수 없어요",
+  "event not found in the frame's calendar": "액자의 캘린더에서 일정을 찾을 수 없어요",
+  "events can last at most a year": "일정은 최대 1년까지 지속될 수 있어요",
+  "invitation not found": "초대를 찾을 수 없어요",
+  "must be ics or caldav": "ics 또는 caldav여야 해요",
+  "not a palette colour": "팔레트에 없는 색상이에요",
+  "only for CalDAV": "CalDAV 전용이에요",
+  "photo not found": "사진을 찾을 수 없어요",
+  "the end is before the start": "종료가 시작보다 앞서요",
+  "the frame already answered": "액자가 이미 응답했어요",
+  "the photo could not be read": "사진을 읽을 수 없어요",
+  "the photo must be an image": "사진은 이미지 파일이어야 해요",
+  "the received-events calendar has no link": "받은 일정 캘린더에는 링크가 없어요",
+  "this invitation was already answered or withdrawn": "이미 응답했거나 취소된 초대예요",
+  "timed events can last at most 31 days": "시간이 정해진 일정은 최대 31일까지 지속될 수 있어요",
+  "timed events need a start and an end": "시간이 정해진 일정에는 시작과 종료가 필요해요",
+  "upload not found, incomplete or already used": "업로드를 찾을 수 없거나, 완료되지 않았거나, 이미 사용되었어요"
  }
 }

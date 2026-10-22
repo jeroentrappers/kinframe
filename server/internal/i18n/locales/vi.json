@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Đẹp quá!",
   "push.preset.call_me": "Gọi điện nhé",
   "push.preset.miss_you": "Nhớ lắm",
-  "push.preset.thanks": "Cảm ơn nhé!"
+  "push.preset.thanks": "Cảm ơn nhé!",
+  "problem.already_decided": "Mục này đã được trả lời",
+  "push.event_accepted.title": "Sự kiện đã được chấp nhận",
+  "push.event_accepted.body": "{frame} đã thêm “{title}” vào lịch",
+  "push.event_declined.title": "Sự kiện bị từ chối",
+  "push.event_declined.body": "{frame} đã từ chối “{title}”"
  },
  "details": {
   "admins cannot change other admins": "quản trị viên không thể thay đổi quản trị viên khác",
@@ -116,6 +121,32 @@
   "web app not built": "ứng dụng web chưa được build",
   "you already own this frame": "bạn đã sở hữu khung ảnh này",
   "you can't send to frame %s": "bạn không thể gửi tới khung ảnh %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day phải là tháng và ngày, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day phải là tháng và ngày, MM-DD",
+  "a calendar needs a name": "lịch cần có tên",
+  "a title of 1 to 200 characters is required": "cần có tiêu đề từ 1 đến 200 ký tự",
+  "all-day events need a start date": "sự kiện cả ngày cần có ngày bắt đầu",
+  "at most 200 characters": "tối đa 200 ký tự",
+  "at most 2000 characters": "tối đa 2000 ký tự",
+  "at most 60 characters": "tối đa 60 ký tự",
+  "calendar not found": "không tìm thấy lịch",
+  "calendars are turned off on this server": "lịch đang bị tắt trên máy chủ này",
+  "enter the link again": "hãy nhập lại liên kết",
+  "event not found": "không tìm thấy sự kiện",
+  "event not found in the frame's calendar": "không tìm thấy sự kiện trong lịch của khung ảnh",
+  "events can last at most a year": "sự kiện chỉ kéo dài tối đa một năm",
+  "invitation not found": "không tìm thấy lời mời",
+  "must be ics or caldav": "phải là ics hoặc caldav",
+  "not a palette colour": "không phải màu trong bảng màu",
+  "only for CalDAV": "chỉ dành cho CalDAV",
+  "photo not found": "không tìm thấy ảnh",
+  "the end is before the start": "thời gian kết thúc trước thời gian bắt đầu",
+  "the frame already answered": "khung ảnh đã trả lời rồi",
+  "the photo could not be read": "không đọc được ảnh",
+  "the photo must be an image": "ảnh phải là tệp hình ảnh",
+  "the received-events calendar has no link": "lịch sự kiện đã nhận không có liên kết",
+  "this invitation was already answered or withdrawn": "lời mời này đã được trả lời hoặc đã bị rút lại",
+  "timed events can last at most 31 days": "sự kiện có giờ chỉ kéo dài tối đa 31 ngày",
+  "timed events need a start and an end": "sự kiện có giờ cần có thời gian bắt đầu và kết thúc",
+  "upload not found, incomplete or already used": "không tìm thấy tệp tải lên, tệp chưa đầy đủ hoặc đã được dùng"
  }
 }

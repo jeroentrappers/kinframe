@@ -99,6 +99,9 @@ class FrameController(val g: FrameGraph) {
 
     val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
 
+    /** Calendars, event invitations, countdowns and the timed calendar view (product spec 4.9). */
+    val calendar by lazy { app.kinframe.frame.calendar.CalendarController(this) }
+
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
     val settingsOpen = MutableStateFlow(false)
@@ -148,8 +151,11 @@ class FrameController(val g: FrameGraph) {
                 g.settings.raw.map { serverLanguageOf(it) }.distinctUntilChanged().collect { onServerLanguage(it) }
             }
             scope.launch {
-                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online -> if (online) joins.refresh() }
+                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online ->
+                    if (online) { joins.refresh(); calendar.refreshInvitations() }
+                }
             }
+            calendar.start()
             reportStateChanges()
             update.start()
             removable.start()
@@ -275,10 +281,16 @@ class FrameController(val g: FrameGraph) {
             if (result.newItems > 0) scope.launch { display.onNewPhotos() }
             // A decision made in the app shows up as a membership change: drop the card here too.
             if (joins.pending.value.isNotEmpty()) joins.refresh()
+            // Withdrawn or decided elsewhere: drop the invitation card too.
+            if (calendar.invitations.value.isNotEmpty()) calendar.refreshInvitations()
         }
 
         override fun onJoinRequest(request: JsonObject) {
             scope.launch { joins.onEvent(request) }
+        }
+
+        override fun onEventInvitation(invitation: JsonObject) {
+            scope.launch { calendar.onInvitationEvent(invitation) }
         }
     }
 
@@ -288,6 +300,7 @@ class FrameController(val g: FrameGraph) {
         stopSession()
         slideshow.reset()
         joins.clear()
+        calendar.clear()
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()
@@ -323,6 +336,7 @@ class FrameController(val g: FrameGraph) {
             }
             "sync_now" -> {
                 _session.value?.requestPull(); _session.value?.sendHeartbeatNow()
+                calendar.syncNow()
                 update.requestCheck(UpdateManager.Trigger.Remote)
                 null
             }

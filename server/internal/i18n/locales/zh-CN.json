@@ -47,7 +47,12 @@
   "push.preset.beautiful": "真好看！",
   "push.preset.call_me": "给我打电话",
   "push.preset.miss_you": "想你了",
-  "push.preset.thanks": "谢谢！"
+  "push.preset.thanks": "谢谢！",
+  "problem.already_decided": "此项已回复过",
+  "push.event_accepted.title": "日程已接受",
+  "push.event_accepted.body": "{frame} 已将“{title}”添加到日历",
+  "push.event_declined.title": "日程已拒绝",
+  "push.event_declined.body": "{frame} 拒绝了“{title}”"
  },
  "details": {
   "admins cannot change other admins": "管理员不能更改其他管理员",
@@ -116,6 +121,32 @@
   "web app not built": "网页应用尚未构建",
   "you already own this frame": "你已经是这台相框的所有者",
   "you can't send to frame %s": "你不能向相框 %s 发送内容",
-  "on_this_day must be a month and day, MM-DD": "on_this_day 必须是月和日，格式为 MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day 必须是月和日，格式为 MM-DD",
+  "a calendar needs a name": "日历需要一个名称",
+  "a title of 1 to 200 characters is required": "标题须为 1 到 200 个字符",
+  "all-day events need a start date": "全天日程需要开始日期",
+  "at most 200 characters": "最多 200 个字符",
+  "at most 2000 characters": "最多 2000 个字符",
+  "at most 60 characters": "最多 60 个字符",
+  "calendar not found": "找不到日历",
+  "calendars are turned off on this server": "此服务器已关闭日历功能",
+  "enter the link again": "请重新输入链接",
+  "event not found": "找不到日程",
+  "event not found in the frame's calendar": "在相框的日历中找不到该日程",
+  "events can last at most a year": "日程最长持续一年",
+  "invitation not found": "找不到邀请",
+  "must be ics or caldav": "必须是 ics 或 caldav",
+  "not a palette colour": "不是调色板中的颜色",
+  "only for CalDAV": "仅适用于 CalDAV",
+  "photo not found": "找不到照片",
+  "the end is before the start": "结束时间早于开始时间",
+  "the frame already answered": "相框已经回复过了",
+  "the photo could not be read": "无法读取照片",
+  "the photo must be an image": "照片必须是图片文件",
+  "the received-events calendar has no link": "收到的日程所在的日历没有链接",
+  "this invitation was already answered or withdrawn": "此邀请已被回复或已撤回",
+  "timed events can last at most 31 days": "有具体时间的日程最长持续 31 天",
+  "timed events need a start and an end": "有具体时间的日程需要开始和结束时间",
+  "upload not found, incomplete or already used": "上传未找到、未完成或已被使用"
  }
 }

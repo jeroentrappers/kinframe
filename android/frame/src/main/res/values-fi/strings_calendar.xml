@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Tänään</string>
+    <string name="calendar_tomorrow">Huomenna</string>
+    <string name="calendar_view_month">Kuukausi</string>
+    <string name="calendar_view_week">Viikko</string>
+    <string name="calendar_view_four_day">4 päivää</string>
+    <string name="calendar_week_number">Viikko %1$d</string>
+    <string name="calendar_previous">Edellinen</string>
+    <string name="calendar_next">Seuraava</string>
+    <string name="calendar_sync_now">Synkronoi nyt</string>
+    <string name="calendar_syncing">Synkronoidaan…</string>
+    <string name="calendar_close">Sulje kalenteri</string>
+    <string name="calendar_all_day">Koko päivän</string>
+    <string name="calendar_received">Vastaanotetut tapahtumat</string>
+    <string name="calendar_nothing">Ei suunnitelmia</string>
+    <string name="calendar_nothing_today">Ei muuta tänään</string>
+    <string name="calendar_empty_title">Ei vielä kalentereita</string>
+    <string name="calendar_empty_body">Lisää perheen kalenteri kinframe-sovelluksesta tai -verkkosivustolta kuvakehyksen Kalenterit-kohdasta. Täällä voi näyttää yhdessä niin monta kalenteria kuin haluat.</string>
+    <string name="calendar_time_range">%1$s–%2$s</string>
+    <string name="calendar_until">%1$s asti</string>
+    <string name="calendar_from">%1$s alkaen</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d lisää</item>
+        <item quantity="other">+%d lisää</item>
+    </plurals>
+    <string name="calendar_rain">%1$d %%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Tänään</string>
+    <string name="countdown_tomorrow">Huomenna</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d päivä</item>
+        <item quantity="other">%d päivää</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">%d päivän päästä</item>
+        <item quantity="other">%d päivän päästä</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Lähettäjä: %1$s</string>
+    <string name="event_repeats">Toistuu</string>
+    <string name="event_countdown">Laske aikaa tähän</string>
+    <string name="event_countdown_hint">Diaesityksessä ja kalenterin yläreunassa</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s lähetti sinulle tapahtuman</string>
+    <string name="invitation_body">Lisätäänkö se tämän kuvakehyksen kalenteriin?</string>
+    <string name="invitation_accept">Lisää kalenteriin</string>
+    <string name="invitation_decline">Hylkää</string>
+    <string name="invitation_later">Ei nyt</string>
+    <string name="invitation_pill_one">Tapahtuma lähettäjältä %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d tapahtumakutsu</item>
+        <item quantity="other">%d tapahtumakutsua</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Kalenteri</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Kalenteri</string>
+    <string name="settings_calendar_open">Avaa kalenteri</string>
+    <string name="settings_calendar_view">Kalenterinäkymä</string>
+    <string name="settings_calendar_start_today">Aloita tästä päivästä</string>
+    <string name="settings_calendar_fade_past">Himmennä menneet tapahtumat</string>
+    <string name="settings_calendar_week_numbers">Viikkonumerot</string>
+    <string name="settings_calendar_sidebar">Kalenteri kuvien vieressä</string>
+    <string name="settings_calendar_countdowns">Laskurit diaesityksessä</string>
+    <string name="settings_calendar_timed">Näytä kalenteri tiettyinä aikoina</string>
+    <string name="settings_calendar_timed_from">Alkaen</string>
+    <string name="settings_calendar_timed_to">Asti</string>
+    <string name="settings_calendar_timed_add">Lisää aika</string>
+    <string name="settings_calendar_timed_remove">Poista</string>
+    <string name="settings_calendar_sources">Tämän kuvakehyksen kalenterit</string>
+    <string name="settings_calendar_sources_hint">Kalenterit lisätään ja niitä hallitaan kinframe-sovelluksesta tai -verkkosivustolta.</string>
+    <string name="calendar_status_ok">Ajan tasalla</string>
+    <string name="calendar_status_syncing">Synkronoidaan…</string>
+    <string name="calendar_status_failed">Synkronointi epäonnistui</string>
+    <string name="calendar_status_auth_failed">Kirjautuminen vaaditaan</string>
+    <string name="calendar_status_disabled">Pois käytöstä</string>
+</resources>

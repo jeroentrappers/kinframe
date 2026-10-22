@@ -90,6 +90,31 @@ class Outbox(
         kick()
     }
 
+    /** Accept or decline an event invitation (README §5.8). A 409 later means it was already decided or withdrawn. */
+    suspend fun invitationDecision(invitationId: String, accept: Boolean) {
+        db.outbox().insert(
+            OutboxEntity(
+                kind = OutboxEntity.INVITATION_DECISION, placementId = invitationId,
+                payload = buildJsonObject { put("accept", JsonPrimitive(accept)) }.toString(), notBefore = now(), createdAt = now(),
+            ),
+        )
+        kick()
+    }
+
+    /** Turns the countdown for a calendar event on or off; the latest choice per event wins. */
+    suspend fun countdown(eventId: String, on: Boolean) {
+        db.tx {
+            db.outbox().deleteKindFor(OutboxEntity.COUNTDOWN, eventId)
+            db.outbox().insert(
+                OutboxEntity(
+                    kind = OutboxEntity.COUNTDOWN, placementId = eventId,
+                    payload = buildJsonObject { put("on", JsonPrimitive(on)) }.toString(), notBefore = now(), createdAt = now(),
+                ),
+            )
+        }
+        kick()
+    }
+
     /** Merges [patch] into the single pending settings patch. */
     suspend fun settingsPatch(patch: JsonObject) {
         db.tx {
@@ -154,6 +179,8 @@ class Outbox(
             OutboxEntity.PLACEMENT_PATCH -> api.patchPlacement(o.placementId!!, payload)
             OutboxEntity.REPLY -> api.sendReply(o.placementId!!, payload["preset"]!!.jsonPrimitive.content)
             OutboxEntity.JOIN_DECISION -> api.decideJoin(o.placementId!!, payload["approve"]!!.jsonPrimitive.content == "true")
+            OutboxEntity.INVITATION_DECISION -> api.decideInvitation(o.placementId!!, payload["accept"]!!.jsonPrimitive.content == "true")
+            OutboxEntity.COUNTDOWN -> api.setCountdown(o.placementId!!, payload["on"]!!.jsonPrimitive.content == "true")
             OutboxEntity.SETTINGS_PATCH -> {
                 val version = currentSettingsVersion()
                 val result = api.patchSettings(version, payload)

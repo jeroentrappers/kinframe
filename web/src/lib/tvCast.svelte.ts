@@ -1,4 +1,4 @@
-// Drives a slideshow on a TV from this browser (README §5.8):
+// Drives a slideshow on a TV from this browser (README §5.9):
 //   cast         Google Cast Web Sender SDK + Default Media Receiver (Chromium). The sender loads one
 //                signed media URL per slide on its own timer.
 //   presentation Presentation API: the TV shows the /tv page; commands go over the connection.

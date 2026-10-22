@@ -6,6 +6,8 @@ import type { components } from '../src/lib/api/schema';
 type S = components['schemas'];
 type Send = S['Send'];
 
+const BASE = `http://localhost:${process.env.PW_PORT ?? 4173}`;
+
 let idSeq = 0;
 export const uid = (p = '0000') => `0192f0a0-${p.padStart(4, '0')}-7000-8000-${String(++idSeq).padStart(12, '0')}`;
 
@@ -52,8 +54,11 @@ export interface MockState {
 	pushEndpoints: S['PushEndpoint'][];
 	/** Codes of fresh, unclaimed frames for "Move to a new frame". */
 	replaceCodes: string[];
-	/** TV links per frame (README §5.8); `expired` tokens answer 410. */
+	/** TV links per frame (README §5.9); `expired` tokens answer 410. */
 	tvLinks: Record<string, (S['TvLink'] & { placement_ids?: string[]; revoked?: boolean })[]>;
+	calendars: Record<string, S['CalendarSource'][]>;
+	calendarViews: Record<string, S['CalendarView']>;
+	eventInvitations: Record<string, S['EventInvitation'][]>;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -63,11 +68,12 @@ export function emptyState(): MockState {
 		discovery: {
 			name: 'Testfamilie',
 			version: '0.1.0',
-			api: 'http://localhost:4173/v1',
-			auth: { issuer: '', mobile_client_id: '', web_client_id: '', api_resource: 'http://localhost:4173/v1' },
+			api: `${BASE}/v1`,
+			auth: { issuer: '', mobile_client_id: '', web_client_id: '', api_resource: `${BASE}/v1` },
 			limits: { max_items_per_send: 200, max_video_seconds: 300, max_upload_bytes: 2147483648, trash_retention_days: 30 },
 			dev_auth: true,
 			weather: true,
+			calendar: true,
 			webpush_public_key: 'BNNL5ZaTfK81qhXOx23-wewhigUeFb632jN6LvRWCFH1ubQr77FE_9qV1FuojuRmHP42zmf34rXgW80OvUVDgTk'
 		},
 		me: null,
@@ -85,6 +91,9 @@ export function emptyState(): MockState {
 		pushEndpoints: [],
 		replaceCodes: [],
 		tvLinks: {},
+		calendars: {},
+		calendarViews: {},
+		eventInvitations: {},
 		calls: [],
 		ws: null
 	};
@@ -434,6 +443,150 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (l) l.revoked = true;
 			return route.fulfill({ status: 204 });
 		}
+		// ---- calendars (README §5.8)
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/calendars$/))) {
+			const list = (state.calendars[m[1]!] ??= []);
+			if (method === 'POST') {
+				const b = body as S['CalendarSourceCreate'];
+				const used = list.map((s) => s.color);
+				const color = b.color ?? (CAL_COLORS.find((c) => !used.includes(c)) ?? 'sky');
+				const host = (() => {
+					try {
+						return new URL(b.url.replace(/^webcal:/i, 'https:')).host;
+					} catch {
+						return 'calendar';
+					}
+				})();
+				const src: S['CalendarSource'] = {
+					id: uid('c'),
+					kind: b.kind,
+					name: b.name ?? host,
+					color,
+					enabled: b.enabled ?? true,
+					url_hint: `https://${host}/…`,
+					username: b.username ?? null,
+					has_password: !!b.password,
+					status: 'syncing',
+					last_error: null,
+					last_synced_at: null,
+					event_count: 0,
+					created_at: new Date().toISOString()
+				};
+				list.push(src);
+				return json(route, 201, src);
+			}
+			// Syncs "finish" by the next poll.
+			for (const s of list) {
+				if (s.status === 'syncing') {
+					s.status = s.enabled ? 'ok' : 'disabled';
+					s.last_synced_at = new Date().toISOString();
+					s.event_count = s.event_count || 6;
+				}
+			}
+			return json(route, 200, list);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/calendars:test$/)) && method === 'POST') {
+			const b = body as S['CalendarSourceCreate'];
+			if (/bad|broken/.test(b.url)) return json(route, 200, { ok: false, status: 'failed', error: 'HTTP 404 Not Found' });
+			if (b.kind === 'caldav' && b.password === 'wrong') return json(route, 200, { ok: false, status: 'auth_failed', error: 'HTTP 401 Unauthorized' });
+			if (b.kind === 'caldav')
+				return json(route, 200, {
+					ok: true,
+					status: 'ok',
+					error: null,
+					calendar_name: null,
+					event_count: 9,
+					calendars: [
+						{ url: `${b.url}/remote.php/dav/calendars/oma/personal/`, name: 'Personal', color: '#0082c9' },
+						{ url: `${b.url}/remote.php/dav/calendars/oma/birthdays/`, name: 'Birthdays', color: '#e5726a' }
+					]
+				});
+			return json(route, 200, { ok: true, status: 'ok', error: null, calendar_name: 'Family', event_count: 12, calendars: [] });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/calendars\/([^/]+)\/sync$/)) && method === 'POST') {
+			const s = (state.calendars[m[1]!] ?? []).find((x) => x.id === m![2]);
+			if (!s) return problem(route, 404, 'not_found', 'No calendar');
+			s.status = 'syncing';
+			return json(route, 202, s);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/calendars\/([^/]+)$/))) {
+			const list = state.calendars[m[1]!] ?? [];
+			const s = list.find((x) => x.id === m![2]);
+			if (!s) return problem(route, 404, 'not_found', 'No calendar');
+			if (method === 'DELETE') {
+				state.calendars[m[1]!] = list.filter((x) => x !== s);
+				const v = state.calendarViews[m[1]!];
+				if (v) {
+					v.sources = v.sources.filter((x) => x.id !== s.id);
+					v.events = v.events.filter((e) => e.source_id !== s.id);
+				}
+				return route.fulfill({ status: 204 });
+			}
+			const b = body as S['CalendarSourceUpdate'];
+			Object.assign(s, { ...b, password: undefined, has_password: s.has_password || !!b.password });
+			delete (s as Record<string, unknown>).password;
+			if (b.enabled === false) s.status = 'disabled';
+			else if (b.enabled === true && s.status === 'disabled') s.status = 'syncing';
+			if (b.url || b.password) s.status = 'syncing';
+			const v = state.calendarViews[m[1]!];
+			const info = v?.sources.find((x) => x.id === s.id);
+			if (info) Object.assign(info, { name: s.name, color: s.color, status: s.status });
+			return json(route, 200, s);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/calendar$/)) && method === 'GET') {
+			const v = (state.calendarViews[m[1]!] ??= sampleCalendar(state.calendars[m[1]!] ?? [], { events: false }));
+			// Only enabled sources show.
+			const enabled = new Set((state.calendars[m[1]!] ?? []).filter((s) => s.enabled).map((s) => s.id));
+			return json(route, 200, { ...v, events: v.events.filter((e) => enabled.has(e.source_id) || !state.calendars[m![1]!]?.some((s) => s.id === e.source_id)) });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/countdowns\/([^/]+)$/))) {
+			const v = state.calendarViews[m[1]!];
+			const ev = v?.events.find((e) => e.id === m![2]);
+			if (!v || !ev) return problem(route, 404, 'not_found', 'No such event');
+			ev.countdown = method === 'PUT';
+			v.countdowns = v.countdowns.filter((c) => c.event_id !== ev.id);
+			if (ev.countdown) {
+				const color = v.sources.find((s) => s.id === ev.source_id)?.color ?? 'sky';
+				v.countdowns.push({ event_id: ev.id, source_id: ev.source_id, title: ev.title, all_day: ev.all_day, start_at: ev.start_at ?? null, start_date: ev.start_date ?? null, color });
+				v.countdowns.sort((a, b) => (a.start_date ?? a.start_at ?? '').localeCompare(b.start_date ?? b.start_at ?? ''));
+			}
+			return route.fulfill({ status: 204 });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/events$/))) {
+			const list = (state.eventInvitations[m[1]!] ??= []);
+			if (method === 'POST') {
+				const b = body as S['EventInvitationCreate'];
+				const inv: S['EventInvitation'] = {
+					id: uid('v'),
+					frame_id: m[1]!,
+					sender_id: state.me!.id,
+					sender_name: state.me!.display_name,
+					status: 'pending',
+					title: b.title,
+					all_day: b.all_day ?? false,
+					start_at: b.start_at ?? null,
+					end_at: b.end_at ?? null,
+					start_date: b.start_date ?? null,
+					end_date: b.end_date ?? null,
+					location: b.location ?? null,
+					notes: b.notes ?? null,
+					has_photo: !!b.photo_upload_id,
+					photo_placement: b.photo_placement ?? 'top',
+					created_at: new Date().toISOString(),
+					decided_at: null
+				};
+				list.unshift(inv);
+				return json(route, 201, inv);
+			}
+			return json(route, 200, list);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/events\/([^/]+)$/)) && method === 'DELETE') {
+			const inv = (state.eventInvitations[m[1]!] ?? []).find((x) => x.id === m![2]);
+			if (!inv) return problem(route, 404, 'not_found', 'No invitation');
+			if (inv.status !== 'pending') return problem(route, 409, 'already_decided', 'Already decided');
+			inv.status = 'withdrawn';
+			return route.fulfill({ status: 204 });
+		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/settings$/))) {
 			const s = (state.settings[m[1]!] ??= defaultSettings());
 			if (method === 'PATCH') {
@@ -509,7 +662,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			state.uploads[id] = { length: Number(req.headers()['upload-length']), offset: 0, filename: meta.filename ?? '', prepared: meta.prepared };
 			return route.fulfill({
 				status: 201,
-				headers: { Location: `http://localhost:4173/v1/uploads/${id}`, 'Tus-Resumable': '1.0.0', 'Access-Control-Expose-Headers': 'Location, Upload-Offset' }
+				headers: { Location: `${BASE}/v1/uploads/${id}`, 'Tus-Resumable': '1.0.0', 'Access-Control-Expose-Headers': 'Location, Upload-Offset' }
 			});
 		}
 		if ((m = path.match(/^\/v1\/uploads\/([^/]+)$/))) {
@@ -614,6 +767,93 @@ function deepMerge(a: Record<string, unknown>, b: Record<string, unknown>): Reco
 		else out[k] = v;
 	}
 	return out;
+}
+
+// ------------------------------------------------------------------ calendars
+
+export const CAL_COLORS: S['CalendarColor'][] = ['coral', 'tangerine', 'amber', 'olive', 'mint', 'sage', 'teal', 'sky', 'ocean', 'lavender', 'plum', 'rose'];
+
+const dayStr = (offset: number) => {
+	const d = new Date();
+	d.setHours(12, 0, 0, 0);
+	d.setDate(d.getDate() + offset);
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+/** An instant on a day (offset from today) at a local hour in the browser's zone. */
+const at = (offset: number, hour: number, minute = 0) => {
+	const d = new Date();
+	d.setDate(d.getDate() + offset);
+	d.setHours(hour, minute, 0, 0);
+	return d.toISOString();
+};
+
+/** Three sources a family would have: the received-events calendar, a shared ICS link and a CalDAV calendar. */
+export function sampleSources(): S['CalendarSource'][] {
+	const now = new Date().toISOString();
+	const base = { enabled: true, last_error: null, last_synced_at: new Date(Date.now() - 4 * 60_000).toISOString(), created_at: now, has_password: false, username: null };
+	return [
+		{ ...base, id: uid('c1'), kind: 'local', name: '', color: 'rose', url_hint: null, status: 'ok', event_count: 2 },
+		{ ...base, id: uid('c2'), kind: 'ics', name: 'Family', color: 'teal', url_hint: 'https://calendar.google.com/…/basic.ics', status: 'ok', event_count: 14 },
+		{ ...base, id: uid('c3'), kind: 'caldav', name: 'Oma’s appointments', color: 'amber', url_hint: 'https://cloud.example.org/…', username: 'oma', has_password: true, status: 'ok', event_count: 5 },
+		{ ...base, id: uid('c4'), kind: 'ics', name: 'Football club', color: 'ocean', url_hint: 'https://club.example.be/…/team.ics', status: 'failed', last_error: 'HTTP 404 Not Found', event_count: 0 }
+	];
+}
+
+/** A merged calendar around today, with a week of weather (README §5.8). */
+export function sampleCalendar(sources: S['CalendarSource'][], opts: { events?: boolean; timezone?: string } = {}): S['CalendarView'] {
+	const tz = opts.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+	const id = (k: string) => `ev_${k}_000000000000`.slice(0, 24);
+	const [local, family, oma] = [sources.find((s) => s.kind === 'local'), sources.find((s) => s.kind === 'ics'), sources.find((s) => s.kind === 'caldav')];
+	const events: S['CalendarEvent'][] = [];
+	if (opts.events !== false && family && oma) {
+		const push = (e: Omit<S['CalendarEvent'], 'recurring' | 'countdown'> & Partial<S['CalendarEvent']>) => events.push({ recurring: false, countdown: false, ...e });
+		push({ id: id('trip'), source_id: family.id, title: 'Holiday in the Ardennes', all_day: true, start_date: dayStr(9), end_date: dayStr(13), location: 'La Roche' });
+		push({ id: id('bday'), source_id: family.id, title: 'Lisa’s birthday', all_day: true, start_date: dayStr(3), end_date: dayStr(3), countdown: true });
+		push({ id: id('xmas'), source_id: family.id, title: 'Christmas at Oma’s', all_day: true, start_date: dayStr(24), end_date: dayStr(24), countdown: true });
+		push({ id: id('swim'), source_id: family.id, title: 'Swimming lesson', all_day: false, start_at: at(0, 16, 30), end_at: at(0, 17, 15), recurring: true });
+		push({ id: id('swim2'), source_id: family.id, title: 'Swimming lesson', all_day: false, start_at: at(7, 16, 30), end_at: at(7, 17, 15), recurring: true });
+		push({ id: id('doc'), source_id: oma.id, title: 'Doctor', all_day: false, start_at: at(0, 10, 0), end_at: at(0, 10, 30), location: 'Kerkstraat 12' });
+		push({ id: id('cards'), source_id: oma.id, title: 'Card club', all_day: false, start_at: at(1, 14, 0), end_at: at(1, 17, 0), recurring: true });
+		push({ id: id('cards2'), source_id: oma.id, title: 'Card club', all_day: false, start_at: at(8, 14, 0), end_at: at(8, 17, 0), recurring: true });
+		push({ id: id('hair'), source_id: oma.id, title: 'Hairdresser', all_day: false, start_at: at(2, 9, 30), end_at: at(2, 10, 30) });
+		push({ id: id('market'), source_id: oma.id, title: 'Market with Marie', all_day: false, start_at: at(5, 9, 0), end_at: at(5, 11, 0), location: 'Vrijdagmarkt' });
+		push({ id: id('past'), source_id: oma.id, title: 'Physio', all_day: false, start_at: at(-2, 11, 0), end_at: at(-2, 12, 0) });
+		push({ id: id('dinner'), source_id: family.id, title: 'Dinner with Tom', all_day: false, start_at: at(2, 18, 30), end_at: at(2, 21, 0) });
+		push({ id: id('school'), source_id: family.id, title: 'School trip', all_day: false, start_at: at(4, 8, 0), end_at: at(4, 15, 30) });
+		if (local) {
+			push({ id: id('lunch'), source_id: local.id, title: 'Sunday lunch at ours', all_day: false, start_at: at(5, 12, 30), end_at: at(5, 15, 0), sender_name: 'Jeroen', location: 'Gent', has_photo: true, photo_placement: 'top' });
+			push({ id: id('call'), source_id: local.id, title: 'Video call with Lisa', all_day: false, start_at: at(1, 19, 0), end_at: at(1, 19, 30), sender_name: 'Lisa' });
+		}
+	}
+	const codes = [2, 61, 3, 0, 80, 1, 71];
+	const daily = codes.map((code, i) => ({
+		date: dayStr(i),
+		min_c: [6, 8, 7, 4, 9, 5, -1][i]!,
+		max_c: [13, 12, 14, 15, 11, 16, 3][i]!,
+		code,
+		precip_mm: code >= 60 ? 4.2 : 0,
+		precip_prob: [10, 80, 30, 0, 60, 5, 70][i]!,
+		sunrise: null,
+		sunset: null
+	}));
+	const countdowns = events
+		.filter((e) => e.countdown)
+		.map((e) => ({ event_id: e.id, source_id: e.source_id, title: e.title, all_day: e.all_day, start_at: e.start_at ?? null, start_date: e.start_date ?? null, color: sources.find((s) => s.id === e.source_id)!.color }));
+	return {
+		generated_at: new Date().toISOString(),
+		timezone: tz,
+		window: { from: dayStr(-30), to: dayStr(30) },
+		sources: sources.map((s) => ({ id: s.id, kind: s.kind, name: s.name, color: s.color, status: s.status, last_synced_at: s.last_synced_at ?? null })),
+		events,
+		countdowns,
+		weather: {
+			fetched_at: new Date().toISOString(),
+			location: { name: 'Gent', lat: 51.05, lon: 3.72 },
+			timezone: tz,
+			current: { temp_c: 11.4, code: 2, is_day: true },
+			daily
+		}
+	};
 }
 
 /** Push a user-websocket event (README §6.2) to the page. */

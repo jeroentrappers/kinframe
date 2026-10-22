@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">วันนี้</string>
+    <string name="calendar_tomorrow">พรุ่งนี้</string>
+    <string name="calendar_view_month">เดือน</string>
+    <string name="calendar_view_week">สัปดาห์</string>
+    <string name="calendar_view_four_day">4 วัน</string>
+    <string name="calendar_week_number">สัปดาห์ที่ %1$d</string>
+    <string name="calendar_previous">ก่อนหน้า</string>
+    <string name="calendar_next">ถัดไป</string>
+    <string name="calendar_sync_now">ซิงค์เลย</string>
+    <string name="calendar_syncing">กำลังซิงค์…</string>
+    <string name="calendar_close">ปิดปฏิทิน</string>
+    <string name="calendar_all_day">ทั้งวัน</string>
+    <string name="calendar_received">กิจกรรมที่ได้รับ</string>
+    <string name="calendar_nothing">ไม่มีนัดหมาย</string>
+    <string name="calendar_nothing_today">วันนี้ไม่มีนัดหมายอื่นแล้ว</string>
+    <string name="calendar_empty_title">ยังไม่มีปฏิทิน</string>
+    <string name="calendar_empty_body">เพิ่มปฏิทินครอบครัวได้จากแอปหรือเว็บไซต์ kinframe ในส่วนปฏิทินของกรอบรูป แสดงปฏิทินพร้อมกันที่นี่ได้กี่รายการก็ได้</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">ถึง %1$s</string>
+    <string name="calendar_from">ตั้งแต่ %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="other">+อีก %d</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">วันนี้</string>
+    <string name="countdown_tomorrow">พรุ่งนี้</string>
+    <plurals name="countdown_days">
+        <item quantity="other">%d วัน</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="other">อีก %d วัน</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">ส่งโดย %1$s</string>
+    <string name="event_repeats">ซ้ำ</string>
+    <string name="event_countdown">นับถอยหลังถึงกิจกรรมนี้</string>
+    <string name="event_countdown_hint">บนสไลด์โชว์และด้านบนของปฏิทิน</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s ส่งกิจกรรมมาให้คุณ</string>
+    <string name="invitation_body">เพิ่มลงในปฏิทินของกรอบรูปนี้ไหม</string>
+    <string name="invitation_accept">เพิ่มลงปฏิทิน</string>
+    <string name="invitation_decline">ปฏิเสธ</string>
+    <string name="invitation_later">ไว้ทีหลัง</string>
+    <string name="invitation_pill_one">กิจกรรมจาก %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="other">คำเชิญกิจกรรม %d รายการ</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">ปฏิทิน</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">ปฏิทิน</string>
+    <string name="settings_calendar_open">เปิดปฏิทิน</string>
+    <string name="settings_calendar_view">มุมมองปฏิทิน</string>
+    <string name="settings_calendar_start_today">เริ่มที่วันนี้</string>
+    <string name="settings_calendar_fade_past">ทำให้กิจกรรมที่ผ่านไปแล้วจางลง</string>
+    <string name="settings_calendar_week_numbers">เลขสัปดาห์</string>
+    <string name="settings_calendar_sidebar">ปฏิทินข้างรูป</string>
+    <string name="settings_calendar_countdowns">นับถอยหลังบนสไลด์โชว์</string>
+    <string name="settings_calendar_timed">แสดงปฏิทินตามเวลาที่ตั้งไว้</string>
+    <string name="settings_calendar_timed_from">ตั้งแต่</string>
+    <string name="settings_calendar_timed_to">ถึง</string>
+    <string name="settings_calendar_timed_add">เพิ่มเวลา</string>
+    <string name="settings_calendar_timed_remove">ลบ</string>
+    <string name="settings_calendar_sources">ปฏิทินบนกรอบรูปนี้</string>
+    <string name="settings_calendar_sources_hint">เพิ่มและจัดการปฏิทินได้จากแอปหรือเว็บไซต์ kinframe</string>
+    <string name="calendar_status_ok">อัปเดตแล้ว</string>
+    <string name="calendar_status_syncing">กำลังซิงค์…</string>
+    <string name="calendar_status_failed">ซิงค์ไม่ได้</string>
+    <string name="calendar_status_auth_failed">ต้องลงชื่อเข้าใช้</string>
+    <string name="calendar_status_disabled">ปิดอยู่</string>
+</resources>

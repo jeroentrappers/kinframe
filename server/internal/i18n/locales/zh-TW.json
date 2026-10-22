@@ -47,7 +47,12 @@
   "push.preset.beautiful": "好美！",
   "push.preset.call_me": "打電話給我",
   "push.preset.miss_you": "想你喔",
-  "push.preset.thanks": "謝謝！"
+  "push.preset.thanks": "謝謝！",
+  "problem.already_decided": "這個項目已經回覆過了",
+  "push.event_accepted.title": "活動已接受",
+  "push.event_accepted.body": "{frame} 已將「{title}」加入行事曆",
+  "push.event_declined.title": "活動已婉拒",
+  "push.event_declined.body": "{frame} 婉拒了「{title}」"
  },
  "details": {
   "admins cannot change other admins": "管理員無法變更其他管理員",
@@ -116,6 +121,32 @@
   "web app not built": "網頁應用程式尚未建置",
   "you already own this frame": "你已經是這台相框的擁有者",
   "you can't send to frame %s": "你無法傳送內容到相框 %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day 必須是月和日，格式為 MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day 必須是月和日，格式為 MM-DD",
+  "a calendar needs a name": "行事曆需要名稱",
+  "a title of 1 to 200 characters is required": "標題須為 1 到 200 個字元",
+  "all-day events need a start date": "全天活動需要開始日期",
+  "at most 200 characters": "最多 200 個字元",
+  "at most 2000 characters": "最多 2000 個字元",
+  "at most 60 characters": "最多 60 個字元",
+  "calendar not found": "找不到行事曆",
+  "calendars are turned off on this server": "這個伺服器已關閉行事曆功能",
+  "enter the link again": "請重新輸入連結",
+  "event not found": "找不到活動",
+  "event not found in the frame's calendar": "在相框的行事曆中找不到這個活動",
+  "events can last at most a year": "活動最長只能持續一年",
+  "invitation not found": "找不到邀請",
+  "must be ics or caldav": "必須是 ics 或 caldav",
+  "not a palette colour": "不是調色盤中的顏色",
+  "only for CalDAV": "僅適用於 CalDAV",
+  "photo not found": "找不到照片",
+  "the end is before the start": "結束時間早於開始時間",
+  "the frame already answered": "相框已經回覆過了",
+  "the photo could not be read": "無法讀取照片",
+  "the photo must be an image": "照片必須是圖片檔",
+  "the received-events calendar has no link": "收到的活動所在的行事曆沒有連結",
+  "this invitation was already answered or withdrawn": "這個邀請已被回覆或已撤回",
+  "timed events can last at most 31 days": "有指定時間的活動最長只能持續 31 天",
+  "timed events need a start and an end": "有指定時間的活動需要開始和結束時間",
+  "upload not found, incomplete or already used": "找不到上傳內容、上傳未完成或已被使用"
  }
 }

@@ -47,7 +47,12 @@
   "push.preset.beautiful": "מקסים!",
   "push.preset.call_me": "תתקשרו אליי",
   "push.preset.miss_you": "מתגעגעים",
-  "push.preset.thanks": "תודה!"
+  "push.preset.thanks": "תודה!",
+  "problem.already_decided": "כבר ענו על זה",
+  "push.event_accepted.title": "האירוע אושר",
+  "push.event_accepted.body": "{frame} הוסיפה את \"{title}\" ליומן שלה",
+  "push.event_declined.title": "האירוע נדחה",
+  "push.event_declined.body": "{frame} דחתה את \"{title}\""
  },
  "details": {
   "admins cannot change other admins": "מנהלים לא יכולים לשנות מנהלים אחרים",
@@ -116,6 +121,32 @@
   "web app not built": "אפליקציית האינטרנט לא נבנתה",
   "you already own this frame": "המסגרת הזו כבר בבעלותכם",
   "you can't send to frame %s": "אין לכם אפשרות לשלוח למסגרת %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day חייב להיות חודש ויום, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day חייב להיות חודש ויום, MM-DD",
+  "a calendar needs a name": "ליומן צריך להיות שם",
+  "a title of 1 to 200 characters is required": "נדרשת כותרת באורך 1 עד 200 תווים",
+  "all-day events need a start date": "לאירועים של יום שלם נדרש תאריך התחלה",
+  "at most 200 characters": "עד 200 תווים",
+  "at most 2000 characters": "עד 2000 תווים",
+  "at most 60 characters": "עד 60 תווים",
+  "calendar not found": "היומן לא נמצא",
+  "calendars are turned off on this server": "היומנים כבויים בשרת הזה",
+  "enter the link again": "יש להזין את הקישור שוב",
+  "event not found": "האירוע לא נמצא",
+  "event not found in the frame's calendar": "האירוע לא נמצא ביומן של המסגרת",
+  "events can last at most a year": "אירוע יכול להימשך שנה לכל היותר",
+  "invitation not found": "ההזמנה לא נמצאה",
+  "must be ics or caldav": "חייב להיות ics או caldav",
+  "not a palette colour": "זה לא צבע מהפלטה",
+  "only for CalDAV": "רק ל-CalDAV",
+  "photo not found": "התמונה לא נמצאה",
+  "the end is before the start": "הסיום לפני ההתחלה",
+  "the frame already answered": "המסגרת כבר ענתה",
+  "the photo could not be read": "לא ניתן היה לקרוא את התמונה",
+  "the photo must be an image": "התמונה חייבת להיות קובץ תמונה",
+  "the received-events calendar has no link": "ליומן האירועים שהתקבלו אין קישור",
+  "this invitation was already answered or withdrawn": "כבר ענו על ההזמנה הזו או שהיא בוטלה",
+  "timed events can last at most 31 days": "אירועים עם שעה יכולים להימשך 31 ימים לכל היותר",
+  "timed events need a start and an end": "לאירועים עם שעה נדרשות שעת התחלה ושעת סיום",
+  "upload not found, incomplete or already used": "ההעלאה לא נמצאה, לא הושלמה או שכבר נעשה בה שימוש"
  }
 }

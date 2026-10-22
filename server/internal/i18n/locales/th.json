@@ -47,7 +47,12 @@
   "push.preset.beautiful": "สวยจัง!",
   "push.preset.call_me": "โทรหาหน่อยนะ",
   "push.preset.miss_you": "คิดถึงนะ",
-  "push.preset.thanks": "ขอบคุณนะ!"
+  "push.preset.thanks": "ขอบคุณนะ!",
+  "problem.already_decided": "รายการนี้ได้รับการตอบแล้ว",
+  "push.event_accepted.title": "ยอมรับกิจกรรมแล้ว",
+  "push.event_accepted.body": "{frame} เพิ่ม “{title}” ลงในปฏิทินแล้ว",
+  "push.event_declined.title": "ปฏิเสธกิจกรรมแล้ว",
+  "push.event_declined.body": "{frame} ปฏิเสธ “{title}”"
  },
  "details": {
   "admins cannot change other admins": "ผู้ดูแลเปลี่ยนแปลงผู้ดูแลคนอื่นไม่ได้",
@@ -116,6 +121,32 @@
   "web app not built": "ยังไม่ได้บิลด์เว็บแอป",
   "you already own this frame": "คุณเป็นเจ้าของกรอบรูปนี้อยู่แล้ว",
   "you can't send to frame %s": "คุณส่งไปยังกรอบรูป %s ไม่ได้",
-  "on_this_day must be a month and day, MM-DD": "on_this_day ต้องเป็นเดือนและวันในรูปแบบ MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day ต้องเป็นเดือนและวันในรูปแบบ MM-DD",
+  "a calendar needs a name": "ปฏิทินต้องมีชื่อ",
+  "a title of 1 to 200 characters is required": "ต้องมีชื่อเรื่องยาว 1 ถึง 200 ตัวอักษร",
+  "all-day events need a start date": "กิจกรรมทั้งวันต้องมีวันที่เริ่ม",
+  "at most 200 characters": "ไม่เกิน 200 ตัวอักษร",
+  "at most 2000 characters": "ไม่เกิน 2000 ตัวอักษร",
+  "at most 60 characters": "ไม่เกิน 60 ตัวอักษร",
+  "calendar not found": "ไม่พบปฏิทิน",
+  "calendars are turned off on this server": "ปฏิทินถูกปิดอยู่บนเซิร์ฟเวอร์นี้",
+  "enter the link again": "ป้อนลิงก์อีกครั้ง",
+  "event not found": "ไม่พบกิจกรรม",
+  "event not found in the frame's calendar": "ไม่พบกิจกรรมในปฏิทินของกรอบรูป",
+  "events can last at most a year": "กิจกรรมยาวได้ไม่เกินหนึ่งปี",
+  "invitation not found": "ไม่พบคำเชิญ",
+  "must be ics or caldav": "ต้องเป็น ics หรือ caldav",
+  "not a palette colour": "ไม่ใช่สีในชุดสี",
+  "only for CalDAV": "สำหรับ CalDAV เท่านั้น",
+  "photo not found": "ไม่พบรูป",
+  "the end is before the start": "เวลาสิ้นสุดอยู่ก่อนเวลาเริ่ม",
+  "the frame already answered": "กรอบรูปตอบไปแล้ว",
+  "the photo could not be read": "อ่านรูปไม่ได้",
+  "the photo must be an image": "รูปต้องเป็นไฟล์ภาพ",
+  "the received-events calendar has no link": "ปฏิทินกิจกรรมที่ได้รับไม่มีลิงก์",
+  "this invitation was already answered or withdrawn": "คำเชิญนี้ได้รับการตอบหรือถูกถอนไปแล้ว",
+  "timed events can last at most 31 days": "กิจกรรมที่ระบุเวลายาวได้ไม่เกิน 31 วัน",
+  "timed events need a start and an end": "กิจกรรมที่ระบุเวลาต้องมีเวลาเริ่มและเวลาสิ้นสุด",
+  "upload not found, incomplete or already used": "ไม่พบการอัปโหลด อัปโหลดไม่ครบ หรือถูกใช้ไปแล้ว"
  }
 }

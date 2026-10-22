@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Какая красота!",
   "push.preset.call_me": "Позвони мне",
   "push.preset.miss_you": "Скучаю по тебе",
-  "push.preset.thanks": "Спасибо!"
+  "push.preset.thanks": "Спасибо!",
+  "problem.already_decided": "На это уже ответили",
+  "push.event_accepted.title": "Событие принято",
+  "push.event_accepted.body": "{frame} добавила «{title}» в календарь",
+  "push.event_declined.title": "Событие отклонено",
+  "push.event_declined.body": "{frame} отклонила «{title}»"
  },
  "details": {
   "admins cannot change other admins": "администраторы не могут изменять других администраторов",
@@ -116,6 +121,32 @@
   "web app not built": "веб-приложение не собрано",
   "you already own this frame": "вы уже владелец этой рамки",
   "you can't send to frame %s": "вы не можете отправлять на рамку %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day должен быть месяцем и днём в формате MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day должен быть месяцем и днём в формате MM-DD",
+  "a calendar needs a name": "у календаря должно быть название",
+  "a title of 1 to 200 characters is required": "нужно название длиной от 1 до 200 символов",
+  "all-day events need a start date": "для события на весь день нужна дата начала",
+  "at most 200 characters": "не больше 200 символов",
+  "at most 2000 characters": "не больше 2000 символов",
+  "at most 60 characters": "не больше 60 символов",
+  "calendar not found": "календарь не найден",
+  "calendars are turned off on this server": "календари на этом сервере отключены",
+  "enter the link again": "введите ссылку ещё раз",
+  "event not found": "событие не найдено",
+  "event not found in the frame's calendar": "событие не найдено в календаре рамки",
+  "events can last at most a year": "событие может длиться не больше года",
+  "invitation not found": "приглашение не найдено",
+  "must be ics or caldav": "должно быть ics или caldav",
+  "not a palette colour": "этого цвета нет в палитре",
+  "only for CalDAV": "только для CalDAV",
+  "photo not found": "фото не найдено",
+  "the end is before the start": "конец раньше начала",
+  "the frame already answered": "рамка уже ответила",
+  "the photo could not be read": "не удалось прочитать фото",
+  "the photo must be an image": "фото должно быть изображением",
+  "the received-events calendar has no link": "у календаря полученных событий нет ссылки",
+  "this invitation was already answered or withdrawn": "на это приглашение уже ответили или его отозвали",
+  "timed events can last at most 31 days": "событие со временем может длиться не больше 31 дня",
+  "timed events need a start and an end": "для события со временем нужны начало и конец",
+  "upload not found, incomplete or already used": "загрузка не найдена, не завершена или уже использована"
  }
 }

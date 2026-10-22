@@ -47,7 +47,12 @@
   "push.preset.beautiful": "बहुत सुंदर!",
   "push.preset.call_me": "मुझे फ़ोन करना",
   "push.preset.miss_you": "तुम्हारी याद आती है",
-  "push.preset.thanks": "धन्यवाद!"
+  "push.preset.thanks": "धन्यवाद!",
+  "problem.already_decided": "इसका जवाब पहले ही दिया जा चुका है",
+  "push.event_accepted.title": "इवेंट स्वीकार किया गया",
+  "push.event_accepted.body": "{frame} ने “{title}” को अपने कैलेंडर में जोड़ा",
+  "push.event_declined.title": "इवेंट के लिए मना किया गया",
+  "push.event_declined.body": "{frame} ने “{title}” के लिए मना किया"
  },
  "details": {
   "admins cannot change other admins": "एडमिन दूसरे एडमिन को नहीं बदल सकते",
@@ -116,6 +121,32 @@
   "web app not built": "वेब ऐप बिल्ड नहीं किया गया",
   "you already own this frame": "आप पहले से इस फ़्रेम के मालिक हैं",
   "you can't send to frame %s": "आप फ़्रेम %s पर नहीं भेज सकते",
-  "on_this_day must be a month and day, MM-DD": "on_this_day एक महीना और दिन होना चाहिए, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day एक महीना और दिन होना चाहिए, MM-DD",
+  "a calendar needs a name": "कैलेंडर का नाम होना ज़रूरी है",
+  "a title of 1 to 200 characters is required": "1 से 200 अक्षरों का शीर्षक ज़रूरी है",
+  "all-day events need a start date": "पूरे दिन के इवेंट के लिए शुरू होने की तारीख ज़रूरी है",
+  "at most 200 characters": "ज़्यादा से ज़्यादा 200 अक्षर",
+  "at most 2000 characters": "ज़्यादा से ज़्यादा 2000 अक्षर",
+  "at most 60 characters": "ज़्यादा से ज़्यादा 60 अक्षर",
+  "calendar not found": "कैलेंडर नहीं मिला",
+  "calendars are turned off on this server": "इस सर्वर पर कैलेंडर बंद हैं",
+  "enter the link again": "लिंक फिर से डालें",
+  "event not found": "इवेंट नहीं मिला",
+  "event not found in the frame's calendar": "फ़्रेम के कैलेंडर में इवेंट नहीं मिला",
+  "events can last at most a year": "इवेंट ज़्यादा से ज़्यादा एक साल का हो सकता है",
+  "invitation not found": "न्योता नहीं मिला",
+  "must be ics or caldav": "ics या caldav होना चाहिए",
+  "not a palette colour": "यह पैलेट का रंग नहीं है",
+  "only for CalDAV": "सिर्फ़ CalDAV के लिए",
+  "photo not found": "फ़ोटो नहीं मिली",
+  "the end is before the start": "खत्म होने का समय शुरू होने से पहले है",
+  "the frame already answered": "फ़्रेम पहले ही जवाब दे चुका है",
+  "the photo could not be read": "फ़ोटो पढ़ी नहीं जा सकी",
+  "the photo must be an image": "फ़ोटो एक इमेज होनी चाहिए",
+  "the received-events calendar has no link": "मिले हुए इवेंट वाले कैलेंडर का कोई लिंक नहीं है",
+  "this invitation was already answered or withdrawn": "इस न्योते का जवाब पहले ही दिया जा चुका है या इसे वापस लिया जा चुका है",
+  "timed events can last at most 31 days": "तय समय वाले इवेंट ज़्यादा से ज़्यादा 31 दिन के हो सकते हैं",
+  "timed events need a start and an end": "तय समय वाले इवेंट के लिए शुरू और खत्म होने का समय ज़रूरी है",
+  "upload not found, incomplete or already used": "अपलोड नहीं मिला, अधूरा है या पहले ही इस्तेमाल हो चुका है"
  }
 }

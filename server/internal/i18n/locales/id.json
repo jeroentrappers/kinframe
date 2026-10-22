@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Cantik sekali!",
   "push.preset.call_me": "Telepon aku ya",
   "push.preset.miss_you": "Kangen kamu",
-  "push.preset.thanks": "Terima kasih!"
+  "push.preset.thanks": "Terima kasih!",
+  "problem.already_decided": "Ini sudah dijawab",
+  "push.event_accepted.title": "Acara diterima",
+  "push.event_accepted.body": "{frame} menambahkan “{title}” ke kalendernya",
+  "push.event_declined.title": "Acara ditolak",
+  "push.event_declined.body": "{frame} menolak “{title}”"
  },
  "details": {
   "admins cannot change other admins": "admin tidak dapat mengubah admin lain",
@@ -116,6 +121,32 @@
   "web app not built": "aplikasi web belum di-build",
   "you already own this frame": "Anda sudah memiliki bingkai ini",
   "you can't send to frame %s": "Anda tidak dapat mengirim ke bingkai %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day harus berupa bulan dan tanggal, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day harus berupa bulan dan tanggal, MM-DD",
+  "a calendar needs a name": "kalender perlu nama",
+  "a title of 1 to 200 characters is required": "judul 1 sampai 200 karakter wajib diisi",
+  "all-day events need a start date": "acara sepanjang hari perlu tanggal mulai",
+  "at most 200 characters": "maksimal 200 karakter",
+  "at most 2000 characters": "maksimal 2000 karakter",
+  "at most 60 characters": "maksimal 60 karakter",
+  "calendar not found": "kalender tidak ditemukan",
+  "calendars are turned off on this server": "kalender dinonaktifkan di server ini",
+  "enter the link again": "masukkan tautan lagi",
+  "event not found": "acara tidak ditemukan",
+  "event not found in the frame's calendar": "acara tidak ditemukan di kalender bingkai",
+  "events can last at most a year": "acara paling lama satu tahun",
+  "invitation not found": "undangan tidak ditemukan",
+  "must be ics or caldav": "harus ics atau caldav",
+  "not a palette colour": "bukan warna dari palet",
+  "only for CalDAV": "hanya untuk CalDAV",
+  "photo not found": "foto tidak ditemukan",
+  "the end is before the start": "waktu selesai sebelum waktu mulai",
+  "the frame already answered": "bingkai sudah menjawab",
+  "the photo could not be read": "foto tidak dapat dibaca",
+  "the photo must be an image": "foto harus berupa gambar",
+  "the received-events calendar has no link": "kalender acara yang diterima tidak punya tautan",
+  "this invitation was already answered or withdrawn": "undangan ini sudah dijawab atau ditarik",
+  "timed events can last at most 31 days": "acara berjam paling lama 31 hari",
+  "timed events need a start and an end": "acara berjam perlu waktu mulai dan selesai",
+  "upload not found, incomplete or already used": "unggahan tidak ditemukan, belum lengkap, atau sudah dipakai"
  }
 }

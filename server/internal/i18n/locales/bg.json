@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Прекрасно!",
   "push.preset.call_me": "Обади ми се",
   "push.preset.miss_you": "Липсваш ми",
-  "push.preset.thanks": "Благодаря!"
+  "push.preset.thanks": "Благодаря!",
+  "problem.already_decided": "На това вече е отговорено",
+  "push.event_accepted.title": "Събитието е прието",
+  "push.event_accepted.body": "{frame} добави „{title}“ в календара си",
+  "push.event_declined.title": "Събитието е отказано",
+  "push.event_declined.body": "{frame} отказа „{title}“"
  },
  "details": {
   "admins cannot change other admins": "администраторите не могат да променят други администратори",
@@ -116,6 +121,32 @@
   "web app not built": "уеб приложението не е компилирано",
   "you already own this frame": "вече сте собственик на тази рамка",
   "you can't send to frame %s": "не можете да изпращате до рамка %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day трябва да е месец и ден във формат MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day трябва да е месец и ден във формат MM-DD",
+  "a calendar needs a name": "календарът трябва да има име",
+  "a title of 1 to 200 characters is required": "изисква се заглавие от 1 до 200 знака",
+  "all-day events need a start date": "целодневните събития трябва да имат начална дата",
+  "at most 200 characters": "най-много 200 знака",
+  "at most 2000 characters": "най-много 2000 знака",
+  "at most 60 characters": "най-много 60 знака",
+  "calendar not found": "календарът не е намерен",
+  "calendars are turned off on this server": "календарите са изключени на този сървър",
+  "enter the link again": "въведете връзката отново",
+  "event not found": "събитието не е намерено",
+  "event not found in the frame's calendar": "събитието не е намерено в календара на рамката",
+  "events can last at most a year": "събитията могат да траят най-много година",
+  "invitation not found": "поканата не е намерена",
+  "must be ics or caldav": "трябва да е ics или caldav",
+  "not a palette colour": "цветът не е от палитрата",
+  "only for CalDAV": "само за CalDAV",
+  "photo not found": "снимката не е намерена",
+  "the end is before the start": "краят е преди началото",
+  "the frame already answered": "рамката вече отговори",
+  "the photo could not be read": "снимката не можа да бъде прочетена",
+  "the photo must be an image": "снимката трябва да е изображение",
+  "the received-events calendar has no link": "календарът с получени събития няма връзка",
+  "this invitation was already answered or withdrawn": "на тази покана вече е отговорено или е оттеглена",
+  "timed events can last at most 31 days": "събитията с час могат да траят най-много 31 дни",
+  "timed events need a start and an end": "събитията с час трябва да имат начало и край",
+  "upload not found, incomplete or already used": "каченият файл не е намерен, не е завършен или вече е използван"
  }
 }

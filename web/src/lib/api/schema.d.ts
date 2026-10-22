@@ -691,6 +691,200 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/frames/{frameId}/calendars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number. */
+        get: operations["listCalendars"];
+        put?: never;
+        /**
+         * @description Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+         *     result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+         *     `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+         *     several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+         */
+        post: operations["createCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars:test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+         *     `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+         *     `ok: false` with `status` and `error` when the calendar cannot be read.
+         */
+        post: operations["testCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars/{calendarId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+         *     calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+         */
+        delete: operations["deleteCalendar"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+         *     are kept. Changing the URL or credentials syncs right away.
+         */
+        patch: operations["updateCalendar"];
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars/{calendarId}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Sync now (needs change_settings). Returns at once with `status: syncing`. */
+        post: operations["syncCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+         *     `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+         *     day.
+         */
+        get: operations["getFrameCalendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/countdowns/{eventId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+         *     Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+         *     frame's calendar.
+         */
+        put: operations["setCountdown"];
+        post?: never;
+        delete: operations["clearCountdown"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description Events sent to this frame, newest first. Senders see their own; owner and admin see all. */
+        get: operations["listEventInvitations"];
+        put?: never;
+        /**
+         * @description Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+         *     accepted events go to the frame's local received-events calendar. The sender gets an
+         *     `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+         *     new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+         */
+        post: operations["sendEventToFrame"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise. */
+        delete: operations["withdrawEventInvitation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events/{invitationId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none. */
+        get: operations["getEventInvitationPhoto"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/devices/enroll": {
         parameters: {
             query?: never;
@@ -988,6 +1182,96 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/calendar/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description "Sync now" on the frame: the server re-syncs all of the frame's calendar sources. A `calendar` change follows when something changed. */
+        post: operations["deviceSyncCalendars"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/countdowns/{eventId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** @description The countdown toggle in the frame's event details. A `calendar` change follows. */
+        put: operations["deviceSetCountdown"];
+        post?: never;
+        delete: operations["deviceClearCountdown"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+         *     after syncing and after an `event_invitation` websocket message, like join requests.
+         */
+        get: operations["deviceListInvitations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before. */
+        post: operations["deviceDecideInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations/{invitationId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match. */
+        get: operations["deviceGetInvitationPhoto"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/update": {
         parameters: {
             query?: never;
@@ -1082,7 +1366,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "server_error";
         Discovery: {
             name: string;
             version: string;
@@ -1108,6 +1392,11 @@ export interface components {
              * @default false
              */
             weather?: boolean;
+            /**
+             * @description True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+             * @default false
+             */
+            calendar?: boolean;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -1609,6 +1898,16 @@ export interface components {
              */
             mode?: "off" | "dim";
         };
+        /** @description Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight. */
+        CalendarSchedule: {
+            id: components["schemas"]["Id"];
+            /** @example 07:00 */
+            from: string;
+            /** @example 09:00 */
+            to: string;
+            days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            enabled: boolean;
+        };
         /** @description Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients. */
         FrameSettings: {
             version: number;
@@ -1675,6 +1974,16 @@ export interface components {
                 weather?: boolean;
                 /** @default true */
                 clock_24h?: boolean;
+                /**
+                 * @description Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+                 * @default false
+                 */
+                calendar_sidebar?: boolean;
+                /**
+                 * @description Countdown widgets on the slideshow (the nearest three).
+                 * @default true
+                 */
+                countdowns?: boolean;
             };
             video?: {
                 /** @default true */
@@ -1725,6 +2034,35 @@ export interface components {
                  * @enum {string}
                  */
                 first_day_of_week?: "mon" | "sun" | "sat";
+            };
+            /** @description Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`. */
+            calendar?: {
+                /**
+                 * @default week
+                 * @enum {string}
+                 */
+                view?: "four_day" | "week" | "month";
+                /**
+                 * @description Week and 4-day views start on today rather than the first day of the week.
+                 * @default true
+                 */
+                start_on_today?: boolean;
+                /** @default true */
+                fade_past?: boolean;
+                /** @default false */
+                week_numbers?: boolean;
+                /**
+                 * @description Sync window before today.
+                 * @default 30
+                 */
+                past_days?: number;
+                /**
+                 * @description Sync window after today.
+                 * @default 30
+                 */
+                future_days?: number;
+                /** @description Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day. */
+                timed_views?: components["schemas"]["CalendarSchedule"][];
             };
             /**
              * @description Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
@@ -1853,7 +2191,7 @@ export interface components {
         Change: {
             seq: number;
             /** @enum {string} */
-            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "reset";
+            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "reset";
             placement?: components["schemas"]["Placement"] & {
                 /** @description Frame rendition to download (present on placement.upsert when status is ready). */
                 media?: {
@@ -1904,6 +2242,7 @@ export interface components {
                 owner_name?: string;
             };
             weather?: components["schemas"]["Weather"];
+            calendar?: components["schemas"]["Calendar"] | null;
         };
         /**
          * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -1984,6 +2323,227 @@ export interface components {
                 sunset?: string | null;
             }[];
         } | null;
+        /**
+         * @description Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+         *     everywhere).
+         * @enum {string}
+         */
+        CalendarColor: "coral" | "tangerine" | "amber" | "olive" | "mint" | "sage" | "teal" | "sky" | "ocean" | "lavender" | "plum" | "rose";
+        /**
+         * @description `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+         * @enum {string}
+         */
+        CalendarSourceKind: "ics" | "caldav" | "local";
+        /**
+         * @description `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+         * @enum {string}
+         */
+        CalendarSyncStatus: "ok" | "syncing" | "failed" | "auth_failed" | "disabled";
+        CalendarSource: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["CalendarSourceKind"];
+            /** @description Display name. Empty for the local calendar until renamed: clients show "Received events". */
+            name: string;
+            color: components["schemas"]["CalendarColor"];
+            enabled: boolean;
+            /**
+             * @description Redacted URL for display. Null for `local`.
+             * @example https://calendar.google.com/…/basic.ics
+             */
+            url_hint?: string | null;
+            /** @description CalDAV only. */
+            username?: string | null;
+            has_password?: boolean;
+            status: components["schemas"]["CalendarSyncStatus"];
+            /** @description Short reason of the last failed sync (English). */
+            last_error?: string | null;
+            /**
+             * Format: date-time
+             * @description Last successful sync.
+             */
+            last_synced_at?: string | null;
+            /** Format: date-time */
+            last_attempt_at?: string | null;
+            /** Format: date-time */
+            next_sync_at?: string | null;
+            /** @description Events of this source in the frame's window. */
+            event_count?: number;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        CalendarSourceCreate: {
+            /** @enum {string} */
+            kind: "ics" | "caldav";
+            /** @description `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL. */
+            url: string;
+            /** @description Defaults to the calendar's own name */
+            name?: string;
+            color?: components["schemas"]["CalendarColor"];
+            /** @default true */
+            enabled?: boolean;
+            /** @description CalDAV only. */
+            username?: string;
+            /** @description CalDAV only; use an app-specific password. */
+            password?: string;
+            /** @description CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`. */
+            calendar_url?: string;
+        };
+        CalendarSourceUpdate: {
+            name?: string;
+            color?: components["schemas"]["CalendarColor"];
+            enabled?: boolean;
+            url?: string;
+            username?: string;
+            password?: string;
+            calendar_url?: string;
+        };
+        CalendarTestResult: {
+            ok: boolean;
+            /** @enum {string} */
+            status: "ok" | "failed" | "auth_failed";
+            error?: string | null;
+            /** @description The calendar's own name */
+            calendar_name?: string | null;
+            /** @description Events in the next 30 days. */
+            event_count?: number | null;
+            /** @description CalDAV only. Calendars on the account that hold events. */
+            calendars?: {
+                url: string;
+                name: string;
+                /** @description The server's colour (hex) */
+                color?: string | null;
+            }[];
+        };
+        /** @description Stable id of one event occurrence (a hash of source, UID and occurrence start). */
+        CalendarEventId: string;
+        /**
+         * @description One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+         *     all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+         */
+        CalendarEvent: {
+            id: components["schemas"]["CalendarEventId"];
+            source_id: components["schemas"]["Id"];
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            location?: string | null;
+            notes?: string | null;
+            recurring?: boolean;
+            countdown?: boolean;
+            /** @description Received events only. */
+            sender_name?: string | null;
+            /** @description Received events only; the photo is at `/v1/device/invitations/{id}/photo`. */
+            invitation_id?: components["schemas"]["Id"] | null;
+            has_photo?: boolean;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"] | null;
+        };
+        CalendarSourceInfo: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["CalendarSourceKind"];
+            name: string;
+            color: components["schemas"]["CalendarColor"];
+            status: components["schemas"]["CalendarSyncStatus"];
+            /** Format: date-time */
+            last_synced_at?: string | null;
+        };
+        /** @description A marked event, even when it lies outside the window. */
+        Countdown: {
+            event_id: components["schemas"]["CalendarEventId"];
+            source_id?: components["schemas"]["Id"] | null;
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            color: components["schemas"]["CalendarColor"];
+        };
+        /**
+         * @description Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+         *     list, deduplicated across sources by UID and start, sorted by start.
+         */
+        Calendar: {
+            /** Format: date-time */
+            generated_at: string;
+            /**
+             * @description The frame's time zone (`locale.timezone`), used for the window and all-day events.
+             * @example Europe/Brussels
+             */
+            timezone: string;
+            window: {
+                /** Format: date */
+                from: string;
+                /**
+                 * Format: date
+                 * @description Inclusive.
+                 */
+                to: string;
+            };
+            sources: components["schemas"]["CalendarSourceInfo"][];
+            events: components["schemas"]["CalendarEvent"][];
+            /** @description Marked events that have not passed yet, nearest first. */
+            countdowns: components["schemas"]["Countdown"][];
+        };
+        CalendarView: components["schemas"]["Calendar"] & {
+            weather?: components["schemas"]["Weather"];
+        };
+        /**
+         * @description `top`: the photo above the event details. `background`: the photo fills the card behind them.
+         * @enum {string}
+         */
+        EventPhotoPlacement: "top" | "background";
+        /** @description Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`). */
+        EventInvitationCreate: {
+            title: string;
+            /** @default false */
+            all_day?: boolean;
+            /** Format: date-time */
+            start_at?: string;
+            /** Format: date-time */
+            end_at?: string;
+            /** Format: date */
+            start_date?: string;
+            /** Format: date */
+            end_date?: string;
+            location?: string;
+            notes?: string;
+            /** @description A finished tus upload holding an image. */
+            photo_upload_id?: string;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"];
+        };
+        EventInvitation: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            sender_id: components["schemas"]["Id"];
+            sender_name: string;
+            /** @enum {string} */
+            status: "pending" | "accepted" | "declined" | "withdrawn";
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            location?: string | null;
+            notes?: string | null;
+            has_photo: boolean;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at?: string | null;
+        };
     };
     responses: {
         /** @description Error (RFC 9457) */
@@ -2001,6 +2561,9 @@ export interface components {
         UserId: components["schemas"]["Id"];
         ItemId: components["schemas"]["Id"];
         PlacementId: components["schemas"]["Id"];
+        CalendarId: components["schemas"]["Id"];
+        InvitationId: components["schemas"]["Id"];
+        EventId: components["schemas"]["CalendarEventId"];
         EndpointId: components["schemas"]["Id"];
         InviteToken: string;
         Cursor: string;
@@ -3381,6 +3944,328 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    listCalendars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sources in display order; the local received-events calendar (if any) comes first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createCalendar: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    testCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarTestResult"];
+                };
+            };
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    syncCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFrameCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Merged calendar */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarView"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    clearCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unmarked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listEventInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    sendEventToFrame: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInvitationCreate"];
+            };
+        };
+        responses: {
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    withdrawEventInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Withdrawn */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getEventInvitationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     enrollDevice: {
         parameters: {
             query?: never;
@@ -3846,6 +4731,143 @@ export interface operations {
                 };
             };
             default: components["responses"]["Problem"];
+        };
+    };
+    deviceSyncCalendars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deviceSetCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    deviceClearCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unmarked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deviceListInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"][];
+                };
+            };
+        };
+    };
+    deviceDecideInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    decision: "accept" | "decline";
+                };
+            };
+        };
+        responses: {
+            /** @description Decided */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+        };
+    };
+    deviceGetInvitationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            /** @description Not modified */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
         };
     };
     deviceCheckUpdate: {

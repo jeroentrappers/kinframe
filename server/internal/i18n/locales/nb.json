@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Så fint!",
   "push.preset.call_me": "Ring meg",
   "push.preset.miss_you": "Savner deg",
-  "push.preset.thanks": "Takk!"
+  "push.preset.thanks": "Takk!",
+  "problem.already_decided": "Dette er allerede besvart",
+  "push.event_accepted.title": "Hendelse godtatt",
+  "push.event_accepted.body": "{frame} la «{title}» til i kalenderen sin",
+  "push.event_declined.title": "Hendelse avslått",
+  "push.event_declined.body": "{frame} avslo «{title}»"
  },
  "details": {
   "admins cannot change other admins": "administratorer kan ikke endre andre administratorer",
@@ -116,6 +121,32 @@
   "web app not built": "nettappen er ikke bygget",
   "you already own this frame": "du eier allerede denne fotorammen",
   "you can't send to frame %s": "du kan ikke sende til fotorammen %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day må være en måned og dag, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day må være en måned og dag, MM-DD",
+  "a calendar needs a name": "en kalender må ha et navn",
+  "a title of 1 to 200 characters is required": "en tittel på 1 til 200 tegn er påkrevd",
+  "all-day events need a start date": "heldagshendelser må ha en startdato",
+  "at most 200 characters": "maks. 200 tegn",
+  "at most 2000 characters": "maks. 2000 tegn",
+  "at most 60 characters": "maks. 60 tegn",
+  "calendar not found": "fant ikke kalenderen",
+  "calendars are turned off on this server": "kalendere er slått av på denne serveren",
+  "enter the link again": "skriv inn lenken på nytt",
+  "event not found": "fant ikke hendelsen",
+  "event not found in the frame's calendar": "fant ikke hendelsen i fotorammens kalender",
+  "events can last at most a year": "hendelser kan vare høyst ett år",
+  "invitation not found": "fant ikke invitasjonen",
+  "must be ics or caldav": "må være ics eller caldav",
+  "not a palette colour": "ikke en farge fra paletten",
+  "only for CalDAV": "bare for CalDAV",
+  "photo not found": "fant ikke bildet",
+  "the end is before the start": "slutten er før starten",
+  "the frame already answered": "fotorammen har allerede svart",
+  "the photo could not be read": "bildet kunne ikke leses",
+  "the photo must be an image": "bildet må være en bildefil",
+  "the received-events calendar has no link": "kalenderen for mottatte hendelser har ingen lenke",
+  "this invitation was already answered or withdrawn": "invitasjonen er allerede besvart eller trukket tilbake",
+  "timed events can last at most 31 days": "hendelser med klokkeslett kan vare høyst 31 dager",
+  "timed events need a start and an end": "hendelser med klokkeslett må ha en start og en slutt",
+  "upload not found, incomplete or already used": "fant ikke opplastingen, eller den er ufullstendig eller allerede brukt"
  }
 }

@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Beautiful!",
   "push.preset.call_me": "Call me",
   "push.preset.miss_you": "Miss you",
-  "push.preset.thanks": "Thanks!"
+  "push.preset.thanks": "Thanks!",
+  "problem.already_decided": "This was already answered",
+  "push.event_accepted.title": "Event accepted",
+  "push.event_accepted.body": "{frame} added “{title}” to its calendar",
+  "push.event_declined.title": "Event declined",
+  "push.event_declined.body": "{frame} declined “{title}”"
  },
  "details": {
   "admins cannot change other admins": "admins cannot change other admins",
@@ -116,6 +121,32 @@
   "web app not built": "web app not built",
   "you already own this frame": "you already own this frame",
   "you can't send to frame %s": "you can't send to frame %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day must be a month and day, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day must be a month and day, MM-DD",
+  "a calendar needs a name": "a calendar needs a name",
+  "a title of 1 to 200 characters is required": "a title of 1 to 200 characters is required",
+  "all-day events need a start date": "all-day events need a start date",
+  "at most 200 characters": "at most 200 characters",
+  "at most 2000 characters": "at most 2000 characters",
+  "at most 60 characters": "at most 60 characters",
+  "calendar not found": "calendar not found",
+  "calendars are turned off on this server": "calendars are turned off on this server",
+  "enter the link again": "enter the link again",
+  "event not found": "event not found",
+  "event not found in the frame's calendar": "event not found in the frame's calendar",
+  "events can last at most a year": "events can last at most a year",
+  "invitation not found": "invitation not found",
+  "must be ics or caldav": "must be ics or caldav",
+  "not a palette colour": "not a palette colour",
+  "only for CalDAV": "only for CalDAV",
+  "photo not found": "photo not found",
+  "the end is before the start": "the end is before the start",
+  "the frame already answered": "the frame already answered",
+  "the photo could not be read": "the photo could not be read",
+  "the photo must be an image": "the photo must be an image",
+  "the received-events calendar has no link": "the received-events calendar has no link",
+  "this invitation was already answered or withdrawn": "this invitation was already answered or withdrawn",
+  "timed events can last at most 31 days": "timed events can last at most 31 days",
+  "timed events need a start and an end": "timed events need a start and an end",
+  "upload not found, incomplete or already used": "upload not found, incomplete or already used"
  }
 }

@@ -44,6 +44,7 @@ const (
 	AppUpdateRequired   Code = "app_update_required"
 	UpstreamUnavailable Code = "upstream_unavailable"
 	FeatureDisabled     Code = "feature_disabled"
+	AlreadyDecided      Code = "already_decided"
 	ServerError         Code = "server_error"
 )
 
@@ -79,6 +80,7 @@ var defaults = map[Code]struct {
 	AppUpdateRequired:   {426, "The frame app must be updated"},
 	UpstreamUnavailable: {502, "An external service is not reachable right now"},
 	FeatureDisabled:     {503, "This feature is turned off on this server"},
+	AlreadyDecided:      {409, "This was already answered"},
 	ServerError:         {500, "Something went wrong on the server"},
 }
 

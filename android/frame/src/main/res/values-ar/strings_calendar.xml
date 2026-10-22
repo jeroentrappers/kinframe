@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">اليوم</string>
+    <string name="calendar_tomorrow">غدًا</string>
+    <string name="calendar_view_month">شهر</string>
+    <string name="calendar_view_week">أسبوع</string>
+    <string name="calendar_view_four_day">4 أيام</string>
+    <string name="calendar_week_number">الأسبوع %1$d</string>
+    <string name="calendar_previous">السابق</string>
+    <string name="calendar_next">التالي</string>
+    <string name="calendar_sync_now">مزامنة الآن</string>
+    <string name="calendar_syncing">جارٍ المزامنة…</string>
+    <string name="calendar_close">إغلاق التقويم</string>
+    <string name="calendar_all_day">طوال اليوم</string>
+    <string name="calendar_received">المواعيد المستلمة</string>
+    <string name="calendar_nothing">لا شيء مخطط له</string>
+    <string name="calendar_nothing_today">لا شيء آخر مخطط له اليوم</string>
+    <string name="calendar_empty_title">لا توجد تقاويم بعد</string>
+    <string name="calendar_empty_body">أضف تقويم العائلة من تطبيق kinframe أو موقعه، ضمن تقاويم الإطار. يمكن عرض أي عدد من التقاويم معًا هنا.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">حتى %1$s</string>
+    <string name="calendar_from">من %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="zero">+%d أخرى</item>
+        <item quantity="one">+%d آخر</item>
+        <item quantity="two">+%d آخران</item>
+        <item quantity="few">+%d أخرى</item>
+        <item quantity="many">+%d أخرى</item>
+        <item quantity="other">+%d أخرى</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">اليوم</string>
+    <string name="countdown_tomorrow">غدًا</string>
+    <plurals name="countdown_days">
+        <item quantity="zero">%d يوم</item>
+        <item quantity="one">%d يوم</item>
+        <item quantity="two">يومان</item>
+        <item quantity="few">%d أيام</item>
+        <item quantity="many">%d يومًا</item>
+        <item quantity="other">%d يوم</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="zero">بعد %d يوم</item>
+        <item quantity="one">بعد يوم واحد</item>
+        <item quantity="two">بعد يومين</item>
+        <item quantity="few">بعد %d أيام</item>
+        <item quantity="many">بعد %d يومًا</item>
+        <item quantity="other">بعد %d يوم</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">أرسله %1$s</string>
+    <string name="event_repeats">يتكرر</string>
+    <string name="event_countdown">عدّ تنازلي لهذا الموعد</string>
+    <string name="event_countdown_hint">في عرض الشرائح وأعلى التقويم</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">أرسل لك %1$s موعدًا</string>
+    <string name="invitation_body">هل تريد إضافته إلى تقويم هذا الإطار؟</string>
+    <string name="invitation_accept">إضافة إلى التقويم</string>
+    <string name="invitation_decline">رفض</string>
+    <string name="invitation_later">ليس الآن</string>
+    <string name="invitation_pill_one">موعد من %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="zero">%d دعوة لمواعيد</item>
+        <item quantity="one">دعوة واحدة لموعد</item>
+        <item quantity="two">دعوتان لموعدين</item>
+        <item quantity="few">%d دعوات لمواعيد</item>
+        <item quantity="many">%d دعوة لمواعيد</item>
+        <item quantity="other">%d دعوة لمواعيد</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">التقويم</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">التقويم</string>
+    <string name="settings_calendar_open">فتح التقويم</string>
+    <string name="settings_calendar_view">عرض التقويم</string>
+    <string name="settings_calendar_start_today">البدء من اليوم</string>
+    <string name="settings_calendar_fade_past">تخفيت المواعيد الماضية</string>
+    <string name="settings_calendar_week_numbers">أرقام الأسابيع</string>
+    <string name="settings_calendar_sidebar">التقويم بجانب الصور</string>
+    <string name="settings_calendar_countdowns">العدّ التنازلي في عرض الشرائح</string>
+    <string name="settings_calendar_timed">عرض التقويم في أوقات محددة</string>
+    <string name="settings_calendar_timed_from">من</string>
+    <string name="settings_calendar_timed_to">حتى</string>
+    <string name="settings_calendar_timed_add">إضافة وقت</string>
+    <string name="settings_calendar_timed_remove">إزالة</string>
+    <string name="settings_calendar_sources">التقاويم على هذا الإطار</string>
+    <string name="settings_calendar_sources_hint">تُضاف التقاويم وتُدار من تطبيق kinframe أو موقعه.</string>
+    <string name="calendar_status_ok">محدّث</string>
+    <string name="calendar_status_syncing">جارٍ المزامنة…</string>
+    <string name="calendar_status_failed">تعذّرت المزامنة</string>
+    <string name="calendar_status_auth_failed">يلزم تسجيل الدخول</string>
+    <string name="calendar_status_disabled">متوقف</string>
+</resources>

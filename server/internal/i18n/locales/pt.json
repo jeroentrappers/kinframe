@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Que linda!",
   "push.preset.call_me": "Me liga",
   "push.preset.miss_you": "Saudade de você",
-  "push.preset.thanks": "Obrigado!"
+  "push.preset.thanks": "Obrigado!",
+  "problem.already_decided": "Isso já foi respondido",
+  "push.event_accepted.title": "Evento aceito",
+  "push.event_accepted.body": "{frame} adicionou “{title}” à agenda",
+  "push.event_declined.title": "Evento recusado",
+  "push.event_declined.body": "{frame} recusou “{title}”"
  },
  "details": {
   "admins cannot change other admins": "administradores não podem alterar outros administradores",
@@ -116,6 +121,32 @@
   "web app not built": "o app web não foi compilado",
   "you already own this frame": "você já é o proprietário deste porta-retrato",
   "you can't send to frame %s": "você não pode enviar para o porta-retrato %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day deve ser um mês e um dia, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day deve ser um mês e um dia, MM-DD",
+  "a calendar needs a name": "uma agenda precisa de um nome",
+  "a title of 1 to 200 characters is required": "é obrigatório um título de 1 a 200 caracteres",
+  "all-day events need a start date": "eventos de dia inteiro precisam de uma data de início",
+  "at most 200 characters": "no máximo 200 caracteres",
+  "at most 2000 characters": "no máximo 2000 caracteres",
+  "at most 60 characters": "no máximo 60 caracteres",
+  "calendar not found": "agenda não encontrada",
+  "calendars are turned off on this server": "as agendas estão desativadas neste servidor",
+  "enter the link again": "digite o link novamente",
+  "event not found": "evento não encontrado",
+  "event not found in the frame's calendar": "evento não encontrado na agenda do porta-retrato",
+  "events can last at most a year": "um evento pode durar no máximo um ano",
+  "invitation not found": "convite não encontrado",
+  "must be ics or caldav": "deve ser ics ou caldav",
+  "not a palette colour": "não é uma cor da paleta",
+  "only for CalDAV": "só para CalDAV",
+  "photo not found": "foto não encontrada",
+  "the end is before the start": "o fim é antes do início",
+  "the frame already answered": "o porta-retrato já respondeu",
+  "the photo could not be read": "não foi possível ler a foto",
+  "the photo must be an image": "a foto precisa ser uma imagem",
+  "the received-events calendar has no link": "a agenda de eventos recebidos não tem link",
+  "this invitation was already answered or withdrawn": "este convite já foi respondido ou retirado",
+  "timed events can last at most 31 days": "eventos com horário podem durar no máximo 31 dias",
+  "timed events need a start and an end": "eventos com horário precisam de início e fim",
+  "upload not found, incomplete or already used": "upload não encontrado, incompleto ou já usado"
  }
 }

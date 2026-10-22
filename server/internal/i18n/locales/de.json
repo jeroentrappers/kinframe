@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Wunderschön!",
   "push.preset.call_me": "Ruf mich an",
   "push.preset.miss_you": "Vermisse dich",
-  "push.preset.thanks": "Danke!"
+  "push.preset.thanks": "Danke!",
+  "problem.already_decided": "Wurde bereits beantwortet",
+  "push.event_accepted.title": "Termin angenommen",
+  "push.event_accepted.body": "{frame} hat „{title}“ in den Kalender übernommen",
+  "push.event_declined.title": "Termin abgelehnt",
+  "push.event_declined.body": "{frame} hat „{title}“ abgelehnt"
  },
  "details": {
   "admins cannot change other admins": "Admins können andere Admins nicht ändern",
@@ -116,6 +121,32 @@
   "web app not built": "Web-App nicht gebaut",
   "you already own this frame": "dieser Rahmen gehört dir bereits",
   "you can't send to frame %s": "du kannst nicht an Rahmen %s senden",
-  "on_this_day must be a month and day, MM-DD": "on_this_day muss ein Monat und Tag sein, MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day muss ein Monat und Tag sein, MM-DD",
+  "a calendar needs a name": "ein Kalender braucht einen Namen",
+  "a title of 1 to 200 characters is required": "ein Titel mit 1 bis 200 Zeichen ist erforderlich",
+  "all-day events need a start date": "ganztägige Termine brauchen ein Startdatum",
+  "at most 200 characters": "höchstens 200 Zeichen",
+  "at most 2000 characters": "höchstens 2000 Zeichen",
+  "at most 60 characters": "höchstens 60 Zeichen",
+  "calendar not found": "Kalender nicht gefunden",
+  "calendars are turned off on this server": "Kalender sind auf diesem Server ausgeschaltet",
+  "enter the link again": "gib den Link erneut ein",
+  "event not found": "Termin nicht gefunden",
+  "event not found in the frame's calendar": "Termin nicht im Kalender des Rahmens gefunden",
+  "events can last at most a year": "ein Termin dauert höchstens ein Jahr",
+  "invitation not found": "Einladung nicht gefunden",
+  "must be ics or caldav": "muss ics oder caldav sein",
+  "not a palette colour": "keine Farbe aus der Palette",
+  "only for CalDAV": "nur für CalDAV",
+  "photo not found": "Foto nicht gefunden",
+  "the end is before the start": "das Ende liegt vor dem Beginn",
+  "the frame already answered": "der Rahmen hat bereits geantwortet",
+  "the photo could not be read": "das Foto konnte nicht gelesen werden",
+  "the photo must be an image": "das Foto muss ein Bild sein",
+  "the received-events calendar has no link": "der Kalender für empfangene Termine hat keinen Link",
+  "this invitation was already answered or withdrawn": "diese Einladung wurde bereits beantwortet oder zurückgezogen",
+  "timed events can last at most 31 days": "Termine mit Uhrzeit dauern höchstens 31 Tage",
+  "timed events need a start and an end": "Termine mit Uhrzeit brauchen einen Beginn und ein Ende",
+  "upload not found, incomplete or already used": "Upload nicht gefunden, unvollständig oder bereits verwendet"
  }
 }

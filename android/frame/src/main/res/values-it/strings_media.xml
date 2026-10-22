@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Tocca per riprodurre</string>
+    <string name="settings_live_photos">Foto Live</string>
+    <string name="live_photos_on">Riproduci quando appare</string>
+    <string name="live_photos_tap">Riproduci al tocco</string>
+    <string name="live_photos_off">Solo foto</string>
+</resources>

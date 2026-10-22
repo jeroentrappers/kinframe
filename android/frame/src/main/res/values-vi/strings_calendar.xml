@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Hôm nay</string>
+    <string name="calendar_tomorrow">Ngày mai</string>
+    <string name="calendar_view_month">Tháng</string>
+    <string name="calendar_view_week">Tuần</string>
+    <string name="calendar_view_four_day">4 ngày</string>
+    <string name="calendar_week_number">Tuần %1$d</string>
+    <string name="calendar_previous">Trước</string>
+    <string name="calendar_next">Sau</string>
+    <string name="calendar_sync_now">Đồng bộ ngay</string>
+    <string name="calendar_syncing">Đang đồng bộ…</string>
+    <string name="calendar_close">Đóng lịch</string>
+    <string name="calendar_all_day">Cả ngày</string>
+    <string name="calendar_received">Sự kiện đã nhận</string>
+    <string name="calendar_nothing">Không có kế hoạch nào</string>
+    <string name="calendar_nothing_today">Hôm nay không còn kế hoạch nào khác</string>
+    <string name="calendar_empty_title">Chưa có lịch nào</string>
+    <string name="calendar_empty_body">Thêm lịch gia đình từ ứng dụng hoặc trang web kinframe, trong mục Lịch của khung ảnh. Có thể hiển thị cùng lúc bao nhiêu lịch tùy thích tại đây.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">đến %1$s</string>
+    <string name="calendar_from">từ %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="other">+%d nữa</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Hôm nay</string>
+    <string name="countdown_tomorrow">Ngày mai</string>
+    <plurals name="countdown_days">
+        <item quantity="other">%d ngày</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="other">còn %d ngày</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Do %1$s gửi</string>
+    <string name="event_repeats">Lặp lại</string>
+    <string name="event_countdown">Đếm ngược đến sự kiện này</string>
+    <string name="event_countdown_hint">Trên trình chiếu và ở đầu lịch</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s đã gửi cho bạn một sự kiện</string>
+    <string name="invitation_body">Thêm vào lịch của khung ảnh này?</string>
+    <string name="invitation_accept">Thêm vào lịch</string>
+    <string name="invitation_decline">Từ chối</string>
+    <string name="invitation_later">Để sau</string>
+    <string name="invitation_pill_one">Sự kiện từ %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="other">%d lời mời sự kiện</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Lịch</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Lịch</string>
+    <string name="settings_calendar_open">Mở lịch</string>
+    <string name="settings_calendar_view">Chế độ xem lịch</string>
+    <string name="settings_calendar_start_today">Bắt đầu từ hôm nay</string>
+    <string name="settings_calendar_fade_past">Làm mờ sự kiện đã qua</string>
+    <string name="settings_calendar_week_numbers">Số tuần</string>
+    <string name="settings_calendar_sidebar">Lịch bên cạnh ảnh</string>
+    <string name="settings_calendar_countdowns">Đếm ngược trên trình chiếu</string>
+    <string name="settings_calendar_timed">Hiện lịch vào giờ đã đặt</string>
+    <string name="settings_calendar_timed_from">Từ</string>
+    <string name="settings_calendar_timed_to">Đến</string>
+    <string name="settings_calendar_timed_add">Thêm giờ</string>
+    <string name="settings_calendar_timed_remove">Xóa</string>
+    <string name="settings_calendar_sources">Lịch trên khung ảnh này</string>
+    <string name="settings_calendar_sources_hint">Lịch được thêm và quản lý từ ứng dụng hoặc trang web kinframe.</string>
+    <string name="calendar_status_ok">Đã cập nhật</string>
+    <string name="calendar_status_syncing">Đang đồng bộ…</string>
+    <string name="calendar_status_failed">Không đồng bộ được</string>
+    <string name="calendar_status_auth_failed">Cần đăng nhập</string>
+    <string name="calendar_status_disabled">Đã tắt</string>
+</resources>

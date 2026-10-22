@@ -103,6 +103,8 @@ class SyncEngine(
                 }
                 // `weather: null` means no weather any more (widget off, location removed): drop what we have.
                 ChangeType.WEATHER -> state = state.copy(weatherJson = c.weather?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // `calendar: null` means the frame has no calendars any more.
+                ChangeType.CALENDAR -> state = state.copy(calendarJson = c.calendar?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 ChangeType.RESET -> {
                     Log.i(TAG, "reset at seq ${c.seq}: re-syncing from 0")
                     placements.deleteAll()

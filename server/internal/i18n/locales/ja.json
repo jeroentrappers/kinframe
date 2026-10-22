@@ -47,7 +47,12 @@
   "push.preset.beautiful": "きれいだね！",
   "push.preset.call_me": "電話してね",
   "push.preset.miss_you": "会いたいな",
-  "push.preset.thanks": "ありがとう！"
+  "push.preset.thanks": "ありがとう！",
+  "problem.already_decided": "これはすでに応答済みです",
+  "push.event_accepted.title": "予定が承認されました",
+  "push.event_accepted.body": "{frame} が「{title}」をカレンダーに追加しました",
+  "push.event_declined.title": "予定が辞退されました",
+  "push.event_declined.body": "{frame} が「{title}」を辞退しました"
  },
  "details": {
   "admins cannot change other admins": "管理者はほかの管理者を変更できません",
@@ -116,6 +121,32 @@
   "web app not built": "ウェブアプリがビルドされていません",
   "you already own this frame": "このフレームはすでにあなたのものです",
   "you can't send to frame %s": "フレーム %s には送信できません",
-  "on_this_day must be a month and day, MM-DD": "on_this_day は月と日（MM-DD）で指定してください"
+  "on_this_day must be a month and day, MM-DD": "on_this_day は月と日（MM-DD）で指定してください",
+  "a calendar needs a name": "カレンダーには名前が必要です",
+  "a title of 1 to 200 characters is required": "1～200 文字のタイトルが必要です",
+  "all-day events need a start date": "終日の予定には開始日が必要です",
+  "at most 200 characters": "200 文字以内で入力してください",
+  "at most 2000 characters": "2000 文字以内で入力してください",
+  "at most 60 characters": "60 文字以内で入力してください",
+  "calendar not found": "カレンダーが見つかりません",
+  "calendars are turned off on this server": "このサーバーではカレンダーがオフになっています",
+  "enter the link again": "リンクをもう一度入力してください",
+  "event not found": "予定が見つかりません",
+  "event not found in the frame's calendar": "フレームのカレンダーに予定が見つかりません",
+  "events can last at most a year": "予定の期間は最長 1 年です",
+  "invitation not found": "招待が見つかりません",
+  "must be ics or caldav": "ics または caldav を指定してください",
+  "not a palette colour": "パレットにない色です",
+  "only for CalDAV": "CalDAV のみ",
+  "photo not found": "写真が見つかりません",
+  "the end is before the start": "終了が開始より前になっています",
+  "the frame already answered": "フレームはすでに応答しています",
+  "the photo could not be read": "写真を読み込めませんでした",
+  "the photo must be an image": "写真は画像ファイルである必要があります",
+  "the received-events calendar has no link": "受け取った予定のカレンダーにはリンクがありません",
+  "this invitation was already answered or withdrawn": "この招待はすでに応答済みか、取り消されています",
+  "timed events can last at most 31 days": "時刻指定の予定の期間は最長 31 日です",
+  "timed events need a start and an end": "時刻指定の予定には開始と終了が必要です",
+  "upload not found, incomplete or already used": "アップロードが見つからないか、未完了か、すでに使用されています"
  }
 }

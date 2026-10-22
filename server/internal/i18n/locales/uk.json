@@ -47,7 +47,12 @@
   "push.preset.beautiful": "Яка краса!",
   "push.preset.call_me": "Подзвони мені",
   "push.preset.miss_you": "Сумую за тобою",
-  "push.preset.thanks": "Дякую!"
+  "push.preset.thanks": "Дякую!",
+  "problem.already_decided": "На це вже відповіли",
+  "push.event_accepted.title": "Подію прийнято",
+  "push.event_accepted.body": "{frame} додала «{title}» до календаря",
+  "push.event_declined.title": "Подію відхилено",
+  "push.event_declined.body": "{frame} відхилила «{title}»"
  },
  "details": {
   "admins cannot change other admins": "адміністратори не можуть змінювати інших адміністраторів",
@@ -116,6 +121,32 @@
   "web app not built": "вебзастосунок не зібрано",
   "you already own this frame": "ви вже власник цієї рамки",
   "you can't send to frame %s": "ви не можете надсилати на рамку %s",
-  "on_this_day must be a month and day, MM-DD": "on_this_day має бути місяцем і днем у форматі MM-DD"
+  "on_this_day must be a month and day, MM-DD": "on_this_day має бути місяцем і днем у форматі MM-DD",
+  "a calendar needs a name": "календар повинен мати назву",
+  "a title of 1 to 200 characters is required": "потрібна назва довжиною від 1 до 200 символів",
+  "all-day events need a start date": "для події на весь день потрібна дата початку",
+  "at most 200 characters": "не більше 200 символів",
+  "at most 2000 characters": "не більше 2000 символів",
+  "at most 60 characters": "не більше 60 символів",
+  "calendar not found": "календар не знайдено",
+  "calendars are turned off on this server": "календарі на цьому сервері вимкнено",
+  "enter the link again": "введіть посилання ще раз",
+  "event not found": "подію не знайдено",
+  "event not found in the frame's calendar": "подію не знайдено в календарі рамки",
+  "events can last at most a year": "подія може тривати не більше року",
+  "invitation not found": "запрошення не знайдено",
+  "must be ics or caldav": "має бути ics або caldav",
+  "not a palette colour": "цього кольору немає в палітрі",
+  "only for CalDAV": "лише для CalDAV",
+  "photo not found": "фото не знайдено",
+  "the end is before the start": "кінець раніше за початок",
+  "the frame already answered": "рамка вже відповіла",
+  "the photo could not be read": "не вдалося прочитати фото",
+  "the photo must be an image": "фото має бути зображенням",
+  "the received-events calendar has no link": "календар отриманих подій не має посилання",
+  "this invitation was already answered or withdrawn": "на це запрошення вже відповіли або його відкликано",
+  "timed events can last at most 31 days": "подія з часом може тривати не більше 31 дня",
+  "timed events need a start and an end": "для події з часом потрібні початок і кінець",
+  "upload not found, incomplete or already used": "завантаження не знайдено, не завершено або вже використано"
  }
 }
