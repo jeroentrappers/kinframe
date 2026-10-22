@@ -284,55 +284,36 @@ func (w *Worker) makeMaster(ctx context.Context, m *store.Media) (*store.MediaMa
 	}
 	defer os.RemoveAll(tmp)
 
-	out := &store.MediaMaster{SourceSHA256: srcSHA}
+	start := time.Now()
+	out := &store.MediaMaster{SourceSHA256: srcSHA, Pipeline: "transcode"}
 	var masterPath string
-	switch kind {
-	case media.Photo:
-		masterPath = filepath.Join(tmp, "master.webp")
-		size, captured, err := w.Tools.PhotoMaster(ctx, src, masterPath)
-		if err != nil {
+	if m.Prepared != nil {
+		var err error
+		masterPath, err = w.preparedMaster(ctx, m, kind, src, tmp, out)
+		if reason, rejected := media.RejectionReason(err); rejected {
+			out.Pipeline, out.PipelineNote = "fallback", &reason
+			masterPath = ""
+		} else if err != nil {
+			return nil, err
+		} else {
+			out.Pipeline = "prepared"
+		}
+	}
+	if masterPath == "" {
+		if masterPath, err = w.transcodeMaster(ctx, m, kind, src, tmp, out); err != nil {
 			return nil, err
 		}
-		out.Width, out.Height, out.CapturedAt = size.W, size.H, captured
-		out.Mime = "image/webp"
-		out.Key = fmt.Sprintf("media/%s/master.webp", m.ID)
-	case media.Video:
-		info, err := w.Tools.ProbeVideo(ctx, src)
-		if err != nil {
-			return nil, err
-		}
-		var trim *media.Trim
-		start, end := 0, info.DurationMS
-		if m.TrimStartMS != nil || m.TrimEndMS != nil {
-			trim = &media.Trim{}
-			if m.TrimStartMS != nil {
-				trim.StartMS, start = *m.TrimStartMS, *m.TrimStartMS
-			}
-			if m.TrimEndMS != nil && *m.TrimEndMS < info.DurationMS {
-				trim.EndMS, end = *m.TrimEndMS, *m.TrimEndMS
-			}
-		}
-		if w.MaxVideoMS != nil && end-start > w.MaxVideoMS(ctx) {
-			return nil, errTooLong
-		}
-		masterPath = filepath.Join(tmp, "master.mp4")
-		vi, err := w.Tools.VideoMaster(ctx, src, info, trim, m.IncludeAudio, masterPath)
-		if err != nil {
-			return nil, err
-		}
+	}
+	if kind == media.Video && !m.Motion {
 		posterPath := filepath.Join(tmp, "poster.webp")
-		if err := w.Tools.Poster(ctx, masterPath, vi.DurationMS, posterPath); err != nil {
+		if err := w.Tools.Poster(ctx, masterPath, *out.DurationMS, posterPath); err != nil {
 			return nil, err
 		}
 		posterKey := fmt.Sprintf("media/%s/poster.webp", m.ID)
 		if err := w.Blob.PutFile(ctx, posterKey, posterPath, blob.PutOptions{ContentType: "image/webp"}); err != nil {
 			return nil, err
 		}
-		out.Width, out.Height, out.CapturedAt = vi.Size.W, vi.Size.H, vi.CapturedAt
-		out.DurationMS, out.HasAudio = &vi.DurationMS, &vi.HasAudio
 		out.PosterKey = &posterKey
-		out.Mime = "video/mp4"
-		out.Key = fmt.Sprintf("media/%s/master.mp4", m.ID)
 	}
 	if out.SHA256, out.Bytes, err = media.FileDigest(masterPath); err != nil {
 		return nil, err
@@ -340,7 +321,138 @@ func (w *Worker) makeMaster(ctx context.Context, m *store.Media) (*store.MediaMa
 	if err := w.Blob.PutFile(ctx, out.Key, masterPath, blob.PutOptions{ContentType: out.Mime, SHA256: out.SHA256}); err != nil {
 		return nil, err
 	}
+	note := ""
+	if out.PipelineNote != nil {
+		note = *out.PipelineNote
+	}
+	w.Log.Info("media master", "media", m.ID, "kind", kind, "pipeline", out.Pipeline, "note", note,
+		"motion", m.Motion, "bytes", out.Bytes, "took", time.Since(start).Round(time.Millisecond))
 	return out, nil
+}
+
+// videoWindow resolves the trim and the length limit for a video media.
+func (w *Worker) videoWindow(ctx context.Context, m *store.Media, info media.VideoInfo) (*media.Trim, error) {
+	var trim *media.Trim
+	start, end := 0, info.DurationMS
+	if m.TrimStartMS != nil || m.TrimEndMS != nil {
+		trim = &media.Trim{}
+		if m.TrimStartMS != nil {
+			trim.StartMS, start = *m.TrimStartMS, *m.TrimStartMS
+		}
+		if m.TrimEndMS != nil && *m.TrimEndMS < info.DurationMS {
+			trim.EndMS, end = *m.TrimEndMS, *m.TrimEndMS
+		}
+	}
+	if m.Motion && end-start > media.MaxMotionMS {
+		// Motion clips are short by nature; cut rather than reject.
+		if trim == nil {
+			trim = &media.Trim{}
+		}
+		trim.EndMS, end = start+media.MaxMotionMS, start+media.MaxMotionMS
+	}
+	if !m.Motion && w.MaxVideoMS != nil && end-start > w.MaxVideoMS(ctx) {
+		return nil, errTooLong
+	}
+	return trim, nil
+}
+
+// transcodeMaster is the full pipeline: decode, autorotate, scale, encode.
+func (w *Worker) transcodeMaster(ctx context.Context, m *store.Media, kind media.Kind, src, tmp string, out *store.MediaMaster) (string, error) {
+	switch kind {
+	case media.Photo:
+		masterPath := filepath.Join(tmp, "master.webp")
+		size, captured, err := w.Tools.PhotoMaster(ctx, src, masterPath)
+		if err != nil {
+			return "", err
+		}
+		out.Width, out.Height, out.CapturedAt = size.W, size.H, captured
+		out.Mime = "image/webp"
+		out.Key = fmt.Sprintf("media/%s/master.webp", m.ID)
+		return masterPath, nil
+	case media.Video:
+		info, err := w.Tools.ProbeVideo(ctx, src)
+		if err != nil {
+			return "", err
+		}
+		trim, err := w.videoWindow(ctx, m, info)
+		if err != nil {
+			return "", err
+		}
+		masterPath := filepath.Join(tmp, "master.mp4")
+		vi, err := w.Tools.VideoMaster(ctx, src, info, trim, m.IncludeAudio, masterPath)
+		if err != nil {
+			return "", err
+		}
+		w.setVideoMaster(m, vi, out)
+		return masterPath, nil
+	}
+	return "", media.ErrUnsupported
+}
+
+func (w *Worker) setVideoMaster(m *store.Media, vi media.VideoInfo, out *store.MediaMaster) {
+	out.Width, out.Height, out.CapturedAt = vi.Size.W, vi.Size.H, vi.CapturedAt
+	out.DurationMS, out.HasAudio = &vi.DurationMS, &vi.HasAudio
+	out.Mime = "video/mp4"
+	out.Key = fmt.Sprintf("media/%s/master.mp4", m.ID)
+}
+
+// preparedMaster verifies a prepared upload (README §5.3 "Prepared uploads")
+// and returns a master made without re-encoding: a photo with its metadata
+// stripped losslessly, or a video remuxed without metadata. A
+// media.Rejection error means "take the normal pipeline".
+func (w *Worker) preparedMaster(ctx context.Context, m *store.Media, kind media.Kind, src, tmp string, out *store.MediaMaster) (string, error) {
+	decl := media.Declared{Width: m.DeclaredWidth, Height: m.DeclaredHeight, DurationMS: m.DeclaredDurationMS}
+	switch {
+	case kind == media.Photo && *m.Prepared == media.PreparedPhotoV1:
+		_, mime, err := media.Sniff(src)
+		if err != nil {
+			return "", err
+		}
+		ext := map[string]string{"image/webp": "webp", "image/jpeg": "jpg"}[mime]
+		if ext == "" {
+			return "", media.Rejection("format " + mime)
+		}
+		masterPath := filepath.Join(tmp, "master."+ext)
+		pp, err := w.Tools.VerifyPreparedPhoto(ctx, src, masterPath, decl)
+		if err != nil {
+			return "", err
+		}
+		out.Width, out.Height, out.CapturedAt = pp.Size.W, pp.Size.H, pp.CapturedAt
+		out.Mime = pp.Mime
+		out.Key = fmt.Sprintf("media/%s/master.%s", m.ID, ext)
+		return masterPath, nil
+	case kind == media.Video && *m.Prepared == media.PreparedVideoV1:
+		info, err := w.Tools.ProbeVideo(ctx, src)
+		if err != nil {
+			return "", err
+		}
+		if m.TrimStartMS != nil || m.TrimEndMS != nil {
+			// Stream copy cannot cut between keyframes; clients apply trims themselves.
+			return "", media.Rejection("trim requested")
+		}
+		maxMS := media.MaxMotionMS
+		if !m.Motion && w.MaxVideoMS != nil {
+			maxMS = w.MaxVideoMS(ctx)
+		}
+		if info.DurationMS > maxMS {
+			if m.Motion {
+				return "", media.Rejection("motion clip too long")
+			}
+			return "", errTooLong
+		}
+		if err := media.CheckPreparedVideo(info, maxMS, decl); err != nil {
+			return "", err
+		}
+		masterPath := filepath.Join(tmp, "master.mp4")
+		vi, err := w.Tools.RemuxVideo(ctx, src, m.IncludeAudio, masterPath)
+		if err != nil {
+			return "", err
+		}
+		vi.CapturedAt = info.CapturedAt
+		w.setVideoMaster(m, vi, out)
+		return masterPath, nil
+	}
+	return "", media.Rejection(fmt.Sprintf("profile %s does not match a %s", *m.Prepared, kind))
 }
 
 func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
@@ -493,29 +605,33 @@ func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget
 	if m.Kind == string(media.Video) {
 		out = filepath.Join(tmp, "r.mp4")
 		info := media.VideoInfo{Size: media.Size{W: *m.Width, H: *m.Height}, HasAudio: m.HasAudio != nil && *m.HasAudio}
-		if probed, err := w.Tools.ProbeVideo(ctx, master); err == nil {
+		probed, perr := w.Tools.ProbeVideo(ctx, master)
+		if perr == nil {
 			info.FPS = probed.FPS
 		}
-		size, err := w.Tools.VideoRendition(ctx, master, info, media.Size{W: t.DecodeW, H: t.DecodeH}, out)
+		decode := media.Size{W: t.DecodeW, H: t.DecodeH}
+		faststart, _ := media.Faststart(master)
+		if perr == nil && media.ReusableAsRendition(probed, decode, faststart) {
+			// The master already is what this frame would get: serve its bytes.
+			r.Width, r.Height, r.Mime = probed.Size.W, probed.Size.H, "video/mp4"
+			r.Key, r.SHA256, r.ReusedMaster = *m.MasterKey, *m.MasterSHA256, true
+			if m.MasterBytes != nil {
+				r.Bytes = *m.MasterBytes
+			}
+			if err := w.videoPoster(ctx, m, variant, probed.Size, tmp, &r); err != nil {
+				return err
+			}
+			w.Log.Info("media rendition", "media", m.ID, "variant", variant, "reused_master", true)
+			return w.Store.PutRendition(ctx, r)
+		}
+		size, err := w.Tools.VideoRendition(ctx, master, info, decode, out)
 		if err != nil {
 			return err
 		}
 		r.Width, r.Height, r.Mime = size.W, size.H, "video/mp4"
 		r.Key = fmt.Sprintf("media/%s/%s.mp4", m.ID, variant)
-		if m.PosterKey != nil {
-			poster, err := blob.LocalFile(ctx, w.Blob, *m.PosterKey, tmp)
-			if err != nil {
-				return err
-			}
-			pout := filepath.Join(tmp, "p.webp")
-			if err := w.Tools.ResizeImage(ctx, poster, size, media.RenditionPhotoQ, pout); err != nil {
-				return err
-			}
-			pk := fmt.Sprintf("media/%s/%s-poster.webp", m.ID, variant)
-			if err := w.Blob.PutFile(ctx, pk, pout, blob.PutOptions{ContentType: "image/webp"}); err != nil {
-				return err
-			}
-			r.PosterKey = &pk
+		if err := w.videoPoster(ctx, m, variant, size, tmp, &r); err != nil {
+			return err
 		}
 	} else {
 		out = filepath.Join(tmp, "r.webp")
@@ -533,6 +649,28 @@ func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget
 		return err
 	}
 	return w.Store.PutRendition(ctx, r)
+}
+
+// videoPoster writes the frame-sized poster of a video rendition (motion
+// clips have none: the still of their item is the poster).
+func (w *Worker) videoPoster(ctx context.Context, m *store.Media, variant string, size media.Size, tmp string, r *store.Rendition) error {
+	if m.PosterKey == nil {
+		return nil
+	}
+	poster, err := blob.LocalFile(ctx, w.Blob, *m.PosterKey, tmp)
+	if err != nil {
+		return err
+	}
+	pout := filepath.Join(tmp, "p.webp")
+	if err := w.Tools.ResizeImage(ctx, poster, size, media.RenditionPhotoQ, pout); err != nil {
+		return err
+	}
+	pk := fmt.Sprintf("media/%s/%s-poster.webp", m.ID, variant)
+	if err := w.Blob.PutFile(ctx, pk, pout, blob.PutOptions{ContentType: "image/webp"}); err != nil {
+		return err
+	}
+	r.PosterKey = &pk
+	return nil
 }
 
 // tempDir creates a per-job scratch directory; callers remove it.
