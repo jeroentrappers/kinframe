@@ -34,7 +34,8 @@ type Server struct {
 	st      *store.Store
 	hub     *ws.Hub
 	notify  *notify.Notifier
-	blob    blob.Local
+	blob    blob.Store
+	scratch string // local scratch directory (avatar processing)
 	tools   media.Tools
 	log     *slog.Logger
 	users   auth.UserVerifier
@@ -66,7 +67,8 @@ type Deps struct {
 	Store    *store.Store
 	Hub      *ws.Hub
 	Notifier *notify.Notifier
-	Blob     blob.Local
+	Blob     blob.Store
+	Scratch  string // local scratch directory; defaults to the OS temp dir
 	Tools    media.Tools
 	Log      *slog.Logger
 	Users    auth.UserVerifier
@@ -82,6 +84,7 @@ func New(d Deps) (*Server, error) {
 		hub:         d.Hub,
 		notify:      d.Notifier,
 		blob:        d.Blob,
+		scratch:     d.Scratch,
 		tools:       d.Tools,
 		log:         d.Log,
 		users:       d.Users,

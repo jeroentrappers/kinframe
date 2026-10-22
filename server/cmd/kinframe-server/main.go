@@ -4,6 +4,7 @@
 //	kinframe-server migrate      apply database migrations and exit
 //	kinframe-server healthcheck  probe GET /healthz on the local listener (for Docker)
 //	kinframe-server bootstrap-logto  configure Logto for kinframe (idempotent, see server/README.md)
+//	kinframe-server migrate-blobs --from fs --to s3  copy stored media between blob backends
 package main
 
 import (
@@ -37,6 +38,9 @@ func run() error {
 	}
 	if len(os.Args) > 1 && os.Args[1] == "bootstrap-logto" {
 		return bootstrapLogto()
+	}
+	if len(os.Args) > 1 && os.Args[1] == "migrate-blobs" {
+		return migrateBlobs(os.Args[2:])
 	}
 	cfg, err := config.Load()
 	if err != nil {
@@ -80,7 +84,7 @@ func run() error {
 		}
 		return a.Serve(ctx, l)
 	default:
-		return fmt.Errorf("unknown command %q (want serve, migrate, healthcheck or bootstrap-logto)", cmd)
+		return fmt.Errorf("unknown command %q (want serve, migrate, healthcheck, bootstrap-logto or migrate-blobs)", cmd)
 	}
 }
 

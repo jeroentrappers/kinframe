@@ -48,6 +48,41 @@ services:
     volumes:
       - media:/data
 
+{% if kinframe_minio %}
+  # S3-compatible object store for media (Silo, the maintained MinIO fork). Reachable only on the compose
+  # network; the console is published on loopback only when kinframe_minio_console_port is set.
+  minio:
+    image: {{ kinframe_minio_image }}:{{ kinframe_minio_version }}
+    container_name: kinframe-minio
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    env_file: ./minio.env
+    volumes:
+      - miniodata:/data
+{% if (kinframe_minio_console_port | int) > 0 %}
+    ports:
+      - "127.0.0.1:{{ kinframe_minio_console_port }}:9001"
+{% endif %}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # One-shot: bucket, least-privilege policy and kinframe's user. Run by Ansible with
+  # `docker compose run --rm minio-bootstrap`.
+  minio-bootstrap:
+    image: {{ kinframe_minio_image }}:{{ kinframe_minio_version }}
+    profiles: [bootstrap]
+    entrypoint: ["/bin/sh", "/bootstrap/minio-bootstrap.sh"]
+    restart: "no"
+    depends_on:
+      minio: { condition: service_healthy }
+    env_file: ./minio.env
+    volumes:
+      - ./minio-bootstrap.sh:/bootstrap/minio-bootstrap.sh:ro
+
+{% endif %}
   server:
     image: {{ kinframe_image }}:{{ kinframe_version }}
     container_name: kinframe-server
@@ -55,6 +90,9 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       logto: { condition: service_started }
+{% if kinframe_minio %}
+      minio: { condition: service_healthy }
+{% endif %}
     env_file: ./kinframe.env
     volumes:
       - media:/data
@@ -64,3 +102,6 @@ services:
 volumes:
   pgdata:
   media:
+{% if kinframe_minio %}
+  miniodata:
+{% endif %}

@@ -75,4 +75,5 @@ GET /.well-known/kinframe
 ## Self-hosting
 
 A single `docker compose up` runs backend, Postgres, Logto and Caddy (TLS). Media storage is a volume, or optionally
-any S3-compatible bucket.
+any S3-compatible bucket (a bundled Silo/MinIO object store or managed storage); the server streams media from it
+either way, so clients never see where it lives (`server/README.md`, "Media storage").

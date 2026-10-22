@@ -27,7 +27,8 @@ type Config struct {
 	Version    string
 
 	DatabaseURL string
-	DataDir     string // media, uploads
+	DataDir     string // media (fs backend), uploads, scratch space
+	Blob        BlobConfig
 	WebDir      string // built SPA; empty disables static serving
 
 	SigningKey []byte // HMAC key for device tokens, dev tokens and signed media URLs
@@ -102,6 +103,7 @@ func load(get func(string) string) (*Config, error) {
 		return def
 	}
 	var errs []error
+	var err error
 	intv := func(k string, def int) int {
 		v := env(k, "")
 		if v == "" {
@@ -180,6 +182,9 @@ func load(get func(string) string) (*Config, error) {
 	}
 	if c.FrameReleasesInterval < time.Minute {
 		errs = append(errs, errors.New("KINFRAME_FRAME_RELEASES_POLL_MINUTES must be at least 1"))
+	}
+	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
+		errs = append(errs, err)
 	}
 	c.LogtoConfigFile = env("KINFRAME_LOGTO_CONFIG_FILE", DefaultLogtoConfigFile(c.DataDir))
 	if lf, err := ReadLogtoFile(c.LogtoConfigFile); err != nil {

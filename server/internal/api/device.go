@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/blob"
+	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
@@ -331,26 +334,22 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 
 // ---------------------------------------------------------------- media download
 
-// serveBlob serves a stored file with Range, ETag and If-None-Match support.
+// serveBlob streams a stored object with Range, ETag and If-None-Match
+// support, whatever the backend. An empty etag uses the store's own (fs:
+// modification time and size, as before; s3: the object's ETag).
 func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentType, etag, cacheControl string) {
-	path, err := s.blob.Path(key)
+	obj, info, err := s.blob.Open(r.Context(), key)
 	if err != nil {
+		if !errors.Is(err, blob.ErrNotFound) {
+			s.writeError(w, r, err)
+			return
+		}
 		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
-	f, err := os.Open(path)
-	if err != nil {
-		problem.Write(w, r, problem.New(problem.NotFound, ""))
-		return
-	}
-	defer f.Close()
-	st, err := f.Stat()
-	if err != nil || st.IsDir() {
-		problem.Write(w, r, problem.New(problem.NotFound, ""))
-		return
-	}
+	defer obj.Close()
 	if contentType == "" {
-		switch filepath.Ext(path) {
+		switch path.Ext(key) {
 		case ".webp":
 			contentType = "image/webp"
 		case ".mp4":
@@ -361,13 +360,61 @@ func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentT
 		w.Header().Set("Content-Type", contentType)
 	}
 	if etag == "" {
-		etag = fmt.Sprintf(`"%x-%x"`, st.ModTime().UnixNano(), st.Size())
+		etag = info.ETag
 	}
 	w.Header().Set("ETag", etag)
 	if cacheControl != "" {
 		w.Header().Set("Cache-Control", cacheControl)
 	}
-	http.ServeContent(w, r, "", st.ModTime(), f)
+	http.ServeContent(w, r, "", info.ModTime, obj)
+}
+
+// presignTTL is how long presigned bucket URLs stay valid
+// (KINFRAME_MEDIA_REDIRECT=presigned).
+const presignTTL = 15 * time.Minute
+
+// serveBlobOrRedirect serves URLs that browsers and apps load (signed media
+// URLs, avatars). With KINFRAME_MEDIA_REDIRECT=presigned it redirects to a
+// short-lived presigned bucket URL instead of streaming; the bucket then
+// answers Range requests itself. Frame downloads (deviceGetMedia) always
+// stream, because frames revalidate against the rendition's sha256 ETag.
+func (s *Server) serveBlobOrRedirect(w http.ResponseWriter, r *http.Request, key, contentType, etag, cacheControl string) {
+	if s.cfg.Blob.MediaRedirect != config.MediaRedirectPresigned {
+		s.serveBlob(w, r, key, contentType, etag, cacheControl)
+		return
+	}
+	if contentType == "" {
+		contentType = blob.ContentType(key)
+	}
+	u, err := s.blob.PresignGet(r.Context(), key, presignTTL, contentType)
+	if err != nil {
+		s.log.Warn("presign blob URL, streaming instead", "key", key, "err", err)
+		s.serveBlob(w, r, key, contentType, etag, cacheControl)
+		return
+	}
+	// Cacheable for a fraction of the presigned URL's lifetime.
+	w.Header().Set("Cache-Control", "private, max-age=300")
+	http.Redirect(w, r, u, http.StatusFound)
+}
+
+// deleteBlob removes an object the database no longer references; failures
+// only leave garbage behind, so they are logged.
+func (s *Server) deleteBlob(ctx context.Context, key string) {
+	if err := s.blob.Delete(context.WithoutCancel(ctx), key); err != nil {
+		s.log.Warn("delete blob", "key", key, "err", err)
+	}
+}
+
+// tempDir creates a scratch directory; the caller removes it.
+func (s *Server) tempDir() (string, error) {
+	dir := s.scratch
+	if dir == "" {
+		dir = os.TempDir()
+	}
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return "", err
+	}
+	return os.MkdirTemp(dir, "req-*")
 }
 
 func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {

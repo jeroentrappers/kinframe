@@ -22,6 +22,7 @@ import (
 	"github.com/coder/websocket"
 
 	"github.com/jeroentrappers/kinframe/server/internal/app"
+	"github.com/jeroentrappers/kinframe/server/internal/blob/blobtest"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/testdb"
@@ -30,6 +31,7 @@ import (
 func TestMain(m *testing.M) {
 	code := m.Run()
 	testdb.Stop()
+	blobtest.Stop()
 	os.Exit(code)
 }
 

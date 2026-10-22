@@ -91,7 +91,10 @@ func changesOf(ch map[string]any, typ string) []map[string]any {
 
 func TestVideoSend(t *testing.T) {
 	requireMedia(t)
-	e := newEnv(t)
+	videoSend(t, newEnv(t))
+}
+
+func videoSend(t *testing.T, e *env) {
 	u := e.user("v@x.org", "Vera")
 	d, frameID := e.claim(u)
 	clip := makeClip(t, 1280, 720, 6, "hevc")
