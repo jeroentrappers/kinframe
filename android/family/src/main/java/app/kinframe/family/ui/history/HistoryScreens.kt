@@ -73,6 +73,7 @@ import app.kinframe.family.ui.NoteTone
 import app.kinframe.family.ui.PageColumn
 import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.QuietButton
+import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.SectionTitle
 import app.kinframe.family.ui.SkeletonList
 import app.kinframe.family.ui.StagePill
@@ -250,6 +251,12 @@ fun DeliveryRow(d: FrameDelivery, compact: Boolean) {
         if (!d.online && d.stage.rank < Stage.Delivered.rank && d.stage != Stage.Failed && !compact) {
             Text(stringResource(R.string.detail_offline_waiting), style = Kin.type.caption, color = c.inkFaint)
         }
+        if (d.sharedBy.isNotEmpty() && !compact) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(KinIcons.Share, null, Modifier.size(14.dp), tint = c.inkSoft)
+                Text(stringResource(R.string.shared_by, d.sharedBy.joinToString(", ")), style = Kin.type.caption, color = c.inkSoft)
+            }
+        }
         Reactions(d.reactions, d.replies, d.frameName)
     }
 }
@@ -293,6 +300,8 @@ fun SendDetailScreen(
     onSaveCaption: () -> Unit,
     onCancelEdit: () -> Unit,
     onUnsend: () -> Unit,
+    /** "Share to another frame" for the whole send, or one item (by id); null when there is nowhere to share to. */
+    onShare: ((List<String>) -> Unit)? = null,
 ) {
     val c = Kin.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
@@ -316,6 +325,10 @@ fun SendDetailScreen(
                         }
                     }
                     state.error?.let { Note(stringResource(it), tone = NoteTone.Danger) }
+                    val shareable = send.items.filter { it.status != "failed" }.map { it.id }
+                    if (!state.unsent && onShare != null && shareable.isNotEmpty()) {
+                        SecondaryButton(stringResource(R.string.share_action), { onShare(shareable) }, icon = KinIcons.Share)
+                    }
                     if (!state.unsent) QuietButton(stringResource(R.string.detail_unsend), { confirm = true }, danger = true)
                 }
             }

@@ -93,6 +93,8 @@ fun LibraryTab(
     onAction: (String) -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
+    /** "Share to another frame" for the selection; null when there is no other frame you can send to. */
+    onShare: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     val grid = rememberLazyGridState()
@@ -133,7 +135,8 @@ fun LibraryTab(
                 } else items(p.value, key = { it.id }) { pl ->
                     val sel = pl.id in state.selected
                     val desc = stringResource(if (pl.item.kind == MediaKind.VIDEO) R.string.library_video_by else R.string.library_item_by, pl.item.senderName.orEmpty()) +
-                        (pl.item.caption?.let { ". $it" } ?: "") + ". " + stringResource(R.string.library_received, Format.relative(pl.receivedAt))
+                        (pl.item.caption?.let { ". $it" } ?: "") + ". " + stringResource(R.string.library_received, Format.relative(pl.receivedAt)) +
+                        (pl.sharedByName?.let { ". " + stringResource(R.string.shared_by, it) } ?: "")
                     Box(
                         Modifier.aspectRatio(1f).clip(RoundedCornerShape(10.dp))
                             .border(if (sel) 3.dp else 0.dp, if (sel) c.accent else Color.Transparent, RoundedCornerShape(10.dp))
@@ -142,6 +145,8 @@ fun LibraryTab(
                     ) {
                         Thumb(pl.item.thumbUrl, null, Modifier.fillMaxSize(), corner = 10.dp)
                         if (pl.item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(22.dp), tint = Color.White)
+                        if (pl.sharedByName != null) Icon(KinIcons.Share, null, Modifier.align(Alignment.BottomEnd).padding(5.dp).size(20.dp)
+                            .clip(CircleShape).background(Color.Black.copy(alpha = 0.45f)).padding(3.dp), tint = Color.White)
                         if (pl.pendingModeration) Text(stringResource(R.string.library_pending), style = Kin.type.caption, color = Color.White,
                             modifier = Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha = 0.6f)).padding(4.dp))
                         if (selecting) {
@@ -164,6 +169,9 @@ fun LibraryTab(
                 IconButton(onClear) { Icon(KinIcons.Close, stringResource(R.string.library_clear_selection), tint = c.ink) }
                 Text(pluralStringResource(R.plurals.library_selected, state.selected.size, state.selected.size), style = Kin.type.label, color = c.ink, modifier = Modifier.weight(1f))
                 TextButton(onSelectAll) { Text(stringResource(R.string.library_select_all), color = c.accent) }
+                if (onShare != null && state.tab != LibraryTab.Trash) {
+                    IconButton(onShare, enabled = !state.busy) { Icon(KinIcons.Share, stringResource(R.string.share_action), tint = c.ink) }
+                }
                 when (state.tab) {
                     LibraryTab.Visible -> {
                         IconButton({ onAction(BulkAction.HIDE) }, enabled = !state.busy) { Icon(KinIcons.EyeOff, stringResource(R.string.library_hide), tint = c.ink) }

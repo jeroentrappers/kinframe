@@ -31,6 +31,8 @@ data class FrameDelivery(
     val progress: Float,
     val reactions: List<String?>,
     val replies: List<String>,
+    /** Members who shared this send's photos to the frame (README §5.3). */
+    val sharedBy: List<String> = emptyList(),
 )
 
 object Delivery {
@@ -74,6 +76,7 @@ object Delivery {
                 progress = progress(stages),
                 reactions = f.placements.map { it.reaction },
                 replies = f.placements.flatMap { it.replies },
+                sharedBy = f.placements.filter { it.status != PlacementStatus.REMOVED }.mapNotNull { it.sharedByName }.distinct(),
             )
         }
     }

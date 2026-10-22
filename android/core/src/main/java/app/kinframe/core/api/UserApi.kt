@@ -70,6 +70,11 @@ interface KinApi {
     suspend fun placements(frameId: String, visibility: String = "visible", cursor: String? = null, limit: Int = 60): PlacementsPage
     suspend fun updatePlacement(frameId: String, placementId: String, patch: JsonObject): Placement
     suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String): BulkResult
+    /**
+     * Share placements of [frameId] to other frames without uploading again (README §5.3). With [dryRun] nothing is
+     * created and `skipped` tells which frames already have the items.
+     */
+    suspend fun sharePlacements(frameId: String, placementIds: List<String>, frameIds: List<String>, dryRun: Boolean = false, idempotencyKey: String? = null): ShareResult
 
     suspend fun settings(frameId: String): SettingsDocument
     /** Merge patch with `If-Match: "<version>"`; a stale version answers `412 version_conflict`. */
@@ -258,6 +263,14 @@ class HttpKinApi(
             put("action", JsonPrimitive(action))
         }))
     }.decode(BulkResult.serializer())
+
+    override suspend fun sharePlacements(frameId: String, placementIds: List<String>, frameIds: List<String>, dryRun: Boolean, idempotencyKey: String?): ShareResult = call {
+        url(ep("frames/$frameId/placements:share")).apply { idempotencyKey?.let { header("Idempotency-Key", it) } }.post(json(buildJsonObject {
+            put("placement_ids", kotlinx.serialization.json.JsonArray(placementIds.map { JsonPrimitive(it) }))
+            put("frame_ids", kotlinx.serialization.json.JsonArray(frameIds.map { JsonPrimitive(it) }))
+            if (dryRun) put("dry_run", JsonPrimitive(true))
+        }))
+    }.decode(ShareResult.serializer())
 
     // ------------------------------------------------------------------ settings and weather
 
