@@ -20,11 +20,12 @@ import (
 // ---------------------------------------------------------------- Send JSON
 
 type sendPlacementJSON struct {
-	PlacementID uuid.UUID `json:"placement_id"`
-	ItemID      uuid.UUID `json:"item_id"`
-	Status      string    `json:"status"`
-	Reaction    *string   `json:"reaction"`
-	Replies     []string  `json:"replies"`
+	PlacementID  uuid.UUID `json:"placement_id"`
+	ItemID       uuid.UUID `json:"item_id"`
+	Status       string    `json:"status"`
+	Reaction     *string   `json:"reaction"`
+	Replies      []string  `json:"replies"`
+	SharedByName *string   `json:"shared_by_name"`
 }
 
 type sendFrameJSON struct {
@@ -108,6 +109,7 @@ func (s *Server) renderSends(ctx context.Context, q db.DBTX, sends []store.Send)
 		}
 		sd.Frames[fi].Placements = append(sd.Frames[fi].Placements, sendPlacementJSON{
 			PlacementID: p.PlacementID, ItemID: p.ItemID, Status: status, Reaction: p.Reaction, Replies: replies,
+			SharedByName: p.SharedByName,
 		})
 	}
 	return out, nil
@@ -347,7 +349,14 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 				}
 			}
 		}
-		if err := s.placeItems(ctx, tx, sendID, itemIDs, frames, members); err != nil {
+		toPlace := make([]placeItem, len(items))
+		for i, p := range items {
+			toPlace[i] = placeItem{ItemID: itemIDs[i], SendID: &sendID}
+			if p.reuse != nil {
+				toPlace[i].MediaID = p.reuse.MediaID
+			}
+		}
+		if _, _, err := s.placeOnFrames(ctx, tx, toPlace, frames, members, nil, false); err != nil {
 			return err
 		}
 		if err := tx.TouchLastSent(ctx, frames, u.ID); err != nil {
@@ -373,29 +382,6 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 		return nil, err
 	}
 	return accepted(sd), nil
-}
-
-// placeItems creates placements of items on frames (skipping ones already there).
-func (s *Server) placeItems(ctx context.Context, tx *store.Tx, sendID uuid.UUID, itemIDs, frames []uuid.UUID, members map[uuid.UUID]*store.Membership) error {
-	for _, fid := range frames {
-		f, err := tx.LockFrame(ctx, fid)
-		if err != nil {
-			return notFound(err, "frame")
-		}
-		moderated := f.Moderation && !members[fid].IsManager()
-		for _, itemID := range itemIDs {
-			sid := sendID
-			_, err := tx.Exec(ctx, `
-				INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation)
-				SELECT $1, $2, $3, $4, 'pending', $5
-				WHERE NOT EXISTS (SELECT 1 FROM placements WHERE frame_id = $2 AND item_id = $3 AND removed_at IS NULL)`,
-				store.NewID(), fid, itemID, sid, moderated)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 // ---------------------------------------------------------------- read, unsend, forward
@@ -465,7 +451,9 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 		return nil, err
 	}
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
-		_, err := tx.RemovePlacements(ctx, `p.send_id = $1`, req.SendId)
+		// Shared placements carry the original send too; matching the send's
+		// items as well keeps every copy covered.
+		_, err := tx.RemovePlacements(ctx, `p.send_id = $1 OR p.item_id IN (SELECT item_id FROM send_items WHERE send_id = $1)`, req.SendId)
 		return err
 	})
 	if err != nil {
@@ -488,19 +476,16 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 		if err != nil {
 			return err
 		}
-		itemIDs := make([]uuid.UUID, 0, len(rows))
-		medias := map[uuid.UUID]bool{}
-		for _, r := range rows {
-			itemIDs = append(itemIDs, r.ItemID)
-			medias[r.MediaID] = true
+		items := make([]placeItem, len(rows))
+		for i, r := range rows {
+			items[i] = placeItem{ItemID: r.ItemID, MediaID: r.MediaID, SendID: &req.SendId}
 		}
-		if err := s.placeItems(ctx, tx, req.SendId, itemIDs, frames, members); err != nil {
+		created, _, err := s.placeOnFrames(ctx, tx, items, frames, members, nil, false)
+		if err != nil {
 			return err
 		}
-		for m := range medias {
-			if err := tx.Enqueue(ctx, store.JobEnsureRenditions, map[string]any{"media_id": m}); err != nil {
-				return err
-			}
+		if err := ensureRenditionsFor(ctx, tx, created); err != nil {
+			return err
 		}
 		return tx.TouchLastSent(ctx, frames, me(ctx).ID)
 	})
@@ -705,7 +690,8 @@ func (s *Server) deliveredPushes(ctx context.Context, f *store.Frame, changes []
 	out := map[uuid.UUID]*notify.Push{}
 	checked := map[uuid.UUID]bool{}
 	for _, c := range changes {
-		if !c.NewlyDelivered || c.SendID == nil || c.SenderID == nil || checked[*c.SendID] {
+		// Shared placements notify the sharer instead (sharedDeliveredPushes).
+		if !c.NewlyDelivered || c.SendID == nil || c.SenderID == nil || c.SharedByID != nil || checked[*c.SendID] {
 			continue
 		}
 		checked[*c.SendID] = true

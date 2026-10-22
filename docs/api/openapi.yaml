@@ -517,7 +517,9 @@ paths:
     post:
       tags: [sends]
       operationId: forwardSend
-      description: Place the same items on additional frames.
+      description: |
+        Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+        renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
       parameters: [ { name: sendId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
       requestBody:
         required: true
@@ -666,6 +668,48 @@ paths:
                       properties:
                         id: { $ref: '#/components/schemas/Id' }
                         code: { $ref: '#/components/schemas/ProblemCode' }
+
+  /v1/frames/{frameId}/placements:share:
+    post:
+      tags: [library]
+      operationId: sharePlacements
+      description: |
+        Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+        "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+        a frame rendition is only made when the target's screen size has none yet.
+
+        - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+          `see_library` there or be the item's sender (or the member who shared it there).
+        - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+          (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+          placements may be shared per request.
+        - A target that already holds the item is skipped and reported in `skipped`.
+        - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+          and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+        - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+          other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+        - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+          already have the selection.
+        - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { $ref: '#/components/parameters/IdempotencyKey' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [placement_ids, frame_ids]
+              properties:
+                placement_ids: { type: array, minItems: 1, maxItems: 1000, items: { $ref: '#/components/schemas/Id' } }
+                frame_ids: { type: array, minItems: 1, maxItems: 100, items: { $ref: '#/components/schemas/Id' } }
+                dry_run: { type: boolean, default: false }
+      responses:
+        '200': { description: Created placements and skipped targets, content: { application/json: { schema: { $ref: '#/components/schemas/ShareResult' } } } }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
 
   # ---------------------------------------------------------------- albums
   /v1/frames/{frameId}/albums:
@@ -1574,6 +1618,32 @@ components:
         seen_at: { type: [string, 'null'], format: date-time }
         received_at: { type: string, format: date-time }
         album_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        shared_by_user_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+        shared_by_name:
+          type: [string, 'null']
+          description: Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+
+    ShareResult:
+      type: object
+      required: [placements, skipped]
+      properties:
+        placements:
+          type: array
+          description: The placements created on the target frames (empty for a dry run).
+          items: { $ref: '#/components/schemas/Placement' }
+        skipped:
+          type: array
+          description: Source placement × target frame pairs that were not shared.
+          items:
+            type: object
+            required: [placement_id, frame_id, reason]
+            properties:
+              placement_id: { $ref: '#/components/schemas/Id' }
+              frame_id: { $ref: '#/components/schemas/Id' }
+              reason: { type: string, enum: [already_on_frame] }
+              existing_placement_id: { $ref: '#/components/schemas/Id' }
 
     Send:
       type: object
@@ -1603,6 +1673,7 @@ components:
                     status: { $ref: '#/components/schemas/PlacementStatus' }
                     reaction: { oneOf: [ { $ref: '#/components/schemas/Reaction' }, { type: 'null' } ] }
                     replies: { type: array, items: { $ref: '#/components/schemas/ReplyPreset' } }
+                    shared_by_name: { type: [string, 'null'], description: Set when another member shared this item to the frame. }
         summary:
           type: object
           properties:

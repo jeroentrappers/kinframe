@@ -58,6 +58,7 @@ func (r Response) VisitRemoveMemberResponse(w http.ResponseWriter) error        
 func (r Response) VisitReplaceDeviceResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitRevokeInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitUnsendResponse(w http.ResponseWriter) error                 { return r.write(w) }
 func (r Response) VisitUpdateAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }

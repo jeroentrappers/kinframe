@@ -64,9 +64,11 @@ func (s *Server) ListPlacements(ctx context.Context, req gen.ListPlacementsReque
 	}), nil
 }
 
-// canEditPlacement: the item's sender, or manage_library.
+// canEditPlacement: the item's sender, the member who shared this placement
+// to the frame (so they can take it back), or manage_library.
 func canEditPlacement(m *store.Membership, row *store.PlacementRow) bool {
-	return m.Effective().ManageLibrary || (row.SenderUserID != nil && *row.SenderUserID == m.UserID)
+	return m.Effective().ManageLibrary || (row.SenderUserID != nil && *row.SenderUserID == m.UserID) ||
+		(row.SharedByUserID != nil && *row.SharedByUserID == m.UserID)
 }
 
 func (s *Server) editablePlacement(ctx context.Context, frameID, placementID uuid.UUID) (*store.Membership, *store.PlacementRow, error) {

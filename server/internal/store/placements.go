@@ -31,11 +31,14 @@ type Placement struct {
 	SeenAt            *time.Time `db:"seen_at"`
 	ReceivedAt        time.Time  `db:"received_at"`
 	RemovedAt         *time.Time `db:"removed_at"`
+	// SharedByUserID is the member who shared this placement from another
+	// frame's library; nil when the item's sender placed it.
+	SharedByUserID *uuid.UUID `db:"shared_by_user_id"`
 }
 
 const placementCols = `p.id, p.frame_id, p.item_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
 	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
-	p.received_at, p.removed_at`
+	p.received_at, p.removed_at, p.shared_by_user_id`
 
 type Reply struct {
 	Preset string    `json:"preset"`
@@ -46,16 +49,18 @@ type Reply struct {
 type PlacementRow struct {
 	Placement
 	ItemRow
-	Replies  []Reply     `db:"replies"`
-	AlbumIDs []uuid.UUID `db:"album_ids"`
+	Replies      []Reply     `db:"replies"`
+	AlbumIDs     []uuid.UUID `db:"album_ids"`
+	SharedByName *string     `db:"shared_by_name"`
 }
 
 // placementRowCols omits p.item_id: ItemRow supplies the item_id column for both structs.
 const placementRowCols = `p.id, p.frame_id, p.send_id, p.status, p.hidden, p.trashed_at, p.pending_moderation,
 	p.fit_override, p.focal_override_x, p.focal_override_y, p.rotation, p.reaction, p.delivered_at, p.seen_at,
-	p.received_at, p.removed_at`
+	p.received_at, p.removed_at, p.shared_by_user_id`
 
 const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `,
+	(SELECT sb.display_name FROM users sb WHERE sb.id = p.shared_by_user_id) AS shared_by_name,
 	COALESCE((SELECT json_agg(json_build_object('preset', r.preset, 'at', r.at) ORDER BY r.at)
 		FROM placement_replies r WHERE r.placement_id = p.id), '[]'::json) AS replies,
 	COALESCE((SELECT array_agg(ap.album_id ORDER BY ap.album_id) FROM album_placements ap WHERE ap.placement_id = p.id), '{}') AS album_ids
@@ -63,8 +68,8 @@ const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `
 
 func (tx *Tx) CreatePlacement(ctx context.Context, p Placement) error {
 	_, err := tx.Exec(ctx, `
-		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation) VALUES ($1, $2, $3, $4, $5, $6)`,
-		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration)
+		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation, shared_by_user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration, p.SharedByUserID)
 	return err
 }
 
@@ -152,6 +157,8 @@ type StatusChange struct {
 	FrameID     uuid.UUID  `db:"frame_id"`
 	SendID      *uuid.UUID `db:"send_id"`
 	SenderID    *uuid.UUID `db:"sender_user_id"`
+	// SharedByID is set for placements shared from another frame's library.
+	SharedByID *uuid.UUID `db:"shared_by_user_id"`
 	// NewlyDelivered is set when this change delivered the placement (it was pending or ready).
 	NewlyDelivered bool `db:"newly_delivered"`
 }
@@ -161,7 +168,7 @@ func (tx *Tx) MarkDelivered(ctx context.Context, frameID uuid.UUID, ids []uuid.U
 	return many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'delivered', delivered_at = now() FROM items i
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = ANY($2) AND p.status IN ('pending', 'ready') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, true AS newly_delivered`, frameID, ids))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, true AS newly_delivered`, frameID, ids))
 }
 
 // MarkSeen moves placements to seen (delivered implied) at the given time.
@@ -170,7 +177,7 @@ func (tx *Tx) MarkSeen(ctx context.Context, frameID, id uuid.UUID, at time.Time)
 		UPDATE placements p SET status = 'seen', seen_at = $3, delivered_at = COALESCE(p.delivered_at, $3)
 		FROM items i, (SELECT status AS old_status FROM placements WHERE id = $2) o
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = $2 AND p.status IN ('pending', 'ready', 'delivered') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, o.old_status IN ('pending', 'ready') AS newly_delivered`, frameID, id, at))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, o.old_status IN ('pending', 'ready') AS newly_delivered`, frameID, id, at))
 }
 
 // MarkReady moves pending placements of a media on a frame to ready.
@@ -178,7 +185,7 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 	changed, err := many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'ready' FROM items i
 		WHERE i.id = p.item_id AND i.media_id = $1 AND p.frame_id = $2 AND p.status = 'pending' AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, false AS newly_delivered`, mediaID, frameID))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, false AS newly_delivered`, mediaID, frameID))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +197,16 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 func (s *Store) SendDeliveredOn(ctx context.Context, sendID, frameID uuid.UUID) (bool, error) {
 	var done bool
 	err := s.Pool.QueryRow(ctx, `SELECT NOT EXISTS (SELECT 1 FROM placements WHERE send_id = $1 AND frame_id = $2
-		AND removed_at IS NULL AND status IN ('pending', 'ready'))`, sendID, frameID).Scan(&done)
+		AND removed_at IS NULL AND shared_by_user_id IS NULL AND status IN ('pending', 'ready'))`, sendID, frameID).Scan(&done)
+	return done, err
+}
+
+// SharedDeliveredOn reports whether every live placement a member shared to a
+// frame has reached it (the sharer's "delivered" notification).
+func (s *Store) SharedDeliveredOn(ctx context.Context, sharerID, frameID uuid.UUID) (bool, error) {
+	var done bool
+	err := s.Pool.QueryRow(ctx, `SELECT NOT EXISTS (SELECT 1 FROM placements WHERE shared_by_user_id = $1 AND frame_id = $2
+		AND removed_at IS NULL AND status IN ('pending', 'ready'))`, sharerID, frameID).Scan(&done)
 	return done, err
 }
 
@@ -232,7 +248,7 @@ func (s *Store) PurgeExpiredTrash(ctx context.Context, days int) (int, error) {
 
 type PlacementFilter struct {
 	FrameID    uuid.UUID
-	OnlySender *uuid.UUID // restrict to the caller's own placements
+	OnlySender *uuid.UUID // restrict to the caller's own placements (sent or shared by them)
 	Visibility string     // visible, hidden, trashed, pending_moderation, all
 	SenderID   *uuid.UUID
 	Kind       *string
@@ -292,7 +308,8 @@ func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]Placem
 		where += ` AND p.pending_moderation AND p.trashed_at IS NULL`
 	}
 	if f.OnlySender != nil {
-		where += ` AND i.sender_user_id = ` + arg(*f.OnlySender)
+		a := arg(*f.OnlySender)
+		where += ` AND (i.sender_user_id = ` + a + ` OR p.shared_by_user_id = ` + a + `)`
 	}
 	if f.SenderID != nil {
 		where += ` AND (i.sender_user_id = ` + arg(*f.SenderID) + ` OR i.sender_frame_id = $` + fmt.Sprint(len(args)) + `)`
@@ -353,7 +370,7 @@ func (s *Store) CountPlacements(ctx context.Context, frameID uuid.UUID, onlySend
 			count(*) FILTER (WHERE p.hidden AND p.trashed_at IS NULL)::int AS hidden,
 			count(*) FILTER (WHERE p.trashed_at IS NOT NULL)::int AS trashed
 		FROM placements p JOIN items i ON i.id = p.item_id JOIN media m ON m.id = i.media_id
-		WHERE p.frame_id = $1 AND p.removed_at IS NULL AND ($2::uuid IS NULL OR i.sender_user_id = $2)`, frameID, onlySender))
+		WHERE p.frame_id = $1 AND p.removed_at IS NULL AND ($2::uuid IS NULL OR i.sender_user_id = $2 OR p.shared_by_user_id = $2)`, frameID, onlySender))
 }
 
 // ---------------------------------------------------------------- sends
@@ -415,15 +432,17 @@ type SendPlacementRow struct {
 	Removed     bool       `db:"removed"`
 	Reaction    *string    `db:"reaction"`
 	Replies     []string   `db:"replies"`
-	DeviceID    *uuid.UUID `db:"device_id"`
-	MediaStatus string     `db:"media_status"`
+	DeviceID     *uuid.UUID `db:"device_id"`
+	MediaStatus  string     `db:"media_status"`
+	SharedByName *string    `db:"shared_by_name"`
 }
 
 func (s *Store) SendPlacementRows(ctx context.Context, q db.DBTX, sendIDs []uuid.UUID) ([]SendPlacementRow, error) {
 	return many[SendPlacementRow](q.Query(ctx, `
 		SELECT p.id, p.send_id, p.item_id, p.frame_id, f.name AS frame_name, p.status, p.removed_at IS NOT NULL AS removed,
 			p.reaction, COALESCE((SELECT array_agg(r.preset ORDER BY r.at) FROM placement_replies r WHERE r.placement_id = p.id), '{}') AS replies,
-			f.device_id, m.status AS media_status
+			f.device_id, m.status AS media_status,
+			(SELECT sb.display_name FROM users sb WHERE sb.id = p.shared_by_user_id) AS shared_by_name
 		FROM placements p JOIN frames f ON f.id = p.frame_id JOIN items i ON i.id = p.item_id JOIN media m ON m.id = i.media_id
 		WHERE p.send_id = ANY($1) ORDER BY f.name, p.frame_id, p.received_at, p.id`, sendIDs))
 }

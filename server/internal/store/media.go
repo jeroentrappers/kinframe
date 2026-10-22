@@ -317,12 +317,14 @@ func (s *Store) SetItemThumbs(ctx context.Context, id uuid.UUID, k256, k512 stri
 	return err
 }
 
-// UserCanSeeItem: the sender, or a member of a frame with a live placement of
-// the item who may see the library (or is a manager).
+// UserCanSeeItem: the sender, a member who shared a live placement of it, or a
+// member of a frame with a live placement of the item who may see the library
+// (or is a manager).
 func (s *Store) UserCanSeeItem(ctx context.Context, userID, itemID uuid.UUID) (bool, error) {
 	var ok bool
 	err := s.Pool.QueryRow(ctx, `
 		SELECT EXISTS (SELECT 1 FROM items WHERE id = $2 AND sender_user_id = $1)
+		OR EXISTS (SELECT 1 FROM placements WHERE item_id = $2 AND shared_by_user_id = $1 AND removed_at IS NULL)
 		OR EXISTS (
 			SELECT 1 FROM placements p JOIN memberships m ON m.frame_id = p.frame_id AND m.user_id = $1
 			JOIN frames f ON f.id = p.frame_id AND f.deleted_at IS NULL

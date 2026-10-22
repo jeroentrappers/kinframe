@@ -157,7 +157,7 @@ func (s *Server) LeaveFrame(ctx context.Context, req gen.LeaveFrameRequestObject
 
 func (s *Server) removeMember(ctx context.Context, tx *store.Tx, frameID, userID uuid.UUID, removeItems bool) error {
 	if removeItems {
-		if _, err := tx.RemovePlacements(ctx, `p.frame_id = $1 AND p.item_id IN (SELECT id FROM items WHERE sender_user_id = $2)`, frameID, userID); err != nil {
+		if _, err := tx.RemovePlacements(ctx, `p.frame_id = $1 AND (p.item_id IN (SELECT id FROM items WHERE sender_user_id = $2) OR p.shared_by_user_id = $2)`, frameID, userID); err != nil {
 			return err
 		}
 	}
