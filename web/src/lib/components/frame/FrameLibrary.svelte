@@ -13,6 +13,8 @@
 	import EmptyState from '../EmptyState.svelte';
 	import Icon, { type IconName } from '../Icon.svelte';
 	import Thumb from '../Thumb.svelte';
+	import TvDialog from '../TvDialog.svelte';
+	import type { TvScope } from '$lib/tv';
 	import AlbumNameDialog from './AlbumNameDialog.svelte';
 	import AlbumPickerDialog from './AlbumPickerDialog.svelte';
 	import AlbumScheduleDialog from './AlbumScheduleDialog.svelte';
@@ -420,6 +422,18 @@
 		requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-index="${to}"] .grip`)?.focus());
 	}
 
+	// ---------------------------------------------------------------- show on TV
+	let tvOpen = $state(false);
+	let tvScope = $state<TvScope>({ kind: 'all' });
+	let tvSingleVideo = $state(false);
+
+	function showOnTv(scope: TvScope, singleVideo = false) {
+		tvScope = scope;
+		tvSingleVideo = singleVideo;
+		viewerOpen = false;
+		tvOpen = true;
+	}
+
 	const playing = (a: Album) => playingId === a.id;
 	const scheduledNow = (a: Album) => scheduleCovers(a.schedule);
 	const coverItem = $derived(album?.cover_placement_id ? items.find((p) => p.id === album.cover_placement_id) : items[0]);
@@ -493,6 +507,11 @@
 						{playing(album) ? t('albums.stopPlaying') : t('albums.play')}
 					</button>
 				{/if}
+				{#if seeAll && items.length > 0}
+					<button class="btn btn-sm" onclick={() => album && showOnTv({ kind: 'album', albumId: album.id, name: album.name })}>
+						<Icon name="tv" size={16} />{t('tv.show')}
+					</button>
+				{/if}
 				{#if manage}
 					<span class="icon-tools">
 					<button class="btn btn-ghost btn-icon btn-sm" onclick={startArranging} disabled={items.length < 2} aria-label={t('albums.arrange')} title={t('albums.arrange')}><Icon name="grip" size={18} /></button>
@@ -525,6 +544,9 @@
 			<p class="muted small num">
 				{tn('history.photos', counts.photos ?? 0)}{#if counts.videos}, {tn('history.videos', counts.videos)}{/if}
 			</p>
+		{/if}
+		{#if view === 'visible' && seeAll && items.length > 0}
+			<button class="btn btn-sm tv-btn" onclick={() => showOnTv({ kind: 'all' })}><Icon name="tv" size={16} />{t('tv.show')}</button>
 		{/if}
 	</div>
 {/if}
@@ -617,6 +639,20 @@
 		<span class="sel num">{tn('library.selected', selected.size)}</span>
 		<span class="spacer"></span>
 		<button class="btn btn-ghost btn-sm select-all" onclick={() => (selected = new Set(items.map((p) => p.id)))}>{t('library.selectAll')}</button>
+		{#if view === 'visible'}
+			<button
+				class="btn btn-sm"
+				onclick={() => {
+					const ids = items.filter((p) => selected.has(p.id)).map((p) => p.id);
+					const one = ids.length === 1 ? items.find((p) => p.id === ids[0]) : undefined;
+					showOnTv({ kind: 'selection', ids }, one?.item.kind === 'video');
+				}}
+				aria-label={t('tv.show')}
+				title={t('tv.show')}
+			>
+				<Icon name="tv" size={16} /><span class="label-long">{t('tv.show')}</span>
+			</button>
+		{/if}
 		{#if album}
 			{#if manage && selected.size === 1}
 				<button class="btn btn-sm" onclick={() => { const p = items.find((x) => selected.has(x.id)); if (p) void setCover(p); }}>
@@ -654,6 +690,11 @@
 		</div>
 	{/if}
 	{#snippet footer()}
+		{#if viewing && view === 'visible' && !viewing.pending_moderation}
+			<button class="btn" onclick={() => viewing && showOnTv({ kind: 'selection', ids: [viewing.id] }, viewing.item.kind === 'video')}>
+				<Icon name="tv" size={16} />{t('tv.show')}
+			</button>
+		{/if}
 		{#if viewing}
 			{#if viewingInAlbum && manage}
 				{#if album?.cover_placement_id !== viewing.id}
@@ -690,6 +731,7 @@
 <AlbumNameDialog bind:open={renameOpen} title={t('albums.renameTitle')} submitLabel={t('common.save')} initial={album?.name ?? ''} onsave={rename} />
 <AlbumScheduleDialog bind:open={scheduleOpen} albumName={album?.name ?? ''} schedule={album?.schedule} onsave={saveSchedule} />
 <AlbumPickerDialog bind:open={pickerOpen} {albums} count={pickerIds.length} onpick={addToAlbum} />
+<TvDialog bind:open={tvOpen} frameId={frame.id} frameName={frame.name} scope={tvScope} singleVideo={tvSingleVideo} />
 
 <Dialog bind:open={deleteOpen} title={t('albums.deleteConfirm', { name: album?.name ?? '' })}>
 	<p class="muted">{album && playing(album) ? t('albums.deleteBodyPlaying') : t('albums.deleteBody')}</p>

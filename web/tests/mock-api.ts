@@ -52,6 +52,8 @@ export interface MockState {
 	pushEndpoints: S['PushEndpoint'][];
 	/** Codes of fresh, unclaimed frames for "Move to a new frame". */
 	replaceCodes: string[];
+	/** TV links per frame (README §5.8); `expired` tokens answer 410. */
+	tvLinks: Record<string, (S['TvLink'] & { placement_ids?: string[]; revoked?: boolean })[]>;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -82,6 +84,7 @@ export function emptyState(): MockState {
 		albums: {},
 		pushEndpoints: [],
 		replaceCodes: [],
+		tvLinks: {},
 		calls: [],
 		ws: null
 	};
@@ -165,6 +168,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 	await page.route(/\/v1\//, async (route) => {
 		const req = route.request();
 		const url = new URL(req.url());
+		// Third-party scripts with /v1/ in their path (the Cast SDK) are someone else's.
+		if (!url.host.startsWith('localhost')) return route.fallback();
 		const path = url.pathname;
 		const method = req.method();
 		let body: unknown;
@@ -175,10 +180,55 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		}
 		state.calls.push({ method, path, body, headers: req.headers() });
 
+		let m: RegExpMatchArray | null;
+
+		// ---- public: TV slideshow and signed media (no Authorization header, like a TV or Chromecast)
+		if ((m = path.match(/^\/v1\/media\/signed\/(.+)$/))) {
+			const seed = [...m[1]!].reduce((a, c) => a + c.charCodeAt(0), 0);
+			return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: photoSvg(seed), headers: { 'Access-Control-Allow-Origin': '*' } });
+		}
+		if ((m = path.match(/^\/v1\/tv\/([^/]+)$/)) && method === 'GET') {
+			const token = decodeURIComponent(m[1]!);
+			for (const [frameId, links] of Object.entries(state.tvLinks)) {
+				const l = links.find((x) => x.token === token);
+				if (!l) continue;
+				if (l.revoked) break;
+				if (Date.parse(l.expires_at) < Date.now()) return problem(route, 410, 'link_expired', 'This link has expired');
+				const frame = state.frames.find((f) => f.id === frameId)!;
+				let pls = (state.placements[frameId] ?? []).filter((p) => !p.hidden && !p.trashed);
+				if (l.placement_ids?.length) pls = l.placement_ids.map((id) => pls.find((p) => p.id === id)).filter((p): p is S['Placement'] => !!p);
+				else if (l.album_id) pls = pls.filter((p) => p.album_ids?.includes(l.album_id!));
+				const origin = 'http://localhost:4173';
+				const slides: S['TvSlide'][] = pls.map((p) => ({
+					placement_id: p.id,
+					kind: p.item.kind,
+					url: `${origin}/v1/media/signed/${p.item.id}/master?exp=1&sig=x`,
+					mime: p.item.kind === 'video' ? 'video/mp4' : 'image/svg+xml',
+					thumb_url: `${origin}/v1/media/signed/${p.item.id}/thumb?exp=1&sig=x`,
+					poster_url: p.item.kind === 'video' ? `${origin}/v1/media/signed/${p.item.id}/poster?exp=1&sig=x` : null,
+					caption: p.item.caption ?? null,
+					sender_name: p.item.sender_name ?? '',
+					captured_at: p.item.captured_at ?? null,
+					received_at: p.received_at ?? p.item.created_at,
+					width: 640,
+					height: 480,
+					duration_ms: p.item.duration_ms ?? null
+				}));
+				return json(route, 200, {
+					frame_id: frameId,
+					frame_name: frame.name,
+					album_name: null,
+					interval_seconds: l.interval_seconds,
+					expires_at: l.expires_at,
+					refresh_after: new Date(Date.now() + 45 * 60_000).toISOString(),
+					slides
+				} satisfies S['TvSlideshow']);
+			}
+			return problem(route, 404, 'not_found', 'This TV link is not valid');
+		}
+
 		if (!req.headers()['authorization']?.startsWith('Bearer ') && !path.startsWith('/v1/uploads/'))
 			return problem(route, 401, 'unauthorized', 'Unauthorized');
-
-		let m: RegExpMatchArray | null;
 
 		// ---- me
 		if (path === '/v1/me' && method === 'GET') return state.me ? json(route, 200, state.me) : problem(route, 401, 'unauthorized', 'x');
@@ -347,6 +397,41 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/invites\/([^/]+)$/))) {
 			state.invites[m[1]!] = (state.invites[m[1]!] ?? []).filter((i) => i.id !== m![2]);
+			return route.fulfill({ status: 204 });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/tv-links$/))) {
+			const list = (state.tvLinks[m[1]!] ??= []);
+			if (method === 'POST') {
+				const b = (body ?? {}) as S['TvLinkCreate'];
+				const token = 'tv_' + Math.random().toString(36).slice(2).padEnd(28, 'x');
+				const l = {
+					id: uid('7'),
+					frame_id: m[1]!,
+					token,
+					url: `http://localhost:4173/tv/${m[1]!}?t=${token}`,
+					purpose: b.purpose ?? 'tv',
+					album_id: b.album_id ?? null,
+					placement_count: b.placement_ids?.length ? b.placement_ids.length : null,
+					placement_ids: b.placement_ids,
+					kind: b.kind ?? null,
+					interval_seconds: b.interval_seconds ?? 10,
+					created_by_name: state.me?.display_name ?? 'Me',
+					expires_at: new Date(Date.now() + (b.expires_in_hours ?? 12) * 3600_000).toISOString(),
+					created_at: new Date().toISOString()
+				};
+				list.unshift(l);
+				const { placement_ids: _ids, ...out } = l;
+				return json(route, 201, out);
+			}
+			return json(
+				route,
+				200,
+				list.filter((l) => !l.revoked && Date.parse(l.expires_at) > Date.now()).map(({ placement_ids: _ids, revoked: _r, ...l }) => l)
+			);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/tv-links\/([^/]+)$/)) && method === 'DELETE') {
+			const l = (state.tvLinks[m[1]!] ?? []).find((x) => x.id === m![2]);
+			if (l) l.revoked = true;
 			return route.fulfill({ status: 204 });
 		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/settings$/))) {
