@@ -212,7 +212,7 @@ func (a *App) Maintain(ctx context.Context) {
 		log.Error("expired uploads", "err", err)
 	} else {
 		for _, id := range ids {
-			a.API.RemoveUpload(filepath.Join(a.Cfg.DataDir, "uploads", id))
+			a.API.RemoveExpiredUpload(filepath.Join(a.Cfg.DataDir, "uploads", id))
 			if err := a.Store.DeleteUpload(ctx, id); err != nil {
 				log.Error("delete upload", "err", err)
 			}

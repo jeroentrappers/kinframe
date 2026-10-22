@@ -212,9 +212,21 @@ type mediaJSON struct {
 	PosterURL *string `json:"poster_url"`
 }
 
+type motionJSON struct {
+	URL        string `json:"url"`
+	SHA256     string `json:"sha256"`
+	Bytes      int64  `json:"bytes"`
+	Mime       string `json:"mime"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	DurationMS int    `json:"duration_ms"`
+	HasAudio   bool   `json:"has_audio"`
+}
+
 type placementChange struct {
 	gen.Placement
-	Media *mediaJSON `json:"media,omitempty"`
+	Media  *mediaJSON  `json:"media,omitempty"`
+	Motion *motionJSON `json:"motion,omitempty"`
 }
 
 func deviceTarget(d *store.Device) store.MediaTarget {
@@ -243,6 +255,9 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 		var mediaIDs []uuid.UUID
 		for _, p := range placements {
 			mediaIDs = append(mediaIDs, p.MediaID)
+			if p.MotionMediaID != nil {
+				mediaIDs = append(mediaIDs, *p.MotionMediaID)
+			}
 		}
 		if renditions, err = s.st.RenditionsFor(ctx, mediaIDs); err != nil {
 			return nil, err
@@ -294,6 +309,22 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 					m.PosterURL = ptr(m.URL + "?variant=poster")
 				}
 				pc.Media = m
+			}
+			if p.IsLive() && pc.Media != nil {
+				mv := worker.Variant(string(media.Video), target)
+				for _, r := range renditions[*p.MotionMediaID] {
+					if r.Variant != mv {
+						continue
+					}
+					pc.Motion = &motionJSON{
+						URL:    fmt.Sprintf("%s/v1/device/media/%s?variant=motion", s.cfg.PublicURL, p.Placement.ID),
+						SHA256: r.SHA256, Bytes: r.Bytes, Mime: r.Mime, Width: r.Width, Height: r.Height,
+					}
+					if p.MotionDurationMS != nil {
+						pc.Motion.DurationMS = *p.MotionDurationMS
+					}
+					pc.Motion.HasAudio = p.MotionHasAudio != nil && *p.MotionHasAudio
+				}
 			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "placement.upsert", "placement": pc})
 		case store.FeedAlbum:
@@ -439,11 +470,19 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 		s.serveBlob(w, r, *p.SenderAvatarKey, "image/webp", "", "private, max-age=86400")
 		return
 	}
-	if variant != "" && variant != "display" && variant != "poster" {
+	if variant != "" && variant != "display" && variant != "poster" && variant != "motion" {
 		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
-	rend, err := s.st.GetRendition(ctx, p.MediaID, worker.Variant(p.Kind, deviceTarget(d)))
+	mediaID, kind := p.MediaID, p.Kind
+	if variant == "motion" {
+		if !p.IsLive() {
+			problem.Write(w, r, problem.New(problem.NotFound, "not a live photo"))
+			return
+		}
+		mediaID, kind = *p.MotionMediaID, string(media.Video)
+	}
+	rend, err := s.st.GetRendition(ctx, mediaID, worker.Variant(kind, deviceTarget(d)))
 	if err == store.ErrNotFound {
 		problem.Write(w, r, problem.New(problem.NotFound, "rendition not ready"))
 		return
