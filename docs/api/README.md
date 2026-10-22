@@ -272,6 +272,43 @@ GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirro
   reinstalls the previous APK (`pm install -r -d`, root only), skips that version code from then on and reports
   `update_state: rolled_back` in the heartbeat.
 
+### 5.8 Showing a frame on a TV
+
+Product spec 4.11 (Google Cast / DLNA). The library is shown on a TV through a **TV link**: a short-lived,
+revocable share token.
+
+- `POST /v1/frames/{id}/tv-links {album_id?, placement_ids?, kind?, interval_seconds, expires_in_hours, purpose}`
+  returns `{token, url, expires_at, …}`. `url` is the web app's full-screen TV page, `/tv/<frameId>?t=<token>`.
+  - Needs `see_library`, unless every `placement_ids` entry is the caller's own (e.g. "Show on TV" from History).
+  - Default expiry is 12 h (max 7 days). `GET` lists active links (owner/admin see all) and `DELETE …/{linkId}`
+    revokes one.
+- `GET /v1/tv/{token}` needs no sign-in. It returns `TvSlideshow`: the frame name, interval and up to 500 slides.
+  - Slides are the visible placements, newest first, or the selection in its own order.
+  - Each slide carries an **absolute signed URL of the master rendition** (WebP photo or H.264/AAC MP4). A TV
+    browser or Chromecast can fetch it without headers, with Range and CORS `*`.
+  - URLs live 1–2 h. Clients refetch after `refresh_after` (45 min).
+  - The creator's membership and `see_library` are re-checked on every fetch, so leaving the frame or losing the
+    permission narrows or kills the link.
+  - Revoked or unknown tokens return `404 not_found`; expired ones return `410 link_expired`.
+- **Web senders**:
+  - Chromium browsers use the Google Cast Web Sender SDK with the **Default Media Receiver**, so no receiver app
+    registration is needed. The sender drives the slideshow: it loads one slide URL per interval and offers
+    play/pause, next/previous, interval and stop.
+  - Browsers with the Presentation API present the TV page itself.
+  - The fallback is the TV page link (with QR) for a smart-TV browser.
+  - Single videos can also use the Remote Playback API.
+
+### 5.9 Import and backup from SD/USB on the frame
+
+- `POST /v1/device/imports/check {sha256: […]}` returns the hashes the frame already has: a live placement whose
+  source, master or frame rendition hash matches. The frame skips those before uploading.
+- `POST /v1/device/imports` (body = the file, `X-Filename`, optional `X-Captured-At` and `?caption=`) hashes the body.
+  - A duplicate returns `200` with the existing placement.
+  - A new file returns `202` and joins the library with the frame as sender.
+- Restoring a kinframe export from a stick (written by the frame: original-quality files named
+  `YYYY-MM-DD_sender_caption.ext` plus a `kinframe-export.json` manifest) uses the same endpoints, with captions
+  from the manifest. Files that came from this frame's own renditions are recognised and skipped.
+
 ## 6. Websockets
 
 Both use JSON text frames `{ "type": "...", ... }` and server ping/pong every 25 s. Clients reconnect with
