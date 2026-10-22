@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Ange ägarens pinkod</string>
+    <string name="pin_reason_settings">för att öppna inställningarna</string>
+    <string name="pin_reason_exit">för att lämna kinframe</string>
+    <string name="pin_reason_wifi">för att ändra wifi</string>
+    <string name="pin_reason_power_off">för att stänga av fotoramen</string>
+    <string name="pin_reason_restart">för att starta om fotoramen</string>
+    <string name="pin_reason_server">för att byta server</string>
+    <string name="pin_reason_reset">för att återställa fotoramen</string>
+    <string name="pin_checking">Kontrollerar…</string>
+    <string name="pin_wrong">Det är inte pinkoden.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Det är inte pinkoden. %d försök till före en kort paus.</item>
+        <item quantity="other">Det är inte pinkoden. %d försök till före en kort paus.</item>
+    </plurals>
+    <string name="pin_locked">För många felaktiga försök. Försök igen om %s.</string>
+    <string name="pin_forgot">Glömt pinkoden? Fotoramens ägare kan ta bort den i kinframe-appen, under den här fotoramens inställningar.</string>
+    <string name="pin_new_title">Välj en pinkod</string>
+    <string name="pin_new_body">4 till 6 siffror. Den efterfrågas för att öppna inställningarna, stänga av fotoramen eller ändra wifi.</string>
+    <string name="pin_confirm_title">Ange pinkoden igen</string>
+    <string name="pin_confirm_body">Bara för säkerhets skull.</string>
+    <string name="pin_mismatch">Pinkoderna matchade inte. Välj en igen.</string>
+    <string name="pin_key_delete">Radera</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Ägarens pinkod</string>
+    <string name="settings_pin_off">Av. Alla vid fotoramen kan öppna inställningarna.</string>
+    <string name="settings_pin_on">På. Inställningar, ström och wifi kräver pinkoden.</string>
+    <string name="settings_pin_set">Välj en pinkod</string>
+    <string name="settings_pin_change">Ändra pinkod</string>
+    <string name="settings_pin_remove">Ta bort pinkod</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Någon</string>
+    <string name="join_title">%1$s vill gå med</string>
+    <string name="join_body_code">%1$s angav koden till %2$s. Om du tillåter det kan %1$s skicka foton till den här fotoramen.</string>
+    <string name="join_body_invited">%1$s bjöd in %3$s till %2$s. Om du tillåter det kan %3$s skicka foton till den här fotoramen.</string>
+    <string name="join_invited_by">Inbjuden av %s</string>
+    <string name="join_allow">Tillåt</string>
+    <string name="join_deny">Tillåt inte</string>
+    <string name="join_later">Inte nu</string>
+    <string name="join_later_hint">Den finns kvar under aviseringar i menyn.</string>
+    <string name="join_pill_one">%s vill gå med</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d person vill gå med</item>
+        <item quantity="other">%d personer vill gå med</item>
+    </plurals>
+    <string name="notifications_title">Aviseringar</string>
+    <string name="notifications_empty">Allt är klart</string>
+    <string name="notifications_empty_body">Inget väntar på dig.</string>
+    <string name="menu_notifications">Aviseringar</string>
+    <string name="action_close">Stäng</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Ingen internetanslutning</string>
+    <string name="status_card_offline_body">Fotona på fotoramen fortsätter att visas. Nya kommer så fort den är online igen.</string>
+    <string name="status_card_server_title">Når inte fotoservern</string>
+    <string name="status_card_server_body">Wifi fungerar, men servern svarar inte. Nya foton kommer när den är tillbaka.</string>
+    <string name="status_card_portal_title">Det här wifi-nätverket kräver inloggning</string>
+    <string name="status_card_portal_body">Öppna nätverkets inloggningssida för att få fotoramen online.</string>
+    <string name="status_card_portal_action">Logga in</string>
+    <string name="status_card_storage_title">Fotoramen är nästan full</string>
+    <string name="status_card_storage_body">Äldre foton har tagits bort från fotoramen för att frigöra plats; de finns kvar säkert på servern. Nya foton kan få vänta tills det finns plats.</string>
+    <string name="portal_title">Logga in på wifi</string>
+    <string name="portal_body">Det här stängs av sig självt när fotoramen är online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Vilken tidszon står fotoramen i?</string>
+    <string name="setup_tz_body">Så att klockan, datumet och vilotiden blir rätt.</string>
+    <string name="setup_tz_suggested">Förslag</string>
+    <string name="setup_tz_all">Alla tidszoner</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Asien</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australien</string>
+    <string name="tz_region_pacific">Stilla havet</string>
+    <string name="tz_region_atlantic">Atlanten</string>
+    <string name="tz_region_indian">Indiska oceanen</string>
+    <string name="tz_region_antarctica">Antarktis</string>
+    <string name="setup_update_checking">Letar efter en nyare version…</string>
+    <string name="setup_update_checking_body">Fotoramen ser till att den kör senaste kinframe innan du börjar.</string>
+    <string name="setup_update_downloading">Laddar ned version %s</string>
+    <string name="setup_update_downloading_body">Den installeras direkt efteråt. Du kan hoppa över det här; fotoramen uppdaterar sig då själv senare.</string>
+    <string name="setup_update_installing">Installerar version %s</string>
+    <string name="setup_update_installing_body">Fotoramen startar om av sig själv om en stund och fortsätter konfigurationen där du slutade.</string>
+    <string name="setup_update_current">kinframe är uppdaterad</string>
+    <string name="setup_update_current_body">Vidare till sista steget.</string>
+    <string name="setup_update_failed">Det gick inte att söka efter uppdateringar</string>
+    <string name="setup_update_failed_body">Inga problem: fotoramen tittar igen senare och uppdaterar sig själv.</string>
+    <string name="setup_update_skip">Hoppa över tills vidare</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">I dag för %d år sedan</item>
+        <item quantity="other">I dag för %d år sedan</item>
+    </plurals>
+    <string name="transition_kenburns">Långsam zoom</string>
+    <string name="settings_collage">Flera foton samtidigt (collage)</string>
+    <string name="settings_collage_max">Foton per skärm</string>
+    <string name="settings_pair_portraits">Visa två stående foton sida vid sida</string>
+    <string name="settings_on_this_day">Visa minnen från den här dagen tidigare år</string>
+    <string name="settings_video">Videor</string>
+    <string name="settings_video_autoplay">Spela upp videor automatiskt</string>
+    <string name="settings_video_playback">Efter en video</string>
+    <string name="video_once_hold">Spela en gång och vänta sedan</string>
+    <string name="video_loop">Upprepa hela tiden</string>
+    <string name="video_once_advance">Spela en gång och gå sedan vidare</string>
+    <string name="settings_video_volume">Videovolym</string>
+    <string name="settings_video_auto_mute">Stäng av ljudet när ingen har rört fotoramen på</string>
+    <string name="video_auto_mute_off">Aldrig</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

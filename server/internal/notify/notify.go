@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 
+	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
 )
@@ -82,57 +82,19 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 	}
 }
 
-var texts = map[string]map[string][2]string{
-	"en": {
-		"reaction":         {"New reaction", "{frame} reacted to your photo"},
-		"reply":            {"New reply", "{frame}: {preset}"},
-		"delivered":        {"Delivered", "Your photos arrived on {frame}"},
-		"failed":           {"Couldn't send", "A photo or video could not be processed"},
-		"join_request":     {"Join request", "{name} wants to join {frame}"},
-		"membership":       {"Frame access changed", "Your access to {frame} changed"},
-		"frame_offline":    {"Frame offline", "{frame} went offline"},
-		"event_accepted":   {"Event accepted", "{frame} added “{title}” to its calendar"},
-		"event_declined":   {"Event declined", "{frame} declined “{title}”"},
-		"preset.beautiful": {"", "Beautiful!"},
-		"preset.call_me":   {"", "Call me"},
-		"preset.miss_you":  {"", "Miss you"},
-		"preset.thanks":    {"", "Thanks!"},
-	},
-	"nl": {
-		"reaction":         {"Nieuwe reactie", "{frame} reageerde op je foto"},
-		"reply":            {"Nieuw antwoord", "{frame}: {preset}"},
-		"delivered":        {"Afgeleverd", "Je foto's zijn aangekomen op {frame}"},
-		"failed":           {"Versturen mislukt", "Een foto of video kon niet verwerkt worden"},
-		"join_request":     {"Verzoek om lid te worden", "{name} wil lid worden van {frame}"},
-		"membership":       {"Toegang gewijzigd", "Je toegang tot {frame} is gewijzigd"},
-		"frame_offline":    {"Fotolijst offline", "{frame} is offline"},
-		"event_accepted":   {"Afspraak aanvaard", "{frame} zette “{title}” in de agenda"},
-		"event_declined":   {"Afspraak geweigerd", "{frame} weigerde “{title}”"},
-		"preset.beautiful": {"", "Prachtig!"},
-		"preset.call_me":   {"", "Bel me"},
-		"preset.miss_you":  {"", "Ik mis je"},
-		"preset.thanks":    {"", "Bedankt!"},
-	},
-}
-
-// Text returns a localized title and body.
+// Text returns a localized title and body for a push (texts in package i18n
+// as "push.<key>.title" / ".body"; quick replies as "push.preset.<id>").
+// locale is any BCP 47 tag; unsupported languages get English.
 func Text(locale, key string, args map[string]string) (string, string) {
-	lang, _, _ := strings.Cut(strings.ToLower(locale), "-")
-	t, ok := texts[lang]
-	if !ok {
-		t = texts["en"]
-	}
-	pair := t[key]
-	repl := make([]string, 0, 2*len(args))
+	lang := i18n.Pick(locale)
+	a := make(map[string]string, len(args))
 	for k, v := range args {
-		if k == "preset" {
-			// Translate into a copy: args is shared by every endpoint (and locale) of the user.
-			v = t["preset."+v][1]
-		}
-		repl = append(repl, "{"+k+"}", v)
+		a[k] = v
 	}
-	r := strings.NewReplacer(repl...)
-	return r.Replace(pair[0]), r.Replace(pair[1])
+	if p, ok := a["preset"]; ok {
+		a["preset"] = i18n.T(lang, "push.preset."+p, nil)
+	}
+	return i18n.T(lang, "push."+key+".title", a), i18n.T(lang, "push."+key+".body", a)
 }
 
 // HTTPSender delivers UnifiedPush (a plain POST of the payload to the

@@ -43,9 +43,6 @@ type Frame struct {
 	DeletedAt              *time.Time      `db:"deleted_at"`
 }
 
-// DefaultFrameName names a freshly claimed frame after its owner.
-func DefaultFrameName(owner string) string { return truncate(owner+"'s frame", 40) }
-
 const frameCols = `id, name, location, device_id, default_permissions, approve_joins_on_frame, invite_requires_approval,
 	moderation, settings, settings_version, settings_field_versions, latest_seq, feed_floor_seq, created_at, deleted_at`
 

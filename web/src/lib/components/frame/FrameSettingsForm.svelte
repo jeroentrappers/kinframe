@@ -4,7 +4,8 @@
 	import { mergePatchDiff, rebaseSettings, type JsonObject } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
-	import { t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { i18n, LOCALES, t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { matchLocale } from '$lib/i18n/locales';
 	import { softFly } from '$lib/motion';
 	import Icon from '../Icon.svelte';
 	import LocationPicker from './LocationPicker.svelte';
@@ -29,6 +30,8 @@
 		c.display = { brightness: 204, sleep_schedules: [], ...c.display };
 		c.widgets = { caption: true, clock: true, weather: false, ...c.widgets };
 		c.locale = { temperature_unit: 'c', ...c.locale };
+		// Older frames may store a region tag (nl-BE) or a code we don't list; show the closest language.
+		c.locale.language = matchLocale(c.locale.language) ?? 'en';
 		c.location ??= null;
 		return c;
 	}
@@ -172,9 +175,9 @@
 				<div class="field">
 					<label for="s-int">{t('settingsForm.interval')}</label>
 					<select id="s-int" class="select" bind:value={form.slideshow.interval_s}>
-						{#each INTERVALS as s}<option value={s}>{formatInterval(s)}</option>{/each}
+						{#each INTERVALS as s}<option value={s}>{formatInterval(s, i18n.tag)}</option>{/each}
 						{#if form.slideshow.interval_s && !INTERVALS.includes(form.slideshow.interval_s)}
-							<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s)}</option>
+							<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s, i18n.tag)}</option>
 						{/if}
 					</select>
 				</div>
@@ -240,6 +243,17 @@
 					<Icon name="sun" size={20} />
 				</div>
 			</div>
+			{#if form.locale}
+				<div class="field">
+					<label for="s-lang" class="label">{t('settingsForm.frameLanguage')}</label>
+					<select id="s-lang" class="select" bind:value={form.locale.language} aria-describedby="s-lang-hint">
+						{#each LOCALES as l (l.id)}
+							<option value={l.id} lang={l.id}>{l.label}</option>
+						{/each}
+					</select>
+					<p id="s-lang-hint" class="hint">{t('settingsForm.frameLanguageHint')}</p>
+				</div>
+			{/if}
 		</section>
 
 		<section class="card card-pad stack" aria-labelledby="wx-title">
@@ -293,7 +307,7 @@
 								<span class="tiny muted">{t('settingsForm.sleepAt')}</span>
 								<input class="input time" type="time" bind:value={s.sleep_at} required />
 							</label>
-							<span class="arrow" aria-hidden="true">→</span>
+							<span class="arrow" aria-hidden="true">{i18n.dir === 'rtl' ? '←' : '→'}</span>
 							<label>
 								<span class="tiny muted">{t('settingsForm.wakeAt')}</span>
 								<input class="input time" type="time" bind:value={s.wake_at} required />

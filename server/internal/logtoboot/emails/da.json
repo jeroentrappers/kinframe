@@ -1,0 +1,14 @@
+{
+ "footer": "Koden udløber om 10 minutter. Hvis du ikke har bedt om den, kan du se bort fra denne mail.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Din kinframe-loginkode: {{code}}", "intro": "Hej\n\nBrug denne kode til at logge ind på kinframe:"},
+  "Register": {"subject": "Din kinframe-tilmeldingskode: {{code}}", "intro": "Velkommen til kinframe!\n\nBrug denne kode til at gøre oprettelsen af din konto færdig:"},
+  "ForgotPassword": {"subject": "Din kode til gendannelse af din kinframe-konto: {{code}}", "intro": "Hej\n\nBrug denne kode til at gendanne din kinframe-konto:"},
+  "Generic": {"subject": "Din kinframe-bekræftelseskode: {{code}}", "intro": "Hej\n\nDin kinframe-bekræftelseskode er:"},
+  "BindNewIdentifier": {"subject": "Bekræft din nye mailadresse til kinframe: {{code}}", "intro": "Hej\n\nBrug denne kode til at bekræfte den nye mailadresse til din kinframe-konto:"},
+  "UserPermissionValidation": {"subject": "Din kinframe-bekræftelseskode: {{code}}", "intro": "Hej\n\nBrug denne kode til at bekræfte, at det er dig, før du ændrer din kinframe-konto:"},
+  "MfaVerification": {"subject": "Din kinframe-bekræftelseskode: {{code}}", "intro": "Hej\n\nBrug denne kode til at gøre dit login på kinframe færdigt:"},
+  "BindMfa": {"subject": "Din kinframe-bekræftelseskode: {{code}}", "intro": "Hej\n\nBrug denne kode til at slå totrinsbekræftelse til for kinframe:"}
+ }
+}

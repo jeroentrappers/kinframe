@@ -704,7 +704,7 @@ func (s *Server) getEventInvitationPhoto(w http.ResponseWriter, r *http.Request)
 	frameID, err1 := uuid.Parse(r.PathValue("frameId"))
 	invID, err2 := uuid.Parse(r.PathValue("invitationId"))
 	if err1 != nil || err2 != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	m, err := s.membership(ctx, frameID)
@@ -714,7 +714,7 @@ func (s *Server) getEventInvitationPhoto(w http.ResponseWriter, r *http.Request)
 	}
 	inv, err := s.st.GetInvitation(ctx, invID)
 	if err != nil || inv.FrameID != frameID || inv.PhotoKey == nil || (!m.IsManager() && (inv.SenderID == nil || *inv.SenderID != m.UserID)) {
-		problem.Write(w, problem.New(problem.NotFound, "photo not found"))
+		problem.Write(w, r, problem.New(problem.NotFound, "photo not found"))
 		return
 	}
 	s.serveBlob(w, r, *inv.PhotoKey, "image/webp", `"`+deref(inv.PhotoSHA256)+`"`, "private, max-age=86400")
@@ -839,7 +839,7 @@ func (s *Server) deviceGetInvitationPhoto(w http.ResponseWriter, r *http.Request
 	}
 	invID, err := uuid.Parse(r.PathValue("invitationId"))
 	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	key, sha, err := s.st.InvitationPhotoKey(ctx, invID, f.ID)
@@ -848,7 +848,7 @@ func (s *Server) deviceGetInvitationPhoto(w http.ResponseWriter, r *http.Request
 			s.writeError(w, r, err)
 			return
 		}
-		problem.Write(w, problem.New(problem.NotFound, "photo not found"))
+		problem.Write(w, r, problem.New(problem.NotFound, "photo not found"))
 		return
 	}
 	s.serveBlob(w, r, *key, "image/webp", `"`+deref(sha)+`"`, "private, max-age=31536000, immutable")

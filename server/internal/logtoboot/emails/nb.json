@@ -1,0 +1,14 @@
+{
+ "footer": "Koden utløper om 10 minutter. Hvis du ikke ba om den, kan du se bort fra denne e-posten.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Påloggingskoden din for kinframe: {{code}}", "intro": "Hei!\n\nBruk denne koden for å logge på kinframe:"},
+  "Register": {"subject": "Registreringskoden din for kinframe: {{code}}", "intro": "Velkommen til kinframe!\n\nBruk denne koden for å fullføre opprettelsen av kontoen din:"},
+  "ForgotPassword": {"subject": "Koden din for å gjenopprette kinframe-kontoen: {{code}}", "intro": "Hei!\n\nBruk denne koden for å gjenopprette kinframe-kontoen din:"},
+  "Generic": {"subject": "Bekreftelseskoden din for kinframe: {{code}}", "intro": "Hei!\n\nBekreftelseskoden din for kinframe er:"},
+  "BindNewIdentifier": {"subject": "Bekreft den nye e-postadressen din for kinframe: {{code}}", "intro": "Hei!\n\nBruk denne koden for å bekrefte den nye e-postadressen for kinframe-kontoen din:"},
+  "UserPermissionValidation": {"subject": "Bekreftelseskoden din for kinframe: {{code}}", "intro": "Hei!\n\nBruk denne koden for å bekrefte at det er deg, før du endrer kinframe-kontoen din:"},
+  "MfaVerification": {"subject": "Bekreftelseskoden din for kinframe: {{code}}", "intro": "Hei!\n\nBruk denne koden for å fullføre påloggingen på kinframe:"},
+  "BindMfa": {"subject": "Bekreftelseskoden din for kinframe: {{code}}", "intro": "Hei!\n\nBruk denne koden for å slå på totrinnsbekreftelse for kinframe:"}
+ }
+}

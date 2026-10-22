@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotoram</string>
+
+    <!-- Vanliga åtgärder -->
+    <string name="action_back">Tillbaka</string>
+    <string name="action_cancel">Avbryt</string>
+    <string name="action_continue">Fortsätt</string>
+    <string name="action_try_again">Försök igen</string>
+    <string name="action_undo">Ångra</string>
+
+    <!-- Konfiguration: språk -->
+    <string name="setup_welcome_title">Välkommen till kinframe</string>
+    <string name="setup_language_body">Välj språk för den här fotoramen.</string>
+
+    <!-- Konfiguration: wifi -->
+    <string name="setup_wifi_title">Anslut till wifi</string>
+    <string name="setup_wifi_body">Fotoramen behöver wifi för att ta emot foton. När de väl har kommit visas de även utan anslutning.</string>
+    <string name="wifi_connected_to">Ansluten till %1$s</string>
+    <string name="wifi_network">Wifi</string>
+    <string name="wifi_not_connected">Inte ansluten</string>
+    <string name="wifi_not_connected_hint">Välj ett nätverk för att fortsätta.</string>
+    <string name="wifi_no_internet">Ansluten, men inget internet än</string>
+    <string name="wifi_signal">Signal: %1$s</string>
+    <string name="wifi_open_settings">Wifi-inställningar</string>
+    <string name="wifi_networks">Nätverk i närheten</string>
+    <string name="wifi_scanning">Söker efter nätverk…</string>
+    <string name="wifi_permission_body">För att visa nätverk här behöver Android tillstånd att söka efter wifi.</string>
+    <string name="wifi_show_networks">Visa nätverk</string>
+    <string name="wifi_password">Lösenord</string>
+    <string name="wifi_join">Anslut</string>
+    <string name="signal_0">mycket svag</string>
+    <string name="signal_1">svag</string>
+    <string name="signal_2">ok</string>
+    <string name="signal_3">bra</string>
+    <string name="signal_4">utmärkt</string>
+
+    <!-- Konfiguration: server -->
+    <string name="setup_server_title">Välj en server</string>
+    <string name="setup_server_body">Foton skickas via en kinframe-server. Använd den kostnadsfria kinframe-servern eller en som din familj driver.</string>
+    <string name="server_default_body">Gratis och öppen källkod. Rekommenderas.</string>
+    <string name="server_custom">Använd egen server</string>
+    <string name="server_custom_body">För familjer som driver kinframe själva.</string>
+    <string name="server_address">Serveradress</string>
+    <string name="server_check">Kontrollera server</string>
+    <string name="server_checking">Kontrollerar servern…</string>
+    <string name="server_version">version %1$s</string>
+    <string name="server_insecure">inte krypterad</string>
+    <string name="server_error_invalid">Det ser inte ut som en webbadress. Prova något i stil med https://ramar.exempel.se.</string>
+    <string name="server_error_unreachable">Det gick inte att nå servern. Kontrollera adressen och att fotoramen är online.</string>
+    <string name="server_error_not_kinframe">Servern svarade, men det är inte en kinframe-server.</string>
+
+    <!-- Konfiguration: registrering -->
+    <string name="enroll_title">Gör i ordning din fotoram…</string>
+    <string name="enroll_body">Det tar några sekunder.</string>
+    <string name="enroll_failed_title">Fotoramen kunde inte registreras</string>
+    <string name="enroll_failed_body">Servern svarade: %1$s</string>
+
+    <!-- Konfiguration: ramkod -->
+    <string name="code_title">Koppla fotoramen till din familj</string>
+    <string name="code_step1">Öppna kinframe-appen, eller %1$s i en webbläsare</string>
+    <string name="code_step2">Välj Lägg till fotoram</string>
+    <string name="code_step3">Ange koden, eller skanna QR-koden</string>
+    <string name="code_valid_for">Giltig i %1$s</string>
+    <string name="code_waiting">Väntar på att någon anger koden</string>
+    <string name="code_offline_title">Fotoramen är offline</string>
+    <string name="code_offline_body">Ramkoden kräver internetanslutning. Kontrollera wifi.</string>
+    <string name="code_error_title">Kunde inte hämta en ramkod</string>
+    <string name="code_error_body">Servern svarade inte. Fotoramen fortsätter att försöka.</string>
+
+    <!-- Konfiguration: klart -->
+    <string name="celebrate_title">Ansluten till %1$s</string>
+    <string name="celebrate_title_anon">Ansluten</string>
+    <string name="celebrate_body">Foton som skickas till fotoramen visas här inom några sekunder.</string>
+
+    <!-- Tider och datum -->
+    <string name="duration_h_min">%1$d tim %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">I dag</string>
+    <string name="date_yesterday">I går</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">för %d dag sedan</item>
+        <item quantity="other">för %d dagar sedan</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d tim</string>
+
+    <!-- Bildspel -->
+    <string name="caption_edited">redigerad</string>
+    <string name="unable_photo">Det går inte att visa fotot</string>
+    <string name="unable_video">Det går inte att spela upp videon. Be avsändaren skicka den igen.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nytt foto</item>
+        <item quantity="other">%d nya foton</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Servern går inte att nå</string>
+    <string name="identify_this_is">Det här är</string>
+    <string name="snack_hidden">Fotot är dolt</string>
+    <string name="snack_deleted">Fotot är raderat</string>
+    <string name="menu_settings">Inställningar</string>
+    <string name="menu_power">Ström</string>
+    <string name="menu_hide">Dölj</string>
+    <string name="menu_delete">Radera</string>
+
+    <!-- Tomma lägen -->
+    <string name="empty_title">Inga foton än</string>
+    <string name="empty_body">Foton och videor som skickas med kinframe-appen eller webbplatsen visas här inom några sekunder.</string>
+    <string name="empty_code_title">Lägg till familjen med koden</string>
+    <string name="empty_code_body">Ange den i kinframe-appen, eller skanna QR-koden.</string>
+    <string name="empty_hidden_title">Alla foton är dolda</string>
+    <string name="empty_hidden_body">Dolda foton finns kvar i biblioteket. Visa dem igen från kinframe-appen.</string>
+    <string name="empty_downloading_title">Foton är på väg</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d foto laddas ned.</item>
+        <item quantity="other">%d foton laddas ned.</item>
+    </plurals>
+
+    <!-- Ström -->
+    <string name="power_title">Ström</string>
+    <string name="power_sleep">Viloläge</string>
+    <string name="power_sleep_body">Skärmen släcks tills du rör vid den.</string>
+    <string name="power_restart">Starta om</string>
+    <string name="power_restart_body">Starta om fotoramen.</string>
+    <string name="power_off">Stäng av</string>
+    <string name="power_off_body">Stäng av säkert innan du drar ur sladden.</string>
+    <string name="shutting_down_title">Stänger av…</string>
+    <string name="restarting_title">Startar om…</string>
+    <string name="shutting_down_body">Sparar allt på ett säkert sätt.</string>
+    <string name="safe_title">Nu kan du dra ur sladden</string>
+    <string name="safe_body">Allt är sparat. Tryck på strömknappen eller sätt i sladden igen för att använda fotoramen.</string>
+    <string name="safe_body_noroot">kinframe har sparat allt. Du kan dra ur sladden nu.</string>
+
+    <!-- Återställning -->
+    <string name="recovery_title">kinframe hade problem att visa foton</string>
+    <string name="recovery_body">Appen stoppades oväntat flera gånger i rad. Försök igen, eller rensa nedladdade foton. De laddas ned från servern igen, inget går förlorat.</string>
+    <string name="recovery_clear">Rensa nedladdade foton</string>
+
+    <!-- Inställningar -->
+    <string name="settings_title">Inställningar</string>
+    <string name="settings_language">Språk</string>
+    <string name="settings_slideshow">Bildspel</string>
+    <string name="settings_interval">Visa varje foto i</string>
+    <string name="settings_transition">Övergång</string>
+    <string name="transition_crossfade">Tona</string>
+    <string name="transition_slide">Glid</string>
+    <string name="settings_order">Ordning</string>
+    <string name="order_received">Senast mottagna</string>
+    <string name="order_taken">Tagningsdatum</string>
+    <string name="order_shuffle">Blanda</string>
+    <string name="settings_reverse">Äldst först</string>
+    <string name="settings_fill">Fotostorlek</string>
+    <string name="fill_fill">Fyll skärmen</string>
+    <string name="fill_fit">Visa hela fotot</string>
+    <string name="settings_display">Skärm</string>
+    <string name="settings_brightness">Ljusstyrka</string>
+    <string name="settings_brightness_mode">Automatisk ljusstyrka</string>
+    <string name="brightness_manual">Fast</string>
+    <string name="brightness_sun">Följ solen</string>
+    <string name="settings_sleep">Viloläge</string>
+    <string name="settings_sleep_enabled">Släck skärmen på natten</string>
+    <string name="settings_sleep_at">Vila kl.</string>
+    <string name="settings_wake_at">Vakna kl.</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">och %d schema till, hanteras i kinframe-appen</item>
+        <item quantity="other">och %d scheman till, hanteras i kinframe-appen</item>
+    </plurals>
+    <string name="settings_about">Den här fotoramen</string>
+    <string name="about_frame">Namn</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wifi</string>
+    <string name="about_version">Appversion</string>
+    <string name="about_android_settings">Android-inställningar</string>
+    <string name="settings_updates">Uppdateringar</string>
+    <string name="updates_channel">Kanal</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Beta (testa nya versioner tidigt)</string>
+    <string name="updates_check">Sök efter uppdatering</string>
+    <string name="updates_install_now">Installera nu</string>
+    <string name="updates_checking">Söker efter uppdateringar…</string>
+    <string name="updates_up_to_date">Fotoramen är uppdaterad.</string>
+    <string name="updates_downloading">Laddar ned version %1$s… %2$d %%</string>
+    <string name="updates_waiting">Version %1$s är klar. Den installeras när ingen använder fotoramen.</string>
+    <string name="updates_installing">Installerar version %1$s. Fotoramen startar om strax.</string>
+    <string name="updates_failed">Uppdateringen misslyckades. Fotoramen försöker igen senare.</string>
+    <string name="update_notice_updated">Uppdaterad till version %1$s</string>
+    <string name="update_notice_rolled_back">Den nya versionen hade problem, så fotoramen gick tillbaka till den förra.</string>
+    <string name="update_notice_needs_user">En uppdatering är klar. Tryck på Installera för att fortsätta.</string>
+
+    <!-- Väder (data från servern, som hämtar från Open-Meteo) -->
+    <string name="weather_show_forecast">Visa prognosen</string>
+    <string name="weather_close">Stäng</string>
+    <string name="weather_now">Nu</string>
+    <string name="weather_today">I dag</string>
+    <string name="weather_feels_like">Känns som %1$s</string>
+    <string name="weather_high_low">max %1$s · min %2$s</string>
+    <string name="weather_wind">Vind</string>
+    <string name="weather_humidity">Luftfuktighet</string>
+    <string name="weather_sunrise">Soluppgång</string>
+    <string name="weather_sunset">Solnedgång</string>
+    <string name="weather_next_hours">Närmaste 24 timmarna</string>
+    <string name="weather_next_days">7-dygnsprognos</string>
+    <string name="weather_updated">Uppdaterad %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NO</item>
+        <item>O</item>
+        <item>SO</item>
+        <item>S</item>
+        <item>SV</item>
+        <item>V</item>
+        <item>NV</item>
+    </string-array>
+    <string name="wmo_clear_day">Soligt</string>
+    <string name="wmo_clear_night">Klart</string>
+    <string name="wmo_mainly_clear_day">Mestadels soligt</string>
+    <string name="wmo_mainly_clear_night">Mestadels klart</string>
+    <string name="wmo_partly_cloudy">Växlande molnighet</string>
+    <string name="wmo_overcast">Mulet</string>
+    <string name="wmo_fog">Dimma</string>
+    <string name="wmo_rime_fog">Underkyld dimma</string>
+    <string name="wmo_drizzle_light">Lätt duggregn</string>
+    <string name="wmo_drizzle">Duggregn</string>
+    <string name="wmo_drizzle_dense">Kraftigt duggregn</string>
+    <string name="wmo_freezing_drizzle">Underkylt duggregn</string>
+    <string name="wmo_rain_light">Lätt regn</string>
+    <string name="wmo_rain">Regn</string>
+    <string name="wmo_rain_heavy">Kraftigt regn</string>
+    <string name="wmo_freezing_rain">Underkylt regn</string>
+    <string name="wmo_snow_light">Lätt snöfall</string>
+    <string name="wmo_snow">Snöfall</string>
+    <string name="wmo_snow_heavy">Kraftigt snöfall</string>
+    <string name="wmo_snow_grains">Kornsnö</string>
+    <string name="wmo_showers_light">Lätta skurar</string>
+    <string name="wmo_showers">Skurar</string>
+    <string name="wmo_showers_violent">Kraftiga skurar</string>
+    <string name="wmo_snow_showers_light">Lätta snöbyar</string>
+    <string name="wmo_snow_showers">Snöbyar</string>
+    <string name="wmo_thunderstorm">Åska</string>
+    <string name="wmo_thunderstorm_hail">Åska med hagel</string>
+</resources>

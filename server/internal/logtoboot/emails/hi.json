@@ -1,0 +1,14 @@
+{
+ "footer": "यह कोड 10 मिनट में खत्म हो जाएगा। अगर आपने इसे नहीं मांगा था, तो इस ईमेल को अनदेखा कर सकते हैं।",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "आपका kinframe साइन-इन कोड: {{code}}", "intro": "नमस्ते,\n\nkinframe में साइन इन करने के लिए यह कोड इस्तेमाल करें:"},
+  "Register": {"subject": "आपका kinframe साइन-अप कोड: {{code}}", "intro": "kinframe में आपका स्वागत है!\n\nअपना खाता बनाना पूरा करने के लिए यह कोड इस्तेमाल करें:"},
+  "ForgotPassword": {"subject": "आपका kinframe खाता रिकवरी कोड: {{code}}", "intro": "नमस्ते,\n\nअपना kinframe खाता वापस पाने के लिए यह कोड इस्तेमाल करें:"},
+  "Generic": {"subject": "आपका kinframe पुष्टि कोड: {{code}}", "intro": "नमस्ते,\n\nआपका kinframe पुष्टि कोड है:"},
+  "BindNewIdentifier": {"subject": "kinframe के लिए अपने नए ईमेल की पुष्टि करें: {{code}}", "intro": "नमस्ते,\n\nअपने kinframe खाते के नए ईमेल पते की पुष्टि करने के लिए यह कोड इस्तेमाल करें:"},
+  "UserPermissionValidation": {"subject": "आपका kinframe पुष्टि कोड: {{code}}", "intro": "नमस्ते,\n\nअपने kinframe खाते में बदलाव करने से पहले यह पुष्टि करने के लिए कि यह आप ही हैं, यह कोड इस्तेमाल करें:"},
+  "MfaVerification": {"subject": "आपका kinframe पुष्टि कोड: {{code}}", "intro": "नमस्ते,\n\nkinframe में साइन इन पूरा करने के लिए यह कोड इस्तेमाल करें:"},
+  "BindMfa": {"subject": "आपका kinframe पुष्टि कोड: {{code}}", "intro": "नमस्ते,\n\nkinframe के लिए दो-चरणों वाला सत्यापन चालू करने के लिए यह कोड इस्तेमाल करें:"}
+ }
+}

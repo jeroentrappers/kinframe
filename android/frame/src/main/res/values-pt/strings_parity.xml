@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Digite o PIN do proprietário</string>
+    <string name="pin_reason_settings">para abrir as configurações</string>
+    <string name="pin_reason_exit">para sair do kinframe</string>
+    <string name="pin_reason_wifi">para mudar o Wi-Fi</string>
+    <string name="pin_reason_power_off">para desligar o porta-retrato</string>
+    <string name="pin_reason_restart">para reiniciar o porta-retrato</string>
+    <string name="pin_reason_server">para mudar o servidor</string>
+    <string name="pin_reason_reset">para redefinir o porta-retrato</string>
+    <string name="pin_checking">Verificando…</string>
+    <string name="pin_wrong">Esse não é o PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Esse não é o PIN. Resta %d tentativa antes de uma pausa curta.</item>
+        <item quantity="many">Esse não é o PIN. Restam %d de tentativas antes de uma pausa curta.</item>
+        <item quantity="other">Esse não é o PIN. Restam %d tentativas antes de uma pausa curta.</item>
+    </plurals>
+    <string name="pin_locked">Muitas tentativas erradas. Tente de novo em %s.</string>
+    <string name="pin_forgot">Esqueceu o PIN? O proprietário do porta-retrato pode removê-lo no app kinframe, nas configurações deste porta-retrato.</string>
+    <string name="pin_new_title">Escolha um PIN</string>
+    <string name="pin_new_body">De 4 a 6 dígitos. Ele será pedido para abrir as configurações, desligar o porta-retrato ou mudar o Wi-Fi.</string>
+    <string name="pin_confirm_title">Digite o PIN de novo</string>
+    <string name="pin_confirm_body">Só para confirmar.</string>
+    <string name="pin_mismatch">Os PINs não são iguais. Escolha um de novo.</string>
+    <string name="pin_key_delete">Apagar</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN do proprietário</string>
+    <string name="settings_pin_off">Desativado. Qualquer pessoa pode abrir as configurações.</string>
+    <string name="settings_pin_on">Ativado. Configurações, energia e Wi-Fi pedem o PIN.</string>
+    <string name="settings_pin_set">Definir um PIN</string>
+    <string name="settings_pin_change">Mudar PIN</string>
+    <string name="settings_pin_remove">Remover PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Alguém</string>
+    <string name="join_title">%1$s quer participar</string>
+    <string name="join_body_code">%1$s digitou o código de %2$s. Se você permitir, %1$s poderá enviar fotos para este porta-retrato.</string>
+    <string name="join_body_invited">%1$s convidou %3$s para %2$s. Se você permitir, %3$s poderá enviar fotos para este porta-retrato.</string>
+    <string name="join_invited_by">Convidado por %s</string>
+    <string name="join_allow">Permitir</string>
+    <string name="join_deny">Não permitir</string>
+    <string name="join_later">Agora não</string>
+    <string name="join_later_hint">O pedido fica nas notificações do menu.</string>
+    <string name="join_pill_one">%s quer participar</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d pessoa quer participar</item>
+        <item quantity="many">%d de pessoas querem participar</item>
+        <item quantity="other">%d pessoas querem participar</item>
+    </plurals>
+    <string name="notifications_title">Notificações</string>
+    <string name="notifications_empty">Tudo em dia</string>
+    <string name="notifications_empty_body">Nada esperando por você.</string>
+    <string name="menu_notifications">Notificações</string>
+    <string name="action_close">Fechar</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Sem conexão com a internet</string>
+    <string name="status_card_offline_body">As fotos do porta-retrato continuam passando. As novas chegam assim que a conexão voltar.</string>
+    <string name="status_card_server_title">Não foi possível acessar o servidor de fotos</string>
+    <string name="status_card_server_body">O Wi-Fi funciona, mas o servidor não responde. As fotos novas chegam quando ele voltar.</string>
+    <string name="status_card_portal_title">Este Wi-Fi pede login</string>
+    <string name="status_card_portal_body">Abra a página de login da rede para conectar o porta-retrato.</string>
+    <string name="status_card_portal_action">Fazer login</string>
+    <string name="status_card_storage_title">O porta-retrato está quase cheio</string>
+    <string name="status_card_storage_body">Fotos mais antigas foram tiradas do porta-retrato para liberar espaço; elas continuam seguras no servidor. As fotos novas podem esperar até haver espaço.</string>
+    <string name="portal_title">Fazer login no Wi-Fi</string>
+    <string name="portal_body">Isto fecha sozinho quando o porta-retrato estiver on-line.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Em qual fuso horário está o porta-retrato?</string>
+    <string name="setup_tz_body">Para que o relógio, a data e a programação noturna fiquem certos.</string>
+    <string name="setup_tz_suggested">Sugerido</string>
+    <string name="setup_tz_all">Todos os fusos horários</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Américas</string>
+    <string name="tz_region_asia">Ásia</string>
+    <string name="tz_region_africa">África</string>
+    <string name="tz_region_australia">Austrália</string>
+    <string name="tz_region_pacific">Pacífico</string>
+    <string name="tz_region_atlantic">Atlântico</string>
+    <string name="tz_region_indian">Oceano Índico</string>
+    <string name="tz_region_antarctica">Antártida</string>
+    <string name="setup_update_checking">Procurando uma versão mais recente…</string>
+    <string name="setup_update_checking_body">O porta-retrato confere se está com a versão mais recente do kinframe antes de começar.</string>
+    <string name="setup_update_downloading">Baixando a versão %s</string>
+    <string name="setup_update_downloading_body">Ela é instalada logo em seguida. Você pode pular esta etapa; o porta-retrato se atualiza depois.</string>
+    <string name="setup_update_installing">Instalando a versão %s</string>
+    <string name="setup_update_installing_body">O porta-retrato vai reiniciar sozinho em instantes e continuar a configuração de onde você parou.</string>
+    <string name="setup_update_current">O kinframe está atualizado</string>
+    <string name="setup_update_current_body">Vamos para a última etapa.</string>
+    <string name="setup_update_failed">Não foi possível procurar atualizações</string>
+    <string name="setup_update_failed_body">Sem problemas: o porta-retrato tenta de novo mais tarde e se atualiza sozinho.</string>
+    <string name="setup_update_skip">Pular por enquanto</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Há %d ano, neste dia</item>
+        <item quantity="many">Há %d de anos, neste dia</item>
+        <item quantity="other">Há %d anos, neste dia</item>
+    </plurals>
+    <string name="transition_kenburns">Zoom lento</string>
+    <string name="settings_collage">Várias fotos ao mesmo tempo (colagem)</string>
+    <string name="settings_collage_max">Fotos por tela</string>
+    <string name="settings_pair_portraits">Mostrar duas fotos verticais lado a lado</string>
+    <string name="settings_on_this_day">Mostrar lembranças deste dia em anos anteriores</string>
+    <string name="settings_video">Vídeos</string>
+    <string name="settings_video_autoplay">Reproduzir vídeos automaticamente</string>
+    <string name="settings_video_playback">Depois de um vídeo</string>
+    <string name="video_once_hold">Reproduzir uma vez e esperar</string>
+    <string name="video_loop">Repetir sem parar</string>
+    <string name="video_once_advance">Reproduzir uma vez e seguir</string>
+    <string name="settings_video_volume">Volume dos vídeos</string>
+    <string name="settings_video_auto_mute">Silenciar quando ninguém tocar no porta-retrato por</string>
+    <string name="video_auto_mute_off">Nunca</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

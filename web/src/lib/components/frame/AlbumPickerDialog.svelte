@@ -133,6 +133,6 @@
 		white-space: nowrap;
 	}
 	.new {
-		padding-left: 4px;
+		padding-inline-start: 4px;
 	}
 </style>

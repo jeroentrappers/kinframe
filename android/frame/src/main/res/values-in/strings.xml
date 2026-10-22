@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Bingkai foto</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Kembali</string>
+    <string name="action_cancel">Batal</string>
+    <string name="action_continue">Lanjutkan</string>
+    <string name="action_try_again">Coba lagi</string>
+    <string name="action_undo">Urungkan</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Selamat datang di kinframe</string>
+    <string name="setup_language_body">Pilih bahasa untuk bingkai ini.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Hubungkan ke Wi-Fi</string>
+    <string name="setup_wifi_body">Bingkai memerlukan Wi-Fi untuk menerima foto. Setelah diterima, foto tetap bisa diputar tanpa koneksi.</string>
+    <string name="wifi_connected_to">Terhubung ke %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Tidak terhubung</string>
+    <string name="wifi_not_connected_hint">Pilih jaringan untuk melanjutkan.</string>
+    <string name="wifi_no_internet">Terhubung, tetapi belum ada internet</string>
+    <string name="wifi_signal">Sinyal: %1$s</string>
+    <string name="wifi_open_settings">Setelan Wi-Fi</string>
+    <string name="wifi_networks">Jaringan di sekitar</string>
+    <string name="wifi_scanning">Mencari jaringan…</string>
+    <string name="wifi_permission_body">Untuk menampilkan jaringan di sini, Android memerlukan izin untuk memindai Wi-Fi.</string>
+    <string name="wifi_show_networks">Tampilkan jaringan</string>
+    <string name="wifi_password">Sandi</string>
+    <string name="wifi_join">Hubungkan</string>
+    <string name="signal_0">sangat lemah</string>
+    <string name="signal_1">lemah</string>
+    <string name="signal_2">cukup</string>
+    <string name="signal_3">bagus</string>
+    <string name="signal_4">sangat bagus</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Pilih server</string>
+    <string name="setup_server_body">Foto dikirim melalui server kinframe. Gunakan server kinframe gratis, atau server yang dikelola keluarga Anda.</string>
+    <string name="server_default_body">Gratis dan open source. Direkomendasikan.</string>
+    <string name="server_custom">Gunakan server Anda sendiri</string>
+    <string name="server_custom_body">Untuk keluarga yang meng-host kinframe sendiri.</string>
+    <string name="server_address">Alamat server</string>
+    <string name="server_check">Periksa server</string>
+    <string name="server_checking">Memeriksa server…</string>
+    <string name="server_version">versi %1$s</string>
+    <string name="server_insecure">tidak terenkripsi</string>
+    <string name="server_error_invalid">Sepertinya itu bukan alamat web. Coba seperti https://frames.example.org.</string>
+    <string name="server_error_unreachable">Tidak dapat menjangkau server ini. Periksa alamatnya dan pastikan bingkai online.</string>
+    <string name="server_error_not_kinframe">Server ini merespons, tetapi bukan server kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Menyiapkan bingkai Anda…</string>
+    <string name="enroll_body">Ini hanya butuh beberapa detik.</string>
+    <string name="enroll_failed_title">Bingkai tidak dapat mendaftar</string>
+    <string name="enroll_failed_body">Pesan dari server: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Hubungkan bingkai ini ke keluarga Anda</string>
+    <string name="code_step1">Buka aplikasi kinframe, atau %1$s di browser</string>
+    <string name="code_step2">Pilih Tambahkan bingkai</string>
+    <string name="code_step3">Masukkan kode ini, atau pindai kode QR</string>
+    <string name="code_valid_for">Berlaku selama %1$s</string>
+    <string name="code_waiting">Menunggu seseorang memasukkan kode</string>
+    <string name="code_offline_title">Bingkai sedang offline</string>
+    <string name="code_offline_body">Kode bingkai memerlukan koneksi internet. Periksa Wi-Fi.</string>
+    <string name="code_error_title">Tidak dapat memperoleh kode bingkai</string>
+    <string name="code_error_body">Server tidak merespons. Bingkai akan terus mencoba.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Terhubung ke %1$s</string>
+    <string name="celebrate_title_anon">Terhubung</string>
+    <string name="celebrate_body">Foto yang dikirim ke bingkai ini akan muncul di sini dalam hitungan detik.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d j %2$d mnt</string>
+    <string name="duration_min">%1$d mnt</string>
+    <string name="date_today">Hari ini</string>
+    <string name="date_yesterday">Kemarin</string>
+    <plurals name="date_days_ago">
+        <item quantity="other">%d hari lalu</item>
+    </plurals>
+    <string name="interval_s">%1$d dtk</string>
+    <string name="interval_min">%1$d mnt</string>
+    <string name="interval_h">%1$d j</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">diedit</string>
+    <string name="unable_photo">Tidak dapat menampilkan foto ini</string>
+    <string name="unable_video">Tidak dapat memutar video ini. Minta pengirim untuk mengirimnya lagi.</string>
+    <plurals name="new_photos">
+        <item quantity="other">%d foto baru</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Tidak dapat menjangkau server</string>
+    <string name="identify_this_is">Ini adalah</string>
+    <string name="snack_hidden">Foto disembunyikan</string>
+    <string name="snack_deleted">Foto dihapus</string>
+    <string name="menu_settings">Setelan</string>
+    <string name="menu_power">Daya</string>
+    <string name="menu_hide">Sembunyikan</string>
+    <string name="menu_delete">Hapus</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Belum ada foto</string>
+    <string name="empty_body">Foto dan video yang dikirim lewat aplikasi atau situs kinframe akan muncul di sini dalam hitungan detik.</string>
+    <string name="empty_code_title">Tambahkan keluarga dengan kode ini</string>
+    <string name="empty_code_body">Masukkan di aplikasi kinframe, atau pindai kode QR.</string>
+    <string name="empty_hidden_title">Semua foto disembunyikan</string>
+    <string name="empty_hidden_body">Foto yang disembunyikan tetap ada di koleksi. Tampilkan lagi dari aplikasi kinframe.</string>
+    <string name="empty_downloading_title">Foto sedang dalam perjalanan</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="other">%d foto sedang didownload.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Daya</string>
+    <string name="power_sleep">Tidur</string>
+    <string name="power_sleep_body">Layar mati sampai Anda menyentuhnya.</string>
+    <string name="power_restart">Mulai ulang</string>
+    <string name="power_restart_body">Nyalakan ulang bingkai.</string>
+    <string name="power_off">Matikan</string>
+    <string name="power_off_body">Matikan dengan aman sebelum mencabut kabel.</string>
+    <string name="shutting_down_title">Mematikan…</string>
+    <string name="restarting_title">Memulai ulang…</string>
+    <string name="shutting_down_body">Menyimpan semuanya dengan aman.</string>
+    <string name="safe_title">Sekarang aman untuk mencabut kabel</string>
+    <string name="safe_body">Semuanya sudah disimpan. Untuk menggunakan bingkai lagi, tekan tombol daya atau colokkan kembali.</string>
+    <string name="safe_body_noroot">kinframe sudah menyimpan semuanya. Anda bisa mencabut kabel bingkai sekarang.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe bermasalah saat menampilkan foto</string>
+    <string name="recovery_body">Aplikasi berhenti tiba-tiba beberapa kali berturut-turut. Coba lagi, atau hapus foto yang sudah didownload. Foto akan didownload ulang dari server, tidak ada yang hilang.</string>
+    <string name="recovery_clear">Hapus foto yang didownload</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Setelan</string>
+    <string name="settings_language">Bahasa</string>
+    <string name="settings_slideshow">Slideshow</string>
+    <string name="settings_interval">Tampilkan setiap foto selama</string>
+    <string name="settings_transition">Transisi</string>
+    <string name="transition_crossfade">Memudar</string>
+    <string name="transition_slide">Geser</string>
+    <string name="settings_order">Urutan</string>
+    <string name="order_received">Terbaru diterima</string>
+    <string name="order_taken">Tanggal diambil</string>
+    <string name="order_shuffle">Acak</string>
+    <string name="settings_reverse">Terlama dulu</string>
+    <string name="settings_fill">Ukuran foto</string>
+    <string name="fill_fill">Penuhi layar</string>
+    <string name="fill_fit">Tampilkan seluruh foto</string>
+    <string name="settings_display">Layar</string>
+    <string name="settings_brightness">Kecerahan</string>
+    <string name="settings_brightness_mode">Kecerahan otomatis</string>
+    <string name="brightness_manual">Tetap</string>
+    <string name="brightness_sun">Ikuti matahari</string>
+    <string name="settings_sleep">Tidur</string>
+    <string name="settings_sleep_enabled">Matikan layar pada malam hari</string>
+    <string name="settings_sleep_at">Tidur pukul</string>
+    <string name="settings_wake_at">Bangun pukul</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="other">dan %d jadwal lain, dikelola di aplikasi kinframe</item>
+    </plurals>
+    <string name="settings_about">Bingkai ini</string>
+    <string name="about_frame">Nama</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Versi aplikasi</string>
+    <string name="about_android_settings">Setelan Android</string>
+    <string name="settings_updates">Update</string>
+    <string name="updates_channel">Saluran</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Beta (coba versi baru lebih awal)</string>
+    <string name="updates_check">Periksa update</string>
+    <string name="updates_install_now">Instal sekarang</string>
+    <string name="updates_checking">Memeriksa update…</string>
+    <string name="updates_up_to_date">Bingkai ini sudah versi terbaru.</string>
+    <string name="updates_downloading">Mendownload versi %1$s… %2$d%%</string>
+    <string name="updates_waiting">Versi %1$s sudah siap. Akan diinstal saat bingkai tidak digunakan.</string>
+    <string name="updates_installing">Menginstal versi %1$s. Bingkai akan dimulai ulang sebentar lagi.</string>
+    <string name="updates_failed">Update gagal. Bingkai akan mencoba lagi nanti.</string>
+    <string name="update_notice_updated">Diupdate ke versi %1$s</string>
+    <string name="update_notice_rolled_back">Versi baru bermasalah, jadi bingkai kembali ke versi sebelumnya.</string>
+    <string name="update_notice_needs_user">Update sudah siap. Ketuk Instal untuk melanjutkan.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Tampilkan prakiraan</string>
+    <string name="weather_close">Tutup</string>
+    <string name="weather_now">Sekarang</string>
+    <string name="weather_today">Hari ini</string>
+    <string name="weather_feels_like">Terasa seperti %1$s</string>
+    <string name="weather_high_low">T %1$s · R %2$s</string>
+    <string name="weather_wind">Angin</string>
+    <string name="weather_humidity">Kelembapan</string>
+    <string name="weather_sunrise">Matahari terbit</string>
+    <string name="weather_sunset">Matahari terbenam</string>
+    <string name="weather_next_hours">24 jam ke depan</string>
+    <string name="weather_next_days">Prakiraan 7 hari</string>
+    <string name="weather_updated">Diperbarui %1$s</string>
+    <string-array name="weather_compass">
+        <item>U</item>
+        <item>TL</item>
+        <item>T</item>
+        <item>Tg</item>
+        <item>S</item>
+        <item>BD</item>
+        <item>B</item>
+        <item>BL</item>
+    </string-array>
+    <string name="wmo_clear_day">Cerah</string>
+    <string name="wmo_clear_night">Cerah</string>
+    <string name="wmo_mainly_clear_day">Sebagian besar cerah</string>
+    <string name="wmo_mainly_clear_night">Sebagian besar cerah</string>
+    <string name="wmo_partly_cloudy">Cerah berawan</string>
+    <string name="wmo_overcast">Berawan</string>
+    <string name="wmo_fog">Kabut</string>
+    <string name="wmo_rime_fog">Kabut beku</string>
+    <string name="wmo_drizzle_light">Gerimis ringan</string>
+    <string name="wmo_drizzle">Gerimis</string>
+    <string name="wmo_drizzle_dense">Gerimis lebat</string>
+    <string name="wmo_freezing_drizzle">Gerimis beku</string>
+    <string name="wmo_rain_light">Hujan ringan</string>
+    <string name="wmo_rain">Hujan</string>
+    <string name="wmo_rain_heavy">Hujan lebat</string>
+    <string name="wmo_freezing_rain">Hujan beku</string>
+    <string name="wmo_snow_light">Salju ringan</string>
+    <string name="wmo_snow">Salju</string>
+    <string name="wmo_snow_heavy">Salju lebat</string>
+    <string name="wmo_snow_grains">Butiran salju</string>
+    <string name="wmo_showers_light">Hujan sesaat ringan</string>
+    <string name="wmo_showers">Hujan sesaat</string>
+    <string name="wmo_showers_violent">Hujan sesaat lebat</string>
+    <string name="wmo_snow_showers_light">Hujan salju ringan</string>
+    <string name="wmo_snow_showers">Hujan salju</string>
+    <string name="wmo_thunderstorm">Badai petir</string>
+    <string name="wmo_thunderstorm_hail">Badai petir disertai hujan es</string>
+</resources>

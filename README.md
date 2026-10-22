@@ -16,6 +16,7 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 | `docs/architecture.md` | Components, auth (Logto), server discovery, data flow |
 | `docs/deploy.md` | Hosted server (kinframe.appmire.be) and self-hosting |
 | `docs/hardware/` | Hardware profiles of tested frames |
+| `docs/i18n.md` | The 36 languages: where texts live, adding strings, right-to-left, glossary per language |
 | `docs/clean-room.md` | How kinframe was specified without copying Frameo |
 | `server/` | Go backend *(coming)* |
 | `web/` | SvelteKit website *(coming)* |

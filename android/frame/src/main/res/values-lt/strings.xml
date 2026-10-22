@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Nuotraukų rėmelis</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Atgal</string>
+    <string name="action_cancel">Atšaukti</string>
+    <string name="action_continue">Tęsti</string>
+    <string name="action_try_again">Bandyti dar kartą</string>
+    <string name="action_undo">Anuliuoti</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Sveiki atvykę į kinframe</string>
+    <string name="setup_language_body">Pasirinkite šio rėmelio kalbą.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Prisijunkite prie Wi-Fi</string>
+    <string name="setup_wifi_body">Rėmeliui reikia Wi-Fi, kad gautų nuotraukas. Gautos nuotraukos rodomos ir be ryšio.</string>
+    <string name="wifi_connected_to">Prisijungta prie %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Neprisijungta</string>
+    <string name="wifi_not_connected_hint">Pasirinkite tinklą, kad galėtumėte tęsti.</string>
+    <string name="wifi_no_internet">Prisijungta, bet interneto dar nėra</string>
+    <string name="wifi_signal">Signalas: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi nustatymai</string>
+    <string name="wifi_networks">Netoliese esantys tinklai</string>
+    <string name="wifi_scanning">Ieškoma tinklų…</string>
+    <string name="wifi_permission_body">Kad čia būtų rodomi tinklai, Android reikia leidimo ieškoti Wi-Fi tinklų.</string>
+    <string name="wifi_show_networks">Rodyti tinklus</string>
+    <string name="wifi_password">Slaptažodis</string>
+    <string name="wifi_join">Prisijungti</string>
+    <string name="signal_0">labai silpnas</string>
+    <string name="signal_1">silpnas</string>
+    <string name="signal_2">vidutinis</string>
+    <string name="signal_3">geras</string>
+    <string name="signal_4">puikus</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Pasirinkite serverį</string>
+    <string name="setup_server_body">Nuotraukos keliauja per kinframe serverį. Naudokite nemokamą kinframe serverį arba savo šeimos serverį.</string>
+    <string name="server_default_body">Nemokamas ir atvirojo kodo. Rekomenduojama.</string>
+    <string name="server_custom">Naudoti savo serverį</string>
+    <string name="server_custom_body">Šeimoms, kurios pačios talpina kinframe.</string>
+    <string name="server_address">Serverio adresas</string>
+    <string name="server_check">Tikrinti serverį</string>
+    <string name="server_checking">Tikrinamas serveris…</string>
+    <string name="server_version">versija %1$s</string>
+    <string name="server_insecure">nešifruota</string>
+    <string name="server_error_invalid">Tai nepanašu į interneto adresą. Bandykite, pvz., https://frames.example.org.</string>
+    <string name="server_error_unreachable">Nepavyko pasiekti šio serverio. Patikrinkite adresą ir ar rėmelis prisijungęs prie interneto.</string>
+    <string name="server_error_not_kinframe">Šis serveris atsakė, bet tai ne kinframe serveris.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Ruošiamas jūsų rėmelis…</string>
+    <string name="enroll_body">Tai užtruks kelias sekundes.</string>
+    <string name="enroll_failed_title">Rėmelio užregistruoti nepavyko</string>
+    <string name="enroll_failed_body">Serverio atsakymas: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Susiekite šį rėmelį su savo šeima</string>
+    <string name="code_step1">Atidarykite kinframe programėlę arba %1$s naršyklėje</string>
+    <string name="code_step2">Pasirinkite „Pridėti rėmelį“</string>
+    <string name="code_step3">Įveskite šį kodą arba nuskaitykite QR kodą</string>
+    <string name="code_valid_for">Galioja %1$s</string>
+    <string name="code_waiting">Laukiama, kol kas nors įves kodą</string>
+    <string name="code_offline_title">Rėmelis neprisijungęs</string>
+    <string name="code_offline_body">Rėmelio kodui reikia interneto ryšio. Patikrinkite Wi-Fi.</string>
+    <string name="code_error_title">Nepavyko gauti rėmelio kodo</string>
+    <string name="code_error_body">Serveris neatsakė. Rėmelis bandys toliau.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Prisijungta prie %1$s</string>
+    <string name="celebrate_title_anon">Prisijungta</string>
+    <string name="celebrate_body">Į šį rėmelį išsiųstos nuotraukos čia pasirodys per kelias sekundes.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d val. %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Šiandien</string>
+    <string name="date_yesterday">Vakar</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">prieš %d dieną</item>
+        <item quantity="few">prieš %d dienas</item>
+        <item quantity="many">prieš %d dienos</item>
+        <item quantity="other">prieš %d dienų</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d val.</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">redaguota</string>
+    <string name="unable_photo">Nepavyko parodyti šios nuotraukos</string>
+    <string name="unable_video">Nepavyko paleisti šio vaizdo įrašo. Paprašykite siuntėjo atsiųsti jį dar kartą.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nauja nuotrauka</item>
+        <item quantity="few">%d naujos nuotraukos</item>
+        <item quantity="many">%d naujos nuotraukos</item>
+        <item quantity="other">%d naujų nuotraukų</item>
+    </plurals>
+    <string name="status_offline">Neprisijungęs</string>
+    <string name="status_online">Prisijungęs · %1$s</string>
+    <string name="status_server_unreachable">Nepavyksta pasiekti serverio</string>
+    <string name="identify_this_is">Tai</string>
+    <string name="snack_hidden">Nuotrauka paslėpta</string>
+    <string name="snack_deleted">Nuotrauka ištrinta</string>
+    <string name="menu_settings">Nustatymai</string>
+    <string name="menu_power">Maitinimas</string>
+    <string name="menu_hide">Slėpti</string>
+    <string name="menu_delete">Ištrinti</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Nuotraukų dar nėra</string>
+    <string name="empty_body">Per kinframe programėlę ar svetainę išsiųstos nuotraukos ir vaizdo įrašai čia pasirodo per kelias sekundes.</string>
+    <string name="empty_code_title">Pridėkite šeimą šiuo kodu</string>
+    <string name="empty_code_body">Įveskite jį kinframe programėlėje arba nuskaitykite QR kodą.</string>
+    <string name="empty_hidden_title">Visos nuotraukos paslėptos</string>
+    <string name="empty_hidden_body">Paslėptos nuotraukos lieka bibliotekoje. Vėl jas parodyti galite kinframe programėlėje.</string>
+    <string name="empty_downloading_title">Nuotraukos jau pakeliui</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Atsisiunčiama %d nuotrauka.</item>
+        <item quantity="few">Atsisiunčiamos %d nuotraukos.</item>
+        <item quantity="many">Atsisiunčiama %d nuotraukos.</item>
+        <item quantity="other">Atsisiunčiama %d nuotraukų.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Maitinimas</string>
+    <string name="power_sleep">Užmigdyti</string>
+    <string name="power_sleep_body">Ekranas išjungtas, kol jį paliesite.</string>
+    <string name="power_restart">Paleisti iš naujo</string>
+    <string name="power_restart_body">Paleisti rėmelį iš naujo.</string>
+    <string name="power_off">Išjungti</string>
+    <string name="power_off_body">Saugiai išjunkite prieš atjungdami nuo elektros.</string>
+    <string name="shutting_down_title">Išjungiama…</string>
+    <string name="restarting_title">Paleidžiama iš naujo…</string>
+    <string name="shutting_down_body">Viskas saugiai išsaugoma.</string>
+    <string name="safe_title">Dabar galite saugiai atjungti</string>
+    <string name="safe_body">Viskas išsaugota. Norėdami vėl naudoti rėmelį, paspauskite maitinimo mygtuką arba vėl įjunkite jį į elektros lizdą.</string>
+    <string name="safe_body_noroot">kinframe viską išsaugojo. Dabar galite atjungti rėmelį.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe nepavyko rodyti nuotraukų</string>
+    <string name="recovery_body">Programėlė kelis kartus iš eilės netikėtai sustojo. Bandykite dar kartą arba išvalykite atsisiųstas nuotraukas. Jos vėl atsisiųs iš serverio, niekas nebus prarasta.</string>
+    <string name="recovery_clear">Išvalyti atsisiųstas nuotraukas</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Nustatymai</string>
+    <string name="settings_language">Kalba</string>
+    <string name="settings_slideshow">Skaidrių peržiūra</string>
+    <string name="settings_interval">Kiekvieną nuotrauką rodyti</string>
+    <string name="settings_transition">Perėjimas</string>
+    <string name="transition_crossfade">Išblukimas</string>
+    <string name="transition_slide">Slinkimas</string>
+    <string name="settings_order">Tvarka</string>
+    <string name="order_received">Naujausios gautos</string>
+    <string name="order_taken">Fotografavimo data</string>
+    <string name="order_shuffle">Atsitiktine tvarka</string>
+    <string name="settings_reverse">Seniausios pirmiau</string>
+    <string name="settings_fill">Nuotraukos dydis</string>
+    <string name="fill_fill">Užpildyti ekraną</string>
+    <string name="fill_fit">Rodyti visą nuotrauką</string>
+    <string name="settings_display">Ekranas</string>
+    <string name="settings_brightness">Ryškumas</string>
+    <string name="settings_brightness_mode">Automatinis ryškumas</string>
+    <string name="brightness_manual">Pastovus</string>
+    <string name="brightness_sun">Pagal saulę</string>
+    <string name="settings_sleep">Miego režimas</string>
+    <string name="settings_sleep_enabled">Naktį išjungti ekraną</string>
+    <string name="settings_sleep_at">Užmigti</string>
+    <string name="settings_wake_at">Pabusti</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">ir dar %d tvarkaraštis, valdomas kinframe programėlėje</item>
+        <item quantity="few">ir dar %d tvarkaraščiai, valdomi kinframe programėlėje</item>
+        <item quantity="many">ir dar %d tvarkaraščio, valdomo kinframe programėlėje</item>
+        <item quantity="other">ir dar %d tvarkaraščių, valdomų kinframe programėlėje</item>
+    </plurals>
+    <string name="settings_about">Šis rėmelis</string>
+    <string name="about_frame">Pavadinimas</string>
+    <string name="about_server">Serveris</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Programėlės versija</string>
+    <string name="about_android_settings">Android nustatymai</string>
+    <string name="settings_updates">Atnaujinimai</string>
+    <string name="updates_channel">Kanalas</string>
+    <string name="updates_channel_stable">Stabilus</string>
+    <string name="updates_channel_beta">Beta (naujos versijos anksčiau)</string>
+    <string name="updates_check">Tikrinti, ar yra naujinių</string>
+    <string name="updates_install_now">Įdiegti dabar</string>
+    <string name="updates_checking">Ieškoma naujinių…</string>
+    <string name="updates_up_to_date">Šis rėmelis atnaujintas.</string>
+    <string name="updates_downloading">Atsisiunčiama versija %1$s… %2$d%%</string>
+    <string name="updates_waiting">Versija %1$s paruošta. Ji bus įdiegta, kai rėmeliu niekas nesinaudos.</string>
+    <string name="updates_installing">Diegiama versija %1$s. Rėmelis netrukus pasileis iš naujo.</string>
+    <string name="updates_failed">Atnaujinti nepavyko. Rėmelis bandys vėliau.</string>
+    <string name="update_notice_updated">Atnaujinta į versiją %1$s</string>
+    <string name="update_notice_rolled_back">Naujoje versijoje kilo problemų, todėl rėmelis grįžo prie ankstesnės.</string>
+    <string name="update_notice_needs_user">Naujinys paruoštas. Bakstelėkite „Įdiegti“, kad tęstumėte.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Rodyti prognozę</string>
+    <string name="weather_close">Uždaryti</string>
+    <string name="weather_now">Dabar</string>
+    <string name="weather_today">Šiandien</string>
+    <string name="weather_feels_like">Jaučiasi kaip %1$s</string>
+    <string name="weather_high_low">Maks. %1$s · Min. %2$s</string>
+    <string name="weather_wind">Vėjas</string>
+    <string name="weather_humidity">Drėgnumas</string>
+    <string name="weather_sunrise">Saulėtekis</string>
+    <string name="weather_sunset">Saulėlydis</string>
+    <string name="weather_next_hours">Artimiausios 24 valandos</string>
+    <string name="weather_next_days">7 dienų prognozė</string>
+    <string name="weather_updated">Atnaujinta %1$s</string>
+    <string-array name="weather_compass">
+        <item>Š</item>
+        <item>ŠR</item>
+        <item>R</item>
+        <item>PR</item>
+        <item>P</item>
+        <item>PV</item>
+        <item>V</item>
+        <item>ŠV</item>
+    </string-array>
+    <string name="wmo_clear_day">Saulėta</string>
+    <string name="wmo_clear_night">Giedra</string>
+    <string name="wmo_mainly_clear_day">Daugiausia saulėta</string>
+    <string name="wmo_mainly_clear_night">Daugiausia giedra</string>
+    <string name="wmo_partly_cloudy">Mažai debesuota</string>
+    <string name="wmo_overcast">Debesuota</string>
+    <string name="wmo_fog">Rūkas</string>
+    <string name="wmo_rime_fog">Šąlantis rūkas</string>
+    <string name="wmo_drizzle_light">Silpna dulksna</string>
+    <string name="wmo_drizzle">Dulksna</string>
+    <string name="wmo_drizzle_dense">Smarki dulksna</string>
+    <string name="wmo_freezing_drizzle">Šąlanti dulksna</string>
+    <string name="wmo_rain_light">Nedidelis lietus</string>
+    <string name="wmo_rain">Lietus</string>
+    <string name="wmo_rain_heavy">Smarkus lietus</string>
+    <string name="wmo_freezing_rain">Šąlantis lietus</string>
+    <string name="wmo_snow_light">Nedidelis sniegas</string>
+    <string name="wmo_snow">Sniegas</string>
+    <string name="wmo_snow_heavy">Smarkus sniegas</string>
+    <string name="wmo_snow_grains">Sniego kruopos</string>
+    <string name="wmo_showers_light">Nedidelės liūtys</string>
+    <string name="wmo_showers">Liūtys</string>
+    <string name="wmo_showers_violent">Smarkios liūtys</string>
+    <string name="wmo_snow_showers_light">Nedidelis snygis</string>
+    <string name="wmo_snow_showers">Snygis</string>
+    <string name="wmo_thunderstorm">Perkūnija</string>
+    <string name="wmo_thunderstorm_hail">Perkūnija su kruša</string>
+</resources>

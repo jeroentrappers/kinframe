@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Foto okvir</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Natrag</string>
+    <string name="action_cancel">Odustani</string>
+    <string name="action_continue">Nastavi</string>
+    <string name="action_try_again">Pokušaj ponovno</string>
+    <string name="action_undo">Poništi</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Dobro došli u kinframe</string>
+    <string name="setup_language_body">Odaberite jezik ovog okvira.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Povežite se s Wi-Fi mrežom</string>
+    <string name="setup_wifi_body">Okviru je potreban Wi-Fi za primanje fotografija. Kad stignu, prikazuju se i bez veze.</string>
+    <string name="wifi_connected_to">Povezano s mrežom %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Nije povezano</string>
+    <string name="wifi_not_connected_hint">Za nastavak odaberite mrežu.</string>
+    <string name="wifi_no_internet">Povezano, ali još nema interneta</string>
+    <string name="wifi_signal">Signal: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi postavke</string>
+    <string name="wifi_networks">Mreže u blizini</string>
+    <string name="wifi_scanning">Traženje mreža…</string>
+    <string name="wifi_permission_body">Za prikaz mreža ovdje Android treba dopuštenje za traženje Wi-Fi mreža.</string>
+    <string name="wifi_show_networks">Prikaži mreže</string>
+    <string name="wifi_password">Zaporka</string>
+    <string name="wifi_join">Poveži</string>
+    <string name="signal_0">vrlo slab</string>
+    <string name="signal_1">slab</string>
+    <string name="signal_2">osrednji</string>
+    <string name="signal_3">dobar</string>
+    <string name="signal_4">izvrstan</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Odaberite poslužitelj</string>
+    <string name="setup_server_body">Fotografije putuju preko kinframe poslužitelja. Koristite besplatni kinframe poslužitelj ili onaj koji vodi vaša obitelj.</string>
+    <string name="server_default_body">Besplatno i otvorenog koda. Preporučeno.</string>
+    <string name="server_custom">Koristi vlastiti poslužitelj</string>
+    <string name="server_custom_body">Za obitelji koje same hostaju kinframe.</string>
+    <string name="server_address">Adresa poslužitelja</string>
+    <string name="server_check">Provjeri poslužitelj</string>
+    <string name="server_checking">Provjera poslužitelja…</string>
+    <string name="server_version">verzija %1$s</string>
+    <string name="server_insecure">nije šifrirano</string>
+    <string name="server_error_invalid">To ne izgleda kao web-adresa. Pokušajte nešto poput https://frames.example.org.</string>
+    <string name="server_error_unreachable">Poslužitelj nije dostupan. Provjerite adresu i je li okvir povezan s internetom.</string>
+    <string name="server_error_not_kinframe">Poslužitelj je odgovorio, ali nije kinframe poslužitelj.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Pripremamo vaš okvir…</string>
+    <string name="enroll_body">To traje nekoliko sekundi.</string>
+    <string name="enroll_failed_title">Okvir se nije uspio registrirati</string>
+    <string name="enroll_failed_body">Odgovor poslužitelja: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Povežite ovaj okvir sa svojom obitelji</string>
+    <string name="code_step1">Otvorite aplikaciju kinframe ili %1$s u pregledniku</string>
+    <string name="code_step2">Odaberite Dodaj okvir</string>
+    <string name="code_step3">Unesite ovaj kôd ili skenirajte QR kôd</string>
+    <string name="code_valid_for">Vrijedi još %1$s</string>
+    <string name="code_waiting">Čeka se da netko unese kôd</string>
+    <string name="code_offline_title">Okvir nije povezan</string>
+    <string name="code_offline_body">Za kôd okvira potrebna je internetska veza. Provjerite Wi-Fi.</string>
+    <string name="code_error_title">Nije moguće dobiti kôd okvira</string>
+    <string name="code_error_body">Poslužitelj nije odgovorio. Okvir nastavlja pokušavati.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Povezano: %1$s</string>
+    <string name="celebrate_title_anon">Povezano</string>
+    <string name="celebrate_body">Fotografije poslane na ovaj okvir pojavit će se ovdje za nekoliko sekundi.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Danas</string>
+    <string name="date_yesterday">Jučer</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">prije %d dan</item>
+        <item quantity="few">prije %d dana</item>
+        <item quantity="other">prije %d dana</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">uređeno</string>
+    <string name="unable_photo">Ova se fotografija ne može prikazati</string>
+    <string name="unable_video">Ovaj se videozapis ne može reproducirati. Zamolite pošiljatelja da ga ponovno pošalje.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nova fotografija</item>
+        <item quantity="few">%d nove fotografije</item>
+        <item quantity="other">%d novih fotografija</item>
+    </plurals>
+    <string name="status_offline">Izvan mreže</string>
+    <string name="status_online">Na mreži · %1$s</string>
+    <string name="status_server_unreachable">Poslužitelj nije dostupan</string>
+    <string name="identify_this_is">Ovo je</string>
+    <string name="snack_hidden">Fotografija je skrivena</string>
+    <string name="snack_deleted">Fotografija je izbrisana</string>
+    <string name="menu_settings">Postavke</string>
+    <string name="menu_power">Napajanje</string>
+    <string name="menu_hide">Sakrij</string>
+    <string name="menu_delete">Izbriši</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Još nema fotografija</string>
+    <string name="empty_body">Fotografije i videozapisi poslani putem aplikacije ili web-stranice kinframe pojavljuju se ovdje za nekoliko sekundi.</string>
+    <string name="empty_code_title">Dodajte obitelj ovim kôdom</string>
+    <string name="empty_code_body">Unesite ga u aplikaciju kinframe ili skenirajte QR kôd.</string>
+    <string name="empty_hidden_title">Sve su fotografije skrivene</string>
+    <string name="empty_hidden_body">Skrivene fotografije ostaju u zbirci. Ponovno ih možete prikazati u aplikaciji kinframe.</string>
+    <string name="empty_downloading_title">Fotografije stižu</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Preuzima se %d fotografija.</item>
+        <item quantity="few">Preuzimaju se %d fotografije.</item>
+        <item quantity="other">Preuzima se %d fotografija.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Napajanje</string>
+    <string name="power_sleep">Mirovanje</string>
+    <string name="power_sleep_body">Zaslon je isključen dok ga ne dodirnete.</string>
+    <string name="power_restart">Ponovno pokreni</string>
+    <string name="power_restart_body">Ponovno pokreće okvir.</string>
+    <string name="power_off">Isključi</string>
+    <string name="power_off_body">Sigurno isključivanje prije iskopčavanja.</string>
+    <string name="shutting_down_title">Isključivanje…</string>
+    <string name="restarting_title">Ponovno pokretanje…</string>
+    <string name="shutting_down_body">Sve se sigurno sprema.</string>
+    <string name="safe_title">Sada ga možete sigurno iskopčati</string>
+    <string name="safe_body">Sve je spremljeno. Za ponovno korištenje okvira pritisnite tipku za uključivanje ili ga ponovno ukopčajte.</string>
+    <string name="safe_body_noroot">kinframe je sve spremio. Sada možete iskopčati okvir.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe ima problema s prikazom fotografija</string>
+    <string name="recovery_body">Nekoliko se puta zaredom neočekivano zaustavio. Pokušajte ponovno ili izbrišite preuzete fotografije. Ponovno će se preuzeti s poslužitelja, ništa se ne gubi.</string>
+    <string name="recovery_clear">Izbriši preuzete fotografije</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Postavke</string>
+    <string name="settings_language">Jezik</string>
+    <string name="settings_slideshow">Dijaprojekcija</string>
+    <string name="settings_interval">Prikaz svake fotografije</string>
+    <string name="settings_transition">Prijelaz</string>
+    <string name="transition_crossfade">Pretapanje</string>
+    <string name="transition_slide">Klizanje</string>
+    <string name="settings_order">Redoslijed</string>
+    <string name="order_received">Najnovije primljene</string>
+    <string name="order_taken">Datum snimanja</string>
+    <string name="order_shuffle">Nasumično</string>
+    <string name="settings_reverse">Najstarije prvo</string>
+    <string name="settings_fill">Veličina fotografije</string>
+    <string name="fill_fill">Ispuni zaslon</string>
+    <string name="fill_fit">Prikaži cijelu fotografiju</string>
+    <string name="settings_display">Zaslon</string>
+    <string name="settings_brightness">Svjetlina</string>
+    <string name="settings_brightness_mode">Automatska svjetlina</string>
+    <string name="brightness_manual">Fiksna</string>
+    <string name="brightness_sun">Prema suncu</string>
+    <string name="settings_sleep">Mirovanje</string>
+    <string name="settings_sleep_enabled">Isključi zaslon noću</string>
+    <string name="settings_sleep_at">Mirovanje u</string>
+    <string name="settings_wake_at">Buđenje u</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">i još %d raspored, uređuje se u aplikaciji kinframe</item>
+        <item quantity="few">i još %d rasporeda, uređuju se u aplikaciji kinframe</item>
+        <item quantity="other">i još %d rasporeda, uređuju se u aplikaciji kinframe</item>
+    </plurals>
+    <string name="settings_about">Ovaj okvir</string>
+    <string name="about_frame">Naziv</string>
+    <string name="about_server">Poslužitelj</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Verzija aplikacije</string>
+    <string name="about_android_settings">Android postavke</string>
+    <string name="settings_updates">Ažuriranja</string>
+    <string name="updates_channel">Kanal</string>
+    <string name="updates_channel_stable">Stabilno</string>
+    <string name="updates_channel_beta">Beta (nove verzije ranije)</string>
+    <string name="updates_check">Provjeri ažuriranja</string>
+    <string name="updates_install_now">Instaliraj sada</string>
+    <string name="updates_checking">Traženje ažuriranja…</string>
+    <string name="updates_up_to_date">Okvir je ažuran.</string>
+    <string name="updates_downloading">Preuzimanje verzije %1$s… %2$d %%</string>
+    <string name="updates_waiting">Verzija %1$s je spremna. Instalirat će se kad nitko ne bude koristio okvir.</string>
+    <string name="updates_installing">Instalira se verzija %1$s. Okvir će se uskoro ponovno pokrenuti.</string>
+    <string name="updates_failed">Ažuriranje nije uspjelo. Okvir će pokušati ponovno kasnije.</string>
+    <string name="update_notice_updated">Ažurirano na verziju %1$s</string>
+    <string name="update_notice_rolled_back">Nova verzija imala je problema pa se okvir vratio na prethodnu.</string>
+    <string name="update_notice_needs_user">Ažuriranje je spremno. Za nastavak dodirnite Instaliraj.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">Prikaži prognozu</string>
+    <string name="weather_close">Zatvori</string>
+    <string name="weather_now">Sada</string>
+    <string name="weather_today">Danas</string>
+    <string name="weather_feels_like">Osjećaj: %1$s</string>
+    <string name="weather_high_low">Maks. %1$s · Min. %2$s</string>
+    <string name="weather_wind">Vjetar</string>
+    <string name="weather_humidity">Vlažnost</string>
+    <string name="weather_sunrise">Izlazak sunca</string>
+    <string name="weather_sunset">Zalazak sunca</string>
+    <string name="weather_next_hours">Sljedeća 24 sata</string>
+    <string name="weather_next_days">Prognoza za 7 dana</string>
+    <string name="weather_updated">Ažurirano %1$s</string>
+    <string-array name="weather_compass">
+        <item>S</item>
+        <item>SI</item>
+        <item>I</item>
+        <item>JI</item>
+        <item>J</item>
+        <item>JZ</item>
+        <item>Z</item>
+        <item>SZ</item>
+    </string-array>
+    <string name="wmo_clear_day">Sunčano</string>
+    <string name="wmo_clear_night">Vedro</string>
+    <string name="wmo_mainly_clear_day">Pretežno sunčano</string>
+    <string name="wmo_mainly_clear_night">Pretežno vedro</string>
+    <string name="wmo_partly_cloudy">Djelomično oblačno</string>
+    <string name="wmo_overcast">Oblačno</string>
+    <string name="wmo_fog">Magla</string>
+    <string name="wmo_rime_fog">Ledena magla</string>
+    <string name="wmo_drizzle_light">Slaba rosulja</string>
+    <string name="wmo_drizzle">Rosulja</string>
+    <string name="wmo_drizzle_dense">Jaka rosulja</string>
+    <string name="wmo_freezing_drizzle">Ledena rosulja</string>
+    <string name="wmo_rain_light">Slaba kiša</string>
+    <string name="wmo_rain">Kiša</string>
+    <string name="wmo_rain_heavy">Jaka kiša</string>
+    <string name="wmo_freezing_rain">Ledena kiša</string>
+    <string name="wmo_snow_light">Slab snijeg</string>
+    <string name="wmo_snow">Snijeg</string>
+    <string name="wmo_snow_heavy">Jak snijeg</string>
+    <string name="wmo_snow_grains">Zrnati snijeg</string>
+    <string name="wmo_showers_light">Slabi pljuskovi</string>
+    <string name="wmo_showers">Pljuskovi</string>
+    <string name="wmo_showers_violent">Jaki pljuskovi</string>
+    <string name="wmo_snow_showers_light">Slabi snježni pljuskovi</string>
+    <string name="wmo_snow_showers">Snježni pljuskovi</string>
+    <string name="wmo_thunderstorm">Grmljavina</string>
+    <string name="wmo_thunderstorm_hail">Grmljavina s tučom</string>
+</resources>

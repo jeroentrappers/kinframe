@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Khung ảnh</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Quay lại</string>
+    <string name="action_cancel">Hủy</string>
+    <string name="action_continue">Tiếp tục</string>
+    <string name="action_try_again">Thử lại</string>
+    <string name="action_undo">Hoàn tác</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Chào mừng bạn đến với kinframe</string>
+    <string name="setup_language_body">Chọn ngôn ngữ cho khung ảnh này.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Kết nối Wi-Fi</string>
+    <string name="setup_wifi_body">Khung ảnh cần Wi-Fi để nhận ảnh. Khi ảnh đã về, ảnh vẫn phát được mà không cần kết nối.</string>
+    <string name="wifi_connected_to">Đã kết nối với %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Chưa kết nối</string>
+    <string name="wifi_not_connected_hint">Chọn một mạng để tiếp tục.</string>
+    <string name="wifi_no_internet">Đã kết nối nhưng chưa có Internet</string>
+    <string name="wifi_signal">Tín hiệu: %1$s</string>
+    <string name="wifi_open_settings">Cài đặt Wi-Fi</string>
+    <string name="wifi_networks">Mạng ở gần</string>
+    <string name="wifi_scanning">Đang tìm mạng…</string>
+    <string name="wifi_permission_body">Để liệt kê mạng ở đây, Android cần quyền quét Wi-Fi.</string>
+    <string name="wifi_show_networks">Hiện các mạng</string>
+    <string name="wifi_password">Mật khẩu</string>
+    <string name="wifi_join">Kết nối</string>
+    <string name="signal_0">rất yếu</string>
+    <string name="signal_1">yếu</string>
+    <string name="signal_2">khá</string>
+    <string name="signal_3">tốt</string>
+    <string name="signal_4">rất tốt</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Chọn máy chủ</string>
+    <string name="setup_server_body">Ảnh được gửi qua máy chủ kinframe. Hãy dùng máy chủ kinframe miễn phí, hoặc máy chủ do gia đình bạn tự vận hành.</string>
+    <string name="server_default_body">Miễn phí và nguồn mở. Nên dùng.</string>
+    <string name="server_custom">Dùng máy chủ của riêng bạn</string>
+    <string name="server_custom_body">Dành cho gia đình tự lưu trữ kinframe.</string>
+    <string name="server_address">Địa chỉ máy chủ</string>
+    <string name="server_check">Kiểm tra máy chủ</string>
+    <string name="server_checking">Đang kiểm tra máy chủ…</string>
+    <string name="server_version">phiên bản %1$s</string>
+    <string name="server_insecure">không mã hóa</string>
+    <string name="server_error_invalid">Có vẻ đó không phải địa chỉ web. Hãy thử dạng https://frames.example.org.</string>
+    <string name="server_error_unreachable">Không kết nối được máy chủ này. Hãy kiểm tra địa chỉ và đảm bảo khung ảnh đang trực tuyến.</string>
+    <string name="server_error_not_kinframe">Máy chủ này có phản hồi nhưng không phải máy chủ kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Đang chuẩn bị khung ảnh…</string>
+    <string name="enroll_body">Chỉ mất vài giây.</string>
+    <string name="enroll_failed_title">Khung ảnh không đăng ký được</string>
+    <string name="enroll_failed_body">Máy chủ báo: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Kết nối khung ảnh này với gia đình bạn</string>
+    <string name="code_step1">Mở ứng dụng kinframe, hoặc %1$s trong trình duyệt</string>
+    <string name="code_step2">Chọn Thêm khung ảnh</string>
+    <string name="code_step3">Nhập mã này, hoặc quét mã QR</string>
+    <string name="code_valid_for">Còn hiệu lực %1$s</string>
+    <string name="code_waiting">Đang chờ ai đó nhập mã</string>
+    <string name="code_offline_title">Khung ảnh đang ngoại tuyến</string>
+    <string name="code_offline_body">Mã khung ảnh cần có kết nối Internet. Hãy kiểm tra Wi-Fi.</string>
+    <string name="code_error_title">Không lấy được mã khung ảnh</string>
+    <string name="code_error_body">Máy chủ không phản hồi. Khung ảnh sẽ tiếp tục thử.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Đã kết nối với %1$s</string>
+    <string name="celebrate_title_anon">Đã kết nối</string>
+    <string name="celebrate_body">Ảnh gửi tới khung ảnh này sẽ xuất hiện ở đây sau vài giây.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d giờ %2$d phút</string>
+    <string name="duration_min">%1$d phút</string>
+    <string name="date_today">Hôm nay</string>
+    <string name="date_yesterday">Hôm qua</string>
+    <plurals name="date_days_ago">
+        <item quantity="other">%d ngày trước</item>
+    </plurals>
+    <string name="interval_s">%1$d giây</string>
+    <string name="interval_min">%1$d phút</string>
+    <string name="interval_h">%1$d giờ</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">đã sửa</string>
+    <string name="unable_photo">Không thể hiển thị ảnh này</string>
+    <string name="unable_video">Không thể phát video này. Hãy nhờ người gửi gửi lại.</string>
+    <plurals name="new_photos">
+        <item quantity="other">%d ảnh mới</item>
+    </plurals>
+    <string name="status_offline">Ngoại tuyến</string>
+    <string name="status_online">Trực tuyến · %1$s</string>
+    <string name="status_server_unreachable">Không kết nối được máy chủ</string>
+    <string name="identify_this_is">Đây là</string>
+    <string name="snack_hidden">Đã ẩn ảnh</string>
+    <string name="snack_deleted">Đã xóa ảnh</string>
+    <string name="menu_settings">Cài đặt</string>
+    <string name="menu_power">Nguồn</string>
+    <string name="menu_hide">Ẩn</string>
+    <string name="menu_delete">Xóa</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Chưa có ảnh nào</string>
+    <string name="empty_body">Ảnh và video gửi bằng ứng dụng hoặc trang web kinframe sẽ xuất hiện ở đây sau vài giây.</string>
+    <string name="empty_code_title">Thêm người thân bằng mã này</string>
+    <string name="empty_code_body">Nhập mã trong ứng dụng kinframe, hoặc quét mã QR.</string>
+    <string name="empty_hidden_title">Tất cả ảnh đều bị ẩn</string>
+    <string name="empty_hidden_body">Ảnh đã ẩn vẫn nằm trong thư viện. Hiện lại từ ứng dụng kinframe.</string>
+    <string name="empty_downloading_title">Ảnh đang trên đường tới</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="other">Đang tải xuống %d ảnh.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Nguồn</string>
+    <string name="power_sleep">Ngủ</string>
+    <string name="power_sleep_body">Tắt màn hình cho đến khi bạn chạm vào.</string>
+    <string name="power_restart">Khởi động lại</string>
+    <string name="power_restart_body">Khởi động lại khung ảnh.</string>
+    <string name="power_off">Tắt nguồn</string>
+    <string name="power_off_body">Tắt an toàn trước khi rút điện.</string>
+    <string name="shutting_down_title">Đang tắt…</string>
+    <string name="restarting_title">Đang khởi động lại…</string>
+    <string name="shutting_down_body">Đang lưu mọi thứ an toàn.</string>
+    <string name="safe_title">Giờ có thể rút điện an toàn</string>
+    <string name="safe_body">Mọi thứ đã được lưu. Để dùng lại khung ảnh, hãy nhấn nút nguồn hoặc cắm điện lại.</string>
+    <string name="safe_body_noroot">kinframe đã lưu mọi thứ. Bạn có thể rút điện khung ảnh ngay bây giờ.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe gặp sự cố khi hiển thị ảnh</string>
+    <string name="recovery_body">Ứng dụng đã dừng đột ngột vài lần liên tiếp. Hãy thử lại, hoặc xóa ảnh đã tải xuống. Ảnh sẽ được tải lại từ máy chủ, không mất gì cả.</string>
+    <string name="recovery_clear">Xóa ảnh đã tải xuống</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Cài đặt</string>
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="settings_slideshow">Trình chiếu</string>
+    <string name="settings_interval">Hiện mỗi ảnh trong</string>
+    <string name="settings_transition">Hiệu ứng chuyển</string>
+    <string name="transition_crossfade">Mờ dần</string>
+    <string name="transition_slide">Trượt</string>
+    <string name="settings_order">Thứ tự</string>
+    <string name="order_received">Mới nhận nhất</string>
+    <string name="order_taken">Ngày chụp</string>
+    <string name="order_shuffle">Ngẫu nhiên</string>
+    <string name="settings_reverse">Cũ nhất trước</string>
+    <string name="settings_fill">Kích thước ảnh</string>
+    <string name="fill_fill">Lấp đầy màn hình</string>
+    <string name="fill_fit">Hiện toàn bộ ảnh</string>
+    <string name="settings_display">Màn hình</string>
+    <string name="settings_brightness">Độ sáng</string>
+    <string name="settings_brightness_mode">Độ sáng tự động</string>
+    <string name="brightness_manual">Cố định</string>
+    <string name="brightness_sun">Theo mặt trời</string>
+    <string name="settings_sleep">Ngủ</string>
+    <string name="settings_sleep_enabled">Tắt màn hình vào ban đêm</string>
+    <string name="settings_sleep_at">Ngủ lúc</string>
+    <string name="settings_wake_at">Thức lúc</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="other">và %d lịch khác, quản lý trong ứng dụng kinframe</item>
+    </plurals>
+    <string name="settings_about">Khung ảnh này</string>
+    <string name="about_frame">Tên</string>
+    <string name="about_server">Máy chủ</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Phiên bản ứng dụng</string>
+    <string name="about_android_settings">Cài đặt Android</string>
+    <string name="settings_updates">Cập nhật</string>
+    <string name="updates_channel">Kênh</string>
+    <string name="updates_channel_stable">Ổn định</string>
+    <string name="updates_channel_beta">Beta (dùng thử phiên bản mới sớm)</string>
+    <string name="updates_check">Kiểm tra cập nhật</string>
+    <string name="updates_install_now">Cài đặt ngay</string>
+    <string name="updates_checking">Đang kiểm tra cập nhật…</string>
+    <string name="updates_up_to_date">Khung ảnh này đã được cập nhật.</string>
+    <string name="updates_downloading">Đang tải xuống phiên bản %1$s… %2$d%%</string>
+    <string name="updates_waiting">Phiên bản %1$s đã sẵn sàng. Bản này sẽ được cài khi không ai dùng khung ảnh.</string>
+    <string name="updates_installing">Đang cài phiên bản %1$s. Khung ảnh sẽ khởi động lại trong giây lát.</string>
+    <string name="updates_failed">Cập nhật không thành công. Khung ảnh sẽ thử lại sau.</string>
+    <string name="update_notice_updated">Đã cập nhật lên phiên bản %1$s</string>
+    <string name="update_notice_rolled_back">Phiên bản mới gặp sự cố nên khung ảnh đã quay về phiên bản trước.</string>
+    <string name="update_notice_needs_user">Đã có bản cập nhật. Nhấn Cài đặt để tiếp tục.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Xem dự báo</string>
+    <string name="weather_close">Đóng</string>
+    <string name="weather_now">Bây giờ</string>
+    <string name="weather_today">Hôm nay</string>
+    <string name="weather_feels_like">Cảm giác như %1$s</string>
+    <string name="weather_high_low">C %1$s · T %2$s</string>
+    <string name="weather_wind">Gió</string>
+    <string name="weather_humidity">Độ ẩm</string>
+    <string name="weather_sunrise">Mặt trời mọc</string>
+    <string name="weather_sunset">Mặt trời lặn</string>
+    <string name="weather_next_hours">24 giờ tới</string>
+    <string name="weather_next_days">Dự báo 7 ngày</string>
+    <string name="weather_updated">Cập nhật %1$s</string>
+    <string-array name="weather_compass">
+        <item>B</item>
+        <item>ĐB</item>
+        <item>Đ</item>
+        <item>ĐN</item>
+        <item>N</item>
+        <item>TN</item>
+        <item>T</item>
+        <item>TB</item>
+    </string-array>
+    <string name="wmo_clear_day">Nắng</string>
+    <string name="wmo_clear_night">Quang đãng</string>
+    <string name="wmo_mainly_clear_day">Phần lớn có nắng</string>
+    <string name="wmo_mainly_clear_night">Phần lớn quang đãng</string>
+    <string name="wmo_partly_cloudy">Có mây rải rác</string>
+    <string name="wmo_overcast">Nhiều mây</string>
+    <string name="wmo_fog">Sương mù</string>
+    <string name="wmo_rime_fog">Sương mù đóng băng</string>
+    <string name="wmo_drizzle_light">Mưa phùn nhẹ</string>
+    <string name="wmo_drizzle">Mưa phùn</string>
+    <string name="wmo_drizzle_dense">Mưa phùn dày</string>
+    <string name="wmo_freezing_drizzle">Mưa phùn băng giá</string>
+    <string name="wmo_rain_light">Mưa nhỏ</string>
+    <string name="wmo_rain">Mưa</string>
+    <string name="wmo_rain_heavy">Mưa to</string>
+    <string name="wmo_freezing_rain">Mưa băng giá</string>
+    <string name="wmo_snow_light">Tuyết nhẹ</string>
+    <string name="wmo_snow">Tuyết</string>
+    <string name="wmo_snow_heavy">Tuyết dày</string>
+    <string name="wmo_snow_grains">Hạt tuyết</string>
+    <string name="wmo_showers_light">Mưa rào nhẹ</string>
+    <string name="wmo_showers">Mưa rào</string>
+    <string name="wmo_showers_violent">Mưa rào lớn</string>
+    <string name="wmo_snow_showers_light">Mưa tuyết nhẹ</string>
+    <string name="wmo_snow_showers">Mưa tuyết</string>
+    <string name="wmo_thunderstorm">Dông</string>
+    <string name="wmo_thunderstorm_hail">Dông kèm mưa đá</string>
+</resources>

@@ -277,7 +277,7 @@
 	.place-actions {
 		display: flex;
 		gap: 4px;
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 	.combo {
 		position: relative;
@@ -290,11 +290,11 @@
 	}
 	.search-wrap .input {
 		width: 100%;
-		padding-left: 38px;
+		padding-inline-start: 38px;
 	}
 	.search-icon {
 		position: absolute;
-		left: 12px;
+		inset-inline-start: 12px;
 		top: 50%;
 		transform: translateY(-50%);
 		color: var(--text-faint);
@@ -303,7 +303,7 @@
 	}
 	.small-spin {
 		position: absolute;
-		right: 12px;
+		inset-inline-end: 12px;
 		top: 50%;
 		margin-top: -8px;
 	}

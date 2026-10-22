@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Унесите PIN власника</string>
+    <string name="pin_reason_settings">да бисте отворили подешавања</string>
+    <string name="pin_reason_exit">да бисте изашли из kinframe-а</string>
+    <string name="pin_reason_wifi">да бисте променили Wi-Fi</string>
+    <string name="pin_reason_power_off">да бисте искључили рам</string>
+    <string name="pin_reason_restart">да бисте поново покренули рам</string>
+    <string name="pin_reason_server">да бисте променили сервер</string>
+    <string name="pin_reason_reset">да бисте ресетовали рам</string>
+    <string name="pin_checking">Провера…</string>
+    <string name="pin_wrong">То није PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">То није PIN. Још %d покушај пре кратке паузе.</item>
+        <item quantity="few">То није PIN. Још %d покушаја пре кратке паузе.</item>
+        <item quantity="other">То није PIN. Још %d покушаја пре кратке паузе.</item>
+    </plurals>
+    <string name="pin_locked">Превише погрешних покушаја. Покушајте поново за %s.</string>
+    <string name="pin_forgot">Заборавили сте PIN? Власник рама може да га уклони у апликацији kinframe, у подешавањима овог рама.</string>
+    <string name="pin_new_title">Изаберите PIN</string>
+    <string name="pin_new_body">Од 4 до 6 цифара. Тражиће се за отварање подешавања, искључивање рама или промену Wi-Fi-ја.</string>
+    <string name="pin_confirm_title">Поново унесите PIN</string>
+    <string name="pin_confirm_body">Само ради провере.</string>
+    <string name="pin_mismatch">PIN-ови се не поклапају. Изаберите га поново.</string>
+    <string name="pin_key_delete">Обриши</string>
+    <string name="pin_key_ok">У реду</string>
+    <string name="settings_pin">PIN власника</string>
+    <string name="settings_pin_off">Искључено. Свако поред рама може да отвори подешавања.</string>
+    <string name="settings_pin_on">Укључено. Подешавања, напајање и Wi-Fi траже PIN.</string>
+    <string name="settings_pin_set">Подеси PIN</string>
+    <string name="settings_pin_change">Промени PIN</string>
+    <string name="settings_pin_remove">Уклони PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Неко</string>
+    <string name="join_title">%1$s жели да се придружи</string>
+    <string name="join_body_code">%1$s користи код рама „%2$s”. Ако дозволите, %1$s може да шаље фотографије на овај рам.</string>
+    <string name="join_body_invited">%1$s позива особу %3$s у „%2$s”. Ако дозволите, %3$s може да шаље фотографије на овај рам.</string>
+    <string name="join_invited_by">Позив шаље: %s</string>
+    <string name="join_allow">Дозволи</string>
+    <string name="join_deny">Не дозволи</string>
+    <string name="join_later">Не сада</string>
+    <string name="join_later_hint">Остаје међу обавештењима у менију.</string>
+    <string name="join_pill_one">%s жели да се придружи</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d особа жели да се придружи</item>
+        <item quantity="few">%d особе желе да се придруже</item>
+        <item quantity="other">%d особа жели да се придружи</item>
+    </plurals>
+    <string name="notifications_title">Обавештења</string>
+    <string name="notifications_empty">Све је прегледано</string>
+    <string name="notifications_empty_body">Ништа вас не чека.</string>
+    <string name="menu_notifications">Обавештења</string>
+    <string name="action_close">Затвори</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Нема интернет везе</string>
+    <string name="status_card_offline_body">Фотографије на раму се и даље приказују. Нове стижу чим веза поново проради.</string>
+    <string name="status_card_server_title">Сервер за фотографије није доступан</string>
+    <string name="status_card_server_body">Wi-Fi ради, али сервер не одговара. Нове фотографије стижу када се врати.</string>
+    <string name="status_card_portal_title">Овај Wi-Fi тражи пријаву</string>
+    <string name="status_card_portal_body">Отворите страницу за пријаву на мрежу да би рам био на мрежи.</string>
+    <string name="status_card_portal_action">Пријави се</string>
+    <string name="status_card_storage_title">Рам је скоро пун</string>
+    <string name="status_card_storage_body">Старије фотографије су уклоњене са рама да би се ослободио простор; безбедно остају на серверу. Нове фотографије могу да сачекају док се не ослободи место.</string>
+    <string name="portal_title">Пријава на Wi-Fi</string>
+    <string name="portal_body">Ово се само затвара чим рам буде на мрежи.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">У којој временској зони је рам?</string>
+    <string name="setup_tz_body">Да би сат, датум и ноћни распоред били тачни.</string>
+    <string name="setup_tz_suggested">Предложено</string>
+    <string name="setup_tz_all">Све временске зоне</string>
+    <string name="tz_region_europe">Европа</string>
+    <string name="tz_region_america">Америка</string>
+    <string name="tz_region_asia">Азија</string>
+    <string name="tz_region_africa">Африка</string>
+    <string name="tz_region_australia">Аустралија</string>
+    <string name="tz_region_pacific">Пацифик</string>
+    <string name="tz_region_atlantic">Атлантик</string>
+    <string name="tz_region_indian">Индијски океан</string>
+    <string name="tz_region_antarctica">Антарктик</string>
+    <string name="setup_update_checking">Тражење новије верзије…</string>
+    <string name="setup_update_checking_body">Рам проверава да ли има најновији kinframe пре него што почнете.</string>
+    <string name="setup_update_downloading">Преузимање верзије %s</string>
+    <string name="setup_update_downloading_body">Одмах затим следи инсталација. Можете да прескочите; рам ће се онда ажурирати касније.</string>
+    <string name="setup_update_installing">Инсталирање верзије %s</string>
+    <string name="setup_update_installing_body">Рам ће се ускоро сам поново покренути и наставити подешавање где сте стали.</string>
+    <string name="setup_update_current">kinframe је ажуран</string>
+    <string name="setup_update_current_body">Прелазимо на последњи корак.</string>
+    <string name="setup_update_failed">Провера ажурирања није успела</string>
+    <string name="setup_update_failed_body">Нема проблема: рам ће касније поново проверити и сам се ажурирати.</string>
+    <string name="setup_update_skip">Прескочи за сада</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">На данашњи дан пре %d године</item>
+        <item quantity="few">На данашњи дан пре %d године</item>
+        <item quantity="other">На данашњи дан пре %d година</item>
+    </plurals>
+    <string name="transition_kenburns">Споро зумирање</string>
+    <string name="settings_collage">Више фотографија одједном (колаж)</string>
+    <string name="settings_collage_max">Фотографија по екрану</string>
+    <string name="settings_pair_portraits">Прикажи две усправне фотографије једну поред друге</string>
+    <string name="settings_on_this_day">Прикажи успомене са овог дана из ранијих година</string>
+    <string name="settings_video">Видео снимци</string>
+    <string name="settings_video_autoplay">Аутоматски пуштај видео снимке</string>
+    <string name="settings_video_playback">После видео снимка</string>
+    <string name="video_once_hold">Пусти једном, па сачекај</string>
+    <string name="video_loop">Понављај</string>
+    <string name="video_once_advance">Пусти једном, па настави</string>
+    <string name="settings_video_volume">Јачина звука видеа</string>
+    <string name="settings_video_auto_mute">Искључи звук ако нико не дира рам</string>
+    <string name="video_auto_mute_off">Никад</string>
+    <string name="video_auto_mute_min">%d мин</string>
+</resources>

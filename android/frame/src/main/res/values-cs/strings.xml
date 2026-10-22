@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotorámeček</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Zpět</string>
+    <string name="action_cancel">Zrušit</string>
+    <string name="action_continue">Pokračovat</string>
+    <string name="action_try_again">Zkusit znovu</string>
+    <string name="action_undo">Vrátit</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Vítejte v kinframe</string>
+    <string name="setup_language_body">Vyberte jazyk tohoto rámečku.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Připojte se k Wi-Fi</string>
+    <string name="setup_wifi_body">Rámeček potřebuje Wi-Fi, aby mohl přijímat fotky. Jakmile tu jsou, přehrávají se i bez připojení.</string>
+    <string name="wifi_connected_to">Připojeno k %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Nepřipojeno</string>
+    <string name="wifi_not_connected_hint">Pro pokračování vyberte síť.</string>
+    <string name="wifi_no_internet">Připojeno, ale zatím bez internetu</string>
+    <string name="wifi_signal">Signál: %1$s</string>
+    <string name="wifi_open_settings">Nastavení Wi-Fi</string>
+    <string name="wifi_networks">Sítě v okolí</string>
+    <string name="wifi_scanning">Hledání sítí…</string>
+    <string name="wifi_permission_body">Aby zde mohl zobrazit sítě, potřebuje Android oprávnění k vyhledávání Wi-Fi.</string>
+    <string name="wifi_show_networks">Zobrazit sítě</string>
+    <string name="wifi_password">Heslo</string>
+    <string name="wifi_join">Připojit</string>
+    <string name="signal_0">velmi slabý</string>
+    <string name="signal_1">slabý</string>
+    <string name="signal_2">střední</string>
+    <string name="signal_3">dobrý</string>
+    <string name="signal_4">výborný</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Vyberte server</string>
+    <string name="setup_server_body">Fotky putují přes server kinframe. Použijte bezplatný server kinframe nebo server, který provozuje vaše rodina.</string>
+    <string name="server_default_body">Zdarma a open source. Doporučeno.</string>
+    <string name="server_custom">Použít vlastní server</string>
+    <string name="server_custom_body">Pro rodiny, které si kinframe provozují samy.</string>
+    <string name="server_address">Adresa serveru</string>
+    <string name="server_check">Ověřit server</string>
+    <string name="server_checking">Ověřování serveru…</string>
+    <string name="server_version">verze %1$s</string>
+    <string name="server_insecure">nešifrováno</string>
+    <string name="server_error_invalid">Tohle nevypadá jako webová adresa. Zkuste něco jako https://frames.example.org.</string>
+    <string name="server_error_unreachable">Server se nepodařilo zastihnout. Zkontrolujte adresu a jestli je rámeček online.</string>
+    <string name="server_error_not_kinframe">Server odpověděl, ale není to server kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Připravujeme váš rámeček…</string>
+    <string name="enroll_body">Potrvá to pár sekund.</string>
+    <string name="enroll_failed_title">Rámeček se nepodařilo zaregistrovat</string>
+    <string name="enroll_failed_body">Odpověď serveru: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Propojte rámeček s rodinou</string>
+    <string name="code_step1">Otevřete aplikaci kinframe nebo %1$s v prohlížeči</string>
+    <string name="code_step2">Zvolte Přidat rámeček</string>
+    <string name="code_step3">Zadejte tento kód nebo naskenujte QR kód</string>
+    <string name="code_valid_for">Platí ještě %1$s</string>
+    <string name="code_waiting">Čekáme, až někdo zadá kód</string>
+    <string name="code_offline_title">Rámeček je offline</string>
+    <string name="code_offline_body">Kód rámečku vyžaduje připojení k internetu. Zkontrolujte Wi-Fi.</string>
+    <string name="code_error_title">Kód rámečku se nepodařilo získat</string>
+    <string name="code_error_body">Server neodpověděl. Rámeček to zkouší dál.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Propojeno s %1$s</string>
+    <string name="celebrate_title_anon">Propojeno</string>
+    <string name="celebrate_body">Fotky poslané do tohoto rámečku se tu objeví během pár sekund.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Dnes</string>
+    <string name="date_yesterday">Včera</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">před %d dnem</item>
+        <item quantity="few">před %d dny</item>
+        <item quantity="many">před %d dny</item>
+        <item quantity="other">před %d dny</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">upraveno</string>
+    <string name="unable_photo">Tuto fotku nelze zobrazit</string>
+    <string name="unable_video">Toto video nelze přehrát. Požádejte odesílatele, ať ho pošle znovu.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nová fotka</item>
+        <item quantity="few">%d nové fotky</item>
+        <item quantity="many">%d nových fotek</item>
+        <item quantity="other">%d nových fotek</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Server je nedostupný</string>
+    <string name="identify_this_is">Toto je</string>
+    <string name="snack_hidden">Fotka skryta</string>
+    <string name="snack_deleted">Fotka smazána</string>
+    <string name="menu_settings">Nastavení</string>
+    <string name="menu_power">Napájení</string>
+    <string name="menu_hide">Skrýt</string>
+    <string name="menu_delete">Smazat</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Zatím žádné fotky</string>
+    <string name="empty_body">Fotky a videa poslané z aplikace nebo webu kinframe se tu objeví během několika sekund.</string>
+    <string name="empty_code_title">Přidejte rodinu pomocí tohoto kódu</string>
+    <string name="empty_code_body">Zadejte ho v aplikaci kinframe nebo naskenujte QR kód.</string>
+    <string name="empty_hidden_title">Všechny fotky jsou skryté</string>
+    <string name="empty_hidden_body">Skryté fotky zůstávají v knihovně. Znovu je zobrazíte v aplikaci kinframe.</string>
+    <string name="empty_downloading_title">Fotky jsou na cestě</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Stahuje se %d fotka.</item>
+        <item quantity="few">Stahují se %d fotky.</item>
+        <item quantity="many">Stahuje se %d fotek.</item>
+        <item quantity="other">Stahuje se %d fotek.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Napájení</string>
+    <string name="power_sleep">Uspat</string>
+    <string name="power_sleep_body">Obrazovka zhasne, dokud se jí nedotknete.</string>
+    <string name="power_restart">Restartovat</string>
+    <string name="power_restart_body">Spustit rámeček znovu.</string>
+    <string name="power_off">Vypnout</string>
+    <string name="power_off_body">Před odpojením bezpečně vypněte.</string>
+    <string name="shutting_down_title">Vypínání…</string>
+    <string name="restarting_title">Restartování…</string>
+    <string name="shutting_down_body">Vše se bezpečně ukládá.</string>
+    <string name="safe_title">Nyní můžete rámeček odpojit</string>
+    <string name="safe_body">Vše je uloženo. Chcete-li rámeček znovu použít, stiskněte vypínač nebo ho znovu zapojte.</string>
+    <string name="safe_body_noroot">kinframe vše uložil. Rámeček teď můžete odpojit.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe měl potíže se zobrazením fotek</string>
+    <string name="recovery_body">Několikrát po sobě se nečekaně zastavil. Zkuste to znovu, nebo vymažte stažené fotky. Znovu se stáhnou ze serveru, nic se neztratí.</string>
+    <string name="recovery_clear">Vymazat stažené fotky</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Nastavení</string>
+    <string name="settings_language">Jazyk</string>
+    <string name="settings_slideshow">Prezentace</string>
+    <string name="settings_interval">Zobrazit každou fotku po dobu</string>
+    <string name="settings_transition">Přechod</string>
+    <string name="transition_crossfade">Prolínání</string>
+    <string name="transition_slide">Posun</string>
+    <string name="settings_order">Pořadí</string>
+    <string name="order_received">Nejnovější přijaté</string>
+    <string name="order_taken">Datum pořízení</string>
+    <string name="order_shuffle">Náhodně</string>
+    <string name="settings_reverse">Nejstarší první</string>
+    <string name="settings_fill">Velikost fotky</string>
+    <string name="fill_fill">Vyplnit obrazovku</string>
+    <string name="fill_fit">Zobrazit celou fotku</string>
+    <string name="settings_display">Obrazovka</string>
+    <string name="settings_brightness">Jas</string>
+    <string name="settings_brightness_mode">Automatický jas</string>
+    <string name="brightness_manual">Pevný</string>
+    <string name="brightness_sun">Podle slunce</string>
+    <string name="settings_sleep">Spánek</string>
+    <string name="settings_sleep_enabled">V noci vypnout obrazovku</string>
+    <string name="settings_sleep_at">Uspat v</string>
+    <string name="settings_wake_at">Probudit v</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">a ještě %d plán, spravovaný v aplikaci kinframe</item>
+        <item quantity="few">a ještě %d plány, spravované v aplikaci kinframe</item>
+        <item quantity="many">a ještě %d plánů, spravovaných v aplikaci kinframe</item>
+        <item quantity="other">a ještě %d plánů, spravovaných v aplikaci kinframe</item>
+    </plurals>
+    <string name="settings_about">Tento rámeček</string>
+    <string name="about_frame">Název</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Verze aplikace</string>
+    <string name="about_android_settings">Nastavení Androidu</string>
+    <string name="settings_updates">Aktualizace</string>
+    <string name="updates_channel">Kanál</string>
+    <string name="updates_channel_stable">Stabilní</string>
+    <string name="updates_channel_beta">Beta (nové verze dříve)</string>
+    <string name="updates_check">Zkontrolovat aktualizace</string>
+    <string name="updates_install_now">Nainstalovat</string>
+    <string name="updates_checking">Hledání aktualizací…</string>
+    <string name="updates_up_to_date">Rámeček je aktuální.</string>
+    <string name="updates_downloading">Stahování verze %1$s… %2$d %%</string>
+    <string name="updates_waiting">Verze %1$s je připravena. Nainstaluje se, až rámeček nikdo nebude používat.</string>
+    <string name="updates_installing">Instalace verze %1$s. Rámeček se za chvíli restartuje.</string>
+    <string name="updates_failed">Aktualizace se nezdařila. Rámeček to zkusí později znovu.</string>
+    <string name="update_notice_updated">Aktualizováno na verzi %1$s</string>
+    <string name="update_notice_rolled_back">Nová verze měla potíže, a tak se rámeček vrátil k předchozí.</string>
+    <string name="update_notice_needs_user">Aktualizace je připravena. Pokračujte klepnutím na Nainstalovat.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Zobrazit předpověď</string>
+    <string name="weather_close">Zavřít</string>
+    <string name="weather_now">Teď</string>
+    <string name="weather_today">Dnes</string>
+    <string name="weather_feels_like">Pocitově %1$s</string>
+    <string name="weather_high_low">Max %1$s · Min %2$s</string>
+    <string name="weather_wind">Vítr</string>
+    <string name="weather_humidity">Vlhkost</string>
+    <string name="weather_sunrise">Východ slunce</string>
+    <string name="weather_sunset">Západ slunce</string>
+    <string name="weather_next_hours">Příštích 24 hodin</string>
+    <string name="weather_next_days">Předpověď na 7 dní</string>
+    <string name="weather_updated">Aktualizováno %1$s</string>
+    <string-array name="weather_compass">
+        <item>S</item>
+        <item>SV</item>
+        <item>V</item>
+        <item>JV</item>
+        <item>J</item>
+        <item>JZ</item>
+        <item>Z</item>
+        <item>SZ</item>
+    </string-array>
+    <string name="wmo_clear_day">Slunečno</string>
+    <string name="wmo_clear_night">Jasno</string>
+    <string name="wmo_mainly_clear_day">Převážně slunečno</string>
+    <string name="wmo_mainly_clear_night">Převážně jasno</string>
+    <string name="wmo_partly_cloudy">Polojasno</string>
+    <string name="wmo_overcast">Zataženo</string>
+    <string name="wmo_fog">Mlha</string>
+    <string name="wmo_rime_fog">Mrznoucí mlha</string>
+    <string name="wmo_drizzle_light">Slabé mrholení</string>
+    <string name="wmo_drizzle">Mrholení</string>
+    <string name="wmo_drizzle_dense">Silné mrholení</string>
+    <string name="wmo_freezing_drizzle">Mrznoucí mrholení</string>
+    <string name="wmo_rain_light">Slabý déšť</string>
+    <string name="wmo_rain">Déšť</string>
+    <string name="wmo_rain_heavy">Silný déšť</string>
+    <string name="wmo_freezing_rain">Mrznoucí déšť</string>
+    <string name="wmo_snow_light">Slabé sněžení</string>
+    <string name="wmo_snow">Sněžení</string>
+    <string name="wmo_snow_heavy">Silné sněžení</string>
+    <string name="wmo_snow_grains">Sněhová zrna</string>
+    <string name="wmo_showers_light">Slabé přeháňky</string>
+    <string name="wmo_showers">Přeháňky</string>
+    <string name="wmo_showers_violent">Silné přeháňky</string>
+    <string name="wmo_snow_showers_light">Slabé sněhové přeháňky</string>
+    <string name="wmo_snow_showers">Sněhové přeháňky</string>
+    <string name="wmo_thunderstorm">Bouřka</string>
+    <string name="wmo_thunderstorm_hail">Bouřka s krupobitím</string>
+</resources>

@@ -1,0 +1,14 @@
+{
+ "footer": "รหัสนี้จะหมดอายุใน 10 นาที หากคุณไม่ได้ขอรหัสนี้ ไม่ต้องสนใจอีเมลฉบับนี้",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "รหัสลงชื่อเข้าใช้ kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อลงชื่อเข้าใช้ kinframe:"},
+  "Register": {"subject": "รหัสสมัครใช้งาน kinframe ของคุณ: {{code}}", "intro": "ยินดีต้อนรับสู่ kinframe!\n\nใช้รหัสนี้เพื่อสร้างบัญชีของคุณให้เสร็จ:"},
+  "ForgotPassword": {"subject": "รหัสกู้คืนบัญชี kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อกู้คืนบัญชี kinframe ของคุณ:"},
+  "Generic": {"subject": "รหัสยืนยัน kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nรหัสยืนยัน kinframe ของคุณคือ:"},
+  "BindNewIdentifier": {"subject": "ยืนยันอีเมลใหม่สำหรับ kinframe: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อยืนยันอีเมลใหม่สำหรับบัญชี kinframe ของคุณ:"},
+  "UserPermissionValidation": {"subject": "รหัสยืนยัน kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อยืนยันว่าเป็นคุณก่อนเปลี่ยนแปลงบัญชี kinframe:"},
+  "MfaVerification": {"subject": "รหัสยืนยัน kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อลงชื่อเข้าใช้ kinframe ให้เสร็จ:"},
+  "BindMfa": {"subject": "รหัสยืนยัน kinframe ของคุณ: {{code}}", "intro": "สวัสดี\n\nใช้รหัสนี้เพื่อเปิดการยืนยันแบบสองขั้นตอนสำหรับ kinframe:"}
+ }
+}

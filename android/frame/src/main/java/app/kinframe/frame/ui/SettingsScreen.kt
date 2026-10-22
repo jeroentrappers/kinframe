@@ -35,6 +35,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import app.kinframe.frame.Locales
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -109,6 +112,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
                 app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
+                LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
                 AboutSection(c)
@@ -368,6 +372,30 @@ private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (Strin
             { c.update.requestCheck(UpdateManager.Trigger.User) },
             style = KinButtonStyle.Secondary, enabled = !busy,
         )
+    }
+}
+
+/** The frame's language: the current one, and all 36 to pick from. A choice applies at once and syncs. */
+@Composable
+private fun LanguageSection(c: FrameController) {
+    val context = LocalContext.current
+    val current = remember { Locales.effective(context) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    SectionCard(stringResource(R.string.settings_language)) {
+        if (expanded) {
+            LanguageChoices(current, { code -> expanded = false; c.setLanguage(code) })
+        } else {
+            KinCard(Modifier.fillMaxWidth(), onClick = { expanded = true }, padding = 18.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    KinIcon(KinIcons.Globe, null, tint = Kin.colors.accent)
+                    Text(
+                        Locales.language(current)?.nativeName ?: current, style = Kin.type.bodyStrong,
+                        modifier = Modifier.padding(start = 16.dp).weight(1f),
+                    )
+                    KinIcon(KinIcons.ChevronRight, null, tint = Kin.colors.inkSoft, size = 22.dp)
+                }
+            }
+        }
     }
 }
 

@@ -46,7 +46,11 @@ object Format {
     /** Localised date from a skeleton via ICU (correct order and month case, e.g. "donderdag 22 oktober"). */
     private fun skeleton(locale: Locale, skeleton: String, epochMs: Long, zone: ZoneId): String {
         val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)
-        return java.text.SimpleDateFormat(pattern, locale).apply { timeZone = java.util.TimeZone.getTimeZone(zone.id) }
+        // ICU may answer with stand-alone letters (Russian "cccc", "LLLL") that a plain JVM SimpleDateFormat
+        // rejects; the format-context letters read just as well in a full date.
+        val fmt = runCatching { java.text.SimpleDateFormat(pattern, locale) }
+            .getOrElse { java.text.SimpleDateFormat(pattern.replace('c', 'E').replace('L', 'M'), locale) }
+        return fmt.apply { timeZone = java.util.TimeZone.getTimeZone(zone.id) }
             .format(java.util.Date(epochMs))
     }
 

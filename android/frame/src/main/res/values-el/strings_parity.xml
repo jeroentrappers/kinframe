@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PIN κατόχου -->
+    <string name="pin_enter_title">Εισαγάγετε το PIN του κατόχου</string>
+    <string name="pin_reason_settings">για άνοιγμα των ρυθμίσεων</string>
+    <string name="pin_reason_exit">για έξοδο από το kinframe</string>
+    <string name="pin_reason_wifi">για αλλαγή του Wi-Fi</string>
+    <string name="pin_reason_power_off">για απενεργοποίηση της κορνίζας</string>
+    <string name="pin_reason_restart">για επανεκκίνηση της κορνίζας</string>
+    <string name="pin_reason_server">για αλλαγή του διακομιστή</string>
+    <string name="pin_reason_reset">για επαναφορά της κορνίζας</string>
+    <string name="pin_checking">Έλεγχος…</string>
+    <string name="pin_wrong">Λάθος PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Λάθος PIN. Απομένει %d προσπάθεια πριν από μια σύντομη παύση.</item>
+        <item quantity="other">Λάθος PIN. Απομένουν %d προσπάθειες πριν από μια σύντομη παύση.</item>
+    </plurals>
+    <string name="pin_locked">Πάρα πολλές λάθος προσπάθειες. Δοκιμάστε ξανά σε %s.</string>
+    <string name="pin_forgot">Ξεχάσατε το PIN; Ο κάτοχος της κορνίζας μπορεί να το καταργήσει στην εφαρμογή kinframe, στις ρυθμίσεις αυτής της κορνίζας.</string>
+    <string name="pin_new_title">Επιλέξτε PIN</string>
+    <string name="pin_new_body">4 έως 6 ψηφία. Θα ζητείται για άνοιγμα των ρυθμίσεων, απενεργοποίηση της κορνίζας ή αλλαγή του Wi-Fi.</string>
+    <string name="pin_confirm_title">Εισαγάγετε ξανά το PIN</string>
+    <string name="pin_confirm_body">Για σιγουριά.</string>
+    <string name="pin_mismatch">Τα PIN δεν ταιριάζουν. Επιλέξτε ξανά.</string>
+    <string name="pin_key_delete">Διαγραφή</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN κατόχου</string>
+    <string name="settings_pin_off">Ανενεργό. Όλοι μπορούν να ανοίξουν τις ρυθμίσεις.</string>
+    <string name="settings_pin_on">Ενεργό. Ρυθμίσεις, λειτουργία και Wi-Fi ζητούν το PIN.</string>
+    <string name="settings_pin_set">Ορισμός PIN</string>
+    <string name="settings_pin_change">Αλλαγή PIN</string>
+    <string name="settings_pin_remove">Κατάργηση PIN</string>
+    <!-- Αιτήματα συμμετοχής και ειδοποιήσεις -->
+    <string name="join_someone">Κάποιος</string>
+    <string name="join_title">Ο χρήστης %1$s θέλει να συμμετάσχει</string>
+    <string name="join_body_code">Ο χρήστης %1$s καταχώρισε τον κωδικό της κορνίζας «%2$s». Αν το επιτρέψετε, ο χρήστης %1$s θα μπορεί να στέλνει φωτογραφίες σε αυτή την κορνίζα.</string>
+    <string name="join_body_invited">Ο χρήστης %1$s προσκάλεσε τον χρήστη %3$s στην κορνίζα «%2$s». Αν το επιτρέψετε, ο χρήστης %3$s θα μπορεί να στέλνει φωτογραφίες σε αυτή την κορνίζα.</string>
+    <string name="join_invited_by">Πρόσκληση από: %s</string>
+    <string name="join_allow">Αποδοχή</string>
+    <string name="join_deny">Απόρριψη</string>
+    <string name="join_later">Όχι τώρα</string>
+    <string name="join_later_hint">Θα παραμείνει στις ειδοποιήσεις του μενού.</string>
+    <string name="join_pill_one">Ο χρήστης %s θέλει να συμμετάσχει</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d άτομο θέλει να συμμετάσχει</item>
+        <item quantity="other">%d άτομα θέλουν να συμμετάσχουν</item>
+    </plurals>
+    <string name="notifications_title">Ειδοποιήσεις</string>
+    <string name="notifications_empty">Είστε ενημερωμένοι</string>
+    <string name="notifications_empty_body">Δεν υπάρχει τίποτα σε αναμονή.</string>
+    <string name="menu_notifications">Ειδοποιήσεις</string>
+    <string name="action_close">Κλείσιμο</string>
+    <!-- Κάρτες κατάστασης στην προβολή διαφανειών -->
+    <string name="status_card_offline_title">Δεν υπάρχει σύνδεση στο internet</string>
+    <string name="status_card_offline_body">Οι φωτογραφίες της κορνίζας συνεχίζουν να προβάλλονται. Οι νέες θα έρθουν μόλις επανέλθει η σύνδεση.</string>
+    <string name="status_card_server_title">Ο διακομιστής φωτογραφιών δεν είναι προσβάσιμος</string>
+    <string name="status_card_server_body">Το Wi-Fi λειτουργεί, αλλά ο διακομιστής δεν απαντά. Οι νέες φωτογραφίες θα έρθουν μόλις επανέλθει.</string>
+    <string name="status_card_portal_title">Αυτό το Wi-Fi ζητά σύνδεση</string>
+    <string name="status_card_portal_body">Ανοίξτε τη σελίδα σύνδεσης του δικτύου για να συνδεθεί η κορνίζα.</string>
+    <string name="status_card_portal_action">Σύνδεση</string>
+    <string name="status_card_storage_title">Η κορνίζα έχει σχεδόν γεμίσει</string>
+    <string name="status_card_storage_body">Παλαιότερες φωτογραφίες αφαιρέθηκαν από την κορνίζα για να ελευθερωθεί χώρος· παραμένουν ασφαλείς στον διακομιστή. Οι νέες φωτογραφίες ίσως περιμένουν μέχρι να υπάρξει χώρος.</string>
+    <string name="portal_title">Σύνδεση στο Wi-Fi</string>
+    <string name="portal_body">Θα κλείσει αυτόματα μόλις η κορνίζα συνδεθεί.</string>
+    <!-- Ρύθμιση: ζώνη ώρας και ενημέρωση -->
+    <string name="setup_tz_title">Σε ποια ζώνη ώρας βρίσκεται η κορνίζα;</string>
+    <string name="setup_tz_body">Για να είναι σωστά η ώρα, η ημερομηνία και το νυχτερινό πρόγραμμα.</string>
+    <string name="setup_tz_suggested">Προτεινόμενη</string>
+    <string name="setup_tz_all">Όλες οι ζώνες ώρας</string>
+    <string name="tz_region_europe">Ευρώπη</string>
+    <string name="tz_region_america">Αμερική</string>
+    <string name="tz_region_asia">Ασία</string>
+    <string name="tz_region_africa">Αφρική</string>
+    <string name="tz_region_australia">Αυστραλία</string>
+    <string name="tz_region_pacific">Ειρηνικός</string>
+    <string name="tz_region_atlantic">Ατλαντικός</string>
+    <string name="tz_region_indian">Ινδικός Ωκεανός</string>
+    <string name="tz_region_antarctica">Ανταρκτική</string>
+    <string name="setup_update_checking">Αναζήτηση νεότερης έκδοσης…</string>
+    <string name="setup_update_checking_body">Η κορνίζα βεβαιώνεται ότι έχει την πιο πρόσφατη έκδοση του kinframe πριν ξεκινήσετε.</string>
+    <string name="setup_update_downloading">Λήψη έκδοσης %s</string>
+    <string name="setup_update_downloading_body">Θα εγκατασταθεί αμέσως μετά. Μπορείτε να το παραλείψετε· η κορνίζα θα ενημερωθεί αργότερα.</string>
+    <string name="setup_update_installing">Εγκατάσταση έκδοσης %s</string>
+    <string name="setup_update_installing_body">Η κορνίζα θα επανεκκινηθεί σε λίγο και θα συνεχίσει τη ρύθμιση από εκεί που μείνατε.</string>
+    <string name="setup_update_current">Το kinframe είναι ενημερωμένο</string>
+    <string name="setup_update_current_body">Πάμε στο τελευταίο βήμα.</string>
+    <string name="setup_update_failed">Δεν ήταν δυνατός ο έλεγχος για ενημερώσεις</string>
+    <string name="setup_update_failed_body">Κανένα πρόβλημα: η κορνίζα θα ελέγξει ξανά αργότερα και θα ενημερωθεί.</string>
+    <string name="setup_update_skip">Παράλειψη για τώρα</string>
+    <!-- Επιλογές προβολής διαφανειών -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Σαν σήμερα, πριν από %d χρόνο</item>
+        <item quantity="other">Σαν σήμερα, πριν από %d χρόνια</item>
+    </plurals>
+    <string name="transition_kenburns">Αργό ζουμ</string>
+    <string name="settings_collage">Πολλές φωτογραφίες μαζί (κολάζ)</string>
+    <string name="settings_collage_max">Φωτογραφίες ανά οθόνη</string>
+    <string name="settings_pair_portraits">Δύο κάθετες φωτογραφίες δίπλα δίπλα</string>
+    <string name="settings_on_this_day">Αναμνήσεις από αυτή τη μέρα σε προηγούμενα χρόνια</string>
+    <string name="settings_video">Βίντεο</string>
+    <string name="settings_video_autoplay">Αυτόματη αναπαραγωγή βίντεο</string>
+    <string name="settings_video_playback">Μετά από ένα βίντεο</string>
+    <string name="video_once_hold">Μία φορά, μετά αναμονή</string>
+    <string name="video_loop">Συνεχής επανάληψη</string>
+    <string name="video_once_advance">Μία φορά, μετά το επόμενο</string>
+    <string name="settings_video_volume">Ένταση βίντεο</string>
+    <string name="settings_video_auto_mute">Σίγαση όταν κανείς δεν αγγίζει την κορνίζα για</string>
+    <string name="video_auto_mute_off">Ποτέ</string>
+    <string name="video_auto_mute_min">%d λεπ.</string>
+</resources>

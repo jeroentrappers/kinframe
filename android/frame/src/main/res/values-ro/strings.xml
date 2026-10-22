@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Ramă foto</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Înapoi</string>
+    <string name="action_cancel">Anulați</string>
+    <string name="action_continue">Continuați</string>
+    <string name="action_try_again">Reîncercați</string>
+    <string name="action_undo">Anulați acțiunea</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Bun venit la kinframe</string>
+    <string name="setup_language_body">Alegeți limba acestei rame.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Conectați-vă la Wi-Fi</string>
+    <string name="setup_wifi_body">Rama are nevoie de Wi-Fi pentru a primi fotografii. După ce ajung, se afișează și fără conexiune.</string>
+    <string name="wifi_connected_to">Conectat la %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Neconectat</string>
+    <string name="wifi_not_connected_hint">Alegeți o rețea pentru a continua.</string>
+    <string name="wifi_no_internet">Conectat, dar încă fără internet</string>
+    <string name="wifi_signal">Semnal: %1$s</string>
+    <string name="wifi_open_settings">Setări Wi-Fi</string>
+    <string name="wifi_networks">Rețele din apropiere</string>
+    <string name="wifi_scanning">Se caută rețele…</string>
+    <string name="wifi_permission_body">Pentru a afișa rețelele aici, Android are nevoie de permisiunea de a căuta rețele Wi-Fi.</string>
+    <string name="wifi_show_networks">Afișați rețelele</string>
+    <string name="wifi_password">Parolă</string>
+    <string name="wifi_join">Conectați</string>
+    <string name="signal_0">foarte slab</string>
+    <string name="signal_1">slab</string>
+    <string name="signal_2">acceptabil</string>
+    <string name="signal_3">bun</string>
+    <string name="signal_4">excelent</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Alegeți un server</string>
+    <string name="setup_server_body">Fotografiile trec printr-un server kinframe. Folosiți serverul gratuit kinframe sau unul administrat de familia dvs.</string>
+    <string name="server_default_body">Gratuit și open source. Recomandat.</string>
+    <string name="server_custom">Folosiți propriul server</string>
+    <string name="server_custom_body">Pentru familiile care găzduiesc singure kinframe.</string>
+    <string name="server_address">Adresa serverului</string>
+    <string name="server_check">Verificați serverul</string>
+    <string name="server_checking">Se verifică serverul…</string>
+    <string name="server_version">versiunea %1$s</string>
+    <string name="server_insecure">necriptat</string>
+    <string name="server_error_invalid">Nu pare a fi o adresă web. Încercați ceva de genul https://frames.example.org.</string>
+    <string name="server_error_unreachable">Serverul nu poate fi accesat. Verificați adresa și dacă rama este conectată la internet.</string>
+    <string name="server_error_not_kinframe">Serverul a răspuns, dar nu este un server kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Se pregătește rama…</string>
+    <string name="enroll_body">Durează câteva secunde.</string>
+    <string name="enroll_failed_title">Rama nu s-a putut înregistra</string>
+    <string name="enroll_failed_body">Răspunsul serverului: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Conectați rama la familia dvs.</string>
+    <string name="code_step1">Deschideți aplicația kinframe sau %1$s într-un browser</string>
+    <string name="code_step2">Alegeți Adăugați o ramă</string>
+    <string name="code_step3">Introduceți acest cod sau scanați codul QR</string>
+    <string name="code_valid_for">Valabil %1$s</string>
+    <string name="code_waiting">Se așteaptă ca cineva să introducă codul</string>
+    <string name="code_offline_title">Rama este offline</string>
+    <string name="code_offline_body">Codul ramei necesită o conexiune la internet. Verificați Wi-Fi-ul.</string>
+    <string name="code_error_title">Nu s-a putut obține un cod</string>
+    <string name="code_error_body">Serverul nu a răspuns. Rama continuă să încerce.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Conectat la %1$s</string>
+    <string name="celebrate_title_anon">Conectat</string>
+    <string name="celebrate_body">Fotografiile trimise acestei rame vor apărea aici în câteva secunde.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Azi</string>
+    <string name="date_yesterday">Ieri</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">Acum %d zi</item>
+        <item quantity="few">Acum %d zile</item>
+        <item quantity="other">Acum %d de zile</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">editat</string>
+    <string name="unable_photo">Fotografia nu poate fi afișată</string>
+    <string name="unable_video">Videoclipul nu poate fi redat. Rugați expeditorul să-l trimită din nou.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d fotografie nouă</item>
+        <item quantity="few">%d fotografii noi</item>
+        <item quantity="other">%d de fotografii noi</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Serverul nu poate fi accesat</string>
+    <string name="identify_this_is">Aceasta este</string>
+    <string name="snack_hidden">Fotografie ascunsă</string>
+    <string name="snack_deleted">Fotografie ștearsă</string>
+    <string name="menu_settings">Setări</string>
+    <string name="menu_power">Alimentare</string>
+    <string name="menu_hide">Ascundeți</string>
+    <string name="menu_delete">Ștergeți</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Încă nu există fotografii</string>
+    <string name="empty_body">Fotografiile și videoclipurile trimise din aplicația sau site-ul kinframe apar aici în câteva secunde.</string>
+    <string name="empty_code_title">Adăugați familia cu acest cod</string>
+    <string name="empty_code_body">Introduceți-l în aplicația kinframe sau scanați codul QR.</string>
+    <string name="empty_hidden_title">Toate fotografiile sunt ascunse</string>
+    <string name="empty_hidden_body">Fotografiile ascunse rămân în bibliotecă. Le puteți afișa din nou din aplicația kinframe.</string>
+    <string name="empty_downloading_title">Fotografiile sunt pe drum</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Se descarcă %d fotografie.</item>
+        <item quantity="few">Se descarcă %d fotografii.</item>
+        <item quantity="other">Se descarcă %d de fotografii.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Alimentare</string>
+    <string name="power_sleep">Repaus</string>
+    <string name="power_sleep_body">Ecranul se stinge până îl atingeți.</string>
+    <string name="power_restart">Reporniți</string>
+    <string name="power_restart_body">Porniți rama din nou.</string>
+    <string name="power_off">Opriți</string>
+    <string name="power_off_body">Opriți în siguranță înainte de a scoate din priză.</string>
+    <string name="shutting_down_title">Se oprește…</string>
+    <string name="restarting_title">Se repornește…</string>
+    <string name="shutting_down_body">Totul se salvează în siguranță.</string>
+    <string name="safe_title">Acum puteți scoate rama din priză</string>
+    <string name="safe_body">Totul este salvat. Pentru a folosi din nou rama, apăsați butonul de pornire sau conectați-o din nou la priză.</string>
+    <string name="safe_body_noroot">kinframe a salvat totul. Acum puteți scoate rama din priză.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe a avut probleme la afișarea fotografiilor</string>
+    <string name="recovery_body">S-a oprit neașteptat de câteva ori la rând. Reîncercați sau ștergeți fotografiile descărcate. Se vor descărca din nou de pe server, nu se pierde nimic.</string>
+    <string name="recovery_clear">Ștergeți fotografiile descărcate</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Setări</string>
+    <string name="settings_language">Limbă</string>
+    <string name="settings_slideshow">Prezentare</string>
+    <string name="settings_interval">Afișați fiecare fotografie</string>
+    <string name="settings_transition">Tranziție</string>
+    <string name="transition_crossfade">Estompare</string>
+    <string name="transition_slide">Glisare</string>
+    <string name="settings_order">Ordine</string>
+    <string name="order_received">Cele mai noi primite</string>
+    <string name="order_taken">Data fotografierii</string>
+    <string name="order_shuffle">Aleatoriu</string>
+    <string name="settings_reverse">Cele mai vechi întâi</string>
+    <string name="settings_fill">Dimensiunea fotografiei</string>
+    <string name="fill_fill">Umpleți ecranul</string>
+    <string name="fill_fit">Afișați toată fotografia</string>
+    <string name="settings_display">Ecran</string>
+    <string name="settings_brightness">Luminozitate</string>
+    <string name="settings_brightness_mode">Luminozitate automată</string>
+    <string name="brightness_manual">Fixă</string>
+    <string name="brightness_sun">După soare</string>
+    <string name="settings_sleep">Repaus</string>
+    <string name="settings_sleep_enabled">Stingeți ecranul noaptea</string>
+    <string name="settings_sleep_at">Repaus la</string>
+    <string name="settings_wake_at">Trezire la</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">și încă %d program, gestionat în aplicația kinframe</item>
+        <item quantity="few">și încă %d programe, gestionate în aplicația kinframe</item>
+        <item quantity="other">și încă %d de programe, gestionate în aplicația kinframe</item>
+    </plurals>
+    <string name="settings_about">Această ramă</string>
+    <string name="about_frame">Nume</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Versiunea aplicației</string>
+    <string name="about_android_settings">Setări Android</string>
+    <string name="settings_updates">Actualizări</string>
+    <string name="updates_channel">Canal</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Beta (versiuni noi mai devreme)</string>
+    <string name="updates_check">Căutați actualizări</string>
+    <string name="updates_install_now">Instalați acum</string>
+    <string name="updates_checking">Se caută actualizări…</string>
+    <string name="updates_up_to_date">Rama este actualizată.</string>
+    <string name="updates_downloading">Se descarcă versiunea %1$s… %2$d%%</string>
+    <string name="updates_waiting">Versiunea %1$s este pregătită. Se instalează când nimeni nu folosește rama.</string>
+    <string name="updates_installing">Se instalează versiunea %1$s. Rama repornește imediat.</string>
+    <string name="updates_failed">Actualizarea nu a reușit. Rama va încerca din nou mai târziu.</string>
+    <string name="update_notice_updated">Actualizat la versiunea %1$s</string>
+    <string name="update_notice_rolled_back">Versiunea nouă avea probleme, așa că rama a revenit la cea anterioară.</string>
+    <string name="update_notice_needs_user">O actualizare este pregătită. Atingeți Instalați pentru a continua.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Afișați prognoza</string>
+    <string name="weather_close">Închideți</string>
+    <string name="weather_now">Acum</string>
+    <string name="weather_today">Azi</string>
+    <string name="weather_feels_like">Se simte ca %1$s</string>
+    <string name="weather_high_low">Max. %1$s · Min. %2$s</string>
+    <string name="weather_wind">Vânt</string>
+    <string name="weather_humidity">Umiditate</string>
+    <string name="weather_sunrise">Răsărit</string>
+    <string name="weather_sunset">Apus</string>
+    <string name="weather_next_hours">Următoarele 24 de ore</string>
+    <string name="weather_next_days">Prognoză pe 7 zile</string>
+    <string name="weather_updated">Actualizat %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SV</item>
+        <item>V</item>
+        <item>NV</item>
+    </string-array>
+    <string name="wmo_clear_day">Însorit</string>
+    <string name="wmo_clear_night">Senin</string>
+    <string name="wmo_mainly_clear_day">Predominant însorit</string>
+    <string name="wmo_mainly_clear_night">Predominant senin</string>
+    <string name="wmo_partly_cloudy">Parțial noros</string>
+    <string name="wmo_overcast">Înnorat</string>
+    <string name="wmo_fog">Ceață</string>
+    <string name="wmo_rime_fog">Ceață cu chiciură</string>
+    <string name="wmo_drizzle_light">Burniță slabă</string>
+    <string name="wmo_drizzle">Burniță</string>
+    <string name="wmo_drizzle_dense">Burniță densă</string>
+    <string name="wmo_freezing_drizzle">Burniță înghețată</string>
+    <string name="wmo_rain_light">Ploaie slabă</string>
+    <string name="wmo_rain">Ploaie</string>
+    <string name="wmo_rain_heavy">Ploaie torențială</string>
+    <string name="wmo_freezing_rain">Ploaie înghețată</string>
+    <string name="wmo_snow_light">Ninsoare slabă</string>
+    <string name="wmo_snow">Ninsoare</string>
+    <string name="wmo_snow_heavy">Ninsoare abundentă</string>
+    <string name="wmo_snow_grains">Grăunțe de zăpadă</string>
+    <string name="wmo_showers_light">Averse slabe</string>
+    <string name="wmo_showers">Averse</string>
+    <string name="wmo_showers_violent">Averse puternice</string>
+    <string name="wmo_snow_showers_light">Averse slabe de ninsoare</string>
+    <string name="wmo_snow_showers">Averse de ninsoare</string>
+    <string name="wmo_thunderstorm">Furtună</string>
+    <string name="wmo_thunderstorm_hail">Furtună cu grindină</string>
+</resources>

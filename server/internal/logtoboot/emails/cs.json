@@ -1,0 +1,14 @@
+{
+ "footer": "Platnost kódu vyprší za 10 minut. Pokud jste o něj nežádali, můžete tento e-mail ignorovat.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Váš přihlašovací kód do kinframe: {{code}}", "intro": "Dobrý den,\n\npro přihlášení do kinframe použijte tento kód:"},
+  "Register": {"subject": "Váš registrační kód do kinframe: {{code}}", "intro": "Vítejte v kinframe!\n\nPro dokončení vytvoření účtu použijte tento kód:"},
+  "ForgotPassword": {"subject": "Váš kód pro obnovení účtu kinframe: {{code}}", "intro": "Dobrý den,\n\npro obnovení účtu kinframe použijte tento kód:"},
+  "Generic": {"subject": "Váš ověřovací kód kinframe: {{code}}", "intro": "Dobrý den,\n\nváš ověřovací kód kinframe je:"},
+  "BindNewIdentifier": {"subject": "Potvrďte nový e-mail pro kinframe: {{code}}", "intro": "Dobrý den,\n\npro potvrzení nové e-mailové adresy vašeho účtu kinframe použijte tento kód:"},
+  "UserPermissionValidation": {"subject": "Váš ověřovací kód kinframe: {{code}}", "intro": "Dobrý den,\n\ntímto kódem potvrďte, že jste to vy, než změníte svůj účet kinframe:"},
+  "MfaVerification": {"subject": "Váš ověřovací kód kinframe: {{code}}", "intro": "Dobrý den,\n\npro dokončení přihlášení do kinframe použijte tento kód:"},
+  "BindMfa": {"subject": "Váš ověřovací kód kinframe: {{code}}", "intro": "Dobrý den,\n\npro zapnutí dvoufázového ověření v kinframe použijte tento kód:"}
+ }
+}

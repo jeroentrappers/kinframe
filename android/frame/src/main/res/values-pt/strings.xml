@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Porta-retrato</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Voltar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_continue">Continuar</string>
+    <string name="action_try_again">Tentar de novo</string>
+    <string name="action_undo">Desfazer</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Boas-vindas ao kinframe</string>
+    <string name="setup_language_body">Escolha o idioma deste porta-retrato.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Conecte-se ao Wi-Fi</string>
+    <string name="setup_wifi_body">O porta-retrato precisa de Wi-Fi para receber fotos. Depois que elas chegam, aparecem mesmo sem conexão.</string>
+    <string name="wifi_connected_to">Conectado a %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Desconectado</string>
+    <string name="wifi_not_connected_hint">Escolha uma rede para continuar.</string>
+    <string name="wifi_no_internet">Conectado, mas ainda sem internet</string>
+    <string name="wifi_signal">Sinal: %1$s</string>
+    <string name="wifi_open_settings">Configurações de Wi-Fi</string>
+    <string name="wifi_networks">Redes por perto</string>
+    <string name="wifi_scanning">Procurando redes…</string>
+    <string name="wifi_permission_body">Para listar as redes aqui, o Android precisa de permissão para procurar redes Wi-Fi.</string>
+    <string name="wifi_show_networks">Mostrar redes</string>
+    <string name="wifi_password">Senha</string>
+    <string name="wifi_join">Conectar</string>
+    <string name="signal_0">muito fraco</string>
+    <string name="signal_1">fraco</string>
+    <string name="signal_2">razoável</string>
+    <string name="signal_3">bom</string>
+    <string name="signal_4">excelente</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Escolha um servidor</string>
+    <string name="setup_server_body">As fotos passam por um servidor kinframe. Use o servidor gratuito do kinframe ou um mantido pela sua família.</string>
+    <string name="server_default_body">Gratuito e de código aberto. Recomendado.</string>
+    <string name="server_custom">Usar seu próprio servidor</string>
+    <string name="server_custom_body">Para famílias que hospedam o kinframe por conta própria.</string>
+    <string name="server_address">Endereço do servidor</string>
+    <string name="server_check">Verificar servidor</string>
+    <string name="server_checking">Verificando o servidor…</string>
+    <string name="server_version">versão %1$s</string>
+    <string name="server_insecure">sem criptografia</string>
+    <string name="server_error_invalid">Isso não parece um endereço da web. Tente algo como https://frames.example.org.</string>
+    <string name="server_error_unreachable">Não foi possível acessar este servidor. Verifique o endereço e se o porta-retrato está on-line.</string>
+    <string name="server_error_not_kinframe">Este servidor respondeu, mas não é um servidor kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Preparando seu porta-retrato…</string>
+    <string name="enroll_body">Isso leva alguns segundos.</string>
+    <string name="enroll_failed_title">Não foi possível registrar o porta-retrato</string>
+    <string name="enroll_failed_body">Resposta do servidor: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Conecte este porta-retrato à sua família</string>
+    <string name="code_step1">Abra o app kinframe ou %1$s em um navegador</string>
+    <string name="code_step2">Escolha Adicionar porta-retrato</string>
+    <string name="code_step3">Digite este código ou leia o QR code</string>
+    <string name="code_valid_for">Válido por %1$s</string>
+    <string name="code_waiting">Aguardando alguém digitar o código</string>
+    <string name="code_offline_title">O porta-retrato está off-line</string>
+    <string name="code_offline_body">O código do porta-retrato precisa de internet. Verifique o Wi-Fi.</string>
+    <string name="code_error_title">Não foi possível obter um código</string>
+    <string name="code_error_body">O servidor não respondeu. O porta-retrato continua tentando.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Conectado a %1$s</string>
+    <string name="celebrate_title_anon">Conectado</string>
+    <string name="celebrate_body">As fotos enviadas para este porta-retrato aparecem aqui em segundos.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Hoje</string>
+    <string name="date_yesterday">Ontem</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">Há %d dia</item>
+        <item quantity="many">Há %d de dias</item>
+        <item quantity="other">Há %d dias</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">editada</string>
+    <string name="unable_photo">Não foi possível mostrar esta foto</string>
+    <string name="unable_video">Não foi possível reproduzir este vídeo. Peça para quem enviou mandar de novo.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d foto nova</item>
+        <item quantity="many">%d de fotos novas</item>
+        <item quantity="other">%d fotos novas</item>
+    </plurals>
+    <string name="status_offline">Off-line</string>
+    <string name="status_online">On-line · %1$s</string>
+    <string name="status_server_unreachable">Não foi possível acessar o servidor</string>
+    <string name="identify_this_is">Este é</string>
+    <string name="snack_hidden">Foto ocultada</string>
+    <string name="snack_deleted">Foto excluída</string>
+    <string name="menu_settings">Configurações</string>
+    <string name="menu_power">Energia</string>
+    <string name="menu_hide">Ocultar</string>
+    <string name="menu_delete">Excluir</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Ainda não há fotos</string>
+    <string name="empty_body">Fotos e vídeos enviados pelo app ou site do kinframe aparecem aqui em segundos.</string>
+    <string name="empty_code_title">Adicione a família com este código</string>
+    <string name="empty_code_body">Digite-o no app kinframe ou leia o QR code.</string>
+    <string name="empty_hidden_title">Todas as fotos estão ocultas</string>
+    <string name="empty_hidden_body">Fotos ocultas continuam na biblioteca. Mostre-as de novo pelo app kinframe.</string>
+    <string name="empty_downloading_title">As fotos estão a caminho</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Baixando %d foto.</item>
+        <item quantity="many">Baixando %d de fotos.</item>
+        <item quantity="other">Baixando %d fotos.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Energia</string>
+    <string name="power_sleep">Descansar</string>
+    <string name="power_sleep_body">Tela desligada até você tocar nela.</string>
+    <string name="power_restart">Reiniciar</string>
+    <string name="power_restart_body">Ligar o porta-retrato de novo.</string>
+    <string name="power_off">Desligar</string>
+    <string name="power_off_body">Desligue com segurança antes de tirar da tomada.</string>
+    <string name="shutting_down_title">Desligando…</string>
+    <string name="restarting_title">Reiniciando…</string>
+    <string name="shutting_down_body">Salvando tudo com segurança.</string>
+    <string name="safe_title">Já pode tirar da tomada</string>
+    <string name="safe_body">Tudo foi salvo. Para usar o porta-retrato de novo, aperte o botão liga/desliga ou ligue-o na tomada.</string>
+    <string name="safe_body_noroot">O kinframe salvou tudo. Você já pode tirar o porta-retrato da tomada.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">O kinframe teve problemas para mostrar as fotos</string>
+    <string name="recovery_body">Ele parou inesperadamente algumas vezes seguidas. Tente de novo ou apague as fotos baixadas. Elas serão baixadas outra vez do servidor; nada se perde.</string>
+    <string name="recovery_clear">Apagar fotos baixadas</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Configurações</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_slideshow">Apresentação</string>
+    <string name="settings_interval">Mostrar cada foto por</string>
+    <string name="settings_transition">Transição</string>
+    <string name="transition_crossfade">Esmaecer</string>
+    <string name="transition_slide">Deslizar</string>
+    <string name="settings_order">Ordem</string>
+    <string name="order_received">Recebidas mais recentes</string>
+    <string name="order_taken">Data da foto</string>
+    <string name="order_shuffle">Aleatória</string>
+    <string name="settings_reverse">Mais antigas primeiro</string>
+    <string name="settings_fill">Tamanho da foto</string>
+    <string name="fill_fill">Preencher a tela</string>
+    <string name="fill_fit">Mostrar a foto inteira</string>
+    <string name="settings_display">Tela</string>
+    <string name="settings_brightness">Brilho</string>
+    <string name="settings_brightness_mode">Brilho automático</string>
+    <string name="brightness_manual">Fixo</string>
+    <string name="brightness_sun">Acompanhar o sol</string>
+    <string name="settings_sleep">Descanso</string>
+    <string name="settings_sleep_enabled">Desligar a tela à noite</string>
+    <string name="settings_sleep_at">Descansar às</string>
+    <string name="settings_wake_at">Acordar às</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">e mais %d horário, gerenciado no app kinframe</item>
+        <item quantity="many">e mais %d de horários, gerenciados no app kinframe</item>
+        <item quantity="other">e mais %d horários, gerenciados no app kinframe</item>
+    </plurals>
+    <string name="settings_about">Este porta-retrato</string>
+    <string name="about_frame">Nome</string>
+    <string name="about_server">Servidor</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Versão do app</string>
+    <string name="about_android_settings">Configurações do Android</string>
+    <string name="settings_updates">Atualizações</string>
+    <string name="updates_channel">Canal</string>
+    <string name="updates_channel_stable">Estável</string>
+    <string name="updates_channel_beta">Beta (teste as novidades antes)</string>
+    <string name="updates_check">Verificar atualização</string>
+    <string name="updates_install_now">Instalar agora</string>
+    <string name="updates_checking">Verificando atualizações…</string>
+    <string name="updates_up_to_date">Este porta-retrato está atualizado.</string>
+    <string name="updates_downloading">Baixando a versão %1$s… %2$d%%</string>
+    <string name="updates_waiting">A versão %1$s está pronta. Ela será instalada quando ninguém estiver usando o porta-retrato.</string>
+    <string name="updates_installing">Instalando a versão %1$s. O porta-retrato reinicia em instantes.</string>
+    <string name="updates_failed">A atualização não funcionou. O porta-retrato tentará de novo mais tarde.</string>
+    <string name="update_notice_updated">Atualizado para a versão %1$s</string>
+    <string name="update_notice_rolled_back">A nova versão teve problemas, então o porta-retrato voltou para a anterior.</string>
+    <string name="update_notice_needs_user">Há uma atualização pronta. Toque em Instalar para continuar.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Ver a previsão</string>
+    <string name="weather_close">Fechar</string>
+    <string name="weather_now">Agora</string>
+    <string name="weather_today">Hoje</string>
+    <string name="weather_feels_like">Sensação de %1$s</string>
+    <string name="weather_high_low">Máx. %1$s · Mín. %2$s</string>
+    <string name="weather_wind">Vento</string>
+    <string name="weather_humidity">Umidade</string>
+    <string name="weather_sunrise">Nascer do sol</string>
+    <string name="weather_sunset">Pôr do sol</string>
+    <string name="weather_next_hours">Próximas 24 horas</string>
+    <string name="weather_next_days">Previsão de 7 dias</string>
+    <string name="weather_updated">Atualizado %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>L</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SO</item>
+        <item>O</item>
+        <item>NO</item>
+    </string-array>
+    <string name="wmo_clear_day">Ensolarado</string>
+    <string name="wmo_clear_night">Céu limpo</string>
+    <string name="wmo_mainly_clear_day">Predominantemente ensolarado</string>
+    <string name="wmo_mainly_clear_night">Céu quase limpo</string>
+    <string name="wmo_partly_cloudy">Parcialmente nublado</string>
+    <string name="wmo_overcast">Nublado</string>
+    <string name="wmo_fog">Neblina</string>
+    <string name="wmo_rime_fog">Neblina congelante</string>
+    <string name="wmo_drizzle_light">Garoa fraca</string>
+    <string name="wmo_drizzle">Garoa</string>
+    <string name="wmo_drizzle_dense">Garoa forte</string>
+    <string name="wmo_freezing_drizzle">Garoa congelante</string>
+    <string name="wmo_rain_light">Chuva fraca</string>
+    <string name="wmo_rain">Chuva</string>
+    <string name="wmo_rain_heavy">Chuva forte</string>
+    <string name="wmo_freezing_rain">Chuva congelante</string>
+    <string name="wmo_snow_light">Neve fraca</string>
+    <string name="wmo_snow">Neve</string>
+    <string name="wmo_snow_heavy">Neve forte</string>
+    <string name="wmo_snow_grains">Grãos de neve</string>
+    <string name="wmo_showers_light">Pancadas de chuva fracas</string>
+    <string name="wmo_showers">Pancadas de chuva</string>
+    <string name="wmo_showers_violent">Pancadas de chuva fortes</string>
+    <string name="wmo_snow_showers_light">Pancadas de neve fracas</string>
+    <string name="wmo_snow_showers">Pancadas de neve</string>
+    <string name="wmo_thunderstorm">Tempestade</string>
+    <string name="wmo_thunderstorm_hail">Tempestade com granizo</string>
+</resources>

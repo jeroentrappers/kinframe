@@ -1,7 +1,8 @@
-import type { MessageKey } from './en';
+import type { Catalog } from '../types';
 
-// Nederlands. Must have exactly the keys of en.ts (checked by the compiler).
-export const nl: Record<MessageKey, string> = {
+// Nederlands (reviewed by a native speaker). Must have exactly the keys of en.ts (checked by the compiler and
+// catalogs.test.ts).
+const nl: Catalog = {
 	'common.cancel': 'Annuleren',
 	'common.close': 'Sluiten',
 	'common.dismiss': 'Wegdoen',
@@ -407,14 +408,16 @@ export const nl: Record<MessageKey, string> = {
 	'settingsForm.modeDim': 'Alleen dimmen',
 	'settingsForm.removeSchedule': 'Deze slaaptijd verwijderen',
 	'settingsForm.weatherTitle': 'Locatie & weer',
-	'settingsForm.weatherHint': 'Waar de fotolijst staat. Voor het weer en om het scherm na zonsondergang te dimmen.',
+	'settingsForm.weatherHint': 'Waar het kader staat. Voor het weer en om het scherm na zonsondergang te dimmen.',
 	'settingsForm.showWeather': 'Toon het weer',
-	'settingsForm.showWeatherHint': 'Het huidige weer naast de klok. Tik erop op de fotolijst voor de verwachting.',
+	'settingsForm.showWeatherHint': 'Het huidige weer naast de klok. Tik erop op het kader voor de verwachting.',
 	'settingsForm.needsLocation': 'Kies eerst een plaats.',
 	'settingsForm.temperatureUnit': 'Temperatuur',
 	'settingsForm.celsius': '°C',
 	'settingsForm.fahrenheit': '°F',
 	'settingsForm.weatherCredit': 'Weergegevens van Open-Meteo.com',
+	'settingsForm.frameLanguage': 'Taal van het kader',
+	'settingsForm.frameLanguageHint': 'De taal van de menu’s en berichten op het kader zelf.',
 	'location.search': 'Zoek een gemeente of stad',
 	'location.placeholder': 'bv. Gent',
 	'location.results': 'Plaatsen',
@@ -818,3 +821,5 @@ export const nl: Record<MessageKey, string> = {
 	'cal.settingsSaved': 'Agenda-instellingen bewaard'
 	// ---- calendar (end) ----
 };
+
+export default nl;

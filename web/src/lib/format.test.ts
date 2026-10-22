@@ -63,6 +63,8 @@ describe('numbers and durations', () => {
 		expect(formatInterval(30)).toBe('30 s');
 		expect(formatInterval(300)).toBe('5 min');
 		expect(formatInterval(86400)).toBe('24 h');
+		expect(formatInterval(300, 'de')).toBe('5 Min.');
+		expect(formatInterval(30, 'ar')).not.toContain('s');
 	});
 });
 

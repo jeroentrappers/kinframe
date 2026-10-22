@@ -411,7 +411,10 @@
 	}
 
 	function gripKey(e: KeyboardEvent, index: number) {
-		const delta = e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : 0;
+		// The grid runs right to left in Arabic and Hebrew: the horizontal arrows follow the reading direction.
+		const before = i18n.dir === 'rtl' ? 'ArrowRight' : 'ArrowLeft';
+		const after = i18n.dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+		const delta = e.key === before || e.key === 'ArrowUp' ? -1 : e.key === after || e.key === 'ArrowDown' ? 1 : 0;
 		if (!delta) return;
 		e.preventDefault();
 		const to = index + delta;
@@ -858,7 +861,7 @@
 	.icon-tools {
 		display: inline-flex;
 		gap: 2px;
-		margin-left: auto;
+		margin-inline-start: auto;
 	}
 	.arrange-hint {
 		grid-column: 1 / -1;
@@ -943,7 +946,7 @@
 	.pick {
 		position: absolute;
 		top: 6px;
-		left: 6px;
+		inset-inline-start: 6px;
 		width: 26px;
 		height: 26px;
 		border-radius: 50%;
@@ -985,7 +988,7 @@
 	.grip {
 		position: absolute;
 		top: 6px;
-		right: 6px;
+		inset-inline-end: 6px;
 		width: 36px;
 		height: 36px;
 		border-radius: 10px;
@@ -1007,7 +1010,7 @@
 	}
 	.pos {
 		position: absolute;
-		left: 6px;
+		inset-inline-start: 6px;
 		top: 6px;
 		min-width: 24px;
 		padding: 2px 6px;
@@ -1021,7 +1024,7 @@
 	.tag {
 		position: absolute;
 		bottom: 6px;
-		right: 6px;
+		inset-inline-end: 6px;
 		padding: 1px 7px;
 		border-radius: var(--r-full);
 		background: var(--warn-soft);
@@ -1033,8 +1036,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 3px;
-		left: 6px;
-		right: auto;
+		inset-inline-start: 6px;
+		inset-inline-end: auto;
 		background: rgb(20 14 10 / 0.65);
 		color: #fff;
 	}

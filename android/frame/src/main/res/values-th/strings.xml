@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">กรอบรูป</string>
+
+    <!-- Common actions -->
+    <string name="action_back">กลับ</string>
+    <string name="action_cancel">ยกเลิก</string>
+    <string name="action_continue">ดำเนินการต่อ</string>
+    <string name="action_try_again">ลองอีกครั้ง</string>
+    <string name="action_undo">เลิกทำ</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">ยินดีต้อนรับสู่ kinframe</string>
+    <string name="setup_language_body">เลือกภาษาสำหรับกรอบรูปนี้</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">เชื่อมต่อ Wi-Fi</string>
+    <string name="setup_wifi_body">กรอบรูปต้องใช้ Wi-Fi เพื่อรับรูป เมื่อได้รับแล้ว รูปจะเล่นได้แม้ไม่มีการเชื่อมต่อ</string>
+    <string name="wifi_connected_to">เชื่อมต่อกับ %1$s แล้ว</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">ไม่ได้เชื่อมต่อ</string>
+    <string name="wifi_not_connected_hint">เลือกเครือข่ายเพื่อดำเนินการต่อ</string>
+    <string name="wifi_no_internet">เชื่อมต่อแล้ว แต่ยังไม่มีอินเทอร์เน็ต</string>
+    <string name="wifi_signal">สัญญาณ: %1$s</string>
+    <string name="wifi_open_settings">การตั้งค่า Wi-Fi</string>
+    <string name="wifi_networks">เครือข่ายใกล้เคียง</string>
+    <string name="wifi_scanning">กำลังค้นหาเครือข่าย…</string>
+    <string name="wifi_permission_body">หากต้องการแสดงรายการเครือข่ายที่นี่ Android ต้องได้รับสิทธิ์ในการสแกน Wi-Fi</string>
+    <string name="wifi_show_networks">แสดงเครือข่าย</string>
+    <string name="wifi_password">รหัสผ่าน</string>
+    <string name="wifi_join">เชื่อมต่อ</string>
+    <string name="signal_0">อ่อนมาก</string>
+    <string name="signal_1">อ่อน</string>
+    <string name="signal_2">พอใช้</string>
+    <string name="signal_3">ดี</string>
+    <string name="signal_4">ดีมาก</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">เลือกเซิร์ฟเวอร์</string>
+    <string name="setup_server_body">รูปจะส่งผ่านเซิร์ฟเวอร์ kinframe ใช้เซิร์ฟเวอร์ kinframe ฟรี หรือเซิร์ฟเวอร์ที่ครอบครัวของคุณดูแลเอง</string>
+    <string name="server_default_body">ฟรีและเป็นโอเพนซอร์ส แนะนำ</string>
+    <string name="server_custom">ใช้เซิร์ฟเวอร์ของคุณเอง</string>
+    <string name="server_custom_body">สำหรับครอบครัวที่โฮสต์ kinframe เอง</string>
+    <string name="server_address">ที่อยู่เซิร์ฟเวอร์</string>
+    <string name="server_check">ตรวจสอบเซิร์ฟเวอร์</string>
+    <string name="server_checking">กำลังตรวจสอบเซิร์ฟเวอร์…</string>
+    <string name="server_version">เวอร์ชัน %1$s</string>
+    <string name="server_insecure">ไม่ได้เข้ารหัส</string>
+    <string name="server_error_invalid">ดูเหมือนจะไม่ใช่ที่อยู่เว็บ ลองใส่แบบนี้ https://frames.example.org</string>
+    <string name="server_error_unreachable">ติดต่อเซิร์ฟเวอร์นี้ไม่ได้ ตรวจสอบที่อยู่และดูว่ากรอบรูปออนไลน์อยู่</string>
+    <string name="server_error_not_kinframe">เซิร์ฟเวอร์นี้ตอบกลับ แต่ไม่ใช่เซิร์ฟเวอร์ kinframe</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">กำลังเตรียมกรอบรูปของคุณ…</string>
+    <string name="enroll_body">ใช้เวลาไม่กี่วินาที</string>
+    <string name="enroll_failed_title">กรอบรูปลงทะเบียนไม่สำเร็จ</string>
+    <string name="enroll_failed_body">เซิร์ฟเวอร์แจ้งว่า: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">เชื่อมต่อกรอบรูปนี้กับครอบครัวของคุณ</string>
+    <string name="code_step1">เปิดแอป kinframe หรือ %1$s ในเบราว์เซอร์</string>
+    <string name="code_step2">เลือก เพิ่มกรอบรูป</string>
+    <string name="code_step3">ป้อนรหัสนี้ หรือสแกนคิวอาร์โค้ด</string>
+    <string name="code_valid_for">ใช้ได้อีก %1$s</string>
+    <string name="code_waiting">กำลังรอให้มีคนป้อนรหัส</string>
+    <string name="code_offline_title">กรอบรูปออฟไลน์อยู่</string>
+    <string name="code_offline_body">รหัสกรอบรูปต้องใช้การเชื่อมต่ออินเทอร์เน็ต ตรวจสอบ Wi-Fi</string>
+    <string name="code_error_title">รับรหัสกรอบรูปไม่ได้</string>
+    <string name="code_error_body">เซิร์ฟเวอร์ไม่ตอบกลับ กรอบรูปจะลองใหม่ต่อไป</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">เชื่อมต่อกับ %1$s แล้ว</string>
+    <string name="celebrate_title_anon">เชื่อมต่อแล้ว</string>
+    <string name="celebrate_body">รูปที่ส่งมายังกรอบรูปนี้จะปรากฏที่นี่ภายในไม่กี่วินาที</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d ชม. %2$d นาที</string>
+    <string name="duration_min">%1$d นาที</string>
+    <string name="date_today">วันนี้</string>
+    <string name="date_yesterday">เมื่อวาน</string>
+    <plurals name="date_days_ago">
+        <item quantity="other">%d วันที่แล้ว</item>
+    </plurals>
+    <string name="interval_s">%1$d วิ</string>
+    <string name="interval_min">%1$d นาที</string>
+    <string name="interval_h">%1$d ชม.</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">แก้ไขแล้ว</string>
+    <string name="unable_photo">แสดงรูปนี้ไม่ได้</string>
+    <string name="unable_video">เล่นวิดีโอนี้ไม่ได้ ขอให้ผู้ส่งส่งมาใหม่</string>
+    <plurals name="new_photos">
+        <item quantity="other">รูปใหม่ %d รูป</item>
+    </plurals>
+    <string name="status_offline">ออฟไลน์</string>
+    <string name="status_online">ออนไลน์ · %1$s</string>
+    <string name="status_server_unreachable">ติดต่อเซิร์ฟเวอร์ไม่ได้</string>
+    <string name="identify_this_is">นี่คือ</string>
+    <string name="snack_hidden">ซ่อนรูปแล้ว</string>
+    <string name="snack_deleted">ลบรูปแล้ว</string>
+    <string name="menu_settings">การตั้งค่า</string>
+    <string name="menu_power">พลังงาน</string>
+    <string name="menu_hide">ซ่อน</string>
+    <string name="menu_delete">ลบ</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">ยังไม่มีรูป</string>
+    <string name="empty_body">รูปและวิดีโอที่ส่งผ่านแอปหรือเว็บไซต์ kinframe จะปรากฏที่นี่ภายในไม่กี่วินาที</string>
+    <string name="empty_code_title">เพิ่มครอบครัวด้วยรหัสนี้</string>
+    <string name="empty_code_body">ป้อนรหัสในแอป kinframe หรือสแกนคิวอาร์โค้ด</string>
+    <string name="empty_hidden_title">รูปทั้งหมดถูกซ่อนอยู่</string>
+    <string name="empty_hidden_body">รูปที่ซ่อนยังอยู่ในคลังรูป แสดงอีกครั้งได้จากแอป kinframe</string>
+    <string name="empty_downloading_title">รูปกำลังมา</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="other">กำลังดาวน์โหลดรูป %d รูป</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">พลังงาน</string>
+    <string name="power_sleep">พักหน้าจอ</string>
+    <string name="power_sleep_body">ปิดหน้าจอจนกว่าจะแตะ</string>
+    <string name="power_restart">รีสตาร์ท</string>
+    <string name="power_restart_body">เริ่มกรอบรูปใหม่</string>
+    <string name="power_off">ปิดเครื่อง</string>
+    <string name="power_off_body">ปิดอย่างปลอดภัยก่อนถอดปลั๊ก</string>
+    <string name="shutting_down_title">กำลังปิดเครื่อง…</string>
+    <string name="restarting_title">กำลังรีสตาร์ท…</string>
+    <string name="shutting_down_body">กำลังบันทึกทุกอย่างอย่างปลอดภัย</string>
+    <string name="safe_title">ถอดปลั๊กได้อย่างปลอดภัยแล้ว</string>
+    <string name="safe_body">บันทึกทุกอย่างแล้ว หากต้องการใช้กรอบรูปอีกครั้ง ให้กดปุ่มเปิดปิดหรือเสียบปลั๊กใหม่</string>
+    <string name="safe_body_noroot">kinframe บันทึกทุกอย่างแล้ว ถอดปลั๊กกรอบรูปได้เลย</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe มีปัญหาในการแสดงรูป</string>
+    <string name="recovery_body">แอปหยุดทำงานโดยไม่คาดคิดหลายครั้งติดกัน ลองอีกครั้ง หรือล้างรูปที่ดาวน์โหลดไว้ รูปจะดาวน์โหลดจากเซิร์ฟเวอร์ใหม่ ไม่มีอะไรสูญหาย</string>
+    <string name="recovery_clear">ล้างรูปที่ดาวน์โหลดไว้</string>
+
+    <!-- Settings -->
+    <string name="settings_title">การตั้งค่า</string>
+    <string name="settings_language">ภาษา</string>
+    <string name="settings_slideshow">สไลด์โชว์</string>
+    <string name="settings_interval">แสดงแต่ละรูปนาน</string>
+    <string name="settings_transition">การเปลี่ยนภาพ</string>
+    <string name="transition_crossfade">จางหาย</string>
+    <string name="transition_slide">เลื่อน</string>
+    <string name="settings_order">ลำดับ</string>
+    <string name="order_received">ได้รับล่าสุด</string>
+    <string name="order_taken">วันที่ถ่าย</string>
+    <string name="order_shuffle">สุ่ม</string>
+    <string name="settings_reverse">เก่าสุดก่อน</string>
+    <string name="settings_fill">ขนาดรูป</string>
+    <string name="fill_fill">เต็มหน้าจอ</string>
+    <string name="fill_fit">แสดงทั้งรูป</string>
+    <string name="settings_display">หน้าจอ</string>
+    <string name="settings_brightness">ความสว่าง</string>
+    <string name="settings_brightness_mode">ความสว่างอัตโนมัติ</string>
+    <string name="brightness_manual">คงที่</string>
+    <string name="brightness_sun">ตามดวงอาทิตย์</string>
+    <string name="settings_sleep">พักหน้าจอ</string>
+    <string name="settings_sleep_enabled">ปิดหน้าจอตอนกลางคืน</string>
+    <string name="settings_sleep_at">พักหน้าจอเวลา</string>
+    <string name="settings_wake_at">เปิดหน้าจอเวลา</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="other">และอีก %d กำหนดเวลา จัดการได้ในแอป kinframe</item>
+    </plurals>
+    <string name="settings_about">กรอบรูปนี้</string>
+    <string name="about_frame">ชื่อ</string>
+    <string name="about_server">เซิร์ฟเวอร์</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">เวอร์ชันแอป</string>
+    <string name="about_android_settings">การตั้งค่า Android</string>
+    <string name="settings_updates">อัปเดต</string>
+    <string name="updates_channel">ช่องทาง</string>
+    <string name="updates_channel_stable">เสถียร</string>
+    <string name="updates_channel_beta">เบต้า (ลองเวอร์ชันใหม่ก่อนใคร)</string>
+    <string name="updates_check">ตรวจหาอัปเดต</string>
+    <string name="updates_install_now">ติดตั้งเลย</string>
+    <string name="updates_checking">กำลังตรวจหาอัปเดต…</string>
+    <string name="updates_up_to_date">กรอบรูปนี้เป็นเวอร์ชันล่าสุดแล้ว</string>
+    <string name="updates_downloading">กำลังดาวน์โหลดเวอร์ชัน %1$s… %2$d%%</string>
+    <string name="updates_waiting">เวอร์ชัน %1$s พร้อมแล้ว จะติดตั้งเมื่อไม่มีใครใช้กรอบรูป</string>
+    <string name="updates_installing">กำลังติดตั้งเวอร์ชัน %1$s กรอบรูปจะรีสตาร์ทในอีกสักครู่</string>
+    <string name="updates_failed">อัปเดตไม่สำเร็จ กรอบรูปจะลองใหม่ภายหลัง</string>
+    <string name="update_notice_updated">อัปเดตเป็นเวอร์ชัน %1$s แล้ว</string>
+    <string name="update_notice_rolled_back">เวอร์ชันใหม่มีปัญหา กรอบรูปจึงกลับไปใช้เวอร์ชันก่อนหน้า</string>
+    <string name="update_notice_needs_user">มีอัปเดตพร้อมแล้ว แตะ ติดตั้ง เพื่อดำเนินการต่อ</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">แสดงพยากรณ์อากาศ</string>
+    <string name="weather_close">ปิด</string>
+    <string name="weather_now">ตอนนี้</string>
+    <string name="weather_today">วันนี้</string>
+    <string name="weather_feels_like">รู้สึกเหมือน %1$s</string>
+    <string name="weather_high_low">สูง %1$s · ต่ำ %2$s</string>
+    <string name="weather_wind">ลม</string>
+    <string name="weather_humidity">ความชื้น</string>
+    <string name="weather_sunrise">พระอาทิตย์ขึ้น</string>
+    <string name="weather_sunset">พระอาทิตย์ตก</string>
+    <string name="weather_next_hours">24 ชั่วโมงข้างหน้า</string>
+    <string name="weather_next_days">พยากรณ์ 7 วัน</string>
+    <string name="weather_updated">อัปเดตเมื่อ %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="wmo_clear_day">แดดจัด</string>
+    <string name="wmo_clear_night">ท้องฟ้าแจ่มใส</string>
+    <string name="wmo_mainly_clear_day">แดดเป็นส่วนใหญ่</string>
+    <string name="wmo_mainly_clear_night">ท้องฟ้าโปร่งเป็นส่วนใหญ่</string>
+    <string name="wmo_partly_cloudy">มีเมฆบางส่วน</string>
+    <string name="wmo_overcast">มีเมฆมาก</string>
+    <string name="wmo_fog">หมอก</string>
+    <string name="wmo_rime_fog">หมอกน้ำแข็ง</string>
+    <string name="wmo_drizzle_light">ฝนปรอยเล็กน้อย</string>
+    <string name="wmo_drizzle">ฝนปรอย</string>
+    <string name="wmo_drizzle_dense">ฝนปรอยหนัก</string>
+    <string name="wmo_freezing_drizzle">ฝนปรอยเยือกแข็ง</string>
+    <string name="wmo_rain_light">ฝนเล็กน้อย</string>
+    <string name="wmo_rain">ฝน</string>
+    <string name="wmo_rain_heavy">ฝนตกหนัก</string>
+    <string name="wmo_freezing_rain">ฝนเยือกแข็ง</string>
+    <string name="wmo_snow_light">หิมะเล็กน้อย</string>
+    <string name="wmo_snow">หิมะ</string>
+    <string name="wmo_snow_heavy">หิมะตกหนัก</string>
+    <string name="wmo_snow_grains">เกล็ดหิมะ</string>
+    <string name="wmo_showers_light">ฝนโปรยปรายเล็กน้อย</string>
+    <string name="wmo_showers">ฝนโปรยปราย</string>
+    <string name="wmo_showers_violent">ฝนกระหน่ำ</string>
+    <string name="wmo_snow_showers_light">หิมะโปรยปรายเล็กน้อย</string>
+    <string name="wmo_snow_showers">หิมะโปรยปราย</string>
+    <string name="wmo_thunderstorm">พายุฝนฟ้าคะนอง</string>
+    <string name="wmo_thunderstorm_hail">พายุฝนฟ้าคะนองและลูกเห็บ</string>
+</resources>

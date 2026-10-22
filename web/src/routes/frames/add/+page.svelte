@@ -238,7 +238,7 @@
 	}
 	.name-form {
 		width: 100%;
-		text-align: left;
+		text-align: start;
 		margin-top: var(--s-3);
 	}
 	.center {

@@ -1,0 +1,14 @@
+{
+ "footer": "Der Code läuft in 10 Minuten ab. Wenn du ihn nicht angefordert hast, kannst du diese E-Mail ignorieren.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Dein kinframe-Anmeldecode: {{code}}", "intro": "Hallo,\n\nmit diesem Code meldest du dich bei kinframe an:"},
+  "Register": {"subject": "Dein kinframe-Registrierungscode: {{code}}", "intro": "Willkommen bei kinframe!\n\nMit diesem Code schließt du die Erstellung deines Kontos ab:"},
+  "ForgotPassword": {"subject": "Dein Code zur Wiederherstellung deines kinframe-Kontos: {{code}}", "intro": "Hallo,\n\nmit diesem Code stellst du dein kinframe-Konto wieder her:"},
+  "Generic": {"subject": "Dein kinframe-Bestätigungscode: {{code}}", "intro": "Hallo,\n\ndein kinframe-Bestätigungscode lautet:"},
+  "BindNewIdentifier": {"subject": "Bestätige deine neue E-Mail-Adresse für kinframe: {{code}}", "intro": "Hallo,\n\nmit diesem Code bestätigst du die neue E-Mail-Adresse für dein kinframe-Konto:"},
+  "UserPermissionValidation": {"subject": "Dein kinframe-Bestätigungscode: {{code}}", "intro": "Hallo,\n\nmit diesem Code bestätigst du, dass du es bist, bevor du dein kinframe-Konto änderst:"},
+  "MfaVerification": {"subject": "Dein kinframe-Bestätigungscode: {{code}}", "intro": "Hallo,\n\nmit diesem Code schließt du die Anmeldung bei kinframe ab:"},
+  "BindMfa": {"subject": "Dein kinframe-Bestätigungscode: {{code}}", "intro": "Hallo,\n\nmit diesem Code aktivierst du die Bestätigung in zwei Schritten für kinframe:"}
+ }
+}

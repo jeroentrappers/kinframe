@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Introduceți PIN-ul proprietarului</string>
+    <string name="pin_reason_settings">pentru a deschide setările</string>
+    <string name="pin_reason_exit">pentru a ieși din kinframe</string>
+    <string name="pin_reason_wifi">pentru a schimba Wi-Fi-ul</string>
+    <string name="pin_reason_power_off">pentru a opri rama</string>
+    <string name="pin_reason_restart">pentru a reporni rama</string>
+    <string name="pin_reason_server">pentru a schimba serverul</string>
+    <string name="pin_reason_reset">pentru a reseta rama</string>
+    <string name="pin_checking">Se verifică…</string>
+    <string name="pin_wrong">PIN-ul nu este corect.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">PIN-ul nu este corect. Mai aveți %d încercare înainte de o scurtă pauză.</item>
+        <item quantity="few">PIN-ul nu este corect. Mai aveți %d încercări înainte de o scurtă pauză.</item>
+        <item quantity="other">PIN-ul nu este corect. Mai aveți %d de încercări înainte de o scurtă pauză.</item>
+    </plurals>
+    <string name="pin_locked">Prea multe încercări greșite. Încercați din nou peste %s.</string>
+    <string name="pin_forgot">Ați uitat PIN-ul? Proprietarul ramei îl poate elimina din aplicația kinframe, în setările acestei rame.</string>
+    <string name="pin_new_title">Alegeți un PIN</string>
+    <string name="pin_new_body">Între 4 și 6 cifre. Va fi cerut pentru a deschide setările, a opri rama sau a schimba Wi-Fi-ul.</string>
+    <string name="pin_confirm_title">Introduceți din nou PIN-ul</string>
+    <string name="pin_confirm_body">Doar pentru siguranță.</string>
+    <string name="pin_mismatch">PIN-urile nu se potrivesc. Alegeți din nou unul.</string>
+    <string name="pin_key_delete">Ștergeți</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN-ul proprietarului</string>
+    <string name="settings_pin_off">Dezactivat. Oricine poate deschide setările.</string>
+    <string name="settings_pin_on">Activat. Setările, alimentarea și Wi-Fi-ul cer PIN-ul.</string>
+    <string name="settings_pin_set">Setați un PIN</string>
+    <string name="settings_pin_change">Schimbați PIN-ul</string>
+    <string name="settings_pin_remove">Eliminați PIN-ul</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Cineva</string>
+    <string name="join_title">%1$s dorește să se alăture</string>
+    <string name="join_body_code">%1$s a introdus codul ramei %2$s. Dacă permiteți, %1$s va putea trimite fotografii acestei rame.</string>
+    <string name="join_body_invited">Invitație de la %1$s pentru %3$s la %2$s. Dacă permiteți, %3$s va putea trimite fotografii acestei rame.</string>
+    <string name="join_invited_by">Invitat de %s</string>
+    <string name="join_allow">Permiteți</string>
+    <string name="join_deny">Nu permiteți</string>
+    <string name="join_later">Nu acum</string>
+    <string name="join_later_hint">Rămâne la notificări, în meniu.</string>
+    <string name="join_pill_one">%s dorește să se alăture</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d persoană dorește să se alăture</item>
+        <item quantity="few">%d persoane doresc să se alăture</item>
+        <item quantity="other">%d de persoane doresc să se alăture</item>
+    </plurals>
+    <string name="notifications_title">Notificări</string>
+    <string name="notifications_empty">Totul la zi</string>
+    <string name="notifications_empty_body">Nu vă așteaptă nimic.</string>
+    <string name="menu_notifications">Notificări</string>
+    <string name="action_close">Închideți</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Nu există conexiune la internet</string>
+    <string name="status_card_offline_body">Fotografiile de pe ramă rulează în continuare. Cele noi sosesc imediat ce conexiunea revine.</string>
+    <string name="status_card_server_title">Serverul de fotografii nu poate fi accesat</string>
+    <string name="status_card_server_body">Wi-Fi-ul funcționează, dar serverul nu răspunde. Fotografiile noi sosesc când revine.</string>
+    <string name="status_card_portal_title">Această rețea Wi-Fi cere autentificare</string>
+    <string name="status_card_portal_body">Deschideți pagina de autentificare a rețelei pentru a conecta rama.</string>
+    <string name="status_card_portal_action">Conectați-vă</string>
+    <string name="status_card_storage_title">Rama este aproape plină</string>
+    <string name="status_card_storage_body">Unele fotografii mai vechi au fost scoase de pe ramă pentru a face loc; rămân în siguranță pe server. Fotografiile noi pot aștepta până se face loc.</string>
+    <string name="portal_title">Conectați-vă la Wi-Fi</string>
+    <string name="portal_body">Se închide singură când rama este online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">În ce fus orar se află rama?</string>
+    <string name="setup_tz_body">Pentru ca ora, data și programul de noapte să fie corecte.</string>
+    <string name="setup_tz_suggested">Sugerat</string>
+    <string name="setup_tz_all">Toate fusurile orare</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">America</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">Africa</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacific</string>
+    <string name="tz_region_atlantic">Atlantic</string>
+    <string name="tz_region_indian">Oceanul Indian</string>
+    <string name="tz_region_antarctica">Antarctica</string>
+    <string name="setup_update_checking">Se caută o versiune mai nouă…</string>
+    <string name="setup_update_checking_body">Rama verifică dacă are cea mai nouă versiune kinframe înainte de a începe.</string>
+    <string name="setup_update_downloading">Se descarcă versiunea %s</string>
+    <string name="setup_update_downloading_body">Se instalează imediat după. Puteți sări peste acest pas; rama se va actualiza mai târziu.</string>
+    <string name="setup_update_installing">Se instalează versiunea %s</string>
+    <string name="setup_update_installing_body">Rama repornește singură în curând și continuă configurarea de unde ați rămas.</string>
+    <string name="setup_update_current">kinframe este actualizat</string>
+    <string name="setup_update_current_body">Trecem la ultimul pas.</string>
+    <string name="setup_update_failed">Nu s-au putut căuta actualizări</string>
+    <string name="setup_update_failed_body">Nicio problemă: rama verifică din nou mai târziu și se actualizează singură.</string>
+    <string name="setup_update_skip">Omiteți deocamdată</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Acum %d an, în această zi</item>
+        <item quantity="few">Acum %d ani, în această zi</item>
+        <item quantity="other">Acum %d de ani, în această zi</item>
+    </plurals>
+    <string name="transition_kenburns">Zoom lent</string>
+    <string name="settings_collage">Mai multe fotografii deodată (colaj)</string>
+    <string name="settings_collage_max">Fotografii pe ecran</string>
+    <string name="settings_pair_portraits">Afișați două fotografii verticale alăturate</string>
+    <string name="settings_on_this_day">Afișați amintiri din această zi din anii trecuți</string>
+    <string name="settings_video">Videoclipuri</string>
+    <string name="settings_video_autoplay">Redați automat videoclipurile</string>
+    <string name="settings_video_playback">După un videoclip</string>
+    <string name="video_once_hold">Redați o dată, apoi așteptați</string>
+    <string name="video_loop">Repetați continuu</string>
+    <string name="video_once_advance">Redați o dată, apoi continuați</string>
+    <string name="settings_video_volume">Volumul videoclipurilor</string>
+    <string name="settings_video_auto_mute">Dezactivați sunetul dacă nimeni nu a atins rama de</string>
+    <string name="video_auto_mute_off">Niciodată</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

@@ -1,0 +1,14 @@
+{
+ "footer": "このコードの有効期限は 10 分です。お心当たりがない場合は、このメールを無視してください。",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "kinframe のログインコード: {{code}}", "intro": "こんにちは。\n\nkinframe にログインするには、次のコードを使ってください:"},
+  "Register": {"subject": "kinframe の登録コード: {{code}}", "intro": "kinframe へようこそ！\n\nアカウントの作成を完了するには、次のコードを使ってください:"},
+  "ForgotPassword": {"subject": "kinframe のアカウント復旧コード: {{code}}", "intro": "こんにちは。\n\nkinframe のアカウントを復旧するには、次のコードを使ってください:"},
+  "Generic": {"subject": "kinframe の確認コード: {{code}}", "intro": "こんにちは。\n\nkinframe の確認コードは次のとおりです:"},
+  "BindNewIdentifier": {"subject": "kinframe の新しいメールアドレスの確認: {{code}}", "intro": "こんにちは。\n\nkinframe アカウントの新しいメールアドレスを確認するには、次のコードを使ってください:"},
+  "UserPermissionValidation": {"subject": "kinframe の確認コード: {{code}}", "intro": "こんにちは。\n\nkinframe アカウントを変更する前に、ご本人確認のため次のコードを使ってください:"},
+  "MfaVerification": {"subject": "kinframe の確認コード: {{code}}", "intro": "こんにちは。\n\nkinframe へのログインを完了するには、次のコードを使ってください:"},
+  "BindMfa": {"subject": "kinframe の確認コード: {{code}}", "intro": "こんにちは。\n\nkinframe の 2 段階認証をオンにするには、次のコードを使ってください:"}
+ }
+}

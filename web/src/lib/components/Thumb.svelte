@@ -75,7 +75,7 @@
 	}
 	.video-badge {
 		position: absolute;
-		left: 6px;
+		inset-inline-start: 6px;
 		bottom: 6px;
 		width: 22px;
 		height: 22px;

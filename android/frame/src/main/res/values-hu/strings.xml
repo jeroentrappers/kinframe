@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Képkeret</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Vissza</string>
+    <string name="action_cancel">Mégse</string>
+    <string name="action_continue">Tovább</string>
+    <string name="action_try_again">Újra</string>
+    <string name="action_undo">Visszavonás</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Üdv a kinframe-ben!</string>
+    <string name="setup_language_body">Válaszd ki a képkeret nyelvét.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Csatlakozás Wi-Fi-hez</string>
+    <string name="setup_wifi_body">A képkeretnek Wi-Fi kell a fotók fogadásához. Ha már megérkeztek, kapcsolat nélkül is megjelennek.</string>
+    <string name="wifi_connected_to">Csatlakozva: %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Nincs kapcsolat</string>
+    <string name="wifi_not_connected_hint">A folytatáshoz válassz egy hálózatot.</string>
+    <string name="wifi_no_internet">Csatlakozva, de még nincs internet</string>
+    <string name="wifi_signal">Jel: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi-beállítások</string>
+    <string name="wifi_networks">Közeli hálózatok</string>
+    <string name="wifi_scanning">Hálózatok keresése…</string>
+    <string name="wifi_permission_body">A hálózatok listázásához az Androidnak engedély kell a Wi-Fi-hálózatok kereséséhez.</string>
+    <string name="wifi_show_networks">Hálózatok mutatása</string>
+    <string name="wifi_password">Jelszó</string>
+    <string name="wifi_join">Csatlakozás</string>
+    <string name="signal_0">nagyon gyenge</string>
+    <string name="signal_1">gyenge</string>
+    <string name="signal_2">közepes</string>
+    <string name="signal_3">jó</string>
+    <string name="signal_4">kiváló</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Válassz szervert</string>
+    <string name="setup_server_body">A fotók egy kinframe-szerveren keresztül érkeznek. Használd az ingyenes kinframe-szervert, vagy a családod saját szerverét.</string>
+    <string name="server_default_body">Ingyenes és nyílt forráskódú. Ajánlott.</string>
+    <string name="server_custom">Saját szerver használata</string>
+    <string name="server_custom_body">Olyan családoknak, akik maguk üzemeltetik a kinframe-et.</string>
+    <string name="server_address">Szerver címe</string>
+    <string name="server_check">Szerver ellenőrzése</string>
+    <string name="server_checking">Szerver ellenőrzése…</string>
+    <string name="server_version">verzió: %1$s</string>
+    <string name="server_insecure">nem titkosított</string>
+    <string name="server_error_invalid">Ez nem tűnik webcímnek. Próbálj valami ilyesmit: https://frames.example.org.</string>
+    <string name="server_error_unreachable">A szerver nem érhető el. Ellenőrizd a címet, és hogy a képkeret online van-e.</string>
+    <string name="server_error_not_kinframe">A szerver válaszolt, de nem kinframe-szerver.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">A képkeret előkészítése…</string>
+    <string name="enroll_body">Ez néhány másodpercig tart.</string>
+    <string name="enroll_failed_title">A képkeret regisztrálása nem sikerült</string>
+    <string name="enroll_failed_body">A szerver válasza: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Kapcsold össze a képkeretet a családoddal</string>
+    <string name="code_step1">Nyisd meg a kinframe appot, vagy ezt a címet böngészőben: %1$s</string>
+    <string name="code_step2">Válaszd a Képkeret hozzáadása lehetőséget</string>
+    <string name="code_step3">Írd be ezt a kódot, vagy olvasd be a QR-kódot</string>
+    <string name="code_valid_for">Érvényes még: %1$s</string>
+    <string name="code_waiting">Várakozás, hogy valaki beírja a kódot</string>
+    <string name="code_offline_title">A képkeret offline</string>
+    <string name="code_offline_body">A képkeretkódhoz internetkapcsolat kell. Ellenőrizd a Wi-Fit.</string>
+    <string name="code_error_title">Nem sikerült képkeretkódot kérni</string>
+    <string name="code_error_body">A szerver nem válaszolt. A képkeret tovább próbálkozik.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Összekapcsolva: %1$s</string>
+    <string name="celebrate_title_anon">Összekapcsolva</string>
+    <string name="celebrate_body">A képkeretre küldött fotók másodperceken belül itt jelennek meg.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d ó %2$d perc</string>
+    <string name="duration_min">%1$d perc</string>
+    <string name="date_today">Ma</string>
+    <string name="date_yesterday">Tegnap</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d napja</item>
+        <item quantity="other">%d napja</item>
+    </plurals>
+    <string name="interval_s">%1$d mp</string>
+    <string name="interval_min">%1$d perc</string>
+    <string name="interval_h">%1$d óra</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">szerkesztve</string>
+    <string name="unable_photo">Ez a fotó nem jeleníthető meg</string>
+    <string name="unable_video">Ez a videó nem játszható le. Kérd meg a küldőt, hogy küldje el újra.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d új fotó</item>
+        <item quantity="other">%d új fotó</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">A szerver nem érhető el</string>
+    <string name="identify_this_is">Ez a képkeret:</string>
+    <string name="snack_hidden">Fotó elrejtve</string>
+    <string name="snack_deleted">Fotó törölve</string>
+    <string name="menu_settings">Beállítások</string>
+    <string name="menu_power">Kikapcsolás</string>
+    <string name="menu_hide">Elrejtés</string>
+    <string name="menu_delete">Törlés</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Még nincsenek fotók</string>
+    <string name="empty_body">A kinframe appal vagy weboldalról küldött fotók és videók másodperceken belül itt jelennek meg.</string>
+    <string name="empty_code_title">Add hozzá a családot ezzel a kóddal</string>
+    <string name="empty_code_body">Írd be a kinframe appban, vagy olvasd be a QR-kódot.</string>
+    <string name="empty_hidden_title">Minden fotó el van rejtve</string>
+    <string name="empty_hidden_body">Az elrejtett fotók a könyvtárban maradnak. A kinframe appban újra megjelenítheted őket.</string>
+    <string name="empty_downloading_title">Úton vannak a fotók</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d fotó letöltése folyamatban.</item>
+        <item quantity="other">%d fotó letöltése folyamatban.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Kikapcsolás</string>
+    <string name="power_sleep">Alvás</string>
+    <string name="power_sleep_body">A képernyő kikapcsol, amíg meg nem érinted.</string>
+    <string name="power_restart">Újraindítás</string>
+    <string name="power_restart_body">A képkeret újraindítása.</string>
+    <string name="power_off">Kikapcsolás</string>
+    <string name="power_off_body">Biztonságos leállítás kihúzás előtt.</string>
+    <string name="shutting_down_title">Leállítás…</string>
+    <string name="restarting_title">Újraindítás…</string>
+    <string name="shutting_down_body">Minden biztonságosan mentésre kerül.</string>
+    <string name="safe_title">Most már kihúzhatod</string>
+    <string name="safe_body">Minden el van mentve. A képkeret újbóli használatához nyomd meg a bekapcsológombot, vagy dugd vissza.</string>
+    <string name="safe_body_noroot">A kinframe mindent elmentett. Most már kihúzhatod a képkeretet.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">A kinframe nem tudta megjeleníteni a fotókat</string>
+    <string name="recovery_body">Többször egymás után váratlanul leállt. Próbáld újra, vagy töröld a letöltött fotókat. Ezek újra letöltődnek a szerverről, semmi sem vész el.</string>
+    <string name="recovery_clear">Letöltött fotók törlése</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Beállítások</string>
+    <string name="settings_language">Nyelv</string>
+    <string name="settings_slideshow">Diavetítés</string>
+    <string name="settings_interval">Egy fotó megjelenítési ideje</string>
+    <string name="settings_transition">Áttűnés</string>
+    <string name="transition_crossfade">Elhalványulás</string>
+    <string name="transition_slide">Csúszás</string>
+    <string name="settings_order">Sorrend</string>
+    <string name="order_received">Legutóbb érkezett</string>
+    <string name="order_taken">Készítés dátuma</string>
+    <string name="order_shuffle">Véletlenszerű</string>
+    <string name="settings_reverse">Legrégebbi elöl</string>
+    <string name="settings_fill">Fotóméret</string>
+    <string name="fill_fill">Teljes képernyő</string>
+    <string name="fill_fit">Teljes fotó</string>
+    <string name="settings_display">Képernyő</string>
+    <string name="settings_brightness">Fényerő</string>
+    <string name="settings_brightness_mode">Automatikus fényerő</string>
+    <string name="brightness_manual">Állandó</string>
+    <string name="brightness_sun">Napszak szerint</string>
+    <string name="settings_sleep">Alvás</string>
+    <string name="settings_sleep_enabled">Képernyő kikapcsolása éjszaka</string>
+    <string name="settings_sleep_at">Alvás ekkor</string>
+    <string name="settings_wake_at">Ébredés ekkor</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">és még %d időzítés, a kinframe appban kezelhető</item>
+        <item quantity="other">és még %d időzítés, a kinframe appban kezelhetők</item>
+    </plurals>
+    <string name="settings_about">Ez a képkeret</string>
+    <string name="about_frame">Név</string>
+    <string name="about_server">Szerver</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Appverzió</string>
+    <string name="about_android_settings">Android-beállítások</string>
+    <string name="settings_updates">Frissítések</string>
+    <string name="updates_channel">Csatorna</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Béta (új verziók korábban)</string>
+    <string name="updates_check">Frissítés keresése</string>
+    <string name="updates_install_now">Telepítés most</string>
+    <string name="updates_checking">Frissítések keresése…</string>
+    <string name="updates_up_to_date">A képkeret naprakész.</string>
+    <string name="updates_downloading">%1$s verzió letöltése… %2$d%%</string>
+    <string name="updates_waiting">A(z) %1$s verzió kész. Akkor települ, amikor senki sem használja a képkeretet.</string>
+    <string name="updates_installing">A(z) %1$s verzió telepítése. A képkeret mindjárt újraindul.</string>
+    <string name="updates_failed">A frissítés nem sikerült. A képkeret később újra megpróbálja.</string>
+    <string name="update_notice_updated">Frissítve erre a verzióra: %1$s</string>
+    <string name="update_notice_rolled_back">Az új verzióval gondok voltak, ezért a képkeret visszaállt az előzőre.</string>
+    <string name="update_notice_needs_user">Egy frissítés készen áll. A folytatáshoz koppints a Telepítés gombra.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">Előrejelzés mutatása</string>
+    <string name="weather_close">Bezárás</string>
+    <string name="weather_now">Most</string>
+    <string name="weather_today">Ma</string>
+    <string name="weather_feels_like">Hőérzet: %1$s</string>
+    <string name="weather_high_low">Max. %1$s · Min. %2$s</string>
+    <string name="weather_wind">Szél</string>
+    <string name="weather_humidity">Páratartalom</string>
+    <string name="weather_sunrise">Napkelte</string>
+    <string name="weather_sunset">Napnyugta</string>
+    <string name="weather_next_hours">Következő 24 óra</string>
+    <string name="weather_next_days">7 napos előrejelzés</string>
+    <string name="weather_updated">Frissítve: %1$s</string>
+    <string-array name="weather_compass">
+        <item>É</item>
+        <item>ÉK</item>
+        <item>K</item>
+        <item>DK</item>
+        <item>D</item>
+        <item>DNy</item>
+        <item>Ny</item>
+        <item>ÉNy</item>
+    </string-array>
+    <string name="wmo_clear_day">Napos</string>
+    <string name="wmo_clear_night">Derült</string>
+    <string name="wmo_mainly_clear_day">Többnyire napos</string>
+    <string name="wmo_mainly_clear_night">Többnyire derült</string>
+    <string name="wmo_partly_cloudy">Részben felhős</string>
+    <string name="wmo_overcast">Borult</string>
+    <string name="wmo_fog">Köd</string>
+    <string name="wmo_rime_fog">Zúzmarás köd</string>
+    <string name="wmo_drizzle_light">Gyenge szitálás</string>
+    <string name="wmo_drizzle">Szitálás</string>
+    <string name="wmo_drizzle_dense">Erős szitálás</string>
+    <string name="wmo_freezing_drizzle">Ónos szitálás</string>
+    <string name="wmo_rain_light">Gyenge eső</string>
+    <string name="wmo_rain">Eső</string>
+    <string name="wmo_rain_heavy">Erős eső</string>
+    <string name="wmo_freezing_rain">Ónos eső</string>
+    <string name="wmo_snow_light">Gyenge havazás</string>
+    <string name="wmo_snow">Havazás</string>
+    <string name="wmo_snow_heavy">Erős havazás</string>
+    <string name="wmo_snow_grains">Szemcsés hó</string>
+    <string name="wmo_showers_light">Gyenge zápor</string>
+    <string name="wmo_showers">Zápor</string>
+    <string name="wmo_showers_violent">Erős zápor</string>
+    <string name="wmo_snow_showers_light">Gyenge hózápor</string>
+    <string name="wmo_snow_showers">Hózápor</string>
+    <string name="wmo_thunderstorm">Zivatar</string>
+    <string name="wmo_thunderstorm_hail">Zivatar jégesővel</string>
+</resources>

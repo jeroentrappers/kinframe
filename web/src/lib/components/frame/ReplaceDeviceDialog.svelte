@@ -80,7 +80,7 @@
 <style>
 	.steps {
 		margin: 0;
-		padding-left: 1.3em;
+		padding-inline-start: 1.3em;
 		display: flex;
 		flex-direction: column;
 		gap: 6px;

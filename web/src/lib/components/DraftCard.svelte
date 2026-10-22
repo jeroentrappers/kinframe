@@ -154,7 +154,7 @@
 	}
 	.adjust {
 		position: absolute;
-		left: 8px;
+		inset-inline-start: 8px;
 		bottom: 8px;
 		display: inline-flex;
 		align-items: center;
@@ -181,7 +181,7 @@
 	.fit-tag {
 		position: absolute;
 		top: 8px;
-		left: 8px;
+		inset-inline-start: 8px;
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
@@ -200,13 +200,13 @@
 		background: color-mix(in srgb, var(--primary) 85%, black);
 	}
 	.fit-tag {
-		left: auto;
-		right: 44px;
+		inset-inline-start: auto;
+		inset-inline-end: 44px;
 	}
 	.remove {
 		position: absolute;
 		top: 6px;
-		right: 6px;
+		inset-inline-end: 6px;
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
@@ -284,14 +284,14 @@
 		min-height: 0;
 		font-size: 0.9rem;
 		padding: 8px 10px;
-		padding-right: 36px;
+		padding-inline-end: 36px;
 		border-radius: 10px;
 		resize: none;
 		border-color: var(--border);
 	}
 	.counter {
 		position: absolute;
-		right: 10px;
+		inset-inline-end: 10px;
 		bottom: 8px;
 		font-size: 0.74rem;
 		color: var(--text-faint);

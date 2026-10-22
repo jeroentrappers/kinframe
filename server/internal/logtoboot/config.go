@@ -37,6 +37,24 @@ type Config struct {
 
 	SMTP *SMTPConfig // nil when KINFRAME_SMTP_HOST is unset
 
+	// Social sign-in providers, in sign-in page order (KINFRAME_SOCIAL_*).
+	Social []SocialProvider
+	// SocialRemoveUnconfigured deletes connectors kinframe created for
+	// providers whose env vars are gone (KINFRAME_SOCIAL_REMOVE_UNCONFIGURED).
+	SocialRemoveUnconfigured bool
+	// SocialLinkByEmail links a first social sign-in to the existing account
+	// with the same verified email (KINFRAME_SOCIAL_LINK_BY_EMAIL, default on).
+	SocialLinkByEmail bool
+
+	// Branding applies the kinframe look to Logto's sign-in pages
+	// (KINFRAME_LOGTO_BRANDING, default on).
+	Branding   bool
+	TermsURL   string // KINFRAME_TERMS_URL; empty = no terms link
+	PrivacyURL string // KINFRAME_PRIVACY_URL; empty = no privacy link
+
+	// Warnings are logged at the start of a run.
+	Warnings []string
+
 	OutputFile string
 }
 
@@ -139,6 +157,40 @@ func loadConfig(get func(string) string) (*Config, error) {
 			errs = append(errs, errors.New("KINFRAME_SMTP_FROM is required with KINFRAME_SMTP_HOST"))
 		}
 		c.SMTP = s
+	}
+
+	social, warnings, socialErrs := loadSocial(env, get)
+	c.Social, c.Warnings = social, warnings
+	errs = append(errs, socialErrs...)
+	parseBool := func(k string, def bool) bool {
+		switch strings.ToLower(env(k)) {
+		case "":
+			return def
+		case "1", "true", "yes", "on":
+			return true
+		case "0", "false", "no", "off":
+			return false
+		}
+		errs = append(errs, fmt.Errorf("%s: want true or false, got %q", k, env(k)))
+		return def
+	}
+	c.SocialRemoveUnconfigured = parseBool("KINFRAME_SOCIAL_REMOVE_UNCONFIGURED", false)
+	c.SocialLinkByEmail = parseBool("KINFRAME_SOCIAL_LINK_BY_EMAIL", true)
+	c.Branding = parseBool("KINFRAME_LOGTO_BRANDING", true)
+	for _, x := range []struct {
+		k   string
+		dst *string
+	}{{"KINFRAME_TERMS_URL", &c.TermsURL}, {"KINFRAME_PRIVACY_URL", &c.PrivacyURL}} {
+		v := env(x.k)
+		if v == "" {
+			continue
+		}
+		u, err := url.Parse(v)
+		if err != nil || u.Scheme != "https" && u.Scheme != "http" || u.Host == "" {
+			errs = append(errs, fmt.Errorf("%s: want an absolute http(s) URL, got %q", x.k, v))
+			continue
+		}
+		*x.dst = v
 	}
 
 	c.OutputFile = env("KINFRAME_LOGTO_CONFIG_FILE")

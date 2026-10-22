@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">相框</string>
+
+    <!-- Common actions -->
+    <string name="action_back">返回</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_continue">继续</string>
+    <string name="action_try_again">重试</string>
+    <string name="action_undo">撤销</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">欢迎使用 kinframe</string>
+    <string name="setup_language_body">请选择这台相框的语言。</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">连接 Wi-Fi</string>
+    <string name="setup_wifi_body">相框需要连接 Wi-Fi 才能接收照片。照片下载后，断网也能照常播放。</string>
+    <string name="wifi_connected_to">已连接到 %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">未连接</string>
+    <string name="wifi_not_connected_hint">请选择一个网络以继续。</string>
+    <string name="wifi_no_internet">已连接，但暂时无法访问互联网</string>
+    <string name="wifi_signal">信号：%1$s</string>
+    <string name="wifi_open_settings">Wi-Fi 设置</string>
+    <string name="wifi_networks">附近的网络</string>
+    <string name="wifi_scanning">正在查找网络…</string>
+    <string name="wifi_permission_body">要在这里列出网络，Android 需要扫描 Wi-Fi 的权限。</string>
+    <string name="wifi_show_networks">显示网络</string>
+    <string name="wifi_password">密码</string>
+    <string name="wifi_join">连接</string>
+    <string name="signal_0">很弱</string>
+    <string name="signal_1">弱</string>
+    <string name="signal_2">一般</string>
+    <string name="signal_3">良好</string>
+    <string name="signal_4">极佳</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">选择服务器</string>
+    <string name="setup_server_body">照片通过 kinframe 服务器传送。你可以使用免费的 kinframe 服务器，也可以使用家人自己搭建的服务器。</string>
+    <string name="server_default_body">免费开源，推荐使用。</string>
+    <string name="server_custom">使用自己的服务器</string>
+    <string name="server_custom_body">适合自行部署 kinframe 的家庭。</string>
+    <string name="server_address">服务器地址</string>
+    <string name="server_check">检查服务器</string>
+    <string name="server_checking">正在检查服务器…</string>
+    <string name="server_version">版本 %1$s</string>
+    <string name="server_insecure">未加密</string>
+    <string name="server_error_invalid">这看起来不像网址。请试试类似 https://frames.example.org 的格式。</string>
+    <string name="server_error_unreachable">无法连接到此服务器。请检查地址，并确认相框已联网。</string>
+    <string name="server_error_not_kinframe">此服务器有响应，但它不是 kinframe 服务器。</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">正在准备你的相框…</string>
+    <string name="enroll_body">只需几秒钟。</string>
+    <string name="enroll_failed_title">相框注册失败</string>
+    <string name="enroll_failed_body">服务器返回：%1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">将这台相框连接到你的家人</string>
+    <string name="code_step1">打开 kinframe 应用，或在浏览器中打开 %1$s</string>
+    <string name="code_step2">选择“添加相框”</string>
+    <string name="code_step3">输入此代码，或扫描二维码</string>
+    <string name="code_valid_for">有效期：%1$s</string>
+    <string name="code_waiting">等待有人输入代码</string>
+    <string name="code_offline_title">相框已离线</string>
+    <string name="code_offline_body">获取相框代码需要联网。请检查 Wi-Fi。</string>
+    <string name="code_error_title">无法获取相框代码</string>
+    <string name="code_error_body">服务器没有响应。相框会继续尝试。</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">已连接到 %1$s</string>
+    <string name="celebrate_title_anon">已连接</string>
+    <string name="celebrate_body">发送到这台相框的照片会在几秒内显示在这里。</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d 小时 %2$d 分钟</string>
+    <string name="duration_min">%1$d 分钟</string>
+    <string name="date_today">今天</string>
+    <string name="date_yesterday">昨天</string>
+    <plurals name="date_days_ago">
+        <item quantity="other">%d 天前</item>
+    </plurals>
+    <string name="interval_s">%1$d 秒</string>
+    <string name="interval_min">%1$d 分钟</string>
+    <string name="interval_h">%1$d 小时</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">已编辑</string>
+    <string name="unable_photo">无法显示这张照片</string>
+    <string name="unable_video">无法播放这个视频。请让发送者重新发送。</string>
+    <plurals name="new_photos">
+        <item quantity="other">%d 张新照片</item>
+    </plurals>
+    <string name="status_offline">离线</string>
+    <string name="status_online">在线 · %1$s</string>
+    <string name="status_server_unreachable">无法连接到服务器</string>
+    <string name="identify_this_is">这是</string>
+    <string name="snack_hidden">照片已隐藏</string>
+    <string name="snack_deleted">照片已删除</string>
+    <string name="menu_settings">设置</string>
+    <string name="menu_power">电源</string>
+    <string name="menu_hide">隐藏</string>
+    <string name="menu_delete">删除</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">还没有照片</string>
+    <string name="empty_body">通过 kinframe 应用或网站发送的照片和视频，几秒内就会显示在这里。</string>
+    <string name="empty_code_title">用此代码添加家人</string>
+    <string name="empty_code_body">在 kinframe 应用中输入代码，或扫描二维码。</string>
+    <string name="empty_hidden_title">所有照片都已隐藏</string>
+    <string name="empty_hidden_body">隐藏的照片仍保留在图库中。可在 kinframe 应用中重新显示。</string>
+    <string name="empty_downloading_title">照片正在路上</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="other">正在下载 %d 张照片。</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">电源</string>
+    <string name="power_sleep">休眠</string>
+    <string name="power_sleep_body">关闭屏幕，触摸即可唤醒。</string>
+    <string name="power_restart">重启</string>
+    <string name="power_restart_body">重新启动相框。</string>
+    <string name="power_off">关机</string>
+    <string name="power_off_body">拔掉电源前请先安全关机。</string>
+    <string name="shutting_down_title">正在关机…</string>
+    <string name="restarting_title">正在重启…</string>
+    <string name="shutting_down_body">正在安全保存所有内容。</string>
+    <string name="safe_title">现在可以安全拔掉电源了</string>
+    <string name="safe_body">所有内容都已保存。如需再次使用相框，请按电源键或重新插上电源。</string>
+    <string name="safe_body_noroot">kinframe 已保存所有内容。现在可以拔掉相框的电源了。</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe 显示照片时出现问题</string>
+    <string name="recovery_body">它连续几次意外停止。请重试，或清除已下载的照片。照片会从服务器重新下载，不会丢失任何内容。</string>
+    <string name="recovery_clear">清除已下载的照片</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="settings_slideshow">幻灯片</string>
+    <string name="settings_interval">每张照片显示</string>
+    <string name="settings_transition">切换效果</string>
+    <string name="transition_crossfade">淡入淡出</string>
+    <string name="transition_slide">滑动</string>
+    <string name="settings_order">顺序</string>
+    <string name="order_received">最新收到</string>
+    <string name="order_taken">拍摄日期</string>
+    <string name="order_shuffle">随机</string>
+    <string name="settings_reverse">最早的在前</string>
+    <string name="settings_fill">照片尺寸</string>
+    <string name="fill_fill">铺满屏幕</string>
+    <string name="fill_fit">显示完整照片</string>
+    <string name="settings_display">屏幕</string>
+    <string name="settings_brightness">亮度</string>
+    <string name="settings_brightness_mode">自动亮度</string>
+    <string name="brightness_manual">固定</string>
+    <string name="brightness_sun">随日出日落调节</string>
+    <string name="settings_sleep">休眠</string>
+    <string name="settings_sleep_enabled">夜间关闭屏幕</string>
+    <string name="settings_sleep_at">休眠时间</string>
+    <string name="settings_wake_at">唤醒时间</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="other">另有 %d 个时间段，可在 kinframe 应用中管理</item>
+    </plurals>
+    <string name="settings_about">本相框</string>
+    <string name="about_frame">名称</string>
+    <string name="about_server">服务器</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">应用版本</string>
+    <string name="about_android_settings">Android 设置</string>
+    <string name="settings_updates">更新</string>
+    <string name="updates_channel">更新渠道</string>
+    <string name="updates_channel_stable">稳定版</string>
+    <string name="updates_channel_beta">测试版（抢先体验新版本）</string>
+    <string name="updates_check">检查更新</string>
+    <string name="updates_install_now">立即安装</string>
+    <string name="updates_checking">正在检查更新…</string>
+    <string name="updates_up_to_date">这台相框已是最新版本。</string>
+    <string name="updates_downloading">正在下载版本 %1$s… %2$d%%</string>
+    <string name="updates_waiting">版本 %1$s 已准备就绪，将在无人使用相框时安装。</string>
+    <string name="updates_installing">正在安装版本 %1$s。相框即将重启。</string>
+    <string name="updates_failed">更新失败。相框稍后会再试。</string>
+    <string name="update_notice_updated">已更新到版本 %1$s</string>
+    <string name="update_notice_rolled_back">新版本出现问题，相框已恢复到上一个版本。</string>
+    <string name="update_notice_needs_user">有可用更新。点按“安装”以继续。</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">查看天气预报</string>
+    <string name="weather_close">关闭</string>
+    <string name="weather_now">现在</string>
+    <string name="weather_today">今天</string>
+    <string name="weather_feels_like">体感 %1$s</string>
+    <string name="weather_high_low">最高 %1$s · 最低 %2$s</string>
+    <string name="weather_wind">风</string>
+    <string name="weather_humidity">湿度</string>
+    <string name="weather_sunrise">日出</string>
+    <string name="weather_sunset">日落</string>
+    <string name="weather_next_hours">未来 24 小时</string>
+    <string name="weather_next_days">7 天预报</string>
+    <string name="weather_updated">更新于 %1$s</string>
+    <string-array name="weather_compass">
+        <item>北</item>
+        <item>东北</item>
+        <item>东</item>
+        <item>东南</item>
+        <item>南</item>
+        <item>西南</item>
+        <item>西</item>
+        <item>西北</item>
+    </string-array>
+    <string name="wmo_clear_day">晴</string>
+    <string name="wmo_clear_night">晴</string>
+    <string name="wmo_mainly_clear_day">大部晴朗</string>
+    <string name="wmo_mainly_clear_night">大部晴朗</string>
+    <string name="wmo_partly_cloudy">多云</string>
+    <string name="wmo_overcast">阴</string>
+    <string name="wmo_fog">雾</string>
+    <string name="wmo_rime_fog">冻雾</string>
+    <string name="wmo_drizzle_light">小毛毛雨</string>
+    <string name="wmo_drizzle">毛毛雨</string>
+    <string name="wmo_drizzle_dense">大毛毛雨</string>
+    <string name="wmo_freezing_drizzle">冻毛毛雨</string>
+    <string name="wmo_rain_light">小雨</string>
+    <string name="wmo_rain">中雨</string>
+    <string name="wmo_rain_heavy">大雨</string>
+    <string name="wmo_freezing_rain">冻雨</string>
+    <string name="wmo_snow_light">小雪</string>
+    <string name="wmo_snow">中雪</string>
+    <string name="wmo_snow_heavy">大雪</string>
+    <string name="wmo_snow_grains">米雪</string>
+    <string name="wmo_showers_light">小阵雨</string>
+    <string name="wmo_showers">阵雨</string>
+    <string name="wmo_showers_violent">强阵雨</string>
+    <string name="wmo_snow_showers_light">小阵雪</string>
+    <string name="wmo_snow_showers">阵雪</string>
+    <string name="wmo_thunderstorm">雷阵雨</string>
+    <string name="wmo_thunderstorm_hail">雷阵雨伴有冰雹</string>
+</resources>

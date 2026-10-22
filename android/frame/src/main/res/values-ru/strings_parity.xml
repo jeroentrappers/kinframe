@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Введите PIN-код владельца</string>
+    <string name="pin_reason_settings">чтобы открыть настройки</string>
+    <string name="pin_reason_exit">чтобы выйти из kinframe</string>
+    <string name="pin_reason_wifi">чтобы сменить Wi-Fi</string>
+    <string name="pin_reason_power_off">чтобы выключить рамку</string>
+    <string name="pin_reason_restart">чтобы перезапустить рамку</string>
+    <string name="pin_reason_server">чтобы сменить сервер</string>
+    <string name="pin_reason_reset">чтобы сбросить рамку</string>
+    <string name="pin_checking">Проверка…</string>
+    <string name="pin_wrong">Неверный PIN-код.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Неверный PIN-код. Осталась %d попытка до короткой паузы.</item>
+        <item quantity="few">Неверный PIN-код. Осталось %d попытки до короткой паузы.</item>
+        <item quantity="many">Неверный PIN-код. Осталось %d попыток до короткой паузы.</item>
+        <item quantity="other">Неверный PIN-код. Осталось %d попытки до короткой паузы.</item>
+    </plurals>
+    <string name="pin_locked">Слишком много неверных попыток. Повторите через %s.</string>
+    <string name="pin_forgot">Забыли PIN-код? Владелец рамки может удалить его в приложении kinframe, в настройках этой рамки.</string>
+    <string name="pin_new_title">Придумайте PIN-код</string>
+    <string name="pin_new_body">От 4 до 6 цифр. Он понадобится, чтобы открыть настройки, выключить рамку или сменить Wi-Fi.</string>
+    <string name="pin_confirm_title">Введите PIN-код ещё раз</string>
+    <string name="pin_confirm_body">Для проверки.</string>
+    <string name="pin_mismatch">PIN-коды не совпадают. Придумайте его заново.</string>
+    <string name="pin_key_delete">Удалить</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN-код владельца</string>
+    <string name="settings_pin_off">Выключен. Любой рядом с рамкой может открыть настройки.</string>
+    <string name="settings_pin_on">Включён. Для настроек, питания и Wi-Fi нужен PIN-код.</string>
+    <string name="settings_pin_set">Задать PIN-код</string>
+    <string name="settings_pin_change">Изменить PIN-код</string>
+    <string name="settings_pin_remove">Удалить PIN-код</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Кто-то</string>
+    <string name="join_title">%1$s хочет присоединиться</string>
+    <string name="join_body_code">%1$s использует код рамки «%2$s». Если разрешите, %1$s сможет отправлять фото на эту рамку.</string>
+    <string name="join_body_invited">%1$s приглашает в «%2$s»: %3$s. Если разрешите, %3$s сможет отправлять фото на эту рамку.</string>
+    <string name="join_invited_by">Приглашение: %s</string>
+    <string name="join_allow">Разрешить</string>
+    <string name="join_deny">Не разрешать</string>
+    <string name="join_later">Не сейчас</string>
+    <string name="join_later_hint">Запрос останется в уведомлениях в меню.</string>
+    <string name="join_pill_one">%s хочет присоединиться</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d человек хочет присоединиться</item>
+        <item quantity="few">%d человека хотят присоединиться</item>
+        <item quantity="many">%d человек хотят присоединиться</item>
+        <item quantity="other">%d человека хотят присоединиться</item>
+    </plurals>
+    <string name="notifications_title">Уведомления</string>
+    <string name="notifications_empty">Всё просмотрено</string>
+    <string name="notifications_empty_body">Новых уведомлений нет.</string>
+    <string name="menu_notifications">Уведомления</string>
+    <string name="action_close">Закрыть</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Нет подключения к интернету</string>
+    <string name="status_card_offline_body">Фото на рамке продолжают показываться. Новые придут, как только связь восстановится.</string>
+    <string name="status_card_server_title">Сервер фото недоступен</string>
+    <string name="status_card_server_body">Wi-Fi работает, но сервер не отвечает. Новые фото придут, когда он снова заработает.</string>
+    <string name="status_card_portal_title">Эта сеть Wi-Fi требует входа</string>
+    <string name="status_card_portal_body">Откройте страницу входа в сеть, чтобы подключить рамку к интернету.</string>
+    <string name="status_card_portal_action">Войти</string>
+    <string name="status_card_storage_title">Память рамки почти заполнена</string>
+    <string name="status_card_storage_body">Старые фото удалены с рамки, чтобы освободить место; на сервере они в сохранности. Новые фото могут подождать, пока не появится место.</string>
+    <string name="portal_title">Вход в сеть Wi-Fi</string>
+    <string name="portal_body">Окно закроется само, когда рамка подключится к интернету.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">В каком часовом поясе рамка?</string>
+    <string name="setup_tz_body">Чтобы часы, дата и ночной режим работали правильно.</string>
+    <string name="setup_tz_suggested">Рекомендуемые</string>
+    <string name="setup_tz_all">Все часовые пояса</string>
+    <string name="tz_region_europe">Европа</string>
+    <string name="tz_region_america">Америка</string>
+    <string name="tz_region_asia">Азия</string>
+    <string name="tz_region_africa">Африка</string>
+    <string name="tz_region_australia">Австралия</string>
+    <string name="tz_region_pacific">Тихий океан</string>
+    <string name="tz_region_atlantic">Атлантика</string>
+    <string name="tz_region_indian">Индийский океан</string>
+    <string name="tz_region_antarctica">Антарктида</string>
+    <string name="setup_update_checking">Поиск новой версии…</string>
+    <string name="setup_update_checking_body">Перед началом рамка проверяет, что на ней последняя версия kinframe.</string>
+    <string name="setup_update_downloading">Загрузка версии %s</string>
+    <string name="setup_update_downloading_body">Установка начнётся сразу после загрузки. Можно пропустить: рамка обновится позже.</string>
+    <string name="setup_update_installing">Установка версии %s</string>
+    <string name="setup_update_installing_body">Скоро рамка сама перезапустится и продолжит настройку с того же места.</string>
+    <string name="setup_update_current">Установлена последняя версия kinframe</string>
+    <string name="setup_update_current_body">Переходим к последнему шагу.</string>
+    <string name="setup_update_failed">Не удалось проверить обновления</string>
+    <string name="setup_update_failed_body">Ничего страшного: рамка проверит позже и обновится сама.</string>
+    <string name="setup_update_skip">Пропустить</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">В этот день %d год назад</item>
+        <item quantity="few">В этот день %d года назад</item>
+        <item quantity="many">В этот день %d лет назад</item>
+        <item quantity="other">В этот день %d года назад</item>
+    </plurals>
+    <string name="transition_kenburns">Плавное приближение</string>
+    <string name="settings_collage">Несколько фото сразу (коллаж)</string>
+    <string name="settings_collage_max">Фото на экране</string>
+    <string name="settings_pair_portraits">Показывать два вертикальных фото рядом</string>
+    <string name="settings_on_this_day">Показывать воспоминания за этот день прошлых лет</string>
+    <string name="settings_video">Видео</string>
+    <string name="settings_video_autoplay">Автовоспроизведение видео</string>
+    <string name="settings_video_playback">После видео</string>
+    <string name="video_once_hold">Один раз и ждать</string>
+    <string name="video_loop">Повторять</string>
+    <string name="video_once_advance">Один раз и дальше</string>
+    <string name="settings_video_volume">Громкость видео</string>
+    <string name="settings_video_auto_mute">Выключать звук, если рамку не трогали</string>
+    <string name="video_auto_mute_off">Никогда</string>
+    <string name="video_auto_mute_min">%d мин</string>
+</resources>
