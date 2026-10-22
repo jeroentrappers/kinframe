@@ -112,6 +112,7 @@
   "weather is turned off on this server": "cuaca dinonaktifkan di server ini",
   "web app not built": "aplikasi web belum di-build",
   "you already own this frame": "Anda sudah memiliki bingkai ini",
-  "you can't send to frame %s": "Anda tidak dapat mengirim ke bingkai %s"
+  "you can't send to frame %s": "Anda tidak dapat mengirim ke bingkai %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day harus berupa bulan dan tanggal, MM-DD"
  }
 }

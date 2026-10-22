@@ -112,6 +112,7 @@
   "weather is turned off on this server": "laikapstākļi šajā serverī ir izslēgti",
   "web app not built": "tīmekļa lietotne nav sakompilēta",
   "you already own this frame": "šis rāmis jau pieder jums",
-  "you can't send to frame %s": "jūs nevarat sūtīt uz rāmi %s"
+  "you can't send to frame %s": "jūs nevarat sūtīt uz rāmi %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day jābūt mēnesim un dienai, MM-DD"
  }
 }

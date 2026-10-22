@@ -8,6 +8,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { frames } from '$lib/frames.svelte';
 	import { live } from '$lib/live.svelte';
+	import { push } from '$lib/push.svelte';
 	import { toasts } from '$lib/toast.svelte';
 	import { applyDocumentLocale, i18n, t } from '$lib/i18n/index.svelte';
 	import AppShell from '$components/AppShell.svelte';
@@ -59,6 +60,7 @@
 		if (auth.status === 'signed_in') {
 			live.start(() => auth.getToken());
 			void frames.load();
+			void push.init();
 		} else if (auth.status === 'signed_out') {
 			live.stop();
 			frames.reset();

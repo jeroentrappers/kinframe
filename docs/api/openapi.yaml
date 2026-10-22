@@ -580,6 +580,12 @@ paths:
         - { name: sender_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
         - { name: kind, in: query, schema: { $ref: '#/components/schemas/MediaKind' } }
         - { name: album_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - name: on_this_day
+          in: query
+          description: |
+            "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+            on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+          schema: { type: string, pattern: '^[0-9]{2}-[0-9]{2}$' }
         - { name: sort, in: query, schema: { type: string, enum: [received_desc, received_asc, taken_desc, taken_asc], default: received_desc } }
       responses:
         '200':
@@ -1204,6 +1210,11 @@ components:
           type: boolean
           default: false
           description: True when the server fetches weather for frames and serves `/v1/geocode`.
+        webpush_public_key:
+          type: [string, 'null']
+          description: |
+            VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+            subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
 
     Limits:
       type: object
@@ -1478,7 +1489,7 @@ components:
               fit: { $ref: '#/components/schemas/Fit' }
               trim:
                 type: object
-                description: Videos only.
+                description: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 properties:
                   start_ms: { type: integer, minimum: 0 }
                   end_ms: { type: integer, minimum: 1 }

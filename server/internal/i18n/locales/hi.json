@@ -112,6 +112,7 @@
   "weather is turned off on this server": "इस सर्वर पर मौसम बंद है",
   "web app not built": "वेब ऐप बिल्ड नहीं किया गया",
   "you already own this frame": "आप पहले से इस फ़्रेम के मालिक हैं",
-  "you can't send to frame %s": "आप फ़्रेम %s पर नहीं भेज सकते"
+  "you can't send to frame %s": "आप फ़्रेम %s पर नहीं भेज सकते",
+  "on_this_day must be a month and day, MM-DD": "on_this_day एक महीना और दिन होना चाहिए, MM-DD"
  }
 }

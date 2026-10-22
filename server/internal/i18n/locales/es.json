@@ -112,6 +112,7 @@
   "weather is turned off on this server": "el tiempo está desactivado en este servidor",
   "web app not built": "la aplicación web no está compilada",
   "you already own this frame": "ya eres el propietario de este marco",
-  "you can't send to frame %s": "no puedes enviar al marco %s"
+  "you can't send to frame %s": "no puedes enviar al marco %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day debe ser un mes y un día, MM-DD"
  }
 }

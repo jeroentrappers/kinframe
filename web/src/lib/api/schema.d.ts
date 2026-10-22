@@ -997,6 +997,11 @@ export interface components {
              * @default false
              */
             weather?: boolean;
+            /**
+             * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+             *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+             */
+            webpush_public_key?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -1231,7 +1236,7 @@ export interface components {
                 caption?: string | null;
                 focal_point?: components["schemas"]["FocalPoint"];
                 fit?: components["schemas"]["Fit"];
-                /** @description Videos only. */
+                /** @description Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter). */
                 trim?: {
                     start_ms?: number;
                     end_ms?: number;
@@ -2684,6 +2689,11 @@ export interface operations {
                 sender_id?: components["schemas"]["Id"];
                 kind?: components["schemas"]["MediaKind"];
                 album_id?: components["schemas"]["Id"];
+                /**
+                 * @description "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+                 *     on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+                 */
+                on_this_day?: string;
                 sort?: "received_desc" | "received_asc" | "taken_desc" | "taken_asc";
             };
             header?: never;

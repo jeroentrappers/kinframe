@@ -12,6 +12,7 @@ import {
 	type ItemIssue
 } from './logic';
 import { probeImage, probeVideo, sha256Hex } from './media';
+import { defaultTrim, keptSeconds, trimForApi, type Trim } from './parity';
 import { PARALLEL_UPLOADS, uploadFile, type UploadHandle } from './upload';
 
 export interface DraftItem {
@@ -24,6 +25,9 @@ export interface DraftItem {
 	width: number | null;
 	height: number | null;
 	durationS: number | null;
+	/** Selected part of a video (seconds); null keeps the whole clip. */
+	trim: Trim | null;
+	includeAudio: boolean;
 	caption: string;
 	fit: 'fill' | 'fit';
 	focal: Focal;
@@ -89,6 +93,8 @@ class Compose {
 				width: null,
 				height: null,
 				durationS: null,
+				trim: null,
+				includeAudio: true,
 				caption: '',
 				fit: 'fill',
 				focal: { x: 0.5, y: 0.5 },
@@ -114,7 +120,10 @@ class Compose {
 				i.width = meta?.width ?? null;
 				i.height = meta?.height ?? null;
 				i.previewable = meta !== null;
-				i.issue = itemIssue({ kind: 'video', bytes: i.file.size, durationS: i.durationS }, discovery.limits);
+				// Too long for the server: start with its first allowed stretch selected.
+				if (i.durationS != null && i.durationS > discovery.limits.max_video_seconds)
+					i.trim = defaultTrim(i.durationS, discovery.limits.max_video_seconds);
+				this.recheck(key);
 			});
 		} else {
 			const size = await probeImage(item.previewUrl);
@@ -124,6 +133,13 @@ class Compose {
 				i.previewable = size !== null;
 			});
 		}
+	}
+
+	/** Re-evaluate an item's issue after its trim changed. */
+	recheck(key: string) {
+		this.#patch(key, (i) => {
+			i.issue = itemIssue({ kind: i.kind, bytes: i.file.size, durationS: keptSeconds(i.trim, i.durationS) }, discovery.limits);
+		});
 	}
 
 	#patch(key: string, fn: (i: DraftItem) => void) {
@@ -199,6 +215,7 @@ class Compose {
 				caption: i.caption.trim() || null,
 				fit: i.fit,
 				focal_point: i.focal,
+				...(i.kind === 'video' ? { trim: trimForApi(i.trim, i.durationS), include_audio: i.includeAudio } : {}),
 				captured_at: i.file.lastModified ? new Date(i.file.lastModified).toISOString() : null
 			}))
 		};

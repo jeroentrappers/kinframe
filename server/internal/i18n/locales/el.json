@@ -112,6 +112,7 @@
   "weather is turned off on this server": "ο καιρός είναι απενεργοποιημένος σε αυτόν τον διακομιστή",
   "web app not built": "η εφαρμογή ιστού δεν έχει δημιουργηθεί",
   "you already own this frame": "είστε ήδη ο κάτοχος αυτής της κορνίζας",
-  "you can't send to frame %s": "δεν μπορείτε να στείλετε στην κορνίζα %s"
+  "you can't send to frame %s": "δεν μπορείτε να στείλετε στην κορνίζα %s",
+  "on_this_day must be a month and day, MM-DD": "το on_this_day πρέπει να είναι μήνας και ημέρα, MM-DD"
  }
 }

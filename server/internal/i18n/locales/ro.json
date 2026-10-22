@@ -112,6 +112,7 @@
   "weather is turned off on this server": "vremea este dezactivată pe acest server",
   "web app not built": "aplicația web nu este compilată",
   "you already own this frame": "sunteți deja proprietarul acestei rame",
-  "you can't send to frame %s": "nu puteți trimite pe rama %s"
+  "you can't send to frame %s": "nu puteți trimite pe rama %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day trebuie să fie o lună și o zi, MM-DD"
  }
 }

@@ -112,6 +112,7 @@
   "weather is turned off on this server": "vreme je na tem strežniku izklopljeno",
   "web app not built": "spletna aplikacija ni zgrajena",
   "you already own this frame": "ta okvir je že vaš",
-  "you can't send to frame %s": "v okvir %s ne morete pošiljati"
+  "you can't send to frame %s": "v okvir %s ne morete pošiljati",
+  "on_this_day must be a month and day, MM-DD": "on_this_day mora biti mesec in dan, MM-DD"
  }
 }

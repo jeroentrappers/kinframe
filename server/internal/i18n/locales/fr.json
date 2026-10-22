@@ -112,6 +112,7 @@
   "weather is turned off on this server": "la météo est désactivée sur ce serveur",
   "web app not built": "l’app web n’a pas été compilée",
   "you already own this frame": "vous êtes déjà propriétaire de ce cadre",
-  "you can't send to frame %s": "vous ne pouvez pas envoyer au cadre %s"
+  "you can't send to frame %s": "vous ne pouvez pas envoyer au cadre %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day doit être un mois et un jour, au format MM-DD"
  }
 }

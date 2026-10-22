@@ -112,6 +112,7 @@
   "weather is turned off on this server": "מזג האוויר כבוי בשרת הזה",
   "web app not built": "אפליקציית האינטרנט לא נבנתה",
   "you already own this frame": "המסגרת הזו כבר בבעלותכם",
-  "you can't send to frame %s": "אין לכם אפשרות לשלוח למסגרת %s"
+  "you can't send to frame %s": "אין לכם אפשרות לשלוח למסגרת %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day חייב להיות חודש ויום, MM-DD"
  }
 }

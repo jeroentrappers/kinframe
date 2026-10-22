@@ -112,6 +112,7 @@
   "weather is turned off on this server": "Wetter ist auf diesem Server ausgeschaltet",
   "web app not built": "Web-App nicht gebaut",
   "you already own this frame": "dieser Rahmen gehört dir bereits",
-  "you can't send to frame %s": "du kannst nicht an Rahmen %s senden"
+  "you can't send to frame %s": "du kannst nicht an Rahmen %s senden",
+  "on_this_day must be a month and day, MM-DD": "on_this_day muss ein Monat und Tag sein, MM-DD"
  }
 }

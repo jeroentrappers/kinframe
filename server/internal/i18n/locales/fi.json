@@ -112,6 +112,7 @@
   "weather is turned off on this server": "sää on poistettu käytöstä tällä palvelimella",
   "web app not built": "verkkosovellusta ei ole koottu",
   "you already own this frame": "omistat jo tämän kuvakehyksen",
-  "you can't send to frame %s": "et voi lähettää kuvakehykseen %s"
+  "you can't send to frame %s": "et voi lähettää kuvakehykseen %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day on annettava kuukautena ja päivänä, MM-DD"
  }
 }

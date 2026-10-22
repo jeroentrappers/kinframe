@@ -112,6 +112,7 @@
   "weather is turned off on this server": "weather is turned off on this server",
   "web app not built": "web app not built",
   "you already own this frame": "you already own this frame",
-  "you can't send to frame %s": "you can't send to frame %s"
+  "you can't send to frame %s": "you can't send to frame %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day must be a month and day, MM-DD"
  }
 }

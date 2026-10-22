@@ -48,6 +48,10 @@ export interface MockState {
 	settings: Record<string, S['FrameSettings']>;
 	uploads: Record<string, { length: number; offset: number; filename: string }>;
 	invitePreviews: Record<string, S['InvitePreview']>;
+	albums: Record<string, S['Album'][]>;
+	pushEndpoints: S['PushEndpoint'][];
+	/** Codes of fresh, unclaimed frames for "Move to a new frame". */
+	replaceCodes: string[];
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -61,7 +65,8 @@ export function emptyState(): MockState {
 			auth: { issuer: '', mobile_client_id: '', web_client_id: '', api_resource: 'http://localhost:4173/v1' },
 			limits: { max_items_per_send: 200, max_video_seconds: 300, max_upload_bytes: 2147483648, trash_retention_days: 30 },
 			dev_auth: true,
-			weather: true
+			weather: true,
+			webpush_public_key: 'BNNL5ZaTfK81qhXOx23-wewhigUeFb632jN6LvRWCFH1ubQr77FE_9qV1FuojuRmHP42zmf34rXgW80OvUVDgTk'
 		},
 		me: null,
 		frames: [],
@@ -74,6 +79,9 @@ export function emptyState(): MockState {
 		settings: {},
 		uploads: {},
 		invitePreviews: {},
+		albums: {},
+		pushEndpoints: [],
+		replaceCodes: [],
 		calls: [],
 		ws: null
 	};
@@ -178,6 +186,18 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			Object.assign(state.me!, body);
 			return json(route, 200, state.me);
 		}
+		if (path === '/v1/me/push-endpoints' && method === 'GET') return json(route, 200, state.pushEndpoints);
+		if (path === '/v1/me/push-endpoints' && method === 'POST') {
+			const b = body as S['PushEndpointCreate'];
+			let ep = state.pushEndpoints.find((e) => e.kind === b.kind && e.endpoint === b.endpoint);
+			if (ep) Object.assign(ep, b);
+			else state.pushEndpoints.push((ep = { ...b, id: uid('e'), created_at: new Date().toISOString() }));
+			return json(route, 200, ep);
+		}
+		if ((m = path.match(/^\/v1\/me\/push-endpoints\/([^/]+)$/)) && method === 'DELETE') {
+			state.pushEndpoints = state.pushEndpoints.filter((e) => e.id !== m![1]);
+			return route.fulfill({ status: 204 });
+		}
 
 		// ---- geocode
 		if (path === '/v1/geocode' && method === 'GET') {
@@ -203,6 +223,67 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (!f) return problem(route, 404, 'not_found', 'Not found');
 			if (method === 'PATCH') Object.assign(f, body);
 			return json(route, 200, f);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/transfer$/)) && method === 'POST') {
+			const f = state.frames.find((x) => x.id === m![1])!;
+			const list = state.members[f.id] ?? [];
+			const to = list.find((x) => x.user_id === (body as { user_id: string }).user_id);
+			if (!to) return problem(route, 404, 'not_found', 'Not a member');
+			for (const x of list) if (x.role === 'owner') x.role = 'admin';
+			to.role = 'owner';
+			f.role = 'admin';
+			f.owner_name = to.display_name;
+			return route.fulfill({ status: 204 });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/leave$/)) && method === 'POST') {
+			const f = state.frames.find((x) => x.id === m![1])!;
+			if (f.role === 'owner') return problem(route, 409, 'owner_cannot_leave', 'Transfer ownership first');
+			state.frames = state.frames.filter((x) => x.id !== f.id);
+			return route.fulfill({ status: 204 });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/replace-device$/)) && method === 'POST') {
+			const f = state.frames.find((x) => x.id === m![1])!;
+			const code = (body as { code: string }).code;
+			if (!state.replaceCodes.includes(code)) return problem(route, 404, 'code_invalid', 'Invalid code');
+			state.replaceCodes = state.replaceCodes.filter((c) => c !== code);
+			return json(route, 200, f);
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/albums$/))) {
+			const list = (state.albums[m[1]!] ??= []);
+			if (method === 'POST') {
+				const b = body as S['AlbumWrite'];
+				const a: S['Album'] = {
+					id: uid('a'),
+					name: b.name!,
+					version: 1,
+					placement_count: b.placement_ids?.length ?? 0,
+					placement_ids: b.placement_ids ?? [],
+					schedule: b.schedule ?? null
+				};
+				list.push(a);
+				return json(route, 201, a);
+			}
+			return json(route, 200, [...list].sort((x, y) => x.name.localeCompare(y.name)));
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/albums\/([^/]+)$/))) {
+			const list = state.albums[m[1]!] ?? [];
+			const a = list.find((x) => x.id === m![2]);
+			if (!a) return problem(route, 404, 'not_found', 'No album');
+			if (method === 'DELETE') {
+				state.albums[m[1]!] = list.filter((x) => x !== a);
+				const s = state.settings[m[1]!];
+				if (s?.slideshow?.album_id === a.id) s.slideshow.album_id = null;
+				return route.fulfill({ status: 204 });
+			}
+			if (req.headers()['if-match'] !== `"${a.version}"`) return problem(route, 412, 'version_conflict', 'Conflict');
+			const b = body as S['AlbumWrite'];
+			if (b.name) a.name = b.name;
+			if (b.cover_placement_id) a.cover_placement_id = b.cover_placement_id;
+			if ('schedule' in b) a.schedule = b.schedule ?? null;
+			if (b.placement_ids) a.placement_ids = b.placement_ids;
+			a.placement_count = a.placement_ids?.length ?? 0;
+			a.version++;
+			return json(route, 200, a);
 		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/health$/))) {
 			const f = state.frames.find((x) => x.id === m![1])!;
@@ -283,7 +364,17 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/placements$/))) {
 			const vis = url.searchParams.get('visibility') ?? 'visible';
 			const all = state.placements[m[1]!] ?? [];
-			const list = all.filter((p) => (vis === 'trashed' ? p.trashed : vis === 'hidden' ? p.hidden && !p.trashed : !p.hidden && !p.trashed));
+			let list = all.filter((p) => (vis === 'trashed' ? p.trashed : vis === 'hidden' ? p.hidden && !p.trashed : !p.hidden && !p.trashed));
+			const albumId = url.searchParams.get('album_id');
+			if (albumId) {
+				const ids = state.albums[m[1]!]?.find((a) => a.id === albumId)?.placement_ids ?? [];
+				list = list.filter((p) => ids.includes(p.id));
+			}
+			const otd = url.searchParams.get('on_this_day');
+			if (otd) {
+				const year = new Date().getFullYear();
+				list = list.filter((p) => p.item.captured_at && p.item.captured_at.slice(5, 10) === otd && Number(p.item.captured_at.slice(0, 4)) < year);
+			}
 			return json(route, 200, {
 				placements: list,
 				next_cursor: null,
@@ -296,7 +387,15 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			});
 		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/placements:bulk$/))) {
-			const b = body as { placement_ids: string[]; action: string };
+			const b = body as { placement_ids: string[]; action: string; album_id?: string };
+			const album = b.album_id ? state.albums[m[1]!]?.find((a) => a.id === b.album_id) : undefined;
+			if (album) {
+				const ids = album.placement_ids ?? [];
+				if (b.action === 'add_to_album') album.placement_ids = [...ids, ...b.placement_ids.filter((id) => !ids.includes(id))];
+				if (b.action === 'remove_from_album') album.placement_ids = ids.filter((id) => !b.placement_ids.includes(id));
+				album.placement_count = album.placement_ids?.length ?? 0;
+				album.version++;
+			}
 			for (const p of state.placements[m[1]!] ?? []) {
 				if (!b.placement_ids.includes(p.id)) continue;
 				if (b.action === 'hide') p.hidden = true;

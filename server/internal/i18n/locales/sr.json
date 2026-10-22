@@ -112,6 +112,7 @@
   "weather is turned off on this server": "временска прогноза је искључена на овом серверу",
   "web app not built": "веб апликација није изграђена",
   "you already own this frame": "већ сте власник овог рама",
-  "you can't send to frame %s": "не можете да шаљете на рам %s"
+  "you can't send to frame %s": "не можете да шаљете на рам %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day мора бити месец и дан у облику MM-DD"
  }
 }

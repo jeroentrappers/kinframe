@@ -112,6 +112,7 @@
   "weather is turned off on this server": "このサーバーでは天気がオフになっています",
   "web app not built": "ウェブアプリがビルドされていません",
   "you already own this frame": "このフレームはすでにあなたのものです",
-  "you can't send to frame %s": "フレーム %s には送信できません"
+  "you can't send to frame %s": "フレーム %s には送信できません",
+  "on_this_day must be a month and day, MM-DD": "on_this_day は月と日（MM-DD）で指定してください"
  }
 }

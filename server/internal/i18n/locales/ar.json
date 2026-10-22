@@ -112,6 +112,7 @@
   "weather is turned off on this server": "الطقس متوقف على هذا الخادم",
   "web app not built": "لم يتم إنشاء تطبيق الويب",
   "you already own this frame": "أنت تملك هذا الإطار بالفعل",
-  "you can't send to frame %s": "لا يمكنك الإرسال إلى الإطار %s"
+  "you can't send to frame %s": "لا يمكنك الإرسال إلى الإطار %s",
+  "on_this_day must be a month and day, MM-DD": "يجب أن يكون on_this_day شهرًا ويومًا بصيغة MM-DD"
  }
 }

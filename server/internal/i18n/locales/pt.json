@@ -112,6 +112,7 @@
   "weather is turned off on this server": "o clima está desativado neste servidor",
   "web app not built": "o app web não foi compilado",
   "you already own this frame": "você já é o proprietário deste porta-retrato",
-  "you can't send to frame %s": "você não pode enviar para o porta-retrato %s"
+  "you can't send to frame %s": "você não pode enviar para o porta-retrato %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day deve ser um mês e um dia, MM-DD"
  }
 }

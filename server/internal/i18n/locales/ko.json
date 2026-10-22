@@ -112,6 +112,7 @@
   "weather is turned off on this server": "이 서버에서는 날씨가 꺼져 있어요",
   "web app not built": "웹 앱이 빌드되지 않았어요",
   "you already own this frame": "이미 이 액자의 소유자예요",
-  "you can't send to frame %s": "%s 액자로 보낼 수 없어요"
+  "you can't send to frame %s": "%s 액자로 보낼 수 없어요",
+  "on_this_day must be a month and day, MM-DD": "on_this_day는 월과 일(MM-DD) 형식이어야 해요"
  }
 }

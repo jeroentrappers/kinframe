@@ -112,6 +112,7 @@
   "weather is turned off on this server": "สภาพอากาศปิดอยู่บนเซิร์ฟเวอร์นี้",
   "web app not built": "ยังไม่ได้บิลด์เว็บแอป",
   "you already own this frame": "คุณเป็นเจ้าของกรอบรูปนี้อยู่แล้ว",
-  "you can't send to frame %s": "คุณส่งไปยังกรอบรูป %s ไม่ได้"
+  "you can't send to frame %s": "คุณส่งไปยังกรอบรูป %s ไม่ได้",
+  "on_this_day must be a month and day, MM-DD": "on_this_day ต้องเป็นเดือนและวันในรูปแบบ MM-DD"
  }
 }

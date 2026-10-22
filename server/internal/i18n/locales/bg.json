@@ -112,6 +112,7 @@
   "weather is turned off on this server": "прогнозата за времето е изключена на този сървър",
   "web app not built": "уеб приложението не е компилирано",
   "you already own this frame": "вече сте собственик на тази рамка",
-  "you can't send to frame %s": "не можете да изпращате до рамка %s"
+  "you can't send to frame %s": "не можете да изпращате до рамка %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day трябва да е месец и ден във формат MM-DD"
  }
 }

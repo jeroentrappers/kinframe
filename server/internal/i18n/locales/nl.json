@@ -112,6 +112,7 @@
   "weather is turned off on this server": "het weer staat uit op deze server",
   "web app not built": "de webapp is niet gebouwd",
   "you already own this frame": "je bent al eigenaar van deze fotolijst",
-  "you can't send to frame %s": "je kunt niet sturen naar fotolijst %s"
+  "you can't send to frame %s": "je kunt niet sturen naar fotolijst %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day moet een maand en dag zijn, MM-DD"
  }
 }

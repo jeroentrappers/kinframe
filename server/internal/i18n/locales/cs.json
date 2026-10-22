@@ -112,6 +112,7 @@
   "weather is turned off on this server": "počasí je na tomto serveru vypnuté",
   "web app not built": "webová aplikace není sestavena",
   "you already own this frame": "tento rámeček už vlastníte",
-  "you can't send to frame %s": "do rámečku %s nemůžete posílat"
+  "you can't send to frame %s": "do rámečku %s nemůžete posílat",
+  "on_this_day must be a month and day, MM-DD": "on_this_day musí být měsíc a den, MM-DD"
  }
 }

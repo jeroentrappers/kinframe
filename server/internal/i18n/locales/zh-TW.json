@@ -112,6 +112,7 @@
   "weather is turned off on this server": "這個伺服器已關閉天氣功能",
   "web app not built": "網頁應用程式尚未建置",
   "you already own this frame": "你已經是這台相框的擁有者",
-  "you can't send to frame %s": "你無法傳送內容到相框 %s"
+  "you can't send to frame %s": "你無法傳送內容到相框 %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day 必須是月和日，格式為 MM-DD"
  }
 }

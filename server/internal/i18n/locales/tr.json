@@ -112,6 +112,7 @@
   "weather is turned off on this server": "hava durumu bu sunucuda kapalı",
   "web app not built": "web uygulaması derlenmemiş",
   "you already own this frame": "bu çerçevenin sahibi zaten sizsiniz",
-  "you can't send to frame %s": "%s çerçevesine gönderim yapamazsınız"
+  "you can't send to frame %s": "%s çerçevesine gönderim yapamazsınız",
+  "on_this_day must be a month and day, MM-DD": "on_this_day bir ay ve gün olmalıdır, MM-DD"
  }
 }

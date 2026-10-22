@@ -112,6 +112,7 @@
   "weather is turned off on this server": "погоду вимкнено на цьому сервері",
   "web app not built": "вебзастосунок не зібрано",
   "you already own this frame": "ви вже власник цієї рамки",
-  "you can't send to frame %s": "ви не можете надсилати на рамку %s"
+  "you can't send to frame %s": "ви не можете надсилати на рамку %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day має бути місяцем і днем у форматі MM-DD"
  }
 }

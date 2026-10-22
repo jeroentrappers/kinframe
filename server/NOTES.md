@@ -10,6 +10,9 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Weather: `GET /v1/geocode` (`Place[]`), the `Weather` schema for `Change.weather` (nullable; extends the earlier
   `fetched_at`/`current.temp_c`/`daily[].min_c`… fields without renaming them), Discovery `weather`, problem codes
   `upstream_unavailable` (502) and `feature_disabled` (503), and `required`/range limits on `settings.location`.
+- Web parity: Discovery `webpush_public_key` (VAPID), `listPlacements?on_this_day=MM-DD` ("On this day": captured on
+  that month-day in an earlier year, UTC capture dates), and the documented 3 s minimum for `trim`
+  (`422 validation_failed` on `items.N.trim`). Deleting the album a frame plays resets `slideshow.album_id` to null.
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -131,9 +134,17 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Push
 
-- Endpoints are stored for all kinds. Delivery is implemented for UnifiedPush (plain POST of a JSON payload with ids,
-  localized title/body in en/nl). WebPush (needs RFC 8291 encryption + VAPID), FCM and APNs are not delivered yet.
-  Push is only used when the user has no open websocket.
+- Endpoints are stored for all kinds. Delivery is implemented for UnifiedPush (plain POST of the JSON payload) and
+  WebPush (RFC 8291 aes128gcm encryption + RFC 8292 VAPID, via `github.com/SherClockHolmes/webpush-go`, TTL 24 h).
+  FCM and APNs are not delivered yet. Push is only used when the user has no open websocket.
+- Payload: `{type, key, title, body, ids}`; `type` is the websocket event type, `key` the message (`reaction`,
+  `reply`, `delivered`, `failed`, `join_request`, `membership`), title/body localized (en/nl) from the endpoint's
+  `locale`. Reaction and reply pushes carry `send_id` too, so clients can open the send.
+- `delivered` is pushed once per send and frame, by the ack that delivers its last placement there (seen-after-
+  delivered doesn't repeat it). Placements of a send that failed don't hold it back.
+- A push service answering 404/410 (or a webpush endpoint without keys) deletes the endpoint.
+- VAPID keys: `KINFRAME_VAPID_*` or generated once into `<data dir>/vapid.json`; the public key is in discovery
+  (`webpush_public_key`, contract addition) for `PushManager.subscribe`.
 
 ## Rate limits (in memory, per process)
 
@@ -145,7 +156,7 @@ invites 60/h per user; dev tokens 120/h per IP.
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
 - Calendar, S3 storage.
 - Garbage collection of media no longer referenced by any live placement.
-- WebPush/FCM/APNs delivery.
+- FCM/APNs delivery.
 - Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm
   because libvips 8.14 there did **not** strip EXIF/GPS with `[Q=..,strip]`, which `TestPhotoPipeline` caught inside
   the image. The root cause in 8.14 wasn't investigated further. `make test-docker` (full suite with

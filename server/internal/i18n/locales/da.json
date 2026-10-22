@@ -112,6 +112,7 @@
   "weather is turned off on this server": "vejr er slået fra på denne server",
   "web app not built": "webappen er ikke bygget",
   "you already own this frame": "du ejer allerede denne ramme",
-  "you can't send to frame %s": "du kan ikke sende til rammen %s"
+  "you can't send to frame %s": "du kan ikke sende til rammen %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day skal være en måned og en dag, MM-DD"
  }
 }

@@ -112,6 +112,7 @@
   "weather is turned off on this server": "az időjárás ki van kapcsolva ezen a szerveren",
   "web app not built": "a webalkalmazás nincs lefordítva",
   "you already own this frame": "már te vagy ennek a képkeretnek a tulajdonosa",
-  "you can't send to frame %s": "nem küldhetsz erre a képkeretre: %s"
+  "you can't send to frame %s": "nem küldhetsz erre a képkeretre: %s",
+  "on_this_day must be a month and day, MM-DD": "az on_this_day értéke hónap és nap legyen, MM-DD"
  }
 }

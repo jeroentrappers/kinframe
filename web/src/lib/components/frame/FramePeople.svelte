@@ -13,8 +13,12 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import RoleBadge from '../RoleBadge.svelte';
+	import TransferDialog from './TransferDialog.svelte';
 
-	let { frame, manage }: { frame: Frame; manage: boolean } = $props();
+	let { frame, manage, onchanged }: { frame: Frame; manage: boolean; onchanged?: () => void } = $props();
+
+	let transferOpen = $state(false);
+	let transferTo = $state<string | null>(null);
 
 	const canInvite = $derived(can(frame, 'invite'));
 	const PERMS: { key: keyof Permissions; label: MessageKey; hint: MessageKey }[] = [
@@ -292,6 +296,15 @@
 												{/each}
 											</fieldset>
 										{/if}
+										{#if frame.role === 'owner'}
+											<button
+												class="btn btn-ghost btn-sm"
+												onclick={() => {
+													transferTo = m.user_id;
+													transferOpen = true;
+												}}><Icon name="crown" size={16} />{t('people.makeOwner')}</button
+											>
+										{/if}
 										<button
 											class="btn btn-danger-ghost btn-sm"
 											onclick={() => {
@@ -378,6 +391,18 @@
 		{/if}
 	</div>
 {/if}
+
+<TransferDialog
+	bind:open={transferOpen}
+	{frame}
+	preselect={transferTo}
+	ondone={(r) => {
+		toasts.success(t('transfer.done', { name: r.newOwner.display_name }));
+		expanded = null;
+		void load();
+		onchanged?.();
+	}}
+/>
 
 <Dialog bind:open={removeOpen} title={t('people.removeConfirm', { name: removing?.display_name ?? '' })}>
 	<div class="stack">

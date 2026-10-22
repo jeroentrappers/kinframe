@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.design.Kin
@@ -78,7 +79,7 @@ class LocalizedScreenshotTest {
 
     @Test fun setupCode() = each("setup_code") {
         StepScaffold(index = 3, onBack = null, primary = null) {
-            CodeReadyContent(Format.code("K7Q4PX2M"), "https://kinframe.example.org/f/K7Q4PX", "kinframe.example.org", "59 min", landscape = true)
+            CodeReadyContent(Format.code("K7Q4PX2M"), "https://kinframe.example.org/f/K7Q4PX", "kinframe.example.org", Format.remaining(LocalContext.current, 83 * 60_000L), landscape = true)
         }
     }
 

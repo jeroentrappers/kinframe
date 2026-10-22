@@ -112,6 +112,7 @@
   "weather is turned off on this server": "šiame serveryje orai išjungti",
   "web app not built": "žiniatinklio programa nesukompiliuota",
   "you already own this frame": "šis rėmelis jau jūsų",
-  "you can't send to frame %s": "negalite siųsti į rėmelį %s"
+  "you can't send to frame %s": "negalite siųsti į rėmelį %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day turi būti mėnuo ir diena, MM-DD"
  }
 }

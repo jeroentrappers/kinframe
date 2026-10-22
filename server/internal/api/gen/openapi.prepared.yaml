@@ -359,6 +359,12 @@ components:
                 web:
                     format: uri
                     type: string
+                webpush_public_key:
+                    description: |
+                        VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+                        subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+                    nullable: true
+                    type: string
             required:
                 - name
                 - version
@@ -1420,7 +1426,7 @@ components:
                                 default: true
                                 type: boolean
                             trim:
-                                description: Videos only.
+                                description: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                                 properties:
                                     end_ms:
                                         minimum: 1
@@ -2640,6 +2646,14 @@ paths:
                   name: album_id
                   schema:
                     $ref: '#/components/schemas/Id'
+                - description: |
+                    "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+                    on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+                  in: query
+                  name: on_this_day
+                  schema:
+                    pattern: ^[0-9]{2}-[0-9]{2}$
+                    type: string
                 - in: query
                   name: sort
                   schema:

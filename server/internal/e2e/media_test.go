@@ -127,11 +127,19 @@ func TestVideoSend(t *testing.T) {
 		t.Fatal("poster")
 	}
 
+	// Trimmed below the 3 s minimum: rejected up front.
+	short := e.upload(u, clip, "short.mov", "video/quicktime")
+	r := e.do(req{method: "POST", path: "/v1/sends", token: u.token, body: map[string]any{"frame_ids": []string{frameID},
+		"items": []map[string]any{{"upload_id": short, "trim": map[string]any{"start_ms": 1000, "end_ms": 2500}}}}})
+	if r.StatusCode != 422 || r.code() != "validation_failed" || !strings.Contains(string(r.body), "items.0.trim") {
+		t.Fatalf("short trim: %d %s", r.StatusCode, r.body)
+	}
+
 	// Too long after trim: rejected up front.
 	e.expect(req{method: "PUT", path: "/v1/operator/limits", token: e.operator(), body: map[string]any{
 		"max_items_per_send": 200, "max_video_seconds": 2, "max_upload_bytes": 1 << 30}}, 200)
 	up2 := e.upload(u, clip, "b.mov", "video/quicktime")
-	r := e.do(req{method: "POST", path: "/v1/sends", token: u.token, body: map[string]any{"frame_ids": []string{frameID}, "items": []map[string]any{{"upload_id": up2}}}})
+	r = e.do(req{method: "POST", path: "/v1/sends", token: u.token, body: map[string]any{"frame_ids": []string{frameID}, "items": []map[string]any{{"upload_id": up2}}}})
 	if r.StatusCode != 422 || r.code() != "video_too_long" {
 		t.Fatalf("too long: %d %s", r.StatusCode, r.body)
 	}
@@ -268,4 +276,39 @@ func TestImportsAndFailures(t *testing.T) {
 		t.Fatalf("avatar url %v", avatarResp["avatar_url"])
 	}
 	e.expect(req{method: "DELETE", path: "/v1/me/avatar", token: u.token}, 204)
+}
+
+// TestOnThisDay: ?on_this_day=MM-DD lists placements captured on that day in earlier years.
+func TestOnThisDay(t *testing.T) {
+	requireMedia(t)
+	e := newEnv(t)
+	u := e.user("o@x.org", "Odette")
+	_, frameID := e.claim(u)
+	now := time.Now().UTC()
+	dates := map[string]string{
+		"three years ago": now.AddDate(-3, 0, 0).Format("2006:01:02") + " 10:00:00",
+		"this year":       now.Format("2006:01:02") + " 00:30:00",
+		"other day":       now.AddDate(-2, 0, 3).Format("2006:01:02") + " 10:00:00",
+	}
+	sends := map[string]string{}
+	for caption, d := range dates {
+		up := e.upload(u, mediatest.JPEG(640, 480, 1, d, false), caption+".jpg", "image/jpeg")
+		sends[caption] = e.sendOne(u, []string{frameID}, map[string]any{"upload_id": up, "caption": caption})
+	}
+	for _, id := range sends {
+		e.waitSend(u, id)
+	}
+	lib := e.get("/v1/frames/"+frameID+"/placements?on_this_day="+now.Format("01-02"), u.token).m(t)
+	pls := lib["placements"].([]any)
+	if len(pls) != 1 || dig(pls[0].(map[string]any), "item", "caption") != "three years ago" {
+		t.Fatalf("on this day: %v", pls)
+	}
+	for _, bad := range []string{"13-01", "1-2", "02-30"} {
+		if r := e.do(req{method: "GET", path: "/v1/frames/" + frameID + "/placements?on_this_day=" + bad, token: u.token}); r.StatusCode != 400 {
+			t.Errorf("%s: %d %s", bad, r.StatusCode, r.body)
+		}
+	}
+	if r := e.do(req{method: "GET", path: "/v1/frames/" + frameID + "/placements?on_this_day=02-29", token: u.token}); r.StatusCode != 200 {
+		t.Errorf("leap day: %d", r.StatusCode)
+	}
 }

@@ -112,6 +112,7 @@
   "weather is turned off on this server": "il meteo è disattivato su questo server",
   "web app not built": "app web non compilata",
   "you already own this frame": "sei già proprietario di questa cornice",
-  "you can't send to frame %s": "non puoi inviare alla cornice %s"
+  "you can't send to frame %s": "non puoi inviare alla cornice %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day deve essere un mese e un giorno, MM-DD"
  }
 }

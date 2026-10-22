@@ -112,6 +112,7 @@
   "weather is turned off on this server": "vädret är avstängt på den här servern",
   "web app not built": "webbappen är inte byggd",
   "you already own this frame": "du äger redan den här fotoramen",
-  "you can't send to frame %s": "du kan inte skicka till fotoramen %s"
+  "you can't send to frame %s": "du kan inte skicka till fotoramen %s",
+  "on_this_day must be a month and day, MM-DD": "on_this_day måste vara en månad och dag, MM-DD"
  }
 }
