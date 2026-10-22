@@ -34,7 +34,7 @@ Whole stack in Docker instead: `docker compose -f ../deploy/compose/docker-compo
 | `make test-docker` | Same suite inside the Debian image toolchain, with vips and ffmpeg (`docker build --target test`) |
 | `make lint` | `go vet` and staticcheck |
 | `make run` | Run locally in dev auth mode against the compose Postgres |
-| `make docker` | Runtime image (Debian bookworm-slim, ffmpeg + libvips-tools, non-root uid 10001) |
+| `make docker` | Runtime image (Debian trixie-slim, ffmpeg + libvips-tools, non-root uid 10001) |
 
 The binary has three commands: `serve` (default), `migrate` (apply migrations and exit; `serve` also migrates on start)
 and `healthcheck` (used by the image's `HEALTHCHECK`).

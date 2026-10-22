@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- build ----------------------------------------------------------------
-FROM golang:1.27-bookworm AS build
+FROM golang:1.27-trixie AS build
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
@@ -21,7 +21,7 @@ ENV KINFRAME_REQUIRE_MEDIA_TOOLS=1 GOFLAGS=-buildvcs=false
 RUN go test -count=1 ./...
 
 # ---- runtime --------------------------------------------------------------
-FROM debian:bookworm-slim AS runtime
+FROM debian:trixie-slim AS runtime
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg libvips-tools ca-certificates tzdata \
  && rm -rf /var/lib/apt/lists/* \

@@ -110,6 +110,8 @@ invites 60/h per user; dev tokens 120/h per IP.
 - Weather change type, calendar, S3 storage.
 - Garbage collection of media no longer referenced by any live placement.
 - WebPush/FCM/APNs delivery.
-- The Docker image and `make test-docker` were written but could not be built here (no Docker access for this user);
-  the full suite including media tests ran locally against conda-forge libvips 8.18 and ffmpeg. Debian bookworm ships
-  libvips 8.14 and ffmpeg 5.1; the CLI flags used (`thumbnail --size down`, `[Q=..,strip]`, `extract_area`) exist there.
+- Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm
+  because libvips 8.14 there did **not** strip EXIF/GPS with `[Q=..,strip]`, which `TestPhotoPipeline` caught inside
+  the image. The root cause in 8.14 wasn't investigated further. `make test-docker` (full suite with
+  `KINFRAME_REQUIRE_MEDIA_TOOLS=1`) passes on trixie, and so does the suite on the dev laptop with Debian 13's system
+  vips/ffmpeg. Production (appmire-hetz1) is Debian 13 as well.
