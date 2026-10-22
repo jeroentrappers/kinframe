@@ -30,9 +30,13 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Auth
 
-- Logto access tokens normally carry no name/email. The user row gets `name`/`email` claims if present (Logto custom
-  JWT claims), else the display name falls back to "New member" and clients should `PATCH /v1/me` with the ID-token
-  name after sign-in. `logto-bootstrap` should configure the custom claims.
+- Logto access tokens normally carry no name/email. `bootstrap-logto` makes Logto ask for a name at sign-up (built-in
+  `name` profile field) and installs a custom access-token script (Logto OSS runs it locally) that adds `name` and
+  `email` for the kinframe API resource only, so the user row is created with the real name. Without those claims
+  (other Logto setups) the display name falls back to the email local part or "New member", and clients should
+  `PATCH /v1/me` with the ID-token name after sign-in (the web app does).
+- Client-credentials (M2M) tokens for the API resource are accepted like user tokens (`sub` = app ID). Only apps
+  created in this Logto by its admin can get them.
 - Device tokens: HS256 with a key derived from `KINFRAME_SIGNING_KEY`, `iss` = public URL, `aud` = `device`, 1 h.
   Revocation is checked on every request (device row), so a revoked device fails immediately.
 - `426 app_update_required` compares the device's `app_version_code` (from enrollment, updated by heartbeats) with
@@ -105,7 +109,6 @@ invites 60/h per user; dev tokens 120/h per IP.
 
 ## Not done yet (v0.1 follow-ups)
 
-- `logto-bootstrap` command (docs/deploy.md).
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
 - Weather change type, calendar, S3 storage.
 - Garbage collection of media no longer referenced by any live placement.

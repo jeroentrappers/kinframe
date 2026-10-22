@@ -46,7 +46,8 @@ class Auth {
 				endpoint: issuer.replace(/\/oidc\/?$/, ''),
 				appId: web_client_id,
 				resources: [api_resource],
-				scopes: ['email', 'profile', 'offline_access']
+				// kinframe:operate is only granted to accounts with the kinframe-operator role.
+				scopes: ['email', 'profile', 'offline_access', 'kinframe:operate']
 			});
 		}
 		return this.#logto;

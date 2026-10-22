@@ -11,6 +11,7 @@
       - logto_db_password is defined
       - kinframe_signing_key is defined and kinframe_signing_key | length >= 43
       - kinframe_smtp_host is defined and kinframe_smtp_password is defined
+      - logto_admin_password is defined and logto_admin_password | length >= 8
     fail_msg: Set the domains and the secrets (see defaults/main.yml).
     quiet: true
 
@@ -33,7 +34,8 @@
     mode: "{{ item.mode }}"
   loop:
     - { path: "{{ kinframe_dir }}", mode: "0750" }
-    - { path: "{{ kinframe_dir }}/initdb", mode: "0750" }
+    # Postgres lists this as uid 70; the SQL inside stays 0400 and owned by uid 70.
+    - { path: "{{ kinframe_dir }}/initdb", mode: "0755" }
     - { path: "{{ kinframe_dir }}/secrets", mode: "0700" }
 
 - name: Postgres superuser password
@@ -56,6 +58,7 @@
     - { src: docker-compose.yml.j2, dest: docker-compose.yml, mode: "0640" }
     - { src: kinframe.env.j2, dest: kinframe.env, mode: "0600" }
     - { src: logto.env.j2, dest: logto.env, mode: "0600" }
+    - { src: bootstrap.env.j2, dest: bootstrap.env, mode: "0600" }
     - { src: initdb.sql.j2, dest: initdb/10-kinframe.sql, mode: "0400", owner: "70" }
   loop_control: { label: "{{ item.dest }}" }
   no_log: true
@@ -68,9 +71,9 @@
   register: pulled
   changed_when: "'Pulled' in pulled.stderr or 'Downloaded' in pulled.stderr"
 
-- name: Start or update the stack
+- name: Start or update Postgres and Logto
   ansible.builtin.command:
-    cmd: docker compose up -d --remove-orphans
+    cmd: docker compose up -d --remove-orphans postgres logto
     chdir: "{{ kinframe_dir }}"
   register: stack_up
   changed_when: "'Started' in stack_up.stderr or 'Created' in stack_up.stderr or 'Recreate' in stack_up.stderr"
@@ -78,11 +81,43 @@
 - name: Wait for Logto
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ logto_core_port }}/oidc/.well-known/openid-configuration"
+    headers: { Host: "{{ logto_domain }}", X-Forwarded-Proto: https }
   register: logto_up
   retries: 40
   delay: 5
   until: logto_up is succeeded
   changed_when: false
+
+# Idempotent: creates the console admin on the first run, then only reconciles. no_log because the
+# first run prints the one-time Management API credentials (not needed: later runs sign in as admin).
+- name: Configure Logto (bootstrap-logto)
+  ansible.builtin.command:
+    cmd: docker compose run --rm logto-bootstrap
+    chdir: "{{ kinframe_dir }}"
+  register: bootstrap
+  changed_when: "'nothing changed' not in (bootstrap.stdout + bootstrap.stderr)"
+  no_log: true
+
+- name: Bootstrap summary
+  ansible.builtin.debug:
+    msg: >-
+      {{ (bootstrap.stdout_lines + bootstrap.stderr_lines)
+         | reject('search', 'M2M_SECRET|M2M_ID|PASSWORD') | select('search', 'msg=|level=') | list }}
+
+- name: Start or update the kinframe server
+  ansible.builtin.command:
+    cmd: docker compose up -d --remove-orphans server
+    chdir: "{{ kinframe_dir }}"
+  register: server_up
+  changed_when: "'Started' in server_up.stderr or 'Created' in server_up.stderr or 'Recreate' in server_up.stderr"
+
+# The server reads the Logto client IDs (/data/logto.json) at start.
+- name: Restart the server after a Logto change
+  ansible.builtin.command:
+    cmd: docker compose restart server
+    chdir: "{{ kinframe_dir }}"
+  when: bootstrap is changed and server_up is not changed
+  changed_when: true
 
 - name: Wait for the kinframe server
   ansible.builtin.uri:
@@ -94,8 +129,12 @@
   until: kinframe_up is succeeded
   changed_when: false
 
-- name: Discovery must not advertise dev auth
+- name: Discovery is production-ready
   ansible.builtin.assert:
-    that: not (kinframe_up.json.dev_auth | default(false))
-    fail_msg: The server is running with dev auth enabled. Refusing to continue.
+    that:
+      - not (kinframe_up.json.dev_auth | default(false))
+      - kinframe_up.json.auth.issuer == 'https://' ~ logto_domain ~ '/oidc'
+      - kinframe_up.json.auth.web_client_id | length > 0
+      - kinframe_up.json.auth.mobile_client_id | length > 0
+    fail_msg: "Discovery is not production-ready: {{ kinframe_up.json.auth | default({}) }} dev_auth={{ kinframe_up.json.dev_auth | default(false) }}"
     quiet: true

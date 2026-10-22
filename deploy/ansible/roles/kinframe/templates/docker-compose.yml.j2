@@ -35,6 +35,19 @@ services:
       - "127.0.0.1:{{ logto_core_port }}:3001"
       - "127.0.0.1:{{ logto_admin_port }}:3002"
 
+  # One-shot Logto setup (resource, apps, roles, SMTP, sign-in experience). Run by Ansible with
+  # `docker compose run --rm logto-bootstrap`; the profile keeps `up -d` from starting it.
+  logto-bootstrap:
+    image: {{ kinframe_image }}:{{ kinframe_version }}
+    profiles: [bootstrap]
+    command: ["bootstrap-logto"]
+    restart: "no"
+    depends_on:
+      logto: { condition: service_started }
+    env_file: [./kinframe.env, ./bootstrap.env]
+    volumes:
+      - media:/data
+
   server:
     image: {{ kinframe_image }}:{{ kinframe_version }}
     container_name: kinframe-server

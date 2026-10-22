@@ -3,9 +3,11 @@
 package config
 
 import (
+	"cmp"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -36,6 +38,9 @@ type Config struct {
 	MobileClientID string
 	WebClientID    string
 	DevAuth        bool
+	// LogtoConfigFile is where `bootstrap-logto` writes the Logto client
+	// settings; values from it fill in OIDC settings not set in the env.
+	LogtoConfigFile string
 
 	TrustProxy bool
 
@@ -133,7 +138,17 @@ func load(get func(string) string) (*Config, error) {
 		UploadExpiry:    24 * time.Hour,
 		JanitorInterval: time.Duration(intv("KINFRAME_JANITOR_INTERVAL_SECONDS", 600)) * time.Second,
 	}
-	c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", c.APIURL())
+	c.LogtoConfigFile = env("KINFRAME_LOGTO_CONFIG_FILE", DefaultLogtoConfigFile(c.DataDir))
+	if lf, err := ReadLogtoFile(c.LogtoConfigFile); err != nil {
+		errs = append(errs, fmt.Errorf("KINFRAME_LOGTO_CONFIG_FILE: %w", err))
+	} else if lf != nil {
+		// Explicit env vars win; the bootstrap output fills the gaps.
+		c.OIDCIssuer = cmp.Or(c.OIDCIssuer, strings.TrimRight(lf.Issuer, "/"))
+		c.WebClientID = cmp.Or(c.WebClientID, lf.WebClientID)
+		c.MobileClientID = cmp.Or(c.MobileClientID, lf.MobileClientID)
+		c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", lf.APIResource)
+	}
+	c.OIDCAudience = cmp.Or(c.OIDCAudience, env("KINFRAME_OIDC_AUDIENCE", c.APIURL()))
 	if err := c.LogLevel.UnmarshalText([]byte(env("KINFRAME_LOG_LEVEL", "info"))); err != nil {
 		errs = append(errs, fmt.Errorf("KINFRAME_LOG_LEVEL: %w", err))
 	}
@@ -148,7 +163,7 @@ func load(get func(string) string) (*Config, error) {
 		errs = append(errs, errors.New("KINFRAME_DEV_AUTH must not be enabled when KINFRAME_ENV=production"))
 	}
 	if c.Production() && c.OIDCIssuer == "" {
-		errs = append(errs, errors.New("KINFRAME_OIDC_ISSUER is required in production"))
+		errs = append(errs, errors.New("KINFRAME_OIDC_ISSUER is required in production (or run bootstrap-logto to write KINFRAME_LOGTO_CONFIG_FILE)"))
 	}
 	if !c.DevAuth && c.OIDCIssuer == "" {
 		errs = append(errs, errors.New("set KINFRAME_OIDC_ISSUER, or KINFRAME_DEV_AUTH=1 for local development"))
@@ -172,6 +187,34 @@ func load(get func(string) string) (*Config, error) {
 		return nil, errors.Join(errs...)
 	}
 	return c, nil
+}
+
+// LogtoFile is the Logto client configuration written by `bootstrap-logto`
+// and served in discovery (/.well-known/kinframe).
+type LogtoFile struct {
+	Issuer         string `json:"issuer"`
+	WebClientID    string `json:"web_client_id"`
+	MobileClientID string `json:"mobile_client_id"`
+	APIResource    string `json:"api_resource"`
+}
+
+// DefaultLogtoConfigFile is the bootstrap output location inside the data dir.
+func DefaultLogtoConfigFile(dataDir string) string { return filepath.Join(dataDir, "logto.json") }
+
+// ReadLogtoFile returns nil, nil when the file doesn't exist.
+func ReadLogtoFile(path string) (*LogtoFile, error) {
+	b, err := os.ReadFile(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var lf LogtoFile
+	if err := json.Unmarshal(b, &lf); err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	return &lf, nil
 }
 
 func parseKey(s string) ([]byte, error) {

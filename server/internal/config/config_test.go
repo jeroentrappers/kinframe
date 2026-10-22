@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -52,5 +54,42 @@ func TestDevKeyPersists(t *testing.T) {
 	}
 	if string(a.SigningKey) != string(b.SigningKey) || len(a.SigningKey) != 32 {
 		t.Fatal("dev key not persisted")
+	}
+}
+
+func TestLogtoConfigFile(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "logto.json"), []byte(`{"issuer":"https://auth.example.org/oidc/","web_client_id":"web","mobile_client_id":"mob","api_resource":"https://k.example.org/v1"}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	env := map[string]string{
+		"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_ENV": "production", "KINFRAME_DATA_DIR": dir,
+		"KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32), "KINFRAME_PUBLIC_URL": "https://k.example.org",
+	}
+	c, err := load(func(k string) string { return env[k] })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.OIDCIssuer != "https://auth.example.org/oidc" || c.WebClientID != "web" || c.MobileClientID != "mob" || c.OIDCAudience != "https://k.example.org/v1" {
+		t.Fatalf("file not applied: %+v", c)
+	}
+
+	// Explicit env vars win over the file.
+	env["KINFRAME_OIDC_WEB_CLIENT_ID"] = "override"
+	env["KINFRAME_OIDC_AUDIENCE"] = "https://other/v1"
+	c, err = load(func(k string) string { return env[k] })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.WebClientID != "override" || c.MobileClientID != "mob" || c.OIDCAudience != "https://other/v1" {
+		t.Fatalf("env should win: %+v", c)
+	}
+
+	// A corrupt file is an error, not silently ignored.
+	if err := os.WriteFile(filepath.Join(dir, "logto.json"), []byte("{"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := load(func(k string) string { return env[k] }); err == nil || !strings.Contains(err.Error(), "KINFRAME_LOGTO_CONFIG_FILE") {
+		t.Fatalf("err = %v", err)
 	}
 }

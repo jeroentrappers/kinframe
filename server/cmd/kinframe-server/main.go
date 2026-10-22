@@ -3,6 +3,7 @@
 //	kinframe-server           serve the API (default)
 //	kinframe-server migrate      apply database migrations and exit
 //	kinframe-server healthcheck  probe GET /healthz on the local listener (for Docker)
+//	kinframe-server bootstrap-logto  configure Logto for kinframe (idempotent, see server/README.md)
 package main
 
 import (
@@ -20,6 +21,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/app"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
+	"github.com/jeroentrappers/kinframe/server/internal/logtoboot"
 )
 
 func main() {
@@ -32,6 +34,9 @@ func main() {
 func run() error {
 	if len(os.Args) > 1 && os.Args[1] == "healthcheck" {
 		return healthcheck()
+	}
+	if len(os.Args) > 1 && os.Args[1] == "bootstrap-logto" {
+		return bootstrapLogto()
 	}
 	cfg, err := config.Load()
 	if err != nil {
@@ -75,8 +80,25 @@ func run() error {
 		}
 		return a.Serve(ctx, l)
 	default:
-		return fmt.Errorf("unknown command %q (want serve, migrate or healthcheck)", cmd)
+		return fmt.Errorf("unknown command %q (want serve, migrate, healthcheck or bootstrap-logto)", cmd)
 	}
+}
+
+// bootstrapLogto has its own configuration (it needs neither the database
+// nor the signing key). Logs go to stderr; stdout only carries the one-time
+// machine-to-machine credentials.
+func bootstrapLogto() error {
+	cfg, err := logtoboot.LoadConfig()
+	if err != nil {
+		return err
+	}
+	var h slog.Handler = slog.NewTextHandler(os.Stderr, nil)
+	if os.Getenv("KINFRAME_LOG_FORMAT") == "json" {
+		h = slog.NewJSONHandler(os.Stderr, nil)
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	return logtoboot.Run(ctx, cfg, slog.New(h), os.Stdout)
 }
 
 func healthcheck() error {

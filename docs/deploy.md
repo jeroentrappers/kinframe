@@ -28,7 +28,64 @@ checks they're free before the first deploy.
 | `server` | `ghcr.io/jeroentrappers/kinframe-server:<tag>` | Go API, media worker (ffmpeg + libvips), serves the built web SPA. Binds `127.0.0.1:8110`. Media volume `/opt/kinframe/media`. |
 | `logto` | `svhd/logto:1.43.0` (same pin as appmire-logto) | Binds `127.0.0.1:8111` (core) and `127.0.0.1:8112` (admin). `ENDPOINT=https://auth.kinframe.appmire.be`, `ADMIN_ENDPOINT=http://localhost:8112`, `TRUST_PROXY_HEADER=1`. |
 | `postgres` | `postgres:17-alpine` | Databases `kinframe` and `logto`, each with its own role. Not exposed. |
-| `logto-bootstrap` | `kinframe-server` image, `bootstrap-logto` command | One-shot job, idempotent. Uses Logto's Management API (machine-to-machine app) to create the API resource, the SPA app (web, redirect `https://<domain>/callback`, post-logout `https://<domain>/`), the native apps (Android and iOS, redirect `app.kinframe:/callback` plus `https://<domain>/app/callback`), the `kinframe-operator` role and the sign-in experience (email one-time code and passkeys). It writes the resulting client IDs into the server's config volume, which `/.well-known/kinframe` serves. **It also creates the console admin account at once.** Logto grants admin to the first visitor of a fresh console (see appmire-logto's README), so the console must never be reachable before bootstrap has run. |
+| `logto-bootstrap` | `kinframe-server` image, `bootstrap-logto` command | One-shot job, idempotent (a re-run changes nothing). Uses Logto's Management API to create the API resource (`https://<domain>/v1`, 1 h tokens, scope `kinframe:operate`), the `kinframe-operator` role, the SPA app `kinframe web` (redirect `https://<domain>/callback`, post-logout `https://<domain>/`, CORS origin `https://<domain>`), one native app `kinframe app` for Android and iOS (redirects `app.kinframe:/callback` and `https://<domain>/app/callback`, post-logout `app.kinframe:/logout` and `https://<domain>/app/logout`), the SMTP email connector, the sign-in experience (email one-time codes, passkeys, name asked at sign-up, browser language) and custom access-token claims (`name`, `email`). It writes the client IDs to `/data/logto.json`, which the server reads at start and serves in `/.well-known/kinframe`. **On a fresh Logto it also creates the console admin account**: Logto grants admin to the first account registered in the console, so bootstrap must run before the console is reachable. See [First deploy](#first-deploy-logto-bootstrap). |
+
+### First deploy: Logto bootstrap
+
+`kinframe-server bootstrap-logto` talks to Logto only through its public HTTP APIs: the admin console's own sign-in
+flow (OIDC + Experience API) and the Management API. It never writes to Logto's database.
+
+Compose wiring (the job shares the server's `/data` volume; the server starts after it):
+
+```yaml
+  logto-bootstrap:
+    image: ghcr.io/jeroentrappers/kinframe-server:<tag>
+    command: ["bootstrap-logto"]
+    restart: "no"
+    depends_on:
+      logto: { condition: service_started }   # bootstrap waits for /api/status itself
+    env_file: ./kinframe.env                    # KINFRAME_PUBLIC_URL, KINFRAME_SMTP_*, …
+    environment:
+      KINFRAME_LOGTO_ENDPOINT: https://auth.kinframe.appmire.be   # = Logto ENDPOINT
+      KINFRAME_LOGTO_URL: http://logto:3001
+      KINFRAME_LOGTO_ADMIN_ENDPOINT: <Logto ADMIN_ENDPOINT, exactly>
+      KINFRAME_LOGTO_ADMIN_URL: http://logto:3002
+    volumes:
+      - media:/data
+  server:
+    depends_on:
+      logto-bootstrap: { condition: service_completed_successfully }
+```
+
+The `*_ENDPOINT` values must equal Logto's `ENDPOINT`/`ADMIN_ENDPOINT`: bootstrap connects to the `*_URL` addresses but
+sends the public host in `Host`/`X-Forwarded-*` (Logto has `TRUST_PROXY_HEADER=1`), because Logto picks the tenant and
+issuer from it.
+
+The Postgres role Logto connects as needs `CREATEROLE`: `db seed` creates per-tenant roles and fails with
+"permission denied to create role" otherwise (`CREATE ROLE logto LOGIN CREATEROLE PASSWORD '…'`).
+
+Procedure:
+
+1. Put a console admin username and a strong password (Logto requires at least 8 characters) in the vault as
+   `KINFRAME_LOGTO_ADMIN_USERNAME` / `KINFRAME_LOGTO_ADMIN_PASSWORD`, plus `KINFRAME_SMTP_HOST/PORT/USER/PASSWORD/FROM`
+   and optionally `KINFRAME_OPERATOR_EMAILS`.
+2. Bring the stack up **without the admin vhost** (or with it IP-restricted, as on hetz1). The first bootstrap run:
+   creates the console admin account (which closes console registration), creates a machine-to-machine app
+   `kinframe bootstrap` with the "Logto Management API access" role, configures everything listed above and writes
+   `/data/logto.json`. It prints the M2M credentials **once** on stdout:
+   `docker compose logs logto-bootstrap | grep KINFRAME_LOGTO_M2M`.
+3. Store `KINFRAME_LOGTO_M2M_ID` and `KINFRAME_LOGTO_M2M_SECRET` in the vault and set them for the job. Later runs use
+   them instead of the admin password, which can then be removed from the job's environment (keep it in the vault: it
+   is the console login).
+4. Operators: list their emails in `KINFRAME_OPERATOR_EMAILS`. Users must have signed up before the role can be
+   assigned; re-run the job after they did (`docker compose run --rm logto-bootstrap`). Their clients must request the
+   `kinframe:operate` scope to get it in the token.
+
+If the M2M secret is lost: delete the `kinframe bootstrap` app in the console and run the job once with the admin
+credentials; it creates a new app and prints the new secret. If Logto's ENDPOINT or kinframe's domain changes, re-run
+the job: it updates redirect URIs and creates the new API resource (the old one is left in place).
+
+No manual console steps are needed. The console is only for looking around and for changes beyond this setup.
 
 ### nginx vhost specifics
 
