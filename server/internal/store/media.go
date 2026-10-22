@@ -117,9 +117,9 @@ const mediaCols = `id, owner_user_id, source_sha256, kind, status, failure_code,
 
 func (tx *Tx) CreateMedia(ctx context.Context, m Media) error {
 	_, err := tx.Exec(ctx, `
-		INSERT INTO media (id, owner_user_id, kind, source_path, source_mime, trim_start_ms, trim_end_ms, include_audio, duration_ms)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		m.ID, m.OwnerUserID, m.Kind, m.SourcePath, m.SourceMime, m.TrimStartMS, m.TrimEndMS, m.IncludeAudio, m.DurationMS)
+		INSERT INTO media (id, owner_user_id, kind, source_path, source_mime, trim_start_ms, trim_end_ms, include_audio, duration_ms, source_sha256)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+		m.ID, m.OwnerUserID, m.Kind, m.SourcePath, m.SourceMime, m.TrimStartMS, m.TrimEndMS, m.IncludeAudio, m.DurationMS, m.SourceSHA256)
 	return err
 }
 
@@ -273,6 +273,7 @@ type ItemRow struct {
 	HasAudio        *bool      `db:"has_audio"`
 	CapturedAt      *time.Time `db:"captured_at"`
 	MasterKey       *string    `db:"master_key"`
+	MasterMime      *string    `db:"master_mime"`
 	PosterKey       *string    `db:"poster_key"`
 }
 
@@ -281,7 +282,7 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
 	i.created_at AS item_created_at, i.captured_hint,
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio, m.captured_at,
-	m.master_key, m.poster_key`
+	m.master_key, m.master_mime, m.poster_key`
 
 const itemJoins = ` JOIN media m ON m.id = i.media_id
 	LEFT JOIN users su ON su.id = i.sender_user_id LEFT JOIN frames sf ON sf.id = i.sender_frame_id`

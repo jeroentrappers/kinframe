@@ -53,6 +53,8 @@ type Server struct {
 	devTokenIP  *ratelimit.Limiter
 	inviteUser  *ratelimit.Limiter
 	geocodeUser *ratelimit.Limiter
+	tvUser      *ratelimit.Limiter
+	tvIP        *ratelimit.Limiter
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
@@ -100,6 +102,8 @@ func New(d Deps) (*Server, error) {
 		devTokenIP:  ratelimit.New(120, time.Hour),
 		inviteUser:  ratelimit.New(60, time.Hour),
 		geocodeUser: ratelimit.New(60, time.Minute),
+		tvUser:      ratelimit.New(60, time.Hour),
+		tvIP:        ratelimit.New(600, time.Hour),
 	}
 	if err := s.setupTus(); err != nil {
 		return nil, err

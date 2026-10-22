@@ -25,6 +25,7 @@ const (
 	CodeExpired         Code = "code_expired"
 	InviteInvalid       Code = "invite_invalid"
 	InviteExpired       Code = "invite_expired"
+	LinkExpired         Code = "link_expired"
 	AlreadyMember       Code = "already_member"
 	ValidationFailed    Code = "validation_failed"
 	TooManyItems        Code = "too_many_items"
@@ -59,6 +60,7 @@ var defaults = map[Code]struct {
 	CodeExpired:         {410, "This code has expired"},
 	InviteInvalid:       {404, "This invite link is not valid"},
 	InviteExpired:       {410, "This invite link has expired"},
+	LinkExpired:         {410, "This link has expired"},
 	AlreadyMember:       {409, "You are already a member of this frame"},
 	ValidationFailed:    {422, "Some fields are not valid"},
 	TooManyItems:        {422, "Too many items in one send"},
