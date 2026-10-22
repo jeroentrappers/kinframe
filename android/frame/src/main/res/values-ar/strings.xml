@@ -112,6 +112,9 @@
     <string name="menu_power">التشغيل</string>
     <string name="menu_hide">إخفاء</string>
     <string name="menu_delete">حذف</string>
+    <string name="menu_add_someone">إضافة شخص</string>
+    <string name="add_someone_title">إضافة شخص إلى هذا الإطار</string>
+    <string name="back_to_kinframe">العودة إلى kinframe</string>
     <string name="menu_rotate">تدوير</string>
 
     <!-- Empty states -->

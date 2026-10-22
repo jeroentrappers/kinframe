@@ -104,6 +104,9 @@
     <string name="menu_power">Strøm</string>
     <string name="menu_hide">Skjul</string>
     <string name="menu_delete">Slet</string>
+    <string name="menu_add_someone">Tilføj nogen</string>
+    <string name="add_someone_title">Tilføj nogen til denne ramme</string>
+    <string name="back_to_kinframe">Tilbage til kinframe</string>
     <string name="menu_rotate">Rotér</string>
 
     <!-- Empty states -->

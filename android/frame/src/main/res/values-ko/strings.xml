@@ -102,6 +102,9 @@
     <string name="menu_power">전원</string>
     <string name="menu_hide">숨기기</string>
     <string name="menu_delete">삭제</string>
+    <string name="menu_add_someone">사람 추가</string>
+    <string name="add_someone_title">이 액자에 사람 추가</string>
+    <string name="back_to_kinframe">kinframe으로 돌아가기</string>
     <string name="menu_rotate">회전</string>
 
     <!-- Empty states -->

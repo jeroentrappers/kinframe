@@ -104,6 +104,9 @@
     <string name="menu_power">Av/på</string>
     <string name="menu_hide">Skjul</string>
     <string name="menu_delete">Slett</string>
+    <string name="menu_add_someone">Legg til noen</string>
+    <string name="add_someone_title">Legg til noen i denne rammen</string>
+    <string name="back_to_kinframe">Tilbake til kinframe</string>
     <string name="menu_rotate">Roter</string>
 
     <!-- Tomme visninger -->

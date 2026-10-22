@@ -104,6 +104,9 @@
     <string name="menu_power">Λειτουργία</string>
     <string name="menu_hide">Απόκρυψη</string>
     <string name="menu_delete">Διαγραφή</string>
+    <string name="menu_add_someone">Προσθήκη ατόμου</string>
+    <string name="add_someone_title">Προσθέστε κάποιον σε αυτή την κορνίζα</string>
+    <string name="back_to_kinframe">Επιστροφή στο kinframe</string>
     <string name="menu_rotate">Περιστροφή</string>
 
     <!-- Empty states -->

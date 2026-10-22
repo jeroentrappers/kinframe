@@ -102,6 +102,9 @@
     <string name="menu_power">Nguồn</string>
     <string name="menu_hide">Ẩn</string>
     <string name="menu_delete">Xóa</string>
+    <string name="menu_add_someone">Thêm người</string>
+    <string name="add_someone_title">Thêm người vào khung ảnh này</string>
+    <string name="back_to_kinframe">Quay lại kinframe</string>
     <string name="menu_rotate">Xoay</string>
 
     <!-- Empty states -->

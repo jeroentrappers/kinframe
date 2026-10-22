@@ -108,6 +108,9 @@
     <string name="menu_power">Napájení</string>
     <string name="menu_hide">Skrýt</string>
     <string name="menu_delete">Smazat</string>
+    <string name="menu_add_someone">Přidat někoho</string>
+    <string name="add_someone_title">Přidejte někoho k tomuto rámečku</string>
+    <string name="back_to_kinframe">Zpět do kinframe</string>
     <string name="menu_rotate">Otočit</string>
 
     <!-- Empty states -->

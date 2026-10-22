@@ -492,10 +492,10 @@ private fun CodeStep(c: SetupController, s: SetupState) {
 
 /** The frame code with instructions and QR code (screenshot tests render it without a controller). */
 @Composable
-internal fun CodeReadyContent(code: String, joinUrl: String, webHost: String, validFor: String, landscape: Boolean) {
+internal fun CodeReadyContent(code: String, joinUrl: String, webHost: String, validFor: String, landscape: Boolean, title: Int = R.string.code_title) {
     val instructions = @Composable {
         Column {
-            KinHeading(stringResource(R.string.code_title), null)
+            KinHeading(stringResource(title), null)
             Spacer(Modifier.height(20.dp))
             CodeInstruction(1, stringResource(R.string.code_step1, webHost))
             CodeInstruction(2, stringResource(R.string.code_step2))

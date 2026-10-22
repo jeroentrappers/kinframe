@@ -96,6 +96,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Back from Android's settings (by the floating button or otherwise).
+        app.kinframe.frame.system.ReturnButton.hide(this)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleProvisioning(intent)

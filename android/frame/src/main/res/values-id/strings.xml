@@ -102,6 +102,9 @@
     <string name="menu_power">Daya</string>
     <string name="menu_hide">Sembunyikan</string>
     <string name="menu_delete">Hapus</string>
+    <string name="menu_add_someone">Tambahkan seseorang</string>
+    <string name="add_someone_title">Tambahkan seseorang ke bingkai ini</string>
+    <string name="back_to_kinframe">Kembali ke kinframe</string>
     <string name="menu_rotate">Putar</string>
 
     <!-- Empty states -->

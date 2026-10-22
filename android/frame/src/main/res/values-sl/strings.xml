@@ -108,6 +108,9 @@
     <string name="menu_power">Napajanje</string>
     <string name="menu_hide">Skrij</string>
     <string name="menu_delete">Izbriši</string>
+    <string name="menu_add_someone">Dodaj nekoga</string>
+    <string name="add_someone_title">Dodajte nekoga v ta okvir</string>
+    <string name="back_to_kinframe">Nazaj v kinframe</string>
     <string name="menu_rotate">Zasukaj</string>
 
     <!-- Empty states -->

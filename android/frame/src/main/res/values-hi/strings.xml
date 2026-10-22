@@ -104,6 +104,9 @@
     <string name="menu_power">पावर</string>
     <string name="menu_hide">छिपाएं</string>
     <string name="menu_delete">मिटाएं</string>
+    <string name="menu_add_someone">किसी को जोड़ें</string>
+    <string name="add_someone_title">इस फ़्रेम में किसी को जोड़ें</string>
+    <string name="back_to_kinframe">kinframe पर वापस जाएँ</string>
     <string name="menu_rotate">घुमाएँ</string>
 
     <!-- Empty states -->

@@ -108,6 +108,9 @@
     <string name="menu_power">Maitinimas</string>
     <string name="menu_hide">Slėpti</string>
     <string name="menu_delete">Ištrinti</string>
+    <string name="menu_add_someone">Pridėti žmogų</string>
+    <string name="add_someone_title">Pridėkite žmogų prie šio rėmelio</string>
+    <string name="back_to_kinframe">Grįžti į kinframe</string>
     <string name="menu_rotate">Pasukti</string>
 
     <!-- Empty states -->

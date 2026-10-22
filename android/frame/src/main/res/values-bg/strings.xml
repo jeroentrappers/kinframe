@@ -104,6 +104,9 @@
     <string name="menu_power">Захранване</string>
     <string name="menu_hide">Скриване</string>
     <string name="menu_delete">Изтриване</string>
+    <string name="menu_add_someone">Добавяне на човек</string>
+    <string name="add_someone_title">Добавете човек към тази рамка</string>
+    <string name="back_to_kinframe">Назад към kinframe</string>
     <string name="menu_rotate">Завъртане</string>
 
     <!-- Empty states -->
