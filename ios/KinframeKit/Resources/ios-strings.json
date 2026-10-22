@@ -3,6 +3,14 @@
     "en": "Back",
     "nl": "Terug"
   },
+  "ios.cmd.doneSync": {
+    "en": "{name} is checking for new photos",
+    "nl": "{name} zoekt naar nieuwe foto’s"
+  },
+  "ios.cmd.sync": {
+    "en": "Sync now",
+    "nl": "Nu bijwerken"
+  },
   "ios.continue": {
     "en": "Continue",
     "nl": "Verder"
@@ -22,6 +30,10 @@
   "ios.focal.up": {
     "en": "Move up",
     "nl": "Omhoog"
+  },
+  "ios.library.video": {
+    "en": "Video",
+    "nl": "Video"
   },
   "ios.name.placeholder": {
     "en": "e.g. Lisa",

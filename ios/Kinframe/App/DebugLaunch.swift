@@ -50,6 +50,9 @@ enum DebugLaunch {
         case "settings": app.tab = .settings
         default: break
         }
+        if let id = args.string(forKey: "kfSend") {
+            app.historyPath = NavigationPath([HistoryRoute(sendId: id)])
+        }
         if let ids = args.string(forKey: "kfComposeFrames") {
             app.composeFrameIds = Set(ids.split(separator: ",").map(String.init))
         }

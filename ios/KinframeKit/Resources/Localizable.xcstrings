@@ -3503,6 +3503,40 @@
         }
       }
     },
+    "ios.cmd.doneSync": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is checking for new photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} zoekt naar nieuwe foto’s"
+          }
+        }
+      }
+    },
+    "ios.cmd.sync": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sync now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nu bijwerken"
+          }
+        }
+      }
+    },
     "ios.continue": {
       "extractionState": "manual",
       "localizations": {
@@ -3584,6 +3618,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Omhoog"
+          }
+        }
+      }
+    },
+    "ios.library.video": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video"
           }
         }
       }

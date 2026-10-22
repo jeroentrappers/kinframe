@@ -67,7 +67,7 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
 }
 
 extension L10n {
-    static func has(_ key: String) -> Bool {
+    public static func has(_ key: String) -> Bool {
         lookup(key) != key
     }
 }
