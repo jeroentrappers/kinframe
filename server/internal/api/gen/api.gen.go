@@ -1881,10 +1881,14 @@ type DeviceState struct {
 type Discovery struct {
 	Api  string `json:"api"`
 	Auth struct {
-		ApiResource    string `json:"api_resource"`
-		Issuer         string `json:"issuer"`
-		MobileClientId string `json:"mobile_client_id"`
-		WebClientId    string `json:"web_client_id"`
+		ApiResource string `json:"api_resource"`
+
+		// DesktopClientId Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+		// (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+		DesktopClientId *string `json:"desktop_client_id,omitempty"`
+		Issuer          string  `json:"issuer"`
+		MobileClientId  string  `json:"mobile_client_id"`
+		WebClientId     string  `json:"web_client_id"`
 	} `json:"auth"`
 
 	// Calendar True when the server syncs calendars for frames (ICS/webcal and CalDAV).

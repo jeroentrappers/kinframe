@@ -1378,6 +1378,11 @@ export interface components {
                 /** Format: uri */
                 issuer: string;
                 mobile_client_id: string;
+                /**
+                 * @description Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+                 *     (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+                 */
+                desktop_client_id?: string;
                 web_client_id: string;
                 api_resource: string;
             };

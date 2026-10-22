@@ -22,6 +22,7 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 | `web/` | SvelteKit website *(coming)* |
 | `android/` | Frame app and Android family app (Kotlin, Compose) *(coming)* |
 | `ios/` | iOS family app (SwiftUI) *(coming)* |
+| `desktop/` | Windows, macOS and Linux app (Rust, egui) with bulk import of whole folders |
 | `tools/mictest/` | Tiny APK that checks whether a frame has a working microphone |
 
 ## Components
@@ -29,6 +30,8 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 - **Frame app**: kiosk launcher for Android-based frames (Android 6+, including stock Frameo hardware).
 - **Family apps**: native Android and iOS apps with share-sheet sending.
 - **Website**: send, manage frames and members, browse the library.
+- **Desktop app** (Windows, macOS, Linux): sign in, add frames, and send whole folders or albums at once, with
+  progress, duplicate detection and uploads that resume after a restart. See `desktop/README.md`.
 - **Server**: Go, PostgreSQL, Logto for accounts. One `docker compose up` to self-host.
 
 ## License

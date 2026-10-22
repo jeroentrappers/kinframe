@@ -781,6 +781,11 @@ components:
                     properties:
                         api_resource:
                             type: string
+                        desktop_client_id:
+                            description: |
+                                Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+                                (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+                            type: string
                         issuer:
                             format: uri
                             type: string
