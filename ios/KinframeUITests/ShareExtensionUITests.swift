@@ -49,6 +49,45 @@ final class ShareExtensionUITests: XCTestCase {
         attach(app, "settings-saved")
     }
 
+    /// People: let in the first person waiting to join KF_FRAME_ID.
+    func testApproveJoinRequest() throws {
+        let id = try XCTUnwrap(ProcessInfo.processInfo.environment["KF_FRAME_ID"], "set TEST_RUNNER_KF_FRAME_ID")
+        let app = XCUIApplication()
+        app.launchArguments = ["-kfLanguage", "en", "-kfFrame", id, "-kfSection", "people"]
+        app.launch()
+        let letIn = app.buttons["Let in"].firstMatch
+        XCTAssertTrue(letIn.waitForExistence(timeout: 15))
+        letIn.tap()
+        XCTAssertTrue(letIn.waitForNonExistence(timeout: 10))
+    }
+
+    /// Overview: send "Identify" to KF_FRAME_ID (the frame must be online).
+    func testRemoteCommand() throws {
+        let id = try XCTUnwrap(ProcessInfo.processInfo.environment["KF_FRAME_ID"], "set TEST_RUNNER_KF_FRAME_ID")
+        let app = XCUIApplication()
+        app.launchArguments = ["-kfLanguage", "en", "-kfFrame", id, "-kfSection", "overview"]
+        app.launch()
+        let identify = app.buttons["Identify"]
+        XCTAssertTrue(identify.waitForExistence(timeout: 15))
+        identify.tap()
+        XCTAssertTrue(app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'showing its name'")).firstMatch.waitForExistence(timeout: 10))
+    }
+
+    /// Opens Logto's sign-in page for the production server (no credentials are entered). KF_LOGTO=1 to run.
+    func testLogtoSignInOpens() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["KF_LOGTO"] != nil, "set TEST_RUNNER_KF_LOGTO=1 to run")
+        let app = XCUIApplication()
+        app.launchArguments = ["-kfLanguage", "en", "-kfReset", "YES", "-kfServer", "https://kinframe.appmire.be", "-kfStep", "signIn"]
+        app.launch()
+        let signIn = app.buttons["Sign in"]
+        XCTAssertTrue(signIn.waitForExistence(timeout: 15))
+        signIn.tap()
+        sleep(8)
+        if let dir = ProcessInfo.processInfo.environment["KF_SHOTS"] {
+            try? XCUIScreen.main.screenshot().pngRepresentation.write(to: URL(fileURLWithPath: "\(dir)/logto.png"))
+        }
+    }
+
     /// Exploratory: Photos → Share → kinframe. Taps by position because the extension's scene isn't inspectable.
     func testShareFromPhotosApp() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["KF_PHOTOS"] != nil, "set TEST_RUNNER_KF_PHOTOS=1 to run")

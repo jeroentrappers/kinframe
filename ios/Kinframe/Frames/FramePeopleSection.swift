@@ -144,6 +144,7 @@ struct FramePeopleSection: View {
                         Button(L("people.deny")) { Task { await decide(r, false) } }.buttonStyle(.kf(.ghost))
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .card(padding: 14)
             }
         }
@@ -275,33 +276,36 @@ private struct MemberSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if viewerRole == .owner {
-                    Section {
-                        Picker(L("people.role"), selection: $role) {
-                            Text(L("role.member")).tag(Member.RolePayloadForUpdate.member)
-                            Text(L("role.admin")).tag(Member.RolePayloadForUpdate.admin)
-                        }
-                        .pickerStyle(.segmented)
-                    } footer: {
-                        Text(role == .admin ? L("people.adminHint") : L("people.memberHint"))
-                    }
-                }
-                if role == .member {
-                    Section(L("people.permissions")) {
-                        ForEach(Self.keys, id: \.1) { key, name in
-                            Toggle(isOn: Binding(get: { permissions[keyPath: key] ?? false }, set: { permissions[keyPath: key] = $0 })) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(L("perm.\(name)"))
-                                    Text(L("perm.\(name)Hint")).font(.footnote).foregroundStyle(Palette.textMuted)
-                                }
+                Group {
+                    if viewerRole == .owner {
+                        Section {
+                            Picker(L("people.role"), selection: $role) {
+                                Text(L("role.member")).tag(Member.RolePayloadForUpdate.member)
+                                Text(L("role.admin")).tag(Member.RolePayloadForUpdate.admin)
                             }
-                            .tint(Palette.accent)
+                            .pickerStyle(.segmented)
+                        } footer: {
+                            Text(role == .admin ? L("people.adminHint") : L("people.memberHint"))
                         }
                     }
+                    if role == .member {
+                        Section(L("people.permissions")) {
+                            ForEach(Self.keys, id: \.1) { key, name in
+                                Toggle(isOn: Binding(get: { permissions[keyPath: key] ?? false }, set: { permissions[keyPath: key] = $0 })) {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(L("perm.\(name)"))
+                                        Text(L("perm.\(name)Hint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                                    }
+                                }
+                                .tint(Palette.accent)
+                            }
+                        }
+                    }
+                    Section {
+                        Button(L("people.remove"), role: .destructive) { confirmRemove = true }
+                    }
                 }
-                Section {
-                    Button(L("people.remove"), role: .destructive) { confirmRemove = true }
-                }
+                .listRowBackground(Palette.surface)
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
@@ -366,49 +370,52 @@ private struct InviteCreateSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if let created, let url = URL(string: created.url) {
-                    Section {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Label(L("people.linkReady"), systemImage: "checkmark.circle.fill").foregroundStyle(Palette.accentText).font(.headline)
-                            Text(created.url).font(.footnote.monospaced()).textSelection(.enabled).foregroundStyle(Palette.textMuted)
-                            ShareLink(item: url, subject: Text(L("people.shareTitle", ["name": frameName])), message: Text(L("people.shareText", ["name": frameName]))) {
-                                Label(L("people.share"), systemImage: "square.and.arrow.up")
+                Group {
+                    if let created, let url = URL(string: created.url) {
+                        Section {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Label(L("people.linkReady"), systemImage: "checkmark.circle.fill").foregroundStyle(Palette.accentText).font(.headline)
+                                Text(created.url).font(.footnote.monospaced()).textSelection(.enabled).foregroundStyle(Palette.textMuted)
+                                ShareLink(item: url, subject: Text(L("people.shareTitle", ["name": frameName])), message: Text(L("people.shareText", ["name": frameName]))) {
+                                    Label(L("people.share"), systemImage: "square.and.arrow.up")
+                                }
+                                .buttonStyle(.kf(.primary, fill: true))
+                                Button {
+                                    UIPasteboard.general.url = url
+                                    app.toasts.show(L("people.copied"))
+                                } label: {
+                                    Label(L("people.copy"), systemImage: "doc.on.doc")
+                                }
+                                .buttonStyle(.kf(.secondary, fill: true))
                             }
-                            .buttonStyle(.kf(.primary, fill: true))
-                            Button {
-                                UIPasteboard.general.url = url
-                                app.toasts.show(L("people.copied"))
-                            } label: {
-                                Label(L("people.copy"), systemImage: "doc.on.doc")
+                            .padding(.vertical, 6)
+                        }
+                    } else {
+                        Section {
+                            Text(approval ? L("people.inviteHintApproval") : L("people.inviteHint")).font(.subheadline).foregroundStyle(Palette.textMuted)
+                        }
+                        Section(L("people.expires")) {
+                            Picker(L("people.expires"), selection: $hours) {
+                                Text(L("people.exp1d")).tag(24)
+                                Text(L("people.exp7d")).tag(168)
+                                Text(L("people.exp30d")).tag(720)
                             }
-                            .buttonStyle(.kf(.secondary, fill: true))
+                            .pickerStyle(.segmented)
                         }
-                        .padding(.vertical, 6)
-                    }
-                } else {
-                    Section {
-                        Text(approval ? L("people.inviteHintApproval") : L("people.inviteHint")).font(.subheadline).foregroundStyle(Palette.textMuted)
-                    }
-                    Section(L("people.expires")) {
-                        Picker(L("people.expires"), selection: $hours) {
-                            Text(L("people.exp1d")).tag(24)
-                            Text(L("people.exp7d")).tag(168)
-                            Text(L("people.exp30d")).tag(720)
+                        Section(L("people.uses")) {
+                            Picker(L("people.uses"), selection: $singleUse) {
+                                Text(L("people.usesSingle")).tag(true)
+                                Text(L("people.usesUnlimited")).tag(false)
+                            }
+                            .pickerStyle(.inline)
+                            .labelsHidden()
                         }
-                        .pickerStyle(.segmented)
-                    }
-                    Section(L("people.uses")) {
-                        Picker(L("people.uses"), selection: $singleUse) {
-                            Text(L("people.usesSingle")).tag(true)
-                            Text(L("people.usesUnlimited")).tag(false)
+                        Section(L("people.note") + " (" + L("common.optional") + ")") {
+                            TextField(L("people.notePlaceholder"), text: $note)
                         }
-                        .pickerStyle(.inline)
-                        .labelsHidden()
-                    }
-                    Section(L("people.note") + " (" + L("common.optional") + ")") {
-                        TextField(L("people.notePlaceholder"), text: $note)
                     }
                 }
+                .listRowBackground(Palette.surface)
             }
             .scrollContentBackground(.hidden)
             .pageBackground()

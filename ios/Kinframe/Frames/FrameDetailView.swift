@@ -426,30 +426,33 @@ private struct TransferSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    Text(L("transfer.body")).font(.subheadline).foregroundStyle(Palette.textMuted)
-                }
-                let eligible = members.filter { $0.role != .owner }
-                if eligible.isEmpty {
-                    Text(L("transfer.noOne")).foregroundStyle(Palette.textMuted)
-                } else {
-                    Section(L("transfer.pick")) {
-                        ForEach(eligible) { m in
-                            Button {
-                                choice = m.userId
-                            } label: {
-                                HStack {
-                                    AvatarView(name: m.displayName, url: m.avatarUrl, size: 32)
-                                    Text(m.displayName).foregroundStyle(Palette.text)
-                                    RoleBadge(role: m.role)
-                                    Spacer()
-                                    if choice == m.userId { Image(systemName: "checkmark").foregroundStyle(Palette.primary) }
+                Group {
+                    Section {
+                        Text(L("transfer.body")).font(.subheadline).foregroundStyle(Palette.textMuted)
+                    }
+                    let eligible = members.filter { $0.role != .owner }
+                    if eligible.isEmpty {
+                        Text(L("transfer.noOne")).foregroundStyle(Palette.textMuted)
+                    } else {
+                        Section(L("transfer.pick")) {
+                            ForEach(eligible) { m in
+                                Button {
+                                    choice = m.userId
+                                } label: {
+                                    HStack {
+                                        AvatarView(name: m.displayName, url: m.avatarUrl, size: 32)
+                                        Text(m.displayName).foregroundStyle(Palette.text)
+                                        RoleBadge(role: m.role)
+                                        Spacer()
+                                        if choice == m.userId { Image(systemName: "checkmark").foregroundStyle(Palette.primary) }
+                                    }
                                 }
+                                .accessibilityAddTraits(choice == m.userId ? .isSelected : [])
                             }
-                            .accessibilityAddTraits(choice == m.userId ? .isSelected : [])
                         }
                     }
                 }
+                .listRowBackground(Palette.surface)
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
