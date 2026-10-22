@@ -1,0 +1,14 @@
+{
+ "footer": "Код дійсний 10 хвилин. Якщо ви його не запитували, просто проігноруйте цей лист.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Ваш код для входу в kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб увійти в kinframe:"},
+  "Register": {"subject": "Ваш код для реєстрації в kinframe: {{code}}", "intro": "Вітаємо в kinframe!\n\nВведіть цей код, щоб завершити створення облікового запису:"},
+  "ForgotPassword": {"subject": "Ваш код для відновлення облікового запису kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб відновити обліковий запис kinframe:"},
+  "Generic": {"subject": "Ваш код підтвердження kinframe: {{code}}", "intro": "Вітаємо!\n\nВаш код підтвердження kinframe:"},
+  "BindNewIdentifier": {"subject": "Підтвердьте нову адресу пошти для kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб підтвердити нову адресу ел. пошти для облікового запису kinframe:"},
+  "UserPermissionValidation": {"subject": "Ваш код підтвердження kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб підтвердити, що це ви, перш ніж змінити обліковий запис kinframe:"},
+  "MfaVerification": {"subject": "Ваш код підтвердження kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб завершити вхід у kinframe:"},
+  "BindMfa": {"subject": "Ваш код підтвердження kinframe: {{code}}", "intro": "Вітаємо!\n\nВведіть цей код, щоб увімкнути двоетапну перевірку в kinframe:"}
+ }
+}

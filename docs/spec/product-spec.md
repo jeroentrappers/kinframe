@@ -274,5 +274,8 @@ Decided by the project owner on 2026-10-22.
    - **Per-frame-size renditions and thumbnails**, derived from the master and regenerable at any time. Frames up to
      1440p, including ones added later, get full quality.
    - The upload is deleted as soon as the master is written.
+   - Phones and browsers may make the master themselves (smaller uploads, less server CPU). The server verifies it
+     and keeps it without re-encoding, but always strips metadata itself; anything that doesn't conform is processed
+     as usual (API README §5.3, "Prepared uploads").
 3. **One server can host several unrelated families.** Frames and memberships isolate them. There is no extra tenant
    concept, and the operator role can see everything.

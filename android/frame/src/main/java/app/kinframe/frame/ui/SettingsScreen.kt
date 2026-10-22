@@ -35,6 +35,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import app.kinframe.frame.Locales
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.FrameSettings
+import app.kinframe.core.api.LivePhotos
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.SleepScheduleDto
 import app.kinframe.core.design.ChoiceChips
@@ -108,6 +112,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
                 RemovableSection(c)
@@ -181,6 +186,16 @@ private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (Str
             SwitchRow(stringResource(R.string.settings_pair_portraits), ss.pairPortraits) { section("slideshow", arrayOf("pair_portraits" to it)) }
         }
         SwitchRow(stringResource(R.string.settings_on_this_day), ss.onThisDay) { section("slideshow", arrayOf("on_this_day" to it)) }
+        Labeled(stringResource(R.string.settings_live_photos)) {
+            ChoiceChips(
+                listOf(
+                    LivePhotos.ON to stringResource(R.string.live_photos_on),
+                    LivePhotos.TAP to stringResource(R.string.live_photos_tap),
+                    LivePhotos.OFF to stringResource(R.string.live_photos_off),
+                ),
+                ss.livePhotos.takeIf { it in LivePhotos.all } ?: LivePhotos.ON, { section("slideshow", arrayOf("live_photos" to it)) },
+            )
+        }
         Labeled(stringResource(R.string.settings_fill)) {
             ChoiceChips(
                 listOf(true to stringResource(R.string.fill_fill), false to stringResource(R.string.fill_fit)),
@@ -386,6 +401,30 @@ private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (Strin
             { c.update.requestCheck(UpdateManager.Trigger.User) },
             style = KinButtonStyle.Secondary, enabled = !busy,
         )
+    }
+}
+
+/** The frame's language: the current one, and all 36 to pick from. A choice applies at once and syncs. */
+@Composable
+private fun LanguageSection(c: FrameController) {
+    val context = LocalContext.current
+    val current = remember { Locales.effective(context) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    SectionCard(stringResource(R.string.settings_language)) {
+        if (expanded) {
+            LanguageChoices(current, { code -> expanded = false; c.setLanguage(code) })
+        } else {
+            KinCard(Modifier.fillMaxWidth(), onClick = { expanded = true }, padding = 18.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    KinIcon(KinIcons.Globe, null, tint = Kin.colors.accent)
+                    Text(
+                        Locales.language(current)?.nativeName ?: current, style = Kin.type.bodyStrong,
+                        modifier = Modifier.padding(start = 16.dp).weight(1f),
+                    )
+                    KinIcon(KinIcons.ChevronRight, null, tint = Kin.colors.inkSoft, size = 22.dp)
+                }
+            }
+        }
     }
 }
 

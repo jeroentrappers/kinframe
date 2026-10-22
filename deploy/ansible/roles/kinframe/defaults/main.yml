@@ -70,5 +70,28 @@ kinframe_s3_path_style: false      # MinIO/Silo need path-style; forced on with 
 # presigned: signed media URLs and avatars redirect to 15-minute presigned bucket URLs (bucket must be public).
 kinframe_media_redirect: "off"
 
+# Social sign-in on Logto's sign-in page (bootstrap-logto creates the connectors). Every provider is off
+# while its client ID is empty; IDs and secrets come from the vault. Registration steps and the exact
+# callback URLs (https://<logto_domain>/callback/<apple|google|microsoft|facebook|github>) are in
+# docs/deploy.md ("Social sign-in").
+kinframe_social_apple_client_id: ""        # the Services ID, e.g. app.kinframe.signin (no secret needed)
+kinframe_social_google_client_id: ""
+kinframe_social_google_client_secret: ""
+kinframe_social_microsoft_client_id: ""    # Entra app (client) ID
+kinframe_social_microsoft_client_secret: ""
+kinframe_social_microsoft_tenant: common   # common = personal Microsoft accounts + work/school accounts
+kinframe_social_facebook_client_id: ""     # Meta app ID (Facebook Login; Instagram has no consumer login)
+kinframe_social_facebook_client_secret: ""
+kinframe_social_github_client_id: ""
+kinframe_social_github_client_secret: ""
+# Removing a provider's ID leaves its Logto connector (and button) in place unless this is true.
+kinframe_social_remove_unconfigured: false
+# Link a first social sign-in to the existing account with the same verified email.
+kinframe_social_link_by_email: true
+# Logto sign-in page: kinframe look (logo, colours, CSS) and optional legal links (empty = no link).
+kinframe_logto_branding: true
+kinframe_terms_url: ""
+kinframe_privacy_url: ""
+
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}

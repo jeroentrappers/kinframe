@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Unesite PIN vlasnika</string>
+    <string name="pin_reason_settings">za otvaranje postavki</string>
+    <string name="pin_reason_exit">za izlaz iz kinframea</string>
+    <string name="pin_reason_wifi">za promjenu Wi-Fi mreže</string>
+    <string name="pin_reason_power_off">za isključivanje okvira</string>
+    <string name="pin_reason_restart">za ponovno pokretanje okvira</string>
+    <string name="pin_reason_server">za promjenu poslužitelja</string>
+    <string name="pin_reason_reset">za vraćanje okvira na zadano</string>
+    <string name="pin_checking">Provjera…</string>
+    <string name="pin_wrong">To nije PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">To nije PIN. Još %d pokušaj prije kratke stanke.</item>
+        <item quantity="few">To nije PIN. Još %d pokušaja prije kratke stanke.</item>
+        <item quantity="other">To nije PIN. Još %d pokušaja prije kratke stanke.</item>
+    </plurals>
+    <string name="pin_locked">Previše pogrešnih pokušaja. Pokušajte ponovno za %s.</string>
+    <string name="pin_forgot">Zaboravili ste PIN? Vlasnik okvira može ga ukloniti u aplikaciji kinframe, u postavkama ovog okvira.</string>
+    <string name="pin_new_title">Odaberite PIN</string>
+    <string name="pin_new_body">Od 4 do 6 znamenki. Tražit će se za otvaranje postavki, isključivanje okvira ili promjenu Wi-Fi mreže.</string>
+    <string name="pin_confirm_title">Ponovno unesite PIN</string>
+    <string name="pin_confirm_body">Samo za svaki slučaj.</string>
+    <string name="pin_mismatch">PIN-ovi se ne podudaraju. Odaberite ga ponovno.</string>
+    <string name="pin_key_delete">Izbriši</string>
+    <string name="pin_key_ok">U redu</string>
+    <string name="settings_pin">PIN vlasnika</string>
+    <string name="settings_pin_off">Isključeno. Svatko uz okvir može otvoriti postavke.</string>
+    <string name="settings_pin_on">Uključeno. Postavke, napajanje i Wi-Fi traže PIN.</string>
+    <string name="settings_pin_set">Postavi PIN</string>
+    <string name="settings_pin_change">Promijeni PIN</string>
+    <string name="settings_pin_remove">Ukloni PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Netko</string>
+    <string name="join_title">%1$s se želi pridružiti</string>
+    <string name="join_body_code">%1$s koristi kod okvira „%2$s”. Ako dopustite, %1$s može slati fotografije na ovaj okvir.</string>
+    <string name="join_body_invited">%1$s poziva osobu %3$s u „%2$s”. Ako dopustite, %3$s može slati fotografije na ovaj okvir.</string>
+    <string name="join_invited_by">Poziv šalje: %s</string>
+    <string name="join_allow">Dopusti</string>
+    <string name="join_deny">Ne dopusti</string>
+    <string name="join_later">Ne sada</string>
+    <string name="join_later_hint">Ostaje među obavijestima u izborniku.</string>
+    <string name="join_pill_one">%s se želi pridružiti</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d osoba se želi pridružiti</item>
+        <item quantity="few">%d osobe se žele pridružiti</item>
+        <item quantity="other">%d osoba se želi pridružiti</item>
+    </plurals>
+    <string name="notifications_title">Obavijesti</string>
+    <string name="notifications_empty">Sve je pregledano</string>
+    <string name="notifications_empty_body">Ništa vas ne čeka.</string>
+    <string name="menu_notifications">Obavijesti</string>
+    <string name="action_close">Zatvori</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Nema internetske veze</string>
+    <string name="status_card_offline_body">Fotografije na okviru i dalje se prikazuju. Nove stižu čim se veza vrati.</string>
+    <string name="status_card_server_title">Poslužitelj fotografija nije dostupan</string>
+    <string name="status_card_server_body">Wi-Fi radi, ali poslužitelj ne odgovara. Nove fotografije stižu kad se vrati.</string>
+    <string name="status_card_portal_title">Ovaj Wi-Fi traži prijavu</string>
+    <string name="status_card_portal_body">Otvorite stranicu za prijavu na mrežu kako bi okvir bio povezan.</string>
+    <string name="status_card_portal_action">Prijava</string>
+    <string name="status_card_storage_title">Okvir je gotovo pun</string>
+    <string name="status_card_storage_body">Starije fotografije uklonjene su s okvira kako bi se oslobodio prostor; ostaju sigurne na poslužitelju. Nove fotografije mogu čekati dok se ne oslobodi mjesto.</string>
+    <string name="portal_title">Prijava na Wi-Fi</string>
+    <string name="portal_body">Zatvara se samo čim okvir bude povezan.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">U kojoj je vremenskoj zoni okvir?</string>
+    <string name="setup_tz_body">Kako bi sat, datum i noćni raspored bili točni.</string>
+    <string name="setup_tz_suggested">Predloženo</string>
+    <string name="setup_tz_all">Sve vremenske zone</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Azija</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australija</string>
+    <string name="tz_region_pacific">Pacifik</string>
+    <string name="tz_region_atlantic">Atlantik</string>
+    <string name="tz_region_indian">Indijski ocean</string>
+    <string name="tz_region_antarctica">Antarktika</string>
+    <string name="setup_update_checking">Traženje novije verzije…</string>
+    <string name="setup_update_checking_body">Okvir provjerava ima li najnoviji kinframe prije nego što počnete.</string>
+    <string name="setup_update_downloading">Preuzimanje verzije %s</string>
+    <string name="setup_update_downloading_body">Odmah zatim slijedi instalacija. Možete preskočiti; okvir će se tada ažurirati kasnije.</string>
+    <string name="setup_update_installing">Instaliranje verzije %s</string>
+    <string name="setup_update_installing_body">Okvir će se uskoro sam ponovno pokrenuti i nastaviti postavljanje gdje ste stali.</string>
+    <string name="setup_update_current">kinframe je ažuran</string>
+    <string name="setup_update_current_body">Idemo na posljednji korak.</string>
+    <string name="setup_update_failed">Provjera ažuriranja nije uspjela</string>
+    <string name="setup_update_failed_body">Nema problema: okvir će kasnije ponovno provjeriti i sam se ažurirati.</string>
+    <string name="setup_update_skip">Preskoči zasad</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Na današnji dan prije %d godine</item>
+        <item quantity="few">Na današnji dan prije %d godine</item>
+        <item quantity="other">Na današnji dan prije %d godina</item>
+    </plurals>
+    <string name="transition_kenburns">Polagano zumiranje</string>
+    <string name="settings_collage">Više fotografija odjednom (kolaž)</string>
+    <string name="settings_collage_max">Fotografija po zaslonu</string>
+    <string name="settings_pair_portraits">Prikaži dvije uspravne fotografije jednu uz drugu</string>
+    <string name="settings_on_this_day">Prikaži uspomene s ovog dana iz prijašnjih godina</string>
+    <string name="settings_video">Videozapisi</string>
+    <string name="settings_video_autoplay">Automatski reproduciraj videozapise</string>
+    <string name="settings_video_playback">Nakon videozapisa</string>
+    <string name="video_once_hold">Reproduciraj jednom, zatim čekaj</string>
+    <string name="video_loop">Ponavljaj</string>
+    <string name="video_once_advance">Reproduciraj jednom, zatim dalje</string>
+    <string name="settings_video_volume">Glasnoća videozapisa</string>
+    <string name="settings_video_auto_mute">Isključi zvuk ako nitko ne dodirne okvir</string>
+    <string name="video_auto_mute_off">Nikad</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

@@ -1,0 +1,14 @@
+{
+ "footer": "De code verloopt na 10 minuten. Heb je hem niet aangevraagd? Dan kun je deze e-mail negeren.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Je aanmeldcode voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om je aan te melden bij kinframe:"},
+  "Register": {"subject": "Je registratiecode voor kinframe: {{code}}", "intro": "Welkom bij kinframe!\n\nGebruik deze code om je account aan te maken:"},
+  "ForgotPassword": {"subject": "Je herstelcode voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om je kinframe-account te herstellen:"},
+  "Generic": {"subject": "Je verificatiecode voor kinframe: {{code}}", "intro": "Hallo,\n\nJe verificatiecode voor kinframe is:"},
+  "BindNewIdentifier": {"subject": "Bevestig je nieuwe e-mailadres voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om het nieuwe e-mailadres van je kinframe-account te bevestigen:"},
+  "UserPermissionValidation": {"subject": "Je verificatiecode voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om te bevestigen dat jij het bent voor je je kinframe-account wijzigt:"},
+  "MfaVerification": {"subject": "Je verificatiecode voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om je aanmelding bij kinframe af te ronden:"},
+  "BindMfa": {"subject": "Je verificatiecode voor kinframe: {{code}}", "intro": "Hallo,\n\nGebruik deze code om verificatie in twee stappen aan te zetten voor kinframe:"}
+ }
+}

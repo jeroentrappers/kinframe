@@ -1,6 +1,6 @@
 import { authFetch } from './api/client';
 
-export type MediaVariant = 'thumb_256' | 'thumb_512' | 'master' | 'poster';
+export type MediaVariant = 'thumb_256' | 'thumb_512' | 'master' | 'poster' | 'motion';
 
 /**
  * <img> can't send a bearer token, so media is fetched with auth and shown via an object URL.

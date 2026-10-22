@@ -205,7 +205,7 @@
 		</button>
 	</div>
 
-	<div class="track-wrap">
+	<div class="track-wrap" dir="ltr">
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="track" bind:this={track} onpointermove={move} onpointerup={up} onpointercancel={up}>
 			<div class="strip" aria-hidden="true">

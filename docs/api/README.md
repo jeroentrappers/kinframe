@@ -137,11 +137,11 @@ don't reveal whether a code ever existed.
 
 ```
 client                         server                                   frame
-  │ tus POST /v1/uploads  (Upload-Metadata: filename, filetype, sha256)
+  │ tus POST /v1/uploads  (Upload-Metadata: filename, filetype, sha256, prepared?)
   │ tus PATCH … (resumable, 4 MiB chunks)
-  │ POST /v1/sends {frame_ids, items:[{upload_id, caption, focal_point, fit, trim}]}
+  │ POST /v1/sends {frame_ids, items:[{upload_id, live_video_upload_id?, caption, focal_point, fit, trim, captured_at}]}
   │ ◀── 202 { send_id, items:[{item_id, status:"processing"}] }
-  │                               process: decode → master → frame renditions → thumbs → faces
+  │                               process: verify or decode → master → frame renditions → thumbs → faces
   │                               placements ready ──── ws "changes" ─────▶ │
   │                                                     GET /v1/device/changes │
   │                                                     GET /v1/device/media/… │
@@ -158,11 +158,57 @@ client                         server                                   frame
   - `filetype`: a MIME type
   - `sha256`: hex, optional. If the same user already has an item with that hash, the send reuses it without
     processing.
+  - `prepared`: optional, `photo-master-v1` or `video-master-v1`. The client already made the master (below).
+    Unknown values are ignored.
 - Max upload size is in discovery `limits.max_upload_bytes` (default 2 GiB).
+
+**Prepared uploads (client-side preparation)**
+
+Phones and browsers can make the master themselves, which saves upload bytes (a 12 MP JPEG or HEIC becomes a
+≈1 MB WebP, a 4K clip a 1080p one) and server CPU. The server **verifies instead of trusting**; anything that does
+not conform silently takes the normal pipeline, so preparing is always safe.
+
+| Profile | The client produces | The server checks | Then |
+|---|---|---|---|
+| `photo-master-v1` | WebP (lossy, q90) or JPEG where WebP encoding isn't available; long edge ≤ 2560 px; EXIF orientation applied; no metadata; sRGB | WebP or JPEG by magic bytes, ≤ 16 MiB, ≤ 2560 px, no orientation other than 1, 8-bit sRGB or grey, one page, decodes completely, matches the declared `width`/`height` | stores it as the master **without re-encoding**, after stripping all metadata again (EXIF, XMP, IPTC, comments, anything after the image; the ICC profile stays). Frame renditions and thumbnails are made from it as usual. |
+| `video-master-v1` | MP4, H.264 High or Main (Baseline accepted) at level ≤ 4.1, yuv420p, ≤ 1080p (either orientation, rotation applied), ≤ 30 fps preferred (≤ 60 accepted), AAC-LC stereo/mono or no audio, trim and mute already applied, bitrate ≈ w·h·3.5 bps capped at 8 Mbps | MP4 container, one video stream, the codec/profile/level/pixel format above, no rotation flag, ≤ 1080p, ≤ 60 fps, AAC (≤ 2 channels) or no audio, duration ≤ `max_video_seconds` (and matching `duration_ms` ±0.5 s), total bitrate ≤ 20 Mbps, no `trim` in the send | **remuxes** it (stream copy, no re-encode) without any container or stream metadata and with the index first (faststart), and stores that as the master. |
+
+- **Privacy is never delegated.** Metadata is stripped server-side on every path, also when a client claims to have
+  done it. Prepared files carry no capture time, so clients send `captured_at` (and `width`, `height`,
+  `duration_ms`) with the send item.
+- **Frame video renditions reuse the master** whenever it already fits the frame: H.264 ≤ level 4.1 within the
+  device's `max_video_decode`, ≤ 30 fps, bitrate within the rendition budget (w·h·4, max 8 Mbps, +10 %), AAC or no
+  audio, faststart. The frame then downloads the master's bytes and the server transcodes nothing. This applies to
+  any master, prepared or not. Photos always get their cheap per-frame-size WebP and thumbnails.
+- Clients fall back to uploading the original whenever preparation fails or is unsupported (HEIC without a decoder,
+  no WebCodecs, an encoder error). Mixed sends are fine.
+- The operator sees how masters were made in `GET /v1/operator/stats` → `media_pipeline` (`transcoded`,
+  `prepared`, `fallback`, `reused_renditions`); each master is also logged with its path and the rejection reason.
+
+**Live Photos (iOS) and Motion Photos (Android)**
+
+A **live item** is a still plus a short motion clip (≤ 10 s; longer clips are cut).
+
+- **Sending**: either two uploads, the still as `upload_id` and the clip as `live_video_upload_id` (iOS Live Photo:
+  HEIC/JPEG + MOV, or both prepared), or one Android **Motion Photo** (a JPEG/HEIC with an embedded MP4, XMP
+  `GCamera:MotionPhoto`/`MicroVideo` with `Container:Directory` offsets, or a HEIC `mpvd` box) as `upload_id`: the
+  server finds and splits the clip itself. Clients that split it themselves send the parts as two uploads. Send
+  `live: false` to send a Motion Photo as a still only. The clip is muted unless `include_audio: true` is sent
+  explicitly. `trim` is not allowed on live items.
+- **Stored**: the still as a photo master, the clip as a video master (H.264 ≤ 1080p, same prepared/fallback rules).
+  The clip has no poster and no thumbnails of its own: the still is its poster. If the clip fails to process, the
+  item simply stays a photo.
+- **API**: `Item.kind` is `live` with `Item.motion` (`status`, size, duration, audio); the clip's master is at
+  `GET /v1/items/{id}/media/motion`. Every photo field (size, thumbnails, `captured_at`) describes the still.
+  The library filter `kind=photo` includes live items and `kind=live` returns only them.
+- **Frames**: `placement.upsert` carries the still's rendition in `media` (so frames that don't know `live` show a
+  normal photo) and, once ready, `motion` `{url, sha256, bytes, mime, width, height, duration_ms, has_audio}` with
+  the frame-sized clip (`GET /v1/device/media/{placement_id}?variant=motion`). The frame plays it per
+  `settings.slideshow.live_photos`: `on` (default: once when the slide appears, again on tap), `tap` or `off`.
 
 **Sends**
 - `POST /v1/sends` validates everything before accepting: permissions on every frame, item count, video length after
-  trim, supported types. It is all-or-nothing.
+  trim, supported types, live clip uploads. It is all-or-nothing.
 - Processing is asynchronous. Failures mark the item `failed` with a `code` (`unsupported_media`, `corrupt_media`,
   `video_too_long`), visible in the sender's history and pushed.
 

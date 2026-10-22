@@ -277,8 +277,27 @@ func (s *Server) deviceFrame(ctx context.Context) (*store.Frame, error) {
 }
 
 func notFound(err error, what string) error {
-	if err == store.ErrNotFound {
-		return problem.New(problem.NotFound, "%s not found", what)
+	if err != store.ErrNotFound {
+		return err
 	}
-	return err
+	// Literal details, so each one has its own translation (package i18n).
+	switch what {
+	case "album":
+		return problem.New(problem.NotFound, "album not found")
+	case "frame":
+		return problem.New(problem.NotFound, "frame not found")
+	case "invite":
+		return problem.New(problem.NotFound, "invite not found")
+	case "item":
+		return problem.New(problem.NotFound, "item not found")
+	case "join request":
+		return problem.New(problem.NotFound, "join request not found")
+	case "member":
+		return problem.New(problem.NotFound, "member not found")
+	case "placement":
+		return problem.New(problem.NotFound, "placement not found")
+	case "send":
+		return problem.New(problem.NotFound, "send not found")
+	}
+	return problem.New(problem.NotFound, "")
 }

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">أدخل رقم PIN الخاص بالمالك</string>
+    <string name="pin_reason_settings">لفتح الإعدادات</string>
+    <string name="pin_reason_exit">للخروج من kinframe</string>
+    <string name="pin_reason_wifi">لتغيير Wi-Fi</string>
+    <string name="pin_reason_power_off">لإيقاف تشغيل الإطار</string>
+    <string name="pin_reason_restart">لإعادة تشغيل الإطار</string>
+    <string name="pin_reason_server">لتغيير الخادم</string>
+    <string name="pin_reason_reset">لإعادة ضبط الإطار</string>
+    <string name="pin_checking">جارٍ التحقق…</string>
+    <string name="pin_wrong">رقم PIN غير صحيح.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="zero">رقم PIN غير صحيح. تبقّت %d محاولة قبل توقف قصير.</item>
+        <item quantity="one">رقم PIN غير صحيح. تبقّت محاولة واحدة قبل توقف قصير.</item>
+        <item quantity="two">رقم PIN غير صحيح. تبقّت %d محاولة قبل توقف قصير.</item>
+        <item quantity="few">رقم PIN غير صحيح. تبقّت %d محاولات قبل توقف قصير.</item>
+        <item quantity="many">رقم PIN غير صحيح. تبقّت %d محاولة قبل توقف قصير.</item>
+        <item quantity="other">رقم PIN غير صحيح. تبقّت %d محاولة قبل توقف قصير.</item>
+    </plurals>
+    <string name="pin_locked">محاولات خاطئة كثيرة. حاول مجددًا بعد %s.</string>
+    <string name="pin_forgot">هل نسيت رقم PIN؟ يمكن لمالك الإطار إزالته من تطبيق kinframe، ضمن إعدادات هذا الإطار.</string>
+    <string name="pin_new_title">اختر رقم PIN</string>
+    <string name="pin_new_body">من 4 إلى 6 أرقام. سيُطلب عند فتح الإعدادات أو إيقاف تشغيل الإطار أو تغيير Wi-Fi.</string>
+    <string name="pin_confirm_title">أدخل رقم PIN مرة أخرى</string>
+    <string name="pin_confirm_body">للتأكد فقط.</string>
+    <string name="pin_mismatch">الرقمان غير متطابقين. اختر رقمًا مجددًا.</string>
+    <string name="pin_key_delete">حذف</string>
+    <string name="pin_key_ok">موافق</string>
+    <string name="settings_pin">رقم PIN الخاص بالمالك</string>
+    <string name="settings_pin_off">متوقف. يمكن لأي شخص عند الإطار فتح الإعدادات.</string>
+    <string name="settings_pin_on">مفعّل. تطلب الإعدادات والتشغيل وWi-Fi رقم PIN.</string>
+    <string name="settings_pin_set">تعيين رقم PIN</string>
+    <string name="settings_pin_change">تغيير رقم PIN</string>
+    <string name="settings_pin_remove">إزالة رقم PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">شخص ما</string>
+    <string name="join_title">يريد %1$s الانضمام</string>
+    <string name="join_body_code">أدخل %1$s رمز %2$s. إذا سمحت بذلك، يمكن لـ %1$s إرسال صور إلى هذا الإطار.</string>
+    <string name="join_body_invited">دعا %1$s %3$s إلى %2$s. إذا سمحت بذلك، يمكن لـ %3$s إرسال صور إلى هذا الإطار.</string>
+    <string name="join_invited_by">بدعوة من %s</string>
+    <string name="join_allow">السماح</string>
+    <string name="join_deny">عدم السماح</string>
+    <string name="join_later">ليس الآن</string>
+    <string name="join_later_hint">سيبقى في الإشعارات ضمن القائمة.</string>
+    <string name="join_pill_one">يريد %s الانضمام</string>
+    <plurals name="join_pill_many">
+        <item quantity="zero">%d شخص يريد الانضمام</item>
+        <item quantity="one">شخص واحد يريد الانضمام</item>
+        <item quantity="two">%d شخص يريدان الانضمام</item>
+        <item quantity="few">%d أشخاص يريدون الانضمام</item>
+        <item quantity="many">%d شخصًا يريدون الانضمام</item>
+        <item quantity="other">%d شخص يريدون الانضمام</item>
+    </plurals>
+    <string name="notifications_title">الإشعارات</string>
+    <string name="notifications_empty">لا جديد</string>
+    <string name="notifications_empty_body">لا يوجد شيء بانتظارك.</string>
+    <string name="menu_notifications">الإشعارات</string>
+    <string name="action_close">إغلاق</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">لا يوجد اتصال بالإنترنت</string>
+    <string name="status_card_offline_body">تستمر الصور الموجودة على الإطار في العرض. وتصل الصور الجديدة فور عودة الاتصال.</string>
+    <string name="status_card_server_title">تعذّر الوصول إلى خادم الصور</string>
+    <string name="status_card_server_body">شبكة Wi-Fi تعمل، لكن الخادم لا يستجيب. ستصل الصور الجديدة عند عودته.</string>
+    <string name="status_card_portal_title">تطلب شبكة Wi-Fi هذه تسجيل الدخول</string>
+    <string name="status_card_portal_body">افتح صفحة تسجيل الدخول للشبكة لتوصيل الإطار بالإنترنت.</string>
+    <string name="status_card_portal_action">تسجيل الدخول</string>
+    <string name="status_card_storage_title">الإطار ممتلئ تقريبًا</string>
+    <string name="status_card_storage_body">أُزيلت صور أقدم من الإطار لتوفير مساحة، وهي تبقى آمنة على الخادم. قد تنتظر الصور الجديدة حتى تتوفر مساحة.</string>
+    <string name="portal_title">تسجيل الدخول إلى Wi-Fi</string>
+    <string name="portal_body">ستُغلق هذه الصفحة تلقائيًا عند اتصال الإطار بالإنترنت.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">في أي منطقة زمنية يوجد الإطار؟</string>
+    <string name="setup_tz_body">لكي تكون الساعة والتاريخ وجدول الليل صحيحة.</string>
+    <string name="setup_tz_suggested">مقترحة</string>
+    <string name="setup_tz_all">كل المناطق الزمنية</string>
+    <string name="tz_region_europe">أوروبا</string>
+    <string name="tz_region_america">الأمريكتان</string>
+    <string name="tz_region_asia">آسيا</string>
+    <string name="tz_region_africa">أفريقيا</string>
+    <string name="tz_region_australia">أستراليا</string>
+    <string name="tz_region_pacific">المحيط الهادئ</string>
+    <string name="tz_region_atlantic">المحيط الأطلسي</string>
+    <string name="tz_region_indian">المحيط الهندي</string>
+    <string name="tz_region_antarctica">القارة القطبية الجنوبية</string>
+    <string name="setup_update_checking">جارٍ البحث عن إصدار أحدث…</string>
+    <string name="setup_update_checking_body">يتأكد الإطار من أنه يعمل بأحدث إصدار من kinframe قبل أن تبدأ.</string>
+    <string name="setup_update_downloading">جارٍ تنزيل الإصدار %s</string>
+    <string name="setup_update_downloading_body">سيُثبَّت بعد ذلك مباشرةً. يمكنك التخطي، وسيتحدّث الإطار تلقائيًا لاحقًا.</string>
+    <string name="setup_update_installing">جارٍ تثبيت الإصدار %s</string>
+    <string name="setup_update_installing_body">سيُعاد تشغيل الإطار تلقائيًا بعد لحظات ويكمل الإعداد من حيث توقفت.</string>
+    <string name="setup_update_current">kinframe محدَّث</string>
+    <string name="setup_update_current_body">إلى الخطوة الأخيرة.</string>
+    <string name="setup_update_failed">تعذّر البحث عن تحديثات</string>
+    <string name="setup_update_failed_body">لا مشكلة: سيبحث الإطار مجددًا لاحقًا ويتحدّث تلقائيًا.</string>
+    <string name="setup_update_skip">التخطي الآن</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="zero">في مثل هذا اليوم قبل %d سنة</item>
+        <item quantity="one">في مثل هذا اليوم قبل سنة</item>
+        <item quantity="two">في مثل هذا اليوم قبل %d سنة</item>
+        <item quantity="few">في مثل هذا اليوم قبل %d سنوات</item>
+        <item quantity="many">في مثل هذا اليوم قبل %d سنة</item>
+        <item quantity="other">في مثل هذا اليوم قبل %d سنة</item>
+    </plurals>
+    <string name="transition_kenburns">تكبير بطيء</string>
+    <string name="settings_collage">عدة صور معًا (كولاج)</string>
+    <string name="settings_collage_max">الصور في كل شاشة</string>
+    <string name="settings_pair_portraits">عرض صورتين عموديتين جنبًا إلى جنب</string>
+    <string name="settings_on_this_day">عرض ذكريات هذا اليوم من السنوات السابقة</string>
+    <string name="settings_video">الفيديوهات</string>
+    <string name="settings_video_autoplay">تشغيل الفيديوهات تلقائيًا</string>
+    <string name="settings_video_playback">بعد انتهاء الفيديو</string>
+    <string name="video_once_hold">تشغيل مرة ثم الانتظار</string>
+    <string name="video_loop">التكرار باستمرار</string>
+    <string name="video_once_advance">تشغيل مرة ثم الانتقال</string>
+    <string name="settings_video_volume">مستوى صوت الفيديو</string>
+    <string name="settings_video_auto_mute">كتم الصوت إذا لم يلمس أحد الإطار لمدة</string>
+    <string name="video_auto_mute_off">أبدًا</string>
+    <string name="video_auto_mute_min">%d د</string>
+</resources>

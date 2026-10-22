@@ -26,6 +26,7 @@ import app.kinframe.frame.weather.Weather
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +42,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.put
 import java.time.Instant
 import java.time.ZoneId
 
@@ -143,6 +145,9 @@ class FrameController(val g: FrameGraph) {
             }
             scope.launch { g.settings.settings.collect { applyTimezone() } }
             scope.launch {
+                g.settings.raw.map { serverLanguageOf(it) }.distinctUntilChanged().collect { onServerLanguage(it) }
+            }
+            scope.launch {
                 connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online -> if (online) joins.refresh() }
             }
             reportStateChanges()
@@ -155,6 +160,51 @@ class FrameController(val g: FrameGraph) {
                     delay(15 * 60_000L)
                 }
             }
+        }
+    }
+
+    /** The activity recreates itself on each emission (a new language must reload every string). */
+    val recreateRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    /**
+     * Switches the frame's language right away (setup wizard, frame settings) and, once the frame belongs to a
+     * family, stores it in the frame settings (`locale.language`) so server-made texts (the frame's default name,
+     * error messages) and the web app's frame settings match.
+     */
+    fun setLanguage(code: String) {
+        if (!Locales.isSupported(code)) return
+        val changed = Locales.stored(g.app) != code
+        g.prefs.language = code
+        _session.value?.outbox?.let { outbox ->
+            g.prefs.serverLanguage = code
+            scope.launch { outbox.settingsPatch(languagePatch(code)) }
+        }
+        if (changed) recreateRequests.tryEmit(Unit)
+    }
+
+    private fun languagePatch(code: String) = buildJsonObject { put("locale", buildJsonObject { put("language", code) }) }
+
+    private fun serverLanguageOf(doc: JsonObject): String? =
+        ((doc["locale"] as? JsonObject)?.get("language") as? JsonPrimitive)?.contentOrNull
+
+    /**
+     * Follows a language change made in the web app. The first value seen after the frame is claimed comes from
+     * the server's defaults, so there the frame's own choice wins and is sent up instead.
+     */
+    private fun onServerLanguage(tag: String?) {
+        val server = Locales.match(tag) ?: return
+        val local = Locales.effective(g.app)
+        val last = g.prefs.serverLanguage
+        g.prefs.serverLanguage = server
+        if (server == local) return
+        if (last == null) {
+            _session.value?.outbox?.let { outbox ->
+                g.prefs.serverLanguage = local
+                scope.launch { outbox.settingsPatch(languagePatch(local)) }
+            }
+        } else if (server != last) {
+            g.prefs.language = server
+            recreateRequests.tryEmit(Unit)
         }
     }
 

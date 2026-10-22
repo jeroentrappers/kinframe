@@ -1,0 +1,14 @@
+{
+ "footer": "تنتهي صلاحية الرمز خلال 10 دقائق. إذا لم تطلبه، يمكنك تجاهل هذه الرسالة.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "رمز تسجيل الدخول إلى kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لتسجيل الدخول إلى kinframe:"},
+  "Register": {"subject": "رمز التسجيل في kinframe: {{code}}", "intro": "مرحبًا بك في kinframe!\n\nاستخدم هذا الرمز لإكمال إنشاء حسابك:"},
+  "ForgotPassword": {"subject": "رمز استرداد حساب kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لاسترداد حسابك في kinframe:"},
+  "Generic": {"subject": "رمز التحقق من kinframe: {{code}}", "intro": "مرحبًا،\n\nرمز التحقق الخاص بك من kinframe هو:"},
+  "BindNewIdentifier": {"subject": "أكّد بريدك الإلكتروني الجديد في kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لتأكيد عنوان البريد الإلكتروني الجديد لحسابك في kinframe:"},
+  "UserPermissionValidation": {"subject": "رمز التحقق من kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لتأكيد هويتك قبل تغيير حسابك في kinframe:"},
+  "MfaVerification": {"subject": "رمز التحقق من kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لإكمال تسجيل الدخول إلى kinframe:"},
+  "BindMfa": {"subject": "رمز التحقق من kinframe: {{code}}", "intro": "مرحبًا،\n\nاستخدم هذا الرمز لتفعيل التحقق بخطوتين في kinframe:"}
+ }
+}

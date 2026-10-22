@@ -35,7 +35,7 @@ func (s *Server) tvLinkJSON(l *store.TvLink) gen.TvLink {
 		CreatedByName: l.CreatedByName, ExpiresAt: l.ExpiresAt, CreatedAt: l.CreatedAt,
 	}
 	if l.Kind != nil {
-		out.Kind = ptr(gen.TvLinkKind(*l.Kind))
+		out.Kind = ptr(gen.MediaKind(*l.Kind))
 	}
 	if l.PlacementIDs != nil {
 		out.PlacementCount = ptr(len(l.PlacementIDs))

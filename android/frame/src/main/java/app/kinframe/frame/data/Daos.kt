@@ -89,8 +89,29 @@ interface PlacementDao {
     @Query("UPDATE placements SET reaction = :reaction WHERE id = :id")
     suspend fun setReaction(id: String, reaction: String?)
 
-    @Query("SELECT localFile FROM placements WHERE localFile IS NOT NULL")
+    @Query("SELECT localFile FROM placements WHERE localFile IS NOT NULL UNION SELECT motionLocalFile FROM placements WHERE motionLocalFile IS NOT NULL")
     suspend fun allLocalFiles(): List<String>
+
+    /** Live photos whose still is stored but whose clip is not (yet): the clip never blocks the still. */
+    @Query(
+        """SELECT * FROM placements
+           WHERE kind = 'live' AND localFile IS NOT NULL AND motionUrl IS NOT NULL AND motionLocalFile IS NULL
+             AND trashed = 0 AND motionNextAttemptAt <= :now
+           ORDER BY receivedAt DESC LIMIT :limit""",
+    )
+    suspend fun pendingMotion(now: Long, limit: Int): List<PlacementEntity>
+
+    @Query(
+        """SELECT MIN(motionNextAttemptAt) FROM placements
+           WHERE kind = 'live' AND localFile IS NOT NULL AND motionUrl IS NOT NULL AND motionLocalFile IS NULL AND trashed = 0""",
+    )
+    suspend fun earliestMotionRetry(): Long?
+
+    @Query("UPDATE placements SET motionLocalFile = :file, motionAttempts = 0 WHERE motionSha256 = :sha")
+    suspend fun markMotionStored(sha: String, file: String): Int
+
+    @Query("UPDATE placements SET motionAttempts = :attempts, motionNextAttemptAt = :next WHERE id = :id")
+    suspend fun markMotionFailed(id: String, attempts: Int, next: Long)
 
     @Query("SELECT COUNT(*) FROM placements WHERE localFile IS NOT NULL")
     suspend fun countCached(): Int

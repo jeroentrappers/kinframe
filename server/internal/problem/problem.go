@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 )
 
 type Code string
@@ -96,6 +98,8 @@ type Problem struct {
 	Errors     []FieldError  `json:"errors,omitempty"`
 	RetryAfter time.Duration `json:"-"`
 	cause      error
+	format     string // English detail format: the lookup key for translations
+	args       []any
 }
 
 func (p *Problem) Error() string {
@@ -117,6 +121,7 @@ func New(code Code, detail string, args ...any) *Problem {
 	if !ok {
 		d = defaults[ServerError]
 	}
+	format := detail
 	if len(args) > 0 {
 		detail = fmt.Sprintf(detail, args...)
 	}
@@ -126,7 +131,29 @@ func New(code Code, detail string, args ...any) *Problem {
 		Status: d.status,
 		Code:   code,
 		Detail: detail,
+		format: format,
+		args:   args,
 	}
+}
+
+// Localize translates the title and detail into lang (a supported language,
+// see package i18n). English, or an unknown language, keeps the texts as built.
+func (p *Problem) Localize(lang string) *Problem {
+	if lang == "" || lang == i18n.Default {
+		return p
+	}
+	if key := "problem." + string(p.Code); i18n.Has(key) {
+		p.Title = i18n.T(lang, key, nil)
+	}
+	if p.format != "" {
+		f := i18n.Detail(lang, p.format)
+		if len(p.args) > 0 {
+			p.Detail = fmt.Sprintf(f, p.args...)
+		} else {
+			p.Detail = f
+		}
+	}
+	return p
 }
 
 // WithStatus overrides the HTTP status (e.g. 400 for malformed JSON).
@@ -159,8 +186,12 @@ func From(err error) *Problem {
 	return Internal(err)
 }
 
-// Write serialises p as application/problem+json.
-func Write(w http.ResponseWriter, p *Problem) {
+// Write serialises p as application/problem+json, localized for the request's
+// Accept-Language (r may be nil).
+func Write(w http.ResponseWriter, r *http.Request, p *Problem) {
+	if r != nil {
+		p.Localize(i18n.Normalize(r.Header.Get("Accept-Language")))
+	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	if p.RetryAfter > 0 {
 		w.Header().Set("Retry-After", strconv.Itoa(int(p.RetryAfter.Seconds()+0.999)))

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Въведете ПИН кода на собственика</string>
+    <string name="pin_reason_settings">за да отворите настройките</string>
+    <string name="pin_reason_exit">за да излезете от kinframe</string>
+    <string name="pin_reason_wifi">за да промените Wi-Fi</string>
+    <string name="pin_reason_power_off">за да изключите рамката</string>
+    <string name="pin_reason_restart">за да рестартирате рамката</string>
+    <string name="pin_reason_server">за да смените сървъра</string>
+    <string name="pin_reason_reset">за да нулирате рамката</string>
+    <string name="pin_checking">Проверка…</string>
+    <string name="pin_wrong">Това не е ПИН кодът.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Това не е ПИН кодът. Остава %d опит преди кратка пауза.</item>
+        <item quantity="other">Това не е ПИН кодът. Остават %d опита преди кратка пауза.</item>
+    </plurals>
+    <string name="pin_locked">Твърде много грешни опити. Опитайте отново след %s.</string>
+    <string name="pin_forgot">Забравили сте ПИН кода? Собственикът на рамката може да го премахне в приложението kinframe, в настройките на тази рамка.</string>
+    <string name="pin_new_title">Изберете ПИН код</string>
+    <string name="pin_new_body">От 4 до 6 цифри. Ще се иска за отваряне на настройките, изключване на рамката или смяна на Wi-Fi.</string>
+    <string name="pin_confirm_title">Въведете ПИН кода отново</string>
+    <string name="pin_confirm_body">Само за проверка.</string>
+    <string name="pin_mismatch">ПИН кодовете не съвпадат. Изберете отново.</string>
+    <string name="pin_key_delete">Изтриване</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">ПИН на собственика</string>
+    <string name="settings_pin_off">Изключен. Всеки до рамката може да отвори настройките.</string>
+    <string name="settings_pin_on">Включен. Настройките, захранването и Wi-Fi искат ПИН кода.</string>
+    <string name="settings_pin_set">Задаване на ПИН</string>
+    <string name="settings_pin_change">Промяна на ПИН</string>
+    <string name="settings_pin_remove">Премахване на ПИН</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Някой</string>
+    <string name="join_title">%1$s иска да се присъедини</string>
+    <string name="join_body_code">%1$s въведе кода на „%2$s“. Ако разрешите, %1$s ще може да изпраща снимки до тази рамка.</string>
+    <string name="join_body_invited">%1$s покани %3$s в „%2$s“. Ако разрешите, %3$s ще може да изпраща снимки до тази рамка.</string>
+    <string name="join_invited_by">Покана от %s</string>
+    <string name="join_allow">Разрешаване</string>
+    <string name="join_deny">Отказ</string>
+    <string name="join_later">Не сега</string>
+    <string name="join_later_hint">Остава в известията в менюто.</string>
+    <string name="join_pill_one">%s иска да се присъедини</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d човек иска да се присъедини</item>
+        <item quantity="other">%d души искат да се присъединят</item>
+    </plurals>
+    <string name="notifications_title">Известия</string>
+    <string name="notifications_empty">Всичко е прегледано</string>
+    <string name="notifications_empty_body">Нищо не ви чака.</string>
+    <string name="menu_notifications">Известия</string>
+    <string name="action_close">Затваряне</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Няма връзка с интернет</string>
+    <string name="status_card_offline_body">Снимките на рамката продължават да се показват. Новите пристигат веднага щом връзката се върне.</string>
+    <string name="status_card_server_title">Няма връзка със сървъра за снимки</string>
+    <string name="status_card_server_body">Wi-Fi работи, но сървърът не отговаря. Новите снимки ще пристигнат, когато се върне.</string>
+    <string name="status_card_portal_title">Тази Wi-Fi мрежа иска вход</string>
+    <string name="status_card_portal_body">Отворете страницата за вход в мрежата, за да свържете рамката с интернет.</string>
+    <string name="status_card_portal_action">Вход</string>
+    <string name="status_card_storage_title">Рамката е почти пълна</string>
+    <string name="status_card_storage_body">По-старите снимки бяха премахнати от рамката, за да се освободи място; те остават на сигурно на сървъра. Новите снимки може да изчакат, докато има място.</string>
+    <string name="portal_title">Вход в Wi-Fi</string>
+    <string name="portal_body">Затваря се само, щом рамката е онлайн.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">В коя часова зона е рамката?</string>
+    <string name="setup_tz_body">За да са верни часовникът, датата и нощният график.</string>
+    <string name="setup_tz_suggested">Предложени</string>
+    <string name="setup_tz_all">Всички часови зони</string>
+    <string name="tz_region_europe">Европа</string>
+    <string name="tz_region_america">Америка</string>
+    <string name="tz_region_asia">Азия</string>
+    <string name="tz_region_africa">Африка</string>
+    <string name="tz_region_australia">Австралия</string>
+    <string name="tz_region_pacific">Тихи океан</string>
+    <string name="tz_region_atlantic">Атлантически океан</string>
+    <string name="tz_region_indian">Индийски океан</string>
+    <string name="tz_region_antarctica">Антарктида</string>
+    <string name="setup_update_checking">Търсене на нова версия…</string>
+    <string name="setup_update_checking_body">Рамката проверява дали има най-новия kinframe, преди да започнете.</string>
+    <string name="setup_update_downloading">Изтегляне на версия %s</string>
+    <string name="setup_update_downloading_body">Инсталира се веднага след това. Можете да пропуснете; рамката ще се актуализира по-късно.</string>
+    <string name="setup_update_installing">Инсталиране на версия %s</string>
+    <string name="setup_update_installing_body">Рамката ще се рестартира сама след малко и ще продължи настройката оттам, докъдето сте стигнали.</string>
+    <string name="setup_update_current">kinframe е актуален</string>
+    <string name="setup_update_current_body">Към последната стъпка.</string>
+    <string name="setup_update_failed">Неуспешна проверка за актуализации</string>
+    <string name="setup_update_failed_body">Няма проблем: рамката ще провери отново по-късно и ще се актуализира сама.</string>
+    <string name="setup_update_skip">Пропускане засега</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Днес преди %d година</item>
+        <item quantity="other">Днес преди %d години</item>
+    </plurals>
+    <string name="transition_kenburns">Бавно приближаване</string>
+    <string name="settings_collage">Няколко снимки наведнъж (колаж)</string>
+    <string name="settings_collage_max">Снимки на екран</string>
+    <string name="settings_pair_portraits">Две вертикални снимки една до друга</string>
+    <string name="settings_on_this_day">Спомени от този ден в предишни години</string>
+    <string name="settings_video">Видеоклипове</string>
+    <string name="settings_video_autoplay">Автоматично пускане на видеоклипове</string>
+    <string name="settings_video_playback">След видеоклип</string>
+    <string name="video_once_hold">Веднъж, после изчакване</string>
+    <string name="video_loop">Повтаряне</string>
+    <string name="video_once_advance">Веднъж, после напред</string>
+    <string name="settings_video_volume">Сила на звука на видеоклиповете</string>
+    <string name="settings_video_auto_mute">Без звук, ако никой не докосне рамката</string>
+    <string name="video_auto_mute_off">Никога</string>
+    <string name="video_auto_mute_min">%d мин</string>
+</resources>

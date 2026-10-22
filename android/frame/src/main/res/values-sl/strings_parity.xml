@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Vnesite PIN lastnika</string>
+    <string name="pin_reason_settings">za odpiranje nastavitev</string>
+    <string name="pin_reason_exit">za izhod iz kinframe</string>
+    <string name="pin_reason_wifi">za spremembo omrežja Wi-Fi</string>
+    <string name="pin_reason_power_off">za izklop okvirja</string>
+    <string name="pin_reason_restart">za ponovni zagon okvirja</string>
+    <string name="pin_reason_server">za spremembo strežnika</string>
+    <string name="pin_reason_reset">za ponastavitev okvirja</string>
+    <string name="pin_checking">Preverjanje…</string>
+    <string name="pin_wrong">To ni pravi PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">To ni pravi PIN. Še %d poskus pred kratkim premorom.</item>
+        <item quantity="two">To ni pravi PIN. Še %d poskusa pred kratkim premorom.</item>
+        <item quantity="few">To ni pravi PIN. Še %d poskusi pred kratkim premorom.</item>
+        <item quantity="other">To ni pravi PIN. Še %d poskusov pred kratkim premorom.</item>
+    </plurals>
+    <string name="pin_locked">Preveč napačnih poskusov. Poskusite znova čez %s.</string>
+    <string name="pin_forgot">Ste pozabili PIN? Lastnik okvirja ga lahko odstrani v aplikaciji kinframe, v nastavitvah tega okvirja.</string>
+    <string name="pin_new_title">Izberite PIN</string>
+    <string name="pin_new_body">4 do 6 števk. Zahtevan bo za odpiranje nastavitev, izklop okvirja ali spremembo omrežja Wi-Fi.</string>
+    <string name="pin_confirm_title">Znova vnesite PIN</string>
+    <string name="pin_confirm_body">Samo za vsak primer.</string>
+    <string name="pin_mismatch">PIN-a se ne ujemata. Izberite ga znova.</string>
+    <string name="pin_key_delete">Izbriši</string>
+    <string name="pin_key_ok">V redu</string>
+    <string name="settings_pin">PIN lastnika</string>
+    <string name="settings_pin_off">Izklopljeno. Nastavitve lahko odpre kdorkoli pri okvirju.</string>
+    <string name="settings_pin_on">Vklopljeno. Nastavitve, napajanje in Wi-Fi zahtevajo PIN.</string>
+    <string name="settings_pin_set">Nastavi PIN</string>
+    <string name="settings_pin_change">Spremeni PIN</string>
+    <string name="settings_pin_remove">Odstrani PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Nekdo</string>
+    <string name="join_title">%1$s se želi pridružiti</string>
+    <string name="join_body_code">%1$s se želi pridružiti s kodo okvirja »%2$s«. Če dovolite, lahko %1$s pošilja fotografije v ta okvir.</string>
+    <string name="join_body_invited">%3$s ima povabilo v okvir »%2$s« (povabilo: %1$s). Če dovolite, lahko %3$s pošilja fotografije v ta okvir.</string>
+    <string name="join_invited_by">Povabilo: %s</string>
+    <string name="join_allow">Dovoli</string>
+    <string name="join_deny">Ne dovoli</string>
+    <string name="join_later">Ne zdaj</string>
+    <string name="join_later_hint">Ostane med obvestili v meniju.</string>
+    <string name="join_pill_one">%s se želi pridružiti</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d oseba se želi pridružiti</item>
+        <item quantity="two">%d osebi se želita pridružiti</item>
+        <item quantity="few">%d osebe se želijo pridružiti</item>
+        <item quantity="other">%d oseb se želi pridružiti</item>
+    </plurals>
+    <string name="notifications_title">Obvestila</string>
+    <string name="notifications_empty">Vse je pregledano</string>
+    <string name="notifications_empty_body">Nič vas ne čaka.</string>
+    <string name="menu_notifications">Obvestila</string>
+    <string name="action_close">Zapri</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Ni internetne povezave</string>
+    <string name="status_card_offline_body">Fotografije v okvirju se še naprej prikazujejo. Nove pridejo, ko bo okvir spet povezan.</string>
+    <string name="status_card_server_title">Strežnik s fotografijami ni dosegljiv</string>
+    <string name="status_card_server_body">Wi-Fi deluje, vendar se strežnik ne odziva. Nove fotografije pridejo, ko bo spet dosegljiv.</string>
+    <string name="status_card_portal_title">To omrežje Wi-Fi zahteva prijavo</string>
+    <string name="status_card_portal_body">Odprite stran za prijavo v omrežje, da se okvir poveže z internetom.</string>
+    <string name="status_card_portal_action">Prijava</string>
+    <string name="status_card_storage_title">Okvir je skoraj poln</string>
+    <string name="status_card_storage_body">Starejše fotografije so bile odstranjene iz okvirja, da se sprosti prostor; na strežniku ostanejo varne. Nove fotografije bodo morda počakale, da bo prostor.</string>
+    <string name="portal_title">Prijava v Wi-Fi</string>
+    <string name="portal_body">To se zapre samo, ko je okvir povezan.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">V katerem časovnem pasu je okvir?</string>
+    <string name="setup_tz_body">Da bodo ura, datum in nočni urnik pravilni.</string>
+    <string name="setup_tz_suggested">Predlagano</string>
+    <string name="setup_tz_all">Vsi časovni pasovi</string>
+    <string name="tz_region_europe">Evropa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Azija</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Avstralija</string>
+    <string name="tz_region_pacific">Pacifik</string>
+    <string name="tz_region_atlantic">Atlantik</string>
+    <string name="tz_region_indian">Indijski ocean</string>
+    <string name="tz_region_antarctica">Antarktika</string>
+    <string name="setup_update_checking">Iskanje novejše različice…</string>
+    <string name="setup_update_checking_body">Okvir pred začetkom preveri, ali ima najnovejši kinframe.</string>
+    <string name="setup_update_downloading">Prenašanje različice %s</string>
+    <string name="setup_update_downloading_body">Takoj zatem se namesti. To lahko preskočite; okvir se bo pozneje posodobil sam.</string>
+    <string name="setup_update_installing">Nameščanje različice %s</string>
+    <string name="setup_update_installing_body">Okvir se bo čez trenutek sam znova zagnal in nadaljeval nastavitev tam, kjer ste ostali.</string>
+    <string name="setup_update_current">kinframe je posodobljen</string>
+    <string name="setup_update_current_body">Naprej na zadnji korak.</string>
+    <string name="setup_update_failed">Posodobitev ni bilo mogoče preveriti</string>
+    <string name="setup_update_failed_body">Nič hudega: okvir bo pozneje preveril znova in se posodobil sam.</string>
+    <string name="setup_update_skip">Zdaj preskoči</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Danes pred %d letom</item>
+        <item quantity="two">Danes pred %d letoma</item>
+        <item quantity="few">Danes pred %d leti</item>
+        <item quantity="other">Danes pred %d leti</item>
+    </plurals>
+    <string name="transition_kenburns">Počasna povečava</string>
+    <string name="settings_collage">Več fotografij hkrati (kolaž)</string>
+    <string name="settings_collage_max">Fotografij na zaslonu</string>
+    <string name="settings_pair_portraits">Prikaži dve pokončni fotografiji drugo ob drugi</string>
+    <string name="settings_on_this_day">Prikaži spomine na ta dan iz prejšnjih let</string>
+    <string name="settings_video">Videoposnetki</string>
+    <string name="settings_video_autoplay">Samodejno predvajaj videoposnetke</string>
+    <string name="settings_video_playback">Po videoposnetku</string>
+    <string name="video_once_hold">Predvajaj enkrat in počakaj</string>
+    <string name="video_loop">Ponavljaj</string>
+    <string name="video_once_advance">Predvajaj enkrat in nadaljuj</string>
+    <string name="settings_video_volume">Glasnost videoposnetkov</string>
+    <string name="settings_video_auto_mute">Utišaj, če se okvirja nihče ni dotaknil</string>
+    <string name="video_auto_mute_off">Nikoli</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

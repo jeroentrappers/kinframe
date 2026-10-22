@@ -31,6 +31,10 @@ data class Discovery(
     val web: String? = null,
     val auth: DiscoveryAuth? = null,
     val limits: Limits? = null,
+    /** Development servers only: `POST /dev/token` works instead of Logto. */
+    val devAuth: Boolean = false,
+    /** The server fetches weather and serves `/v1/geocode`. */
+    val weather: Boolean = false,
 )
 
 @Serializable
@@ -130,6 +134,7 @@ data class Item(
     val id: String,
     val kind: String = MediaKind.PHOTO,
     val status: String? = null,
+    val failureCode: String? = null,
     val senderId: String? = null,
     val senderName: String? = null,
     val caption: String? = null,
@@ -144,11 +149,27 @@ data class Item(
     val placeName: String? = null,
     val createdAt: String? = null,
     val thumbUrl: String? = null,
+    /** Live items only: the motion clip (README §5.3 "Live Photos"). */
+    val motion: ItemMotion? = null,
+) {
+    /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
+    val isLive: Boolean get() = kind == MediaKind.LIVE
+}
+
+@Serializable
+data class ItemMotion(
+    val status: String = "processing",
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean? = null,
 )
 
+/** Media kinds. Unknown kinds from a newer server are shown as photos. */
 object MediaKind {
     const val PHOTO = "photo"
     const val VIDEO = "video"
+    const val LIVE = "live"
 }
 
 object Reaction {
@@ -171,6 +192,19 @@ data class PlacementMedia(
     val posterUrl: String? = null,
 )
 
+/** The frame-sized motion clip of a live placement (`placement.motion`), once ready. */
+@Serializable
+data class PlacementMotion(
+    val url: String,
+    val sha256: String,
+    val bytes: Long = 0,
+    val mime: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean = false,
+)
+
 @Serializable
 data class Placement(
     val id: String,
@@ -189,8 +223,13 @@ data class Placement(
     val seenAt: String? = null,
     val receivedAt: String? = null,
     val albumIds: List<String> = emptyList(),
+    val replies: List<PlacementReply> = emptyList(),
     val media: PlacementMedia? = null,
+    val motion: PlacementMotion? = null,
 )
+
+@Serializable
+data class PlacementReply(val preset: String? = null, val at: String? = null)
 
 @Serializable
 data class ChangeMember(
@@ -316,6 +355,34 @@ object ProblemCode {
     const val VERSION_CONFLICT = "version_conflict"
     const val RATE_LIMITED = "rate_limited"
     const val APP_UPDATE_REQUIRED = "app_update_required"
+    const val FORBIDDEN = "forbidden"
+    const val MISSING_PERMISSION = "missing_permission"
+    const val CODE_INVALID = "code_invalid"
+    const val CODE_EXPIRED = "code_expired"
+    const val INVITE_INVALID = "invite_invalid"
+    const val INVITE_EXPIRED = "invite_expired"
+    const val ALREADY_MEMBER = "already_member"
+    const val VALIDATION_FAILED = "validation_failed"
+    const val TOO_MANY_ITEMS = "too_many_items"
+    const val VIDEO_TOO_LONG = "video_too_long"
+    const val UPLOAD_TOO_LARGE = "upload_too_large"
+    const val UPLOAD_NOT_FOUND = "upload_not_found"
+    const val UNSUPPORTED_MEDIA = "unsupported_media"
+    const val CORRUPT_MEDIA = "corrupt_media"
+    const val FRAME_OFFLINE = "frame_offline"
+    const val COMMAND_TIMEOUT = "command_timeout"
+    const val OWNER_CANNOT_LEAVE = "owner_cannot_leave"
+    const val UPSTREAM_UNAVAILABLE = "upstream_unavailable"
+    const val FEATURE_DISABLED = "feature_disabled"
+    const val SERVER_ERROR = "server_error"
+}
+
+/** The four reply presets a frame can send back (README §5.5). */
+object ReplyPreset {
+    const val BEAUTIFUL = "beautiful"
+    const val CALL_ME = "call_me"
+    const val MISS_YOU = "miss_you"
+    const val THANKS = "thanks"
 }
 
 /** Result of `POST /device/imports`: the placement, and whether the frame already had this file (`200`, not `202`). */

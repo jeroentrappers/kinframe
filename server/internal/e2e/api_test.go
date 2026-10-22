@@ -527,7 +527,16 @@ func TestSPA(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(web, "index.html"), []byte("<!doctype html><title>kinframe</title>"), 0o644)
 	_ = os.MkdirAll(filepath.Join(web, "_app", "immutable"), 0o755)
 	_ = os.WriteFile(filepath.Join(web, "_app", "immutable", "app.js"), []byte("console.log(1)"), 0o644)
+	_ = os.MkdirAll(filepath.Join(web, "fonts"), 0o755)
+	_ = os.WriteFile(filepath.Join(web, "fonts", "f.woff2"), []byte("wOF2"), 0o644)
 	e := newEnv(t, func(c *config.Config) { c.WebDir = web })
+	// Logto's sign-in page loads the display font cross-origin.
+	if f := e.get("/fonts/f.woff2", ""); f.Header.Get("Access-Control-Allow-Origin") != "*" {
+		t.Fatalf("font without CORS: %v", f.Header)
+	}
+	if js := e.get("/_app/immutable/app.js", ""); js.Header.Get("Access-Control-Allow-Origin") != "" {
+		t.Fatalf("CORS on a non-font asset: %v", js.Header)
+	}
 	for _, p := range []string{"/", "/f/12345678", "/i/abcdefghijklmnopqrstuvwxyz", "/frames/x/settings"} {
 		r := e.get(p, "")
 		if !strings.Contains(string(r.body), "<title>kinframe</title>") {

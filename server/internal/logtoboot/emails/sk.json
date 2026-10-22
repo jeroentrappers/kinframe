@@ -1,0 +1,14 @@
+{
+ "footer": "Platnosť kódu vyprší o 10 minút. Ak ste oň nežiadali, môžete tento e-mail ignorovať.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Váš prihlasovací kód do kinframe: {{code}}", "intro": "Dobrý deň,\n\nna prihlásenie do kinframe použite tento kód:"},
+  "Register": {"subject": "Váš registračný kód do kinframe: {{code}}", "intro": "Vitajte v kinframe!\n\nNa dokončenie vytvorenia účtu použite tento kód:"},
+  "ForgotPassword": {"subject": "Váš kód na obnovenie účtu kinframe: {{code}}", "intro": "Dobrý deň,\n\nna obnovenie účtu kinframe použite tento kód:"},
+  "Generic": {"subject": "Váš overovací kód kinframe: {{code}}", "intro": "Dobrý deň,\n\nváš overovací kód kinframe je:"},
+  "BindNewIdentifier": {"subject": "Potvrďte nový e-mail pre kinframe: {{code}}", "intro": "Dobrý deň,\n\nna potvrdenie novej e-mailovej adresy vášho účtu kinframe použite tento kód:"},
+  "UserPermissionValidation": {"subject": "Váš overovací kód kinframe: {{code}}", "intro": "Dobrý deň,\n\ntýmto kódom potvrďte, že ste to vy, skôr než zmeníte svoj účet kinframe:"},
+  "MfaVerification": {"subject": "Váš overovací kód kinframe: {{code}}", "intro": "Dobrý deň,\n\nna dokončenie prihlásenia do kinframe použite tento kód:"},
+  "BindMfa": {"subject": "Váš overovací kód kinframe: {{code}}", "intro": "Dobrý deň,\n\nna zapnutie dvojstupňového overenia v kinframe použite tento kód:"}
+ }
+}

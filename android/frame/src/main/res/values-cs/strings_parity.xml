@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Zadejte PIN vlastníka</string>
+    <string name="pin_reason_settings">pro otevření nastavení</string>
+    <string name="pin_reason_exit">pro ukončení kinframe</string>
+    <string name="pin_reason_wifi">pro změnu Wi-Fi</string>
+    <string name="pin_reason_power_off">pro vypnutí rámečku</string>
+    <string name="pin_reason_restart">pro restart rámečku</string>
+    <string name="pin_reason_server">pro změnu serveru</string>
+    <string name="pin_reason_reset">pro obnovení rámečku</string>
+    <string name="pin_checking">Ověřování…</string>
+    <string name="pin_wrong">To není správný PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">To není správný PIN. Zbývá %d pokus před krátkou pauzou.</item>
+        <item quantity="few">To není správný PIN. Zbývají %d pokusy před krátkou pauzou.</item>
+        <item quantity="many">To není správný PIN. Zbývá %d pokusu před krátkou pauzou.</item>
+        <item quantity="other">To není správný PIN. Zbývá %d pokusů před krátkou pauzou.</item>
+    </plurals>
+    <string name="pin_locked">Příliš mnoho chybných pokusů. Zkuste to znovu za %s.</string>
+    <string name="pin_forgot">Zapomněli jste PIN? Vlastník rámečku ho může odebrat v aplikaci kinframe v nastavení tohoto rámečku.</string>
+    <string name="pin_new_title">Zvolte PIN</string>
+    <string name="pin_new_body">4 až 6 číslic. Bude vyžadován pro otevření nastavení, vypnutí rámečku nebo změnu Wi-Fi.</string>
+    <string name="pin_confirm_title">Zadejte PIN znovu</string>
+    <string name="pin_confirm_body">Jen pro jistotu.</string>
+    <string name="pin_mismatch">PIN se neshodují. Zvolte ho znovu.</string>
+    <string name="pin_key_delete">Smazat</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">PIN vlastníka</string>
+    <string name="settings_pin_off">Vypnuto. Nastavení může otevřít kdokoli u rámečku.</string>
+    <string name="settings_pin_on">Zapnuto. Nastavení, napájení a Wi-Fi vyžadují PIN.</string>
+    <string name="settings_pin_set">Nastavit PIN</string>
+    <string name="settings_pin_change">Změnit PIN</string>
+    <string name="settings_pin_remove">Odebrat PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Někdo</string>
+    <string name="join_title">%1$s se chce připojit</string>
+    <string name="join_body_code">%1$s se chce připojit kódem rámečku „%2$s“. Pokud to povolíte, %1$s může posílat fotky do tohoto rámečku.</string>
+    <string name="join_body_invited">%3$s má pozvánku od %1$s do rámečku „%2$s“. Pokud to povolíte, %3$s může posílat fotky do tohoto rámečku.</string>
+    <string name="join_invited_by">Pozvánka od: %s</string>
+    <string name="join_allow">Povolit</string>
+    <string name="join_deny">Nepovolit</string>
+    <string name="join_later">Teď ne</string>
+    <string name="join_later_hint">Zůstane v oznámeních v nabídce.</string>
+    <string name="join_pill_one">%s se chce připojit</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d osoba se chce připojit</item>
+        <item quantity="few">%d osoby se chtějí připojit</item>
+        <item quantity="many">%d osoby se chce připojit</item>
+        <item quantity="other">%d osob se chce připojit</item>
+    </plurals>
+    <string name="notifications_title">Oznámení</string>
+    <string name="notifications_empty">Vše vyřízeno</string>
+    <string name="notifications_empty_body">Nic na vás nečeká.</string>
+    <string name="menu_notifications">Oznámení</string>
+    <string name="action_close">Zavřít</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Žádné připojení k internetu</string>
+    <string name="status_card_offline_body">Fotky v rámečku se dál přehrávají. Nové dorazí, jakmile bude rámeček zase online.</string>
+    <string name="status_card_server_title">Server s fotkami je nedostupný</string>
+    <string name="status_card_server_body">Wi-Fi funguje, ale server neodpovídá. Nové fotky dorazí, až bude zpět.</string>
+    <string name="status_card_portal_title">Tato Wi-Fi vyžaduje přihlášení</string>
+    <string name="status_card_portal_body">Otevřete přihlašovací stránku sítě, aby se rámeček připojil k internetu.</string>
+    <string name="status_card_portal_action">Přihlásit se</string>
+    <string name="status_card_storage_title">Rámeček je téměř plný</string>
+    <string name="status_card_storage_body">Starší fotky byly z rámečku odebrány, aby se uvolnilo místo; na serveru zůstávají v bezpečí. Nové fotky možná počkají, až bude místo.</string>
+    <string name="portal_title">Přihlášení k Wi-Fi</string>
+    <string name="portal_body">Toto okno se samo zavře, jakmile bude rámeček online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">V jakém časovém pásmu je rámeček?</string>
+    <string name="setup_tz_body">Aby hodiny, datum a noční režim fungovaly správně.</string>
+    <string name="setup_tz_suggested">Navrhované</string>
+    <string name="setup_tz_all">Všechna časová pásma</string>
+    <string name="tz_region_europe">Evropa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Asie</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Austrálie</string>
+    <string name="tz_region_pacific">Tichomoří</string>
+    <string name="tz_region_atlantic">Atlantik</string>
+    <string name="tz_region_indian">Indický oceán</string>
+    <string name="tz_region_antarctica">Antarktida</string>
+    <string name="setup_update_checking">Hledání novější verze…</string>
+    <string name="setup_update_checking_body">Rámeček si před začátkem ověří, že má nejnovější kinframe.</string>
+    <string name="setup_update_downloading">Stahování verze %s</string>
+    <string name="setup_update_downloading_body">Hned poté se nainstaluje. Můžete to přeskočit; rámeček se pak aktualizuje sám později.</string>
+    <string name="setup_update_installing">Instalace verze %s</string>
+    <string name="setup_update_installing_body">Rámeček se za chvíli sám restartuje a bude pokračovat v nastavení tam, kde jste skončili.</string>
+    <string name="setup_update_current">kinframe je aktuální</string>
+    <string name="setup_update_current_body">Pojďme na poslední krok.</string>
+    <string name="setup_update_failed">Aktualizace se nepodařilo ověřit</string>
+    <string name="setup_update_failed_body">Nevadí: rámeček to zkusí později znovu a aktualizuje se sám.</string>
+    <string name="setup_update_skip">Zatím přeskočit</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Dnes před %d rokem</item>
+        <item quantity="few">Dnes před %d roky</item>
+        <item quantity="many">Dnes před %d roku</item>
+        <item quantity="other">Dnes před %d lety</item>
+    </plurals>
+    <string name="transition_kenburns">Pomalé přiblížení</string>
+    <string name="settings_collage">Více fotek najednou (koláž)</string>
+    <string name="settings_collage_max">Fotek na obrazovce</string>
+    <string name="settings_pair_portraits">Zobrazit dvě fotky na výšku vedle sebe</string>
+    <string name="settings_on_this_day">Zobrazovat vzpomínky z tohoto dne v minulých letech</string>
+    <string name="settings_video">Videa</string>
+    <string name="settings_video_autoplay">Přehrávat videa automaticky</string>
+    <string name="settings_video_playback">Po videu</string>
+    <string name="video_once_hold">Přehrát jednou a počkat</string>
+    <string name="video_loop">Opakovat stále</string>
+    <string name="video_once_advance">Přehrát jednou a pokračovat</string>
+    <string name="settings_video_volume">Hlasitost videí</string>
+    <string name="settings_video_auto_mute">Ztlumit, když se rámečku nikdo nedotkl po dobu</string>
+    <string name="video_auto_mute_off">Nikdy</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

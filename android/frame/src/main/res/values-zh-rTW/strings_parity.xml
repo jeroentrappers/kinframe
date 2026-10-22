@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">輸入擁有者 PIN 碼</string>
+    <string name="pin_reason_settings">以開啟設定</string>
+    <string name="pin_reason_exit">以離開 kinframe</string>
+    <string name="pin_reason_wifi">以變更 Wi-Fi</string>
+    <string name="pin_reason_power_off">以關閉相框</string>
+    <string name="pin_reason_restart">以重新啟動相框</string>
+    <string name="pin_reason_server">以變更伺服器</string>
+    <string name="pin_reason_reset">以重設相框</string>
+    <string name="pin_checking">正在驗證…</string>
+    <string name="pin_wrong">PIN 碼不正確。</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="other">PIN 碼不正確。再錯 %d 次就需要稍候片刻。</item>
+    </plurals>
+    <string name="pin_locked">錯誤次數過多。請在 %s 後再試一次。</string>
+    <string name="pin_forgot">忘記 PIN 碼了嗎？相框擁有者可以在 kinframe 應用程式中這台相框的設定裡將它移除。</string>
+    <string name="pin_new_title">設定 PIN 碼</string>
+    <string name="pin_new_body">4 到 6 位數字。開啟設定、關閉相框或變更 Wi-Fi 時都需要輸入。</string>
+    <string name="pin_confirm_title">再次輸入 PIN 碼</string>
+    <string name="pin_confirm_body">再確認一次。</string>
+    <string name="pin_mismatch">兩次輸入的 PIN 碼不一致，請重新設定。</string>
+    <string name="pin_key_delete">刪除</string>
+    <string name="pin_key_ok">確定</string>
+    <string name="settings_pin">擁有者 PIN 碼</string>
+    <string name="settings_pin_off">已關閉。任何人都能在相框上開啟設定。</string>
+    <string name="settings_pin_on">已開啟。設定、電源和 Wi-Fi 需要輸入 PIN 碼。</string>
+    <string name="settings_pin_set">設定 PIN 碼</string>
+    <string name="settings_pin_change">變更 PIN 碼</string>
+    <string name="settings_pin_remove">移除 PIN 碼</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">有人</string>
+    <string name="join_title">%1$s 想要加入</string>
+    <string name="join_body_code">%1$s 輸入了 %2$s 的代碼。如果你允許，%1$s 就能傳送照片到這台相框。</string>
+    <string name="join_body_invited">%1$s 邀請 %3$s 加入 %2$s。如果你允許，%3$s 就能傳送照片到這台相框。</string>
+    <string name="join_invited_by">由 %s 邀請</string>
+    <string name="join_allow">允許</string>
+    <string name="join_deny">不允許</string>
+    <string name="join_later">稍後再說</string>
+    <string name="join_later_hint">它會保留在選單的通知中。</string>
+    <string name="join_pill_one">%s 想要加入</string>
+    <plurals name="join_pill_many">
+        <item quantity="other">%d 人想要加入</item>
+    </plurals>
+    <string name="notifications_title">通知</string>
+    <string name="notifications_empty">全部處理完畢</string>
+    <string name="notifications_empty_body">目前沒有待處理的事項。</string>
+    <string name="menu_notifications">通知</string>
+    <string name="action_close">關閉</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">沒有網路連線</string>
+    <string name="status_card_offline_body">相框上的照片會繼續播放。恢復連線後，新照片就會馬上送達。</string>
+    <string name="status_card_server_title">無法連上照片伺服器</string>
+    <string name="status_card_server_body">Wi-Fi 正常，但伺服器沒有回應。伺服器恢復後，新照片就會送達。</string>
+    <string name="status_card_portal_title">這個 Wi-Fi 需要登入</string>
+    <string name="status_card_portal_body">開啟網路的登入頁面，讓相框連上網路。</string>
+    <string name="status_card_portal_action">登入</string>
+    <string name="status_card_storage_title">相框儲存空間快滿了</string>
+    <string name="status_card_storage_body">為了騰出空間，已從相框移除較舊的照片；這些照片仍安全地保存在伺服器上。新照片可能要等有空間後才會顯示。</string>
+    <string name="portal_title">登入 Wi-Fi</string>
+    <string name="portal_body">相框連上網路後，這個頁面會自動關閉。</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">相框位於哪個時區？</string>
+    <string name="setup_tz_body">這樣時鐘、日期和夜間排程才會正確。</string>
+    <string name="setup_tz_suggested">建議</string>
+    <string name="setup_tz_all">所有時區</string>
+    <string name="tz_region_europe">歐洲</string>
+    <string name="tz_region_america">美洲</string>
+    <string name="tz_region_asia">亞洲</string>
+    <string name="tz_region_africa">非洲</string>
+    <string name="tz_region_australia">澳洲</string>
+    <string name="tz_region_pacific">太平洋</string>
+    <string name="tz_region_atlantic">大西洋</string>
+    <string name="tz_region_indian">印度洋</string>
+    <string name="tz_region_antarctica">南極洲</string>
+    <string name="setup_update_checking">正在尋找新版本…</string>
+    <string name="setup_update_checking_body">開始使用前，相框會確認已執行最新版 kinframe。</string>
+    <string name="setup_update_downloading">正在下載版本 %s</string>
+    <string name="setup_update_downloading_body">下載完成後會立即安裝。你也可以略過，相框稍後會自動更新。</string>
+    <string name="setup_update_installing">正在安裝版本 %s</string>
+    <string name="setup_update_installing_body">相框稍後會自動重新啟動，並從中斷處繼續設定。</string>
+    <string name="setup_update_current">kinframe 已是最新版本</string>
+    <string name="setup_update_current_body">前往最後一個步驟。</string>
+    <string name="setup_update_failed">無法檢查更新</string>
+    <string name="setup_update_failed_body">沒關係：相框稍後會再檢查一次並自動更新。</string>
+    <string name="setup_update_skip">暫時略過</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="other">%d 年前的今天</item>
+    </plurals>
+    <string name="transition_kenburns">緩慢縮放</string>
+    <string name="settings_collage">同時顯示多張照片（拼貼）</string>
+    <string name="settings_collage_max">每個畫面的照片數</string>
+    <string name="settings_pair_portraits">並排顯示兩張直式照片</string>
+    <string name="settings_on_this_day">顯示往年今日的回憶</string>
+    <string name="settings_video">影片</string>
+    <string name="settings_video_autoplay">自動播放影片</string>
+    <string name="settings_video_playback">影片播放完畢後</string>
+    <string name="video_once_hold">播放一次後停留</string>
+    <string name="video_loop">重複播放</string>
+    <string name="video_once_advance">播放一次後繼續</string>
+    <string name="settings_video_volume">影片音量</string>
+    <string name="settings_video_auto_mute">無人觸碰相框多久後靜音</string>
+    <string name="video_auto_mute_off">永不</string>
+    <string name="video_auto_mute_min">%d 分鐘</string>
+</resources>

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Cornice digitale</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Indietro</string>
+    <string name="action_cancel">Annulla</string>
+    <string name="action_continue">Continua</string>
+    <string name="action_try_again">Riprova</string>
+    <string name="action_undo">Annulla</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Ti diamo il benvenuto in kinframe</string>
+    <string name="setup_language_body">Scegli la lingua di questa cornice.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Connettiti al Wi-Fi</string>
+    <string name="setup_wifi_body">La cornice ha bisogno del Wi-Fi per ricevere le foto. Una volta arrivate, si vedono anche senza connessione.</string>
+    <string name="wifi_connected_to">Connessa a %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Non connessa</string>
+    <string name="wifi_not_connected_hint">Scegli una rete per continuare.</string>
+    <string name="wifi_no_internet">Connessa, ma ancora senza internet</string>
+    <string name="wifi_signal">Segnale: %1$s</string>
+    <string name="wifi_open_settings">Impostazioni Wi-Fi</string>
+    <string name="wifi_networks">Reti vicine</string>
+    <string name="wifi_scanning">Ricerca reti…</string>
+    <string name="wifi_permission_body">Per mostrare qui le reti, Android ha bisogno dell’autorizzazione a cercare reti Wi-Fi.</string>
+    <string name="wifi_show_networks">Mostra reti</string>
+    <string name="wifi_password">Password</string>
+    <string name="wifi_join">Connetti</string>
+    <string name="signal_0">molto debole</string>
+    <string name="signal_1">debole</string>
+    <string name="signal_2">discreto</string>
+    <string name="signal_3">buono</string>
+    <string name="signal_4">ottimo</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Scegli un server</string>
+    <string name="setup_server_body">Le foto passano da un server kinframe. Usa il server kinframe gratuito, oppure quello gestito dalla tua famiglia.</string>
+    <string name="server_default_body">Gratuito e open source. Consigliato.</string>
+    <string name="server_custom">Usa il tuo server</string>
+    <string name="server_custom_body">Per le famiglie che ospitano kinframe in proprio.</string>
+    <string name="server_address">Indirizzo del server</string>
+    <string name="server_check">Verifica server</string>
+    <string name="server_checking">Verifica del server…</string>
+    <string name="server_version">versione %1$s</string>
+    <string name="server_insecure">non crittografato</string>
+    <string name="server_error_invalid">Non sembra un indirizzo web. Prova qualcosa come https://frames.example.org.</string>
+    <string name="server_error_unreachable">Impossibile raggiungere il server. Controlla l’indirizzo e che la cornice sia online.</string>
+    <string name="server_error_not_kinframe">Il server ha risposto, ma non è un server kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Preparazione della cornice…</string>
+    <string name="enroll_body">Ci vuole qualche secondo.</string>
+    <string name="enroll_failed_title">Registrazione della cornice non riuscita</string>
+    <string name="enroll_failed_body">Risposta del server: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Collega questa cornice alla tua famiglia</string>
+    <string name="code_step1">Apri l’app kinframe, oppure %1$s in un browser</string>
+    <string name="code_step2">Scegli Aggiungi una cornice</string>
+    <string name="code_step3">Inserisci questo codice o scansiona il codice QR</string>
+    <string name="code_valid_for">Valido per %1$s</string>
+    <string name="code_waiting">In attesa che qualcuno inserisca il codice</string>
+    <string name="code_offline_title">La cornice è offline</string>
+    <string name="code_offline_body">Il codice della cornice richiede una connessione a internet. Controlla il Wi-Fi.</string>
+    <string name="code_error_title">Impossibile ottenere un codice</string>
+    <string name="code_error_body">Il server non ha risposto. La cornice continua a provare.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Collegata a %1$s</string>
+    <string name="celebrate_title_anon">Collegata</string>
+    <string name="celebrate_body">Le foto inviate a questa cornice appariranno qui in pochi secondi.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Oggi</string>
+    <string name="date_yesterday">Ieri</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d giorno fa</item>
+        <item quantity="many">%d di giorni fa</item>
+        <item quantity="other">%d giorni fa</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">modificata</string>
+    <string name="unable_photo">Impossibile mostrare questa foto</string>
+    <string name="unable_video">Impossibile riprodurre questo video. Chiedi a chi l’ha inviato di mandarlo di nuovo.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nuova foto</item>
+        <item quantity="many">%d di nuove foto</item>
+        <item quantity="other">%d nuove foto</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Server non raggiungibile</string>
+    <string name="identify_this_is">Questa è</string>
+    <string name="snack_hidden">Foto nascosta</string>
+    <string name="snack_deleted">Foto eliminata</string>
+    <string name="menu_settings">Impostazioni</string>
+    <string name="menu_power">Alimentazione</string>
+    <string name="menu_hide">Nascondi</string>
+    <string name="menu_delete">Elimina</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Ancora nessuna foto</string>
+    <string name="empty_body">Foto e video inviati con l’app o il sito di kinframe appaiono qui in pochi secondi.</string>
+    <string name="empty_code_title">Aggiungi la famiglia con questo codice</string>
+    <string name="empty_code_body">Inseriscilo nell’app kinframe o scansiona il codice QR.</string>
+    <string name="empty_hidden_title">Tutte le foto sono nascoste</string>
+    <string name="empty_hidden_body">Le foto nascoste restano nella raccolta. Puoi mostrarle di nuovo dall’app kinframe.</string>
+    <string name="empty_downloading_title">Le foto stanno arrivando</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Download di %d foto in corso.</item>
+        <item quantity="many">Download di %d di foto in corso.</item>
+        <item quantity="other">Download di %d foto in corso.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Alimentazione</string>
+    <string name="power_sleep">Riposo</string>
+    <string name="power_sleep_body">Schermo spento finché non lo tocchi.</string>
+    <string name="power_restart">Riavvia</string>
+    <string name="power_restart_body">Riavvia la cornice.</string>
+    <string name="power_off">Spegni</string>
+    <string name="power_off_body">Spegnimento sicuro prima di staccare la spina.</string>
+    <string name="shutting_down_title">Spegnimento…</string>
+    <string name="restarting_title">Riavvio…</string>
+    <string name="shutting_down_body">Salvataggio di tutto in corso.</string>
+    <string name="safe_title">Ora puoi staccare la spina</string>
+    <string name="safe_body">È tutto salvato. Per usare di nuovo la cornice, premi il tasto di accensione o ricollegala alla corrente.</string>
+    <string name="safe_body_noroot">kinframe ha salvato tutto. Ora puoi staccare la spina della cornice.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe ha avuto problemi a mostrare le foto</string>
+    <string name="recovery_body">Si è interrotta più volte di seguito. Riprova, oppure cancella le foto scaricate. Verranno riscaricate dal server, non si perde nulla.</string>
+    <string name="recovery_clear">Cancella foto scaricate</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_language">Lingua</string>
+    <string name="settings_slideshow">Presentazione</string>
+    <string name="settings_interval">Durata di ogni foto</string>
+    <string name="settings_transition">Transizione</string>
+    <string name="transition_crossfade">Dissolvenza</string>
+    <string name="transition_slide">Scorrimento</string>
+    <string name="settings_order">Ordine</string>
+    <string name="order_received">Ultime ricevute</string>
+    <string name="order_taken">Data dello scatto</string>
+    <string name="order_shuffle">Casuale</string>
+    <string name="settings_reverse">Prima le più vecchie</string>
+    <string name="settings_fill">Dimensione foto</string>
+    <string name="fill_fill">Riempi lo schermo</string>
+    <string name="fill_fit">Mostra la foto intera</string>
+    <string name="settings_display">Schermo</string>
+    <string name="settings_brightness">Luminosità</string>
+    <string name="settings_brightness_mode">Luminosità automatica</string>
+    <string name="brightness_manual">Fissa</string>
+    <string name="brightness_sun">Segui il sole</string>
+    <string name="settings_sleep">Riposo</string>
+    <string name="settings_sleep_enabled">Spegni lo schermo di notte</string>
+    <string name="settings_sleep_at">Riposo alle</string>
+    <string name="settings_wake_at">Risveglio alle</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">e %d altro orario, gestito nell’app kinframe</item>
+        <item quantity="many">e altri %d di orari, gestiti nell’app kinframe</item>
+        <item quantity="other">e altri %d orari, gestiti nell’app kinframe</item>
+    </plurals>
+    <string name="settings_about">Questa cornice</string>
+    <string name="about_frame">Nome</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Versione app</string>
+    <string name="about_android_settings">Impostazioni Android</string>
+    <string name="settings_updates">Aggiornamenti</string>
+    <string name="updates_channel">Canale</string>
+    <string name="updates_channel_stable">Stabile</string>
+    <string name="updates_channel_beta">Beta (prova le novità in anteprima)</string>
+    <string name="updates_check">Cerca aggiornamenti</string>
+    <string name="updates_install_now">Installa ora</string>
+    <string name="updates_checking">Ricerca aggiornamenti…</string>
+    <string name="updates_up_to_date">La cornice è aggiornata.</string>
+    <string name="updates_downloading">Download versione %1$s… %2$d%%</string>
+    <string name="updates_waiting">La versione %1$s è pronta. Verrà installata quando nessuno usa la cornice.</string>
+    <string name="updates_installing">Installazione versione %1$s. La cornice si riavvierà tra poco.</string>
+    <string name="updates_failed">Aggiornamento non riuscito. La cornice riproverà più tardi.</string>
+    <string name="update_notice_updated">Aggiornata alla versione %1$s</string>
+    <string name="update_notice_rolled_back">La nuova versione aveva problemi, quindi la cornice è tornata alla precedente.</string>
+    <string name="update_notice_needs_user">Un aggiornamento è pronto. Tocca Installa per continuare.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Mostra le previsioni</string>
+    <string name="weather_close">Chiudi</string>
+    <string name="weather_now">Adesso</string>
+    <string name="weather_today">Oggi</string>
+    <string name="weather_feels_like">Percepita %1$s</string>
+    <string name="weather_high_low">Max %1$s · Min %2$s</string>
+    <string name="weather_wind">Vento</string>
+    <string name="weather_humidity">Umidità</string>
+    <string name="weather_sunrise">Alba</string>
+    <string name="weather_sunset">Tramonto</string>
+    <string name="weather_next_hours">Prossime 24 ore</string>
+    <string name="weather_next_days">Previsioni a 7 giorni</string>
+    <string name="weather_updated">Aggiornato %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SO</item>
+        <item>O</item>
+        <item>NO</item>
+    </string-array>
+    <string name="wmo_clear_day">Soleggiato</string>
+    <string name="wmo_clear_night">Sereno</string>
+    <string name="wmo_mainly_clear_day">Prevalentemente soleggiato</string>
+    <string name="wmo_mainly_clear_night">Prevalentemente sereno</string>
+    <string name="wmo_partly_cloudy">Parzialmente nuvoloso</string>
+    <string name="wmo_overcast">Nuvoloso</string>
+    <string name="wmo_fog">Nebbia</string>
+    <string name="wmo_rime_fog">Nebbia gelata</string>
+    <string name="wmo_drizzle_light">Pioviggine leggera</string>
+    <string name="wmo_drizzle">Pioviggine</string>
+    <string name="wmo_drizzle_dense">Pioviggine intensa</string>
+    <string name="wmo_freezing_drizzle">Pioviggine gelata</string>
+    <string name="wmo_rain_light">Pioggia leggera</string>
+    <string name="wmo_rain">Pioggia</string>
+    <string name="wmo_rain_heavy">Pioggia forte</string>
+    <string name="wmo_freezing_rain">Pioggia gelata</string>
+    <string name="wmo_snow_light">Neve leggera</string>
+    <string name="wmo_snow">Neve</string>
+    <string name="wmo_snow_heavy">Neve forte</string>
+    <string name="wmo_snow_grains">Neve granulosa</string>
+    <string name="wmo_showers_light">Rovesci leggeri</string>
+    <string name="wmo_showers">Rovesci</string>
+    <string name="wmo_showers_violent">Rovesci forti</string>
+    <string name="wmo_snow_showers_light">Rovesci di neve leggeri</string>
+    <string name="wmo_snow_showers">Rovesci di neve</string>
+    <string name="wmo_thunderstorm">Temporale</string>
+    <string name="wmo_thunderstorm_hail">Temporale con grandine</string>
+</resources>

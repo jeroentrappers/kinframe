@@ -56,7 +56,7 @@ func (s *Server) devToken(w http.ResponseWriter, r *http.Request) {
 	if ok, retry := s.devTokenIP.Allow(clientIP(r.Context())); !ok {
 		p := problem.New(problem.RateLimited, "")
 		p.RetryAfter = retry
-		problem.Write(w, p)
+		problem.Write(w, r, p)
 		return
 	}
 	var body struct {
@@ -65,12 +65,12 @@ func (s *Server) devToken(w http.ResponseWriter, r *http.Request) {
 		Operator bool   `json:"operator"`
 	}
 	if err := json.NewDecoder(io.LimitReader(r.Body, 4096)).Decode(&body); err != nil {
-		problem.Write(w, problem.New(problem.ValidationFailed, "malformed body").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.New(problem.ValidationFailed, "malformed body").WithStatus(http.StatusBadRequest))
 		return
 	}
 	body.Email = strings.TrimSpace(body.Email)
 	if !strings.Contains(body.Email, "@") || len(body.Email) > 200 {
-		problem.Write(w, problem.Validation("email", "format", "a valid email address is required"))
+		problem.Write(w, r, problem.Validation("email", "format", "a valid email address is required"))
 		return
 	}
 	tok, ttl, err := s.dev.Issue(body.Email, body.Name, body.Operator)
@@ -171,7 +171,7 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 	u := me(ctx)
 	ct := strings.ToLower(strings.TrimSpace(strings.Split(r.Header.Get("Content-Type"), ";")[0]))
 	if ct != "image/jpeg" && ct != "image/png" && ct != "image/webp" {
-		problem.Write(w, problem.New(problem.UnsupportedMedia, "avatars must be JPEG, PNG or WebP").WithStatus(http.StatusUnsupportedMediaType))
+		problem.Write(w, r, problem.New(problem.UnsupportedMedia, "avatars must be JPEG, PNG or WebP").WithStatus(http.StatusUnsupportedMediaType))
 		return
 	}
 	tmp, err := s.tempDir()
@@ -193,11 +193,11 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if n > 20<<20 {
-		problem.Write(w, problem.New(problem.UploadTooLarge, "avatars are limited to 20 MB"))
+		problem.Write(w, r, problem.New(problem.UploadTooLarge, "avatars are limited to 20 MB"))
 		return
 	}
 	if kind, _, err := media.Sniff(src); err != nil || kind != media.Photo {
-		problem.Write(w, problem.New(problem.UnsupportedMedia, ""))
+		problem.Write(w, r, problem.New(problem.UnsupportedMedia, ""))
 		return
 	}
 	out := filepath.Join(tmp, "avatar.webp")
@@ -205,11 +205,11 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 	norm := filepath.Join(tmp, "norm.webp")
 	size, _, err := s.tools.PhotoMaster(ctx, src, norm)
 	if err != nil {
-		problem.Write(w, problem.New(problem.CorruptMedia, ""))
+		problem.Write(w, r, problem.New(problem.CorruptMedia, ""))
 		return
 	}
 	if err := s.tools.Thumb(ctx, norm, size, 256, 0.5, 0.5, out); err != nil {
-		problem.Write(w, problem.New(problem.CorruptMedia, ""))
+		problem.Write(w, r, problem.New(problem.CorruptMedia, ""))
 		return
 	}
 	key := "avatars/" + u.ID.String() + "/" + auth.RandomToken(12) + ".webp"
@@ -335,9 +335,13 @@ func (s *Server) OperatorStats(ctx context.Context, _ gen.OperatorStatsRequestOb
 	if err != nil {
 		return nil, err
 	}
+	pipeline, err := s.st.PipelineStats(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return ok(map[string]any{
 		"users": users, "frames": frames, "frames_online": s.hub.OnlineFrames(), "items": items,
-		"storage_bytes": storage, "processing_queue": queue,
+		"storage_bytes": storage, "processing_queue": queue, "media_pipeline": pipeline,
 	}), nil
 }
 

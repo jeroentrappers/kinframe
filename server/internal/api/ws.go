@@ -33,7 +33,7 @@ func (s *Server) userWS(w http.ResponseWriter, r *http.Request) {
 	}
 	p, prob := s.resolveUser(r.Context(), token)
 	if prob != nil {
-		problem.Write(w, prob)
+		problem.Write(w, r, prob)
 		return
 	}
 	expires := p.claims.ExpiresAt

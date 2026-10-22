@@ -83,7 +83,7 @@ func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 		channel = s.updateChannel(r, d)
 	case "stable", "beta":
 	default:
-		problem.Write(w, problem.Validation("channel", "enum", "channel must be stable or beta").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.Validation("channel", "enum", "channel must be stable or beta").WithStatus(http.StatusBadRequest))
 		return
 	}
 	skip := map[int]bool{}
@@ -94,7 +94,7 @@ func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 			}
 			n, err := strconv.Atoi(part)
 			if err != nil || len(skip) >= 50 {
-				problem.Write(w, problem.Validation("skip", "format", "skip is a comma-separated list of version codes").WithStatus(http.StatusBadRequest))
+				problem.Write(w, r, problem.Validation("skip", "format", "skip is a comma-separated list of version codes").WithStatus(http.StatusBadRequest))
 				return
 			}
 			skip[n] = true
@@ -128,17 +128,17 @@ func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 func (s *Server) deviceGetUpdateApk(w http.ResponseWriter, r *http.Request) {
 	code, err := strconv.Atoi(r.PathValue("versionCode"))
 	if err != nil || s.releases == nil {
-		problem.Write(w, problem.New(problem.NotFound, "no such release"))
+		problem.Write(w, r, problem.New(problem.NotFound, "no such release"))
 		return
 	}
 	rel := s.releases.Get(code)
 	if rel == nil {
-		problem.Write(w, problem.New(problem.NotFound, "no such release"))
+		problem.Write(w, r, problem.New(problem.NotFound, "no such release"))
 		return
 	}
 	f, err := os.Open(rel.Path)
 	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, "release no longer available"))
+		problem.Write(w, r, problem.New(problem.NotFound, "release no longer available"))
 		return
 	}
 	defer f.Close()

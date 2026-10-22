@@ -73,6 +73,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        lifecycleScope.launch {
+            // A language change (on the frame or from the web app) reloads every string and the layout direction.
+            graph.controller.recreateRequests.collect { recreate() }
+        }
         registerReceiver(screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -152,11 +156,8 @@ class MainActivity : ComponentActivity() {
      */
     private fun handleProvisioning(intent: Intent?) {
         val server = intent?.getStringExtra("server_url")
-        val language = intent?.getStringExtra("language")
-        if (language != null && Locales.supported.any { it.first == language } && graph.prefs.language != language) {
-            graph.prefs.language = language
-            recreate()
-        }
+        val language = Locales.match(intent?.getStringExtra("language"))
+        if (language != null && graph.prefs.language != language) graph.controller.setLanguage(language)
         if (server != null && graph.credentials.load() == null) {
             graph.controller.setup.setUseCustom(server.trimEnd('/') != BuildConfig.DEFAULT_SERVER)
             graph.controller.setup.setCustomUrl(server)

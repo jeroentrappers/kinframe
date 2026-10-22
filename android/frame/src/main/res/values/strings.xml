@@ -141,6 +141,7 @@
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
     <string name="settings_slideshow">Slideshow</string>
     <string name="settings_interval">Show each photo for</string>
     <string name="settings_transition">Transition</string>

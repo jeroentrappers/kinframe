@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sahip PIN kodu -->
+    <string name="pin_enter_title">Sahibin PIN kodunu girin</string>
+    <string name="pin_reason_settings">ayarları açmak için</string>
+    <string name="pin_reason_exit">kinframe\'den çıkmak için</string>
+    <string name="pin_reason_wifi">Wi-Fi ağını değiştirmek için</string>
+    <string name="pin_reason_power_off">çerçeveyi kapatmak için</string>
+    <string name="pin_reason_restart">çerçeveyi yeniden başlatmak için</string>
+    <string name="pin_reason_server">sunucuyu değiştirmek için</string>
+    <string name="pin_reason_reset">çerçeveyi sıfırlamak için</string>
+    <string name="pin_checking">Kontrol ediliyor…</string>
+    <string name="pin_wrong">PIN yanlış.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">PIN yanlış. Kısa bir aradan önce %d deneme hakkınız kaldı.</item>
+        <item quantity="other">PIN yanlış. Kısa bir aradan önce %d deneme hakkınız kaldı.</item>
+    </plurals>
+    <string name="pin_locked">Çok fazla yanlış deneme. %s sonra tekrar deneyin.</string>
+    <string name="pin_forgot">PIN\'i mi unuttunuz? Çerçevenin sahibi, kinframe uygulamasında bu çerçevenin ayarlarından PIN\'i kaldırabilir.</string>
+    <string name="pin_new_title">Bir PIN seçin</string>
+    <string name="pin_new_body">4 ila 6 rakam. Ayarları açmak, çerçeveyi kapatmak veya Wi-Fi\'yi değiştirmek için sorulur.</string>
+    <string name="pin_confirm_title">PIN\'i tekrar girin</string>
+    <string name="pin_confirm_body">Emin olmak için.</string>
+    <string name="pin_mismatch">PIN\'ler eşleşmedi. Tekrar seçin.</string>
+    <string name="pin_key_delete">Sil</string>
+    <string name="pin_key_ok">Tamam</string>
+    <string name="settings_pin">Sahip PIN\'i</string>
+    <string name="settings_pin_off">Kapalı. Çerçevedeki herkes ayarları açabilir.</string>
+    <string name="settings_pin_on">Açık. Ayarlar, güç ve Wi-Fi için PIN sorulur.</string>
+    <string name="settings_pin_set">PIN belirle</string>
+    <string name="settings_pin_change">PIN\'i değiştir</string>
+    <string name="settings_pin_remove">PIN\'i kaldır</string>
+    <!-- Katılma istekleri ve bildirimler -->
+    <string name="join_someone">Biri</string>
+    <string name="join_title">%1$s katılmak istiyor</string>
+    <string name="join_body_code">%1$s, “%2$s” çerçevesinin kodunu girdi. İzin verirseniz %1$s bu çerçeveye fotoğraf gönderebilir.</string>
+    <string name="join_body_invited">%1$s, %3$s adlı kişiyi “%2$s” çerçevesine davet etti. İzin verirseniz %3$s bu çerçeveye fotoğraf gönderebilir.</string>
+    <string name="join_invited_by">Davet eden: %s</string>
+    <string name="join_allow">İzin ver</string>
+    <string name="join_deny">İzin verme</string>
+    <string name="join_later">Şimdi değil</string>
+    <string name="join_later_hint">Menüdeki bildirimlerde kalır.</string>
+    <string name="join_pill_one">%s katılmak istiyor</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d kişi katılmak istiyor</item>
+        <item quantity="other">%d kişi katılmak istiyor</item>
+    </plurals>
+    <string name="notifications_title">Bildirimler</string>
+    <string name="notifications_empty">Hepsi bu kadar</string>
+    <string name="notifications_empty_body">Bekleyen bir şey yok.</string>
+    <string name="menu_notifications">Bildirimler</string>
+    <string name="action_close">Kapat</string>
+    <!-- Slayt gösterisindeki durum kartları -->
+    <string name="status_card_offline_title">İnternet bağlantısı yok</string>
+    <string name="status_card_offline_body">Çerçevedeki fotoğraflar gösterilmeye devam eder. Yenileri, bağlantı gelir gelmez ulaşır.</string>
+    <string name="status_card_server_title">Fotoğraf sunucusuna ulaşılamıyor</string>
+    <string name="status_card_server_body">Wi-Fi çalışıyor ama sunucu yanıt vermiyor. Yeni fotoğraflar, sunucu geri geldiğinde ulaşır.</string>
+    <string name="status_card_portal_title">Bu Wi-Fi oturum açmanızı istiyor</string>
+    <string name="status_card_portal_body">Çerçeveyi internete bağlamak için ağın oturum açma sayfasını açın.</string>
+    <string name="status_card_portal_action">Oturum aç</string>
+    <string name="status_card_storage_title">Çerçeve neredeyse dolu</string>
+    <string name="status_card_storage_body">Yer açmak için eski fotoğraflar çerçeveden kaldırıldı; sunucuda güvende kalırlar. Yeni fotoğraflar yer açılana kadar bekleyebilir.</string>
+    <string name="portal_title">Wi-Fi\'de oturum açın</string>
+    <string name="portal_body">Çerçeve internete bağlanınca bu kendiliğinden kapanır.</string>
+    <!-- Kurulum: saat dilimi ve güncelleme -->
+    <string name="setup_tz_title">Çerçeve hangi saat diliminde?</string>
+    <string name="setup_tz_body">Saat, tarih ve gece planı doğru olsun diye.</string>
+    <string name="setup_tz_suggested">Önerilen</string>
+    <string name="setup_tz_all">Tüm saat dilimleri</string>
+    <string name="tz_region_europe">Avrupa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Asya</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Avustralya</string>
+    <string name="tz_region_pacific">Pasifik</string>
+    <string name="tz_region_atlantic">Atlantik</string>
+    <string name="tz_region_indian">Hint Okyanusu</string>
+    <string name="tz_region_antarctica">Antarktika</string>
+    <string name="setup_update_checking">Yeni sürüm aranıyor…</string>
+    <string name="setup_update_checking_body">Çerçeve, başlamadan önce en son kinframe sürümünü çalıştırdığından emin olur.</string>
+    <string name="setup_update_downloading">%s sürümü indiriliyor</string>
+    <string name="setup_update_downloading_body">Hemen ardından yüklenir. Bunu atlayabilirsiniz; çerçeve daha sonra kendini günceller.</string>
+    <string name="setup_update_installing">%s sürümü yükleniyor</string>
+    <string name="setup_update_installing_body">Çerçeve birazdan kendiliğinden yeniden başlar ve kuruluma kaldığınız yerden devam eder.</string>
+    <string name="setup_update_current">kinframe güncel</string>
+    <string name="setup_update_current_body">Son adıma geçelim.</string>
+    <string name="setup_update_failed">Güncellemeler denetlenemedi</string>
+    <string name="setup_update_failed_body">Sorun değil: çerçeve daha sonra tekrar bakar ve kendini günceller.</string>
+    <string name="setup_update_skip">Şimdilik atla</string>
+    <!-- Slayt gösterisi seçenekleri -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">%d yıl önce bugün</item>
+        <item quantity="other">%d yıl önce bugün</item>
+    </plurals>
+    <string name="transition_kenburns">Yavaş yakınlaştırma</string>
+    <string name="settings_collage">Aynı anda birkaç fotoğraf (kolaj)</string>
+    <string name="settings_collage_max">Ekran başına fotoğraf</string>
+    <string name="settings_pair_portraits">İki dikey fotoğrafı yan yana göster</string>
+    <string name="settings_on_this_day">Önceki yıllarda bugünden anıları göster</string>
+    <string name="settings_video">Videolar</string>
+    <string name="settings_video_autoplay">Videoları otomatik oynat</string>
+    <string name="settings_video_playback">Video bitince</string>
+    <string name="video_once_hold">Bir kez oynat, sonra bekle</string>
+    <string name="video_loop">Tekrarlamaya devam et</string>
+    <string name="video_once_advance">Bir kez oynat, sonra geç</string>
+    <string name="settings_video_volume">Video ses düzeyi</string>
+    <string name="settings_video_auto_mute">Kimse çerçeveye şu süre dokunmazsa sesi kapat:</string>
+    <string name="video_auto_mute_off">Hiçbir zaman</string>
+    <string name="video_auto_mute_min">%d dk</string>
+</resources>

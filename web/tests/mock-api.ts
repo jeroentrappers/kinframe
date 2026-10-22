@@ -46,7 +46,7 @@ export interface MockState {
 	joinRequests: Record<string, S['JoinRequest'][]>;
 	invites: Record<string, S['Invite'][]>;
 	settings: Record<string, S['FrameSettings']>;
-	uploads: Record<string, { length: number; offset: number; filename: string }>;
+	uploads: Record<string, { length: number; offset: number; filename: string; prepared?: string; data?: Buffer[] }>;
 	invitePreviews: Record<string, S['InvitePreview']>;
 	albums: Record<string, S['Album'][]>;
 	pushEndpoints: S['PushEndpoint'][];
@@ -506,7 +506,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 					return [k, v ? Buffer.from(v, 'base64').toString() : ''];
 				})
 			);
-			state.uploads[id] = { length: Number(req.headers()['upload-length']), offset: 0, filename: meta.filename ?? '' };
+			state.uploads[id] = { length: Number(req.headers()['upload-length']), offset: 0, filename: meta.filename ?? '', prepared: meta.prepared };
 			return route.fulfill({
 				status: 201,
 				headers: { Location: `http://localhost:4173/v1/uploads/${id}`, 'Tus-Resumable': '1.0.0', 'Access-Control-Expose-Headers': 'Location, Upload-Offset' }
@@ -515,7 +515,11 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		if ((m = path.match(/^\/v1\/uploads\/([^/]+)$/))) {
 			const u = state.uploads[m[1]!];
 			if (!u) return route.fulfill({ status: 404 });
-			if (method === 'PATCH') u.offset += req.postDataBuffer()?.length ?? 0;
+			if (method === 'PATCH') {
+				const chunk = req.postDataBuffer();
+				u.offset += chunk?.length ?? 0;
+				if (chunk) (u.data ??= []).push(chunk);
+			}
 			return route.fulfill({ status: method === 'HEAD' ? 200 : 204, headers: { 'Upload-Offset': String(u.offset), 'Upload-Length': String(u.length), 'Tus-Resumable': '1.0.0' } });
 		}
 
@@ -524,7 +528,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			const b = body as S['SendCreate'];
 			const items: S['Item'][] = b.items.map((it, i) => ({
 				id: uid('i'),
-				kind: state.uploads[it.upload_id]?.filename.match(/\.(mp4|mov)$/) ? 'video' : 'photo',
+				kind: it.live_video_upload_id ? 'live' : state.uploads[it.upload_id]?.filename.match(/\.(mp4|mov)$/) ? 'video' : 'photo',
 				status: 'processing',
 				sender_id: state.me!.id,
 				sender_name: state.me!.display_name,

@@ -1,0 +1,14 @@
+{
+ "footer": "Koda poteče čez 10 minut. Če je niste zahtevali, lahko to e-poštno sporočilo prezrete.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Vaša koda za prijavo v kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo se prijavite v kinframe:"},
+  "Register": {"subject": "Vaša koda za registracijo v kinframe: {{code}}", "intro": "Dobrodošli v kinframe!\n\nS to kodo dokončajte ustvarjanje računa:"},
+  "ForgotPassword": {"subject": "Vaša koda za obnovitev računa kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo obnovite svoj račun kinframe:"},
+  "Generic": {"subject": "Vaša potrditvena koda za kinframe: {{code}}", "intro": "Pozdravljeni,\n\nvaša potrditvena koda za kinframe je:"},
+  "BindNewIdentifier": {"subject": "Potrdite nov e-poštni naslov za kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo potrdite nov e-poštni naslov za svoj račun kinframe:"},
+  "UserPermissionValidation": {"subject": "Vaša potrditvena koda za kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo potrdite, da ste to vi, preden spremenite svoj račun kinframe:"},
+  "MfaVerification": {"subject": "Vaša potrditvena koda za kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo dokončajte prijavo v kinframe:"},
+  "BindMfa": {"subject": "Vaša potrditvena koda za kinframe: {{code}}", "intro": "Pozdravljeni,\n\ns to kodo vklopite preverjanje v dveh korakih za kinframe:"}
+ }
+}

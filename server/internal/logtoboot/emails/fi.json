@@ -1,0 +1,14 @@
+{
+ "footer": "Koodi vanhenee 10 minuutissa. Jos et pyytänyt sitä, voit jättää tämän viestin huomiotta.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "kinframen kirjautumiskoodisi: {{code}}", "intro": "Hei,\n\nkirjaudu kinframeen tällä koodilla:"},
+  "Register": {"subject": "kinframen rekisteröitymiskoodisi: {{code}}", "intro": "Tervetuloa kinframeen!\n\nViimeistele tilin luominen tällä koodilla:"},
+  "ForgotPassword": {"subject": "kinframe-tilisi palautuskoodi: {{code}}", "intro": "Hei,\n\npalauta kinframe-tilisi tällä koodilla:"},
+  "Generic": {"subject": "kinframen vahvistuskoodisi: {{code}}", "intro": "Hei,\n\nkinframen vahvistuskoodisi on:"},
+  "BindNewIdentifier": {"subject": "Vahvista uusi sähköpostiosoitteesi kinframeen: {{code}}", "intro": "Hei,\n\nvahvista kinframe-tilisi uusi sähköpostiosoite tällä koodilla:"},
+  "UserPermissionValidation": {"subject": "kinframen vahvistuskoodisi: {{code}}", "intro": "Hei,\n\nvahvista tällä koodilla, että kyse on sinusta, ennen kuin kinframe-tiliäsi muutetaan:"},
+  "MfaVerification": {"subject": "kinframen vahvistuskoodisi: {{code}}", "intro": "Hei,\n\nviimeistele kirjautuminen kinframeen tällä koodilla:"},
+  "BindMfa": {"subject": "kinframen vahvistuskoodisi: {{code}}", "intro": "Hei,\n\not kaksivaiheisen vahvistuksen käyttöön kinframessa tällä koodilla:"}
+ }
+}

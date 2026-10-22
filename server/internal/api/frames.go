@@ -10,6 +10,7 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
+	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/settings"
@@ -354,16 +355,24 @@ func (s *Server) RedeemFrameCode(ctx context.Context, req gen.RedeemFrameCodeReq
 }
 
 func (s *Server) claim(ctx context.Context, tx *store.Tx, d *store.Device, u *store.User) (redeemOutcome, error) {
+	// The frame's language is what it reported at enrolment (chosen in its setup wizard); the claiming user's
+	// language is the fallback. The default name is in that language, so it reads naturally on the frame.
 	lang, tz := "", ""
 	if d.Locale != nil {
-		lang = (*d.Locale)[:min(2, len(*d.Locale))]
+		lang = i18n.Normalize(*d.Locale)
+	}
+	if lang == "" && u.Locale != nil {
+		lang = i18n.Normalize(*u.Locale)
+	}
+	if lang == "" {
+		lang = i18n.Default
 	}
 	if d.Timezone != nil {
 		tz = *d.Timezone
 	}
 	doc, _ := json.Marshal(settings.Defaults(lang, tz))
 	f, err := tx.CreateFrame(ctx, store.Frame{
-		ID: store.NewID(), Name: store.DefaultFrameName(u.DisplayName), DeviceID: &d.ID,
+		ID: store.NewID(), Name: i18n.DefaultFrameName(lang, u.DisplayName), DeviceID: &d.ID,
 		DefaultPermissions: store.DefaultMemberPermissions, Settings: doc,
 	})
 	if err != nil {
@@ -502,8 +511,10 @@ func (s *Server) ReplaceDevice(ctx context.Context, req gen.ReplaceDeviceRequest
 			return err
 		}
 		// The new device may have another screen size: render what it needs.
-		rows, err := tx.Query(ctx, `SELECT DISTINCT i.media_id FROM placements p JOIN items i ON i.id = p.item_id
-			WHERE p.frame_id = $1 AND p.removed_at IS NULL`, f.ID)
+		rows, err := tx.Query(ctx, `SELECT i.media_id FROM placements p JOIN items i ON i.id = p.item_id
+			WHERE p.frame_id = $1 AND p.removed_at IS NULL
+			UNION SELECT i.motion_media_id FROM placements p JOIN items i ON i.id = p.item_id
+			WHERE p.frame_id = $1 AND p.removed_at IS NULL AND i.motion_media_id IS NOT NULL`, f.ID)
 		if err != nil {
 			return err
 		}

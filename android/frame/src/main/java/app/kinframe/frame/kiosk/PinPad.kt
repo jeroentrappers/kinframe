@@ -207,7 +207,14 @@ private fun PinMessageLine(message: PinMessage, center: Boolean) {
 private val WarmError = Color(0xFFF2A48A)
 
 @Composable
-private fun Keypad(enabled: Boolean, entered: Int, onDigit: (Char) -> Unit, onBackspace: () -> Unit, onSubmit: () -> Unit) {
+private fun Keypad(enabled: Boolean, entered: Int, onDigit: (Char) -> Unit, onBackspace: () -> Unit, onSubmit: () -> Unit) =
+    // A number pad keeps 1-2-3 from left to right in every language, also in Arabic and Hebrew.
+    androidx.compose.runtime.CompositionLocalProvider(
+        androidx.compose.ui.platform.LocalLayoutDirection provides androidx.compose.ui.unit.LayoutDirection.Ltr,
+    ) { KeypadLtr(enabled, entered, onDigit, onBackspace, onSubmit) }
+
+@Composable
+private fun KeypadLtr(enabled: Boolean, entered: Int, onDigit: (Char) -> Unit, onBackspace: () -> Unit, onSubmit: () -> Unit) {
     val alpha by animateFloatAsState(if (enabled) 1f else 0.35f, label = "keys")
     Column(Modifier.graphicsLayer { this.alpha = alpha }, verticalArrangement = Arrangement.spacedBy(KEY_GAP)) {
         listOf("123", "456", "789").forEach { row ->

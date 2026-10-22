@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- common -->
+    <string name="common_cancel">Annuleren</string>
+    <string name="common_close">Sluiten</string>
+    <string name="common_back">Terug</string>
+    <string name="common_continue">Doorgaan</string>
+    <string name="common_done">Klaar</string>
+    <string name="common_edit">Bewerken</string>
+    <string name="common_loading">Laden…</string>
+    <string name="common_load_more">Meer tonen</string>
+    <string name="common_optional">optioneel</string>
+    <string name="common_save">Bewaren</string>
+    <string name="common_saved">Bewaard</string>
+    <string name="common_try_again">Opnieuw proberen</string>
+    <string name="common_undo">Ongedaan maken</string>
+    <string name="common_remove">Verwijderen</string>
+    <string name="common_more">Meer opties</string>
+    <string name="common_selected">Geselecteerd</string>
+    <string name="common_not_selected">Niet geselecteerd</string>
+
+    <string name="nav_frames">Kaders</string>
+    <string name="nav_send">Sturen</string>
+    <string name="nav_history">Verstuurd</string>
+    <string name="nav_settings">Instellingen</string>
+
+    <string name="live_reconnecting">Opnieuw verbinden…</string>
+    <string name="live_join_request">%1$s wil %2$s volgen</string>
+
+    <!-- welcome and server choice -->
+    <string name="welcome_title">Jouw foto’s, op hun kader, in een paar seconden.</string>
+    <string name="welcome_lede">kinframe stuurt foto’s en video’s naar de fotokaders van de familie. Geen abonnement, geen tracking, en de server is van jullie.</string>
+    <string name="welcome_default_server">Doorgaan met %1$s</string>
+    <string name="welcome_own_server">Je eigen server gebruiken</string>
+    <string name="welcome_footer">kinframe is vrije software (AGPL-3.0)</string>
+    <string name="server_title">Je eigen server</string>
+    <string name="server_body">Vul het adres in van de kinframe-server van je familie. Je vindt het op de website van de server.</string>
+    <string name="server_label">Serveradres</string>
+    <string name="server_placeholder">kaders.voorbeeld.be</string>
+    <string name="server_check">Server controleren</string>
+    <string name="server_checking">Even kijken…</string>
+    <string name="server_found">Gevonden</string>
+    <string name="server_version">Versie %1$s</string>
+    <string name="server_use">Deze server gebruiken</string>
+    <string name="server_invalid">Dat lijkt geen serveradres. Kijk het na en probeer opnieuw.</string>
+    <string name="server_unreachable">Op dat adres staat geen kinframe-server, of hij is nu niet bereikbaar.</string>
+    <string name="server_change">Andere server</string>
+    <string name="server_switch_title">Dit openen op %1$s?</string>
+    <string name="server_switch_body">Deze link hoort bij een andere kinframe-server. Om hem te gebruiken, schakelt de app over naar die server en meld je je daar aan.</string>
+    <string name="server_switch_confirm">Van server wisselen</string>
+
+    <!-- sign in -->
+    <string name="signin_connected">Verbonden met %1$s</string>
+    <string name="signin_button">Aanmelden</string>
+    <string name="signin_hint">Nieuw? Door aan te melden maak je een account. Je krijgt een code per e-mail, geen wachtwoord nodig.</string>
+    <string name="signin_working">Je wordt aangemeld…</string>
+    <string name="signin_failed">Aanmelden is niet gelukt. Probeer het opnieuw.</string>
+    <string name="signin_expired">Je bent afgemeld. Meld je opnieuw aan om verder te gaan.</string>
+    <string name="signin_reason_frame">Meld je aan om het kader toe te voegen. Daarna gaan we meteen verder.</string>
+    <string name="signin_reason_invite">Meld je aan om de uitnodiging te aanvaarden. Daarna gaan we meteen verder.</string>
+    <string name="signin_no_auth">Aanmelden is nog niet ingesteld op deze server. Vraag de beheerder om de installatie af te werken.</string>
+    <string name="signin_dev_title">Aanmelden voor ontwikkelaars</string>
+    <string name="signin_dev_hint">Deze server draait in ontwikkelmodus. Kies een e-mailadres om als die persoon verder te gaan.</string>
+    <string name="signin_dev_email">E-mail</string>
+    <string name="signin_dev_name">Naam</string>
+
+    <!-- first run -->
+    <string name="name_title">Welkom bij kinframe!</string>
+    <string name="name_body">Hoe mag je familie je noemen? Deze naam staat op het kader bij de foto’s die je stuurt.</string>
+    <string name="name_label">Je naam</string>
+
+    <!-- frames -->
+    <string name="frames_title">Jouw kaders</string>
+    <plurals name="frames_summary">
+        <item quantity="one">%1$d kader · %2$d online</item>
+        <item quantity="other">%1$d kaders · %2$d online</item>
+    </plurals>
+    <string name="frames_add">Kader toevoegen</string>
+    <string name="frames_open">%1$s openen</string>
+    <string name="frames_needs_update">Er staat een update klaar voor dit kader</string>
+    <string name="frames_empty_title">Voeg je eerste kader toe</string>
+    <string name="frames_empty_body">Elk kinframe toont een code van 8 cijfers op het scherm. Vul die hier in om een nieuw kader in te stellen of je bij de familie aan te sluiten.</string>
+    <string name="frames_empty_cta">Eerste kader toevoegen</string>
+    <string name="frames_send_to">Naar %1$s sturen</string>
+
+    <string name="frame_online">Online</string>
+    <string name="frame_offline">Offline</string>
+    <string name="frame_last_seen">Laatst gezien %1$s</string>
+    <string name="frame_name">Naam van het kader</string>
+    <string name="frame_location">Waar staat het?</string>
+    <string name="frame_tab_overview">Overzicht</string>
+    <string name="frame_tab_library">Foto’s</string>
+    <string name="frame_tab_people">Mensen</string>
+    <string name="frame_tab_settings">Instellingen</string>
+
+    <string name="role_owner">Eigenaar</string>
+    <string name="role_admin">Beheerder</string>
+    <string name="role_member">Lid</string>
+
+    <!-- add frame -->
+    <string name="add_title">Kader toevoegen</string>
+    <string name="add_body">Vul de code van 8 cijfers in die op het kader staat. Een nieuw kader toont ze tijdens het instellen. Op een kader dat al werkt, open je het menu en kies je Iemand toevoegen.</string>
+    <string name="add_code_label">Code van het kader</string>
+    <string name="add_code_hint">Je mag de hele code of de link plakken. Spaties maken niet uit.</string>
+    <string name="add_paste">Plakken</string>
+    <string name="add_submit">Kader toevoegen</string>
+    <string name="add_checking">Even kijken…</string>
+    <string name="add_claimed_title">Het is van jou!</string>
+    <string name="add_claimed_body">Je bent nu de eigenaar van dit kader. Geef het een naam, zodat de familie weet welk kader het is.</string>
+    <string name="add_name_placeholder">Kader van oma</string>
+    <string name="add_location_placeholder">Woonkamer</string>
+    <string name="add_save_and_send">Bewaren en foto’s sturen</string>
+    <string name="add_later">Dat doe ik later</string>
+    <string name="add_named">%1$s is klaar</string>
+    <string name="add_joined_title">Je volgt nu %1$s</string>
+    <string name="add_joined_body">Wat je nu stuurt, verschijnt op het kader. %1$s kan aanpassen wat je mag doen.</string>
+    <string name="add_already_title">Je bent er al bij</string>
+    <string name="add_already_body">Je bent al lid van %1$s.</string>
+    <string name="add_pending_title">Wachten op een ja</string>
+    <string name="add_pending_body">Iemand bij %1$s moet op het kader op Toestaan tikken. We laten het je weten zodra dat gebeurt.</string>
+    <string name="add_send_first">Je eerste foto’s sturen</string>
+    <string name="add_view_frame">Kader bekijken</string>
+    <string name="add_back_to_frames">Terug naar kaders</string>
+
+    <!-- send -->
+    <string name="send_title">Foto’s sturen</string>
+    <string name="send_lede">Kies foto’s en video’s, schrijf er iets bij en kies naar welke kaders ze gaan.</string>
+    <string name="send_choose">Foto’s kiezen</string>
+    <string name="send_choose_hint">Tot %1$d tegelijk, foto’s en video’s door elkaar. Je kunt ze ook delen vanuit je galerij.</string>
+    <string name="send_add_more">Meer toevoegen</string>
+    <string name="send_clear">Alles wissen</string>
+    <string name="send_count">%1$d van %2$d</string>
+    <string name="send_adjust">Aanpassen</string>
+    <string name="send_adjust_item">Item %1$d aanpassen</string>
+    <string name="send_adjust_title">Kadrering en onderschrift</string>
+    <string name="send_remove_item">Item %1$d verwijderen</string>
+    <string name="send_caption">Onderschrift</string>
+    <string name="send_caption_placeholder">Schrijf er iets bij…</string>
+    <string name="send_chars_left">Nog %1$d van %2$d tekens</string>
+    <string name="send_apply_all">Voor alle %1$d gebruiken</string>
+    <plurals name="send_applied_all">
+        <item quantity="one">Onderschrift gebruikt voor %1$d item</item>
+        <item quantity="other">Onderschrift gebruikt voor alle %1$d items</item>
+    </plurals>
+    <string name="send_fit_legend">Op het kader</string>
+    <string name="send_fill">Scherm vullen</string>
+    <string name="send_fit">Alles tonen</string>
+    <string name="send_fill_hint">De foto vult het scherm en wordt bijgesneden rond het punt dat je koos.</string>
+    <string name="send_fit_hint">De hele foto is zichtbaar, met zacht vervaagde randen.</string>
+    <string name="send_focal_label">Belangrijkste punt</string>
+    <string name="send_focal_value">%1$d%% van links, %2$d%% van boven</string>
+    <string name="send_focal_hint">Tik op het belangrijkste deel van de foto. Het kader houdt dat in beeld bij het bijsnijden.</string>
+    <string name="send_landscape">Liggend</string>
+    <string name="send_portrait">Staand</string>
+    <string name="send_previews_label">Zo ziet het eruit op het kader</string>
+    <string name="send_issue_too_large">Te groot. De limiet is %1$s.</string>
+    <string name="send_issue_too_long">Te lang. Video’s mogen tot %1$s duren. Knip hem in om te versturen.</string>
+    <plurals name="send_issues">
+        <item quantity="one">Pas het gemarkeerde item aan of verwijder het om te versturen.</item>
+        <item quantity="other">Pas de %1$d gemarkeerde items aan of verwijder ze om te versturen.</item>
+    </plurals>
+    <string name="send_over_limit">Je kunt tot %1$d tegelijk sturen. %2$d zijn weggelaten.</string>
+    <plurals name="send_skipped">
+        <item quantity="one">%1$d bestand is overgeslagen omdat het geen foto of video is.</item>
+        <item quantity="other">%1$d bestanden zijn overgeslagen omdat het geen foto’s of video’s zijn.</item>
+    </plurals>
+    <string name="send_to">Sturen naar</string>
+    <string name="send_offline_note">Kaders die offline zijn, krijgen de foto’s zodra ze weer online zijn.</string>
+    <string name="send_pick_frame">Kies minstens één kader.</string>
+    <plurals name="send_button">
+        <item quantity="one">Versturen</item>
+        <item quantity="other">Alle %1$d versturen</item>
+    </plurals>
+    <string name="send_preparing">Je foto’s worden klaargemaakt…</string>
+    <string name="send_sent">Onderweg! Je mag de app sluiten, het versturen gaat op de achtergrond verder.</string>
+    <string name="send_no_frames_title">Nog geen kaders</string>
+    <string name="send_no_frames_body">Voeg eerst een kader toe, dan kun je er foto’s naar sturen.</string>
+    <string name="send_video_badge">Video, %1$s</string>
+    <string name="send_trim">Inkorten</string>
+    <string name="send_trim_label">Deel van de video om te sturen</string>
+    <string name="send_trim_range">%1$s – %2$s · %3$s</string>
+    <string name="send_trim_min">Video’s moeten minstens 3 seconden duren.</string>
+    <string name="send_include_audio">Met geluid</string>
+    <string name="send_photo_n">Foto %1$d</string>
+    <string name="send_video_n">Video %1$d</string>
+
+    <!-- outbox / upload progress -->
+    <string name="outbox_title">Wordt verstuurd</string>
+    <string name="outbox_uploading">%1$d van %2$d uploaden · %3$d%%</string>
+    <string name="outbox_waiting_network">Wachten op een verbinding…</string>
+    <string name="outbox_finishing">Bijna klaar…</string>
+    <string name="outbox_failed">Deze foto’s konden niet verstuurd worden</string>
+    <string name="outbox_retry">Opnieuw</string>
+    <string name="outbox_discard">Weggooien</string>
+    <string name="outbox_sent_to">Verstuurd naar %1$s</string>
+
+    <!-- history -->
+    <string name="history_title">Verstuurd</string>
+    <string name="history_lede">Alles wat je verstuurd hebt, en hoe het ermee gaat.</string>
+    <string name="history_filter_all">Alles</string>
+    <string name="history_filter_ongoing">Onderweg</string>
+    <string name="history_filter_delivered">Afgeleverd</string>
+    <string name="history_today">Vandaag</string>
+    <string name="history_yesterday">Gisteren</string>
+    <plurals name="history_photos">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="other">%1$d foto’s</item>
+    </plurals>
+    <plurals name="history_videos">
+        <item quantity="one">%1$d video</item>
+        <item quantity="other">%1$d video’s</item>
+    </plurals>
+    <string name="history_partial">%1$d van %2$d</string>
+    <string name="history_open_send">Zending van %1$s openen</string>
+    <string name="history_empty_title">Nog niets verstuurd</string>
+    <string name="history_empty_body">Foto’s die je stuurt, zie je hier terug, samen met wanneer ze aankwamen en hoe het kader reageerde.</string>
+    <string name="history_empty_filtered">Hier is nu niets</string>
+
+    <string name="stage_processing">Wordt verwerkt</string>
+    <string name="stage_on_its_way">Onderweg</string>
+    <string name="stage_delivered">Afgeleverd</string>
+    <string name="stage_seen">Bekeken</string>
+    <string name="stage_failed">Mislukt</string>
+    <string name="stage_removed">Verwijderd</string>
+
+    <string name="reaction_love">Hartje</string>
+    <string name="reaction_laugh">Haha</string>
+    <string name="reaction_wow">Wauw</string>
+    <string name="reaction_sad">Verdrietig</string>
+    <string name="reply_beautiful">Prachtig!</string>
+    <string name="reply_call_me">Bel me</string>
+    <string name="reply_miss_you">Ik mis je</string>
+    <string name="reply_thanks">Dankjewel</string>
+    <string name="reaction_from">%1$s van %2$s</string>
+
+    <string name="detail_title">Verstuurd</string>
+    <string name="detail_sent_at">Verstuurd %1$s</string>
+    <string name="detail_unsend">Terugtrekken</string>
+    <string name="detail_unsent">Van alle kaders verwijderd</string>
+    <string name="detail_unsend_title">Van de kaders verwijderen?</string>
+    <string name="detail_unsend_body">Deze foto’s verdwijnen van elk kader, ook van kaders die nu offline zijn.</string>
+    <string name="detail_remove_now">Nu verwijderen</string>
+    <string name="detail_delivery_label">Aflevering per kader</string>
+    <string name="detail_counts">%1$d bekeken · %2$d van %3$d afgeleverd</string>
+    <string name="detail_offline_waiting">wacht tot het kader online komt</string>
+    <string name="detail_no_caption">Geen onderschrift</string>
+    <string name="detail_edited">Aangepast</string>
+    <string name="detail_edit_caption">Onderschrift van item %1$d bewerken</string>
+    <string name="detail_caption_saved">Onderschrift aangepast op elk kader</string>
+    <string name="detail_replies">Antwoorden</string>
+
+    <string name="failure_unsupported_media">Dit bestandstype wordt niet ondersteund.</string>
+    <string name="failure_corrupt_media">Dit bestand lijkt beschadigd.</string>
+    <string name="failure_video_too_long">Deze video is te lang.</string>
+    <string name="failure_unknown">Er ging iets mis bij het klaarmaken van dit item.</string>
+
+    <!-- frame overview -->
+    <string name="overview_remote">Bediening op afstand</string>
+    <string name="overview_offline_control">Het kader is offline. Bediening op afstand werkt weer zodra het verbonden is.</string>
+    <string name="overview_details">Gegevens</string>
+    <string name="overview_owner">Eigenaar</string>
+    <string name="overview_members">Mensen</string>
+    <string name="overview_photos">Foto’s</string>
+    <string name="overview_screen">Scherm</string>
+    <string name="overview_since">Toegevoegd</string>
+    <string name="overview_health">Gezondheid</string>
+    <string name="overview_rename">Naam en plaats</string>
+    <string name="overview_renamed">Bewaard</string>
+    <string name="overview_leave_title">Dit kader verlaten</string>
+    <string name="overview_leave_body">Je kunt dan niet meer naar dit kader sturen. Met een nieuwe code of uitnodiging kun je opnieuw aansluiten.</string>
+    <string name="overview_leave_button">Kader verlaten</string>
+    <string name="overview_leave_confirm">%1$s verlaten?</string>
+    <string name="overview_leave_dialog_body">Je foto’s kunnen op het kader blijven zodat iedereen ervan geniet, of ze kunnen weg.</string>
+    <string name="overview_remove_mine">Ook de foto’s verwijderen die ik stuurde</string>
+    <string name="overview_left">Je hebt %1$s verlaten</string>
+    <string name="overview_remove_title">Dit kader verwijderen</string>
+    <string name="overview_remove_body">Het kader wordt losgekoppeld en verdwijnt voor iedereen. Foto’s blijven in ieders geschiedenis staan.</string>
+    <string name="overview_remove_button">Kader verwijderen</string>
+    <string name="overview_remove_confirm">%1$s verwijderen?</string>
+    <string name="overview_remove_dialog_body">Het kader gaat terug naar het instelscherm en niemand heeft er nog toegang toe. Dit kan niet ongedaan gemaakt worden.</string>
+    <string name="overview_type_name">Typ “%1$s” om te bevestigen</string>
+    <string name="overview_removed">%1$s is verwijderd</string>
+
+    <string name="cmd_previous">Vorige</string>
+    <string name="cmd_next">Volgende</string>
+    <string name="cmd_sleep">Slapen</string>
+    <string name="cmd_wake">Wakker maken</string>
+    <string name="cmd_identify">Herkennen</string>
+    <string name="cmd_sync">Nu bijwerken</string>
+    <string name="cmd_done_previous">Een foto teruggegaan</string>
+    <string name="cmd_done_next">Naar de volgende foto</string>
+    <string name="cmd_done_sleep">%1$s gaat slapen</string>
+    <string name="cmd_done_wake">%1$s wordt wakker</string>
+    <string name="cmd_done_identify">%1$s toont even zijn naam</string>
+    <string name="cmd_done_sync">%1$s kijkt of er nieuwe foto’s zijn</string>
+    <string name="cmd_failed">Het kader kon dat nu niet doen.</string>
+
+    <string name="health_wifi">Wifi</string>
+    <string name="health_storage">Opslag</string>
+    <string name="health_free">%1$s vrij van %2$s</string>
+    <string name="health_cached">Foto’s op het kader</string>
+    <plurals name="health_missing">
+        <item quantity="one">%1$d nog aan het downloaden</item>
+        <item quantity="other">%1$d nog aan het downloaden</item>
+    </plurals>
+    <string name="health_uptime">Draait al</string>
+    <string name="health_version">Appversie</string>
+    <string name="health_last_seen">Laatste contact</string>
+    <string name="health_unclean">Stroom verloren %1$s.</string>
+
+    <!-- library -->
+    <string name="library_visible">Op het kader</string>
+    <string name="library_hidden">Verborgen</string>
+    <string name="library_trash_tab">Prullenbak</string>
+    <string name="library_own_only">Je ziet de foto’s die jij stuurde. De eigenaar kan je alles laten zien.</string>
+    <string name="library_trash_note">Items in de prullenbak worden na %1$d dagen definitief verwijderd.</string>
+    <string name="library_empty_title">Nog geen foto’s op dit kader</string>
+    <string name="library_empty_body">Stuur er een paar om de diavoorstelling te starten.</string>
+    <string name="library_empty_hidden">Niets verborgen</string>
+    <string name="library_empty_trash">De prullenbak is leeg</string>
+    <string name="library_item_by">Foto van %1$s</string>
+    <string name="library_video_by">Video van %1$s</string>
+    <string name="library_select_all">Alles selecteren</string>
+    <string name="library_clear_selection">Selectie wissen</string>
+    <plurals name="library_selected">
+        <item quantity="one">%1$d geselecteerd</item>
+        <item quantity="other">%1$d geselecteerd</item>
+    </plurals>
+    <string name="library_hide">Verbergen</string>
+    <string name="library_unhide">Weer tonen</string>
+    <string name="library_trash">Naar prullenbak</string>
+    <string name="library_restore">Terugzetten</string>
+    <plurals name="library_done_hide">
+        <item quantity="one">%1$d foto verborgen</item>
+        <item quantity="other">%1$d foto’s verborgen</item>
+    </plurals>
+    <plurals name="library_done_unhide">
+        <item quantity="one">%1$d foto weer op het kader</item>
+        <item quantity="other">%1$d foto’s weer op het kader</item>
+    </plurals>
+    <plurals name="library_done_trash">
+        <item quantity="one">%1$d foto naar de prullenbak</item>
+        <item quantity="other">%1$d foto’s naar de prullenbak</item>
+    </plurals>
+    <plurals name="library_done_restore">
+        <item quantity="one">%1$d foto teruggezet</item>
+        <item quantity="other">%1$d foto’s teruggezet</item>
+    </plurals>
+    <plurals name="library_some_failed">
+        <item quantity="one">%1$d item kon niet aangepast worden.</item>
+        <item quantity="other">%1$d items konden niet aangepast worden.</item>
+    </plurals>
+    <string name="library_pending">Wacht op goedkeuring</string>
+    <string name="library_from">Van %1$s</string>
+    <string name="library_received">Ontvangen %1$s</string>
+
+    <!-- people -->
+    <string name="people_requests">Wil graag meedoen</string>
+    <string name="people_via_code">Gebruikte de code van het kader</string>
+    <string name="people_via_invite">Uitgenodigd door %1$s</string>
+    <string name="people_approve">Toelaten</string>
+    <string name="people_deny">Weigeren</string>
+    <string name="people_approved">%1$s kan nu naar dit kader sturen</string>
+    <string name="people_denied">%1$s geweigerd</string>
+    <string name="people_members">Mensen</string>
+    <string name="people_you">jij</string>
+    <string name="people_last_sent">Laatst gestuurd %1$s</string>
+    <string name="people_never_sent">Heeft nog niets gestuurd</string>
+    <string name="people_edit_member">%1$s bewerken</string>
+    <string name="people_role">Rol</string>
+    <string name="people_admin_hint">Beheerders kunnen alles, behalve het kader verwijderen of het eigenaarschap doorgeven.</string>
+    <string name="people_member_hint">Leden mogen wat je hieronder toestaat.</string>
+    <string name="people_permissions">Mag</string>
+    <string name="people_remove">Van het kader verwijderen</string>
+    <string name="people_remove_confirm">%1$s verwijderen?</string>
+    <string name="people_remove_body">Deze persoon kan dan niet meer naar dit kader sturen.</string>
+    <string name="people_remove_items">Ook de foto’s verwijderen die deze persoon stuurde</string>
+    <string name="people_removed">%1$s is verwijderd</string>
+    <string name="people_invite">Iemand uitnodigen</string>
+    <string name="people_invite_hint">Deel een link. Wie hem opent en zich aanmeldt, volgt meteen dit kader.</string>
+    <string name="people_invite_hint_approval">Deel een link. Wie hem opent, keur jij eerst goed voor die persoon kan sturen.</string>
+    <string name="people_expires">Link werkt</string>
+    <string name="people_exp_1d">1 dag</string>
+    <string name="people_exp_7d">1 week</string>
+    <string name="people_exp_30d">30 dagen</string>
+    <string name="people_uses">Te gebruiken</string>
+    <string name="people_uses_single">Eén keer</string>
+    <string name="people_uses_unlimited">Door iedereen met de link</string>
+    <string name="people_note">Notitie voor jezelf</string>
+    <string name="people_note_placeholder">Voor nicht Lisa</string>
+    <string name="people_create">Link maken en delen</string>
+    <string name="people_copy">Link kopiëren</string>
+    <string name="people_copied">Link gekopieerd</string>
+    <string name="people_share">Delen</string>
+    <string name="people_share_title">Volg %1$s op kinframe</string>
+    <string name="people_share_text">Volg %1$s zodat je er foto’s naar kunt sturen: %2$s</string>
+    <string name="people_active_invites">Actieve links</string>
+    <string name="people_by_name">Gemaakt door %1$s</string>
+    <string name="people_uses_of">%1$d van %2$d keer gebruikt</string>
+    <string name="people_uses_n">%1$d× gebruikt</string>
+    <string name="people_expires_in">verloopt %1$s</string>
+    <string name="people_revoke">Link intrekken</string>
+    <string name="people_revoked">Uitnodigingslink ingetrokken</string>
+
+    <string name="perm_send">Foto’s en video’s sturen</string>
+    <string name="perm_send_hint">Hun foto’s verschijnen op het kader.</string>
+    <string name="perm_invite">Anderen uitnodigen</string>
+    <string name="perm_invite_hint">Uitnodigingslinks maken voor dit kader.</string>
+    <string name="perm_see_library">Alle foto’s zien</string>
+    <string name="perm_see_library_hint">Alles op het kader bekijken, niet alleen de eigen foto’s.</string>
+    <string name="perm_manage_library">Foto’s beheren</string>
+    <string name="perm_manage_library_hint">Foto’s van iedereen verbergen of verwijderen en onderschriften aanpassen.</string>
+    <string name="perm_change_settings">Instellingen wijzigen</string>
+    <string name="perm_change_settings_hint">Diavoorstelling, slaaptijden en bediening op afstand.</string>
+
+    <!-- frame settings -->
+    <string name="fs_offline_note">Het kader is offline. Je wijzigingen worden bewaard en toegepast zodra het weer verbonden is.</string>
+    <string name="fs_conflict">Iemand anders wijzigde deze instellingen op hetzelfde moment. We hebben jouw aanpassingen daarbovenop gezet. Kijk ze na en bewaar opnieuw.</string>
+    <string name="fs_slideshow">Diavoorstelling</string>
+    <string name="fs_interval">Elke foto tonen gedurende</string>
+    <string name="fs_order">Volgorde</string>
+    <string name="fs_order_received">Nieuwst ontvangen eerst</string>
+    <string name="fs_order_taken">Op datum van opname</string>
+    <string name="fs_order_shuffle">Willekeurig</string>
+    <string name="fs_reverse">Volgorde omdraaien</string>
+    <string name="fs_transition">Overgang</string>
+    <string name="fs_crossfade">Vervagen</string>
+    <string name="fs_slide">Schuiven</string>
+    <string name="fs_kenburns">Pannen en zoomen</string>
+    <string name="fs_fill">Scherm vullen</string>
+    <string name="fs_fill_hint">Foto’s bijsnijden zodat er geen randen zijn. Per foto kan dat anders.</string>
+    <string name="fs_show_caption">Onderschriften tonen</string>
+    <string name="fs_show_clock">Klok tonen</string>
+    <string name="fs_display">Scherm</string>
+    <string name="fs_brightness">Helderheid</string>
+    <string name="fs_sleep">Slaaptijden</string>
+    <string name="fs_sleep_hint">Het kader zet ’s nachts het scherm uit. Nieuwe foto’s komen gewoon binnen terwijl het slaapt.</string>
+    <string name="fs_add_schedule">Slaaptijd toevoegen</string>
+    <string name="fs_no_schedules">Het kader blijft altijd aan.</string>
+    <string name="fs_schedule_n">Slaaptijd %1$d</string>
+    <string name="fs_sleep_at">Slapen om</string>
+    <string name="fs_wake_at">Wakker om</string>
+    <string name="fs_mode_off">Scherm uit</string>
+    <string name="fs_mode_dim">Alleen dimmen</string>
+    <string name="fs_remove_schedule">Deze slaaptijd verwijderen</string>
+    <string name="fs_weather_title">Locatie &amp; weer</string>
+    <string name="fs_weather_hint">Waar het kader staat. Voor het weer en om het scherm na zonsondergang te dimmen.</string>
+    <string name="fs_show_weather">Toon het weer</string>
+    <string name="fs_show_weather_hint">Het huidige weer naast de klok. Tik erop op het kader voor de verwachting.</string>
+    <string name="fs_needs_location">Kies eerst een plaats.</string>
+    <string name="fs_temperature_unit">Temperatuur</string>
+    <string name="fs_celsius">°C</string>
+    <string name="fs_fahrenheit">°F</string>
+    <string name="fs_weather_credit">Weergegevens van Open-Meteo.com</string>
+    <string name="fs_unsaved">Niet bewaarde wijzigingen</string>
+    <string name="fs_discard">Weggooien</string>
+    <string name="fs_saved">Instellingen naar %1$s gestuurd</string>
+    <string name="fs_merged_saved">Bewaard. De wijzigingen van iemand anders zijn ook behouden.</string>
+    <string name="fs_no_permission">Alleen wie instellingen mag wijzigen, ziet deze.</string>
+    <string name="location_search">Zoek een gemeente of stad</string>
+    <string name="location_placeholder">bv. Gent</string>
+    <string name="location_no_results">Geen plaatsen gevonden voor “%1$s”.</string>
+    <string name="location_change">Wijzigen</string>
+    <string name="location_remove">Verwijderen</string>
+    <string name="location_unnamed">Gekozen plaats</string>
+    <string name="location_error_busy">Te veel zoekopdrachten tegelijk. Wacht even en typ opnieuw.</string>
+    <string name="location_error_upstream">Het zoeken naar plaatsen lukt nu niet. Probeer het over een minuutje opnieuw.</string>
+    <string name="location_error_disabled">Weer en plaatsen zoeken staan uit op deze server.</string>
+
+    <string name="day_mon">ma</string>
+    <string name="day_tue">di</string>
+    <string name="day_wed">wo</string>
+    <string name="day_thu">do</string>
+    <string name="day_fri">vr</string>
+    <string name="day_sat">za</string>
+    <string name="day_sun">zo</string>
+
+    <plurals name="duration_seconds">
+        <item quantity="one">%1$d seconde</item>
+        <item quantity="other">%1$d seconden</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d minuut</item>
+        <item quantity="other">%1$d minuten</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%1$d uur</item>
+        <item quantity="other">%1$d uur</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">%1$d dag</item>
+        <item quantity="other">%1$d dagen</item>
+    </plurals>
+
+    <!-- invite accept -->
+    <string name="invite_title">Uitnodiging</string>
+    <string name="invite_from">%1$s nodigt je uit</string>
+    <string name="invite_join">%1$s volgen</string>
+    <string name="invite_instant">Zodra je meedoet, verschijnen de foto’s die je stuurt op dit kader.</string>
+    <string name="invite_needs_approval">%1$s keurt nieuwe mensen goed voor ze kunnen sturen.</string>
+    <string name="invite_accept">Meedoen</string>
+    <string name="invite_not_now">Nu niet</string>
+    <string name="invite_already">Je bent al lid van dit kader.</string>
+    <string name="invite_pending_title">Verzoek verstuurd</string>
+    <string name="invite_pending_body">%1$s ziet je verzoek. We laten het je weten zodra je erbij bent.</string>
+    <string name="invite_joined_body">De foto’s die je nu stuurt, verschijnen op dit kader.</string>
+    <string name="invite_invalid_title">Deze uitnodiging werkt niet</string>
+
+    <!-- settings -->
+    <string name="settings_title">Instellingen</string>
+    <string name="settings_profile">Je profiel</string>
+    <string name="settings_display_name">Je naam</string>
+    <string name="settings_display_name_hint">Staat op het kader bij de foto’s die je stuurt.</string>
+    <string name="settings_name_saved">Naam aangepast</string>
+    <string name="settings_email">E-mail</string>
+    <string name="settings_notifications">Meldingen</string>
+    <string name="settings_push_on">Reacties, antwoorden en verzoeken om mee te doen komen binnen via %1$s, ook als de app dicht is.</string>
+    <string name="settings_push_none">Wil je meldingen krijgen terwijl de app dicht is? Installeer dan een UnifiedPush-app zoals ntfy. kinframe gebruikt de pushdienst van Google niet.</string>
+    <string name="settings_push_pick">Pushdienst kiezen</string>
+    <string name="settings_push_enable">Meldingen aanzetten</string>
+    <string name="settings_push_fcm">Reacties, antwoorden en verzoeken om mee te doen komen binnen via Firebase Cloud Messaging.</string>
+    <string name="settings_notifications_blocked">Meldingen staan uit voor kinframe in de Android-instellingen.</string>
+    <string name="settings_open_system">Android-instellingen openen</string>
+    <string name="settings_server">Server</string>
+    <string name="settings_server_name">Naam</string>
+    <string name="settings_version">Versie</string>
+    <string name="settings_address">Adres</string>
+    <string name="settings_max_items">Items per zending</string>
+    <string name="settings_max_video">Langste video</string>
+    <string name="settings_max_upload">Grootste bestand</string>
+    <string name="settings_dev_mode">Aangemeld met een ontwikkeltoken.</string>
+    <string name="settings_signed_in_as">Aangemeld als %1$s</string>
+    <string name="settings_sign_out">Afmelden</string>
+    <string name="settings_change_server_hint">Als je van server wisselt, word je afgemeld.</string>
+    <string name="settings_about">kinframe %1$s · vrije software onder de AGPL-3.0 · geen tracking</string>
+
+    <!-- notifications -->
+    <string name="channel_activity">Reacties en antwoorden</string>
+    <string name="channel_activity_desc">Als een kader op je foto’s reageert of een antwoord stuurt.</string>
+    <string name="channel_people">Verzoeken om mee te doen</string>
+    <string name="channel_people_desc">Als iemand een kader wil volgen dat jij beheert.</string>
+    <string name="channel_sending">Versturen</string>
+    <string name="channel_sending_desc">Voortgang terwijl foto’s geüpload worden.</string>
+    <string name="channel_frames">Nieuws van je kaders</string>
+    <string name="channel_frames_desc">Aflevering en wijzigingen aan je toegang.</string>
+    <string name="notif_sending_title">Naar %1$s sturen</string>
+    <plurals name="notif_sending_items">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="other">%1$d foto’s</item>
+    </plurals>
+    <string name="notif_reaction_title">Nieuwe reactie</string>
+    <string name="notif_reaction_body">%1$s reageerde op je foto</string>
+    <string name="notif_reply_title">Nieuw antwoord</string>
+    <string name="notif_join_title">Verzoek om mee te doen</string>
+
+    <!-- share target -->
+    <string name="share_label">Naar een kader sturen</string>
+
+    <!-- accessibility -->
+    <string name="a11y_frame_status_online">%1$s, online</string>
+    <string name="a11y_frame_status_offline">%1$s, offline</string>
+    <string name="a11y_photo">Foto</string>
+    <string name="a11y_video">Video</string>
+    <string name="a11y_focal_picker">Voorbeeld van de foto. Dubbeltik om het belangrijkste punt te kiezen.</string>
+    <string name="a11y_select_item">Item selecteren</string>
+
+    <!-- problems (ProblemCode) -->
+    <string name="problem_unauthorized">Meld je opnieuw aan.</string>
+    <string name="problem_token_expired">Je sessie is verlopen. Meld je opnieuw aan.</string>
+    <string name="problem_forbidden">Dat mag je niet doen.</string>
+    <string name="problem_missing_permission">Daarvoor heb je geen toestemming op dit kader. Vraag het aan de eigenaar.</string>
+    <string name="problem_not_found">Dat vinden we niet. Misschien is het verwijderd.</string>
+    <string name="problem_code_invalid">Die code hoort bij geen enkel kader. Kijk de cijfers op het kader na en probeer opnieuw.</string>
+    <string name="problem_code_expired">Die code is verlopen. Het kader toont een nieuwe.</string>
+    <string name="problem_invite_invalid">Deze uitnodigingslink is ongeldig. Vraag een nieuwe.</string>
+    <string name="problem_invite_expired">Deze uitnodigingslink is verlopen. Vraag een nieuwe.</string>
+    <string name="problem_already_member">Je bent al lid van dit kader.</string>
+    <string name="problem_validation_failed">Er klopt iets niet in het formulier.</string>
+    <string name="problem_too_many_items">Dat is meer dan deze server in één keer aanvaardt.</string>
+    <string name="problem_video_too_long">Die video is langer dan deze server toelaat.</string>
+    <string name="problem_upload_too_large">Dat bestand is groter dan deze server toelaat.</string>
+    <string name="problem_upload_not_found">Een upload is zoekgeraakt. Probeer opnieuw te versturen.</string>
+    <string name="problem_unsupported_media">Een van de bestanden is geen ondersteund foto- of videoformaat.</string>
+    <string name="problem_corrupt_media">Een van de bestanden lijkt beschadigd.</string>
+    <string name="problem_version_conflict">Dit is ondertussen ergens anders gewijzigd. Herlaad en probeer opnieuw.</string>
+    <string name="problem_frame_offline">Het kader is nu offline. Probeer opnieuw zodra het verbonden is.</string>
+    <string name="problem_command_timeout">Het kader antwoordde niet op tijd. Misschien is de verbinding zwak.</string>
+    <string name="problem_owner_cannot_leave">Als eigenaar geef je het kader eerst aan iemand anders voor je vertrekt.</string>
+    <string name="problem_rate_limited">Dat waren veel pogingen. Wacht even en probeer opnieuw.</string>
+    <string name="problem_app_update_required">Er is een update van deze app nodig.</string>
+    <string name="problem_upstream_unavailable">Het zoeken naar plaatsen lukt nu niet. Probeer het over een minuutje opnieuw.</string>
+    <string name="problem_feature_disabled">Dit staat uit op deze server.</string>
+    <string name="problem_server_error">Er ging iets mis op de server. Probeer het opnieuw.</string>
+    <string name="problem_network">Je lijkt offline te zijn. Controleer je verbinding en probeer opnieuw.</string>
+    <!-- Client-side preparation and Live/Motion Photos -->
+    <string name="outbox_preparing">%1$d van %2$d voorbereiden · %3$d%%</string>
+    <string name="live_badge">Live</string>
+    <string name="a11y_live_photo">Livefoto</string>
+    <string name="send_live_title">Bewegende foto</string>
+    <string name="send_live_still_only">Alleen als gewone foto versturen</string>
+    <string name="send_live_hint">De fotolijst speelt het korte filmpje af wanneer de foto verschijnt.</string>
+    <string name="send_live_still_hint">Alleen de foto wordt verstuurd, zonder filmpje.</string>
+    <string name="fs_live_photos">Livefoto’s</string>
+    <string name="fs_live_on">Afspelen bij tonen</string>
+    <string name="fs_live_tap">Afspelen bij tikken</string>
+    <string name="fs_live_off">Alleen foto</string>
+</resources>

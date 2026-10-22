@@ -165,6 +165,15 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if out.CapturedAt == nil {
 		out.CapturedAt = it.CapturedHint
 	}
+	if it.IsLive() {
+		out.Kind = gen.Live
+		mo := gen.ItemMotion{Status: gen.ItemMotionStatusProcessing}
+		if *it.MotionStatus == "ready" {
+			mo = gen.ItemMotion{Status: gen.ItemMotionStatusReady, Width: it.MotionWidth, Height: it.MotionHeight,
+				DurationMs: it.MotionDurationMS, HasAudio: it.MotionHasAudio}
+		}
+		out.Motion = &mo
+	}
 	if it.FocalX != nil && it.FocalY != nil {
 		out.FocalPoint = &gen.FocalPoint{X: float32(*it.FocalX), Y: float32(*it.FocalY)}
 	}

@@ -1,0 +1,14 @@
+{
+ "footer": "Kodas galioja 10 minučių. Jei jo neprašėte, šį laišką galite ignoruoti.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Jūsų kinframe prisijungimo kodas: {{code}}", "intro": "Sveiki,\n\nNorėdami prisijungti prie kinframe, naudokite šį kodą:"},
+  "Register": {"subject": "Jūsų kinframe registracijos kodas: {{code}}", "intro": "Sveiki atvykę į kinframe!\n\nNorėdami baigti kurti paskyrą, naudokite šį kodą:"},
+  "ForgotPassword": {"subject": "Jūsų kinframe paskyros atkūrimo kodas: {{code}}", "intro": "Sveiki,\n\nNorėdami atkurti savo kinframe paskyrą, naudokite šį kodą:"},
+  "Generic": {"subject": "Jūsų kinframe patvirtinimo kodas: {{code}}", "intro": "Sveiki,\n\nJūsų kinframe patvirtinimo kodas:"},
+  "BindNewIdentifier": {"subject": "Patvirtinkite naują kinframe el. pašto adresą: {{code}}", "intro": "Sveiki,\n\nNorėdami patvirtinti naują savo kinframe paskyros el. pašto adresą, naudokite šį kodą:"},
+  "UserPermissionValidation": {"subject": "Jūsų kinframe patvirtinimo kodas: {{code}}", "intro": "Sveiki,\n\nPrieš keičiant kinframe paskyrą, patvirtinkite, kad tai jūs, naudodami šį kodą:"},
+  "MfaVerification": {"subject": "Jūsų kinframe patvirtinimo kodas: {{code}}", "intro": "Sveiki,\n\nNorėdami baigti prisijungti prie kinframe, naudokite šį kodą:"},
+  "BindMfa": {"subject": "Jūsų kinframe patvirtinimo kodas: {{code}}", "intro": "Sveiki,\n\nNorėdami įjungti dviejų veiksmų patvirtinimą kinframe, naudokite šį kodą:"}
+ }
+}

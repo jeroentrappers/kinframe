@@ -96,7 +96,7 @@ class SetupController(private val c: FrameController) {
         }
     }
 
-    fun chooseLanguage(lang: String) { g.prefs.language = lang }
+    fun chooseLanguage(lang: String) = c.setLanguage(lang)
 
     /** The zone picked in the wizard: used for the clock right away and sent with the enrollment. */
     fun chooseTimezone(id: String) {
