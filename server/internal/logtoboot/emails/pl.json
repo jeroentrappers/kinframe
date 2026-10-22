@@ -1,0 +1,14 @@
+{
+ "footer": "Kod wygasa za 10 minut. Jeśli to nie była twoja prośba, możesz zignorować tę wiadomość.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Twój kod logowania do kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby zalogować się do kinframe:"},
+  "Register": {"subject": "Twój kod rejestracji w kinframe: {{code}}", "intro": "Witaj w kinframe!\n\nUżyj tego kodu, aby dokończyć zakładanie konta:"},
+  "ForgotPassword": {"subject": "Twój kod odzyskiwania konta kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby odzyskać konto kinframe:"},
+  "Generic": {"subject": "Twój kod weryfikacyjny kinframe: {{code}}", "intro": "Cześć,\n\nTwój kod weryfikacyjny kinframe to:"},
+  "BindNewIdentifier": {"subject": "Potwierdź nowy adres e-mail w kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby potwierdzić nowy adres e-mail swojego konta kinframe:"},
+  "UserPermissionValidation": {"subject": "Twój kod weryfikacyjny kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby potwierdzić, że to ty, zanim zmienisz konto kinframe:"},
+  "MfaVerification": {"subject": "Twój kod weryfikacyjny kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby dokończyć logowanie do kinframe:"},
+  "BindMfa": {"subject": "Twój kod weryfikacyjny kinframe: {{code}}", "intro": "Cześć,\n\nUżyj tego kodu, aby włączyć weryfikację dwuetapową w kinframe:"}
+ }
+}

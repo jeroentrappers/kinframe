@@ -10,6 +10,9 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Weather: `GET /v1/geocode` (`Place[]`), the `Weather` schema for `Change.weather` (nullable; extends the earlier
   `fetched_at`/`current.temp_c`/`daily[].min_c`… fields without renaming them), Discovery `weather`, problem codes
   `upstream_unavailable` (502) and `feature_disabled` (503), and `required`/range limits on `settings.location`.
+- Web parity: Discovery `webpush_public_key` (VAPID), `listPlacements?on_this_day=MM-DD` ("On this day": captured on
+  that month-day in an earlier year, UTC capture dates), and the documented 3 s minimum for `trim`
+  (`422 validation_failed` on `items.N.trim`). Deleting the album a frame plays resets `slideshow.album_id` to null.
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -92,6 +95,16 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Signed media URLs: `/v1/media/signed/{key}?exp=…&sig=…`, HMAC-SHA256, valid 1–2 h (expiry rounded up so URLs are
   cacheable). `Item.thumb_url` uses them; `GET /v1/items/{id}/media/{variant}` redirects to one (5 min).
 - Avatars are public at unguessable URLs (`/avatars/{user}/{random}.webp`) so frames and `<img>` can cache them.
+- Blob storage (`fs` or `s3`): only processed files are stored, never originals. The fs store keeps the old layout
+  and ETags, so switching nothing changes nothing. The S3 store records `Content-Type` and the sha256 (user metadata)
+  on upload. Its `Open` stats once and then issues one ranged GET per contiguous read with `If-Match` on the stat's
+  ETag, so `http.ServeContent` handles Range/multi-range/304 exactly as for files and never mixes two versions.
+- Scratch moved from `<data dir>/media/tmp` to `<data dir>/tmp` (same volume, so the fs store still renames into
+  place); the fs store's `List` skips the old `tmp/` directory and `*.tmp` leftovers.
+- Presigned redirects apply to signed media URLs and avatars only. Frame downloads always stream: frames revalidate
+  with the rendition's sha256 ETag and send their device token, neither of which a bucket understands.
+- The frame release mirror (`<data dir>/frame-releases`) stays on local disk: it is a cache refilled from GitHub or
+  the drop-in directory, not user data. Weather is cached in PostgreSQL.
 - Frame imports (`/v1/device/imports`) create media without an owner; sender is the frame (`sender_id` = frame id).
 
 ## Change feed
@@ -110,6 +123,10 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   otherwise `412 version_conflict`, after which the client re-applies, so the latest write wins. Missing `If-Match` →
   400. `version` and `kiosk.owner_pin_set` are read-only and ignored in patches. The merged document is validated
   against `FrameSettings`; unknown fields are preserved.
+- Owner PIN: only the owner may send `kiosk.owner_pin` (4–6 digits or null; others get 403). It is replaced by
+  `kiosk.owner_pin_hash` (PBKDF2-HMAC-SHA256, 20 000 iterations, 16-byte salt) before merging, so the PIN is never
+  stored. People never see the hash and can't write it; the frame gets it in the feed and may replace it with
+  `PATCH /device/settings` when the PIN is changed at the frame. `owner_pin_set` is derived from the hash.
 
 ## Weather
 
@@ -131,9 +148,17 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Push
 
-- Endpoints are stored for all kinds. Delivery is implemented for UnifiedPush (plain POST of a JSON payload with ids,
-  localized title/body in en/nl). WebPush (needs RFC 8291 encryption + VAPID), FCM and APNs are not delivered yet.
-  Push is only used when the user has no open websocket.
+- Endpoints are stored for all kinds. Delivery is implemented for UnifiedPush (plain POST of the JSON payload) and
+  WebPush (RFC 8291 aes128gcm encryption + RFC 8292 VAPID, via `github.com/SherClockHolmes/webpush-go`, TTL 24 h).
+  FCM and APNs are not delivered yet. Push is only used when the user has no open websocket.
+- Payload: `{type, key, title, body, ids}`; `type` is the websocket event type, `key` the message (`reaction`,
+  `reply`, `delivered`, `failed`, `join_request`, `membership`), title/body localized (en/nl) from the endpoint's
+  `locale`. Reaction and reply pushes carry `send_id` too, so clients can open the send.
+- `delivered` is pushed once per send and frame, by the ack that delivers its last placement there (seen-after-
+  delivered doesn't repeat it). Placements of a send that failed don't hold it back.
+- A push service answering 404/410 (or a webpush endpoint without keys) deletes the endpoint.
+- VAPID keys: `KINFRAME_VAPID_*` or generated once into `<data dir>/vapid.json`; the public key is in discovery
+  (`webpush_public_key`, contract addition) for `PushManager.subscribe`.
 
 ## Rate limits (in memory, per process)
 
@@ -143,9 +168,9 @@ invites 60/h per user; dev tokens 120/h per IP.
 ## Not done yet (v0.1 follow-ups)
 
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
-- Calendar, S3 storage.
+- Calendar.
 - Garbage collection of media no longer referenced by any live placement.
-- WebPush/FCM/APNs delivery.
+- FCM/APNs delivery.
 - Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm
   because libvips 8.14 there did **not** strip EXIF/GPS with `[Q=..,strip]`, which `TestPhotoPipeline` caught inside
   the image. The root cause in 8.14 wasn't investigated further. `make test-docker` (full suite with

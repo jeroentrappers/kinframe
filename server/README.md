@@ -36,8 +36,8 @@ Whole stack in Docker instead: `docker compose -f ../deploy/compose/docker-compo
 | `make run` | Run locally in dev auth mode against the compose Postgres |
 | `make docker` | Runtime image (Debian trixie-slim, ffmpeg + libvips-tools, non-root uid 10001) |
 
-The binary has four commands: `serve` (default), `migrate` (apply migrations and exit; `serve` also migrates on start),
-`healthcheck` (used by the image's `HEALTHCHECK`) and `bootstrap-logto` (below).
+The binary has five commands: `serve` (default), `migrate` (apply migrations and exit; `serve` also migrates on start),
+`healthcheck` (used by the image's `HEALTHCHECK`), `bootstrap-logto` and `migrate-blobs` (both below).
 
 ## Configuration
 
@@ -50,7 +50,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_PUBLIC_URL` | `http://localhost:8110` | External base URL (links, tus `Location`, media URLs, discovery) |
 | `KINFRAME_SERVER_NAME` | `kinframe` | Name shown by apps before sign-in (discovery) |
 | `KINFRAME_DATABASE_URL` | — (required) | PostgreSQL URL |
-| `KINFRAME_DATA_DIR` | `./data` | Media (`media/`), tus uploads (`uploads/`), dev signing key |
+| `KINFRAME_DATA_DIR` | `./data` | Media with the fs backend (`media/`), tus uploads (`uploads/`), pipeline scratch (`tmp/`), dev signing key |
 | `KINFRAME_WEB_DIR` | — | Built web SPA; served with SPA fallback (`/f/{code}`, `/i/{token}`, …) |
 | `KINFRAME_SIGNING_KEY` | generated in dev | 32+ random bytes (hex/base64); signs device tokens, dev tokens and media URLs. Required in production |
 | `KINFRAME_OIDC_ISSUER` | — | Logto issuer, e.g. `https://auth.example.org/oidc` (required unless dev auth) |
@@ -71,6 +71,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_COMMAND_TIMEOUT_SECONDS` | `10` | Remote command wait before `504` |
 | `KINFRAME_JANITOR_INTERVAL_SECONDS` | `600` | Trash purge, feed pruning, upload expiry |
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |
+| `KINFRAME_VAPID_PUBLIC_KEY` / `KINFRAME_VAPID_PRIVATE_KEY` | generated | WebPush VAPID key pair (base64url P-256 public point and private scalar). Set both or neither; when unset the server generates a pair once and keeps it in `<data dir>/vapid.json` (mode 0600). Keep it stable: browser subscriptions are bound to the public key |
+| `KINFRAME_VAPID_SUBJECT` | public URL if https, else `mailto:kinframe@localhost` | Contact push services see in the VAPID token (`mailto:` or `https://`) |
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
 | `KINFRAME_VERSION` | `0.1.0` | Reported in discovery |
@@ -79,11 +81,66 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_FRAME_RELEASES_POLL_MINUTES` | `30` | GitHub poll interval (also polled at start; ETag, rate limits respected) |
 | `KINFRAME_FRAME_RELEASES_GITHUB_TOKEN` | — | Optional token for a higher GitHub API rate limit |
 | `KINFRAME_FRAME_RELEASES_API` | `https://api.github.com` | GitHub API base (GitHub Enterprise, tests) |
-| `KINFRAME_APPLE_APP_IDS` | `TEAMID.app.kinframe.family` | Comma-separated iOS app ids (`<team id>.<bundle id>`) served in `/.well-known/apple-app-site-association`, so `/f/<code>` and `/i/<token>` links open the iOS app. Set your own when you build the app under another team; `off` disables the file |
+| `KINFRAME_BLOB_BACKEND` | `fs` | Where processed media is stored: `fs` (`<data dir>/media`) or `s3` (see [Media storage](#media-storage)) |
+| `KINFRAME_BLOB_FS_ROOT` | `<data dir>/media` | Root of the fs store |
+| `KINFRAME_S3_ENDPOINT` | — | `host:port` or URL (`https://…` sets TLS) of the S3 API. Required for `s3` |
+| `KINFRAME_S3_REGION` | `us-east-1` | Bucket region |
+| `KINFRAME_S3_BUCKET` | — | Bucket. Required for `s3` |
+| `KINFRAME_S3_ACCESS_KEY` / `_SECRET_KEY` | — | Credentials. Required for `s3` |
+| `KINFRAME_S3_USE_SSL` | `true` | TLS when the endpoint has no scheme |
+| `KINFRAME_S3_PATH_STYLE` | `false` | Path-style requests; MinIO/Silo and most self-hosted servers need `true` |
+| `KINFRAME_S3_PREFIX` | — | Key prefix inside the bucket (share a bucket) |
+| `KINFRAME_S3_CREATE_BUCKET` | `true` | Create the bucket at start when missing (needs the permission) |
+| `KINFRAME_MEDIA_REDIRECT` | `off` | `presigned`: signed media URLs and avatars 302 to 15-minute presigned bucket URLs (s3 only) |
+| `KINFRAME_S3_PUBLIC_ENDPOINT` | the endpoint | Endpoint presigned URLs point at, when clients reach the bucket under another name |
+| `KINFRAME_APPLE_TEAM_ID` | — | Apple Developer Team ID the iOS family app is signed with. When set, `/.well-known/apple-app-site-association` lists `<team id>.<bundle id>` so `/f/<code>` and `/i/<token>` links open the iOS app. Unset: the file is not served |
+| `KINFRAME_APPLE_BUNDLE_ID` | `app.kinframe.family` | Bundle id of the iOS app, for the same file (change it for your own build) |
 | `KINFRAME_WEATHER` | `on` | `off` disables weather for all frames and `/v1/geocode` (discovery `weather: false`) |
 | `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
 | `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
+
+## Media storage
+
+Processed media (masters, frame renditions, posters, thumbnails, avatars) lives in a blob store
+(`internal/blob`): the local filesystem (`fs`, default) or any S3-compatible bucket (`s3`: AWS S3, MinIO/Silo,
+Hetzner Object Storage, Backblaze B2, Cloudflare R2, …) via minio-go. Originals are never stored: tus uploads stay in
+`<data dir>/uploads` and are deleted once the master exists. vips and ffmpeg need real files, so each pipeline job
+works in its own `<data dir>/tmp/job-*` directory (masters are downloaded there when the store is remote) and removes
+it on every exit path; the janitor prunes anything a crash left behind after 6 h.
+
+Serving is unchanged for clients: the server streams objects with `Range`, `ETag` and `If-None-Match` (ranged GETs
+against the bucket, so a `Range` request or a 304 never downloads the whole object). Frame renditions keep their
+sha256 ETag; other files get the store's ETag (fs: modification time and size as before; s3: the object ETag, so
+caches revalidate once after a switch). With `KINFRAME_MEDIA_REDIRECT=presigned` signed media URLs and avatars
+redirect to presigned bucket URLs instead, for buckets clients can reach; frame downloads always stream.
+
+Local development: `docker compose -f ../deploy/compose/docker-compose.dev.yml --profile s3 up -d` starts Silo on
+127.0.0.1:9100 (console 9101); the variables are in `.env.example`. Tests start their own Silo container through the
+Docker CLI (falling back to `sg docker -c` for shells that predate docker group membership) and skip the S3 cases
+without Docker; `KINFRAME_REQUIRE_S3=1` makes them fail instead, `KINFRAME_TEST_S3_ENDPOINT` (+ `_ACCESS_KEY`,
+`_SECRET_KEY`) uses an existing server.
+
+### migrate-blobs
+
+`kinframe-server migrate-blobs --from fs --to s3` copies every object between the configured stores (either
+direction). It reads only the blob variables (`KINFRAME_DATA_DIR`/`KINFRAME_BLOB_FS_ROOT` and `KINFRAME_S3_*`;
+`KINFRAME_BLOB_BACKEND` is ignored), so it runs next to a live server. Objects already in the destination with the
+same size and sha256 are skipped, so it is idempotent and resumable; every copy is re-read and its sha256 checked.
+Progress is logged every 10 s; it exits non-zero when any object failed (run it again to retry).
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--from`, `--to` | `fs`, `s3` | Backends |
+| `--dry-run` | off | Only report what would be copied |
+| `--prefix` | — | Only keys with this prefix (`media/`, `items/`, `avatars/`) |
+| `--workers` | `4` | Parallel copies |
+| `--no-verify` | off | Skip re-reading copies (size is still checked) |
+| `-v` | off | Log every object |
+
+Switching a server: run it once while the server still uses `fs`, switch `KINFRAME_BLOB_BACKEND=s3` and restart,
+then run it again to pick up what was written in between. The fs copy stays until you delete it. The production
+procedure is in `docs/deploy.md`.
 
 ## Weather
 
@@ -147,7 +204,7 @@ Management API access, in order of preference:
 ## Layout
 
 ```
-cmd/kinframe-server   main: serve, migrate, healthcheck, bootstrap-logto
+cmd/kinframe-server   main: serve, migrate, healthcheck, bootstrap-logto, migrate-blobs
 internal/api          HTTP handlers (strict server impl + tus, websockets, media), validation, auth middleware
 internal/api/gen      generated by oapi-codegen (do not edit), plus the prepared spec used for request validation
 internal/app          wiring and background loops (workers, janitor)
@@ -155,6 +212,7 @@ internal/logtoboot    bootstrap-logto: Logto Management API setup
 internal/auth         Logto JWT validation, dev tokens, device tokens, argon2id, signed URLs
 internal/store        PostgreSQL access (pgx), change feed, job queue
 internal/db           pool, embedded goose migrations
+internal/blob         blob stores (filesystem, S3) for processed media, migration between them
 internal/media        sniffing, geometry, vips/ffmpeg wrappers
 internal/worker       media pipeline on the Postgres job queue (FOR UPDATE SKIP LOCKED)
 internal/ws           websocket hub (device + user), commands

@@ -361,6 +361,13 @@ func (h *Hub) ServeUser(w http.ResponseWriter, r *http.Request, userID uuid.UUID
 	h.mu.Unlock()
 }
 
+// UserConnected reports whether the user has an open websocket.
+func (h *Hub) UserConnected(userID uuid.UUID) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return len(h.users[userID]) > 0
+}
+
 // SendToUser queues a message on all of the user's connections; false if none.
 func (h *Hub) SendToUser(userID uuid.UUID, msg any) bool {
 	h.mu.Lock()

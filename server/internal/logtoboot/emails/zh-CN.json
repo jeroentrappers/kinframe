@@ -1,0 +1,14 @@
+{
+ "footer": "此验证码将在 10 分钟后失效。如果这不是你本人的请求，请忽略此邮件。",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "你的 kinframe 登录验证码：{{code}}", "intro": "你好：\n\n请使用以下验证码登录 kinframe："},
+  "Register": {"subject": "你的 kinframe 注册验证码：{{code}}", "intro": "欢迎使用 kinframe！\n\n请使用以下验证码完成账号创建："},
+  "ForgotPassword": {"subject": "你的 kinframe 账号恢复验证码：{{code}}", "intro": "你好：\n\n请使用以下验证码恢复你的 kinframe 账号："},
+  "Generic": {"subject": "你的 kinframe 验证码：{{code}}", "intro": "你好：\n\n你的 kinframe 验证码是："},
+  "BindNewIdentifier": {"subject": "确认你的 kinframe 新邮箱：{{code}}", "intro": "你好：\n\n请使用以下验证码确认你 kinframe 账号的新邮箱地址："},
+  "UserPermissionValidation": {"subject": "你的 kinframe 验证码：{{code}}", "intro": "你好：\n\n在更改你的 kinframe 账号之前，请使用以下验证码确认是你本人操作："},
+  "MfaVerification": {"subject": "你的 kinframe 验证码：{{code}}", "intro": "你好：\n\n请使用以下验证码完成 kinframe 登录："},
+  "BindMfa": {"subject": "你的 kinframe 验证码：{{code}}", "intro": "你好：\n\n请使用以下验证码为 kinframe 开启两步验证："}
+ }
+}

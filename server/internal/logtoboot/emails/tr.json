@@ -1,0 +1,14 @@
+{
+ "footer": "Kodun süresi 10 dakika içinde dolar. Bu kodu siz istemediyseniz bu e-postayı yok sayabilirsiniz.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "kinframe giriş kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe’e giriş yapmak için bu kodu kullanın:"},
+  "Register": {"subject": "kinframe kayıt kodunuz: {{code}}", "intro": "kinframe’e hoş geldiniz!\n\nHesabınızı oluşturmayı tamamlamak için bu kodu kullanın:"},
+  "ForgotPassword": {"subject": "kinframe hesap kurtarma kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe hesabınızı kurtarmak için bu kodu kullanın:"},
+  "Generic": {"subject": "kinframe doğrulama kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe doğrulama kodunuz:"},
+  "BindNewIdentifier": {"subject": "kinframe için yeni e-postanızı onaylayın: {{code}}", "intro": "Merhaba,\n\nkinframe hesabınızın yeni e-posta adresini onaylamak için bu kodu kullanın:"},
+  "UserPermissionValidation": {"subject": "kinframe doğrulama kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe hesabınızda değişiklik yapmadan önce siz olduğunuzu onaylamak için bu kodu kullanın:"},
+  "MfaVerification": {"subject": "kinframe doğrulama kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe’e girişi tamamlamak için bu kodu kullanın:"},
+  "BindMfa": {"subject": "kinframe doğrulama kodunuz: {{code}}", "intro": "Merhaba,\n\nkinframe için iki adımlı doğrulamayı açmak için bu kodu kullanın:"}
+ }
+}

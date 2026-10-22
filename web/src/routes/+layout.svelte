@@ -8,8 +8,9 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { frames } from '$lib/frames.svelte';
 	import { live } from '$lib/live.svelte';
+	import { push } from '$lib/push.svelte';
 	import { toasts } from '$lib/toast.svelte';
-	import { i18n, t } from '$lib/i18n/index.svelte';
+	import { applyDocumentLocale, i18n, t } from '$lib/i18n/index.svelte';
 	import AppShell from '$components/AppShell.svelte';
 	import Toaster from '$components/Toaster.svelte';
 	import Logo from '$components/Logo.svelte';
@@ -26,13 +27,13 @@
 
 	async function boot() {
 		booting = true;
-		const doc = await discovery.load();
+		const [doc] = await Promise.all([discovery.load(), i18n.ready]);
 		if (doc) await auth.init();
 		booting = false;
 	}
 
 	onMount(() => {
-		document.documentElement.lang = i18n.locale;
+		applyDocumentLocale(i18n.locale);
 		void boot();
 		const off = live.on((e) => {
 			if (e.type === 'frame.status') frames.setStatus(e.frame_id, e.online, e.last_seen_at);
@@ -59,6 +60,7 @@
 		if (auth.status === 'signed_in') {
 			live.start(() => auth.getToken());
 			void frames.load();
+			void push.init();
 		} else if (auth.status === 'signed_out') {
 			live.stop();
 			frames.reset();

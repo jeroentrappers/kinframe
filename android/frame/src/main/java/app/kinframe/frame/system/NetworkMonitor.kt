@@ -20,6 +20,8 @@ class NetworkMonitor(private val context: Context) {
         val linkMbps: Int? = null,
         /** 0..4 */
         val level: Int = 0,
+        /** Android's own probe found a captive portal (sign-in page) on this network. */
+        val captivePortal: Boolean = false,
     )
 
     private val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -61,6 +63,7 @@ class NetworkMonitor(private val context: Context) {
             rssi = rssi,
             linkMbps = info?.linkSpeed?.takeIf { isWifi && it > 0 },
             level = rssi?.let { WifiManager.calculateSignalLevel(it, 5) } ?: 0,
+            captivePortal = caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL) == true,
         )
     }
 }

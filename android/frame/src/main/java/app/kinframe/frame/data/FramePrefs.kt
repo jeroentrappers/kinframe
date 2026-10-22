@@ -27,6 +27,11 @@ class FramePrefs(context: Context) {
         get() = sp.getString("language", null)
         set(v) = sp.edit(commit = true) { putString("language", v) }
 
+    /** Last `locale.language` seen in the server settings (null until the frame is claimed). */
+    var serverLanguage: String?
+        get() = sp.getString("server_language", null)
+        set(v) = sp.edit(commit = true) { putString("server_language", v) }
+
     /** Highest setup step the person reached (so a power cut mid-setup resumes there). */
     var setupStep: Int
         get() = sp.getInt("setup_step", 0)
@@ -40,6 +45,11 @@ class FramePrefs(context: Context) {
         get() = sp.getString("owner_name", null)
         set(v) = sp.edit(commit = true) { putString("owner_name", v) }
 
+    /** Time zone picked in the setup wizard (until the server's settings say otherwise). */
+    var timezone: String?
+        get() = sp.getString("timezone", null)
+        set(v) = sp.edit(commit = true) { putString("timezone", v) }
+
     var playlistSeed: Long
         get() = sp.getLong("playlist_seed", 0L)
         set(v) = sp.edit { putLong("playlist_seed", v) }
@@ -48,9 +58,20 @@ class FramePrefs(context: Context) {
         get() = sp.getString("playlist_current", null)
         set(v) = sp.edit { putString("playlist_current", v) }
 
+    /** Wrong owner-PIN attempts in a row and the lockout end (wall clock), see [app.kinframe.frame.kiosk.PinAttempts]. */
+    val pinAttempts = object : app.kinframe.frame.kiosk.PinAttempts.Store {
+        override var failures: Int
+            get() = sp.getInt("pin_failures", 0)
+            set(v) = sp.edit(commit = true) { putInt("pin_failures", v) }
+        override var lockedUntil: Long
+            get() = sp.getLong("pin_locked_until", 0L)
+            set(v) = sp.edit(commit = true) { putLong("pin_locked_until", v) }
+    }
+
     /** Forget everything tied to the device credential; keeps language and server choice. */
     fun wipeDevice() = sp.edit(commit = true) {
-        remove("claimed"); remove("owner_name"); remove("playlist_seed"); remove("playlist_current")
+        remove("pin_failures"); remove("pin_locked_until")
+        remove("claimed"); remove("owner_name"); remove("server_language"); remove("playlist_seed"); remove("playlist_current")
         putInt("setup_step", 0)
     }
 }

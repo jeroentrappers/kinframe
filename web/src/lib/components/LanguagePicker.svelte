@@ -10,14 +10,15 @@
 	<span class="visually-hidden">{t('settings.language')}</span>
 	<select
 		value={i18n.locale}
-		onchange={(e) => {
+		onchange={async (e) => {
 			const l = e.currentTarget.value as Locale;
-			i18n.set(l);
+			await i18n.set(l);
 			onchange?.(l);
 		}}
 	>
-		{#each LOCALES as l}
-			<option value={l.id}>{l.label}</option>
+		<!-- Each language in its own name (and script), so anyone can find theirs. -->
+		{#each LOCALES as l (l.id)}
+			<option value={l.id} lang={l.id}>{l.label}</option>
 		{/each}
 	</select>
 </label>
@@ -27,7 +28,8 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		padding: 0 6px 0 12px;
+		padding-block: 0;
+		padding-inline: 12px 6px;
 		border-radius: var(--r-full);
 		border: 1px solid var(--border);
 		background: var(--surface);
@@ -46,5 +48,6 @@
 		padding: 8px 4px;
 		cursor: pointer;
 		outline: none;
+		max-width: 14em;
 	}
 </style>

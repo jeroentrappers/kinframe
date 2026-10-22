@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { api, call, ApiError, type Frame, type FrameSettings, type SleepSchedule } from '$lib/api/client';
+	import { api, call, ApiError, type Album, type Frame, type FrameSettings, type SleepSchedule } from '$lib/api/client';
 	import { formatInterval } from '$lib/format';
 	import { mergePatchDiff, rebaseSettings, type JsonObject } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
-	import { t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { i18n, LOCALES, t, type MessageKey } from '$lib/i18n/index.svelte';
+	import { matchLocale } from '$lib/i18n/locales';
 	import { softFly } from '$lib/motion';
 	import Icon from '../Icon.svelte';
 	import LocationPicker from './LocationPicker.svelte';
@@ -25,10 +26,12 @@
 	/** Fill in spec defaults (product spec §6) for anything the server left out. */
 	function withDefaults(s: FrameSettings): FrameSettings {
 		const c = clone(s);
-		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', ...c.slideshow };
+		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', album_id: null, on_this_day: false, ...c.slideshow };
 		c.display = { brightness: 204, sleep_schedules: [], ...c.display };
 		c.widgets = { caption: true, clock: true, weather: false, ...c.widgets };
 		c.locale = { temperature_unit: 'c', ...c.locale };
+		// Older frames may store a region tag (nl-BE) or a code we don't list; show the closest language.
+		c.locale.language = matchLocale(c.locale.language) ?? 'en';
 		c.location ??= null;
 		return c;
 	}
@@ -45,9 +48,14 @@
 		}
 	}
 
+	let albums = $state<Album[]>([]);
+
 	$effect(() => {
 		void frame.id;
 		void load();
+		call(api.GET('/v1/frames/{frameId}/albums', { params: { path: { frameId: frame.id } } }))
+			.then((a) => (albums = a))
+			.catch(() => (albums = []));
 	});
 
 	const strip = (s: FrameSettings): JsonObject => {
@@ -167,9 +175,9 @@
 				<div class="field">
 					<label for="s-int">{t('settingsForm.interval')}</label>
 					<select id="s-int" class="select" bind:value={form.slideshow.interval_s}>
-						{#each INTERVALS as s}<option value={s}>{formatInterval(s)}</option>{/each}
+						{#each INTERVALS as s}<option value={s}>{formatInterval(s, i18n.tag)}</option>{/each}
 						{#if form.slideshow.interval_s && !INTERVALS.includes(form.slideshow.interval_s)}
-							<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s)}</option>
+							<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s, i18n.tag)}</option>
 						{/if}
 					</select>
 				</div>
@@ -207,6 +215,20 @@
 					</select>
 				</div>
 			{/if}
+			{#if albums.length > 0 || form.slideshow.album_id}
+				<div class="field">
+					<label for="s-album">{t('settingsForm.playAlbum')}</label>
+					<select id="s-album" class="select" bind:value={form.slideshow.album_id}>
+						<option value={null}>{t('settingsForm.allPhotos')}</option>
+						{#each albums as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
+					</select>
+					<span class="hint">{t('settingsForm.playAlbumHint')}</span>
+				</div>
+			{/if}
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.slideshow.on_this_day} />
+				<span><span class="s-label">{t('settingsForm.onThisDay')}</span><span class="hint">{t('settingsForm.onThisDayHint')}</span></span>
+			</label>
 			<label class="switch"><input type="checkbox" bind:checked={form.widgets.caption} /><span>{t('settingsForm.showCaption')}</span></label>
 			<label class="switch"><input type="checkbox" bind:checked={form.widgets.clock} /><span>{t('settingsForm.showClock')}</span></label>
 		</section>
@@ -221,6 +243,17 @@
 					<Icon name="sun" size={20} />
 				</div>
 			</div>
+			{#if form.locale}
+				<div class="field">
+					<label for="s-lang" class="label">{t('settingsForm.frameLanguage')}</label>
+					<select id="s-lang" class="select" bind:value={form.locale.language} aria-describedby="s-lang-hint">
+						{#each LOCALES as l (l.id)}
+							<option value={l.id} lang={l.id}>{l.label}</option>
+						{/each}
+					</select>
+					<p id="s-lang-hint" class="hint">{t('settingsForm.frameLanguageHint')}</p>
+				</div>
+			{/if}
 		</section>
 
 		<section class="card card-pad stack" aria-labelledby="wx-title">
@@ -274,7 +307,7 @@
 								<span class="tiny muted">{t('settingsForm.sleepAt')}</span>
 								<input class="input time" type="time" bind:value={s.sleep_at} required />
 							</label>
-							<span class="arrow" aria-hidden="true">→</span>
+							<span class="arrow" aria-hidden="true">{i18n.dir === 'rtl' ? '←' : '→'}</span>
 							<label>
 								<span class="tiny muted">{t('settingsForm.wakeAt')}</span>
 								<input class="input time" type="time" bind:value={s.wake_at} required />

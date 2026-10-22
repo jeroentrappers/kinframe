@@ -37,6 +37,38 @@ kinframe_log_level: info
 # logto_admin_password:          # ≥ 8 chars; the Logto console login
 # kinframe_signing_key:          # ≥ 32 random bytes, hex or base64; signs device tokens and media URLs
 # kinframe_smtp_host / _port / _user / _password / _from
+# kinframe_s3_access_key:        # backend s3 or kinframe_minio: kinframe's own key (not the root account)
+# kinframe_s3_secret_key:        # ≥ 8 chars (MinIO's minimum)
+# kinframe_minio_root_user:      # kinframe_minio only: object store admin, used by the bootstrap job
+# kinframe_minio_root_password:  # ≥ 8 chars
+
+# Media storage (processed media only: masters, renditions, posters, thumbnails, avatars).
+#   fs: the `media` volume (default; nothing changes for existing deployments)
+#   s3: an S3-compatible bucket, either the bundled object store below or a managed one
+kinframe_blob_backend: fs
+
+# Bundled S3 server: Silo (pgsty/silo), the community-maintained MinIO fork. MinIO Inc. stopped publishing
+# community images (minio/minio is gone from Docker Hub); Silo keeps the MinIO S3 API, MINIO_* settings and
+# on-disk format, ships security fixes and includes `mc`. Can be enabled while the backend is still `fs`, so the
+# media can be copied over with `migrate-blobs` before switching.
+kinframe_minio: false
+kinframe_minio_image: pgsty/silo
+kinframe_minio_version: RELEASE.2026-10-18T00-00-00Z
+kinframe_minio_console_port: 0     # >0 publishes the web console on 127.0.0.1:<port> (ssh -L to use it)
+
+# S3 settings. With kinframe_minio the endpoint is the bundled server (http://minio:9000, path-style) and the
+# bootstrap job creates the bucket and a kinframe user limited to it. For managed storage set the endpoint,
+# region, TLS and addressing to what the provider documents and create the bucket and key there.
+kinframe_s3_endpoint: ""           # e.g. https://fsn1.your-objectstorage.com (ignored with kinframe_minio)
+kinframe_s3_public_endpoint: ""    # only for kinframe_media_redirect=presigned: the bucket as clients reach it
+kinframe_s3_region: us-east-1
+kinframe_s3_bucket: kinframe
+kinframe_s3_prefix: ""             # optional key prefix inside the bucket
+kinframe_s3_use_ssl: true          # managed storage; the bundled server is plain HTTP on the compose network
+kinframe_s3_path_style: false      # MinIO/Silo need path-style; forced on with kinframe_minio
+# off: the server streams media (default, keeps the bucket private and internal).
+# presigned: signed media URLs and avatars redirect to 15-minute presigned bucket URLs (bucket must be public).
+kinframe_media_redirect: "off"
 
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}

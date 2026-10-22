@@ -1,0 +1,14 @@
+{
+ "footer": "Mã này sẽ hết hạn sau 10 phút. Nếu bạn không yêu cầu mã này, bạn có thể bỏ qua email này.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Mã đăng nhập kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nDùng mã này để đăng nhập vào kinframe:"},
+  "Register": {"subject": "Mã đăng ký kinframe của bạn: {{code}}", "intro": "Chào mừng bạn đến với kinframe!\n\nDùng mã này để hoàn tất việc tạo tài khoản:"},
+  "ForgotPassword": {"subject": "Mã khôi phục tài khoản kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nDùng mã này để khôi phục tài khoản kinframe của bạn:"},
+  "Generic": {"subject": "Mã xác minh kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nMã xác minh kinframe của bạn là:"},
+  "BindNewIdentifier": {"subject": "Xác nhận email mới cho kinframe: {{code}}", "intro": "Xin chào,\n\nDùng mã này để xác nhận địa chỉ email mới cho tài khoản kinframe của bạn:"},
+  "UserPermissionValidation": {"subject": "Mã xác minh kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nDùng mã này để xác nhận đó là bạn trước khi thay đổi tài khoản kinframe:"},
+  "MfaVerification": {"subject": "Mã xác minh kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nDùng mã này để hoàn tất đăng nhập vào kinframe:"},
+  "BindMfa": {"subject": "Mã xác minh kinframe của bạn: {{code}}", "intro": "Xin chào,\n\nDùng mã này để bật xác minh 2 bước cho kinframe:"}
+ }
+}

@@ -388,6 +388,27 @@ func (e HeartbeatScreenState) Valid() bool {
 	}
 }
 
+// Defines values for HeartbeatStorageState.
+const (
+	Critical HeartbeatStorageState = "critical"
+	Low      HeartbeatStorageState = "low"
+	Ok       HeartbeatStorageState = "ok"
+)
+
+// Valid indicates whether the value is a known member of the HeartbeatStorageState enum.
+func (e HeartbeatStorageState) Valid() bool {
+	switch e {
+	case Critical:
+		return true
+	case Low:
+		return true
+	case Ok:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for HeartbeatUpdateState.
 const (
 	HeartbeatUpdateStateDownloading HeartbeatUpdateState = "downloading"
@@ -475,6 +496,21 @@ func (e MediaKind) Valid() bool {
 	case Photo:
 		return true
 	case Video:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PinHashAlg.
+const (
+	Pbkdf2Sha256 PinHashAlg = "pbkdf2-sha256"
+)
+
+// Valid indicates whether the value is a known member of the PinHashAlg enum.
+func (e PinHashAlg) Valid() bool {
+	switch e {
+	case Pbkdf2Sha256:
 		return true
 	default:
 		return false
@@ -1260,6 +1296,10 @@ type Discovery struct {
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
 	Weather *bool   `json:"weather,omitempty"`
 	Web     *string `json:"web,omitempty"`
+
+	// WebpushPublicKey VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+	// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+	WebpushPublicKey *string `json:"webpush_public_key,omitempty"`
 }
 
 // Fit defines model for Fit.
@@ -1337,7 +1377,17 @@ type FrameSettings struct {
 	} `json:"display,omitempty"`
 	Kiosk *struct {
 		AllowRemoveMembersOnFrame *bool `json:"allow_remove_members_on_frame,omitempty"`
-		OwnerPinSet               *bool `json:"owner_pin_set,omitempty"`
+
+		// OwnerPin Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+		// The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+		// locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+		OwnerPin *string `json:"owner_pin,omitempty"`
+
+		// OwnerPinHash Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+		// in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+		// with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+		OwnerPinHash *PinHash `json:"owner_pin_hash,omitempty"`
+		OwnerPinSet  *bool    `json:"owner_pin_set,omitempty"`
 	} `json:"kiosk,omitempty"`
 	Locale *struct {
 		FirstDayOfWeek  *FrameSettingsLocaleFirstDayOfWeek  `json:"first_day_of_week,omitempty"`
@@ -1480,13 +1530,19 @@ type Heartbeat struct {
 	LastShutdownClean *bool  `json:"last_shutdown_clean,omitempty"`
 
 	// LastUpdateError Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`
-	LastUpdateError   *string               `json:"last_update_error,omitempty"`
-	LocalTime         *time.Time            `json:"local_time,omitempty"`
-	PlacementsCached  *int                  `json:"placements_cached,omitempty"`
+	LastUpdateError  *string    `json:"last_update_error,omitempty"`
+	LocalTime        *time.Time `json:"local_time,omitempty"`
+	PlacementsCached *int       `json:"placements_cached,omitempty"`
+
+	// PlacementsEvicted Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+	PlacementsEvicted *int                  `json:"placements_evicted,omitempty"`
 	PlacementsMissing *int                  `json:"placements_missing,omitempty"`
 	ScreenState       *HeartbeatScreenState `json:"screen_state,omitempty"`
 	StorageFreeBytes  *int                  `json:"storage_free_bytes,omitempty"`
-	StorageTotalBytes *int                  `json:"storage_total_bytes,omitempty"`
+
+	// StorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+	StorageState      *HeartbeatStorageState `json:"storage_state,omitempty"`
+	StorageTotalBytes *int                   `json:"storage_total_bytes,omitempty"`
 
 	// Timezone Example: Europe/Brussels
 	Timezone *string `json:"timezone,omitempty"`
@@ -1504,6 +1560,9 @@ type Heartbeat struct {
 
 // HeartbeatScreenState defines model for Heartbeat.ScreenState.
 type HeartbeatScreenState string
+
+// HeartbeatStorageState `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+type HeartbeatStorageState string
 
 // HeartbeatUpdateState Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
 // `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
@@ -1624,6 +1683,23 @@ type Permissions struct {
 	SeeLibrary     *bool `json:"see_library,omitempty"`
 	Send           *bool `json:"send,omitempty"`
 }
+
+// PinHash PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+type PinHash struct {
+	Alg PinHashAlg `json:"alg"`
+
+	// Hash base64 of 32 bytes
+	Hash string `json:"hash"`
+
+	// Iterations Example: 20000
+	Iterations int `json:"iterations"`
+
+	// Salt base64
+	Salt string `json:"salt"`
+}
+
+// PinHashAlg defines model for PinHash.Alg.
+type PinHashAlg string
 
 // Place A geocoding result (Open-Meteo geocoding API).
 type Place struct {
@@ -1823,7 +1899,7 @@ type SendCreate struct {
 		FocalPoint   *FocalPoint `json:"focal_point,omitempty"`
 		IncludeAudio *bool       `json:"include_audio,omitempty"`
 
-		// Trim Videos only.
+		// Trim Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
 		Trim *struct {
 			EndMs   *int `json:"end_ms,omitempty"`
 			StartMs *int `json:"start_ms,omitempty"`
@@ -2122,7 +2198,11 @@ type ListPlacementsParams struct {
 	SenderId   *Id                             `form:"sender_id,omitempty" json:"sender_id,omitempty"`
 	Kind       *MediaKind                      `form:"kind,omitempty" json:"kind,omitempty"`
 	AlbumId    *Id                             `form:"album_id,omitempty" json:"album_id,omitempty"`
-	Sort       *ListPlacementsParamsSort       `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// OnThisDay "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+	// on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+	OnThisDay *string                   `form:"on_this_day,omitempty" json:"on_this_day,omitempty"`
+	Sort      *ListPlacementsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
 }
 
 // ListPlacementsParamsVisibility defines parameters for ListPlacements.
@@ -2327,6 +2407,9 @@ type ServerInterface interface {
 
 	// (POST /v1/device/imports)
 	DeviceImport(w http.ResponseWriter, r *http.Request, params DeviceImportParams)
+
+	// (GET /v1/device/join-requests)
+	DeviceListJoinRequests(w http.ResponseWriter, r *http.Request)
 
 	// (POST /v1/device/join-requests/{requestId})
 	DeviceDecideJoin(w http.ResponseWriter, r *http.Request, requestId Id)
@@ -2663,6 +2746,20 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceListJoinRequests operation middleware
+func (siw *ServerInterfaceWrapper) DeviceListJoinRequests(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceListJoinRequests(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3655,6 +3752,19 @@ func (siw *ServerInterfaceWrapper) ListPlacements(w http.ResponseWriter, r *http
 		return
 	}
 
+	// ------------- Optional query parameter "on_this_day" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "on_this_day", r.URL.Query(), &params.OnThisDay, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "on_this_day"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "on_this_day", Err: err})
+		}
+		return
+	}
+
 	// ------------- Optional query parameter "sort" -------------
 
 	err = runtime.BindQueryParameterWithOptions("form", true, false, "sort", r.URL.Query(), &params.Sort, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
@@ -4519,6 +4629,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/code", wrapper.DeviceGetCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/heartbeat", wrapper.DeviceHeartbeat)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports", wrapper.DeviceImport)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/join-requests/{requestId}", wrapper.DeviceDecideJoin)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/members/{userId}", wrapper.DeviceRemoveMember)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/placements/{placementId}", wrapper.DevicePatchPlacement)
@@ -4700,6 +4811,27 @@ func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceListJoinRequestsRequestObject struct {
+}
+
+type DeviceListJoinRequestsResponseObject interface {
+	VisitDeviceListJoinRequestsResponse(w http.ResponseWriter) error
+}
+
+type DeviceListJoinRequests200JSONResponse []JoinRequest
+
+func (response DeviceListJoinRequests200JSONResponse) VisitDeviceListJoinRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -6578,6 +6710,9 @@ type StrictServerInterface interface {
 	// (POST /v1/device/imports)
 	DeviceImport(ctx context.Context, request DeviceImportRequestObject) (DeviceImportResponseObject, error)
 
+	// (GET /v1/device/join-requests)
+	DeviceListJoinRequests(ctx context.Context, request DeviceListJoinRequestsRequestObject) (DeviceListJoinRequestsResponseObject, error)
+
 	// (POST /v1/device/join-requests/{requestId})
 	DeviceDecideJoin(ctx context.Context, request DeviceDecideJoinRequestObject) (DeviceDecideJoinResponseObject, error)
 
@@ -6943,6 +7078,30 @@ func (sh *strictHandler) DeviceImport(w http.ResponseWriter, r *http.Request, pa
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceImportResponseObject); ok {
 		if err := validResponse.VisitDeviceImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceListJoinRequests operation middleware
+func (sh *strictHandler) DeviceListJoinRequests(w http.ResponseWriter, r *http.Request) {
+	var request DeviceListJoinRequestsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceListJoinRequests(ctx, request.(DeviceListJoinRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceListJoinRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceListJoinRequestsResponseObject); ok {
+		if err := validResponse.VisitDeviceListJoinRequestsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

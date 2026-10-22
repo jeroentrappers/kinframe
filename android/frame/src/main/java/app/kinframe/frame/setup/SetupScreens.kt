@@ -89,7 +89,9 @@ import app.kinframe.frame.FrameApp
 import app.kinframe.frame.Locales
 import app.kinframe.frame.R
 import app.kinframe.frame.ui.Format
+import app.kinframe.frame.ui.LanguageGrid
 import app.kinframe.frame.ui.QrCode
+import app.kinframe.frame.ui.StatusCard
 import kotlinx.coroutines.delay
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import kotlin.math.cos
@@ -111,8 +113,10 @@ fun SetupFlow(controller: SetupController) {
             when (step) {
                 SetupStep.Language -> LanguageStep(controller)
                 SetupStep.Wifi -> WifiStep(controller)
+                SetupStep.TimeZone -> TimeZoneStep(controller)
                 SetupStep.Server -> ServerStep(controller, state)
                 SetupStep.Enrolling -> EnrollingStep(controller, state)
+                SetupStep.Update -> UpdateStep(controller)
                 SetupStep.Code -> CodeStep(controller, state)
                 SetupStep.Celebrate -> CelebrateStep(state.ownerName)
             }
@@ -122,7 +126,7 @@ fun SetupFlow(controller: SetupController) {
 
 /** Common wizard frame: wordmark and page dots on top, content, actions at the bottom. */
 @Composable
-private fun StepScaffold(
+internal fun StepScaffold(
     index: Int,
     onBack: (() -> Unit)?,
     primary: (@Composable () -> Unit)?,
@@ -132,7 +136,7 @@ private fun StepScaffold(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Wordmark()
             Spacer(Modifier.weight(1f))
-            PageDots(count = 4, current = index)
+            PageDots(count = SETUP_DOTS, current = index)
         }
         Box(Modifier.weight(1f).fillMaxWidth().padding(vertical = 24.dp)) { content() }
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -164,33 +168,32 @@ fun Wordmark(onDark: Boolean = false) {
 @Composable
 private fun LanguageStep(c: SetupController) {
     val context = LocalContext.current
-    var selected by remember { mutableStateOf(Locales.effective(context)) }
+    // Starts on the system language when we have it; tapping a language switches the whole wizard to it at once.
+    val selected = remember { Locales.effective(context) }
     StepScaffold(
         index = 0, onBack = null,
         primary = {
             KinButton(stringResource(R.string.action_continue), {
-                val changed = Locales.stored(context) != selected
-                c.chooseLanguage(selected)
+                if (Locales.stored(context) == null) c.chooseLanguage(selected)
                 c.goTo(SetupStep.Wifi)
-                if (changed) (context as? Activity)?.recreate()
             })
         },
     ) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+        LanguageStepContent(selected) { c.chooseLanguage(it) }
+    }
+}
+
+/** The language step's body, separate from [SetupController] for screenshot tests. */
+@Composable
+internal fun LanguageStepContent(selected: String, onSelect: (String) -> Unit) {
+    Column(Modifier.fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Globe, null, tint = Kin.colors.accent, size = 34.dp)
+            Spacer(Modifier.width(16.dp))
             KinHeading(stringResource(R.string.setup_welcome_title), stringResource(R.string.setup_language_body))
-            Spacer(Modifier.height(36.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                Locales.supported.forEach { (code, name) ->
-                    KinCard(Modifier.width(300.dp), selected = selected == code, onClick = { selected = code }) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            KinIcon(KinIcons.Globe, null, tint = if (selected == code) Kin.colors.accent else Kin.colors.inkSoft)
-                            Text(name, style = Kin.type.title, modifier = Modifier.padding(start = 16.dp).weight(1f))
-                            if (selected == code) KinIcon(KinIcons.Check, null, tint = Kin.colors.accent)
-                        }
-                    }
-                }
-            }
         }
+        Spacer(Modifier.height(20.dp))
+        LanguageGrid(selected, onSelect, Modifier.weight(1f))
     }
 }
 
@@ -222,7 +225,7 @@ private fun WifiStep(c: SetupController) {
     }
     StepScaffold(
         index = 1, onBack = { c.back() },
-        primary = { KinButton(stringResource(R.string.action_continue), { c.goTo(SetupStep.Server) }, enabled = net.connected) },
+        primary = { KinButton(stringResource(R.string.action_continue), { c.goTo(SetupStep.TimeZone) }, enabled = net.connected) },
     ) {
         Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
             Column(Modifier.weight(1f)) {
@@ -246,6 +249,18 @@ private fun WifiStep(c: SetupController) {
                             )
                         }
                     }
+                }
+                val portal by graph.controller.portal.loginUrl.collectAsState()
+                LaunchedEffect(net.connected, net.validated, net.captivePortal) {
+                    if (net.connected) graph.controller.portal.check()
+                }
+                if (net.connected && portal != null) {
+                    Spacer(Modifier.height(16.dp))
+                    StatusCard(
+                        KinIcons.Login, stringResource(R.string.status_card_portal_title), stringResource(R.string.status_card_portal_body),
+                        Kin.colors.accent, onDismiss = {}, action = stringResource(R.string.status_card_portal_action),
+                        onAction = { graph.controller.portalOpen.value = true }, dismissible = false,
+                    )
                 }
                 Spacer(Modifier.height(20.dp))
                 KinButton(stringResource(R.string.wifi_open_settings), openSystem, style = KinButtonStyle.Secondary)
@@ -331,51 +346,57 @@ private fun ServerStep(c: SetupController, s: SetupState) {
     LaunchedEffect(s.useCustomServer) { if (!s.useCustomServer && s.check == ServerCheck.Idle) c.checkServer() }
     val ok = s.check as? ServerCheck.Ok
     StepScaffold(
-        index = 2, onBack = { c.back() },
+        index = 3, onBack = { c.back() },
         primary = {
             if (ok != null) KinButton(stringResource(R.string.action_continue), { c.confirmServer() })
             else KinButton(stringResource(R.string.server_check), { c.checkServer() }, enabled = s.check != ServerCheck.Checking)
         },
     ) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            KinHeading(stringResource(R.string.setup_server_title), stringResource(R.string.setup_server_body))
-            Spacer(Modifier.height(28.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                KinCard(Modifier.weight(1f).heightIn(min = 120.dp), selected = !s.useCustomServer, onClick = { c.setUseCustom(false) }) {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            KinIcon(KinIcons.Server, null, tint = Kin.colors.accent)
-                            Text(ServerUrl.display(BuildConfig.DEFAULT_SERVER.toHttpUrl()), style = Kin.type.bodyStrong, modifier = Modifier.padding(start = 12.dp))
-                        }
-                        Text(stringResource(R.string.server_default_body), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 8.dp))
+        ServerStepContent(s, c::setUseCustom, c::setCustomUrl, c::checkServer)
+    }
+}
+
+/** The server step's body (screenshot tests render it without a controller). */
+@Composable
+internal fun ServerStepContent(s: SetupState, onUseCustom: (Boolean) -> Unit, onUrl: (String) -> Unit, onGo: () -> Unit) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        KinHeading(stringResource(R.string.setup_server_title), stringResource(R.string.setup_server_body))
+        Spacer(Modifier.height(28.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+            KinCard(Modifier.weight(1f).heightIn(min = 120.dp), selected = !s.useCustomServer, onClick = { onUseCustom(false) }) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        KinIcon(KinIcons.Server, null, tint = Kin.colors.accent)
+                        Text(ServerUrl.display(BuildConfig.DEFAULT_SERVER.toHttpUrl()), style = Kin.type.bodyStrong, modifier = Modifier.padding(start = 12.dp))
                     }
-                }
-                KinCard(Modifier.weight(1f).heightIn(min = 120.dp), selected = s.useCustomServer, onClick = { c.setUseCustom(true) }) {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            KinIcon(KinIcons.Settings, null, tint = Kin.colors.accent)
-                            Text(stringResource(R.string.server_custom), style = Kin.type.bodyStrong, modifier = Modifier.padding(start = 12.dp))
-                        }
-                        Text(stringResource(R.string.server_custom_body), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 8.dp))
-                    }
+                    Text(stringResource(R.string.server_default_body), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 8.dp))
                 }
             }
-            if (s.useCustomServer) {
-                Spacer(Modifier.height(20.dp))
-                OutlinedTextField(
-                    value = s.customUrl, onValueChange = c::setCustomUrl, singleLine = true,
-                    label = { Text(stringResource(R.string.server_address)) },
-                    placeholder = { Text("https://frames.example.org") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go, autoCorrectEnabled = false),
-                    keyboardActions = KeyboardActions(onGo = { c.checkServer() }),
-                    textStyle = Kin.type.body,
-                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Kin.colors.accent, focusedLabelColor = Kin.colors.accent, cursorColor = Kin.colors.accent),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+            KinCard(Modifier.weight(1f).heightIn(min = 120.dp), selected = s.useCustomServer, onClick = { onUseCustom(true) }) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        KinIcon(KinIcons.Settings, null, tint = Kin.colors.accent)
+                        Text(stringResource(R.string.server_custom), style = Kin.type.bodyStrong, modifier = Modifier.padding(start = 12.dp))
+                    }
+                    Text(stringResource(R.string.server_custom_body), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 8.dp))
+                }
             }
-            Spacer(Modifier.height(20.dp))
-            ServerCheckResult(s.check)
         }
+        if (s.useCustomServer) {
+            Spacer(Modifier.height(20.dp))
+            OutlinedTextField(
+                value = s.customUrl, onValueChange = onUrl, singleLine = true,
+                label = { Text(stringResource(R.string.server_address)) },
+                placeholder = { Text("https://frames.example.org") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go, autoCorrectEnabled = false),
+                keyboardActions = KeyboardActions(onGo = { onGo() }),
+                textStyle = Kin.type.body,
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Kin.colors.accent, focusedLabelColor = Kin.colors.accent, cursorColor = Kin.colors.accent),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        Spacer(Modifier.height(20.dp))
+        ServerCheckResult(s.check)
     }
 }
 
@@ -419,7 +440,7 @@ private fun ServerCheckResult(check: ServerCheck) {
 
 @Composable
 private fun EnrollingStep(c: SetupController, s: SetupState) {
-    StepScaffold(index = 2, onBack = if (s.enrollError != null) ({ c.goTo(SetupStep.Server) }) else null, primary = {
+    StepScaffold(index = 3, onBack = if (s.enrollError != null) ({ c.goTo(SetupStep.Server) }) else null, primary = {
         if (s.enrollError != null) KinButton(stringResource(R.string.action_try_again), { c.enroll() })
     }) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -442,7 +463,7 @@ private fun CodeStep(c: SetupController, s: SetupState) {
     val graph = remember { FrameApp.graph(context) }
     var now by remember { mutableLongStateOf(graph.clock.nowMs()) }
     LaunchedEffect(Unit) { while (true) { delay(15_000); now = graph.clock.nowMs() } }
-    StepScaffold(index = 3, onBack = null, primary = null) {
+    StepScaffold(index = 5, onBack = null, primary = null) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val landscape = maxWidth > maxHeight
             when (val code = s.code) {
@@ -457,45 +478,55 @@ private fun CodeStep(c: SetupController, s: SetupState) {
                     Spacer(Modifier.height(24.dp))
                     KinButton(stringResource(R.string.action_try_again), { c.retryCode() })
                 }
-                is CodeState.Ready -> {
-                    val instructions = @Composable {
-                        Column {
-                            KinHeading(stringResource(R.string.code_title), null)
-                            Spacer(Modifier.height(20.dp))
-                            CodeInstruction(1, stringResource(R.string.code_step1, graph.webHostDisplay()))
-                            CodeInstruction(2, stringResource(R.string.code_step2))
-                            CodeInstruction(3, stringResource(R.string.code_step3))
-                            Spacer(Modifier.height(24.dp))
-                            Text(Format.code(code.code.code), style = Kin.type.code, color = Kin.colors.ink)
-                            Text(
-                                stringResource(R.string.code_valid_for, Format.remaining(context, code.expiresAtMs - now)),
-                                style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 4.dp),
-                            )
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp)) {
-                                WaitingDots()
-                                Text(stringResource(R.string.code_waiting), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 10.dp))
-                            }
-                        }
-                    }
-                    val qr = @Composable {
-                        Box(
-                            Modifier.clip(KinShapeL).background(Color.White).padding(22.dp),
-                            contentAlignment = Alignment.Center,
-                        ) { QrCode(code.code.joinUrl, Modifier.size(if (landscape) 300.dp else 260.dp)) }
-                    }
-                    if (landscape) {
-                        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(56.dp)) {
-                            Box(Modifier.weight(1f)) { instructions() }
-                            qr()
-                        }
-                    } else {
-                        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterVertically)) {
-                            instructions()
-                            qr()
-                        }
-                    }
-                }
+                is CodeState.Ready -> CodeReadyContent(
+                    code = Format.code(code.code.code),
+                    joinUrl = code.code.joinUrl,
+                    webHost = graph.webHostDisplay(),
+                    validFor = Format.remaining(context, code.expiresAtMs - now),
+                    landscape = landscape,
+                )
             }
+        }
+    }
+}
+
+/** The frame code with instructions and QR code (screenshot tests render it without a controller). */
+@Composable
+internal fun CodeReadyContent(code: String, joinUrl: String, webHost: String, validFor: String, landscape: Boolean) {
+    val instructions = @Composable {
+        Column {
+            KinHeading(stringResource(R.string.code_title), null)
+            Spacer(Modifier.height(20.dp))
+            CodeInstruction(1, stringResource(R.string.code_step1, webHost))
+            CodeInstruction(2, stringResource(R.string.code_step2))
+            CodeInstruction(3, stringResource(R.string.code_step3))
+            Spacer(Modifier.height(24.dp))
+            Text(code, style = Kin.type.code, color = Kin.colors.ink)
+            Text(
+                stringResource(R.string.code_valid_for, validFor),
+                style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 4.dp),
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 16.dp)) {
+                WaitingDots()
+                Text(stringResource(R.string.code_waiting), style = Kin.type.caption, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 10.dp))
+            }
+        }
+    }
+    val qr = @Composable {
+        Box(
+            Modifier.clip(KinShapeL).background(Color.White).padding(22.dp),
+            contentAlignment = Alignment.Center,
+        ) { QrCode(joinUrl, Modifier.size(if (landscape) 300.dp else 260.dp)) }
+    }
+    if (landscape) {
+        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(56.dp)) {
+            Box(Modifier.weight(1f)) { instructions() }
+            qr()
+        }
+    } else {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterVertically)) {
+            instructions()
+            qr()
         }
     }
 }
@@ -527,7 +558,7 @@ private fun WaitingDots() {
 // ---------------------------------------------------------------------------------------------- celebrate
 
 @Composable
-private fun CelebrateStep(owner: String?) {
+internal fun CelebrateStep(owner: String?) {
     val t = rememberInfiniteTransition(label = "celebrate")
     val pulse by t.animateFloat(0.92f, 1.06f, infiniteRepeatable(tween(1100, easing = FastOutSlowInEasing), RepeatMode.Reverse), label = "pulse")
     val ring by t.animateFloat(0f, 1f, infiniteRepeatable(tween(2200, easing = LinearEasing)), label = "ring")
@@ -564,3 +595,4 @@ private fun CelebrateStep(owner: String?) {
     }
 }
 
+private const val SETUP_DOTS = 6

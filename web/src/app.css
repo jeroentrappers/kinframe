@@ -195,7 +195,7 @@ textarea {
 
 .skip-link {
 	position: absolute;
-	left: var(--s-3);
+	inset-inline-start: var(--s-3);
 	top: -100px;
 	z-index: 100;
 	padding: var(--s-2) var(--s-4);
@@ -478,10 +478,13 @@ hr.sep {
 }
 .select {
 	appearance: none;
-	padding-right: 40px;
+	padding-inline-end: 40px;
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23887766' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
 	background-position: right 14px center;
+}
+[dir='rtl'] .select {
+	background-position: left 14px center;
 }
 
 /* Switch: <label class="switch"><input type="checkbox"><span>Label</span></label> */
@@ -511,7 +514,7 @@ hr.sep {
 	content: '';
 	position: absolute;
 	top: 2px;
-	left: 2px;
+	inset-inline-start: 2px;
 	width: 22px;
 	height: 22px;
 	border-radius: 50%;
@@ -525,6 +528,9 @@ hr.sep {
 }
 .switch input:checked::after {
 	transform: translateX(18px);
+}
+[dir='rtl'] .switch input:checked::after {
+	transform: translateX(-18px);
 }
 .switch input:focus-visible {
 	outline: 3px solid var(--focus);

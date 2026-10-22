@@ -1,5 +1,597 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">kinframe</string>
-    <string name="placeholder">The kinframe family app is coming soon.</string>
+    <string name="app_name" translatable="false">kinframe</string>
+
+    <!-- common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
+    <string name="common_back">Back</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_done">Done</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_load_more">Show more</string>
+    <string name="common_optional">optional</string>
+    <string name="common_save">Save</string>
+    <string name="common_saved">Saved</string>
+    <string name="common_try_again">Try again</string>
+    <string name="common_undo">Undo</string>
+    <string name="common_remove">Remove</string>
+    <string name="common_more">More options</string>
+    <string name="common_selected">Selected</string>
+    <string name="common_not_selected">Not selected</string>
+
+    <string name="nav_frames">Frames</string>
+    <string name="nav_send">Send</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="live_reconnecting">Reconnecting…</string>
+    <string name="live_join_request">%1$s wants to join %2$s</string>
+
+    <!-- welcome and server choice -->
+    <string name="welcome_title">Your photos, on their frame, in seconds.</string>
+    <string name="welcome_lede">kinframe sends photos and videos to the family’s photo frames. No subscriptions, no tracking, and the server belongs to your family.</string>
+    <string name="welcome_default_server">Continue with %1$s</string>
+    <string name="welcome_own_server">Use your own server</string>
+    <string name="welcome_footer">kinframe is free software (AGPL-3.0)</string>
+    <string name="server_title">Your own server</string>
+    <string name="server_body">Enter the address of your family’s kinframe server. You can find it on the server’s website.</string>
+    <string name="server_label">Server address</string>
+    <string name="server_placeholder">frames.example.org</string>
+    <string name="server_check">Check server</string>
+    <string name="server_checking">Checking…</string>
+    <string name="server_found">Found it</string>
+    <string name="server_version">Version %1$s</string>
+    <string name="server_use">Use this server</string>
+    <string name="server_invalid">That doesn’t look like a server address. Check it and try again.</string>
+    <string name="server_unreachable">There’s no kinframe server at that address, or it can’t be reached right now.</string>
+    <string name="server_change">Change server</string>
+    <string name="server_switch_title">Open this on %1$s?</string>
+    <string name="server_switch_body">This link belongs to another kinframe server. To use it, the app switches to that server and you sign in there.</string>
+    <string name="server_switch_confirm">Switch server</string>
+
+    <!-- sign in -->
+    <string name="signin_connected">Connected to %1$s</string>
+    <string name="signin_button">Sign in</string>
+    <string name="signin_hint">New here? Signing in creates your account. We’ll email you a code, no password needed.</string>
+    <string name="signin_working">Signing you in…</string>
+    <string name="signin_failed">Sign-in didn’t work. Please try again.</string>
+    <string name="signin_expired">You were signed out. Please sign in again to continue.</string>
+    <string name="signin_reason_frame">Sign in to add the frame. We’ll take you right back.</string>
+    <string name="signin_reason_invite">Sign in to accept your invitation. We’ll take you right back.</string>
+    <string name="signin_no_auth">Sign-in isn’t set up on this server yet. Ask whoever runs it to finish the setup.</string>
+    <string name="signin_dev_title">Developer sign-in</string>
+    <string name="signin_dev_hint">This server runs in development mode. Pick any email to act as that person.</string>
+    <string name="signin_dev_email">Email</string>
+    <string name="signin_dev_name">Name</string>
+
+    <!-- first run -->
+    <string name="name_title">Welcome to kinframe!</string>
+    <string name="name_body">What should your family call you? This name appears on the frame next to the photos you send.</string>
+    <string name="name_label">Your name</string>
+
+    <!-- frames -->
+    <string name="frames_title">Your frames</string>
+    <plurals name="frames_summary">
+        <item quantity="one">%1$d frame · %2$d online</item>
+        <item quantity="other">%1$d frames · %2$d online</item>
+    </plurals>
+    <string name="frames_add">Add a frame</string>
+    <string name="frames_open">Open %1$s</string>
+    <string name="frames_needs_update">An update is waiting for this frame</string>
+    <string name="frames_empty_title">Add your first frame</string>
+    <string name="frames_empty_body">Every kinframe shows an 8-digit code on its screen. Enter it here to set up a new frame or join one from the family.</string>
+    <string name="frames_empty_cta">Add your first frame</string>
+    <string name="frames_send_to">Send to %1$s</string>
+
+    <string name="frame_online">Online</string>
+    <string name="frame_offline">Offline</string>
+    <string name="frame_last_seen">Last seen %1$s</string>
+    <string name="frame_name">Frame name</string>
+    <string name="frame_location">Where is it?</string>
+    <string name="frame_tab_overview">Overview</string>
+    <string name="frame_tab_library">Photos</string>
+    <string name="frame_tab_people">People</string>
+    <string name="frame_tab_settings">Settings</string>
+
+    <string name="role_owner">Owner</string>
+    <string name="role_admin">Admin</string>
+    <string name="role_member">Member</string>
+
+    <!-- add frame -->
+    <string name="add_title">Add a frame</string>
+    <string name="add_body">Enter the 8-digit code shown on the frame. A new frame shows it during setup. On a frame that’s already set up, open the menu and choose Add someone.</string>
+    <string name="add_code_label">Frame code</string>
+    <string name="add_code_hint">You can paste the whole code or the link. Spaces don’t matter.</string>
+    <string name="add_paste">Paste</string>
+    <string name="add_submit">Add frame</string>
+    <string name="add_checking">Checking…</string>
+    <string name="add_claimed_title">It’s yours!</string>
+    <string name="add_claimed_body">You’re the owner of this frame now. Give it a name so the family knows which one it is.</string>
+    <string name="add_name_placeholder">Oma’s frame</string>
+    <string name="add_location_placeholder">Living room</string>
+    <string name="add_save_and_send">Save and send photos</string>
+    <string name="add_later">I’ll do this later</string>
+    <string name="add_named">%1$s is ready</string>
+    <string name="add_joined_title">You joined %1$s</string>
+    <string name="add_joined_body">Anything you send now appears on the frame. %1$s can change what you’re allowed to do.</string>
+    <string name="add_already_title">You’re already in</string>
+    <string name="add_already_body">You’re already a member of %1$s.</string>
+    <string name="add_pending_title">Waiting for a yes</string>
+    <string name="add_pending_body">Someone at %1$s needs to tap Allow on the frame. We’ll let you know when they do.</string>
+    <string name="add_send_first">Send your first photos</string>
+    <string name="add_view_frame">View frame</string>
+    <string name="add_back_to_frames">Back to frames</string>
+
+    <!-- send -->
+    <string name="send_title">Send photos</string>
+    <string name="send_lede">Pick photos and videos, add a few words, and choose the frames to send them to.</string>
+    <string name="send_choose">Choose photos</string>
+    <string name="send_choose_hint">Up to %1$d at a time, photos and videos mixed. You can also share them from your gallery.</string>
+    <string name="send_add_more">Add more</string>
+    <string name="send_clear">Clear all</string>
+    <string name="send_count">%1$d of %2$d</string>
+    <string name="send_adjust">Adjust</string>
+    <string name="send_adjust_item">Adjust item %1$d</string>
+    <string name="send_adjust_title">Framing and caption</string>
+    <string name="send_remove_item">Remove item %1$d</string>
+    <string name="send_caption">Caption</string>
+    <string name="send_caption_placeholder">Add a caption…</string>
+    <string name="send_chars_left">%1$d of %2$d characters left</string>
+    <string name="send_apply_all">Use for all %1$d</string>
+    <plurals name="send_applied_all">
+        <item quantity="one">Caption applied to %1$d item</item>
+        <item quantity="other">Caption applied to all %1$d items</item>
+    </plurals>
+    <string name="send_fit_legend">On the frame</string>
+    <string name="send_fill">Fill the screen</string>
+    <string name="send_fit">Show it all</string>
+    <string name="send_fill_hint">The photo fills the screen, cropped around the point you picked.</string>
+    <string name="send_fit_hint">The whole photo is shown, with soft blurred edges.</string>
+    <string name="send_focal_label">Focus point</string>
+    <string name="send_focal_value">%1$d%% from the left, %2$d%% from the top</string>
+    <string name="send_focal_hint">Tap the most important part of the photo. The frame keeps it in view when it crops.</string>
+    <string name="send_landscape">Landscape</string>
+    <string name="send_portrait">Portrait</string>
+    <string name="send_previews_label">How it looks on the frame</string>
+    <string name="send_issue_too_large">Too large. The limit is %1$s.</string>
+    <string name="send_issue_too_long">Too long. Videos can be up to %1$s. Trim it to send.</string>
+    <plurals name="send_issues">
+        <item quantity="one">Fix or remove the highlighted item to send.</item>
+        <item quantity="other">Fix or remove the %1$d highlighted items to send.</item>
+    </plurals>
+    <string name="send_over_limit">You can send up to %1$d at a time. %2$d were left out.</string>
+    <plurals name="send_skipped">
+        <item quantity="one">%1$d file was skipped because it isn’t a photo or video.</item>
+        <item quantity="other">%1$d files were skipped because they aren’t photos or videos.</item>
+    </plurals>
+    <string name="send_to">Send to</string>
+    <string name="send_offline_note">Offline frames get the photos as soon as they’re back online.</string>
+    <string name="send_pick_frame">Choose at least one frame.</string>
+    <plurals name="send_button">
+        <item quantity="one">Send it</item>
+        <item quantity="other">Send all %1$d</item>
+    </plurals>
+    <string name="send_preparing">Getting your photos ready…</string>
+    <string name="send_sent">Sending! You can close the app, it continues in the background.</string>
+    <string name="send_no_frames_title">No frames yet</string>
+    <string name="send_no_frames_body">Add a frame first, then you can send photos to it.</string>
+    <string name="send_video_badge">Video, %1$s</string>
+    <string name="send_trim">Trim</string>
+    <string name="send_trim_label">Part of the video to send</string>
+    <string name="send_trim_range">%1$s – %2$s · %3$s</string>
+    <string name="send_trim_min">Videos need to be at least 3 seconds.</string>
+    <string name="send_include_audio">Include sound</string>
+    <string name="send_photo_n">Photo %1$d</string>
+    <string name="send_video_n">Video %1$d</string>
+
+    <!-- outbox / upload progress -->
+    <string name="outbox_title">Sending</string>
+    <string name="outbox_uploading">Uploading %1$d of %2$d · %3$d%%</string>
+    <string name="outbox_waiting_network">Waiting for a connection…</string>
+    <string name="outbox_finishing">Almost done…</string>
+    <string name="outbox_failed">Couldn’t send these photos</string>
+    <string name="outbox_retry">Retry</string>
+    <string name="outbox_discard">Discard</string>
+    <string name="outbox_sent_to">Sent to %1$s</string>
+
+    <!-- history -->
+    <string name="history_title">History</string>
+    <string name="history_lede">Everything you’ve sent, and how it’s doing.</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_ongoing">On the way</string>
+    <string name="history_filter_delivered">Delivered</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <plurals name="history_photos">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <plurals name="history_videos">
+        <item quantity="one">%1$d video</item>
+        <item quantity="other">%1$d videos</item>
+    </plurals>
+    <string name="history_partial">%1$d of %2$d</string>
+    <string name="history_open_send">Open the send from %1$s</string>
+    <string name="history_empty_title">Nothing sent yet</string>
+    <string name="history_empty_body">When you send photos you’ll see them here, along with when they arrive and how the frame reacted.</string>
+    <string name="history_empty_filtered">Nothing here right now</string>
+
+    <string name="stage_processing">Processing</string>
+    <string name="stage_on_its_way">On its way</string>
+    <string name="stage_delivered">Delivered</string>
+    <string name="stage_seen">Seen</string>
+    <string name="stage_failed">Failed</string>
+    <string name="stage_removed">Removed</string>
+
+    <string name="reaction_love">Love</string>
+    <string name="reaction_laugh">Haha</string>
+    <string name="reaction_wow">Wow</string>
+    <string name="reaction_sad">Sad</string>
+    <string name="reply_beautiful">Beautiful!</string>
+    <string name="reply_call_me">Call me</string>
+    <string name="reply_miss_you">Miss you</string>
+    <string name="reply_thanks">Thank you</string>
+    <string name="reaction_from">%1$s from %2$s</string>
+
+    <string name="detail_title">Sent</string>
+    <string name="detail_sent_at">Sent %1$s</string>
+    <string name="detail_unsend">Unsend</string>
+    <string name="detail_unsent">Removed from all frames</string>
+    <string name="detail_unsend_title">Remove from the frames?</string>
+    <string name="detail_unsend_body">These photos will disappear from every frame, even ones that are offline right now.</string>
+    <string name="detail_remove_now">Remove now</string>
+    <string name="detail_delivery_label">Delivery per frame</string>
+    <string name="detail_counts">%1$d seen · %2$d of %3$d delivered</string>
+    <string name="detail_offline_waiting">waiting for the frame to come online</string>
+    <string name="detail_no_caption">No caption</string>
+    <string name="detail_edited">Edited</string>
+    <string name="detail_edit_caption">Edit caption of item %1$d</string>
+    <string name="detail_caption_saved">Caption updated on every frame</string>
+    <string name="detail_replies">Replies</string>
+
+    <string name="failure_unsupported_media">This file type isn’t supported.</string>
+    <string name="failure_corrupt_media">This file seems to be damaged.</string>
+    <string name="failure_video_too_long">This video is too long.</string>
+    <string name="failure_unknown">Something went wrong while preparing this item.</string>
+
+    <!-- frame overview -->
+    <string name="overview_remote">Remote control</string>
+    <string name="overview_offline_control">The frame is offline. Remote control works again when it’s connected.</string>
+    <string name="overview_details">Details</string>
+    <string name="overview_owner">Owner</string>
+    <string name="overview_members">People</string>
+    <string name="overview_photos">Photos</string>
+    <string name="overview_screen">Screen</string>
+    <string name="overview_since">Added</string>
+    <string name="overview_health">Health</string>
+    <string name="overview_rename">Name and place</string>
+    <string name="overview_renamed">Saved</string>
+    <string name="overview_leave_title">Leave this frame</string>
+    <string name="overview_leave_body">You won’t be able to send to this frame anymore. You can join again with a new code or invite.</string>
+    <string name="overview_leave_button">Leave frame</string>
+    <string name="overview_leave_confirm">Leave %1$s?</string>
+    <string name="overview_leave_dialog_body">Your photos can stay on the frame for everyone to enjoy, or be removed.</string>
+    <string name="overview_remove_mine">Also remove the photos I sent</string>
+    <string name="overview_left">You left %1$s</string>
+    <string name="overview_remove_title">Remove this frame</string>
+    <string name="overview_remove_body">This disconnects the frame and removes it for everyone. Photos stay in each sender’s history.</string>
+    <string name="overview_remove_button">Remove frame</string>
+    <string name="overview_remove_confirm">Remove %1$s?</string>
+    <string name="overview_remove_dialog_body">The frame goes back to its setup screen and everyone loses access. This can’t be undone.</string>
+    <string name="overview_type_name">Type “%1$s” to confirm</string>
+    <string name="overview_removed">%1$s was removed</string>
+
+    <string name="cmd_previous">Previous</string>
+    <string name="cmd_next">Next</string>
+    <string name="cmd_sleep">Sleep</string>
+    <string name="cmd_wake">Wake up</string>
+    <string name="cmd_identify">Identify</string>
+    <string name="cmd_sync">Sync now</string>
+    <string name="cmd_done_previous">Went back a photo</string>
+    <string name="cmd_done_next">Skipped to the next photo</string>
+    <string name="cmd_done_sleep">%1$s is going to sleep</string>
+    <string name="cmd_done_wake">%1$s is waking up</string>
+    <string name="cmd_done_identify">%1$s is showing its name</string>
+    <string name="cmd_done_sync">%1$s is checking for new photos</string>
+    <string name="cmd_failed">The frame couldn’t do that right now.</string>
+
+    <string name="health_wifi">Wi-Fi</string>
+    <string name="health_storage">Storage</string>
+    <string name="health_free">%1$s free of %2$s</string>
+    <string name="health_cached">Photos on the frame</string>
+    <plurals name="health_missing">
+        <item quantity="one">%1$d still downloading</item>
+        <item quantity="other">%1$d still downloading</item>
+    </plurals>
+    <string name="health_uptime">Running for</string>
+    <string name="health_version">App version</string>
+    <string name="health_last_seen">Last contact</string>
+    <string name="health_unclean">Lost power %1$s.</string>
+
+    <!-- library -->
+    <string name="library_visible">On the frame</string>
+    <string name="library_hidden">Hidden</string>
+    <string name="library_trash_tab">Trash</string>
+    <string name="library_own_only">You’re seeing the photos you sent. The owner can let you see everything.</string>
+    <string name="library_trash_note">Items in the trash are deleted for good after %1$d days.</string>
+    <string name="library_empty_title">No photos on this frame yet</string>
+    <string name="library_empty_body">Send a few to get the slideshow going.</string>
+    <string name="library_empty_hidden">Nothing hidden</string>
+    <string name="library_empty_trash">The trash is empty</string>
+    <string name="library_item_by">Photo from %1$s</string>
+    <string name="library_video_by">Video from %1$s</string>
+    <string name="library_select_all">Select all</string>
+    <string name="library_clear_selection">Clear selection</string>
+    <plurals name="library_selected">
+        <item quantity="one">%1$d selected</item>
+        <item quantity="other">%1$d selected</item>
+    </plurals>
+    <string name="library_hide">Hide</string>
+    <string name="library_unhide">Show again</string>
+    <string name="library_trash">Move to trash</string>
+    <string name="library_restore">Restore</string>
+    <plurals name="library_done_hide">
+        <item quantity="one">%1$d photo hidden</item>
+        <item quantity="other">%1$d photos hidden</item>
+    </plurals>
+    <plurals name="library_done_unhide">
+        <item quantity="one">%1$d photo back on the frame</item>
+        <item quantity="other">%1$d photos back on the frame</item>
+    </plurals>
+    <plurals name="library_done_trash">
+        <item quantity="one">%1$d photo moved to trash</item>
+        <item quantity="other">%1$d photos moved to trash</item>
+    </plurals>
+    <plurals name="library_done_restore">
+        <item quantity="one">%1$d photo restored</item>
+        <item quantity="other">%1$d photos restored</item>
+    </plurals>
+    <plurals name="library_some_failed">
+        <item quantity="one">%1$d item couldn’t be changed.</item>
+        <item quantity="other">%1$d items couldn’t be changed.</item>
+    </plurals>
+    <string name="library_pending">Awaiting approval</string>
+    <string name="library_from">From %1$s</string>
+    <string name="library_received">Received %1$s</string>
+
+    <!-- people -->
+    <string name="people_requests">Waiting to join</string>
+    <string name="people_via_code">Used the frame code</string>
+    <string name="people_via_invite">Invited by %1$s</string>
+    <string name="people_approve">Let in</string>
+    <string name="people_deny">Decline</string>
+    <string name="people_approved">%1$s can now send to this frame</string>
+    <string name="people_denied">Declined %1$s</string>
+    <string name="people_members">People</string>
+    <string name="people_you">you</string>
+    <string name="people_last_sent">Last sent %1$s</string>
+    <string name="people_never_sent">Hasn’t sent anything yet</string>
+    <string name="people_edit_member">Edit %1$s</string>
+    <string name="people_role">Role</string>
+    <string name="people_admin_hint">Admins can do everything except remove the frame or hand over ownership.</string>
+    <string name="people_member_hint">Members can do what you allow below.</string>
+    <string name="people_permissions">Allowed to</string>
+    <string name="people_remove">Remove from frame</string>
+    <string name="people_remove_confirm">Remove %1$s?</string>
+    <string name="people_remove_body">They won’t be able to send to this frame anymore.</string>
+    <string name="people_remove_items">Also remove the photos they sent</string>
+    <string name="people_removed">%1$s was removed</string>
+    <string name="people_invite">Invite someone</string>
+    <string name="people_invite_hint">Share a link. Anyone who opens it and signs in joins this frame.</string>
+    <string name="people_invite_hint_approval">Share a link. When someone opens it, you approve them before they can send.</string>
+    <string name="people_expires">Link works for</string>
+    <string name="people_exp_1d">1 day</string>
+    <string name="people_exp_7d">1 week</string>
+    <string name="people_exp_30d">30 days</string>
+    <string name="people_uses">Can be used</string>
+    <string name="people_uses_single">Once</string>
+    <string name="people_uses_unlimited">By anyone with the link</string>
+    <string name="people_note">Note for yourself</string>
+    <string name="people_note_placeholder">For cousin Lisa</string>
+    <string name="people_create">Create and share link</string>
+    <string name="people_copy">Copy link</string>
+    <string name="people_copied">Link copied</string>
+    <string name="people_share">Share</string>
+    <string name="people_share_title">Join %1$s on kinframe</string>
+    <string name="people_share_text">Join %1$s so you can send photos to it: %2$s</string>
+    <string name="people_active_invites">Active links</string>
+    <string name="people_by_name">Created by %1$s</string>
+    <string name="people_uses_of">Used %1$d of %2$d</string>
+    <string name="people_uses_n">Used %1$d×</string>
+    <string name="people_expires_in">expires %1$s</string>
+    <string name="people_revoke">Revoke link</string>
+    <string name="people_revoked">Invite link revoked</string>
+
+    <string name="perm_send">Send photos and videos</string>
+    <string name="perm_send_hint">Their photos show up on the frame.</string>
+    <string name="perm_invite">Invite others</string>
+    <string name="perm_invite_hint">Create invite links for this frame.</string>
+    <string name="perm_see_library">See all photos</string>
+    <string name="perm_see_library_hint">Browse everything on the frame, not just their own.</string>
+    <string name="perm_manage_library">Manage photos</string>
+    <string name="perm_manage_library_hint">Hide or delete anyone’s photos and edit captions.</string>
+    <string name="perm_change_settings">Change settings</string>
+    <string name="perm_change_settings_hint">Slideshow, sleep times and remote control.</string>
+
+    <!-- frame settings -->
+    <string name="fs_offline_note">The frame is offline. Your changes are saved and applied when it reconnects.</string>
+    <string name="fs_conflict">Someone else changed these settings at the same time. We kept your edits on top of theirs. Check them and save again.</string>
+    <string name="fs_slideshow">Slideshow</string>
+    <string name="fs_interval">Show each photo for</string>
+    <string name="fs_order">Order</string>
+    <string name="fs_order_received">Newest received first</string>
+    <string name="fs_order_taken">By date taken</string>
+    <string name="fs_order_shuffle">Shuffle</string>
+    <string name="fs_reverse">Reverse the order</string>
+    <string name="fs_transition">Transition</string>
+    <string name="fs_crossfade">Fade</string>
+    <string name="fs_slide">Slide</string>
+    <string name="fs_kenburns">Pan &amp; zoom</string>
+    <string name="fs_fill">Fill the screen</string>
+    <string name="fs_fill_hint">Crop photos so there are no bars. Each photo can override this.</string>
+    <string name="fs_show_caption">Show captions</string>
+    <string name="fs_show_clock">Show the clock</string>
+    <string name="fs_display">Screen</string>
+    <string name="fs_brightness">Brightness</string>
+    <string name="fs_sleep">Sleep times</string>
+    <string name="fs_sleep_hint">The frame turns its screen off at night. New photos still arrive while it sleeps.</string>
+    <string name="fs_add_schedule">Add a sleep time</string>
+    <string name="fs_no_schedules">The frame stays on all the time.</string>
+    <string name="fs_schedule_n">Sleep time %1$d</string>
+    <string name="fs_sleep_at">Sleep at</string>
+    <string name="fs_wake_at">Wake at</string>
+    <string name="fs_mode_off">Screen off</string>
+    <string name="fs_mode_dim">Dim only</string>
+    <string name="fs_remove_schedule">Remove this sleep time</string>
+    <string name="fs_weather_title">Location &amp; weather</string>
+    <string name="fs_weather_hint">Where the frame is. Used for the weather and to dim the screen after sunset.</string>
+    <string name="fs_show_weather">Show the weather</string>
+    <string name="fs_show_weather_hint">Current weather next to the clock. Tap it on the frame for the forecast.</string>
+    <string name="fs_needs_location">Choose a place first.</string>
+    <string name="fs_temperature_unit">Temperature</string>
+    <string name="fs_celsius">°C</string>
+    <string name="fs_fahrenheit">°F</string>
+    <string name="fs_weather_credit">Weather data by Open-Meteo.com</string>
+    <string name="fs_unsaved">Unsaved changes</string>
+    <string name="fs_discard">Discard</string>
+    <string name="fs_saved">Settings sent to %1$s</string>
+    <string name="fs_merged_saved">Saved. Someone else’s changes were kept too.</string>
+    <string name="fs_no_permission">Only people allowed to change settings can see these.</string>
+    <string name="location_search">Find a town or city</string>
+    <string name="location_placeholder">e.g. Gent</string>
+    <string name="location_no_results">No places found for “%1$s”.</string>
+    <string name="location_change">Change</string>
+    <string name="location_remove">Remove</string>
+    <string name="location_unnamed">Chosen place</string>
+    <string name="location_error_busy">Too many searches at once. Wait a moment and type again.</string>
+    <string name="location_error_upstream">The place search is not reachable right now. Try again in a minute.</string>
+    <string name="location_error_disabled">Weather and place search are turned off on this server.</string>
+
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="day_sun">Sun</string>
+
+    <plurals name="duration_seconds">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="duration_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="duration_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <!-- invite accept -->
+    <string name="invite_title">Invitation</string>
+    <string name="invite_from">%1$s invited you</string>
+    <string name="invite_join">Join %1$s</string>
+    <string name="invite_instant">Once you join, the photos you send appear on this frame.</string>
+    <string name="invite_needs_approval">%1$s approves new people before they can send.</string>
+    <string name="invite_accept">Join frame</string>
+    <string name="invite_not_now">Not now</string>
+    <string name="invite_already">You’re already a member of this frame.</string>
+    <string name="invite_pending_title">Request sent</string>
+    <string name="invite_pending_body">%1$s will see your request. We’ll let you know when you’re in.</string>
+    <string name="invite_joined_body">The photos you send now appear on this frame.</string>
+    <string name="invite_invalid_title">This invitation doesn’t work</string>
+
+    <!-- settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_profile">Your profile</string>
+    <string name="settings_display_name">Your name</string>
+    <string name="settings_display_name_hint">Shown on the frame next to the photos you send.</string>
+    <string name="settings_name_saved">Name updated</string>
+    <string name="settings_email">Email</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_push_on">Reactions, replies and join requests reach you through %1$s, even when the app is closed.</string>
+    <string name="settings_push_none">To get notified while the app is closed, install a UnifiedPush app such as ntfy. kinframe doesn’t use Google’s push service.</string>
+    <string name="settings_push_pick">Choose push service</string>
+    <string name="settings_push_enable">Turn on notifications</string>
+    <string name="settings_push_fcm">Reactions, replies and join requests reach you through Firebase Cloud Messaging.</string>
+    <string name="settings_notifications_blocked">Notifications are turned off for kinframe in Android settings.</string>
+    <string name="settings_open_system">Open Android settings</string>
+    <string name="settings_server">Server</string>
+    <string name="settings_server_name">Name</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_address">Address</string>
+    <string name="settings_max_items">Items per send</string>
+    <string name="settings_max_video">Longest video</string>
+    <string name="settings_max_upload">Largest file</string>
+    <string name="settings_dev_mode">Signed in with a development token.</string>
+    <string name="settings_signed_in_as">Signed in as %1$s</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_change_server_hint">Changing the server signs you out.</string>
+    <string name="settings_about">kinframe %1$s · free software under the AGPL-3.0 · no tracking</string>
+
+    <!-- notifications -->
+    <string name="channel_activity">Reactions and replies</string>
+    <string name="channel_activity_desc">When a frame reacts to your photos or sends a reply.</string>
+    <string name="channel_people">Join requests</string>
+    <string name="channel_people_desc">When someone wants to join a frame you manage.</string>
+    <string name="channel_sending">Sending</string>
+    <string name="channel_sending_desc">Progress while photos are being uploaded.</string>
+    <string name="channel_frames">Frame updates</string>
+    <string name="channel_frames_desc">Delivery and changes to your access.</string>
+    <string name="notif_sending_title">Sending to %1$s</string>
+    <plurals name="notif_sending_items">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <string name="notif_reaction_title">New reaction</string>
+    <string name="notif_reaction_body">%1$s reacted to your photo</string>
+    <string name="notif_reply_title">New reply</string>
+    <string name="notif_join_title">Join request</string>
+
+    <!-- share target -->
+    <string name="share_label">Send to a frame</string>
+
+    <!-- accessibility -->
+    <string name="a11y_frame_status_online">%1$s, online</string>
+    <string name="a11y_frame_status_offline">%1$s, offline</string>
+    <string name="a11y_photo">Photo</string>
+    <string name="a11y_video">Video</string>
+    <string name="a11y_focal_picker">Photo preview. Double tap to set the focus point.</string>
+    <string name="a11y_select_item">Select item</string>
+
+    <!-- problems (ProblemCode) -->
+    <string name="problem_unauthorized">Please sign in again.</string>
+    <string name="problem_token_expired">Your session expired. Please sign in again.</string>
+    <string name="problem_forbidden">You’re not allowed to do that.</string>
+    <string name="problem_missing_permission">You don’t have permission for that on this frame. Ask the owner.</string>
+    <string name="problem_not_found">We couldn’t find that. It may have been removed.</string>
+    <string name="problem_code_invalid">That code doesn’t match a frame. Check the digits on the frame and try again.</string>
+    <string name="problem_code_expired">That code has expired. The frame will show a new one.</string>
+    <string name="problem_invite_invalid">This invite link isn’t valid. Ask for a new one.</string>
+    <string name="problem_invite_expired">This invite link has expired. Ask for a new one.</string>
+    <string name="problem_already_member">You’re already a member of this frame.</string>
+    <string name="problem_validation_failed">Something in the form isn’t quite right.</string>
+    <string name="problem_too_many_items">That’s more than this server accepts in one go.</string>
+    <string name="problem_video_too_long">That video is longer than this server allows.</string>
+    <string name="problem_upload_too_large">That file is larger than this server allows.</string>
+    <string name="problem_upload_not_found">An upload went missing. Please try sending again.</string>
+    <string name="problem_unsupported_media">One of the files isn’t a supported photo or video format.</string>
+    <string name="problem_corrupt_media">One of the files seems to be damaged.</string>
+    <string name="problem_version_conflict">This changed somewhere else in the meantime. Reload and try again.</string>
+    <string name="problem_frame_offline">The frame is offline right now. Try again when it’s connected.</string>
+    <string name="problem_command_timeout">The frame didn’t answer in time. It may have a weak connection.</string>
+    <string name="problem_owner_cannot_leave">As the owner, hand the frame over to someone else before leaving.</string>
+    <string name="problem_rate_limited">That was a lot of tries. Please wait a moment and try again.</string>
+    <string name="problem_app_update_required">An update of this app is needed.</string>
+    <string name="problem_upstream_unavailable">The place search is not reachable right now. Try again in a minute.</string>
+    <string name="problem_feature_disabled">This is turned off on this server.</string>
+    <string name="problem_server_error">Something went wrong on the server. Please try again.</string>
+    <string name="problem_network">You seem to be offline. Check your connection and try again.</string>
 </resources>

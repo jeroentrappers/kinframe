@@ -27,7 +27,8 @@ type Config struct {
 	Version    string
 
 	DatabaseURL string
-	DataDir     string // media, uploads
+	DataDir     string // media (fs backend), uploads, scratch space
+	Blob        BlobConfig
 	WebDir      string // built SPA; empty disables static serving
 
 	SigningKey []byte // HMAC key for device tokens, dev tokens and signed media URLs
@@ -57,8 +58,13 @@ type Config struct {
 	LogLevel           slog.Level
 	LogJSON            bool
 	PushEnabled        bool
-	UploadExpiry       time.Duration
-	JanitorInterval    time.Duration
+	// WebPush (RFC 8291/8292). The VAPID key pair comes from KINFRAME_VAPID_PUBLIC_KEY and
+	// KINFRAME_VAPID_PRIVATE_KEY, or is generated once into <data dir>/vapid.json.
+	VAPIDPublicKey  string // base64url uncompressed P-256 point
+	VAPIDPrivateKey string // base64url scalar
+	VAPIDSubject    string // mailto: or https: contact for push services
+	UploadExpiry    time.Duration
+	JanitorInterval time.Duration
 
 	// Frame app self-update mirror (docs/api/README.md §5.7).
 	FrameReleasesRepo     string // GitHub owner/name; empty disables GitHub polling
@@ -102,6 +108,7 @@ func load(get func(string) string) (*Config, error) {
 		return def
 	}
 	var errs []error
+	var err error
 	intv := func(k string, def int) int {
 		v := env(k, "")
 		if v == "" {
@@ -182,6 +189,9 @@ func load(get func(string) string) (*Config, error) {
 	if c.FrameReleasesInterval < time.Minute {
 		errs = append(errs, errors.New("KINFRAME_FRAME_RELEASES_POLL_MINUTES must be at least 1"))
 	}
+	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
+		errs = append(errs, err)
+	}
 	c.LogtoConfigFile = env("KINFRAME_LOGTO_CONFIG_FILE", DefaultLogtoConfigFile(c.DataDir))
 	if lf, err := ReadLogtoFile(c.LogtoConfigFile); err != nil {
 		errs = append(errs, fmt.Errorf("KINFRAME_LOGTO_CONFIG_FILE: %w", err))
@@ -226,6 +236,35 @@ func load(get func(string) string) (*Config, error) {
 		}
 	}
 	c.SigningKey = key
+
+	if c.PushEnabled {
+		pub, priv := env("KINFRAME_VAPID_PUBLIC_KEY", ""), env("KINFRAME_VAPID_PRIVATE_KEY", "")
+		switch {
+		case (pub == "") != (priv == ""):
+			errs = append(errs, errors.New("set both KINFRAME_VAPID_PUBLIC_KEY and KINFRAME_VAPID_PRIVATE_KEY, or neither"))
+		case pub == "":
+			pub, priv, err = vapidKeys(c.DataDir)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("VAPID keys: %w", err))
+			}
+		default:
+			if err := checkVAPID(pub, priv); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_VAPID_*: %w", err))
+			}
+		}
+		c.VAPIDPublicKey, c.VAPIDPrivateKey = pub, priv
+		c.VAPIDSubject = env("KINFRAME_VAPID_SUBJECT", "")
+		if c.VAPIDSubject == "" {
+			if strings.HasPrefix(c.PublicURL, "https://") {
+				c.VAPIDSubject = c.PublicURL
+			} else {
+				c.VAPIDSubject = "mailto:kinframe@localhost"
+			}
+		}
+		if !strings.HasPrefix(c.VAPIDSubject, "mailto:") && !strings.HasPrefix(c.VAPIDSubject, "https://") {
+			errs = append(errs, errors.New("KINFRAME_VAPID_SUBJECT must start with mailto: or https://"))
+		}
+	}
 
 	if len(errs) > 0 {
 		return nil, errors.Join(errs...)

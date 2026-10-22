@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">フォトフレーム</string>
+
+    <!-- Common actions -->
+    <string name="action_back">戻る</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="action_continue">続ける</string>
+    <string name="action_try_again">再試行</string>
+    <string name="action_undo">元に戻す</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">kinframe へようこそ</string>
+    <string name="setup_language_body">このフレームの言語を選んでください。</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Wi-Fi に接続</string>
+    <string name="setup_wifi_body">写真を受け取るには Wi-Fi が必要です。届いた写真は、接続がなくても表示されます。</string>
+    <string name="wifi_connected_to">%1$s に接続済み</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">未接続</string>
+    <string name="wifi_not_connected_hint">続けるにはネットワークを選んでください。</string>
+    <string name="wifi_no_internet">接続済みですが、まだインターネットにつながっていません</string>
+    <string name="wifi_signal">電波: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi 設定</string>
+    <string name="wifi_networks">近くのネットワーク</string>
+    <string name="wifi_scanning">ネットワークを探しています…</string>
+    <string name="wifi_permission_body">ここにネットワークを表示するには、Android に Wi-Fi をスキャンする権限が必要です。</string>
+    <string name="wifi_show_networks">ネットワークを表示</string>
+    <string name="wifi_password">パスワード</string>
+    <string name="wifi_join">接続</string>
+    <string name="signal_0">非常に弱い</string>
+    <string name="signal_1">弱い</string>
+    <string name="signal_2">普通</string>
+    <string name="signal_3">良好</string>
+    <string name="signal_4">非常に良好</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">サーバーを選択</string>
+    <string name="setup_server_body">写真は kinframe サーバーを通って届きます。無料の kinframe サーバーか、家族が運営するサーバーを使ってください。</string>
+    <string name="server_default_body">無料のオープンソース。おすすめです。</string>
+    <string name="server_custom">自分のサーバーを使う</string>
+    <string name="server_custom_body">kinframe を自分で運営している家族向けです。</string>
+    <string name="server_address">サーバーのアドレス</string>
+    <string name="server_check">サーバーを確認</string>
+    <string name="server_checking">サーバーを確認しています…</string>
+    <string name="server_version">バージョン %1$s</string>
+    <string name="server_insecure">暗号化されていません</string>
+    <string name="server_error_invalid">ウェブアドレスではないようです。https://frames.example.org のように入力してください。</string>
+    <string name="server_error_unreachable">このサーバーに接続できませんでした。アドレスと、フレームがオンラインかどうかを確認してください。</string>
+    <string name="server_error_not_kinframe">このサーバーは応答しましたが、kinframe サーバーではありません。</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">フレームを準備しています…</string>
+    <string name="enroll_body">数秒かかります。</string>
+    <string name="enroll_failed_title">フレームを登録できませんでした</string>
+    <string name="enroll_failed_body">サーバーからの応答: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">このフレームを家族とつなげましょう</string>
+    <string name="code_step1">kinframe アプリを開くか、ブラウザで %1$s を開きます</string>
+    <string name="code_step2">「フレームを追加」を選びます</string>
+    <string name="code_step3">このコードを入力するか、QR コードを読み取ります</string>
+    <string name="code_valid_for">有効期限: あと %1$s</string>
+    <string name="code_waiting">コードが入力されるのを待っています</string>
+    <string name="code_offline_title">フレームがオフラインです</string>
+    <string name="code_offline_body">フレームコードにはインターネット接続が必要です。Wi-Fi を確認してください。</string>
+    <string name="code_error_title">フレームコードを取得できませんでした</string>
+    <string name="code_error_body">サーバーが応答しません。フレームは再試行を続けます。</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">%1$s さんとつながりました</string>
+    <string name="celebrate_title_anon">つながりました</string>
+    <string name="celebrate_body">このフレームに送られた写真は、数秒でここに表示されます。</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d時間%2$d分</string>
+    <string name="duration_min">%1$d分</string>
+    <string name="date_today">今日</string>
+    <string name="date_yesterday">昨日</string>
+    <plurals name="date_days_ago">
+        <item quantity="other">%d日前</item>
+    </plurals>
+    <string name="interval_s">%1$d秒</string>
+    <string name="interval_min">%1$d分</string>
+    <string name="interval_h">%1$d時間</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">編集済み</string>
+    <string name="unable_photo">この写真を表示できません</string>
+    <string name="unable_video">この動画を再生できません。送った人にもう一度送ってもらってください。</string>
+    <plurals name="new_photos">
+        <item quantity="other">新しい写真 %d 枚</item>
+    </plurals>
+    <string name="status_offline">オフライン</string>
+    <string name="status_online">オンライン · %1$s</string>
+    <string name="status_server_unreachable">サーバーに接続できません</string>
+    <string name="identify_this_is">このフレームは</string>
+    <string name="snack_hidden">写真を非表示にしました</string>
+    <string name="snack_deleted">写真を削除しました</string>
+    <string name="menu_settings">設定</string>
+    <string name="menu_power">電源</string>
+    <string name="menu_hide">非表示</string>
+    <string name="menu_delete">削除</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">まだ写真がありません</string>
+    <string name="empty_body">kinframe のアプリやウェブサイトから送られた写真や動画が、数秒でここに表示されます。</string>
+    <string name="empty_code_title">このコードで家族を追加</string>
+    <string name="empty_code_body">kinframe アプリで入力するか、QR コードを読み取ってください。</string>
+    <string name="empty_hidden_title">すべての写真が非表示です</string>
+    <string name="empty_hidden_body">非表示の写真はライブラリに残っています。kinframe アプリから再表示できます。</string>
+    <string name="empty_downloading_title">写真が届くところです</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="other">%d 枚の写真をダウンロードしています。</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">電源</string>
+    <string name="power_sleep">スリープ</string>
+    <string name="power_sleep_body">画面に触れるまで消灯します。</string>
+    <string name="power_restart">再起動</string>
+    <string name="power_restart_body">フレームを再起動します。</string>
+    <string name="power_off">電源を切る</string>
+    <string name="power_off_body">プラグを抜く前に安全に終了します。</string>
+    <string name="shutting_down_title">終了しています…</string>
+    <string name="restarting_title">再起動しています…</string>
+    <string name="shutting_down_body">すべて安全に保存しています。</string>
+    <string name="safe_title">プラグを抜いても大丈夫です</string>
+    <string name="safe_body">すべて保存しました。もう一度使うときは、電源ボタンを押すか、プラグを差し直してください。</string>
+    <string name="safe_body_noroot">kinframe はすべて保存しました。フレームのプラグを抜いても大丈夫です。</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe で写真の表示に問題が発生しました</string>
+    <string name="recovery_body">何度か続けて予期せず停止しました。もう一度試すか、ダウンロード済みの写真を消去してください。写真はサーバーから再ダウンロードされるので、何も失われません。</string>
+    <string name="recovery_clear">ダウンロード済みの写真を消去</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="settings_language">言語</string>
+    <string name="settings_slideshow">スライドショー</string>
+    <string name="settings_interval">1 枚の表示時間</string>
+    <string name="settings_transition">切り替え効果</string>
+    <string name="transition_crossfade">フェード</string>
+    <string name="transition_slide">スライド</string>
+    <string name="settings_order">表示順</string>
+    <string name="order_received">受信が新しい順</string>
+    <string name="order_taken">撮影日順</string>
+    <string name="order_shuffle">シャッフル</string>
+    <string name="settings_reverse">古い順</string>
+    <string name="settings_fill">写真のサイズ</string>
+    <string name="fill_fill">画面いっぱいに表示</string>
+    <string name="fill_fit">写真全体を表示</string>
+    <string name="settings_display">画面</string>
+    <string name="settings_brightness">明るさ</string>
+    <string name="settings_brightness_mode">明るさの自動調整</string>
+    <string name="brightness_manual">固定</string>
+    <string name="brightness_sun">日の出・日の入りに合わせる</string>
+    <string name="settings_sleep">スリープ</string>
+    <string name="settings_sleep_enabled">夜は画面を消す</string>
+    <string name="settings_sleep_at">スリープ開始</string>
+    <string name="settings_wake_at">起動</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="other">ほかに %d 件のスケジュール（kinframe アプリで管理）</item>
+    </plurals>
+    <string name="settings_about">このフレーム</string>
+    <string name="about_frame">名前</string>
+    <string name="about_server">サーバー</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">アプリのバージョン</string>
+    <string name="about_android_settings">Android の設定</string>
+    <string name="settings_updates">アップデート</string>
+    <string name="updates_channel">チャンネル</string>
+    <string name="updates_channel_stable">安定版</string>
+    <string name="updates_channel_beta">ベータ版（新バージョンを先に試す）</string>
+    <string name="updates_check">アップデートを確認</string>
+    <string name="updates_install_now">今すぐインストール</string>
+    <string name="updates_checking">アップデートを確認しています…</string>
+    <string name="updates_up_to_date">このフレームは最新です。</string>
+    <string name="updates_downloading">バージョン %1$s をダウンロード中… %2$d%%</string>
+    <string name="updates_waiting">バージョン %1$s の準備ができました。フレームが使われていないときにインストールされます。</string>
+    <string name="updates_installing">バージョン %1$s をインストールしています。まもなくフレームが再起動します。</string>
+    <string name="updates_failed">アップデートできませんでした。後でもう一度試します。</string>
+    <string name="update_notice_updated">バージョン %1$s にアップデートしました</string>
+    <string name="update_notice_rolled_back">新しいバージョンに問題があったため、以前のバージョンに戻しました。</string>
+    <string name="update_notice_needs_user">アップデートの準備ができました。「インストール」をタップして続けてください。</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">天気予報を表示</string>
+    <string name="weather_close">閉じる</string>
+    <string name="weather_now">現在</string>
+    <string name="weather_today">今日</string>
+    <string name="weather_feels_like">体感 %1$s</string>
+    <string name="weather_high_low">最高 %1$s · 最低 %2$s</string>
+    <string name="weather_wind">風</string>
+    <string name="weather_humidity">湿度</string>
+    <string name="weather_sunrise">日の出</string>
+    <string name="weather_sunset">日の入り</string>
+    <string name="weather_next_hours">24時間の予報</string>
+    <string name="weather_next_days">7日間の予報</string>
+    <string name="weather_updated">%1$s に更新</string>
+    <string-array name="weather_compass">
+        <item>北</item>
+        <item>北東</item>
+        <item>東</item>
+        <item>南東</item>
+        <item>南</item>
+        <item>南西</item>
+        <item>西</item>
+        <item>北西</item>
+    </string-array>
+    <string name="wmo_clear_day">晴れ</string>
+    <string name="wmo_clear_night">晴れ</string>
+    <string name="wmo_mainly_clear_day">おおむね晴れ</string>
+    <string name="wmo_mainly_clear_night">おおむね晴れ</string>
+    <string name="wmo_partly_cloudy">晴れ時々曇り</string>
+    <string name="wmo_overcast">曇り</string>
+    <string name="wmo_fog">霧</string>
+    <string name="wmo_rime_fog">着氷性の霧</string>
+    <string name="wmo_drizzle_light">弱い霧雨</string>
+    <string name="wmo_drizzle">霧雨</string>
+    <string name="wmo_drizzle_dense">強い霧雨</string>
+    <string name="wmo_freezing_drizzle">着氷性の霧雨</string>
+    <string name="wmo_rain_light">小雨</string>
+    <string name="wmo_rain">雨</string>
+    <string name="wmo_rain_heavy">大雨</string>
+    <string name="wmo_freezing_rain">着氷性の雨</string>
+    <string name="wmo_snow_light">小雪</string>
+    <string name="wmo_snow">雪</string>
+    <string name="wmo_snow_heavy">大雪</string>
+    <string name="wmo_snow_grains">霧雪</string>
+    <string name="wmo_showers_light">弱いにわか雨</string>
+    <string name="wmo_showers">にわか雨</string>
+    <string name="wmo_showers_violent">強いにわか雨</string>
+    <string name="wmo_snow_showers_light">弱いにわか雪</string>
+    <string name="wmo_snow_showers">にわか雪</string>
+    <string name="wmo_thunderstorm">雷雨</string>
+    <string name="wmo_thunderstorm_hail">ひょうを伴う雷雨</string>
+</resources>

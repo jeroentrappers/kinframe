@@ -28,6 +28,8 @@ checks they're free before the first deploy.
 | `server` | `ghcr.io/jeroentrappers/kinframe-server:<tag>` | Go API, media worker (ffmpeg + libvips), serves the built web SPA. Binds `127.0.0.1:8110`. Media volume `/opt/kinframe/media`. |
 | `logto` | `svhd/logto:1.43.0` (same pin as appmire-logto) | Binds `127.0.0.1:8111` (core) and `127.0.0.1:8112` (admin). `ENDPOINT=https://auth.kinframe.appmire.be`, `ADMIN_ENDPOINT=http://localhost:8112`, `TRUST_PROXY_HEADER=1`. |
 | `postgres` | `postgres:17-alpine` | Databases `kinframe` and `logto`, each with its own role. Not exposed. |
+| `minio` (optional, `kinframe_minio: true`) | `pgsty/silo:RELEASE.2026-10-18T00-00-00Z` | S3-compatible object store for media, volume `miniodata`, only on the compose network. Console on `127.0.0.1:<kinframe_minio_console_port>` when that is set (default: not exposed). See [Media storage](#media-storage-s3). |
+| `minio-bootstrap` | same image, `minio-bootstrap.sh` | One-shot, idempotent: private bucket, a policy limited to that bucket, and the `kinframe_s3_access_key` user with it. The server only gets that user, never the root credentials. |
 | `logto-bootstrap` | `kinframe-server` image, `bootstrap-logto` command | One-shot job, idempotent (a re-run changes nothing). Uses Logto's Management API to create the API resource (`https://<domain>/v1`, 1 h tokens, scope `kinframe:operate`), the `kinframe-operator` role, the SPA app `kinframe web` (redirect `https://<domain>/callback`, post-logout `https://<domain>/`, CORS origin `https://<domain>`), one native app `kinframe app` for Android and iOS (redirects `app.kinframe:/callback` and `https://<domain>/app/callback`, post-logout `app.kinframe:/logout` and `https://<domain>/app/logout`), the SMTP email connector, the sign-in experience (email one-time codes, passkeys, name asked at sign-up, browser language) and custom access-token claims (`name`, `email`). It writes the client IDs to `/data/logto.json`, which the server reads at start and serves in `/.well-known/kinframe`. **On a fresh Logto it also creates the console admin account**: Logto grants admin to the first account registered in the console, so bootstrap must run before the console is reachable. See [First deploy](#first-deploy-logto-bootstrap). |
 
 ### First deploy: Logto bootstrap
@@ -86,6 +88,51 @@ credentials; it creates a new app and prints the new secret. If Logto's ENDPOINT
 the job: it updates redirect URIs and creates the new API resource (the old one is left in place).
 
 No manual console steps are needed. The console is only for looking around and for changes beyond this setup.
+
+### Media storage (S3)
+
+Media is stored in the `media` volume by default (`kinframe_blob_backend: fs`). The role can also run an S3 object
+store next to the server and switch to it, which later makes moving to managed S3-compatible storage (Hetzner Object
+Storage, B2, R2, AWS) a matter of pointing `kinframe_s3_endpoint` at it and running the same copy again.
+
+**Image choice.** MinIO Inc. stopped publishing community builds in October 2025 and archived the repository in 2026;
+`minio/minio` is no longer on Docker Hub. The role uses **Silo** (`pgsty/silo`, formerly `pgsty/minio`), the
+community fork maintained by Pigsty: same S3 API, `MINIO_*` settings and on-disk format, regular security releases,
+multi-arch images that include `mc` and `curl` (healthcheck and bootstrap need no second image). Pinned to a release
+tag; bump `kinframe_minio_version` deliberately.
+
+**Switching hetz1 to S3** (from the `kinframe-deploy` repo; nothing changes for users, media keeps being served at
+the same URLs):
+
+1. Add to the vault (`group_vars/all/vault.yml`), all generated fresh:
+   `kinframe_minio_root_user` (e.g. `kinframe_root`), `kinframe_minio_root_password` (`openssl rand -hex 32`),
+   `kinframe_s3_access_key` (e.g. `kinframe-media`), `kinframe_s3_secret_key` (`openssl rand -hex 32`).
+2. In `group_vars/all.yml` set `kinframe_minio: true` (backend still `fs`) and run
+   `ansible-playbook site.yml --tags app`. This starts `kinframe-minio`, runs `minio-bootstrap` and restarts the
+   server with the S3 settings in its env (still serving from the volume).
+3. Copy the media, first as a dry run:
+   ```
+   ssh appmire-hetz1 'cd /opt/kinframe && docker compose exec -T server kinframe-server migrate-blobs --from fs --to s3 --dry-run </dev/null'
+   ssh appmire-hetz1 'cd /opt/kinframe && docker compose exec -T server kinframe-server migrate-blobs --from fs --to s3 </dev/null'
+   ```
+   Inside the server container both configs are present: `/data/media` (fs) and `KINFRAME_S3_*` (s3). The command is
+   idempotent and resumable; rerun it after an interruption or a failure.
+4. Set `kinframe_blob_backend: s3` and run the play again. The server restarts on the bucket.
+5. Run step 3 (without `--dry-run`) once more to copy anything written between the first copy and the restart. It
+   should report only a handful of copies; a third run must report `copied=0`.
+6. Check a frame and the web app, then add the `miniodata` volume to the host backups. Keep `/data/media` for a while
+   as a fallback; remove it later with `docker compose exec server rm -rf /data/media`.
+
+Rollback: set `kinframe_blob_backend: fs`, run the play, then
+`migrate-blobs --from s3 --to fs` for media created on S3 in the meantime.
+
+Managed storage later: create the bucket and an access key limited to it at the provider. `migrate-blobs` knows one
+S3 configuration at a time, so go through the volume: `migrate-blobs --from s3 --to fs` (Silo → `/data/media`), set
+`kinframe_minio: false`, `kinframe_s3_endpoint`/`_region`/`_path_style` and the new key in the vault, run the play,
+then `migrate-blobs --from fs --to s3` (twice, as above).
+
+`kinframe_media_redirect: presigned` makes signed media URLs and avatars redirect to presigned bucket URLs, which
+only helps when clients can reach the bucket (`kinframe_s3_public_endpoint`); with the bundled store it stays `off`.
 
 ### nginx vhost specifics
 

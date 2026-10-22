@@ -16,6 +16,25 @@
     fail_msg: Set the domains and the secrets (see defaults/main.yml).
     quiet: true
 
+- name: Media storage settings are complete
+  ansible.builtin.assert:
+    that:
+      - kinframe_blob_backend in ['fs', 's3']
+      - kinframe_media_redirect in ['off', 'presigned']
+      - kinframe_media_redirect == 'off' or kinframe_blob_backend == 's3'
+      - kinframe_s3_bucket is match('^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$')
+      - kinframe_s3_access_key is defined and kinframe_s3_access_key | length >= 3
+      - kinframe_s3_secret_key is defined and kinframe_s3_secret_key | length >= 8
+      - kinframe_minio or kinframe_s3_endpoint | length > 0
+      - not kinframe_minio or (kinframe_minio_root_user is defined and kinframe_minio_root_user | length >= 3)
+      - not kinframe_minio or (kinframe_minio_root_password is defined and kinframe_minio_root_password | length >= 8)
+      - not kinframe_minio or kinframe_minio_root_user != kinframe_s3_access_key
+    fail_msg: >-
+      S3 media storage needs kinframe_s3_access_key/_secret_key (≥ 8 chars) from the vault, plus either
+      kinframe_minio (with kinframe_minio_root_user/_password) or kinframe_s3_endpoint (see defaults/main.yml).
+    quiet: true
+  when: kinframe_blob_backend == 's3' or kinframe_minio
+
 - name: Loopback ports are free or already ours
   ansible.builtin.shell: |
     set -o pipefail
@@ -24,7 +43,8 @@
   register: port_check
   changed_when: false
   failed_when: port_check.stdout | length > 0
-  loop: ["{{ kinframe_port }}", "{{ logto_core_port }}", "{{ logto_admin_port }}"]
+  loop: "{{ [kinframe_port, logto_core_port, logto_admin_port]
+            + ([kinframe_minio_console_port] if kinframe_minio and (kinframe_minio_console_port | int) > 0 else []) }}"
 
 - name: Project directories
   ansible.builtin.file:
@@ -61,9 +81,20 @@
     - { src: logto.env.j2, dest: logto.env, mode: "0600" }
     - { src: bootstrap.env.j2, dest: bootstrap.env, mode: "0600" }
     - { src: initdb.sql.j2, dest: initdb/10-kinframe.sql, mode: "0400", owner: "70" }
+    - { src: minio.env.j2, dest: minio.env, mode: "0600", when: "{{ kinframe_minio }}" }
   loop_control: { label: "{{ item.dest }}" }
+  when: item.when | default(true) | bool
   no_log: true
   register: rendered
+
+- name: Object store bootstrap script
+  ansible.builtin.copy:
+    src: minio-bootstrap.sh
+    dest: "{{ kinframe_dir }}/minio-bootstrap.sh"
+    owner: root
+    group: root
+    mode: "0644"
+  when: kinframe_minio
 
 - name: Pull images
   ansible.builtin.command:
@@ -113,6 +144,23 @@
     that: bootstrap.rc == 0
     fail_msg: bootstrap-logto failed (exit {{ bootstrap.rc }}); see the output above.
     quiet: true
+
+- name: Start or update the object store
+  ansible.builtin.command:
+    cmd: docker compose up -d --wait minio
+    chdir: "{{ kinframe_dir }}"
+  register: minio_up
+  changed_when: "'Started' in minio_up.stderr or 'Created' in minio_up.stderr or 'Recreate' in minio_up.stderr"
+  when: kinframe_minio
+
+# Idempotent: bucket, least-privilege policy and kinframe's user (the server never gets root credentials).
+- name: Configure the object store (minio-bootstrap)
+  ansible.builtin.command:
+    cmd: docker compose run --rm minio-bootstrap
+    chdir: "{{ kinframe_dir }}"
+  register: minio_bootstrap
+  changed_when: "'nothing changed' not in minio_bootstrap.stdout"
+  when: kinframe_minio
 
 - name: Start or update the kinframe server
   ansible.builtin.command:

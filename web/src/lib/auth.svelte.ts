@@ -1,7 +1,8 @@
 import LogtoClient from '@logto/browser';
 import { api, apiUrl, call, configureApi, type User } from './api/client';
 import { discovery } from './discovery.svelte';
-import { i18n } from './i18n/index.svelte';
+import { hasSavedLocale, i18n } from './i18n/index.svelte';
+import { matchLocale } from './i18n/locales';
 
 const DEV_TOKEN_KEY = 'kinframe.devToken';
 /** Name the server gives new accounts when the access token carries no name claim. */
@@ -77,9 +78,13 @@ class Auth {
 	async loadMe(): Promise<boolean> {
 		try {
 			this.me = await call(api.GET('/v1/me'));
-			if (this.me?.locale && !localStorageHas('kinframe.locale')) {
-				const l = this.me.locale.toLowerCase();
-				if (l.startsWith('nl')) i18n.set('nl');
+			if (this.me?.locale && !hasSavedLocale()) {
+				// A profile language set elsewhere (another browser, the phone app) wins over browser detection.
+				const l = matchLocale(this.me.locale);
+				if (l && l !== i18n.locale) void i18n.set(l);
+			} else if (this.me && !this.me.locale) {
+				// First sign-in: tell the server our language so notifications match.
+				void call(api.PATCH('/v1/me', { body: { locale: i18n.locale } })).then((u) => (this.me = u), () => {});
 			}
 			return true;
 		} catch {
@@ -122,7 +127,8 @@ class Auth {
 	async signIn(next?: string) {
 		if (!this.logto) throw new Error('Sign-in is not configured on this server.');
 		this.rememberNext(next);
-		await this.logto.signIn({ redirectUri: callbackUrl() });
+		// ui_locales: the sign-in page and the code e-mail use our language when Logto supports it.
+		await this.logto.signIn({ redirectUri: callbackUrl(), extraParams: { ui_locales: `${i18n.locale} en` } });
 	}
 
 	/** Finish the redirect flow on /callback. Returns where to go next. */
@@ -205,14 +211,6 @@ class Auth {
 		this.me = null;
 		this.expired = this.status === 'signed_in';
 		this.status = 'signed_out';
-	}
-}
-
-function localStorageHas(key: string) {
-	try {
-		return localStorage.getItem(key) !== null;
-	} catch {
-		return false;
 	}
 }
 

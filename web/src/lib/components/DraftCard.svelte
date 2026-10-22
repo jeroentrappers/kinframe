@@ -3,6 +3,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { CAPTION_MAX, captionRemaining, formatBytes, formatDuration } from '$lib/format';
 	import { coverPosition } from '$lib/logic';
+	import { isTrimmed, keptSeconds } from '$lib/parity';
 	import { problemMessage } from '$lib/problem';
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import Icon from './Icon.svelte';
@@ -16,6 +17,8 @@
 	}: { item: DraftItem; index: number; locked: boolean; onedit: () => void; onremove: () => void } = $props();
 
 	const remaining = $derived(captionRemaining(item.caption));
+	const trimmed = $derived(isTrimmed(item.trim, item.durationS));
+	const kept = $derived(keptSeconds(item.trim, item.durationS));
 	const aspect = $derived(item.width && item.height ? item.width / item.height : 1);
 	const pos = $derived(coverPosition(item.focal, aspect, 1));
 	const pct = $derived(item.file.size ? Math.round((item.uploaded / item.file.size) * 100) : 0);
@@ -41,7 +44,10 @@
 			{#if !locked}<span class="adjust"><Icon name="crop" size={15} />{t('send.adjust')}</span>{/if}
 		</button>
 		{#if item.kind === 'video'}
-			<span class="duration num"><Icon name="play" size={11} stroke={0} />{item.durationS != null ? formatDuration(item.durationS) : '…'}</span>
+			<span class="duration num" class:trimmed title={trimmed ? t('trim.trimmedTo', { length: formatDuration(kept ?? 0) }) : undefined}>
+				<Icon name={trimmed ? 'scissors' : 'play'} size={11} stroke={trimmed ? 2.4 : 0} />{kept != null ? formatDuration(kept) : '…'}
+				{#if !item.includeAudio}<Icon name="volumeOff" size={12} stroke={2.2} />{/if}
+			</span>
 		{/if}
 		{#if item.fit === 'fit'}<span class="fit-tag">{t('send.fitShort')}</span>{/if}
 		{#if !locked}
@@ -148,7 +154,7 @@
 	}
 	.adjust {
 		position: absolute;
-		left: 8px;
+		inset-inline-start: 8px;
 		bottom: 8px;
 		display: inline-flex;
 		align-items: center;
@@ -175,7 +181,7 @@
 	.fit-tag {
 		position: absolute;
 		top: 8px;
-		left: 8px;
+		inset-inline-start: 8px;
 		display: inline-flex;
 		align-items: center;
 		gap: 4px;
@@ -187,17 +193,20 @@
 		font-weight: 700;
 		pointer-events: none;
 	}
-	.duration :global(svg) {
+	.duration:not(.trimmed) :global(svg:first-child) {
 		fill: currentColor;
 	}
+	.duration.trimmed {
+		background: color-mix(in srgb, var(--primary) 85%, black);
+	}
 	.fit-tag {
-		left: auto;
-		right: 44px;
+		inset-inline-start: auto;
+		inset-inline-end: 44px;
 	}
 	.remove {
 		position: absolute;
 		top: 6px;
-		right: 6px;
+		inset-inline-end: 6px;
 		width: 32px;
 		height: 32px;
 		border-radius: 50%;
@@ -275,14 +284,14 @@
 		min-height: 0;
 		font-size: 0.9rem;
 		padding: 8px 10px;
-		padding-right: 36px;
+		padding-inline-end: 36px;
 		border-radius: 10px;
 		resize: none;
 		border-color: var(--border);
 	}
 	.counter {
 		position: absolute;
-		right: 10px;
+		inset-inline-end: 10px;
 		bottom: 8px;
 		font-size: 0.74rem;
 		color: var(--text-faint);

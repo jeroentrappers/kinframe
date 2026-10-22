@@ -580,6 +580,12 @@ paths:
         - { name: sender_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
         - { name: kind, in: query, schema: { $ref: '#/components/schemas/MediaKind' } }
         - { name: album_id, in: query, schema: { $ref: '#/components/schemas/Id' } }
+        - name: on_this_day
+          in: query
+          description: |
+            "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+            on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+          schema: { type: string, pattern: '^[0-9]{2}-[0-9]{2}$' }
         - { name: sort, in: query, schema: { type: string, enum: [received_desc, received_asc, taken_desc, taken_asc], default: received_desc } }
       responses:
         '200':
@@ -958,6 +964,20 @@ paths:
       responses:
         '204': { description: Sent }
 
+  /v1/device/join-requests:
+    get:
+      tags: [device]
+      operationId: deviceListJoinRequests
+      security: [ { deviceAuth: [] } ]
+      description: |
+        Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+        The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+        connect and after syncing, so requests announced while it was offline are not lost.
+      responses:
+        '200':
+          description: Oldest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/JoinRequest' } } } }
+
   /v1/device/join-requests/{requestId}:
     post:
       tags: [device]
@@ -1204,6 +1224,11 @@ components:
           type: boolean
           default: false
           description: True when the server fetches weather for frames and serves `/v1/geocode`.
+        webpush_public_key:
+          type: [string, 'null']
+          description: |
+            VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+            subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
 
     Limits:
       type: object
@@ -1338,6 +1363,13 @@ components:
         cache_bytes: { type: integer }
         placements_cached: { type: integer }
         placements_missing: { type: integer }
+        placements_evicted:
+          type: integer
+          description: Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+        storage_state:
+          type: string
+          enum: [ok, low, critical]
+          description: '`low`: below the frame''s low-water mark, evicting. `critical`: nearly full with nothing left to evict.'
         screen_state: { type: string, enum: ['on', 'off', dimmed, sleeping] }
         last_shutdown_clean: { type: boolean }
         crash_count_24h: { type: integer }
@@ -1478,7 +1510,7 @@ components:
               fit: { $ref: '#/components/schemas/Fit' }
               trim:
                 type: object
-                description: Videos only.
+                description: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 properties:
                   start_ms: { type: integer, minimum: 0 }
                   end_ms: { type: integer, minimum: 1 }
@@ -1700,6 +1732,22 @@ components:
           properties:
             allow_remove_members_on_frame: { type: boolean, default: true }
             owner_pin_set: { type: boolean, readOnly: true }
+            owner_pin:
+              type: [string, 'null']
+              writeOnly: true
+              pattern: '^[0-9]{4,6}$'
+              description: |
+                Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+                locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+            owner_pin_hash:
+              description: |
+                Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+                in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+                with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+              oneOf:
+                - { $ref: '#/components/schemas/PinHash' }
+                - { type: 'null' }
         updates:
           type: object
           properties:
@@ -1708,6 +1756,17 @@ components:
               enum: [stable, beta]
               default: stable
               description: Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+
+    PinHash:
+      type: object
+      description: |
+        PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+      required: [alg, iterations, salt, hash]
+      properties:
+        alg: { type: string, enum: [pbkdf2-sha256] }
+        iterations: { type: integer, minimum: 1000, maximum: 1000000, examples: [20000] }
+        salt: { type: string, minLength: 16, maxLength: 64, description: base64, at least 12 random bytes }
+        hash: { type: string, minLength: 44, maxLength: 44, description: base64 of 32 bytes }
 
     FrameUpdate:
       type: object

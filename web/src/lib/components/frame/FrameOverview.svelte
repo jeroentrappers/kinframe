@@ -8,6 +8,8 @@
 	import { i18n, t, tn, type MessageKey } from '$lib/i18n/index.svelte';
 	import Dialog from '../Dialog.svelte';
 	import Icon, { type IconName } from '../Icon.svelte';
+	import ReplaceDeviceDialog from './ReplaceDeviceDialog.svelte';
+	import TransferDialog from './TransferDialog.svelte';
 
 	let { frame, onupdated }: { frame: Frame; onupdated: (f: Frame) => void } = $props();
 
@@ -111,6 +113,32 @@
 			toasts.error(problemMessage(e));
 		} finally {
 			busy = false;
+		}
+	}
+
+	// ---- ownership
+	let transferOpen = $state(false);
+	let transferLeaving = $state(false);
+	let replaceOpen = $state(false);
+
+	function openTransfer(leaving: boolean) {
+		transferLeaving = leaving;
+		transferOpen = true;
+	}
+
+	async function afterTransfer(r: { left: boolean; newOwner: { display_name: string } }) {
+		if (r.left) {
+			frames.remove(frame.id);
+			toasts.success(t('transfer.doneLeft', { name: r.newOwner.display_name, frame: frame.name }));
+			await goto('/frames');
+			return;
+		}
+		toasts.success(t('transfer.done', { name: r.newOwner.display_name }));
+		try {
+			const f = await call(api.GET('/v1/frames/{frameId}', { params: { path: { frameId: frame.id } } }));
+			onupdated(f);
+		} catch {
+			/* the live update will refresh it */
 		}
 	}
 
@@ -228,7 +256,7 @@
 						<li>
 							<Icon name="clock" size={18} />
 							<span class="h-label">{t('health.uptime')}</span>
-							<span class="h-val num">{hb ? formatUptime(hb.uptime_s) : '–'}</span>
+							<span class="h-val num">{hb ? formatUptime(hb.uptime_s, i18n.tag) : '–'}</span>
 						</li>
 						<li>
 							<Icon name="info" size={18} />
@@ -254,11 +282,36 @@
 			</section>
 		{/if}
 
+		{#if frame.role === 'owner'}
+			<section class="card card-pad owner-tools" aria-labelledby="own-title">
+				<div class="section-title"><h2 id="own-title">{t('overview.ownership')}</h2></div>
+				<div class="tool">
+					<span class="tool-icon"><Icon name="crown" size={18} /></span>
+					<div class="tool-text">
+						<strong>{t('transfer.title')}</strong>
+						<span class="muted small">{t('overview.transferBody')}</span>
+					</div>
+					<button class="btn btn-sm" onclick={() => openTransfer(false)}>{t('overview.transferButton')}</button>
+				</div>
+				<div class="tool">
+					<span class="tool-icon"><Icon name="swap" size={18} /></span>
+					<div class="tool-text">
+						<strong>{t('replace.short')}</strong>
+						<span class="muted small">{t('overview.replaceBody')}</span>
+					</div>
+					<button class="btn btn-sm" onclick={() => (replaceOpen = true)}>{t('overview.replaceButton')}</button>
+				</div>
+			</section>
+		{/if}
+
 		<section class="card card-pad danger" aria-labelledby="dz-title">
-			<div class="section-title"><h2 id="dz-title">{frame.role === 'owner' ? t('overview.removeTitle') : t('overview.leaveTitle')}</h2></div>
+			<div class="section-title"><h2 id="dz-title">{frame.role === 'owner' ? t('overview.dangerTitle') : t('overview.leaveTitle')}</h2></div>
 			{#if frame.role === 'owner'}
-				<p class="muted small">{t('overview.removeBody')}</p>
-				<button class="btn btn-danger-ghost" onclick={() => (removeOpen = true)}><Icon name="trash" size={18} />{t('overview.removeButton')}</button>
+				<p class="muted small">{t('overview.ownerLeaveBody')}</p>
+				<div class="row-wrap">
+					<button class="btn btn-danger-ghost" onclick={() => openTransfer(true)}><Icon name="logout" size={18} />{t('overview.leaveButton')}</button>
+					<button class="btn btn-danger-ghost" onclick={() => (removeOpen = true)}><Icon name="trash" size={18} />{t('overview.removeButton')}</button>
+				</div>
 			{:else}
 				<p class="muted small">{t('overview.leaveBody')}</p>
 				<button class="btn btn-danger-ghost" onclick={() => (leaveOpen = true)}><Icon name="logout" size={18} />{t('overview.leaveButton')}</button>
@@ -266,6 +319,16 @@
 		</section>
 	</div>
 </div>
+
+<TransferDialog bind:open={transferOpen} {frame} leaving={transferLeaving} ondone={afterTransfer} />
+<ReplaceDeviceDialog
+	bind:open={replaceOpen}
+	{frame}
+	onreplaced={(f) => {
+		onupdated(f);
+		frames.upsert(f);
+	}}
+/>
 
 <Dialog bind:open={leaveOpen} title={t('overview.leaveConfirm', { name: frame.name })}>
 	<div class="stack">
@@ -401,10 +464,10 @@
 		color: var(--text);
 		font-weight: 600;
 		font-size: 0.9rem;
-		text-align: right;
+		text-align: end;
 	}
 	.bar-row {
-		padding-left: 28px;
+		padding-inline-start: 28px;
 	}
 	.bar-row .progress {
 		flex: 1;
@@ -428,5 +491,36 @@
 	}
 	.danger p {
 		margin-bottom: var(--s-3);
+	}
+	.owner-tools {
+		display: flex;
+		flex-direction: column;
+	}
+	.tool {
+		display: flex;
+		align-items: center;
+		gap: var(--s-3);
+		padding: 10px 0;
+		flex-wrap: wrap;
+	}
+	.tool + .tool {
+		border-top: 1px solid var(--border);
+	}
+	.tool-icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		background: var(--surface-2);
+		color: var(--text-muted);
+		flex: none;
+	}
+	.tool-text {
+		flex: 1;
+		min-width: 180px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
 	}
 </style>

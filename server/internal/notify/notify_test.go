@@ -10,7 +10,7 @@ func TestText(t *testing.T) {
 	}{
 		{"en", "reaction", map[string]string{"frame": "Oma"}, "New reaction", "Oma reacted to your photo"},
 		{"nl-BE", "reaction", map[string]string{"frame": "Oma"}, "Nieuwe reactie", "Oma reageerde op je foto"},
-		{"fr", "reply", map[string]string{"frame": "Oma", "preset": "call_me"}, "New reply", "Oma: Call me"},
+		{"xx", "reply", map[string]string{"frame": "Oma", "preset": "call_me"}, "New reply", "Oma: Call me"},
 		{"nl", "reply", map[string]string{"frame": "Oma", "preset": "miss_you"}, "Nieuw antwoord", "Oma: Ik mis je"},
 	}
 	for _, tt := range tests {

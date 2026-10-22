@@ -3,8 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"github.com/jeroentrappers/kinframe/server/internal/settings"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -34,6 +36,12 @@ func (s *Server) ListPlacements(ctx context.Context, req gen.ListPlacementsReque
 	}
 	if req.Params.Cursor != nil {
 		f.Cursor = *req.Params.Cursor
+	}
+	if d := req.Params.OnThisDay; d != nil {
+		if _, err := time.Parse("01-02", *d); err != nil && *d != "02-29" {
+			return nil, problem.Validation("on_this_day", "format", "on_this_day must be a month and day, MM-DD").WithStatus(http.StatusBadRequest)
+		}
+		f.OnThisDay = *d
 	}
 	rows, next, err := s.st.ListPlacements(ctx, f)
 	if err == store.ErrBadCursor {
@@ -74,7 +82,7 @@ func (s *Server) editablePlacement(ctx context.Context, frameID, placementID uui
 		return nil, nil, problem.New(problem.NotFound, "placement not found")
 	}
 	if !canEditPlacement(m, row) {
-		return nil, nil, problem.New(problem.MissingPermission, "requires the manage_library permission")
+		return nil, nil, problem.New(problem.MissingPermission, "requires the %s permission", "manage_library")
 	}
 	return m, row, nil
 }
@@ -334,6 +342,20 @@ func (s *Server) DeleteAlbum(ctx context.Context, req gen.DeleteAlbumRequestObje
 	})
 	if err != nil {
 		return nil, err
+	}
+	// A frame playing the deleted album goes back to all photos.
+	if f, err := s.st.GetFrame(ctx, s.st.Q(), req.FrameId); err == nil {
+		var doc struct {
+			Slideshow struct {
+				AlbumID *string `json:"album_id"`
+			} `json:"slideshow"`
+		}
+		if json.Unmarshal(f.Settings, &doc) == nil && doc.Slideshow.AlbumID != nil && *doc.Slideshow.AlbumID == req.AlbumId.String() {
+			patch := map[string]any{"slideshow": map[string]any{"album_id": nil}}
+			if _, err := s.patchSettings(ctx, req.FrameId, `"`+strconv.Itoa(f.SettingsVersion)+`"`, patch, settings.ActorOther); err != nil {
+				s.log.Warn("reset slideshow album", "frame", req.FrameId, "err", err)
+			}
+		}
 	}
 	return noContent(), nil
 }

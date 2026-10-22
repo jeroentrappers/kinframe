@@ -1,108 +1,162 @@
-// Package blob stores media files on the local filesystem under opaque keys.
+// Package blob stores media files under opaque keys, either on the local
+// filesystem (Local) or in an S3-compatible bucket (S3: AWS S3, MinIO/Silo,
+// Hetzner, Backblaze B2, Cloudflare R2, …).
+//
 // Keys are slash-separated relative paths such as "media/<id>/master.webp".
+// Only processed files are stored (masters, renditions, posters, thumbnails,
+// avatars); tus uploads and the media pipeline's scratch files stay on local
+// disk and are never written to a Store.
 package blob
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
-type Local struct{ Root string }
+// ErrNotFound is returned (wrapped) for keys that do not exist.
+var ErrNotFound = errors.New("blob not found")
 
-// Path returns the absolute path of a key, rejecting traversal.
-func (l Local) Path(key string) (string, error) {
-	clean := filepath.Clean("/" + key)
-	if clean == "/" || strings.Contains(key, "..") || strings.HasPrefix(key, "/") {
-		return "", fmt.Errorf("invalid blob key %q", key)
-	}
-	return filepath.Join(l.Root, filepath.FromSlash(clean)), nil
+// ErrUnsupported is returned by optional operations a backend cannot do
+// (presigned URLs on the filesystem store).
+var ErrUnsupported = errors.New("not supported by this blob store")
+
+// Info describes a stored object.
+type Info struct {
+	Key         string
+	Size        int64
+	ModTime     time.Time
+	ETag        string // quoted HTTP entity tag
+	ContentType string // may be empty on the filesystem store
+	SHA256      string // hex, when the backend recorded it at upload; may be empty
 }
 
-// Put moves (or copies, across filesystems) src into place atomically.
-func (l Local) Put(key, src string) error {
-	dst, err := l.Path(key)
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		return err
-	}
-	if err := os.Rename(src, dst); err == nil {
-		return nil
-	}
-	tmp := dst + ".tmp"
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	out, err := os.Create(tmp)
-	if err != nil {
-		return err
-	}
-	if _, err := io.Copy(out, in); err != nil {
-		out.Close()
-		return err
-	}
-	if err := out.Sync(); err != nil {
-		out.Close()
-		return err
-	}
-	if err := out.Close(); err != nil {
-		return err
-	}
-	if err := os.Rename(tmp, dst); err != nil {
-		return err
-	}
-	return os.Remove(src)
+// PutOptions are optional attributes of a stored object.
+type PutOptions struct {
+	ContentType string // derived from the key's extension when empty
+	SHA256      string // hex digest, recorded as object metadata where supported
 }
 
-// Write stores data under key.
-func (l Local) Write(key string, data []byte) error {
-	dst, err := l.Path(key)
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
-		return err
-	}
-	tmp := dst + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, dst)
+// Object is an open blob. It supports Seek so http.ServeContent can serve
+// Range requests; for S3 each Read after a Seek is one ranged GET.
+type Object interface {
+	io.ReadSeekCloser
 }
 
-// Delete removes a key; missing keys are not an error.
-func (l Local) Delete(key string) error {
-	p, err := l.Path(key)
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(p); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return err
+// Store is a blob backend.
+type Store interface {
+	// Backend names the implementation ("fs" or "s3").
+	Backend() string
+	// Put stores size bytes from r under key (size -1 if unknown), replacing
+	// any existing object. Readers see either the old or the new object.
+	Put(ctx context.Context, key string, r io.Reader, size int64, opts PutOptions) error
+	// PutFile stores the local file src under key. The store may consume
+	// src (the filesystem store renames it into place); callers must not
+	// rely on src existing afterwards.
+	PutFile(ctx context.Context, key, src string, opts PutOptions) error
+	// Stat returns an object's metadata, or ErrNotFound.
+	Stat(ctx context.Context, key string) (Info, error)
+	// Open opens an object for reading, or returns ErrNotFound.
+	Open(ctx context.Context, key string) (Object, Info, error)
+	// Delete removes a key; missing keys are not an error.
+	Delete(ctx context.Context, key string) error
+	// List calls fn for every object whose key starts with prefix ("" for
+	// all), in lexical order. Returning an error from fn stops the walk.
+	List(ctx context.Context, prefix string, fn func(Info) error) error
+	// PresignGet returns a time-limited URL that GETs the object directly
+	// from the backend, or ErrUnsupported.
+	PresignGet(ctx context.Context, key string, ttl time.Duration, contentType string) (string, error)
+}
+
+// Localer is implemented by stores whose objects are plain local files, so
+// the media pipeline can read them in place instead of copying.
+type Localer interface {
+	LocalPath(key string) (string, error)
+}
+
+// CheckKey rejects empty, absolute and traversing keys.
+func CheckKey(key string) error {
+	if key == "" || strings.HasPrefix(key, "/") || strings.Contains(key, "..") || strings.Contains(key, "\\") ||
+		strings.HasSuffix(key, "/") || path.Clean(key) != key {
+		return fmt.Errorf("invalid blob key %q", key)
 	}
 	return nil
 }
 
-// DeletePrefix removes a key directory recursively.
-func (l Local) DeletePrefix(prefix string) error {
-	p, err := l.Path(prefix)
-	if err != nil {
-		return err
+// ContentType guesses a content type from the key's extension.
+func ContentType(key string) string {
+	switch strings.ToLower(path.Ext(key)) {
+	case ".webp":
+		return "image/webp"
+	case ".mp4":
+		return "video/mp4"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".json":
+		return "application/json"
 	}
-	return os.RemoveAll(p)
+	return "application/octet-stream"
 }
 
-// TempDir returns a scratch directory on the same filesystem as the store.
-func (l Local) TempDir() (string, error) {
-	base := filepath.Join(l.Root, "tmp")
-	if err := os.MkdirAll(base, 0o755); err != nil {
+// LocalFile returns a local path holding key's content: the object itself
+// for filesystem stores, otherwise a copy downloaded into dir (which the
+// caller removes).
+func LocalFile(ctx context.Context, s Store, key, dir string) (string, error) {
+	if l, ok := s.(Localer); ok {
+		p, err := l.LocalPath(key)
+		if err != nil {
+			return "", err
+		}
+		if _, err := os.Stat(p); err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return "", fmt.Errorf("%s: %w", key, ErrNotFound)
+			}
+			return "", err
+		}
+		return p, nil
+	}
+	obj, _, err := s.Open(ctx, key)
+	if err != nil {
 		return "", err
 	}
-	return os.MkdirTemp(base, "job-*")
+	defer obj.Close()
+	f, err := os.CreateTemp(dir, "src-*"+filepath.Ext(key))
+	if err != nil {
+		return "", err
+	}
+	if _, err := io.Copy(f, obj); err != nil {
+		f.Close()
+		os.Remove(f.Name())
+		return "", fmt.Errorf("download %s: %w", key, err)
+	}
+	if err := f.Close(); err != nil {
+		os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
+}
+
+// Digest streams an object and returns its sha256 (hex) and size.
+func Digest(ctx context.Context, s Store, key string) (string, int64, error) {
+	obj, _, err := s.Open(ctx, key)
+	if err != nil {
+		return "", 0, err
+	}
+	defer obj.Close()
+	h := sha256.New()
+	n, err := io.Copy(h, obj)
+	if err != nil {
+		return "", 0, err
+	}
+	return hex.EncodeToString(h.Sum(nil)), n, nil
 }

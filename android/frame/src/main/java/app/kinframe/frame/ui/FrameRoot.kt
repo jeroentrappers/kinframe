@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import app.kinframe.core.design.KinframeTheme
 import app.kinframe.frame.AppScreen
 import app.kinframe.frame.FrameController
+import app.kinframe.frame.kiosk.OwnerPinPrompt
 import app.kinframe.frame.setup.SetupFlow
 import app.kinframe.frame.slideshow.SlideshowScreen
 import kotlinx.coroutines.launch
@@ -39,5 +40,8 @@ fun FrameRoot(c: FrameController) {
             }
         }
         UpdateNotice(c.update)
+        val portalOpen by c.portalOpen.collectAsState()
+        if (portalOpen) CaptivePortalScreen(c)
+        OwnerPinPrompt(c)
     }
 }

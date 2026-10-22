@@ -46,6 +46,11 @@ class FrameGraph(val app: Application) {
         .writeTimeout(30, TimeUnit.SECONDS)
         .pingInterval(40, TimeUnit.SECONDS)
         .retryOnConnectionFailure(true)
+        // The server localizes error texts by Accept-Language: use the frame's language, not the system's.
+        .addInterceptor { chain ->
+            val req = chain.request()
+            chain.proceed(if (req.header("Accept-Language") != null) req else req.newBuilder().header("Accept-Language", Locales.effective(app)).build())
+        }
         .build()
 
     val discovery = DiscoveryClient(http)

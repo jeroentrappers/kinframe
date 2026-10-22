@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -82,9 +84,16 @@ import app.kinframe.core.design.StatusPill
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.data.PlacementEntity
+import app.kinframe.frame.join.JoinRequestLayer
+import app.kinframe.frame.join.JoinRequestsPill
+import app.kinframe.frame.join.NotificationsPanel
+import app.kinframe.frame.join.rememberJoinAvatars
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.ui.Format
+import app.kinframe.frame.ui.FrameStatus
+import app.kinframe.frame.ui.FrameStatusCard
+import app.kinframe.frame.ui.FrameStatuses
 import app.kinframe.frame.ui.PowerDialog
 import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
@@ -113,13 +122,20 @@ fun SlideshowScreen(c: FrameController) {
     var burstSeq by remember { mutableIntStateOf(0) }
     var snack by remember { mutableStateOf<Snack?>(null) }
     var forecastOpen by remember { mutableStateOf(false) }
+    var notificationsOpen by remember { mutableStateOf(false) }
+    val joinPending by c.joins.pending.collectAsState()
+    val joinFocused by c.joins.focused.collectAsState()
+    val sync by c.syncState.collectAsState()
     val nowMs by minuteTicker(c)
     val weatherDoc by c.weather.collectAsState()
     // Shown only when enabled, located and fresh (> 6 h old means the frame has been offline a long while).
     val weather = weatherDoc?.takeIf { settings.widgets.weather && settings.location != null && !it.isStale(nowMs) }
     LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen) { ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen }
+    val joinCard = joinFocused != null
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard
+    }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
 
@@ -156,7 +172,10 @@ fun SlideshowScreen(c: FrameController) {
             Modifier
                 .fillMaxSize()
                 .pointerInputTaps(
-                    onTap = { menuOpen = !menuOpen; menuTouch = System.currentTimeMillis() },
+                    onTap = { pos ->
+                        if (!menuOpen) ss.selectAt(pos.x / wPx, pos.y / hPx)
+                        menuOpen = !menuOpen; menuTouch = System.currentTimeMillis()
+                    },
                     onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
                 )
                 .pointerInputSwipe(
@@ -169,24 +188,36 @@ fun SlideshowScreen(c: FrameController) {
                 ),
         ) {
             val dir = stage.direction
-            stage.outgoing?.let { out ->
-                key(out.key) {
-                    SlideLayer(out) {
-                        if (stage.kind == TransitionKind.Slide) translationX = -dir * wPx * progress.value
+            // One call site for both layers, so a slide keeps its state (its Ken Burns motion) when it becomes the
+            // outgoing one and fades out from where it was.
+            listOfNotNull(stage.outgoing?.let { it to false }, stage.incoming?.let { it to true }).forEach { (slide, incoming) ->
+                key(slide.key) {
+                    val kb = slide.kenBurns
+                    val motion = remember { Animatable(0f) }
+                    if (kb != null) {
+                        val hold = stage.holdMs
+                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(hold.coerceIn(1_000, Int.MAX_VALUE.toLong()).toInt(), easing = LinearEasing)) }
                     }
-                }
-            }
-            stage.incoming?.let { inc ->
-                key(inc.key) {
-                    SlideLayer(inc) {
-                        when (stage.kind) {
-                            TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
-                            TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
-                            TransitionKind.Cut -> translationX = drag.value * 0.35f
+                    SlideLayer(slide) {
+                        if (incoming) {
+                            when (stage.kind) {
+                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
+                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
+                                TransitionKind.Cut -> translationX = drag.value * 0.35f
+                            }
+                        } else if (stage.kind == TransitionKind.Slide) {
+                            translationX = -dir * wPx * progress.value
+                        }
+                        if (kb != null) {
+                            // One scaled textured quad per frame: within the Mali-400 budget (see KenBurns).
+                            val t = motion.value
+                            scaleX = kb.scaleAt(t); scaleY = kb.scaleAt(t)
+                            translationX += kb.xAt(t) * wPx
+                            translationY = kb.yAt(t) * hPx
                         }
                     }
+                    if (incoming) VideoLayer(c, slide, wPx, hPx)
                 }
-                VideoLayer(c, inc, wPx, hPx)
             }
             TextureWarmup(c)
             if (stage.incoming == null) empty?.let { EmptyStateView(c, it) }
@@ -198,7 +229,11 @@ fun SlideshowScreen(c: FrameController) {
             onWeatherClick = { menuOpen = false; forecastOpen = true },
         )
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
-        ConnectionPill(c, Modifier.align(Alignment.TopStart).padding(24.dp), hidden = menuOpen)
+        VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
+        Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            StatusArea(c, hidden = menuOpen || joinCard)
+            JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
+        }
 
         burst?.let { (r, at) -> key(burstSeq) { ReactionBurst(r, at) { burst = null } } }
 
@@ -222,7 +257,9 @@ fun SlideshowScreen(c: FrameController) {
                 }
             },
             onPower = { menuOpen = false; powerOpen = true },
-            onSettings = { menuOpen = false; c.settingsOpen.value = true },
+            onSettings = { menuOpen = false; c.openSettings() },
+            notificationCount = joinPending.size,
+            onNotifications = { menuOpen = false; notificationsOpen = true },
         )
 
         snack?.let { s ->
@@ -244,10 +281,17 @@ fun SlideshowScreen(c: FrameController) {
             h24 = settings.widgets.clock24h, onClose = { forecastOpen = false },
         )
 
+        NotificationsPanel(
+            visible = notificationsOpen, items = joinPending, avatars = rememberJoinAvatars(c), nowMs = nowMs,
+            onAllow = { c.joins.decide(it, approve = true) }, onDeny = { c.joins.decide(it, approve = false) },
+            onClose = { notificationsOpen = false },
+        )
+        JoinRequestLayer(c, sync?.frameName ?: stringResource(R.string.frame_default_name))
+
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
         AnimatedVisibility(settingsOpen, enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 12 }, exit = fadeOut(tween(200))) {
-            SettingsScreen(c, onClose = { c.settingsOpen.value = false })
+            SettingsScreen(c, onClose = { c.closeSettings() })
         }
 
         IdentifyOverlay(c)
@@ -259,8 +303,8 @@ const val UNDO_MS = 6_500L
 
 data class Snack(val text: Int, val placementId: String, val outboxId: Long, val hidden: Boolean)
 
-private fun Modifier.pointerInputTaps(onTap: () -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
-    pointerInput("taps") { detectTapGestures(onTap = { onTap() }, onDoubleTap = { onDoubleTap(it) }) }
+private fun Modifier.pointerInputTaps(onTap: (Offset) -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
+    pointerInput("taps") { detectTapGestures(onTap = { onTap(it) }, onDoubleTap = { onDoubleTap(it) }) }
 
 private fun Modifier.pointerInputSwipe(onDrag: (Float) -> Unit, onEnd: () -> Unit): Modifier =
     pointerInput("swipe") {
@@ -381,34 +425,63 @@ private fun ClockWidget(
 }
 
 @Composable
-private fun NewPhotosPill(c: FrameController, modifier: Modifier) {
-    val n by c.slideshow.newCount.collectAsState()
-    AnimatedVisibility(n > 0, modifier.padding(top = 24.dp), enter = fadeIn() + slideInVertically { -it }, exit = fadeOut() + slideOutVertically { -it }) {
+private fun VolumePill(c: FrameController, modifier: Modifier) {
+    val v by c.slideshow.volumeHint.collectAsState()
+    AnimatedVisibility(v != null, modifier, enter = fadeIn(), exit = fadeOut()) {
+        val pct = v ?: 0
         Row(
-            Modifier.clip(CircleShape).background(Kin.colors.accent).clickable { c.slideshow.showNew() }.padding(horizontal = 24.dp, vertical = 12.dp),
+            Modifier.clip(CircleShape).background(Color(0xE61C1714)).padding(horizontal = 24.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            KinIcon(KinIcons.Image, null, tint = Color.White, size = 22.dp)
-            Text(pluralStringResource(R.plurals.new_photos, n, n), style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 10.dp))
+            Text(if (pct == 0) "\uD83D\uDD07" else "\uD83D\uDD0A", fontSize = 22.sp)
+            Box(Modifier.padding(start = 14.dp).size(220.dp, 8.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f))) {
+                Box(Modifier.fillMaxHeight().fillMaxWidth(pct / 100f).clip(CircleShape).background(Color.White))
+            }
+            Text("$pct%", style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 14.dp))
         }
     }
 }
 
 @Composable
-private fun ConnectionPill(c: FrameController, modifier: Modifier, hidden: Boolean) {
-    val conn by c.connection.collectAsState()
-    // Only after a minute, so short blips don't flash a warning.
-    var show by remember { mutableStateOf(false) }
-    LaunchedEffect(conn) {
-        show = false
-        if (conn == FrameSession.Connection.Offline || conn == FrameSession.Connection.ServerUnreachable) { delay(60_000); show = true }
+private fun NewPhotosPill(c: FrameController, modifier: Modifier) {
+    val n by c.slideshow.newCount.collectAsState()
+    AnimatedVisibility(n > 0, modifier.padding(top = 24.dp), enter = fadeIn() + slideInVertically { -it }, exit = fadeOut() + slideOutVertically { -it }) {
+        NewPhotosPillContent(n) { c.slideshow.showNew() }
     }
-    AnimatedVisibility(show && !hidden, modifier, enter = fadeIn(), exit = fadeOut()) {
-        StatusPill(
-            stringResource(if (conn == FrameSession.Connection.Offline) R.string.status_offline else R.string.status_server_unreachable),
-            leading = { KinIcon(KinIcons.WifiOff, null, tint = Color.White, size = 18.dp) },
-        )
+}
+
+@Composable
+internal fun NewPhotosPillContent(n: Int, onClick: () -> Unit) {
+    Row(
+        Modifier.clip(CircleShape).background(Kin.colors.accent).clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        KinIcon(KinIcons.Image, null, tint = Color.White, size = 22.dp)
+        Text(pluralStringResource(R.plurals.new_photos, n, n), style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 10.dp))
     }
+}
+
+/** One calm, dismissible status card (offline, server unreachable, captive portal, storage full). */
+@Composable
+private fun StatusArea(c: FrameController, hidden: Boolean) {
+    val status by c.frameStatus.collectAsState()
+    var shown by remember { mutableStateOf<FrameStatus?>(null) }
+    LaunchedEffect(status) {
+        shown = null
+        delay(FrameStatuses.delayMs(status))
+        shown = status
+    }
+    var dismissed by remember { mutableStateOf<Pair<FrameStatus, Long>?>(null) }
+    val now = System.currentTimeMillis()
+    val visible = shown?.takeIf { s ->
+        val d = dismissed
+        d == null || d.first != s || (s == FrameStatus.StorageCritical && now - d.second > FrameStatuses.STORAGE_SNOOZE_MS)
+    }
+    FrameStatusCard(
+        if (hidden) null else visible,
+        onDismiss = { dismissed = shown?.let { it to System.currentTimeMillis() } },
+        onAction = { c.portalOpen.value = true },
+    )
 }
 
 @Composable
@@ -436,7 +509,7 @@ private fun ReactionBurst(reaction: String, at: Offset, onDone: () -> Unit) {
 }
 
 @Composable
-private fun UndoSnackbar(s: Snack, modifier: Modifier, onUndo: () -> Unit, onTimeout: () -> Unit) {
+internal fun UndoSnackbar(s: Snack, modifier: Modifier, onUndo: () -> Unit, onTimeout: () -> Unit) {
     LaunchedEffect(Unit) { delay(UNDO_MS - 300); onTimeout() }
     Row(
         modifier.clip(CircleShape).background(Color(0xF02E2621)).padding(start = 28.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
@@ -495,11 +568,56 @@ private fun QuickMenu(
     onDelete: (PlacementEntity) -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    notificationCount: Int,
+    onNotifications: () -> Unit,
 ) {
     val current by c.slideshow.current.collectAsState()
     val conn by c.connection.collectAsState()
     val net by c.g.network.status.collectAsState()
     val sync by c.syncState.collectAsState()
+    val p = current
+    QuickMenuContent(
+        visible = visible,
+        compact = compact,
+        frameName = sync?.frameName ?: stringResource(R.string.frame_default_name),
+        status = when {
+            !net.connected -> stringResource(R.string.status_offline)
+            conn == FrameSession.Connection.Online -> stringResource(R.string.status_online, net.ssid ?: stringResource(R.string.wifi_network))
+            else -> stringResource(R.string.status_server_unreachable)
+        },
+        wifiIcon = if (net.connected) (if (net.level >= 2) KinIcons.Wifi else KinIcons.WifiWeak) else KinIcons.WifiOff,
+        hasPhoto = p != null,
+        reaction = p?.reaction,
+        onTouch = onTouch,
+        onReact = onReact,
+        onHide = { p?.let(onHide) },
+        onDelete = { p?.let(onDelete) },
+        onPower = onPower,
+        onSettings = onSettings,
+        notificationCount = notificationCount,
+        onNotifications = onNotifications,
+    )
+}
+
+/** The quick menu's bars without the controller (also rendered by the screenshot tests). */
+@Composable
+internal fun QuickMenuContent(
+    visible: Boolean,
+    compact: Boolean,
+    frameName: String,
+    status: String,
+    wifiIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    hasPhoto: Boolean,
+    reaction: String?,
+    onTouch: () -> Unit,
+    onReact: (String?) -> Unit,
+    onHide: () -> Unit,
+    onDelete: () -> Unit,
+    onPower: () -> Unit,
+    onSettings: () -> Unit,
+    notificationCount: Int = 0,
+    onNotifications: () -> Unit = {},
+) {
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(visible, Modifier.align(Alignment.TopCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { -it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { -it / 2 }) {
             Row(
@@ -508,27 +626,32 @@ private fun QuickMenu(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text(sync?.frameName ?: stringResource(R.string.frame_default_name), style = Kin.type.title, color = Color.White)
+                    Text(frameName, style = Kin.type.title, color = Color.White, maxLines = 2)
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                        KinIcon(if (net.connected) (if (net.level >= 2) KinIcons.Wifi else KinIcons.WifiWeak) else KinIcons.WifiOff, null, tint = Color.White.copy(alpha = 0.85f), size = 20.dp)
+                        KinIcon(wifiIcon, null, tint = Color.White.copy(alpha = 0.85f), size = 20.dp)
                         Text(
-                            when {
-                                !net.connected -> stringResource(R.string.status_offline)
-                                conn == FrameSession.Connection.Online -> stringResource(R.string.status_online, net.ssid ?: stringResource(R.string.wifi_network))
-                                else -> stringResource(R.string.status_server_unreachable)
-                            },
+                            status,
                             style = Kin.type.caption, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.padding(start = 8.dp),
                         )
                     }
                 }
+                Box {
+                    RoundAction(KinIcons.Bell, stringResource(R.string.menu_notifications)) { onTouch(); onNotifications() }
+                    if (notificationCount > 0) {
+                        Box(
+                            Modifier.align(Alignment.TopEnd).size(24.dp).clip(CircleShape).background(Kin.colors.accent),
+                            contentAlignment = Alignment.Center,
+                        ) { Text("$notificationCount", style = Kin.type.caption, color = Color.White) }
+                    }
+                }
+                Spacer(Modifier.size(14.dp))
                 RoundAction(KinIcons.Settings, stringResource(R.string.menu_settings)) { onTouch(); onSettings() }
                 Spacer(Modifier.size(14.dp))
                 RoundAction(KinIcons.Power, stringResource(R.string.menu_power)) { onTouch(); onPower() }
             }
         }
-        val p = current
-        AnimatedVisibility(visible && p != null, Modifier.align(Alignment.BottomCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { it / 2 }) {
-            if (p != null) {
+        AnimatedVisibility(visible && hasPhoto, Modifier.align(Alignment.BottomCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { it / 2 }) {
+            run {
                 Row(
                     // Float above the caption + sender line (drawn into the bottom of the slide) instead of covering it.
                     Modifier.padding(bottom = 112.dp).clip(KinShapeL).background(Color(0xE61C1714)).padding(horizontal = 20.dp, vertical = 16.dp),
@@ -536,7 +659,7 @@ private fun QuickMenu(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Reaction.all.forEach { r ->
-                        val selected = p.reaction == r
+                        val selected = reaction == r
                         Box(
                             Modifier.size(64.dp).clip(CircleShape)
                                 .background(if (selected) Color.White.copy(alpha = 0.95f) else Color.White.copy(alpha = 0.1f))
@@ -545,8 +668,8 @@ private fun QuickMenu(
                         ) { Text(reactionEmoji(r), fontSize = 30.sp) }
                     }
                     Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
-                    PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide(p) }
-                    PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete(p) }
+                    PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide() }
+                    PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete() }
                 }
             }
         }
@@ -579,21 +702,7 @@ private fun PillAction(icon: androidx.compose.ui.graphics.vector.ImageVector, la
 private fun EmptyStateView(c: FrameController, state: EmptyState) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Kin.colors.paper)) {
         val landscape = maxWidth > maxHeight
-        val message = @Composable {
-            Column(Modifier.widthIn(max = 560.dp)) {
-                EmptyIllustration()
-                Spacer(Modifier.height(36.dp))
-                when (state) {
-                    EmptyState.NoPhotos -> KinHeading(stringResource(R.string.empty_title), stringResource(R.string.empty_body))
-                    EmptyState.AllHidden -> KinHeading(stringResource(R.string.empty_hidden_title), stringResource(R.string.empty_hidden_body))
-                    is EmptyState.Downloading -> {
-                        KinHeading(stringResource(R.string.empty_downloading_title), pluralStringResource(R.plurals.empty_downloading_body, state.total, state.total))
-                        Spacer(Modifier.height(20.dp))
-                        CircularProgressIndicator(Modifier.size(28.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
-                    }
-                }
-            }
-        }
+        val message = @Composable { EmptyMessage(state) }
         if (landscape) {
             Row(Modifier.fillMaxSize().padding(horizontal = 72.dp, vertical = 56.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(64.dp)) {
                 Box(Modifier.weight(1f)) { message() }
@@ -607,6 +716,23 @@ private fun EmptyStateView(c: FrameController, state: EmptyState) {
             ) {
                 message()
                 if (state == EmptyState.NoPhotos) EmptyCodeCard(c)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun EmptyMessage(state: EmptyState) {
+    Column(Modifier.widthIn(max = 560.dp)) {
+        EmptyIllustration()
+        Spacer(Modifier.height(36.dp))
+        when (state) {
+            EmptyState.NoPhotos -> KinHeading(stringResource(R.string.empty_title), stringResource(R.string.empty_body))
+            EmptyState.AllHidden -> KinHeading(stringResource(R.string.empty_hidden_title), stringResource(R.string.empty_hidden_body))
+            is EmptyState.Downloading -> {
+                KinHeading(stringResource(R.string.empty_downloading_title), pluralStringResource(R.plurals.empty_downloading_body, state.total, state.total))
+                Spacer(Modifier.height(20.dp))
+                CircularProgressIndicator(Modifier.size(28.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
             }
         }
     }

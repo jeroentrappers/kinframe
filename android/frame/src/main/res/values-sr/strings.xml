@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Фото-рам</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Откажи</string>
+    <string name="action_continue">Настави</string>
+    <string name="action_try_again">Покушај поново</string>
+    <string name="action_undo">Опозови</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Добро дошли у kinframe</string>
+    <string name="setup_language_body">Изаберите језик овог рама.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Повежите се на Wi-Fi</string>
+    <string name="setup_wifi_body">Раму је потребан Wi-Fi да би примао фотографије. Када стигну, приказују се и без везе.</string>
+    <string name="wifi_connected_to">Повезано са мрежом %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Није повезано</string>
+    <string name="wifi_not_connected_hint">Изаберите мрежу да бисте наставили.</string>
+    <string name="wifi_no_internet">Повезано, али интернета још нема</string>
+    <string name="wifi_signal">Сигнал: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi подешавања</string>
+    <string name="wifi_networks">Мреже у близини</string>
+    <string name="wifi_scanning">Тражење мрежа…</string>
+    <string name="wifi_permission_body">Да би овде приказао мреже, Android-у је потребна дозвола за скенирање Wi-Fi мрежа.</string>
+    <string name="wifi_show_networks">Прикажи мреже</string>
+    <string name="wifi_password">Лозинка</string>
+    <string name="wifi_join">Повежи</string>
+    <string name="signal_0">веома слаб</string>
+    <string name="signal_1">слаб</string>
+    <string name="signal_2">осредњи</string>
+    <string name="signal_3">добар</string>
+    <string name="signal_4">одличан</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Изаберите сервер</string>
+    <string name="setup_server_body">Фотографије путују преко kinframe сервера. Користите бесплатни kinframe сервер или онај који води ваша породица.</string>
+    <string name="server_default_body">Бесплатно и отвореног кода. Препоручено.</string>
+    <string name="server_custom">Користи свој сервер</string>
+    <string name="server_custom_body">За породице које саме хостују kinframe.</string>
+    <string name="server_address">Адреса сервера</string>
+    <string name="server_check">Провери сервер</string>
+    <string name="server_checking">Провера сервера…</string>
+    <string name="server_version">верзија %1$s</string>
+    <string name="server_insecure">није шифровано</string>
+    <string name="server_error_invalid">Ово не изгледа као веб адреса. Пробајте нешто попут https://frames.example.org.</string>
+    <string name="server_error_unreachable">Сервер није доступан. Проверите адресу и да ли је рам на мрежи.</string>
+    <string name="server_error_not_kinframe">Овај сервер је одговорио, али није kinframe сервер.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Рам се припрема…</string>
+    <string name="enroll_body">Ово траје неколико секунди.</string>
+    <string name="enroll_failed_title">Регистрација рама није успела</string>
+    <string name="enroll_failed_body">Порука сервера: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Повежите овај рам са породицом</string>
+    <string name="code_step1">Отворите kinframe апликацију или %1$s у прегледачу</string>
+    <string name="code_step2">Изаберите Додај рам</string>
+    <string name="code_step3">Унесите овај код или скенирајте QR код</string>
+    <string name="code_valid_for">Важи још %1$s</string>
+    <string name="code_waiting">Чека се да неко унесе код</string>
+    <string name="code_offline_title">Рам није на мрежи</string>
+    <string name="code_offline_body">За код рама потребна је интернет веза. Проверите Wi-Fi.</string>
+    <string name="code_error_title">Код рама није добијен</string>
+    <string name="code_error_body">Сервер није одговорио. Рам наставља да покушава.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Повезано: %1$s</string>
+    <string name="celebrate_title_anon">Повезано</string>
+    <string name="celebrate_body">Фотографије послате на овај рам појавиће се овде за неколико секунди.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d ч %2$d мин</string>
+    <string name="duration_min">%1$d мин</string>
+    <string name="date_today">Данас</string>
+    <string name="date_yesterday">Јуче</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">пре %d дан</item>
+        <item quantity="few">пре %d дана</item>
+        <item quantity="other">пре %d дана</item>
+    </plurals>
+    <string name="interval_s">%1$d с</string>
+    <string name="interval_min">%1$d мин</string>
+    <string name="interval_h">%1$d ч</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">измењено</string>
+    <string name="unable_photo">Ова фотографија не може да се прикаже</string>
+    <string name="unable_video">Овај видео не може да се пусти. Замолите пошиљаоца да га пошаље поново.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d нова фотографија</item>
+        <item quantity="few">%d нове фотографије</item>
+        <item quantity="other">%d нових фотографија</item>
+    </plurals>
+    <string name="status_offline">Ван мреже</string>
+    <string name="status_online">На мрежи · %1$s</string>
+    <string name="status_server_unreachable">Сервер није доступан</string>
+    <string name="identify_this_is">Ово је</string>
+    <string name="snack_hidden">Фотографија је сакривена</string>
+    <string name="snack_deleted">Фотографија је избрисана</string>
+    <string name="menu_settings">Подешавања</string>
+    <string name="menu_power">Напајање</string>
+    <string name="menu_hide">Сакриј</string>
+    <string name="menu_delete">Избриши</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Још нема фотографија</string>
+    <string name="empty_body">Фотографије и видео снимци послати из kinframe апликације или са сајта појављују се овде за неколико секунди.</string>
+    <string name="empty_code_title">Додајте породицу овим кодом</string>
+    <string name="empty_code_body">Унесите га у kinframe апликацију или скенирајте QR код.</string>
+    <string name="empty_hidden_title">Све фотографије су сакривене</string>
+    <string name="empty_hidden_body">Сакривене фотографије остају у библиотеци. Поново их прикажите из kinframe апликације.</string>
+    <string name="empty_downloading_title">Фотографије стижу</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Преузима се %d фотографија.</item>
+        <item quantity="few">Преузимају се %d фотографије.</item>
+        <item quantity="other">Преузима се %d фотографија.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Напајање</string>
+    <string name="power_sleep">Мировање</string>
+    <string name="power_sleep_body">Екран је угашен док га не додирнете.</string>
+    <string name="power_restart">Поново покрени</string>
+    <string name="power_restart_body">Поново покрените рам.</string>
+    <string name="power_off">Искључи</string>
+    <string name="power_off_body">Безбедно искључите пре вађења кабла.</string>
+    <string name="shutting_down_title">Искључивање…</string>
+    <string name="restarting_title">Поновно покретање…</string>
+    <string name="shutting_down_body">Све се безбедно чува.</string>
+    <string name="safe_title">Сада можете да искључите кабл</string>
+    <string name="safe_body">Све је сачувано. Да бисте поново користили рам, притисните дугме за напајање или поново укључите кабл.</string>
+    <string name="safe_body_noroot">kinframe је све сачувао. Сада можете да искључите рам из струје.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe је имао проблем са приказом фотографија</string>
+    <string name="recovery_body">Неколико пута заредом се неочекивано зауставио. Покушајте поново или обришите преузете фотографије. Поново ће се преузети са сервера, ништа се не губи.</string>
+    <string name="recovery_clear">Обриши преузете фотографије</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Подешавања</string>
+    <string name="settings_language">Језик</string>
+    <string name="settings_slideshow">Пројекција слајдова</string>
+    <string name="settings_interval">Свака фотографија траје</string>
+    <string name="settings_transition">Прелаз</string>
+    <string name="transition_crossfade">Претапање</string>
+    <string name="transition_slide">Клизање</string>
+    <string name="settings_order">Редослед</string>
+    <string name="order_received">Најновије примљене</string>
+    <string name="order_taken">Датум снимања</string>
+    <string name="order_shuffle">Насумично</string>
+    <string name="settings_reverse">Прво најстарије</string>
+    <string name="settings_fill">Величина фотографије</string>
+    <string name="fill_fill">Попуни екран</string>
+    <string name="fill_fit">Прикажи целу фотографију</string>
+    <string name="settings_display">Екран</string>
+    <string name="settings_brightness">Осветљеност</string>
+    <string name="settings_brightness_mode">Аутоматска осветљеност</string>
+    <string name="brightness_manual">Фиксна</string>
+    <string name="brightness_sun">Прати сунце</string>
+    <string name="settings_sleep">Мировање</string>
+    <string name="settings_sleep_enabled">Гаси екран ноћу</string>
+    <string name="settings_sleep_at">Мировање у</string>
+    <string name="settings_wake_at">Буђење у</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">и још %d распоред, у kinframe апликацији</item>
+        <item quantity="few">и још %d распореда, у kinframe апликацији</item>
+        <item quantity="other">и још %d распореда, у kinframe апликацији</item>
+    </plurals>
+    <string name="settings_about">Овај рам</string>
+    <string name="about_frame">Назив</string>
+    <string name="about_server">Сервер</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Верзија апликације</string>
+    <string name="about_android_settings">Android подешавања</string>
+    <string name="settings_updates">Ажурирања</string>
+    <string name="updates_channel">Канал</string>
+    <string name="updates_channel_stable">Стабилни</string>
+    <string name="updates_channel_beta">Бета (нове верзије раније)</string>
+    <string name="updates_check">Потражи ажурирање</string>
+    <string name="updates_install_now">Инсталирај сада</string>
+    <string name="updates_checking">Тражење ажурирања…</string>
+    <string name="updates_up_to_date">Овај рам је ажуриран.</string>
+    <string name="updates_downloading">Преузимање верзије %1$s… %2$d%%</string>
+    <string name="updates_waiting">Верзија %1$s је спремна. Инсталираће се када нико не користи рам.</string>
+    <string name="updates_installing">Инсталира се верзија %1$s. Рам ће се ускоро поново покренути.</string>
+    <string name="updates_failed">Ажурирање није успело. Рам ће покушати поново касније.</string>
+    <string name="update_notice_updated">Ажурирано на верзију %1$s</string>
+    <string name="update_notice_rolled_back">Нова верзија је имала проблема, па се рам вратио на претходну.</string>
+    <string name="update_notice_needs_user">Ажурирање је спремно. Додирните Инсталирај да бисте наставили.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Прикажи прогнозу</string>
+    <string name="weather_close">Затвори</string>
+    <string name="weather_now">Сада</string>
+    <string name="weather_today">Данас</string>
+    <string name="weather_feels_like">Осећај као %1$s</string>
+    <string name="weather_high_low">Макс. %1$s · Мин. %2$s</string>
+    <string name="weather_wind">Ветар</string>
+    <string name="weather_humidity">Влажност</string>
+    <string name="weather_sunrise">Излазак сунца</string>
+    <string name="weather_sunset">Залазак сунца</string>
+    <string name="weather_next_hours">Наредна 24 сата</string>
+    <string name="weather_next_days">Прогноза за 7 дана</string>
+    <string name="weather_updated">Ажурирано %1$s</string>
+    <string-array name="weather_compass">
+        <item>С</item>
+        <item>СИ</item>
+        <item>И</item>
+        <item>ЈИ</item>
+        <item>Ј</item>
+        <item>ЈЗ</item>
+        <item>З</item>
+        <item>СЗ</item>
+    </string-array>
+    <string name="wmo_clear_day">Сунчано</string>
+    <string name="wmo_clear_night">Ведро</string>
+    <string name="wmo_mainly_clear_day">Претежно сунчано</string>
+    <string name="wmo_mainly_clear_night">Претежно ведро</string>
+    <string name="wmo_partly_cloudy">Делимично облачно</string>
+    <string name="wmo_overcast">Облачно</string>
+    <string name="wmo_fog">Магла</string>
+    <string name="wmo_rime_fog">Ледена магла</string>
+    <string name="wmo_drizzle_light">Слаба росуља</string>
+    <string name="wmo_drizzle">Росуља</string>
+    <string name="wmo_drizzle_dense">Јака росуља</string>
+    <string name="wmo_freezing_drizzle">Ледена росуља</string>
+    <string name="wmo_rain_light">Слаба киша</string>
+    <string name="wmo_rain">Киша</string>
+    <string name="wmo_rain_heavy">Јака киша</string>
+    <string name="wmo_freezing_rain">Ледена киша</string>
+    <string name="wmo_snow_light">Слаб снег</string>
+    <string name="wmo_snow">Снег</string>
+    <string name="wmo_snow_heavy">Јак снег</string>
+    <string name="wmo_snow_grains">Зрнаст снег</string>
+    <string name="wmo_showers_light">Слаби пљускови</string>
+    <string name="wmo_showers">Пљускови</string>
+    <string name="wmo_showers_violent">Јаки пљускови</string>
+    <string name="wmo_snow_showers_light">Слаби снежни пљускови</string>
+    <string name="wmo_snow_showers">Снежни пљускови</string>
+    <string name="wmo_thunderstorm">Грмљавина</string>
+    <string name="wmo_thunderstorm_hail">Грмљавина са градом</string>
+</resources>

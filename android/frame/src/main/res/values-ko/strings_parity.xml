@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">소유자 PIN을 입력하세요</string>
+    <string name="pin_reason_settings">설정을 열려면</string>
+    <string name="pin_reason_exit">kinframe을 나가려면</string>
+    <string name="pin_reason_wifi">Wi-Fi를 변경하려면</string>
+    <string name="pin_reason_power_off">액자 전원을 끄려면</string>
+    <string name="pin_reason_restart">액자를 다시 시작하려면</string>
+    <string name="pin_reason_server">서버를 변경하려면</string>
+    <string name="pin_reason_reset">액자를 초기화하려면</string>
+    <string name="pin_checking">확인하는 중…</string>
+    <string name="pin_wrong">PIN이 맞지 않아요.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="other">PIN이 맞지 않아요. %d번 더 틀리면 잠시 기다려야 해요.</item>
+    </plurals>
+    <string name="pin_locked">너무 많이 틀렸어요. %s 후에 다시 시도하세요.</string>
+    <string name="pin_forgot">PIN을 잊으셨나요? 액자 소유자가 kinframe 앱의 이 액자 설정에서 PIN을 삭제할 수 있어요.</string>
+    <string name="pin_new_title">PIN 정하기</string>
+    <string name="pin_new_body">4~6자리 숫자예요. 설정을 열거나, 액자 전원을 끄거나, Wi-Fi를 변경할 때 물어봐요.</string>
+    <string name="pin_confirm_title">PIN을 다시 입력하세요</string>
+    <string name="pin_confirm_body">한 번 더 확인할게요.</string>
+    <string name="pin_mismatch">PIN이 일치하지 않아요. 다시 정해 주세요.</string>
+    <string name="pin_key_delete">지우기</string>
+    <string name="pin_key_ok">확인</string>
+    <string name="settings_pin">소유자 PIN</string>
+    <string name="settings_pin_off">꺼짐. 액자 앞에 있는 누구나 설정을 열 수 있어요.</string>
+    <string name="settings_pin_on">켜짐. 설정, 전원, Wi-Fi에서 PIN을 물어봐요.</string>
+    <string name="settings_pin_set">PIN 설정</string>
+    <string name="settings_pin_change">PIN 변경</string>
+    <string name="settings_pin_remove">PIN 삭제</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">누군가</string>
+    <string name="join_title">%1$s 님이 참여하고 싶어 해요</string>
+    <string name="join_body_code">%1$s 님이 %2$s의 코드를 입력했어요. 허용하면 %1$s 님이 이 액자로 사진을 보낼 수 있어요.</string>
+    <string name="join_body_invited">%1$s 님이 %3$s 님을 %2$s에 초대했어요. 허용하면 %3$s 님이 이 액자로 사진을 보낼 수 있어요.</string>
+    <string name="join_invited_by">%s 님이 초대함</string>
+    <string name="join_allow">허용</string>
+    <string name="join_deny">허용 안 함</string>
+    <string name="join_later">나중에</string>
+    <string name="join_later_hint">메뉴의 알림에 그대로 남아 있어요.</string>
+    <string name="join_pill_one">%s 님이 참여하고 싶어 해요</string>
+    <plurals name="join_pill_many">
+        <item quantity="other">%d명이 참여하고 싶어 해요</item>
+    </plurals>
+    <string name="notifications_title">알림</string>
+    <string name="notifications_empty">모두 확인했어요</string>
+    <string name="notifications_empty_body">기다리고 있는 알림이 없어요.</string>
+    <string name="menu_notifications">알림</string>
+    <string name="action_close">닫기</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">인터넷에 연결되지 않음</string>
+    <string name="status_card_offline_body">액자에 있는 사진은 계속 재생돼요. 다시 연결되면 새 사진이 바로 도착해요.</string>
+    <string name="status_card_server_title">사진 서버에 연결할 수 없어요</string>
+    <string name="status_card_server_body">Wi-Fi는 되지만 서버가 응답하지 않아요. 서버가 돌아오면 새 사진이 도착해요.</string>
+    <string name="status_card_portal_title">이 Wi-Fi는 로그인이 필요해요</string>
+    <string name="status_card_portal_body">네트워크 로그인 페이지를 열어 액자를 인터넷에 연결하세요.</string>
+    <string name="status_card_portal_action">로그인</string>
+    <string name="status_card_storage_title">액자 저장 공간이 거의 찼어요</string>
+    <string name="status_card_storage_body">공간을 만들려고 오래된 사진을 액자에서 내렸어요. 서버에는 안전하게 남아 있어요. 새 사진은 공간이 생길 때까지 기다릴 수 있어요.</string>
+    <string name="portal_title">Wi-Fi에 로그인</string>
+    <string name="portal_body">액자가 인터넷에 연결되면 자동으로 닫혀요.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">액자가 있는 곳의 시간대는?</string>
+    <string name="setup_tz_body">시계, 날짜, 야간 일정이 정확하도록 설정해요.</string>
+    <string name="setup_tz_suggested">추천</string>
+    <string name="setup_tz_all">모든 시간대</string>
+    <string name="tz_region_europe">유럽</string>
+    <string name="tz_region_america">아메리카</string>
+    <string name="tz_region_asia">아시아</string>
+    <string name="tz_region_africa">아프리카</string>
+    <string name="tz_region_australia">오스트레일리아</string>
+    <string name="tz_region_pacific">태평양</string>
+    <string name="tz_region_atlantic">대서양</string>
+    <string name="tz_region_indian">인도양</string>
+    <string name="tz_region_antarctica">남극</string>
+    <string name="setup_update_checking">새 버전을 찾는 중…</string>
+    <string name="setup_update_checking_body">시작하기 전에 액자가 최신 kinframe을 사용하는지 확인해요.</string>
+    <string name="setup_update_downloading">버전 %s 다운로드 중</string>
+    <string name="setup_update_downloading_body">다운로드 후 바로 설치돼요. 건너뛰어도 액자가 나중에 알아서 업데이트해요.</string>
+    <string name="setup_update_installing">버전 %s 설치 중</string>
+    <string name="setup_update_installing_body">잠시 후 액자가 알아서 다시 시작되고, 멈춘 곳부터 설정을 이어가요.</string>
+    <string name="setup_update_current">kinframe이 최신 상태예요</string>
+    <string name="setup_update_current_body">마지막 단계로 넘어갈게요.</string>
+    <string name="setup_update_failed">업데이트를 확인하지 못했어요</string>
+    <string name="setup_update_failed_body">괜찮아요. 액자가 나중에 다시 확인하고 알아서 업데이트해요.</string>
+    <string name="setup_update_skip">지금은 건너뛰기</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="other">%d년 전 오늘</item>
+    </plurals>
+    <string name="transition_kenburns">천천히 확대</string>
+    <string name="settings_collage">여러 사진을 한 번에 (콜라주)</string>
+    <string name="settings_collage_max">화면당 사진 수</string>
+    <string name="settings_pair_portraits">세로 사진 두 장을 나란히 표시</string>
+    <string name="settings_on_this_day">지난 몇 년간 오늘의 추억 보기</string>
+    <string name="settings_video">동영상</string>
+    <string name="settings_video_autoplay">동영상 자동 재생</string>
+    <string name="settings_video_playback">동영상이 끝나면</string>
+    <string name="video_once_hold">한 번 재생 후 멈춤</string>
+    <string name="video_loop">계속 반복</string>
+    <string name="video_once_advance">한 번 재생 후 다음으로</string>
+    <string name="settings_video_volume">동영상 음량</string>
+    <string name="settings_video_auto_mute">아무도 액자를 만지지 않으면 음소거</string>
+    <string name="video_auto_mute_off">사용 안 함</string>
+    <string name="video_auto_mute_min">%d분</string>
+</resources>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Anna omistajan PIN-koodi</string>
+    <string name="pin_reason_settings">avataksesi asetukset</string>
+    <string name="pin_reason_exit">poistuaksesi kinframesta</string>
+    <string name="pin_reason_wifi">vaihtaaksesi Wi-Fin</string>
+    <string name="pin_reason_power_off">sammuttaaksesi kuvakehyksen</string>
+    <string name="pin_reason_restart">käynnistääksesi kuvakehyksen uudelleen</string>
+    <string name="pin_reason_server">vaihtaaksesi palvelimen</string>
+    <string name="pin_reason_reset">nollataksesi kuvakehyksen</string>
+    <string name="pin_checking">Tarkistetaan…</string>
+    <string name="pin_wrong">PIN-koodi on väärä.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">PIN-koodi on väärä. Vielä %d yritys ennen lyhyttä taukoa.</item>
+        <item quantity="other">PIN-koodi on väärä. Vielä %d yritystä ennen lyhyttä taukoa.</item>
+    </plurals>
+    <string name="pin_locked">Liian monta väärää yritystä. Yritä uudelleen %s kuluttua.</string>
+    <string name="pin_forgot">Unohditko PIN-koodin? Kuvakehyksen omistaja voi poistaa sen kinframe-sovelluksessa tämän kuvakehyksen asetuksista.</string>
+    <string name="pin_new_title">Valitse PIN-koodi</string>
+    <string name="pin_new_body">4–6 numeroa. Sitä kysytään, kun avataan asetukset, sammutetaan kuvakehys tai vaihdetaan Wi-Fi.</string>
+    <string name="pin_confirm_title">Anna PIN-koodi uudelleen</string>
+    <string name="pin_confirm_body">Ihan varmuuden vuoksi.</string>
+    <string name="pin_mismatch">PIN-koodit eivät täsmänneet. Valitse koodi uudelleen.</string>
+    <string name="pin_key_delete">Poista</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Omistajan PIN-koodi</string>
+    <string name="settings_pin_off">Pois. Kuka tahansa voi avata asetukset kuvakehyksestä.</string>
+    <string name="settings_pin_on">Päällä. Asetukset, virta ja Wi-Fi kysyvät PIN-koodia.</string>
+    <string name="settings_pin_set">Aseta PIN-koodi</string>
+    <string name="settings_pin_change">Vaihda PIN-koodi</string>
+    <string name="settings_pin_remove">Poista PIN-koodi</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Joku</string>
+    <string name="join_title">%1$s haluaa liittyä</string>
+    <string name="join_body_code">%1$s antoi kuvakehyksen %2$s koodin. Jos sallit sen, %1$s voi lähettää kuvia tähän kuvakehykseen.</string>
+    <string name="join_body_invited">%1$s kutsui henkilön %3$s kuvakehykseen %2$s. Jos sallit sen, %3$s voi lähettää kuvia tähän kuvakehykseen.</string>
+    <string name="join_invited_by">Kutsuja: %s</string>
+    <string name="join_allow">Salli</string>
+    <string name="join_deny">Älä salli</string>
+    <string name="join_later">Ei nyt</string>
+    <string name="join_later_hint">Pyyntö jää valikon ilmoituksiin.</string>
+    <string name="join_pill_one">%s haluaa liittyä</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d henkilö haluaa liittyä</item>
+        <item quantity="other">%d henkilöä haluaa liittyä</item>
+    </plurals>
+    <string name="notifications_title">Ilmoitukset</string>
+    <string name="notifications_empty">Kaikki luettu</string>
+    <string name="notifications_empty_body">Mikään ei odota sinua.</string>
+    <string name="menu_notifications">Ilmoitukset</string>
+    <string name="action_close">Sulje</string>
+    <!-- Status cards on the slideshow -->
+    <string name="status_card_offline_title">Ei internetyhteyttä</string>
+    <string name="status_card_offline_body">Kuvakehyksen kuvat näkyvät edelleen. Uudet tulevat heti, kun yhteys palaa.</string>
+    <string name="status_card_server_title">Kuvapalvelimeen ei saada yhteyttä</string>
+    <string name="status_card_server_body">Wi-Fi toimii, mutta palvelin ei vastaa. Uudet kuvat tulevat, kun se palaa.</string>
+    <string name="status_card_portal_title">Tämä Wi-Fi vaatii kirjautumisen</string>
+    <string name="status_card_portal_body">Avaa verkon kirjautumissivu, jotta kuvakehys pääsee verkkoon.</string>
+    <string name="status_card_portal_action">Kirjaudu</string>
+    <string name="status_card_storage_title">Kuvakehys on melkein täynnä</string>
+    <string name="status_card_storage_body">Vanhempia kuvia poistettiin kuvakehyksestä tilan vapauttamiseksi; ne ovat yhä tallessa palvelimella. Uudet kuvat voivat joutua odottamaan, kunnes tilaa on.</string>
+    <string name="portal_title">Kirjaudu Wi-Fiin</string>
+    <string name="portal_body">Tämä sulkeutuu itsestään, kun kuvakehys on verkossa.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Millä aikavyöhykkeellä kuvakehys on?</string>
+    <string name="setup_tz_body">Jotta kello, päivämäärä ja lepoaika ovat oikein.</string>
+    <string name="setup_tz_suggested">Ehdotettu</string>
+    <string name="setup_tz_all">Kaikki aikavyöhykkeet</string>
+    <string name="tz_region_europe">Eurooppa</string>
+    <string name="tz_region_america">Amerikka</string>
+    <string name="tz_region_asia">Aasia</string>
+    <string name="tz_region_africa">Afrikka</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Tyynimeri</string>
+    <string name="tz_region_atlantic">Atlantti</string>
+    <string name="tz_region_indian">Intian valtameri</string>
+    <string name="tz_region_antarctica">Etelämanner</string>
+    <string name="setup_update_checking">Etsitään uudempaa versiota…</string>
+    <string name="setup_update_checking_body">Kuvakehys varmistaa, että siinä on uusin kinframe ennen kuin aloitat.</string>
+    <string name="setup_update_downloading">Ladataan versiota %s</string>
+    <string name="setup_update_downloading_body">Se asennetaan heti perään. Voit ohittaa tämän; kuvakehys päivittyy silloin myöhemmin itse.</string>
+    <string name="setup_update_installing">Asennetaan versiota %s</string>
+    <string name="setup_update_installing_body">Kuvakehys käynnistyy kohta itsestään uudelleen ja jatkaa käyttöönottoa siitä, mihin jäit.</string>
+    <string name="setup_update_current">kinframe on ajan tasalla</string>
+    <string name="setup_update_current_body">Siirrytään viimeiseen vaiheeseen.</string>
+    <string name="setup_update_failed">Päivityksiä ei voitu tarkistaa</string>
+    <string name="setup_update_failed_body">Ei hätää: kuvakehys tarkistaa myöhemmin uudelleen ja päivittyy itse.</string>
+    <string name="setup_update_skip">Ohita toistaiseksi</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Tänään %d vuosi sitten</item>
+        <item quantity="other">Tänään %d vuotta sitten</item>
+    </plurals>
+    <string name="transition_kenburns">Hidas zoomaus</string>
+    <string name="settings_collage">Useita kuvia kerralla (kollaasi)</string>
+    <string name="settings_collage_max">Kuvia näytöllä</string>
+    <string name="settings_pair_portraits">Näytä kaksi pystykuvaa rinnakkain</string>
+    <string name="settings_on_this_day">Näytä muistoja tältä päivältä aiempina vuosina</string>
+    <string name="settings_video">Videot</string>
+    <string name="settings_video_autoplay">Toista videot automaattisesti</string>
+    <string name="settings_video_playback">Videon jälkeen</string>
+    <string name="video_once_hold">Toista kerran ja odota</string>
+    <string name="video_loop">Toista jatkuvasti</string>
+    <string name="video_once_advance">Toista kerran ja jatka</string>
+    <string name="settings_video_volume">Videon äänenvoimakkuus</string>
+    <string name="settings_video_auto_mute">Mykistä, kun kuvakehystä ei ole koskettu</string>
+    <string name="video_auto_mute_off">Ei koskaan</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

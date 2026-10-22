@@ -138,6 +138,10 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 	if err := b.ensureEmailConnector(ctx); err != nil {
 		return fmt.Errorf("email connector: %w", err)
 	}
+	if err := b.ensureEmailTemplates(ctx); err != nil {
+		// Not fatal: the connector's English templates still work.
+		b.log.Warn("could not store localized verification emails; they stay in English", "err", err)
+	}
 	if err := b.ensureNameProfileField(ctx); err != nil {
 		return fmt.Errorf("name profile field: %w", err)
 	}

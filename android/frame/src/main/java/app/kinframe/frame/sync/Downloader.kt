@@ -44,6 +44,8 @@ class Downloader(
     private val parallelism: Int = 2,
     private val minFreeBytes: Long = MediaCache.MIN_FREE_BYTES,
     private val freeBytes: () -> Long = media::freeBytes,
+    /** Frees space (storage eviction) so [bytes] more fit; returns true when there is room now. */
+    private val makeRoom: suspend (bytes: Long) -> Boolean = { false },
 ) {
     private val wake = Channel<Unit>(Channel.CONFLATED)
     private val inFlight: MutableSet<String> = java.util.Collections.synchronizedSet(HashSet<String>())
@@ -96,7 +98,7 @@ class Downloader(
                 link(sha, name, p)
                 return true
             }
-            if (freeBytes() - p.mediaBytes < minFreeBytes) throw IOException("storage_full")
+            if (freeBytes() - p.mediaBytes < minFreeBytes && !makeRoom(p.mediaBytes)) throw IOException("storage_full")
             val part = media.partial(sha)
             fetchInto(url, part, sha, p.mediaBytes)
             if (!part.renameTo(target)) throw IOException("rename failed")
@@ -123,6 +125,7 @@ class Downloader(
         val ids = db.tx {
             db.placements().markStoredBySha(sha, name, now())
             val ids = db.placements().idsWithSha(sha)
+            // A re-download after storage eviction acks delivered again; the server ignores it (status only advances).
             ids.forEach { acks.enqueueDeliveredInTx(it) }
             ids
         }

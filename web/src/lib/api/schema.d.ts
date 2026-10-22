@@ -824,6 +824,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+         *     The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+         *     connect and after syncing, so requests announced while it was offline are not lost.
+         */
+        get: operations["deviceListJoinRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/join-requests/{requestId}": {
         parameters: {
             query?: never;
@@ -997,6 +1018,11 @@ export interface components {
              * @default false
              */
             weather?: boolean;
+            /**
+             * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+             *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+             */
+            webpush_public_key?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -1121,6 +1147,13 @@ export interface components {
             cache_bytes?: number;
             placements_cached?: number;
             placements_missing?: number;
+            /** @description Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show. */
+            placements_evicted?: number;
+            /**
+             * @description `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+             * @enum {string}
+             */
+            storage_state?: "ok" | "low" | "critical";
             /** @enum {string} */
             screen_state?: "on" | "off" | "dimmed" | "sleeping";
             last_shutdown_clean?: boolean;
@@ -1231,7 +1264,7 @@ export interface components {
                 caption?: string | null;
                 focal_point?: components["schemas"]["FocalPoint"];
                 fit?: components["schemas"]["Fit"];
-                /** @description Videos only. */
+                /** @description Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter). */
                 trim?: {
                     start_ms?: number;
                     end_ms?: number;
@@ -1491,6 +1524,18 @@ export interface components {
                 /** @default true */
                 allow_remove_members_on_frame?: boolean;
                 readonly owner_pin_set?: boolean;
+                /**
+                 * @description Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                 *     The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+                 *     locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+                 */
+                owner_pin?: string | null;
+                /**
+                 * @description Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+                 *     in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+                 *     with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+                 */
+                owner_pin_hash?: components["schemas"]["PinHash"] | null;
             };
             updates?: {
                 /**
@@ -1500,6 +1545,17 @@ export interface components {
                  */
                 channel?: "stable" | "beta";
             };
+        };
+        /** @description PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64. */
+        PinHash: {
+            /** @enum {string} */
+            alg: "pbkdf2-sha256";
+            /** @example 20000 */
+            iterations: number;
+            /** @description base64 */
+            salt: string;
+            /** @description base64 of 32 bytes */
+            hash: string;
         };
         /** @description A frame app release mirrored by the server. */
         FrameUpdate: {
@@ -2684,6 +2740,11 @@ export interface operations {
                 sender_id?: components["schemas"]["Id"];
                 kind?: components["schemas"]["MediaKind"];
                 album_id?: components["schemas"]["Id"];
+                /**
+                 * @description "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+                 *     on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+                 */
+                on_this_day?: string;
                 sort?: "received_desc" | "received_asc" | "taken_desc" | "taken_asc";
             };
             header?: never;
@@ -3311,6 +3372,26 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    deviceListJoinRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequest"][];
+                };
             };
         };
     };

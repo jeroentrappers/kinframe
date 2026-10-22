@@ -127,6 +127,9 @@ func (s *Server) renderSend(ctx context.Context, id uuid.UUID) (*sendJSON, error
 
 // ---------------------------------------------------------------- create
 
+// minTrimMS is the shortest part of a video a sender may keep (product spec 4.3).
+const minTrimMS = 3000
+
 type preparedItem struct {
 	reuse   *store.ItemRow // existing item whose media is reused
 	upload  *store.Upload
@@ -239,6 +242,10 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 				}
 				if start >= end {
 					fail(i, problem.ValidationFailed, "trim", "trim must select a non-empty part of the video")
+					continue
+				}
+				if end-start < minTrimMS && info.DurationMS > minTrimMS {
+					fail(i, problem.ValidationFailed, "trim", "a trimmed video must be at least 3 seconds long")
 					continue
 				}
 				p.trimS, p.trimE = it.Trim.StartMs, it.Trim.EndMs
@@ -594,7 +601,7 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	itemID, err := uuid.Parse(r.PathValue("itemId"))
 	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	allowed, err := s.st.UserCanSeeItem(ctx, me(ctx).ID, itemID)
@@ -603,7 +610,7 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !allowed {
-		problem.Write(w, problem.New(problem.NotFound, "item not found"))
+		problem.Write(w, r, problem.New(problem.NotFound, "item not found"))
 		return
 	}
 	it, err := s.st.GetItemRow(ctx, s.st.Q(), itemID)
@@ -622,11 +629,11 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 	case "poster":
 		key = it.PosterKey
 	default:
-		problem.Write(w, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
 	if key == nil {
-		problem.Write(w, problem.New(problem.NotFound, "not available (yet)"))
+		problem.Write(w, r, problem.New(problem.NotFound, "not available (yet)"))
 		return
 	}
 	http.Redirect(w, r, s.signedURL(*key, 5*time.Minute), http.StatusFound)
@@ -638,10 +645,10 @@ func (s *Server) signedMedia(w http.ResponseWriter, r *http.Request) {
 	key := r.PathValue("key")
 	q := r.URL.Query()
 	if !s.signer.Valid("/v1/media/signed/"+key, q.Get("exp"), q.Get("sig")) {
-		problem.Write(w, problem.New(problem.Forbidden, "invalid or expired link"))
+		problem.Write(w, r, problem.New(problem.Forbidden, "invalid or expired link"))
 		return
 	}
-	s.serveBlob(w, r, key, "", "", "private, max-age=3600")
+	s.serveBlobOrRedirect(w, r, key, "", "", "private, max-age=3600")
 }
 
 // ---------------------------------------------------------------- events
@@ -649,6 +656,12 @@ func (s *Server) signedMedia(w http.ResponseWriter, r *http.Request) {
 // publishSendUpdates sends send.updated to the senders of the given sends
 // (send -> sender). pushKey, if set, also pushes when the sender is offline.
 func (s *Server) publishSendUpdates(ctx context.Context, sends map[uuid.UUID]uuid.UUID, pushKey string) {
+	s.publishSendUpdatesWith(ctx, sends, pushKey, nil)
+}
+
+// publishSendUpdatesWith is publishSendUpdates with explicit pushes per send,
+// which win over pushKey.
+func (s *Server) publishSendUpdatesWith(ctx context.Context, sends map[uuid.UUID]uuid.UUID, pushKey string, pushes map[uuid.UUID]*notify.Push) {
 	for sendID, sender := range sends {
 		sd, err := s.renderSend(ctx, sendID)
 		if err != nil {
@@ -663,19 +676,50 @@ func (s *Server) publishSendUpdates(ctx context.Context, sends map[uuid.UUID]uui
 			}
 			push = &notify.Push{Key: pushKey, Args: map[string]string{"frame": frame}, IDs: map[string]string{"send_id": sendID.String()}}
 		}
+		if p := pushes[sendID]; p != nil {
+			push = p
+		}
 		s.notify.User(sender, notify.Event{"type": "send.updated", "send": sd}, push)
 	}
 }
 
 // PlacementsChanged implements worker.Events.
 func (s *Server) PlacementsChanged(changes []store.StatusChange) {
+	s.placementsChanged(context.Background(), changes, nil)
+}
+
+func (s *Server) placementsChanged(ctx context.Context, changes []store.StatusChange, pushes map[uuid.UUID]*notify.Push) {
 	sends := map[uuid.UUID]uuid.UUID{}
 	for _, c := range changes {
 		if c.SendID != nil && c.SenderID != nil {
 			sends[*c.SendID] = *c.SenderID
 		}
 	}
-	s.publishSendUpdates(context.Background(), sends, "")
+	s.publishSendUpdatesWith(ctx, sends, "", pushes)
+}
+
+// deliveredPushes returns a "delivered" push for every send that this ack
+// completed on the frame (all its placements there reached the frame), so the
+// sender hears once per frame, when the last photo arrives.
+func (s *Server) deliveredPushes(ctx context.Context, f *store.Frame, changes []store.StatusChange) map[uuid.UUID]*notify.Push {
+	out := map[uuid.UUID]*notify.Push{}
+	checked := map[uuid.UUID]bool{}
+	for _, c := range changes {
+		if !c.NewlyDelivered || c.SendID == nil || c.SenderID == nil || checked[*c.SendID] {
+			continue
+		}
+		checked[*c.SendID] = true
+		done, err := s.st.SendDeliveredOn(ctx, *c.SendID, f.ID)
+		if err != nil {
+			s.log.Warn("delivered check", "send", *c.SendID, "err", err)
+			continue
+		}
+		if done {
+			out[*c.SendID] = &notify.Push{Key: "delivered", Args: map[string]string{"frame": f.Name},
+				IDs: map[string]string{"send_id": c.SendID.String(), "frame_id": f.ID.String()}}
+		}
+	}
+	return out
 }
 
 // MediaFailed implements worker.Events.

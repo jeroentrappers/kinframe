@@ -9,6 +9,8 @@
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, kindSummary, t, tn } from '$lib/i18n/index.svelte';
 	import Icon from '$components/Icon.svelte';
+	import PushOffer from '$components/PushOffer.svelte';
+	import { push } from '$lib/push.svelte';
 	import ReactionChips from '$components/ReactionChips.svelte';
 	import StagePill from '$components/StagePill.svelte';
 	import Thumb from '$components/Thumb.svelte';
@@ -123,6 +125,10 @@
 			</div>
 			<button class="btn btn-danger-ghost" onclick={unsend}><Icon name="trash" size={18} />{t('detail.unsend')}</button>
 		</header>
+
+		{#if push.justSent && push.shouldOffer}
+			<PushOffer />
+		{/if}
 
 		<section class="card card-pad frames" aria-label={t('detail.deliveryLabel')}>
 			{#each deliveries as d (d.frameId)}
@@ -286,7 +292,7 @@
 	}
 	.dur {
 		position: absolute;
-		right: 6px;
+		inset-inline-end: 6px;
 		bottom: 6px;
 		padding: 1px 7px;
 		border-radius: var(--r-full);

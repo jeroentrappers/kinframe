@@ -25,7 +25,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.io.IOException
 import java.time.Instant
 
-enum class SetupStep { Language, Wifi, Server, Enrolling, Code, Celebrate }
+enum class SetupStep { Language, Wifi, TimeZone, Server, Enrolling, Update, Code, Celebrate }
 
 sealed interface ServerCheck {
     data object Idle : ServerCheck
@@ -52,7 +52,8 @@ data class SetupState(
 )
 
 /**
- * The first-run wizard (product spec 4.8): language → Wi-Fi → server → enroll → frame code → "Connected".
+ * The first-run wizard (product spec 4.8): language → Wi-Fi → time zone → server → enroll → update → frame code →
+ * "Connected".
  * Progress is persisted so a power cut during setup resumes at the same step.
  */
 class SetupController(private val c: FrameController) {
@@ -61,7 +62,7 @@ class SetupController(private val c: FrameController) {
     val state: StateFlow<SetupState> = _state
     private var codeJob: Job? = null
 
-    val steps = listOf(SetupStep.Language, SetupStep.Wifi, SetupStep.Server, SetupStep.Code)
+    val steps = listOf(SetupStep.Language, SetupStep.Wifi, SetupStep.TimeZone, SetupStep.Server, SetupStep.Update, SetupStep.Code)
 
     fun resume() {
         val enrolled = g.credentials.load() != null
@@ -89,12 +90,42 @@ class SetupController(private val c: FrameController) {
     fun back() {
         when (_state.value.step) {
             SetupStep.Wifi -> goTo(SetupStep.Language)
-            SetupStep.Server -> goTo(SetupStep.Wifi)
+            SetupStep.TimeZone -> goTo(SetupStep.Wifi)
+            SetupStep.Server -> goTo(SetupStep.TimeZone)
             else -> Unit
         }
     }
 
-    fun chooseLanguage(lang: String) { g.prefs.language = lang }
+    fun chooseLanguage(lang: String) = c.setLanguage(lang)
+
+    /** The zone picked in the wizard: used for the clock right away and sent with the enrollment. */
+    fun chooseTimezone(id: String) {
+        g.prefs.timezone = id
+        g.clock.zone = runCatching { java.time.ZoneId.of(id) }.getOrDefault(g.clock.zone)
+    }
+
+    fun currentTimezone(): String? = g.prefs.timezone
+
+    fun updateStatus() = c.update.status
+
+    fun suggestedTimezones(): List<String> =
+        TimeZones.suggest(java.util.TimeZone.getDefault().id, java.util.Locale.getDefault().country)
+
+    /** Update step (product spec 4.8): look for a newer version and install it right away, before the code. */
+    fun startUpdateCheck() {
+        updateCheckStarted = true
+        c.update.requestCheck(app.kinframe.frame.update.UpdateManager.Trigger.User)
+    }
+
+    var updateCheckStarted = false
+        private set
+
+    /** Leaves the update step (up to date, failed, or skipped); a running download carries on in the background. */
+    fun finishUpdateStep() {
+        if (_state.value.step != SetupStep.Update) return
+        goTo(SetupStep.Code)
+        startCodeLoop()
+    }
 
     fun setUseCustom(custom: Boolean) = _state.update { it.copy(useCustomServer = custom, check = ServerCheck.Idle) }
     fun setCustomUrl(url: String) = _state.update { it.copy(customUrl = url, check = ServerCheck.Idle) }
@@ -151,15 +182,14 @@ class SetupController(private val c: FrameController) {
             try {
                 if (g.credentials.load() == null) {
                     val root = withTimeoutOrNull(5_000) { g.root.isAvailable() } ?: false
-                    val req = withContext(Dispatchers.IO) { DeviceInfo.enrollRequest(g.app, root) }
+                    val req = withContext(Dispatchers.IO) { DeviceInfo.enrollRequest(g.app, root, g.prefs.timezone) }
                     val res = g.api.enroll(req)
                     withContext(Dispatchers.IO) { g.credentials.save(DeviceCredential(res.deviceId, res.deviceSecret)) }
                     Log.i(TAG, "enrolled as ${res.deviceId}")
                 }
                 g.api.accessToken(forceRefresh = true)
                 c.startSession()
-                goTo(SetupStep.Code)
-                startCodeLoop()
+                goTo(SetupStep.Update)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

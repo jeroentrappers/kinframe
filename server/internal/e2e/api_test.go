@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -135,8 +136,21 @@ func TestCodesAndJoining(t *testing.T) {
 	if r := e.do(req{method: "GET", path: "/v1/frames/" + frameID, token: cleo.token}); r.StatusCode != 404 {
 		t.Fatalf("pending user can see frame: %d", r.StatusCode)
 	}
+	// The frame can list what is still pending (e.g. after being offline).
+	var pending []map[string]any
+	e.get("/v1/device/join-requests", d.token).json(t, &pending)
+	if len(pending) != 1 || pending[0]["id"] != pend["join_request_id"] || dig(pending[0], "user", "display_name") != "Cleo" {
+		t.Fatalf("device pending list: %v", pending)
+	}
 	e.expect(req{method: "POST", path: "/v1/device/join-requests/" + pend["join_request_id"].(string), token: d.token, body: map[string]any{"decision": "approve"}}, 204)
 	cleoWS.await("membership.updated", 5*time.Second)
+	e.get("/v1/device/join-requests", d.token).json(t, &pending)
+	if len(pending) != 0 {
+		t.Fatalf("decided request still pending: %v", pending)
+	}
+	if r := e.do(req{method: "POST", path: "/v1/device/join-requests/" + pend["join_request_id"].(string), token: d.token, body: map[string]any{"decision": "deny"}}); r.StatusCode != 404 {
+		t.Fatalf("deciding twice: %d", r.StatusCode)
+	}
 	if f := e.get("/v1/frames/"+frameID, cleo.token).m(t); f["role"] != "member" || f["location"] != "Living room" || f["member_count"] != float64(3) {
 		t.Fatalf("after approval: %v", f)
 	}
@@ -441,10 +455,22 @@ func TestFeedReset(t *testing.T) {
 	if c := next["changes"].([]any); len(c) != 1 || c[0].(map[string]any)["type"] != "album.upsert" {
 		t.Fatalf("album change: %v", next)
 	}
+	// Play it on the frame; deleting it switches the frame back to all photos.
+	st := e.get("/v1/frames/"+frameID+"/settings", owner.token).m(t)
+	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token,
+		header: map[string]string{"If-Match": fmt.Sprintf(`"%v"`, st["version"])},
+		body:   map[string]any{"slideshow": map[string]any{"album_id": a["id"]}}}, 200)
 	e.expect(req{method: "DELETE", path: base + "/" + a["id"].(string), token: owner.token}, 204)
 	next = e.get("/v1/device/changes?since="+ftoa(head), d.token).m(t)
-	if c := next["changes"].([]any); len(c) != 1 || c[0].(map[string]any)["type"] != "album.remove" {
+	types := map[string]bool{}
+	for _, c := range next["changes"].([]any) {
+		types[c.(map[string]any)["type"].(string)] = true
+	}
+	if !types["album.remove"] || !types["settings"] || len(types) != 2 {
 		t.Fatalf("album remove: %v", next)
+	}
+	if st := e.get("/v1/frames/"+frameID+"/settings", owner.token).m(t); dig(st, "slideshow", "album_id") != nil {
+		t.Fatalf("album_id after delete: %v", st["slideshow"])
 	}
 }
 

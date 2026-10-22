@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Фоторамка</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Отказ</string>
+    <string name="action_continue">Продължаване</string>
+    <string name="action_try_again">Нов опит</string>
+    <string name="action_undo">Отмяна</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Добре дошли в kinframe</string>
+    <string name="setup_language_body">Изберете езика на тази рамка.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Свързване с Wi-Fi</string>
+    <string name="setup_wifi_body">Рамката се нуждае от Wi-Fi, за да получава снимки. След като пристигнат, те се показват и без връзка.</string>
+    <string name="wifi_connected_to">Свързано с %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Няма връзка</string>
+    <string name="wifi_not_connected_hint">Изберете мрежа, за да продължите.</string>
+    <string name="wifi_no_internet">Свързано, но още няма интернет</string>
+    <string name="wifi_signal">Сигнал: %1$s</string>
+    <string name="wifi_open_settings">Настройки за Wi-Fi</string>
+    <string name="wifi_networks">Мрежи наблизо</string>
+    <string name="wifi_scanning">Търсене на мрежи…</string>
+    <string name="wifi_permission_body">За да покаже мрежите тук, Android се нуждае от разрешение за търсене на Wi-Fi.</string>
+    <string name="wifi_show_networks">Показване на мрежите</string>
+    <string name="wifi_password">Парола</string>
+    <string name="wifi_join">Свързване</string>
+    <string name="signal_0">много слаб</string>
+    <string name="signal_1">слаб</string>
+    <string name="signal_2">среден</string>
+    <string name="signal_3">добър</string>
+    <string name="signal_4">отличен</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Изберете сървър</string>
+    <string name="setup_server_body">Снимките минават през сървър на kinframe. Използвайте безплатния сървър на kinframe или такъв, който поддържа семейството ви.</string>
+    <string name="server_default_body">Безплатен и с отворен код. Препоръчва се.</string>
+    <string name="server_custom">Собствен сървър</string>
+    <string name="server_custom_body">За семейства, които сами хостват kinframe.</string>
+    <string name="server_address">Адрес на сървъра</string>
+    <string name="server_check">Проверка на сървъра</string>
+    <string name="server_checking">Сървърът се проверява…</string>
+    <string name="server_version">версия %1$s</string>
+    <string name="server_insecure">не е шифрован</string>
+    <string name="server_error_invalid">Това не прилича на уеб адрес. Опитайте нещо като https://frames.example.org.</string>
+    <string name="server_error_unreachable">Няма връзка с този сървър. Проверете адреса и дали рамката е онлайн.</string>
+    <string name="server_error_not_kinframe">Сървърът отговори, но не е сървър на kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Рамката се подготвя…</string>
+    <string name="enroll_body">Това отнема няколко секунди.</string>
+    <string name="enroll_failed_title">Рамката не можа да се регистрира</string>
+    <string name="enroll_failed_body">Отговор на сървъра: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Свържете рамката със семейството си</string>
+    <string name="code_step1">Отворете приложението kinframe или %1$s в браузър</string>
+    <string name="code_step2">Изберете „Добавяне на рамка“</string>
+    <string name="code_step3">Въведете този код или сканирайте QR кода</string>
+    <string name="code_valid_for">Валиден още %1$s</string>
+    <string name="code_waiting">Изчакване някой да въведе кода</string>
+    <string name="code_offline_title">Рамката е офлайн</string>
+    <string name="code_offline_body">За кода на рамката е нужна интернет връзка. Проверете Wi-Fi.</string>
+    <string name="code_error_title">Не можа да се получи код на рамката</string>
+    <string name="code_error_body">Сървърът не отговори. Рамката продължава да опитва.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Свързано с %1$s</string>
+    <string name="celebrate_title_anon">Свързано</string>
+    <string name="celebrate_body">Снимките, изпратени до тази рамка, ще се появяват тук за секунди.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d ч %2$d мин</string>
+    <string name="duration_min">%1$d мин</string>
+    <string name="date_today">Днес</string>
+    <string name="date_yesterday">Вчера</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">преди %d ден</item>
+        <item quantity="other">преди %d дни</item>
+    </plurals>
+    <string name="interval_s">%1$d сек</string>
+    <string name="interval_min">%1$d мин</string>
+    <string name="interval_h">%1$d ч</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">редактирано</string>
+    <string name="unable_photo">Снимката не може да се покаже</string>
+    <string name="unable_video">Видеоклипът не може да се пусне. Помолете подателя да го изпрати отново.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d нова снимка</item>
+        <item quantity="other">%d нови снимки</item>
+    </plurals>
+    <string name="status_offline">Офлайн</string>
+    <string name="status_online">Онлайн · %1$s</string>
+    <string name="status_server_unreachable">Няма връзка със сървъра</string>
+    <string name="identify_this_is">Това е</string>
+    <string name="snack_hidden">Снимката е скрита</string>
+    <string name="snack_deleted">Снимката е изтрита</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_power">Захранване</string>
+    <string name="menu_hide">Скриване</string>
+    <string name="menu_delete">Изтриване</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Още няма снимки</string>
+    <string name="empty_body">Снимките и видеоклиповете, изпратени от приложението или уебсайта на kinframe, се появяват тук до секунди.</string>
+    <string name="empty_code_title">Добавете семейството с този код</string>
+    <string name="empty_code_body">Въведете го в приложението kinframe или сканирайте QR кода.</string>
+    <string name="empty_hidden_title">Всички снимки са скрити</string>
+    <string name="empty_hidden_body">Скритите снимки остават в библиотеката. Можете да ги покажете отново от приложението kinframe.</string>
+    <string name="empty_downloading_title">Снимките пристигат</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Изтегля се %d снимка.</item>
+        <item quantity="other">Изтеглят се %d снимки.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Захранване</string>
+    <string name="power_sleep">Сън</string>
+    <string name="power_sleep_body">Екранът е изключен, докато не го докоснете.</string>
+    <string name="power_restart">Рестартиране</string>
+    <string name="power_restart_body">Рамката се стартира отново.</string>
+    <string name="power_off">Изключване</string>
+    <string name="power_off_body">Безопасно изключване преди изваждане от контакта.</string>
+    <string name="shutting_down_title">Изключване…</string>
+    <string name="restarting_title">Рестартиране…</string>
+    <string name="shutting_down_body">Всичко се запазва безопасно.</string>
+    <string name="safe_title">Вече можете да извадите кабела</string>
+    <string name="safe_body">Всичко е запазено. За да използвате рамката отново, натиснете бутона за захранване или я включете отново в контакта.</string>
+    <string name="safe_body_noroot">kinframe запази всичко. Вече можете да изключите рамката от контакта.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe имаше проблем с показването на снимки</string>
+    <string name="recovery_body">Приложението спря неочаквано няколко пъти подред. Опитайте отново или изчистете изтеглените снимки. Те ще се изтеглят отново от сървъра, нищо не се губи.</string>
+    <string name="recovery_clear">Изчистване на изтеглените снимки</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_language">Език</string>
+    <string name="settings_slideshow">Слайдшоу</string>
+    <string name="settings_interval">Всяка снимка се показва</string>
+    <string name="settings_transition">Преход</string>
+    <string name="transition_crossfade">Преливане</string>
+    <string name="transition_slide">Плъзгане</string>
+    <string name="settings_order">Ред</string>
+    <string name="order_received">Последно получени</string>
+    <string name="order_taken">Дата на заснемане</string>
+    <string name="order_shuffle">Разбъркано</string>
+    <string name="settings_reverse">Първо най-старите</string>
+    <string name="settings_fill">Размер на снимката</string>
+    <string name="fill_fill">Запълване на екрана</string>
+    <string name="fill_fit">Цялата снимка</string>
+    <string name="settings_display">Екран</string>
+    <string name="settings_brightness">Яркост</string>
+    <string name="settings_brightness_mode">Автоматична яркост</string>
+    <string name="brightness_manual">Фиксирана</string>
+    <string name="brightness_sun">Според слънцето</string>
+    <string name="settings_sleep">Сън</string>
+    <string name="settings_sleep_enabled">Изключване на екрана през нощта</string>
+    <string name="settings_sleep_at">Заспиване в</string>
+    <string name="settings_wake_at">Събуждане в</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">и още %d график в приложението kinframe</item>
+        <item quantity="other">и още %d графика в приложението kinframe</item>
+    </plurals>
+    <string name="settings_about">Тази рамка</string>
+    <string name="about_frame">Име</string>
+    <string name="about_server">Сървър</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Версия на приложението</string>
+    <string name="about_android_settings">Настройки на Android</string>
+    <string name="settings_updates">Актуализации</string>
+    <string name="updates_channel">Канал</string>
+    <string name="updates_channel_stable">Стабилен</string>
+    <string name="updates_channel_beta">Бета (новите версии по-рано)</string>
+    <string name="updates_check">Проверка за актуализация</string>
+    <string name="updates_install_now">Инсталиране сега</string>
+    <string name="updates_checking">Проверка за актуализации…</string>
+    <string name="updates_up_to_date">Рамката е актуализирана.</string>
+    <string name="updates_downloading">Изтегляне на версия %1$s… %2$d%%</string>
+    <string name="updates_waiting">Версия %1$s е готова. Ще се инсталира, когато никой не използва рамката.</string>
+    <string name="updates_installing">Инсталира се версия %1$s. Рамката ще се рестартира след малко.</string>
+    <string name="updates_failed">Актуализацията не успя. Рамката ще опита отново по-късно.</string>
+    <string name="update_notice_updated">Актуализирано до версия %1$s</string>
+    <string name="update_notice_rolled_back">Новата версия имаше проблеми, затова рамката се върна към предишната.</string>
+    <string name="update_notice_needs_user">Има готова актуализация. Докоснете „Инсталиране“, за да продължите.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Показване на прогнозата</string>
+    <string name="weather_close">Затваряне</string>
+    <string name="weather_now">Сега</string>
+    <string name="weather_today">Днес</string>
+    <string name="weather_feels_like">Усеща се като %1$s</string>
+    <string name="weather_high_low">Макс. %1$s · Мин. %2$s</string>
+    <string name="weather_wind">Вятър</string>
+    <string name="weather_humidity">Влажност</string>
+    <string name="weather_sunrise">Изгрев</string>
+    <string name="weather_sunset">Залез</string>
+    <string name="weather_next_hours">Следващите 24 часа</string>
+    <string name="weather_next_days">Прогноза за 7 дни</string>
+    <string name="weather_updated">Обновено %1$s</string>
+    <string-array name="weather_compass">
+        <item>С</item>
+        <item>СИ</item>
+        <item>И</item>
+        <item>ЮИ</item>
+        <item>Ю</item>
+        <item>ЮЗ</item>
+        <item>З</item>
+        <item>СЗ</item>
+    </string-array>
+    <string name="wmo_clear_day">Слънчево</string>
+    <string name="wmo_clear_night">Ясно</string>
+    <string name="wmo_mainly_clear_day">Предимно слънчево</string>
+    <string name="wmo_mainly_clear_night">Предимно ясно</string>
+    <string name="wmo_partly_cloudy">Частична облачност</string>
+    <string name="wmo_overcast">Облачно</string>
+    <string name="wmo_fog">Мъгла</string>
+    <string name="wmo_rime_fog">Заледяваща мъгла</string>
+    <string name="wmo_drizzle_light">Слаб ръмеж</string>
+    <string name="wmo_drizzle">Ръмеж</string>
+    <string name="wmo_drizzle_dense">Силен ръмеж</string>
+    <string name="wmo_freezing_drizzle">Заледяващ ръмеж</string>
+    <string name="wmo_rain_light">Слаб дъжд</string>
+    <string name="wmo_rain">Дъжд</string>
+    <string name="wmo_rain_heavy">Силен дъжд</string>
+    <string name="wmo_freezing_rain">Заледяващ дъжд</string>
+    <string name="wmo_snow_light">Слаб сняг</string>
+    <string name="wmo_snow">Сняг</string>
+    <string name="wmo_snow_heavy">Силен снеговалеж</string>
+    <string name="wmo_snow_grains">Снежни зърна</string>
+    <string name="wmo_showers_light">Слаби превалявания</string>
+    <string name="wmo_showers">Превалявания</string>
+    <string name="wmo_showers_violent">Силни превалявания</string>
+    <string name="wmo_snow_showers_light">Слаби снеговалежи</string>
+    <string name="wmo_snow_showers">Снеговалежи</string>
+    <string name="wmo_thunderstorm">Гръмотевична буря</string>
+    <string name="wmo_thunderstorm_hail">Гръмотевична буря с градушка</string>
+</resources>

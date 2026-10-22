@@ -161,6 +161,18 @@ class DeviceApi(
             .post(KinJson.encodeToString(JsonObject.serializer(), buildJsonObject { put("preset", JsonPrimitive(preset)) }).toRequestBody(JSON_MEDIA))
     }.expectOk()
 
+    /** `GET /device/join-requests`: requests waiting for a decision on the frame. */
+    suspend fun joinRequests(): List<JoinRequest> = authed { url(endpoint("device/join-requests")).get() }
+        .decode(kotlinx.serialization.builtins.ListSerializer(JoinRequest.serializer()))
+
+    /** `POST /device/join-requests/{id}` with `approve` or `deny`; 404 means someone already decided. */
+    suspend fun decideJoin(requestId: String, approve: Boolean) = authed {
+        url(endpoint("device/join-requests/$requestId")).post(
+            KinJson.encodeToString(JsonObject.serializer(), buildJsonObject { put("decision", JsonPrimitive(if (approve) "approve" else "deny")) })
+                .toRequestBody(JSON_MEDIA),
+        )
+    }.expectOk()
+
     /**
      * `GET /device/update`: the newest release for [channel] (null = the frame's setting) that is newer than this
      * app, skipping [skip]; null when up to date (204).

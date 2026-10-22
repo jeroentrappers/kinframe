@@ -31,6 +31,10 @@ data class Discovery(
     val web: String? = null,
     val auth: DiscoveryAuth? = null,
     val limits: Limits? = null,
+    /** Development servers only: `POST /dev/token` works instead of Logto. */
+    val devAuth: Boolean = false,
+    /** The server fetches weather and serves `/v1/geocode`. */
+    val weather: Boolean = false,
 )
 
 @Serializable
@@ -130,6 +134,7 @@ data class Item(
     val id: String,
     val kind: String = MediaKind.PHOTO,
     val status: String? = null,
+    val failureCode: String? = null,
     val senderId: String? = null,
     val senderName: String? = null,
     val caption: String? = null,
@@ -189,8 +194,12 @@ data class Placement(
     val seenAt: String? = null,
     val receivedAt: String? = null,
     val albumIds: List<String> = emptyList(),
+    val replies: List<PlacementReply> = emptyList(),
     val media: PlacementMedia? = null,
 )
+
+@Serializable
+data class PlacementReply(val preset: String? = null, val at: String? = null)
 
 @Serializable
 data class ChangeMember(
@@ -256,6 +265,10 @@ data class Heartbeat(
     val cacheBytes: Long? = null,
     val placementsCached: Int? = null,
     val placementsMissing: Int? = null,
+    /** Removed from the cache to free space; downloaded again when they are about to show. */
+    val placementsEvicted: Int? = null,
+    /** `ok`, `low` (evicting) or `critical` (nothing left to evict). */
+    val storageState: String? = null,
     val screenState: String? = null,
     val lastShutdownClean: Boolean? = null,
     val crashCount24h: Int? = null,
@@ -280,6 +293,20 @@ data class FrameUpdate(
     val prerelease: Boolean = false,
 )
 
+/** `JoinRequest`: someone wants to join a frame whose owner asked to approve joins on the frame. */
+@Serializable
+data class JoinRequest(
+    val id: String,
+    val user: JoinRequestUser = JoinRequestUser(),
+    val via: String = "frame_code",
+    val invitedByName: String? = null,
+    val note: String? = null,
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class JoinRequestUser(val id: String? = null, val displayName: String? = null, val avatarUrl: String? = null)
+
 @Serializable
 data class Problem(
     val type: String? = null,
@@ -298,4 +325,32 @@ object ProblemCode {
     const val VERSION_CONFLICT = "version_conflict"
     const val RATE_LIMITED = "rate_limited"
     const val APP_UPDATE_REQUIRED = "app_update_required"
+    const val FORBIDDEN = "forbidden"
+    const val MISSING_PERMISSION = "missing_permission"
+    const val CODE_INVALID = "code_invalid"
+    const val CODE_EXPIRED = "code_expired"
+    const val INVITE_INVALID = "invite_invalid"
+    const val INVITE_EXPIRED = "invite_expired"
+    const val ALREADY_MEMBER = "already_member"
+    const val VALIDATION_FAILED = "validation_failed"
+    const val TOO_MANY_ITEMS = "too_many_items"
+    const val VIDEO_TOO_LONG = "video_too_long"
+    const val UPLOAD_TOO_LARGE = "upload_too_large"
+    const val UPLOAD_NOT_FOUND = "upload_not_found"
+    const val UNSUPPORTED_MEDIA = "unsupported_media"
+    const val CORRUPT_MEDIA = "corrupt_media"
+    const val FRAME_OFFLINE = "frame_offline"
+    const val COMMAND_TIMEOUT = "command_timeout"
+    const val OWNER_CANNOT_LEAVE = "owner_cannot_leave"
+    const val UPSTREAM_UNAVAILABLE = "upstream_unavailable"
+    const val FEATURE_DISABLED = "feature_disabled"
+    const val SERVER_ERROR = "server_error"
+}
+
+/** The four reply presets a frame can send back (README §5.5). */
+object ReplyPreset {
+    const val BEAUTIFUL = "beautiful"
+    const val CALL_ME = "call_me"
+    const val MISS_YOU = "miss_you"
+    const val THANKS = "thanks"
 }

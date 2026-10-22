@@ -5,6 +5,7 @@
 	import FocalPicker from './FocalPicker.svelte';
 	import FramePreview from './FramePreview.svelte';
 	import Icon from './Icon.svelte';
+	import TrimEditor from './TrimEditor.svelte';
 
 	let {
 		item,
@@ -18,6 +19,9 @@
 </script>
 
 <div class="editor">
+	{#if item.kind === 'video' && item.previewable && item.durationS}
+		<div class="full"><TrimEditor {item} /></div>
+	{/if}
 	<div class="left">
 		{#if item.previewable}
 			<FocalPicker src={item.previewUrl} kind={item.kind} bind:focal={item.focal} alt={item.file.name} />
@@ -94,6 +98,15 @@
 			grid-template-columns: 1.1fr 1fr;
 			align-items: start;
 		}
+	}
+	.full {
+		grid-column: 1 / -1;
+		min-width: 0;
+		padding-bottom: var(--s-4);
+		border-bottom: 1px solid var(--border);
+	}
+	.editor > div {
+		min-width: 0;
 	}
 	.previews {
 		display: flex;

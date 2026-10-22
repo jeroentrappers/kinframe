@@ -285,7 +285,7 @@ exponential back-off from 1 s up to 60 s, with ±20 % jitter.
 | S→F | `changes` | `latest_seq` | Hint only. The frame calls `/device/changes`. |
 | S→F | `command` | `id`, `command_type`, `args` | Remote command. |
 | S→F | `claimed` | `owner_name` | Leave the setup or code screen. |
-| S→F | `join_request` | `request` | Show Allow/Deny. |
+| S→F | `join_request` | `request` | Show Allow/Deny. Requests still pending (e.g. sent while the frame was offline) come from `GET /v1/device/join-requests`. |
 | S→F | `revoked` | — | Wipe credential, back to setup. Followed by close `4401`. |
 | F→S | `state` | `screen: on/off/dimmed`, `showing_placement_id`, `brightness`, `volume` | Sent on change, at most every 2 s. |
 | F→S | `command_result` | `id`, `ok`, `error_code` | Result of a command. |
@@ -312,6 +312,12 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 - The same events are sent as push notifications when the user has no open websocket, through registered endpoints:
   `POST /v1/me/push-endpoints {kind: "unifiedpush"|"fcm"|"apns"|"webpush", endpoint_or_token, ...}`.
 - Payloads carry only IDs and a localized title and body. Clients fetch details over the API.
+- **WebPush** (browsers): subscribe with `PushManager.subscribe({userVisibleOnly: true, applicationServerKey})`
+  using discovery's `webpush_public_key` (VAPID, RFC 8292), then register `{kind: "webpush", endpoint,
+  webpush_keys: {p256dh, auth}, locale}`. Messages are encrypted with RFC 8291 (`aes128gcm`). The decrypted payload is
+  `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`). Endpoints the
+  push service reports as gone (404/410) are deleted by the server.
+- `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
 
 ## 7. Versioning
 

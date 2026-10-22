@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotorāmis</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Atpakaļ</string>
+    <string name="action_cancel">Atcelt</string>
+    <string name="action_continue">Turpināt</string>
+    <string name="action_try_again">Mēģināt vēlreiz</string>
+    <string name="action_undo">Atsaukt</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Laipni lūdzam kinframe</string>
+    <string name="setup_language_body">Izvēlieties šī rāmja valodu.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Izveidojiet savienojumu ar Wi-Fi</string>
+    <string name="setup_wifi_body">Rāmim ir nepieciešams Wi-Fi, lai saņemtu fotoattēlus. Kad tie ir saņemti, tos var rādīt arī bez savienojuma.</string>
+    <string name="wifi_connected_to">Savienots ar %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Nav savienojuma</string>
+    <string name="wifi_not_connected_hint">Lai turpinātu, izvēlieties tīklu.</string>
+    <string name="wifi_no_internet">Savienots, bet interneta vēl nav</string>
+    <string name="wifi_signal">Signāls: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi iestatījumi</string>
+    <string name="wifi_networks">Tuvumā esošie tīkli</string>
+    <string name="wifi_scanning">Meklē tīklus…</string>
+    <string name="wifi_permission_body">Lai šeit parādītu tīklus, Android nepieciešama atļauja meklēt Wi-Fi tīklus.</string>
+    <string name="wifi_show_networks">Rādīt tīklus</string>
+    <string name="wifi_password">Parole</string>
+    <string name="wifi_join">Savienot</string>
+    <string name="signal_0">ļoti vājš</string>
+    <string name="signal_1">vājš</string>
+    <string name="signal_2">vidējs</string>
+    <string name="signal_3">labs</string>
+    <string name="signal_4">izcils</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Izvēlieties serveri</string>
+    <string name="setup_server_body">Fotoattēli ceļo caur kinframe serveri. Izmantojiet bezmaksas kinframe serveri vai savas ģimenes serveri.</string>
+    <string name="server_default_body">Bezmaksas un atvērtā koda. Ieteicams.</string>
+    <string name="server_custom">Izmantot savu serveri</string>
+    <string name="server_custom_body">Ģimenēm, kas kinframe uztur pašas.</string>
+    <string name="server_address">Servera adrese</string>
+    <string name="server_check">Pārbaudīt serveri</string>
+    <string name="server_checking">Pārbauda serveri…</string>
+    <string name="server_version">versija %1$s</string>
+    <string name="server_insecure">nešifrēts</string>
+    <string name="server_error_invalid">Tas neizskatās pēc tīmekļa adreses. Mēģiniet, piemēram, https://frames.example.org.</string>
+    <string name="server_error_unreachable">Neizdevās sasniegt šo serveri. Pārbaudiet adresi un to, vai rāmis ir tiešsaistē.</string>
+    <string name="server_error_not_kinframe">Šis serveris atbildēja, bet tas nav kinframe serveris.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Sagatavo jūsu rāmi…</string>
+    <string name="enroll_body">Tas aizņems dažas sekundes.</string>
+    <string name="enroll_failed_title">Rāmi neizdevās reģistrēt</string>
+    <string name="enroll_failed_body">Servera atbilde: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Savienojiet šo rāmi ar savu ģimeni</string>
+    <string name="code_step1">Atveriet lietotni kinframe vai %1$s pārlūkā</string>
+    <string name="code_step2">Izvēlieties „Pievienot rāmi”</string>
+    <string name="code_step3">Ievadiet šo kodu vai noskenējiet QR kodu</string>
+    <string name="code_valid_for">Derīgs %1$s</string>
+    <string name="code_waiting">Gaida, kad kāds ievadīs kodu</string>
+    <string name="code_offline_title">Rāmis ir bezsaistē</string>
+    <string name="code_offline_body">Rāmja kodam nepieciešams interneta savienojums. Pārbaudiet Wi-Fi.</string>
+    <string name="code_error_title">Neizdevās iegūt rāmja kodu</string>
+    <string name="code_error_body">Serveris neatbildēja. Rāmis turpinās mēģināt.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Savienots ar %1$s</string>
+    <string name="celebrate_title_anon">Savienots</string>
+    <string name="celebrate_body">Uz šo rāmi nosūtītie fotoattēli šeit parādīsies dažu sekunžu laikā.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Šodien</string>
+    <string name="date_yesterday">Vakar</string>
+    <plurals name="date_days_ago">
+        <item quantity="zero">pirms %d dienām</item>
+        <item quantity="one">pirms %d dienas</item>
+        <item quantity="other">pirms %d dienām</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">rediģēts</string>
+    <string name="unable_photo">Šo fotoattēlu nevar parādīt</string>
+    <string name="unable_video">Šo video nevar atskaņot. Palūdziet sūtītājam to nosūtīt vēlreiz.</string>
+    <plurals name="new_photos">
+        <item quantity="zero">%d jauni fotoattēli</item>
+        <item quantity="one">%d jauns fotoattēls</item>
+        <item quantity="other">%d jauni fotoattēli</item>
+    </plurals>
+    <string name="status_offline">Bezsaistē</string>
+    <string name="status_online">Tiešsaistē · %1$s</string>
+    <string name="status_server_unreachable">Nevar sasniegt serveri</string>
+    <string name="identify_this_is">Šis ir</string>
+    <string name="snack_hidden">Fotoattēls paslēpts</string>
+    <string name="snack_deleted">Fotoattēls izdzēsts</string>
+    <string name="menu_settings">Iestatījumi</string>
+    <string name="menu_power">Barošana</string>
+    <string name="menu_hide">Paslēpt</string>
+    <string name="menu_delete">Dzēst</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Vēl nav fotoattēlu</string>
+    <string name="empty_body">Ar kinframe lietotni vai vietni nosūtītie fotoattēli un video šeit parādās dažu sekunžu laikā.</string>
+    <string name="empty_code_title">Pievienojiet ģimeni ar šo kodu</string>
+    <string name="empty_code_body">Ievadiet to kinframe lietotnē vai noskenējiet QR kodu.</string>
+    <string name="empty_hidden_title">Visi fotoattēli ir paslēpti</string>
+    <string name="empty_hidden_body">Paslēptie fotoattēli paliek bibliotēkā. Tos var atkal rādīt no kinframe lietotnes.</string>
+    <string name="empty_downloading_title">Fotoattēli jau ceļā</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="zero">Tiek lejupielādēti %d fotoattēli.</item>
+        <item quantity="one">Tiek lejupielādēts %d fotoattēls.</item>
+        <item quantity="other">Tiek lejupielādēti %d fotoattēli.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Barošana</string>
+    <string name="power_sleep">Miega režīms</string>
+    <string name="power_sleep_body">Ekrāns izslēgts, līdz tam pieskarsieties.</string>
+    <string name="power_restart">Restartēt</string>
+    <string name="power_restart_body">Palaist rāmi no jauna.</string>
+    <string name="power_off">Izslēgt</string>
+    <string name="power_off_body">Droši izslēdziet pirms atvienošanas no strāvas.</string>
+    <string name="shutting_down_title">Izslēdz…</string>
+    <string name="restarting_title">Restartē…</string>
+    <string name="shutting_down_body">Viss tiek droši saglabāts.</string>
+    <string name="safe_title">Tagad var droši atvienot</string>
+    <string name="safe_body">Viss ir saglabāts. Lai atkal lietotu rāmi, nospiediet barošanas pogu vai pievienojiet to strāvai.</string>
+    <string name="safe_body_noroot">kinframe visu ir saglabājis. Tagad varat atvienot rāmi.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe radās problēmas ar fotoattēlu rādīšanu</string>
+    <string name="recovery_body">Lietotne vairākas reizes pēc kārtas negaidīti apstājās. Mēģiniet vēlreiz vai notīriet lejupielādētos fotoattēlus. Tie tiks lejupielādēti no servera vēlreiz, nekas netiks zaudēts.</string>
+    <string name="recovery_clear">Notīrīt lejupielādētos fotoattēlus</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Iestatījumi</string>
+    <string name="settings_language">Valoda</string>
+    <string name="settings_slideshow">Slaidrāde</string>
+    <string name="settings_interval">Katru fotoattēlu rādīt</string>
+    <string name="settings_transition">Pāreja</string>
+    <string name="transition_crossfade">Izgaisana</string>
+    <string name="transition_slide">Slīdēšana</string>
+    <string name="settings_order">Secība</string>
+    <string name="order_received">Jaunākie saņemtie</string>
+    <string name="order_taken">Uzņemšanas datums</string>
+    <string name="order_shuffle">Jauktā secībā</string>
+    <string name="settings_reverse">Vecākie vispirms</string>
+    <string name="settings_fill">Fotoattēla izmērs</string>
+    <string name="fill_fill">Aizpildīt ekrānu</string>
+    <string name="fill_fit">Rādīt visu fotoattēlu</string>
+    <string name="settings_display">Ekrāns</string>
+    <string name="settings_brightness">Spilgtums</string>
+    <string name="settings_brightness_mode">Automātisks spilgtums</string>
+    <string name="brightness_manual">Fiksēts</string>
+    <string name="brightness_sun">Pēc saules</string>
+    <string name="settings_sleep">Miega režīms</string>
+    <string name="settings_sleep_enabled">Naktī izslēgt ekrānu</string>
+    <string name="settings_sleep_at">Aizmigt</string>
+    <string name="settings_wake_at">Pamosties</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="zero">un vēl %d grafiki, ko pārvalda kinframe lietotnē</item>
+        <item quantity="one">un vēl %d grafiks, ko pārvalda kinframe lietotnē</item>
+        <item quantity="other">un vēl %d grafiki, ko pārvalda kinframe lietotnē</item>
+    </plurals>
+    <string name="settings_about">Šis rāmis</string>
+    <string name="about_frame">Nosaukums</string>
+    <string name="about_server">Serveris</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Lietotnes versija</string>
+    <string name="about_android_settings">Android iestatījumi</string>
+    <string name="settings_updates">Atjauninājumi</string>
+    <string name="updates_channel">Kanāls</string>
+    <string name="updates_channel_stable">Stabilais</string>
+    <string name="updates_channel_beta">Beta (jaunās versijas agrāk)</string>
+    <string name="updates_check">Meklēt atjauninājumu</string>
+    <string name="updates_install_now">Instalēt tūlīt</string>
+    <string name="updates_checking">Meklē atjauninājumus…</string>
+    <string name="updates_up_to_date">Šis rāmis ir atjaunināts.</string>
+    <string name="updates_downloading">Lejupielādē versiju %1$s… %2$d%%</string>
+    <string name="updates_waiting">Versija %1$s ir gatava. Tā tiks instalēta, kad rāmi neviens neizmantos.</string>
+    <string name="updates_installing">Instalē versiju %1$s. Rāmis drīz restartēsies.</string>
+    <string name="updates_failed">Atjaunināšana neizdevās. Rāmis mēģinās vēlāk.</string>
+    <string name="update_notice_updated">Atjaunināts uz versiju %1$s</string>
+    <string name="update_notice_rolled_back">Jaunajai versijai bija problēmas, tāpēc rāmis atgriezās pie iepriekšējās.</string>
+    <string name="update_notice_needs_user">Atjauninājums ir gatavs. Pieskarieties „Instalēt”, lai turpinātu.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Rādīt prognozi</string>
+    <string name="weather_close">Aizvērt</string>
+    <string name="weather_now">Tagad</string>
+    <string name="weather_today">Šodien</string>
+    <string name="weather_feels_like">Jūtas kā %1$s</string>
+    <string name="weather_high_low">Maks. %1$s · Min. %2$s</string>
+    <string name="weather_wind">Vējš</string>
+    <string name="weather_humidity">Mitrums</string>
+    <string name="weather_sunrise">Saullēkts</string>
+    <string name="weather_sunset">Saulriets</string>
+    <string name="weather_next_hours">Nākamās 24 stundas</string>
+    <string name="weather_next_days">7 dienu prognoze</string>
+    <string name="weather_updated">Atjaunināts %1$s</string>
+    <string-array name="weather_compass">
+        <item>Z</item>
+        <item>ZA</item>
+        <item>A</item>
+        <item>DA</item>
+        <item>D</item>
+        <item>DR</item>
+        <item>R</item>
+        <item>ZR</item>
+    </string-array>
+    <string name="wmo_clear_day">Saulains</string>
+    <string name="wmo_clear_night">Skaidrs</string>
+    <string name="wmo_mainly_clear_day">Pārsvarā saulains</string>
+    <string name="wmo_mainly_clear_night">Pārsvarā skaidrs</string>
+    <string name="wmo_partly_cloudy">Daļēji mākoņains</string>
+    <string name="wmo_overcast">Mākoņains</string>
+    <string name="wmo_fog">Migla</string>
+    <string name="wmo_rime_fog">Sarmas migla</string>
+    <string name="wmo_drizzle_light">Neliela smidzināšana</string>
+    <string name="wmo_drizzle">Smidzina</string>
+    <string name="wmo_drizzle_dense">Stipra smidzināšana</string>
+    <string name="wmo_freezing_drizzle">Salstoša smidzināšana</string>
+    <string name="wmo_rain_light">Neliels lietus</string>
+    <string name="wmo_rain">Lietus</string>
+    <string name="wmo_rain_heavy">Stiprs lietus</string>
+    <string name="wmo_freezing_rain">Salstošs lietus</string>
+    <string name="wmo_snow_light">Neliels sniegs</string>
+    <string name="wmo_snow">Sniegs</string>
+    <string name="wmo_snow_heavy">Stiprs sniegs</string>
+    <string name="wmo_snow_grains">Sniega graudi</string>
+    <string name="wmo_showers_light">Nelielas lietusgāzes</string>
+    <string name="wmo_showers">Lietusgāzes</string>
+    <string name="wmo_showers_violent">Stipras lietusgāzes</string>
+    <string name="wmo_snow_showers_light">Neliels īslaicīgs sniegs</string>
+    <string name="wmo_snow_showers">Īslaicīgs sniegs</string>
+    <string name="wmo_thunderstorm">Pērkona negaiss</string>
+    <string name="wmo_thunderstorm_hail">Pērkona negaiss ar krusu</string>
+</resources>

@@ -359,6 +359,12 @@ components:
                 web:
                     format: uri
                     type: string
+                webpush_public_key:
+                    description: |
+                        VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+                        subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+                    nullable: true
+                    type: string
             required:
                 - name
                 - version
@@ -509,6 +515,23 @@ components:
                         allow_remove_members_on_frame:
                             default: true
                             type: boolean
+                        owner_pin:
+                            description: |
+                                Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                                The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+                                locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+                            nullable: true
+                            pattern: ^[0-9]{4,6}$
+                            type: string
+                            writeOnly: true
+                        owner_pin_hash:
+                            allOf:
+                                - $ref: '#/components/schemas/PinHash'
+                            description: |
+                                Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+                                in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+                                with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+                            nullable: true
                         owner_pin_set:
                             readOnly: true
                             type: boolean
@@ -792,6 +815,9 @@ components:
                     type: string
                 placements_cached:
                     type: integer
+                placements_evicted:
+                    description: Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+                    type: integer
                 placements_missing:
                     type: integer
                 screen_state:
@@ -803,6 +829,13 @@ components:
                     type: string
                 storage_free_bytes:
                     type: integer
+                storage_state:
+                    description: '`low`: below the frame''s low-water mark, evicting. `critical`: nearly full with nothing left to evict.'
+                    enum:
+                        - ok
+                        - low
+                        - critical
+                    type: string
                 storage_total_bytes:
                     type: integer
                 timezone:
@@ -1048,6 +1081,36 @@ components:
                     type: boolean
                 send:
                     type: boolean
+            type: object
+        PinHash:
+            description: |
+                PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+            properties:
+                alg:
+                    enum:
+                        - pbkdf2-sha256
+                    type: string
+                hash:
+                    description: base64 of 32 bytes
+                    maxLength: 44
+                    minLength: 44
+                    type: string
+                iterations:
+                    example: 20000
+                    maximum: 1000000
+                    minimum: 1000
+                    type: integer
+                salt:
+                    at least 12 random bytes: null
+                    description: base64
+                    maxLength: 64
+                    minLength: 16
+                    type: string
+            required:
+                - alg
+                - iterations
+                - salt
+                - hash
             type: object
         Place:
             description: A geocoding result (Open-Meteo geocoding API).
@@ -1420,7 +1483,7 @@ components:
                                 default: true
                                 type: boolean
                             trim:
-                                description: Videos only.
+                                description: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                                 properties:
                                     end_ms:
                                         minimum: 1
@@ -1873,6 +1936,26 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Placement'
                     description: Accepted; a placement.upsert change follows
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/join-requests:
+        get:
+            description: |
+                Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+                The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+                connect and after syncing, so requests announced while it was offline are not lost.
+            operationId: deviceListJoinRequests
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/JoinRequest'
+                                type: array
+                    description: Oldest first
             security:
                 - deviceAuth: []
             tags:
@@ -2640,6 +2723,14 @@ paths:
                   name: album_id
                   schema:
                     $ref: '#/components/schemas/Id'
+                - description: |
+                    "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+                    on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+                  in: query
+                  name: on_this_day
+                  schema:
+                    pattern: ^[0-9]{2}-[0-9]{2}$
+                    type: string
                 - in: query
                   name: sort
                   schema:

@@ -12,6 +12,7 @@
 	}: { open?: boolean; title: string; children: Snippet; footer?: Snippet; size?: 'sm' | 'md' } = $props();
 
 	let dialog: HTMLDialogElement | undefined = $state();
+	const uid = $props.id();
 
 	$effect(() => {
 		if (!dialog) return;
@@ -23,7 +24,7 @@
 <dialog
 	bind:this={dialog}
 	class={size}
-	aria-labelledby="dlg-title"
+	aria-labelledby="{uid}-title"
 	onclose={() => (open = false)}
 	onclick={(e) => {
 		if (e.target === dialog) open = false;
@@ -32,7 +33,7 @@
 	{#if open}
 		<div class="inner">
 			<header>
-				<h2 id="dlg-title">{title}</h2>
+				<h2 id="{uid}-title">{title}</h2>
 				<button class="btn btn-ghost btn-icon btn-sm" aria-label={t('common.close')} onclick={() => (open = false)}>
 					<Icon name="x" size={18} />
 				</button>
@@ -73,8 +74,11 @@
 	.inner {
 		display: flex;
 		flex-direction: column;
+		/* Long content scrolls inside; the title and the actions stay in view. */
+		max-height: calc(100dvh - 48px);
 	}
 	header {
+		flex: none;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -86,12 +90,27 @@
 	}
 	.body {
 		padding: var(--s-4) var(--s-5);
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		min-height: 0;
 	}
 	footer {
 		display: flex;
 		justify-content: flex-end;
 		gap: var(--s-2);
-		padding: 0 var(--s-5) var(--s-5);
+		padding: var(--s-1) var(--s-5) var(--s-5);
 		flex-wrap: wrap;
+		flex: none;
+	}
+	@media (max-width: 480px) {
+		.body {
+			padding: var(--s-4);
+		}
+		footer {
+			padding: 0 var(--s-4) var(--s-4);
+		}
+		footer :global(.btn) {
+			flex: 1 1 auto;
+		}
 	}
 </style>

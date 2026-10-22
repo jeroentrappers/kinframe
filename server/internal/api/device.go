@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/blob"
+	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
@@ -310,7 +313,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				"user_id": m.UserID, "display_name": m.DisplayName, "avatar_url": s.avatarURL(m.AvatarKey), "role": m.Role,
 			}})
 		case store.FeedSettings:
-			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": settingsDoc(f)})
+			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": deviceSettingsDoc(f)})
 		case store.FeedWeather:
 			w, err := s.frameWeather(ctx, f)
 			if err != nil {
@@ -331,26 +334,22 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 
 // ---------------------------------------------------------------- media download
 
-// serveBlob serves a stored file with Range, ETag and If-None-Match support.
+// serveBlob streams a stored object with Range, ETag and If-None-Match
+// support, whatever the backend. An empty etag uses the store's own (fs:
+// modification time and size, as before; s3: the object's ETag).
 func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentType, etag, cacheControl string) {
-	path, err := s.blob.Path(key)
+	obj, info, err := s.blob.Open(r.Context(), key)
 	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		if !errors.Is(err, blob.ErrNotFound) {
+			s.writeError(w, r, err)
+			return
+		}
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
-	f, err := os.Open(path)
-	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
-		return
-	}
-	defer f.Close()
-	st, err := f.Stat()
-	if err != nil || st.IsDir() {
-		problem.Write(w, problem.New(problem.NotFound, ""))
-		return
-	}
+	defer obj.Close()
 	if contentType == "" {
-		switch filepath.Ext(path) {
+		switch path.Ext(key) {
 		case ".webp":
 			contentType = "image/webp"
 		case ".mp4":
@@ -361,13 +360,61 @@ func (s *Server) serveBlob(w http.ResponseWriter, r *http.Request, key, contentT
 		w.Header().Set("Content-Type", contentType)
 	}
 	if etag == "" {
-		etag = fmt.Sprintf(`"%x-%x"`, st.ModTime().UnixNano(), st.Size())
+		etag = info.ETag
 	}
 	w.Header().Set("ETag", etag)
 	if cacheControl != "" {
 		w.Header().Set("Cache-Control", cacheControl)
 	}
-	http.ServeContent(w, r, "", st.ModTime(), f)
+	http.ServeContent(w, r, "", info.ModTime, obj)
+}
+
+// presignTTL is how long presigned bucket URLs stay valid
+// (KINFRAME_MEDIA_REDIRECT=presigned).
+const presignTTL = 15 * time.Minute
+
+// serveBlobOrRedirect serves URLs that browsers and apps load (signed media
+// URLs, avatars). With KINFRAME_MEDIA_REDIRECT=presigned it redirects to a
+// short-lived presigned bucket URL instead of streaming; the bucket then
+// answers Range requests itself. Frame downloads (deviceGetMedia) always
+// stream, because frames revalidate against the rendition's sha256 ETag.
+func (s *Server) serveBlobOrRedirect(w http.ResponseWriter, r *http.Request, key, contentType, etag, cacheControl string) {
+	if s.cfg.Blob.MediaRedirect != config.MediaRedirectPresigned {
+		s.serveBlob(w, r, key, contentType, etag, cacheControl)
+		return
+	}
+	if contentType == "" {
+		contentType = blob.ContentType(key)
+	}
+	u, err := s.blob.PresignGet(r.Context(), key, presignTTL, contentType)
+	if err != nil {
+		s.log.Warn("presign blob URL, streaming instead", "key", key, "err", err)
+		s.serveBlob(w, r, key, contentType, etag, cacheControl)
+		return
+	}
+	// Cacheable for a fraction of the presigned URL's lifetime.
+	w.Header().Set("Cache-Control", "private, max-age=300")
+	http.Redirect(w, r, u, http.StatusFound)
+}
+
+// deleteBlob removes an object the database no longer references; failures
+// only leave garbage behind, so they are logged.
+func (s *Server) deleteBlob(ctx context.Context, key string) {
+	if err := s.blob.Delete(context.WithoutCancel(ctx), key); err != nil {
+		s.log.Warn("delete blob", "key", key, "err", err)
+	}
+}
+
+// tempDir creates a scratch directory; the caller removes it.
+func (s *Server) tempDir() (string, error) {
+	dir := s.scratch
+	if dir == "" {
+		dir = os.TempDir()
+	}
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return "", err
+	}
+	return os.MkdirTemp(dir, "req-*")
 }
 
 func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
@@ -375,7 +422,7 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	d := deviceFrom(ctx)
 	pid, err := uuid.Parse(r.PathValue("placementId"))
 	if err != nil || d.FrameID == nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	p, err := s.st.GetPlacementRow(ctx, s.st.Q(), pid, d.FrameID)
@@ -386,19 +433,19 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	variant := r.URL.Query().Get("variant")
 	if variant == "avatar" {
 		if p.SenderAvatarKey == nil {
-			problem.Write(w, problem.New(problem.NotFound, "sender has no avatar"))
+			problem.Write(w, r, problem.New(problem.NotFound, "sender has no avatar"))
 			return
 		}
 		s.serveBlob(w, r, *p.SenderAvatarKey, "image/webp", "", "private, max-age=86400")
 		return
 	}
 	if variant != "" && variant != "display" && variant != "poster" {
-		problem.Write(w, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
 	rend, err := s.st.GetRendition(ctx, p.MediaID, worker.Variant(p.Kind, deviceTarget(d)))
 	if err == store.ErrNotFound {
-		problem.Write(w, problem.New(problem.NotFound, "rendition not ready"))
+		problem.Write(w, r, problem.New(problem.NotFound, "rendition not ready"))
 		return
 	}
 	if err != nil {
@@ -407,7 +454,7 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 	}
 	if variant == "poster" {
 		if rend.PosterKey == nil {
-			problem.Write(w, problem.New(problem.NotFound, "no poster"))
+			problem.Write(w, r, problem.New(problem.NotFound, "no poster"))
 			return
 		}
 		s.serveBlob(w, r, *rend.PosterKey, "image/webp", "", "private, max-age=86400")
@@ -451,7 +498,7 @@ func (s *Server) DeviceAck(ctx context.Context, req gen.DeviceAckRequestObject) 
 	if err != nil {
 		return nil, err
 	}
-	s.PlacementsChanged(changes)
+	s.placementsChanged(ctx, changes, s.deliveredPushes(ctx, f, changes))
 	return noContent(), nil
 }
 
@@ -528,7 +575,7 @@ func (s *Server) DeviceSetReaction(ctx context.Context, req gen.DeviceSetReactio
 		var push *notify.Push
 		if reaction != nil {
 			push = &notify.Push{Key: "reaction", Args: map[string]string{"frame": f.Name},
-				IDs: map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}}
+				IDs: placementIDs(p, f)}
 		}
 		s.notify.User(*p.SenderUserID, notify.Event{
 			"type": "reaction", "placement_id": p.Placement.ID, "frame_id": f.ID, "reaction": reaction, "by_frame_name": f.Name,
@@ -558,12 +605,28 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 	if p.SenderUserID != nil {
 		s.notify.User(*p.SenderUserID, notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset},
 			&notify.Push{Key: "reply", Args: map[string]string{"frame": f.Name, "preset": preset},
-				IDs: map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}})
+				IDs: placementIDs(p, f)})
 		if p.SendID != nil {
 			s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{*p.SendID: *p.SenderUserID}, "")
 		}
 	}
 	return noContent(), nil
+}
+
+func (s *Server) DeviceListJoinRequests(ctx context.Context, req gen.DeviceListJoinRequestsRequestObject) (gen.DeviceListJoinRequestsResponseObject, error) {
+	f, err := s.deviceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	jrs, err := s.st.ListPendingJoinRequests(ctx, f.ID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.JoinRequest, len(jrs))
+	for i := range jrs {
+		out[i] = s.joinRequestJSON(&jrs[i])
+	}
+	return ok(out), nil
 }
 
 func (s *Server) DeviceDecideJoin(ctx context.Context, req gen.DeviceDecideJoinRequestObject) (gen.DeviceDecideJoinResponseObject, error) {
@@ -659,4 +722,13 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		return nil, err
 	}
 	return accepted(s.placementJSON(row)), nil
+}
+
+// placementIDs are the ids a push about a placement carries (README §6.3).
+func placementIDs(p *store.PlacementRow, f *store.Frame) map[string]string {
+	ids := map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}
+	if p.SendID != nil {
+		ids["send_id"] = p.SendID.String()
+	}
+	return ids
 }
