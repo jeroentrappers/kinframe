@@ -135,6 +135,8 @@ class SlideRenderer {
             canvas.drawBitmap(src, null, RectF(f.left, f.top, f.right, f.bottom), paint)
         }
         r.caption?.let { CaptionPainter.draw(canvas, r.screenW, r.screenH, it, r.density) }
+        // Painted edge to edge: opaque, so the GPU can skip blending (a large saving on the Mali-400).
+        out.setHasAlpha(false)
         return out
     }
 
@@ -183,6 +185,8 @@ class SlideRenderer {
             if (t.label != null || t.caption != null) drawTileLabel(canvas, dst, t, density)
             canvas.restore()
         }
+        // Painted edge to edge: opaque, so the GPU can skip blending (a large saving on the Mali-400).
+        out.setHasAlpha(false)
         return out
     }
 

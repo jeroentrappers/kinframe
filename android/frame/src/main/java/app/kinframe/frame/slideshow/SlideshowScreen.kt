@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -54,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -110,6 +113,7 @@ import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
 import app.kinframe.frame.weather.ForecastOverlay
 import app.kinframe.frame.weather.Weather
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -210,7 +214,14 @@ fun SlideshowScreen(c: FrameController) {
         // Swiping: the neighbouring photo is attached beside the current one and both follow the finger 1:1; on release
         // the transition continues from there (or both spring back). The drag only applies to the stage it started on, so
         // the frame the next stage arrives already uses that stage's own progress — no jump.
-        val drag = remember { Animatable(0f) }
+        // Plain state, written synchronously per touch event: no coroutine hop that could drop a delta and let the photo
+        // lag behind the finger. Springs animate it with animate().
+        var dragValue by remember { mutableFloatStateOf(0f) }
+        var dragAnim by remember { mutableStateOf<Job?>(null) }
+        fun springDrag(spec: AnimationSpec<Float>, after: () -> Unit = {}) {
+            dragAnim?.cancel()
+            dragAnim = scope.launch { animate(dragValue, 0f, animationSpec = spec) { v, _ -> dragValue = v }; after() }
+        }
         var dragSeq by remember { mutableLongStateOf(-1L) }
         var neighborDir by remember { mutableIntStateOf(0) }
         val currentSeq by rememberUpdatedState(stage.seq)
@@ -221,11 +232,11 @@ fun SlideshowScreen(c: FrameController) {
             if (neighborDir != 0 && dragSeq == stage.seq) ss.neighbor(neighborDir) else null
         }
         val follows = neighbor != null
-        fun dragX(): Float = if (dragSeq == currentSeq) (if (follows) drag.value else drag.value * 0.35f) else 0f
+        fun dragX(): Float = if (dragSeq == currentSeq) (if (follows) dragValue else dragValue * 0.35f) else 0f
         // When the neighbour arrives mid-drag, switch from rubber band to 1:1 without moving what is on screen.
         var followedBefore by remember { mutableStateOf(false) }
         LaunchedEffect(follows) {
-            if (follows && !followedBefore && dragSeq == currentSeq) drag.snapTo(drag.value * 0.35f)
+            if (follows && !followedBefore && dragSeq == currentSeq) dragValue *= 0.35f
             followedBefore = follows
         }
 
@@ -253,19 +264,20 @@ fun SlideshowScreen(c: FrameController) {
                         dragSeq = currentSeq
                         neighborDir = 0
                         followedBefore = false
-                        scope.launch { drag.snapTo(0f) }
+                        dragAnim?.cancel()
+                        dragValue = 0f
                     },
                     onDrag = { dx ->
                         if (dragSeq == currentSeq) {
-                            val nx = (drag.value + dx).coerceIn(-wPx.toFloat(), wPx.toFloat())
+                            val nx = (dragValue + dx).coerceIn(-wPx.toFloat(), wPx.toFloat())
                             val dirNow = if (nx < 0) 1 else if (nx > 0) -1 else neighborDir
                             if (dirNow != neighborDir) neighborDir = dirNow
-                            scope.launch { drag.snapTo(nx) }
+                            dragValue = nx
                         }
                     },
                     onEnd = { velocityX ->
                         if (dragSeq != currentSeq) return@pointerInputSwipe
-                        val dx = drag.value
+                        val dx = dragValue
                         val dir = if (dx < 0) 1 else -1
                         val fling = abs(velocityX) > 900f && sign(velocityX) == sign(dx)
                         val commit = dx != 0f && (abs(dx) > wPx * 0.2f || fling)
@@ -275,17 +287,20 @@ fun SlideshowScreen(c: FrameController) {
                                 val seqAtRelease = currentSeq
                                 ss.swipe(dir, abs(dx) / wPx, n.key)
                                 // Safety net: if nothing came in (e.g. the item vanished), spring back.
-                                scope.launch {
+                                dragAnim?.cancel()
+                                dragAnim = scope.launch {
                                     delay(800)
-                                    if (currentSeq == seqAtRelease) { drag.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow)); dragSeq = -1L }
+                                    if (currentSeq == seqAtRelease) {
+                                        animate(dragValue, 0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { v, _ -> dragValue = v }
+                                        dragSeq = -1L
+                                    }
                                 }
                             }
                             commit -> {
-                                scope.launch { drag.animateTo(0f, tween(200)); dragSeq = -1L }
+                                springDrag(tween(200)) { dragSeq = -1L }
                                 if (dir > 0) ss.next(manual = true) else ss.previous()
                             }
-                            else -> scope.launch {
-                                drag.animateTo(0f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
+                            else -> springDrag(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) {
                                 dragSeq = -1L
                                 neighborDir = 0
                             }
@@ -460,13 +475,16 @@ private fun Modifier.pointerInputSwipe(onStart: () -> Unit, onDrag: (Float) -> U
 
 // ---------------------------------------------------------------------------------------------- layers
 
-/** Draws the prepared next slide into a 1 × 1 px box so HWUI uploads its texture before the transition starts. */
+/** Draws the prepared neighbour slides into a 1 × 1 px box so HWUI uploads its texture before the transition starts. */
 @Composable
 private fun TextureWarmup(c: FrameController) {
     val prepared by c.slideshow.prepared.collectAsState()
-    val img = prepared?.image ?: return
+    val previous by c.slideshow.preparedPrevious.collectAsState()
+    // Both neighbours: either may be pulled in by a swipe, and a cold upload stalls the first drag frame (~70 ms).
+    val images = listOfNotNull(prepared?.image, previous?.image)
+    if (images.isEmpty()) return
     Canvas(Modifier.size(1.dp)) {
-        drawImage(img, dstSize = androidx.compose.ui.unit.IntSize(1, 1))
+        images.forEach { drawImage(it, dstSize = androidx.compose.ui.unit.IntSize(1, 1)) }
     }
 }
 
