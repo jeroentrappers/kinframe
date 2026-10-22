@@ -3775,6 +3775,57 @@
         }
       }
     },
+    "ios.server.change": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use another server"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een andere server gebruiken"
+          }
+        }
+      }
+    },
+    "ios.server.changeBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You’ll be signed out here. Sends still on their way stay in the queue until you’re back on this server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je wordt hier afgemeld. Zendingen die nog onderweg zijn, blijven in de wachtrij tot je terug op deze server bent."
+          }
+        }
+      }
+    },
+    "ios.server.changeTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use another server?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een andere server gebruiken?"
+          }
+        }
+      }
+    },
     "ios.server.check": {
       "extractionState": "manual",
       "localizations": {
@@ -3928,6 +3979,23 @@
         }
       }
     },
+    "ios.settings.languageHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used in the app and for notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor de app en voor meldingen."
+          }
+        }
+      }
+    },
     "ios.settings.languageSystem": {
       "extractionState": "manual",
       "localizations": {
@@ -3941,6 +4009,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zoals de telefoon"
+          }
+        }
+      }
+    },
+    "ios.share.signedOut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the kinframe app and sign in first. Then you can share photos straight to your frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open eerst de kinframe-app en meld je aan. Daarna kun je foto’s rechtstreeks naar je kaders delen."
           }
         }
       }

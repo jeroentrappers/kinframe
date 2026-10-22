@@ -67,6 +67,18 @@
     "en": "kinframe runs on a server your family trusts. Most families use the default one. If someone in the family runs their own, pick that.",
     "nl": "kinframe draait op een server die je familie vertrouwt. De meeste families gebruiken de standaardserver. Heeft iemand in de familie een eigen server, kies die dan."
   },
+  "ios.server.change": {
+    "en": "Use another server",
+    "nl": "Een andere server gebruiken"
+  },
+  "ios.server.changeBody": {
+    "en": "You’ll be signed out here. Sends still on their way stay in the queue until you’re back on this server.",
+    "nl": "Je wordt hier afgemeld. Zendingen die nog onderweg zijn, blijven in de wachtrij tot je terug op deze server bent."
+  },
+  "ios.server.changeTitle": {
+    "en": "Use another server?",
+    "nl": "Een andere server gebruiken?"
+  },
   "ios.server.check": {
     "en": "Check",
     "nl": "Controleren"
@@ -103,9 +115,17 @@
     "en": "Can’t reach that server. Check the address and your connection.",
     "nl": "Die server is niet bereikbaar. Kijk het adres en je verbinding na."
   },
+  "ios.settings.languageHint": {
+    "en": "Used in the app and for notifications.",
+    "nl": "Voor de app en voor meldingen."
+  },
   "ios.settings.languageSystem": {
     "en": "Same as the phone",
     "nl": "Zoals de telefoon"
+  },
+  "ios.share.signedOut": {
+    "en": "Open the kinframe app and sign in first. Then you can share photos straight to your frames.",
+    "nl": "Open eerst de kinframe-app en meld je aan. Daarna kun je foto’s rechtstreeks naar je kaders delen."
   },
   "ios.switch.body": {
     "en": "This link is for {server}. You’ll be signed out here and can sign in there.",
