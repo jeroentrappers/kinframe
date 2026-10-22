@@ -73,6 +73,8 @@ data class SyncStateEntity(
     val frameLocation: String? = null,
     val ownerName: String? = null,
     val weatherJson: String? = null,
+    /** Last `calendar` change (`FrameCalendar`), so the calendar shows after a reboot while offline. */
+    val calendarJson: String? = null,
 )
 
 /** Durable ack queue (README §5.4): delivered when stored, seen on first display. */
@@ -107,5 +109,9 @@ data class OutboxEntity(
         const val REPLY = "reply"
         /** Allow/deny of a join request; `placementId` holds the request id. */
         const val JOIN_DECISION = "join_decision"
+        /** Accept/decline of an event invitation; `placementId` holds the invitation id. */
+        const val INVITATION_DECISION = "invitation_decision"
+        /** Countdown on/off for a calendar event; `placementId` holds the event id. */
+        const val COUNTDOWN = "countdown"
     }
 }
