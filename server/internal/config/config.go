@@ -11,12 +11,15 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/mail"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jeroentrappers/kinframe/server/internal/shop"
 )
 
 type Config struct {
@@ -87,6 +90,13 @@ type Config struct {
 	CalendarEnabled bool
 	CalendarSync    time.Duration
 	SecretsKey      []byte
+
+	// SMTP for the server's own mail (shop reservations); nil when
+	// KINFRAME_SMTP_HOST is unset. The same settings configure Logto's
+	// sign-in mails (bootstrap-logto).
+	SMTP *shop.SMTP
+	// Shop is the optional pre-order shop (KINFRAME_SHOP_FILE); nil = no shop.
+	Shop *shop.Config
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -207,6 +217,21 @@ func load(get func(string) string) (*Config, error) {
 	}
 	if c.FrameReleasesInterval < time.Minute {
 		errs = append(errs, errors.New("KINFRAME_FRAME_RELEASES_POLL_MINUTES must be at least 1"))
+	}
+	if host := env("KINFRAME_SMTP_HOST", ""); host != "" {
+		c.SMTP = &shop.SMTP{Host: host, Port: intv("KINFRAME_SMTP_PORT", 587), User: env("KINFRAME_SMTP_USER", ""),
+			Password: get("KINFRAME_SMTP_PASSWORD"), From: env("KINFRAME_SMTP_FROM", "")}
+		if a, err := mail.ParseAddress(c.SMTP.From); err != nil || a.Address == "" {
+			errs = append(errs, errors.New("KINFRAME_SMTP_FROM must be an email address when KINFRAME_SMTP_HOST is set"))
+		}
+		if c.SMTP.Port <= 0 || c.SMTP.Port > 65535 {
+			errs = append(errs, fmt.Errorf("KINFRAME_SMTP_PORT: invalid port %d", c.SMTP.Port))
+		}
+	}
+	if f := env("KINFRAME_SHOP_FILE", ""); f != "" {
+		if c.Shop, err = shop.Load(f, c.ServerName); err != nil {
+			errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: %w", err))
+		}
 	}
 	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
 		errs = append(errs, err)

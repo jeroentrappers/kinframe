@@ -240,6 +240,13 @@ func (a *App) Maintain(ctx context.Context) {
 			}
 		}
 	}
+	if a.Cfg.Shop != nil {
+		if n, err := a.Store.PurgeReservations(ctx, a.Cfg.Shop.RetentionDays); err != nil {
+			log.Error("purge shop reservations", "err", err)
+		} else if n > 0 {
+			log.Info("deleted old shop reservations", "count", n)
+		}
+	}
 	if err := a.Store.PruneIdempotency(ctx); err != nil {
 		log.Error("prune idempotency keys", "err", err)
 	}

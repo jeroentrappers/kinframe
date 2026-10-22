@@ -24,6 +24,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
+	"github.com/jeroentrappers/kinframe/server/internal/shop"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
@@ -57,6 +58,11 @@ type Server struct {
 	calendarTestUser *ratelimit.Limiter
 	tvUser           *ratelimit.Limiter
 	tvIP             *ratelimit.Limiter
+	shopIP           *ratelimit.Limiter
+	shopCancelIP     *ratelimit.Limiter
+
+	shopTokens *shop.Tokens
+	mailer     shop.Mailer // nil: SMTP not configured
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
@@ -82,6 +88,9 @@ type Deps struct {
 	Releases *releases.Mirror  // frame app releases; nil disables self-update
 	Weather  *weather.Service  // nil disables weather and /v1/geocode
 	Calendar *calendar.Service // nil disables calendars
+	// Mailer sends the server's own email (shop); defaults to SMTP from the
+	// config, nil when SMTP is not configured.
+	Mailer shop.Mailer
 }
 
 func New(d Deps) (*Server, error) {
@@ -111,6 +120,13 @@ func New(d Deps) (*Server, error) {
 		calendarTestUser: ratelimit.New(30, time.Minute),
 		tvUser:           ratelimit.New(60, time.Hour),
 		tvIP:             ratelimit.New(600, time.Hour),
+		shopIP:           ratelimit.New(10, time.Hour),
+		shopCancelIP:     ratelimit.New(30, time.Hour),
+		shopTokens:       shop.NewTokens(auth.DeriveKey(d.Config.SigningKey, "shop-cancel")),
+		mailer:           d.Mailer,
+	}
+	if s.mailer == nil && d.Config.SMTP != nil {
+		s.mailer = &shop.SMTPMailer{Cfg: *d.Config.SMTP}
 	}
 	if d.Calendar != nil {
 		s.sealer = d.Calendar.Sealer

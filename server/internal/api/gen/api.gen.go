@@ -1120,6 +1120,30 @@ func (e ShareResultSkippedReason) Valid() bool {
 	}
 }
 
+// Defines values for ShopReservationStatus.
+const (
+	Cancelled ShopReservationStatus = "cancelled"
+	Confirmed ShopReservationStatus = "confirmed"
+	Contacted ShopReservationStatus = "contacted"
+	New       ShopReservationStatus = "new"
+)
+
+// Valid indicates whether the value is a known member of the ShopReservationStatus enum.
+func (e ShopReservationStatus) Valid() bool {
+	switch e {
+	case Cancelled:
+		return true
+	case Confirmed:
+		return true
+	case Contacted:
+		return true
+	case New:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SleepScheduleDays.
 const (
 	SleepScheduleDaysFri SleepScheduleDays = "fri"
@@ -1919,6 +1943,11 @@ type Discovery struct {
 	DevAuth *bool  `json:"dev_auth,omitempty"`
 	Limits  Limits `json:"limits"`
 	Name    string `json:"name"`
+
+	// Shop Pre-order shop run by the server operator (README §5.10). Present only when the operator configured one
+	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+	// to text; `en` is always present and is the fallback.
+	Shop    *Shop  `json:"shop,omitempty"`
 	Version string `json:"version"`
 
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
@@ -2395,6 +2424,9 @@ type Limits struct {
 	TrashRetentionDays *int `json:"trash_retention_days,omitempty"`
 }
 
+// LocalizedText Language code → text; `en` is the fallback.
+type LocalizedText map[string]string
+
 // MediaKind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
 // Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
 // `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
@@ -2699,6 +2731,152 @@ type ShareResult struct {
 
 // ShareResultSkippedReason defines model for ShareResult.Skipped.Reason.
 type ShareResultSkippedReason string
+
+// Shop Pre-order shop run by the server operator (README §5.10). Present only when the operator configured one
+// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+// to text; `en` is always present and is the fallback.
+type Shop struct {
+	// Brand Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+	//
+	// Example: kinframe
+	Brand string `json:"brand"`
+
+	// Currency ISO 4217
+	//
+	// Example: EUR
+	Currency string `json:"currency"`
+
+	// EstimatedDelivery Language code → text; `en` is the fallback.
+	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
+	Products          []ShopProduct  `json:"products"`
+	Seller            struct {
+		Email openapi_types.Email `json:"email"`
+
+		// Legal Legal line for the footer, e.g. company, address and VAT number.
+		Legal      *string `json:"legal,omitempty"`
+		Name       string  `json:"name"`
+		PrivacyUrl *string `json:"privacy_url,omitempty"`
+	} `json:"seller"`
+	Shipping ShopShipping `json:"shipping"`
+
+	// VatPercent VAT included in all prices
+	//
+	// Example: 21
+	VatPercent float32 `json:"vat_percent"`
+}
+
+// ShopLine defines model for ShopLine.
+type ShopLine struct {
+	LineCents int    `json:"line_cents"`
+	Name      string `json:"name"`
+	ProductId string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+	UnitCents int    `json:"unit_cents"`
+}
+
+// ShopProduct defines model for ShopProduct.
+type ShopProduct struct {
+	// Id Example: frame-10
+	Id string `json:"id"`
+
+	// Image Illustration key: frame-10 or frame-15
+	//
+	// Example: frame-10
+	Image  *string `json:"image,omitempty"`
+	MaxQty int     `json:"max_qty"`
+
+	// Name Example: kinframe 10.1"
+	Name string `json:"name"`
+
+	// PriceCents Unit price incl. VAT
+	PriceCents int `json:"price_cents"`
+
+	// Size Screen size label
+	//
+	// Example: 10.1"
+	Size *string `json:"size,omitempty"`
+
+	// Specs Language code → short spec bullets; `en` is the fallback.
+	Specs *map[string][]string `json:"specs,omitempty"`
+}
+
+// ShopReservation defines model for ShopReservation.
+type ShopReservation struct {
+	CancelledAt *time.Time `json:"cancelled_at,omitempty"`
+	Country     string     `json:"country"`
+	CreatedAt   time.Time  `json:"created_at"`
+	Currency    string     `json:"currency"`
+	Email       string     `json:"email"`
+
+	// Id UUIDv7
+	Id            Id                    `json:"id"`
+	InternalNote  *string               `json:"internal_note,omitempty"`
+	Items         []ShopLine            `json:"items"`
+	Locale        string                `json:"locale"`
+	Name          string                `json:"name"`
+	Note          *string               `json:"note,omitempty"`
+	PostalCode    *string               `json:"postal_code,omitempty"`
+	Reference     string                `json:"reference"`
+	ShippingCents int                   `json:"shipping_cents"`
+	Status        ShopReservationStatus `json:"status"`
+	SubtotalCents int                   `json:"subtotal_cents"`
+	TotalCents    int                   `json:"total_cents"`
+	UpdatedAt     time.Time             `json:"updated_at"`
+}
+
+// ShopReservationCreate defines model for ShopReservationCreate.
+type ShopReservationCreate struct {
+	// Consent Must be true. The customer agrees to be contacted about this reservation.
+	Consent bool `json:"consent"`
+
+	// Country Example: BE
+	Country string `json:"country"`
+	Email   string `json:"email"`
+	Items   []struct {
+		ProductId string `json:"product_id"`
+		Quantity  int    `json:"quantity"`
+	} `json:"items"`
+
+	// Locale Language for the emails (falls back to English)
+	//
+	// Example: nl
+	Locale     *string `json:"locale,omitempty"`
+	Name       string  `json:"name"`
+	Note       *string `json:"note,omitempty"`
+	PostalCode *string `json:"postal_code,omitempty"`
+
+	// Website Honeypot; leave empty.
+	Website *string `json:"website,omitempty"`
+}
+
+// ShopReservationReceipt defines model for ShopReservationReceipt.
+type ShopReservationReceipt struct {
+	Currency string     `json:"currency"`
+	Email    string     `json:"email"`
+	Items    []ShopLine `json:"items"`
+
+	// Reference Example: KF-7Q3M
+	Reference     string                `json:"reference"`
+	ShippingCents int                   `json:"shipping_cents"`
+	Status        ShopReservationStatus `json:"status"`
+	SubtotalCents int                   `json:"subtotal_cents"`
+	TotalCents    int                   `json:"total_cents"`
+}
+
+// ShopReservationStatus defines model for ShopReservationStatus.
+type ShopReservationStatus string
+
+// ShopShipping defines model for ShopShipping.
+type ShopShipping struct {
+	// Countries Example: ["BE","NL"]
+	Countries []string `json:"countries"`
+
+	// FlatCents Shipping cost per order incl. VAT
+	FlatCents int `json:"flat_cents"`
+
+	// FreeFromCents Item subtotal from which shipping is free; null = never
+	FreeFromCents *int `json:"free_from_cents,omitempty"`
+}
 
 // SleepSchedule defines model for SleepSchedule.
 type SleepSchedule struct {
@@ -3212,6 +3390,18 @@ type UpdateMeJSONBody struct {
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
 }
 
+// OperatorListReservationsParams defines parameters for OperatorListReservations.
+type OperatorListReservationsParams struct {
+	Status *ShopReservationStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// OperatorUpdateReservationJSONBody defines parameters for OperatorUpdateReservation.
+type OperatorUpdateReservationJSONBody struct {
+	// InternalNote Only for the operator; never emailed.
+	InternalNote *string                `json:"internal_note,omitempty"`
+	Status       *ShopReservationStatus `json:"status,omitempty"`
+}
+
 // ListMySendsParams defines parameters for ListMySends.
 type ListMySendsParams struct {
 	Cursor *Cursor                 `form:"cursor,omitempty" json:"cursor,omitempty"`
@@ -3230,6 +3420,11 @@ type CreateSendParams struct {
 // ForwardSendJSONBody defines parameters for ForwardSend.
 type ForwardSendJSONBody struct {
 	FrameIds []Id `json:"frame_ids"`
+}
+
+// CancelShopReservationJSONBody defines parameters for CancelShopReservation.
+type CancelShopReservationJSONBody struct {
+	Token string `json:"token"`
 }
 
 // DeviceAckJSONRequestBody defines body for DeviceAck for application/json ContentType.
@@ -3334,11 +3529,20 @@ type RegisterPushEndpointJSONRequestBody = PushEndpointCreate
 // OperatorSetLimitsJSONRequestBody defines body for OperatorSetLimits for application/json ContentType.
 type OperatorSetLimitsJSONRequestBody = Limits
 
+// OperatorUpdateReservationJSONRequestBody defines body for OperatorUpdateReservation for application/json ContentType.
+type OperatorUpdateReservationJSONRequestBody OperatorUpdateReservationJSONBody
+
 // CreateSendJSONRequestBody defines body for CreateSend for application/json ContentType.
 type CreateSendJSONRequestBody = SendCreate
 
 // ForwardSendJSONRequestBody defines body for ForwardSend for application/json ContentType.
 type ForwardSendJSONRequestBody ForwardSendJSONBody
+
+// CreateShopReservationJSONRequestBody defines body for CreateShopReservation for application/json ContentType.
+type CreateShopReservationJSONRequestBody = ShopReservationCreate
+
+// CancelShopReservationJSONRequestBody defines body for CancelShopReservation for application/json ContentType.
+type CancelShopReservationJSONRequestBody CancelShopReservationJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -3580,6 +3784,12 @@ type ServerInterface interface {
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/operator/reservations)
+	OperatorListReservations(w http.ResponseWriter, r *http.Request, params OperatorListReservationsParams)
+
+	// (PATCH /v1/operator/reservations/{reservationId})
+	OperatorUpdateReservation(w http.ResponseWriter, r *http.Request, reservationId Id)
+
 	// (GET /v1/operator/stats)
 	OperatorStats(w http.ResponseWriter, r *http.Request)
 
@@ -3597,6 +3807,12 @@ type ServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(w http.ResponseWriter, r *http.Request, sendId Id)
+
+	// (POST /v1/shop/reservations)
+	CreateShopReservation(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/shop/reservations/cancel)
+	CancelShopReservation(w http.ResponseWriter, r *http.Request)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
@@ -6017,6 +6233,65 @@ func (siw *ServerInterfaceWrapper) OperatorSetLimits(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
+// OperatorListReservations operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListReservations(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OperatorListReservationsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListReservations(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorUpdateReservation operation middleware
+func (siw *ServerInterfaceWrapper) OperatorUpdateReservation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "reservationId" -------------
+	var reservationId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "reservationId", r.PathValue("reservationId"), &reservationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "reservationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorUpdateReservation(w, r, reservationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorStats operation middleware
 func (siw *ServerInterfaceWrapper) OperatorStats(w http.ResponseWriter, r *http.Request) {
 
@@ -6200,6 +6475,34 @@ func (siw *ServerInterfaceWrapper) ForwardSend(w http.ResponseWriter, r *http.Re
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.ForwardSend(w, r, sendId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateShopReservation operation middleware
+func (siw *ServerInterfaceWrapper) CreateShopReservation(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateShopReservation(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CancelShopReservation operation middleware
+func (siw *ServerInterfaceWrapper) CancelShopReservation(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CancelShopReservation(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6434,12 +6737,16 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/push-endpoints/{endpointId}", wrapper.DeletePushEndpoint)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/stats", wrapper.OperatorStats)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends", wrapper.CreateSend)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.GetSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations", wrapper.CreateShopReservation)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -9136,6 +9443,87 @@ func (response OperatorSetLimits200JSONResponse) VisitOperatorSetLimitsResponse(
 	return err
 }
 
+type OperatorListReservationsRequestObject struct {
+	Params OperatorListReservationsParams
+}
+
+type OperatorListReservationsResponseObject interface {
+	VisitOperatorListReservationsResponse(w http.ResponseWriter) error
+}
+
+type OperatorListReservations200JSONResponse struct {
+	Reservations []ShopReservation `json:"reservations"`
+}
+
+func (response OperatorListReservations200JSONResponse) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListReservationsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListReservationsdefaultApplicationProblemPlusJSONResponse) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorUpdateReservationRequestObject struct {
+	ReservationId Id `json:"reservationId"`
+	Body          *OperatorUpdateReservationJSONRequestBody
+}
+
+type OperatorUpdateReservationResponseObject interface {
+	VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error
+}
+
+type OperatorUpdateReservation200JSONResponse ShopReservation
+
+func (response OperatorUpdateReservation200JSONResponse) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorUpdateReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorUpdateReservationdefaultApplicationProblemPlusJSONResponse) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorStatsRequestObject struct {
 }
 
@@ -9341,6 +9729,88 @@ func (response ForwardSend202JSONResponse) VisitForwardSendResponse(w http.Respo
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateShopReservationRequestObject struct {
+	Body *CreateShopReservationJSONRequestBody
+}
+
+type CreateShopReservationResponseObject interface {
+	VisitCreateShopReservationResponse(w http.ResponseWriter) error
+}
+
+type CreateShopReservation201JSONResponse ShopReservationReceipt
+
+func (response CreateShopReservation201JSONResponse) VisitCreateShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateShopReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateShopReservationdefaultApplicationProblemPlusJSONResponse) VisitCreateShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelShopReservationRequestObject struct {
+	Body *CancelShopReservationJSONRequestBody
+}
+
+type CancelShopReservationResponseObject interface {
+	VisitCancelShopReservationResponse(w http.ResponseWriter) error
+}
+
+type CancelShopReservation200JSONResponse struct {
+	// Reference Example: KF-7Q3M
+	Reference string                `json:"reference"`
+	Status    ShopReservationStatus `json:"status"`
+}
+
+func (response CancelShopReservation200JSONResponse) VisitCancelShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelShopReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CancelShopReservationdefaultApplicationProblemPlusJSONResponse) VisitCancelShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -9624,6 +10094,12 @@ type StrictServerInterface interface {
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(ctx context.Context, request OperatorSetLimitsRequestObject) (OperatorSetLimitsResponseObject, error)
 
+	// (GET /v1/operator/reservations)
+	OperatorListReservations(ctx context.Context, request OperatorListReservationsRequestObject) (OperatorListReservationsResponseObject, error)
+
+	// (PATCH /v1/operator/reservations/{reservationId})
+	OperatorUpdateReservation(ctx context.Context, request OperatorUpdateReservationRequestObject) (OperatorUpdateReservationResponseObject, error)
+
 	// (GET /v1/operator/stats)
 	OperatorStats(ctx context.Context, request OperatorStatsRequestObject) (OperatorStatsResponseObject, error)
 
@@ -9641,6 +10117,12 @@ type StrictServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(ctx context.Context, request ForwardSendRequestObject) (ForwardSendResponseObject, error)
+
+	// (POST /v1/shop/reservations)
+	CreateShopReservation(ctx context.Context, request CreateShopReservationRequestObject) (CreateShopReservationResponseObject, error)
+
+	// (POST /v1/shop/reservations/cancel)
+	CancelShopReservation(ctx context.Context, request CancelShopReservationRequestObject) (CancelShopReservationResponseObject, error)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
@@ -11969,6 +12451,65 @@ func (sh *strictHandler) OperatorSetLimits(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// OperatorListReservations operation middleware
+func (sh *strictHandler) OperatorListReservations(w http.ResponseWriter, r *http.Request, params OperatorListReservationsParams) {
+	var request OperatorListReservationsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListReservations(ctx, request.(OperatorListReservationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListReservations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListReservationsResponseObject); ok {
+		if err := validResponse.VisitOperatorListReservationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorUpdateReservation operation middleware
+func (sh *strictHandler) OperatorUpdateReservation(w http.ResponseWriter, r *http.Request, reservationId Id) {
+	var request OperatorUpdateReservationRequestObject
+
+	request.ReservationId = reservationId
+
+	var body OperatorUpdateReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorUpdateReservation(ctx, request.(OperatorUpdateReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorUpdateReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorUpdateReservationResponseObject); ok {
+		if err := validResponse.VisitOperatorUpdateReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // OperatorStats operation middleware
 func (sh *strictHandler) OperatorStats(w http.ResponseWriter, r *http.Request) {
 	var request OperatorStatsRequestObject
@@ -12130,6 +12671,68 @@ func (sh *strictHandler) ForwardSend(w http.ResponseWriter, r *http.Request, sen
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ForwardSendResponseObject); ok {
 		if err := validResponse.VisitForwardSendResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateShopReservation operation middleware
+func (sh *strictHandler) CreateShopReservation(w http.ResponseWriter, r *http.Request) {
+	var request CreateShopReservationRequestObject
+
+	var body CreateShopReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateShopReservation(ctx, request.(CreateShopReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateShopReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateShopReservationResponseObject); ok {
+		if err := validResponse.VisitCreateShopReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CancelShopReservation operation middleware
+func (sh *strictHandler) CancelShopReservation(w http.ResponseWriter, r *http.Request) {
+	var request CancelShopReservationRequestObject
+
+	var body CancelShopReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CancelShopReservation(ctx, request.(CancelShopReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CancelShopReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CancelShopReservationResponseObject); ok {
+		if err := validResponse.VisitCancelShopReservationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
