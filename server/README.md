@@ -56,8 +56,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OIDC_ISSUER` | — | Logto issuer, e.g. `https://auth.example.org/oidc` (required unless dev auth) |
 | `KINFRAME_OIDC_AUDIENCE` | `<public url>/v1` | Logto API resource indicator (`aud`) |
 | `KINFRAME_OIDC_JWKS_URL` | from OIDC discovery | Override the JWKS location |
-| `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` | — | Published in discovery |
-| `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `api_resource`). Read at start; fills in the four OIDC settings above when their env vars are unset (env vars win) |
+| `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` / `KINFRAME_OIDC_DESKTOP_CLIENT_ID` | — | Published in discovery |
+| `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `desktop_client_id`, `api_resource`). Read at start; fills in the OIDC settings above when their env vars are unset (env vars win) |
 | `KINFRAME_DEV_AUTH` | off | Enable `POST /dev/token` (never in production) |
 | `KINFRAME_TRUST_PROXY` | off | Use `X-Forwarded-For`/`X-Real-IP` for client IPs (rate limits) |
 | `KINFRAME_WORKERS` | CPUs/2 | Media worker goroutines |

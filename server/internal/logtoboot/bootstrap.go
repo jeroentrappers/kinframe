@@ -28,6 +28,7 @@ const (
 	operatorRoleName  = "kinframe-operator"
 	webAppName        = "kinframe web"
 	nativeAppName     = "kinframe app"
+	desktopAppName    = "kinframe desktop"
 	bootstrapAppName  = "kinframe bootstrap"
 	mobileScheme      = "app.kinframe"
 	nameProfileField  = "name"
@@ -135,6 +136,10 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 	if err != nil {
 		return fmt.Errorf("mobile app: %w", err)
 	}
+	desktopID, err := b.ensureDesktopApp(ctx)
+	if err != nil {
+		return fmt.Errorf("desktop app: %w", err)
+	}
 	if err := b.ensureEmailConnector(ctx); err != nil {
 		return fmt.Errorf("email connector: %w", err)
 	}
@@ -153,10 +158,11 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 	}
 
 	if err := b.writeOutput(config.LogtoFile{
-		Issuer:         issuer,
-		WebClientID:    webID,
-		MobileClientID: mobileID,
-		APIResource:    b.cfg.APIResource(),
+		Issuer:          issuer,
+		WebClientID:     webID,
+		MobileClientID:  mobileID,
+		DesktopClientID: desktopID,
+		APIResource:     b.cfg.APIResource(),
 	}); err != nil {
 		return fmt.Errorf("write %s: %w", b.cfg.OutputFile, err)
 	}
@@ -387,6 +393,24 @@ func (b *Bootstrapper) ensureOperatorRole(ctx context.Context, scopeID string) e
 		b.changed("assigned operator role", "email", email)
 	}
 	return nil
+}
+
+// desktopRedirect is the loopback redirect of the desktop client (RFC 8252
+// §7.3). Logto (oidc-provider) ignores the port of loopback redirect URIs for
+// Native applications, so this one entry covers the random port the desktop
+// app listens on: http://127.0.0.1:53127/callback matches. Post-logout
+// redirects get no such port leniency, so the desktop app signs out by
+// revoking its refresh token instead of a browser round trip.
+var desktopClientMetadata = oidcClientMetadata{
+	RedirectURIs:           []string{"http://127.0.0.1/callback"},
+	PostLogoutRedirectURIs: []string{},
+}
+
+// ensureDesktopApp registers the Native app the Windows, macOS and Linux
+// client signs in with. It is separate from the mobile app so operators can
+// see and revoke desktop sessions on their own.
+func (b *Bootstrapper) ensureDesktopApp(ctx context.Context) (string, error) {
+	return b.ensureApp(ctx, desktopAppName, "Native", "kinframe desktop app (Windows, macOS and Linux)", desktopClientMetadata, nil)
 }
 
 // ensureApp returns the client ID of the named application.
