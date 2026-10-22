@@ -332,14 +332,14 @@ class SlideshowController(private val c: FrameController) {
         val placed = Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
-        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}" } +
+        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}" } +
             "|$withLabels|${screenW}x$screenH"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }
         val requests = tiles.map { t ->
             val q = t.placement
             val dateMs = when (settings.slideshow.captionDate) { "taken" -> q.capturedAt ?: q.receivedAt; "none" -> null; else -> q.receivedAt }
-            val meta = listOfNotNull(q.senderName, dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
+            val meta = listOfNotNull(Credit.line(ctx, q.senderName, q.sharedByName), dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
                 .joinToString(" · ").ifEmpty { null }
             SlideRenderer.TileRequest(
                 g.media.file(q.localFile ?: ""), q.rotation, q.focalX, q.focalY, t.cell,
@@ -383,7 +383,7 @@ class SlideshowController(private val c: FrameController) {
         val memory = if (settings.slideshow.onThisDay) OnThisDay.yearsAgo(p.capturedAt, today, g.clock.zone) else null
         val meta = buildList {
             memory?.let { add(ctx.resources.getQuantityString(app.kinframe.frame.R.plurals.on_this_day_years, it, it)) }
-            name?.let { add(it) }
+            Credit.line(ctx, name, p.sharedByName)?.let { add(it) }
             dateMs?.let { add(app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone)) }
             if (p.captionEdited) add(ctx.getString(app.kinframe.frame.R.string.caption_edited))
         }.joinToString(" · ") + (p.reaction?.let { "   " + reactionEmoji(it) } ?: "")

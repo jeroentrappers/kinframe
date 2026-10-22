@@ -48,6 +48,8 @@ data class PlacementEntity(
     val evictedAt: Long? = null,
     /** Albums this placement is in, comma-separated ids (album mode plays one album). */
     val albumIds: String? = null,
+    /** The member who shared this photo here from another frame; the caption reads "sender · shared by X". */
+    val sharedByName: String? = null,
 ) {
     val albumIdList: List<String> get() = albumIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     val isVideo: Boolean get() = kind == "video"
