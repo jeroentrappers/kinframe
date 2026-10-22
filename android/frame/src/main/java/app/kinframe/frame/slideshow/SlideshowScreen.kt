@@ -134,12 +134,15 @@ fun SlideshowScreen(c: FrameController) {
         val hPx = constraints.maxHeight
         LaunchedEffect(wPx, hPx) { ss.setScreenSize(wPx, hPx) }
 
-        val progress = remember { Animatable(1f) }
+        // A fresh Animatable per stage, created in the same composition that introduces the incoming slide, so its very
+        // first frame already draws progress 0. (Snapping to 0 inside the LaunchedEffect ran a frame too late: the new
+        // photo flashed fully opaque, then jumped back and faded in.)
+        val animates = stage.incoming != null && stage.durationMs > 0
+        val progress = remember(stage.seq) { Animatable(if (animates) 0f else 1f) }
         LaunchedEffect(stage.seq) {
-            if (stage.incoming != null && stage.durationMs > 0) {
-                progress.snapTo(0f)
+            if (animates) {
                 progress.animateTo(1f, tween(stage.durationMs, easing = if (stage.kind == TransitionKind.Slide) FastOutSlowInEasing else LinearOutSlowInEasing))
-            } else progress.snapTo(1f)
+            }
             ss.onTransitionDone(stage.seq)
         }
         val drag = remember { Animatable(0f) }
