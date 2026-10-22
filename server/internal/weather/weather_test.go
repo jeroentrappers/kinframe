@@ -113,6 +113,10 @@ func TestWantedAndRender(t *testing.T) {
 	if !ok || *loc.Name != "Gent" || loc.Lat != 51.05 {
 		t.Fatalf("wanted: %v %+v", ok, loc)
 	}
+	// The hybrid calendar sidebar shows the forecast too.
+	if _, ok := Wanted(json.RawMessage(`{"widgets":{"weather":false,"calendar_sidebar":true},"location":{"lat":51.05,"lon":3.72}}`)); !ok {
+		t.Error("calendar sidebar should want weather")
+	}
 	for _, s := range []string{
 		`{"widgets":{"weather":false},"location":{"name":"Gent","lat":51.05,"lon":3.72}}`,
 		`{"widgets":{"weather":true},"location":null}`,

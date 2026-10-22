@@ -200,7 +200,7 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
-  every frame with `settings.location` set and `widgets.weather` on. Frames never call third parties.
+  every frame with `settings.location` set and `widgets.weather` or `widgets.calendar_sidebar` on (the calendar shows the forecast per day). Frames never call third parties.
   - Payload: `fetched_at`, `location {name, lat, lon}` (from the frame's settings), `timezone`, `utc_offset_seconds`,
     `units`, `current` (`temp_c`, `apparent_c`, `code` = WMO weather code, `is_day`, `wind_kmh`, `wind_dir_deg`,
     `humidity_pct`, `precip_mm`), `hourly` (the next 24 h from the current hour: `time`, `temp_c`, `code`, `is_day`,

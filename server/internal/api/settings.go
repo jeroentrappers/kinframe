@@ -132,7 +132,7 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 // touchesWeather reports whether a settings patch may change what weather a frame needs.
 func touchesWeather(paths []string) bool {
 	for _, p := range paths {
-		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" {
+		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" || p == "widgets.calendar_sidebar" {
 			return true
 		}
 	}
