@@ -72,6 +72,20 @@ GET /.well-known/kinframe
   delivery state and reactions in the family app.
 - Phone notifications: UnifiedPush/ntfy by default (no Google dependency), with FCM/APNs optional for store builds.
 
+## Emoji on Android 6 frames
+
+The reference frame's system emoji font is from 2016 (Unicode 8): newer emoji in captions and names show as empty
+boxes. Evaluated on 2026-10-22 against the frame APK (2.8 MB release build):
+
+| Option | APK impact | Verdict |
+|---|---|---|
+| `androidx.emoji2:emoji2-bundled` (Noto Color Emoji with EmojiCompat metadata) | about +10 MB | Over the ~6 MB budget for the frame APK; every self-update would download it again. |
+| Subset of Noto Color Emoji (only what Android 6 lacks, bitmaps re-encoded at 72 px) | about +2 MB | Fits, but needs custom font tooling, loses EmojiCompat metadata (so no automatic replacement in Compose text) and can't be verified without the frame. |
+| Monochrome Noto Emoji | about +1 MB | Fits, but black-and-white emoji next to colour ones look broken; not the polish bar. |
+| **Font delivered by the kinframe server** (recommended next step) | +0 (emoji2 1.4 is already a Compose dependency) | The server serves `NotoColorEmojiCompat.ttf` (OFL, ~10 MB) once per frame from `/v1/device/assets/emoji`; the frame stores it next to the media cache and calls `EmojiCompat.init` with a `MetadataRepo` built from it. Compose text then renders modern emoji automatically and `CaptionPainter` runs captions through `EmojiCompat.process`. No third parties, works offline after the first download, and app updates stay small. |
+
+So no emoji font is bundled for now; the server-delivered font is the planned implementation.
+
 ## Self-hosting
 
 A single `docker compose up` runs backend, Postgres, Logto and Caddy (TLS). Media storage is a volume, or optionally
