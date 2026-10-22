@@ -87,6 +87,9 @@ services:
     image: {{ kinframe_image }}:{{ kinframe_version }}
     container_name: kinframe-server
     restart: unless-stopped
+    # One file descriptor per websocket (every frame stays connected): Docker's default of 1024 caps it too low.
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 }
     depends_on:
       postgres: { condition: service_healthy }
       logto: { condition: service_started }
