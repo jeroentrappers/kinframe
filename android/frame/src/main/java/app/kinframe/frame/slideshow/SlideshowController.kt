@@ -315,8 +315,8 @@ class SlideshowController(private val c: FrameController) {
         if (playlist.seed != g.prefs.playlistSeed) g.prefs.playlistSeed = playlist.seed
         _newCount.value = playlist.pendingNew().size
         group.forEach { markShown(it) }
+        // Neighbours are pre-rendered when the transition ends (onTransitionDone), not while it animates.
         if (duration == 0) onTransitionDone(_stage.value.seq)
-        prefetch()
     }
 
     /** The UI reports the end of a transition; videos start only then. */
@@ -326,6 +326,7 @@ class SlideshowController(private val c: FrameController) {
         shownAt = SystemClock.elapsedRealtime()
         val st = _stage.value
         if (st.outgoing != null) _stage.value = st.copy(outgoing = null)
+        prefetch()
         val p = st.incoming?.placement ?: return
         if (p.isVideo && settings.video.autoplay && st.incoming.image != null) startVideo(p)
         if (p.isLive && st.incoming.image != null) {
@@ -514,18 +515,21 @@ class SlideshowController(private val c: FrameController) {
 
     /** The pre-rendered previous slide, shown beside the current one while swiping back. */
     private val _preparedPrevious = MutableStateFlow<Slide?>(null)
+    val preparedPrevious: StateFlow<Slide?> = _preparedPrevious
 
+    /**
+     * Renders both swipe neighbours as soon as a transition has ended. The previous one is usually the photo that was
+     * just on screen (still in the cache), and after going back the next one is too, so repeated swipes find them ready.
+     */
     private fun prefetch() {
-        val nextId = playlist.peekNext() ?: return
-        if (nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
-        val p = playable[nextId] ?: return
+        val nextId = playlist.peekNext()
+        if (nextId != null && nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
+        val next = nextId?.let { playable[it] }
+        val prev = playlist.peekPrevious()?.let { playable[it] }
         c.scope.launch {
-            delay(1_200) // after the running transition
-            runCatching { obtain(p) }.getOrNull()?.let { _prepared.value = it }
-            playlist.peekPrevious()?.let { playable[it] }?.let { pp ->
-                runCatching { obtain(pp) }.getOrNull()?.let { _preparedPrevious.value = it }
-            }
-            prebufferLive(p)
+            prev?.let { pp -> runCatching { obtain(pp) }.getOrNull()?.let { _preparedPrevious.value = it } }
+            next?.let { np -> runCatching { obtain(np) }.getOrNull()?.let { _prepared.value = it } }
+            next?.let { prebufferLive(it) }
         }
     }
 

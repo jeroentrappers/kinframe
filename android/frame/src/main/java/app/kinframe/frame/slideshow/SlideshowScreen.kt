@@ -214,11 +214,20 @@ fun SlideshowScreen(c: FrameController) {
         var dragSeq by remember { mutableLongStateOf(-1L) }
         var neighborDir by remember { mutableIntStateOf(0) }
         val currentSeq by rememberUpdatedState(stage.seq)
-        val neighbor = remember(neighborDir, stage.seq, dragSeq) {
+        // Recomputed when a neighbour finishes rendering, so it can appear in the middle of a drag.
+        val preparedNext by ss.prepared.collectAsState()
+        val preparedPrev by ss.preparedPrevious.collectAsState()
+        val neighbor = remember(neighborDir, stage.seq, stage.outgoing, dragSeq, preparedNext, preparedPrev) {
             if (neighborDir != 0 && dragSeq == stage.seq) ss.neighbor(neighborDir) else null
         }
         val follows = neighbor != null
         fun dragX(): Float = if (dragSeq == currentSeq) (if (follows) drag.value else drag.value * 0.35f) else 0f
+        // When the neighbour arrives mid-drag, switch from rubber band to 1:1 without moving what is on screen.
+        var followedBefore by remember { mutableStateOf(false) }
+        LaunchedEffect(follows) {
+            if (follows && !followedBefore && dragSeq == currentSeq) drag.snapTo(drag.value * 0.35f)
+            followedBefore = follows
+        }
 
         Box(
             Modifier
@@ -236,11 +245,15 @@ fun SlideshowScreen(c: FrameController) {
                 )
                 .pointerInputSwipe(
                     onStart = {
-                        if (ss.stage.value.outgoing == null) {
-                            dragSeq = currentSeq
-                            neighborDir = 0
-                            scope.launch { drag.snapTo(0f) }
+                        // A swipe during a running transition first finishes it, so this swipe has neighbours.
+                        if (ss.stage.value.outgoing != null) {
+                            val seq = currentSeq
+                            scope.launch { progress.snapTo(1f); ss.onTransitionDone(seq) }
                         }
+                        dragSeq = currentSeq
+                        neighborDir = 0
+                        followedBefore = false
+                        scope.launch { drag.snapTo(0f) }
                     },
                     onDrag = { dx ->
                         if (dragSeq == currentSeq) {
