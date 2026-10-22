@@ -189,6 +189,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | "On this day" and scheduled albums | + (4) |
 | Moderation queue: the owner approves items before they show (useful for frames in care homes) | + (5) |
 | Google Cast / DLNA: show a frame's library on a TV | + (6) |
+| Optional pre-order shop for operators who sell frames: product cards on the landing page, reservations without payment, operator list and CSV export (API README §5.11). Off unless configured; open-source servers have no shop | + (7) |
 
 ## 5. Non-functional requirements
 

@@ -21,10 +21,12 @@
 
 	/** Routes that render without a session. Everything else (including /f/{code} and /i/{token})
 	 *  bounces to the landing page with ?next= and comes back after sign-in. */
-	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//];
+	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/];
 	const isPublic = $derived(PUBLIC.some((r) => r.test(page.url.pathname)));
 	/** The TV page (/tv/{frameId}?t=…) is full screen and needs no session: the link's token is the credential. */
 	const isTv = $derived(page.url.pathname.startsWith('/tv/'));
+	/** The shop pages (/shop, /shop/cancel) have their own header, signed in or not. */
+	const isShop = $derived(/^\/shop(\/|$)/.test(page.url.pathname));
 
 	let booting = $state(true);
 
@@ -91,7 +93,7 @@
 			<button class="btn btn-primary" onclick={boot}><Icon name="refresh" size={18} />{t('common.tryAgain')}</button>
 		</div>
 	</div>
-{:else if isTv}
+{:else if isTv || isShop}
 	{@render children()}
 {:else if auth.status === 'signed_in' && page.url.pathname !== '/' && page.url.pathname !== '/callback'}
 	<AppShell>{@render children()}</AppShell>

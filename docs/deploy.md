@@ -272,6 +272,60 @@ then `migrate-blobs --from fs --to s3` (twice, as above).
 `kinframe_media_redirect: presigned` makes signed media URLs and avatars redirect to presigned bucket URLs, which
 only helps when clients can reach the bucket (`kinframe_s3_public_endpoint`); with the bundled store it stays `off`.
 
+### Pre-order shop
+
+The hosted server can take **reservations for frames** (no payment) while stock is being arranged: a "Get a …"
+section on the landing page, a reservation form at `/shop`, emails to the customer and the operator, and a list with
+CSV export under Settings → Shop reservations for operators. API details: `docs/api/README.md` §5.11.
+
+The shop only exists when the operator configures it; the role default (`kinframe_shop: {}`) means no shop, and so
+does a server without `KINFRAME_SHOP_FILE`. The real values (seller, prices, inbox) belong in the **private**
+deployment repo, never here. Example with placeholders, in `group_vars/all.yml`:
+
+```yaml
+kinframe_shop:
+  brand: kinframe                    # consumer brand in shop texts and emails; default: kinframe_server_name
+  reference_prefix: KF               # reservation numbers like KF-7Q3M (1-4 capitals)
+  currency: EUR
+  vat_percent: 21                    # prices below include it
+  seller:
+    name: Example BV
+    email: shop@example.org          # shown on the site; customers' replies go here
+    legal: "Example BV · Example Street 1, 1000 Brussels · VAT BE0000.000.000"
+    privacy_url: https://example.org/privacy   # optional
+  notify_email: orders@example.org   # gets a mail per reservation and cancellation; not published
+  estimated_delivery: { en: "spring 2027", nl: "voorjaar 2027", fr: "printemps 2027" }
+  retention_days: 365                # delete reservations a year after the last change (cancelled: after 30 days)
+  products:
+    - id: frame-10
+      name: 'kinframe 10.1"'
+      size: '10.1"'
+      price_cents: 7900
+      max_qty: 5
+      image: frame-10                # illustration: frame-10 (16:10) or frame-15 (16:9, drawn larger)
+      specs:                         # short bullets per language; en is the fallback
+        en: ["1280×800 IPS touchscreen", "Wi-Fi", "kinframe preinstalled, no subscription"]
+        nl: ["1280×800 IPS-touchscreen", "Wifi", "kinframe vooraf geïnstalleerd, geen abonnement"]
+        fr: ["Écran tactile IPS 1280×800", "Wi-Fi", "kinframe préinstallé, sans abonnement"]
+  shipping:
+    countries: [BE, NL]              # ISO codes; the form only offers these
+    flat_cents: 695
+    free_from_cents: 10000           # item subtotal for free shipping; null = never free
+```
+
+The role writes this (plus `enabled: true`) to `/opt/kinframe/shop.json`, mounts it read-only at
+`/etc/kinframe/shop.json`, sets `KINFRAME_SHOP_FILE` and restarts the server when it changes. Removing the variable
+removes the file and the shop. The server refuses to start on an invalid file (unknown keys, bad addresses or
+country codes, prices ≤ 0…), so a typo shows up in the deploy instead of on the site.
+
+Mail goes out over the same `kinframe_smtp_*` settings as Logto's sign-in codes. Customers get their confirmation
+in English, Dutch, French or German (others: English) with a link to cancel; there are no tracking pixels.
+
+**Privacy.** A reservation stores name, email, country, optional postal code and note, language, the items and
+the time of consent (the form has an explicit, unticked consent checkbox). No IP addresses. Reservations are
+deleted automatically `retention_days` after their last change, cancelled ones 30 days after cancelling; the CSV
+export is for the operator's own follow-up. The site footer names the seller, the legal line and this policy.
+
 ### nginx vhost specifics
 
 These differ from the WordPress vhosts:

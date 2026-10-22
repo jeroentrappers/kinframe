@@ -92,6 +92,7 @@
   "not available (yet)": "（まだ）利用できません",
   "only the creator or an owner/admin can revoke this invite": "この招待を無効にできるのは、作成者またはオーナー・管理者だけです",
   "only the creator or an owner/admin can revoke this link": "このリンクを無効にできるのは、作成者またはオーナー・管理者だけです",
+  "some reservation details are not valid": "予約内容の一部が正しくありません",
   "this TV link is not valid": "このテレビ用リンクは無効です",
   "operator access required": "サーバー運営者の権限が必要です",
   "owner only": "オーナーのみ",

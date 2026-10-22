@@ -21,3 +21,5 @@ output-options:
     - getEventInvitationPhoto
     # Only mounted in dev auth mode.
     - devToken
+    # Hand-written: CSV download.
+    - operatorExportReservations

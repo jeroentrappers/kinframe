@@ -92,6 +92,7 @@
   "not available (yet)": "לא זמין (עדיין)",
   "only the creator or an owner/admin can revoke this invite": "רק מי שיצר את ההזמנה או בעלים/מנהל יכולים לבטל אותה",
   "only the creator or an owner/admin can revoke this link": "רק מי שיצר את הקישור או בעלים/מנהל יכולים לבטל אותו",
+  "some reservation details are not valid": "חלק מפרטי ההזמנה אינם תקינים",
   "this TV link is not valid": "קישור הטלוויזיה הזה אינו תקף",
   "operator access required": "נדרשת גישת מפעיל השרת",
   "owner only": "לבעלים בלבד",

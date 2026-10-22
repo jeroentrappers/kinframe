@@ -43,6 +43,9 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
 	}
+	if s.cfg.Shop != nil {
+		d.Shop = shopJSON(s.cfg.Shop)
+	}
 	return ok(d), nil
 }
 

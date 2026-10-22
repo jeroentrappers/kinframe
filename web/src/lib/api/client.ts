@@ -41,8 +41,17 @@ export class ApiError extends Error {
 	readonly title: string;
 	readonly detail?: string;
 	readonly retryAfter?: number;
+	/** Field-level validation errors (422). */
+	readonly errors?: Problem['errors'];
 
-	constructor(status: number, code: ProblemCode | 'network', title: string, detail?: string, retryAfter?: number) {
+	constructor(
+		status: number,
+		code: ProblemCode | 'network',
+		title: string,
+		detail?: string,
+		retryAfter?: number,
+		errors?: Problem['errors']
+	) {
 		super(detail ?? title);
 		this.name = 'ApiError';
 		this.status = status;
@@ -50,6 +59,7 @@ export class ApiError extends Error {
 		this.title = title;
 		this.detail = detail;
 		this.retryAfter = retryAfter;
+		this.errors = errors;
 	}
 
 	static fromResponse(response: Response, body: unknown): ApiError {
@@ -72,7 +82,8 @@ export class ApiError extends Error {
 			p.code ?? fallback,
 			p.title ?? response.statusText,
 			p.detail,
-			Number.isFinite(retry) && retry > 0 ? retry : undefined
+			Number.isFinite(retry) && retry > 0 ? retry : undefined,
+			Array.isArray(p.errors) ? p.errors : undefined
 		);
 	}
 }

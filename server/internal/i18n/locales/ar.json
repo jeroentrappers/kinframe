@@ -92,6 +92,7 @@
   "not available (yet)": "غير متاح (بعد)",
   "only the creator or an owner/admin can revoke this invite": "لا يمكن إلغاء هذه الدعوة إلا لمنشئها أو للمالك أو لمشرف",
   "only the creator or an owner/admin can revoke this link": "لا يمكن إلغاء هذا الرابط إلا لمن أنشأه أو للمالك أو المشرف",
+  "some reservation details are not valid": "بعض بيانات الحجز غير صالحة",
   "this TV link is not valid": "رابط التلفاز هذا غير صالح",
   "operator access required": "يلزم وصول المشغّل",
   "owner only": "للمالك فقط",

@@ -811,6 +811,8 @@ components:
                     $ref: '#/components/schemas/Limits'
                 name:
                     type: string
+                shop:
+                    $ref: '#/components/schemas/Shop'
                 version:
                     type: string
                 weather:
@@ -1690,6 +1692,11 @@ components:
                 - max_video_seconds
                 - max_upload_bytes
             type: object
+        LocalizedText:
+            additionalProperties:
+                type: string
+            description: Language code → text; `en` is the fallback.
+            type: object
         MediaKind:
             description: |
                 `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
@@ -2236,6 +2243,289 @@ components:
             required:
                 - placements
                 - skipped
+            type: object
+        Shop:
+            description: |
+                Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+                (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+                to text; `en` is always present and is the fallback.
+            properties:
+                brand:
+                    description: Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+                    example: kinframe
+                    type: string
+                currency:
+                    description: ISO 4217
+                    example: EUR
+                    type: string
+                estimated_delivery:
+                    $ref: '#/components/schemas/LocalizedText'
+                products:
+                    items:
+                        $ref: '#/components/schemas/ShopProduct'
+                    type: array
+                seller:
+                    properties:
+                        email:
+                            format: email
+                            type: string
+                        legal:
+                            description: Legal line for the footer, e.g. company, address and VAT number.
+                            type: string
+                        name:
+                            type: string
+                        privacy_url:
+                            format: uri
+                            type: string
+                    required:
+                        - name
+                        - email
+                    type: object
+                shipping:
+                    $ref: '#/components/schemas/ShopShipping'
+                vat_percent:
+                    description: VAT included in all prices
+                    example: 21
+                    type: number
+            required:
+                - brand
+                - currency
+                - vat_percent
+                - products
+                - shipping
+                - seller
+            type: object
+        ShopLine:
+            properties:
+                line_cents:
+                    type: integer
+                name:
+                    type: string
+                product_id:
+                    type: string
+                quantity:
+                    type: integer
+                unit_cents:
+                    type: integer
+            required:
+                - product_id
+                - name
+                - quantity
+                - unit_cents
+                - line_cents
+            type: object
+        ShopProduct:
+            properties:
+                id:
+                    example: frame-10
+                    type: string
+                image:
+                    description: 'Illustration key: frame-10 or frame-15'
+                    example: frame-10
+                    type: string
+                max_qty:
+                    minimum: 1
+                    type: integer
+                name:
+                    example: kinframe 10.1"
+                    type: string
+                price_cents:
+                    description: Unit price incl. VAT
+                    in cents: null
+                    type: integer
+                size:
+                    description: Screen size label
+                    example: 10.1"
+                    type: string
+                specs:
+                    additionalProperties:
+                        items:
+                            type: string
+                        type: array
+                    description: Language code → short spec bullets; `en` is the fallback.
+                    type: object
+            required:
+                - id
+                - name
+                - price_cents
+                - max_qty
+            type: object
+        ShopReservation:
+            properties:
+                cancelled_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                country:
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                currency:
+                    type: string
+                email:
+                    type: string
+                id:
+                    $ref: '#/components/schemas/Id'
+                internal_note:
+                    nullable: true
+                    type: string
+                items:
+                    items:
+                        $ref: '#/components/schemas/ShopLine'
+                    type: array
+                locale:
+                    type: string
+                name:
+                    type: string
+                note:
+                    nullable: true
+                    type: string
+                postal_code:
+                    nullable: true
+                    type: string
+                reference:
+                    type: string
+                shipping_cents:
+                    type: integer
+                status:
+                    $ref: '#/components/schemas/ShopReservationStatus'
+                subtotal_cents:
+                    type: integer
+                total_cents:
+                    type: integer
+                updated_at:
+                    format: date-time
+                    type: string
+            required:
+                - id
+                - reference
+                - status
+                - name
+                - email
+                - country
+                - items
+                - subtotal_cents
+                - shipping_cents
+                - total_cents
+                - currency
+                - locale
+                - created_at
+                - updated_at
+            type: object
+        ShopReservationCreate:
+            properties:
+                consent:
+                    description: Must be true. The customer agrees to be contacted about this reservation.
+                    type: boolean
+                country:
+                    example: BE
+                    maxLength: 2
+                    minLength: 2
+                    type: string
+                email:
+                    maxLength: 254
+                    type: string
+                items:
+                    items:
+                        properties:
+                            product_id:
+                                maxLength: 64
+                                type: string
+                            quantity:
+                                maximum: 99
+                                minimum: 1
+                                type: integer
+                        required:
+                            - product_id
+                            - quantity
+                        type: object
+                    maxItems: 20
+                    type: array
+                locale:
+                    description: Language for the emails (falls back to English)
+                    example: nl
+                    maxLength: 35
+                    type: string
+                name:
+                    maxLength: 100
+                    minLength: 1
+                    type: string
+                note:
+                    maxLength: 1000
+                    type: string
+                postal_code:
+                    maxLength: 12
+                    type: string
+                website:
+                    description: Honeypot; leave empty.
+                    maxLength: 200
+                    type: string
+            required:
+                - name
+                - email
+                - country
+                - items
+                - consent
+            type: object
+        ShopReservationReceipt:
+            properties:
+                currency:
+                    type: string
+                email:
+                    type: string
+                items:
+                    items:
+                        $ref: '#/components/schemas/ShopLine'
+                    type: array
+                reference:
+                    example: KF-7Q3M
+                    type: string
+                shipping_cents:
+                    type: integer
+                status:
+                    $ref: '#/components/schemas/ShopReservationStatus'
+                subtotal_cents:
+                    type: integer
+                total_cents:
+                    type: integer
+            required:
+                - reference
+                - status
+                - email
+                - items
+                - subtotal_cents
+                - shipping_cents
+                - total_cents
+                - currency
+            type: object
+        ShopReservationStatus:
+            enum:
+                - new
+                - contacted
+                - confirmed
+                - cancelled
+            type: string
+        ShopShipping:
+            properties:
+                countries:
+                    example:
+                        - BE
+                        - NL
+                    items:
+                        description: ISO 3166-1 alpha-2
+                        type: string
+                    type: array
+                flat_cents:
+                    description: Shipping cost per order incl. VAT
+                    type: integer
+                free_from_cents:
+                    description: Item subtotal from which shipping is free; null = never
+                    nullable: true
+                    type: integer
+            required:
+                - countries
+                - flat_cents
             type: object
         SleepSchedule:
             properties:
@@ -4755,6 +5045,96 @@ paths:
                     - kinframe:operate
             tags:
                 - operator
+    /v1/operator/reservations:
+        get:
+            description: Shop reservations, newest first. `404 not_found` when the server has no shop.
+            operationId: operatorListReservations
+            parameters:
+                - in: query
+                  name: status
+                  schema:
+                    $ref: '#/components/schemas/ShopReservationStatus'
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    reservations:
+                                        items:
+                                            $ref: '#/components/schemas/ShopReservation'
+                                        type: array
+                                required:
+                                    - reservations
+                                type: object
+                    description: Reservations
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/reservations.csv:
+        get:
+            description: All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
+            operationId: operatorExportReservations
+            parameters:
+                - in: query
+                  name: status
+                  schema:
+                    $ref: '#/components/schemas/ShopReservationStatus'
+            responses:
+                "200":
+                    content:
+                        text/csv:
+                            schema:
+                                type: string
+                    description: CSV export
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/reservations/{reservationId}:
+        patch:
+            operationId: operatorUpdateReservation
+            parameters:
+                - in: path
+                  name: reservationId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                internal_note:
+                                    description: Only for the operator; never emailed.
+                                    maxLength: 2000
+                                    nullable: true
+                                    type: string
+                                status:
+                                    $ref: '#/components/schemas/ShopReservationStatus'
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShopReservation'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
     /v1/operator/stats:
         get:
             operationId: operatorStats
@@ -4923,6 +5303,76 @@ paths:
                     description: Accepted
             tags:
                 - sends
+    /v1/shop/reservations:
+        post:
+            description: |
+                Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+                emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+                Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+                Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+                not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+                and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+                `items.<i>.quantity`/`maximum`, `consent`/`required`.
+            operationId: createShopReservation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ShopReservationCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShopReservationReceipt'
+                    description: Reserved
+                default:
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - shop
+    /v1/shop/reservations/cancel:
+        post:
+            description: |
+                Cancels a reservation with the signed token from the link in the confirmation email (the web page
+                `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+                invalid token or a deleted reservation.
+            operationId: cancelShopReservation
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                token:
+                                    maxLength: 200
+                                    minLength: 10
+                                    type: string
+                            required:
+                                - token
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    reference:
+                                        example: KF-7Q3M
+                                        type: string
+                                    status:
+                                        $ref: '#/components/schemas/ShopReservationStatus'
+                                required:
+                                    - reference
+                                    - status
+                                type: object
+                    description: Cancelled
+                default:
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - shop
     /v1/tv/{token}:
         get:
             description: |
@@ -5009,6 +5459,8 @@ tags:
       name: devices
     - description: Endpoints called by the frame itself (device token).
       name: device
+    - description: Pre-order reservations for frames sold by the server operator (only when configured).
+      name: shop
     - name: operator
     - description: Development-only helpers; absent in production.
       name: dev

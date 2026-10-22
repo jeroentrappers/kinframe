@@ -460,6 +460,43 @@ revocable share token.
   `YYYY-MM-DD_sender_caption.ext` plus a `kinframe-export.json` manifest) uses the same endpoints, with captions
   from the manifest. Files that came from this frame's own renditions are recognised and skipped.
 
+### 5.11 Pre-order shop (optional)
+
+A server operator who sells frames can switch on a small reservation shop with a config file
+(`KINFRAME_SHOP_FILE`, see `docs/deploy.md` → *Pre-order shop*). Without it there is no shop at all: discovery has
+no `shop` object and every endpoint below answers `404 not_found`. Reservations are pre-orders **without payment**:
+the operator emails customers when stock is in, with the final price and a payment link outside kinframe.
+
+- **Discovery** `shop`: `brand` (the consumer brand for shop texts; defaults to the server name), `currency`,
+  `vat_percent`, `products[]` (`id`, `name`, `size`, `price_cents` incl. VAT, `max_qty`, `image`, `specs` per
+  language), `shipping` (`countries`, `flat_cents`, `free_from_cents`), `estimated_delivery` per language, and
+  `seller` (`name`, `email`, `legal`, `privacy_url`). Language maps always have `en`, the fallback. The operator's
+  notification address is not published.
+- **Reserve** `POST /v1/shop/reservations` (no auth): `name`, `email`, `country` (one of `shipping.countries`),
+  optional `postal_code` and `note`, `items[]` (`product_id`, `quantity` 1…`max_qty`; lines for the same product
+  are merged), `locale` and `consent: true`. The server prices the order from its own config (the client never
+  sends prices): items + `flat_cents` shipping, free when the item subtotal is at least `free_from_cents`. All
+  field problems come back at once as one `422` with `errors[]` (`email`/`format`, `country`/`enum`,
+  `items`/`minItems`, `items.<i>.product_id`/`enum`, `items.<i>.quantity`/`maximum`, `consent`/`required`).
+  `201` returns the receipt with a short reference like `KF-7Q3M` (prefix configurable; no look-alike characters).
+  - Spam: 10 requests per hour per IP (`429 rate_limited`, `Retry-After`), and a honeypot field `website` that
+    people never see. A filled honeypot gets a normal-looking `201` and nothing is stored or sent.
+  - Mail: a confirmation to the customer in their language (English, Dutch, French or German; others get English)
+    and a notification to the operator's `notify_email`, both plain text + simple HTML, no images or tracking.
+    They go out in the background over `KINFRAME_SMTP_*`; without SMTP the reservation is stored and a warning
+    is logged.
+- **Cancel** `POST /v1/shop/reservations/cancel {token}` (no auth). The email links to the web page
+  `/shop/cancel?token=…`, which asks for confirmation first (mail scanners open links) and then calls this. The
+  token is the reservation ID with an HMAC from the server's signing key; it doesn't expire, the reservation's
+  deletion ends it. Idempotent; the operator is notified once.
+- **Operator** (`kinframe:operate`): `GET /v1/operator/reservations[?status=]` (newest first),
+  `PATCH /v1/operator/reservations/{id}` with `status` (`new`, `contacted`, `confirmed`, `cancelled`) and/or
+  `internal_note` (`null` clears it; never emailed), and `GET /v1/operator/reservations.csv[?status=]` (UTF-8
+  with BOM, one column per product, cells starting with `= + - @` prefixed with `'`). The web app shows them under
+  Settings → Shop reservations.
+- **Retention**: the maintenance loop deletes reservations `retention_days` (default 365) after their last change,
+  and cancelled ones 30 days after the cancellation. No IP addresses are stored; the time of consent is.
+
 ## 6. Websockets
 
 Both use JSON text frames `{ "type": "...", ... }` and server ping/pong every 25 s. Clients reconnect with

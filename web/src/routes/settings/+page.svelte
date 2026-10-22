@@ -174,6 +174,16 @@
 			{/if}
 		</section>
 
+		{#if auth.me?.is_operator && discovery.shop}
+			<a class="card card-pad row between shop-link" href="/settings/reservations">
+				<span>
+					<span class="s-label">{t('reservations.settingsLink')}</span>
+					<span class="hint">{t('reservations.settingsHint')}</span>
+				</span>
+				<Icon name="chevronRight" size={20} />
+			</a>
+		{/if}
+
 		<section class="card card-pad" aria-labelledby="server-title">
 			<div class="section-title"><h2 id="server-title">{t('settings.server')}</h2></div>
 			<dl class="facts">
@@ -257,6 +267,14 @@
 	}
 	.push-note {
 		margin-top: var(--s-3);
+	}
+	.shop-link {
+		color: inherit;
+		text-decoration: none;
+	}
+	.shop-link > span {
+		display: flex;
+		flex-direction: column;
 	}
 	.dev-note {
 		margin-top: var(--s-3);

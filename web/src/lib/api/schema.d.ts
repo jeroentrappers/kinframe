@@ -1349,6 +1349,52 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/shop/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+         *     emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+         *     Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+         *     Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+         *     not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+         *     and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+         *     `items.<i>.quantity`/`maximum`, `consent`/`required`.
+         */
+        post: operations["createShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shop/reservations/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Cancels a reservation with the signed token from the link in the confirmation email (the web page
+         *     `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+         *     invalid token or a deleted reservation.
+         */
+        post: operations["cancelShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/operator/stats": {
         parameters: {
             query?: never;
@@ -1379,6 +1425,56 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Shop reservations, newest first. `404 not_found` when the server has no shop. */
+        get: operations["operatorListReservations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reservations.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters. */
+        get: operations["operatorExportReservations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reservations/{reservationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["operatorUpdateReservation"];
         trace?: never;
     };
 }
@@ -1445,6 +1541,145 @@ export interface components {
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
              */
             webpush_public_key?: string | null;
+            shop?: components["schemas"]["Shop"];
+        };
+        /**
+         * @description Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+         *     (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+         *     to text; `en` is always present and is the fallback.
+         */
+        Shop: {
+            /**
+             * @description Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+             * @example kinframe
+             */
+            brand: string;
+            /**
+             * @description ISO 4217
+             * @example EUR
+             */
+            currency: string;
+            /**
+             * @description VAT included in all prices
+             * @example 21
+             */
+            vat_percent: number;
+            products: components["schemas"]["ShopProduct"][];
+            shipping: components["schemas"]["ShopShipping"];
+            estimated_delivery?: components["schemas"]["LocalizedText"];
+            seller: {
+                name: string;
+                /** Format: email */
+                email: string;
+                /** @description Legal line for the footer, e.g. company, address and VAT number. */
+                legal?: string;
+                /** Format: uri */
+                privacy_url?: string;
+            };
+        };
+        /** @description Language code → text; `en` is the fallback. */
+        LocalizedText: {
+            [key: string]: string;
+        };
+        ShopProduct: {
+            /** @example frame-10 */
+            id: string;
+            /** @example kinframe 10.1" */
+            name: string;
+            /**
+             * @description Screen size label
+             * @example 10.1"
+             */
+            size?: string;
+            /** @description Unit price incl. VAT */
+            price_cents: number;
+            max_qty: number;
+            /**
+             * @description Illustration key: frame-10 or frame-15
+             * @example frame-10
+             */
+            image?: string;
+            /** @description Language code → short spec bullets; `en` is the fallback. */
+            specs?: {
+                [key: string]: string[];
+            };
+        };
+        ShopShipping: {
+            /**
+             * @example [
+             *       "BE",
+             *       "NL"
+             *     ]
+             */
+            countries: string[];
+            /** @description Shipping cost per order incl. VAT */
+            flat_cents: number;
+            /** @description Item subtotal from which shipping is free; null = never */
+            free_from_cents?: number | null;
+        };
+        /** @enum {string} */
+        ShopReservationStatus: "new" | "contacted" | "confirmed" | "cancelled";
+        ShopReservationCreate: {
+            name: string;
+            email: string;
+            /** @example BE */
+            country: string;
+            postal_code?: string;
+            items: {
+                product_id: string;
+                quantity: number;
+            }[];
+            note?: string;
+            /**
+             * @description Language for the emails (falls back to English)
+             * @example nl
+             */
+            locale?: string;
+            /** @description Must be true. The customer agrees to be contacted about this reservation. */
+            consent: boolean;
+            /** @description Honeypot; leave empty. */
+            website?: string;
+        };
+        ShopLine: {
+            product_id: string;
+            name: string;
+            quantity: number;
+            unit_cents: number;
+            line_cents: number;
+        };
+        ShopReservationReceipt: {
+            /** @example KF-7Q3M */
+            reference: string;
+            status: components["schemas"]["ShopReservationStatus"];
+            email: string;
+            items: components["schemas"]["ShopLine"][];
+            subtotal_cents: number;
+            shipping_cents: number;
+            total_cents: number;
+            currency: string;
+        };
+        ShopReservation: {
+            id: components["schemas"]["Id"];
+            reference: string;
+            status: components["schemas"]["ShopReservationStatus"];
+            name: string;
+            email: string;
+            country: string;
+            postal_code?: string | null;
+            note?: string | null;
+            locale: string;
+            items: components["schemas"]["ShopLine"][];
+            subtotal_cents: number;
+            shipping_cents: number;
+            total_cents: number;
+            currency: string;
+            internal_note?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            cancelled_at?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -5039,6 +5274,62 @@ export interface operations {
             404: components["responses"]["Problem"];
         };
     };
+    createShopReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShopReservationCreate"];
+            };
+        };
+        responses: {
+            /** @description Reserved */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservationReceipt"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    cancelShopReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example KF-7Q3M */
+                        reference: string;
+                        status: components["schemas"]["ShopReservationStatus"];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     operatorStats: {
         parameters: {
             query?: never;
@@ -5120,6 +5411,85 @@ export interface operations {
                     "application/json": components["schemas"]["Limits"];
                 };
             };
+        };
+    };
+    operatorListReservations: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ShopReservationStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reservations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        reservations: components["schemas"]["ShopReservation"][];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorExportReservations: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ShopReservationStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CSV export */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorUpdateReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    status?: components["schemas"]["ShopReservationStatus"];
+                    /** @description Only for the operator; never emailed. */
+                    internal_note?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservation"];
+                };
+            };
+            default: components["responses"]["Problem"];
         };
     };
 }

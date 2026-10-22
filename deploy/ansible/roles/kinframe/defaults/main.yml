@@ -93,5 +93,10 @@ kinframe_logto_branding: true
 kinframe_terms_url: ""
 kinframe_privacy_url: ""
 
+# Optional pre-order shop (docs/deploy.md "Pre-order shop"). Empty = no shop (the default). A dict with the
+# server's shop file fields (brand, seller, products, shipping, estimated_delivery, notify_email, …); the role
+# writes it to <kinframe_dir>/shop.json and sets KINFRAME_SHOP_FILE. Mails go out over kinframe_smtp_*.
+kinframe_shop: {}
+
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}
