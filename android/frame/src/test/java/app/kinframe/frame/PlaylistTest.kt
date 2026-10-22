@@ -26,6 +26,21 @@ class PlaylistTest {
     }
 
     @Test
+    fun peekPreviousNamesWhatPreviousReturnsWithoutMoving() {
+        val p = Playlist(1) { now }
+        p.update(items(4), PlayOrder.RECEIVED, reverse = false)
+        // No history yet: steps back in the order.
+        p.next()
+        assertEquals("p4", p.peekPrevious())
+        p.take(2) // p2, p3
+        val peeked = p.peekPrevious()
+        assertEquals("p2", peeked)
+        assertEquals("peek must not move", "p2", p.peekPrevious())
+        assertEquals(peeked, p.previous())
+        assertEquals(p.peekPrevious(), p.previous())
+    }
+
+    @Test
     fun takenOrderUsesCaptureTime() {
         val p = Playlist(1) { now }
         p.update(items(3), PlayOrder.TAKEN, reverse = false)

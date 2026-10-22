@@ -1,5 +1,10 @@
 package app.kinframe.frame.slideshow
 
+import kotlin.math.sign
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import android.view.TextureView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -159,14 +164,32 @@ fun SlideshowScreen(c: FrameController) {
         // first frame already draws progress 0. (Snapping to 0 inside the LaunchedEffect ran a frame too late: the new
         // photo flashed fully opaque, then jumped back and faded in.)
         val animates = stage.incoming != null && stage.durationMs > 0
-        val progress = remember(stage.seq) { Animatable(if (animates) 0f else 1f) }
+        val progress = remember(stage.seq) { Animatable(if (animates) stage.startProgress else 1f) }
         LaunchedEffect(stage.seq) {
             if (animates) {
-                progress.animateTo(1f, tween(stage.durationMs, easing = if (stage.kind == TransitionKind.Slide) FastOutSlowInEasing else LinearOutSlowInEasing))
+                // A swipe that is already under way keeps its speed and only decelerates.
+                val easing = when {
+                    stage.kind != TransitionKind.Slide -> LinearOutSlowInEasing
+                    stage.startProgress > 0f -> LinearOutSlowInEasing
+                    else -> FastOutSlowInEasing
+                }
+                progress.animateTo(1f, tween(stage.durationMs, easing = easing))
             }
             ss.onTransitionDone(stage.seq)
         }
+
+        // Swiping: the neighbouring photo is attached beside the current one and both follow the finger 1:1; on release
+        // the transition continues from there (or both spring back). The drag only applies to the stage it started on, so
+        // the frame the next stage arrives already uses that stage's own progress — no jump.
         val drag = remember { Animatable(0f) }
+        var dragSeq by remember { mutableLongStateOf(-1L) }
+        var neighborDir by remember { mutableIntStateOf(0) }
+        val currentSeq by rememberUpdatedState(stage.seq)
+        val neighbor = remember(neighborDir, stage.seq, dragSeq) {
+            if (neighborDir != 0 && dragSeq == stage.seq) ss.neighbor(neighborDir) else null
+        }
+        val follows = neighbor != null
+        fun dragX(): Float = if (dragSeq == currentSeq) (if (follows) drag.value else drag.value * 0.35f) else 0f
 
         Box(
             Modifier
@@ -183,15 +206,57 @@ fun SlideshowScreen(c: FrameController) {
                     onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
                 )
                 .pointerInputSwipe(
-                    onDrag = { dx -> scope.launch { drag.snapTo(drag.value + dx) } },
-                    onEnd = {
+                    onStart = {
+                        if (ss.stage.value.outgoing == null) {
+                            dragSeq = currentSeq
+                            neighborDir = 0
+                            scope.launch { drag.snapTo(0f) }
+                        }
+                    },
+                    onDrag = { dx ->
+                        if (dragSeq == currentSeq) {
+                            val nx = (drag.value + dx).coerceIn(-wPx.toFloat(), wPx.toFloat())
+                            val dirNow = if (nx < 0) 1 else if (nx > 0) -1 else neighborDir
+                            if (dirNow != neighborDir) neighborDir = dirNow
+                            scope.launch { drag.snapTo(nx) }
+                        }
+                    },
+                    onEnd = { velocityX ->
+                        if (dragSeq != currentSeq) return@pointerInputSwipe
                         val dx = drag.value
-                        scope.launch { drag.animateTo(0f, tween(250)) }
-                        if (abs(dx) > wPx * 0.12f) { if (dx < 0) ss.next(manual = true) else ss.previous() }
+                        val dir = if (dx < 0) 1 else -1
+                        val fling = abs(velocityX) > 900f && sign(velocityX) == sign(dx)
+                        val commit = dx != 0f && (abs(dx) > wPx * 0.2f || fling)
+                        val n = if (commit) ss.neighbor(dir) else null
+                        when {
+                            commit && n != null -> {
+                                val seqAtRelease = currentSeq
+                                ss.swipe(dir, abs(dx) / wPx, n.key)
+                                // Safety net: if nothing came in (e.g. the item vanished), spring back.
+                                scope.launch {
+                                    delay(800)
+                                    if (currentSeq == seqAtRelease) { drag.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow)); dragSeq = -1L }
+                                }
+                            }
+                            commit -> {
+                                scope.launch { drag.animateTo(0f, tween(200)); dragSeq = -1L }
+                                if (dir > 0) ss.next(manual = true) else ss.previous()
+                            }
+                            else -> scope.launch {
+                                drag.animateTo(0f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
+                                dragSeq = -1L
+                                neighborDir = 0
+                            }
+                        }
                     },
                 ),
         ) {
             val dir = stage.direction
+            neighbor?.let { nb ->
+                key(nb.key) {
+                    SlideLayer(nb) { translationX = dragX() + neighborDir * wPx }
+                }
+            }
             // One call site for both layers, so a slide keeps its state (its Ken Burns motion) when it becomes the
             // outgoing one and fades out from where it was.
             listOfNotNull(stage.outgoing?.let { it to false }, stage.incoming?.let { it to true }).forEach { (slide, incoming) ->
@@ -205,9 +270,9 @@ fun SlideshowScreen(c: FrameController) {
                     SlideLayer(slide) {
                         if (incoming) {
                             when (stage.kind) {
-                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
-                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
-                                TransitionKind.Cut -> translationX = drag.value * 0.35f
+                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + dragX()
+                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = dragX() }
+                                TransitionKind.Cut -> translationX = dragX()
                             }
                         } else if (stage.kind == TransitionKind.Slide) {
                             translationX = -dir * wPx * progress.value
@@ -220,7 +285,7 @@ fun SlideshowScreen(c: FrameController) {
                             translationY = kb.yAt(t) * hPx
                         }
                     }
-                    if (incoming) VideoLayer(c, slide, wPx, hPx)
+                    if (incoming) Box(Modifier.fillMaxSize().graphicsLayer { translationX = dragX() }) { VideoLayer(c, slide, wPx, hPx) }
                 }
             }
             TextureWarmup(c)
@@ -311,9 +376,19 @@ data class Snack(val text: Int, val placementId: String, val outboxId: Long, val
 private fun Modifier.pointerInputTaps(onTap: (Offset) -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
     pointerInput("taps") { detectTapGestures(onTap = { onTap(it) }, onDoubleTap = { onDoubleTap(it) }) }
 
-private fun Modifier.pointerInputSwipe(onDrag: (Float) -> Unit, onEnd: () -> Unit): Modifier =
+/** Horizontal drags with the release velocity (px/s) so a quick flick commits even when it moved only a little. */
+private fun Modifier.pointerInputSwipe(onStart: () -> Unit, onDrag: (Float) -> Unit, onEnd: (velocityX: Float) -> Unit): Modifier =
     pointerInput("swipe") {
-        detectHorizontalDragGestures(onDragEnd = onEnd, onDragCancel = onEnd) { change, dx -> change.consume(); onDrag(dx) }
+        val tracker = VelocityTracker()
+        detectHorizontalDragGestures(
+            onDragStart = { tracker.resetTracking(); onStart() },
+            onDragEnd = { onEnd(tracker.calculateVelocity().x) },
+            onDragCancel = { onEnd(0f) },
+        ) { change, dx ->
+            tracker.addPosition(change.uptimeMillis, change.position)
+            change.consume()
+            onDrag(dx)
+        }
     }
 
 // ---------------------------------------------------------------------------------------------- layers

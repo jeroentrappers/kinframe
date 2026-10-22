@@ -125,6 +125,17 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     /** "On this day" items not shown yet today. */
     fun pendingFeatured(): List<String> = ordered.filter { it in featuredIds && it !in featuredShown }
 
+    /** What [previous] would return, without moving (the slide shown beside the current one while swiping back). */
+    fun peekPrevious(): String? {
+        for (i in history.indices.reversed()) {
+            val id = history[i]
+            if (id in entries && id != current) return id
+        }
+        if (ordered.isEmpty()) return null
+        val idx = ordered.indexOf(current)
+        return ordered[if (idx <= 0) ordered.size - 1 else idx - 1]
+    }
+
     fun previous(): String? {
         while (history.isNotEmpty()) {
             val id = history.removeLast()

@@ -59,6 +59,8 @@ data class Stage(
     val direction: Int = 1,
     /** How long the incoming slide is expected to stay (drives the Ken Burns motion). */
     val holdMs: Long = 30_000,
+    /** Where a slide transition starts (0..1): a released swipe continues from the finger instead of from the edge. */
+    val startProgress: Float = 0f,
 )
 
 sealed interface EmptyState {
@@ -228,6 +230,22 @@ class SlideshowController(private val c: FrameController) {
     fun next(manual: Boolean, fade: Boolean = false) = c.scope.launch { navigate(+1, manual, fade) }
     fun previous(fade: Boolean = false) = c.scope.launch { navigate(-1, true, fade) }
 
+    /**
+     * Finishes a swipe the finger has already moved [fromProgress] of the way. [previewKey] is the key of the slide that was
+     * shown beside the current one while dragging; if the slide that actually comes next differs (e.g. it became a pair),
+     * the transition starts from the edge instead of jumping.
+     */
+    fun swipe(direction: Int, fromProgress: Float, previewKey: String) =
+        c.scope.launch { navigate(direction, manual = true, startProgress = fromProgress.coerceIn(0f, 0.95f), previewKey = previewKey) }
+
+    /** The already-rendered single slide a swipe in [direction] would bring in, or null (not ready, collage, mid-transition). */
+    fun neighbor(direction: Int): Slide? {
+        val st = _stage.value
+        if (st.outgoing != null || st.incoming == null || st.incoming.tiles.isNotEmpty()) return null
+        val (slide, id) = if (direction > 0) _prepared.value to playlist.peekNext() else _preparedPrevious.value to playlist.peekPrevious()
+        return slide?.takeIf { id != null && it.placement.id == id && it.tiles.isEmpty() && id in playable }
+    }
+
     /** Shows [id] as soon as it is playable again (e.g. right after "Undo"). */
     suspend fun showWhenAvailable(id: String, timeoutMs: Long = 3_000) {
         val deadline = SystemClock.elapsedRealtime() + timeoutMs
@@ -247,7 +265,7 @@ class SlideshowController(private val c: FrameController) {
 
     fun showNew() = c.scope.launch { playlist.pendingNew().firstOrNull()?.let { show(it) } }
 
-    private suspend fun navigate(direction: Int, manual: Boolean, fade: Boolean = false) {
+    private suspend fun navigate(direction: Int, manual: Boolean, fade: Boolean = false, startProgress: Float = 0f, previewKey: String? = null) {
         if (screenW == 0 || stopped) return
         if (navLock.isLocked && !manual) return
         navLock.withLock {
@@ -265,11 +283,11 @@ class SlideshowController(private val c: FrameController) {
                 settings.slideshow.transition == "slide" -> TransitionKind.Slide
                 else -> TransitionKind.Crossfade
             }
-            present(id, direction, kind)
+            present(id, direction, kind, startProgress, previewKey)
         }
     }
 
-    private suspend fun present(id: String, direction: Int, kind: TransitionKind) {
+    private suspend fun present(id: String, direction: Int, kind: TransitionKind, startProgress: Float = 0f, previewKey: String? = null) {
         val p = playable[id] ?: return
         g.crashGuard.currentItem = id
         val group = groupFor(p)
@@ -280,14 +298,17 @@ class SlideshowController(private val c: FrameController) {
         val slide = if (kb != null) base.copy(kenBurns = kb) else base
         stopVideo()
         val prev = _stage.value
+        // Continue a released swipe from where the finger left it, but only if the slide shown while dragging is the one
+        // that actually comes in.
+        val start = if (kind == TransitionKind.Slide && previewKey != null && previewKey == slide.key) startProgress else 0f
         val duration = when (kind) {
-            TransitionKind.Slide -> 450
+            TransitionKind.Slide -> (450 * (1f - start)).toInt().coerceAtLeast(140)
             TransitionKind.Cut -> 0
             TransitionKind.Crossfade -> settings.slideshow.transitionMs.coerceIn(200, 3000)
         }
         transitionRunning = duration > 0
         val hold = settings.slideshow.intervalS.coerceIn(2, 86_400) * 1000L + duration
-        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null) TransitionKind.Crossfade else kind, duration, direction, hold)
+        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null) TransitionKind.Crossfade else kind, duration, direction, hold, start)
         _current.value = p
         shownAt = SystemClock.elapsedRealtime()
         g.prefs.playlistCurrent = id
@@ -394,7 +415,8 @@ class SlideshowController(private val c: FrameController) {
             Slide(group.first(), bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, tiles = tiles)
         }
         cache[key] = slide
-        while (cache.size > 3) cache.remove(cache.keys.first())
+        // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.
+        while (cache.size > 4) cache.remove(cache.keys.first())
         return slide
     }
 
@@ -467,7 +489,8 @@ class SlideshowController(private val c: FrameController) {
             Slide(p, bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, strip?.asImageBitmap())
         }
         cache[key] = slide
-        while (cache.size > 3) cache.remove(cache.keys.first())
+        // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.
+        while (cache.size > 4) cache.remove(cache.keys.first())
         return slide
     }
 
@@ -489,6 +512,9 @@ class SlideshowController(private val c: FrameController) {
     private val _prepared = MutableStateFlow<Slide?>(null)
     val prepared: StateFlow<Slide?> = _prepared
 
+    /** The pre-rendered previous slide, shown beside the current one while swiping back. */
+    private val _preparedPrevious = MutableStateFlow<Slide?>(null)
+
     private fun prefetch() {
         val nextId = playlist.peekNext() ?: return
         if (nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
@@ -496,6 +522,9 @@ class SlideshowController(private val c: FrameController) {
         c.scope.launch {
             delay(1_200) // after the running transition
             runCatching { obtain(p) }.getOrNull()?.let { _prepared.value = it }
+            playlist.peekPrevious()?.let { playable[it] }?.let { pp ->
+                runCatching { obtain(pp) }.getOrNull()?.let { _preparedPrevious.value = it }
+            }
             prebufferLive(p)
         }
     }
