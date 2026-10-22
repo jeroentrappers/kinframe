@@ -74,7 +74,7 @@ func (s *Server) editablePlacement(ctx context.Context, frameID, placementID uui
 		return nil, nil, problem.New(problem.NotFound, "placement not found")
 	}
 	if !canEditPlacement(m, row) {
-		return nil, nil, problem.New(problem.MissingPermission, "requires the manage_library permission")
+		return nil, nil, problem.New(problem.MissingPermission, "requires the %s permission", "manage_library")
 	}
 	return m, row, nil
 }

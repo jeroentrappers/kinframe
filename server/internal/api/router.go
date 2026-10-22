@@ -30,7 +30,7 @@ import (
 func (s *Server) Handler() (http.Handler, error) {
 	strict := gen.NewStrictHandlerWithOptions(s, nil, gen.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
-			problem.Write(w, problem.New(problem.ValidationFailed, "malformed request body").WithStatus(http.StatusBadRequest))
+			problem.Write(w, r, problem.New(problem.ValidationFailed, "malformed request body").WithStatus(http.StatusBadRequest))
 		},
 		ResponseErrorHandlerFunc: s.writeError,
 	})
@@ -38,7 +38,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	gen.HandlerWithOptions(strict, gen.StdHTTPServerOptions{
 		BaseRouter: inner,
 		ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
-			problem.Write(w, problem.New(problem.ValidationFailed, "%s", err.Error()).WithStatus(http.StatusBadRequest))
+			problem.Write(w, r, problem.New(problem.ValidationFailed, "%s", err.Error()).WithStatus(http.StatusBadRequest))
 		},
 	})
 	validator, err := newValidator()
@@ -84,14 +84,14 @@ func (s *Server) writeError(w http.ResponseWriter, r *http.Request, err error) {
 	if p.Status == http.StatusInternalServerError {
 		s.log.Error("request failed", "method", r.Method, "path", r.URL.Path, "err", err)
 	}
-	problem.Write(w, p)
+	problem.Write(w, r, p)
 }
 
 // withProblemNotFound turns the mux's plain-text 404/405 into problem+json.
 func withProblemNotFound(mux *http.ServeMux) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if _, pattern := mux.Handler(r); pattern == "" {
-			problem.Write(w, problem.New(problem.NotFound, "no such endpoint"))
+			problem.Write(w, r, problem.New(problem.NotFound, "no such endpoint"))
 			return
 		}
 		mux.ServeHTTP(w, r)
@@ -172,17 +172,17 @@ func (s *Server) deviceAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := bearer(r)
 		if token == "" {
-			problem.Write(w, problem.New(problem.Unauthorized, "missing device token"))
+			problem.Write(w, r, problem.New(problem.Unauthorized, "missing device token"))
 			return
 		}
 		id, err := s.devices.Verify(token)
 		if err != nil {
-			problem.Write(w, authProblem(err))
+			problem.Write(w, r, authProblem(err))
 			return
 		}
 		d, err := s.st.GetDevice(r.Context(), s.st.Q(), id)
 		if err == store.ErrNotFound || (err == nil && d.RevokedAt != nil) {
-			problem.Write(w, problem.New(problem.DeviceRevoked, ""))
+			problem.Write(w, r, problem.New(problem.DeviceRevoked, ""))
 			return
 		}
 		if err != nil {
@@ -190,7 +190,7 @@ func (s *Server) deviceAuth(next http.Handler) http.Handler {
 			return
 		}
 		if s.cfg.MinFrameAppVersion > 0 && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
-			problem.Write(w, problem.New(problem.AppUpdateRequired, ""))
+			problem.Write(w, r, problem.New(problem.AppUpdateRequired, ""))
 			return
 		}
 		_ = s.st.TouchDevice(r.Context(), d.ID)
@@ -235,11 +235,11 @@ func (v *validator) middleware(next http.Handler) http.Handler {
 		if jsonBody && r.Body != nil {
 			raw, err := io.ReadAll(io.LimitReader(r.Body, maxJSONBody+1))
 			if err != nil {
-				problem.Write(w, problem.New(problem.ValidationFailed, "could not read body").WithStatus(http.StatusBadRequest))
+				problem.Write(w, r, problem.New(problem.ValidationFailed, "could not read body").WithStatus(http.StatusBadRequest))
 				return
 			}
 			if len(raw) > maxJSONBody {
-				problem.Write(w, problem.New(problem.ValidationFailed, "body too large").WithStatus(http.StatusRequestEntityTooLarge))
+				problem.Write(w, r, problem.New(problem.ValidationFailed, "body too large").WithStatus(http.StatusRequestEntityTooLarge))
 				return
 			}
 			r.Body = io.NopCloser(bytes.NewReader(raw))
@@ -260,7 +260,7 @@ func (v *validator) middleware(next http.Handler) http.Handler {
 			},
 		}
 		if err := openapi3filter.ValidateRequest(r.Context(), in); err != nil {
-			problem.Write(w, validationProblem(err))
+			problem.Write(w, r, validationProblem(err))
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -362,7 +362,7 @@ func (s *Server) recoverer(next http.Handler) http.Handler {
 					panic(v)
 				}
 				s.log.Error("panic", "path", r.URL.Path, "panic", v)
-				problem.Write(w, problem.New(problem.ServerError, ""))
+				problem.Write(w, r, problem.New(problem.ServerError, ""))
 			}
 		}()
 		next.ServeHTTP(w, r)
@@ -398,7 +398,7 @@ func (s *Server) spa() http.Handler {
 				_, _ = w.Write([]byte("kinframe server " + s.cfg.Version + "\n"))
 				return
 			}
-			problem.Write(w, problem.New(problem.NotFound, ""))
+			problem.Write(w, r, problem.New(problem.NotFound, ""))
 		})
 	}
 	root := http.Dir(s.cfg.WebDir)
@@ -406,7 +406,7 @@ func (s *Server) spa() http.Handler {
 	index := filepath.Join(s.cfg.WebDir, "index.html")
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
-			problem.Write(w, problem.New(problem.NotFound, ""))
+			problem.Write(w, r, problem.New(problem.NotFound, ""))
 			return
 		}
 		p := filepath.Clean("/" + r.URL.Path)
@@ -425,7 +425,7 @@ func (s *Server) spa() http.Handler {
 		}
 		w.Header().Set("Cache-Control", "no-cache")
 		if _, err := os.Stat(index); err != nil {
-			problem.Write(w, problem.New(problem.NotFound, "web app not built"))
+			problem.Write(w, r, problem.New(problem.NotFound, "web app not built"))
 			return
 		}
 		http.ServeFile(w, r, index)

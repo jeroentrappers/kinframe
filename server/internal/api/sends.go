@@ -594,7 +594,7 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	itemID, err := uuid.Parse(r.PathValue("itemId"))
 	if err != nil {
-		problem.Write(w, problem.New(problem.NotFound, ""))
+		problem.Write(w, r, problem.New(problem.NotFound, ""))
 		return
 	}
 	allowed, err := s.st.UserCanSeeItem(ctx, me(ctx).ID, itemID)
@@ -603,7 +603,7 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !allowed {
-		problem.Write(w, problem.New(problem.NotFound, "item not found"))
+		problem.Write(w, r, problem.New(problem.NotFound, "item not found"))
 		return
 	}
 	it, err := s.st.GetItemRow(ctx, s.st.Q(), itemID)
@@ -622,11 +622,11 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 	case "poster":
 		key = it.PosterKey
 	default:
-		problem.Write(w, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
+		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
 	if key == nil {
-		problem.Write(w, problem.New(problem.NotFound, "not available (yet)"))
+		problem.Write(w, r, problem.New(problem.NotFound, "not available (yet)"))
 		return
 	}
 	http.Redirect(w, r, s.signedURL(*key, 5*time.Minute), http.StatusFound)
@@ -638,7 +638,7 @@ func (s *Server) signedMedia(w http.ResponseWriter, r *http.Request) {
 	key := r.PathValue("key")
 	q := r.URL.Query()
 	if !s.signer.Valid("/v1/media/signed/"+key, q.Get("exp"), q.Get("sig")) {
-		problem.Write(w, problem.New(problem.Forbidden, "invalid or expired link"))
+		problem.Write(w, r, problem.New(problem.Forbidden, "invalid or expired link"))
 		return
 	}
 	s.serveBlob(w, r, key, "", "", "private, max-age=3600")
