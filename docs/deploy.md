@@ -52,9 +52,9 @@ A committed Ansible Vault can be downloaded by anyone and its passphrase attacke
 - Postgres passwords (`kinframe` and `logto` roles)
 - Logto machine-to-machine app secret
 - device-token signing key
-- **SMTP username and password.** Use the same mail settings as the existing **auth.appmire.be** Logto
-  (`~/Developer/appmire/appmire-logto`). Its SMTP email connector is configured in that instance's console and stored
-  in its database, not in the repo. `logto-bootstrap` creates the matching connector via the Management API.
+- **SMTP username and password** for Logto's sign-in emails. The hosted server sends through the operator's own
+  mail server, using an SMTP-only app password rather than a mailbox password. `logto-bootstrap` creates the matching
+  connector via the Management API.
 
 ```
 cd kinframe-deploy
