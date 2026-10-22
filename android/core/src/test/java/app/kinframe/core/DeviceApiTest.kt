@@ -1,0 +1,131 @@
+package app.kinframe.core
+
+import app.kinframe.core.api.ApiException
+import app.kinframe.core.api.DeviceApi
+import app.kinframe.core.api.DeviceRevokedException
+import app.kinframe.core.auth.DeviceCredential
+import app.kinframe.core.auth.MemoryCredentialStore
+import kotlinx.coroutines.runBlocking
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
+import okhttp3.OkHttpClient
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
+import org.junit.Before
+import org.junit.Test
+
+class DeviceApiTest {
+    private val server = MockWebServer()
+    private var now = 0L
+    private lateinit var api: DeviceApi
+
+    @Before
+    fun setUp() {
+        server.start()
+        api = DeviceApi(OkHttpClient(), server.url("/v1"), MemoryCredentialStore(DeviceCredential("dev1", "s3cret")), "test/1", { now })
+    }
+
+    @After
+    fun tearDown() = server.close()
+
+    private fun token(t: String, exp: Int = 3600) =
+        MockResponse.Builder().code(200).body("""{"access_token":"$t","expires_in":$exp}""").build()
+
+    private fun json(body: String, code: Int = 200) = MockResponse.Builder().code(code).body(body)
+        .addHeader("Content-Type", if (code >= 400) "application/problem+json" else "application/json").build()
+
+    private val state = """{"device_id":"dev1","claimed":true,"latest_seq":3}"""
+
+    @Test
+    fun exchangesSecretThenSendsBearerAndAppHeader() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json(state))
+        assertTrue(api.state().claimed)
+        val tokenReq = server.takeRequest()
+        assertEquals("/v1/devices/token", tokenReq.url.encodedPath)
+        assertTrue(tokenReq.body!!.utf8().contains("\"device_secret\":\"s3cret\""))
+        val r = server.takeRequest()
+        assertEquals("Bearer t1", r.headers["Authorization"])
+        assertEquals("test/1", r.headers["X-Kinframe-App"])
+    }
+
+    @Test
+    fun refreshesWhenLessThanFiveMinutesRemain() = runBlocking {
+        server.enqueue(token("t1", exp = 3600))
+        server.enqueue(json(state))
+        server.enqueue(json(state))
+        server.enqueue(token("t2", exp = 3600))
+        server.enqueue(json(state))
+        api.state()
+        now += 50 * 60 * 1000 // 10 min left: still fine
+        api.state()
+        now += 6 * 60 * 1000 // 4 min left: refresh first
+        api.state()
+        val paths = List(5) { server.takeRequest() }.map { it.url.encodedPath to it.headers["Authorization"] }
+        assertEquals(
+            listOf("/v1/devices/token" to null, "/v1/device/state" to "Bearer t1", "/v1/device/state" to "Bearer t1", "/v1/devices/token" to null, "/v1/device/state" to "Bearer t2"),
+            paths,
+        )
+    }
+
+    @Test
+    fun tokenExpiredRefreshesAndRetriesOnce() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"type":"x","title":"expired","status":401,"code":"token_expired"}""", 401))
+        server.enqueue(token("t2"))
+        server.enqueue(json(state))
+        assertEquals(3, api.state().latestSeq)
+        assertEquals(4, server.requestCount)
+    }
+
+    @Test
+    fun deviceRevokedSurfacesAsException() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"type":"x","title":"revoked","status":401,"code":"device_revoked"}""", 401))
+        try {
+            api.state(); fail()
+        } catch (e: DeviceRevokedException) {
+            assertEquals("device_revoked", e.code)
+        }
+    }
+
+    @Test
+    fun rejectedSecretMeansRevoked() = runBlocking {
+        server.enqueue(json("""{"type":"x","title":"no","status":401,"code":"unauthorized"}""", 401))
+        try {
+            api.state(); fail()
+        } catch (e: DeviceRevokedException) {
+            // expected
+        }
+    }
+
+    @Test
+    fun settingsPatchSendsIfMatchAndMergePatch() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"type":"x","title":"stale","status":412,"code":"version_conflict"}""", 412))
+        try {
+            api.patchSettings(7, kotlinx.serialization.json.buildJsonObject { })
+            fail()
+        } catch (e: ApiException) {
+            assertEquals(412, e.status)
+            assertEquals("version_conflict", e.code)
+        }
+        server.takeRequest()
+        val r = server.takeRequest()
+        assertEquals("\"7\"", r.headers["If-Match"])
+        assertTrue(r.headers["Content-Type"]!!.startsWith("application/merge-patch+json"))
+    }
+
+    @Test
+    fun reactionNullIsSentExplicitly() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(MockResponse.Builder().code(204).build())
+        api.setReaction("p1", null)
+        server.takeRequest()
+        val r = server.takeRequest()
+        assertEquals("PUT", r.method)
+        assertEquals("""{"reaction":null}""", r.body!!.utf8())
+    }
+}

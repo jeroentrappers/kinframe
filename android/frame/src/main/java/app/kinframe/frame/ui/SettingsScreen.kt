@@ -1,0 +1,299 @@
+package app.kinframe.frame.ui
+
+import android.app.Activity
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import app.kinframe.core.api.FrameSettings
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.SleepScheduleDto
+import app.kinframe.core.design.ChoiceChips
+import app.kinframe.core.design.Kin
+import app.kinframe.core.design.KinButton
+import app.kinframe.core.design.KinButtonStyle
+import app.kinframe.core.design.KinCard
+import app.kinframe.core.design.KinIcon
+import app.kinframe.core.design.KinIcons
+import app.kinframe.frame.BuildConfig
+import app.kinframe.frame.FrameController
+import app.kinframe.frame.OwnerGate
+import app.kinframe.frame.R
+import app.kinframe.frame.schedule.SleepPlanner
+import app.kinframe.frame.setup.signalWord
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+
+/**
+ * The frame's basic settings (v0.1): slideshow, display, sleep. Edits apply immediately and sync to the server with
+ * `PATCH /device/settings` (If-Match) through the outbox. Closes itself after 5 minutes without touch.
+ */
+@Composable
+fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
+    val s by c.g.settings.settings.collectAsState()
+    val scope = rememberCoroutineScope()
+    var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
+
+    fun patch(p: JsonObject) {
+        scope.launch { c.session.value?.outbox?.settingsPatch(p) }
+    }
+    fun section(name: String, vararg fields: Pair<String, Any?>) = patch(buildJsonObject {
+        put(name, buildJsonObject { fields.forEach { (k, v) -> put(k, with(app.kinframe.core.api.MergePatch) { v.toJson() }) } })
+    })
+
+    Box(
+        Modifier.fillMaxSize().background(Kin.colors.paper)
+            .pointerInput(Unit) {
+                awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis() } }
+            },
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 40.dp, top = 20.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(64.dp).clip(CircleShape).clickable(onClick = onClose), contentAlignment = Alignment.Center) {
+                    KinIcon(KinIcons.ChevronLeft, stringResource(R.string.action_back))
+                }
+                Text(stringResource(R.string.settings_title), style = Kin.type.headline, modifier = Modifier.padding(start = 8.dp))
+            }
+            Column(
+                Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 88.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                SlideshowSection(c, s, ::section)
+                DisplaySection(c, s, ::section)
+                SleepSection(s) { patch(it) }
+                AboutSection(c)
+                Spacer(Modifier.height(40.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionCard(title: String, content: @Composable () -> Unit) {
+    KinCard(Modifier.fillMaxWidth().widthIn(max = 1000.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Text(title, style = Kin.type.title)
+            content()
+        }
+    }
+}
+
+@Composable
+private fun Labeled(label: String, content: @Composable () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(label, style = Kin.type.label, color = Kin.colors.inkSoft)
+        content()
+    }
+}
+
+@Composable
+private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
+    val context = LocalContext.current
+    val ss = s.slideshow
+    SectionCard(stringResource(R.string.settings_slideshow)) {
+        Labeled(stringResource(R.string.settings_interval)) {
+            ChoiceChips(
+                Format.intervalPresets.map { it to Format.interval(context, it) }, ss.intervalS,
+                { section("slideshow", arrayOf("interval_s" to it)) },
+                Modifier.horizontalScroll(rememberScrollState()),
+            )
+        }
+        Labeled(stringResource(R.string.settings_transition)) {
+            ChoiceChips(
+                listOf("crossfade" to stringResource(R.string.transition_crossfade), "slide" to stringResource(R.string.transition_slide)),
+                if (ss.transition == "slide") "slide" else "crossfade", { section("slideshow", arrayOf("transition" to it)) },
+            )
+        }
+        Labeled(stringResource(R.string.settings_order)) {
+            ChoiceChips(
+                listOf(
+                    "received" to stringResource(R.string.order_received),
+                    "taken" to stringResource(R.string.order_taken),
+                    "shuffle" to stringResource(R.string.order_shuffle),
+                ),
+                ss.order, { section("slideshow", arrayOf("order" to it)) },
+            )
+        }
+        SwitchRow(stringResource(R.string.settings_reverse), ss.reverse) { section("slideshow", arrayOf("reverse" to it)) }
+        Labeled(stringResource(R.string.settings_fill)) {
+            ChoiceChips(
+                listOf(true to stringResource(R.string.fill_fill), false to stringResource(R.string.fill_fit)),
+                ss.fill, { section("slideshow", arrayOf("fill" to it)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun DisplaySection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
+    var value by remember(s.display.brightness) { mutableFloatStateOf(s.display.brightness.toFloat()) }
+    SectionCard(stringResource(R.string.settings_display)) {
+        Labeled(stringResource(R.string.settings_brightness)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                KinIcon(KinIcons.Moon, null, tint = Kin.colors.inkSoft, size = 24.dp)
+                Slider(
+                    value = value,
+                    onValueChange = {
+                        value = it
+                        c.display.previewBrightness = it.toInt()
+                        c.display.applyBrightness()
+                    },
+                    onValueChangeFinished = {
+                        c.display.previewBrightness = null
+                        section("display", arrayOf("brightness" to value.toInt()))
+                    },
+                    valueRange = 15f..255f,
+                    colors = SliderDefaults.colors(thumbColor = Kin.colors.accent, activeTrackColor = Kin.colors.accent, inactiveTrackColor = Kin.colors.line),
+                    modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                )
+                KinIcon(KinIcons.Sun, null, tint = Kin.colors.inkSoft, size = 28.dp)
+            }
+        }
+        if (s.location?.lat != null) {
+            Labeled(stringResource(R.string.settings_brightness_mode)) {
+                ChoiceChips(
+                    listOf("manual" to stringResource(R.string.brightness_manual), "sun" to stringResource(R.string.brightness_sun)),
+                    if (s.display.brightnessMode == "sun") "sun" else "manual",
+                    { section("display", arrayOf("brightness_mode" to it)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SleepSection(s: FrameSettings, patch: (JsonObject) -> Unit) {
+    val current = s.display.sleepSchedules.firstOrNull() ?: SleepScheduleDto(id = "default", enabled = false)
+    fun write(updated: SleepScheduleDto) {
+        val list = listOf(updated) + s.display.sleepSchedules.drop(1)
+        patch(buildJsonObject {
+            put("display", buildJsonObject {
+                put("sleep_schedules", KinJson.encodeToJsonElement(ListSerializer(SleepScheduleDto.serializer()), list))
+            })
+        })
+    }
+    fun shift(t: String, minutes: Int): String {
+        val lt = SleepPlanner.parseTime(t) ?: return t
+        return lt.plusMinutes(minutes.toLong()).toString().take(5)
+    }
+    SectionCard(stringResource(R.string.settings_sleep)) {
+        SwitchRow(stringResource(R.string.settings_sleep_enabled), current.enabled) { write(current.copy(enabled = it)) }
+        if (current.enabled) {
+            Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
+                TimeStepper(stringResource(R.string.settings_sleep_at), current.sleepAt, { write(current.copy(sleepAt = shift(current.sleepAt, -15))) }, { write(current.copy(sleepAt = shift(current.sleepAt, 15))) })
+                TimeStepper(stringResource(R.string.settings_wake_at), current.wakeAt, { write(current.copy(wakeAt = shift(current.wakeAt, -15))) }, { write(current.copy(wakeAt = shift(current.wakeAt, 15))) })
+            }
+            if (s.display.sleepSchedules.size > 1) {
+                Text(androidx.compose.ui.res.pluralStringResource(R.plurals.settings_sleep_more, s.display.sleepSchedules.size - 1, s.display.sleepSchedules.size - 1), style = Kin.type.caption, color = Kin.colors.inkSoft)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
+    Labeled(label) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StepButton(KinIcons.Minus, onMinus)
+            Text(value, style = Kin.type.headline, modifier = Modifier.padding(horizontal = 20.dp))
+            StepButton(KinIcons.Plus, onPlus)
+        }
+    }
+}
+
+@Composable
+private fun StepButton(icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
+    Box(Modifier.size(60.dp).clip(CircleShape).background(Kin.colors.paperDeep).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        KinIcon(icon, null, tint = Kin.colors.ink)
+    }
+}
+
+@Composable
+private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().clip(CircleShape).clickable { onChange(!checked) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, style = Kin.type.body, modifier = Modifier.weight(1f))
+        Switch(
+            checked, onChange,
+            colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
+        )
+    }
+}
+
+@Composable
+private fun AboutSection(c: FrameController) {
+    val context = LocalContext.current
+    val net by c.g.network.status.collectAsState()
+    val sync by c.syncState.collectAsState()
+    SectionCard(stringResource(R.string.settings_about)) {
+        InfoRow(stringResource(R.string.about_frame), sync?.frameName ?: stringResource(R.string.frame_default_name))
+        InfoRow(stringResource(R.string.about_server), c.g.serverDisplayName())
+        InfoRow(
+            stringResource(R.string.about_wifi),
+            if (net.connected) "${net.ssid ?: stringResource(R.string.wifi_network)} · ${signalWord(net.level)}" else stringResource(R.string.wifi_not_connected),
+        )
+        InfoRow(stringResource(R.string.about_version), "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            KinButton(stringResource(R.string.wifi_open_settings), {
+                (context as? Activity)?.let { a ->
+                    OwnerGate.authorize(a, OwnerGate.Reason.ExitKiosk) {
+                        runCatching { a.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    }
+                }
+            }, style = KinButtonStyle.Secondary)
+            KinButton(stringResource(R.string.about_android_settings), { (context as? Activity)?.let { c.openAndroidSettings(it) } }, style = KinButtonStyle.Quiet)
+        }
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(Modifier.fillMaxWidth()) {
+        Text(label, style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.widthIn(min = 200.dp))
+        Text(value, style = Kin.type.body)
+    }
+}
+
+@Suppress("unused")
+private fun JsonPrimitive.unused() = this

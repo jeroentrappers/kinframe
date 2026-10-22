@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotolijst</string>
+
+    <string name="action_back">Terug</string>
+    <string name="action_cancel">Annuleren</string>
+    <string name="action_continue">Verder</string>
+    <string name="action_try_again">Opnieuw proberen</string>
+    <string name="action_undo">Ongedaan maken</string>
+
+    <string name="setup_welcome_title">Welkom bij kinframe</string>
+    <string name="setup_language_body">Kies de taal voor deze fotolijst.</string>
+
+    <string name="setup_wifi_title">Verbind met wifi</string>
+    <string name="setup_wifi_body">De fotolijst heeft wifi nodig om foto\'s te ontvangen. Eenmaal binnen spelen ze ook zonder verbinding.</string>
+    <string name="wifi_connected_to">Verbonden met %1$s</string>
+    <string name="wifi_network">Wifi</string>
+    <string name="wifi_not_connected">Niet verbonden</string>
+    <string name="wifi_not_connected_hint">Kies een netwerk om verder te gaan.</string>
+    <string name="wifi_no_internet">Verbonden, maar nog geen internet</string>
+    <string name="wifi_signal">Signaal: %1$s</string>
+    <string name="wifi_open_settings">Wifi-instellingen</string>
+    <string name="wifi_networks">Netwerken in de buurt</string>
+    <string name="wifi_scanning">Netwerken zoeken…</string>
+    <string name="wifi_permission_body">Om netwerken hier te tonen, vraagt Android toestemming om naar wifi te zoeken.</string>
+    <string name="wifi_show_networks">Netwerken tonen</string>
+    <string name="wifi_password">Wachtwoord</string>
+    <string name="wifi_join">Verbinden</string>
+    <string name="signal_0">heel zwak</string>
+    <string name="signal_1">zwak</string>
+    <string name="signal_2">redelijk</string>
+    <string name="signal_3">goed</string>
+    <string name="signal_4">uitstekend</string>
+
+    <string name="setup_server_title">Kies een server</string>
+    <string name="setup_server_body">Foto\'s reizen via een kinframe-server. Gebruik de gratis kinframe-server, of een server van je familie.</string>
+    <string name="server_default_body">Gratis en open source. Aanbevolen.</string>
+    <string name="server_custom">Eigen server gebruiken</string>
+    <string name="server_custom_body">Voor families die kinframe zelf hosten.</string>
+    <string name="server_address">Serveradres</string>
+    <string name="server_check">Server controleren</string>
+    <string name="server_checking">Server controleren…</string>
+    <string name="server_version">versie %1$s</string>
+    <string name="server_insecure">niet versleuteld</string>
+    <string name="server_error_invalid">Dat lijkt geen webadres. Probeer bijvoorbeeld https://fotos.voorbeeld.be.</string>
+    <string name="server_error_unreachable">Deze server is niet bereikbaar. Controleer het adres en of de fotolijst online is.</string>
+    <string name="server_error_not_kinframe">Deze server antwoordt, maar het is geen kinframe-server.</string>
+
+    <string name="enroll_title">Je fotolijst klaarmaken…</string>
+    <string name="enroll_body">Dit duurt enkele seconden.</string>
+    <string name="enroll_failed_title">De fotolijst kon zich niet aanmelden</string>
+    <string name="enroll_failed_body">De server zei: %1$s</string>
+
+    <string name="code_title">Verbind deze fotolijst met je familie</string>
+    <string name="code_step1">Open de kinframe-app, of %1$s in een browser</string>
+    <string name="code_step2">Kies Fotolijst toevoegen</string>
+    <string name="code_step3">Voer deze code in, of scan de QR-code</string>
+    <string name="code_valid_for">Geldig voor %1$s</string>
+    <string name="code_waiting">Wachten tot iemand de code invoert</string>
+    <string name="code_offline_title">De fotolijst is offline</string>
+    <string name="code_offline_body">Voor een code is internet nodig. Controleer de wifi.</string>
+    <string name="code_error_title">Geen code ontvangen</string>
+    <string name="code_error_body">De server antwoordt niet. De fotolijst blijft het proberen.</string>
+
+    <string name="celebrate_title">Verbonden met %1$s</string>
+    <string name="celebrate_title_anon">Verbonden</string>
+    <string name="celebrate_body">Foto\'s voor deze fotolijst verschijnen hier binnen enkele seconden.</string>
+
+    <string name="duration_h_min">%1$d u %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Vandaag</string>
+    <string name="date_yesterday">Gisteren</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d dag geleden</item>
+        <item quantity="other">%d dagen geleden</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d u</string>
+
+    <string name="caption_edited">bewerkt</string>
+    <string name="unable_photo">Deze foto kan niet getoond worden</string>
+    <string name="unable_video">Deze video kan niet afgespeeld worden. Vraag de afzender om hem opnieuw te sturen.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nieuwe foto</item>
+        <item quantity="other">%d nieuwe foto\'s</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Server niet bereikbaar</string>
+    <string name="identify_this_is">Dit is</string>
+    <string name="snack_hidden">Foto verborgen</string>
+    <string name="snack_deleted">Foto verwijderd</string>
+    <string name="menu_settings">Instellingen</string>
+    <string name="menu_power">Aan/uit</string>
+    <string name="menu_hide">Verbergen</string>
+    <string name="menu_delete">Verwijderen</string>
+
+    <string name="empty_title">Nog geen foto\'s</string>
+    <string name="empty_body">Foto\'s en video\'s die met de kinframe-app of -website verstuurd worden, verschijnen hier binnen enkele seconden.</string>
+    <string name="empty_code_title">Voeg familie toe met deze code</string>
+    <string name="empty_code_body">Voer hem in in de kinframe-app, of scan de QR-code.</string>
+    <string name="empty_hidden_title">Alle foto\'s zijn verborgen</string>
+    <string name="empty_hidden_body">Verborgen foto\'s blijven in de bibliotheek. Toon ze opnieuw via de kinframe-app.</string>
+    <string name="empty_downloading_title">Foto\'s zijn onderweg</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d foto wordt gedownload.</item>
+        <item quantity="other">%d foto\'s worden gedownload.</item>
+    </plurals>
+
+    <string name="power_title">Aan/uit</string>
+    <string name="power_sleep">Slapen</string>
+    <string name="power_sleep_body">Scherm uit tot je het aanraakt.</string>
+    <string name="power_restart">Herstarten</string>
+    <string name="power_restart_body">Start de fotolijst opnieuw.</string>
+    <string name="power_off">Uitschakelen</string>
+    <string name="power_off_body">Veilig afsluiten voor je de stekker uittrekt.</string>
+    <string name="shutting_down_title">Afsluiten…</string>
+    <string name="restarting_title">Herstarten…</string>
+    <string name="shutting_down_body">Alles wordt veilig opgeslagen.</string>
+    <string name="safe_title">Je kunt de stekker nu veilig uittrekken</string>
+    <string name="safe_body">Alles is opgeslagen. Druk op de aan/uit-knop of steek de stekker opnieuw in om de fotolijst weer te gebruiken.</string>
+    <string name="safe_body_noroot">kinframe heeft alles opgeslagen. Je kunt de stekker nu uittrekken.</string>
+
+    <string name="recovery_title">kinframe had problemen met het tonen van foto\'s</string>
+    <string name="recovery_body">De app stopte een paar keer na elkaar onverwacht. Probeer opnieuw, of wis de gedownloade foto\'s. Ze worden opnieuw van de server gehaald, er gaat niets verloren.</string>
+    <string name="recovery_clear">Gedownloade foto\'s wissen</string>
+
+    <string name="settings_title">Instellingen</string>
+    <string name="settings_slideshow">Diavoorstelling</string>
+    <string name="settings_interval">Elke foto tonen gedurende</string>
+    <string name="settings_transition">Overgang</string>
+    <string name="transition_crossfade">Vervagen</string>
+    <string name="transition_slide">Schuiven</string>
+    <string name="settings_order">Volgorde</string>
+    <string name="order_received">Laatst ontvangen</string>
+    <string name="order_taken">Opnamedatum</string>
+    <string name="order_shuffle">Willekeurig</string>
+    <string name="settings_reverse">Oudste eerst</string>
+    <string name="settings_fill">Fotogrootte</string>
+    <string name="fill_fill">Scherm vullen</string>
+    <string name="fill_fit">Hele foto tonen</string>
+    <string name="settings_display">Scherm</string>
+    <string name="settings_brightness">Helderheid</string>
+    <string name="settings_brightness_mode">Automatische helderheid</string>
+    <string name="brightness_manual">Vast</string>
+    <string name="brightness_sun">Volg de zon</string>
+    <string name="settings_sleep">Slapen</string>
+    <string name="settings_sleep_enabled">Scherm \'s nachts uitzetten</string>
+    <string name="settings_sleep_at">Slapen om</string>
+    <string name="settings_wake_at">Wakker om</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">en nog %d schema, te beheren in de kinframe-app</item>
+        <item quantity="other">en nog %d schema\'s, te beheren in de kinframe-app</item>
+    </plurals>
+    <string name="settings_about">Deze fotolijst</string>
+    <string name="about_frame">Naam</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wifi</string>
+    <string name="about_version">App-versie</string>
+    <string name="about_android_settings">Android-instellingen</string>
+</resources>

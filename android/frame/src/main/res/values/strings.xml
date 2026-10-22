@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">kinframe</string>
+    <string name="frame_default_name">Photo frame</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_try_again">Try again</string>
+    <string name="action_undo">Undo</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Welcome to kinframe</string>
+    <string name="setup_language_body">Choose the language for this frame.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Connect to Wi-Fi</string>
+    <string name="setup_wifi_body">The frame needs Wi-Fi to receive photos. Once they\'re here, they also play without a connection.</string>
+    <string name="wifi_connected_to">Connected to %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Not connected</string>
+    <string name="wifi_not_connected_hint">Pick a network to continue.</string>
+    <string name="wifi_no_internet">Connected, but there\'s no internet yet</string>
+    <string name="wifi_signal">Signal: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi settings</string>
+    <string name="wifi_networks">Networks nearby</string>
+    <string name="wifi_scanning">Looking for networks…</string>
+    <string name="wifi_permission_body">To list networks here, Android needs permission to scan for Wi-Fi.</string>
+    <string name="wifi_show_networks">Show networks</string>
+    <string name="wifi_password">Password</string>
+    <string name="wifi_join">Connect</string>
+    <string name="signal_0">very weak</string>
+    <string name="signal_1">weak</string>
+    <string name="signal_2">fair</string>
+    <string name="signal_3">good</string>
+    <string name="signal_4">excellent</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Choose a server</string>
+    <string name="setup_server_body">Photos travel through a kinframe server. Use the free kinframe server, or one your family runs.</string>
+    <string name="server_default_body">Free and open source. Recommended.</string>
+    <string name="server_custom">Use your own server</string>
+    <string name="server_custom_body">For families that host kinframe themselves.</string>
+    <string name="server_address">Server address</string>
+    <string name="server_check">Check server</string>
+    <string name="server_checking">Checking the server…</string>
+    <string name="server_version">version %1$s</string>
+    <string name="server_insecure">not encrypted</string>
+    <string name="server_error_invalid">That doesn\'t look like a web address. Try something like https://frames.example.org.</string>
+    <string name="server_error_unreachable">Couldn\'t reach this server. Check the address and that the frame is online.</string>
+    <string name="server_error_not_kinframe">This server answered, but it isn\'t a kinframe server.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Getting your frame ready…</string>
+    <string name="enroll_body">This takes a few seconds.</string>
+    <string name="enroll_failed_title">The frame couldn\'t register</string>
+    <string name="enroll_failed_body">The server said: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Connect this frame to your family</string>
+    <string name="code_step1">Open the kinframe app, or %1$s in a browser</string>
+    <string name="code_step2">Choose Add a frame</string>
+    <string name="code_step3">Enter this code, or scan the QR code</string>
+    <string name="code_valid_for">Valid for %1$s</string>
+    <string name="code_waiting">Waiting for someone to enter the code</string>
+    <string name="code_offline_title">The frame is offline</string>
+    <string name="code_offline_body">A frame code needs an internet connection. Check the Wi-Fi.</string>
+    <string name="code_error_title">Couldn\'t get a frame code</string>
+    <string name="code_error_body">The server didn\'t answer. The frame keeps trying.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Connected to %1$s</string>
+    <string name="celebrate_title_anon">Connected</string>
+    <string name="celebrate_body">Photos sent to this frame will appear here in seconds.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Today</string>
+    <string name="date_yesterday">Yesterday</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">edited</string>
+    <string name="unable_photo">Unable to show this photo</string>
+    <string name="unable_video">Unable to play this video. Ask the sender to send it again.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d new photo</item>
+        <item quantity="other">%d new photos</item>
+    </plurals>
+    <string name="status_offline">Offline</string>
+    <string name="status_online">Online · %1$s</string>
+    <string name="status_server_unreachable">Can\'t reach the server</string>
+    <string name="identify_this_is">This is</string>
+    <string name="snack_hidden">Photo hidden</string>
+    <string name="snack_deleted">Photo deleted</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_power">Power</string>
+    <string name="menu_hide">Hide</string>
+    <string name="menu_delete">Delete</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">No photos yet</string>
+    <string name="empty_body">Photos and videos sent with the kinframe app or website appear here within seconds.</string>
+    <string name="empty_code_title">Add family with this code</string>
+    <string name="empty_code_body">Enter it in the kinframe app, or scan the QR code.</string>
+    <string name="empty_hidden_title">All photos are hidden</string>
+    <string name="empty_hidden_body">Hidden photos stay in the library. Show them again from the kinframe app.</string>
+    <string name="empty_downloading_title">Photos are on their way</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d photo is downloading.</item>
+        <item quantity="other">%d photos are downloading.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Power</string>
+    <string name="power_sleep">Sleep</string>
+    <string name="power_sleep_body">Screen off until you touch it.</string>
+    <string name="power_restart">Restart</string>
+    <string name="power_restart_body">Start the frame again.</string>
+    <string name="power_off">Power off</string>
+    <string name="power_off_body">Shut down safely before unplugging.</string>
+    <string name="shutting_down_title">Shutting down…</string>
+    <string name="restarting_title">Restarting…</string>
+    <string name="shutting_down_body">Saving everything safely.</string>
+    <string name="safe_title">It\'s now safe to unplug</string>
+    <string name="safe_body">Everything is saved. To use the frame again, press the power button or plug it back in.</string>
+    <string name="safe_body_noroot">kinframe has saved everything. You can unplug the frame now.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe had trouble showing photos</string>
+    <string name="recovery_body">It stopped unexpectedly a few times in a row. Try again, or clear the downloaded photos. They download again from the server, nothing is lost.</string>
+    <string name="recovery_clear">Clear downloaded photos</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_slideshow">Slideshow</string>
+    <string name="settings_interval">Show each photo for</string>
+    <string name="settings_transition">Transition</string>
+    <string name="transition_crossfade">Fade</string>
+    <string name="transition_slide">Slide</string>
+    <string name="settings_order">Order</string>
+    <string name="order_received">Newest received</string>
+    <string name="order_taken">Date taken</string>
+    <string name="order_shuffle">Shuffle</string>
+    <string name="settings_reverse">Oldest first</string>
+    <string name="settings_fill">Photo size</string>
+    <string name="fill_fill">Fill the screen</string>
+    <string name="fill_fit">Show the whole photo</string>
+    <string name="settings_display">Screen</string>
+    <string name="settings_brightness">Brightness</string>
+    <string name="settings_brightness_mode">Automatic brightness</string>
+    <string name="brightness_manual">Fixed</string>
+    <string name="brightness_sun">Follow the sun</string>
+    <string name="settings_sleep">Sleep</string>
+    <string name="settings_sleep_enabled">Turn the screen off at night</string>
+    <string name="settings_sleep_at">Sleep at</string>
+    <string name="settings_wake_at">Wake at</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">and %d more schedule, managed in the kinframe app</item>
+        <item quantity="other">and %d more schedules, managed in the kinframe app</item>
+    </plurals>
+    <string name="settings_about">This frame</string>
+    <string name="about_frame">Name</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">App version</string>
+    <string name="about_android_settings">Android settings</string>
+</resources>

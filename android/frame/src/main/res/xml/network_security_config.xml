@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Self-hosters often run the server on their LAN without TLS; the setup wizard warns when http is used. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <!-- Frame firmware is often Android 6/7.0, which predates Let's Encrypt's own roots (added in 7.1.1),
+                 and the old cross-signed chain has expired. Bundle ISRG Root X1 (RSA) and X2 (ECDSA) so frames
+                 can reach servers with Let's Encrypt certificates, including kinframe.appmire.be. -->
+            <certificates src="@raw/isrg_root_x1" />
+            <certificates src="@raw/isrg_root_x2" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
