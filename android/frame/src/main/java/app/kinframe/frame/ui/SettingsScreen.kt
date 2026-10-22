@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.FrameSettings
+import app.kinframe.core.api.LivePhotos
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.SleepScheduleDto
 import app.kinframe.core.design.ChoiceChips
@@ -184,6 +185,16 @@ private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (Str
             SwitchRow(stringResource(R.string.settings_pair_portraits), ss.pairPortraits) { section("slideshow", arrayOf("pair_portraits" to it)) }
         }
         SwitchRow(stringResource(R.string.settings_on_this_day), ss.onThisDay) { section("slideshow", arrayOf("on_this_day" to it)) }
+        Labeled(stringResource(R.string.settings_live_photos)) {
+            ChoiceChips(
+                listOf(
+                    LivePhotos.ON to stringResource(R.string.live_photos_on),
+                    LivePhotos.TAP to stringResource(R.string.live_photos_tap),
+                    LivePhotos.OFF to stringResource(R.string.live_photos_off),
+                ),
+                ss.livePhotos.takeIf { it in LivePhotos.all } ?: LivePhotos.ON, { section("slideshow", arrayOf("live_photos" to it)) },
+            )
+        }
         Labeled(stringResource(R.string.settings_fill)) {
             ChoiceChips(
                 listOf(true to stringResource(R.string.fill_fill), false to stringResource(R.string.fill_fit)),
