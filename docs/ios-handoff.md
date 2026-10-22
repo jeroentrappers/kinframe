@@ -156,3 +156,26 @@ the same PR.
 - **PR description:** what works and what's left, with screenshots. No AI attribution.
 - **Questions:** raise them in the PR description or ask the user (Jeroen) directly rather than guessing on
   product-level decisions.
+
+## Addendum: share to another frame
+
+Members can put photos that are already on one frame onto other frames without uploading again (README §5.3,
+"Sharing between frames"; `sharePlacements` in `openapi.yaml`). Match the web and Android apps:
+
+- **Endpoint:** `POST /v1/frames/{frameId}/placements:share` with `{placement_ids, frame_ids, dry_run?}` and an
+  `Idempotency-Key`. `{frameId}` is the frame the photos are on. Response: `{placements: [Placement], skipped:
+  [{placement_id, frame_id, reason: "already_on_frame", existing_placement_id}]}`.
+- **Who:** `see_library` on the source frame (or being the item's sender) and `send` on every target. Offer only frames
+  where the user can send, excluding the source frame.
+- **Entry points:** the library's multi-select bar and single-photo view, and the send detail in History (source = the
+  first frame that still holds every item of the send).
+- **Picker:** a sheet listing target frames. Run a dry run first (`dry_run: true`, all candidate frames) and mark
+  frames whose `skipped` covers the whole selection as "Already there" (not selectable), partial ones as "Has some".
+- **Confirm:** toast "Shared to {frames}" with **Undo**, which calls `POST /v1/frames/{id}/placements:bulk`
+  `{action: "purge"}` for the returned placements, grouped by `frame_id` (the sharer may purge what they created).
+- **Credit:** `Placement.shared_by_name` and `Send.frames[].placements[].shared_by_name` show "Shared by X" in the
+  photo detail and per frame in History. The item's `sender_name` stays the original sender.
+- **Push:** the sharer receives `delivered` (websocket event `share.delivered` with `frame_id`, `frame_name`) when the
+  shared photos arrive; the original sender keeps getting reactions and replies.
+- Strings: "Share to another frame", "Share", "Already there", "Has some", "Shared to %@", "Sharing undone",
+  "Shared by %@" (English and Dutch at least; see the web catalogs for the other languages).
