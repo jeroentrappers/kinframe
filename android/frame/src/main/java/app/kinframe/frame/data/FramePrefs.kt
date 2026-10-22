@@ -27,6 +27,11 @@ class FramePrefs(context: Context) {
         get() = sp.getString("language", null)
         set(v) = sp.edit(commit = true) { putString("language", v) }
 
+    /** Last `locale.language` seen in the server settings (null until the frame is claimed). */
+    var serverLanguage: String?
+        get() = sp.getString("server_language", null)
+        set(v) = sp.edit(commit = true) { putString("server_language", v) }
+
     /** Highest setup step the person reached (so a power cut mid-setup resumes there). */
     var setupStep: Int
         get() = sp.getInt("setup_step", 0)
@@ -50,7 +55,7 @@ class FramePrefs(context: Context) {
 
     /** Forget everything tied to the device credential; keeps language and server choice. */
     fun wipeDevice() = sp.edit(commit = true) {
-        remove("claimed"); remove("owner_name"); remove("playlist_seed"); remove("playlist_current")
+        remove("claimed"); remove("owner_name"); remove("server_language"); remove("playlist_seed"); remove("playlist_current")
         putInt("setup_step", 0)
     }
 }

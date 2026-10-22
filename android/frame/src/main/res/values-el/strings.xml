@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Κορνίζα</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Πίσω</string>
+    <string name="action_cancel">Ακύρωση</string>
+    <string name="action_continue">Συνέχεια</string>
+    <string name="action_try_again">Δοκιμή ξανά</string>
+    <string name="action_undo">Αναίρεση</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Καλώς ήρθατε στο kinframe</string>
+    <string name="setup_language_body">Επιλέξτε τη γλώσσα αυτής της κορνίζας.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Σύνδεση σε Wi-Fi</string>
+    <string name="setup_wifi_body">Η κορνίζα χρειάζεται Wi-Fi για να λαμβάνει φωτογραφίες. Μόλις φτάσουν, προβάλλονται και χωρίς σύνδεση.</string>
+    <string name="wifi_connected_to">Συνδέθηκε στο %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Χωρίς σύνδεση</string>
+    <string name="wifi_not_connected_hint">Επιλέξτε δίκτυο για να συνεχίσετε.</string>
+    <string name="wifi_no_internet">Συνδέθηκε, αλλά δεν υπάρχει ακόμη internet</string>
+    <string name="wifi_signal">Σήμα: %1$s</string>
+    <string name="wifi_open_settings">Ρυθμίσεις Wi-Fi</string>
+    <string name="wifi_networks">Κοντινά δίκτυα</string>
+    <string name="wifi_scanning">Αναζήτηση δικτύων…</string>
+    <string name="wifi_permission_body">Για να εμφανιστούν εδώ τα δίκτυα, το Android χρειάζεται άδεια για σάρωση Wi-Fi.</string>
+    <string name="wifi_show_networks">Εμφάνιση δικτύων</string>
+    <string name="wifi_password">Κωδικός πρόσβασης</string>
+    <string name="wifi_join">Σύνδεση</string>
+    <string name="signal_0">πολύ ασθενές</string>
+    <string name="signal_1">ασθενές</string>
+    <string name="signal_2">μέτριο</string>
+    <string name="signal_3">καλό</string>
+    <string name="signal_4">εξαιρετικό</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Επιλογή διακομιστή</string>
+    <string name="setup_server_body">Οι φωτογραφίες περνούν από έναν διακομιστή kinframe. Χρησιμοποιήστε τον δωρεάν διακομιστή kinframe ή έναν που διαχειρίζεται η οικογένειά σας.</string>
+    <string name="server_default_body">Δωρεάν και ανοιχτού κώδικα. Προτείνεται.</string>
+    <string name="server_custom">Δικός σας διακομιστής</string>
+    <string name="server_custom_body">Για οικογένειες που φιλοξενούν οι ίδιες το kinframe.</string>
+    <string name="server_address">Διεύθυνση διακομιστή</string>
+    <string name="server_check">Έλεγχος διακομιστή</string>
+    <string name="server_checking">Έλεγχος διακομιστή…</string>
+    <string name="server_version">έκδοση %1$s</string>
+    <string name="server_insecure">χωρίς κρυπτογράφηση</string>
+    <string name="server_error_invalid">Αυτό δεν μοιάζει με διεύθυνση ιστού. Δοκιμάστε κάτι σαν https://frames.example.org.</string>
+    <string name="server_error_unreachable">Δεν ήταν δυνατή η σύνδεση με τον διακομιστή. Ελέγξτε τη διεύθυνση και ότι η κορνίζα είναι συνδεδεμένη.</string>
+    <string name="server_error_not_kinframe">Ο διακομιστής απάντησε, αλλά δεν είναι διακομιστής kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Η κορνίζα σας ετοιμάζεται…</string>
+    <string name="enroll_body">Θα πάρει λίγα δευτερόλεπτα.</string>
+    <string name="enroll_failed_title">Η κορνίζα δεν μπόρεσε να εγγραφεί</string>
+    <string name="enroll_failed_body">Ο διακομιστής απάντησε: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Συνδέστε την κορνίζα με την οικογένειά σας</string>
+    <string name="code_step1">Ανοίξτε την εφαρμογή kinframe ή το %1$s σε πρόγραμμα περιήγησης</string>
+    <string name="code_step2">Επιλέξτε Προσθήκη κορνίζας</string>
+    <string name="code_step3">Πληκτρολογήστε αυτόν τον κωδικό ή σαρώστε τον κωδικό QR</string>
+    <string name="code_valid_for">Ισχύει για %1$s</string>
+    <string name="code_waiting">Αναμονή για καταχώριση του κωδικού</string>
+    <string name="code_offline_title">Η κορνίζα είναι εκτός σύνδεσης</string>
+    <string name="code_offline_body">Ο κωδικός κορνίζας χρειάζεται σύνδεση στο internet. Ελέγξτε το Wi-Fi.</string>
+    <string name="code_error_title">Δεν ήταν δυνατή η λήψη κωδικού κορνίζας</string>
+    <string name="code_error_body">Ο διακομιστής δεν απάντησε. Η κορνίζα συνεχίζει να προσπαθεί.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Συνδέθηκε με %1$s</string>
+    <string name="celebrate_title_anon">Συνδέθηκε</string>
+    <string name="celebrate_body">Οι φωτογραφίες που στέλνονται σε αυτή την κορνίζα θα εμφανίζονται εδώ σε λίγα δευτερόλεπτα.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d ώρ. %2$d λεπ.</string>
+    <string name="duration_min">%1$d λεπ.</string>
+    <string name="date_today">Σήμερα</string>
+    <string name="date_yesterday">Χθες</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">Πριν από %d ημέρα</item>
+        <item quantity="other">Πριν από %d ημέρες</item>
+    </plurals>
+    <string name="interval_s">%1$d δευτ.</string>
+    <string name="interval_min">%1$d λεπ.</string>
+    <string name="interval_h">%1$d ώρ.</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">επεξεργασμένο</string>
+    <string name="unable_photo">Δεν είναι δυνατή η εμφάνιση αυτής της φωτογραφίας</string>
+    <string name="unable_video">Δεν είναι δυνατή η αναπαραγωγή του βίντεο. Ζητήστε από τον αποστολέα να το στείλει ξανά.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d νέα φωτογραφία</item>
+        <item quantity="other">%d νέες φωτογραφίες</item>
+    </plurals>
+    <string name="status_offline">Εκτός σύνδεσης</string>
+    <string name="status_online">Σε σύνδεση · %1$s</string>
+    <string name="status_server_unreachable">Ο διακομιστής δεν είναι προσβάσιμος</string>
+    <string name="identify_this_is">Αυτή είναι η κορνίζα</string>
+    <string name="snack_hidden">Η φωτογραφία αποκρύφτηκε</string>
+    <string name="snack_deleted">Η φωτογραφία διαγράφηκε</string>
+    <string name="menu_settings">Ρυθμίσεις</string>
+    <string name="menu_power">Λειτουργία</string>
+    <string name="menu_hide">Απόκρυψη</string>
+    <string name="menu_delete">Διαγραφή</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Δεν υπάρχουν φωτογραφίες ακόμη</string>
+    <string name="empty_body">Οι φωτογραφίες και τα βίντεο που στέλνονται από την εφαρμογή ή τον ιστότοπο του kinframe εμφανίζονται εδώ σε λίγα δευτερόλεπτα.</string>
+    <string name="empty_code_title">Προσθέστε την οικογένεια με αυτόν τον κωδικό</string>
+    <string name="empty_code_body">Πληκτρολογήστε τον στην εφαρμογή kinframe ή σαρώστε τον κωδικό QR.</string>
+    <string name="empty_hidden_title">Όλες οι φωτογραφίες είναι κρυφές</string>
+    <string name="empty_hidden_body">Οι κρυφές φωτογραφίες μένουν στη βιβλιοθήκη. Εμφανίστε τις ξανά από την εφαρμογή kinframe.</string>
+    <string name="empty_downloading_title">Οι φωτογραφίες έρχονται</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Λήψη %d φωτογραφίας.</item>
+        <item quantity="other">Λήψη %d φωτογραφιών.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Λειτουργία</string>
+    <string name="power_sleep">Ύπνος</string>
+    <string name="power_sleep_body">Η οθόνη σβήνει μέχρι να την αγγίξετε.</string>
+    <string name="power_restart">Επανεκκίνηση</string>
+    <string name="power_restart_body">Η κορνίζα ξεκινά ξανά.</string>
+    <string name="power_off">Απενεργοποίηση</string>
+    <string name="power_off_body">Ασφαλής τερματισμός πριν την αποσυνδέσετε από το ρεύμα.</string>
+    <string name="shutting_down_title">Τερματισμός…</string>
+    <string name="restarting_title">Επανεκκίνηση…</string>
+    <string name="shutting_down_body">Όλα αποθηκεύονται με ασφάλεια.</string>
+    <string name="safe_title">Μπορείτε τώρα να την αποσυνδέσετε</string>
+    <string name="safe_body">Όλα αποθηκεύτηκαν. Για να χρησιμοποιήσετε ξανά την κορνίζα, πατήστε το κουμπί λειτουργίας ή συνδέστε την ξανά στο ρεύμα.</string>
+    <string name="safe_body_noroot">Το kinframe αποθήκευσε τα πάντα. Μπορείτε τώρα να αποσυνδέσετε την κορνίζα από το ρεύμα.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">Το kinframe είχε πρόβλημα με την προβολή φωτογραφιών</string>
+    <string name="recovery_body">Σταμάτησε απροσδόκητα μερικές φορές στη σειρά. Δοκιμάστε ξανά ή διαγράψτε τις φωτογραφίες που έχουν ληφθεί. Θα ληφθούν ξανά από τον διακομιστή, δεν χάνεται τίποτα.</string>
+    <string name="recovery_clear">Διαγραφή ληφθέντων φωτογραφιών</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ρυθμίσεις</string>
+    <string name="settings_language">Γλώσσα</string>
+    <string name="settings_slideshow">Προβολή διαφανειών</string>
+    <string name="settings_interval">Διάρκεια κάθε φωτογραφίας</string>
+    <string name="settings_transition">Μετάβαση</string>
+    <string name="transition_crossfade">Σβήσιμο</string>
+    <string name="transition_slide">Ολίσθηση</string>
+    <string name="settings_order">Σειρά</string>
+    <string name="order_received">Πιο πρόσφατες</string>
+    <string name="order_taken">Ημερομηνία λήψης</string>
+    <string name="order_shuffle">Τυχαία</string>
+    <string name="settings_reverse">Παλαιότερες πρώτα</string>
+    <string name="settings_fill">Μέγεθος φωτογραφίας</string>
+    <string name="fill_fill">Γέμισμα οθόνης</string>
+    <string name="fill_fit">Ολόκληρη η φωτογραφία</string>
+    <string name="settings_display">Οθόνη</string>
+    <string name="settings_brightness">Φωτεινότητα</string>
+    <string name="settings_brightness_mode">Αυτόματη φωτεινότητα</string>
+    <string name="brightness_manual">Σταθερή</string>
+    <string name="brightness_sun">Ανάλογα με τον ήλιο</string>
+    <string name="settings_sleep">Ύπνος</string>
+    <string name="settings_sleep_enabled">Σβήσιμο οθόνης τη νύχτα</string>
+    <string name="settings_sleep_at">Ύπνος στις</string>
+    <string name="settings_wake_at">Αφύπνιση στις</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">και %d ακόμη πρόγραμμα, στην εφαρμογή kinframe</item>
+        <item quantity="other">και %d ακόμη προγράμματα, στην εφαρμογή kinframe</item>
+    </plurals>
+    <string name="settings_about">Αυτή η κορνίζα</string>
+    <string name="about_frame">Όνομα</string>
+    <string name="about_server">Διακομιστής</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Έκδοση εφαρμογής</string>
+    <string name="about_android_settings">Ρυθμίσεις Android</string>
+    <string name="settings_updates">Ενημερώσεις</string>
+    <string name="updates_channel">Κανάλι</string>
+    <string name="updates_channel_stable">Σταθερό</string>
+    <string name="updates_channel_beta">Beta (νέες εκδόσεις νωρίτερα)</string>
+    <string name="updates_check">Έλεγχος για ενημέρωση</string>
+    <string name="updates_install_now">Εγκατάσταση τώρα</string>
+    <string name="updates_checking">Έλεγχος για ενημερώσεις…</string>
+    <string name="updates_up_to_date">Η κορνίζα είναι ενημερωμένη.</string>
+    <string name="updates_downloading">Λήψη έκδοσης %1$s… %2$d%%</string>
+    <string name="updates_waiting">Η έκδοση %1$s είναι έτοιμη. Θα εγκατασταθεί όταν δεν χρησιμοποιεί κανείς την κορνίζα.</string>
+    <string name="updates_installing">Εγκατάσταση έκδοσης %1$s. Η κορνίζα θα επανεκκινηθεί σε λίγο.</string>
+    <string name="updates_failed">Η ενημέρωση απέτυχε. Η κορνίζα θα προσπαθήσει ξανά αργότερα.</string>
+    <string name="update_notice_updated">Ενημερώθηκε στην έκδοση %1$s</string>
+    <string name="update_notice_rolled_back">Η νέα έκδοση είχε προβλήματα, οπότε η κορνίζα επέστρεψε στην προηγούμενη.</string>
+    <string name="update_notice_needs_user">Μια ενημέρωση είναι έτοιμη. Πατήστε Εγκατάσταση για να συνεχίσετε.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">Εμφάνιση πρόγνωσης</string>
+    <string name="weather_close">Κλείσιμο</string>
+    <string name="weather_now">Τώρα</string>
+    <string name="weather_today">Σήμερα</string>
+    <string name="weather_feels_like">Αίσθηση %1$s</string>
+    <string name="weather_high_low">Μέγ. %1$s · Ελάχ. %2$s</string>
+    <string name="weather_wind">Άνεμος</string>
+    <string name="weather_humidity">Υγρασία</string>
+    <string name="weather_sunrise">Ανατολή</string>
+    <string name="weather_sunset">Δύση</string>
+    <string name="weather_next_hours">Επόμενες 24 ώρες</string>
+    <string name="weather_next_days">Πρόγνωση 7 ημερών</string>
+    <string name="weather_updated">Ενημέρωση %1$s</string>
+    <string-array name="weather_compass">
+        <item>Β</item>
+        <item>ΒΑ</item>
+        <item>Α</item>
+        <item>ΝΑ</item>
+        <item>Ν</item>
+        <item>ΝΔ</item>
+        <item>Δ</item>
+        <item>ΒΔ</item>
+    </string-array>
+    <string name="wmo_clear_day">Ηλιοφάνεια</string>
+    <string name="wmo_clear_night">Αίθριος</string>
+    <string name="wmo_mainly_clear_day">Κυρίως ηλιόλουστος</string>
+    <string name="wmo_mainly_clear_night">Κυρίως αίθριος</string>
+    <string name="wmo_partly_cloudy">Μερική νεφοκάλυψη</string>
+    <string name="wmo_overcast">Συννεφιά</string>
+    <string name="wmo_fog">Ομίχλη</string>
+    <string name="wmo_rime_fog">Παγωμένη ομίχλη</string>
+    <string name="wmo_drizzle_light">Ασθενές ψιχάλισμα</string>
+    <string name="wmo_drizzle">Ψιχάλισμα</string>
+    <string name="wmo_drizzle_dense">Έντονο ψιχάλισμα</string>
+    <string name="wmo_freezing_drizzle">Παγωμένο ψιχάλισμα</string>
+    <string name="wmo_rain_light">Ασθενής βροχή</string>
+    <string name="wmo_rain">Βροχή</string>
+    <string name="wmo_rain_heavy">Ισχυρή βροχή</string>
+    <string name="wmo_freezing_rain">Παγωμένη βροχή</string>
+    <string name="wmo_snow_light">Ασθενής χιονόπτωση</string>
+    <string name="wmo_snow">Χιόνι</string>
+    <string name="wmo_snow_heavy">Ισχυρή χιονόπτωση</string>
+    <string name="wmo_snow_grains">Χιονόκοκκοι</string>
+    <string name="wmo_showers_light">Ασθενείς μπόρες</string>
+    <string name="wmo_showers">Μπόρες</string>
+    <string name="wmo_showers_violent">Ισχυρές μπόρες</string>
+    <string name="wmo_snow_showers_light">Ασθενείς χιονοπτώσεις</string>
+    <string name="wmo_snow_showers">Χιονοπτώσεις</string>
+    <string name="wmo_thunderstorm">Καταιγίδα</string>
+    <string name="wmo_thunderstorm_hail">Καταιγίδα με χαλάζι</string>
+</resources>

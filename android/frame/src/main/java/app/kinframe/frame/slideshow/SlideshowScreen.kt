@@ -384,13 +384,18 @@ private fun ClockWidget(
 private fun NewPhotosPill(c: FrameController, modifier: Modifier) {
     val n by c.slideshow.newCount.collectAsState()
     AnimatedVisibility(n > 0, modifier.padding(top = 24.dp), enter = fadeIn() + slideInVertically { -it }, exit = fadeOut() + slideOutVertically { -it }) {
-        Row(
-            Modifier.clip(CircleShape).background(Kin.colors.accent).clickable { c.slideshow.showNew() }.padding(horizontal = 24.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            KinIcon(KinIcons.Image, null, tint = Color.White, size = 22.dp)
-            Text(pluralStringResource(R.plurals.new_photos, n, n), style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 10.dp))
-        }
+        NewPhotosPillContent(n) { c.slideshow.showNew() }
+    }
+}
+
+@Composable
+internal fun NewPhotosPillContent(n: Int, onClick: () -> Unit) {
+    Row(
+        Modifier.clip(CircleShape).background(Kin.colors.accent).clickable(onClick = onClick).padding(horizontal = 24.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        KinIcon(KinIcons.Image, null, tint = Color.White, size = 22.dp)
+        Text(pluralStringResource(R.plurals.new_photos, n, n), style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 10.dp))
     }
 }
 
@@ -436,7 +441,7 @@ private fun ReactionBurst(reaction: String, at: Offset, onDone: () -> Unit) {
 }
 
 @Composable
-private fun UndoSnackbar(s: Snack, modifier: Modifier, onUndo: () -> Unit, onTimeout: () -> Unit) {
+internal fun UndoSnackbar(s: Snack, modifier: Modifier, onUndo: () -> Unit, onTimeout: () -> Unit) {
     LaunchedEffect(Unit) { delay(UNDO_MS - 300); onTimeout() }
     Row(
         modifier.clip(CircleShape).background(Color(0xF02E2621)).padding(start = 28.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
@@ -500,6 +505,45 @@ private fun QuickMenu(
     val conn by c.connection.collectAsState()
     val net by c.g.network.status.collectAsState()
     val sync by c.syncState.collectAsState()
+    val p = current
+    QuickMenuContent(
+        visible = visible,
+        compact = compact,
+        frameName = sync?.frameName ?: stringResource(R.string.frame_default_name),
+        status = when {
+            !net.connected -> stringResource(R.string.status_offline)
+            conn == FrameSession.Connection.Online -> stringResource(R.string.status_online, net.ssid ?: stringResource(R.string.wifi_network))
+            else -> stringResource(R.string.status_server_unreachable)
+        },
+        wifiIcon = if (net.connected) (if (net.level >= 2) KinIcons.Wifi else KinIcons.WifiWeak) else KinIcons.WifiOff,
+        hasPhoto = p != null,
+        reaction = p?.reaction,
+        onTouch = onTouch,
+        onReact = onReact,
+        onHide = { p?.let(onHide) },
+        onDelete = { p?.let(onDelete) },
+        onPower = onPower,
+        onSettings = onSettings,
+    )
+}
+
+/** The quick menu's bars without the controller (also rendered by the screenshot tests). */
+@Composable
+internal fun QuickMenuContent(
+    visible: Boolean,
+    compact: Boolean,
+    frameName: String,
+    status: String,
+    wifiIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    hasPhoto: Boolean,
+    reaction: String?,
+    onTouch: () -> Unit,
+    onReact: (String?) -> Unit,
+    onHide: () -> Unit,
+    onDelete: () -> Unit,
+    onPower: () -> Unit,
+    onSettings: () -> Unit,
+) {
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(visible, Modifier.align(Alignment.TopCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { -it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { -it / 2 }) {
             Row(
@@ -508,15 +552,11 @@ private fun QuickMenu(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
-                    Text(sync?.frameName ?: stringResource(R.string.frame_default_name), style = Kin.type.title, color = Color.White)
+                    Text(frameName, style = Kin.type.title, color = Color.White, maxLines = 2)
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                        KinIcon(if (net.connected) (if (net.level >= 2) KinIcons.Wifi else KinIcons.WifiWeak) else KinIcons.WifiOff, null, tint = Color.White.copy(alpha = 0.85f), size = 20.dp)
+                        KinIcon(wifiIcon, null, tint = Color.White.copy(alpha = 0.85f), size = 20.dp)
                         Text(
-                            when {
-                                !net.connected -> stringResource(R.string.status_offline)
-                                conn == FrameSession.Connection.Online -> stringResource(R.string.status_online, net.ssid ?: stringResource(R.string.wifi_network))
-                                else -> stringResource(R.string.status_server_unreachable)
-                            },
+                            status,
                             style = Kin.type.caption, color = Color.White.copy(alpha = 0.85f), modifier = Modifier.padding(start = 8.dp),
                         )
                     }
@@ -526,9 +566,8 @@ private fun QuickMenu(
                 RoundAction(KinIcons.Power, stringResource(R.string.menu_power)) { onTouch(); onPower() }
             }
         }
-        val p = current
-        AnimatedVisibility(visible && p != null, Modifier.align(Alignment.BottomCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { it / 2 }) {
-            if (p != null) {
+        AnimatedVisibility(visible && hasPhoto, Modifier.align(Alignment.BottomCenter), enter = fadeIn(tween(220)) + slideInVertically(tween(260)) { it / 2 }, exit = fadeOut(tween(200)) + slideOutVertically(tween(220)) { it / 2 }) {
+            run {
                 Row(
                     // Float above the caption + sender line (drawn into the bottom of the slide) instead of covering it.
                     Modifier.padding(bottom = 112.dp).clip(KinShapeL).background(Color(0xE61C1714)).padding(horizontal = 20.dp, vertical = 16.dp),
@@ -536,7 +575,7 @@ private fun QuickMenu(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Reaction.all.forEach { r ->
-                        val selected = p.reaction == r
+                        val selected = reaction == r
                         Box(
                             Modifier.size(64.dp).clip(CircleShape)
                                 .background(if (selected) Color.White.copy(alpha = 0.95f) else Color.White.copy(alpha = 0.1f))
@@ -545,8 +584,8 @@ private fun QuickMenu(
                         ) { Text(reactionEmoji(r), fontSize = 30.sp) }
                     }
                     Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
-                    PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide(p) }
-                    PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete(p) }
+                    PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide() }
+                    PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete() }
                 }
             }
         }
@@ -579,21 +618,7 @@ private fun PillAction(icon: androidx.compose.ui.graphics.vector.ImageVector, la
 private fun EmptyStateView(c: FrameController, state: EmptyState) {
     BoxWithConstraints(Modifier.fillMaxSize().background(Kin.colors.paper)) {
         val landscape = maxWidth > maxHeight
-        val message = @Composable {
-            Column(Modifier.widthIn(max = 560.dp)) {
-                EmptyIllustration()
-                Spacer(Modifier.height(36.dp))
-                when (state) {
-                    EmptyState.NoPhotos -> KinHeading(stringResource(R.string.empty_title), stringResource(R.string.empty_body))
-                    EmptyState.AllHidden -> KinHeading(stringResource(R.string.empty_hidden_title), stringResource(R.string.empty_hidden_body))
-                    is EmptyState.Downloading -> {
-                        KinHeading(stringResource(R.string.empty_downloading_title), pluralStringResource(R.plurals.empty_downloading_body, state.total, state.total))
-                        Spacer(Modifier.height(20.dp))
-                        CircularProgressIndicator(Modifier.size(28.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
-                    }
-                }
-            }
-        }
+        val message = @Composable { EmptyMessage(state) }
         if (landscape) {
             Row(Modifier.fillMaxSize().padding(horizontal = 72.dp, vertical = 56.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(64.dp)) {
                 Box(Modifier.weight(1f)) { message() }
@@ -607,6 +632,23 @@ private fun EmptyStateView(c: FrameController, state: EmptyState) {
             ) {
                 message()
                 if (state == EmptyState.NoPhotos) EmptyCodeCard(c)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun EmptyMessage(state: EmptyState) {
+    Column(Modifier.widthIn(max = 560.dp)) {
+        EmptyIllustration()
+        Spacer(Modifier.height(36.dp))
+        when (state) {
+            EmptyState.NoPhotos -> KinHeading(stringResource(R.string.empty_title), stringResource(R.string.empty_body))
+            EmptyState.AllHidden -> KinHeading(stringResource(R.string.empty_hidden_title), stringResource(R.string.empty_hidden_body))
+            is EmptyState.Downloading -> {
+                KinHeading(stringResource(R.string.empty_downloading_title), pluralStringResource(R.plurals.empty_downloading_body, state.total, state.total))
+                Spacer(Modifier.height(20.dp))
+                CircularProgressIndicator(Modifier.size(28.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
             }
         }
     }

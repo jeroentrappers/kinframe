@@ -38,7 +38,15 @@ import kotlinx.coroutines.launch
 
 /** Power menu (product spec 4.7): sleep now, restart, power off. */
 @Composable
-fun PowerDialog(c: FrameController, onDismiss: () -> Unit) {
+fun PowerDialog(c: FrameController, onDismiss: () -> Unit) = PowerDialogContent(
+    onSleep = { c.display.sleepNow() },
+    onRestart = { c.scope.launch { c.power.restart() } },
+    onPowerOff = { c.scope.launch { c.power.powerOff() } },
+    onDismiss = onDismiss,
+)
+
+@Composable
+internal fun PowerDialogContent(onSleep: () -> Unit, onRestart: () -> Unit, onPowerOff: () -> Unit, onDismiss: () -> Unit) {
     Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f)).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
         KinCard(Modifier.clickable(enabled = false) {}, padding = 32.dp) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -46,13 +54,13 @@ fun PowerDialog(c: FrameController, onDismiss: () -> Unit) {
                 Spacer(Modifier.height(28.dp))
                 val options = @Composable { compact: Boolean ->
                     PowerOption(KinIcons.Moon, stringResource(R.string.power_sleep), stringResource(R.string.power_sleep_body), compact) {
-                        onDismiss(); c.display.sleepNow()
+                        onDismiss(); onSleep()
                     }
                     PowerOption(KinIcons.Restart, stringResource(R.string.power_restart), stringResource(R.string.power_restart_body), compact) {
-                        onDismiss(); c.scope.launch { c.power.restart() }
+                        onDismiss(); onRestart()
                     }
                     PowerOption(KinIcons.Power, stringResource(R.string.power_off), stringResource(R.string.power_off_body), compact) {
-                        onDismiss(); c.scope.launch { c.power.powerOff() }
+                        onDismiss(); onPowerOff()
                     }
                 }
                 androidx.compose.foundation.layout.BoxWithConstraints {
@@ -86,7 +94,7 @@ private fun PowerOption(icon: ImageVector, title: String, body: String, compact:
         return
     }
     KinCard(Modifier.width(250.dp).fillMaxHeight(), onClick = onClick, padding = 24.dp) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.size(72.dp).clip(CircleShape).background(Kin.colors.accentSoft), contentAlignment = Alignment.Center) {
                 KinIcon(icon, null, tint = Kin.colors.accent, size = 34.dp)
             }

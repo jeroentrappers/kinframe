@@ -94,7 +94,7 @@ class SetupController(private val c: FrameController) {
         }
     }
 
-    fun chooseLanguage(lang: String) { g.prefs.language = lang }
+    fun chooseLanguage(lang: String) = c.setLanguage(lang)
 
     fun setUseCustom(custom: Boolean) = _state.update { it.copy(useCustomServer = custom, check = ServerCheck.Idle) }
     fun setCustomUrl(url: String) = _state.update { it.copy(customUrl = url, check = ServerCheck.Idle) }

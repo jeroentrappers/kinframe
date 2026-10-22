@@ -127,6 +127,7 @@
     <string name="recovery_clear">Gedownloade foto\'s wissen</string>
 
     <string name="settings_title">Instellingen</string>
+    <string name="settings_language">Taal</string>
     <string name="settings_slideshow">Diavoorstelling</string>
     <string name="settings_interval">Elke foto tonen gedurende</string>
     <string name="settings_transition">Overgang</string>

@@ -117,7 +117,7 @@ object DeviceInfo {
             ),
             screen = screen(context),
             app = DeviceAppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
-            locale = Locale.getDefault().toLanguageTag(),
+            locale = app.kinframe.frame.Locales.effective(context),
             timezone = TimeZone.getDefault().id,
         )
     }

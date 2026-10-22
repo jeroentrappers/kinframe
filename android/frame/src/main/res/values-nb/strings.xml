@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotoramme</string>
+
+    <!-- Vanlige handlinger -->
+    <string name="action_back">Tilbake</string>
+    <string name="action_cancel">Avbryt</string>
+    <string name="action_continue">Fortsett</string>
+    <string name="action_try_again">Prøv igjen</string>
+    <string name="action_undo">Angre</string>
+
+    <!-- Oppsett: språk -->
+    <string name="setup_welcome_title">Velkommen til kinframe</string>
+    <string name="setup_language_body">Velg språk for denne fotorammen.</string>
+
+    <!-- Oppsett: Wi-Fi -->
+    <string name="setup_wifi_title">Koble til Wi-Fi</string>
+    <string name="setup_wifi_body">Fotorammen trenger Wi-Fi for å motta bilder. Når de først er her, vises de også uten tilkobling.</string>
+    <string name="wifi_connected_to">Koblet til %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Ikke tilkoblet</string>
+    <string name="wifi_not_connected_hint">Velg et nettverk for å fortsette.</string>
+    <string name="wifi_no_internet">Tilkoblet, men ikke internett ennå</string>
+    <string name="wifi_signal">Signal: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi-innstillinger</string>
+    <string name="wifi_networks">Nettverk i nærheten</string>
+    <string name="wifi_scanning">Søker etter nettverk…</string>
+    <string name="wifi_permission_body">For å vise nettverk her trenger Android tillatelse til å søke etter Wi-Fi.</string>
+    <string name="wifi_show_networks">Vis nettverk</string>
+    <string name="wifi_password">Passord</string>
+    <string name="wifi_join">Koble til</string>
+    <string name="signal_0">svært svakt</string>
+    <string name="signal_1">svakt</string>
+    <string name="signal_2">middels</string>
+    <string name="signal_3">godt</string>
+    <string name="signal_4">utmerket</string>
+
+    <!-- Oppsett: server -->
+    <string name="setup_server_title">Velg en server</string>
+    <string name="setup_server_body">Bildene går via en kinframe-server. Bruk den gratis kinframe-serveren, eller en som familien din drifter.</string>
+    <string name="server_default_body">Gratis og åpen kildekode. Anbefalt.</string>
+    <string name="server_custom">Bruk egen server</string>
+    <string name="server_custom_body">For familier som drifter kinframe selv.</string>
+    <string name="server_address">Serveradresse</string>
+    <string name="server_check">Sjekk serveren</string>
+    <string name="server_checking">Sjekker serveren…</string>
+    <string name="server_version">versjon %1$s</string>
+    <string name="server_insecure">ikke kryptert</string>
+    <string name="server_error_invalid">Det ser ikke ut som en nettadresse. Prøv noe som https://rammer.eksempel.no.</string>
+    <string name="server_error_unreachable">Fikk ikke kontakt med serveren. Sjekk adressen og at fotorammen er på nett.</string>
+    <string name="server_error_not_kinframe">Serveren svarte, men det er ikke en kinframe-server.</string>
+
+    <!-- Oppsett: registrering -->
+    <string name="enroll_title">Gjør klar fotorammen…</string>
+    <string name="enroll_body">Dette tar noen sekunder.</string>
+    <string name="enroll_failed_title">Fotorammen kunne ikke registreres</string>
+    <string name="enroll_failed_body">Serveren svarte: %1$s</string>
+
+    <!-- Oppsett: rammekode -->
+    <string name="code_title">Koble fotorammen til familien din</string>
+    <string name="code_step1">Åpne kinframe-appen, eller %1$s i en nettleser</string>
+    <string name="code_step2">Velg Legg til fotoramme</string>
+    <string name="code_step3">Skriv inn denne koden, eller skann QR-koden</string>
+    <string name="code_valid_for">Gyldig i %1$s</string>
+    <string name="code_waiting">Venter på at noen skriver inn koden</string>
+    <string name="code_offline_title">Fotorammen er frakoblet</string>
+    <string name="code_offline_body">Rammekoden krever internettilkobling. Sjekk Wi-Fi.</string>
+    <string name="code_error_title">Fikk ikke en rammekode</string>
+    <string name="code_error_body">Serveren svarte ikke. Fotorammen fortsetter å prøve.</string>
+
+    <!-- Oppsett: ferdig -->
+    <string name="celebrate_title">Koblet til %1$s</string>
+    <string name="celebrate_title_anon">Tilkoblet</string>
+    <string name="celebrate_body">Bilder som sendes til fotorammen, vises her i løpet av sekunder.</string>
+
+    <!-- Varighet og datoer -->
+    <string name="duration_h_min">%1$d t %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">I dag</string>
+    <string name="date_yesterday">I går</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">for %d dag siden</item>
+        <item quantity="other">for %d dager siden</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d t</string>
+
+    <!-- Lysbildefremvisning -->
+    <string name="caption_edited">redigert</string>
+    <string name="unable_photo">Kan ikke vise dette bildet</string>
+    <string name="unable_video">Kan ikke spille av denne videoen. Be avsenderen sende den på nytt.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d nytt bilde</item>
+        <item quantity="other">%d nye bilder</item>
+    </plurals>
+    <string name="status_offline">Frakoblet</string>
+    <string name="status_online">På nett · %1$s</string>
+    <string name="status_server_unreachable">Får ikke kontakt med serveren</string>
+    <string name="identify_this_is">Dette er</string>
+    <string name="snack_hidden">Bildet er skjult</string>
+    <string name="snack_deleted">Bildet er slettet</string>
+    <string name="menu_settings">Innstillinger</string>
+    <string name="menu_power">Av/på</string>
+    <string name="menu_hide">Skjul</string>
+    <string name="menu_delete">Slett</string>
+
+    <!-- Tomme visninger -->
+    <string name="empty_title">Ingen bilder ennå</string>
+    <string name="empty_body">Bilder og videoer som sendes med kinframe-appen eller -nettstedet, vises her i løpet av sekunder.</string>
+    <string name="empty_code_title">Legg til familien med denne koden</string>
+    <string name="empty_code_body">Skriv den inn i kinframe-appen, eller skann QR-koden.</string>
+    <string name="empty_hidden_title">Alle bildene er skjult</string>
+    <string name="empty_hidden_body">Skjulte bilder blir liggende i biblioteket. Vis dem igjen fra kinframe-appen.</string>
+    <string name="empty_downloading_title">Bildene er på vei</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d bilde lastes ned.</item>
+        <item quantity="other">%d bilder lastes ned.</item>
+    </plurals>
+
+    <!-- Av/på -->
+    <string name="power_title">Av/på</string>
+    <string name="power_sleep">Hvilemodus</string>
+    <string name="power_sleep_body">Skjermen er av til du tar på den.</string>
+    <string name="power_restart">Start på nytt</string>
+    <string name="power_restart_body">Start fotorammen på nytt.</string>
+    <string name="power_off">Slå av</string>
+    <string name="power_off_body">Slå av trygt før du trekker ut ledningen.</string>
+    <string name="shutting_down_title">Slår av…</string>
+    <string name="restarting_title">Starter på nytt…</string>
+    <string name="shutting_down_body">Lagrer alt trygt.</string>
+    <string name="safe_title">Nå kan du trekke ut ledningen</string>
+    <string name="safe_body">Alt er lagret. Trykk på av/på-knappen eller sett inn ledningen igjen for å bruke fotorammen.</string>
+    <string name="safe_body_noroot">kinframe har lagret alt. Du kan trekke ut ledningen nå.</string>
+
+    <!-- Gjenoppretting -->
+    <string name="recovery_title">kinframe hadde problemer med å vise bilder</string>
+    <string name="recovery_body">Appen stoppet uventet flere ganger på rad. Prøv igjen, eller tøm de nedlastede bildene. De lastes ned fra serveren på nytt, ingenting går tapt.</string>
+    <string name="recovery_clear">Tøm nedlastede bilder</string>
+
+    <!-- Innstillinger -->
+    <string name="settings_title">Innstillinger</string>
+    <string name="settings_language">Språk</string>
+    <string name="settings_slideshow">Lysbildefremvisning</string>
+    <string name="settings_interval">Vis hvert bilde i</string>
+    <string name="settings_transition">Overgang</string>
+    <string name="transition_crossfade">Ton over</string>
+    <string name="transition_slide">Skyv</string>
+    <string name="settings_order">Rekkefølge</string>
+    <string name="order_received">Sist mottatt</string>
+    <string name="order_taken">Dato tatt</string>
+    <string name="order_shuffle">Tilfeldig</string>
+    <string name="settings_reverse">Eldste først</string>
+    <string name="settings_fill">Bildestørrelse</string>
+    <string name="fill_fill">Fyll skjermen</string>
+    <string name="fill_fit">Vis hele bildet</string>
+    <string name="settings_display">Skjerm</string>
+    <string name="settings_brightness">Lysstyrke</string>
+    <string name="settings_brightness_mode">Automatisk lysstyrke</string>
+    <string name="brightness_manual">Fast</string>
+    <string name="brightness_sun">Følg solen</string>
+    <string name="settings_sleep">Hvilemodus</string>
+    <string name="settings_sleep_enabled">Slå av skjermen om natten</string>
+    <string name="settings_sleep_at">Hvile kl.</string>
+    <string name="settings_wake_at">Våkne kl.</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">og %d tidsplan til, styres i kinframe-appen</item>
+        <item quantity="other">og %d tidsplaner til, styres i kinframe-appen</item>
+    </plurals>
+    <string name="settings_about">Denne fotorammen</string>
+    <string name="about_frame">Navn</string>
+    <string name="about_server">Server</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Appversjon</string>
+    <string name="about_android_settings">Android-innstillinger</string>
+    <string name="settings_updates">Oppdateringer</string>
+    <string name="updates_channel">Kanal</string>
+    <string name="updates_channel_stable">Stabil</string>
+    <string name="updates_channel_beta">Beta (prøv nye versjoner tidlig)</string>
+    <string name="updates_check">Se etter oppdatering</string>
+    <string name="updates_install_now">Installer nå</string>
+    <string name="updates_checking">Ser etter oppdateringer…</string>
+    <string name="updates_up_to_date">Fotorammen er oppdatert.</string>
+    <string name="updates_downloading">Laster ned versjon %1$s… %2$d %%</string>
+    <string name="updates_waiting">Versjon %1$s er klar. Den installeres når ingen bruker fotorammen.</string>
+    <string name="updates_installing">Installerer versjon %1$s. Fotorammen starter på nytt om et øyeblikk.</string>
+    <string name="updates_failed">Oppdateringen mislyktes. Fotorammen prøver igjen senere.</string>
+    <string name="update_notice_updated">Oppdatert til versjon %1$s</string>
+    <string name="update_notice_rolled_back">Den nye versjonen hadde problemer, så fotorammen gikk tilbake til den forrige.</string>
+    <string name="update_notice_needs_user">En oppdatering er klar. Trykk på Installer for å fortsette.</string>
+
+    <!-- Vær (data fra serveren, som henter fra Open-Meteo) -->
+    <string name="weather_show_forecast">Vis værvarselet</string>
+    <string name="weather_close">Lukk</string>
+    <string name="weather_now">Nå</string>
+    <string name="weather_today">I dag</string>
+    <string name="weather_feels_like">Føles som %1$s</string>
+    <string name="weather_high_low">maks %1$s · min %2$s</string>
+    <string name="weather_wind">Vind</string>
+    <string name="weather_humidity">Luftfuktighet</string>
+    <string name="weather_sunrise">Soloppgang</string>
+    <string name="weather_sunset">Solnedgang</string>
+    <string name="weather_next_hours">Neste 24 timer</string>
+    <string name="weather_next_days">Varsel for 7 dager</string>
+    <string name="weather_updated">Oppdatert %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NØ</item>
+        <item>Ø</item>
+        <item>SØ</item>
+        <item>S</item>
+        <item>SV</item>
+        <item>V</item>
+        <item>NV</item>
+    </string-array>
+    <string name="wmo_clear_day">Sol</string>
+    <string name="wmo_clear_night">Klarvær</string>
+    <string name="wmo_mainly_clear_day">For det meste sol</string>
+    <string name="wmo_mainly_clear_night">For det meste klart</string>
+    <string name="wmo_partly_cloudy">Delvis skyet</string>
+    <string name="wmo_overcast">Skyet</string>
+    <string name="wmo_fog">Tåke</string>
+    <string name="wmo_rime_fog">Underkjølt tåke</string>
+    <string name="wmo_drizzle_light">Lett yr</string>
+    <string name="wmo_drizzle">Yr</string>
+    <string name="wmo_drizzle_dense">Kraftig yr</string>
+    <string name="wmo_freezing_drizzle">Underkjølt yr</string>
+    <string name="wmo_rain_light">Lett regn</string>
+    <string name="wmo_rain">Regn</string>
+    <string name="wmo_rain_heavy">Kraftig regn</string>
+    <string name="wmo_freezing_rain">Underkjølt regn</string>
+    <string name="wmo_snow_light">Lett snø</string>
+    <string name="wmo_snow">Snø</string>
+    <string name="wmo_snow_heavy">Kraftig snø</string>
+    <string name="wmo_snow_grains">Kornsnø</string>
+    <string name="wmo_showers_light">Lette regnbyger</string>
+    <string name="wmo_showers">Regnbyger</string>
+    <string name="wmo_showers_violent">Kraftige regnbyger</string>
+    <string name="wmo_snow_showers_light">Lette snøbyger</string>
+    <string name="wmo_snow_showers">Snøbyger</string>
+    <string name="wmo_thunderstorm">Torden</string>
+    <string name="wmo_thunderstorm_hail">Torden med hagl</string>
+</resources>

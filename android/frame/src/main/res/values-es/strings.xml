@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Marco de fotos</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Atrás</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_continue">Continuar</string>
+    <string name="action_try_again">Reintentar</string>
+    <string name="action_undo">Deshacer</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">Te damos la bienvenida a kinframe</string>
+    <string name="setup_language_body">Elige el idioma de este marco.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Conéctate a una red Wi-Fi</string>
+    <string name="setup_wifi_body">El marco necesita Wi-Fi para recibir fotos. Una vez descargadas, también se muestran sin conexión.</string>
+    <string name="wifi_connected_to">Conectado a %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Sin conexión</string>
+    <string name="wifi_not_connected_hint">Elige una red para continuar.</string>
+    <string name="wifi_no_internet">Conectado, pero aún sin internet</string>
+    <string name="wifi_signal">Señal: %1$s</string>
+    <string name="wifi_open_settings">Ajustes de Wi-Fi</string>
+    <string name="wifi_networks">Redes cercanas</string>
+    <string name="wifi_scanning">Buscando redes…</string>
+    <string name="wifi_permission_body">Para mostrar las redes aquí, Android necesita permiso para buscar redes Wi-Fi.</string>
+    <string name="wifi_show_networks">Mostrar redes</string>
+    <string name="wifi_password">Contraseña</string>
+    <string name="wifi_join">Conectar</string>
+    <string name="signal_0">muy débil</string>
+    <string name="signal_1">débil</string>
+    <string name="signal_2">aceptable</string>
+    <string name="signal_3">buena</string>
+    <string name="signal_4">excelente</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Elige un servidor</string>
+    <string name="setup_server_body">Las fotos pasan por un servidor de kinframe. Usa el servidor gratuito de kinframe o uno que gestione tu familia.</string>
+    <string name="server_default_body">Gratuito y de código abierto. Recomendado.</string>
+    <string name="server_custom">Usar tu propio servidor</string>
+    <string name="server_custom_body">Para familias que alojan kinframe por su cuenta.</string>
+    <string name="server_address">Dirección del servidor</string>
+    <string name="server_check">Comprobar servidor</string>
+    <string name="server_checking">Comprobando el servidor…</string>
+    <string name="server_version">versión %1$s</string>
+    <string name="server_insecure">sin cifrar</string>
+    <string name="server_error_invalid">No parece una dirección web. Prueba algo como https://frames.example.org.</string>
+    <string name="server_error_unreachable">No se ha podido conectar con este servidor. Comprueba la dirección y que el marco esté conectado.</string>
+    <string name="server_error_not_kinframe">Este servidor ha respondido, pero no es un servidor de kinframe.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Preparando tu marco…</string>
+    <string name="enroll_body">Solo tardará unos segundos.</string>
+    <string name="enroll_failed_title">No se ha podido registrar el marco</string>
+    <string name="enroll_failed_body">Respuesta del servidor: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Conecta este marco con tu familia</string>
+    <string name="code_step1">Abre la app kinframe o %1$s en un navegador</string>
+    <string name="code_step2">Elige Añadir un marco</string>
+    <string name="code_step3">Introduce este código o escanea el código QR</string>
+    <string name="code_valid_for">Válido durante %1$s</string>
+    <string name="code_waiting">Esperando a que alguien introduzca el código</string>
+    <string name="code_offline_title">El marco no tiene conexión</string>
+    <string name="code_offline_body">El código del marco necesita conexión a internet. Comprueba el Wi-Fi.</string>
+    <string name="code_error_title">No se ha podido obtener un código</string>
+    <string name="code_error_body">El servidor no ha respondido. El marco lo seguirá intentando.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Conectado a %1$s</string>
+    <string name="celebrate_title_anon">Conectado</string>
+    <string name="celebrate_body">Las fotos que se envíen a este marco aparecerán aquí en segundos.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Hoy</string>
+    <string name="date_yesterday">Ayer</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">Hace %d día</item>
+        <item quantity="many">Hace %d de días</item>
+        <item quantity="other">Hace %d días</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">editado</string>
+    <string name="unable_photo">No se puede mostrar esta foto</string>
+    <string name="unable_video">No se puede reproducir este vídeo. Pide a quien lo envió que lo vuelva a enviar.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d foto nueva</item>
+        <item quantity="many">%d de fotos nuevas</item>
+        <item quantity="other">%d fotos nuevas</item>
+    </plurals>
+    <string name="status_offline">Sin conexión</string>
+    <string name="status_online">Conectado · %1$s</string>
+    <string name="status_server_unreachable">No se puede conectar con el servidor</string>
+    <string name="identify_this_is">Este es</string>
+    <string name="snack_hidden">Foto ocultada</string>
+    <string name="snack_deleted">Foto eliminada</string>
+    <string name="menu_settings">Ajustes</string>
+    <string name="menu_power">Apagado</string>
+    <string name="menu_hide">Ocultar</string>
+    <string name="menu_delete">Eliminar</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Aún no hay fotos</string>
+    <string name="empty_body">Las fotos y los vídeos enviados con la app o la web de kinframe aparecen aquí en segundos.</string>
+    <string name="empty_code_title">Añade a tu familia con este código</string>
+    <string name="empty_code_body">Introdúcelo en la app kinframe o escanea el código QR.</string>
+    <string name="empty_hidden_title">Todas las fotos están ocultas</string>
+    <string name="empty_hidden_body">Las fotos ocultas siguen en la biblioteca. Puedes volver a mostrarlas desde la app kinframe.</string>
+    <string name="empty_downloading_title">Las fotos están en camino</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">Descargando %d foto.</item>
+        <item quantity="many">Descargando %d de fotos.</item>
+        <item quantity="other">Descargando %d fotos.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Apagado</string>
+    <string name="power_sleep">Reposo</string>
+    <string name="power_sleep_body">Pantalla apagada hasta que la toques.</string>
+    <string name="power_restart">Reiniciar</string>
+    <string name="power_restart_body">Vuelve a iniciar el marco.</string>
+    <string name="power_off">Apagar</string>
+    <string name="power_off_body">Apágalo de forma segura antes de desenchufarlo.</string>
+    <string name="shutting_down_title">Apagando…</string>
+    <string name="restarting_title">Reiniciando…</string>
+    <string name="shutting_down_body">Guardándolo todo de forma segura.</string>
+    <string name="safe_title">Ya puedes desenchufarlo</string>
+    <string name="safe_body">Todo está guardado. Para volver a usar el marco, pulsa el botón de encendido o vuelve a enchufarlo.</string>
+    <string name="safe_body_noroot">kinframe lo ha guardado todo. Ya puedes desenchufar el marco.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe ha tenido problemas para mostrar las fotos</string>
+    <string name="recovery_body">Se ha detenido inesperadamente varias veces seguidas. Vuelve a intentarlo o borra las fotos descargadas. Se volverán a descargar del servidor; no se pierde nada.</string>
+    <string name="recovery_clear">Borrar fotos descargadas</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_language">Idioma</string>
+    <string name="settings_slideshow">Presentación</string>
+    <string name="settings_interval">Mostrar cada foto durante</string>
+    <string name="settings_transition">Transición</string>
+    <string name="transition_crossfade">Fundido</string>
+    <string name="transition_slide">Deslizar</string>
+    <string name="settings_order">Orden</string>
+    <string name="order_received">Recibidas recientemente</string>
+    <string name="order_taken">Fecha de captura</string>
+    <string name="order_shuffle">Aleatorio</string>
+    <string name="settings_reverse">Más antiguas primero</string>
+    <string name="settings_fill">Tamaño de la foto</string>
+    <string name="fill_fill">Llenar la pantalla</string>
+    <string name="fill_fit">Mostrar la foto entera</string>
+    <string name="settings_display">Pantalla</string>
+    <string name="settings_brightness">Brillo</string>
+    <string name="settings_brightness_mode">Brillo automático</string>
+    <string name="brightness_manual">Fijo</string>
+    <string name="brightness_sun">Según el sol</string>
+    <string name="settings_sleep">Reposo</string>
+    <string name="settings_sleep_enabled">Apagar la pantalla por la noche</string>
+    <string name="settings_sleep_at">Reposo a las</string>
+    <string name="settings_wake_at">Encender a las</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">y %d horario más, gestionado en la app kinframe</item>
+        <item quantity="many">y %d de horarios más, gestionados en la app kinframe</item>
+        <item quantity="other">y %d horarios más, gestionados en la app kinframe</item>
+    </plurals>
+    <string name="settings_about">Este marco</string>
+    <string name="about_frame">Nombre</string>
+    <string name="about_server">Servidor</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Versión de la app</string>
+    <string name="about_android_settings">Ajustes de Android</string>
+    <string name="settings_updates">Actualizaciones</string>
+    <string name="updates_channel">Canal</string>
+    <string name="updates_channel_stable">Estable</string>
+    <string name="updates_channel_beta">Beta (prueba antes las novedades)</string>
+    <string name="updates_check">Buscar actualizaciones</string>
+    <string name="updates_install_now">Instalar ahora</string>
+    <string name="updates_checking">Buscando actualizaciones…</string>
+    <string name="updates_up_to_date">Este marco está actualizado.</string>
+    <string name="updates_downloading">Descargando la versión %1$s… %2$d%%</string>
+    <string name="updates_waiting">La versión %1$s está lista. Se instalará cuando nadie esté usando el marco.</string>
+    <string name="updates_installing">Instalando la versión %1$s. El marco se reiniciará en un momento.</string>
+    <string name="updates_failed">La actualización no ha funcionado. El marco lo volverá a intentar más tarde.</string>
+    <string name="update_notice_updated">Actualizado a la versión %1$s</string>
+    <string name="update_notice_rolled_back">La nueva versión daba problemas, así que el marco ha vuelto a la anterior.</string>
+    <string name="update_notice_needs_user">Hay una actualización lista. Toca Instalar para continuar.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Ver la previsión</string>
+    <string name="weather_close">Cerrar</string>
+    <string name="weather_now">Ahora</string>
+    <string name="weather_today">Hoy</string>
+    <string name="weather_feels_like">Sensación de %1$s</string>
+    <string name="weather_high_low">Máx. %1$s · Mín. %2$s</string>
+    <string name="weather_wind">Viento</string>
+    <string name="weather_humidity">Humedad</string>
+    <string name="weather_sunrise">Amanecer</string>
+    <string name="weather_sunset">Atardecer</string>
+    <string name="weather_next_hours">Próximas 24 horas</string>
+    <string name="weather_next_days">Previsión a 7 días</string>
+    <string name="weather_updated">Actualizado: %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SO</item>
+        <item>O</item>
+        <item>NO</item>
+    </string-array>
+    <string name="wmo_clear_day">Soleado</string>
+    <string name="wmo_clear_night">Despejado</string>
+    <string name="wmo_mainly_clear_day">Mayormente soleado</string>
+    <string name="wmo_mainly_clear_night">Mayormente despejado</string>
+    <string name="wmo_partly_cloudy">Parcialmente nublado</string>
+    <string name="wmo_overcast">Nublado</string>
+    <string name="wmo_fog">Niebla</string>
+    <string name="wmo_rime_fog">Niebla helada</string>
+    <string name="wmo_drizzle_light">Llovizna ligera</string>
+    <string name="wmo_drizzle">Llovizna</string>
+    <string name="wmo_drizzle_dense">Llovizna intensa</string>
+    <string name="wmo_freezing_drizzle">Llovizna helada</string>
+    <string name="wmo_rain_light">Lluvia ligera</string>
+    <string name="wmo_rain">Lluvia</string>
+    <string name="wmo_rain_heavy">Lluvia intensa</string>
+    <string name="wmo_freezing_rain">Lluvia helada</string>
+    <string name="wmo_snow_light">Nieve ligera</string>
+    <string name="wmo_snow">Nieve</string>
+    <string name="wmo_snow_heavy">Nieve intensa</string>
+    <string name="wmo_snow_grains">Cinarra</string>
+    <string name="wmo_showers_light">Chubascos ligeros</string>
+    <string name="wmo_showers">Chubascos</string>
+    <string name="wmo_showers_violent">Chubascos fuertes</string>
+    <string name="wmo_snow_showers_light">Chubascos de nieve ligeros</string>
+    <string name="wmo_snow_showers">Chubascos de nieve</string>
+    <string name="wmo_thunderstorm">Tormenta</string>
+    <string name="wmo_thunderstorm_hail">Tormenta con granizo</string>
+</resources>

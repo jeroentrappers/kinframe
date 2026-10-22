@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Fotoğraf çerçevesi</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Geri</string>
+    <string name="action_cancel">İptal</string>
+    <string name="action_continue">Devam</string>
+    <string name="action_try_again">Tekrar dene</string>
+    <string name="action_undo">Geri al</string>
+
+    <!-- Setup: language -->
+    <string name="setup_welcome_title">kinframe\'e hoş geldiniz</string>
+    <string name="setup_language_body">Bu çerçevenin dilini seçin.</string>
+
+    <!-- Setup: Wi-Fi -->
+    <string name="setup_wifi_title">Wi-Fi ağına bağlanın</string>
+    <string name="setup_wifi_body">Çerçevenin fotoğraf alabilmesi için Wi-Fi gerekir. Fotoğraflar geldikten sonra bağlantı olmadan da gösterilir.</string>
+    <string name="wifi_connected_to">Bağlı: %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Bağlı değil</string>
+    <string name="wifi_not_connected_hint">Devam etmek için bir ağ seçin.</string>
+    <string name="wifi_no_internet">Bağlı, ancak henüz internet yok</string>
+    <string name="wifi_signal">Sinyal: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi ayarları</string>
+    <string name="wifi_networks">Yakındaki ağlar</string>
+    <string name="wifi_scanning">Ağlar aranıyor…</string>
+    <string name="wifi_permission_body">Ağları burada listelemek için Android\'in Wi-Fi tarama izni gerekiyor.</string>
+    <string name="wifi_show_networks">Ağları göster</string>
+    <string name="wifi_password">Şifre</string>
+    <string name="wifi_join">Bağlan</string>
+    <string name="signal_0">çok zayıf</string>
+    <string name="signal_1">zayıf</string>
+    <string name="signal_2">orta</string>
+    <string name="signal_3">iyi</string>
+    <string name="signal_4">mükemmel</string>
+
+    <!-- Setup: server -->
+    <string name="setup_server_title">Sunucu seçin</string>
+    <string name="setup_server_body">Fotoğraflar bir kinframe sunucusu üzerinden gelir. Ücretsiz kinframe sunucusunu ya da ailenizin çalıştırdığı bir sunucuyu kullanın.</string>
+    <string name="server_default_body">Ücretsiz ve açık kaynak. Önerilen.</string>
+    <string name="server_custom">Kendi sunucunuzu kullanın</string>
+    <string name="server_custom_body">kinframe\'i kendisi barındıran aileler için.</string>
+    <string name="server_address">Sunucu adresi</string>
+    <string name="server_check">Sunucuyu kontrol et</string>
+    <string name="server_checking">Sunucu kontrol ediliyor…</string>
+    <string name="server_version">sürüm %1$s</string>
+    <string name="server_insecure">şifrelenmemiş</string>
+    <string name="server_error_invalid">Bu bir web adresine benzemiyor. https://frames.example.org gibi bir adres deneyin.</string>
+    <string name="server_error_unreachable">Sunucuya ulaşılamadı. Adresi ve çerçevenin çevrimiçi olduğunu kontrol edin.</string>
+    <string name="server_error_not_kinframe">Sunucu yanıt verdi, ancak bu bir kinframe sunucusu değil.</string>
+
+    <!-- Setup: enrolling -->
+    <string name="enroll_title">Çerçeveniz hazırlanıyor…</string>
+    <string name="enroll_body">Bu birkaç saniye sürer.</string>
+    <string name="enroll_failed_title">Çerçeve kaydedilemedi</string>
+    <string name="enroll_failed_body">Sunucunun yanıtı: %1$s</string>
+
+    <!-- Setup: frame code -->
+    <string name="code_title">Bu çerçeveyi ailenize bağlayın</string>
+    <string name="code_step1">kinframe uygulamasını açın veya tarayıcıda %1$s adresine gidin</string>
+    <string name="code_step2">Çerçeve ekle\'yi seçin</string>
+    <string name="code_step3">Bu kodu girin veya QR kodunu tarayın</string>
+    <string name="code_valid_for">Geçerlilik süresi: %1$s</string>
+    <string name="code_waiting">Birinin kodu girmesi bekleniyor</string>
+    <string name="code_offline_title">Çerçeve çevrimdışı</string>
+    <string name="code_offline_body">Çerçeve kodu için internet bağlantısı gerekir. Wi-Fi bağlantısını kontrol edin.</string>
+    <string name="code_error_title">Çerçeve kodu alınamadı</string>
+    <string name="code_error_body">Sunucu yanıt vermedi. Çerçeve denemeye devam ediyor.</string>
+
+    <!-- Setup: celebration -->
+    <string name="celebrate_title">Bağlandı: %1$s</string>
+    <string name="celebrate_title_anon">Bağlandı</string>
+    <string name="celebrate_body">Bu çerçeveye gönderilen fotoğraflar birkaç saniye içinde burada görünür.</string>
+
+    <!-- Durations and dates -->
+    <string name="duration_h_min">%1$d sa %2$d dk</string>
+    <string name="duration_min">%1$d dk</string>
+    <string name="date_today">Bugün</string>
+    <string name="date_yesterday">Dün</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d gün önce</item>
+        <item quantity="other">%d gün önce</item>
+    </plurals>
+    <string name="interval_s">%1$d sn</string>
+    <string name="interval_min">%1$d dk</string>
+    <string name="interval_h">%1$d sa</string>
+
+    <!-- Slideshow -->
+    <string name="caption_edited">düzenlendi</string>
+    <string name="unable_photo">Bu fotoğraf gösterilemiyor</string>
+    <string name="unable_video">Bu video oynatılamıyor. Gönderen kişiden tekrar göndermesini isteyin.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d yeni fotoğraf</item>
+        <item quantity="other">%d yeni fotoğraf</item>
+    </plurals>
+    <string name="status_offline">Çevrimdışı</string>
+    <string name="status_online">Çevrimiçi · %1$s</string>
+    <string name="status_server_unreachable">Sunucuya ulaşılamıyor</string>
+    <string name="identify_this_is">Bu çerçevenin adı</string>
+    <string name="snack_hidden">Fotoğraf gizlendi</string>
+    <string name="snack_deleted">Fotoğraf silindi</string>
+    <string name="menu_settings">Ayarlar</string>
+    <string name="menu_power">Güç</string>
+    <string name="menu_hide">Gizle</string>
+    <string name="menu_delete">Sil</string>
+
+    <!-- Empty states -->
+    <string name="empty_title">Henüz fotoğraf yok</string>
+    <string name="empty_body">kinframe uygulaması veya web sitesiyle gönderilen fotoğraf ve videolar birkaç saniye içinde burada görünür.</string>
+    <string name="empty_code_title">Bu kodla ailenizi ekleyin</string>
+    <string name="empty_code_body">Kodu kinframe uygulamasına girin veya QR kodunu tarayın.</string>
+    <string name="empty_hidden_title">Tüm fotoğraflar gizli</string>
+    <string name="empty_hidden_body">Gizli fotoğraflar kitaplıkta kalır. kinframe uygulamasından tekrar gösterebilirsiniz.</string>
+    <string name="empty_downloading_title">Fotoğraflar yolda</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d fotoğraf indiriliyor.</item>
+        <item quantity="other">%d fotoğraf indiriliyor.</item>
+    </plurals>
+
+    <!-- Power -->
+    <string name="power_title">Güç</string>
+    <string name="power_sleep">Uyku</string>
+    <string name="power_sleep_body">Dokunana kadar ekran kapalı kalır.</string>
+    <string name="power_restart">Yeniden başlat</string>
+    <string name="power_restart_body">Çerçeveyi yeniden başlatır.</string>
+    <string name="power_off">Kapat</string>
+    <string name="power_off_body">Fişten çekmeden önce güvenle kapatır.</string>
+    <string name="shutting_down_title">Kapanıyor…</string>
+    <string name="restarting_title">Yeniden başlatılıyor…</string>
+    <string name="shutting_down_body">Her şey güvenle kaydediliyor.</string>
+    <string name="safe_title">Artık fişten çekebilirsiniz</string>
+    <string name="safe_body">Her şey kaydedildi. Çerçeveyi tekrar kullanmak için güç düğmesine basın veya fişe takın.</string>
+    <string name="safe_body_noroot">kinframe her şeyi kaydetti. Çerçeveyi artık fişten çekebilirsiniz.</string>
+
+    <!-- Recovery -->
+    <string name="recovery_title">kinframe fotoğrafları gösterirken sorun yaşadı</string>
+    <string name="recovery_body">Art arda birkaç kez beklenmedik şekilde durdu. Tekrar deneyin veya indirilen fotoğrafları temizleyin. Fotoğraflar sunucudan yeniden iner, hiçbir şey kaybolmaz.</string>
+    <string name="recovery_clear">İndirilen fotoğrafları temizle</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ayarlar</string>
+    <string name="settings_language">Dil</string>
+    <string name="settings_slideshow">Slayt gösterisi</string>
+    <string name="settings_interval">Her fotoğrafın süresi</string>
+    <string name="settings_transition">Geçiş</string>
+    <string name="transition_crossfade">Solma</string>
+    <string name="transition_slide">Kaydırma</string>
+    <string name="settings_order">Sıra</string>
+    <string name="order_received">En son gelen</string>
+    <string name="order_taken">Çekim tarihi</string>
+    <string name="order_shuffle">Karışık</string>
+    <string name="settings_reverse">Önce en eski</string>
+    <string name="settings_fill">Fotoğraf boyutu</string>
+    <string name="fill_fill">Ekranı doldur</string>
+    <string name="fill_fit">Fotoğrafın tamamını göster</string>
+    <string name="settings_display">Ekran</string>
+    <string name="settings_brightness">Parlaklık</string>
+    <string name="settings_brightness_mode">Otomatik parlaklık</string>
+    <string name="brightness_manual">Sabit</string>
+    <string name="brightness_sun">Güneşe göre</string>
+    <string name="settings_sleep">Uyku</string>
+    <string name="settings_sleep_enabled">Geceleri ekranı kapat</string>
+    <string name="settings_sleep_at">Uyku saati</string>
+    <string name="settings_wake_at">Uyanma saati</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">ve kinframe uygulamasından yönetilen %d plan daha</item>
+        <item quantity="other">ve kinframe uygulamasından yönetilen %d plan daha</item>
+    </plurals>
+    <string name="settings_about">Bu çerçeve</string>
+    <string name="about_frame">Ad</string>
+    <string name="about_server">Sunucu</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Uygulama sürümü</string>
+    <string name="about_android_settings">Android ayarları</string>
+    <string name="settings_updates">Güncellemeler</string>
+    <string name="updates_channel">Kanal</string>
+    <string name="updates_channel_stable">Kararlı</string>
+    <string name="updates_channel_beta">Beta (yeni sürümleri erken deneyin)</string>
+    <string name="updates_check">Güncellemeyi denetle</string>
+    <string name="updates_install_now">Şimdi yükle</string>
+    <string name="updates_checking">Güncellemeler denetleniyor…</string>
+    <string name="updates_up_to_date">Bu çerçeve güncel.</string>
+    <string name="updates_downloading">%1$s sürümü indiriliyor… %%%2$d</string>
+    <string name="updates_waiting">%1$s sürümü hazır. Çerçeveyi kimse kullanmadığında yüklenecek.</string>
+    <string name="updates_installing">%1$s sürümü yükleniyor. Çerçeve birazdan yeniden başlayacak.</string>
+    <string name="updates_failed">Güncelleme başarısız oldu. Çerçeve daha sonra tekrar deneyecek.</string>
+    <string name="update_notice_updated">%1$s sürümüne güncellendi</string>
+    <string name="update_notice_rolled_back">Yeni sürümde sorunlar vardı, bu yüzden çerçeve önceki sürüme döndü.</string>
+    <string name="update_notice_needs_user">Bir güncelleme hazır. Devam etmek için Yükle\'ye dokunun.</string>
+
+    <!-- Weather -->
+    <string name="weather_show_forecast">Tahmini göster</string>
+    <string name="weather_close">Kapat</string>
+    <string name="weather_now">Şimdi</string>
+    <string name="weather_today">Bugün</string>
+    <string name="weather_feels_like">Hissedilen %1$s</string>
+    <string name="weather_high_low">En yüksek %1$s · En düşük %2$s</string>
+    <string name="weather_wind">Rüzgâr</string>
+    <string name="weather_humidity">Nem</string>
+    <string name="weather_sunrise">Gün doğumu</string>
+    <string name="weather_sunset">Gün batımı</string>
+    <string name="weather_next_hours">Sonraki 24 saat</string>
+    <string name="weather_next_days">7 günlük tahmin</string>
+    <string name="weather_updated">Güncelleme: %1$s</string>
+    <string-array name="weather_compass">
+        <item>K</item>
+        <item>KD</item>
+        <item>D</item>
+        <item>GD</item>
+        <item>G</item>
+        <item>GB</item>
+        <item>B</item>
+        <item>KB</item>
+    </string-array>
+    <string name="wmo_clear_day">Güneşli</string>
+    <string name="wmo_clear_night">Açık</string>
+    <string name="wmo_mainly_clear_day">Çoğunlukla güneşli</string>
+    <string name="wmo_mainly_clear_night">Çoğunlukla açık</string>
+    <string name="wmo_partly_cloudy">Parçalı bulutlu</string>
+    <string name="wmo_overcast">Bulutlu</string>
+    <string name="wmo_fog">Sis</string>
+    <string name="wmo_rime_fog">Dondurucu sis</string>
+    <string name="wmo_drizzle_light">Hafif çisenti</string>
+    <string name="wmo_drizzle">Çisenti</string>
+    <string name="wmo_drizzle_dense">Yoğun çisenti</string>
+    <string name="wmo_freezing_drizzle">Dondurucu çisenti</string>
+    <string name="wmo_rain_light">Hafif yağmur</string>
+    <string name="wmo_rain">Yağmur</string>
+    <string name="wmo_rain_heavy">Şiddetli yağmur</string>
+    <string name="wmo_freezing_rain">Dondurucu yağmur</string>
+    <string name="wmo_snow_light">Hafif kar</string>
+    <string name="wmo_snow">Kar</string>
+    <string name="wmo_snow_heavy">Yoğun kar</string>
+    <string name="wmo_snow_grains">Kar taneleri</string>
+    <string name="wmo_showers_light">Hafif sağanak</string>
+    <string name="wmo_showers">Sağanak</string>
+    <string name="wmo_showers_violent">Şiddetli sağanak</string>
+    <string name="wmo_snow_showers_light">Hafif kar sağanağı</string>
+    <string name="wmo_snow_showers">Kar sağanağı</string>
+    <string name="wmo_thunderstorm">Gök gürültülü fırtına</string>
+    <string name="wmo_thunderstorm_hail">Dolulu fırtına</string>
+</resources>

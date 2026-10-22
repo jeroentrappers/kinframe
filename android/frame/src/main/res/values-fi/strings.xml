@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frame_default_name">Kuvakehys</string>
+
+    <!-- Yleiset toiminnot -->
+    <string name="action_back">Takaisin</string>
+    <string name="action_cancel">Peruuta</string>
+    <string name="action_continue">Jatka</string>
+    <string name="action_try_again">Yritä uudelleen</string>
+    <string name="action_undo">Kumoa</string>
+
+    <!-- Käyttöönotto: kieli -->
+    <string name="setup_welcome_title">Tervetuloa kinframeen</string>
+    <string name="setup_language_body">Valitse kuvakehyksen kieli.</string>
+
+    <!-- Käyttöönotto: Wi-Fi -->
+    <string name="setup_wifi_title">Yhdistä Wi-Fiin</string>
+    <string name="setup_wifi_body">Kuvakehys tarvitsee Wi-Fin kuvien vastaanottamiseen. Kun kuvat ovat perillä, ne näkyvät myös ilman yhteyttä.</string>
+    <string name="wifi_connected_to">Yhdistetty: %1$s</string>
+    <string name="wifi_network">Wi-Fi</string>
+    <string name="wifi_not_connected">Ei yhteyttä</string>
+    <string name="wifi_not_connected_hint">Jatka valitsemalla verkko.</string>
+    <string name="wifi_no_internet">Yhdistetty, mutta internetyhteyttä ei vielä ole</string>
+    <string name="wifi_signal">Signaali: %1$s</string>
+    <string name="wifi_open_settings">Wi-Fi-asetukset</string>
+    <string name="wifi_networks">Lähellä olevat verkot</string>
+    <string name="wifi_scanning">Etsitään verkkoja…</string>
+    <string name="wifi_permission_body">Jotta verkot voidaan näyttää tässä, Android tarvitsee luvan etsiä Wi-Fi-verkkoja.</string>
+    <string name="wifi_show_networks">Näytä verkot</string>
+    <string name="wifi_password">Salasana</string>
+    <string name="wifi_join">Yhdistä</string>
+    <string name="signal_0">erittäin heikko</string>
+    <string name="signal_1">heikko</string>
+    <string name="signal_2">kohtalainen</string>
+    <string name="signal_3">hyvä</string>
+    <string name="signal_4">erinomainen</string>
+
+    <!-- Käyttöönotto: palvelin -->
+    <string name="setup_server_title">Valitse palvelin</string>
+    <string name="setup_server_body">Kuvat kulkevat kinframe-palvelimen kautta. Käytä ilmaista kinframe-palvelinta tai perheesi omaa.</string>
+    <string name="server_default_body">Ilmainen ja avointa lähdekoodia. Suositeltu.</string>
+    <string name="server_custom">Käytä omaa palvelinta</string>
+    <string name="server_custom_body">Perheille, jotka ylläpitävät kinframea itse.</string>
+    <string name="server_address">Palvelimen osoite</string>
+    <string name="server_check">Tarkista palvelin</string>
+    <string name="server_checking">Tarkistetaan palvelinta…</string>
+    <string name="server_version">versio %1$s</string>
+    <string name="server_insecure">ei salattu</string>
+    <string name="server_error_invalid">Tämä ei näytä verkko-osoitteelta. Kokeile esimerkiksi https://kehykset.esimerkki.fi.</string>
+    <string name="server_error_unreachable">Palvelimeen ei saatu yhteyttä. Tarkista osoite ja että kuvakehys on verkossa.</string>
+    <string name="server_error_not_kinframe">Palvelin vastasi, mutta se ei ole kinframe-palvelin.</string>
+
+    <!-- Käyttöönotto: rekisteröinti -->
+    <string name="enroll_title">Kuvakehystä valmistellaan…</string>
+    <string name="enroll_body">Tämä kestää muutaman sekunnin.</string>
+    <string name="enroll_failed_title">Kuvakehyksen rekisteröinti epäonnistui</string>
+    <string name="enroll_failed_body">Palvelimen vastaus: %1$s</string>
+
+    <!-- Käyttöönotto: kehyskoodi -->
+    <string name="code_title">Yhdistä kuvakehys perheeseesi</string>
+    <string name="code_step1">Avaa kinframe-sovellus tai %1$s selaimessa</string>
+    <string name="code_step2">Valitse Lisää kuvakehys</string>
+    <string name="code_step3">Anna tämä koodi tai skannaa QR-koodi</string>
+    <string name="code_valid_for">Voimassa: %1$s</string>
+    <string name="code_waiting">Odotetaan, että joku antaa koodin</string>
+    <string name="code_offline_title">Kuvakehys ei ole verkossa</string>
+    <string name="code_offline_body">Kehyskoodi vaatii internetyhteyden. Tarkista Wi-Fi.</string>
+    <string name="code_error_title">Kehyskoodia ei saatu</string>
+    <string name="code_error_body">Palvelin ei vastannut. Kuvakehys yrittää edelleen.</string>
+
+    <!-- Käyttöönotto: valmis -->
+    <string name="celebrate_title">Yhdistetty: %1$s</string>
+    <string name="celebrate_title_anon">Yhdistetty</string>
+    <string name="celebrate_body">Tähän kuvakehykseen lähetetyt kuvat näkyvät täällä sekunneissa.</string>
+
+    <!-- Kestot ja päivämäärät -->
+    <string name="duration_h_min">%1$d h %2$d min</string>
+    <string name="duration_min">%1$d min</string>
+    <string name="date_today">Tänään</string>
+    <string name="date_yesterday">Eilen</string>
+    <plurals name="date_days_ago">
+        <item quantity="one">%d päivä sitten</item>
+        <item quantity="other">%d päivää sitten</item>
+    </plurals>
+    <string name="interval_s">%1$d s</string>
+    <string name="interval_min">%1$d min</string>
+    <string name="interval_h">%1$d h</string>
+
+    <!-- Diaesitys -->
+    <string name="caption_edited">muokattu</string>
+    <string name="unable_photo">Kuvaa ei voi näyttää</string>
+    <string name="unable_video">Videota ei voi toistaa. Pyydä lähettäjää lähettämään se uudelleen.</string>
+    <plurals name="new_photos">
+        <item quantity="one">%d uusi kuva</item>
+        <item quantity="other">%d uutta kuvaa</item>
+    </plurals>
+    <string name="status_offline">Ei verkossa</string>
+    <string name="status_online">Verkossa · %1$s</string>
+    <string name="status_server_unreachable">Palvelimeen ei saada yhteyttä</string>
+    <string name="identify_this_is">Tämä on</string>
+    <string name="snack_hidden">Kuva piilotettu</string>
+    <string name="snack_deleted">Kuva poistettu</string>
+    <string name="menu_settings">Asetukset</string>
+    <string name="menu_power">Virta</string>
+    <string name="menu_hide">Piilota</string>
+    <string name="menu_delete">Poista</string>
+
+    <!-- Tyhjät näkymät -->
+    <string name="empty_title">Ei vielä kuvia</string>
+    <string name="empty_body">kinframe-sovelluksella tai -sivustolla lähetetyt kuvat ja videot näkyvät täällä sekunneissa.</string>
+    <string name="empty_code_title">Lisää perhe tällä koodilla</string>
+    <string name="empty_code_body">Anna se kinframe-sovelluksessa tai skannaa QR-koodi.</string>
+    <string name="empty_hidden_title">Kaikki kuvat on piilotettu</string>
+    <string name="empty_hidden_body">Piilotetut kuvat pysyvät kirjastossa. Näytä ne uudelleen kinframe-sovelluksesta.</string>
+    <string name="empty_downloading_title">Kuvat ovat tulossa</string>
+    <plurals name="empty_downloading_body">
+        <item quantity="one">%d kuva latautuu.</item>
+        <item quantity="other">%d kuvaa latautuu.</item>
+    </plurals>
+
+    <!-- Virta -->
+    <string name="power_title">Virta</string>
+    <string name="power_sleep">Lepotila</string>
+    <string name="power_sleep_body">Näyttö sammuu, kunnes kosketat sitä.</string>
+    <string name="power_restart">Käynnistä uudelleen</string>
+    <string name="power_restart_body">Käynnistä kuvakehys uudelleen.</string>
+    <string name="power_off">Sammuta</string>
+    <string name="power_off_body">Sammuta turvallisesti ennen kuin irrotat johdon.</string>
+    <string name="shutting_down_title">Sammutetaan…</string>
+    <string name="restarting_title">Käynnistetään uudelleen…</string>
+    <string name="shutting_down_body">Kaikki tallennetaan turvallisesti.</string>
+    <string name="safe_title">Voit nyt irrottaa johdon</string>
+    <string name="safe_body">Kaikki on tallennettu. Voit käyttää kuvakehystä taas painamalla virtapainiketta tai kytkemällä johdon takaisin.</string>
+    <string name="safe_body_noroot">kinframe on tallentanut kaiken. Voit irrottaa kuvakehyksen johdon nyt.</string>
+
+    <!-- Palautus -->
+    <string name="recovery_title">kinframella oli ongelmia kuvien näyttämisessä</string>
+    <string name="recovery_body">Sovellus pysähtyi odottamatta useita kertoja peräkkäin. Yritä uudelleen tai tyhjennä ladatut kuvat. Ne ladataan palvelimelta uudelleen, mitään ei menetetä.</string>
+    <string name="recovery_clear">Tyhjennä ladatut kuvat</string>
+
+    <!-- Asetukset -->
+    <string name="settings_title">Asetukset</string>
+    <string name="settings_language">Kieli</string>
+    <string name="settings_slideshow">Diaesitys</string>
+    <string name="settings_interval">Kunkin kuvan näyttöaika</string>
+    <string name="settings_transition">Siirtymä</string>
+    <string name="transition_crossfade">Häivytys</string>
+    <string name="transition_slide">Liuku</string>
+    <string name="settings_order">Järjestys</string>
+    <string name="order_received">Viimeksi saapuneet</string>
+    <string name="order_taken">Kuvauspäivä</string>
+    <string name="order_shuffle">Satunnainen</string>
+    <string name="settings_reverse">Vanhimmat ensin</string>
+    <string name="settings_fill">Kuvan koko</string>
+    <string name="fill_fill">Täytä näyttö</string>
+    <string name="fill_fit">Näytä koko kuva</string>
+    <string name="settings_display">Näyttö</string>
+    <string name="settings_brightness">Kirkkaus</string>
+    <string name="settings_brightness_mode">Automaattinen kirkkaus</string>
+    <string name="brightness_manual">Kiinteä</string>
+    <string name="brightness_sun">Auringon mukaan</string>
+    <string name="settings_sleep">Lepotila</string>
+    <string name="settings_sleep_enabled">Sammuta näyttö yöksi</string>
+    <string name="settings_sleep_at">Lepotila alkaa</string>
+    <string name="settings_wake_at">Herätys</string>
+    <plurals name="settings_sleep_more">
+        <item quantity="one">ja %d muu aikataulu, hallitaan kinframe-sovelluksessa</item>
+        <item quantity="other">ja %d muuta aikataulua, hallitaan kinframe-sovelluksessa</item>
+    </plurals>
+    <string name="settings_about">Tämä kuvakehys</string>
+    <string name="about_frame">Nimi</string>
+    <string name="about_server">Palvelin</string>
+    <string name="about_wifi">Wi-Fi</string>
+    <string name="about_version">Sovelluksen versio</string>
+    <string name="about_android_settings">Android-asetukset</string>
+    <string name="settings_updates">Päivitykset</string>
+    <string name="updates_channel">Kanava</string>
+    <string name="updates_channel_stable">Vakaa</string>
+    <string name="updates_channel_beta">Beta (kokeile uusia versioita etukäteen)</string>
+    <string name="updates_check">Tarkista päivitykset</string>
+    <string name="updates_install_now">Asenna nyt</string>
+    <string name="updates_checking">Tarkistetaan päivityksiä…</string>
+    <string name="updates_up_to_date">Kuvakehys on ajan tasalla.</string>
+    <string name="updates_downloading">Ladataan versiota %1$s… %2$d %%</string>
+    <string name="updates_waiting">Versio %1$s on valmis. Se asennetaan, kun kukaan ei käytä kuvakehystä.</string>
+    <string name="updates_installing">Asennetaan versiota %1$s. Kuvakehys käynnistyy hetken kuluttua uudelleen.</string>
+    <string name="updates_failed">Päivitys epäonnistui. Kuvakehys yrittää myöhemmin uudelleen.</string>
+    <string name="update_notice_updated">Päivitetty versioon %1$s</string>
+    <string name="update_notice_rolled_back">Uudessa versiossa oli ongelmia, joten kuvakehys palasi edelliseen versioon.</string>
+    <string name="update_notice_needs_user">Päivitys on valmis. Jatka napauttamalla Asenna.</string>
+
+    <!-- Sää (tiedot palvelimelta, joka hakee ne Open-Meteosta) -->
+    <string name="weather_show_forecast">Näytä sääennuste</string>
+    <string name="weather_close">Sulje</string>
+    <string name="weather_now">Nyt</string>
+    <string name="weather_today">Tänään</string>
+    <string name="weather_feels_like">Tuntuu kuin %1$s</string>
+    <string name="weather_high_low">ylin %1$s · alin %2$s</string>
+    <string name="weather_wind">Tuuli</string>
+    <string name="weather_humidity">Kosteus</string>
+    <string name="weather_sunrise">Auringonnousu</string>
+    <string name="weather_sunset">Auringonlasku</string>
+    <string name="weather_next_hours">Seuraavat 24 tuntia</string>
+    <string name="weather_next_days">7 päivän ennuste</string>
+    <string name="weather_updated">Päivitetty %1$s</string>
+    <string-array name="weather_compass">
+        <item>P</item>
+        <item>KO</item>
+        <item>I</item>
+        <item>KA</item>
+        <item>E</item>
+        <item>LO</item>
+        <item>L</item>
+        <item>LU</item>
+    </string-array>
+    <string name="wmo_clear_day">Aurinkoista</string>
+    <string name="wmo_clear_night">Selkeää</string>
+    <string name="wmo_mainly_clear_day">Enimmäkseen aurinkoista</string>
+    <string name="wmo_mainly_clear_night">Enimmäkseen selkeää</string>
+    <string name="wmo_partly_cloudy">Puolipilvistä</string>
+    <string name="wmo_overcast">Pilvistä</string>
+    <string name="wmo_fog">Sumua</string>
+    <string name="wmo_rime_fog">Jäätävää sumua</string>
+    <string name="wmo_drizzle_light">Heikkoa tihkua</string>
+    <string name="wmo_drizzle">Tihkusadetta</string>
+    <string name="wmo_drizzle_dense">Voimakasta tihkua</string>
+    <string name="wmo_freezing_drizzle">Jäätävää tihkua</string>
+    <string name="wmo_rain_light">Heikkoa sadetta</string>
+    <string name="wmo_rain">Sadetta</string>
+    <string name="wmo_rain_heavy">Voimakasta sadetta</string>
+    <string name="wmo_freezing_rain">Jäätävää sadetta</string>
+    <string name="wmo_snow_light">Heikkoa lumisadetta</string>
+    <string name="wmo_snow">Lumisadetta</string>
+    <string name="wmo_snow_heavy">Voimakasta lumisadetta</string>
+    <string name="wmo_snow_grains">Lumijyväsiä</string>
+    <string name="wmo_showers_light">Heikkoja sadekuuroja</string>
+    <string name="wmo_showers">Sadekuuroja</string>
+    <string name="wmo_showers_violent">Voimakkaita sadekuuroja</string>
+    <string name="wmo_snow_showers_light">Heikkoja lumikuuroja</string>
+    <string name="wmo_snow_showers">Lumikuuroja</string>
+    <string name="wmo_thunderstorm">Ukkosta</string>
+    <string name="wmo_thunderstorm_hail">Ukkosta ja raekuuroja</string>
+</resources>
