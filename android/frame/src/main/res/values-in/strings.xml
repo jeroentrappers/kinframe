@@ -102,6 +102,7 @@
     <string name="menu_power">Daya</string>
     <string name="menu_hide">Sembunyikan</string>
     <string name="menu_delete">Hapus</string>
+    <string name="menu_rotate">Putar</string>
 
     <!-- Empty states -->
     <string name="empty_title">Belum ada foto</string>

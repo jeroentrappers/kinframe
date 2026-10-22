@@ -45,6 +45,11 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     private val featuredShown = HashSet<String>()
     private var featuredIds: Set<String> = emptySet()
     private val history = ArrayDeque<String>()
+    /**
+     * Items stepped back over with [previous], most recent last. Going forward replays them first, like a browser's
+     * forward button, so back-then-forward returns to the same photos; only then does the order continue.
+     */
+    private val forward = ArrayDeque<String>()
 
     val size: Int get() = ordered.size
     fun contains(id: String) = id in entries
@@ -74,9 +79,15 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         }
     }
 
-    fun peekNext(): String? = choose().first
+    fun peekNext(): String? = forwardTop() ?: choose().first
 
     fun next(): String? {
+        forwardTop()?.let { id ->
+            forward.removeLast()
+            current?.let { pushHistory(it) }
+            current = id
+            return id
+        }
         val choice = choose()
         val (id, newCycle, newSeed) = choice
         if (id == null) return null
@@ -125,10 +136,22 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     /** "On this day" items not shown yet today. */
     fun pendingFeatured(): List<String> = ordered.filter { it in featuredIds && it !in featuredShown }
 
+    /** What [previous] would return, without moving (the slide shown beside the current one while swiping back). */
+    fun peekPrevious(): String? {
+        for (i in history.indices.reversed()) {
+            val id = history[i]
+            if (id in entries && id != current) return id
+        }
+        if (ordered.isEmpty()) return null
+        val idx = ordered.indexOf(current)
+        return ordered[if (idx <= 0) ordered.size - 1 else idx - 1]
+    }
+
     fun previous(): String? {
         while (history.isNotEmpty()) {
             val id = history.removeLast()
             if (id in entries && id != current) {
+                current?.let { forward.addLast(it) }
                 current = id
                 return id
             }
@@ -137,13 +160,25 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         if (ordered.isEmpty()) return null
         val idx = ordered.indexOf(current)
         val id = ordered[if (idx <= 0) ordered.size - 1 else idx - 1]
+        current?.let { forward.addLast(it) }
         current = id
         return id
+    }
+
+    /** The next item to replay after going back, dropping ones that were removed meanwhile. */
+    private fun forwardTop(): String? {
+        while (forward.isNotEmpty()) {
+            val id = forward.last()
+            if (id in entries && id != current) return id
+            forward.removeLast()
+        }
+        return null
     }
 
     /** Shows a specific item now (remote `show_placement`, tapping the "new" card). */
     fun jumpTo(id: String): Boolean {
         if (id !in entries) return false
+        forward.clear()
         current?.let { if (it != id) pushHistory(it) }
         current = id
         anchor = id

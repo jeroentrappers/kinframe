@@ -102,6 +102,7 @@
     <string name="menu_power">Nguồn</string>
     <string name="menu_hide">Ẩn</string>
     <string name="menu_delete">Xóa</string>
+    <string name="menu_rotate">Xoay</string>
 
     <!-- Empty states -->
     <string name="empty_title">Chưa có ảnh nào</string>

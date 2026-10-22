@@ -106,6 +106,7 @@
     <string name="menu_power">Barošana</string>
     <string name="menu_hide">Paslēpt</string>
     <string name="menu_delete">Dzēst</string>
+    <string name="menu_rotate">Pagriezt</string>
 
     <!-- Empty states -->
     <string name="empty_title">Vēl nav fotoattēlu</string>

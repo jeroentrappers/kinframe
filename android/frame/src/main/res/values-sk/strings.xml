@@ -108,6 +108,7 @@
     <string name="menu_power">Napájanie</string>
     <string name="menu_hide">Skryť</string>
     <string name="menu_delete">Odstrániť</string>
+    <string name="menu_rotate">Otočiť</string>
 
     <!-- Empty states -->
     <string name="empty_title">Zatiaľ žiadne fotky</string>

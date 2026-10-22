@@ -106,6 +106,7 @@
     <string name="menu_power">Alimentazione</string>
     <string name="menu_hide">Nascondi</string>
     <string name="menu_delete">Elimina</string>
+    <string name="menu_rotate">Ruota</string>
 
     <!-- Empty states -->
     <string name="empty_title">Ancora nessuna foto</string>

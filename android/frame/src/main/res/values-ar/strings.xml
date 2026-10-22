@@ -112,6 +112,7 @@
     <string name="menu_power">التشغيل</string>
     <string name="menu_hide">إخفاء</string>
     <string name="menu_delete">حذف</string>
+    <string name="menu_rotate">تدوير</string>
 
     <!-- Empty states -->
     <string name="empty_title">لا توجد صور بعد</string>

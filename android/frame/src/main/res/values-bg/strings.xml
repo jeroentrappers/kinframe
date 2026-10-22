@@ -104,6 +104,7 @@
     <string name="menu_power">Захранване</string>
     <string name="menu_hide">Скриване</string>
     <string name="menu_delete">Изтриване</string>
+    <string name="menu_rotate">Завъртане</string>
 
     <!-- Empty states -->
     <string name="empty_title">Още няма снимки</string>

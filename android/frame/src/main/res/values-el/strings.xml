@@ -104,6 +104,7 @@
     <string name="menu_power">Λειτουργία</string>
     <string name="menu_hide">Απόκρυψη</string>
     <string name="menu_delete">Διαγραφή</string>
+    <string name="menu_rotate">Περιστροφή</string>
 
     <!-- Empty states -->
     <string name="empty_title">Δεν υπάρχουν φωτογραφίες ακόμη</string>

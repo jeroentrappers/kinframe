@@ -83,6 +83,13 @@ interface PlacementDao {
     @Query("UPDATE placements SET hidden = :hidden WHERE id = :id")
     suspend fun setHidden(id: String, hidden: Boolean)
 
+    @Query("UPDATE placements SET rotation = :rotation WHERE id = :id")
+    suspend fun setRotation(id: String, rotation: Int)
+
+    /** [fit] "fill" or "fit"; null follows the frame's setting. */
+    @Query("UPDATE placements SET fit = :fit WHERE id = :id")
+    suspend fun setFit(id: String, fit: String?)
+
     @Query("UPDATE placements SET trashed = :trashed WHERE id = :id")
     suspend fun setTrashed(id: String, trashed: Boolean)
 

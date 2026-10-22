@@ -1,5 +1,10 @@
 package app.kinframe.frame.slideshow
 
+import kotlin.math.sign
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import android.view.TextureView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -9,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -49,6 +56,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +68,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.GraphicsLayerScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -105,6 +114,7 @@ import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
 import app.kinframe.frame.weather.ForecastOverlay
 import app.kinframe.frame.weather.Weather
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -188,14 +198,48 @@ fun SlideshowScreen(c: FrameController) {
         // first frame already draws progress 0. (Snapping to 0 inside the LaunchedEffect ran a frame too late: the new
         // photo flashed fully opaque, then jumped back and faded in.)
         val animates = stage.incoming != null && stage.durationMs > 0
-        val progress = remember(stage.seq) { Animatable(if (animates) 0f else 1f) }
+        val progress = remember(stage.seq) { Animatable(if (animates) stage.startProgress else 1f) }
         LaunchedEffect(stage.seq) {
             if (animates) {
-                progress.animateTo(1f, tween(stage.durationMs, easing = if (stage.kind == TransitionKind.Slide) FastOutSlowInEasing else LinearOutSlowInEasing))
+                // A swipe that is already under way keeps its speed and only decelerates.
+                val easing = when {
+                    stage.kind != TransitionKind.Slide -> LinearOutSlowInEasing
+                    stage.startProgress > 0f -> LinearOutSlowInEasing
+                    else -> FastOutSlowInEasing
+                }
+                progress.animateTo(1f, tween(stage.durationMs, easing = easing))
             }
             ss.onTransitionDone(stage.seq)
         }
-        val drag = remember { Animatable(0f) }
+
+        // Swiping: the neighbouring photo is attached beside the current one and both follow the finger 1:1; on release
+        // the transition continues from there (or both spring back). The drag only applies to the stage it started on, so
+        // the frame the next stage arrives already uses that stage's own progress — no jump.
+        // Plain state, written synchronously per touch event: no coroutine hop that could drop a delta and let the photo
+        // lag behind the finger. Springs animate it with animate().
+        var dragValue by remember { mutableFloatStateOf(0f) }
+        var dragAnim by remember { mutableStateOf<Job?>(null) }
+        fun springDrag(spec: AnimationSpec<Float>, after: () -> Unit = {}) {
+            dragAnim?.cancel()
+            dragAnim = scope.launch { animate(dragValue, 0f, animationSpec = spec) { v, _ -> dragValue = v }; after() }
+        }
+        var dragSeq by remember { mutableLongStateOf(-1L) }
+        var neighborDir by remember { mutableIntStateOf(0) }
+        val currentSeq by rememberUpdatedState(stage.seq)
+        // Recomputed when a neighbour finishes rendering, so it can appear in the middle of a drag.
+        val preparedNext by ss.prepared.collectAsState()
+        val preparedPrev by ss.preparedPrevious.collectAsState()
+        val neighbor = remember(neighborDir, stage.seq, stage.outgoing, dragSeq, preparedNext, preparedPrev) {
+            if (neighborDir != 0 && dragSeq == stage.seq) ss.neighbor(neighborDir) else null
+        }
+        val follows = neighbor != null
+        fun dragX(): Float = if (dragSeq == currentSeq) (if (follows) dragValue else dragValue * 0.35f) else 0f
+        // When the neighbour arrives mid-drag, switch from rubber band to 1:1 without moving what is on screen.
+        var followedBefore by remember { mutableStateOf(false) }
+        LaunchedEffect(follows) {
+            if (follows && !followedBefore && dragSeq == currentSeq) dragValue *= 0.35f
+            followedBefore = follows
+        }
 
         Box(
             Modifier
@@ -212,15 +256,69 @@ fun SlideshowScreen(c: FrameController) {
                     onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
                 )
                 .pointerInputSwipe(
-                    onDrag = { dx -> scope.launch { drag.snapTo(drag.value + dx) } },
-                    onEnd = {
-                        val dx = drag.value
-                        scope.launch { drag.animateTo(0f, tween(250)) }
-                        if (abs(dx) > wPx * 0.12f) { if (dx < 0) ss.next(manual = true) else ss.previous() }
+                    onStart = {
+                        // A swipe during a running transition first finishes it, so this swipe has neighbours.
+                        if (ss.stage.value.outgoing != null) {
+                            val seq = currentSeq
+                            scope.launch { progress.snapTo(1f); ss.onTransitionDone(seq) }
+                        }
+                        dragSeq = currentSeq
+                        neighborDir = 0
+                        followedBefore = false
+                        dragAnim?.cancel()
+                        dragValue = 0f
+                        ss.holdVideo(true)
+                    },
+                    onDrag = { dx ->
+                        if (dragSeq == currentSeq) {
+                            val nx = (dragValue + dx).coerceIn(-wPx.toFloat(), wPx.toFloat())
+                            val dirNow = if (nx < 0) 1 else if (nx > 0) -1 else neighborDir
+                            if (dirNow != neighborDir) neighborDir = dirNow
+                            dragValue = nx
+                        }
+                    },
+                    onEnd = { velocityX ->
+                        if (dragSeq != currentSeq) return@pointerInputSwipe
+                        val dx = dragValue
+                        val dir = if (dx < 0) 1 else -1
+                        val fling = abs(velocityX) > 900f && sign(velocityX) == sign(dx)
+                        val commit = dx != 0f && (abs(dx) > wPx * 0.2f || fling)
+                        val n = if (commit) ss.neighbor(dir) else null
+                        when {
+                            commit && n != null -> {
+                                val seqAtRelease = currentSeq
+                                ss.swipe(dir, abs(dx) / wPx, n.key)
+                                // Safety net: if nothing came in (e.g. the item vanished), spring back.
+                                dragAnim?.cancel()
+                                dragAnim = scope.launch {
+                                    delay(800)
+                                    if (currentSeq == seqAtRelease) {
+                                        animate(dragValue, 0f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { v, _ -> dragValue = v }
+                                        dragSeq = -1L
+                                        ss.holdVideo(false)
+                                    }
+                                }
+                            }
+                            commit -> {
+                                springDrag(tween(200)) { dragSeq = -1L }
+                                if (dir > 0) ss.next(manual = true) else ss.previous()
+                            }
+                            else -> springDrag(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)) {
+                                dragSeq = -1L
+                                neighborDir = 0
+                                ss.holdVideo(false)
+                            }
+                        }
                     },
                 ),
         ) {
             val dir = stage.direction
+            neighbor?.let { nb ->
+                key(nb.key) {
+                    SlideLayer(nb) { translationX = dragX() + neighborDir * wPx }
+                    CaptionLayer(nb, hPx) { translationX = dragX() + neighborDir * wPx }
+                }
+            }
             // One call site for both layers, so a slide keeps its state (its Ken Burns motion) when it becomes the
             // outgoing one and fades out from where it was.
             listOfNotNull(stage.outgoing?.let { it to false }, stage.incoming?.let { it to true }).forEach { (slide, incoming) ->
@@ -229,18 +327,25 @@ fun SlideshowScreen(c: FrameController) {
                     val motion = remember { Animatable(0f) }
                     if (kb != null) {
                         val hold = stage.holdMs
-                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(hold.coerceIn(1_000, Int.MAX_VALUE.toLong()).toInt(), easing = LinearEasing)) }
+                        // Time in segments (see KenBurns), at a constant pace from the fade-in until well past the fade-out:
+                        // the camera never stops while the photo is visible.
+                        val ms = (hold + 15_000L).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+                        LaunchedEffect(Unit) { motion.animateTo(ms.toFloat() / KenBurns.SEGMENT_MS, tween(ms, easing = LinearEasing)) }
                     }
-                    SlideLayer(slide) {
+                    // Where the transition and the finger put the slide; Ken Burns adds its motion to the photo only.
+                    val place: GraphicsLayerScope.() -> Unit = {
                         if (incoming) {
                             when (stage.kind) {
-                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
-                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
-                                TransitionKind.Cut -> translationX = drag.value * 0.35f
+                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + dragX()
+                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = dragX() }
+                                TransitionKind.Cut -> translationX = dragX()
                             }
                         } else if (stage.kind == TransitionKind.Slide) {
                             translationX = -dir * wPx * progress.value
                         }
+                    }
+                    SlideLayer(slide) {
+                        place()
                         if (kb != null) {
                             // One scaled textured quad per frame: within the Mali-400 budget (see KenBurns).
                             val t = motion.value
@@ -249,7 +354,8 @@ fun SlideshowScreen(c: FrameController) {
                             translationY = kb.yAt(t) * hPx
                         }
                     }
-                    if (incoming) VideoLayer(c, slide, wPx, hPx)
+                    if (incoming) Box(Modifier.fillMaxSize().graphicsLayer { translationX = dragX() }) { VideoLayer(c, slide, wPx, hPx) }
+                    CaptionLayer(slide, hPx, place)
                 }
             }
             TextureWarmup(c)
@@ -312,6 +418,9 @@ fun SlideshowScreen(c: FrameController) {
                     snack = Snack(R.string.snack_deleted, p.id, id, hidden = false)
                 }
             },
+            // The menu stays open, so a photo that is a quarter turn off can be turned again right away.
+            onRotate = { p -> scope.launch { c.session.value?.outbox?.adjust(p.id, turn = true) } },
+            onFit = { p, fill -> scope.launch { c.session.value?.outbox?.adjust(p.id, fit = if (fill) "fill" else "fit") } },
             onPower = { menuOpen = false; powerOpen = true },
             onSettings = { menuOpen = false; c.openSettings() },
             onCalendar = { menuOpen = false; c.calendar.openCalendar() },
@@ -365,25 +474,38 @@ data class Snack(val text: Int, val placementId: String, val outboxId: Long, val
 private fun Modifier.pointerInputTaps(onTap: (Offset) -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
     pointerInput("taps") { detectTapGestures(onTap = { onTap(it) }, onDoubleTap = { onDoubleTap(it) }) }
 
-private fun Modifier.pointerInputSwipe(onDrag: (Float) -> Unit, onEnd: () -> Unit): Modifier =
+/** Horizontal drags with the release velocity (px/s) so a quick flick commits even when it moved only a little. */
+private fun Modifier.pointerInputSwipe(onStart: () -> Unit, onDrag: (Float) -> Unit, onEnd: (velocityX: Float) -> Unit): Modifier =
     pointerInput("swipe") {
-        detectHorizontalDragGestures(onDragEnd = onEnd, onDragCancel = onEnd) { change, dx -> change.consume(); onDrag(dx) }
+        val tracker = VelocityTracker()
+        detectHorizontalDragGestures(
+            onDragStart = { tracker.resetTracking(); onStart() },
+            onDragEnd = { onEnd(tracker.calculateVelocity().x) },
+            onDragCancel = { onEnd(0f) },
+        ) { change, dx ->
+            tracker.addPosition(change.uptimeMillis, change.position)
+            change.consume()
+            onDrag(dx)
+        }
     }
 
 // ---------------------------------------------------------------------------------------------- layers
 
-/** Draws the prepared next slide into a 1 × 1 px box so HWUI uploads its texture before the transition starts. */
+/** Draws the prepared neighbour slides into a 1 × 1 px box so HWUI uploads its texture before the transition starts. */
 @Composable
 private fun TextureWarmup(c: FrameController) {
     val prepared by c.slideshow.prepared.collectAsState()
-    val img = prepared?.image ?: return
+    val previous by c.slideshow.preparedPrevious.collectAsState()
+    // Both neighbours: either may be pulled in by a swipe, and a cold upload stalls the first drag frame (~70 ms).
+    val images = listOfNotNull(prepared?.image, previous?.image)
+    if (images.isEmpty()) return
     Canvas(Modifier.size(1.dp)) {
-        drawImage(img, dstSize = androidx.compose.ui.unit.IntSize(1, 1))
+        images.forEach { drawImage(it, dstSize = androidx.compose.ui.unit.IntSize(1, 1)) }
     }
 }
 
 @Composable
-private fun SlideLayer(slide: Slide, layer: androidx.compose.ui.graphics.GraphicsLayerScope.() -> Unit) {
+private fun SlideLayer(slide: Slide, layer: GraphicsLayerScope.() -> Unit) {
     val img = slide.image
     if (img != null) {
         Canvas(
@@ -405,17 +527,30 @@ private fun SlideLayer(slide: Slide, layer: androidx.compose.ui.graphics.Graphic
     }
 }
 
+/** A [Slide.captionSeparate] caption, above the photo: it moves with the slide but does not zoom with Ken Burns. */
+@Composable
+private fun CaptionLayer(slide: Slide, hPx: Int, layer: GraphicsLayerScope.() -> Unit) {
+    val strip = slide.captionStrip
+    if (!slide.captionSeparate || strip == null) return
+    Canvas(
+        Modifier.fillMaxSize().graphicsLayer {
+            compositingStrategy = CompositingStrategy.ModulateAlpha
+            layer()
+        },
+    ) { drawImage(strip, topLeft = Offset(0f, (hPx - strip.height).toFloat())) }
+}
+
 @Composable
 private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
     val p = slide.placement
     val video by c.slideshow.video.collectAsState()
     val v = video
-    if (v == null || v.placementId != p.id) return
+    if (v == null || v.placementId != p.id || v.held) return
     val alpha by animateFloatAsState(if (v.visible) 1f else 0f, tween(if (v.live) SlideshowController.LIVE_FADE_MS.toInt() else 250), label = "video")
     val settings by c.g.settings.settings.collectAsState()
     val vw = p.width ?: wPx
     val vh = p.height ?: hPx
-    val fill = (p.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill" && !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx)
+    val fill = p.fit == "fill" || (p.fit == null && settings.slideshow.fill && !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx))
     val scale = if (fill) maxOf(wPx.toFloat() / vw, hPx.toFloat() / vh) else minOf(wPx.toFloat() / vw, hPx.toFloat() / vh)
     val dw = (vw * scale).roundToInt()
     val dh = (vh * scale).roundToInt()
@@ -432,7 +567,7 @@ private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
                 .size(with(d) { dw.toDp() }, with(d) { dh.toDp() })
                 .graphicsLayer { this.alpha = alpha },
         )
-        slide.captionStrip?.let { strip ->
+        slide.captionStrip?.takeIf { !slide.captionSeparate }?.let { strip ->
             Canvas(Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha; compositingStrategy = CompositingStrategy.ModulateAlpha }) {
                 drawImage(strip, topLeft = Offset(0f, (hPx - strip.height).toFloat()))
             }
@@ -650,6 +785,8 @@ private fun QuickMenu(
     onReact: (String?) -> Unit,
     onHide: (PlacementEntity) -> Unit,
     onDelete: (PlacementEntity) -> Unit,
+    onRotate: (PlacementEntity) -> Unit,
+    onFit: (PlacementEntity, fill: Boolean) -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
     onCalendar: () -> Unit,
@@ -657,6 +794,8 @@ private fun QuickMenu(
     onNotifications: () -> Unit,
 ) {
     val current by c.slideshow.current.collectAsState()
+    val stage by c.slideshow.stage.collectAsState()
+    val settings by c.g.settings.settings.collectAsState()
     val conn by c.connection.collectAsState()
     val net by c.g.network.status.collectAsState()
     val sync by c.syncState.collectAsState()
@@ -677,6 +816,12 @@ private fun QuickMenu(
         onReact = onReact,
         onHide = { p?.let(onHide) },
         onDelete = { p?.let(onDelete) },
+        // One photo on its own: a collage arranges its tiles itself, and a playing clip is not turned.
+        adjustable = p != null && stage.incoming?.tiles.isNullOrEmpty(),
+        rotatable = p != null && !p.isVideo,
+        filled = (p?.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill",
+        onRotate = { onTouch(); p?.let(onRotate) },
+        onFit = { fill -> onTouch(); p?.let { onFit(it, fill) } },
         onPower = onPower,
         onSettings = onSettings,
         onCalendar = onCalendar,
@@ -701,6 +846,12 @@ internal fun QuickMenuContent(
     onDelete: () -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    adjustable: Boolean = false,
+    rotatable: Boolean = false,
+    /** Whether the photo fills the screen now; the button offers the other choice. */
+    filled: Boolean = true,
+    onRotate: () -> Unit = {},
+    onFit: (fill: Boolean) -> Unit = {},
     onCalendar: () -> Unit = {},
     notificationCount: Int = 0,
     onNotifications: () -> Unit = {},
@@ -759,6 +910,12 @@ internal fun QuickMenuContent(
                     Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
                     PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide() }
                     PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete() }
+                    if (adjustable) {
+                        Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
+                        if (rotatable) PillAction(KinIcons.RotateCw, stringResource(R.string.menu_rotate), compact) { onRotate() }
+                        if (filled) PillAction(KinIcons.Shrink, stringResource(R.string.fill_fit), compact) { onFit(false) }
+                        else PillAction(KinIcons.Expand, stringResource(R.string.fill_fill), compact) { onFit(true) }
+                    }
                 }
             }
         }

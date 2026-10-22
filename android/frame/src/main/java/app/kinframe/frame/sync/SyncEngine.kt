@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
@@ -190,6 +191,8 @@ class SyncEngine(
                 OutboxEntity.PLACEMENT_PATCH -> {
                     payload["hidden"]?.jsonPrimitive?.booleanOrNull?.let { r = r.copy(hidden = it) }
                     payload["trashed"]?.jsonPrimitive?.booleanOrNull?.let { r = r.copy(trashed = it) }
+                    payload["rotation"]?.jsonPrimitive?.intOrNull?.let { r = r.copy(rotation = it) }
+                    payload["fit"]?.jsonPrimitive?.let { if (it.isString) r = r.copy(fit = it.content) }
                 }
                 OutboxEntity.REACTION -> r = r.copy(reaction = payload["reaction"]?.jsonPrimitive?.let { if (it.isString) it.content else null })
             }

@@ -106,6 +106,7 @@
     <string name="menu_power">Alimentation</string>
     <string name="menu_hide">Masquer</string>
     <string name="menu_delete">Supprimer</string>
+    <string name="menu_rotate">Pivoter</string>
 
     <!-- Empty states -->
     <string name="empty_title">Pas encore de photos</string>

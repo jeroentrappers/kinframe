@@ -62,6 +62,22 @@ class Outbox(
         return id
     }
 
+    /** Turns the photo or switches fill / whole photo on the frame: applied locally now, sent in the background. */
+    suspend fun adjust(placementId: String, turn: Boolean = false, fit: String? = null) {
+        db.tx {
+            // A quarter turn clockwise from what is stored, so quick repeated taps each turn once more.
+            val rotation = if (turn) db.placements().get(placementId)?.let { (it.rotation + 90) % 360 } else null
+            rotation?.let { db.placements().setRotation(placementId, it) }
+            fit?.let { db.placements().setFit(placementId, it) }
+            val payload = buildJsonObject {
+                rotation?.let { put("rotation", JsonPrimitive(it)) }
+                fit?.let { put("fit", JsonPrimitive(it)) }
+            }
+            db.outbox().insert(OutboxEntity(kind = OutboxEntity.PLACEMENT_PATCH, placementId = placementId, payload = payload.toString(), notBefore = now(), createdAt = now()))
+        }
+        kick()
+    }
+
     /** Undo: drops the queued action and restores the local flags. Returns false if it was already sent. */
     suspend fun cancel(outboxId: Long, placementId: String, restoreHidden: Boolean? = null, restoreTrashed: Boolean? = null): Boolean = db.tx {
         val pending = db.outbox().forPlacement(placementId).any { it.id == outboxId }

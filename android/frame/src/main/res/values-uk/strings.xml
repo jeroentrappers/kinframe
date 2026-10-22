@@ -108,6 +108,7 @@
     <string name="menu_power">Живлення</string>
     <string name="menu_hide">Приховати</string>
     <string name="menu_delete">Видалити</string>
+    <string name="menu_rotate">Повернути</string>
 
     <!-- Empty states -->
     <string name="empty_title">Фото ще немає</string>

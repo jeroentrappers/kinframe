@@ -92,10 +92,10 @@ class KenBurnsTest {
     @Test fun neverShowsAnEdge() {
         repeat(500) { i ->
             val p = KenBurns.params("placement-$i", if (i % 3 == 0) null else (i % 10) / 9.0, if (i % 4 == 0) null else (i % 7) / 6.0)
-            for (k in 0..20) {
-                val t = k / 20f
+            for (k in 0..400) {
+                val t = k / 25f // more than two full loops
                 val s = p.scaleAt(t)
-                assertTrue(s >= 1f - 1e-6f && s <= KenBurns.MAX_ZOOM + 1e-6f)
+                assertTrue(s >= 1f && s <= KenBurns.MAX_ZOOM + 1e-6f)
                 val slack = (s - 1f) / 2f + 1e-5f
                 assertTrue("x id=$i t=$t", abs(p.xAt(t)) <= slack)
                 assertTrue("y id=$i t=$t", abs(p.yAt(t)) <= slack)
@@ -103,16 +103,21 @@ class KenBurnsTest {
         }
     }
 
-    @Test fun subtleDeterministicAndVaried() {
-        val a = KenBurns.params("abc", 0.2, 0.3)
-        assertEquals(a, KenBurns.params("abc", 0.2, 0.3))
-        val zooms = (0 until 100).map { KenBurns.params("p$it", null, null) }
-        assertTrue(zooms.all { maxOf(it.startScale, it.endScale) in KenBurns.MIN_ZOOM..KenBurns.MAX_ZOOM })
-        assertTrue("both directions", zooms.any { it.endScale > it.startScale } && zooms.any { it.endScale < it.startScale })
-        // Toward a focal point on the left: the image moves right.
-        val left = (0 until 50).map { KenBurns.params("q$it", 0.1, 0.5) }.first { it.endScale > it.startScale }
-        assertTrue(left.endX > 0f)
-        assertEquals(0f, KenBurns.ease(0f)); assertEquals(1f, KenBurns.ease(1f)); assertEquals(0.5f, KenBurns.ease(0.5f), 1e-6f)
+    @Test fun pushesInOntoTheSubjectAndNeverStops() {
+        val p = KenBurns.params("abc", 0.2, 0.3)
+        assertEquals(p, KenBurns.params("abc", 0.2, 0.3))
+        // Starts wide, the first move ends close on the focal point (left/top: the image moves right/down).
+        assertTrue(p.scaleAt(0f) <= KenBurns.WIDE_MAX)
+        assertTrue(p.scaleAt(1f) >= KenBurns.CLOSE_MIN)
+        assertTrue(p.xAt(1f) > 0f && p.yAt(1f) > 0f)
+        // Constant motion: every tenth of a segment the framing changes visibly, keyframes included.
+        for (k in 0 until 60) {
+            val a = p.at(k / 10f); val b = p.at((k + 1) / 10f)
+            val change = abs(a.scale - b.scale) + abs(a.x - b.x) + abs(a.y - b.y)
+            assertTrue("still at ${k / 10f}", change > 0.002f)
+        }
+        // Different photos move differently.
+        assertTrue((0 until 20).map { KenBurns.params("p$it", null, null) }.toSet().size == 20)
     }
 }
 

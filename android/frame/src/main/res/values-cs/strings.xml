@@ -108,6 +108,7 @@
     <string name="menu_power">Napájení</string>
     <string name="menu_hide">Skrýt</string>
     <string name="menu_delete">Smazat</string>
+    <string name="menu_rotate">Otočit</string>
 
     <!-- Empty states -->
     <string name="empty_title">Zatím žádné fotky</string>

@@ -95,6 +95,7 @@
     <string name="menu_power">Aan/uit</string>
     <string name="menu_hide">Verbergen</string>
     <string name="menu_delete">Verwijderen</string>
+    <string name="menu_rotate">Draaien</string>
 
     <string name="empty_title">Nog geen foto\'s</string>
     <string name="empty_body">Foto\'s en video\'s die met de kinframe-app of -website verstuurd worden, verschijnen hier binnen enkele seconden.</string>
