@@ -1,0 +1,14 @@
+{
+ "footer": "이 코드는 10분 후에 만료돼요. 요청하지 않으셨다면 이 이메일을 무시하셔도 돼요.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "kinframe 로그인 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe에 로그인하려면 이 코드를 사용하세요:"},
+  "Register": {"subject": "kinframe 가입 코드: {{code}}", "intro": "kinframe에 오신 것을 환영해요!\n\n계정 만들기를 완료하려면 이 코드를 사용하세요:"},
+  "ForgotPassword": {"subject": "kinframe 계정 복구 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe 계정을 복구하려면 이 코드를 사용하세요:"},
+  "Generic": {"subject": "kinframe 인증 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe 인증 코드는 다음과 같아요:"},
+  "BindNewIdentifier": {"subject": "kinframe 새 이메일 확인: {{code}}", "intro": "안녕하세요.\n\nkinframe 계정의 새 이메일 주소를 확인하려면 이 코드를 사용하세요:"},
+  "UserPermissionValidation": {"subject": "kinframe 인증 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe 계정을 변경하기 전에 본인 확인을 위해 이 코드를 사용하세요:"},
+  "MfaVerification": {"subject": "kinframe 인증 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe 로그인을 완료하려면 이 코드를 사용하세요:"},
+  "BindMfa": {"subject": "kinframe 인증 코드: {{code}}", "intro": "안녕하세요.\n\nkinframe 2단계 인증을 켜려면 이 코드를 사용하세요:"}
+ }
+}

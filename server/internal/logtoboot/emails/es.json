@@ -1,0 +1,14 @@
+{
+ "footer": "El código caduca en 10 minutos. Si no lo has pedido, puedes ignorar este correo.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Tu código para iniciar sesión en kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para iniciar sesión en kinframe:"},
+  "Register": {"subject": "Tu código de registro en kinframe: {{code}}", "intro": "¡Te damos la bienvenida a kinframe!\n\nUsa este código para terminar de crear tu cuenta:"},
+  "ForgotPassword": {"subject": "Tu código para recuperar tu cuenta de kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para recuperar tu cuenta de kinframe:"},
+  "Generic": {"subject": "Tu código de verificación de kinframe: {{code}}", "intro": "Hola:\n\nTu código de verificación de kinframe es:"},
+  "BindNewIdentifier": {"subject": "Confirma tu nuevo correo para kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para confirmar la nueva dirección de correo de tu cuenta de kinframe:"},
+  "UserPermissionValidation": {"subject": "Tu código de verificación de kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para confirmar que eres tú antes de cambiar tu cuenta de kinframe:"},
+  "MfaVerification": {"subject": "Tu código de verificación de kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para terminar de iniciar sesión en kinframe:"},
+  "BindMfa": {"subject": "Tu código de verificación de kinframe: {{code}}", "intro": "Hola:\n\nUsa este código para activar la verificación en dos pasos en kinframe:"}
+ }
+}

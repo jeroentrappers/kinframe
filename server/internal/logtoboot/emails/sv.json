@@ -1,0 +1,14 @@
+{
+ "footer": "Koden gäller i 10 minuter. Om du inte har bett om den kan du ignorera mejlet.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Din inloggningskod för kinframe: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att logga in på kinframe:"},
+  "Register": {"subject": "Din registreringskod för kinframe: {{code}}", "intro": "Välkommen till kinframe!\n\nAnvänd den här koden för att slutföra skapandet av ditt konto:"},
+  "ForgotPassword": {"subject": "Din kod för att återställa kinframe-kontot: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att återställa ditt kinframe-konto:"},
+  "Generic": {"subject": "Din verifieringskod för kinframe: {{code}}", "intro": "Hej!\n\nDin verifieringskod för kinframe är:"},
+  "BindNewIdentifier": {"subject": "Bekräfta din nya e-postadress för kinframe: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att bekräfta den nya e-postadressen för ditt kinframe-konto:"},
+  "UserPermissionValidation": {"subject": "Din verifieringskod för kinframe: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att bekräfta att det är du innan du ändrar ditt kinframe-konto:"},
+  "MfaVerification": {"subject": "Din verifieringskod för kinframe: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att slutföra inloggningen på kinframe:"},
+  "BindMfa": {"subject": "Din verifieringskod för kinframe: {{code}}", "intro": "Hej!\n\nAnvänd den här koden för att aktivera tvåstegsverifiering för kinframe:"}
+ }
+}

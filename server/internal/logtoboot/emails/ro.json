@@ -1,0 +1,14 @@
+{
+ "footer": "Codul expiră în 10 minute. Dacă nu l-ați cerut, puteți ignora acest e-mail.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Codul dvs. de conectare la kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a vă conecta la kinframe:"},
+  "Register": {"subject": "Codul dvs. de înregistrare la kinframe: {{code}}", "intro": "Bun venit la kinframe!\n\nFolosiți acest cod pentru a finaliza crearea contului:"},
+  "ForgotPassword": {"subject": "Codul dvs. de recuperare a contului kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a vă recupera contul kinframe:"},
+  "Generic": {"subject": "Codul dvs. de verificare kinframe: {{code}}", "intro": "Bună ziua,\n\nCodul dvs. de verificare kinframe este:"},
+  "BindNewIdentifier": {"subject": "Confirmați noul e-mail pentru kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a confirma noua adresă de e-mail a contului kinframe:"},
+  "UserPermissionValidation": {"subject": "Codul dvs. de verificare kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a confirma că sunteți dvs. înainte de a modifica contul kinframe:"},
+  "MfaVerification": {"subject": "Codul dvs. de verificare kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a finaliza conectarea la kinframe:"},
+  "BindMfa": {"subject": "Codul dvs. de verificare kinframe: {{code}}", "intro": "Bună ziua,\n\nFolosiți acest cod pentru a activa verificarea în doi pași pentru kinframe:"}
+ }
+}

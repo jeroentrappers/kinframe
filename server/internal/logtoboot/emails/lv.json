@@ -1,0 +1,14 @@
+{
+ "footer": "Kods ir derīgs 10 minūtes. Ja jūs to nepieprasījāt, varat ignorēt šo e-pastu.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "Jūsu kinframe pierakstīšanās kods: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai pierakstītos kinframe:"},
+  "Register": {"subject": "Jūsu kinframe reģistrācijas kods: {{code}}", "intro": "Laipni lūdzam kinframe!\n\nIzmantojiet šo kodu, lai pabeigtu konta izveidi:"},
+  "ForgotPassword": {"subject": "Jūsu kinframe konta atkopšanas kods: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai atkoptu savu kinframe kontu:"},
+  "Generic": {"subject": "Jūsu kinframe verifikācijas kods: {{code}}", "intro": "Labdien!\n\nJūsu kinframe verifikācijas kods ir:"},
+  "BindNewIdentifier": {"subject": "Apstipriniet savu jauno kinframe e-pastu: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai apstiprinātu sava kinframe konta jauno e-pasta adresi:"},
+  "UserPermissionValidation": {"subject": "Jūsu kinframe verifikācijas kods: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai apstiprinātu, ka tas esat jūs, pirms maināt savu kinframe kontu:"},
+  "MfaVerification": {"subject": "Jūsu kinframe verifikācijas kods: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai pabeigtu pierakstīšanos kinframe:"},
+  "BindMfa": {"subject": "Jūsu kinframe verifikācijas kods: {{code}}", "intro": "Labdien!\n\nIzmantojiet šo kodu, lai ieslēgtu divpakāpju verifikāciju kinframe:"}
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "footer": "תוקף הקוד יפוג בעוד 10 דקות. אם לא ביקשתם אותו, אפשר להתעלם מהאימייל הזה.",
+ "signature": "— kinframe",
+ "templates": {
+  "SignIn": {"subject": "קוד הכניסה שלכם ל-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד לכניסה ל-kinframe:"},
+  "Register": {"subject": "קוד ההרשמה שלכם ל-kinframe: {{code}}", "intro": "ברוכים הבאים ל-kinframe!\n\nזה הקוד להשלמת יצירת החשבון:"},
+  "ForgotPassword": {"subject": "קוד שחזור החשבון שלכם ב-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד לשחזור החשבון שלכם ב-kinframe:"},
+  "Generic": {"subject": "קוד האימות שלכם ב-kinframe: {{code}}", "intro": "שלום,\n\nקוד האימות שלכם ב-kinframe הוא:"},
+  "BindNewIdentifier": {"subject": "אישור כתובת האימייל החדשה ב-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד לאישור כתובת האימייל החדשה של החשבון שלכם ב-kinframe:"},
+  "UserPermissionValidation": {"subject": "קוד האימות שלכם ב-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד לאישור שזה אתם לפני שינוי החשבון שלכם ב-kinframe:"},
+  "MfaVerification": {"subject": "קוד האימות שלכם ב-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד להשלמת הכניסה ל-kinframe:"},
+  "BindMfa": {"subject": "קוד האימות שלכם ב-kinframe: {{code}}", "intro": "שלום,\n\nזה הקוד להפעלת אימות דו-שלבי ב-kinframe:"}
+ }
+}
