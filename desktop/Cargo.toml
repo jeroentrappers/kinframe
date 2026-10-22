@@ -65,14 +65,14 @@ product-name = "kinframe"
 identifier = "app.kinframe.desktop"
 category = "Photography"
 copyright = "Copyright © 2026 Jeroen Trappers and kinframe contributors"
-before-packaging-command = "cargo build --release"
 out-dir = "target/packages"
 icons = ["assets/icons/icon-32.png", "assets/icons/icon-128.png", "assets/icons/icon-256.png", "assets/icons/icon-512.png"]
-licenseFile = "../LICENSE"
+license-file = "../LICENSE"
 
 [package.metadata.packager.deb]
 depends = ["xdg-desktop-portal", "libxkbcommon0", "libvulkan1 | libgl1"]
 section = "graphics"
+desktop-template = "packaging/kinframe.desktop"
 
 [package.metadata.packager.macos]
 minimum-system-version = "11.0"
