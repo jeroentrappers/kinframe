@@ -4,6 +4,9 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppModel.self) private var app
     @State private var languageVersion = L10n.code
+    #if DEBUG
+    @State private var sharePreview: ShareModel?
+    #endif
 
     var body: some View {
         ZStack {
@@ -23,6 +26,16 @@ struct RootView: View {
         .tint(Palette.primary)
         .id(languageVersion)
         .task { await app.launch() }
+        #if DEBUG
+        // -kfSharePreview /a.jpg,/b.mp4: show the share extension's composer in the app (screenshots).
+        .sheet(item: $sharePreview) { model in ShareRootView(model: model).task { await model.start() } }
+        .task {
+            try? await Task.sleep(for: .seconds(2))
+            if let list = UserDefaults.standard.string(forKey: "kfSharePreview") {
+                sharePreview = ShareModel(context: nil, preview: list.split(separator: ",").map { URL(fileURLWithPath: String($0)) })
+            }
+        }
+        #endif
         .onReceive(NotificationCenter.default.publisher(for: .kinframeLanguageChanged)) { _ in
             languageVersion = L10n.code + UUID().uuidString
         }
@@ -132,3 +145,7 @@ private struct OfflineBanner: View {
             .accessibilityLabel(L("boot.unreachableTitle") + ". " + L("boot.unreachableBody"))
     }
 }
+
+#if DEBUG
+extension ShareModel: @retroactive Identifiable {}
+#endif

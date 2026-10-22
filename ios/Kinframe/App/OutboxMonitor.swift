@@ -24,6 +24,7 @@ final class OutboxMonitor {
         transport.setOrphanHandler { tag, response, error in
             Task { await runner.handleOrphan(tag: tag, response: response, error: error) }
         }
+        store.cleanUp()
         jobs = store.all()
         Task { [weak self] in
             for await event in runner.events {

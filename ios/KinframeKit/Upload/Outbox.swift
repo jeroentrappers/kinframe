@@ -191,6 +191,22 @@ public final class OutboxStore: Sendable {
         return dirs.compactMap { UUID(uuidString: $0.lastPathComponent) }.compactMap(load).sorted { $0.createdAt > $1.createdAt }
     }
 
+    /// Remove directories left without a job (a process died while queueing) and stale composer staging folders.
+    public func cleanUp(olderThan age: TimeInterval = 3600) {
+        let fm = FileManager.default
+        let cutoff = Date().addingTimeInterval(-age)
+        let staging = root.deletingLastPathComponent().appending(path: "Staging", directoryHint: .isDirectory)
+        for dir in [root, staging] {
+            for url in (try? fm.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey])) ?? [] {
+                let modified = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+                guard modified < cutoff else { continue }
+                if dir == staging || !fm.fileExists(atPath: url.appending(path: "job.json").path) {
+                    try? fm.removeItem(at: url)
+                }
+            }
+        }
+    }
+
     public func remove(_ id: UUID) {
         try? FileManager.default.removeItem(at: directory(id))
     }

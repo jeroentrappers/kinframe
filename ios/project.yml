@@ -108,3 +108,26 @@ targets:
     dependencies:
       - target: Kinframe
       - target: KinframeKit
+
+  KinframeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: KinframeUITests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: app.kinframe.family.uitests
+        TEST_TARGET_NAME: Kinframe
+    dependencies:
+      - target: Kinframe
+
+schemes:
+  KinframeUITests:
+    build:
+      targets:
+        Kinframe: all
+        KinframeUITests: [test]
+    test:
+      targets:
+        - KinframeUITests
