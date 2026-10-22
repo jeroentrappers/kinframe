@@ -220,6 +220,7 @@ fn visuals(p: &Palette, dark: bool) -> Visuals {
     v.warn_fg_color = p.warn;
     v.error_fg_color = p.danger;
     v.override_text_color = None;
+    v.indent_has_left_vline = false;
     v.selection = Selection {
         bg_fill: p.primary_soft,
         stroke: Stroke::new(1.5, p.primary),

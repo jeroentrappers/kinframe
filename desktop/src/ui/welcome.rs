@@ -17,7 +17,7 @@ impl App {
                 ui.add_space((ui.available_height() * 0.08).clamp(24.0, 72.0));
                 logo(ui, 72.0);
                 ui.add_space(10.0);
-                ui.allocate_ui(vec2(width + 80.0, 0.0), |ui| {
+                ui.allocate_ui(vec2(width + 240.0, 0.0), |ui| {
                     ui.vertical_centered(|ui| {
                         ui.label(
                             RichText::new(t("welcome.title"))

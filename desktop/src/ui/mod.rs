@@ -179,6 +179,10 @@ pub struct App {
     last_history_refresh: Option<Instant>,
     /// "Sign in" was pressed before the server was checked: continue once it is.
     pending_sign_in: bool,
+    /// `KINFRAME_SCREENSHOT=<file.png>`: save a screenshot of the real window after a few seconds, then quit.
+    screenshot: Option<(PathBuf, Instant)>,
+    /// Files or folders passed on the command line ("Open with kinframe"), scanned once signed in.
+    pub open_paths: Vec<PathBuf>,
 }
 
 impl App {
@@ -197,6 +201,12 @@ impl App {
         let mut app = Self::with_parts(ctx, dirs, settings, Some(rt), auth::default_store());
         app.start_engine();
         app.boot();
+        app.open_paths = std::env::args_os()
+            .skip(1)
+            .map(PathBuf::from)
+            .filter(|p| p.exists())
+            .collect();
+        app.screenshot = std::env::var_os("KINFRAME_SCREENSHOT").map(|p| (PathBuf::from(p), Instant::now()));
         app
     }
 
@@ -266,6 +276,8 @@ impl App {
             show_settings: false,
             last_history_refresh: None,
             pending_sign_in: false,
+            screenshot: None,
+            open_paths: vec![],
             discovery,
             http,
             dirs,
@@ -485,6 +497,8 @@ impl App {
         self.reload_frames();
         self.load_history(false);
         self.start_live();
+        let paths = std::mem::take(&mut self.open_paths);
+        self.scan(paths);
     }
 
     fn load_me(&mut self, name_claim: Option<String>) {
@@ -831,6 +845,11 @@ impl App {
             Msg::Frames(r) => match r {
                 Ok(f) => {
                     self.frames = f;
+                    // A folder scanned before the frames arrived gets the usual targets now.
+                    let defaults = self.default_frames();
+                    if let Some(d) = self.draft.as_mut().filter(|d| d.frames.is_empty()) {
+                        d.frames = defaults;
+                    }
                     self.frames_loaded = true;
                     self.frames_error = None;
                 }
@@ -861,17 +880,7 @@ impl App {
                     self.toast(Tone::Warn, t("import.nothingFound"));
                     return;
                 }
-                let sendable: Vec<&FrameSummary> = self.frames.iter().filter(|f| f.can_send()).collect();
-                let mut frames: BTreeSet<String> = self
-                    .settings
-                    .last_frames
-                    .iter()
-                    .filter(|id| sendable.iter().any(|f| &f.id == *id))
-                    .cloned()
-                    .collect();
-                if frames.is_empty() && sendable.len() == 1 {
-                    frames.insert(sendable[0].id.clone());
-                }
+                let frames = self.default_frames();
                 let n = result.files.len();
                 self.draft = Some(Draft {
                     title,
@@ -936,6 +945,22 @@ impl App {
             },
             Msg::Thumb(d) => self.thumbs.finish(&self.ctx, d),
         }
+    }
+
+    /// The frames last sent to (still sendable), or the only frame there is.
+    fn default_frames(&self) -> BTreeSet<String> {
+        let sendable: Vec<&FrameSummary> = self.frames.iter().filter(|f| f.can_send()).collect();
+        let mut frames: BTreeSet<String> = self
+            .settings
+            .last_frames
+            .iter()
+            .filter(|id| sendable.iter().any(|f| &f.id == *id))
+            .cloned()
+            .collect();
+        if frames.is_empty() && sendable.len() == 1 {
+            frames.insert(sendable[0].id.clone());
+        }
+        frames
     }
 
     fn on_live(&mut self, e: LiveEvent) {
@@ -1011,6 +1036,7 @@ impl App {
             self.handle(m);
         }
         self.thumbs.begin_frame();
+        self.take_screenshot(ui.ctx());
         let p = palette(ui.ctx());
         self.handle_drops(ui.ctx());
         self.shortcuts(ui.ctx());
@@ -1054,6 +1080,32 @@ impl App {
         if busy || self.scanning.is_some() {
             ui.ctx().request_repaint_after(Duration::from_millis(250));
         }
+    }
+
+    fn take_screenshot(&mut self, ctx: &egui::Context) {
+        let Some((path, started)) = &self.screenshot else {
+            return;
+        };
+        if started.elapsed() < Duration::from_secs(5) {
+            ctx.request_repaint_after(Duration::from_millis(200));
+            return;
+        }
+        let path = path.clone();
+        self.screenshot = None;
+        let c = ctx.clone();
+        ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(egui::ScreenshotCallback::new(
+            move |img| {
+                let [w, h] = img.size;
+                let rgba: Vec<u8> = img.pixels.iter().flat_map(|p| p.to_array()).collect();
+                if let Some(buf) = image::RgbaImage::from_raw(w as u32, h as u32, rgba)
+                    && let Err(e) = buf.save(&path)
+                {
+                    log::warn!("screenshot failed: {e}");
+                }
+                c.send_viewport_cmd(egui::ViewportCommand::Close);
+                c.request_repaint();
+            },
+        )));
     }
 
     fn handle_drops(&mut self, ctx: &egui::Context) {
