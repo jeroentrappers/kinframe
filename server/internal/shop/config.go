@@ -1,4 +1,4 @@
-// Package shop is the optional pre-order shop (docs/api/README.md §5.10): the
+// Package shop is the optional pre-order shop (docs/api/README.md §5.11): the
 // operator's configuration (KINFRAME_SHOP_FILE), price and shipping rules,
 // reservation references, signed cancel links and the emails sent for a
 // reservation. A server without a shop file has no shop at all.

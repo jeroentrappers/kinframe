@@ -1,5 +1,5 @@
 <script lang="ts">
-	// Pre-order reservation (README §5.10): choose frames, leave contact details, no payment. Only on servers with a
+	// Pre-order reservation (README §5.11): choose frames, leave contact details, no payment. Only on servers with a
 	// shop; the server recomputes every price, the live total here is a preview of the same rule.
 	import { tick } from 'svelte';
 	import { page } from '$app/state';

@@ -99,6 +99,9 @@ services:
     env_file: ./kinframe.env
     volumes:
       - media:/data
+{% if kinframe_shop %}
+      - ./shop.json:/etc/kinframe/shop.json:ro
+{% endif %}
     ports:
       - "127.0.0.1:{{ kinframe_port }}:8110"
 

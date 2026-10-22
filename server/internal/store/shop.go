@@ -11,7 +11,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
 )
 
-// Reservation is a shop pre-order (README §5.10).
+// Reservation is a shop pre-order (README §5.11).
 type Reservation struct {
 	ID            uuid.UUID   `db:"id"`
 	Reference     string      `db:"reference"`

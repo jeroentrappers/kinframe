@@ -1,6 +1,6 @@
 -- +goose Up
 
--- Pre-order reservations for the optional shop (README §5.10). Prices are the
+-- Pre-order reservations for the optional shop (README §5.11). Prices are the
 -- server's own at the time of the reservation (items: [{product_id, name,
 -- quantity, unit_cents, line_cents}]). No IP addresses or payment data are kept.
 -- Rows are deleted by the maintenance loop after the shop's retention period.

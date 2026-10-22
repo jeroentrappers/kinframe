@@ -98,6 +98,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
 | `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
 | `KINFRAME_CALENDAR` | `on` | `off` disables calendar sync, sent events and countdowns (discovery `calendar: false`) |
+| `KINFRAME_SHOP_FILE` | — | Optional pre-order shop config (YAML or JSON, see `docs/deploy.md` → *Pre-order shop*). Unset = no shop. Validated at startup |
+| `KINFRAME_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` | port `587` | The server's own mail (shop confirmations); the same variables configure Logto's sign-in mails. 465 = implicit TLS, 587 = STARTTLS required, other ports STARTTLS if offered. `_FROM` is required with `_HOST` |
 | `KINFRAME_CALENDAR_SYNC_MINUTES` | `15` | Interval between syncs of each ICS/CalDAV source (minimum 5); up to 3 min jitter, back-off to 2 h on errors |
 | `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords (AES-256-GCM). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
 

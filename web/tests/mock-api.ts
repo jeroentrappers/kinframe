@@ -59,7 +59,7 @@ export interface MockState {
 	calendars: Record<string, S['CalendarSource'][]>;
 	calendarViews: Record<string, S['CalendarView']>;
 	eventInvitations: Record<string, S['EventInvitation'][]>;
-	/** Shop reservations (README §5.10); only reachable when discovery has a shop. */
+	/** Shop reservations (README §5.11); only reachable when discovery has a shop. */
 	reservations: S['ShopReservation'][];
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;

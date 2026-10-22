@@ -1944,7 +1944,7 @@ type Discovery struct {
 	Limits  Limits `json:"limits"`
 	Name    string `json:"name"`
 
-	// Shop Pre-order shop run by the server operator (README §5.10). Present only when the operator configured one
+	// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
 	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
 	// to text; `en` is always present and is the fallback.
 	Shop    *Shop  `json:"shop,omitempty"`
@@ -2732,7 +2732,7 @@ type ShareResult struct {
 // ShareResultSkippedReason defines model for ShareResult.Skipped.Reason.
 type ShareResultSkippedReason string
 
-// Shop Pre-order shop run by the server operator (README §5.10). Present only when the operator configured one
+// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
 // (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
 // to text; `en` is always present and is the fallback.
 type Shop struct {

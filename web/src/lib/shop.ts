@@ -1,4 +1,4 @@
-// Pure logic for the optional pre-order shop (README §5.10): totals with the shipping rule, money
+// Pure logic for the optional pre-order shop (README §5.11): totals with the shipping rule, money
 // formatting, localized config texts and form validation. No DOM, no state: unit-tested in shop.test.ts.
 // The server recomputes every price; these are only for showing a live total.
 import type { Schemas } from './api/client';

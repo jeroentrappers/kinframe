@@ -1544,7 +1544,7 @@ export interface components {
             shop?: components["schemas"]["Shop"];
         };
         /**
-         * @description Pre-order shop run by the server operator (README §5.10). Present only when the operator configured one
+         * @description Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
          *     (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
          *     to text; `en` is always present and is the fallback.
          */

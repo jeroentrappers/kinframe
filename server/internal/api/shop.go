@@ -18,7 +18,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
 
-// The pre-order shop (README §5.10): public reservations without payment,
+// The pre-order shop (README §5.11): public reservations without payment,
 // confirmation emails with a signed cancel link, and operator endpoints.
 // Everything here answers 404 on servers without a shop configuration.
 
