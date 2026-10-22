@@ -13,6 +13,7 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/blob"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
@@ -156,7 +157,7 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 		return nil, err
 	}
 	if u.AvatarKey != nil {
-		_ = s.blob.Delete(*u.AvatarKey)
+		s.deleteBlob(ctx, *u.AvatarKey)
 	}
 	return noContent(), nil
 }
@@ -170,7 +171,7 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 		problem.Write(w, problem.New(problem.UnsupportedMedia, "avatars must be JPEG, PNG or WebP").WithStatus(http.StatusUnsupportedMediaType))
 		return
 	}
-	tmp, err := s.blob.TempDir()
+	tmp, err := s.tempDir()
 	if err != nil {
 		s.writeError(w, r, err)
 		return
@@ -209,7 +210,7 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key := "avatars/" + u.ID.String() + "/" + auth.RandomToken(12) + ".webp"
-	if err := s.blob.Put(key, out); err != nil {
+	if err := s.blob.PutFile(ctx, key, out, blob.PutOptions{ContentType: "image/webp"}); err != nil {
 		s.writeError(w, r, err)
 		return
 	}
@@ -219,7 +220,7 @@ func (s *Server) putAvatar(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if u.AvatarKey != nil {
-		_ = s.blob.Delete(*u.AvatarKey)
+		s.deleteBlob(ctx, *u.AvatarKey)
 	}
 	if err := s.bumpMemberEverywhere(ctx, u.ID); err != nil {
 		s.writeError(w, r, err)
@@ -235,7 +236,7 @@ func (s *Server) DeleteAvatar(ctx context.Context, _ gen.DeleteAvatarRequestObje
 		return nil, err
 	}
 	if u.AvatarKey != nil {
-		_ = s.blob.Delete(*u.AvatarKey)
+		s.deleteBlob(ctx, *u.AvatarKey)
 		if err := s.bumpMemberEverywhere(ctx, u.ID); err != nil {
 			return nil, err
 		}
@@ -246,7 +247,7 @@ func (s *Server) DeleteAvatar(ctx context.Context, _ gen.DeleteAvatarRequestObje
 // avatarFile serves avatars publicly; keys contain a random component.
 func (s *Server) avatarFile(w http.ResponseWriter, r *http.Request) {
 	key := "avatars/" + r.PathValue("user") + "/" + r.PathValue("file")
-	s.serveBlob(w, r, key, "image/webp", "", "public, max-age=604800, immutable")
+	s.serveBlobOrRedirect(w, r, key, "image/webp", "", "public, max-age=604800, immutable")
 }
 
 // ---------------------------------------------------------------- push endpoints

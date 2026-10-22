@@ -39,7 +39,11 @@ func (CentreFocal) Focal(context.Context, string) (float64, float64) { return 0.
 
 type Worker struct {
 	Store   *store.Store
-	Blob    blob.Local
+	Blob    blob.Store
+	// Scratch is a local directory for intermediate files; vips and ffmpeg
+	// need real files, so masters are downloaded here when the store is
+	// remote. Every job removes its own directory, also on failure.
+	Scratch string
 	Tools   media.Tools
 	Log     *slog.Logger
 	Events  Events
@@ -274,7 +278,7 @@ func (w *Worker) makeMaster(ctx context.Context, m *store.Media) (*store.MediaMa
 	if err != nil {
 		return nil, err
 	}
-	tmp, err := w.Blob.TempDir()
+	tmp, err := w.tempDir()
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +325,7 @@ func (w *Worker) makeMaster(ctx context.Context, m *store.Media) (*store.MediaMa
 			return nil, err
 		}
 		posterKey := fmt.Sprintf("media/%s/poster.webp", m.ID)
-		if err := w.Blob.Put(posterKey, posterPath); err != nil {
+		if err := w.Blob.PutFile(ctx, posterKey, posterPath, blob.PutOptions{ContentType: "image/webp"}); err != nil {
 			return nil, err
 		}
 		out.Width, out.Height, out.CapturedAt = vi.Size.W, vi.Size.H, vi.CapturedAt
@@ -333,7 +337,7 @@ func (w *Worker) makeMaster(ctx context.Context, m *store.Media) (*store.MediaMa
 	if out.SHA256, out.Bytes, err = media.FileDigest(masterPath); err != nil {
 		return nil, err
 	}
-	if err := w.Blob.Put(out.Key, masterPath); err != nil {
+	if err := w.Blob.PutFile(ctx, out.Key, masterPath, blob.PutOptions{ContentType: out.Mime, SHA256: out.SHA256}); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -357,7 +361,12 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 	if srcKey == nil {
 		return nil
 	}
-	src, err := w.Blob.Path(*srcKey)
+	tmp, err := w.tempDir()
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(tmp)
+	src, err := blob.LocalFile(ctx, w.Blob, *srcKey, tmp)
 	if err != nil {
 		return err
 	}
@@ -367,11 +376,6 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 	} else {
 		fx, fy = w.Focal.Focal(ctx, src)
 	}
-	tmp, err := w.Blob.TempDir()
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(tmp)
 	// A fresh suffix per generation keeps signed thumbnail URLs cache-safe.
 	suffix := uuid.NewString()[:8]
 	keys := make([]string, len(media.ThumbSizes))
@@ -382,7 +386,7 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 			return err
 		}
 		keys[i] = fmt.Sprintf("items/%s/thumb_%d-%s.webp", itemID, n, suffix)
-		if err := w.Blob.Put(keys[i], p); err != nil {
+		if err := w.Blob.PutFile(ctx, keys[i], p, blob.PutOptions{ContentType: "image/webp"}); err != nil {
 			return err
 		}
 	}
@@ -391,7 +395,9 @@ func (w *Worker) thumbs(ctx context.Context, itemID uuid.UUID) error {
 	}
 	for _, old := range []*string{it.Thumb256Key, it.Thumb512Key} {
 		if old != nil {
-			_ = w.Blob.Delete(*old)
+			if err := w.Blob.Delete(ctx, *old); err != nil {
+				w.Log.Warn("delete old thumbnail", "key", *old, "err", err)
+			}
 		}
 	}
 	return nil
@@ -472,15 +478,15 @@ func (w *Worker) ensureRenditions(ctx context.Context, mediaID uuid.UUID) error 
 }
 
 func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget, variant string) error {
-	master, err := w.Blob.Path(*m.MasterKey)
-	if err != nil {
-		return err
-	}
-	tmp, err := w.Blob.TempDir()
+	tmp, err := w.tempDir()
 	if err != nil {
 		return err
 	}
 	defer os.RemoveAll(tmp)
+	master, err := blob.LocalFile(ctx, w.Blob, *m.MasterKey, tmp)
+	if err != nil {
+		return err
+	}
 	screen := media.Size{W: t.ScreenW, H: t.ScreenH}
 	r := store.Rendition{MediaID: m.ID, Variant: variant}
 	var out string
@@ -497,7 +503,7 @@ func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget
 		r.Width, r.Height, r.Mime = size.W, size.H, "video/mp4"
 		r.Key = fmt.Sprintf("media/%s/%s.mp4", m.ID, variant)
 		if m.PosterKey != nil {
-			poster, err := w.Blob.Path(*m.PosterKey)
+			poster, err := blob.LocalFile(ctx, w.Blob, *m.PosterKey, tmp)
 			if err != nil {
 				return err
 			}
@@ -506,7 +512,7 @@ func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget
 				return err
 			}
 			pk := fmt.Sprintf("media/%s/%s-poster.webp", m.ID, variant)
-			if err := w.Blob.Put(pk, pout); err != nil {
+			if err := w.Blob.PutFile(ctx, pk, pout, blob.PutOptions{ContentType: "image/webp"}); err != nil {
 				return err
 			}
 			r.PosterKey = &pk
@@ -523,8 +529,20 @@ func (w *Worker) render(ctx context.Context, m *store.Media, t store.MediaTarget
 	if r.SHA256, r.Bytes, err = media.FileDigest(out); err != nil {
 		return err
 	}
-	if err := w.Blob.Put(r.Key, out); err != nil {
+	if err := w.Blob.PutFile(ctx, r.Key, out, blob.PutOptions{ContentType: r.Mime, SHA256: r.SHA256}); err != nil {
 		return err
 	}
 	return w.Store.PutRendition(ctx, r)
+}
+
+// tempDir creates a per-job scratch directory; callers remove it.
+func (w *Worker) tempDir() (string, error) {
+	dir := w.Scratch
+	if dir == "" {
+		dir = os.TempDir()
+	}
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return "", err
+	}
+	return os.MkdirTemp(dir, "job-*")
 }

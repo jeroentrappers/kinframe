@@ -641,7 +641,7 @@ func (s *Server) signedMedia(w http.ResponseWriter, r *http.Request) {
 		problem.Write(w, problem.New(problem.Forbidden, "invalid or expired link"))
 		return
 	}
-	s.serveBlob(w, r, key, "", "", "private, max-age=3600")
+	s.serveBlobOrRedirect(w, r, key, "", "", "private, max-age=3600")
 }
 
 // ---------------------------------------------------------------- events
