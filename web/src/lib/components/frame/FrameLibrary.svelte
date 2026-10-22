@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { flip } from 'svelte/animate';
 	import { api, call, ApiError, type Album, type AlbumSchedule, type Frame, type Placement } from '$lib/api/client';
-	import { can } from '$lib/frames.svelte';
+	import { can, frames } from '$lib/frames.svelte';
 	import { formatDateTime } from '$lib/format';
 	import { getFrameSettings, patchFrameSettings } from '$lib/frameSettings';
 	import { formatMonthDay, moveItem, orderBy, scheduleCovers } from '$lib/parity';
@@ -12,6 +12,7 @@
 	import Dialog from '../Dialog.svelte';
 	import EmptyState from '../EmptyState.svelte';
 	import Icon, { type IconName } from '../Icon.svelte';
+	import ShareDialog from '../ShareDialog.svelte';
 	import Thumb from '../Thumb.svelte';
 	import AlbumNameDialog from './AlbumNameDialog.svelte';
 	import AlbumPickerDialog from './AlbumPickerDialog.svelte';
@@ -37,6 +38,17 @@
 	const seeAll = $derived(can(frame, 'see_library'));
 	const manage = $derived(can(frame, 'manage_library'));
 	const control = $derived(can(frame, 'change_settings'));
+	// Sharing needs another frame you can send to (README §5.3, "Sharing between frames").
+	const canShare = $derived(frames.list.some((f) => f.id !== frame.id && can(f, 'send')));
+	let shareOpen = $state(false);
+	let shareIds = $state<string[]>([]);
+
+	function share(ids: string[] = [...selected]) {
+		if (ids.length === 0) return;
+		shareIds = ids;
+		viewerOpen = false;
+		shareOpen = true;
+	}
 
 	// ---------------------------------------------------------------- albums
 	let albums = $state<Album[]>([]);
@@ -120,6 +132,7 @@
 		void frame.id;
 		void loadAlbums();
 		void loadPlaying();
+		void frames.load();
 	});
 
 	$effect(() => {
@@ -626,10 +639,20 @@
 					<Icon name="star" size={16} />{t('albums.makeCover')}
 				</button>
 			{/if}
+			{#if canShare}
+				<button class="btn btn-sm btn-soft" onclick={() => share()}>
+					<Icon name="share" size={16} /><span class="label-long">{t('share.action')}</span><span class="label-short">{t('share.actionShort')}</span>
+				</button>
+			{/if}
 			{#if manage}
 				<button class="btn btn-sm btn-danger" onclick={() => removeFromAlbum()}><Icon name="x" size={16} />{t('albums.remove')}</button>
 			{/if}
 		{:else}
+			{#if canShare && view !== 'trashed'}
+				<button class="btn btn-sm btn-soft" onclick={() => share()}>
+					<Icon name="share" size={16} /><span class="label-long">{t('share.action')}</span><span class="label-short">{t('share.actionShort')}</span>
+				</button>
+			{/if}
 			{#if manage && view === 'visible'}
 				<button class="btn btn-sm btn-soft" onclick={() => { pickerIds = [...selected]; pickerOpen = true; }}>
 					<Icon name="album" size={16} /><span class="label-long">{t('albums.addToAlbum')}</span><span class="label-short">{t('albums.addShort')}</span>
@@ -651,6 +674,9 @@
 				<Thumb itemId={viewing.item.id} variant={viewing.item.kind === 'video' ? 'poster' : 'master'} kind={viewing.item.kind} alt={viewing.item.caption ?? ''} />
 			</div>
 			{#if viewing.item.caption}<p>{viewing.item.caption}</p>{/if}
+			{#if viewing.shared_by_name}
+				<p class="shared-by small"><Icon name="share" size={14} />{t('share.sharedBy', { name: viewing.shared_by_name })}</p>
+			{/if}
 			<p class="muted small">
 				{#if viewing.item.captured_at}{t('library.taken', { when: formatDateTime(viewing.item.captured_at, i18n.tag) })} · {/if}{t('library.received', { when: formatDateTime(viewing.received_at, i18n.tag) })}
 			</p>
@@ -658,6 +684,9 @@
 	{/if}
 	{#snippet footer()}
 		{#if viewing}
+			{#if canShare && !viewing.trashed && !viewing.pending_moderation}
+				<button class="btn" onclick={() => viewing && share([viewing.id])}><Icon name="share" size={16} />{t('share.actionShort')}</button>
+			{/if}
 			{#if viewingInAlbum && manage}
 				{#if album?.cover_placement_id !== viewing.id}
 					<button class="btn" onclick={() => viewing && setCover(viewing)}><Icon name="star" size={16} />{t('albums.makeCover')}</button>
@@ -693,6 +722,7 @@
 <AlbumNameDialog bind:open={renameOpen} title={t('albums.renameTitle')} submitLabel={t('common.save')} initial={album?.name ?? ''} onsave={rename} />
 <AlbumScheduleDialog bind:open={scheduleOpen} albumName={album?.name ?? ''} schedule={album?.schedule} onsave={saveSchedule} />
 <AlbumPickerDialog bind:open={pickerOpen} {albums} count={pickerIds.length} onpick={addToAlbum} />
+<ShareDialog bind:open={shareOpen} frameId={frame.id} placementIds={shareIds} onshared={() => (selected = new Set())} />
 
 <Dialog bind:open={deleteOpen} title={t('albums.deleteConfirm', { name: album?.name ?? '' })}>
 	<p class="muted">{album && playing(album) ? t('albums.deleteBodyPlaying') : t('albums.deleteBody')}</p>
@@ -1100,5 +1130,12 @@
 	}
 	.big :global(img) {
 		object-fit: contain !important;
+	}
+	.shared-by {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--text-muted);
+		font-weight: 600;
 	}
 </style>

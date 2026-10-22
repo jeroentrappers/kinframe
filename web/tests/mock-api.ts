@@ -396,6 +396,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				album.placement_count = album.placement_ids?.length ?? 0;
 				album.version++;
 			}
+			if (b.action === 'purge') state.placements[m[1]!] = (state.placements[m[1]!] ?? []).filter((p) => !b.placement_ids.includes(p.id));
 			for (const p of state.placements[m[1]!] ?? []) {
 				if (!b.placement_ids.includes(p.id)) continue;
 				if (b.action === 'hide') p.hidden = true;
@@ -404,6 +405,46 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				if (b.action === 'restore') p.trashed = false;
 			}
 			return json(route, 200, { ok: b.placement_ids, failed: [] });
+		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/placements:share$/)) && method === 'POST') {
+			// README §5.3 "Sharing between frames": new placements of the same items, duplicates skipped.
+			const b = body as { placement_ids: string[]; frame_ids: string[]; dry_run?: boolean };
+			const sources = b.placement_ids.map((pid) => ({ pid, item: findItem(state, m![1]!, pid) }));
+			if (sources.some((s) => !s.item)) return problem(route, 404, 'not_found', 'Placement not found');
+			for (const fid of b.frame_ids) {
+				const f = state.frames.find((x) => x.id === fid);
+				if (!f) return problem(route, 404, 'not_found', 'Frame not found');
+				if (f.role === 'member' && !f.permissions.send) return problem(route, 403, 'missing_permission', 'Cannot send');
+			}
+			const created: S['Placement'][] = [];
+			const skipped: { placement_id: string; frame_id: string; reason: 'already_on_frame'; existing_placement_id: string }[] = [];
+			for (const fid of b.frame_ids) {
+				const list = (state.placements[fid] ??= []);
+				for (const s of sources) {
+					const existing = list.find((p) => p.item.id === s.item!.id);
+					if (existing) {
+						skipped.push({ placement_id: s.pid, frame_id: fid, reason: 'already_on_frame', existing_placement_id: existing.id });
+						continue;
+					}
+					if (b.dry_run) continue;
+					const f = state.frames.find((x) => x.id === fid)!;
+					const p: S['Placement'] = {
+						id: uid('p'),
+						frame_id: fid,
+						item: s.item!,
+						status: 'pending',
+						hidden: false,
+						trashed: false,
+						pending_moderation: f.moderation === true && f.role === 'member',
+						received_at: new Date().toISOString(),
+						shared_by_user_id: state.me!.id,
+						shared_by_name: state.me!.display_name
+					};
+					list.unshift(p);
+					created.push(p);
+				}
+			}
+			return json(route, 200, { placements: created, skipped });
 		}
 
 		// ---- invites (recipient side)
@@ -515,6 +556,17 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 	});
 
 	return state;
+}
+
+/** The item behind a placement on a frame: from the frame's library, else from the sent history. */
+function findItem(state: MockState, frameId: string, placementId: string): S['Item'] | undefined {
+	const lib = state.placements[frameId]?.find((p) => p.id === placementId);
+	if (lib) return lib.item;
+	for (const s of state.sends) {
+		const pl = s.frames.find((f) => f.frame_id === frameId)?.placements.find((p) => p.placement_id === placementId);
+		if (pl) return s.items.find((i) => i.id === pl.item_id);
+	}
+	return undefined;
 }
 
 function deepMerge(a: Record<string, unknown>, b: Record<string, unknown>): Record<string, unknown> {
