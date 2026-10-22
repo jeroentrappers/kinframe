@@ -22,6 +22,7 @@ data class FrameSettings(
     val locale: LocaleSettings = LocaleSettings(),
     val location: LocationSettings? = null,
     val notifications: NotificationSettings = NotificationSettings(),
+    val kiosk: KioskSettings = KioskSettings(),
     val updates: UpdateSettings = UpdateSettings(),
 ) {
     companion object {
@@ -100,6 +101,27 @@ data class LocaleSettings(
 
 @Serializable
 data class LocationSettings(val name: String? = null, val lat: Double? = null, val lon: Double? = null)
+
+/**
+ * Kiosk settings. The owner PIN is never stored, only [ownerPinHash] (`PinHash`: PBKDF2-HMAC-SHA256), which only the
+ * frame receives; people see [ownerPinSet].
+ */
+@Serializable
+data class KioskSettings(
+    val allowRemoveMembersOnFrame: Boolean = true,
+    val ownerPinSet: Boolean = false,
+    val ownerPinHash: PinHashDto? = null,
+)
+
+@Serializable
+data class PinHashDto(
+    val alg: String = "pbkdf2-sha256",
+    val iterations: Int = 20_000,
+    /** Standard base64. */
+    val salt: String = "",
+    /** Standard base64 of the 32-byte derived key. */
+    val hash: String = "",
+)
 
 /** Frame app release channel (`stable` or `beta`, the beta program). */
 @Serializable

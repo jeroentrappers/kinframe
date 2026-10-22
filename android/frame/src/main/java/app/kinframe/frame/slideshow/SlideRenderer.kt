@@ -53,6 +53,11 @@ class SlideRenderer {
 
     private val paint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG or Paint.DITHER_FLAG)
 
+    companion object {
+        /** Warm near-black between collage tiles (the theme's `night`). */
+        val TILE_BACKGROUND: Int = Color.rgb(28, 23, 20)
+    }
+
     /** Caption strip for video slides, drawn above the playing video (bottom [stripHeight] px of the screen). */
     fun renderCaptionStrip(r: Request): Bitmap? {
         val c = r.caption ?: return null
@@ -131,6 +136,98 @@ class SlideRenderer {
         }
         r.caption?.let { CaptionPainter.draw(canvas, r.screenW, r.screenH, it, r.density) }
         return out
+    }
+
+    /** One photo of a collage or a smart pair. [label] is a short caption ("Anna · Yesterday") or null. */
+    data class TileRequest(
+        val file: File,
+        val rotation: Int,
+        val focalX: Double?,
+        val focalY: Double?,
+        val cell: Collage.Cell,
+        val label: String? = null,
+        val caption: String? = null,
+    )
+
+    /**
+     * Composes a collage into one screen-sized bitmap (so the transition stays two textured quads): each photo
+     * fills its cell around its focal point, with soft rounded corners and an even gap on a warm dark background.
+     * Photos are decoded one at a time at the cell's size and recycled right away.
+     */
+    fun renderTiles(tiles: List<TileRequest>, screenW: Int, screenH: Int, density: Float): Bitmap {
+        val out = Bitmap.createBitmap(screenW, screenH, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(out)
+        canvas.drawColor(TILE_BACKGROUND)
+        val gap = 8f * density
+        val radius = 14f * density
+        for (t in tiles) {
+            val dst = RectF(
+                t.cell.left * screenW + gap / 2 + if (t.cell.left == 0f) gap / 2 else 0f,
+                t.cell.top * screenH + gap / 2 + if (t.cell.top == 0f) gap / 2 else 0f,
+                t.cell.right * screenW - gap / 2 - if (t.cell.right >= 1f) gap / 2 else 0f,
+                t.cell.bottom * screenH - gap / 2 - if (t.cell.bottom >= 1f) gap / 2 else 0f,
+            )
+            val dw = dst.width().roundToInt().coerceAtLeast(1)
+            val dh = dst.height().roundToInt().coerceAtLeast(1)
+            val src = runCatching { decodeFill(t.file, t.rotation, dw, dh) }.getOrNull()
+            canvas.save()
+            val clip = android.graphics.Path().apply { addRoundRect(dst, radius, radius, android.graphics.Path.Direction.CW) }
+            canvas.clipPath(clip)
+            if (src != null) {
+                val c = FocalCrop.fillSource(src.width, src.height, dw, dh, t.focalX ?: 0.5, t.focalY ?: 0.5)
+                canvas.drawBitmap(src, Rect(c.left.roundToInt(), c.top.roundToInt(), c.right.roundToInt(), c.bottom.roundToInt()), dst, paint)
+                src.recycle()
+            } else {
+                canvas.drawColor(Color.rgb(46, 38, 33))
+            }
+            if (t.label != null || t.caption != null) drawTileLabel(canvas, dst, t, density)
+            canvas.restore()
+        }
+        return out
+    }
+
+    /** Caption (one line) and sender line at the bottom of a tile, over a soft scrim. */
+    private fun drawTileLabel(canvas: Canvas, dst: RectF, t: TileRequest, density: Float) {
+        val pad = 16f * density
+        val width = (dst.width() - 2 * pad).toInt().coerceAtLeast(1)
+        val metaPaint = android.text.TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.argb(230, 255, 255, 255); textSize = 16f * density
+            setShadowLayer(6f, 0f, 1f, Color.argb(153, 0, 0, 0))
+        }
+        val capPaint = android.text.TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE; textSize = 20f * density
+            setShadowLayer(6f, 0f, 1f, Color.argb(153, 0, 0, 0))
+        }
+        val cap = t.caption?.let { android.text.TextUtils.ellipsize(it.replace('\n', ' '), capPaint, width.toFloat(), android.text.TextUtils.TruncateAt.END).toString() }
+        val meta = t.label?.let { android.text.TextUtils.ellipsize(it, metaPaint, width.toFloat(), android.text.TextUtils.TruncateAt.END).toString() }
+        val lineCap = capPaint.fontSpacing
+        val lineMeta = metaPaint.fontSpacing
+        val textH = (if (cap != null) lineCap else 0f) + (if (meta != null) lineMeta else 0f)
+        val scrimTop = dst.bottom - textH - pad * 2.5f
+        canvas.drawRect(dst.left, scrimTop, dst.right, dst.bottom, Paint().apply {
+            shader = android.graphics.LinearGradient(0f, scrimTop, 0f, dst.bottom, Color.TRANSPARENT, Color.argb(150, 0, 0, 0), android.graphics.Shader.TileMode.CLAMP)
+        })
+        var y = dst.bottom - pad - textH
+        if (cap != null) { canvas.drawText(cap, dst.left + pad, y - capPaint.ascent(), capPaint); y += lineCap }
+        if (meta != null) canvas.drawText(meta, dst.left + pad, y - metaPaint.ascent(), metaPaint)
+    }
+
+    /** Decodes for fill mode at [w] × [h]: the smallest power-of-two sample that still covers the cell. */
+    private fun decodeFill(file: File, rotation: Int, w: Int, h: Int): Bitmap {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw UndecodableException("cannot read ${file.name}")
+        val rotated = rotation % 180 != 0
+        val srcW = if (rotated) bounds.outHeight else bounds.outWidth
+        val srcH = if (rotated) bounds.outWidth else bounds.outHeight
+        val scale = max(w.toFloat() / srcW, h.toFloat() / srcH)
+        val needW = (srcW * scale).roundToInt().coerceAtLeast(1)
+        val needH = (srcH * scale).roundToInt().coerceAtLeast(1)
+        val sample = if (rotated) FocalCrop.sampleSize(bounds.outWidth, bounds.outHeight, needH, needW)
+        else FocalCrop.sampleSize(bounds.outWidth, bounds.outHeight, needW, needH)
+        val bmp = BitmapFactory.decodeFile(file.absolutePath, BitmapFactory.Options().apply { inSampleSize = sample })
+            ?: throw UndecodableException("decode failed ${file.name}")
+        return if (rotation % 360 != 0) rotate(bmp, rotation) else bmp
     }
 
     /** A heavily blurred, slightly darkened copy of the photo behind the letterbox bars. */

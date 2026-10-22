@@ -79,6 +79,17 @@ class Outbox(
         pending
     }.also { kick() }
 
+    /** Allow or deny a join request at the frame (README §5.1); a 404 later means someone else already decided. */
+    suspend fun joinDecision(requestId: String, approve: Boolean) {
+        db.outbox().insert(
+            OutboxEntity(
+                kind = OutboxEntity.JOIN_DECISION, placementId = requestId,
+                payload = buildJsonObject { put("approve", JsonPrimitive(approve)) }.toString(), notBefore = now(), createdAt = now(),
+            ),
+        )
+        kick()
+    }
+
     /** Merges [patch] into the single pending settings patch. */
     suspend fun settingsPatch(patch: JsonObject) {
         db.tx {
@@ -142,6 +153,7 @@ class Outbox(
             OutboxEntity.REACTION -> api.setReaction(o.placementId!!, payload["reaction"]?.jsonPrimitive?.let { if (it.isString) it.content else null })
             OutboxEntity.PLACEMENT_PATCH -> api.patchPlacement(o.placementId!!, payload)
             OutboxEntity.REPLY -> api.sendReply(o.placementId!!, payload["preset"]!!.jsonPrimitive.content)
+            OutboxEntity.JOIN_DECISION -> api.decideJoin(o.placementId!!, payload["approve"]!!.jsonPrimitive.content == "true")
             OutboxEntity.SETTINGS_PATCH -> {
                 val version = currentSettingsVersion()
                 val result = api.patchSettings(version, payload)

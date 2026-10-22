@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -54,7 +55,8 @@ import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
 import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
-import app.kinframe.frame.OwnerGate
+import app.kinframe.frame.kiosk.OwnerGate
+import app.kinframe.frame.kiosk.SetPinFlow
 import app.kinframe.frame.R
 import app.kinframe.frame.schedule.SleepPlanner
 import app.kinframe.frame.setup.signalWord
@@ -75,6 +77,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     val s by c.g.settings.settings.collectAsState()
     val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var choosingPin by remember { mutableStateOf(false) }
     LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
 
     fun patch(p: JsonObject) {
@@ -87,7 +90,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     Box(
         Modifier.fillMaxSize().background(Kin.colors.paper)
             .pointerInput(Unit) {
-                awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis() } }
+                awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis(); c.gate.touch() } }
             },
     ) {
         Column(Modifier.fillMaxSize()) {
@@ -102,12 +105,17 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 SlideshowSection(c, s, ::section)
+                VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
+        }
+        if (choosingPin) {
+            SetPinFlow(onDone = { pin -> choosingPin = false; scope.launch { c.setOwnerPin(pin) } }, onCancel = { choosingPin = false })
         }
     }
 }
@@ -144,8 +152,12 @@ private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (Str
         }
         Labeled(stringResource(R.string.settings_transition)) {
             ChoiceChips(
-                listOf("crossfade" to stringResource(R.string.transition_crossfade), "slide" to stringResource(R.string.transition_slide)),
-                if (ss.transition == "slide") "slide" else "crossfade", { section("slideshow", arrayOf("transition" to it)) },
+                listOf(
+                    "crossfade" to stringResource(R.string.transition_crossfade),
+                    "slide" to stringResource(R.string.transition_slide),
+                    "kenburns" to stringResource(R.string.transition_kenburns),
+                ),
+                ss.transition.takeIf { it == "slide" || it == "kenburns" } ?: "crossfade", { section("slideshow", arrayOf("transition" to it)) },
             )
         }
         Labeled(stringResource(R.string.settings_order)) {
@@ -159,10 +171,53 @@ private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (Str
             )
         }
         SwitchRow(stringResource(R.string.settings_reverse), ss.reverse) { section("slideshow", arrayOf("reverse" to it)) }
+        SwitchRow(stringResource(R.string.settings_collage), ss.collage) { section("slideshow", arrayOf("collage" to it)) }
+        if (ss.collage) {
+            Labeled(stringResource(R.string.settings_collage_max)) {
+                ChoiceChips((2..6).map { it to "$it" }, ss.collageMax.coerceIn(2, 6), { section("slideshow", arrayOf("collage_max" to it)) })
+            }
+        } else {
+            SwitchRow(stringResource(R.string.settings_pair_portraits), ss.pairPortraits) { section("slideshow", arrayOf("pair_portraits" to it)) }
+        }
+        SwitchRow(stringResource(R.string.settings_on_this_day), ss.onThisDay) { section("slideshow", arrayOf("on_this_day" to it)) }
         Labeled(stringResource(R.string.settings_fill)) {
             ChoiceChips(
                 listOf(true to stringResource(R.string.fill_fill), false to stringResource(R.string.fill_fit)),
                 ss.fill, { section("slideshow", arrayOf("fill" to it)) },
+            )
+        }
+    }
+}
+
+/** Video options (product spec 4.4 and §6: autoplay on, play once and hold, auto-mute off). */
+@Composable
+private fun VideoSection(s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
+    val v = s.video
+    var volume by remember(v.volume) { mutableFloatStateOf(v.volume.toFloat()) }
+    SectionCard(stringResource(R.string.settings_video)) {
+        SwitchRow(stringResource(R.string.settings_video_autoplay), v.autoplay) { section("video", arrayOf("autoplay" to it)) }
+        Labeled(stringResource(R.string.settings_video_playback)) {
+            ChoiceChips(
+                listOf(
+                    "once_hold" to stringResource(R.string.video_once_hold),
+                    "loop" to stringResource(R.string.video_loop),
+                    "once_advance" to stringResource(R.string.video_once_advance),
+                ),
+                v.playback, { section("video", arrayOf("playback" to it)) },
+            )
+        }
+        Labeled(stringResource(R.string.settings_video_volume)) {
+            Slider(
+                value = volume, onValueChange = { volume = it },
+                onValueChangeFinished = { section("video", arrayOf("volume" to volume.toInt())) },
+                valueRange = 0f..100f,
+                colors = SliderDefaults.colors(thumbColor = Kin.colors.accent, activeTrackColor = Kin.colors.accent, inactiveTrackColor = Kin.colors.line),
+            )
+        }
+        Labeled(stringResource(R.string.settings_video_auto_mute)) {
+            ChoiceChips(
+                listOf(0 to stringResource(R.string.video_auto_mute_off)) + listOf(10, 30, 60).map { it to stringResource(R.string.video_auto_mute_min, it) },
+                v.autoMuteMin ?: 0, { section("video", arrayOf("auto_mute_min" to it.takeIf { m -> m > 0 })) },
             )
         }
     }
@@ -263,6 +318,26 @@ private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
     }
 }
 
+/** Owner PIN (product spec §5): set, change or remove it here; the owner can also remove it remotely. */
+@Composable
+private fun OwnerPinSection(c: FrameController, s: FrameSettings, onChoose: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val set = s.kiosk.ownerPinHash != null
+    SectionCard(stringResource(R.string.settings_pin)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Lock, null, tint = if (set) Kin.colors.sage else Kin.colors.inkFaint)
+            Text(
+                stringResource(if (set) R.string.settings_pin_on else R.string.settings_pin_off),
+                style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 14.dp),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            KinButton(stringResource(if (set) R.string.settings_pin_change else R.string.settings_pin_set), onChoose, style = KinButtonStyle.Secondary)
+            if (set) KinButton(stringResource(R.string.settings_pin_remove), { scope.launch { c.setOwnerPin(null) } }, style = KinButtonStyle.Quiet)
+        }
+    }
+}
+
 @Composable
 private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
     val status by c.update.status.collectAsState()
@@ -311,7 +386,7 @@ private fun AboutSection(c: FrameController) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             KinButton(stringResource(R.string.wifi_open_settings), {
                 (context as? Activity)?.let { a ->
-                    OwnerGate.authorize(a, OwnerGate.Reason.ExitKiosk) {
+                    c.gate.authorize(OwnerGate.Reason.Wifi) {
                         runCatching { a.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     }
                 }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pincode van de eigenaar -->
+    <string name="pin_enter_title">Voer de pincode van de eigenaar in</string>
+    <string name="pin_reason_settings">om de instellingen te openen</string>
+    <string name="pin_reason_exit">om kinframe te verlaten</string>
+    <string name="pin_reason_wifi">om de wifi te wijzigen</string>
+    <string name="pin_reason_power_off">om de fotolijst uit te zetten</string>
+    <string name="pin_reason_restart">om de fotolijst opnieuw op te starten</string>
+    <string name="pin_reason_server">om de server te wijzigen</string>
+    <string name="pin_reason_reset">om de fotolijst te resetten</string>
+    <string name="pin_checking">Controleren…</string>
+    <string name="pin_wrong">Dat is niet de pincode.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Dat is niet de pincode. Nog %d poging voor een korte pauze.</item>
+        <item quantity="other">Dat is niet de pincode. Nog %d pogingen voor een korte pauze.</item>
+    </plurals>
+    <string name="pin_locked">Te veel foute pogingen. Probeer het opnieuw over %s.</string>
+    <string name="pin_forgot">Pincode vergeten? De eigenaar van de fotolijst kan hem verwijderen in de kinframe-app, bij de instellingen van deze fotolijst.</string>
+    <string name="pin_new_title">Kies een pincode</string>
+    <string name="pin_new_body">4 tot 6 cijfers. Hij wordt gevraagd om de instellingen te openen, de fotolijst uit te zetten of de wifi te wijzigen.</string>
+    <string name="pin_confirm_title">Voer de pincode nog eens in</string>
+    <string name="pin_confirm_body">Voor de zekerheid.</string>
+    <string name="pin_mismatch">De pincodes kwamen niet overeen. Kies er opnieuw een.</string>
+    <string name="pin_key_delete">Wissen</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Pincode van de eigenaar</string>
+    <string name="settings_pin_off">Uit. Iedereen bij de fotolijst kan de instellingen openen.</string>
+    <string name="settings_pin_on">Aan. Instellingen, uitzetten en wifi vragen om de pincode.</string>
+    <string name="settings_pin_set">Pincode instellen</string>
+    <string name="settings_pin_change">Pincode wijzigen</string>
+    <string name="settings_pin_remove">Pincode verwijderen</string>
+    <!-- Verzoeken om lid te worden en meldingen -->
+    <string name="join_someone">Iemand</string>
+    <string name="join_title">%1$s wil graag lid worden</string>
+    <string name="join_body_code">%1$s heeft de code van %2$s ingevoerd. Als je het toestaat, kan %1$s foto\'s naar deze fotolijst sturen.</string>
+    <string name="join_body_invited">%1$s heeft %3$s uitgenodigd voor %2$s. Als je het toestaat, kan %3$s foto\'s naar deze fotolijst sturen.</string>
+    <string name="join_invited_by">Uitgenodigd door %s</string>
+    <string name="join_allow">Toestaan</string>
+    <string name="join_deny">Niet toestaan</string>
+    <string name="join_later">Later</string>
+    <string name="join_later_hint">Je vindt het terug bij de meldingen in het menu.</string>
+    <string name="join_pill_one">%s wil graag lid worden</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d persoon wil graag lid worden</item>
+        <item quantity="other">%d personen willen graag lid worden</item>
+    </plurals>
+    <string name="notifications_title">Meldingen</string>
+    <string name="notifications_empty">Alles bijgewerkt</string>
+    <string name="notifications_empty_body">Er wacht niets op je.</string>
+    <string name="menu_notifications">Meldingen</string>
+    <string name="action_close">Sluiten</string>
+    <!-- Statuskaarten op de diavoorstelling -->
+    <string name="status_card_offline_title">Geen internetverbinding</string>
+    <string name="status_card_offline_body">De foto\'s op de fotolijst blijven spelen. Nieuwe komen binnen zodra hij weer online is.</string>
+    <string name="status_card_server_title">De fotoserver is niet bereikbaar</string>
+    <string name="status_card_server_body">De wifi werkt, maar de server antwoordt niet. Nieuwe foto\'s komen binnen zodra hij terug is.</string>
+    <string name="status_card_portal_title">Deze wifi vraagt om aan te melden</string>
+    <string name="status_card_portal_body">Open de aanmeldpagina van het netwerk om de fotolijst online te krijgen.</string>
+    <string name="status_card_portal_action">Aanmelden</string>
+    <string name="status_card_storage_title">De fotolijst is bijna vol</string>
+    <string name="status_card_storage_body">Oudere foto\'s zijn van de fotolijst gehaald om plaats te maken; ze blijven veilig op de server. Nieuwe foto\'s wachten misschien tot er plaats is.</string>
+    <string name="portal_title">Aanmelden bij de wifi</string>
+    <string name="portal_body">Dit sluit vanzelf zodra de fotolijst online is.</string>
+    <!-- Installatie: tijdzone en update -->
+    <string name="setup_tz_title">In welke tijdzone staat de fotolijst?</string>
+    <string name="setup_tz_body">Zodat de klok, de datum en de nachtstand kloppen.</string>
+    <string name="setup_tz_suggested">Voorgesteld</string>
+    <string name="setup_tz_all">Alle tijdzones</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Azië</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australië</string>
+    <string name="tz_region_pacific">Grote Oceaan</string>
+    <string name="tz_region_atlantic">Atlantische Oceaan</string>
+    <string name="tz_region_indian">Indische Oceaan</string>
+    <string name="tz_region_antarctica">Antarctica</string>
+    <string name="setup_update_checking">Zoeken naar een nieuwere versie…</string>
+    <string name="setup_update_checking_body">De fotolijst zorgt dat hij de nieuwste kinframe heeft voor je begint.</string>
+    <string name="setup_update_downloading">Versie %s downloaden</string>
+    <string name="setup_update_downloading_body">Daarna wordt ze meteen geïnstalleerd. Je kunt dit overslaan; de fotolijst werkt zichzelf dan later bij.</string>
+    <string name="setup_update_installing">Versie %s installeren</string>
+    <string name="setup_update_installing_body">De fotolijst start zo vanzelf opnieuw op en gaat dan verder waar je was.</string>
+    <string name="setup_update_current">kinframe is up-to-date</string>
+    <string name="setup_update_current_body">Op naar de laatste stap.</string>
+    <string name="setup_update_failed">Kon niet zoeken naar updates</string>
+    <string name="setup_update_failed_body">Geen probleem: de fotolijst kijkt later opnieuw en werkt zichzelf bij.</string>
+    <string name="setup_update_skip">Nu overslaan</string>
+    <!-- Diavoorstelling -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Vandaag %d jaar geleden</item>
+        <item quantity="other">Vandaag %d jaar geleden</item>
+    </plurals>
+    <string name="transition_kenburns">Langzaam inzoomen</string>
+    <string name="settings_collage">Meerdere foto\'s tegelijk (collage)</string>
+    <string name="settings_collage_max">Foto\'s per scherm</string>
+    <string name="settings_pair_portraits">Twee staande foto\'s naast elkaar tonen</string>
+    <string name="settings_on_this_day">Herinneringen van deze dag in vorige jaren tonen</string>
+    <string name="settings_video">Video\'s</string>
+    <string name="settings_video_autoplay">Video\'s automatisch afspelen</string>
+    <string name="settings_video_playback">Na een video</string>
+    <string name="video_once_hold">Eén keer afspelen, dan wachten</string>
+    <string name="video_loop">Blijven herhalen</string>
+    <string name="video_once_advance">Eén keer afspelen, dan verder</string>
+    <string name="settings_video_volume">Volume van video\'s</string>
+    <string name="settings_video_auto_mute">Dempen als niemand de fotolijst aanraakte gedurende</string>
+    <string name="video_auto_mute_off">Nooit</string>
+    <string name="video_auto_mute_min">%d min</string>
+</resources>

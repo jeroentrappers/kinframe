@@ -136,8 +136,21 @@ func TestCodesAndJoining(t *testing.T) {
 	if r := e.do(req{method: "GET", path: "/v1/frames/" + frameID, token: cleo.token}); r.StatusCode != 404 {
 		t.Fatalf("pending user can see frame: %d", r.StatusCode)
 	}
+	// The frame can list what is still pending (e.g. after being offline).
+	var pending []map[string]any
+	e.get("/v1/device/join-requests", d.token).json(t, &pending)
+	if len(pending) != 1 || pending[0]["id"] != pend["join_request_id"] || dig(pending[0], "user", "display_name") != "Cleo" {
+		t.Fatalf("device pending list: %v", pending)
+	}
 	e.expect(req{method: "POST", path: "/v1/device/join-requests/" + pend["join_request_id"].(string), token: d.token, body: map[string]any{"decision": "approve"}}, 204)
 	cleoWS.await("membership.updated", 5*time.Second)
+	e.get("/v1/device/join-requests", d.token).json(t, &pending)
+	if len(pending) != 0 {
+		t.Fatalf("decided request still pending: %v", pending)
+	}
+	if r := e.do(req{method: "POST", path: "/v1/device/join-requests/" + pend["join_request_id"].(string), token: d.token, body: map[string]any{"decision": "deny"}}); r.StatusCode != 404 {
+		t.Fatalf("deciding twice: %d", r.StatusCode)
+	}
 	if f := e.get("/v1/frames/"+frameID, cleo.token).m(t); f["role"] != "member" || f["location"] != "Living room" || f["member_count"] != float64(3) {
 		t.Fatalf("after approval: %v", f)
 	}

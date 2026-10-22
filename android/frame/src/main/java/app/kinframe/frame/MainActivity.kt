@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 /**
  * The frame's only activity: a HOME launcher in immersive kiosk mode that keeps the screen on.
- * Leaving it requires the owner gate ([OwnerGate]) or adb.
+ * Leaving it requires the owner PIN ([app.kinframe.frame.kiosk.OwnerGate]) when one is set, or adb.
  */
 class MainActivity : ComponentActivity() {
     private val graph by lazy { FrameApp.graph(this) }
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // Kiosk: back never leaves the frame app; it closes the settings screen if open.
-                if (graph.controller.settingsOpen.value) graph.controller.settingsOpen.value = false
+                if (graph.controller.settingsOpen.value) graph.controller.closeSettings()
             }
         })
 
@@ -74,6 +74,20 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         runCatching { unregisterReceiver(screenOffReceiver) }
         super.onDestroy()
+    }
+
+    /** Volume keys set the video volume (the frame has no other use for them). */
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent): Boolean {
+        val delta = when (keyCode) {
+            android.view.KeyEvent.KEYCODE_VOLUME_UP -> 10
+            android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> -10
+            else -> return super.onKeyDown(keyCode, event)
+        }
+        if (graph.controller.screen.value == AppScreen.Slideshow) {
+            graph.controller.slideshow.nudgeVolume(delta)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

@@ -44,7 +44,12 @@ data class PlacementEntity(
     val lastShownAt: Long? = null,
     /** Arrived while the frame was running and not shown yet: plays first (new-photo experience). */
     val isNew: Boolean = false,
+    /** The file was removed to free space (least recently shown); downloaded again only when it is about to show. */
+    val evictedAt: Long? = null,
+    /** Albums this placement is in, comma-separated ids (album mode plays one album). */
+    val albumIds: String? = null,
 ) {
+    val albumIdList: List<String> get() = albumIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     val isVideo: Boolean get() = kind == "video"
     val isDeliverable: Boolean get() = status == "ready" || status == "delivered" || status == "seen"
     val isVisible: Boolean get() = isDeliverable && !hidden && !trashed && !pendingModeration
@@ -100,5 +105,7 @@ data class OutboxEntity(
         const val PLACEMENT_PATCH = "placement_patch"
         const val SETTINGS_PATCH = "settings_patch"
         const val REPLY = "reply"
+        /** Allow/deny of a join request; `placementId` holds the request id. */
+        const val JOIN_DECISION = "join_decision"
     }
 }
