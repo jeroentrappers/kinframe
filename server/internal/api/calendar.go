@@ -13,7 +13,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/google/uuid"
-	openapi_types "github.com/oapi-codegen/runtime/types"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/blob"
@@ -146,9 +145,6 @@ func (s *Server) CreateCalendar(ctx context.Context, req gen.CreateCalendarReque
 	in, err := validateConnection(kind, sourceInput{url: b.Url, username: trimmed(b.Username), password: deref(b.Password), collection: trimmed(b.CalendarUrl)})
 	if err != nil {
 		return nil, err
-	}
-	if kind == "ics" && (in.username != "" || in.password != "") {
-		// Allowed (some self-hosted feeds use basic auth), nothing to validate.
 	}
 	name := trimmed(b.Name)
 	if tooLong(name, 60) {
@@ -478,13 +474,6 @@ func (s *Server) ClearCountdown(ctx context.Context, req gen.ClearCountdownReque
 }
 
 // ---------------------------------------------------------------- sent events
-
-func dateJSON(t *time.Time) *openapi_types.Date {
-	if t == nil {
-		return nil
-	}
-	return &openapi_types.Date{Time: *t}
-}
 
 func invitationJSON(inv *store.Invitation) map[string]any {
 	var sender any
@@ -876,8 +865,6 @@ func (s *Server) frameCalendar(ctx context.Context, f *store.Frame) (json.RawMes
 	}
 	return st.Payload, nil
 }
-
-var _ = dateJSON
 
 func deref(p *string) string {
 	if p == nil {

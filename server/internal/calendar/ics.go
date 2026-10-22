@@ -192,7 +192,7 @@ func Parse(raw []byte, floating *time.Location) (*Parsed, error) {
 
 var (
 	wallLayout = "20060102T150405"
-	tagRe      = regexp.MustCompile(`(?s)<[^>]*>`)
+	tagRe      = regexp.MustCompile(`(?is)<(?:!--.*?--|/?(?:html|head|body|meta|title|style|p|br|div|span|a|b|i|u|em|strong|ul|ol|li|font|table|tbody|tr|td|th|hr|h[1-6]|img|o:p)\b[^>]*)>`)
 	spaceRe    = regexp.MustCompile(`[ \t]+`)
 	blankRe    = regexp.MustCompile(`\n{3,}`)
 )
@@ -245,7 +245,7 @@ func unescapeText(s string) string {
 
 func cleanText(s string, limit int, multiline bool) string {
 	s = unescapeText(s)
-	if strings.Contains(s, "<") && strings.Contains(s, ">") {
+	if multiline && tagRe.MatchString(s) {
 		s = strings.NewReplacer("<br>", "\n", "<br/>", "\n", "<br />", "\n", "</p>", "\n").Replace(s)
 		s = tagRe.ReplaceAllString(s, "")
 		s = html.UnescapeString(s)
