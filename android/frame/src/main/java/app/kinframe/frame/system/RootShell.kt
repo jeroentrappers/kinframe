@@ -25,10 +25,16 @@ open class RootShell {
 
     data class Result(val exitCode: Int, val output: String)
 
-    /** Runs [command] as root via `su 0 sh -c`. Never throws. */
+    /**
+     * Runs [command] as root by piping it into `su 0 sh`. Never throws.
+     *
+     * Not `su 0 sh -c <command>`: the su on Rockchip frame firmware re-parses its arguments, so quoting, redirects,
+     * subshells and `&` break (a backgrounded job never ran). Commands on stdin reach sh untouched.
+     */
     open suspend fun run(command: String, timeoutMs: Long = 10_000): Result = withContext(Dispatchers.IO) {
         try {
-            val p = ProcessBuilder("su", "0", "sh", "-c", command).redirectErrorStream(true).start()
+            val p = ProcessBuilder("su", "0", "sh").redirectErrorStream(true).start()
+            p.outputStream.bufferedWriter().use { it.write(command); it.write("\nexit\n") }
             val out = StringBuilder()
             val reader = Thread {
                 runCatching { p.inputStream.bufferedReader().forEachLine { out.appendLine(it) } }

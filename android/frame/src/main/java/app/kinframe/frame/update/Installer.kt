@@ -83,7 +83,8 @@ class Installer(private val context: Context, private val root: RootShell, priva
         logFile.delete()
         val args = listOf(mode, apk.path, previous?.path ?: "", marker?.path ?: "", logFile.path, Process.myUid().toString(), context.packageName)
             .joinToString(" ") { "'" + it.replace("'", "") + "'" }
-        root.run("sh '${script.path}' $args </dev/null >/dev/null 2>&1 &", timeoutMs = 5_000)
+        // setsid: a new session, so the script outlives su and the app process the package manager is about to kill.
+        root.run("setsid sh '${script.path}' $args </dev/null >/dev/null 2>&1 &", timeoutMs = 5_000)
     }
 
     // ------------------------------------------------------------------ without root
