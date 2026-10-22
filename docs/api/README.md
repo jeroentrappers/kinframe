@@ -471,7 +471,14 @@ the operator emails customers when stock is in, with the final price and a payme
   `vat_percent`, `products[]` (`id`, `name`, `size`, `price_cents` incl. VAT, `max_qty`, `image`, `specs` per
   language), `shipping` (`countries`, `flat_cents`, `free_from_cents`), `estimated_delivery` per language, and
   `seller` (`name`, `email`, `legal`, `privacy_url`). Language maps always have `en`, the fallback. The operator's
-  notification address is not published.
+  notification address is not published. Optional `domains` (storefront host names) and `default_locale`.
+- **Storefront domains**: the operator may serve the shop on its own host names (`domains`), proxied to the same
+  server. Discovery is identical on every host (`web` stays the app's origin). On a storefront the web app shows
+  only the brand's landing page, `/shop` and `/shop/cancel`, sends every other path to the same path on `web`, and
+  calls the API on its own origin. The server uses the request's `Host` (or `X-Forwarded-Host` behind a trusted
+  proxy) only for two things: the customer's cancel link points to the storefront the reservation was made on, and
+  `index.html` gets the brand's title, description and Open Graph tags in the visitor's language
+  (`Accept-Language` among en/nl/fr/de, else `default_locale`). Unknown hosts are served like the app's own.
 - **Reserve** `POST /v1/shop/reservations` (no auth): `name`, `email`, `country` (one of `shipping.countries`),
   optional `postal_code` and `note`, `items[]` (`product_id`, `quantity` 1…`max_qty`; lines for the same product
   are merged), `locale` and `consent: true`. The server prices the order from its own config (the client never

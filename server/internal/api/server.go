@@ -210,6 +210,7 @@ const (
 	deviceKey
 	rawBodyKey
 	ipKey
+	hostKey
 )
 
 type principal struct {
@@ -237,6 +238,13 @@ func isOperator(ctx context.Context) bool {
 func deviceFrom(ctx context.Context) *store.Device {
 	d, _ := ctx.Value(deviceKey).(*store.Device)
 	return d
+}
+
+// requestHost is the Host the client asked for (X-Forwarded-Host behind a
+// trusted proxy), port included.
+func requestHost(ctx context.Context) string {
+	h, _ := ctx.Value(hostKey).(string)
+	return h
 }
 
 func clientIP(ctx context.Context) string {

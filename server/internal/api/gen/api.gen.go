@@ -2746,6 +2746,21 @@ type Shop struct {
 	// Example: EUR
 	Currency string `json:"currency"`
 
+	// DefaultLocale Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+	// the shop emails in). Defaults to `en`.
+	//
+	//
+	// Example: nl
+	DefaultLocale *string `json:"default_locale,omitempty"`
+
+	// Domains Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+	// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+	// sign-in and the family app live. Absent when the operator configured none.
+	//
+	//
+	// Example: ["shop.example.org"]
+	Domains *[]string `json:"domains,omitempty"`
+
 	// EstimatedDelivery Language code → text; `en` is the fallback.
 	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
 	Products          []ShopProduct  `json:"products"`

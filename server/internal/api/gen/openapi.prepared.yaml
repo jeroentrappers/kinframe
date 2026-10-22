@@ -2258,6 +2258,22 @@ components:
                     description: ISO 4217
                     example: EUR
                     type: string
+                default_locale:
+                    description: |
+                        Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+                        the shop emails in). Defaults to `en`.
+                    example: nl
+                    type: string
+                domains:
+                    description: |
+                        Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+                        `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+                        sign-in and the family app live. Absent when the operator configured none.
+                    example:
+                        - shop.example.org
+                    items:
+                        type: string
+                    type: array
                 estimated_delivery:
                     $ref: '#/components/schemas/LocalizedText'
                 products:

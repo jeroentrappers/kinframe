@@ -10,7 +10,8 @@
 	import { live } from '$lib/live.svelte';
 	import { push } from '$lib/push.svelte';
 	import { toasts } from '$lib/toast.svelte';
-	import { applyDocumentLocale, i18n, t } from '$lib/i18n/index.svelte';
+	import { applyDocumentLocale, hasSavedLocale, i18n, t } from '$lib/i18n/index.svelte';
+	import { isStorefrontPath, storefrontLocale } from '$lib/storefront';
 	import AppShell from '$components/AppShell.svelte';
 	import Toaster from '$components/Toaster.svelte';
 	import Logo from '$components/Logo.svelte';
@@ -30,12 +31,34 @@
 
 	let booting = $state(true);
 
+	/** On a storefront, app pages live on the main origin: same path there (sign-in only happens there). */
+	function leaveStorefront(): boolean {
+		if (isStorefrontPath(location.pathname)) return false;
+		const target = discovery.appUrl(location.pathname + location.search + location.hash);
+		if (!target) return false;
+		location.replace(target);
+		return true;
+	}
+
 	async function boot() {
 		booting = true;
 		const [doc] = await Promise.all([discovery.load(), i18n.ready]);
-		if (doc) await auth.init();
+		if (doc && discovery.storefront) {
+			if (leaveStorefront()) return; // keep the splash while the browser leaves
+			if (!hasSavedLocale()) {
+				const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+				await i18n.use(storefrontLocale(langs, doc.shop?.default_locale));
+			}
+		} else if (doc) {
+			await auth.init();
+		}
 		booting = false;
 	}
+
+	// Client-side navigation on a storefront to an app page (an old bookmark in history, a typed link).
+	$effect(() => {
+		if (!booting && discovery.storefront && !isStorefrontPath(page.url.pathname)) leaveStorefront();
+	});
 
 	onMount(() => {
 		applyDocumentLocale(i18n.locale);
@@ -93,6 +116,8 @@
 			<button class="btn btn-primary" onclick={boot}><Icon name="refresh" size={18} />{t('common.tryAgain')}</button>
 		</div>
 	</div>
+{:else if discovery.storefront}
+	{#if isStorefrontPath(page.url.pathname)}{@render children()}{/if}
 {:else if isTv || isShop}
 	{@render children()}
 {:else if auth.status === 'signed_in' && page.url.pathname !== '/' && page.url.pathname !== '/callback'}

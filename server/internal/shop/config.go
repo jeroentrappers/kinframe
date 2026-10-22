@@ -39,6 +39,13 @@ type Config struct {
 	// RetentionDays: reservations are deleted this many days after their last
 	// change (cancelled ones after 30 days). Default 365.
 	RetentionDays int `yaml:"retention_days"`
+	// Domains are extra hostnames ("shop.example.org") that serve the web app
+	// as a storefront: the brand's landing page and the shop, without the
+	// family app. They proxy to the same server (docs/deploy.md).
+	Domains []string `yaml:"domains"`
+	// DefaultLocale is the storefront's language for visitors whose browser
+	// prefers none of the shop languages (EmailLanguages). Default "en".
+	DefaultLocale string `yaml:"default_locale"`
 }
 
 type Seller struct {
@@ -107,6 +114,8 @@ var (
 	countryRe  = regexp.MustCompile(`^[A-Z]{2}$`)
 	currencyRe = regexp.MustCompile(`^[A-Z]{3}$`)
 	prefixRe   = regexp.MustCompile(`^[A-Z]{1,4}$`)
+	// A host name with at least two labels, no scheme, port or path.
+	domainRe = regexp.MustCompile(`^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$`)
 )
 
 // Load reads and validates a shop file. It returns nil, nil when the file
@@ -141,6 +150,12 @@ func Parse(b []byte, serverName string) (*Config, error) {
 	}
 	if c.RetentionDays == 0 {
 		c.RetentionDays = 365
+	}
+	if c.DefaultLocale == "" {
+		c.DefaultLocale = "en"
+	}
+	for i, d := range c.Domains {
+		c.Domains[i] = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(d)), ".")
 	}
 	if err := c.validate(); err != nil {
 		return nil, fmt.Errorf("shop config: %w", err)
@@ -227,6 +242,17 @@ func (c *Config) validate() error {
 	}
 	if len(c.EstimatedDelivery) > 0 && c.EstimatedDelivery["en"] == "" {
 		bad("estimated_delivery needs an en text (the fallback)")
+	}
+	for i, d := range c.Domains {
+		if len(d) > 253 || !domainRe.MatchString(d) {
+			bad("domains[%d] must be a host name like shop.example.org (no scheme, port or path), got %q", i, d)
+		}
+		if slices.Index(c.Domains, d) != i {
+			bad("domains: %q is listed twice", d)
+		}
+	}
+	if !slices.Contains(EmailLanguages(), c.DefaultLocale) {
+		bad("default_locale must be one of %v, got %q", EmailLanguages(), c.DefaultLocale)
 	}
 	return errors.Join(errs...)
 }

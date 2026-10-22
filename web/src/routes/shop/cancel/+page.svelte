@@ -31,7 +31,7 @@
 	}
 </script>
 
-<svelte:head><title>{t('shop.cancelTitle')} · {discovery.name}</title></svelte:head>
+<svelte:head><title>{t('shop.cancelTitle')} · {discovery.storefront ? discovery.brand : discovery.name}</title></svelte:head>
 
 <div class="cancel-page">
 	<header class="container top">

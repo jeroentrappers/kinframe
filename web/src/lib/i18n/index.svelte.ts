@@ -50,6 +50,11 @@ class I18n {
 		return this.#activate(locale, true);
 	}
 
+	/** Switch language without remembering it (a default the person didn't choose). */
+	use(locale: Locale): Promise<void> {
+		return this.#activate(locale, false);
+	}
+
 	async #activate(locale: Locale, save: boolean) {
 		if (!this.#catalogs[locale]) {
 			const load = loaderFor(locale);
