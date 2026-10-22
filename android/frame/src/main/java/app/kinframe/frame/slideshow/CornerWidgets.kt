@@ -1,6 +1,7 @@
 package app.kinframe.frame.slideshow
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,6 +58,8 @@ internal fun CornerWidgets(
     nowMs: Long,
     unit: String,
     onPaper: Boolean,
+    /** Tapping the clock or date opens the full-screen calendar (behaviour spec B.3). */
+    onClockClick: (() -> Unit)? = null,
     onWeatherClick: () -> Unit,
 ) {
     if (clock == null && date == null && weather == null) return
@@ -77,7 +80,15 @@ internal fun CornerWidgets(
                 }
             }
             if (clock != null || date != null) {
-                Column(horizontalAlignment = Alignment.End) {
+                Column(
+                    if (onClockClick != null) {
+                        Modifier.clickable(
+                            androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() }, indication = null,
+                            role = androidx.compose.ui.semantics.Role.Button, onClick = onClockClick,
+                        )
+                    } else Modifier,
+                    horizontalAlignment = Alignment.End,
+                ) {
                     if (clock != null) Text(clock, style = Kin.type.display.copy(color = color, shadow = shadow, fontWeight = FontWeight.Light))
                     if (date != null) Text(date, style = Kin.type.body.copy(color = color.copy(alpha = 0.9f), shadow = shadow))
                 }
