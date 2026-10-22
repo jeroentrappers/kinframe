@@ -133,7 +133,9 @@
 	const describedBy = (...ids: (string | false | undefined)[]) => ids.filter(Boolean).join(' ') || undefined;
 </script>
 
-<svelte:head><title>{shop ? t('shop.pageTitle', { brand }) : t('shop.unavailable')} · {discovery.name}</title></svelte:head>
+<svelte:head>
+	<title>{shop ? t('shop.pageTitle', { brand }) : t('shop.unavailable')}{discovery.storefront ? '' : ` · ${discovery.name}`}</title>
+</svelte:head>
 
 <div class="shop-page">
 	<header class="container top">

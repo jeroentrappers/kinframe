@@ -216,7 +216,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		const req = route.request();
 		const url = new URL(req.url());
 		// Third-party scripts with /v1/ in their path (the Cast SDK) are someone else's.
-		if (!url.host.startsWith('localhost')) return route.fallback();
+		// (*.localhost is the app too: storefront tests use storefront.localhost.)
+		if (!/^([a-z0-9-]+\.)?localhost(:|$)/.test(url.host)) return route.fallback();
 		const path = url.pathname;
 		const method = req.method();
 		let body: unknown;

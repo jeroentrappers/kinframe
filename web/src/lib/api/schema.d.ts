@@ -1567,6 +1567,21 @@ export interface components {
             products: components["schemas"]["ShopProduct"][];
             shipping: components["schemas"]["ShopShipping"];
             estimated_delivery?: components["schemas"]["LocalizedText"];
+            /**
+             * @description Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+             *     `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+             *     sign-in and the family app live. Absent when the operator configured none.
+             * @example [
+             *       "shop.example.org"
+             *     ]
+             */
+            domains?: string[];
+            /**
+             * @description Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+             *     the shop emails in). Defaults to `en`.
+             * @example nl
+             */
+            default_locale?: string;
             seller: {
                 name: string;
                 /** Format: email */

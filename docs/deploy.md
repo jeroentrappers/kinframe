@@ -311,6 +311,8 @@ kinframe_shop:
     countries: [BE, NL]              # ISO codes; the form only offers these
     flat_cents: 695
     free_from_cents: 10000           # item subtotal for free shipping; null = never free
+  domains: [shop.example.org]        # optional storefront host names, see "Storefront domain" below
+  default_locale: en                 # storefront language when the browser asks for none of en/nl/fr/de
 ```
 
 The role writes this (plus `enabled: true`) to `/opt/kinframe/shop.json`, mounts it read-only at
@@ -325,6 +327,35 @@ in English, Dutch, French or German (others: English) with a link to cancel; the
 the time of consent (the form has an explicit, unticked consent checkbox). No IP addresses. Reservations are
 deleted automatically `retention_days` after their last change, cancelled ones 30 days after cancelling; the CSV
 export is for the operator's own follow-up. The site footer names the seller, the legal line and this policy.
+
+#### Storefront domain
+
+The shop can also live on its own domain under the consumer brand, while the server, the API, sign-in and the
+family app stay on `KINFRAME_PUBLIC_URL`. List the host names in `kinframe_shop.domains` (no scheme, port or path;
+not the app's own host). On those hosts the same server and the same web build act as a storefront:
+
+- `/` is a landing page for the brand (`brand`): hero, how it works, the products, a short FAQ, and a footer link
+  "Already have a frame? Open the app" to the app's origin. `/shop` and `/shop/cancel` work as on the app.
+- Every other path (frames, send, settings, `/callback`, join links…) redirects to the same path on the app's
+  origin (discovery `web`). Nobody signs in on a storefront, so Logto needs no extra redirect URIs or CORS origins.
+- The web app calls the API on the storefront's own origin (`https://<storefront>/v1/...`), so no CORS is needed;
+  the server knows from the `Host` header (or `X-Forwarded-Host` with `KINFRAME_TRUST_PROXY=1`) where a
+  reservation was made, and the customer's cancel link in the confirmation email points back to that storefront.
+  Operator links and everything else keep using `KINFRAME_PUBLIC_URL`.
+- `index.html` on a storefront carries the brand's title, description, `<html lang>` and Open Graph tags (so a
+  shared link previews as the brand), in the visitor's language (`Accept-Language`, one of en/nl/fr/de, else
+  `default_locale`). The web app picks its default language the same way; a language the visitor chose wins.
+
+What the extra nginx vhost needs (the role doesn't manage nginx; the operator's own nginx setup does):
+
+- TLS for the storefront host, and `proxy_pass` of **all** paths to the same upstream as the app vhost
+  (`127.0.0.1:<kinframe_port>`), including `/v1/` and `/.well-known/kinframe`, with `proxy_set_header Host $host`
+  (or `X-Forwarded-Host $host` behind `KINFRAME_TRUST_PROXY=1`), `X-Forwarded-For` and `X-Forwarded-Proto` like the
+  app vhost.
+- No websocket or upload locations are needed (nothing on a storefront uses them), but reusing the app vhost's
+  configuration as-is is fine.
+- Nothing else changes: no DNS or Logto changes for the app, no extra server instance. The server refuses to start
+  when a storefront domain is the app's own host.
 
 ### nginx vhost specifics
 

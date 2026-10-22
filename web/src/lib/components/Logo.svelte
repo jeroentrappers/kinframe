@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { discovery } from '$lib/discovery.svelte';
+
 	let { size = 30, wordmark = true }: { size?: number; wordmark?: boolean } = $props();
 </script>
 
@@ -9,7 +11,8 @@
 		<circle cx="41" cy="26" r="5" fill="var(--sun)" />
 		<path d="M11 43 23 31l9 9 6-6 15 15H17a6 6 0 0 1-6-6z" fill="#4f7a5a" />
 	</svg>
-	{#if wordmark}<span class="word">kinframe</span>{/if}
+	<!-- On a storefront domain the wordmark is the shop's brand. -->
+	{#if wordmark}<span class="word">{discovery.siteName}</span>{/if}
 </span>
 
 <style>

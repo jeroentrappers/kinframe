@@ -58,6 +58,10 @@ func shopJSON(c *shop.Config) *gen.Shop {
 		d := gen.LocalizedText(c.EstimatedDelivery)
 		out.EstimatedDelivery = &d
 	}
+	if len(c.Domains) > 0 {
+		out.Domains = &c.Domains
+	}
+	out.DefaultLocale = ptr(c.DefaultLocale)
 	out.Seller.Name = c.Seller.Name
 	out.Seller.Email = openapi_types.Email(c.Seller.Email)
 	if c.Seller.Legal != "" {
@@ -174,7 +178,7 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	}
 	s.log.Info("shop reservation", "reference", saved.Reference, "total_cents", saved.TotalCents, "country", saved.Country)
 
-	mr := s.mailReservation(saved)
+	mr := s.mailReservation(saved, s.shopOrigin(ctx))
 	s.sendMail("reservation "+saved.Reference, c.CustomerEmail(mr), c.OperatorEmail(mr, false, s.cfg.PublicURL+"/settings/reservations"))
 
 	return created(gen.ShopReservationReceipt{
@@ -183,12 +187,23 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	}), nil
 }
 
-func (s *Server) mailReservation(r *store.Reservation) shop.Reservation {
+// shopOrigin is where customer links point: the storefront domain the request
+// came in on, else the app's public URL.
+func (s *Server) shopOrigin(ctx context.Context) string {
+	host := requestHost(ctx)
+	if !s.cfg.Shop.IsStorefront(host) {
+		return s.cfg.PublicURL
+	}
+	scheme, _, _ := strings.Cut(s.cfg.PublicURL, "://")
+	return scheme + "://" + strings.TrimSuffix(strings.ToLower(host), ".")
+}
+
+func (s *Server) mailReservation(r *store.Reservation, origin string) shop.Reservation {
 	return shop.Reservation{
 		Reference: r.Reference, Name: r.Name, Email: r.Email, Country: r.Country, PostalCode: deref(r.PostalCode),
 		Note: deref(r.Note), Lang: r.Locale,
 		Quote:     shop.Quote{Lines: r.Items, SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents},
-		CancelURL: s.cfg.PublicURL + "/shop/cancel?token=" + s.shopTokens.Sign(r.ID),
+		CancelURL: origin + "/shop/cancel?token=" + s.shopTokens.Sign(r.ID),
 	}
 }
 
@@ -233,7 +248,7 @@ func (s *Server) CancelShopReservation(ctx context.Context, req gen.CancelShopRe
 	}
 	if changed {
 		s.log.Info("shop reservation cancelled by the customer", "reference", r.Reference)
-		s.sendMail("cancellation "+r.Reference, c.OperatorEmail(s.mailReservation(r), true, s.cfg.PublicURL+"/settings/reservations"))
+		s.sendMail("cancellation "+r.Reference, c.OperatorEmail(s.mailReservation(r, s.shopOrigin(ctx)), true, s.cfg.PublicURL+"/settings/reservations"))
 	}
 	return ok(map[string]any{"reference": r.Reference, "status": r.Status}), nil
 }

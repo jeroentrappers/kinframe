@@ -63,3 +63,31 @@ shipping: { countries: [BE, NL], flat_cents: 695, free_from_cents: 10000 }
 		t.Fatalf("disabled shop: %v %v", c, err)
 	}
 }
+
+// A storefront domain is an extra host; the app's own host can't be one.
+func TestShopDomainsNotThePublicHost(t *testing.T) {
+	dir := t.TempDir()
+	shopFile := filepath.Join(dir, "shop.yaml")
+	write := func(domains string) {
+		t.Helper()
+		if err := os.WriteFile(shopFile, []byte(`enabled: true
+seller: { name: S, email: s@example.org }
+notify_email: n@example.org
+products: [{ id: frame-10, name: F, price_cents: 7900, max_qty: 5 }]
+shipping: { countries: [BE], flat_cents: 0 }
+domains: `+domains+"\n"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	env := map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1", "KINFRAME_DATA_DIR": dir,
+		"KINFRAME_PUBLIC_URL": "https://app.example.org", "KINFRAME_SHOP_FILE": shopFile}
+	write("[shop.example.org]")
+	c, err := load(func(k string) string { return env[k] })
+	if err != nil || !c.Shop.IsStorefront("shop.example.org") {
+		t.Fatalf("storefront domain: %v", err)
+	}
+	write("[shop.example.org, App.Example.org]")
+	if _, err := load(func(k string) string { return env[k] }); err == nil || !strings.Contains(err.Error(), "app.example.org") {
+		t.Fatalf("the app's host as a storefront: %v", err)
+	}
+}

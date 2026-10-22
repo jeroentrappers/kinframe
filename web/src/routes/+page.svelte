@@ -10,6 +10,7 @@
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 	import SellerFooter from '$components/SellerFooter.svelte';
 	import ShopSection from '$components/ShopSection.svelte';
+	import Storefront from '$components/Storefront.svelte';
 
 	const next = $derived(safeNext(page.url.searchParams.get('next')));
 	const reason = $derived(next.startsWith('/f/') ? 'frame' : next.startsWith('/i/') ? 'invite' : null);
@@ -52,8 +53,13 @@
 	}
 </script>
 
-<svelte:head><title>kinframe · {discovery.name}</title></svelte:head>
+<svelte:head>
+	{#if !discovery.storefront}<title>kinframe · {discovery.name}</title>{/if}
+</svelte:head>
 
+{#if discovery.storefront && discovery.shop}
+	<Storefront shop={discovery.shop} />
+{:else}
 <div class="landing">
 	<header class="container top">
 		<Logo size={32} />
@@ -155,6 +161,7 @@
 		</p>
 	</footer>
 </div>
+{/if}
 
 <style>
 	.landing {

@@ -3,6 +3,9 @@ package e2e
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -262,6 +265,118 @@ func TestShopWithoutSMTP(t *testing.T) {
 	op := e.expect(req{method: "POST", path: "/dev/token", body: map[string]any{"email": "op@x.org", "name": "Op", "operator": true}}, 200).m(t)["access_token"].(string)
 	if got := e.get("/v1/operator/reservations", op).m(t)["reservations"].([]any); len(got) != 1 {
 		t.Fatalf("stored: %v", got)
+	}
+}
+
+// TestShopStorefront: a storefront domain proxies to the same server. Customer
+// links in mails point back to the storefront the reservation came from;
+// everything else (discovery, operator links) stays on the public URL.
+func TestShopStorefront(t *testing.T) {
+	mail := smtptest.Start(t)
+	sf, err := shop.Parse([]byte(testShop+"domains: [shop.example.org]\ndefault_locale: nl\n"), "kinframe test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	web := t.TempDir()
+	_ = os.WriteFile(filepath.Join(web, "index.html"), []byte(`<!doctype html>
+<html lang="en"><head><meta name="description" content="Send photos and videos to the family's photo frames." />
+<title>kinframe</title></head><body></body></html>`), 0o644)
+	_ = os.WriteFile(filepath.Join(web, "favicon.svg"), []byte("<svg/>"), 0o644)
+	e := newEnv(t, withShop(t, mail), func(c *config.Config) { c.Shop = sf; c.WebDir = web })
+	storefront := map[string]string{"Host": "shop.example.org"}
+
+	// Discovery is the same on every host: `web` is still the app's origin.
+	for _, h := range []map[string]string{nil, storefront} {
+		d := e.expect(req{method: "GET", path: "/.well-known/kinframe", header: h}, 200).m(t)
+		if d["web"] != e.url || dig(d, "shop", "default_locale") != "nl" || !slices.Equal(dig(d, "shop", "domains").([]any), []any{"shop.example.org"}) {
+			t.Fatalf("discovery on %v: web %v shop %v", h, d["web"], d["shop"])
+		}
+	}
+
+	cancelLink := func(m smtptest.Mail) string {
+		t.Helper()
+		l := regexp.MustCompile(`https?://\S+/shop/cancel\?token=\S+`).FindString(m.Text)
+		if l == "" {
+			t.Fatalf("no cancel link in:\n%s", m.Text)
+		}
+		return l
+	}
+	reserve := func(header map[string]string, email string) (customer, operator smtptest.Mail) {
+		t.Helper()
+		n := len(mail.Mails())
+		e.expect(req{method: "POST", path: "/v1/shop/reservations", header: header, body: reservation(map[string]any{"email": email})}, 201)
+		for _, m := range mail.Wait(t, n+2)[n:] {
+			if m.To == email {
+				customer = m
+			} else {
+				operator = m
+			}
+		}
+		return customer, operator
+	}
+
+	// Reserved on the storefront: the cancel link goes back there (in the HTML part too).
+	customer, operator := reserve(map[string]string{"Host": "Shop.Example.org"}, "an@example.org")
+	link := cancelLink(customer)
+	if !strings.HasPrefix(link, "http://shop.example.org/shop/cancel?token=") || !strings.Contains(customer.HTML, `href="http://shop.example.org/shop/cancel?token=`) {
+		t.Fatalf("storefront cancel link %s\n%s", link, customer.HTML)
+	}
+	if !strings.Contains(operator.Text, e.url+"/settings/reservations") {
+		t.Fatalf("operator link must stay on the app:\n%s", operator.Text)
+	}
+	// On the app's own host, and on hosts that aren't storefronts, nothing changes.
+	for i, h := range []map[string]string{nil, {"Host": "other.example.org"}, {"X-Forwarded-Host": "shop.example.org"}} {
+		customer, _ := reserve(h, fmt.Sprintf("p%d@example.org", i))
+		if l := cancelLink(customer); !strings.HasPrefix(l, e.url+"/shop/cancel?token=") {
+			t.Fatalf("host %v: cancel link %s", h, l)
+		}
+	}
+	// The storefront's link works like any other.
+	token := link[strings.Index(link, "token=")+len("token="):]
+	if c := e.expect(req{method: "POST", path: "/v1/shop/reservations/cancel", header: storefront, body: map[string]any{"token": token}}, 200).m(t); c["status"] != "cancelled" {
+		t.Fatalf("cancel on the storefront: %v", c)
+	}
+
+	// The web app on a storefront host carries the brand's title and link preview, in the visitor's language.
+	page := func(path string, header map[string]string) string {
+		t.Helper()
+		r := e.expect(req{method: "GET", path: path, header: header}, 200)
+		return string(r.body)
+	}
+	fr := page("/", map[string]string{"Host": "shop.example.org", "Accept-Language": "fr-BE,fr;q=0.9"})
+	for _, want := range []string{`<html lang="fr">`, "<title>Fotokader : le cadre photo de toute la famille</title>",
+		`<meta property="og:url" content="http://shop.example.org/" />`, `<meta property="og:site_name" content="Fotokader" />`} {
+		if !strings.Contains(fr, want) {
+			t.Fatalf("storefront page lacks %s:\n%s", want, fr)
+		}
+	}
+	if nl := page("/shop", map[string]string{"Host": "shop.example.org", "Accept-Language": "es"}); !strings.Contains(nl, "het fotokader voor de hele familie") {
+		t.Fatalf("default_locale page:\n%s", nl)
+	}
+	for _, h := range []map[string]string{nil, {"Host": "other.example.org"}} {
+		if p := page("/", h); !strings.Contains(p, "<title>kinframe</title>") || strings.Contains(p, "og:") {
+			t.Fatalf("app page on %v changed:\n%s", h, p)
+		}
+	}
+	if svg := page("/favicon.svg", storefront); svg != "<svg/>" {
+		t.Fatalf("static file on the storefront: %s", svg)
+	}
+}
+
+// TestShopStorefrontBehindProxy: with KINFRAME_TRUST_PROXY, X-Forwarded-Host names the storefront.
+func TestShopStorefrontBehindProxy(t *testing.T) {
+	mail := smtptest.Start(t)
+	sf, err := shop.Parse([]byte(testShop+"domains: [shop.example.org]\n"), "kinframe test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := newEnv(t, withShop(t, mail), func(c *config.Config) { c.Shop = sf; c.TrustProxy = true })
+	e.expect(req{method: "POST", path: "/v1/shop/reservations", header: map[string]string{"X-Forwarded-Host": "shop.example.org"},
+		body: reservation(nil)}, 201)
+	for _, m := range mail.Wait(t, 2) {
+		if m.To == "an@example.org" && !strings.Contains(m.Text, "http://shop.example.org/shop/cancel?token=") {
+			t.Fatalf("cancel link behind a proxy:\n%s", m.Text)
+		}
 	}
 }
 

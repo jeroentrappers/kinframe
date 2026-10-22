@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/mail"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -231,6 +232,10 @@ func load(get func(string) string) (*Config, error) {
 	if f := env("KINFRAME_SHOP_FILE", ""); f != "" {
 		if c.Shop, err = shop.Load(f, c.ServerName); err != nil {
 			errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: %w", err))
+		} else if c.Shop != nil {
+			if u, err := url.Parse(c.PublicURL); err == nil && c.Shop.IsStorefront(u.Hostname()) {
+				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: domains must not include the app's own host %q (KINFRAME_PUBLIC_URL)", u.Hostname()))
+			}
 		}
 	}
 	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {

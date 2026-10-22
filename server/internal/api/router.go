@@ -386,7 +386,15 @@ func (s *Server) realIP(next http.Handler) http.Handler {
 				ip = strings.TrimSpace(xr)
 			}
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ipKey, ip)))
+		host := r.Host
+		if s.cfg.TrustProxy {
+			if xh := r.Header.Get("X-Forwarded-Host"); xh != "" {
+				first, _, _ := strings.Cut(xh, ",")
+				host = strings.TrimSpace(first)
+			}
+		}
+		ctx := context.WithValue(r.Context(), ipKey, ip)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, hostKey, host)))
 	})
 }
 
@@ -435,6 +443,19 @@ func (s *Server) spa() http.Handler {
 		w.Header().Set("Cache-Control", "no-cache")
 		if _, err := os.Stat(index); err != nil {
 			problem.Write(w, r, problem.New(problem.NotFound, "web app not built"))
+			return
+		}
+		if host := requestHost(r.Context()); s.cfg.Shop.IsStorefront(host) {
+			// A storefront domain: the brand's title, description and link preview.
+			b, err := os.ReadFile(index)
+			if err != nil {
+				s.writeError(w, r, err)
+				return
+			}
+			lang := s.cfg.Shop.StorefrontLang(r.Header.Get("Accept-Language"))
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Vary", "Accept-Language")
+			_, _ = w.Write(s.cfg.Shop.StorefrontIndex(b, s.shopOrigin(r.Context()), lang))
 			return
 		}
 		http.ServeFile(w, r, index)

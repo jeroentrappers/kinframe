@@ -1,4 +1,5 @@
 import { setApiBase, type Discovery, type Limits } from './api/client';
+import { appUrl, isStorefrontHost } from './storefront';
 
 export const DEFAULT_LIMITS: Required<Limits> = {
 	max_items_per_send: 200,
@@ -36,6 +37,24 @@ class DiscoveryState {
 		return this.doc?.shop?.brand || this.name;
 	}
 
+	/**
+	 * True on one of the shop's storefront domains (`shop.domains`): the app is then the brand's shop only, and
+	 * everything else lives on the main origin (`appUrl`).
+	 */
+	get storefront() {
+		return typeof location !== 'undefined' && isStorefrontHost(location.host, this.doc?.shop?.domains);
+	}
+
+	/** Name for page titles and the wordmark: the brand on a storefront, else the software. */
+	get siteName() {
+		return this.storefront ? this.brand : 'kinframe';
+	}
+
+	/** `path` on the app's main origin (discovery `web`), for links from a storefront; null when unknown. */
+	appUrl(path = '/') {
+		return appUrl(this.doc?.web, this.doc?.api, path, typeof location !== 'undefined' ? location.origin : undefined);
+	}
+
 	/** Logto is usable when the server published an issuer and a web client id. */
 	get logtoConfigured() {
 		return Boolean(this.doc?.auth?.issuer && this.doc?.auth?.web_client_id);
@@ -59,7 +78,9 @@ class DiscoveryState {
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const doc = (await res.json()) as DiscoveryDoc;
 			this.doc = doc;
-			setApiBase(doc.api);
+			// A storefront calls the API on its own origin (the same server behind another vhost): no CORS, and
+			// the server knows which storefront a reservation came from.
+			setApiBase(this.storefront ? `${location.origin}/v1` : doc.api);
 			return doc;
 		} catch (e) {
 			this.error = e instanceof Error ? e.message : String(e);
