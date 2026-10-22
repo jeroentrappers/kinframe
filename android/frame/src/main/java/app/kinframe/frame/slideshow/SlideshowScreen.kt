@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -170,7 +172,10 @@ fun SlideshowScreen(c: FrameController) {
             Modifier
                 .fillMaxSize()
                 .pointerInputTaps(
-                    onTap = { menuOpen = !menuOpen; menuTouch = System.currentTimeMillis() },
+                    onTap = { pos ->
+                        if (!menuOpen) ss.selectAt(pos.x / wPx, pos.y / hPx)
+                        menuOpen = !menuOpen; menuTouch = System.currentTimeMillis()
+                    },
                     onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
                 )
                 .pointerInputSwipe(
@@ -183,24 +188,36 @@ fun SlideshowScreen(c: FrameController) {
                 ),
         ) {
             val dir = stage.direction
-            stage.outgoing?.let { out ->
-                key(out.key) {
-                    SlideLayer(out) {
-                        if (stage.kind == TransitionKind.Slide) translationX = -dir * wPx * progress.value
+            // One call site for both layers, so a slide keeps its state (its Ken Burns motion) when it becomes the
+            // outgoing one and fades out from where it was.
+            listOfNotNull(stage.outgoing?.let { it to false }, stage.incoming?.let { it to true }).forEach { (slide, incoming) ->
+                key(slide.key) {
+                    val kb = slide.kenBurns
+                    val motion = remember { Animatable(0f) }
+                    if (kb != null) {
+                        val hold = stage.holdMs
+                        LaunchedEffect(Unit) { motion.animateTo(1f, tween(hold.coerceIn(1_000, Int.MAX_VALUE.toLong()).toInt(), easing = LinearEasing)) }
                     }
-                }
-            }
-            stage.incoming?.let { inc ->
-                key(inc.key) {
-                    SlideLayer(inc) {
-                        when (stage.kind) {
-                            TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
-                            TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
-                            TransitionKind.Cut -> translationX = drag.value * 0.35f
+                    SlideLayer(slide) {
+                        if (incoming) {
+                            when (stage.kind) {
+                                TransitionKind.Slide -> translationX = dir * wPx * (1 - progress.value) + drag.value * 0.35f
+                                TransitionKind.Crossfade -> { alpha = progress.value; translationX = drag.value * 0.35f }
+                                TransitionKind.Cut -> translationX = drag.value * 0.35f
+                            }
+                        } else if (stage.kind == TransitionKind.Slide) {
+                            translationX = -dir * wPx * progress.value
+                        }
+                        if (kb != null) {
+                            // One scaled textured quad per frame: within the Mali-400 budget (see KenBurns).
+                            val t = motion.value
+                            scaleX = kb.scaleAt(t); scaleY = kb.scaleAt(t)
+                            translationX += kb.xAt(t) * wPx
+                            translationY = kb.yAt(t) * hPx
                         }
                     }
+                    if (incoming) VideoLayer(c, slide, wPx, hPx)
                 }
-                VideoLayer(c, inc, wPx, hPx)
             }
             TextureWarmup(c)
             if (stage.incoming == null) empty?.let { EmptyStateView(c, it) }
@@ -212,6 +229,7 @@ fun SlideshowScreen(c: FrameController) {
             onWeatherClick = { menuOpen = false; forecastOpen = true },
         )
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
+        VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
@@ -285,8 +303,8 @@ const val UNDO_MS = 6_500L
 
 data class Snack(val text: Int, val placementId: String, val outboxId: Long, val hidden: Boolean)
 
-private fun Modifier.pointerInputTaps(onTap: () -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
-    pointerInput("taps") { detectTapGestures(onTap = { onTap() }, onDoubleTap = { onDoubleTap(it) }) }
+private fun Modifier.pointerInputTaps(onTap: (Offset) -> Unit, onDoubleTap: (Offset) -> Unit): Modifier =
+    pointerInput("taps") { detectTapGestures(onTap = { onTap(it) }, onDoubleTap = { onDoubleTap(it) }) }
 
 private fun Modifier.pointerInputSwipe(onDrag: (Float) -> Unit, onEnd: () -> Unit): Modifier =
     pointerInput("swipe") {
@@ -404,6 +422,24 @@ private fun ClockWidget(
         date = if (showDate) Format.longDate(now, c.g.clock.zone, locale) else null,
         weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onWeatherClick = onWeatherClick,
     )
+}
+
+@Composable
+private fun VolumePill(c: FrameController, modifier: Modifier) {
+    val v by c.slideshow.volumeHint.collectAsState()
+    AnimatedVisibility(v != null, modifier, enter = fadeIn(), exit = fadeOut()) {
+        val pct = v ?: 0
+        Row(
+            Modifier.clip(CircleShape).background(Color(0xE61C1714)).padding(horizontal = 24.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(if (pct == 0) "\uD83D\uDD07" else "\uD83D\uDD0A", fontSize = 22.sp)
+            Box(Modifier.padding(start = 14.dp).size(220.dp, 8.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f))) {
+                Box(Modifier.fillMaxHeight().fillMaxWidth(pct / 100f).clip(CircleShape).background(Color.White))
+            }
+            Text("$pct%", style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 14.dp))
+        }
+    }
 }
 
 @Composable

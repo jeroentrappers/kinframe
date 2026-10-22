@@ -88,4 +88,24 @@
     <string name="setup_update_failed">Couldn\'t check for updates</string>
     <string name="setup_update_failed_body">No problem: the frame looks again later and updates itself.</string>
     <string name="setup_update_skip">Skip for now</string>
+    <!-- Slideshow options -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">%d year ago today</item>
+        <item quantity="other">%d years ago today</item>
+    </plurals>
+    <string name="transition_kenburns">Slow zoom</string>
+    <string name="settings_collage">Several photos at once (collage)</string>
+    <string name="settings_collage_max">Photos per screen</string>
+    <string name="settings_pair_portraits">Show two portrait photos side by side</string>
+    <string name="settings_on_this_day">Show memories from this day in earlier years</string>
+    <string name="settings_video">Videos</string>
+    <string name="settings_video_autoplay">Play videos automatically</string>
+    <string name="settings_video_playback">After a video</string>
+    <string name="video_once_hold">Play once, then wait</string>
+    <string name="video_loop">Keep repeating</string>
+    <string name="video_once_advance">Play once, then move on</string>
+    <string name="settings_video_volume">Video volume</string>
+    <string name="settings_video_auto_mute">Mute when nobody touched the frame for</string>
+    <string name="video_auto_mute_off">Never</string>
+    <string name="video_auto_mute_min">%d min</string>
 </resources>

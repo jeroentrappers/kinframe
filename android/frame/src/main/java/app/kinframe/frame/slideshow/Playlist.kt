@@ -9,6 +9,8 @@ data class PlaylistEntry(
     val receivedAt: Long,
     val takenAt: Long?,
     val isNew: Boolean = false,
+    /** "On this day": taken on today's date in an earlier year. Plays once, early, on that day. */
+    val featured: Boolean = false,
 )
 
 enum class PlayOrder { RECEIVED, TAKEN, SHUFFLE;
@@ -31,6 +33,8 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         private set
     var current: String? = null
         private set
+    /** The last item reached through the normal order: after new items and memories it resumes from here. */
+    private var anchor: String? = null
 
     private var entries: Map<String, PlaylistEntry> = emptyMap()
     private var order = PlayOrder.RECEIVED
@@ -38,6 +42,8 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     private var ordered: List<String> = emptyList()
     private val shownThisCycle = LinkedHashSet<String>()
     private val newShown = HashSet<String>()
+    private val featuredShown = HashSet<String>()
+    private var featuredIds: Set<String> = emptySet()
     private val history = ArrayDeque<String>()
 
     val size: Int get() = ordered.size
@@ -51,6 +57,10 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         ordered = computeOrder()
         shownThisCycle.retainAll(entries.keys)
         newShown.retainAll(entries.keys)
+        val featured = items.filter { it.featured }.map { it.id }.toSet()
+        // A new day brings a new set of memories; the ones already shown today stay shown.
+        if (featured != featuredIds) featuredShown.retainAll(featured)
+        featuredIds = featured
         if (orderChanged) shownThisCycle.clear()
         current?.let { shownThisCycle += it }
     }
@@ -59,6 +69,7 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     fun restore(currentId: String?) {
         if (currentId != null && currentId in entries) {
             current = currentId
+            anchor = currentId
             shownThisCycle += currentId
         }
     }
@@ -66,18 +77,53 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
     fun peekNext(): String? = choose().first
 
     fun next(): String? {
-        val (id, newCycle, newSeed) = choose()
+        val choice = choose()
+        val (id, newCycle, newSeed) = choice
         if (id == null) return null
+        if (!choice.special) anchor = id
         if (newCycle) {
             shownThisCycle.clear()
             if (newSeed != seed) { seed = newSeed; ordered = computeOrder() }
         }
         current?.let { pushHistory(it) }
         current = id
-        shownThisCycle += id
-        if (entries[id]?.isNew == true) newShown += id
+        markPlayed(id)
         return id
     }
+
+    private fun markPlayed(id: String) {
+        shownThisCycle += id
+        if (entries[id]?.isNew == true) newShown += id
+        if (id in featuredIds) featuredShown += id
+    }
+
+    /**
+     * The next [n] items after the current one, in play order, without moving (for collages and smart pairing).
+     * Stays within the current cycle.
+     */
+    fun upcoming(n: Int): List<String> {
+        val out = ArrayList<String>()
+        fun add(id: String) { if (id != current && id !in out && out.size < n) out += id }
+        pendingNew().forEach(::add)
+        pendingFeatured().forEach(::add)
+        if (ordered.isNotEmpty()) {
+            val start = anchor?.let { ordered.indexOf(it) } ?: -1
+            for (step in 1..ordered.size) {
+                val id = ordered[(start + step).mod(ordered.size)]
+                if (id !in shownThisCycle) add(id)
+                if (out.size >= n) break
+            }
+        }
+        return out
+    }
+
+    /** [id] is shown together with the current item (collage tile, pair): it counts as played this cycle. */
+    fun consume(id: String) {
+        if (id in entries && id != current) markPlayed(id)
+    }
+
+    /** "On this day" items not shown yet today. */
+    fun pendingFeatured(): List<String> = ordered.filter { it in featuredIds && it !in featuredShown }
 
     fun previous(): String? {
         while (history.isNotEmpty()) {
@@ -100,8 +146,8 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         if (id !in entries) return false
         current?.let { if (it != id) pushHistory(it) }
         current = id
-        shownThisCycle += id
-        if (entries[id]?.isNew == true) newShown += id
+        anchor = id
+        markPlayed(id)
         return true
     }
 
@@ -114,13 +160,14 @@ class Playlist(seed: Long, private val now: () -> Long = System::currentTimeMill
         while (history.size > 50) history.removeFirst()
     }
 
-    private data class Choice(val first: String?, val newCycle: Boolean, val seed: Long)
+    private data class Choice(val first: String?, val newCycle: Boolean, val seed: Long, val special: Boolean = false)
 
     private fun choose(): Choice {
         if (ordered.isEmpty()) return Choice(null, false, seed)
-        pendingNew().firstOrNull { it != current }?.let { return Choice(it, false, seed) }
+        pendingNew().firstOrNull { it != current }?.let { return Choice(it, false, seed, special = true) }
+        pendingFeatured().firstOrNull { it != current }?.let { return Choice(it, false, seed, special = true) }
         if (ordered.size == 1) return Choice(ordered[0], true, seed)
-        val start = ordered.indexOf(current).let { if (it < 0) -1 else it }
+        val start = anchor?.let { ordered.indexOf(it) } ?: -1
         for (step in 1..ordered.size) {
             val id = ordered[(start + step).mod(ordered.size)]
             if (id !in shownThisCycle) return Choice(id, false, seed)

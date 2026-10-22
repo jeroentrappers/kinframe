@@ -163,6 +163,7 @@ class SyncEngine(
             lastShownAt = existing?.lastShownAt,
             isNew = existing?.isNew ?: (!initial && p.seenAt == null && p.status != "seen"),
             evictedAt = if (sameMedia) existing?.evictedAt else null,
+            albumIds = p.albumIds.joinToString(",").ifEmpty { null },
         )
     }
 

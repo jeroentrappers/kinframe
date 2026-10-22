@@ -46,7 +46,10 @@ data class PlacementEntity(
     val isNew: Boolean = false,
     /** The file was removed to free space (least recently shown); downloaded again only when it is about to show. */
     val evictedAt: Long? = null,
+    /** Albums this placement is in, comma-separated ids (album mode plays one album). */
+    val albumIds: String? = null,
 ) {
+    val albumIdList: List<String> get() = albumIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     val isVideo: Boolean get() = kind == "video"
     val isDeliverable: Boolean get() = status == "ready" || status == "delivered" || status == "seen"
     val isVisible: Boolean get() = isDeliverable && !hidden && !trashed && !pendingModeration

@@ -76,6 +76,20 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
+    /** Volume keys set the video volume (the frame has no other use for them). */
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent): Boolean {
+        val delta = when (keyCode) {
+            android.view.KeyEvent.KEYCODE_VOLUME_UP -> 10
+            android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> -10
+            else -> return super.onKeyDown(keyCode, event)
+        }
+        if (graph.controller.screen.value == AppScreen.Slideshow) {
+            graph.controller.slideshow.nudgeVolume(delta)
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) hideSystemBars()

@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -33,6 +33,13 @@ abstract class FrameDatabase : RoomDatabase() {
     companion object {
         const val NAME = "frame.db"
 
+        /** v3: album membership per placement (album mode). */
+        val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN albumIds TEXT DEFAULT NULL")
+            }
+        }
+
         /** v2: storage eviction (`placements.evictedAt`). */
         val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
@@ -46,7 +53,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

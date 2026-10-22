@@ -87,4 +87,24 @@
     <string name="setup_update_failed">Kon niet zoeken naar updates</string>
     <string name="setup_update_failed_body">Geen probleem: de fotolijst kijkt later opnieuw en werkt zichzelf bij.</string>
     <string name="setup_update_skip">Nu overslaan</string>
+    <!-- Diavoorstelling -->
+    <plurals name="on_this_day_years">
+        <item quantity="one">Vandaag %d jaar geleden</item>
+        <item quantity="other">Vandaag %d jaar geleden</item>
+    </plurals>
+    <string name="transition_kenburns">Langzaam inzoomen</string>
+    <string name="settings_collage">Meerdere foto\'s tegelijk (collage)</string>
+    <string name="settings_collage_max">Foto\'s per scherm</string>
+    <string name="settings_pair_portraits">Twee staande foto\'s naast elkaar tonen</string>
+    <string name="settings_on_this_day">Herinneringen van deze dag in vorige jaren tonen</string>
+    <string name="settings_video">Video\'s</string>
+    <string name="settings_video_autoplay">Video\'s automatisch afspelen</string>
+    <string name="settings_video_playback">Na een video</string>
+    <string name="video_once_hold">Eén keer afspelen, dan wachten</string>
+    <string name="video_loop">Blijven herhalen</string>
+    <string name="video_once_advance">Eén keer afspelen, dan verder</string>
+    <string name="settings_video_volume">Volume van video\'s</string>
+    <string name="settings_video_auto_mute">Dempen als niemand de fotolijst aanraakte gedurende</string>
+    <string name="video_auto_mute_off">Nooit</string>
+    <string name="video_auto_mute_min">%d min</string>
 </resources>
