@@ -262,7 +262,8 @@ func TestImportsAndFailures(t *testing.T) {
 	var s map[string]any
 	eventually(t, 30*time.Second, "failure", func() bool {
 		s = e.get("/v1/sends/"+sendID, u.token).m(t)
-		return dig(s, "summary", "failed") == float64(1)
+		// Items and placements are read in separate queries: wait for both.
+		return dig(s, "summary", "failed") == float64(1) && s["items"].([]any)[0].(map[string]any)["status"] == "failed"
 	})
 	if it := s["items"].([]any)[0].(map[string]any); it["status"] != "failed" || it["failure_code"] != "corrupt_media" {
 		t.Fatalf("failed item: %v", it)
