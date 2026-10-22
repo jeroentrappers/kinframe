@@ -79,7 +79,7 @@ final class DiscoveryTests: XCTestCase {
     func testParsesLiveDocument() throws {
         let json = """
         {"name":"kinframe","version":"0.1.0","api":"https://kinframe.appmire.be/v1","web":"https://kinframe.appmire.be",
-         "auth":{"issuer":"https://auth.kinframe.appmire.be/oidc","mobile_client_id":"o7tjvpv0uz2bcoazbedgo",
+         "auth":{"issuer":"https://auth.kinframe.appmire.be/oidc","mobile_client_id":"native-app-id",
                  "web_client_id":"w","api_resource":"https://kinframe.appmire.be/v1"},
          "limits":{"max_items_per_send":200,"max_video_seconds":300,"max_upload_bytes":2147483648,"trash_retention_days":30},
          "weather":true,"something_new":{"a":1}}
