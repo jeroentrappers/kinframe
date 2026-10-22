@@ -22,6 +22,7 @@ data class FrameSettings(
     val locale: LocaleSettings = LocaleSettings(),
     val location: LocationSettings? = null,
     val notifications: NotificationSettings = NotificationSettings(),
+    val updates: UpdateSettings = UpdateSettings(),
 ) {
     companion object {
         val DEFAULT = FrameSettings()
@@ -99,6 +100,10 @@ data class LocaleSettings(
 
 @Serializable
 data class LocationSettings(val name: String? = null, val lat: Double? = null, val lon: Double? = null)
+
+/** Frame app release channel (`stable` or `beta`, the beta program). */
+@Serializable
+data class UpdateSettings(val channel: String = "stable")
 
 @Serializable
 data class NotificationSettings(val sound: Boolean = true, val volume: Int = 40)

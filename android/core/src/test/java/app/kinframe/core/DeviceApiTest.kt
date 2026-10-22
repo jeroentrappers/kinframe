@@ -128,4 +128,34 @@ class DeviceApiTest {
         assertEquals("PUT", r.method)
         assertEquals("""{"reaction":null}""", r.body!!.utf8())
     }
+
+    @Test
+    fun checkUpdateReturnsReleaseOrNullOn204() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"version_name":"0.2.0","version_code":20099,"min_sdk":23,"url":"/v1/device/update/apk/20099",
+            "sha256":"${"a".repeat(64)}","size":1234,"published_at":"2026-10-22T10:00:00Z","prerelease":false,"future":1}"""))
+        val u = api.checkUpdate(channel = "beta", skip = listOf(30001, 30002))!!
+        assertEquals(20099, u.versionCode)
+        assertEquals(1234L, u.size)
+        server.takeRequest()
+        val r = server.takeRequest()
+        assertEquals("/v1/device/update", r.url.encodedPath)
+        assertEquals("beta", r.url.queryParameter("channel"))
+        assertEquals("30001,30002", r.url.queryParameter("skip"))
+        server.enqueue(MockResponse.Builder().code(204).build())
+        assertEquals(null, api.checkUpdate())
+    }
+
+    @Test
+    fun updateRequiredHookFiresOn426() = runBlocking {
+        var fired = 0
+        api.onUpdateRequired = { fired++ }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"type":"x","title":"x","status":426,"code":"app_update_required"}""", 426))
+        try {
+            api.state(); fail("expected 426")
+        } catch (e: app.kinframe.core.api.AppUpdateRequiredException) {
+            assertEquals(1, fired)
+        }
+    }
 }

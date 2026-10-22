@@ -13,5 +13,8 @@ output-options:
     - putAvatar
     - deviceGetMedia
     - getItemMedia
+    # Hand-written: 200-or-204 with header parsing, and binary APK downloads with Range.
+    - deviceCheckUpdate
+    - deviceGetUpdateApk
     # Only mounted in dev auth mode.
     - devToken

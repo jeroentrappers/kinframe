@@ -261,6 +261,23 @@ data class Heartbeat(
     val crashCount24h: Int? = null,
     val localTime: String? = null,
     val timezone: String? = null,
+    /** Self-update state (README §5.7): idle, downloading, waiting, installing, needs_user, updated, failed, rolled_back. */
+    val updateState: String? = null,
+    val lastUpdateError: String? = null,
+)
+
+/** `FrameUpdate`: a frame app release mirrored by the server (`GET /device/update`). */
+@Serializable
+data class FrameUpdate(
+    val versionName: String,
+    val versionCode: Int,
+    val minSdk: Int = 1,
+    val url: String,
+    val sha256: String,
+    val size: Long,
+    val releaseNotes: String? = null,
+    val publishedAt: String? = null,
+    val prerelease: Boolean = false,
 )
 
 @Serializable

@@ -87,16 +87,16 @@ func (e ChangeType) Valid() bool {
 
 // Defines values for DeviceEnrollAppChannel.
 const (
-	Beta   DeviceEnrollAppChannel = "beta"
-	Stable DeviceEnrollAppChannel = "stable"
+	DeviceEnrollAppChannelBeta   DeviceEnrollAppChannel = "beta"
+	DeviceEnrollAppChannelStable DeviceEnrollAppChannel = "stable"
 )
 
 // Valid indicates whether the value is a known member of the DeviceEnrollAppChannel enum.
 func (e DeviceEnrollAppChannel) Valid() bool {
 	switch e {
-	case Beta:
+	case DeviceEnrollAppChannelBeta:
 		return true
-	case Stable:
+	case DeviceEnrollAppChannelStable:
 		return true
 	default:
 		return false
@@ -325,6 +325,24 @@ func (e FrameSettingsSlideshowTransition) Valid() bool {
 	}
 }
 
+// Defines values for FrameSettingsUpdatesChannel.
+const (
+	FrameSettingsUpdatesChannelBeta   FrameSettingsUpdatesChannel = "beta"
+	FrameSettingsUpdatesChannelStable FrameSettingsUpdatesChannel = "stable"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsUpdatesChannel enum.
+func (e FrameSettingsUpdatesChannel) Valid() bool {
+	switch e {
+	case FrameSettingsUpdatesChannelBeta:
+		return true
+	case FrameSettingsUpdatesChannelStable:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsVideoPlayback.
 const (
 	Loop        FrameSettingsVideoPlayback = "loop"
@@ -364,6 +382,42 @@ func (e HeartbeatScreenState) Valid() bool {
 	case HeartbeatScreenStateOn:
 		return true
 	case HeartbeatScreenStateSleeping:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for HeartbeatUpdateState.
+const (
+	HeartbeatUpdateStateDownloading HeartbeatUpdateState = "downloading"
+	HeartbeatUpdateStateFailed      HeartbeatUpdateState = "failed"
+	HeartbeatUpdateStateIdle        HeartbeatUpdateState = "idle"
+	HeartbeatUpdateStateInstalling  HeartbeatUpdateState = "installing"
+	HeartbeatUpdateStateNeedsUser   HeartbeatUpdateState = "needs_user"
+	HeartbeatUpdateStateRolledBack  HeartbeatUpdateState = "rolled_back"
+	HeartbeatUpdateStateUpdated     HeartbeatUpdateState = "updated"
+	HeartbeatUpdateStateWaiting     HeartbeatUpdateState = "waiting"
+)
+
+// Valid indicates whether the value is a known member of the HeartbeatUpdateState enum.
+func (e HeartbeatUpdateState) Valid() bool {
+	switch e {
+	case HeartbeatUpdateStateDownloading:
+		return true
+	case HeartbeatUpdateStateFailed:
+		return true
+	case HeartbeatUpdateStateIdle:
+		return true
+	case HeartbeatUpdateStateInstalling:
+		return true
+	case HeartbeatUpdateStateNeedsUser:
+		return true
+	case HeartbeatUpdateStateRolledBack:
+		return true
+	case HeartbeatUpdateStateUpdated:
+		return true
+	case HeartbeatUpdateStateWaiting:
 		return true
 	default:
 		return false
@@ -1272,6 +1326,10 @@ type FrameSettings struct {
 		Transition    *FrameSettingsSlideshowTransition  `json:"transition,omitempty"`
 		TransitionMs  *int                               `json:"transition_ms,omitempty"`
 	} `json:"slideshow,omitempty"`
+	Updates *struct {
+		// Channel Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+		Channel *FrameSettingsUpdatesChannel `json:"channel,omitempty"`
+	} `json:"updates,omitempty"`
 	Version int `json:"version"`
 	Video   *struct {
 		AutoMuteMin *int                        `json:"auto_mute_min,omitempty"`
@@ -1313,6 +1371,9 @@ type FrameSettingsSlideshowOrder string
 // FrameSettingsSlideshowTransition defines model for FrameSettings.Slideshow.Transition.
 type FrameSettingsSlideshowTransition string
 
+// FrameSettingsUpdatesChannel Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+type FrameSettingsUpdatesChannel string
+
 // FrameSettingsVideoPlayback defines model for FrameSettings.Video.Playback.
 type FrameSettingsVideoPlayback string
 
@@ -1336,14 +1397,41 @@ type FrameSummary struct {
 	Screen      *Screen     `json:"screen,omitempty"`
 }
 
+// FrameUpdate A frame app release mirrored by the server.
+type FrameUpdate struct {
+	// MinSdk Example: 23
+	MinSdk int `json:"min_sdk"`
+
+	// Prerelease True for beta releases.
+	Prerelease   *bool     `json:"prerelease,omitempty"`
+	PublishedAt  time.Time `json:"published_at"`
+	ReleaseNotes *string   `json:"release_notes,omitempty"`
+	Sha256       string    `json:"sha256"`
+
+	// Size bytes
+	Size int `json:"size"`
+
+	// Url Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+	Url string `json:"url"`
+
+	// VersionCode Example: 20099
+	VersionCode int `json:"version_code"`
+
+	// VersionName Example: 0.2.0
+	VersionName string `json:"version_name"`
+}
+
 // Heartbeat defines model for Heartbeat.
 type Heartbeat struct {
-	AndroidSdk        *int                  `json:"android_sdk,omitempty"`
-	AppVersion        string                `json:"app_version"`
-	AppVersionCode    *int                  `json:"app_version_code,omitempty"`
-	CacheBytes        *int                  `json:"cache_bytes,omitempty"`
-	CrashCount24h     *int                  `json:"crash_count_24h,omitempty"`
-	LastShutdownClean *bool                 `json:"last_shutdown_clean,omitempty"`
+	AndroidSdk        *int   `json:"android_sdk,omitempty"`
+	AppVersion        string `json:"app_version"`
+	AppVersionCode    *int   `json:"app_version_code,omitempty"`
+	CacheBytes        *int   `json:"cache_bytes,omitempty"`
+	CrashCount24h     *int   `json:"crash_count_24h,omitempty"`
+	LastShutdownClean *bool  `json:"last_shutdown_clean,omitempty"`
+
+	// LastUpdateError Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`
+	LastUpdateError   *string               `json:"last_update_error,omitempty"`
 	LocalTime         *time.Time            `json:"local_time,omitempty"`
 	PlacementsCached  *int                  `json:"placements_cached,omitempty"`
 	PlacementsMissing *int                  `json:"placements_missing,omitempty"`
@@ -1352,15 +1440,27 @@ type Heartbeat struct {
 	StorageTotalBytes *int                  `json:"storage_total_bytes,omitempty"`
 
 	// Timezone Example: Europe/Brussels
-	Timezone     *string `json:"timezone,omitempty"`
-	UptimeS      int     `json:"uptime_s"`
-	WifiLinkMbps *int    `json:"wifi_link_mbps,omitempty"`
-	WifiRssiDbm  *int    `json:"wifi_rssi_dbm,omitempty"`
-	WifiSsid     *string `json:"wifi_ssid,omitempty"`
+	Timezone *string `json:"timezone,omitempty"`
+
+	// UpdateState Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
+	// `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
+	// showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
+	// `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
+	UpdateState  *HeartbeatUpdateState `json:"update_state,omitempty"`
+	UptimeS      int                   `json:"uptime_s"`
+	WifiLinkMbps *int                  `json:"wifi_link_mbps,omitempty"`
+	WifiRssiDbm  *int                  `json:"wifi_rssi_dbm,omitempty"`
+	WifiSsid     *string               `json:"wifi_ssid,omitempty"`
 }
 
 // HeartbeatScreenState defines model for Heartbeat.ScreenState.
 type HeartbeatScreenState string
+
+// HeartbeatUpdateState Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
+// `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
+// showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
+// `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
+type HeartbeatUpdateState string
 
 // Id UUIDv7
 type Id = openapi_types.UUID

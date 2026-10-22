@@ -58,6 +58,7 @@ import app.kinframe.frame.OwnerGate
 import app.kinframe.frame.R
 import app.kinframe.frame.schedule.SleepPlanner
 import app.kinframe.frame.setup.signalWord
+import app.kinframe.frame.update.UpdateManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -103,6 +104,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 SlideshowSection(c, s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                UpdatesSection(c, s, ::section)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
@@ -257,6 +259,38 @@ private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
         Switch(
             checked, onChange,
             colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
+        )
+    }
+}
+
+@Composable
+private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
+    val status by c.update.status.collectAsState()
+    SectionCard(stringResource(R.string.settings_updates)) {
+        Labeled(stringResource(R.string.updates_channel)) {
+            ChoiceChips(
+                listOf("stable" to stringResource(R.string.updates_channel_stable), "beta" to stringResource(R.string.updates_channel_beta)),
+                if (s.updates.channel == "beta") "beta" else "stable",
+                { section("updates", arrayOf("channel" to it)) },
+            )
+        }
+        val name = status.versionName.orEmpty()
+        val line = when (status.phase) {
+            UpdateManager.Phase.Idle -> null
+            UpdateManager.Phase.Checking -> stringResource(R.string.updates_checking)
+            UpdateManager.Phase.UpToDate -> stringResource(R.string.updates_up_to_date)
+            UpdateManager.Phase.Downloading -> stringResource(R.string.updates_downloading, name, ((status.progress ?: 0f) * 100).toInt())
+            UpdateManager.Phase.Waiting -> stringResource(R.string.updates_waiting, name)
+            UpdateManager.Phase.Installing -> stringResource(R.string.updates_installing, name)
+            UpdateManager.Phase.NeedsUser -> stringResource(R.string.update_notice_needs_user)
+            UpdateManager.Phase.Failed -> stringResource(R.string.updates_failed)
+        }
+        if (line != null) Text(line, style = Kin.type.body, color = Kin.colors.inkSoft)
+        val busy = status.phase in setOf(UpdateManager.Phase.Checking, UpdateManager.Phase.Downloading, UpdateManager.Phase.Installing)
+        KinButton(
+            stringResource(if (status.phase == UpdateManager.Phase.Waiting) R.string.updates_install_now else R.string.updates_check),
+            { c.update.requestCheck(UpdateManager.Trigger.User) },
+            style = KinButtonStyle.Secondary, enabled = !busy,
         )
     }
 }

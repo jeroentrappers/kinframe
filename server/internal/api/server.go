@@ -22,6 +22,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
+	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
 )
@@ -52,6 +53,8 @@ type Server struct {
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
+
+	releases *releases.Mirror // nil: self-update disabled (always 204)
 }
 
 // Deps are the collaborators a Server needs.
@@ -64,7 +67,8 @@ type Deps struct {
 	Tools    media.Tools
 	Log      *slog.Logger
 	Users    auth.UserVerifier
-	Dev      *auth.DevTokens // nil unless dev auth is enabled
+	Dev      *auth.DevTokens  // nil unless dev auth is enabled
+	Releases *releases.Mirror // frame app releases; nil disables self-update
 }
 
 func New(d Deps) (*Server, error) {
@@ -78,6 +82,7 @@ func New(d Deps) (*Server, error) {
 		log:        d.Log,
 		users:      d.Users,
 		dev:        d.Dev,
+		releases:   d.Releases,
 		devices:    auth.NewDeviceTokens(d.Config.SigningKey, d.Config.PublicURL),
 		signer:     auth.NewURLSigner(d.Config.SigningKey),
 		redeemUser: ratelimit.New(10, time.Hour),

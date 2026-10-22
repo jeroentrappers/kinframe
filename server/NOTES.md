@@ -4,7 +4,10 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Contract changes
 
-- None made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
+- Frame self-update (README §5.7): `GET /v1/device/update` (`FrameUpdate` or 204, `channel` and `skip` query
+  parameters), `GET /v1/device/update/apk/{versionCode}`, Heartbeat `update_state` and `last_update_error`,
+  FrameSettings `updates.channel`. Both update endpoints are exempt from `426 app_update_required`.
+- Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
 
@@ -40,7 +43,16 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Device tokens: HS256 with a key derived from `KINFRAME_SIGNING_KEY`, `iss` = public URL, `aud` = `device`, 1 h.
   Revocation is checked on every request (device row), so a revoked device fails immediately.
 - `426 app_update_required` compares the device's `app_version_code` (from enrollment, updated by heartbeats) with
-  `KINFRAME_MIN_FRAME_APP_VERSION_CODE`; heartbeat and state stay allowed. `X-Kinframe-App` is not parsed.
+  `KINFRAME_MIN_FRAME_APP_VERSION_CODE`; heartbeat, state and the update endpoints stay allowed. Only
+  `GET /v1/device/update` parses `X-Kinframe-App` (the version code in parentheses), falling back to the stored code.
+
+## Frame updates
+
+- `GET /v1/device/update` and the APK download are hand-written (excluded from codegen): 200-or-204 and binary
+  `Range` responses. The channel defaults to the frame's `updates.channel`, then the enrollment channel. `min_sdk` is
+  checked against `hardware.android_sdk` from enrollment (or the last heartbeat); unknown means no check.
+- APK metadata comes from the APK itself (binary manifest parser), not from a metadata asset: what the server
+  advertises is exactly what the frame installs, and drop-in APKs need no naming convention.
 - User websocket: no `hello` message (none is specified); closes with 4401 at token expiry.
 
 ## Codes, joining, members

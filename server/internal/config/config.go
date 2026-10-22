@@ -59,6 +59,13 @@ type Config struct {
 	PushEnabled        bool
 	UploadExpiry       time.Duration
 	JanitorInterval    time.Duration
+
+	// Frame app self-update mirror (docs/api/README.md §5.7).
+	FrameReleasesRepo     string // GitHub owner/name; empty disables GitHub polling
+	FrameReleasesAPI      string // GitHub API base URL
+	FrameReleasesToken    string // optional GitHub token
+	FrameReleasesDir      string // optional drop-in directory of APKs
+	FrameReleasesInterval time.Duration
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -137,6 +144,22 @@ func load(get func(string) string) (*Config, error) {
 		PushEnabled:     !boolv("KINFRAME_PUSH_DISABLED"),
 		UploadExpiry:    24 * time.Hour,
 		JanitorInterval: time.Duration(intv("KINFRAME_JANITOR_INTERVAL_SECONDS", 600)) * time.Second,
+
+		FrameReleasesRepo:     env("KINFRAME_FRAME_RELEASES_REPO", "jeroentrappers/kinframe"),
+		FrameReleasesAPI:      env("KINFRAME_FRAME_RELEASES_API", "https://api.github.com"),
+		FrameReleasesToken:    env("KINFRAME_FRAME_RELEASES_GITHUB_TOKEN", ""),
+		FrameReleasesDir:      env("KINFRAME_FRAME_RELEASES_DIR", ""),
+		FrameReleasesInterval: time.Duration(intv("KINFRAME_FRAME_RELEASES_POLL_MINUTES", 30)) * time.Minute,
+	}
+	switch strings.ToLower(c.FrameReleasesRepo) {
+	case "off", "none", "-":
+		c.FrameReleasesRepo = ""
+	}
+	if c.FrameReleasesRepo != "" && strings.Count(c.FrameReleasesRepo, "/") != 1 {
+		errs = append(errs, fmt.Errorf("KINFRAME_FRAME_RELEASES_REPO must be owner/name or off, got %q", c.FrameReleasesRepo))
+	}
+	if c.FrameReleasesInterval < time.Minute {
+		errs = append(errs, errors.New("KINFRAME_FRAME_RELEASES_POLL_MINUTES must be at least 1"))
 	}
 	c.LogtoConfigFile = env("KINFRAME_LOGTO_CONFIG_FILE", DefaultLogtoConfigFile(c.DataDir))
 	if lf, err := ReadLogtoFile(c.LogtoConfigFile); err != nil {

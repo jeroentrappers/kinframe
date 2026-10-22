@@ -646,6 +646,16 @@ components:
                             minimum: 200
                             type: integer
                     type: object
+                updates:
+                    properties:
+                        channel:
+                            default: stable
+                            description: Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+                            enum:
+                                - stable
+                                - beta
+                            type: string
+                    type: object
                 version:
                     type: integer
                 video:
@@ -732,6 +742,46 @@ components:
                 - permissions
                 - online
             type: object
+        FrameUpdate:
+            description: A frame app release mirrored by the server.
+            properties:
+                min_sdk:
+                    example: 23
+                    type: integer
+                prerelease:
+                    description: True for beta releases.
+                    type: boolean
+                published_at:
+                    format: date-time
+                    type: string
+                release_notes:
+                    nullable: true
+                    type: string
+                sha256:
+                    pattern: ^[0-9a-f]{64}$
+                    type: string
+                size:
+                    description: bytes
+                    type: integer
+                url:
+                    description: 'Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.'
+                    format: uri
+                    type: string
+                version_code:
+                    example: 20099
+                    type: integer
+                version_name:
+                    example: 0.2.0
+                    type: string
+            required:
+                - version_name
+                - version_code
+                - min_sdk
+                - url
+                - sha256
+                - size
+                - published_at
+            type: object
         Heartbeat:
             properties:
                 android_sdk:
@@ -746,6 +796,10 @@ components:
                     type: integer
                 last_shutdown_clean:
                     type: boolean
+                last_update_error:
+                    description: 'Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`'
+                    nullable: true
+                    type: string
                 local_time:
                     format: date-time
                     type: string
@@ -766,6 +820,22 @@ components:
                     type: integer
                 timezone:
                     example: Europe/Brussels
+                    type: string
+                update_state:
+                    description: |
+                        Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
+                        `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
+                        showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
+                        `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
+                    enum:
+                        - idle
+                        - downloading
+                        - waiting
+                        - installing
+                        - needs_user
+                        - updated
+                        - failed
+                        - rolled_back
                     type: string
                 uptime_s:
                     type: integer
@@ -1835,6 +1905,80 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/DeviceState'
                     description: State
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/update:
+        get:
+            description: |
+                Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
+                than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
+                whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
+                server's minimum version (`426` is never returned here).
+            operationId: deviceCheckUpdate
+            parameters:
+                - description: Defaults to the frame's `updates.channel` setting (unclaimed frames use the channel from enrollment).
+                  in: query
+                  name: channel
+                  schema:
+                    enum:
+                        - stable
+                        - beta
+                    type: string
+                - description: Version codes the frame refuses (rolled back earlier). The newest release not listed is returned.
+                  explode: false
+                  in: query
+                  name: skip
+                  schema:
+                    items:
+                        type: integer
+                    maxItems: 50
+                    type: array
+                  style: form
+                - description: '`kinframe-frame/<version name> (<version code>)`'
+                  in: header
+                  name: X-Kinframe-App
+                  schema:
+                    example: kinframe-frame/0.2.0 (20099)
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameUpdate'
+                    description: An update is available
+                "204":
+                    description: Up to date (or no release suits this device)
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/update/apk/{versionCode}:
+        get:
+            description: The mirrored APK. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+            operationId: deviceGetUpdateApk
+            parameters:
+                - in: path
+                  name: versionCode
+                  required: true
+                  schema:
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/vnd.android.package-archive:
+                            schema:
+                                format: binary
+                                type: string
+                    description: APK bytes
+                "206":
+                    description: Partial bytes
+                "304":
+                    description: Not modified
+                "404":
+                    $ref: '#/components/responses/Problem'
             security:
                 - deviceAuth: []
             tags:

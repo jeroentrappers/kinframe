@@ -58,6 +58,8 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/items/{itemId}/media/{variant}", user(http.HandlerFunc(s.getItemMedia)))
 	mux.Handle("GET /v1/device/media/{placementId}", s.deviceAuth(http.HandlerFunc(s.deviceGetMedia)))
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))
+	mux.Handle("GET /v1/device/update", s.deviceAuth(http.HandlerFunc(s.deviceCheckUpdate)))
+	mux.Handle("GET /v1/device/update/apk/{versionCode}", s.deviceAuth(http.HandlerFunc(s.deviceGetUpdateApk)))
 	mux.HandleFunc("GET /v1/ws", s.userWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
 	mux.HandleFunc("GET /avatars/{user}/{file}", s.avatarFile)
@@ -159,8 +161,12 @@ func (s *Server) userAuth(next http.Handler) http.Handler {
 }
 
 // deviceVersionExempt lists device calls allowed even when the app is too old,
-// so an outdated frame can still report health and fetch its state.
-var deviceVersionExempt = map[string]bool{"/v1/device/heartbeat": true, "/v1/device/state": true}
+// so an outdated frame can still report health, fetch its state and update itself.
+var deviceVersionExempt = map[string]bool{"/v1/device/heartbeat": true, "/v1/device/state": true, "/v1/device/update": true}
+
+func versionExempt(path string) bool {
+	return deviceVersionExempt[path] || strings.HasPrefix(path, "/v1/device/update/apk/")
+}
 
 func (s *Server) deviceAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -183,7 +189,7 @@ func (s *Server) deviceAuth(next http.Handler) http.Handler {
 			s.writeError(w, r, err)
 			return
 		}
-		if s.cfg.MinFrameAppVersion > 0 && d.AppVersionCode < s.cfg.MinFrameAppVersion && !deviceVersionExempt[r.URL.Path] {
+		if s.cfg.MinFrameAppVersion > 0 && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
 			problem.Write(w, problem.New(problem.AppUpdateRequired, ""))
 			return
 		}

@@ -74,6 +74,28 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
 | `KINFRAME_VERSION` | `0.1.0` | Reported in discovery |
+| `KINFRAME_FRAME_RELEASES_REPO` | `jeroentrappers/kinframe` | GitHub repo whose releases are mirrored for frame self-update (`off` disables) |
+| `KINFRAME_FRAME_RELEASES_DIR` | — | Also serve every `*.apk` dropped in this directory (self-hosted builds; see below) |
+| `KINFRAME_FRAME_RELEASES_POLL_MINUTES` | `30` | GitHub poll interval (also polled at start; ETag, rate limits respected) |
+| `KINFRAME_FRAME_RELEASES_GITHUB_TOKEN` | — | Optional token for a higher GitHub API rate limit |
+| `KINFRAME_FRAME_RELEASES_API` | `https://api.github.com` | GitHub API base (GitHub Enterprise, tests) |
+
+## Frame app releases (self-update)
+
+Frames update only from their own server (`GET /v1/device/update`, docs/api/README.md §5.7). The server keeps a
+mirror in `<data dir>/frame-releases/`:
+
+- **GitHub**: releases of `KINFRAME_FRAME_RELEASES_REPO` with an asset `kinframe-frame-<name>-<code>.apk` and its
+  `kinframe-frame-<name>-<code>.apk.sha256` (written by `.github/workflows/release-frame.yml`). Prereleases are the
+  beta channel. The newest 3 versions plus the newest stable one are kept; a release deleted on GitHub is withdrawn
+  from the mirror at the next poll. Mirrored APKs survive restarts and keep being served while GitHub is unreachable.
+- **Directory**: any `*.apk` in `KINFRAME_FRAME_RELEASES_DIR` is served as is. A version name with a `-` suffix
+  (`0.3.0-beta.1`) is beta. An optional `<file>.apk.json` sidecar can set `{"prerelease": true, "release_notes": "…"}`.
+  The APK must be signed with the same key as the app installed on the frames, or frames refuse it.
+
+Package name, version code and `minSdkVersion` are always read from the APK's binary `AndroidManifest.xml` (a small
+parser in `internal/releases`, no aapt needed). APKs that are not `app.kinframe.frame`, whose sha256 does not match
+the `.sha256` asset, or whose version code disagrees with the asset name are refused.
 
 ## Logto bootstrap
 
@@ -124,6 +146,7 @@ internal/worker       media pipeline on the Postgres job queue (FOR UPDATE SKIP 
 internal/ws           websocket hub (device + user), commands
 internal/settings     frame settings defaults and RFC 7396 merge patch
 internal/notify       websocket/push fan-out (UnifiedPush delivery)
+internal/releases     frame app release mirror (GitHub Releases + drop-in directory), APK manifest parser
 internal/e2e          end-to-end tests over real HTTP
 tools/                specprep (OpenAPI 3.1 → codegen input), respgen
 ```

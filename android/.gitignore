@@ -4,3 +4,6 @@
 /build/
 /*/build/
 /captures/
+# Signing material never goes in the repo.
+*.jks
+*.keystore

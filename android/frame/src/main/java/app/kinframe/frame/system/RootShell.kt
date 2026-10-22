@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit
  * Optional root (product spec §5 "Root use"). Detected once with `su 0 id`. Used only where it adds value:
  * true screen-off, read-only remount on power-off, reboot. Everything degrades gracefully without it.
  */
-class RootShell {
+open class RootShell {
     @Volatile private var available: Boolean? = null
 
-    suspend fun isAvailable(): Boolean {
+    open suspend fun isAvailable(): Boolean {
         available?.let { return it }
         val ok = run("id", timeoutMs = 4000).let { it.exitCode == 0 && it.output.contains("uid=0") }
         available = ok
@@ -26,7 +26,7 @@ class RootShell {
     data class Result(val exitCode: Int, val output: String)
 
     /** Runs [command] as root via `su 0 sh -c`. Never throws. */
-    suspend fun run(command: String, timeoutMs: Long = 10_000): Result = withContext(Dispatchers.IO) {
+    open suspend fun run(command: String, timeoutMs: Long = 10_000): Result = withContext(Dispatchers.IO) {
         try {
             val p = ProcessBuilder("su", "0", "sh", "-c", command).redirectErrorStream(true).start()
             val out = StringBuilder()

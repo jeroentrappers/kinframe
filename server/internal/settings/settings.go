@@ -49,6 +49,7 @@ func Defaults(language, timezone string) Doc {
 		"location":      nil,
 		"notifications": map[string]any{"sound": true, "volume": 40},
 		"kiosk":         map[string]any{"allow_remove_members_on_frame": true, "owner_pin_set": false},
+		"updates":       map[string]any{"channel": "stable"},
 	}
 }
 

@@ -982,6 +982,49 @@ paths:
       responses:
         '202': { description: Accepted; a placement.upsert change follows, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
 
+  /v1/device/update:
+    get:
+      tags: [device]
+      operationId: deviceCheckUpdate
+      security: [ { deviceAuth: [] } ]
+      description: |
+        Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
+        than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
+        whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
+        server's minimum version (`426` is never returned here).
+      parameters:
+        - name: channel
+          in: query
+          description: Defaults to the frame's `updates.channel` setting (unclaimed frames use the channel from enrollment).
+          schema: { type: string, enum: [stable, beta] }
+        - name: skip
+          in: query
+          description: Version codes the frame refuses (rolled back earlier). The newest release not listed is returned.
+          style: form
+          explode: false
+          schema: { type: array, maxItems: 50, items: { type: integer } }
+        - name: X-Kinframe-App
+          in: header
+          description: '`kinframe-frame/<version name> (<version code>)`'
+          schema: { type: string, examples: ['kinframe-frame/0.2.0 (20099)'] }
+      responses:
+        '200': { description: An update is available, content: { application/json: { schema: { $ref: '#/components/schemas/FrameUpdate' } } } }
+        '204': { description: Up to date (or no release suits this device) }
+
+  /v1/device/update/apk/{versionCode}:
+    get:
+      tags: [device]
+      operationId: deviceGetUpdateApk
+      security: [ { deviceAuth: [] } ]
+      description: The mirrored APK. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+      parameters:
+        - { name: versionCode, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: APK bytes, content: { application/vnd.android.package-archive: { schema: { type: string, contentMediaType: application/vnd.android.package-archive } } } }
+        '206': { description: Partial bytes }
+        '304': { description: Not modified }
+        '404': { $ref: '#/components/responses/Problem' }
+
   # ---------------------------------------------------------------- operator
   /v1/operator/stats:
     get:
@@ -1256,6 +1299,15 @@ components:
         crash_count_24h: { type: integer }
         local_time: { type: string, format: date-time }
         timezone: { type: string, examples: [Europe/Brussels] }
+        update_state:
+          type: string
+          description: |
+            Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
+            `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
+            showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
+            `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
+          enum: [idle, downloading, waiting, installing, needs_user, updated, failed, rolled_back]
+        last_update_error: { type: [string, 'null'], description: 'Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199`' }
 
     FrameCommand:
       type: object
@@ -1601,6 +1653,29 @@ components:
           properties:
             allow_remove_members_on_frame: { type: boolean, default: true }
             owner_pin_set: { type: boolean, readOnly: true }
+        updates:
+          type: object
+          properties:
+            channel:
+              type: string
+              enum: [stable, beta]
+              default: stable
+              description: Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+
+    FrameUpdate:
+      type: object
+      description: A frame app release mirrored by the server.
+      required: [version_name, version_code, min_sdk, url, sha256, size, published_at]
+      properties:
+        version_name: { type: string, examples: ['0.2.0'] }
+        version_code: { type: integer, examples: [20099] }
+        min_sdk: { type: integer, examples: [23] }
+        url: { type: string, format: uri, description: 'Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.' }
+        sha256: { type: string, pattern: '^[0-9a-f]{64}$' }
+        size: { type: integer, description: bytes }
+        release_notes: { type: [string, 'null'] }
+        published_at: { type: string, format: date-time }
+        prerelease: { type: boolean, description: True for beta releases. }
 
     FrameSettingsPatch:
       description: RFC 7396 merge patch of FrameSettings (any subset; arrays are replaced whole).

@@ -38,5 +38,6 @@ fun FrameRoot(c: FrameController) {
                 else -> Box(Modifier.fillMaxSize().background(Color.Black))
             }
         }
+        UpdateNotice(c.update)
     }
 }

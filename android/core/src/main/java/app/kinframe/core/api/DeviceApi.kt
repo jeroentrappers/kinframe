@@ -44,6 +44,9 @@ class DeviceApi(
     private val appVersion: String,
     private val monotonicMs: () -> Long = { System.nanoTime() / 1_000_000 },
 ) {
+    /** Called whenever any device call is answered with `426 app_update_required` (README §7). */
+    @Volatile var onUpdateRequired: (() -> Unit)? = null
+
     private val tokenLock = Mutex()
     @Volatile private var token: String? = null
     @Volatile private var tokenExpiresAt: Long = 0
@@ -108,6 +111,7 @@ class DeviceApi(
             val rb = Request.Builder().header("X-Kinframe-App", appVersion).header("Accept", "application/json")
             val request = rb.spec().header("Authorization", "Bearer $t").build()
             val r = http.newCall(request).await()
+            if (r.code == 426) onUpdateRequired?.invoke()
             if (r.code != 401) return r
             val p = r.use { it.problemOrNull() }
             if (p?.code == ProblemCode.DEVICE_REVOKED) throw DeviceRevokedException(p)
@@ -156,6 +160,21 @@ class DeviceApi(
         url(endpoint("device/placements/$placementId/replies"))
             .post(KinJson.encodeToString(JsonObject.serializer(), buildJsonObject { put("preset", JsonPrimitive(preset)) }).toRequestBody(JSON_MEDIA))
     }.expectOk()
+
+    /**
+     * `GET /device/update`: the newest release for [channel] (null = the frame's setting) that is newer than this
+     * app, skipping [skip]; null when up to date (204).
+     */
+    suspend fun checkUpdate(channel: String? = null, skip: Collection<Int> = emptyList()): FrameUpdate? = authed {
+        url(endpoint("device/update").newBuilder().apply {
+            if (channel != null) addQueryParameter("channel", channel)
+            if (skip.isNotEmpty()) addQueryParameter("skip", skip.joinToString(","))
+        }.build()).get()
+    }.use { r ->
+        if (r.code == 204) return@use null
+        if (!r.isSuccessful) r.throwForStatus()
+        KinJson.decodeFromString(FrameUpdate.serializer(), r.body.string())
+    }
 
     /**
      * Raw media request (caller closes the response). Sends the device token only to the API's own origin, so

@@ -159,4 +159,19 @@
     <string name="about_wifi">Wifi</string>
     <string name="about_version">App-versie</string>
     <string name="about_android_settings">Android-instellingen</string>
+    <string name="settings_updates">Updates</string>
+    <string name="updates_channel">Kanaal</string>
+    <string name="updates_channel_stable">Stabiel</string>
+    <string name="updates_channel_beta">Bèta (nieuwe versies eerder proberen)</string>
+    <string name="updates_check">Zoeken naar update</string>
+    <string name="updates_install_now">Nu installeren</string>
+    <string name="updates_checking">Zoeken naar updates…</string>
+    <string name="updates_up_to_date">Deze fotolijst is up-to-date.</string>
+    <string name="updates_downloading">Versie %1$s downloaden… %2$d%%</string>
+    <string name="updates_waiting">Versie %1$s staat klaar. Ze wordt geïnstalleerd wanneer niemand de fotolijst gebruikt.</string>
+    <string name="updates_installing">Versie %1$s wordt geïnstalleerd. De fotolijst herstart zo meteen.</string>
+    <string name="updates_failed">De update is niet gelukt. De fotolijst probeert het later opnieuw.</string>
+    <string name="update_notice_updated">Bijgewerkt naar versie %1$s</string>
+    <string name="update_notice_rolled_back">De nieuwe versie gaf problemen, dus de fotolijst is teruggegaan naar de vorige.</string>
+    <string name="update_notice_needs_user">Er staat een update klaar. Tik op Installeren om verder te gaan.</string>
 </resources>

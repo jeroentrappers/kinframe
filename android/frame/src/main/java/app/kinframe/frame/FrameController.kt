@@ -11,6 +11,7 @@ import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.system.PowerActions
+import app.kinframe.frame.update.UpdateManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -54,6 +55,7 @@ class FrameController(val g: FrameGraph) {
     val display = DisplayController(this)
     val slideshow by lazy { SlideshowController(this) }
     val power = PowerActions(this)
+    val update = UpdateManager(this)
 
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
@@ -75,6 +77,11 @@ class FrameController(val g: FrameGraph) {
             launch(Dispatchers.IO) { g.root.isAvailable() }
             if (g.sessionMarker.needsIntegrityCheck) withContext(Dispatchers.IO) { integrityCheck() }
             applyTimezone()
+            if (update.onAppStart()) {
+                // This version crash-loops right after an update: the previous one is being reinstalled.
+                _screen.value = AppScreen.Restarting
+                return@launch
+            }
             display.start()
             when {
                 g.crashGuard.inCrashLoop -> _screen.value = AppScreen.Recovery
@@ -90,6 +97,7 @@ class FrameController(val g: FrameGraph) {
             }
             scope.launch { g.settings.settings.collect { applyTimezone() } }
             reportStateChanges()
+            update.start()
         }
     }
 
@@ -194,7 +202,11 @@ class FrameController(val g: FrameGraph) {
                 display.wake(remote = true)
                 if (slideshow.show(id)) null else "not_found"
             }
-            "sync_now" -> { _session.value?.requestPull(); _session.value?.sendHeartbeatNow(); null }
+            "sync_now" -> {
+                _session.value?.requestPull(); _session.value?.sendHeartbeatNow()
+                update.requestCheck(UpdateManager.Trigger.Remote)
+                null
+            }
             "identify" -> {
                 identify.value = syncState.value?.frameName ?: g.prefs.ownerName ?: "kinframe"
                 display.wake(remote = true)
@@ -209,6 +221,7 @@ class FrameController(val g: FrameGraph) {
         g.network.refresh()
         val n = g.network.status.value
         val placements = runCatching { g.db.placements().countCached() to g.db.placements().countMissing() }.getOrNull()
+        val (updateState, updateError) = update.heartbeatState()
         return Heartbeat(
             appVersion = BuildConfig.VERSION_NAME,
             appVersionCode = BuildConfig.VERSION_CODE,
@@ -227,6 +240,8 @@ class FrameController(val g: FrameGraph) {
             crashCount24h = g.crashGuard.crashCount24h(),
             localTime = Instant.ofEpochMilli(g.clock.nowMs()).atZone(g.clock.zone).toOffsetDateTime().toString(),
             timezone = g.clock.zone.id,
+            updateState = updateState,
+            lastUpdateError = updateError,
         )
     }
 

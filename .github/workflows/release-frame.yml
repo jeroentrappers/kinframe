@@ -1,0 +1,121 @@
+name: Release frame app
+
+# Builds the signed frame APK for a version tag and publishes it as a GitHub Release. kinframe servers mirror these
+# releases and frames update from their server (docs/api/README.md §5.7).
+#
+#   v0.2.0          → release (stable channel), versionCode 20099
+#   v0.3.0-beta.2   → prerelease (beta channel), versionCode 30002
+#
+# Secrets: ANDROID_KEYSTORE_B64 (base64 of the release keystore), ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS,
+# ANDROID_KEY_PASSWORD.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-frame-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, sign and publish
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version from tag
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # versionCode = major*1_000_000 + minor*10_000 + patch*100 + n, n = 99 for a release, N for -beta.N (1..98).
+          if [[ "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)(-beta\.([0-9]+))?$ ]]; then
+            major=${BASH_REMATCH[1]}; minor=${BASH_REMATCH[2]}; patch=${BASH_REMATCH[3]}; beta=${BASH_REMATCH[5]}
+          else
+            echo "::error::tag $TAG is not vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-beta.N"; exit 1
+          fi
+          if (( minor > 99 || patch > 99 )); then echo "::error::minor and patch must be at most 99"; exit 1; fi
+          if [[ -n "$beta" ]]; then
+            if (( beta < 1 || beta > 98 )); then echo "::error::beta number must be 1..98"; exit 1; fi
+            n=$beta; prerelease=true
+          else
+            n=99; prerelease=false
+          fi
+          name="${TAG#v}"
+          code=$(( major * 1000000 + minor * 10000 + patch * 100 + n ))
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+          echo "asset=kinframe-frame-$name-$code.apk" >> "$GITHUB_OUTPUT"
+          echo "versionName=$name versionCode=$code prerelease=$prerelease"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platforms;android-37.0 build-tools;37.0.0
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Keystore
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [[ -z "$ANDROID_KEYSTORE_B64" ]]; then echo "::error::secret ANDROID_KEYSTORE_B64 is not set"; exit 1; fi
+          echo "$ANDROID_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "KINFRAME_KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+
+      - name: Build
+        env:
+          KINFRAME_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KINFRAME_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KINFRAME_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew --no-daemon :frame:testDebugUnitTest :frame:assembleRelease \
+            -PversionName='${{ steps.version.outputs.name }}' -PversionCode='${{ steps.version.outputs.code }}'
+
+      - name: Verify signature and package
+        run: |
+          apk=frame/build/outputs/apk/release/frame-release.apk
+          bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          "$bt/apksigner" verify --verbose --print-certs "$apk" | tee "$RUNNER_TEMP/certs.txt"
+          if grep -q "CN=Android Debug" "$RUNNER_TEMP/certs.txt"; then echo "::error::APK is signed with the debug key"; exit 1; fi
+          "$bt/aapt2" dump badging "$apk" | head -1 | tee "$RUNNER_TEMP/badging.txt"
+          grep -q "name='app.kinframe.frame' versionCode='${{ steps.version.outputs.code }}' versionName='${{ steps.version.outputs.name }}'" "$RUNNER_TEMP/badging.txt"
+
+      - name: Assets
+        id: assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/dist"
+          asset='${{ steps.version.outputs.asset }}'
+          cp frame/build/outputs/apk/release/frame-release.apk "$RUNNER_TEMP/dist/$asset"
+          (cd "$RUNNER_TEMP/dist" && sha256sum "$asset" > "$asset.sha256" && cat "$asset.sha256")
+          echo "dir=$RUNNER_TEMP/dist" >> "$GITHUB_OUTPUT"
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.jks"
+
+      - name: Publish release
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          dir='${{ steps.assets.outputs.dir }}'
+          asset='${{ steps.version.outputs.asset }}'
+          flags=(--title "kinframe $TAG" --generate-notes --verify-tag)
+          if [[ '${{ steps.version.outputs.prerelease }}' == true ]]; then flags+=(--prerelease); else flags+=(--latest); fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$dir/$asset" "$dir/$asset.sha256" --clobber
+          else
+            gh release create "$TAG" "$dir/$asset" "$dir/$asset.sha256" "${flags[@]}"
+          fi

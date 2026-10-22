@@ -23,6 +23,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
+	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/worker"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
@@ -37,6 +38,8 @@ type App struct {
 	API     *api.Server
 	Worker  *worker.Worker
 	Handler http.Handler
+	// Releases mirrors frame app releases; nil when neither GitHub nor a directory is configured.
+	Releases *releases.Mirror
 }
 
 // New connects to the database, applies migrations and builds the app.
@@ -84,7 +87,18 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	if cfg.PushEnabled {
 		n.Sender = notify.HTTPSender{}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Tools: tools, Log: log, Users: verifiers, Dev: dev})
+	var mirror *releases.Mirror
+	if cfg.FrameReleasesRepo != "" || cfg.FrameReleasesDir != "" {
+		mirror = &releases.Mirror{
+			CacheDir: filepath.Join(cfg.DataDir, "frame-releases"), Repo: cfg.FrameReleasesRepo,
+			APIBase: cfg.FrameReleasesAPI, Token: cfg.FrameReleasesToken, DropDir: cfg.FrameReleasesDir,
+			Interval: cfg.FrameReleasesInterval, Log: log.With("component", "releases"),
+		}
+		if err := mirror.Load(); err != nil {
+			return nil, fmt.Errorf("frame releases: %w", err)
+		}
+	}
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror})
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +114,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
-	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h}, nil
+	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror}, nil
 }
 
 // RunBackground starts the media workers and the maintenance loop.
@@ -109,6 +123,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	wg.Add(2)
 	go func() { defer wg.Done(); a.Worker.Run(ctx) }()
 	go func() { defer wg.Done(); a.maintain(ctx) }()
+	if a.Releases != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
+	}
 	return &wg
 }
 

@@ -65,6 +65,12 @@ class DisplayController(private val c: FrameController) {
 
     fun evaluateNow() { nudge.trySend(Unit) }
 
+    /** `SystemClock.elapsedRealtime()` of the last touch; 0 when not touched since the app started. */
+    val lastTouchElapsed: Long get() = lastTouch
+
+    /** The person put the frame to sleep by hand (quick menu or remote `sleep`), as opposed to a sleep schedule. */
+    val screenOffByHand: Boolean get() = manualSleep
+
     fun onUserActivity() {
         lastTouch = SystemClock.elapsedRealtime()
         if (_mode.value == ScreenMode.Asleep || _mode.value == ScreenMode.FadingOut || _mode.value == ScreenMode.Dimmed) {

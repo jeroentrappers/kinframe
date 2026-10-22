@@ -225,6 +225,34 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
     not connected.
   - The frame confirms with a `command_result` message.
 
+### 5.7 Frame app updates
+
+The server mirrors signed frame releases and the frame updates itself from the server only (product spec 4.10).
+
+```
+GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirror ◀── GET /v1/device/update ── frame
+                                                          (last 3 APKs)  ◀── GET /v1/device/update/apk/{code}
+```
+
+- **Releases** are GitHub releases of `KINFRAME_FRAME_RELEASES_REPO` with an asset
+  `kinframe-frame-<version_name>-<version_code>.apk` and a `kinframe-frame-<version_name>-<version_code>.apk.sha256`
+  (`sha256sum` format). Non-prereleases are the `stable` channel, prereleases `beta`. The server verifies the
+  sha256, reads package name, version code and `minSdkVersion` from the APK's binary manifest, and refuses APKs whose
+  package is not `app.kinframe.frame` or whose version code disagrees with the asset name.
+- **Version codes** are derived from the tag: `major·1 000 000 + minor·10 000 + patch·100 + n`, where `n` is 99 for a
+  release and `N` for `-beta.N` (1–98). So `v0.2.0-beta.3` → 20003 < `v0.2.0` → 20099 < `v0.2.1-beta.1` → 20101.
+- **Check**: `GET /v1/device/update?channel=&skip=` returns `FrameUpdate` or `204`. The channel defaults to the
+  frame's `updates.channel` setting. `skip` lists version codes the frame rolled back from.
+- **Download**: `url` points at the server; it supports `Range`/`If-Range` with ETag `"<sha256>"`, so frames resume.
+- **On the frame**: checks every 24 h plus up to 90 min jitter, on `sync_now`, from "Check for update" in settings,
+  and right away after a `426 app_update_required`. Installs only when nobody touched the frame for 15 minutes and
+  the screen was not switched off by hand. Before installing it verifies sha256, package name, signing certificate
+  (must equal the installed app's) and that the version code is higher. With root it runs `pm install -r`; without
+  root it opens the system installer and shows a notice.
+- **Rollback**: the frame keeps the previous APK. If the crash-loop guard trips within 10 minutes after an update, it
+  reinstalls the previous APK (`pm install -r -d`, root only), skips that version code from then on and reports
+  `update_state: rolled_back` in the heartbeat.
+
 ## 6. Websockets
 
 Both use JSON text frames `{ "type": "...", ... }` and server ping/pong every 25 s. Clients reconnect with
@@ -270,5 +298,6 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 
 - Breaking changes need `/v2`. Additive changes (new fields, new event types, new change types) are not breaking.
 - Clients must ignore unknown fields and event types.
-- The frame sends `X-Kinframe-App: <version>`. The server can answer `426 app_update_required` on any device call.
-  The frame then self-updates (see product spec 4.10).
+- The frame sends `X-Kinframe-App: kinframe-frame/<version name> (<version code>)`. The server can answer
+  `426 app_update_required` on any device call except heartbeat, state and the update endpoints. The frame then
+  self-updates (§5.7, product spec 4.10).

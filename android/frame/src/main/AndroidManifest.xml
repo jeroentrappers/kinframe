@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- Optional: lets the brightness setting also move the system brightness (granted at provisioning). -->
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <!-- Self-update without root: hand the verified APK to the system installer (Android 8+). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
@@ -61,5 +63,13 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".schedule.ScheduleReceiver" android:exported="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/update_paths" />
+        </provider>
     </application>
 </manifest>
