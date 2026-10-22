@@ -241,11 +241,19 @@ test('trim a video and send it without sound', async ({ page }) => {
 	await expect(page).toHaveURL(/\/history\/.+/);
 	const send = st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST');
 	const item = (send!.body as S['SendCreate']).items[0]!;
+	expect(item.include_audio).toBe(false);
+	if (st.uploads[item.upload_id]?.prepared === 'video-master-v1') {
+		// WebCodecs made the master: the trim is already applied, so none is sent.
+		expect(item.trim).toBeUndefined();
+		expect(item.duration_ms).toBeGreaterThan(4300);
+		expect(item.duration_ms).toBeLessThan(4700);
+		expect(st.uploads[item.upload_id]!.filename).toBe('clip.mp4');
+		return;
+	}
 	// The clip is 8.008 s long, so the end handle started at 8.008 and the start was pushed from there.
 	expect(item.trim!.start_ms).toBeGreaterThanOrEqual(2000);
 	expect(item.trim!.start_ms).toBeLessThan(2020);
 	expect(item.trim!.end_ms! - item.trim!.start_ms!).toBe(4500);
-	expect(item.include_audio).toBe(false);
 });
 
 test('notifications: offered after the first send, managed in settings', async ({ page }) => {
