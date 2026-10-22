@@ -27,6 +27,12 @@ export type ReplyPreset = Schemas['ReplyPreset'];
 export type FrameCommandType = Schemas['FrameCommand']['type'];
 export type Album = Schemas['Album'];
 export type AlbumSchedule = NonNullable<Album['schedule']>;
+export type CalendarSource = Schemas['CalendarSource'];
+export type CalendarSourceCreate = Schemas['CalendarSourceCreate'];
+export type CalendarTestResult = Schemas['CalendarTestResult'];
+export type CalendarView = Schemas['CalendarView'];
+export type CalendarSchedule = Schemas['CalendarSchedule'];
+export type EventInvitation = Schemas['EventInvitation'];
 
 /** An RFC 9457 problem (or a network failure, code `network`). */
 export class ApiError extends Error {
