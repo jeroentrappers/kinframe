@@ -28,6 +28,16 @@ class MainActivity : ComponentActivity() {
     private val graph by lazy { FrameApp.graph(this) }
     private var swallowGesture = false
 
+    /** Storage permission prompt and the folder picker for SD/USB export (see [app.kinframe.frame.removable.RemovableStorage]). */
+    private val storagePermissions = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()) { res ->
+        graph.controller.removable.onPermissionResult(res.values.all { it })
+    }
+    private var accessVolume: app.kinframe.frame.removable.Volume? = null
+    private val folderPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri ->
+        accessVolume?.let { graph.controller.removable.onAccessGranted(it, uri) }
+        accessVolume = null
+    }
+
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(Locales.wrap(newBase))
     }
@@ -68,6 +78,22 @@ class MainActivity : ComponentActivity() {
             graph.controller.recreateRequests.collect { recreate() }
         }
         registerReceiver(screenOffReceiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    graph.controller.removable.permissionRequest.collect { ask ->
+                        if (ask) storagePermissions.launch(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                    }
+                }
+                graph.controller.removable.accessRequest.collect { v ->
+                    if (v != null && accessVolume == null) {
+                        accessVolume = v
+                        // No picker on some frame firmwares: report "no access" instead of crashing.
+                        runCatching { folderPicker.launch(null) }.onFailure { graph.controller.removable.onAccessGranted(v, null) }
+                    }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

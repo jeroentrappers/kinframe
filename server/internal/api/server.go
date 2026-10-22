@@ -55,6 +55,8 @@ type Server struct {
 	inviteUser       *ratelimit.Limiter
 	geocodeUser      *ratelimit.Limiter
 	calendarTestUser *ratelimit.Limiter
+	tvUser           *ratelimit.Limiter
+	tvIP             *ratelimit.Limiter
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
@@ -107,6 +109,8 @@ func New(d Deps) (*Server, error) {
 		inviteUser:       ratelimit.New(60, time.Hour),
 		geocodeUser:      ratelimit.New(60, time.Minute),
 		calendarTestUser: ratelimit.New(30, time.Minute),
+		tvUser:           ratelimit.New(60, time.Hour),
+		tvIP:             ratelimit.New(600, time.Hour),
 	}
 	if d.Calendar != nil {
 		s.sealer = d.Calendar.Sealer

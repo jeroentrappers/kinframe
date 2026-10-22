@@ -811,6 +811,9 @@ func (s *Server) signedMedia(w http.ResponseWriter, r *http.Request) {
 		problem.Write(w, r, problem.New(problem.Forbidden, "invalid or expired link"))
 		return
 	}
+	// The URL itself is the capability; Cast receivers and TV browsers may
+	// fetch it cross-origin.
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	s.serveBlobOrRedirect(w, r, key, "", "", "private, max-age=3600")
 }
 

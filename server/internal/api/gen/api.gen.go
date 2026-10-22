@@ -862,6 +862,7 @@ const (
 	ProblemCodeFrameOffline        ProblemCode = "frame_offline"
 	ProblemCodeInviteExpired       ProblemCode = "invite_expired"
 	ProblemCodeInviteInvalid       ProblemCode = "invite_invalid"
+	ProblemCodeLinkExpired         ProblemCode = "link_expired"
 	ProblemCodeMissingPermission   ProblemCode = "missing_permission"
 	ProblemCodeNotFound            ProblemCode = "not_found"
 	ProblemCodeOwnerCannotLeave    ProblemCode = "owner_cannot_leave"
@@ -907,6 +908,8 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeInviteExpired:
 		return true
 	case ProblemCodeInviteInvalid:
+		return true
+	case ProblemCodeLinkExpired:
 		return true
 	case ProblemCodeMissingPermission:
 		return true
@@ -1147,6 +1150,42 @@ func (e SleepScheduleMode) Valid() bool {
 	case SleepScheduleModeDim:
 		return true
 	case SleepScheduleModeOff:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TvLinkPurpose.
+const (
+	TvLinkPurposeCast TvLinkPurpose = "cast"
+	TvLinkPurposeTv   TvLinkPurpose = "tv"
+)
+
+// Valid indicates whether the value is a known member of the TvLinkPurpose enum.
+func (e TvLinkPurpose) Valid() bool {
+	switch e {
+	case TvLinkPurposeCast:
+		return true
+	case TvLinkPurposeTv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TvLinkCreatePurpose.
+const (
+	TvLinkCreatePurposeCast TvLinkCreatePurpose = "cast"
+	TvLinkCreatePurposeTv   TvLinkCreatePurpose = "tv"
+)
+
+// Valid indicates whether the value is a known member of the TvLinkCreatePurpose enum.
+func (e TvLinkCreatePurpose) Valid() bool {
+	switch e {
+	case TvLinkCreatePurposeCast:
+		return true
+	case TvLinkCreatePurposeTv:
 		return true
 	default:
 		return false
@@ -2627,6 +2666,99 @@ type SleepScheduleDays string
 // SleepScheduleMode defines model for SleepSchedule.Mode.
 type SleepScheduleMode string
 
+// TvLink defines model for TvLink.
+type TvLink struct {
+	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
+	CreatedAt     time.Time           `json:"created_at"`
+	CreatedByName *string             `json:"created_by_name,omitempty"`
+	ExpiresAt     time.Time           `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// Id UUIDv7
+	Id              Id         `json:"id"`
+	IntervalSeconds int        `json:"interval_seconds"`
+	Kind            *MediaKind `json:"kind,omitempty"`
+
+	// PlacementCount Size of a fixed selection; null for album/library links.
+	PlacementCount *int          `json:"placement_count,omitempty"`
+	Purpose        TvLinkPurpose `json:"purpose"`
+	Token          string        `json:"token"`
+
+	// Url The TV page: <public URL>/tv/<frameId>?t=<token>
+	Url string `json:"url"`
+}
+
+// TvLinkPurpose defines model for TvLink.Purpose.
+type TvLinkPurpose string
+
+// TvLinkCreate defines model for TvLinkCreate.
+type TvLinkCreate struct {
+	// AlbumId Only this album.
+	AlbumId         *openapi_types.UUID `json:"album_id,omitempty"`
+	ExpiresInHours  *int                `json:"expires_in_hours,omitempty"`
+	IntervalSeconds *int                `json:"interval_seconds,omitempty"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind *MediaKind `json:"kind,omitempty"`
+
+	// PlacementIds Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+	PlacementIds *[]Id `json:"placement_ids,omitempty"`
+
+	// Purpose Informational; cast links are short-lived.
+	Purpose *TvLinkCreatePurpose `json:"purpose,omitempty"`
+}
+
+// TvLinkCreatePurpose Informational; cast links are short-lived.
+type TvLinkCreatePurpose string
+
+// TvSlide defines model for TvSlide.
+type TvSlide struct {
+	Caption    *string    `json:"caption,omitempty"`
+	CapturedAt *time.Time `json:"captured_at,omitempty"`
+	DurationMs *int       `json:"duration_ms,omitempty"`
+	Height     int        `json:"height"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind MediaKind `json:"kind"`
+
+	// Mime e.g. image/webp or video/mp4
+	Mime string `json:"mime"`
+
+	// PlacementId UUIDv7
+	PlacementId Id        `json:"placement_id"`
+	PosterUrl   *string   `json:"poster_url,omitempty"`
+	ReceivedAt  time.Time `json:"received_at"`
+	SenderName  string    `json:"sender_name"`
+	ThumbUrl    *string   `json:"thumb_url,omitempty"`
+
+	// Url Absolute signed URL of the master rendition (Range supported).
+	Url   string `json:"url"`
+	Width int    `json:"width"`
+}
+
+// TvSlideshow defines model for TvSlideshow.
+type TvSlideshow struct {
+	AlbumName *string `json:"album_name,omitempty"`
+
+	// ExpiresAt When the link itself stops working.
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId         Id     `json:"frame_id"`
+	FrameName       string `json:"frame_name"`
+	IntervalSeconds int    `json:"interval_seconds"`
+
+	// RefreshAfter Refetch before the media URLs expire.
+	RefreshAfter time.Time `json:"refresh_after"`
+	Slides       []TvSlide `json:"slides"`
+}
+
 // User defines model for User.
 type User struct {
 	AvatarUrl   *string    `json:"avatar_url,omitempty"`
@@ -2774,8 +2906,15 @@ type DeviceGetChangesParams struct {
 
 // DeviceImportParams defines parameters for DeviceImport.
 type DeviceImportParams struct {
+	// Caption Caption to restore (e.g. from a kinframe export manifest).
+	Caption     *string    `form:"caption,omitempty" json:"caption,omitempty"`
 	XFilename   string     `json:"X-Filename"`
 	XCapturedAt *time.Time `json:"X-Captured-At,omitempty"`
+}
+
+// DeviceImportCheckJSONBody defines parameters for DeviceImportCheck.
+type DeviceImportCheckJSONBody struct {
+	Sha256 []string `json:"sha256"`
 }
 
 // DeviceDecideInvitationJSONBody defines parameters for DeviceDecideInvitation.
@@ -3031,6 +3170,9 @@ type DeviceAckJSONRequestBody DeviceAckJSONBody
 // DeviceHeartbeatJSONRequestBody defines body for DeviceHeartbeat for application/json ContentType.
 type DeviceHeartbeatJSONRequestBody = Heartbeat
 
+// DeviceImportCheckJSONRequestBody defines body for DeviceImportCheck for application/json ContentType.
+type DeviceImportCheckJSONRequestBody DeviceImportCheckJSONBody
+
 // DeviceDecideInvitationJSONRequestBody defines body for DeviceDecideInvitation for application/json ContentType.
 type DeviceDecideInvitationJSONRequestBody DeviceDecideInvitationJSONBody
 
@@ -3106,6 +3248,9 @@ type UpdateFrameSettingsApplicationMergePatchPlusJSONRequestBody = FrameSettings
 // TransferOwnershipJSONRequestBody defines body for TransferOwnership for application/json ContentType.
 type TransferOwnershipJSONRequestBody TransferOwnershipJSONBody
 
+// CreateTvLinkJSONRequestBody defines body for CreateTvLink for application/json ContentType.
+type CreateTvLinkJSONRequestBody = TvLinkCreate
+
 // UpdateItemJSONRequestBody defines body for UpdateItem for application/json ContentType.
 type UpdateItemJSONRequestBody UpdateItemJSONBody
 
@@ -3153,6 +3298,9 @@ type ServerInterface interface {
 
 	// (POST /v1/device/imports)
 	DeviceImport(w http.ResponseWriter, r *http.Request, params DeviceImportParams)
+
+	// (POST /v1/device/imports/check)
+	DeviceImportCheck(w http.ResponseWriter, r *http.Request)
 
 	// (GET /v1/device/invitations)
 	DeviceListInvitations(w http.ResponseWriter, r *http.Request)
@@ -3310,6 +3458,15 @@ type ServerInterface interface {
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
+	// (GET /v1/frames/{frameId}/tv-links)
+	ListTvLinks(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/tv-links)
+	CreateTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (DELETE /v1/frames/{frameId}/tv-links/{linkId})
+	RevokeTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId, linkId Id)
+
 	// (GET /v1/geocode)
 	Geocode(w http.ResponseWriter, r *http.Request, params GeocodeParams)
 
@@ -3366,6 +3523,9 @@ type ServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(w http.ResponseWriter, r *http.Request, sendId Id)
+
+	// (GET /v1/tv/{token})
+	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -3554,6 +3714,19 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 	// Parameter object where we will unmarshal all parameters from the context
 	var params DeviceImportParams
 
+	// ------------- Optional query parameter "caption" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "caption", r.URL.Query(), &params.Caption, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "caption"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "caption", Err: err})
+		}
+		return
+	}
+
 	headers := r.Header
 
 	// ------------- Required header parameter "X-Filename" -------------
@@ -3600,6 +3773,20 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceImportCheck operation middleware
+func (siw *ServerInterfaceWrapper) DeviceImportCheck(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceImportCheck(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -5325,6 +5512,93 @@ func (siw *ServerInterfaceWrapper) TransferOwnership(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
+// ListTvLinks operation middleware
+func (siw *ServerInterfaceWrapper) ListTvLinks(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListTvLinks(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateTvLink operation middleware
+func (siw *ServerInterfaceWrapper) CreateTvLink(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateTvLink(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RevokeTvLink operation middleware
+func (siw *ServerInterfaceWrapper) RevokeTvLink(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "linkId" -------------
+	var linkId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "linkId", r.PathValue("linkId"), &linkId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "linkId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RevokeTvLink(w, r, frameId, linkId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // Geocode operation middleware
 func (siw *ServerInterfaceWrapper) Geocode(w http.ResponseWriter, r *http.Request) {
 
@@ -5811,6 +6085,32 @@ func (siw *ServerInterfaceWrapper) ForwardSend(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// GetTvSlideshow operation middleware
+func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", r.PathValue("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTvSlideshow(w, r, token)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -5940,6 +6240,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/countdowns/{eventId}", wrapper.DeviceSetCountdown)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/heartbeat", wrapper.DeviceHeartbeat)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports", wrapper.DeviceImport)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports/check", wrapper.DeviceImportCheck)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/invitations", wrapper.DeviceListInvitations)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/invitations/{invitationId}", wrapper.DeviceDecideInvitation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
@@ -5991,6 +6292,9 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/transfer", wrapper.TransferOwnership)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.ListTvLinks)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.CreateTvLink)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links/{linkId}", wrapper.RevokeTvLink)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/redeem", wrapper.RedeemFrameCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/geocode", wrapper.Geocode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/invites/{token}", wrapper.PreviewInvite)
@@ -6011,6 +6315,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.GetSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
 }
@@ -6189,6 +6494,20 @@ type DeviceImportResponseObject interface {
 	VisitDeviceImportResponse(w http.ResponseWriter) error
 }
 
+type DeviceImport200JSONResponse Placement
+
+func (response DeviceImport200JSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type DeviceImport202JSONResponse Placement
 
 func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
@@ -6199,6 +6518,64 @@ func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceImportdefaultApplicationProblemPlusJSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportCheckRequestObject struct {
+	Body *DeviceImportCheckJSONRequestBody
+}
+
+type DeviceImportCheckResponseObject interface {
+	VisitDeviceImportCheckResponse(w http.ResponseWriter) error
+}
+
+type DeviceImportCheck200JSONResponse struct {
+	Known []string `json:"known"`
+}
+
+func (response DeviceImportCheck200JSONResponse) VisitDeviceImportCheckResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportCheckdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceImportCheckdefaultApplicationProblemPlusJSONResponse) VisitDeviceImportCheckResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -8007,6 +8384,119 @@ func (response TransferOwnershipdefaultApplicationProblemPlusJSONResponse) Visit
 	return err
 }
 
+type ListTvLinksRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListTvLinksResponseObject interface {
+	VisitListTvLinksResponse(w http.ResponseWriter) error
+}
+
+type ListTvLinks200JSONResponse []TvLink
+
+func (response ListTvLinks200JSONResponse) VisitListTvLinksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListTvLinksdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListTvLinksdefaultApplicationProblemPlusJSONResponse) VisitListTvLinksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTvLinkRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *CreateTvLinkJSONRequestBody
+}
+
+type CreateTvLinkResponseObject interface {
+	VisitCreateTvLinkResponse(w http.ResponseWriter) error
+}
+
+type CreateTvLink201JSONResponse TvLink
+
+func (response CreateTvLink201JSONResponse) VisitCreateTvLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTvLinkdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateTvLinkdefaultApplicationProblemPlusJSONResponse) VisitCreateTvLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RevokeTvLinkRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	LinkId  Id      `json:"linkId"`
+}
+
+type RevokeTvLinkResponseObject interface {
+	VisitRevokeTvLinkResponse(w http.ResponseWriter) error
+}
+
+type RevokeTvLink204Response struct {
+}
+
+func (response RevokeTvLink204Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RevokeTvLinkdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RevokeTvLinkdefaultApplicationProblemPlusJSONResponse) VisitRevokeTvLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GeocodeRequestObject struct {
 	Params GeocodeParams
 }
@@ -8662,6 +9152,45 @@ func (response ForwardSend202JSONResponse) VisitForwardSendResponse(w http.Respo
 	return err
 }
 
+type GetTvSlideshowRequestObject struct {
+	Token string `json:"token"`
+}
+
+type GetTvSlideshowResponseObject interface {
+	VisitGetTvSlideshowResponse(w http.ResponseWriter) error
+}
+
+type GetTvSlideshow200JSONResponse TvSlideshow
+
+func (response GetTvSlideshow200JSONResponse) VisitGetTvSlideshowResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTvSlideshowdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTvSlideshowdefaultApplicationProblemPlusJSONResponse) VisitGetTvSlideshowResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -8691,6 +9220,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/device/imports)
 	DeviceImport(ctx context.Context, request DeviceImportRequestObject) (DeviceImportResponseObject, error)
+
+	// (POST /v1/device/imports/check)
+	DeviceImportCheck(ctx context.Context, request DeviceImportCheckRequestObject) (DeviceImportCheckResponseObject, error)
 
 	// (GET /v1/device/invitations)
 	DeviceListInvitations(ctx context.Context, request DeviceListInvitationsRequestObject) (DeviceListInvitationsResponseObject, error)
@@ -8848,6 +9380,15 @@ type StrictServerInterface interface {
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(ctx context.Context, request TransferOwnershipRequestObject) (TransferOwnershipResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/tv-links)
+	ListTvLinks(ctx context.Context, request ListTvLinksRequestObject) (ListTvLinksResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/tv-links)
+	CreateTvLink(ctx context.Context, request CreateTvLinkRequestObject) (CreateTvLinkResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/tv-links/{linkId})
+	RevokeTvLink(ctx context.Context, request RevokeTvLinkRequestObject) (RevokeTvLinkResponseObject, error)
+
 	// (GET /v1/geocode)
 	Geocode(ctx context.Context, request GeocodeRequestObject) (GeocodeResponseObject, error)
 
@@ -8904,6 +9445,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(ctx context.Context, request ForwardSendRequestObject) (ForwardSendResponseObject, error)
+
+	// (GET /v1/tv/{token})
+	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -9178,6 +9722,37 @@ func (sh *strictHandler) DeviceImport(w http.ResponseWriter, r *http.Request, pa
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceImportResponseObject); ok {
 		if err := validResponse.VisitDeviceImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceImportCheck operation middleware
+func (sh *strictHandler) DeviceImportCheck(w http.ResponseWriter, r *http.Request) {
+	var request DeviceImportCheckRequestObject
+
+	var body DeviceImportCheckJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceImportCheck(ctx, request.(DeviceImportCheckRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceImportCheck")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceImportCheckResponseObject); ok {
+		if err := validResponse.VisitDeviceImportCheckResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -10726,6 +11301,92 @@ func (sh *strictHandler) TransferOwnership(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// ListTvLinks operation middleware
+func (sh *strictHandler) ListTvLinks(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListTvLinksRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListTvLinks(ctx, request.(ListTvLinksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListTvLinks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListTvLinksResponseObject); ok {
+		if err := validResponse.VisitListTvLinksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateTvLink operation middleware
+func (sh *strictHandler) CreateTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request CreateTvLinkRequestObject
+
+	request.FrameId = frameId
+
+	var body CreateTvLinkJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateTvLink(ctx, request.(CreateTvLinkRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateTvLink")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateTvLinkResponseObject); ok {
+		if err := validResponse.VisitCreateTvLinkResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RevokeTvLink operation middleware
+func (sh *strictHandler) RevokeTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId, linkId Id) {
+	var request RevokeTvLinkRequestObject
+
+	request.FrameId = frameId
+	request.LinkId = linkId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RevokeTvLink(ctx, request.(RevokeTvLinkRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RevokeTvLink")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RevokeTvLinkResponseObject); ok {
+		if err := validResponse.VisitRevokeTvLinkResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // Geocode operation middleware
 func (sh *strictHandler) Geocode(w http.ResponseWriter, r *http.Request, params GeocodeParams) {
 	var request GeocodeRequestObject
@@ -11239,6 +11900,32 @@ func (sh *strictHandler) ForwardSend(w http.ResponseWriter, r *http.Request, sen
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ForwardSendResponseObject); ok {
 		if err := validResponse.VisitForwardSendResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTvSlideshow operation middleware
+func (sh *strictHandler) GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string) {
+	var request GetTvSlideshowRequestObject
+
+	request.Token = token
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTvSlideshow(ctx, request.(GetTvSlideshowRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTvSlideshow")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTvSlideshowResponseObject); ok {
+		if err := validResponse.VisitGetTvSlideshowResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

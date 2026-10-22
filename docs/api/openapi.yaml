@@ -28,6 +28,8 @@ tags:
   - name: library
   - name: albums
   - name: settings
+  - name: tv
+    description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
   - name: weather
     description: Place search and weather. Data by Open-Meteo.com (CC BY 4.0), fetched and cached by the server.
   - name: calendar
@@ -713,6 +715,60 @@ paths:
         '204': { description: Deleted }
 
   # ---------------------------------------------------------------- settings
+  # ---------------------------------------------------------------- tv
+  /v1/frames/{frameId}/tv-links:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [tv]
+      operationId: listTvLinks
+      description: Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+      responses:
+        '200':
+          description: Active TV links
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TvLink' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [tv]
+      operationId: createTvLink
+      description: |
+        Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+        (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+        one of the caller's own placements (e.g. "Show on TV" from History).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TvLinkCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/TvLink' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/tv-links/{linkId}:
+    delete:
+      tags: [tv]
+      operationId: revokeTvLink
+      description: Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+      parameters:
+        - { $ref: '#/components/parameters/FrameId' }
+        - { name: linkId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+      responses:
+        '204': { description: Revoked }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/tv/{token}:
+    get:
+      tags: [tv]
+      operationId: getTvSlideshow
+      security: []
+      description: |
+        No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+        rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+        expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+        `410 link_expired` once the link has expired.
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string, minLength: 22, maxLength: 64 } }
+      responses:
+        '200': { description: Slideshow, content: { application/json: { schema: { $ref: '#/components/schemas/TvSlideshow' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
   /v1/frames/{frameId}/settings:
     parameters: [ { $ref: '#/components/parameters/FrameId' } ]
     get:
@@ -1195,15 +1251,55 @@ paths:
       description: |
         Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
         Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+        The server hashes the body: if this frame already has a live placement of the same file (source, master or
+        rendition sha256), nothing is created and the existing placement is returned with `200`.
       parameters:
         - { name: X-Filename, in: header, required: true, schema: { type: string } }
         - { name: X-Captured-At, in: header, schema: { type: string, format: date-time } }
+        - name: caption
+          in: query
+          description: Caption to restore (e.g. from a kinframe export manifest).
+          schema: { type: string, maxLength: 280 }
       requestBody:
         required: true
         content:
           application/octet-stream: { schema: { type: string, contentMediaType: application/octet-stream } }
       responses:
+        '200': { description: Duplicate; the frame already has this file, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
         '202': { description: Accepted; a placement.upsert change follows, content: { application/json: { schema: { $ref: '#/components/schemas/Placement' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/device/imports/check:
+    post:
+      tags: [device]
+      operationId: deviceImportCheck
+      security: [ { deviceAuth: [] } ]
+      description: |
+        Which of these file hashes this frame already has (a live placement whose source, master or frame
+        rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sha256]
+              properties:
+                sha256:
+                  type: array
+                  maxItems: 500
+                  items: { type: string, pattern: '^[0-9a-f]{64}$' }
+      responses:
+        '200':
+          description: The known subset
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [known]
+                properties:
+                  known: { type: array, items: { type: string } }
+        default: { $ref: '#/components/responses/Problem' }
 
   /v1/device/calendar/sync:
     post:
@@ -1445,6 +1541,7 @@ components:
         - code_expired
         - invite_invalid
         - invite_expired
+        - link_expired
         - already_member
         - validation_failed
         - too_many_items
@@ -1958,6 +2055,67 @@ components:
         placement_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
         cover_placement_id: { $ref: '#/components/schemas/Id' }
         schedule: { $ref: '#/components/schemas/Album/properties/schedule' }
+
+    TvLinkCreate:
+      type: object
+      properties:
+        album_id: { type: [string, 'null'], format: uuid, description: Only this album. }
+        placement_ids:
+          type: array
+          maxItems: 500
+          description: Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+          items: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/MediaKind' }
+        purpose: { type: string, enum: [tv, cast], default: tv, description: Informational; cast links are short-lived. }
+        interval_seconds: { type: integer, minimum: 3, maximum: 600, default: 10 }
+        expires_in_hours: { type: integer, minimum: 1, maximum: 168, default: 12 }
+
+    TvLink:
+      type: object
+      required: [id, frame_id, token, url, purpose, interval_seconds, expires_at, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        token: { type: string }
+        url: { type: string, format: uri, description: 'The TV page: <public URL>/tv/<frameId>?t=<token>' }
+        purpose: { type: string, enum: [tv, cast] }
+        album_id: { type: [string, 'null'], format: uuid }
+        placement_count: { type: [integer, 'null'], description: Size of a fixed selection; null for album/library links. }
+        kind: { oneOf: [ { $ref: '#/components/schemas/MediaKind' }, { type: 'null' } ] }
+        interval_seconds: { type: integer }
+        created_by_name: { type: string }
+        expires_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+
+    TvSlide:
+      type: object
+      required: [placement_id, kind, url, mime, sender_name, received_at, width, height]
+      properties:
+        placement_id: { $ref: '#/components/schemas/Id' }
+        kind: { $ref: '#/components/schemas/MediaKind' }
+        url: { type: string, format: uri, description: Absolute signed URL of the master rendition (Range supported). }
+        mime: { type: string, description: e.g. image/webp or video/mp4 }
+        poster_url: { type: [string, 'null'], format: uri }
+        thumb_url: { type: [string, 'null'], format: uri }
+        caption: { type: [string, 'null'] }
+        sender_name: { type: string }
+        captured_at: { type: [string, 'null'], format: date-time }
+        received_at: { type: string, format: date-time }
+        width: { type: integer }
+        height: { type: integer }
+        duration_ms: { type: [integer, 'null'] }
+
+    TvSlideshow:
+      type: object
+      required: [frame_id, frame_name, interval_seconds, expires_at, refresh_after, slides]
+      properties:
+        frame_id: { $ref: '#/components/schemas/Id' }
+        frame_name: { type: string }
+        album_name: { type: [string, 'null'] }
+        interval_seconds: { type: integer }
+        expires_at: { type: string, format: date-time, description: When the link itself stops working. }
+        refresh_after: { type: string, format: date-time, description: Refetch before the media URLs expire. }
+        slides: { type: array, maxItems: 500, items: { $ref: '#/components/schemas/TvSlide' } }
 
     SleepSchedule:
       type: object

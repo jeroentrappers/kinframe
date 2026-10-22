@@ -587,6 +587,69 @@ export interface paths {
         patch: operations["updateAlbum"];
         trace?: never;
     };
+    "/v1/frames/{frameId}/tv-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created. */
+        get: operations["listTvLinks"];
+        put?: never;
+        /**
+         * @description Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+         *     (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+         *     one of the caller's own placements (e.g. "Show on TV" from History).
+         */
+        post: operations["createTvLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/tv-links/{linkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh. */
+        delete: operations["revokeTvLink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tv/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+         *     rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+         *     expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+         *     `410 link_expired` once the link has expired.
+         */
+        get: operations["getTvSlideshow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/settings": {
         parameters: {
             query?: never;
@@ -1089,8 +1152,30 @@ export interface paths {
         /**
          * @description Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
          *     Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+         *     The server hashes the body: if this frame already has a live placement of the same file (source, master or
+         *     rendition sha256), nothing is created and the existing placement is returned with `200`.
          */
         post: operations["deviceImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/imports/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Which of these file hashes this frame already has (a live placement whose source, master or frame
+         *     rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading.
+         */
+        post: operations["deviceImportCheck"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1281,7 +1366,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "server_error";
         Discovery: {
             name: string;
             version: string;
@@ -1714,6 +1799,90 @@ export interface components {
             placement_ids?: components["schemas"]["Id"][];
             cover_placement_id?: components["schemas"]["Id"];
             schedule?: components["schemas"]["Album"]["schedule"];
+        };
+        TvLinkCreate: {
+            /**
+             * Format: uuid
+             * @description Only this album.
+             */
+            album_id?: string | null;
+            /** @description Only these placements, in this order (a selection). Empty or absent = the whole visible library. */
+            placement_ids?: components["schemas"]["Id"][];
+            kind?: components["schemas"]["MediaKind"];
+            /**
+             * @description Informational; cast links are short-lived.
+             * @default tv
+             * @enum {string}
+             */
+            purpose?: "tv" | "cast";
+            /** @default 10 */
+            interval_seconds?: number;
+            /** @default 12 */
+            expires_in_hours?: number;
+        };
+        TvLink: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            token: string;
+            /**
+             * Format: uri
+             * @description The TV page: <public URL>/tv/<frameId>?t=<token>
+             */
+            url: string;
+            /** @enum {string} */
+            purpose: "tv" | "cast";
+            /** Format: uuid */
+            album_id?: string | null;
+            /** @description Size of a fixed selection; null for album/library links. */
+            placement_count?: number | null;
+            kind?: components["schemas"]["MediaKind"] | null;
+            interval_seconds: number;
+            created_by_name?: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        TvSlide: {
+            placement_id: components["schemas"]["Id"];
+            kind: components["schemas"]["MediaKind"];
+            /**
+             * Format: uri
+             * @description Absolute signed URL of the master rendition (Range supported).
+             */
+            url: string;
+            /** @description e.g. image/webp or video/mp4 */
+            mime: string;
+            /** Format: uri */
+            poster_url?: string | null;
+            /** Format: uri */
+            thumb_url?: string | null;
+            caption?: string | null;
+            sender_name: string;
+            /** Format: date-time */
+            captured_at?: string | null;
+            /** Format: date-time */
+            received_at: string;
+            width: number;
+            height: number;
+            duration_ms?: number | null;
+        };
+        TvSlideshow: {
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            album_name?: string | null;
+            interval_seconds: number;
+            /**
+             * Format: date-time
+             * @description When the link itself stops working.
+             */
+            expires_at: string;
+            /**
+             * Format: date-time
+             * @description Refetch before the media URLs expire.
+             */
+            refresh_after: string;
+            slides: components["schemas"]["TvSlide"][];
         };
         SleepSchedule: {
             id: components["schemas"]["Id"];
@@ -3600,6 +3769,101 @@ export interface operations {
             412: components["responses"]["Problem"];
         };
     };
+    listTvLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active TV links */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvLink"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createTvLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TvLinkCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvLink"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    revokeTvLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                linkId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTvSlideshow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Slideshow */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvSlideshow"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     getFrameSettings: {
         parameters: {
             query?: never;
@@ -4402,7 +4666,10 @@ export interface operations {
     };
     deviceImport: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Caption to restore (e.g. from a kinframe export manifest). */
+                caption?: string;
+            };
             header: {
                 "X-Filename": string;
                 "X-Captured-At"?: string;
@@ -4416,6 +4683,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Duplicate; the frame already has this file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Placement"];
+                };
+            };
             /** @description Accepted; a placement.upsert change follows */
             202: {
                 headers: {
@@ -4425,6 +4701,36 @@ export interface operations {
                     "application/json": components["schemas"]["Placement"];
                 };
             };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceImportCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    sha256: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The known subset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        known: string[];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
         };
     };
     deviceSyncCalendars: {

@@ -106,7 +106,7 @@ func (s *Server) authenticate(next http.Handler) http.Handler {
 	user, device := s.userAuth(next), s.deviceAuth(next)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case strings.HasPrefix(r.URL.Path, "/v1/devices/"):
+		case strings.HasPrefix(r.URL.Path, "/v1/devices/"), tvPublicPath(r):
 			next.ServeHTTP(w, r)
 		case strings.HasPrefix(r.URL.Path, "/v1/device/"):
 			device.ServeHTTP(w, r)

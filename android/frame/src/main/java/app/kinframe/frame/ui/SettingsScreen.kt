@@ -116,6 +116,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
+                RemovableSection(c)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
@@ -331,6 +332,24 @@ internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> U
             checked, onChange,
             colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
         )
+    }
+}
+
+/** SD card and USB stick (product spec 4.10): opens the storage panel when one is in the frame. */
+@Composable
+private fun RemovableSection(c: FrameController) {
+    val volumes by c.removable.volumes.collectAsState()
+    val v = volumes.firstOrNull()
+    SectionCard(stringResource(R.string.settings_removable)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Storage, null, tint = if (v != null) Kin.colors.sage else Kin.colors.inkFaint)
+            Text(
+                if (v == null) stringResource(R.string.settings_removable_none)
+                else v.label ?: stringResource(if (v.kind == app.kinframe.frame.removable.Volume.Kind.Usb) R.string.removable_card_usb_title else R.string.removable_card_sd_title),
+                style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.weight(1f).padding(horizontal = 14.dp),
+            )
+            if (v != null) KinButton(stringResource(R.string.removable_card_open), { c.removable.open() }, style = KinButtonStyle.Secondary)
+        }
     }
 }
 

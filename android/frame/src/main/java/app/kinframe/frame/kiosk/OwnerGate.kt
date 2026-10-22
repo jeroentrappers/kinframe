@@ -21,7 +21,7 @@ class OwnerGate(
     private val elapsed: () -> Long = SystemClock::elapsedRealtime,
     private val verifier: suspend (PinHashDto, String) -> Boolean = { h, p -> withContext(Dispatchers.Default) { OwnerPin.verify(h, p) } },
 ) {
-    enum class Reason { OpenSettings, ExitKiosk, Wifi, PowerOff, Restart, ChangeServer, FactoryReset }
+    enum class Reason { OpenSettings, ExitKiosk, Wifi, PowerOff, Restart, ChangeServer, FactoryReset, ExternalStorage }
 
     class Request(val reason: Reason, val onGranted: () -> Unit)
 

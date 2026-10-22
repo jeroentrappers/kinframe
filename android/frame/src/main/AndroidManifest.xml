@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <!-- Self-update without root: hand the verified APK to the system installer (Android 8+). -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- SD card / USB stick export, import and backup (product spec 4.10). Granted at provisioning or with root. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
 
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.wifi" android:required="false" />

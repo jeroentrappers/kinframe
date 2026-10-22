@@ -146,10 +146,11 @@ fun SlideshowScreen(c: FrameController) {
     val invitation by c.calendar.focused.collectAsState()
     val invitations by c.calendar.invitations.collectAsState()
     val calendarBusy = calendarOpen || eventDetail != null || invitation != null
+    val storageOpen by c.removable.panelOpen.collectAsState()
     // The calendar shows the forecast whenever the frame has fresh weather.
     val calendarWeather = weatherDoc?.takeIf { settings.location != null && !it.isStale(nowMs) }
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy) {
-        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -285,6 +286,7 @@ fun SlideshowScreen(c: FrameController) {
         VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
+            app.kinframe.frame.removable.RemovableSlideshowCards(c, hidden = menuOpen || joinCard || settingsOpen)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
             InvitationsPill(if (menuOpen || calendarBusy || joinCard) emptyList() else invitations, Modifier) { c.calendar.reopen() }
         }
@@ -349,6 +351,7 @@ fun SlideshowScreen(c: FrameController) {
         AnimatedVisibility(settingsOpen, enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 12 }, exit = fadeOut(tween(200))) {
             SettingsScreen(c, onClose = { c.closeSettings() })
         }
+        app.kinframe.frame.removable.RemovableHost(c)
 
         IdentifyOverlay(c)
         SleepOverlay(c)

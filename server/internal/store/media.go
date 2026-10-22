@@ -129,10 +129,10 @@ const mediaCols = `id, owner_user_id, source_sha256, kind, status, failure_code,
 func (tx *Tx) CreateMedia(ctx context.Context, m Media) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO media (id, owner_user_id, kind, source_path, source_mime, trim_start_ms, trim_end_ms, include_audio, duration_ms,
-			prepared, motion, declared_width, declared_height, declared_duration_ms)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+			prepared, motion, declared_width, declared_height, declared_duration_ms, source_sha256)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
 		m.ID, m.OwnerUserID, m.Kind, m.SourcePath, m.SourceMime, m.TrimStartMS, m.TrimEndMS, m.IncludeAudio, m.DurationMS,
-		m.Prepared, m.Motion, m.DeclaredWidth, m.DeclaredHeight, m.DeclaredDurationMS)
+		m.Prepared, m.Motion, m.DeclaredWidth, m.DeclaredHeight, m.DeclaredDurationMS, m.SourceSHA256)
 	return err
 }
 
@@ -314,6 +314,7 @@ type ItemRow struct {
 	HasAudio        *bool      `db:"has_audio"`
 	CapturedAt      *time.Time `db:"captured_at"`
 	MasterKey       *string    `db:"master_key"`
+	MasterMime      *string    `db:"master_mime"`
 	PosterKey       *string    `db:"poster_key"`
 	// The Live/Motion Photo clip, if any.
 	MotionMediaID    *uuid.UUID `db:"motion_media_id"`
@@ -335,7 +336,7 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	i.caption, i.caption_edited, i.focal_x, i.focal_y, i.fit, i.thumb256_key, i.thumb512_key,
 	i.created_at AS item_created_at, i.captured_hint,
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio, m.captured_at,
-	m.master_key, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
+	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
 	mm.height AS motion_height, mm.duration_ms AS motion_duration_ms, mm.has_audio AS motion_has_audio,
 	mm.master_key AS motion_master_key`
 

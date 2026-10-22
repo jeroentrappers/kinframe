@@ -1924,6 +1924,7 @@ components:
                 - code_expired
                 - invite_invalid
                 - invite_expired
+                - link_expired
                 - already_member
                 - validation_failed
                 - too_many_items
@@ -2225,6 +2226,170 @@ components:
                 - wake_at
                 - days
                 - enabled
+            type: object
+        TvLink:
+            properties:
+                album_id:
+                    format: uuid
+                    nullable: true
+                    type: string
+                created_at:
+                    format: date-time
+                    type: string
+                created_by_name:
+                    type: string
+                expires_at:
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                id:
+                    $ref: '#/components/schemas/Id'
+                interval_seconds:
+                    type: integer
+                kind:
+                    allOf:
+                        - $ref: '#/components/schemas/MediaKind'
+                    nullable: true
+                placement_count:
+                    description: Size of a fixed selection; null for album/library links.
+                    nullable: true
+                    type: integer
+                purpose:
+                    enum:
+                        - tv
+                        - cast
+                    type: string
+                token:
+                    type: string
+                url:
+                    description: 'The TV page: <public URL>/tv/<frameId>?t=<token>'
+                    format: uri
+                    type: string
+            required:
+                - id
+                - frame_id
+                - token
+                - url
+                - purpose
+                - interval_seconds
+                - expires_at
+                - created_at
+            type: object
+        TvLinkCreate:
+            properties:
+                album_id:
+                    description: Only this album.
+                    format: uuid
+                    nullable: true
+                    type: string
+                expires_in_hours:
+                    default: 12
+                    maximum: 168
+                    minimum: 1
+                    type: integer
+                interval_seconds:
+                    default: 10
+                    maximum: 600
+                    minimum: 3
+                    type: integer
+                kind:
+                    $ref: '#/components/schemas/MediaKind'
+                placement_ids:
+                    description: Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+                    items:
+                        $ref: '#/components/schemas/Id'
+                    maxItems: 500
+                    type: array
+                purpose:
+                    default: tv
+                    description: Informational; cast links are short-lived.
+                    enum:
+                        - tv
+                        - cast
+                    type: string
+            type: object
+        TvSlide:
+            properties:
+                caption:
+                    nullable: true
+                    type: string
+                captured_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                duration_ms:
+                    nullable: true
+                    type: integer
+                height:
+                    type: integer
+                kind:
+                    $ref: '#/components/schemas/MediaKind'
+                mime:
+                    description: e.g. image/webp or video/mp4
+                    type: string
+                placement_id:
+                    $ref: '#/components/schemas/Id'
+                poster_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                received_at:
+                    format: date-time
+                    type: string
+                sender_name:
+                    type: string
+                thumb_url:
+                    format: uri
+                    nullable: true
+                    type: string
+                url:
+                    description: Absolute signed URL of the master rendition (Range supported).
+                    format: uri
+                    type: string
+                width:
+                    type: integer
+            required:
+                - placement_id
+                - kind
+                - url
+                - mime
+                - sender_name
+                - received_at
+                - width
+                - height
+            type: object
+        TvSlideshow:
+            properties:
+                album_name:
+                    nullable: true
+                    type: string
+                expires_at:
+                    description: When the link itself stops working.
+                    format: date-time
+                    type: string
+                frame_id:
+                    $ref: '#/components/schemas/Id'
+                frame_name:
+                    type: string
+                interval_seconds:
+                    type: integer
+                refresh_after:
+                    description: Refetch before the media URLs expire.
+                    format: date-time
+                    type: string
+                slides:
+                    items:
+                        $ref: '#/components/schemas/TvSlide'
+                    maxItems: 500
+                    type: array
+            required:
+                - frame_id
+                - frame_name
+                - interval_seconds
+                - expires_at
+                - refresh_after
+                - slides
             type: object
         User:
             properties:
@@ -2627,6 +2792,8 @@ paths:
             description: |
                 Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
                 Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+                The server hashes the body: if this frame already has a live placement of the same file (source, master or
+                rendition sha256), nothing is created and the existing placement is returned with `200`.
             operationId: deviceImport
             parameters:
                 - in: header
@@ -2639,6 +2806,12 @@ paths:
                   schema:
                     format: date-time
                     type: string
+                - description: Caption to restore (e.g. from a kinframe export manifest).
+                  in: query
+                  name: caption
+                  schema:
+                    maxLength: 280
+                    type: string
             requestBody:
                 content:
                     application/octet-stream:
@@ -2647,12 +2820,61 @@ paths:
                             type: string
                 required: true
             responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Placement'
+                    description: Duplicate; the frame already has this file
                 "202":
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Placement'
                     description: Accepted; a placement.upsert change follows
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/imports/check:
+        post:
+            description: |
+                Which of these file hashes this frame already has (a live placement whose source, master or frame
+                rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading.
+            operationId: deviceImportCheck
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                sha256:
+                                    items:
+                                        pattern: ^[0-9a-f]{64}$
+                                        type: string
+                                    maxItems: 500
+                                    type: array
+                            required:
+                                - sha256
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    known:
+                                        items:
+                                            type: string
+                                        type: array
+                                required:
+                                    - known
+                                type: object
+                    description: The known subset
+                default:
+                    $ref: '#/components/responses/Problem'
             security:
                 - deviceAuth: []
             tags:
@@ -4013,6 +4235,66 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - frames
+    /v1/frames/{frameId}/tv-links:
+        get:
+            description: Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+            operationId: listTvLinks
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/TvLink'
+                                type: array
+                    description: Active TV links
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
+        post:
+            description: |
+                Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+                (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+                one of the caller's own placements (e.g. "Show on TV" from History).
+            operationId: createTvLink
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/TvLinkCreate'
+                required: true
+            responses:
+                "201":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TvLink'
+                    description: Created
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
+    /v1/frames/{frameId}/tv-links/{linkId}:
+        delete:
+            description: Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+            operationId: revokeTvLink
+            parameters:
+                - $ref: '#/components/parameters/FrameId'
+                - in: path
+                  name: linkId
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Id'
+            responses:
+                "204":
+                    description: Revoked
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - tv
     /v1/frames/redeem:
         post:
             description: Claim an unowned frame or join an owned one with the code shown on the frame. See README §5.1.
@@ -4526,6 +4808,34 @@ paths:
                     description: Accepted
             tags:
                 - sends
+    /v1/tv/{token}:
+        get:
+            description: |
+                No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+                rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+                expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+                `410 link_expired` once the link has expired.
+            operationId: getTvSlideshow
+            parameters:
+                - in: path
+                  name: token
+                  required: true
+                  schema:
+                    maxLength: 64
+                    minLength: 22
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/TvSlideshow'
+                    description: Slideshow
+                default:
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - tv
     /v1/uploads:
         post:
             description: |
@@ -4574,6 +4884,8 @@ tags:
     - name: library
     - name: albums
     - name: settings
+    - description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
+      name: tv
     - description: Place search and weather. Data by Open-Meteo.com (CC BY 4.0), fetched and cached by the server.
       name: weather
     - description: Calendars synced by the server (ICS/webcal, CalDAV), events sent to frames, and countdowns.
