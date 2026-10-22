@@ -23,3 +23,6 @@ local.properties
 # Never commit clean-room research material
 *.dex
 decompiled/
+
+# Claude Code agent worktrees
+/.claude/
