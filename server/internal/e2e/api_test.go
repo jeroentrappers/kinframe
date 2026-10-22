@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -441,10 +442,22 @@ func TestFeedReset(t *testing.T) {
 	if c := next["changes"].([]any); len(c) != 1 || c[0].(map[string]any)["type"] != "album.upsert" {
 		t.Fatalf("album change: %v", next)
 	}
+	// Play it on the frame; deleting it switches the frame back to all photos.
+	st := e.get("/v1/frames/"+frameID+"/settings", owner.token).m(t)
+	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token,
+		header: map[string]string{"If-Match": fmt.Sprintf(`"%v"`, st["version"])},
+		body:   map[string]any{"slideshow": map[string]any{"album_id": a["id"]}}}, 200)
 	e.expect(req{method: "DELETE", path: base + "/" + a["id"].(string), token: owner.token}, 204)
 	next = e.get("/v1/device/changes?since="+ftoa(head), d.token).m(t)
-	if c := next["changes"].([]any); len(c) != 1 || c[0].(map[string]any)["type"] != "album.remove" {
+	types := map[string]bool{}
+	for _, c := range next["changes"].([]any) {
+		types[c.(map[string]any)["type"].(string)] = true
+	}
+	if !types["album.remove"] || !types["settings"] || len(types) != 2 {
 		t.Fatalf("album remove: %v", next)
+	}
+	if st := e.get("/v1/frames/"+frameID+"/settings", owner.token).m(t); dig(st, "slideshow", "album_id") != nil {
+		t.Fatalf("album_id after delete: %v", st["slideshow"])
 	}
 }
 

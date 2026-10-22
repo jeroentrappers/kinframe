@@ -8,7 +8,9 @@ const config = {
 		// Pure SPA: the Go server serves build/ and falls back to index.html for every
 		// non-API path (including /f/{code} and /i/{token}).
 		adapter: adapter({ pages: 'build', assets: 'build', fallback: 'index.html', precompress: false, strict: true }),
-		alias: { $components: 'src/lib/components' }
+		alias: { $components: 'src/lib/components' },
+		// The push-only service worker is registered when the user turns notifications on.
+		serviceWorker: { register: false }
 	}
 };
 

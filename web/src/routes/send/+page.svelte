@@ -4,6 +4,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { compose } from '$lib/compose.svelte';
+	import { push } from '$lib/push.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { filesFromDataTransfer } from '$lib/dropfiles';
 	import { can, frames } from '$lib/frames.svelte';
@@ -91,6 +92,7 @@
 		const result = await compose.send();
 		if (result) {
 			toasts.success(t('send.sent'));
+			push.justSent = true;
 			await goto(`/history/${result.id}`);
 		} else if (compose.error) {
 			toasts.error(problemMessage(compose.error));

@@ -25,6 +25,8 @@ export type ProblemCode = Schemas['ProblemCode'];
 export type Problem = Schemas['Problem'];
 export type ReplyPreset = Schemas['ReplyPreset'];
 export type FrameCommandType = Schemas['FrameCommand']['type'];
+export type Album = Schemas['Album'];
+export type AlbumSchedule = NonNullable<Album['schedule']>;
 
 /** An RFC 9457 problem (or a network failure, code `network`). */
 export class ApiError extends Error {

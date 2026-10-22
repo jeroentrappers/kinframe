@@ -6,6 +6,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { squareAvatar } from '$lib/media';
+	import { push } from '$lib/push.svelte';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, t } from '$lib/i18n/index.svelte';
@@ -65,12 +66,35 @@
 	async function saveLocale(l: string) {
 		try {
 			auth.me = await call(api.PATCH('/v1/me', { body: { locale: l === 'nl' ? 'nl-BE' : 'en' } }));
+			await push.syncLocale();
 		} catch {
 			/* the UI already switched; the server copy is only for push texts */
 		}
 	}
 
 	const limits = $derived(discovery.limits);
+
+	async function togglePush(e: Event & { currentTarget: HTMLInputElement }) {
+		const on = e.currentTarget.checked;
+		try {
+			if (on) {
+				const ok = await push.enable();
+				if (ok) toasts.success(t('push.enabled'));
+				else e.currentTarget.checked = false;
+			} else {
+				await push.disable();
+				toasts.show(t('push.disabled'));
+			}
+		} catch (err) {
+			e.currentTarget.checked = push.subscribed;
+			toasts.error(problemMessage(err));
+		}
+	}
+
+	async function signOut() {
+		await push.signOut();
+		await auth.signOut();
+	}
 </script>
 
 <svelte:head><title>{t('settings.title')} · kinframe</title></svelte:head>
@@ -130,6 +154,26 @@
 			</div>
 		</section>
 
+		<section class="card card-pad" aria-labelledby="push-title">
+			<div class="section-title"><h2 id="push-title">{t('push.title')}</h2></div>
+			{#if !push.supported}
+				<p class="muted small"><Icon name="bellOff" size={16} /> {t('push.unsupported')}</p>
+			{:else if !push.available}
+				<p class="muted small"><Icon name="bellOff" size={16} /> {t('push.serverOff')}</p>
+			{:else}
+				<label class="switch">
+					<input type="checkbox" checked={push.subscribed} onchange={togglePush} disabled={push.busy || (push.permission === 'denied' && !push.subscribed)} />
+					<span>
+						<span class="s-label">{t('push.toggle')}</span>
+						<span class="hint">{t('push.toggleHint')}</span>
+					</span>
+				</label>
+				{#if push.permission === 'denied'}
+					<p class="callout callout-warn small push-note" role="status"><Icon name="alert" size={18} />{t('push.blockedHelp')}</p>
+				{/if}
+			{/if}
+		</section>
+
 		<section class="card card-pad" aria-labelledby="server-title">
 			<div class="section-title"><h2 id="server-title">{t('settings.server')}</h2></div>
 			<dl class="facts">
@@ -145,7 +189,7 @@
 
 		<section class="card card-pad row between" aria-label={t('settings.signOut')}>
 			<p class="muted small">{t('settings.signedInAs', { name: auth.me?.display_name ?? '' })}</p>
-			<button class="btn" onclick={() => auth.signOut()}><Icon name="logout" size={18} />{t('settings.signOut')}</button>
+			<button class="btn" onclick={signOut}><Icon name="logout" size={18} />{t('settings.signOut')}</button>
 		</section>
 
 		<p class="faint tiny about">{t('settings.about')}</p>
@@ -203,6 +247,16 @@
 	.mono {
 		font-family: ui-monospace, Menlo, monospace;
 		font-size: 0.9rem;
+	}
+	.switch > span {
+		display: flex;
+		flex-direction: column;
+	}
+	.s-label {
+		font-weight: 600;
+	}
+	.push-note {
+		margin-top: var(--s-3);
 	}
 	.dev-note {
 		margin-top: var(--s-3);

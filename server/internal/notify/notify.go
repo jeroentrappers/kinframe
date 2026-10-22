@@ -71,7 +71,7 @@ func (n *Notifier) push(userID uuid.UUID, ev Event, p *Push) {
 			locale = *ep.Locale
 		}
 		title, body := Text(locale, p.Key, p.Args)
-		payload, _ := json.Marshal(map[string]any{"type": ev["type"], "title": title, "body": body, "ids": p.IDs})
+		payload, _ := json.Marshal(map[string]any{"type": ev["type"], "key": p.Key, "title": title, "body": body, "ids": p.IDs})
 		gone, err := n.Sender.Send(ctx, ep, payload)
 		if gone {
 			_ = n.Store.DeletePushEndpoint(ctx, userID, ep.ID)
@@ -118,12 +118,13 @@ func Text(locale, key string, args map[string]string) (string, string) {
 	if !ok {
 		t = texts["en"]
 	}
-	if p, ok := args["preset"]; ok {
-		args["preset"] = t["preset."+p][1]
-	}
 	pair := t[key]
 	repl := make([]string, 0, 2*len(args))
 	for k, v := range args {
+		if k == "preset" {
+			// Translate into a copy: args is shared by every endpoint (and locale) of the user.
+			v = t["preset."+v][1]
+		}
 		repl = append(repl, "{"+k+"}", v)
 	}
 	r := strings.NewReplacer(repl...)
@@ -131,8 +132,7 @@ func Text(locale, key string, args map[string]string) (string, string) {
 }
 
 // HTTPSender delivers UnifiedPush (a plain POST of the payload to the
-// distributor endpoint). WebPush needs RFC 8291 encryption and FCM/APNs need
-// store credentials; those kinds are skipped until configured.
+// distributor endpoint). Other kinds are ignored; see MultiSender.
 type HTTPSender struct {
 	Client *http.Client
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { api, call, ApiError, type Frame, type FrameSettings, type SleepSchedule } from '$lib/api/client';
+	import { api, call, ApiError, type Album, type Frame, type FrameSettings, type SleepSchedule } from '$lib/api/client';
 	import { formatInterval } from '$lib/format';
 	import { mergePatchDiff, rebaseSettings, type JsonObject } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
@@ -25,7 +25,7 @@
 	/** Fill in spec defaults (product spec §6) for anything the server left out. */
 	function withDefaults(s: FrameSettings): FrameSettings {
 		const c = clone(s);
-		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', ...c.slideshow };
+		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', album_id: null, on_this_day: false, ...c.slideshow };
 		c.display = { brightness: 204, sleep_schedules: [], ...c.display };
 		c.widgets = { caption: true, clock: true, weather: false, ...c.widgets };
 		c.locale = { temperature_unit: 'c', ...c.locale };
@@ -45,9 +45,14 @@
 		}
 	}
 
+	let albums = $state<Album[]>([]);
+
 	$effect(() => {
 		void frame.id;
 		void load();
+		call(api.GET('/v1/frames/{frameId}/albums', { params: { path: { frameId: frame.id } } }))
+			.then((a) => (albums = a))
+			.catch(() => (albums = []));
 	});
 
 	const strip = (s: FrameSettings): JsonObject => {
@@ -207,6 +212,20 @@
 					</select>
 				</div>
 			{/if}
+			{#if albums.length > 0 || form.slideshow.album_id}
+				<div class="field">
+					<label for="s-album">{t('settingsForm.playAlbum')}</label>
+					<select id="s-album" class="select" bind:value={form.slideshow.album_id}>
+						<option value={null}>{t('settingsForm.allPhotos')}</option>
+						{#each albums as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
+					</select>
+					<span class="hint">{t('settingsForm.playAlbumHint')}</span>
+				</div>
+			{/if}
+			<label class="switch">
+				<input type="checkbox" bind:checked={form.slideshow.on_this_day} />
+				<span><span class="s-label">{t('settingsForm.onThisDay')}</span><span class="hint">{t('settingsForm.onThisDayHint')}</span></span>
+			</label>
 			<label class="switch"><input type="checkbox" bind:checked={form.widgets.caption} /><span>{t('settingsForm.showCaption')}</span></label>
 			<label class="switch"><input type="checkbox" bind:checked={form.widgets.clock} /><span>{t('settingsForm.showClock')}</span></label>
 		</section>

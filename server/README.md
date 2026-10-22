@@ -71,6 +71,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_COMMAND_TIMEOUT_SECONDS` | `10` | Remote command wait before `504` |
 | `KINFRAME_JANITOR_INTERVAL_SECONDS` | `600` | Trash purge, feed pruning, upload expiry |
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |
+| `KINFRAME_VAPID_PUBLIC_KEY` / `KINFRAME_VAPID_PRIVATE_KEY` | generated | WebPush VAPID key pair (base64url P-256 public point and private scalar). Set both or neither; when unset the server generates a pair once and keeps it in `<data dir>/vapid.json` (mode 0600). Keep it stable: browser subscriptions are bound to the public key |
+| `KINFRAME_VAPID_SUBJECT` | public URL if https, else `mailto:kinframe@localhost` | Contact push services see in the VAPID token (`mailto:` or `https://`) |
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
 | `KINFRAME_VERSION` | `0.1.0` | Reported in discovery |
