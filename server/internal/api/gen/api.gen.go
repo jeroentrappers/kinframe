@@ -1260,6 +1260,10 @@ type Discovery struct {
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
 	Weather *bool   `json:"weather,omitempty"`
 	Web     *string `json:"web,omitempty"`
+
+	// WebpushPublicKey VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+	// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+	WebpushPublicKey *string `json:"webpush_public_key,omitempty"`
 }
 
 // Fit defines model for Fit.
@@ -1823,7 +1827,7 @@ type SendCreate struct {
 		FocalPoint   *FocalPoint `json:"focal_point,omitempty"`
 		IncludeAudio *bool       `json:"include_audio,omitempty"`
 
-		// Trim Videos only.
+		// Trim Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
 		Trim *struct {
 			EndMs   *int `json:"end_ms,omitempty"`
 			StartMs *int `json:"start_ms,omitempty"`
@@ -2122,7 +2126,11 @@ type ListPlacementsParams struct {
 	SenderId   *Id                             `form:"sender_id,omitempty" json:"sender_id,omitempty"`
 	Kind       *MediaKind                      `form:"kind,omitempty" json:"kind,omitempty"`
 	AlbumId    *Id                             `form:"album_id,omitempty" json:"album_id,omitempty"`
-	Sort       *ListPlacementsParamsSort       `form:"sort,omitempty" json:"sort,omitempty"`
+
+	// OnThisDay "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+	// on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+	OnThisDay *string                   `form:"on_this_day,omitempty" json:"on_this_day,omitempty"`
+	Sort      *ListPlacementsParamsSort `form:"sort,omitempty" json:"sort,omitempty"`
 }
 
 // ListPlacementsParamsVisibility defines parameters for ListPlacements.
@@ -3651,6 +3659,19 @@ func (siw *ServerInterfaceWrapper) ListPlacements(w http.ResponseWriter, r *http
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "album_id"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "album_id", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "on_this_day" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "on_this_day", r.URL.Query(), &params.OnThisDay, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "on_this_day"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "on_this_day", Err: err})
 		}
 		return
 	}

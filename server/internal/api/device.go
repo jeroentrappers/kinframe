@@ -451,7 +451,7 @@ func (s *Server) DeviceAck(ctx context.Context, req gen.DeviceAckRequestObject) 
 	if err != nil {
 		return nil, err
 	}
-	s.PlacementsChanged(changes)
+	s.placementsChanged(ctx, changes, s.deliveredPushes(ctx, f, changes))
 	return noContent(), nil
 }
 
@@ -528,7 +528,7 @@ func (s *Server) DeviceSetReaction(ctx context.Context, req gen.DeviceSetReactio
 		var push *notify.Push
 		if reaction != nil {
 			push = &notify.Push{Key: "reaction", Args: map[string]string{"frame": f.Name},
-				IDs: map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}}
+				IDs: placementIDs(p, f)}
 		}
 		s.notify.User(*p.SenderUserID, notify.Event{
 			"type": "reaction", "placement_id": p.Placement.ID, "frame_id": f.ID, "reaction": reaction, "by_frame_name": f.Name,
@@ -558,7 +558,7 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 	if p.SenderUserID != nil {
 		s.notify.User(*p.SenderUserID, notify.Event{"type": "reply", "placement_id": p.Placement.ID, "frame_id": f.ID, "preset": preset},
 			&notify.Push{Key: "reply", Args: map[string]string{"frame": f.Name, "preset": preset},
-				IDs: map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}})
+				IDs: placementIDs(p, f)})
 		if p.SendID != nil {
 			s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{*p.SendID: *p.SenderUserID}, "")
 		}
@@ -659,4 +659,13 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		return nil, err
 	}
 	return accepted(s.placementJSON(row)), nil
+}
+
+// placementIDs are the ids a push about a placement carries (README §6.3).
+func placementIDs(p *store.PlacementRow, f *store.Frame) map[string]string {
+	ids := map[string]string{"placement_id": p.Placement.ID.String(), "frame_id": f.ID.String()}
+	if p.SendID != nil {
+		ids["send_id"] = p.SendID.String()
+	}
+	return ids
 }

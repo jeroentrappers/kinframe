@@ -152,6 +152,8 @@ type StatusChange struct {
 	FrameID     uuid.UUID  `db:"frame_id"`
 	SendID      *uuid.UUID `db:"send_id"`
 	SenderID    *uuid.UUID `db:"sender_user_id"`
+	// NewlyDelivered is set when this change delivered the placement (it was pending or ready).
+	NewlyDelivered bool `db:"newly_delivered"`
 }
 
 // MarkDelivered moves ready placements on the frame to delivered.
@@ -159,15 +161,16 @@ func (tx *Tx) MarkDelivered(ctx context.Context, frameID uuid.UUID, ids []uuid.U
 	return many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'delivered', delivered_at = now() FROM items i
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = ANY($2) AND p.status IN ('pending', 'ready') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id`, frameID, ids))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, true AS newly_delivered`, frameID, ids))
 }
 
 // MarkSeen moves placements to seen (delivered implied) at the given time.
 func (tx *Tx) MarkSeen(ctx context.Context, frameID, id uuid.UUID, at time.Time) ([]StatusChange, error) {
 	return many[StatusChange](tx.Query(ctx, `
-		UPDATE placements p SET status = 'seen', seen_at = $3, delivered_at = COALESCE(p.delivered_at, $3) FROM items i
+		UPDATE placements p SET status = 'seen', seen_at = $3, delivered_at = COALESCE(p.delivered_at, $3)
+		FROM items i, (SELECT status AS old_status FROM placements WHERE id = $2) o
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = $2 AND p.status IN ('pending', 'ready', 'delivered') AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id`, frameID, id, at))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, o.old_status IN ('pending', 'ready') AS newly_delivered`, frameID, id, at))
 }
 
 // MarkReady moves pending placements of a media on a frame to ready.
@@ -175,11 +178,20 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 	changed, err := many[StatusChange](tx.Query(ctx, `
 		UPDATE placements p SET status = 'ready' FROM items i
 		WHERE i.id = p.item_id AND i.media_id = $1 AND p.frame_id = $2 AND p.status = 'pending' AND p.removed_at IS NULL
-		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id`, mediaID, frameID))
+		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, false AS newly_delivered`, mediaID, frameID))
 	if err != nil {
 		return nil, err
 	}
 	return changed, nil
+}
+
+// SendDeliveredOn reports whether every live placement of a send on a frame
+// has reached the frame (delivered or seen; failed ones don't count against it).
+func (s *Store) SendDeliveredOn(ctx context.Context, sendID, frameID uuid.UUID) (bool, error) {
+	var done bool
+	err := s.Pool.QueryRow(ctx, `SELECT NOT EXISTS (SELECT 1 FROM placements WHERE send_id = $1 AND frame_id = $2
+		AND removed_at IS NULL AND status IN ('pending', 'ready'))`, sendID, frameID).Scan(&done)
+	return done, err
 }
 
 // LivePlacementsOfMedia lists live placement IDs of a media on a frame (for feed bumps).
@@ -225,6 +237,7 @@ type PlacementFilter struct {
 	SenderID   *uuid.UUID
 	Kind       *string
 	AlbumID    *uuid.UUID
+	OnThisDay  string // "MM-DD": captured on this day in an earlier year
 	Sort       string // received_desc, received_asc, taken_desc, taken_asc
 	Cursor     string
 	Limit      int
@@ -289,6 +302,11 @@ func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]Placem
 	}
 	if f.AlbumID != nil {
 		where += ` AND EXISTS (SELECT 1 FROM album_placements ap WHERE ap.placement_id = p.id AND ap.album_id = ` + arg(*f.AlbumID) + `)`
+	}
+	if f.OnThisDay != "" {
+		taken := `(COALESCE(m.captured_at, i.captured_hint) AT TIME ZONE 'UTC')`
+		where += ` AND to_char(` + taken + `, 'MM-DD') = ` + arg(f.OnThisDay) +
+			` AND EXTRACT(year FROM ` + taken + `) < EXTRACT(year FROM now() AT TIME ZONE 'UTC')`
 	}
 	if f.Cursor != "" {
 		c, err := decodeCursor(f.Cursor)

@@ -88,7 +88,11 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 
 	n := &notify.Notifier{Hub: hub, Store: st, Log: log}
 	if cfg.PushEnabled {
-		n.Sender = notify.HTTPSender{}
+		senders := notify.MultiSender{"unifiedpush": notify.HTTPSender{}}
+		if cfg.VAPIDPublicKey != "" {
+			senders["webpush"] = notify.WebPushSender{PublicKey: cfg.VAPIDPublicKey, PrivateKey: cfg.VAPIDPrivateKey, Subject: cfg.VAPIDSubject}
+		}
+		n.Sender = senders
 	}
 	var mirror *releases.Mirror
 	if cfg.FrameReleasesRepo != "" || cfg.FrameReleasesDir != "" {
