@@ -482,6 +482,7 @@ class SlideshowController(private val c: FrameController) {
                 blurBars = settings.slideshow.background == "blur",
                 caption = caption,
                 density = g.app.resources.displayMetrics.density,
+                fillChosen = p.fit == "fill",
             )
             // Videos and live photos: the caption stays readable above the playing clip. Ken Burns: it stays still.
             val strip = if (p.isVideo || p.isLive || separate) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null

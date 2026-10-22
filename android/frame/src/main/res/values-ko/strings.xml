@@ -102,6 +102,7 @@
     <string name="menu_power">전원</string>
     <string name="menu_hide">숨기기</string>
     <string name="menu_delete">삭제</string>
+    <string name="menu_rotate">회전</string>
 
     <!-- Empty states -->
     <string name="empty_title">아직 사진이 없어요</string>

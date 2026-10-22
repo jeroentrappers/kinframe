@@ -104,6 +104,7 @@
     <string name="menu_power">Av/på</string>
     <string name="menu_hide">Skjul</string>
     <string name="menu_delete">Slett</string>
+    <string name="menu_rotate">Roter</string>
 
     <!-- Tomme visninger -->
     <string name="empty_title">Ingen bilder ennå</string>

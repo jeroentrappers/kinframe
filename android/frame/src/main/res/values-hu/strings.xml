@@ -104,6 +104,7 @@
     <string name="menu_power">Kikapcsolás</string>
     <string name="menu_hide">Elrejtés</string>
     <string name="menu_delete">Törlés</string>
+    <string name="menu_rotate">Forgatás</string>
 
     <!-- Empty states -->
     <string name="empty_title">Még nincsenek fotók</string>

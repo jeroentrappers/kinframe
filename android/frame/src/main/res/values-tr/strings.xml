@@ -104,6 +104,7 @@
     <string name="menu_power">Güç</string>
     <string name="menu_hide">Gizle</string>
     <string name="menu_delete">Sil</string>
+    <string name="menu_rotate">Döndür</string>
 
     <!-- Empty states -->
     <string name="empty_title">Henüz fotoğraf yok</string>

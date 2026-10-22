@@ -104,6 +104,7 @@
     <string name="menu_power">पावर</string>
     <string name="menu_hide">छिपाएं</string>
     <string name="menu_delete">मिटाएं</string>
+    <string name="menu_rotate">घुमाएँ</string>
 
     <!-- Empty states -->
     <string name="empty_title">अभी कोई फ़ोटो नहीं</string>

@@ -104,6 +104,7 @@
     <string name="menu_power">Ström</string>
     <string name="menu_hide">Dölj</string>
     <string name="menu_delete">Radera</string>
+    <string name="menu_rotate">Rotera</string>
 
     <!-- Tomma lägen -->
     <string name="empty_title">Inga foton än</string>

@@ -108,6 +108,7 @@
     <string name="menu_power">Napajanje</string>
     <string name="menu_hide">Skrij</string>
     <string name="menu_delete">Izbriši</string>
+    <string name="menu_rotate">Zasukaj</string>
 
     <!-- Empty states -->
     <string name="empty_title">Še ni fotografij</string>

@@ -102,6 +102,7 @@
     <string name="menu_power">電源</string>
     <string name="menu_hide">隱藏</string>
     <string name="menu_delete">刪除</string>
+    <string name="menu_rotate">旋轉</string>
 
     <!-- Empty states -->
     <string name="empty_title">還沒有照片</string>

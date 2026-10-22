@@ -106,6 +106,7 @@
     <string name="menu_power">Alimentare</string>
     <string name="menu_hide">Ascundeți</string>
     <string name="menu_delete">Ștergeți</string>
+    <string name="menu_rotate">Rotește</string>
 
     <!-- Empty states -->
     <string name="empty_title">Încă nu există fotografii</string>

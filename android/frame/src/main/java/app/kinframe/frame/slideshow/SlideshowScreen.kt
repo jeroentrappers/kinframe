@@ -418,6 +418,9 @@ fun SlideshowScreen(c: FrameController) {
                     snack = Snack(R.string.snack_deleted, p.id, id, hidden = false)
                 }
             },
+            // The menu stays open, so a photo that is a quarter turn off can be turned again right away.
+            onRotate = { p -> scope.launch { c.session.value?.outbox?.adjust(p.id, turn = true) } },
+            onFit = { p, fill -> scope.launch { c.session.value?.outbox?.adjust(p.id, fit = if (fill) "fill" else "fit") } },
             onPower = { menuOpen = false; powerOpen = true },
             onSettings = { menuOpen = false; c.openSettings() },
             onCalendar = { menuOpen = false; c.calendar.openCalendar() },
@@ -547,7 +550,7 @@ private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
     val settings by c.g.settings.settings.collectAsState()
     val vw = p.width ?: wPx
     val vh = p.height ?: hPx
-    val fill = (p.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill" && !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx)
+    val fill = p.fit == "fill" || (p.fit == null && settings.slideshow.fill && !FocalCrop.cropTooAggressive(vw, vh, wPx, hPx))
     val scale = if (fill) maxOf(wPx.toFloat() / vw, hPx.toFloat() / vh) else minOf(wPx.toFloat() / vw, hPx.toFloat() / vh)
     val dw = (vw * scale).roundToInt()
     val dh = (vh * scale).roundToInt()
@@ -782,6 +785,8 @@ private fun QuickMenu(
     onReact: (String?) -> Unit,
     onHide: (PlacementEntity) -> Unit,
     onDelete: (PlacementEntity) -> Unit,
+    onRotate: (PlacementEntity) -> Unit,
+    onFit: (PlacementEntity, fill: Boolean) -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
     onCalendar: () -> Unit,
@@ -789,6 +794,8 @@ private fun QuickMenu(
     onNotifications: () -> Unit,
 ) {
     val current by c.slideshow.current.collectAsState()
+    val stage by c.slideshow.stage.collectAsState()
+    val settings by c.g.settings.settings.collectAsState()
     val conn by c.connection.collectAsState()
     val net by c.g.network.status.collectAsState()
     val sync by c.syncState.collectAsState()
@@ -809,6 +816,12 @@ private fun QuickMenu(
         onReact = onReact,
         onHide = { p?.let(onHide) },
         onDelete = { p?.let(onDelete) },
+        // One photo on its own: a collage arranges its tiles itself, and a playing clip is not turned.
+        adjustable = p != null && stage.incoming?.tiles.isNullOrEmpty(),
+        rotatable = p != null && !p.isVideo,
+        filled = (p?.fit ?: if (settings.slideshow.fill) "fill" else "fit") == "fill",
+        onRotate = { onTouch(); p?.let(onRotate) },
+        onFit = { fill -> onTouch(); p?.let { onFit(it, fill) } },
         onPower = onPower,
         onSettings = onSettings,
         onCalendar = onCalendar,
@@ -833,6 +846,12 @@ internal fun QuickMenuContent(
     onDelete: () -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    adjustable: Boolean = false,
+    rotatable: Boolean = false,
+    /** Whether the photo fills the screen now; the button offers the other choice. */
+    filled: Boolean = true,
+    onRotate: () -> Unit = {},
+    onFit: (fill: Boolean) -> Unit = {},
     onCalendar: () -> Unit = {},
     notificationCount: Int = 0,
     onNotifications: () -> Unit = {},
@@ -891,6 +910,12 @@ internal fun QuickMenuContent(
                     Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
                     PillAction(KinIcons.EyeOff, stringResource(R.string.menu_hide), compact) { onHide() }
                     PillAction(KinIcons.Trash, stringResource(R.string.menu_delete), compact) { onDelete() }
+                    if (adjustable) {
+                        Box(Modifier.size(1.dp, 48.dp).background(Color.White.copy(alpha = 0.2f)))
+                        if (rotatable) PillAction(KinIcons.RotateCw, stringResource(R.string.menu_rotate), compact) { onRotate() }
+                        if (filled) PillAction(KinIcons.Shrink, stringResource(R.string.fill_fit), compact) { onFit(false) }
+                        else PillAction(KinIcons.Expand, stringResource(R.string.fill_fill), compact) { onFit(true) }
+                    }
                 }
             }
         }

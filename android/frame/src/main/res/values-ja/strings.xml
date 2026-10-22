@@ -102,6 +102,7 @@
     <string name="menu_power">電源</string>
     <string name="menu_hide">非表示</string>
     <string name="menu_delete">削除</string>
+    <string name="menu_rotate">回転</string>
 
     <!-- Empty states -->
     <string name="empty_title">まだ写真がありません</string>

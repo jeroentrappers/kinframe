@@ -104,6 +104,7 @@
     <string name="menu_power">Ein/Aus</string>
     <string name="menu_hide">Ausblenden</string>
     <string name="menu_delete">Löschen</string>
+    <string name="menu_rotate">Drehen</string>
 
     <!-- Empty states -->
     <string name="empty_title">Noch keine Fotos</string>

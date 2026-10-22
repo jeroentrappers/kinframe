@@ -105,6 +105,7 @@
     <string name="menu_power">Power</string>
     <string name="menu_hide">Hide</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_rotate">Rotate</string>
 
     <!-- Empty states -->
     <string name="empty_title">No photos yet</string>

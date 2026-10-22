@@ -108,6 +108,7 @@
     <string name="menu_power">Zasilanie</string>
     <string name="menu_hide">Ukryj</string>
     <string name="menu_delete">Usuń</string>
+    <string name="menu_rotate">Obróć</string>
 
     <!-- Empty states -->
     <string name="empty_title">Nie ma jeszcze zdjęć</string>

@@ -106,6 +106,7 @@
     <string name="menu_power">Energia</string>
     <string name="menu_hide">Ocultar</string>
     <string name="menu_delete">Excluir</string>
+    <string name="menu_rotate">Girar</string>
 
     <!-- Empty states -->
     <string name="empty_title">Ainda não há fotos</string>

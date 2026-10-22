@@ -106,6 +106,7 @@
     <string name="menu_power">הפעלה</string>
     <string name="menu_hide">הסתרה</string>
     <string name="menu_delete">מחיקה</string>
+    <string name="menu_rotate">סיבוב</string>
 
     <!-- Empty states -->
     <string name="empty_title">עדיין אין תמונות</string>

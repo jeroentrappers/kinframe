@@ -72,6 +72,11 @@ object KinIcons {
     val Globe by lazy { line("globe", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M3 12h18", "M12 3a14 14 0 0 1 0 18", "M12 3a14 14 0 0 0 0 18") }
     val Server by lazy { line("server", "M4 4h16v6H4z", "M4 14h16v6H4z", "M8 7h0.01", "M8 17h0.01") }
     val Info by lazy { line("info", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M12 11v6", "M12 7.5h0.01") }
+    val RotateCw by lazy { line("rotateCw", "M20 3v5h-5", "M20 8A8.5 8.5 0 1 0 20.5 14") }
+    /** Fill the screen: corners pointing out. */
+    val Expand by lazy { line("expand", "M4 9V4h5", "M15 4h5v5", "M20 15v5h-5", "M9 20H4v-5") }
+    /** Show the whole photo: corners pointing in. */
+    val Shrink by lazy { line("shrink", "M9 4v5H4", "M15 4v5h5", "M20 15h-5v5", "M4 15h5v5") }
     val Image by lazy { line("image", "M4 5h16v14H4z", "M4 16l5-5 4 4 3-3 4 4", "M15.5 8.5h0.01") }
     val Lock by lazy { line("lock", "M6 11h12v9H6z", "M8.5 11V8a3.5 3.5 0 0 1 7 0v3") }
     val Smile by lazy { line("smile", "M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18z", "M8.5 14a4.5 4.5 0 0 0 7 0", "M9 9.5h0.01", "M15 9.5h0.01") }

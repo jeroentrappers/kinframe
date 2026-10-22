@@ -36,6 +36,8 @@ class SlideRenderer {
         val caption: CaptionSpec? = null,
         /** px per dp. */
         val density: Float = 1f,
+        /** Fill was picked for this photo on the frame: honoured even where it crops a lot (a panorama). */
+        val fillChosen: Boolean = false,
     )
 
     data class CaptionSpec(
@@ -119,7 +121,7 @@ class SlideRenderer {
     }
 
     private fun useFill(srcW: Int, srcH: Int, r: Request): Boolean =
-        r.fill && !FocalCrop.cropTooAggressive(srcW, srcH, r.screenW, r.screenH)
+        r.fill && (r.fillChosen || !FocalCrop.cropTooAggressive(srcW, srcH, r.screenW, r.screenH))
 
     private fun compose(src: Bitmap, r: Request): Bitmap {
         val out = Bitmap.createBitmap(r.screenW, r.screenH, Bitmap.Config.ARGB_8888)

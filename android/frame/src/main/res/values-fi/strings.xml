@@ -104,6 +104,7 @@
     <string name="menu_power">Virta</string>
     <string name="menu_hide">Piilota</string>
     <string name="menu_delete">Poista</string>
+    <string name="menu_rotate">Kierrä</string>
 
     <!-- Tyhjät näkymät -->
     <string name="empty_title">Ei vielä kuvia</string>
