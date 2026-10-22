@@ -33,6 +33,8 @@ tags:
   - name: device
     description: Endpoints called by the frame itself (device token).
   - name: operator
+  - name: dev
+    description: Development-only helpers; absent in production.
 
 paths:
   /.well-known/kinframe:
@@ -46,6 +48,38 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Discovery' }
+
+  /dev/token:
+    post:
+      tags: [dev]
+      operationId: devToken
+      security: []
+      description: |
+        Development servers only (discovery `dev_auth: true`); 404 otherwise. Issues a user access token signed by the
+        server itself so web and app development works without Logto. The server refuses to start with dev auth
+        enabled when KINFRAME_ENV=production.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+                name: { type: string }
+      responses:
+        '200':
+          description: Token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, expires_in]
+                properties:
+                  access_token: { type: string }
+                  expires_in: { type: integer }
+        '404': { $ref: '#/components/responses/Problem' }
 
   # ---------------------------------------------------------------- me
   /v1/me:
@@ -519,7 +553,7 @@ paths:
     get:
       tags: [sends]
       operationId: getItemMedia
-      description: Thumbnails and the master rendition for app/web. Supports Range and ETag; responds 302 to a short-lived signed URL.
+      description: Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
       parameters:
         - { $ref: '#/components/parameters/ItemId' }
         - name: variant
@@ -1092,6 +1126,10 @@ components:
             web_client_id: { type: string }
             api_resource: { type: string }
         limits: { $ref: '#/components/schemas/Limits' }
+        dev_auth:
+          type: boolean
+          default: false
+          description: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
 
     Limits:
       type: object
@@ -1372,7 +1410,10 @@ components:
         captured_at: { type: [string, 'null'], format: date-time }
         place_name: { type: [string, 'null'] }
         created_at: { type: string, format: date-time }
-        thumb_url: { type: [string, 'null'], format: uri }
+        thumb_url:
+          type: [string, 'null']
+          format: uri
+          description: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
 
     PlacementStatus:
       type: string
