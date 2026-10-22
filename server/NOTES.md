@@ -92,6 +92,16 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Signed media URLs: `/v1/media/signed/{key}?exp=…&sig=…`, HMAC-SHA256, valid 1–2 h (expiry rounded up so URLs are
   cacheable). `Item.thumb_url` uses them; `GET /v1/items/{id}/media/{variant}` redirects to one (5 min).
 - Avatars are public at unguessable URLs (`/avatars/{user}/{random}.webp`) so frames and `<img>` can cache them.
+- Blob storage (`fs` or `s3`): only processed files are stored, never originals. The fs store keeps the old layout
+  and ETags, so switching nothing changes nothing. The S3 store records `Content-Type` and the sha256 (user metadata)
+  on upload. Its `Open` stats once and then issues one ranged GET per contiguous read with `If-Match` on the stat's
+  ETag, so `http.ServeContent` handles Range/multi-range/304 exactly as for files and never mixes two versions.
+- Scratch moved from `<data dir>/media/tmp` to `<data dir>/tmp` (same volume, so the fs store still renames into
+  place); the fs store's `List` skips the old `tmp/` directory and `*.tmp` leftovers.
+- Presigned redirects apply to signed media URLs and avatars only. Frame downloads always stream: frames revalidate
+  with the rendition's sha256 ETag and send their device token, neither of which a bucket understands.
+- The frame release mirror (`<data dir>/frame-releases`) stays on local disk: it is a cache refilled from GitHub or
+  the drop-in directory, not user data. Weather is cached in PostgreSQL.
 - Frame imports (`/v1/device/imports`) create media without an owner; sender is the frame (`sender_id` = frame id).
 
 ## Change feed
@@ -143,7 +153,7 @@ invites 60/h per user; dev tokens 120/h per IP.
 ## Not done yet (v0.1 follow-ups)
 
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
-- Calendar, S3 storage.
+- Calendar.
 - Garbage collection of media no longer referenced by any live placement.
 - WebPush/FCM/APNs delivery.
 - Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm
