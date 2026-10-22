@@ -222,7 +222,7 @@ fun SlideshowScreen(c: FrameController) {
                 }
             },
             onPower = { menuOpen = false; powerOpen = true },
-            onSettings = { menuOpen = false; c.settingsOpen.value = true },
+            onSettings = { menuOpen = false; c.openSettings() },
         )
 
         snack?.let { s ->
@@ -247,7 +247,7 @@ fun SlideshowScreen(c: FrameController) {
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
         AnimatedVisibility(settingsOpen, enter = fadeIn(tween(250)) + slideInVertically(tween(300)) { it / 12 }, exit = fadeOut(tween(200))) {
-            SettingsScreen(c, onClose = { c.settingsOpen.value = false })
+            SettingsScreen(c, onClose = { c.closeSettings() })
         }
 
         IdentifyOverlay(c)

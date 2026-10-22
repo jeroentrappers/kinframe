@@ -481,6 +481,21 @@ func (e MediaKind) Valid() bool {
 	}
 }
 
+// Defines values for PinHashAlg.
+const (
+	Pbkdf2Sha256 PinHashAlg = "pbkdf2-sha256"
+)
+
+// Valid indicates whether the value is a known member of the PinHashAlg enum.
+func (e PinHashAlg) Valid() bool {
+	switch e {
+	case Pbkdf2Sha256:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for PlacementRotation.
 const (
 	PlacementRotationN0   PlacementRotation = 0
@@ -1337,7 +1352,17 @@ type FrameSettings struct {
 	} `json:"display,omitempty"`
 	Kiosk *struct {
 		AllowRemoveMembersOnFrame *bool `json:"allow_remove_members_on_frame,omitempty"`
-		OwnerPinSet               *bool `json:"owner_pin_set,omitempty"`
+
+		// OwnerPin Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+		// The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+		// locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+		OwnerPin *string `json:"owner_pin,omitempty"`
+
+		// OwnerPinHash Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+		// in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+		// with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+		OwnerPinHash *PinHash `json:"owner_pin_hash,omitempty"`
+		OwnerPinSet  *bool    `json:"owner_pin_set,omitempty"`
 	} `json:"kiosk,omitempty"`
 	Locale *struct {
 		FirstDayOfWeek  *FrameSettingsLocaleFirstDayOfWeek  `json:"first_day_of_week,omitempty"`
@@ -1624,6 +1649,23 @@ type Permissions struct {
 	SeeLibrary     *bool `json:"see_library,omitempty"`
 	Send           *bool `json:"send,omitempty"`
 }
+
+// PinHash PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+type PinHash struct {
+	Alg PinHashAlg `json:"alg"`
+
+	// Hash base64 of 32 bytes
+	Hash string `json:"hash"`
+
+	// Iterations Example: 20000
+	Iterations int `json:"iterations"`
+
+	// Salt base64
+	Salt string `json:"salt"`
+}
+
+// PinHashAlg defines model for PinHash.Alg.
+type PinHashAlg string
 
 // Place A geocoding result (Open-Meteo geocoding API).
 type Place struct {

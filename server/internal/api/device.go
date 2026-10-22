@@ -310,7 +310,7 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				"user_id": m.UserID, "display_name": m.DisplayName, "avatar_url": s.avatarURL(m.AvatarKey), "role": m.Role,
 			}})
 		case store.FeedSettings:
-			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": settingsDoc(f)})
+			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": deviceSettingsDoc(f)})
 		case store.FeedWeather:
 			w, err := s.frameWeather(ctx, f)
 			if err != nil {

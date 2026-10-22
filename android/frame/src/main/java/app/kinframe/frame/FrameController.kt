@@ -5,7 +5,12 @@ import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import app.kinframe.core.api.Heartbeat
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.PinHashDto
 import app.kinframe.frame.data.SyncStateEntity
+import app.kinframe.frame.kiosk.OwnerGate
+import app.kinframe.frame.kiosk.OwnerPin
+import app.kinframe.frame.kiosk.PinAttempts
 import app.kinframe.frame.schedule.DisplayController
 import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
@@ -26,7 +31,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import java.time.Instant
@@ -59,6 +66,10 @@ class FrameController(val g: FrameGraph) {
     val slideshow by lazy { SlideshowController(this) }
     val power = PowerActions(this)
     val update = UpdateManager(this)
+    val gate = OwnerGate(
+        pinHash = { g.settings.settings.value.kiosk.ownerPinHash },
+        attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
+    )
 
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
@@ -278,25 +289,34 @@ class FrameController(val g: FrameGraph) {
         }
     }
 
-    /** Leaves the kiosk to the Android settings. The owner PIN gate (later task) plugs into [OwnerGate]. */
+    /** Leaves the kiosk to the Android settings (owner PIN when set). */
     fun openAndroidSettings(activity: android.app.Activity) {
-        OwnerGate.authorize(activity, OwnerGate.Reason.ExitKiosk) {
+        gate.authorize(OwnerGate.Reason.ExitKiosk) {
             activity.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }
 
-    companion object { private const val TAG = "KinFrame" }
-}
+    /** Opens frame settings (owner PIN when set). */
+    fun openSettings() = gate.authorize(OwnerGate.Reason.OpenSettings) { settingsOpen.value = true }
 
-/**
- * Hook for the owner PIN (product spec §5 Security: "the user cannot leave the app without an owner PIN or adb").
- * v0.1 grants immediately; the PIN screen is a later task.
- */
-object OwnerGate {
-    enum class Reason { ExitKiosk, ChangeServer, FactoryReset }
-
-    fun authorize(activity: android.app.Activity, reason: Reason, onGranted: () -> Unit) {
-        Log.i("KinOwnerGate", "authorize $reason (no PIN configured)")
-        onGranted()
+    fun closeSettings() {
+        settingsOpen.value = false
+        gate.lock()
     }
+
+    /**
+     * Sets ([pin]) or removes (null) the owner PIN at the frame. Only the salted hash leaves this function: it goes
+     * into the settings document through the outbox, so it applies at once, offline too. Returns false without a session.
+     */
+    suspend fun setOwnerPin(pin: String?): Boolean {
+        val outbox = session.value?.outbox ?: return false
+        val hash = pin?.let { withContext(Dispatchers.Default) { OwnerPin.hash(it) } }
+        val value = hash?.let { KinJson.encodeToJsonElement(PinHashDto.serializer(), it) } ?: JsonNull
+        outbox.settingsPatch(buildJsonObject { put("kiosk", buildJsonObject { put("owner_pin_hash", value) }) })
+        g.prefs.pinAttempts.failures = 0
+        g.prefs.pinAttempts.lockedUntil = 0
+        return true
+    }
+
+    companion object { private const val TAG = "KinFrame" }
 }

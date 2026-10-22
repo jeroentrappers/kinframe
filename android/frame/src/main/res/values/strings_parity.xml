@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Strings for the frame parity features (owner PIN, join requests, storage, setup, slideshow options). -->
+<resources>
+    <!-- Owner PIN -->
+    <string name="pin_enter_title">Enter the owner PIN</string>
+    <string name="pin_reason_settings">to open settings</string>
+    <string name="pin_reason_exit">to leave kinframe</string>
+    <string name="pin_reason_wifi">to change Wi-Fi</string>
+    <string name="pin_reason_power_off">to turn the frame off</string>
+    <string name="pin_reason_restart">to restart the frame</string>
+    <string name="pin_reason_server">to change the server</string>
+    <string name="pin_reason_reset">to reset the frame</string>
+    <string name="pin_checking">Checking…</string>
+    <string name="pin_wrong">That\'s not the PIN.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">That\'s not the PIN. %d more try before a short pause.</item>
+        <item quantity="other">That\'s not the PIN. %d more tries before a short pause.</item>
+    </plurals>
+    <string name="pin_locked">Too many wrong tries. Try again in %s.</string>
+    <string name="pin_forgot">Forgot the PIN? The frame\'s owner can remove it in the kinframe app, under this frame\'s settings.</string>
+    <string name="pin_new_title">Choose a PIN</string>
+    <string name="pin_new_body">4 to 6 digits. It will be asked to open settings, turn the frame off or change Wi-Fi.</string>
+    <string name="pin_confirm_title">Enter the PIN again</string>
+    <string name="pin_confirm_body">Just to be sure.</string>
+    <string name="pin_mismatch">The PINs didn\'t match. Choose one again.</string>
+    <string name="pin_key_delete">Delete</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Owner PIN</string>
+    <string name="settings_pin_off">Off. Anyone at the frame can open settings.</string>
+    <string name="settings_pin_on">On. Settings, power and Wi-Fi ask for the PIN.</string>
+    <string name="settings_pin_set">Set a PIN</string>
+    <string name="settings_pin_change">Change PIN</string>
+    <string name="settings_pin_remove">Remove PIN</string>
+</resources>

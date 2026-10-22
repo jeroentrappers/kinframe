@@ -509,6 +509,23 @@ components:
                         allow_remove_members_on_frame:
                             default: true
                             type: boolean
+                        owner_pin:
+                            description: |
+                                Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                                The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+                                locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+                            nullable: true
+                            pattern: ^[0-9]{4,6}$
+                            type: string
+                            writeOnly: true
+                        owner_pin_hash:
+                            allOf:
+                                - $ref: '#/components/schemas/PinHash'
+                            description: |
+                                Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+                                in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+                                with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+                            nullable: true
                         owner_pin_set:
                             readOnly: true
                             type: boolean
@@ -1048,6 +1065,36 @@ components:
                     type: boolean
                 send:
                     type: boolean
+            type: object
+        PinHash:
+            description: |
+                PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+            properties:
+                alg:
+                    enum:
+                        - pbkdf2-sha256
+                    type: string
+                hash:
+                    description: base64 of 32 bytes
+                    maxLength: 44
+                    minLength: 44
+                    type: string
+                iterations:
+                    example: 20000
+                    maximum: 1000000
+                    minimum: 1000
+                    type: integer
+                salt:
+                    at least 12 random bytes: null
+                    description: base64
+                    maxLength: 64
+                    minLength: 16
+                    type: string
+            required:
+                - alg
+                - iterations
+                - salt
+                - hash
             type: object
         Place:
             description: A geocoding result (Open-Meteo geocoding API).

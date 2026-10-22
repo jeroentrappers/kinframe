@@ -34,6 +34,7 @@ import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
+import app.kinframe.frame.kiosk.OwnerGate
 import kotlinx.coroutines.launch
 
 /** Power menu (product spec 4.7): sleep now, restart, power off. */
@@ -49,10 +50,10 @@ fun PowerDialog(c: FrameController, onDismiss: () -> Unit) {
                         onDismiss(); c.display.sleepNow()
                     }
                     PowerOption(KinIcons.Restart, stringResource(R.string.power_restart), stringResource(R.string.power_restart_body), compact) {
-                        onDismiss(); c.scope.launch { c.power.restart() }
+                        onDismiss(); c.gate.authorize(OwnerGate.Reason.Restart) { c.scope.launch { c.power.restart() } }
                     }
                     PowerOption(KinIcons.Power, stringResource(R.string.power_off), stringResource(R.string.power_off_body), compact) {
-                        onDismiss(); c.scope.launch { c.power.powerOff() }
+                        onDismiss(); c.gate.authorize(OwnerGate.Reason.PowerOff) { c.scope.launch { c.power.powerOff() } }
                     }
                 }
                 androidx.compose.foundation.layout.BoxWithConstraints {

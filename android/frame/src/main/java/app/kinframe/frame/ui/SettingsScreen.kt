@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -54,7 +55,8 @@ import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
 import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
-import app.kinframe.frame.OwnerGate
+import app.kinframe.frame.kiosk.OwnerGate
+import app.kinframe.frame.kiosk.SetPinFlow
 import app.kinframe.frame.R
 import app.kinframe.frame.schedule.SleepPlanner
 import app.kinframe.frame.setup.signalWord
@@ -75,6 +77,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     val s by c.g.settings.settings.collectAsState()
     val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var choosingPin by remember { mutableStateOf(false) }
     LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
 
     fun patch(p: JsonObject) {
@@ -87,7 +90,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     Box(
         Modifier.fillMaxSize().background(Kin.colors.paper)
             .pointerInput(Unit) {
-                awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis() } }
+                awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis(); c.gate.touch() } }
             },
     ) {
         Column(Modifier.fillMaxSize()) {
@@ -104,10 +107,14 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 SlideshowSection(c, s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
+        }
+        if (choosingPin) {
+            SetPinFlow(onDone = { pin -> choosingPin = false; scope.launch { c.setOwnerPin(pin) } }, onCancel = { choosingPin = false })
         }
     }
 }
@@ -263,6 +270,26 @@ private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Un
     }
 }
 
+/** Owner PIN (product spec §5): set, change or remove it here; the owner can also remove it remotely. */
+@Composable
+private fun OwnerPinSection(c: FrameController, s: FrameSettings, onChoose: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val set = s.kiosk.ownerPinHash != null
+    SectionCard(stringResource(R.string.settings_pin)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Lock, null, tint = if (set) Kin.colors.sage else Kin.colors.inkFaint)
+            Text(
+                stringResource(if (set) R.string.settings_pin_on else R.string.settings_pin_off),
+                style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 14.dp),
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            KinButton(stringResource(if (set) R.string.settings_pin_change else R.string.settings_pin_set), onChoose, style = KinButtonStyle.Secondary)
+            if (set) KinButton(stringResource(R.string.settings_pin_remove), { scope.launch { c.setOwnerPin(null) } }, style = KinButtonStyle.Quiet)
+        }
+    }
+}
+
 @Composable
 private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
     val status by c.update.status.collectAsState()
@@ -311,7 +338,7 @@ private fun AboutSection(c: FrameController) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             KinButton(stringResource(R.string.wifi_open_settings), {
                 (context as? Activity)?.let { a ->
-                    OwnerGate.authorize(a, OwnerGate.Reason.ExitKiosk) {
+                    c.gate.authorize(OwnerGate.Reason.Wifi) {
                         runCatching { a.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     }
                 }

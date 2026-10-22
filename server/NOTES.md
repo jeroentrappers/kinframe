@@ -110,6 +110,10 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   otherwise `412 version_conflict`, after which the client re-applies, so the latest write wins. Missing `If-Match` →
   400. `version` and `kiosk.owner_pin_set` are read-only and ignored in patches. The merged document is validated
   against `FrameSettings`; unknown fields are preserved.
+- Owner PIN: only the owner may send `kiosk.owner_pin` (4–6 digits or null; others get 403). It is replaced by
+  `kiosk.owner_pin_hash` (PBKDF2-HMAC-SHA256, 20 000 iterations, 16-byte salt) before merging, so the PIN is never
+  stored. People never see the hash and can't write it; the frame gets it in the feed and may replace it with
+  `PATCH /device/settings` when the PIN is changed at the frame. `owner_pin_set` is derived from the hash.
 
 ## Weather
 

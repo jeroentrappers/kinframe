@@ -48,8 +48,19 @@ class FramePrefs(context: Context) {
         get() = sp.getString("playlist_current", null)
         set(v) = sp.edit { putString("playlist_current", v) }
 
+    /** Wrong owner-PIN attempts in a row and the lockout end (wall clock), see [app.kinframe.frame.kiosk.PinAttempts]. */
+    val pinAttempts = object : app.kinframe.frame.kiosk.PinAttempts.Store {
+        override var failures: Int
+            get() = sp.getInt("pin_failures", 0)
+            set(v) = sp.edit(commit = true) { putInt("pin_failures", v) }
+        override var lockedUntil: Long
+            get() = sp.getLong("pin_locked_until", 0L)
+            set(v) = sp.edit(commit = true) { putLong("pin_locked_until", v) }
+    }
+
     /** Forget everything tied to the device credential; keeps language and server choice. */
     fun wipeDevice() = sp.edit(commit = true) {
+        remove("pin_failures"); remove("pin_locked_until")
         remove("claimed"); remove("owner_name"); remove("playlist_seed"); remove("playlist_current")
         putInt("setup_step", 0)
     }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Pincode van de eigenaar -->
+    <string name="pin_enter_title">Voer de pincode van de eigenaar in</string>
+    <string name="pin_reason_settings">om de instellingen te openen</string>
+    <string name="pin_reason_exit">om kinframe te verlaten</string>
+    <string name="pin_reason_wifi">om de wifi te wijzigen</string>
+    <string name="pin_reason_power_off">om de fotolijst uit te zetten</string>
+    <string name="pin_reason_restart">om de fotolijst opnieuw op te starten</string>
+    <string name="pin_reason_server">om de server te wijzigen</string>
+    <string name="pin_reason_reset">om de fotolijst te resetten</string>
+    <string name="pin_checking">Controleren…</string>
+    <string name="pin_wrong">Dat is niet de pincode.</string>
+    <plurals name="pin_wrong_left">
+        <item quantity="one">Dat is niet de pincode. Nog %d poging voor een korte pauze.</item>
+        <item quantity="other">Dat is niet de pincode. Nog %d pogingen voor een korte pauze.</item>
+    </plurals>
+    <string name="pin_locked">Te veel foute pogingen. Probeer het opnieuw over %s.</string>
+    <string name="pin_forgot">Pincode vergeten? De eigenaar van de fotolijst kan hem verwijderen in de kinframe-app, bij de instellingen van deze fotolijst.</string>
+    <string name="pin_new_title">Kies een pincode</string>
+    <string name="pin_new_body">4 tot 6 cijfers. Hij wordt gevraagd om de instellingen te openen, de fotolijst uit te zetten of de wifi te wijzigen.</string>
+    <string name="pin_confirm_title">Voer de pincode nog eens in</string>
+    <string name="pin_confirm_body">Voor de zekerheid.</string>
+    <string name="pin_mismatch">De pincodes kwamen niet overeen. Kies er opnieuw een.</string>
+    <string name="pin_key_delete">Wissen</string>
+    <string name="pin_key_ok">OK</string>
+    <string name="settings_pin">Pincode van de eigenaar</string>
+    <string name="settings_pin_off">Uit. Iedereen bij de fotolijst kan de instellingen openen.</string>
+    <string name="settings_pin_on">Aan. Instellingen, uitzetten en wifi vragen om de pincode.</string>
+    <string name="settings_pin_set">Pincode instellen</string>
+    <string name="settings_pin_change">Pincode wijzigen</string>
+    <string name="settings_pin_remove">Pincode verwijderen</string>
+</resources>

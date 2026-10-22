@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 /**
  * The frame's only activity: a HOME launcher in immersive kiosk mode that keeps the screen on.
- * Leaving it requires the owner gate ([OwnerGate]) or adb.
+ * Leaving it requires the owner PIN ([app.kinframe.frame.kiosk.OwnerGate]) when one is set, or adb.
  */
 class MainActivity : ComponentActivity() {
     private val graph by lazy { FrameApp.graph(this) }
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // Kiosk: back never leaves the frame app; it closes the settings screen if open.
-                if (graph.controller.settingsOpen.value) graph.controller.settingsOpen.value = false
+                if (graph.controller.settingsOpen.value) graph.controller.closeSettings()
             }
         })
 
