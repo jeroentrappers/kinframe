@@ -38,7 +38,7 @@ public struct API: Sendable {
     }
 
     /// Run a generated-client call, turning failures into `APIError` (or `CancellationError`).
-    public func call<T: Sendable>(_ operation: (Client) async throws -> T) async throws -> T {
+    public func call<T: Sendable>(_ operation: @Sendable (Client) async throws -> T) async throws -> T {
         do {
             return try await operation(client)
         } catch {

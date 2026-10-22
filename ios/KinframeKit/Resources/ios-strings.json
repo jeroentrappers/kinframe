@@ -1,1 +1,142 @@
-{"ios.settings.languageSystem": {"en": "Same as the phone", "nl": "Zoals de telefoon"}}
+{
+  "ios.back": {
+    "en": "Back",
+    "nl": "Terug"
+  },
+  "ios.continue": {
+    "en": "Continue",
+    "nl": "Verder"
+  },
+  "ios.focal.down": {
+    "en": "Move down",
+    "nl": "Omlaag"
+  },
+  "ios.focal.left": {
+    "en": "Move left",
+    "nl": "Naar links"
+  },
+  "ios.focal.right": {
+    "en": "Move right",
+    "nl": "Naar rechts"
+  },
+  "ios.focal.up": {
+    "en": "Move up",
+    "nl": "Omhoog"
+  },
+  "ios.name.placeholder": {
+    "en": "e.g. Lisa",
+    "nl": "bv. Lisa"
+  },
+  "ios.send.background": {
+    "en": "This keeps going if you close the app.",
+    "nl": "Dit gaat gewoon verder als je de app sluit."
+  },
+  "ios.send.camera": {
+    "en": "Take a photo or video",
+    "nl": "Foto of video maken"
+  },
+  "ios.send.captionAll": {
+    "en": "Caption for all",
+    "nl": "Onderschrift voor alle"
+  },
+  "ios.send.pickBody": {
+    "en": "Up to {max} at a time, photos and videos mixed. You can also share them from Photos or any other app.",
+    "nl": "Tot {max} tegelijk, foto’s en video’s door elkaar. Je kunt ze ook delen vanuit Foto’s of een andere app."
+  },
+  "ios.send.pickTitle": {
+    "en": "Pick photos and videos",
+    "nl": "Kies foto’s en video’s"
+  },
+  "ios.server.addressLabel": {
+    "en": "Server address",
+    "nl": "Adres van de server"
+  },
+  "ios.server.body": {
+    "en": "kinframe runs on a server your family trusts. Most families use the default one. If someone in the family runs their own, pick that.",
+    "nl": "kinframe draait op een server die je familie vertrouwt. De meeste families gebruiken de standaardserver. Heeft iemand in de familie een eigen server, kies die dan."
+  },
+  "ios.server.check": {
+    "en": "Check",
+    "nl": "Controleren"
+  },
+  "ios.server.custom": {
+    "en": "Use your own server",
+    "nl": "Je eigen server gebruiken"
+  },
+  "ios.server.customHint": {
+    "en": "Enter the address you got from whoever runs it.",
+    "nl": "Vul het adres in dat je kreeg van wie de server beheert."
+  },
+  "ios.server.defaultHint": {
+    "en": "The default kinframe server",
+    "nl": "De standaardserver van kinframe"
+  },
+  "ios.server.invalid": {
+    "en": "That doesn’t look like a web address. Check it and try again.",
+    "nl": "Dat lijkt geen webadres. Kijk het na en probeer opnieuw."
+  },
+  "ios.server.notKinframe": {
+    "en": "That address works, but it isn’t a kinframe server.",
+    "nl": "Dat adres werkt, maar het is geen kinframe-server."
+  },
+  "ios.server.placeholder": {
+    "en": "frames.example.org",
+    "nl": "kaders.voorbeeld.be"
+  },
+  "ios.server.title": {
+    "en": "Choose your server",
+    "nl": "Kies je server"
+  },
+  "ios.server.unreachable": {
+    "en": "Can’t reach that server. Check the address and your connection.",
+    "nl": "Die server is niet bereikbaar. Kijk het adres en je verbinding na."
+  },
+  "ios.settings.languageSystem": {
+    "en": "Same as the phone",
+    "nl": "Zoals de telefoon"
+  },
+  "ios.switch.body": {
+    "en": "This link is for {server}. You’ll be signed out here and can sign in there.",
+    "nl": "Deze link hoort bij {server}. Je wordt hier afgemeld en kunt je daar aanmelden."
+  },
+  "ios.switch.confirm": {
+    "en": "Switch",
+    "nl": "Wisselen"
+  },
+  "ios.switch.title": {
+    "en": "Switch server?",
+    "nl": "Van server wisselen?"
+  },
+  "ios.trim.audio": {
+    "en": "Include sound",
+    "nl": "Met geluid"
+  },
+  "ios.trim.hint": {
+    "en": "Drag the edges to choose the part to send: at least {min} seconds, at most {max}.",
+    "nl": "Sleep de randen om het stuk te kiezen dat je stuurt: minstens {min} seconden, hoogstens {max}."
+  },
+  "ios.trim.noAudio": {
+    "en": "This video has no sound.",
+    "nl": "Deze video heeft geen geluid."
+  },
+  "ios.trim.play": {
+    "en": "Play",
+    "nl": "Afspelen"
+  },
+  "ios.trim.stop": {
+    "en": "Stop",
+    "nl": "Stoppen"
+  },
+  "ios.trim.title": {
+    "en": "Trim",
+    "nl": "Inkorten"
+  },
+  "ios.welcome.f1Body": {
+    "en": "Pick photos and videos or share them from any app. They show up on the frame a few seconds later.",
+    "nl": "Kies foto’s en video’s of deel ze vanuit elke app. Enkele seconden later staan ze op het kader."
+  },
+  "ios.welcome.start": {
+    "en": "Get started",
+    "nl": "Aan de slag"
+  }
+}

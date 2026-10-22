@@ -44,6 +44,11 @@
 	<string>$(KINFRAME_APNS_ENABLED)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo or video to send to a frame.</string>
 	<key>UIApplicationSceneManifest</key>
