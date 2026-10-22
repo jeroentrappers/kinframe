@@ -70,6 +70,8 @@ const sk: Catalog = {
 	'frames.add': 'Pridať rámik',
 	'frames.open': 'Otvoriť {name}',
 	'frames.needsUpdate': 'Pre tento rámik čaká aktualizácia',
+	'frames.dropTo': 'Pustite na odoslanie do rámika {name}',
+	'frames.dropHint': 'Pustite ich na rámik a odošlú sa doň',
 	'frames.emptyTitle': 'Pridajte svoj prvý rámik',
 	'frames.emptyBody':
 		'Každý kinframe zobrazuje na obrazovke 8-miestny kód. Zadajte ho sem a nastavte nový rámik alebo sa pripojte k rámiku rodiny.',

@@ -69,6 +69,8 @@ const ko: Catalog = {
 	'frames.add': '액자 추가',
 	'frames.open': '{name} 열기',
 	'frames.needsUpdate': '이 액자에 업데이트가 대기 중이에요',
+	'frames.dropTo': '놓아서 {name}에 보내기',
+	'frames.dropHint': '액자 위에 놓으면 그 액자로 보내요',
 	'frames.emptyTitle': '첫 번째 액자를 추가하세요',
 	'frames.emptyBody':
 		'모든 kinframe 화면에는 8자리 코드가 표시돼요. 여기에 입력하면 새 액자를 설정하거나 가족의 액자에 참여할 수 있어요.',

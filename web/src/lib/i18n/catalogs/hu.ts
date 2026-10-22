@@ -69,6 +69,8 @@ const hu: Catalog = {
 	'frames.add': 'Képkeret hozzáadása',
 	'frames.open': '{name} megnyitása',
 	'frames.needsUpdate': 'Frissítés vár erre a képkeretre',
+	'frames.dropTo': 'Engedd el a küldéshez ide: {name}',
+	'frames.dropHint': 'Engedd el őket egy képkereten, és oda küldjük őket',
 	'frames.emptyTitle': 'Add hozzá az első képkereted',
 	'frames.emptyBody':
 		'Minden kinframe egy 8 jegyű kódot mutat a képernyőjén. Írd be ide, hogy beállíts egy új képkeretet, vagy csatlakozz a család egyikéhez.',

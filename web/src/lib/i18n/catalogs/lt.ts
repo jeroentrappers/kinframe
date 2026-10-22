@@ -71,6 +71,8 @@ const lt: Catalog = {
 	'frames.add': 'Pridėti rėmelį',
 	'frames.open': 'Atidaryti {name}',
 	'frames.needsUpdate': 'Šiam rėmeliui laukia naujinys',
+	'frames.dropTo': 'Paleiskite, kad išsiųstumėte į rėmelį {name}',
+	'frames.dropHint': 'Paleiskite juos ant rėmelio, kad būtų išsiųsti į jį',
 	'frames.emptyTitle': 'Pridėkite pirmąjį rėmelį',
 	'frames.emptyBody':
 		'Kiekvieno kinframe ekrane rodomas 8 skaitmenų kodas. Įveskite jį čia, kad nustatytumėte naują rėmelį arba prisijungtumėte prie šeimos rėmelio.',

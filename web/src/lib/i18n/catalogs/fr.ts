@@ -70,6 +70,8 @@ const fr: Catalog = {
 	'frames.add': 'Ajouter un cadre',
 	'frames.open': 'Ouvrir {name}',
 	'frames.needsUpdate': 'Une mise à jour attend ce cadre',
+	'frames.dropTo': 'Déposez pour envoyer à {name}',
+	'frames.dropHint': 'Déposez-les sur un cadre pour les y envoyer',
 	'frames.emptyTitle': 'Ajoutez votre premier cadre',
 	'frames.emptyBody':
 		'Chaque cadre kinframe affiche un code à 8 chiffres à l’écran. Saisissez-le ici pour configurer un nouveau cadre ou rejoindre celui de la famille.',

@@ -70,6 +70,8 @@ const sr: Catalog = {
 	'frames.add': 'Додај рам',
 	'frames.open': 'Отвори {name}',
 	'frames.needsUpdate': 'Ажурирање чека овај рам',
+	'frames.dropTo': 'Пустите да бисте послали на рам {name}',
+	'frames.dropHint': 'Пустите их на рам да бисте их послали на њега',
 	'frames.emptyTitle': 'Додајте свој први рам',
 	'frames.emptyBody':
 		'Сваки kinframe приказује осмоцифрени код на екрану. Унесите га овде да бисте подесили нови рам или се придружили породичном.',

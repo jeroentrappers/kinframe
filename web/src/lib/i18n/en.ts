@@ -70,6 +70,8 @@ export const en = {
 	'frames.add': 'Add a frame',
 	'frames.open': 'Open {name}',
 	'frames.needsUpdate': 'An update is waiting for this frame',
+	'frames.dropTo': 'Drop to send to {name}',
+	'frames.dropHint': 'Drop them on a frame to send them there',
 	'frames.emptyTitle': 'Add your first frame',
 	'frames.emptyBody':
 		'Every kinframe shows an 8-digit code on its screen. Enter it here to set up a new frame or join one from the family.',

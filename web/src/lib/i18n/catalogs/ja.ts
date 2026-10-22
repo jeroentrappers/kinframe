@@ -69,6 +69,8 @@ const ja: Catalog = {
 	'frames.add': 'フレームを追加',
 	'frames.open': '{name} を開く',
 	'frames.needsUpdate': 'このフレームにはアップデートがあります',
+	'frames.dropTo': 'ドロップして {name} に送信',
+	'frames.dropHint': 'フレームの上にドロップすると、そのフレームに送信されます',
 	'frames.emptyTitle': '最初のフレームを追加しましょう',
 	'frames.emptyBody':
 		'kinframe の画面には 8 桁のコードが表示されます。ここに入力すると、新しいフレームを設定したり、家族のフレームに参加したりできます。',

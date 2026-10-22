@@ -68,6 +68,8 @@ const nl: Catalog = {
 	'frames.add': 'Kader toevoegen',
 	'frames.open': '{name} openen',
 	'frames.needsUpdate': 'Er staat een update klaar voor dit kader',
+	'frames.dropTo': 'Loslaten om naar {name} te sturen',
+	'frames.dropHint': 'Laat ze los op een kader om ze daarheen te sturen',
 	'frames.emptyTitle': 'Voeg je eerste kader toe',
 	'frames.emptyBody':
 		'Elk kinframe toont een code van 8 cijfers op het scherm. Vul die hier in om een nieuw kader in te stellen of je bij de familie aan te sluiten.',

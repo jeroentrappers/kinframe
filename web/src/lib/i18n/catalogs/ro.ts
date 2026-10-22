@@ -68,6 +68,8 @@ const ro: Catalog = {
 	'frames.add': 'Adăugați o ramă',
 	'frames.open': 'Deschideți {name}',
 	'frames.needsUpdate': 'O actualizare așteaptă pentru această ramă',
+	'frames.dropTo': 'Plasați pentru a trimite către {name}',
+	'frames.dropHint': 'Plasați-le pe o ramă pentru a le trimite acolo',
 	'frames.emptyTitle': 'Adăugați prima ramă',
 	'frames.emptyBody':
 		'Fiecare kinframe afișează pe ecran un cod din 8 cifre. Introduceți-l aici pentru a configura o ramă nouă sau pentru a vă alătura uneia din familie.',

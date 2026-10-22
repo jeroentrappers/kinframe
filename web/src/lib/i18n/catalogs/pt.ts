@@ -68,6 +68,8 @@ const pt: Catalog = {
 	'frames.add': 'Adicionar porta-retrato',
 	'frames.open': 'Abrir {name}',
 	'frames.needsUpdate': 'Há uma atualização esperando por este porta-retrato',
+	'frames.dropTo': 'Solte para enviar para {name}',
+	'frames.dropHint': 'Solte-os sobre um porta-retrato para enviá-los para ele',
 	'frames.emptyTitle': 'Adicione seu primeiro porta-retrato',
 	'frames.emptyBody':
 		'Todo kinframe mostra um código de 8 dígitos na tela. Digite-o aqui para configurar um porta-retrato novo ou entrar em um da família.',

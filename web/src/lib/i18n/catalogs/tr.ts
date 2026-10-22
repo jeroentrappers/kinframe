@@ -67,6 +67,8 @@ const tr: Catalog = {
 	'frames.add': 'Çerçeve ekle',
 	'frames.open': 'Aç: {name}',
 	'frames.needsUpdate': 'Bu çerçeve için bir güncelleme bekliyor',
+	'frames.dropTo': '{name} çerçevesine göndermek için bırakın',
+	'frames.dropHint': 'Oraya göndermek için bir çerçevenin üzerine bırakın',
 	'frames.emptyTitle': 'İlk çerçevenizi ekleyin',
 	'frames.emptyBody':
 		'Her kinframe ekranında 8 haneli bir kod gösterir. Yeni bir çerçeve kurmak veya ailedeki bir çerçeveye katılmak için kodu buraya girin.',

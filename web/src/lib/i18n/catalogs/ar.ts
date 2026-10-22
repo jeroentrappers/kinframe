@@ -74,6 +74,8 @@ const ar: Catalog = {
 	'frames.add': 'إضافة إطار',
 	'frames.open': 'فتح {name}',
 	'frames.needsUpdate': 'يوجد تحديث بانتظار هذا الإطار',
+	'frames.dropTo': 'أفلِت للإرسال إلى {name}',
+	'frames.dropHint': 'أفلِتها على إطار لإرسالها إليه',
 	'frames.emptyTitle': 'أضف إطارك الأول',
 	'frames.emptyBody':
 		'يعرض كل إطار kinframe رمزًا من 8 أرقام على شاشته. أدخله هنا لإعداد إطار جديد أو للانضمام إلى إطار من العائلة.',

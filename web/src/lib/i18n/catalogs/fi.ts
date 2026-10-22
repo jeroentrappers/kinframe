@@ -67,6 +67,8 @@ const fi: Catalog = {
 	'frames.add': 'Lisää kuvakehys',
 	'frames.open': 'Avaa {name}',
 	'frames.needsUpdate': 'Tälle kuvakehykselle on päivitys odottamassa',
+	'frames.dropTo': 'Lähetä kohteeseen {name} pudottamalla',
+	'frames.dropHint': 'Pudota ne kuvakehyksen päälle, niin ne lähetetään sinne',
 	'frames.emptyTitle': 'Lisää ensimmäinen kuvakehyksesi',
 	'frames.emptyBody':
 		'Jokainen kinframe näyttää näytöllään 8-numeroisen koodin. Anna se tässä ottaaksesi uuden kuvakehyksen käyttöön tai liittyäksesi perheen kuvakehykseen.',

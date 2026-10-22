@@ -69,6 +69,8 @@ const da: Catalog = {
 	'frames.add': 'Tilføj en ramme',
 	'frames.open': 'Åbn {name}',
 	'frames.needsUpdate': 'Der venter en opdatering til denne ramme',
+	'frames.dropTo': 'Slip for at sende til {name}',
+	'frames.dropHint': 'Slip dem på en ramme for at sende dem dertil',
 	'frames.emptyTitle': 'Tilføj din første ramme',
 	'frames.emptyBody':
 		'Hver kinframe viser en 8-cifret kode på skærmen. Indtast den her for at sætte en ny ramme op eller blive en del af en ramme i familien.',

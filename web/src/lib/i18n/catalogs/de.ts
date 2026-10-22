@@ -69,6 +69,8 @@ const de: Catalog = {
 	'frames.add': 'Rahmen hinzufügen',
 	'frames.open': '{name} öffnen',
 	'frames.needsUpdate': 'Für diesen Rahmen wartet ein Update',
+	'frames.dropTo': 'Loslassen zum Senden an {name}',
+	'frames.dropHint': 'Auf einem Rahmen loslassen, um sie dorthin zu senden',
 	'frames.emptyTitle': 'Füge deinen ersten Rahmen hinzu',
 	'frames.emptyBody':
 		'Jeder kinframe zeigt einen 8-stelligen Code auf dem Bildschirm. Gib ihn hier ein, um einen neuen Rahmen einzurichten oder einem Rahmen der Familie beizutreten.',

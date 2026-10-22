@@ -70,6 +70,8 @@ const it: Catalog = {
 	'frames.add': 'Aggiungi una cornice',
 	'frames.open': 'Apri {name}',
 	'frames.needsUpdate': 'Un aggiornamento è in attesa per questa cornice',
+	'frames.dropTo': 'Rilascia per inviare a {name}',
+	'frames.dropHint': 'Rilasciali su una cornice per inviarli lì',
 	'frames.emptyTitle': 'Aggiungi la tua prima cornice',
 	'frames.emptyBody':
 		'Ogni cornice kinframe mostra sullo schermo un codice di 8 cifre. Inseriscilo qui per configurare una nuova cornice o unirti a una della famiglia.',

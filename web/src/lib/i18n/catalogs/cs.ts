@@ -70,6 +70,8 @@ const cs: Catalog = {
 	'frames.add': 'Přidat rámeček',
 	'frames.open': 'Otevřít {name}',
 	'frames.needsUpdate': 'Pro tento rámeček čeká aktualizace',
+	'frames.dropTo': 'Pusťte pro odeslání do rámečku {name}',
+	'frames.dropHint': 'Pusťte je na rámeček a odešlou se do něj',
 	'frames.emptyTitle': 'Přidejte svůj první rámeček',
 	'frames.emptyBody':
 		'Každý kinframe ukazuje na obrazovce 8místný kód. Zadejte ho sem a nastavte nový rámeček nebo se připojte k rámečku rodiny.',

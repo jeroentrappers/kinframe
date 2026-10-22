@@ -70,6 +70,8 @@ const hr: Catalog = {
 	'frames.add': 'Dodaj okvir',
 	'frames.open': 'Otvori okvir {name}',
 	'frames.needsUpdate': 'Za ovaj okvir čeka ažuriranje',
+	'frames.dropTo': 'Ispustite za slanje na okvir {name}',
+	'frames.dropHint': 'Ispustite ih na okvir da biste ih poslali na njega',
 	'frames.emptyTitle': 'Dodajte svoj prvi okvir',
 	'frames.emptyBody':
 		'Svaki kinframe na zaslonu prikazuje 8-znamenkasti kôd. Unesite ga ovdje kako biste postavili novi okvir ili se pridružili obiteljskom.',
