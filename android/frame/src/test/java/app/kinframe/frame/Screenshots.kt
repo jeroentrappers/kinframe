@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -57,4 +58,10 @@ fun FakePhoto(seed: Int = 0) {
         drawCircle(Color.White.copy(alpha = 0.5f), size.minDimension * 0.12f, Offset(size.width * 0.72f, size.height * 0.25f))
         drawRect(p[3].copy(alpha = 0.5f), Offset(0f, size.height * 0.78f), Size(size.width, size.height * 0.22f))
     }
+}
+
+/** The frame's paper background (setup and settings screens draw on it). */
+@Composable
+fun Paper() {
+    Box(Modifier.fillMaxSize().background(app.kinframe.core.design.Kin.colors.paper))
 }

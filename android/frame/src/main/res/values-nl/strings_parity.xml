@@ -62,4 +62,29 @@
     <string name="status_card_storage_body">Oudere foto\'s zijn van de fotolijst gehaald om plaats te maken; ze blijven veilig op de server. Nieuwe foto\'s wachten misschien tot er plaats is.</string>
     <string name="portal_title">Aanmelden bij de wifi</string>
     <string name="portal_body">Dit sluit vanzelf zodra de fotolijst online is.</string>
+    <!-- Installatie: tijdzone en update -->
+    <string name="setup_tz_title">In welke tijdzone staat de fotolijst?</string>
+    <string name="setup_tz_body">Zodat de klok, de datum en de nachtstand kloppen.</string>
+    <string name="setup_tz_suggested">Voorgesteld</string>
+    <string name="setup_tz_all">Alle tijdzones</string>
+    <string name="tz_region_europe">Europa</string>
+    <string name="tz_region_america">Amerika</string>
+    <string name="tz_region_asia">Azië</string>
+    <string name="tz_region_africa">Afrika</string>
+    <string name="tz_region_australia">Australië</string>
+    <string name="tz_region_pacific">Grote Oceaan</string>
+    <string name="tz_region_atlantic">Atlantische Oceaan</string>
+    <string name="tz_region_indian">Indische Oceaan</string>
+    <string name="tz_region_antarctica">Antarctica</string>
+    <string name="setup_update_checking">Zoeken naar een nieuwere versie…</string>
+    <string name="setup_update_checking_body">De fotolijst zorgt dat hij de nieuwste kinframe heeft voor je begint.</string>
+    <string name="setup_update_downloading">Versie %s downloaden</string>
+    <string name="setup_update_downloading_body">Daarna wordt ze meteen geïnstalleerd. Je kunt dit overslaan; de fotolijst werkt zichzelf dan later bij.</string>
+    <string name="setup_update_installing">Versie %s installeren</string>
+    <string name="setup_update_installing_body">De fotolijst start zo vanzelf opnieuw op en gaat dan verder waar je was.</string>
+    <string name="setup_update_current">kinframe is up-to-date</string>
+    <string name="setup_update_current_body">Op naar de laatste stap.</string>
+    <string name="setup_update_failed">Kon niet zoeken naar updates</string>
+    <string name="setup_update_failed_body">Geen probleem: de fotolijst kijkt later opnieuw en werkt zichzelf bij.</string>
+    <string name="setup_update_skip">Nu overslaan</string>
 </resources>

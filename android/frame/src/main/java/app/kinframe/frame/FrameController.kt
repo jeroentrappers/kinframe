@@ -166,6 +166,7 @@ class FrameController(val g: FrameGraph) {
 
     private fun applyTimezone() {
         val tz = runCatching { g.settings.explicitTimezone()?.let { ZoneId.of(it) } }.getOrNull()
+            ?: runCatching { g.prefs.timezone?.let { ZoneId.of(it) } }.getOrNull()
         g.clock.zone = tz ?: ZoneId.systemDefault()
     }
 

@@ -63,4 +63,29 @@
     <string name="status_card_storage_body">Older photos were taken off the frame to make room; they stay safe on the server. New photos may wait until there is space.</string>
     <string name="portal_title">Sign in to the Wi-Fi</string>
     <string name="portal_body">This closes by itself once the frame is online.</string>
+    <!-- Setup: time zone and update -->
+    <string name="setup_tz_title">Which time zone is the frame in?</string>
+    <string name="setup_tz_body">So the clock, the date and the night-time schedule are right.</string>
+    <string name="setup_tz_suggested">Suggested</string>
+    <string name="setup_tz_all">All time zones</string>
+    <string name="tz_region_europe">Europe</string>
+    <string name="tz_region_america">Americas</string>
+    <string name="tz_region_asia">Asia</string>
+    <string name="tz_region_africa">Africa</string>
+    <string name="tz_region_australia">Australia</string>
+    <string name="tz_region_pacific">Pacific</string>
+    <string name="tz_region_atlantic">Atlantic</string>
+    <string name="tz_region_indian">Indian Ocean</string>
+    <string name="tz_region_antarctica">Antarctica</string>
+    <string name="setup_update_checking">Looking for a newer version…</string>
+    <string name="setup_update_checking_body">The frame makes sure it runs the latest kinframe before you start.</string>
+    <string name="setup_update_downloading">Downloading version %s</string>
+    <string name="setup_update_downloading_body">It installs right after. You can skip this; the frame then updates itself later.</string>
+    <string name="setup_update_installing">Installing version %s</string>
+    <string name="setup_update_installing_body">The frame restarts by itself in a moment and continues setup where you left off.</string>
+    <string name="setup_update_current">kinframe is up to date</string>
+    <string name="setup_update_current_body">On to the last step.</string>
+    <string name="setup_update_failed">Couldn\'t check for updates</string>
+    <string name="setup_update_failed_body">No problem: the frame looks again later and updates itself.</string>
+    <string name="setup_update_skip">Skip for now</string>
 </resources>

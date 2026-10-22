@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -69,6 +70,7 @@ fun StatusCard(
     modifier: Modifier = Modifier,
     action: String? = null,
     onAction: (() -> Unit)? = null,
+    dismissible: Boolean = true,
 ) {
     Row(
         modifier.width(440.dp).clip(KinShapeM).background(Kin.colors.surface.copy(alpha = 0.97f)).border(1.dp, Kin.colors.line, KinShapeM)
@@ -89,8 +91,12 @@ fun StatusCard(
                 ) { Text(action, style = Kin.type.label, color = Kin.colors.onAccent) }
             }
         }
-        Box(Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
-            KinIcon(KinIcons.Close, stringResource(R.string.action_close), tint = Kin.colors.inkFaint, size = 20.dp)
+        if (dismissible) {
+            Box(Modifier.size(48.dp).clip(CircleShape).clickable(onClick = onDismiss), contentAlignment = Alignment.Center) {
+                KinIcon(KinIcons.Close, stringResource(R.string.action_close), tint = Kin.colors.inkFaint, size = 20.dp)
+            }
+        } else {
+            Spacer(Modifier.width(12.dp))
         }
     }
 }

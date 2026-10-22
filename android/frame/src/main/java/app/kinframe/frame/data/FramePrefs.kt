@@ -40,6 +40,11 @@ class FramePrefs(context: Context) {
         get() = sp.getString("owner_name", null)
         set(v) = sp.edit(commit = true) { putString("owner_name", v) }
 
+    /** Time zone picked in the setup wizard (until the server's settings say otherwise). */
+    var timezone: String?
+        get() = sp.getString("timezone", null)
+        set(v) = sp.edit(commit = true) { putString("timezone", v) }
+
     var playlistSeed: Long
         get() = sp.getLong("playlist_seed", 0L)
         set(v) = sp.edit { putLong("playlist_seed", v) }
