@@ -1,5 +1,6 @@
 package app.kinframe.frame.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -48,7 +49,21 @@ data class PlacementEntity(
     val evictedAt: Long? = null,
     /** Albums this placement is in, comma-separated ids (album mode plays one album). */
     val albumIds: String? = null,
+    // ---- Live/Motion Photos (README §5.3): the short clip played over the still (`placement.motion`)
+    val motionUrl: String? = null,
+    val motionSha256: String? = null,
+    @ColumnInfo(defaultValue = "0") val motionBytes: Long = 0,
+    val motionMime: String? = null,
+    val motionDurationMs: Long? = null,
+    @ColumnInfo(defaultValue = "0") val motionHasAudio: Boolean = false,
+    /** The clip's file once downloaded; never needed to show the still. */
+    val motionLocalFile: String? = null,
+    @ColumnInfo(defaultValue = "0") val motionAttempts: Int = 0,
+    @ColumnInfo(defaultValue = "0") val motionNextAttemptAt: Long = 0,
 ) {
+    /** A Live/Motion Photo: shown as a photo, its clip plays over it when downloaded. */
+    val isLive: Boolean get() = kind == "live"
+    val hasMotionFile: Boolean get() = isLive && motionLocalFile != null
     val albumIdList: List<String> get() = albumIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     val isVideo: Boolean get() = kind == "video"
     val isDeliverable: Boolean get() = status == "ready" || status == "delivered" || status == "seen"

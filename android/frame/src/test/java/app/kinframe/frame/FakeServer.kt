@@ -26,7 +26,8 @@ class FakeServer : Dispatcher() {
                 failSince[since]?.let { return MockResponse.Builder().code(it).build() }
                 json(pages[since] ?: """{"changes":[],"next_seq":$since,"has_more":false}""")
             }
-            path.contains("/device/media/") -> mediaResponse(request, path.substringAfterLast('/'))
+            // Live photo clips are served as "<id>?motion" (`?variant=motion`).
+            path.contains("/device/media/") -> mediaResponse(request, path.substringAfterLast('/') + if (request.url.queryParameter("variant") == "motion") "?motion" else "")
             path.endsWith("/device/acks") -> MockResponse.Builder().code(204).build()
             path.endsWith("/device/settings") ->
                 if (settingsStatus == 200) json("""{"version":9,"slideshow":{"interval_s":10}}""")

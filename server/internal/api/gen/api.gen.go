@@ -517,6 +517,27 @@ func (e FrameSettingsSlideshowCaptionDate) Valid() bool {
 	}
 }
 
+// Defines values for FrameSettingsSlideshowLivePhotos.
+const (
+	FrameSettingsSlideshowLivePhotosOff FrameSettingsSlideshowLivePhotos = "off"
+	FrameSettingsSlideshowLivePhotosOn  FrameSettingsSlideshowLivePhotos = "on"
+	FrameSettingsSlideshowLivePhotosTap FrameSettingsSlideshowLivePhotos = "tap"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsSlideshowLivePhotos enum.
+func (e FrameSettingsSlideshowLivePhotos) Valid() bool {
+	switch e {
+	case FrameSettingsSlideshowLivePhotosOff:
+		return true
+	case FrameSettingsSlideshowLivePhotosOn:
+		return true
+	case FrameSettingsSlideshowLivePhotosTap:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsSlideshowOrder.
 const (
 	FrameSettingsSlideshowOrderReceived FrameSettingsSlideshowOrder = "received"
@@ -700,6 +721,24 @@ func (e ItemStatus) Valid() bool {
 	}
 }
 
+// Defines values for ItemMotionStatus.
+const (
+	ItemMotionStatusProcessing ItemMotionStatus = "processing"
+	ItemMotionStatusReady      ItemMotionStatus = "ready"
+)
+
+// Valid indicates whether the value is a known member of the ItemMotionStatus enum.
+func (e ItemMotionStatus) Valid() bool {
+	switch e {
+	case ItemMotionStatusProcessing:
+		return true
+	case ItemMotionStatusReady:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for JoinRequestVia.
 const (
 	JoinRequestViaFrameCode JoinRequestVia = "frame_code"
@@ -720,6 +759,7 @@ func (e JoinRequestVia) Valid() bool {
 
 // Defines values for MediaKind.
 const (
+	Live  MediaKind = "live"
 	Photo MediaKind = "photo"
 	Video MediaKind = "video"
 )
@@ -727,6 +767,8 @@ const (
 // Valid indicates whether the value is a known member of the MediaKind enum.
 func (e MediaKind) Valid() bool {
 	switch e {
+	case Live:
+		return true
 	case Photo:
 		return true
 	case Video:
@@ -1669,6 +1711,22 @@ type Change struct {
 			Url       *string `json:"url,omitempty"`
 			Width     *int    `json:"width,omitempty"`
 		} `json:"media,omitempty"`
+
+		// Motion Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+		// clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+		// ignore it and show `media` as a photo.
+		Motion *struct {
+			Bytes      *int  `json:"bytes,omitempty"`
+			DurationMs *int  `json:"duration_ms,omitempty"`
+			HasAudio   *bool `json:"has_audio,omitempty"`
+			Height     *int  `json:"height,omitempty"`
+
+			// Mime Example: video/mp4
+			Mime   *string `json:"mime,omitempty"`
+			Sha256 *string `json:"sha256,omitempty"`
+			Url    *string `json:"url,omitempty"`
+			Width  *int    `json:"width,omitempty"`
+		} `json:"motion,omitempty"`
 		PendingModeration *bool      `json:"pending_moderation,omitempty"`
 		Reaction          *Reaction  `json:"reaction,omitempty"`
 		ReceivedAt        *time.Time `json:"received_at,omitempty"`
@@ -1986,19 +2044,23 @@ type FrameSettings struct {
 	} `json:"notifications,omitempty"`
 	Slideshow *struct {
 		// AlbumId null = all photos
-		AlbumId       *string                            `json:"album_id,omitempty"`
-		Background    *FrameSettingsSlideshowBackground  `json:"background,omitempty"`
-		CaptionDate   *FrameSettingsSlideshowCaptionDate `json:"caption_date,omitempty"`
-		Collage       *bool                              `json:"collage,omitempty"`
-		CollageMax    *int                               `json:"collage_max,omitempty"`
-		Fill          *bool                              `json:"fill,omitempty"`
-		IntervalS     *int                               `json:"interval_s,omitempty"`
-		OnThisDay     *bool                              `json:"on_this_day,omitempty"`
-		Order         *FrameSettingsSlideshowOrder       `json:"order,omitempty"`
-		PairPortraits *bool                              `json:"pair_portraits,omitempty"`
-		Reverse       *bool                              `json:"reverse,omitempty"`
-		Transition    *FrameSettingsSlideshowTransition  `json:"transition,omitempty"`
-		TransitionMs  *int                               `json:"transition_ms,omitempty"`
+		AlbumId     *string                            `json:"album_id,omitempty"`
+		Background  *FrameSettingsSlideshowBackground  `json:"background,omitempty"`
+		CaptionDate *FrameSettingsSlideshowCaptionDate `json:"caption_date,omitempty"`
+		Collage     *bool                              `json:"collage,omitempty"`
+		CollageMax  *int                               `json:"collage_max,omitempty"`
+		Fill        *bool                              `json:"fill,omitempty"`
+		IntervalS   *int                               `json:"interval_s,omitempty"`
+
+		// LivePhotos Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+		// tap, `off` shows the still only.
+		LivePhotos    *FrameSettingsSlideshowLivePhotos `json:"live_photos,omitempty"`
+		OnThisDay     *bool                             `json:"on_this_day,omitempty"`
+		Order         *FrameSettingsSlideshowOrder      `json:"order,omitempty"`
+		PairPortraits *bool                             `json:"pair_portraits,omitempty"`
+		Reverse       *bool                             `json:"reverse,omitempty"`
+		Transition    *FrameSettingsSlideshowTransition `json:"transition,omitempty"`
+		TransitionMs  *int                              `json:"transition_ms,omitempty"`
 	} `json:"slideshow,omitempty"`
 	Updates *struct {
 		// Channel Frame app release channel (beta program). Beta frames get the newest of beta and stable.
@@ -2049,6 +2111,10 @@ type FrameSettingsSlideshowBackground string
 
 // FrameSettingsSlideshowCaptionDate defines model for FrameSettings.Slideshow.CaptionDate.
 type FrameSettingsSlideshowCaptionDate string
+
+// FrameSettingsSlideshowLivePhotos Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+// tap, `off` shows the still only.
+type FrameSettingsSlideshowLivePhotos string
 
 // FrameSettingsSlideshowOrder defines model for FrameSettings.Slideshow.Order.
 type FrameSettingsSlideshowOrder string
@@ -2199,9 +2265,17 @@ type Item struct {
 	Height     *int        `json:"height,omitempty"`
 
 	// Id UUIDv7
-	Id        Id        `json:"id"`
-	Kind      MediaKind `json:"kind"`
-	PlaceName *string   `json:"place_name,omitempty"`
+	Id Id `json:"id"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind MediaKind `json:"kind"`
+
+	// Motion Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
+	// `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
+	Motion    *ItemMotion `json:"motion,omitempty"`
+	PlaceName *string     `json:"place_name,omitempty"`
 
 	// SenderId UUIDv7
 	SenderId   Id         `json:"sender_id"`
@@ -2215,6 +2289,18 @@ type Item struct {
 
 // ItemStatus defines model for Item.Status.
 type ItemStatus string
+
+// ItemMotion defines model for ItemMotion.
+type ItemMotion struct {
+	DurationMs *int             `json:"duration_ms,omitempty"`
+	HasAudio   *bool            `json:"has_audio,omitempty"`
+	Height     *int             `json:"height,omitempty"`
+	Status     ItemMotionStatus `json:"status"`
+	Width      *int             `json:"width,omitempty"`
+}
+
+// ItemMotionStatus defines model for ItemMotion.Status.
+type ItemMotionStatus string
 
 // JoinRequest defines model for JoinRequest.
 type JoinRequest struct {
@@ -2245,7 +2331,9 @@ type Limits struct {
 	TrashRetentionDays *int `json:"trash_retention_days,omitempty"`
 }
 
-// MediaKind defines model for MediaKind.
+// MediaKind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
 type MediaKind string
 
 // Member defines model for Member.
@@ -2477,13 +2565,31 @@ type SendCreate struct {
 	Items    []struct {
 		Caption *string `json:"caption,omitempty"`
 
-		// CapturedAt Client hint used when the file has no metadata.
+		// CapturedAt Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+		// QuickTime) and send it here. Used when the stored file has no capture time.
 		CapturedAt *time.Time `json:"captured_at,omitempty"`
-		Fit        *Fit       `json:"fit,omitempty"`
+
+		// DurationMs Prepared videos only. Duration the client produced (±500 ms).
+		DurationMs *int `json:"duration_ms,omitempty"`
+		Fit        *Fit `json:"fit,omitempty"`
 
 		// FocalPoint Relative to the master rendition, 0..1 from top-left.
-		FocalPoint   *FocalPoint `json:"focal_point,omitempty"`
-		IncludeAudio *bool       `json:"include_audio,omitempty"`
+		FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+
+		// Height Prepared uploads only. Pixel height the client produced.
+		Height *int `json:"height,omitempty"`
+
+		// IncludeAudio For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+		IncludeAudio *bool `json:"include_audio,omitempty"`
+
+		// Live `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
+		// still only. Without `live_video_upload_id`, the server splits such files itself.
+		Live *bool `json:"live,omitempty"`
+
+		// LiveVideoUploadId Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+		// are cut). `upload_id` must be a photo and `trim` is not allowed. The clip may be a prepared
+		// `video-master-v1`.
+		LiveVideoUploadId *string `json:"live_video_upload_id,omitempty"`
 
 		// Trim Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
 		Trim *struct {
@@ -2493,6 +2599,9 @@ type SendCreate struct {
 
 		// UploadId tus upload id
 		UploadId string `json:"upload_id"`
+
+		// Width Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
+		Width *int `json:"width,omitempty"`
 	} `json:"items"`
 }
 
@@ -8352,9 +8461,20 @@ type OperatorStatsResponseObject interface {
 }
 
 type OperatorStats200JSONResponse struct {
-	Frames          *int `json:"frames,omitempty"`
-	FramesOnline    *int `json:"frames_online,omitempty"`
-	Items           *int `json:"items,omitempty"`
+	Frames       *int `json:"frames,omitempty"`
+	FramesOnline *int `json:"frames_online,omitempty"`
+	Items        *int `json:"items,omitempty"`
+
+	// MediaPipeline How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+	// `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+	// upload that did not conform and was transcoded). `reused_renditions` counts frame video
+	// renditions served from the master's bytes instead of a transcode.
+	MediaPipeline *struct {
+		Fallback         *int `json:"fallback,omitempty"`
+		Prepared         *int `json:"prepared,omitempty"`
+		ReusedRenditions *int `json:"reused_renditions,omitempty"`
+		Transcoded       *int `json:"transcoded,omitempty"`
+	} `json:"media_pipeline,omitempty"`
 	ProcessingQueue *int `json:"processing_queue,omitempty"`
 	StorageBytes    *int `json:"storage_bytes,omitempty"`
 	Users           *int `json:"users,omitempty"`

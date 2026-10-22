@@ -201,7 +201,11 @@ fun SlideshowScreen(c: FrameController) {
                 .fillMaxSize()
                 .pointerInputTaps(
                     onTap = { pos ->
-                        if (!menuOpen) ss.selectAt(pos.x / wPx, pos.y / hPx)
+                        if (!menuOpen) {
+                            ss.selectAt(pos.x / wPx, pos.y / hPx)
+                            // A live photo plays its clip again; the menu opens as usual.
+                            ss.replayLive()
+                        }
                         menuOpen = !menuOpen; menuTouch = System.currentTimeMillis()
                     },
                     onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
@@ -277,6 +281,7 @@ fun SlideshowScreen(c: FrameController) {
             )
         }
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
+        LiveMark(c, hidden = menuOpen, Modifier.align(Alignment.TopEnd))
         VolumePill(c, Modifier.align(Alignment.BottomCenter).padding(bottom = 48.dp))
         Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             StatusArea(c, hidden = menuOpen || joinCard)
@@ -403,7 +408,7 @@ private fun VideoLayer(c: FrameController, slide: Slide, wPx: Int, hPx: Int) {
     val video by c.slideshow.video.collectAsState()
     val v = video
     if (v == null || v.placementId != p.id) return
-    val alpha by animateFloatAsState(if (v.visible) 1f else 0f, tween(250), label = "video")
+    val alpha by animateFloatAsState(if (v.visible) 1f else 0f, tween(if (v.live) SlideshowController.LIVE_FADE_MS.toInt() else 250), label = "video")
     val settings by c.g.settings.settings.collectAsState()
     val vw = p.width ?: wPx
     val vh = p.height ?: hPx
@@ -491,6 +496,30 @@ private fun VolumePill(c: FrameController, modifier: Modifier) {
             }
             Text("$pct%", style = Kin.type.label, color = Color.White, modifier = Modifier.padding(start = 14.dp))
         }
+    }
+}
+
+/** The small "Live" mark on a live photo while its still shows (hidden while the clip plays). */
+@Composable
+private fun LiveMark(c: FrameController, hidden: Boolean, modifier: Modifier) {
+    val mark by c.slideshow.liveMark.collectAsState()
+    val m = mark
+    AnimatedVisibility(m != null && !hidden, modifier.padding(24.dp), enter = fadeIn(), exit = fadeOut()) {
+        LiveMarkContent(tapHint = m == true)
+    }
+}
+
+@Composable
+internal fun LiveMarkContent(tapHint: Boolean) {
+    Row(
+        Modifier.clip(CircleShape).background(Color.Black.copy(alpha = 0.45f)).padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        KinIcon(KinIcons.Play, null, tint = Color.White, size = 18.dp)
+        Text(
+            stringResource(if (tapHint) R.string.live_tap_hint else R.string.live_badge), style = Kin.type.label, color = Color.White,
+            modifier = Modifier.padding(start = 8.dp),
+        )
     }
 }
 

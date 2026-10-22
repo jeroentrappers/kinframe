@@ -49,7 +49,16 @@ data class SlideshowSettings(
     val collageMax: Int = 3,
     val albumId: String? = null,
     val onThisDay: Boolean = false,
+    /** Live/Motion Photos: [LivePhotos.ON] (play once when shown, and on tap), [LivePhotos.TAP] or [LivePhotos.OFF]. */
+    val livePhotos: String = LivePhotos.ON,
 )
+
+object LivePhotos {
+    const val ON = "on"
+    const val TAP = "tap"
+    const val OFF = "off"
+    val all = listOf(ON, TAP, OFF)
+}
 
 @Serializable
 data class WidgetSettings(

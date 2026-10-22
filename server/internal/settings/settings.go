@@ -27,6 +27,7 @@ func Defaults(language, timezone string) Doc {
 			"interval_s": 30, "transition": "crossfade", "transition_ms": 800, "order": "received",
 			"reverse": false, "caption_date": "received", "fill": true, "background": "blur",
 			"pair_portraits": true, "collage": false, "collage_max": 3, "album_id": nil, "on_this_day": false,
+			"live_photos": "on",
 		},
 		"widgets": map[string]any{
 			"caption": true, "avatar": true, "clock": true, "date": true, "weather": false, "clock_24h": true,

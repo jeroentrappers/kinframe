@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"sort"
@@ -145,6 +146,21 @@ type preparedItem struct {
 	focalY  *float64
 	fit     *string
 	hint    *time.Time
+	decl    media.Declared
+	// audioExplicit: include_audio was sent as true (live clips are muted otherwise).
+	audioExplicit bool
+	// motion is the clip of a live item: a separate upload, or split out of a
+	// Motion Photo (motionPath set, upload nil).
+	motion *preparedMotion
+}
+
+// preparedMotion is the motion clip of a live item.
+type preparedMotion struct {
+	upload *store.Upload
+	path   string
+	mime   string
+	reuse  *uuid.UUID // motion media of a reused item
+	split  bool       // extracted from the still's file by the server
 }
 
 // sendTargets validates that the caller may send to every frame.
@@ -184,8 +200,15 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 		first.WithField(fmt.Sprintf("items.%d.%s", i, field), string(code))
 	}
 	usedUploads := map[string]bool{}
+	explicitAudio := rawIncludeAudio(ctx)
 	for i, it := range body.Items {
-		p := preparedItem{caption: it.Caption, hint: it.CapturedAt, audio: it.IncludeAudio == nil || *it.IncludeAudio}
+		p := preparedItem{caption: it.Caption, hint: it.CapturedAt, audio: it.IncludeAudio == nil || *it.IncludeAudio,
+			decl: media.Declared{Width: it.Width, Height: it.Height, DurationMS: it.DurationMs}, audioExplicit: explicitAudio[i]}
+		wantLive := it.Live == nil || *it.Live
+		if it.LiveVideoUploadId != nil && !wantLive {
+			fail(i, problem.ValidationFailed, "live", "live is false but a live video was given")
+			continue
+		}
 		if p.caption != nil && *p.caption == "" {
 			p.caption = nil
 		}
@@ -210,6 +233,16 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 				}
 				p.reuse = row
 				p.kind = media.Kind(row.Kind)
+				if it.LiveVideoUploadId != nil {
+					m, err := s.liveUpload(ctx, *it.LiveVideoUploadId, usedUploads)
+					if err != nil {
+						fail(i, err.code, "live_video_upload_id", err.detail)
+						continue
+					}
+					p.motion = m
+				} else if wantLive && row.IsLive() {
+					p.motion = &preparedMotion{reuse: row.MotionMediaID}
+				}
 				out[i] = p
 				continue
 			}
@@ -226,6 +259,28 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 			continue
 		}
 		p.kind, p.mime = kind, mime
+		if it.LiveVideoUploadId != nil {
+			if kind != media.Photo {
+				fail(i, problem.ValidationFailed, "live_video_upload_id", "the still of a live photo must be a photo")
+				continue
+			}
+			m, err := s.liveUpload(ctx, *it.LiveVideoUploadId, usedUploads)
+			if err != nil {
+				fail(i, err.code, "live_video_upload_id", err.detail)
+				continue
+			}
+			p.motion = m
+		} else if kind == media.Photo && wantLive {
+			// An Android Motion Photo: the still carries its clip; split it out.
+			if r, ok, err := media.FindMotionVideo(p.path); err != nil {
+				return nil, err
+			} else if ok {
+				p.motion = &preparedMotion{path: p.path + ".motion.mp4", mime: "video/mp4", split: true}
+				if err := media.ExtractRange(p.path, r, p.motion.path); err != nil {
+					return nil, err
+				}
+			}
+		}
 		if kind == media.Video {
 			info, err := s.tools.ProbeVideo(ctx, p.path)
 			if err != nil {
@@ -263,6 +318,52 @@ func (s *Server) prepareItems(ctx context.Context, body *gen.CreateSendJSONReque
 		return nil, first
 	}
 	return out, nil
+}
+
+// rawIncludeAudio reports, per item, whether include_audio was sent as true.
+// Request validation fills in the schema default (true), so the decoded body
+// can't tell; live clips are muted unless the sender asked for audio.
+func rawIncludeAudio(ctx context.Context) map[int]bool {
+	raw, _ := ctx.Value(rawBodyKey).([]byte)
+	var b struct {
+		Items []struct {
+			IncludeAudio *bool `json:"include_audio"`
+		} `json:"items"`
+	}
+	out := map[int]bool{}
+	if json.Unmarshal(raw, &b) != nil {
+		return out
+	}
+	for i, it := range b.Items {
+		out[i] = it.IncludeAudio != nil && *it.IncludeAudio
+	}
+	return out
+}
+
+type uploadProblem struct {
+	code   problem.Code
+	detail string
+}
+
+// liveUpload validates the motion clip upload of a live item.
+func (s *Server) liveUpload(ctx context.Context, id string, used map[string]bool) (*preparedMotion, *uploadProblem) {
+	if used[id] {
+		return nil, &uploadProblem{problem.ValidationFailed, "the same upload appears twice"}
+	}
+	used[id] = true
+	up, err := s.st.GetUpload(ctx, s.st.Q(), id)
+	if err != nil || up.UserID != me(ctx).ID || up.CompletedAt == nil || up.ConsumedAt != nil {
+		return nil, &uploadProblem{problem.UploadNotFound, "upload not found, incomplete or already used"}
+	}
+	path := s.uploadPath(up.ID)
+	kind, mime, err := media.Sniff(path)
+	if err != nil || kind != media.Video {
+		return nil, &uploadProblem{problem.UnsupportedMedia, "the motion of a live photo must be a video"}
+	}
+	if _, err := s.tools.ProbeVideo(ctx, path); err != nil {
+		return nil, &uploadProblem{problem.CorruptMedia, "this video could not be read"}
+	}
+	return &preparedMotion{upload: up, path: path, mime: mime}, nil
 }
 
 type sendRef struct {
@@ -319,19 +420,28 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 				}
 				mediaID = store.NewID()
 				path, mime := p.path, p.mime
-				if err := tx.CreateMedia(ctx, store.Media{
+				md := store.Media{
 					ID: mediaID, OwnerUserID: &u.ID, Kind: string(p.kind), SourcePath: &path, SourceMime: &mime,
 					TrimStartMS: p.trimS, TrimEndMS: p.trimE, IncludeAudio: p.audio, DurationMS: p.durMS,
-				}); err != nil {
+					Prepared: p.upload.Prepared, DeclaredWidth: p.decl.Width, DeclaredHeight: p.decl.Height,
+				}
+				if p.kind == media.Video {
+					md.DeclaredDurationMS = p.decl.DurationMS
+				}
+				if err := tx.CreateMedia(ctx, md); err != nil {
 					return err
 				}
 				if err := tx.Enqueue(ctx, store.JobProcessMedia, map[string]any{"media_id": mediaID}); err != nil {
 					return err
 				}
 			}
+			motionID, err := s.createMotion(ctx, tx, i, p)
+			if err != nil {
+				return err
+			}
 			if err := tx.CreateItem(ctx, store.Item{
 				ID: itemID, MediaID: mediaID, SenderUserID: &u.ID, Caption: p.caption,
-				FocalX: p.focalX, FocalY: p.focalY, Fit: p.fit, CapturedHint: p.hint,
+				FocalX: p.focalX, FocalY: p.focalY, Fit: p.fit, CapturedHint: p.hint, MotionMediaID: motionID,
 			}); err != nil {
 				return err
 			}
@@ -344,6 +454,11 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 				}
 				if err := tx.Enqueue(ctx, store.JobEnsureRenditions, map[string]any{"media_id": mediaID}); err != nil {
 					return err
+				}
+				if p.motion != nil && p.motion.reuse != nil {
+					if err := tx.Enqueue(ctx, store.JobEnsureRenditions, map[string]any{"media_id": *p.motion.reuse}); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -373,6 +488,47 @@ func (s *Server) CreateSend(ctx context.Context, req gen.CreateSendRequestObject
 		return nil, err
 	}
 	return accepted(sd), nil
+}
+
+// createMotion creates (or reuses) the motion media of a live item. The clip is
+// muted unless the sender asked for audio explicitly.
+func (s *Server) createMotion(ctx context.Context, tx *store.Tx, i int, p preparedItem) (*uuid.UUID, error) {
+	m := p.motion
+	if m == nil {
+		return nil, nil
+	}
+	if m.reuse != nil {
+		return m.reuse, nil
+	}
+	var prepared *string
+	if m.upload != nil {
+		ok, err := tx.ConsumeUpload(ctx, m.upload.ID, me(ctx).ID)
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, problem.New(problem.UploadNotFound, "upload already used").WithField(fmt.Sprintf("items.%d.live_video_upload_id", i), "upload_not_found")
+		}
+		prepared = m.upload.Prepared
+	}
+	if m.split {
+		// Clips inside Motion Photos are usually camera H.264 already: try the
+		// verified fast path (it falls back to the transcode when they don't conform).
+		v := media.PreparedVideoV1
+		prepared = &v
+	}
+	id := store.NewID()
+	path, mime := m.path, m.mime
+	if err := tx.CreateMedia(ctx, store.Media{
+		ID: id, OwnerUserID: &me(ctx).ID, Kind: string(media.Video), SourcePath: &path, SourceMime: &mime,
+		IncludeAudio: p.audioExplicit, Motion: true, Prepared: prepared,
+	}); err != nil {
+		return nil, err
+	}
+	if err := tx.Enqueue(ctx, store.JobProcessMedia, map[string]any{"media_id": id}); err != nil {
+		return nil, err
+	}
+	return &id, nil
 }
 
 // placeItems creates placements of items on frames (skipping ones already there).
@@ -493,6 +649,9 @@ func (s *Server) ForwardSend(ctx context.Context, req gen.ForwardSendRequestObje
 		for _, r := range rows {
 			itemIDs = append(itemIDs, r.ItemID)
 			medias[r.MediaID] = true
+			if r.MotionMediaID != nil {
+				medias[*r.MotionMediaID] = true
+			}
 		}
 		if err := s.placeItems(ctx, tx, req.SendId, itemIDs, frames, members); err != nil {
 			return err
@@ -628,6 +787,10 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 		key = it.MasterKey
 	case "poster":
 		key = it.PosterKey
+	case "motion":
+		if it.IsLive() {
+			key = it.MotionMasterKey
+		}
 	default:
 		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return

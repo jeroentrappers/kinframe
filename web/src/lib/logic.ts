@@ -264,7 +264,7 @@ export function newIdempotencyKey(): string {
 // ------------------------------------------------------------------ send view model
 
 interface SendLike {
-	items: { id: string; status: 'processing' | 'ready' | 'failed'; kind: 'photo' | 'video' }[];
+	items: { id: string; status: 'processing' | 'ready' | 'failed'; kind: 'photo' | 'video' | 'live' }[];
 	frames: {
 		frame_id: string;
 		frame_name: string;
@@ -323,7 +323,7 @@ export function applyPlacementEvent(
 	return false;
 }
 
-export function kindCounts(items: { kind: 'photo' | 'video' }[]): { photos: number; videos: number } {
+export function kindCounts(items: { kind: 'photo' | 'video' | 'live' }[]): { photos: number; videos: number } {
 	let photos = 0;
 	let videos = 0;
 	for (const i of items) i.kind === 'video' ? videos++ : photos++;

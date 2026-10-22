@@ -336,9 +336,13 @@ func (s *Server) OperatorStats(ctx context.Context, _ gen.OperatorStatsRequestOb
 	if err != nil {
 		return nil, err
 	}
+	pipeline, err := s.st.PipelineStats(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return ok(map[string]any{
 		"users": users, "frames": frames, "frames_online": s.hub.OnlineFrames(), "items": items,
-		"storage_bytes": storage, "processing_queue": queue,
+		"storage_bytes": storage, "processing_queue": queue, "media_pipeline": pipeline,
 	}), nil
 }
 
