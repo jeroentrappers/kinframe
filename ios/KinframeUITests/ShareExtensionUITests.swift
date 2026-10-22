@@ -33,6 +33,22 @@ final class ShareExtensionUITests: XCTestCase {
         sleep(10)
     }
 
+    /// Remote settings: flip "Reverse the order" and save (a merge patch with If-Match). KF_FRAME_ID picks the frame.
+    func testFrameSettingsSave() throws {
+        let id = try XCTUnwrap(ProcessInfo.processInfo.environment["KF_FRAME_ID"], "set TEST_RUNNER_KF_FRAME_ID")
+        let app = XCUIApplication()
+        app.launchArguments = ["-kfLanguage", "en", "-kfFrame", id, "-kfSection", "settings"]
+        app.launch()
+        let toggle = app.switches["Reverse the order"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 15))
+        toggle.switches.firstMatch.exists ? toggle.switches.firstMatch.tap() : toggle.tap()
+        let save = app.buttons["Save"]
+        XCTAssertTrue(save.waitForExistence(timeout: 5))
+        save.tap()
+        XCTAssertTrue(save.waitForNonExistence(timeout: 10), "the save bar goes away once saved")
+        attach(app, "settings-saved")
+    }
+
     /// Exploratory: Photos → Share → kinframe. Taps by position because the extension's scene isn't inspectable.
     func testShareFromPhotosApp() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["KF_PHOTOS"] != nil, "set TEST_RUNNER_KF_PHOTOS=1 to run")

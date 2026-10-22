@@ -71,6 +71,10 @@ struct APIMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var request = request
         request.headerFields[.acceptLanguage] = L10n.code
+        // The generator percent-encodes header parameters; If-Match must reach the server as a quoted version ("7").
+        if let ifMatch = request.headerFields[.ifMatch], let decoded = ifMatch.removingPercentEncoding {
+            request.headerFields[.ifMatch] = decoded
+        }
         let anonymous = operationID == "getDiscovery" || operationID == "devToken"
         if !anonymous, let token = try await tokens.accessToken() {
             request.headerFields[.authorization] = "Bearer \(token)"
