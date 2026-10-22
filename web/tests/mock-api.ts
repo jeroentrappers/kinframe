@@ -59,6 +59,8 @@ export interface MockState {
 	calendars: Record<string, S['CalendarSource'][]>;
 	calendarViews: Record<string, S['CalendarView']>;
 	eventInvitations: Record<string, S['EventInvitation'][]>;
+	/** Shop reservations (README §5.10); only reachable when discovery has a shop. */
+	reservations: S['ShopReservation'][];
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -94,8 +96,44 @@ export function emptyState(): MockState {
 		calendars: {},
 		calendarViews: {},
 		eventInvitations: {},
+		reservations: [],
 		calls: [],
 		ws: null
+	};
+}
+
+/** A shop like the hosted instance's (placeholder seller). Assign to `state.discovery.shop` to enable it. */
+export function shopFixture(): S['Shop'] {
+	return {
+		brand: 'kinframe',
+		currency: 'EUR',
+		vat_percent: 21,
+		products: [
+			{
+				id: 'frame-10',
+				name: 'kinframe 10.1"',
+				size: '10.1"',
+				price_cents: 7900,
+				max_qty: 5,
+				image: 'frame-10',
+				specs: {
+					en: ['1280×800 IPS touchscreen', 'Wi-Fi', 'kinframe preinstalled'],
+					nl: ['1280×800 IPS-touchscreen', 'Wifi', 'kinframe vooraf geïnstalleerd']
+				}
+			},
+			{
+				id: 'frame-15',
+				name: 'kinframe 15.6"',
+				size: '15.6"',
+				price_cents: 15900,
+				max_qty: 5,
+				image: 'frame-15',
+				specs: { en: ['Full HD 1920×1080 IPS touchscreen', 'Wi-Fi', 'kinframe preinstalled'] }
+			}
+		],
+		shipping: { countries: ['BE', 'NL'], flat_cents: 695, free_from_cents: 10000 },
+		estimated_delivery: { en: 'early 2027', nl: 'begin 2027', fr: 'début 2027' },
+		seller: { name: 'Example BV', email: 'shop@example.org', legal: 'Example BV · VAT BE0123.456.789' }
 	};
 }
 
@@ -236,6 +274,61 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			return problem(route, 404, 'not_found', 'This TV link is not valid');
 		}
 
+		// ---- public: shop reservations (no sign-in)
+		if (path === '/v1/shop/reservations' && method === 'POST') {
+			const shop = state.discovery.shop;
+			if (!shop) return problem(route, 404, 'not_found', 'Not found');
+			const b = body as S['ShopReservationCreate'];
+			const errors: { field: string; code: string }[] = [];
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/.test(b.email)) errors.push({ field: 'email', code: 'format' });
+			if (!shop.shipping.countries.includes(b.country)) errors.push({ field: 'country', code: 'enum' });
+			if (!b.consent) errors.push({ field: 'consent', code: 'required' });
+			if (!b.items.length) errors.push({ field: 'items', code: 'minItems' });
+			if (errors.length)
+				return route.fulfill({
+					status: 422,
+					contentType: 'application/problem+json',
+					body: JSON.stringify({ type: 'x', title: 'Validation failed', status: 422, code: 'validation_failed', errors })
+				});
+			const items = b.items.map((it) => {
+				const p = shop.products.find((x) => x.id === it.product_id)!;
+				return { product_id: p.id, name: p.name, quantity: it.quantity, unit_cents: p.price_cents, line_cents: p.price_cents * it.quantity };
+			});
+			const sub = items.reduce((a, l) => a + l.line_cents, 0);
+			const ship = shop.shipping.free_from_cents != null && sub >= shop.shipping.free_from_cents ? 0 : shop.shipping.flat_cents;
+			const r: S['ShopReservation'] = {
+				id: uid('r'),
+				reference: `KF-${String(state.reservations.length + 1).padStart(2, '0')}QM`,
+				status: 'new',
+				name: b.name,
+				email: b.email,
+				country: b.country,
+				postal_code: b.postal_code ?? null,
+				note: b.note ?? null,
+				locale: b.locale ?? 'en',
+				items,
+				subtotal_cents: sub,
+				shipping_cents: ship,
+				total_cents: sub + ship,
+				currency: shop.currency,
+				internal_note: null,
+				created_at: new Date().toISOString(),
+				updated_at: new Date().toISOString(),
+				cancelled_at: null
+			};
+			if (!b.website) state.reservations.unshift(r);
+			const { reference, status, email, subtotal_cents, shipping_cents, total_cents, currency } = r;
+			return json(route, 201, { reference, status, email, items, subtotal_cents, shipping_cents, total_cents, currency });
+		}
+		if (path === '/v1/shop/reservations/cancel' && method === 'POST') {
+			const token = (body as { token: string }).token;
+			const r = state.reservations.find((x) => `tok-${x.reference}` === token);
+			if (!state.discovery.shop || !r) return problem(route, 404, 'not_found', 'Not found');
+			r.status = 'cancelled';
+			r.cancelled_at = new Date().toISOString();
+			return json(route, 200, { reference: r.reference, status: r.status });
+		}
+
 		if (!req.headers()['authorization']?.startsWith('Bearer ') && !path.startsWith('/v1/uploads/'))
 			return problem(route, 401, 'unauthorized', 'Unauthorized');
 
@@ -256,6 +349,23 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		if ((m = path.match(/^\/v1\/me\/push-endpoints\/([^/]+)$/)) && method === 'DELETE') {
 			state.pushEndpoints = state.pushEndpoints.filter((e) => e.id !== m![1]);
 			return route.fulfill({ status: 204 });
+		}
+
+		// ---- operator: shop reservations
+		if (path === '/v1/operator/reservations' && method === 'GET') {
+			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
+			const st = url.searchParams.get('status');
+			return json(route, 200, { reservations: state.reservations.filter((r) => !st || r.status === st) });
+		}
+		if (path === '/v1/operator/reservations.csv' && method === 'GET') {
+			const rows = state.reservations.map((r) => `${r.reference},${r.status},${r.email}`);
+			return route.fulfill({ status: 200, contentType: 'text/csv', body: ['reference,status,email', ...rows].join('\n') });
+		}
+		if ((m = path.match(/^\/v1\/operator\/reservations\/([^/]+)$/)) && method === 'PATCH') {
+			const r = state.reservations.find((x) => x.id === m![1]);
+			if (!r) return problem(route, 404, 'not_found', 'Not found');
+			Object.assign(r, body, { updated_at: new Date().toISOString() });
+			return json(route, 200, r);
 		}
 
 		// ---- geocode

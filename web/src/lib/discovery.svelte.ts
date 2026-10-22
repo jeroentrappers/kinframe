@@ -26,6 +26,16 @@ class DiscoveryState {
 		return { ...DEFAULT_LIMITS, ...(this.doc?.limits ?? {}) };
 	}
 
+	/** The operator's pre-order shop, or null (the default: open-source servers have no shop). */
+	get shop() {
+		return this.doc?.shop ?? null;
+	}
+
+	/** Consumer brand for shop texts; the server name when the shop doesn't set one. */
+	get brand() {
+		return this.doc?.shop?.brand || this.name;
+	}
+
 	/** Logto is usable when the server published an issuer and a web client id. */
 	get logtoConfigured() {
 		return Boolean(this.doc?.auth?.issuer && this.doc?.auth?.web_client_id);
