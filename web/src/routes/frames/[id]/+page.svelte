@@ -139,7 +139,7 @@
 			{:else if tab === 'library'}
 				<FrameLibrary {frame} />
 			{:else if tab === 'people'}
-				<FramePeople {frame} manage={canManage(frame)} />
+				<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
 			{:else if tab === 'settings'}
 				<FrameSettingsForm {frame} />
 			{/if}
