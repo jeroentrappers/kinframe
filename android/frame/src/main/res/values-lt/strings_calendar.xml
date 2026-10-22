@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Šiandien</string>
+    <string name="calendar_tomorrow">Rytoj</string>
+    <string name="calendar_view_month">Mėnuo</string>
+    <string name="calendar_view_week">Savaitė</string>
+    <string name="calendar_view_four_day">4 dienos</string>
+    <string name="calendar_week_number">%1$d savaitė</string>
+    <string name="calendar_previous">Ankstesnis</string>
+    <string name="calendar_next">Kitas</string>
+    <string name="calendar_sync_now">Sinchronizuoti dabar</string>
+    <string name="calendar_syncing">Sinchronizuojama…</string>
+    <string name="calendar_close">Uždaryti kalendorių</string>
+    <string name="calendar_all_day">Visą dieną</string>
+    <string name="calendar_received">Gauti įvykiai</string>
+    <string name="calendar_nothing">Nieko nesuplanuota</string>
+    <string name="calendar_nothing_today">Šiandien daugiau nieko nesuplanuota</string>
+    <string name="calendar_empty_title">Kalendorių dar nėra</string>
+    <string name="calendar_empty_body">Pridėkite šeimos kalendorių per kinframe programėlę ar svetainę, rėmelio skiltyje „Kalendoriai“. Čia kartu galima rodyti kiek norite kalendorių.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">iki %1$s</string>
+    <string name="calendar_from">nuo %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">dar %d</item>
+        <item quantity="few">dar %d</item>
+        <item quantity="many">dar %d</item>
+        <item quantity="other">dar %d</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Šiandien</string>
+    <string name="countdown_tomorrow">Rytoj</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d diena</item>
+        <item quantity="few">%d dienos</item>
+        <item quantity="many">%d dienos</item>
+        <item quantity="other">%d dienų</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">po %d dienos</item>
+        <item quantity="few">po %d dienų</item>
+        <item quantity="many">po %d dienos</item>
+        <item quantity="other">po %d dienų</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Siuntėjas: %1$s</string>
+    <string name="event_repeats">Kartojasi</string>
+    <string name="event_countdown">Skaičiuoti dienas iki šio įvykio</string>
+    <string name="event_countdown_hint">Skaidrių peržiūroje ir kalendoriaus viršuje</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s jums atsiuntė įvykį</string>
+    <string name="invitation_body">Pridėti jį į šio rėmelio kalendorių?</string>
+    <string name="invitation_accept">Pridėti į kalendorių</string>
+    <string name="invitation_decline">Atmesti</string>
+    <string name="invitation_later">Ne dabar</string>
+    <string name="invitation_pill_one">%1$s atsiuntė įvykį</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d kvietimas į įvykį</item>
+        <item quantity="few">%d kvietimai į įvykius</item>
+        <item quantity="many">%d kvietimo į įvykius</item>
+        <item quantity="other">%d kvietimų į įvykius</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Kalendorius</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Kalendorius</string>
+    <string name="settings_calendar_open">Atidaryti kalendorių</string>
+    <string name="settings_calendar_view">Kalendoriaus rodinys</string>
+    <string name="settings_calendar_start_today">Pradėti nuo šiandienos</string>
+    <string name="settings_calendar_fade_past">Blankinti praėjusius įvykius</string>
+    <string name="settings_calendar_week_numbers">Savaičių numeriai</string>
+    <string name="settings_calendar_sidebar">Kalendorius šalia nuotraukų</string>
+    <string name="settings_calendar_countdowns">Atgalinis skaičiavimas skaidrių peržiūroje</string>
+    <string name="settings_calendar_timed">Rodyti kalendorių nustatytu laiku</string>
+    <string name="settings_calendar_timed_from">Nuo</string>
+    <string name="settings_calendar_timed_to">Iki</string>
+    <string name="settings_calendar_timed_add">Pridėti laiką</string>
+    <string name="settings_calendar_timed_remove">Pašalinti</string>
+    <string name="settings_calendar_sources">Kalendoriai šiame rėmelyje</string>
+    <string name="settings_calendar_sources_hint">Kalendoriai pridedami ir tvarkomi per kinframe programėlę ar svetainę.</string>
+    <string name="calendar_status_ok">Atnaujinta</string>
+    <string name="calendar_status_syncing">Sinchronizuojama…</string>
+    <string name="calendar_status_failed">Nepavyko sinchronizuoti</string>
+    <string name="calendar_status_auth_failed">Reikia prisijungti</string>
+    <string name="calendar_status_disabled">Išjungta</string>
+</resources>

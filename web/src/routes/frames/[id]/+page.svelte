@@ -13,8 +13,10 @@
 	import FrameLibrary from '$components/frame/FrameLibrary.svelte';
 	import FramePeople from '$components/frame/FramePeople.svelte';
 	import FrameSettingsForm from '$components/frame/FrameSettingsForm.svelte';
+	import FrameCalendar from '$components/frame/calendar/FrameCalendar.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 
-	type Tab = 'overview' | 'library' | 'people' | 'settings';
+	type Tab = 'overview' | 'library' | 'people' | 'calendar' | 'settings';
 
 	let frame = $state<Frame | null>(null);
 	let error = $state<unknown>(null);
@@ -51,6 +53,8 @@
 			{ id: 'library', label: 'frame.tabLibrary', icon: 'image' },
 			{ id: 'people', label: 'frame.tabPeople', icon: 'users' }
 		];
+		if (discovery.doc?.calendar && (can(frame, 'change_settings') || can(frame, 'send')))
+			list.push({ id: 'calendar', label: 'frame.tabCalendar', icon: 'calendar' });
 		if (can(frame, 'change_settings')) list.push({ id: 'settings', label: 'frame.tabSettings', icon: 'settings' });
 		return list;
 	});
@@ -143,6 +147,8 @@
 				<FrameLibrary {frame} />
 			{:else if tab === 'people'}
 				<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
+			{:else if tab === 'calendar'}
+				<FrameCalendar {frame} />
 			{:else if tab === 'settings'}
 				<FrameSettingsForm {frame} />
 			{/if}
@@ -195,7 +201,8 @@
 			display: none;
 		}
 		.tabs button {
-			padding: 0 10px; /* long labels (German, Russian) still fit on a phone */
+			padding: 0 9px; /* six tabs: long labels (German, Russian) still fit on a phone */
+			font-size: 0.88rem;
 		}
 	}
 	.panel {

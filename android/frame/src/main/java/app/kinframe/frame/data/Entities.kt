@@ -1,5 +1,6 @@
 package app.kinframe.frame.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -48,9 +49,23 @@ data class PlacementEntity(
     val evictedAt: Long? = null,
     /** Albums this placement is in, comma-separated ids (album mode plays one album). */
     val albumIds: String? = null,
+    // ---- Live/Motion Photos (README §5.3): the short clip played over the still (`placement.motion`)
+    val motionUrl: String? = null,
+    val motionSha256: String? = null,
+    @ColumnInfo(defaultValue = "0") val motionBytes: Long = 0,
+    val motionMime: String? = null,
+    val motionDurationMs: Long? = null,
+    @ColumnInfo(defaultValue = "0") val motionHasAudio: Boolean = false,
+    /** The clip's file once downloaded; never needed to show the still. */
+    val motionLocalFile: String? = null,
+    @ColumnInfo(defaultValue = "0") val motionAttempts: Int = 0,
+    @ColumnInfo(defaultValue = "0") val motionNextAttemptAt: Long = 0,
     /** The member who shared this photo here from another frame; the caption reads "sender · shared by X". */
     val sharedByName: String? = null,
 ) {
+    /** A Live/Motion Photo: shown as a photo, its clip plays over it when downloaded. */
+    val isLive: Boolean get() = kind == "live"
+    val hasMotionFile: Boolean get() = isLive && motionLocalFile != null
     val albumIdList: List<String> get() = albumIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     val isVideo: Boolean get() = kind == "video"
     val isDeliverable: Boolean get() = status == "ready" || status == "delivered" || status == "seen"
@@ -75,6 +90,8 @@ data class SyncStateEntity(
     val frameLocation: String? = null,
     val ownerName: String? = null,
     val weatherJson: String? = null,
+    /** Last `calendar` change (`FrameCalendar`), so the calendar shows after a reboot while offline. */
+    val calendarJson: String? = null,
 )
 
 /** Durable ack queue (README §5.4): delivered when stored, seen on first display. */
@@ -109,5 +126,9 @@ data class OutboxEntity(
         const val REPLY = "reply"
         /** Allow/deny of a join request; `placementId` holds the request id. */
         const val JOIN_DECISION = "join_decision"
+        /** Accept/decline of an event invitation; `placementId` holds the invitation id. */
+        const val INVITATION_DECISION = "invitation_decision"
+        /** Countdown on/off for a calendar event; `placementId` holds the event id. */
+        const val COUNTDOWN = "countdown"
     }
 }

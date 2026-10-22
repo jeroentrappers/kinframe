@@ -20,8 +20,10 @@ import (
 type placeItem struct {
 	ItemID  uuid.UUID
 	MediaID uuid.UUID
-	SendID  *uuid.UUID
-	Source  uuid.UUID
+	// MotionMediaID is the clip of a Live/Motion Photo, which needs a rendition for the target too.
+	MotionMediaID *uuid.UUID
+	SendID        *uuid.UUID
+	Source        uuid.UUID
 }
 
 type placed struct {
@@ -29,6 +31,7 @@ type placed struct {
 	FrameID     uuid.UUID
 	ItemID      uuid.UUID
 	MediaID     uuid.UUID
+	MotionID    *uuid.UUID
 	SendID      *uuid.UUID
 }
 
@@ -81,7 +84,7 @@ func (s *Server) placeOnFrames(ctx context.Context, tx *store.Tx, items []placeI
 			if err := tx.CreatePlacement(ctx, p); err != nil {
 				return nil, nil, err
 			}
-			created = append(created, placed{PlacementID: p.ID, FrameID: fid, ItemID: it.ItemID, MediaID: it.MediaID, SendID: it.SendID})
+			created = append(created, placed{PlacementID: p.ID, FrameID: fid, ItemID: it.ItemID, MediaID: it.MediaID, MotionID: it.MotionMediaID, SendID: it.SendID})
 		}
 	}
 	return created, skipped, nil
@@ -91,12 +94,18 @@ func (s *Server) placeOnFrames(ctx context.Context, tx *store.Tx, items []placeI
 func ensureRenditionsFor(ctx context.Context, tx *store.Tx, created []placed) error {
 	done := map[uuid.UUID]bool{}
 	for _, p := range created {
-		if done[p.MediaID] {
-			continue
+		ids := []uuid.UUID{p.MediaID}
+		if p.MotionID != nil {
+			ids = append(ids, *p.MotionID)
 		}
-		done[p.MediaID] = true
-		if err := tx.Enqueue(ctx, store.JobEnsureRenditions, map[string]any{"media_id": p.MediaID}); err != nil {
-			return err
+		for _, id := range ids {
+			if done[id] {
+				continue
+			}
+			done[id] = true
+			if err := tx.Enqueue(ctx, store.JobEnsureRenditions, map[string]any{"media_id": id}); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -152,7 +161,7 @@ func (s *Server) SharePlacements(ctx context.Context, req gen.SharePlacementsReq
 			continue
 		}
 		senders[row.ItemRow.ItemID] = row.SenderUserID
-		items = append(items, placeItem{ItemID: row.ItemRow.ItemID, MediaID: row.MediaID, SendID: row.SendID, Source: id})
+		items = append(items, placeItem{ItemID: row.ItemRow.ItemID, MediaID: row.MediaID, MotionMediaID: row.MotionMediaID, SendID: row.SendID, Source: id})
 	}
 	// Targets: frames the caller may send to.
 	frames, members, err := s.sendTargets(ctx, b.FrameIds)

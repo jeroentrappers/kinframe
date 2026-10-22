@@ -25,6 +25,12 @@ class LocalizationTest {
     /** Every strings*.xml file in values/ (features may keep their strings in a file of their own). */
     private val stringFiles = res.resolve("values").list()!!.filter { it.startsWith("strings") && it.endsWith(".xml") }.sorted()
 
+    /**
+     * New feature files that ship in English and Dutch first (marked `tools:ignore="MissingTranslation"`); the
+     * translation pass adds the other languages and removes them from this list.
+     */
+    private val pendingTranslation = setOf("strings_media.xml", "strings_export.xml")
+
     private fun parse(dir: String, name: String = "strings.xml"): Strings {
         val file = File(res, "$dir/$name")
         assertTrue("missing $file", file.isFile)
@@ -89,7 +95,7 @@ class LocalizationTest {
 
     @Test fun everyLanguageHasEveryString() {
         val problems = mutableListOf<String>()
-        for (name in stringFiles) for (lang in Locales.supported.map { it.code }.filter { it != "en" }) {
+        for (name in stringFiles) for (lang in Locales.supported.map { it.code }.filter { it != "en" && (name !in pendingTranslation || it == "nl") }) {
             val en = parse("values", name)
             val dir = "${dirOf(lang)}/$name"
             val t = parse(dirOf(lang), name)
@@ -115,7 +121,7 @@ class LocalizationTest {
 
     @Test fun legacyCodeCopiesAreIdentical() {
         // Android 6 resolves Hebrew and Indonesian only through the old codes iw / in.
-        for (name in stringFiles) for ((modern, legacy) in listOf("he" to "iw", "id" to "in")) {
+        for (name in stringFiles - pendingTranslation) for ((modern, legacy) in listOf("he" to "iw", "id" to "in")) {
             assertEquals(
                 "values-$legacy/$name must be a copy of values-$modern/$name",
                 File(res, "values-$modern/$name").readText(),

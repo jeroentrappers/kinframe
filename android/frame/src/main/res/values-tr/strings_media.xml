@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Canlı</string>
+    <string name="live_tap_hint">Oynatmak için dokunun</string>
+    <string name="settings_live_photos">Canlı fotoğraflar</string>
+    <string name="live_photos_on">Gösterildiğinde oynat</string>
+    <string name="live_photos_tap">Dokununca oynat</string>
+    <string name="live_photos_off">Yalnızca fotoğraf</string>
+</resources>

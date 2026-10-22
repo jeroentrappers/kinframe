@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Toista napauttamalla</string>
+    <string name="settings_live_photos">Live-kuvat</string>
+    <string name="live_photos_on">Toista näytettäessä</string>
+    <string name="live_photos_tap">Toista napautuksella</string>
+    <string name="live_photos_off">Vain kuva</string>
+</resources>

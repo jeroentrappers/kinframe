@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "a5286815910bd096da5a86c030a69d8e",
+    "identityHash": "77bf25a0b3695122fb08f8ea0eda5a08",
     "entities": [
       {
         "tableName": "placements",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `itemId` TEXT NOT NULL, `kind` TEXT NOT NULL, `status` TEXT NOT NULL, `senderId` TEXT, `senderName` TEXT, `caption` TEXT, `captionEdited` INTEGER NOT NULL, `capturedAt` INTEGER, `receivedAt` INTEGER NOT NULL, `focalX` REAL, `focalY` REAL, `fit` TEXT, `rotation` INTEGER NOT NULL, `hidden` INTEGER NOT NULL, `trashed` INTEGER NOT NULL, `pendingModeration` INTEGER NOT NULL, `reaction` TEXT, `width` INTEGER, `height` INTEGER, `durationMs` INTEGER, `hasAudio` INTEGER, `mediaUrl` TEXT, `mediaSha256` TEXT, `mediaBytes` INTEGER NOT NULL, `mediaMime` TEXT, `localFile` TEXT, `storedAt` INTEGER, `downloadAttempts` INTEGER NOT NULL, `nextAttemptAt` INTEGER NOT NULL, `lastError` TEXT, `firstShownAt` INTEGER, `lastShownAt` INTEGER, `isNew` INTEGER NOT NULL, `evictedAt` INTEGER, `albumIds` TEXT, `sharedByName` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `itemId` TEXT NOT NULL, `kind` TEXT NOT NULL, `status` TEXT NOT NULL, `senderId` TEXT, `senderName` TEXT, `caption` TEXT, `captionEdited` INTEGER NOT NULL, `capturedAt` INTEGER, `receivedAt` INTEGER NOT NULL, `focalX` REAL, `focalY` REAL, `fit` TEXT, `rotation` INTEGER NOT NULL, `hidden` INTEGER NOT NULL, `trashed` INTEGER NOT NULL, `pendingModeration` INTEGER NOT NULL, `reaction` TEXT, `width` INTEGER, `height` INTEGER, `durationMs` INTEGER, `hasAudio` INTEGER, `mediaUrl` TEXT, `mediaSha256` TEXT, `mediaBytes` INTEGER NOT NULL, `mediaMime` TEXT, `localFile` TEXT, `storedAt` INTEGER, `downloadAttempts` INTEGER NOT NULL, `nextAttemptAt` INTEGER NOT NULL, `lastError` TEXT, `firstShownAt` INTEGER, `lastShownAt` INTEGER, `isNew` INTEGER NOT NULL, `evictedAt` INTEGER, `albumIds` TEXT, `motionUrl` TEXT, `motionSha256` TEXT, `motionBytes` INTEGER NOT NULL DEFAULT 0, `motionMime` TEXT, `motionDurationMs` INTEGER, `motionHasAudio` INTEGER NOT NULL DEFAULT 0, `motionLocalFile` TEXT, `motionAttempts` INTEGER NOT NULL DEFAULT 0, `motionNextAttemptAt` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -203,9 +203,57 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "sharedByName",
-            "columnName": "sharedByName",
+            "fieldPath": "motionUrl",
+            "columnName": "motionUrl",
             "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionSha256",
+            "columnName": "motionSha256",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionBytes",
+            "columnName": "motionBytes",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionMime",
+            "columnName": "motionMime",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionDurationMs",
+            "columnName": "motionDurationMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "motionHasAudio",
+            "columnName": "motionHasAudio",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionLocalFile",
+            "columnName": "motionLocalFile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionAttempts",
+            "columnName": "motionAttempts",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionNextAttemptAt",
+            "columnName": "motionNextAttemptAt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -432,7 +480,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a5286815910bd096da5a86c030a69d8e')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77bf25a0b3695122fb08f8ea0eda5a08')"
     ]
   }
 }

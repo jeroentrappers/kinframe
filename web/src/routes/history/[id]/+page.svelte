@@ -17,6 +17,7 @@
 	import ReactionChips from '$components/ReactionChips.svelte';
 	import StagePill from '$components/StagePill.svelte';
 	import Thumb from '$components/Thumb.svelte';
+	import TvDialog from '$components/TvDialog.svelte';
 
 	let send = $state<Send | null>(null);
 	let error = $state<unknown>(null);
@@ -100,6 +101,19 @@
 		}
 	}
 
+	// ---- show on TV: this send's live placements on one of its frames
+	let tvOpen = $state(false);
+	const tvFrame = $derived.by(() => {
+		if (!send) return null;
+		const ready = new Set(send.items.filter((i) => i.status === 'ready').map((i) => i.id));
+		for (const f of send.frames) {
+			const ids = f.placements.filter((p) => ready.has(p.item_id) && p.status !== 'removed' && p.status !== 'failed').map((p) => p.placement_id);
+			if (ids.length) return { id: f.frame_id, name: f.frame_name, ids };
+		}
+		return null;
+	});
+	const tvSingleVideo = $derived(!!send && tvFrame?.ids.length === 1 && send.items.find((i) => i.status === 'ready')?.kind === 'video');
+
 	// ---- unsend (undo instead of "are you sure")
 	function unsend() {
 		if (!send) return;
@@ -150,9 +164,15 @@
 				{#if sendSource}
 					<button class="btn" onclick={() => share(sendSource)}><Icon name="share" size={18} />{t('share.action')}</button>
 				{/if}
+				{#if tvFrame}
+					<button class="btn" onclick={() => (tvOpen = true)}><Icon name="tv" size={18} />{t('tv.show')}</button>
+				{/if}
 				<button class="btn btn-danger-ghost" onclick={unsend}><Icon name="trash" size={18} />{t('detail.unsend')}</button>
 			</div>
 		</header>
+		{#if tvFrame}
+			<TvDialog bind:open={tvOpen} frameId={tvFrame.id} frameName={tvFrame.name} scope={{ kind: 'selection', ids: tvFrame.ids }} singleVideo={tvSingleVideo} />
+		{/if}
 
 		{#if push.justSent && push.shouldOffer}
 			<PushOffer />

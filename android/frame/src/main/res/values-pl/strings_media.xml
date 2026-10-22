@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Dotknij, aby odtworzyć</string>
+    <string name="settings_live_photos">Zdjęcia Live</string>
+    <string name="live_photos_on">Odtwarzaj przy wyświetleniu</string>
+    <string name="live_photos_tap">Odtwarzaj po dotknięciu</string>
+    <string name="live_photos_off">Tylko zdjęcie</string>
+</resources>

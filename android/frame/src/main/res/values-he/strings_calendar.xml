@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">היום</string>
+    <string name="calendar_tomorrow">מחר</string>
+    <string name="calendar_view_month">חודש</string>
+    <string name="calendar_view_week">שבוע</string>
+    <string name="calendar_view_four_day">4 ימים</string>
+    <string name="calendar_week_number">שבוע %1$d</string>
+    <string name="calendar_previous">הקודם</string>
+    <string name="calendar_next">הבא</string>
+    <string name="calendar_sync_now">לסנכרן עכשיו</string>
+    <string name="calendar_syncing">מסתנכרן…</string>
+    <string name="calendar_close">סגירת היומן</string>
+    <string name="calendar_all_day">כל היום</string>
+    <string name="calendar_received">אירועים שהתקבלו</string>
+    <string name="calendar_nothing">אין שום דבר מתוכנן</string>
+    <string name="calendar_nothing_today">אין עוד שום דבר מתוכנן להיום</string>
+    <string name="calendar_empty_title">עדיין אין יומנים</string>
+    <string name="calendar_empty_body">אפשר להוסיף יומן משפחתי מהאפליקציה או מהאתר של kinframe, בקטע היומנים של המסגרת. אפשר להציג כאן יחד כמה יומנים שרוצים.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">עד %1$s</string>
+    <string name="calendar_from">מ-%1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d נוסף</item>
+        <item quantity="two">+%d נוספים</item>
+        <item quantity="other">+%d נוספים</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">היום</string>
+    <string name="countdown_tomorrow">מחר</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d יום</item>
+        <item quantity="two">%d ימים</item>
+        <item quantity="other">%d ימים</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">בעוד יום אחד</item>
+        <item quantity="two">בעוד יומיים</item>
+        <item quantity="other">בעוד %d ימים</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">נשלח על ידי %1$s</string>
+    <string name="event_repeats">חוזר</string>
+    <string name="event_countdown">ספירה לאחור לאירוע הזה</string>
+    <string name="event_countdown_hint">במצגת ובראש היומן</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">אירוע חדש מ-%1$s</string>
+    <string name="invitation_body">להוסיף אותו ליומן של המסגרת הזו?</string>
+    <string name="invitation_accept">הוספה ליומן</string>
+    <string name="invitation_decline">דחייה</string>
+    <string name="invitation_later">לא עכשיו</string>
+    <string name="invitation_pill_one">אירוע מ-%1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">הזמנה אחת לאירוע</item>
+        <item quantity="two">%d הזמנות לאירועים</item>
+        <item quantity="other">%d הזמנות לאירועים</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">יומן</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">יומן</string>
+    <string name="settings_calendar_open">פתיחת היומן</string>
+    <string name="settings_calendar_view">תצוגת היומן</string>
+    <string name="settings_calendar_start_today">להתחיל מהיום</string>
+    <string name="settings_calendar_fade_past">עמעום אירועים שעברו</string>
+    <string name="settings_calendar_week_numbers">מספרי שבועות</string>
+    <string name="settings_calendar_sidebar">יומן לצד התמונות</string>
+    <string name="settings_calendar_countdowns">ספירות לאחור במצגת</string>
+    <string name="settings_calendar_timed">הצגת היומן בשעות קבועות</string>
+    <string name="settings_calendar_timed_from">משעה</string>
+    <string name="settings_calendar_timed_to">עד שעה</string>
+    <string name="settings_calendar_timed_add">הוספת שעה</string>
+    <string name="settings_calendar_timed_remove">הסרה</string>
+    <string name="settings_calendar_sources">יומנים במסגרת הזו</string>
+    <string name="settings_calendar_sources_hint">את היומנים מוסיפים ומנהלים מהאפליקציה או מהאתר של kinframe.</string>
+    <string name="calendar_status_ok">מעודכן</string>
+    <string name="calendar_status_syncing">מסתנכרן…</string>
+    <string name="calendar_status_failed">הסנכרון נכשל</string>
+    <string name="calendar_status_auth_failed">נדרשת התחברות</string>
+    <string name="calendar_status_disabled">כבוי</string>
+</resources>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Σήμερα</string>
+    <string name="calendar_tomorrow">Αύριο</string>
+    <string name="calendar_view_month">Μήνας</string>
+    <string name="calendar_view_week">Εβδομάδα</string>
+    <string name="calendar_view_four_day">4 ημέρες</string>
+    <string name="calendar_week_number">Εβδομάδα %1$d</string>
+    <string name="calendar_previous">Προηγούμενο</string>
+    <string name="calendar_next">Επόμενο</string>
+    <string name="calendar_sync_now">Συγχρονισμός τώρα</string>
+    <string name="calendar_syncing">Συγχρονισμός…</string>
+    <string name="calendar_close">Κλείσιμο ημερολογίου</string>
+    <string name="calendar_all_day">Ολοήμερο</string>
+    <string name="calendar_received">Ληφθέντα συμβάντα</string>
+    <string name="calendar_nothing">Τίποτα προγραμματισμένο</string>
+    <string name="calendar_nothing_today">Τίποτε άλλο για σήμερα</string>
+    <string name="calendar_empty_title">Δεν υπάρχουν ακόμα ημερολόγια</string>
+    <string name="calendar_empty_body">Προσθέστε ένα οικογενειακό ημερολόγιο από την εφαρμογή ή τον ιστότοπο του kinframe, στα Ημερολόγια της κορνίζας. Εδώ μπορούν να εμφανίζονται μαζί όσα ημερολόγια θέλετε.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">έως %1$s</string>
+    <string name="calendar_from">από %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d ακόμα</item>
+        <item quantity="other">+%d ακόμα</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Σήμερα</string>
+    <string name="countdown_tomorrow">Αύριο</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d ημέρα</item>
+        <item quantity="other">%d ημέρες</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">σε %d ημέρα</item>
+        <item quantity="other">σε %d ημέρες</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Από %1$s</string>
+    <string name="event_repeats">Επαναλαμβάνεται</string>
+    <string name="event_countdown">Αντίστροφη μέτρηση</string>
+    <string name="event_countdown_hint">Στην προβολή διαφανειών και στο πάνω μέρος του ημερολογίου</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">Ο/Η %1$s σάς έστειλε ένα συμβάν</string>
+    <string name="invitation_body">Προσθήκη στο ημερολόγιο της κορνίζας;</string>
+    <string name="invitation_accept">Προσθήκη στο ημερολόγιο</string>
+    <string name="invitation_decline">Απόρριψη</string>
+    <string name="invitation_later">Όχι τώρα</string>
+    <string name="invitation_pill_one">Συμβάν από %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d πρόσκληση σε συμβάν</item>
+        <item quantity="other">%d προσκλήσεις σε συμβάντα</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Ημερολόγιο</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Ημερολόγιο</string>
+    <string name="settings_calendar_open">Άνοιγμα ημερολογίου</string>
+    <string name="settings_calendar_view">Προβολή ημερολογίου</string>
+    <string name="settings_calendar_start_today">Έναρξη από σήμερα</string>
+    <string name="settings_calendar_fade_past">Αχνά τα περασμένα συμβάντα</string>
+    <string name="settings_calendar_week_numbers">Αριθμοί εβδομάδων</string>
+    <string name="settings_calendar_sidebar">Ημερολόγιο δίπλα στις φωτογραφίες</string>
+    <string name="settings_calendar_countdowns">Αντίστροφες μετρήσεις στην προβολή διαφανειών</string>
+    <string name="settings_calendar_timed">Εμφάνιση ημερολογίου σε ορισμένες ώρες</string>
+    <string name="settings_calendar_timed_from">Από</string>
+    <string name="settings_calendar_timed_to">Έως</string>
+    <string name="settings_calendar_timed_add">Προσθήκη ώρας</string>
+    <string name="settings_calendar_timed_remove">Αφαίρεση</string>
+    <string name="settings_calendar_sources">Ημερολόγια σε αυτήν την κορνίζα</string>
+    <string name="settings_calendar_sources_hint">Τα ημερολόγια προστίθενται και διαχειρίζονται από την εφαρμογή ή τον ιστότοπο του kinframe.</string>
+    <string name="calendar_status_ok">Ενημερωμένο</string>
+    <string name="calendar_status_syncing">Συγχρονισμός…</string>
+    <string name="calendar_status_failed">Αποτυχία συγχρονισμού</string>
+    <string name="calendar_status_auth_failed">Απαιτείται σύνδεση</string>
+    <string name="calendar_status_disabled">Απενεργοποιημένο</string>
+</resources>

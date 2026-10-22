@@ -132,6 +132,76 @@ Read these, in this order:
 `<AppmireTeamID>.app.kinframe.family` (Team ID from config, e.g. `KINFRAME_APPLE_TEAM_ID`). Add that to the Go server: a small handler, configurable via env, with a test, in
 the same PR.
 
+## Media preparation and Live Photos
+
+The contract is in `docs/api/README.md` §5.3 ("Prepared uploads" and "Live Photos") and `openapi.yaml`
+(`SendCreate.items`, `Item.motion`, `MediaKind: live`). The server verifies everything; anything that doesn't conform
+silently takes the normal server pipeline, so when in doubt, upload the original.
+
+**Where it runs.** Prepare in the background upload queue (the same place that runs tus), never on the main actor and
+never in the Share Extension (memory limit ~120 MB): the extension hands the original files to the App Group queue
+and the main app prepares them. Show "Preparing…" with progress per item. Prepared files go to a temporary file
+first, then tus. Delete them after the send is accepted.
+
+**Photos → `photo-master-v1`**
+
+1. Read the capture time before anything else: ImageIO `CGImageSourceCopyPropertiesAtIndex` →
+   `kCGImagePropertyExifDictionary` `DateTimeOriginal` + `OffsetTimeOriginal` (or `PHAsset.creationDate` when picked
+   from Photos). Send it as `captured_at` (RFC 3339, UTC). Without an offset, treat the wall-clock time as UTC, like
+   the server does.
+2. Decode and downscale in one step with ImageIO: `CGImageSourceCreateThumbnailAtIndex` with
+   `kCGImageSourceThumbnailMaxPixelSize = 2560`, `kCGImageSourceCreateThumbnailFromImageAlways = true` and
+   `kCGImageSourceCreateThumbnailWithTransform = true` (applies the EXIF orientation). This handles HEIC/HEIF, JPEG,
+   PNG and keeps memory low. Never upscale. Convert to sRGB (`CGColorSpace.sRGB`) if the source is Display P3, so the
+   master has orientation 1 and an sRGB profile.
+3. Encode **without metadata**: ImageIO `CGImageDestination` with no properties dictionary (do not copy the source
+   properties; no GPS, no EXIF, no XMP, no orientation tag). Use **WebP** if `CGImageDestinationCopyTypeIdentifiers()`
+   lists `org.webmproject.webp` (it does not on current iOS versions; it is decode-only), otherwise **JPEG** at quality
+   0.9 (`kCGImageDestinationLossyCompressionQuality`). The server accepts both and keeps the bytes as they are.
+4. tus `Upload-Metadata` gets `prepared photo-master-v1`; the send item gets `width`, `height` (of the encoded image)
+   and `captured_at`.
+5. Fallback: if ImageIO can't decode it, upload the original file unchanged without `prepared`.
+
+**Videos → `video-master-v1`**
+
+- Use `AVAssetExportSession` with `AVAssetExportPreset1920x1080` (H.264, AAC; it never upscales) on an
+  `AVMutableComposition` that already applies the **trim** (`timeRange`) and drops the audio track when "include
+  audio" is off. Set `outputFileType = .mp4` and `shouldOptimizeForNetworkUse = true` (faststart). Set
+  `metadata = []` and `metadataItemFilter = .forSharing()` so no location or device metadata is written. The preset
+  bakes the rotation in (`preferredTransform` applied); the server rejects files that still carry a rotation flag.
+- For tighter control (recommended, keeps frame renditions reusable): `AVAssetReader` + `AVAssetWriter` with
+  `AVVideoCodecKey: .h264`, `AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel` (or `High41`),
+  size ≤ 1920×1080 in either orientation (even numbers), `AVVideoAverageBitRateKey` ≈ width × height × 3.5 capped
+  at 8 000 000, `AVVideoExpectedSourceFrameRateKey`/`AVVideoMaxKeyFrameIntervalKey` for ≤ 30 fps (drop frames from
+  60 fps sources), audio `kAudioFormatMPEG4AAC` 128 kbps stereo or mono, `writer.shouldOptimizeForNetworkUse = true`,
+  `writer.metadata = []`.
+- Send `prepared video-master-v1`, `duration_ms` (after trim), `width`, `height`, `captured_at`
+  (`com.apple.quicktime.creationdate` or `PHAsset.creationDate`) and **no** `trim` (it is already applied; the server
+  can't stream-copy a trim and would transcode). Keep `include_audio` as the user chose.
+- Masters that are ≤ 30 fps, level ≤ 4.1 and within the bitrate budget are also served directly to frames as their
+  rendition (no server transcode at all), so prefer those settings.
+- Fallback: if the export fails or is cancelled, upload the original with `trim`/`include_audio` as before.
+
+**Live Photos (`kind: live`)**
+
+1. Picking: `PhotosPicker(selection:, matching: .any(of: [.images, .videos, .livePhotos]))`. For each
+   `PhotosPickerItem` with an `itemIdentifier`, load the `PHAsset` (`PHAsset.fetchAssets(withLocalIdentifiers:)`;
+   needs only limited library access, or use `loadTransferable(type: PHLivePhoto.self)` to detect it) and check
+   `asset.mediaSubtypes.contains(.photoLive)`.
+2. Getting both parts: `PHAssetResource.assetResources(for: asset)` → the `.photo` resource (HEIC still) and the
+   `.pairedVideo` resource (MOV, ~3 s). Write each with `PHAssetResourceManager.default().writeData(for:toFile:options:)`
+   (`options.isNetworkAccessAllowed = true` for iCloud assets). In the Share Extension a Live Photo arrives as a still
+   (and sometimes a `com.apple.live-photo-bundle`); send what you get.
+3. Prepare both: the still exactly like a photo (above); the clip like a video, **muted** by default (drop the audio
+   track) unless the user turned "Live audio" on, ≤ 1080p H.264, no trim. Clips longer than 10 s are cut by the
+   server.
+4. Upload both with tus, then send one item: `{ upload_id: <still>, live_video_upload_id: <clip>, captured_at,
+   width, height, caption, ... }`. Add `include_audio: true` only when the user wants the clip's sound.
+5. Composer: a "Live" badge on the thumbnail and a toggle "Send as still only" (then upload only the still and omit
+   `live_video_upload_id`). History and library: show a "Live" badge for `item.kind == "live"` and play
+   `GET /v1/items/{id}/media/motion` (302 to a signed URL; `AVPlayer` handles it) on long-press, muted.
+6. Treat unknown `kind` values as `photo`; all photo fields of a live item describe the still.
+
 ## Quality bar and verification
 
 - **Tests:** unit tests (XCTest/Swift Testing) for:

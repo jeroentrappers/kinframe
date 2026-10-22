@@ -56,6 +56,8 @@ class FrameSession(
         /** Runs a remote command; returns null on success or an error code. */
         suspend fun onCommand(type: String, args: JsonObject): String?
         fun onJoinRequest(request: JsonObject) {}
+        /** An event was sent to the frame (README §5.8). */
+        fun onEventInvitation(invitation: JsonObject) {}
         suspend fun heartbeat(): Heartbeat
         fun onPulled(result: SyncEngine.PullResult) {}
     }
@@ -218,6 +220,7 @@ class FrameSession(
             }
             "claimed" -> events.onClaimed(msg.str("owner_name"))
             "join_request" -> (msg["request"] as? JsonObject)?.let(events::onJoinRequest)
+            "event_invitation" -> (msg["invitation"] as? JsonObject)?.let(events::onEventInvitation)
             "revoked" -> revoke()
             else -> Unit // unknown types are ignored (README §7)
         }

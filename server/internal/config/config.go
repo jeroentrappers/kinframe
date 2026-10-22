@@ -77,6 +77,13 @@ type Config struct {
 	WeatherURL     string
 	GeocodingURL   string
 	WeatherRefresh time.Duration
+
+	// Calendars (README §5.8). CalendarSync is the interval between syncs of
+	// a source; SecretsKey (optional) encrypts stored calendar credentials,
+	// else a key derived from SigningKey is used.
+	CalendarEnabled bool
+	CalendarSync    time.Duration
+	SecretsKey      []byte
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -169,6 +176,20 @@ func load(get func(string) string) (*Config, error) {
 	switch strings.ToLower(env("KINFRAME_WEATHER", "on")) {
 	case "0", "off", "false", "no":
 		c.WeatherURL, c.GeocodingURL = "", ""
+	}
+	c.CalendarSync = time.Duration(intv("KINFRAME_CALENDAR_SYNC_MINUTES", 15)) * time.Minute
+	c.CalendarEnabled = true
+	switch strings.ToLower(env("KINFRAME_CALENDAR", "on")) {
+	case "0", "off", "false", "no":
+		c.CalendarEnabled = false
+	}
+	if c.CalendarSync < 5*time.Minute {
+		errs = append(errs, errors.New("KINFRAME_CALENDAR_SYNC_MINUTES must be at least 5"))
+	}
+	if sk, err := parseKey(env("KINFRAME_SECRETS_KEY", "")); err != nil {
+		errs = append(errs, fmt.Errorf("KINFRAME_SECRETS_KEY: %w", err))
+	} else {
+		c.SecretsKey = sk
 	}
 	if c.WeatherRefresh < 15*time.Minute {
 		errs = append(errs, errors.New("KINFRAME_WEATHER_REFRESH_MINUTES must be at least 15"))

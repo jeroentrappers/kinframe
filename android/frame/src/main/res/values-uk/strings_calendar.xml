@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Сьогодні</string>
+    <string name="calendar_tomorrow">Завтра</string>
+    <string name="calendar_view_month">Місяць</string>
+    <string name="calendar_view_week">Тиждень</string>
+    <string name="calendar_view_four_day">4 дні</string>
+    <string name="calendar_week_number">Тиждень %1$d</string>
+    <string name="calendar_previous">Назад</string>
+    <string name="calendar_next">Далі</string>
+    <string name="calendar_sync_now">Синхронізувати</string>
+    <string name="calendar_syncing">Синхронізація…</string>
+    <string name="calendar_close">Закрити календар</string>
+    <string name="calendar_all_day">Увесь день</string>
+    <string name="calendar_received">Отримані події</string>
+    <string name="calendar_nothing">Нічого не заплановано</string>
+    <string name="calendar_nothing_today">Сьогодні більше нічого не заплановано</string>
+    <string name="calendar_empty_title">Календарів ще немає</string>
+    <string name="calendar_empty_body">Додайте сімейний календар у застосунку або на сайті kinframe, у розділі «Календарі» цієї рамки. Тут можна показувати разом скільки завгодно календарів.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">до %1$s</string>
+    <string name="calendar_from">з %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">ще %d</item>
+        <item quantity="few">ще %d</item>
+        <item quantity="many">ще %d</item>
+        <item quantity="other">ще %d</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Сьогодні</string>
+    <string name="countdown_tomorrow">Завтра</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d день</item>
+        <item quantity="few">%d дні</item>
+        <item quantity="many">%d днів</item>
+        <item quantity="other">%d дня</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">через %d день</item>
+        <item quantity="few">через %d дні</item>
+        <item quantity="many">через %d днів</item>
+        <item quantity="other">через %d дня</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Відправник: %1$s</string>
+    <string name="event_repeats">Повторюється</string>
+    <string name="event_countdown">Зворотний відлік до події</string>
+    <string name="event_countdown_hint">У слайд-шоу та вгорі календаря</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s надсилає вам подію</string>
+    <string name="invitation_body">Додати її до календаря цієї рамки?</string>
+    <string name="invitation_accept">Додати до календаря</string>
+    <string name="invitation_decline">Відхилити</string>
+    <string name="invitation_later">Не зараз</string>
+    <string name="invitation_pill_one">Подія від %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d запрошення на подію</item>
+        <item quantity="few">%d запрошення на події</item>
+        <item quantity="many">%d запрошень на події</item>
+        <item quantity="other">%d запрошення на події</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Календар</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Календар</string>
+    <string name="settings_calendar_open">Відкрити календар</string>
+    <string name="settings_calendar_view">Вигляд календаря</string>
+    <string name="settings_calendar_start_today">Починати з сьогодні</string>
+    <string name="settings_calendar_fade_past">Приглушувати минулі події</string>
+    <string name="settings_calendar_week_numbers">Номери тижнів</string>
+    <string name="settings_calendar_sidebar">Календар поруч із фото</string>
+    <string name="settings_calendar_countdowns">Зворотний відлік у слайд-шоу</string>
+    <string name="settings_calendar_timed">Показувати календар у визначений час</string>
+    <string name="settings_calendar_timed_from">З</string>
+    <string name="settings_calendar_timed_to">До</string>
+    <string name="settings_calendar_timed_add">Додати час</string>
+    <string name="settings_calendar_timed_remove">Видалити</string>
+    <string name="settings_calendar_sources">Календарі на цій рамці</string>
+    <string name="settings_calendar_sources_hint">Календарі додаються й налаштовуються в застосунку або на сайті kinframe.</string>
+    <string name="calendar_status_ok">Актуально</string>
+    <string name="calendar_status_syncing">Синхронізація…</string>
+    <string name="calendar_status_failed">Не вдалося синхронізувати</string>
+    <string name="calendar_status_auth_failed">Потрібно увійти</string>
+    <string name="calendar_status_disabled">Вимкнено</string>
+</resources>

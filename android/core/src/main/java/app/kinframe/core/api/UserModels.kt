@@ -180,7 +180,22 @@ data class SendItemCreate(
     val trim: Trim? = null,
     val includeAudio: Boolean? = null,
     val capturedAt: String? = null,
+    /** Prepared uploads only: what the client produced (README §5.3 "Prepared uploads"). */
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    /** Makes this a Live Photo: the upload of its motion clip. */
+    val liveVideoUploadId: String? = null,
+    /** `false` sends a Motion Photo as a still only. */
+    val live: Boolean? = null,
 )
+
+/** tus `Upload-Metadata` `prepared` values (README §5.3). */
+object PreparedProfile {
+    const val KEY = "prepared"
+    const val PHOTO = "photo-master-v1"
+    const val VIDEO = "video-master-v1"
+}
 
 @Serializable
 data class SendCreate(val frameIds: List<String>, val items: List<SendItemCreate>)

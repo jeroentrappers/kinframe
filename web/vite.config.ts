@@ -12,6 +12,8 @@ const proxy = {
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	// Media preparation workers (src/lib/prep) are ES modules.
+	worker: { format: 'es' },
 	server: { proxy },
 	preview: { proxy },
 	test: {

@@ -138,11 +138,11 @@ don't reveal whether a code ever existed.
 
 ```
 client                         server                                   frame
-  │ tus POST /v1/uploads  (Upload-Metadata: filename, filetype, sha256)
+  │ tus POST /v1/uploads  (Upload-Metadata: filename, filetype, sha256, prepared?)
   │ tus PATCH … (resumable, 4 MiB chunks)
-  │ POST /v1/sends {frame_ids, items:[{upload_id, caption, focal_point, fit, trim}]}
+  │ POST /v1/sends {frame_ids, items:[{upload_id, live_video_upload_id?, caption, focal_point, fit, trim, captured_at}]}
   │ ◀── 202 { send_id, items:[{item_id, status:"processing"}] }
-  │                               process: decode → master → frame renditions → thumbs → faces
+  │                               process: verify or decode → master → frame renditions → thumbs → faces
   │                               placements ready ──── ws "changes" ─────▶ │
   │                                                     GET /v1/device/changes │
   │                                                     GET /v1/device/media/… │
@@ -159,11 +159,57 @@ client                         server                                   frame
   - `filetype`: a MIME type
   - `sha256`: hex, optional. If the same user already has an item with that hash, the send reuses it without
     processing.
+  - `prepared`: optional, `photo-master-v1` or `video-master-v1`. The client already made the master (below).
+    Unknown values are ignored.
 - Max upload size is in discovery `limits.max_upload_bytes` (default 2 GiB).
+
+**Prepared uploads (client-side preparation)**
+
+Phones and browsers can make the master themselves, which saves upload bytes (a 12 MP JPEG or HEIC becomes a
+≈1 MB WebP, a 4K clip a 1080p one) and server CPU. The server **verifies instead of trusting**; anything that does
+not conform silently takes the normal pipeline, so preparing is always safe.
+
+| Profile | The client produces | The server checks | Then |
+|---|---|---|---|
+| `photo-master-v1` | WebP (lossy, q90) or JPEG where WebP encoding isn't available; long edge ≤ 2560 px; EXIF orientation applied; no metadata; sRGB | WebP or JPEG by magic bytes, ≤ 16 MiB, ≤ 2560 px, no orientation other than 1, 8-bit sRGB or grey, one page, decodes completely, matches the declared `width`/`height` | stores it as the master **without re-encoding**, after stripping all metadata again (EXIF, XMP, IPTC, comments, anything after the image; the ICC profile stays). Frame renditions and thumbnails are made from it as usual. |
+| `video-master-v1` | MP4, H.264 High or Main (Baseline accepted) at level ≤ 4.1, yuv420p, ≤ 1080p (either orientation, rotation applied), ≤ 30 fps preferred (≤ 60 accepted), AAC-LC stereo/mono or no audio, trim and mute already applied, bitrate ≈ w·h·3.5 bps capped at 8 Mbps | MP4 container, one video stream, the codec/profile/level/pixel format above, no rotation flag, ≤ 1080p, ≤ 60 fps, AAC (≤ 2 channels) or no audio, duration ≤ `max_video_seconds` (and matching `duration_ms` ±0.5 s), total bitrate ≤ 20 Mbps, no `trim` in the send | **remuxes** it (stream copy, no re-encode) without any container or stream metadata and with the index first (faststart), and stores that as the master. |
+
+- **Privacy is never delegated.** Metadata is stripped server-side on every path, also when a client claims to have
+  done it. Prepared files carry no capture time, so clients send `captured_at` (and `width`, `height`,
+  `duration_ms`) with the send item.
+- **Frame video renditions reuse the master** whenever it already fits the frame: H.264 ≤ level 4.1 within the
+  device's `max_video_decode`, ≤ 30 fps, bitrate within the rendition budget (w·h·4, max 8 Mbps, +10 %), AAC or no
+  audio, faststart. The frame then downloads the master's bytes and the server transcodes nothing. This applies to
+  any master, prepared or not. Photos always get their cheap per-frame-size WebP and thumbnails.
+- Clients fall back to uploading the original whenever preparation fails or is unsupported (HEIC without a decoder,
+  no WebCodecs, an encoder error). Mixed sends are fine.
+- The operator sees how masters were made in `GET /v1/operator/stats` → `media_pipeline` (`transcoded`,
+  `prepared`, `fallback`, `reused_renditions`); each master is also logged with its path and the rejection reason.
+
+**Live Photos (iOS) and Motion Photos (Android)**
+
+A **live item** is a still plus a short motion clip (≤ 10 s; longer clips are cut).
+
+- **Sending**: either two uploads, the still as `upload_id` and the clip as `live_video_upload_id` (iOS Live Photo:
+  HEIC/JPEG + MOV, or both prepared), or one Android **Motion Photo** (a JPEG/HEIC with an embedded MP4, XMP
+  `GCamera:MotionPhoto`/`MicroVideo` with `Container:Directory` offsets, or a HEIC `mpvd` box) as `upload_id`: the
+  server finds and splits the clip itself. Clients that split it themselves send the parts as two uploads. Send
+  `live: false` to send a Motion Photo as a still only. The clip is muted unless `include_audio: true` is sent
+  explicitly. `trim` is not allowed on live items.
+- **Stored**: the still as a photo master, the clip as a video master (H.264 ≤ 1080p, same prepared/fallback rules).
+  The clip has no poster and no thumbnails of its own: the still is its poster. If the clip fails to process, the
+  item simply stays a photo.
+- **API**: `Item.kind` is `live` with `Item.motion` (`status`, size, duration, audio); the clip's master is at
+  `GET /v1/items/{id}/media/motion`. Every photo field (size, thumbnails, `captured_at`) describes the still.
+  The library filter `kind=photo` includes live items and `kind=live` returns only them.
+- **Frames**: `placement.upsert` carries the still's rendition in `media` (so frames that don't know `live` show a
+  normal photo) and, once ready, `motion` `{url, sha256, bytes, mime, width, height, duration_ms, has_audio}` with
+  the frame-sized clip (`GET /v1/device/media/{placement_id}?variant=motion`). The frame plays it per
+  `settings.slideshow.live_photos`: `on` (default: once when the slide appears, again on tap), `tap` or `off`.
 
 **Sends**
 - `POST /v1/sends` validates everything before accepting: permissions on every frame, item count, video length after
-  trim, supported types. It is all-or-nothing.
+  trim, supported types, live clip uploads. It is all-or-nothing.
 - Processing is asynchronous. Failures mark the item `failed` with a `code` (`unsupported_media`, `corrupt_media`,
   `video_too_long`), visible in the sender's history and pushed.
 
@@ -221,10 +267,11 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `member.upsert` / `member.remove` | Display info only: name, avatar URL |
   | `frame` | Name, location, owner name |
   | `weather` | Current conditions and forecast, when enabled (below), or `weather: null` |
+  | `calendar` | The frame's merged calendar (§5.8), or `calendar: null` when it has none |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
 - **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
-  every frame with `settings.location` set and `widgets.weather` on. Frames never call third parties.
+  every frame with `settings.location` set and `widgets.weather` or `widgets.calendar_sidebar` on (the calendar shows the forecast per day). Frames never call third parties.
   - Payload: `fetched_at`, `location {name, lat, lon}` (from the frame's settings), `timezone`, `utc_offset_seconds`,
     `units`, `current` (`temp_c`, `apparent_c`, `code` = WMO weather code, `is_day`, `wind_kmh`, `wind_dir_deg`,
     `humidity_pct`, `precip_mm`), `hourly` (the next 24 h from the current hour: `time`, `temp_c`, `code`, `is_day`,
@@ -297,6 +344,122 @@ GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirro
   reinstalls the previous APK (`pm install -r -d`, root only), skips that version code from then on and reports
   `update_state: rolled_back` in the heartbeat.
 
+### 5.8 Calendars
+
+Calendars are synced **by the server**, never by the frame, and there is no limit on the number of calendars per
+frame. Management needs `change_settings`; sending an event needs `send`.
+
+**Sources** (`/v1/frames/{id}/calendars`)
+- `ics`: any ICS/iCal link, including `webcal://` (fetched as `https://`). This covers the "secret address" links of
+  Google Calendar, iCloud (public calendar), Outlook/Microsoft 365 ("publish calendar") and Yahoo.
+- `caldav`: a CalDAV server with username and app password (Nextcloud, Fastmail, iCloud with an app-specific
+  password, Radicale, …). The URL may be the server, the account or a calendar. `POST …/calendars:test` lists the
+  account's calendars; the client creates one source per chosen calendar (`calendar_url`).
+- `local`: the frame's **received events** calendar holding accepted invitations. It is created with the first
+  accepted invitation. Its `name` is empty until renamed; clients show "Received events" with a heart.
+- Every source has a display `name`, a `color` from the palette below and `enabled`. The URL, username and
+  password are encrypted at rest (AES-256-GCM). The key is `KINFRAME_SECRETS_KEY` (32+ bytes, hex or base64) or,
+  when unset, derived from `KINFRAME_SIGNING_KEY` with HKDF-SHA256. Rotating that key makes stored credentials
+  unreadable: affected sources go to `auth_failed` until the URL or password is entered again. Responses only carry
+  a redacted `url_hint`.
+
+**Sync**
+- Every 15 minutes (`KINFRAME_CALENDAR_SYNC_MINUTES`) plus up to 3 minutes of jitter, right after a source is added
+  or changed, on "Sync now" (`POST …/calendars/{cid}/sync`) and when the frame asks (`POST /v1/device/calendar/sync`,
+  e.g. from its menu or a `sync_now` command).
+- ICS requests send `If-None-Match`/`If-Modified-Since`; a `304` keeps the stored copy. Responses are capped at 10 MiB.
+- Failures back off from 1 minute, doubling up to 2 hours. Status per source: `syncing`, `ok`, `failed` (with
+  `last_error`), `auth_failed` (HTTP 401/403 or unreadable stored credentials) or `disabled`.
+- The window is `calendar.past_days` before and `calendar.future_days` after today in the frame's time zone
+  (default ±30 days). Recurrence rules are expanded on the server (RRULE, RDATE, EXDATE, and overrides with
+  RECURRENCE-ID; cancelled occurrences are dropped). Time zones come from IANA names, common Windows names and
+  embedded VTIMEZONE definitions; floating times use the frame's time zone.
+
+**The `calendar` change** (schema `Calendar`)
+- `generated_at`, `timezone`, `window {from, to}`, `sources` (id, kind, name, color, status, last_synced_at),
+  `events` and `countdowns`.
+- `events` merges every enabled source into one list sorted by start. An event that appears in several sources
+  (same UID and start) is kept once, from the first source in display order. Each event keeps its `source_id`;
+  clients colour it from that source. Timed events carry `start_at`/`end_at` in UTC; all-day events carry
+  `start_date`/`end_date` (inclusive). `recurring` marks occurrences of a series.
+- Event ids are stable per occurrence, so countdowns and the frame's UI state survive re-syncs.
+- `countdowns` are the marked events that have not passed yet (nearest first, also beyond the window). Mark them
+  with `PUT /v1/frames/{id}/countdowns/{eventId}` or, on the frame, `PUT /v1/device/countdowns/{eventId}`. Frames
+  show the nearest three as slideshow widgets.
+- A new change is emitted only when the content changed (ignoring `generated_at`), and once a day as the window
+  moves. `calendar: null` means "drop your calendar" (the last source was removed); snapshots omit it.
+- `GET /v1/frames/{id}/calendar` returns the same payload plus the frame's `weather`, for a read-only preview.
+
+**Sending an event** (`POST /v1/frames/{id}/events`)
+- Title, all-day or start/end, location, notes and an optional photo (a tus upload, stored as WebP of at most
+  1280 px) shown on `top` of the card or as its `background`.
+- The frame gets a websocket `event_invitation` message (and re-reads `GET /v1/device/invitations` on connect). It
+  shows an invitation card with Accept and Decline: `POST /v1/device/invitations/{iid} {decision}`. The decision
+  is final. Accepted events go into the received-events calendar (a `calendar` change follows).
+- The sender gets `event_invitation.decided` over the websocket, or a push, and sees the status in
+  `GET /v1/frames/{id}/events`. A pending invitation can be withdrawn with `DELETE`.
+
+**Calendar settings** (`FrameSettings.calendar`, `widgets.calendar_sidebar`, `widgets.countdowns`)
+- `view` (`four_day`, `week`, `month`), `start_on_today`, `fade_past`, `week_numbers`, `past_days`,
+  `future_days` and `timed_views`: schedules (same shape as sleep schedules, with `from`/`to`) during which the
+  frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00.
+
+**Palette** (`CalendarColor`). Light is for light backgrounds (event fills on the paper style), dark for dark ones.
+
+| Key | Light | Dark |
+|---|---|---|
+| `coral` | `#E5726A` | `#F0958E` |
+| `tangerine` | `#EE8F4F` | `#F4AE7E` |
+| `amber` | `#DDA731` | `#E9C26A` |
+| `olive` | `#9AA63E` | `#BBC575` |
+| `mint` | `#4FB28A` | `#82CDAE` |
+| `sage` | `#7F9C77` | `#A8C0A1` |
+| `teal` | `#349E9A` | `#6EC1BD` |
+| `sky` | `#4F9FDF` | `#87BFEB` |
+| `ocean` | `#4767C8` | `#8197DD` |
+| `lavender` | `#8E7BD0` | `#B3A6E2` |
+| `plum` | `#AC5F9F` | `#CA92C1` |
+| `rose` | `#DA6C92` | `#E79AB5` |
+
+New sources get the first colour not yet used on the frame, in this order.
+
+### 5.9 Showing a frame on a TV
+
+Product spec 4.11 (Google Cast / DLNA). The library is shown on a TV through a **TV link**: a short-lived,
+revocable share token.
+
+- `POST /v1/frames/{id}/tv-links {album_id?, placement_ids?, kind?, interval_seconds, expires_in_hours, purpose}`
+  returns `{token, url, expires_at, …}`. `url` is the web app's full-screen TV page, `/tv/<frameId>?t=<token>`.
+  - Needs `see_library`, unless every `placement_ids` entry is the caller's own (e.g. "Show on TV" from History).
+  - Default expiry is 12 h (max 7 days). `GET` lists active links (owner/admin see all) and `DELETE …/{linkId}`
+    revokes one.
+- `GET /v1/tv/{token}` needs no sign-in. It returns `TvSlideshow`: the frame name, interval and up to 500 slides.
+  - Slides are the visible placements, newest first, or the selection in its own order.
+  - Each slide carries an **absolute signed URL of the master rendition** (WebP photo or H.264/AAC MP4). A TV
+    browser or Chromecast can fetch it without headers, with Range and CORS `*`.
+  - URLs live 1–2 h. Clients refetch after `refresh_after` (45 min).
+  - The creator's membership and `see_library` are re-checked on every fetch, so leaving the frame or losing the
+    permission narrows or kills the link.
+  - Revoked or unknown tokens return `404 not_found`; expired ones return `410 link_expired`.
+- **Web senders**:
+  - Chromium browsers use the Google Cast Web Sender SDK with the **Default Media Receiver**, so no receiver app
+    registration is needed. The sender drives the slideshow: it loads one slide URL per interval and offers
+    play/pause, next/previous, interval and stop.
+  - Browsers with the Presentation API present the TV page itself.
+  - The fallback is the TV page link (with QR) for a smart-TV browser.
+  - Single videos can also use the Remote Playback API.
+
+### 5.10 Import and backup from SD/USB on the frame
+
+- `POST /v1/device/imports/check {sha256: […]}` returns the hashes the frame already has: a live placement whose
+  source, master or frame rendition hash matches. The frame skips those before uploading.
+- `POST /v1/device/imports` (body = the file, `X-Filename`, optional `X-Captured-At` and `?caption=`) hashes the body.
+  - A duplicate returns `200` with the existing placement.
+  - A new file returns `202` and joins the library with the frame as sender.
+- Restoring a kinframe export from a stick (written by the frame: original-quality files named
+  `YYYY-MM-DD_sender_caption.ext` plus a `kinframe-export.json` manifest) uses the same endpoints, with captions
+  from the manifest. Files that came from this frame's own renditions are recognised and skipped.
+
 ## 6. Websockets
 
 Both use JSON text frames `{ "type": "...", ... }` and server ping/pong every 25 s. Clients reconnect with
@@ -311,6 +474,7 @@ exponential back-off from 1 s up to 60 s, with ±20 % jitter.
 | S→F | `command` | `id`, `command_type`, `args` | Remote command. |
 | S→F | `claimed` | `owner_name` | Leave the setup or code screen. |
 | S→F | `join_request` | `request` | Show Allow/Deny. Requests still pending (e.g. sent while the frame was offline) come from `GET /v1/device/join-requests`. |
+| S→F | `event_invitation` | `invitation` | An event was sent to the frame: show the invitation card. Pending ones also come from `GET /v1/device/invitations`. |
 | S→F | `revoked` | — | Wipe credential, back to setup. Followed by close `4401`. |
 | F→S | `state` | `screen: on/off/dimmed`, `showing_placement_id`, `brightness`, `volume` | Sent on change, at most every 2 s. |
 | F→S | `command_result` | `id`, `ok`, `error_code` | Result of a command. |
@@ -332,6 +496,7 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `frame.status` | `frame_id`, `online`, `last_seen_at` | Frame connectivity |
 | `join_request` | `frame_id`, `request` | Approval needed (owner/admin) |
 | `membership.updated` | `frame_id` | Role or permissions changed |
+| `event_invitation.decided` | `frame_id`, `invitation` | The frame accepted or declined an event you sent |
 
 ### 6.3 Push
 

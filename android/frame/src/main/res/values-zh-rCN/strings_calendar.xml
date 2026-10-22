@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">今天</string>
+    <string name="calendar_tomorrow">明天</string>
+    <string name="calendar_view_month">月</string>
+    <string name="calendar_view_week">周</string>
+    <string name="calendar_view_four_day">4 天</string>
+    <string name="calendar_week_number">第 %1$d 周</string>
+    <string name="calendar_previous">上一页</string>
+    <string name="calendar_next">下一页</string>
+    <string name="calendar_sync_now">立即同步</string>
+    <string name="calendar_syncing">正在同步…</string>
+    <string name="calendar_close">关闭日历</string>
+    <string name="calendar_all_day">全天</string>
+    <string name="calendar_received">收到的日程</string>
+    <string name="calendar_nothing">暂无安排</string>
+    <string name="calendar_nothing_today">今天没有其他安排</string>
+    <string name="calendar_empty_title">还没有日历</string>
+    <string name="calendar_empty_body">请在 kinframe 应用或网站中，从相框的“日历”添加家庭日历。这里可以同时显示任意数量的日历。</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">至 %1$s</string>
+    <string name="calendar_from">%1$s 起</string>
+    <plurals name="calendar_more">
+        <item quantity="other">还有 %d 项</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">今天</string>
+    <string name="countdown_tomorrow">明天</string>
+    <plurals name="countdown_days">
+        <item quantity="other">%d 天</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="other">%d 天后</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">由 %1$s 发送</string>
+    <string name="event_repeats">重复</string>
+    <string name="event_countdown">为此倒计时</string>
+    <string name="event_countdown_hint">显示在幻灯片和日历顶部</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s 给你发来一个日程</string>
+    <string name="invitation_body">添加到这台相框的日历吗？</string>
+    <string name="invitation_accept">添加到日历</string>
+    <string name="invitation_decline">拒绝</string>
+    <string name="invitation_later">以后再说</string>
+    <string name="invitation_pill_one">来自 %1$s 的日程</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="other">%d 个日程邀请</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">日历</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">日历</string>
+    <string name="settings_calendar_open">打开日历</string>
+    <string name="settings_calendar_view">日历视图</string>
+    <string name="settings_calendar_start_today">从今天开始</string>
+    <string name="settings_calendar_fade_past">淡化已过去的日程</string>
+    <string name="settings_calendar_week_numbers">周数</string>
+    <string name="settings_calendar_sidebar">照片旁显示日历</string>
+    <string name="settings_calendar_countdowns">幻灯片上的倒计时</string>
+    <string name="settings_calendar_timed">在指定时间显示日历</string>
+    <string name="settings_calendar_timed_from">从</string>
+    <string name="settings_calendar_timed_to">到</string>
+    <string name="settings_calendar_timed_add">添加时间</string>
+    <string name="settings_calendar_timed_remove">移除</string>
+    <string name="settings_calendar_sources">这台相框上的日历</string>
+    <string name="settings_calendar_sources_hint">日历通过 kinframe 应用或网站添加和管理。</string>
+    <string name="calendar_status_ok">已是最新</string>
+    <string name="calendar_status_syncing">正在同步…</string>
+    <string name="calendar_status_failed">无法同步</string>
+    <string name="calendar_status_auth_failed">需要登录</string>
+    <string name="calendar_status_disabled">已关闭</string>
+</resources>

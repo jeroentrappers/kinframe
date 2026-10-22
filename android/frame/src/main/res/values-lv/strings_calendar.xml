@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Šodien</string>
+    <string name="calendar_tomorrow">Rīt</string>
+    <string name="calendar_view_month">Mēnesis</string>
+    <string name="calendar_view_week">Nedēļa</string>
+    <string name="calendar_view_four_day">4 dienas</string>
+    <string name="calendar_week_number">%1$d. nedēļa</string>
+    <string name="calendar_previous">Iepriekšējais</string>
+    <string name="calendar_next">Nākamais</string>
+    <string name="calendar_sync_now">Sinhronizēt tagad</string>
+    <string name="calendar_syncing">Notiek sinhronizācija…</string>
+    <string name="calendar_close">Aizvērt kalendāru</string>
+    <string name="calendar_all_day">Visu dienu</string>
+    <string name="calendar_received">Saņemtie notikumi</string>
+    <string name="calendar_nothing">Nekas nav ieplānots</string>
+    <string name="calendar_nothing_today">Šodien vairs nekas nav ieplānots</string>
+    <string name="calendar_empty_title">Vēl nav kalendāru</string>
+    <string name="calendar_empty_body">Pievienojiet ģimenes kalendāru kinframe lietotnē vai vietnē, rāmja sadaļā „Kalendāri”. Šeit kopā var rādīt jebkuru skaitu kalendāru.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">līdz %1$s</string>
+    <string name="calendar_from">no %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="zero">vēl %d</item>
+        <item quantity="one">vēl %d</item>
+        <item quantity="other">vēl %d</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Šodien</string>
+    <string name="countdown_tomorrow">Rīt</string>
+    <plurals name="countdown_days">
+        <item quantity="zero">%d dienas</item>
+        <item quantity="one">%d diena</item>
+        <item quantity="other">%d dienas</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="zero">pēc %d dienām</item>
+        <item quantity="one">pēc %d dienas</item>
+        <item quantity="other">pēc %d dienām</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Sūtītājs: %1$s</string>
+    <string name="event_repeats">Atkārtojas</string>
+    <string name="event_countdown">Skaitīt dienas līdz šim</string>
+    <string name="event_countdown_hint">Slaidrādē un kalendāra augšdaļā</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s jums nosūtīja notikumu</string>
+    <string name="invitation_body">Vai pievienot to šī rāmja kalendāram?</string>
+    <string name="invitation_accept">Pievienot kalendāram</string>
+    <string name="invitation_decline">Noraidīt</string>
+    <string name="invitation_later">Ne tagad</string>
+    <string name="invitation_pill_one">Notikums no: %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="zero">%d ielūgumi uz notikumiem</item>
+        <item quantity="one">%d ielūgums uz notikumu</item>
+        <item quantity="other">%d ielūgumi uz notikumiem</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Kalendārs</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Kalendārs</string>
+    <string name="settings_calendar_open">Atvērt kalendāru</string>
+    <string name="settings_calendar_view">Kalendāra skats</string>
+    <string name="settings_calendar_start_today">Sākt ar šodienu</string>
+    <string name="settings_calendar_fade_past">Pabalināt pagājušos notikumus</string>
+    <string name="settings_calendar_week_numbers">Nedēļu numuri</string>
+    <string name="settings_calendar_sidebar">Kalendārs blakus fotoattēliem</string>
+    <string name="settings_calendar_countdowns">Atpakaļskaitīšana slaidrādē</string>
+    <string name="settings_calendar_timed">Rādīt kalendāru noteiktos laikos</string>
+    <string name="settings_calendar_timed_from">No</string>
+    <string name="settings_calendar_timed_to">Līdz</string>
+    <string name="settings_calendar_timed_add">Pievienot laiku</string>
+    <string name="settings_calendar_timed_remove">Noņemt</string>
+    <string name="settings_calendar_sources">Kalendāri šajā rāmī</string>
+    <string name="settings_calendar_sources_hint">Kalendārus pievieno un pārvalda kinframe lietotnē vai vietnē.</string>
+    <string name="calendar_status_ok">Atjaunināts</string>
+    <string name="calendar_status_syncing">Notiek sinhronizācija…</string>
+    <string name="calendar_status_failed">Neizdevās sinhronizēt</string>
+    <string name="calendar_status_auth_failed">Jāpierakstās</string>
+    <string name="calendar_status_disabled">Izslēgts</string>
+</resources>

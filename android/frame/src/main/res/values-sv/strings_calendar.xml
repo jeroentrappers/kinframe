@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Idag</string>
+    <string name="calendar_tomorrow">Imorgon</string>
+    <string name="calendar_view_month">Månad</string>
+    <string name="calendar_view_week">Vecka</string>
+    <string name="calendar_view_four_day">4 dagar</string>
+    <string name="calendar_week_number">Vecka %1$d</string>
+    <string name="calendar_previous">Föregående</string>
+    <string name="calendar_next">Nästa</string>
+    <string name="calendar_sync_now">Synka nu</string>
+    <string name="calendar_syncing">Synkar…</string>
+    <string name="calendar_close">Stäng kalendern</string>
+    <string name="calendar_all_day">Heldag</string>
+    <string name="calendar_received">Mottagna händelser</string>
+    <string name="calendar_nothing">Inget planerat</string>
+    <string name="calendar_nothing_today">Inget mer planerat idag</string>
+    <string name="calendar_empty_title">Inga kalendrar än</string>
+    <string name="calendar_empty_body">Lägg till en familjekalender från kinframe-appen eller webbplatsen, under fotoramens Kalendrar. Hur många kalendrar som helst kan visas tillsammans här.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">till %1$s</string>
+    <string name="calendar_from">från %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d till</item>
+        <item quantity="other">+%d till</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Idag</string>
+    <string name="countdown_tomorrow">Imorgon</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d dag</item>
+        <item quantity="other">%d dagar</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">om %d dag</item>
+        <item quantity="other">om %d dagar</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Skickad av %1$s</string>
+    <string name="event_repeats">Upprepas</string>
+    <string name="event_countdown">Räkna ner till detta</string>
+    <string name="event_countdown_hint">I bildspelet och högst upp i kalendern</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s skickade en händelse till dig</string>
+    <string name="invitation_body">Lägga till den i fotoramens kalender?</string>
+    <string name="invitation_accept">Lägg till i kalendern</string>
+    <string name="invitation_decline">Avböj</string>
+    <string name="invitation_later">Inte nu</string>
+    <string name="invitation_pill_one">Händelse från %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d inbjudan till händelse</item>
+        <item quantity="other">%d inbjudningar till händelser</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Kalender</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Kalender</string>
+    <string name="settings_calendar_open">Öppna kalendern</string>
+    <string name="settings_calendar_view">Kalendervy</string>
+    <string name="settings_calendar_start_today">Börja med idag</string>
+    <string name="settings_calendar_fade_past">Tona ner tidigare händelser</string>
+    <string name="settings_calendar_week_numbers">Veckonummer</string>
+    <string name="settings_calendar_sidebar">Kalender bredvid fotona</string>
+    <string name="settings_calendar_countdowns">Nedräkningar i bildspelet</string>
+    <string name="settings_calendar_timed">Visa kalendern på bestämda tider</string>
+    <string name="settings_calendar_timed_from">Från</string>
+    <string name="settings_calendar_timed_to">Till</string>
+    <string name="settings_calendar_timed_add">Lägg till en tid</string>
+    <string name="settings_calendar_timed_remove">Ta bort</string>
+    <string name="settings_calendar_sources">Kalendrar på den här fotoramen</string>
+    <string name="settings_calendar_sources_hint">Kalendrar läggs till och hanteras från kinframe-appen eller webbplatsen.</string>
+    <string name="calendar_status_ok">Uppdaterad</string>
+    <string name="calendar_status_syncing">Synkar…</string>
+    <string name="calendar_status_failed">Kunde inte synka</string>
+    <string name="calendar_status_auth_failed">Inloggning krävs</string>
+    <string name="calendar_status_disabled">Avstängd</string>
+</resources>

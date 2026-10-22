@@ -10,6 +10,7 @@ describe('push payloads', () => {
 		expect(pushUrl({ key: 'reaction', ids: { send_id: SEND, placement_id: 'x', frame_id: FRAME } })).toBe(`/history/${SEND}`);
 		expect(pushUrl({ key: 'join_request', ids: { frame_id: FRAME, request_id: 'r' } })).toBe(`/frames/${FRAME}?tab=people`);
 		expect(pushUrl({ key: 'membership', ids: { frame_id: FRAME } })).toBe(`/frames/${FRAME}`);
+		expect(pushUrl({ type: 'event_invitation.decided', key: 'event_invitation.accepted', ids: { frame_id: FRAME } })).toBe(`/frames/${FRAME}?tab=calendar`);
 		expect(pushUrl({})).toBe('/history');
 		// Never builds a URL from something that isn't an id.
 		expect(pushUrl({ ids: { send_id: '../../evil' } })).toBe('/history');

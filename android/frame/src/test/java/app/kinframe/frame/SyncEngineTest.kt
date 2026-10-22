@@ -73,6 +73,23 @@ class SyncEngineTest : SyncTestBase() {
     }
 
     @Test
+    fun calendarIsPersistedAndClearedByNull() = runBlocking {
+        val cal = """{"generated_at":"2026-10-22T12:00:00Z","timezone":"Europe/Brussels","window":{"from":"2026-09-22","to":"2026-11-21"},
+            "sources":[{"id":"s1","kind":"ics","name":"Family","color":"coral","status":"ok"}],
+            "events":[{"id":"ev-00000001","source_id":"s1","title":"Swimming","all_day":false,"start_at":"2026-10-22T14:30:00Z","end_at":"2026-10-22T15:30:00Z"}],
+            "countdowns":[]}"""
+        fake.pages[0] = page(1, false, """{"seq":1,"type":"calendar","calendar":$cal}""")
+        engine.pull()
+        val stored = app.kinframe.core.api.FrameCalendar.parse(db.syncState().get()!!.calendarJson)
+        assertEquals("Swimming", stored!!.events.single().title)
+        assertEquals("coral", stored.sources.single().color)
+        // The last calendar was removed on the server: `calendar: null` drops it.
+        fake.pages[1] = page(2, false, """{"seq":2,"type":"calendar","calendar":null}""")
+        engine.pull()
+        assertNull(db.syncState().get()!!.calendarJson)
+    }
+
+    @Test
     fun pagesAreFollowedUntilHasMoreIsFalse() = runBlocking {
         fake.pages[0] = page(1, true, up(1, placement("a", byteArrayOf(1))))
         fake.pages[1] = page(2, true, up(2, placement("b", byteArrayOf(2))))

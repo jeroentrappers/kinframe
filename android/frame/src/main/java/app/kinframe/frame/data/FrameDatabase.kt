@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class],
-    version = 4,
+    version = 6,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -33,10 +33,32 @@ abstract class FrameDatabase : RoomDatabase() {
     companion object {
         const val NAME = "frame.db"
 
-        /** v4: who shared a placement from another frame (caption credit). */
-        val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+        /** v6: who shared a placement from another frame (caption credit). */
+        val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
             override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE placements ADD COLUMN sharedByName TEXT DEFAULT NULL")
+            }
+        }
+
+        /** v5: the merged calendar (`sync_state.calendarJson`). */
+        val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN calendarJson TEXT DEFAULT NULL")
+            }
+        }
+
+        /** v4: Live/Motion Photo clips (`placement.motion`). */
+        val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionUrl TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionSha256 TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionBytes INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionMime TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionDurationMs INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionHasAudio INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionLocalFile TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionAttempts INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE placements ADD COLUMN motionNextAttemptAt INTEGER NOT NULL DEFAULT 0")
             }
         }
 
@@ -54,13 +76,13 @@ abstract class FrameDatabase : RoomDatabase() {
             }
         }
 
-        fun open(context: Context): FrameDatabase =
-            Room.databaseBuilder(context, FrameDatabase::class.java, NAME)
+        fun open(context: Context, name: String = NAME): FrameDatabase =
+            Room.databaseBuilder(context, FrameDatabase::class.java, name)
                 // WAL even on low-RAM devices (Room would pick TRUNCATE there): crash-safe and lets the
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

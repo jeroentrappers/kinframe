@@ -21,6 +21,7 @@ import app.kinframe.family.data.ServerRepository
 import app.kinframe.family.notify.PushMessage
 import app.kinframe.family.notify.PushRegistrar
 import app.kinframe.family.send.ItemSource
+import app.kinframe.family.send.prep.MediaPreparer
 import app.kinframe.family.send.MediaFiles
 import app.kinframe.family.send.OutboxState
 import app.kinframe.family.send.OutboxStore
@@ -132,9 +133,10 @@ class AppGraph(
         val s = servers.current.value ?: return null
         val a = api.value ?: return null
         val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), auth)
+        val preparer = MediaPreparer(app)
         return SendRunner(outbox, a, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
             runCatching { MediaFiles.sha256(ItemSource(app, item).open(0)) }.getOrNull()
-        })
+        }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) })
     }
 
     fun onSent(sendId: String) {

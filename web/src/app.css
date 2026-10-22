@@ -643,6 +643,16 @@ hr.sep {
 	box-shadow: 0 0 0 3px color-mix(in srgb, #3fa564 22%, transparent);
 }
 
+/* Calendar palette (README §5.8): set --ev-light/--ev-dark inline, read --ev. */
+.cal-color {
+	--ev: var(--ev-light, #4f9fdf);
+}
+@media (prefers-color-scheme: dark) {
+	.cal-color {
+		--ev: var(--ev-dark, #87bfeb);
+	}
+}
+
 /* ------------------------------------------------------------------ feedback */
 
 .skeleton {

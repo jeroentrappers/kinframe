@@ -55,6 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.BulkAction
 import app.kinframe.core.api.Frame
+import app.kinframe.core.api.LivePhotos
 import app.kinframe.core.api.MediaKind
 import app.kinframe.core.api.SleepScheduleDto
 import app.kinframe.core.design.Kin
@@ -74,6 +75,7 @@ import app.kinframe.family.ui.SectionTitle
 import app.kinframe.family.ui.Skeleton
 import app.kinframe.family.ui.SkeletonList
 import app.kinframe.family.ui.Surface
+import app.kinframe.family.ui.LiveBadge
 import app.kinframe.family.ui.SwitchRow
 import app.kinframe.family.ui.Thumb
 import app.kinframe.family.ui.ToggleChip
@@ -145,6 +147,7 @@ fun LibraryTab(
                     ) {
                         Thumb(pl.item.thumbUrl, null, Modifier.fillMaxSize(), corner = 10.dp)
                         if (pl.item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(22.dp), tint = Color.White)
+                        if (pl.item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(4.dp))
                         if (pl.sharedByName != null) Icon(KinIcons.Share, null, Modifier.align(Alignment.BottomEnd).padding(5.dp).size(20.dp)
                             .clip(CircleShape).background(Color.Black.copy(alpha = 0.45f)).padding(3.dp), tint = Color.White)
                         if (pl.pendingModeration) Text(stringResource(R.string.library_pending), style = Kin.type.caption, color = Color.White,
@@ -234,6 +237,12 @@ fun SettingsTab(
                         }
                     }
                     SwitchRow(stringResource(R.string.fs_fill), s.slideshow.fill, { vm.set("slideshow.fill", it) }, hint = stringResource(R.string.fs_fill_hint))
+                    Text(stringResource(R.string.fs_live_photos), style = Kin.type.label, color = c.ink)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(LivePhotos.ON to R.string.fs_live_on, LivePhotos.TAP to R.string.fs_live_tap, LivePhotos.OFF to R.string.fs_live_off).forEach { (v, l) ->
+                            ToggleChip(stringResource(l), s.slideshow.livePhotos == v, { vm.set("slideshow.live_photos", v) })
+                        }
+                    }
                     SwitchRow(stringResource(R.string.fs_show_caption), s.widgets.caption, { vm.set("widgets.caption", it) })
                     SwitchRow(stringResource(R.string.fs_show_clock), s.widgets.clock, { vm.set("widgets.clock", it) })
                 }

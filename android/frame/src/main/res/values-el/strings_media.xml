@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Πατήστε για αναπαραγωγή</string>
+    <string name="settings_live_photos">Ζωντανές φωτογραφίες</string>
+    <string name="live_photos_on">Αναπαραγωγή κατά την εμφάνιση</string>
+    <string name="live_photos_tap">Αναπαραγωγή με πάτημα</string>
+    <string name="live_photos_off">Μόνο φωτογραφία</string>
+</resources>

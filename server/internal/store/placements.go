@@ -213,7 +213,7 @@ func (s *Store) SharedDeliveredOn(ctx context.Context, sharerID, frameID uuid.UU
 // LivePlacementsOfMedia lists live placement IDs of a media on a frame (for feed bumps).
 func (s *Store) LivePlacementsOfMedia(ctx context.Context, q db.DBTX, mediaID, frameID uuid.UUID) ([]uuid.UUID, error) {
 	rows, err := q.Query(ctx, `SELECT p.id FROM placements p JOIN items i ON i.id = p.item_id
-		WHERE i.media_id = $1 AND p.frame_id = $2 AND p.removed_at IS NULL AND p.status <> 'failed'`, mediaID, frameID)
+		WHERE (i.media_id = $1 OR i.motion_media_id = $1) AND p.frame_id = $2 AND p.removed_at IS NULL AND p.status <> 'failed'`, mediaID, frameID)
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,10 @@ func (s *Store) ListPlacements(ctx context.Context, f PlacementFilter) ([]Placem
 	if f.SenderID != nil {
 		where += ` AND (i.sender_user_id = ` + arg(*f.SenderID) + ` OR i.sender_frame_id = $` + fmt.Sprint(len(args)) + `)`
 	}
-	if f.Kind != nil {
+	if f.Kind != nil && *f.Kind == "live" {
+		// Live photos also count as photos (kind=photo includes them).
+		where += ` AND mm.id IS NOT NULL AND mm.status <> 'failed'`
+	} else if f.Kind != nil {
 		where += ` AND m.kind = ` + arg(*f.Kind)
 	}
 	if f.AlbumID != nil {

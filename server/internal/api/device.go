@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -212,9 +215,21 @@ type mediaJSON struct {
 	PosterURL *string `json:"poster_url"`
 }
 
+type motionJSON struct {
+	URL        string `json:"url"`
+	SHA256     string `json:"sha256"`
+	Bytes      int64  `json:"bytes"`
+	Mime       string `json:"mime"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	DurationMS int    `json:"duration_ms"`
+	HasAudio   bool   `json:"has_audio"`
+}
+
 type placementChange struct {
 	gen.Placement
-	Media *mediaJSON `json:"media,omitempty"`
+	Media  *mediaJSON  `json:"media,omitempty"`
+	Motion *motionJSON `json:"motion,omitempty"`
 }
 
 func deviceTarget(d *store.Device) store.MediaTarget {
@@ -243,6 +258,9 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 		var mediaIDs []uuid.UUID
 		for _, p := range placements {
 			mediaIDs = append(mediaIDs, p.MediaID)
+			if p.MotionMediaID != nil {
+				mediaIDs = append(mediaIDs, *p.MotionMediaID)
+			}
 		}
 		if renditions, err = s.st.RenditionsFor(ctx, mediaIDs); err != nil {
 			return nil, err
@@ -295,6 +313,22 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				}
 				pc.Media = m
 			}
+			if p.IsLive() && pc.Media != nil {
+				mv := worker.Variant(string(media.Video), target)
+				for _, r := range renditions[*p.MotionMediaID] {
+					if r.Variant != mv {
+						continue
+					}
+					pc.Motion = &motionJSON{
+						URL:    fmt.Sprintf("%s/v1/device/media/%s?variant=motion", s.cfg.PublicURL, p.Placement.ID),
+						SHA256: r.SHA256, Bytes: r.Bytes, Mime: r.Mime, Width: r.Width, Height: r.Height,
+					}
+					if p.MotionDurationMS != nil {
+						pc.Motion.DurationMS = *p.MotionDurationMS
+					}
+					pc.Motion.HasAudio = p.MotionHasAudio != nil && *p.MotionHasAudio
+				}
+			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "placement.upsert", "placement": pc})
 		case store.FeedAlbum:
 			a, found := albums[e.EntityID]
@@ -323,6 +357,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 				continue
 			}
 			out = append(out, map[string]any{"seq": e.Seq, "type": "weather", "weather": w})
+		case store.FeedCalendar:
+			c, err := s.frameCalendar(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if c == nil && snapshot {
+				continue
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "calendar", "calendar": c})
 		case store.FeedFrame:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,
@@ -439,11 +482,19 @@ func (s *Server) deviceGetMedia(w http.ResponseWriter, r *http.Request) {
 		s.serveBlob(w, r, *p.SenderAvatarKey, "image/webp", "", "private, max-age=86400")
 		return
 	}
-	if variant != "" && variant != "display" && variant != "poster" {
+	if variant != "" && variant != "display" && variant != "poster" && variant != "motion" {
 		problem.Write(w, r, problem.Validation("variant", "enum", "unknown variant").WithStatus(http.StatusBadRequest))
 		return
 	}
-	rend, err := s.st.GetRendition(ctx, p.MediaID, worker.Variant(p.Kind, deviceTarget(d)))
+	mediaID, kind := p.MediaID, p.Kind
+	if variant == "motion" {
+		if !p.IsLive() {
+			problem.Write(w, r, problem.New(problem.NotFound, "not available (yet)"))
+			return
+		}
+		mediaID, kind = *p.MotionMediaID, string(media.Video)
+	}
+	rend, err := s.st.GetRendition(ctx, mediaID, worker.Variant(kind, deviceTarget(d)))
 	if err == store.ErrNotFound {
 		problem.Write(w, r, problem.New(problem.NotFound, "rendition not ready"))
 		return
@@ -683,7 +734,8 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 	if err != nil {
 		return nil, err
 	}
-	n, err := io.Copy(out, io.LimitReader(req.Body, maxImportBytes+1))
+	hasher := sha256.New()
+	n, err := io.Copy(io.MultiWriter(out, hasher), io.LimitReader(req.Body, maxImportBytes+1))
 	if cerr := out.Close(); err == nil {
 		err = cerr
 	}
@@ -696,17 +748,31 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		cleanup()
 		return nil, problem.New(problem.UploadTooLarge, "imports are limited to 512 MiB")
 	}
+	sha := hex.EncodeToString(hasher.Sum(nil))
+	// The same file again (a re-import, or a restore from a kinframe export of
+	// this frame): return what the frame already has.
+	if dup, err := s.st.PlacementOfFile(ctx, f.ID, sha); err == nil {
+		cleanup()
+		return ok(s.placementJSON(dup)), nil
+	} else if err != store.ErrNotFound {
+		cleanup()
+		return nil, err
+	}
 	kind, mime, err := media.Sniff(path)
 	if err != nil {
 		cleanup()
 		return nil, problem.New(problem.UnsupportedMedia, "")
 	}
+	var caption *string
+	if c := req.Params.Caption; c != nil && strings.TrimSpace(*c) != "" {
+		caption = ptr(strings.TrimSpace(*c))
+	}
 	mediaID, itemID, placementID := store.NewID(), store.NewID(), store.NewID()
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
-		if err := tx.CreateMedia(ctx, store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true}); err != nil {
+		if err := tx.CreateMedia(ctx, store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true, SourceSHA256: &sha}); err != nil {
 			return err
 		}
-		if err := tx.CreateItem(ctx, store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, CapturedHint: req.Params.XCapturedAt}); err != nil {
+		if err := tx.CreateItem(ctx, store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, Caption: caption, CapturedHint: req.Params.XCapturedAt}); err != nil {
 			return err
 		}
 		if err := tx.CreatePlacement(ctx, store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending"}); err != nil {
@@ -723,6 +789,20 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		return nil, err
 	}
 	return accepted(s.placementJSON(row)), nil
+}
+
+// DeviceImportCheck reports which file hashes the frame already has, so an
+// import from SD/USB can skip duplicates before uploading them.
+func (s *Server) DeviceImportCheck(ctx context.Context, req gen.DeviceImportCheckRequestObject) (gen.DeviceImportCheckResponseObject, error) {
+	f, err := s.deviceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	known, err := s.st.KnownFileHashes(ctx, f.ID, req.Body.Sha256)
+	if err != nil {
+		return nil, err
+	}
+	return ok(map[string]any{"known": known}), nil
 }
 
 // placementIDs are the ids a push about a placement carries (README §6.3).

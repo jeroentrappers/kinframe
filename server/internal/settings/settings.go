@@ -27,9 +27,11 @@ func Defaults(language, timezone string) Doc {
 			"interval_s": 30, "transition": "crossfade", "transition_ms": 800, "order": "received",
 			"reverse": false, "caption_date": "received", "fill": true, "background": "blur",
 			"pair_portraits": true, "collage": false, "collage_max": 3, "album_id": nil, "on_this_day": false,
+			"live_photos": "on",
 		},
 		"widgets": map[string]any{
 			"caption": true, "avatar": true, "clock": true, "date": true, "weather": false, "clock_24h": true,
+			"calendar_sidebar": false, "countdowns": true,
 		},
 		"video": map[string]any{
 			"autoplay": true, "playback": "once_hold", "volume": 60, "auto_mute_min": nil,
@@ -45,6 +47,10 @@ func Defaults(language, timezone string) Doc {
 		},
 		"locale": map[string]any{
 			"language": language, "timezone": timezone, "temperature_unit": "c", "first_day_of_week": "mon",
+		},
+		"calendar": map[string]any{
+			"view": "week", "start_on_today": true, "fade_past": true, "week_numbers": false,
+			"past_days": 30, "future_days": 30, "timed_views": []any{},
 		},
 		"location":      nil,
 		"notifications": map[string]any{"sound": true, "volume": 40},
