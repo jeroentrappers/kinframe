@@ -199,6 +199,13 @@ for (const vp of VIEWPORTS) {
 				await page.getByText('Slideshow').first().waitFor();
 				await page.getByLabel('Order', { exact: true }).selectOption('shuffle');
 				await shot(page, n('10-frame-settings'));
+				await page.getByRole('combobox', { name: 'Find a town or city' }).fill('gen');
+				await page.getByRole('listbox', { name: 'Places' }).getByRole('option').first().waitFor();
+				await page.getByRole('heading', { name: 'Location & weather' }).scrollIntoViewIfNeeded();
+				await page.waitForTimeout(300);
+				await page.screenshot({ path: `${DIR}/${n('10b-frame-settings-location')}.png` });
+				await page.getByRole('combobox', { name: 'Find a town or city' }).press('Enter');
+				await shot(page, n('10c-frame-settings-weather'));
 
 				await page.goto('/i/tok_invite_preview_000000000');
 				await page.getByText('Join The cabin').waitFor();

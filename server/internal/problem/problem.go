@@ -15,31 +15,33 @@ import (
 type Code string
 
 const (
-	Unauthorized      Code = "unauthorized"
-	TokenExpired      Code = "token_expired"
-	DeviceRevoked     Code = "device_revoked"
-	Forbidden         Code = "forbidden"
-	MissingPermission Code = "missing_permission"
-	NotFound          Code = "not_found"
-	CodeInvalid       Code = "code_invalid"
-	CodeExpired       Code = "code_expired"
-	InviteInvalid     Code = "invite_invalid"
-	InviteExpired     Code = "invite_expired"
-	AlreadyMember     Code = "already_member"
-	ValidationFailed  Code = "validation_failed"
-	TooManyItems      Code = "too_many_items"
-	VideoTooLong      Code = "video_too_long"
-	UploadTooLarge    Code = "upload_too_large"
-	UploadNotFound    Code = "upload_not_found"
-	UnsupportedMedia  Code = "unsupported_media"
-	CorruptMedia      Code = "corrupt_media"
-	VersionConflict   Code = "version_conflict"
-	FrameOffline      Code = "frame_offline"
-	CommandTimeout    Code = "command_timeout"
-	OwnerCannotLeave  Code = "owner_cannot_leave"
-	RateLimited       Code = "rate_limited"
-	AppUpdateRequired Code = "app_update_required"
-	ServerError       Code = "server_error"
+	Unauthorized        Code = "unauthorized"
+	TokenExpired        Code = "token_expired"
+	DeviceRevoked       Code = "device_revoked"
+	Forbidden           Code = "forbidden"
+	MissingPermission   Code = "missing_permission"
+	NotFound            Code = "not_found"
+	CodeInvalid         Code = "code_invalid"
+	CodeExpired         Code = "code_expired"
+	InviteInvalid       Code = "invite_invalid"
+	InviteExpired       Code = "invite_expired"
+	AlreadyMember       Code = "already_member"
+	ValidationFailed    Code = "validation_failed"
+	TooManyItems        Code = "too_many_items"
+	VideoTooLong        Code = "video_too_long"
+	UploadTooLarge      Code = "upload_too_large"
+	UploadNotFound      Code = "upload_not_found"
+	UnsupportedMedia    Code = "unsupported_media"
+	CorruptMedia        Code = "corrupt_media"
+	VersionConflict     Code = "version_conflict"
+	FrameOffline        Code = "frame_offline"
+	CommandTimeout      Code = "command_timeout"
+	OwnerCannotLeave    Code = "owner_cannot_leave"
+	RateLimited         Code = "rate_limited"
+	AppUpdateRequired   Code = "app_update_required"
+	UpstreamUnavailable Code = "upstream_unavailable"
+	FeatureDisabled     Code = "feature_disabled"
+	ServerError         Code = "server_error"
 )
 
 // defaults per code: HTTP status and English title.
@@ -47,31 +49,33 @@ var defaults = map[Code]struct {
 	status int
 	title  string
 }{
-	Unauthorized:      {401, "Sign-in required"},
-	TokenExpired:      {401, "The access token has expired"},
-	DeviceRevoked:     {401, "This frame has been removed"},
-	Forbidden:         {403, "You can't do that"},
-	MissingPermission: {403, "You don't have permission for this"},
-	NotFound:          {404, "Not found"},
-	CodeInvalid:       {404, "That code doesn't match a frame"},
-	CodeExpired:       {410, "This code has expired"},
-	InviteInvalid:     {404, "This invite link is not valid"},
-	InviteExpired:     {410, "This invite link has expired"},
-	AlreadyMember:     {409, "You are already a member of this frame"},
-	ValidationFailed:  {422, "Some fields are not valid"},
-	TooManyItems:      {422, "Too many items in one send"},
-	VideoTooLong:      {422, "The video is too long"},
-	UploadTooLarge:    {413, "The upload is too large"},
-	UploadNotFound:    {422, "The upload was not found or has expired"},
-	UnsupportedMedia:  {422, "This file type is not supported"},
-	CorruptMedia:      {422, "This file could not be read"},
-	VersionConflict:   {412, "Someone else changed this in the meantime"},
-	FrameOffline:      {409, "The frame is offline"},
-	CommandTimeout:    {504, "The frame did not respond in time"},
-	OwnerCannotLeave:  {409, "Transfer ownership before leaving"},
-	RateLimited:       {429, "Too many attempts; try again later"},
-	AppUpdateRequired: {426, "The frame app must be updated"},
-	ServerError:       {500, "Something went wrong on the server"},
+	Unauthorized:        {401, "Sign-in required"},
+	TokenExpired:        {401, "The access token has expired"},
+	DeviceRevoked:       {401, "This frame has been removed"},
+	Forbidden:           {403, "You can't do that"},
+	MissingPermission:   {403, "You don't have permission for this"},
+	NotFound:            {404, "Not found"},
+	CodeInvalid:         {404, "That code doesn't match a frame"},
+	CodeExpired:         {410, "This code has expired"},
+	InviteInvalid:       {404, "This invite link is not valid"},
+	InviteExpired:       {410, "This invite link has expired"},
+	AlreadyMember:       {409, "You are already a member of this frame"},
+	ValidationFailed:    {422, "Some fields are not valid"},
+	TooManyItems:        {422, "Too many items in one send"},
+	VideoTooLong:        {422, "The video is too long"},
+	UploadTooLarge:      {413, "The upload is too large"},
+	UploadNotFound:      {422, "The upload was not found or has expired"},
+	UnsupportedMedia:    {422, "This file type is not supported"},
+	CorruptMedia:        {422, "This file could not be read"},
+	VersionConflict:     {412, "Someone else changed this in the meantime"},
+	FrameOffline:        {409, "The frame is offline"},
+	CommandTimeout:      {504, "The frame did not respond in time"},
+	OwnerCannotLeave:    {409, "Transfer ownership before leaving"},
+	RateLimited:         {429, "Too many attempts; try again later"},
+	AppUpdateRequired:   {426, "The frame app must be updated"},
+	UpstreamUnavailable: {502, "An external service is not reachable right now"},
+	FeatureDisabled:     {503, "This feature is turned off on this server"},
+	ServerError:         {500, "Something went wrong on the server"},
 }
 
 // FieldError is one entry of Problem.Errors.

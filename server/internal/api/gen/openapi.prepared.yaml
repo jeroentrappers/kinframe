@@ -205,35 +205,7 @@ components:
                         - reset
                     type: string
                 weather:
-                    properties:
-                        current:
-                            properties:
-                                code:
-                                    description: WMO weather code
-                                    type: integer
-                                is_day:
-                                    type: boolean
-                                temp_c:
-                                    type: number
-                            type: object
-                        daily:
-                            items:
-                                properties:
-                                    code:
-                                        type: integer
-                                    date:
-                                        format: date
-                                        type: string
-                                    max_c:
-                                        type: number
-                                    min_c:
-                                        type: number
-                                type: object
-                            type: array
-                        fetched_at:
-                            format: date-time
-                            type: string
-                    type: object
+                    $ref: '#/components/schemas/Weather'
             required:
                 - seq
                 - type
@@ -380,6 +352,10 @@ components:
                     type: string
                 version:
                     type: string
+                weather:
+                    default: false
+                    description: True when the server fetches weather for frames and serves `/v1/geocode`.
+                    type: boolean
                 web:
                     format: uri
                     type: string
@@ -560,15 +536,25 @@ components:
                             type: string
                     type: object
                 location:
-                    description: Used for weather and sun-based brightness. Set by owner/admin.
+                    description: |
+                        Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
+                        Changing it (or turning `widgets.weather` on) makes the server fetch weather right away.
                     nullable: true
                     properties:
                         lat:
+                            maximum: 90
+                            minimum: -90
                             type: number
                         lon:
+                            maximum: 180
+                            minimum: -180
                             type: number
                         name:
+                            maxLength: 100
                             type: string
+                    required:
+                        - lat
+                        - lon
                     type: object
                 notifications:
                     properties:
@@ -699,6 +685,7 @@ components:
                             type: boolean
                         weather:
                             default: false
+                            description: Current weather widget; needs `location`.
                             type: boolean
                     type: object
             required:
@@ -1062,6 +1049,43 @@ components:
                 send:
                     type: boolean
             type: object
+        Place:
+            description: A geocoding result (Open-Meteo geocoding API).
+            properties:
+                admin1:
+                    description: Region / state / province
+                    example: Flanders
+                    nullable: true
+                    type: string
+                country:
+                    example: Belgium
+                    nullable: true
+                    type: string
+                country_code:
+                    description: ISO 3166-1 alpha-2
+                    example: BE
+                    nullable: true
+                    type: string
+                lat:
+                    maximum: 90
+                    minimum: -90
+                    type: number
+                lon:
+                    maximum: 180
+                    minimum: -180
+                    type: number
+                name:
+                    example: Gent
+                    type: string
+                timezone:
+                    example: Europe/Brussels
+                    nullable: true
+                    type: string
+            required:
+                - name
+                - lat
+                - lon
+            type: object
         Placement:
             properties:
                 album_ids:
@@ -1198,6 +1222,8 @@ components:
                 - owner_cannot_leave
                 - rate_limited
                 - app_update_required
+                - upstream_unavailable
+                - feature_disabled
                 - server_error
             type: string
         PushEndpoint:
@@ -1481,6 +1507,151 @@ components:
             required:
                 - id
                 - display_name
+            type: object
+        Weather:
+            description: |
+                Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
+                removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
+                Values are always metric (°C, km/h, mm); clients convert for `locale.temperature_unit`. Local times carry the
+                location's UTC offset. Data by Open-Meteo.com (CC BY 4.0); clients showing it must credit "Weather data by
+                Open-Meteo.com".
+            nullable: true
+            properties:
+                current:
+                    properties:
+                        apparent_c:
+                            description: Feels-like temperature
+                            nullable: true
+                            type: number
+                        code:
+                            description: WMO weather code (0–99)
+                            type: integer
+                        humidity_pct:
+                            nullable: true
+                            type: integer
+                        is_day:
+                            type: boolean
+                        precip_mm:
+                            nullable: true
+                            type: number
+                        temp_c:
+                            type: number
+                        time:
+                            format: date-time
+                            type: string
+                        wind_dir_deg:
+                            0 = north: null
+                            description: Direction the wind comes from
+                            nullable: true
+                            type: integer
+                        wind_kmh:
+                            nullable: true
+                            type: number
+                    required:
+                        - temp_c
+                        - code
+                        - is_day
+                    type: object
+                daily:
+                    description: Up to 7 days, starting today (in the location's time zone).
+                    items:
+                        properties:
+                            code:
+                                type: integer
+                            date:
+                                format: date
+                                type: string
+                            max_c:
+                                type: number
+                            min_c:
+                                type: number
+                            precip_mm:
+                                nullable: true
+                                type: number
+                            precip_prob:
+                                description: Maximum hourly probability
+                                nullable: true
+                                percent: null
+                                type: integer
+                            sunrise:
+                                format: date-time
+                                nullable: true
+                                type: string
+                            sunset:
+                                format: date-time
+                                nullable: true
+                                type: string
+                        required:
+                            - date
+                            - min_c
+                            - max_c
+                            - code
+                        type: object
+                    type: array
+                fetched_at:
+                    description: When the server fetched this from Open-Meteo
+                    format: date-time
+                    type: string
+                hourly:
+                    description: The next 24 hours, starting with the current hour.
+                    items:
+                        properties:
+                            code:
+                                type: integer
+                            is_day:
+                                type: boolean
+                            precip_prob:
+                                description: Percent
+                                nullable: true
+                                type: integer
+                            temp_c:
+                                type: number
+                            time:
+                                format: date-time
+                                type: string
+                        required:
+                            - time
+                            - temp_c
+                            - code
+                        type: object
+                    type: array
+                location:
+                    properties:
+                        lat:
+                            type: number
+                        lon:
+                            type: number
+                        name:
+                            nullable: true
+                            type: string
+                    type: object
+                timezone:
+                    example: Europe/Brussels
+                    type: string
+                units:
+                    properties:
+                        precipitation:
+                            default: mm
+                            enum:
+                                - mm
+                            type: string
+                        temperature:
+                            default: c
+                            enum:
+                                - c
+                            type: string
+                        wind_speed:
+                            default: km/h
+                            enum:
+                                - km/h
+                            type: string
+                    type: object
+                utc_offset_seconds:
+                    type: integer
+            required:
+                - fetched_at
+                - current
+                - daily
             type: object
     securitySchemes:
         deviceAuth:
@@ -2735,6 +2906,51 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - frames
+    /v1/geocode:
+        get:
+            description: |
+                Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
+                server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
+                no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
+                has weather disabled.
+            operationId: geocode
+            parameters:
+                - in: query
+                  name: q
+                  required: true
+                  schema:
+                    maxLength: 100
+                    minLength: 2
+                    type: string
+                - description: Language of place names (ISO 639-1), e.g. `nl`
+                  in: query
+                  name: lang
+                  schema:
+                    default: en
+                    pattern: ^[a-zA-Z]{2}$
+                    type: string
+                - in: query
+                  name: count
+                  schema:
+                    default: 8
+                    maximum: 20
+                    minimum: 1
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/Place'
+                                type: array
+                    description: Matching places, best first
+                "429":
+                    $ref: '#/components/responses/Problem'
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - weather
     /v1/invites/{token}:
         get:
             description: Requires sign-in so invite tokens can't be enumerated anonymously.
@@ -3198,6 +3414,8 @@ tags:
     - name: library
     - name: albums
     - name: settings
+    - description: Place search and weather. Data by Open-Meteo.com (CC BY 4.0), fetched and cached by the server.
+      name: weather
     - description: Frame enrollment and token exchange (unauthenticated or secret-based).
       name: devices
     - description: Endpoints called by the frame itself (device token).

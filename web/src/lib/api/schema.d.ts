@@ -604,6 +604,28 @@ export interface paths {
         patch: operations["updateFrameSettings"];
         trace?: never;
     };
+    "/v1/geocode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
+         *     server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
+         *     no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
+         *     has weather disabled.
+         */
+        get: operations["geocode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/devices/enroll": {
         parameters: {
             query?: never;
@@ -855,6 +877,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
+         *     than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
+         *     whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
+         *     server's minimum version (`426` is never returned here).
+         */
+        get: operations["deviceCheckUpdate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/update/apk/{versionCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The mirrored APK. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match. */
+        get: operations["deviceGetUpdateApk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/operator/stats": {
         parameters: {
             query?: never;
@@ -910,7 +971,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "server_error";
         Discovery: {
             name: string;
             version: string;
@@ -931,6 +992,11 @@ export interface components {
              * @default false
              */
             dev_auth?: boolean;
+            /**
+             * @description True when the server fetches weather for frames and serves `/v1/geocode`.
+             * @default false
+             */
+            weather?: boolean;
         };
         Limits: {
             /** @default 200 */
@@ -941,6 +1007,27 @@ export interface components {
             max_upload_bytes: number;
             /** @default 30 */
             trash_retention_days?: number;
+        };
+        /** @description A geocoding result (Open-Meteo geocoding API). */
+        Place: {
+            /** @example Gent */
+            name: string;
+            /**
+             * @description Region / state / province
+             * @example Flanders
+             */
+            admin1?: string | null;
+            /** @example Belgium */
+            country?: string | null;
+            /**
+             * @description ISO 3166-1 alpha-2
+             * @example BE
+             */
+            country_code?: string | null;
+            lat: number;
+            lon: number;
+            /** @example Europe/Brussels */
+            timezone?: string | null;
         };
         User: {
             id: components["schemas"]["Id"];
@@ -1042,6 +1129,16 @@ export interface components {
             local_time?: string;
             /** @example Europe/Brussels */
             timezone?: string;
+            /**
+             * @description Self-update state (README §5.7). `idle`: nothing pending. `downloading`, `installing`: in progress.
+             *     `waiting`: downloaded, waiting for the frame to be idle. `needs_user`: no root, the system installer is
+             *     showing. `updated`: the last update succeeded. `failed`: the last attempt failed (see
+             *     `last_update_error`). `rolled_back`: the new version crash-looped and the previous one was reinstalled.
+             * @enum {string}
+             */
+            update_state?: "idle" | "downloading" | "waiting" | "installing" | "needs_user" | "updated" | "failed" | "rolled_back";
+            /** @description Short machine-readable reason, e.g. `sha256_mismatch`, `signature_mismatch`, `install_failed: ...`, `crash_loop 20199` */
+            last_update_error?: string | null;
         };
         FrameCommand: {
             /** @enum {string} */
@@ -1317,7 +1414,10 @@ export interface components {
                 clock?: boolean;
                 /** @default true */
                 date?: boolean;
-                /** @default false */
+                /**
+                 * @description Current weather widget; needs `location`.
+                 * @default false
+                 */
                 weather?: boolean;
                 /** @default true */
                 clock_24h?: boolean;
@@ -1372,11 +1472,14 @@ export interface components {
                  */
                 first_day_of_week?: "mon" | "sun" | "sat";
             };
-            /** @description Used for weather and sun-based brightness. Set by owner/admin. */
+            /**
+             * @description Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
+             *     Changing it (or turning `widgets.weather` on) makes the server fetch weather right away.
+             */
             location?: {
                 name?: string;
-                lat?: number;
-                lon?: number;
+                lat: number;
+                lon: number;
             } | null;
             notifications?: {
                 /** @default true */
@@ -1389,6 +1492,36 @@ export interface components {
                 allow_remove_members_on_frame?: boolean;
                 readonly owner_pin_set?: boolean;
             };
+            updates?: {
+                /**
+                 * @description Frame app release channel (beta program). Beta frames get the newest of beta and stable.
+                 * @default stable
+                 * @enum {string}
+                 */
+                channel?: "stable" | "beta";
+            };
+        };
+        /** @description A frame app release mirrored by the server. */
+        FrameUpdate: {
+            /** @example 0.2.0 */
+            version_name: string;
+            /** @example 20099 */
+            version_code: number;
+            /** @example 23 */
+            min_sdk: number;
+            /**
+             * Format: uri
+             * @description Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+             */
+            url: string;
+            sha256: string;
+            /** @description bytes */
+            size: number;
+            release_notes?: string | null;
+            /** Format: date-time */
+            published_at: string;
+            /** @description True for beta releases. */
+            prerelease?: boolean;
         };
         /** @description RFC 7396 merge patch of FrameSettings (any subset; arrays are replaced whole). */
         FrameSettingsPatch: Record<string, never>;
@@ -1476,24 +1609,87 @@ export interface components {
                 location?: string | null;
                 owner_name?: string;
             };
-            weather?: {
-                /** Format: date-time */
-                fetched_at?: string;
-                current?: {
-                    temp_c?: number;
-                    /** @description WMO weather code */
-                    code?: number;
-                    is_day?: boolean;
-                };
-                daily?: {
-                    /** Format: date */
-                    date?: string;
-                    min_c?: number;
-                    max_c?: number;
-                    code?: number;
-                }[];
-            };
+            weather?: components["schemas"]["Weather"];
         };
+        /**
+         * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
+         *     removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
+         *     Values are always metric (°C, km/h, mm); clients convert for `locale.temperature_unit`. Local times carry the
+         *     location's UTC offset. Data by Open-Meteo.com (CC BY 4.0); clients showing it must credit "Weather data by
+         *     Open-Meteo.com".
+         */
+        Weather: {
+            /**
+             * Format: date-time
+             * @description When the server fetched this from Open-Meteo
+             */
+            fetched_at: string;
+            location?: {
+                name?: string | null;
+                lat?: number;
+                lon?: number;
+            };
+            /** @example Europe/Brussels */
+            timezone?: string;
+            utc_offset_seconds?: number;
+            units?: {
+                /**
+                 * @default c
+                 * @enum {string}
+                 */
+                temperature?: "c";
+                /**
+                 * @default km/h
+                 * @enum {string}
+                 */
+                wind_speed?: "km/h";
+                /**
+                 * @default mm
+                 * @enum {string}
+                 */
+                precipitation?: "mm";
+            };
+            current: {
+                /** Format: date-time */
+                time?: string;
+                temp_c: number;
+                /** @description Feels-like temperature */
+                apparent_c?: number | null;
+                /** @description WMO weather code (0–99) */
+                code: number;
+                is_day: boolean;
+                wind_kmh?: number | null;
+                /** @description Direction the wind comes from */
+                wind_dir_deg?: number | null;
+                humidity_pct?: number | null;
+                precip_mm?: number | null;
+            };
+            /** @description The next 24 hours, starting with the current hour. */
+            hourly?: {
+                /** Format: date-time */
+                time: string;
+                temp_c: number;
+                code: number;
+                is_day?: boolean;
+                /** @description Percent */
+                precip_prob?: number | null;
+            }[];
+            /** @description Up to 7 days, starting today (in the location's time zone). */
+            daily: {
+                /** Format: date */
+                date: string;
+                min_c: number;
+                max_c: number;
+                code: number;
+                precip_mm?: number | null;
+                /** @description Maximum hourly probability */
+                precip_prob?: number | null;
+                /** Format: date-time */
+                sunrise?: string | null;
+                /** Format: date-time */
+                sunset?: string | null;
+            }[];
+        } | null;
     };
     responses: {
         /** @description Error (RFC 9457) */
@@ -2763,6 +2959,33 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    geocode: {
+        parameters: {
+            query: {
+                q: string;
+                /** @description Language of place names (ISO 639-1), e.g. `nl` */
+                lang?: string;
+                count?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Matching places, best first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Place"][];
+                };
+            };
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
     enrollDevice: {
         parameters: {
             query?: never;
@@ -3166,6 +3389,78 @@ export interface operations {
                     "application/json": components["schemas"]["Placement"];
                 };
             };
+        };
+    };
+    deviceCheckUpdate: {
+        parameters: {
+            query?: {
+                /** @description Defaults to the frame's `updates.channel` setting (unclaimed frames use the channel from enrollment). */
+                channel?: "stable" | "beta";
+                /** @description Version codes the frame refuses (rolled back earlier). The newest release not listed is returned. */
+                skip?: number[];
+            };
+            header?: {
+                /** @description `kinframe-frame/<version name> (<version code>)` */
+                "X-Kinframe-App"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description An update is available */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrameUpdate"];
+                };
+            };
+            /** @description Up to date (or no release suits this device) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deviceGetUpdateApk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                versionCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description APK bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.android.package-archive": string;
+                };
+            };
+            /** @description Partial bytes */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not modified */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
         };
     };
     operatorStats: {

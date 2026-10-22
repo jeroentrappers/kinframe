@@ -188,4 +188,57 @@
     <string name="update_notice_updated">Updated to version %1$s</string>
     <string name="update_notice_rolled_back">The new version had problems, so the frame went back to the previous one.</string>
     <string name="update_notice_needs_user">An update is ready. Tap Install to continue.</string>
+
+    <!-- Weather (data from the server, which fetches Open-Meteo) -->
+    <string name="weather_show_forecast">Show the forecast</string>
+    <string name="weather_close">Close</string>
+    <string name="weather_now">Now</string>
+    <string name="weather_today">Today</string>
+    <string name="weather_feels_like">Feels like %1$s</string>
+    <string name="weather_high_low">H %1$s · L %2$s</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_humidity">Humidity</string>
+    <string name="weather_sunrise">Sunrise</string>
+    <string name="weather_sunset">Sunset</string>
+    <string name="weather_next_hours">Next 24 hours</string>
+    <string name="weather_next_days">7-day forecast</string>
+    <string name="weather_updated">Updated %1$s</string>
+    <string name="weather_attribution" translatable="false">Weather data by Open-Meteo.com</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NE</item>
+        <item>E</item>
+        <item>SE</item>
+        <item>S</item>
+        <item>SW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="wmo_clear_day">Sunny</string>
+    <string name="wmo_clear_night">Clear</string>
+    <string name="wmo_mainly_clear_day">Mostly sunny</string>
+    <string name="wmo_mainly_clear_night">Mostly clear</string>
+    <string name="wmo_partly_cloudy">Partly cloudy</string>
+    <string name="wmo_overcast">Cloudy</string>
+    <string name="wmo_fog">Fog</string>
+    <string name="wmo_rime_fog">Freezing fog</string>
+    <string name="wmo_drizzle_light">Light drizzle</string>
+    <string name="wmo_drizzle">Drizzle</string>
+    <string name="wmo_drizzle_dense">Heavy drizzle</string>
+    <string name="wmo_freezing_drizzle">Freezing drizzle</string>
+    <string name="wmo_rain_light">Light rain</string>
+    <string name="wmo_rain">Rain</string>
+    <string name="wmo_rain_heavy">Heavy rain</string>
+    <string name="wmo_freezing_rain">Freezing rain</string>
+    <string name="wmo_snow_light">Light snow</string>
+    <string name="wmo_snow">Snow</string>
+    <string name="wmo_snow_heavy">Heavy snow</string>
+    <string name="wmo_snow_grains">Snow grains</string>
+    <string name="wmo_showers_light">Light showers</string>
+    <string name="wmo_showers">Showers</string>
+    <string name="wmo_showers_violent">Heavy showers</string>
+    <string name="wmo_snow_showers_light">Light snow showers</string>
+    <string name="wmo_snow_showers">Snow showers</string>
+    <string name="wmo_thunderstorm">Thunderstorm</string>
+    <string name="wmo_thunderstorm_hail">Thunderstorm with hail</string>
 </resources>

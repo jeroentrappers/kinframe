@@ -28,6 +28,8 @@ tags:
   - name: library
   - name: albums
   - name: settings
+  - name: weather
+    description: Place search and weather. Data by Open-Meteo.com (CC BY 4.0), fetched and cached by the server.
   - name: devices
     description: Frame enrollment and token exchange (unauthenticated or secret-based).
   - name: device
@@ -720,6 +722,29 @@ paths:
         '412': { $ref: '#/components/responses/Problem' }
         default: { $ref: '#/components/responses/Problem' }
 
+  # ---------------------------------------------------------------- weather
+  /v1/geocode:
+    get:
+      tags: [weather]
+      operationId: geocode
+      description: |
+        Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
+        server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
+        no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
+        has weather disabled.
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 100 } }
+        - { name: lang, in: query, description: 'Language of place names (ISO 639-1), e.g. `nl`', schema: { type: string, pattern: '^[a-zA-Z]{2}$', default: en } }
+        - { name: count, in: query, schema: { type: integer, minimum: 1, maximum: 20, default: 8 } }
+      responses:
+        '200':
+          description: Matching places, best first
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Place' } }
+        '429': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
   # ---------------------------------------------------------------- devices (enrollment)
   /v1/devices/enroll:
     post:
@@ -1150,6 +1175,8 @@ components:
         - owner_cannot_leave
         - rate_limited
         - app_update_required
+        - upstream_unavailable
+        - feature_disabled
         - server_error
 
     Discovery:
@@ -1173,6 +1200,10 @@ components:
           type: boolean
           default: false
           description: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
+        weather:
+          type: boolean
+          default: false
+          description: True when the server fetches weather for frames and serves `/v1/geocode`.
 
     Limits:
       type: object
@@ -1182,6 +1213,19 @@ components:
         max_video_seconds: { type: integer, default: 300 }
         max_upload_bytes: { type: integer, default: 2147483648 }
         trash_retention_days: { type: integer, default: 30 }
+
+    Place:
+      type: object
+      description: A geocoding result (Open-Meteo geocoding API).
+      required: [name, lat, lon]
+      properties:
+        name: { type: string, examples: [Gent] }
+        admin1: { type: [string, 'null'], description: 'Region / state / province', examples: [Flanders] }
+        country: { type: [string, 'null'], examples: [Belgium] }
+        country_code: { type: [string, 'null'], description: ISO 3166-1 alpha-2, examples: [BE] }
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lon: { type: number, minimum: -180, maximum: 180 }
+        timezone: { type: [string, 'null'], examples: [Europe/Brussels] }
 
     User:
       type: object
@@ -1603,7 +1647,7 @@ components:
             avatar: { type: boolean, default: true }
             clock: { type: boolean, default: true }
             date: { type: boolean, default: true }
-            weather: { type: boolean, default: false }
+            weather: { type: boolean, default: false, description: Current weather widget; needs `location`. }
             clock_24h: { type: boolean, default: true }
         video:
           type: object
@@ -1638,11 +1682,14 @@ components:
             first_day_of_week: { type: string, enum: [mon, sun, sat], default: mon }
         location:
           type: [object, 'null']
-          description: Used for weather and sun-based brightness. Set by owner/admin.
+          description: |
+            Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
+            Changing it (or turning `widgets.weather` on) makes the server fetch weather right away.
+          required: [lat, lon]
           properties:
-            name: { type: string }
-            lat: { type: number }
-            lon: { type: number }
+            name: { type: string, maxLength: 100 }
+            lat: { type: number, minimum: -90, maximum: 90 }
+            lon: { type: number, minimum: -180, maximum: 180 }
         notifications:
           type: object
           properties:
@@ -1773,21 +1820,70 @@ components:
             location: { type: [string, 'null'] }
             owner_name: { type: string }
         weather:
+          $ref: '#/components/schemas/Weather'
+
+    Weather:
+      type: [object, 'null']
+      description: |
+        Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
+        removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
+        Values are always metric (°C, km/h, mm); clients convert for `locale.temperature_unit`. Local times carry the
+        location's UTC offset. Data by Open-Meteo.com (CC BY 4.0); clients showing it must credit "Weather data by
+        Open-Meteo.com".
+      required: [fetched_at, current, daily]
+      properties:
+        fetched_at: { type: string, format: date-time, description: When the server fetched this from Open-Meteo }
+        location:
           type: object
           properties:
-            fetched_at: { type: string, format: date-time }
-            current:
-              type: object
-              properties:
-                temp_c: { type: number }
-                code: { type: integer, description: WMO weather code }
-                is_day: { type: boolean }
-            daily:
-              type: array
-              items:
-                type: object
-                properties:
-                  date: { type: string, format: date }
-                  min_c: { type: number }
-                  max_c: { type: number }
-                  code: { type: integer }
+            name: { type: [string, 'null'] }
+            lat: { type: number }
+            lon: { type: number }
+        timezone: { type: string, examples: [Europe/Brussels] }
+        utc_offset_seconds: { type: integer }
+        units:
+          type: object
+          properties:
+            temperature: { type: string, enum: [c], default: c }
+            wind_speed: { type: string, enum: [km/h], default: km/h }
+            precipitation: { type: string, enum: [mm], default: mm }
+        current:
+          type: object
+          required: [temp_c, code, is_day]
+          properties:
+            time: { type: string, format: date-time }
+            temp_c: { type: number }
+            apparent_c: { type: [number, 'null'], description: Feels-like temperature }
+            code: { type: integer, description: WMO weather code (0–99) }
+            is_day: { type: boolean }
+            wind_kmh: { type: [number, 'null'] }
+            wind_dir_deg: { type: [integer, 'null'], description: Direction the wind comes from, 0 = north }
+            humidity_pct: { type: [integer, 'null'] }
+            precip_mm: { type: [number, 'null'] }
+        hourly:
+          type: array
+          description: The next 24 hours, starting with the current hour.
+          items:
+            type: object
+            required: [time, temp_c, code]
+            properties:
+              time: { type: string, format: date-time }
+              temp_c: { type: number }
+              code: { type: integer }
+              is_day: { type: boolean }
+              precip_prob: { type: [integer, 'null'], description: Percent }
+        daily:
+          type: array
+          description: Up to 7 days, starting today (in the location's time zone).
+          items:
+            type: object
+            required: [date, min_c, max_c, code]
+            properties:
+              date: { type: string, format: date }
+              min_c: { type: number }
+              max_c: { type: number }
+              code: { type: integer }
+              precip_mm: { type: [number, 'null'] }
+              precip_prob: { type: [integer, 'null'], description: Maximum hourly probability, percent }
+              sunrise: { type: [string, 'null'], format: date-time }
+              sunset: { type: [string, 'null'], format: date-time }

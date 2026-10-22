@@ -7,6 +7,9 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Frame self-update (README §5.7): `GET /v1/device/update` (`FrameUpdate` or 204, `channel` and `skip` query
   parameters), `GET /v1/device/update/apk/{versionCode}`, Heartbeat `update_state` and `last_update_error`,
   FrameSettings `updates.channel`. Both update endpoints are exempt from `426 app_update_required`.
+- Weather: `GET /v1/geocode` (`Place[]`), the `Weather` schema for `Change.weather` (nullable; extends the earlier
+  `fetched_at`/`current.temp_c`/`daily[].min_c`… fields without renaming them), Discovery `weather`, problem codes
+  `upstream_unavailable` (502) and `feature_disabled` (503), and `required`/range limits on `settings.location`.
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -108,6 +111,24 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   400. `version` and `kiosk.owner_pin_set` are read-only and ignored in patches. The merged document is validated
   against `FrameSettings`; unknown fields are preserved.
 
+## Weather
+
+- Payloads are always metric (the existing `*_c` field names); frames convert for `locale.temperature_unit`. So the
+  cache key is only the location rounded to 2 decimals (`"51.05,3.72"`), not location + unit: one upstream request per
+  town however frames are configured.
+- Cache and per-frame state live in PostgreSQL (`weather_cache`, `frame_weather`), so restarts neither refetch
+  nor lose what frames were sent. The feed entry (kind `weather`, entity = frame id) renders from the cache at read
+  time, with the location (name included) taken from the frame's current settings.
+- One loop ticks every minute; a location is fetched when due (refresh + 0–5 min jitter, or back-off after errors:
+  1 min doubling up to the refresh interval). Locations no frame wants are not fetched, and pruned after a day.
+- "Meaningful change" = a digest over values rounded the way the frame shows them (temperatures to 0.5°, humidity
+  to 5 %, wind to 1 km/h, rain probability to 10 %), codes, day/night, the hourly window start, daily dates and the
+  place name. Unchanged weather is re-sent every 2 h while fetches succeed so the frame's 6 h staleness check holds.
+- A settings patch touching `location*` or `widgets.weather` syncs that frame in the background right after commit;
+  a cached entry that is not due is reused instead of refetched.
+- Geocoding: 60 requests/min per user, results cached in memory for 24 h per (query, language, count), at most
+  2000 entries. Queries shorter than 2 characters after trimming return `[]` without an upstream call.
+
 ## Push
 
 - Endpoints are stored for all kinds. Delivery is implemented for UnifiedPush (plain POST of a JSON payload with ids,
@@ -122,7 +143,7 @@ invites 60/h per user; dev tokens 120/h per IP.
 ## Not done yet (v0.1 follow-ups)
 
 - Face detection for focal points (interface `worker.FocalDetector`, centre for now); perceptual duplicate detection.
-- Weather change type, calendar, S3 storage.
+- Calendar, S3 storage.
 - Garbage collection of media no longer referenced by any live placement.
 - WebPush/FCM/APNs delivery.
 - Media tool versions: the image is **Debian 13 (trixie)**: libvips 8.16, ffmpeg 7.1. It was moved off bookworm

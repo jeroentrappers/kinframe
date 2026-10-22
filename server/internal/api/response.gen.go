@@ -29,6 +29,7 @@ func (r Response) VisitDeviceSetReactionResponse(w http.ResponseWriter) error   
 func (r Response) VisitDeviceTokenResponse(w http.ResponseWriter) error          { return r.write(w) }
 func (r Response) VisitEnrollDeviceResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitForwardSendResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitGeocodeResponse(w http.ResponseWriter) error              { return r.write(w) }
 func (r Response) VisitGetDiscoveryResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitGetFrameResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitGetFrameHealthResponse(w http.ResponseWriter) error       { return r.write(w) }

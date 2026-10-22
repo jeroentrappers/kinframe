@@ -99,7 +99,20 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 		out = settingsDoc(f)
 		return nil
 	})
+	if err == nil && s.weather != nil && touchesWeather(paths) {
+		s.weather.Kick(frameID)
+	}
 	return out, err
+}
+
+// touchesWeather reports whether a settings patch may change what weather a frame needs.
+func touchesWeather(paths []string) bool {
+	for _, p := range paths {
+		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" {
+			return true
+		}
+	}
+	return false
 }
 
 func validateSettings(doc map[string]any) error {

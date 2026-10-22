@@ -195,9 +195,28 @@ The frame keeps a local mirror of its state. The source of truth is an **append-
   | `album.upsert` / `album.remove` | Album changes |
   | `member.upsert` / `member.remove` | Display info only: name, avatar URL |
   | `frame` | Name, location, owner name |
-  | `weather` | Current conditions and forecast, when enabled |
+  | `weather` | Current conditions and forecast, when enabled (below), or `weather: null` |
   | `reset` | The frame must discard local state and re-sync from 0 |
 
+- **Weather** (schema `Weather`): the server fetches it from [Open-Meteo](https://open-meteo.com) (no API key) for
+  every frame with `settings.location` set and `widgets.weather` on. Frames never call third parties.
+  - Payload: `fetched_at`, `location {name, lat, lon}` (from the frame's settings), `timezone`, `utc_offset_seconds`,
+    `units`, `current` (`temp_c`, `apparent_c`, `code` = WMO weather code, `is_day`, `wind_kmh`, `wind_dir_deg`,
+    `humidity_pct`, `precip_mm`), `hourly` (the next 24 h from the current hour: `time`, `temp_c`, `code`, `is_day`,
+    `precip_prob`) and `daily` (7 days from today: `date`, `min_c`, `max_c`, `code`, `precip_mm`, `precip_prob`,
+    `sunrise`, `sunset`). Times are RFC 3339 with the location's offset.
+  - Always metric (°C, km/h, mm). The frame converts for `locale.temperature_unit`.
+  - The server caches per location rounded to 2 decimals (≈1 km), so frames in the same town share one request, and
+    refreshes every 30 min (plus jitter, with back-off on errors). Changing `location` or turning `widgets.weather` on
+    fetches right away.
+  - A new change is emitted only when something visible changed (rounded values, the hourly window, the days, the
+    place name), and at least every 2 h while fetches succeed so `fetched_at` stays recent. Frames hide weather older
+    than 6 h.
+  - `weather: null` means "drop your weather": the location was removed or the widget turned off. Snapshots
+    (`since=0`) omit it.
+  - Place search for the settings UI: `GET /v1/geocode?q=&lang=` (user auth, 60/min per user, cached) proxies the
+    Open-Meteo geocoding API and returns `Place`s.
+  - Attribution (CC BY 4.0): apps that show the data credit "Weather data by Open-Meteo.com".
 - Clients apply changes in order and persist `next_seq` in the same SQLite transaction as the changes.
 - When the frame is behind more than the server's retention window (default 30 days of changes), it gets a `reset`.
 - **Media download**: `GET /v1/device/media/{placement_id}` serves the frame's rendition. It supports `Range` and

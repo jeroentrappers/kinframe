@@ -52,7 +52,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -89,13 +88,13 @@ import app.kinframe.frame.ui.Format
 import app.kinframe.frame.ui.PowerDialog
 import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
+import app.kinframe.frame.weather.ForecastOverlay
+import app.kinframe.frame.weather.Weather
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
-private val textShadow = Shadow(Color(0x99000000), Offset(0f, 2f), 8f)
 
 @Composable
 fun SlideshowScreen(c: FrameController) {
@@ -113,8 +112,14 @@ fun SlideshowScreen(c: FrameController) {
     var burst by remember { mutableStateOf<Pair<String, Offset>?>(null) }
     var burstSeq by remember { mutableIntStateOf(0) }
     var snack by remember { mutableStateOf<Snack?>(null) }
+    var forecastOpen by remember { mutableStateOf(false) }
+    val nowMs by minuteTicker(c)
+    val weatherDoc by c.weather.collectAsState()
+    // Shown only when enabled, located and fresh (> 6 h old means the frame has been offline a long while).
+    val weather = weatherDoc?.takeIf { settings.widgets.weather && settings.location != null && !it.isStale(nowMs) }
+    LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen) { ss.paused.value = menuOpen || powerOpen || settingsOpen }
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen) { ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
 
@@ -187,9 +192,11 @@ fun SlideshowScreen(c: FrameController) {
             if (stage.incoming == null) empty?.let { EmptyStateView(c, it) }
         }
 
-        if (settings.widgets.clock || settings.widgets.date) {
-            ClockWidget(c, settings.widgets.clock, settings.widgets.date, settings.widgets.clock24h, onPaper = stage.incoming == null && empty != null)
-        }
+        ClockWidget(
+            c, nowMs, settings.widgets.clock, settings.widgets.date, settings.widgets.clock24h, weather, settings.locale.temperatureUnit,
+            onPaper = stage.incoming == null && empty != null,
+            onWeatherClick = { menuOpen = false; forecastOpen = true },
+        )
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
         ConnectionPill(c, Modifier.align(Alignment.TopStart).padding(24.dp), hidden = menuOpen)
 
@@ -231,6 +238,11 @@ fun SlideshowScreen(c: FrameController) {
                 }, onTimeout = { snack = null })
             }
         }
+
+        ForecastOverlay(
+            visible = forecastOpen, weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
+            h24 = settings.widgets.clock24h, onClose = { forecastOpen = false },
+        )
 
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
@@ -335,24 +347,37 @@ fun reactionEmoji(r: String) = when (r) {
     else -> ""
 }
 
+/** The trusted time, updated on every minute boundary (clock, date and weather staleness). */
 @Composable
-private fun ClockWidget(c: FrameController, showClock: Boolean, showDate: Boolean, h24: Boolean, onPaper: Boolean) {
-    val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
-    var now by remember { mutableLongStateOf(c.g.clock.nowMs()) }
+private fun minuteTicker(c: FrameController): androidx.compose.runtime.State<Long> {
+    val now = remember { mutableLongStateOf(c.g.clock.nowMs()) }
     LaunchedEffect(Unit) {
         while (true) {
-            now = c.g.clock.nowMs()
-            delay(60_000 - now % 60_000 + 50)
+            now.longValue = c.g.clock.nowMs()
+            delay(60_000 - now.longValue % 60_000 + 50)
         }
     }
-    val color = if (onPaper) Kin.colors.ink else Color.White
-    val shadow = if (onPaper) null else textShadow
-    Box(Modifier.fillMaxSize().padding(end = 40.dp, bottom = 28.dp, top = 28.dp), contentAlignment = if (onPaper) Alignment.TopEnd else Alignment.BottomEnd) {
-        Column(horizontalAlignment = Alignment.End) {
-            if (showClock) Text(Format.clock(now, c.g.clock.zone, h24, locale), style = Kin.type.display.copy(color = color, shadow = shadow, fontWeight = FontWeight.Light))
-            if (showDate) Text(Format.longDate(now, c.g.clock.zone, locale), style = Kin.type.body.copy(color = color.copy(alpha = 0.9f), shadow = shadow))
-        }
-    }
+    return now
+}
+
+@Composable
+private fun ClockWidget(
+    c: FrameController,
+    now: Long,
+    showClock: Boolean,
+    showDate: Boolean,
+    h24: Boolean,
+    weather: Weather?,
+    unit: String,
+    onPaper: Boolean,
+    onWeatherClick: () -> Unit,
+) {
+    val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
+    CornerWidgets(
+        clock = if (showClock) Format.clock(now, c.g.clock.zone, h24, locale) else null,
+        date = if (showDate) Format.longDate(now, c.g.clock.zone, locale) else null,
+        weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onWeatherClick = onWeatherClick,
+    )
 }
 
 @Composable

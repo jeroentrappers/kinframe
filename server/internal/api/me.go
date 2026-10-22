@@ -34,6 +34,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.Auth.MobileClientId = s.cfg.MobileClientID
 	d.Auth.WebClientId = s.cfg.WebClientID
 	d.DevAuth = ptr(s.dev != nil)
+	d.Weather = ptr(s.weather != nil)
 	return ok(d), nil
 }
 

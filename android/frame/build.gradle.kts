@@ -60,7 +60,11 @@ android {
         compose = true
         buildConfig = true
     }
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        // App resources in Robolectric tests (strings for the weather screenshot tests).
+        unitTests.isIncludeAndroidResources = true
+    }
     packaging { resources.excludes += listOf("/META-INF/{AL2.0,LGPL2.1}", "META-INF/versions/9/OSGI-INF/MANIFEST.MF") }
 }
 

@@ -47,6 +47,21 @@ class SyncEngineTest : SyncTestBase() {
     }
 
     @Test
+    fun weatherIsPersistedAndClearedByNull() = runBlocking {
+        val weather = """{"fetched_at":"2026-10-22T12:05:00Z","location":{"name":"Gent"},"current":{"temp_c":14.6,"code":2,"is_day":true},"daily":[]}"""
+        fake.pages[0] = page(1, false, """{"seq":1,"type":"weather","weather":$weather}""")
+        engine.pull()
+        val stored = app.kinframe.frame.weather.Weather.parse(db.syncState().get()!!.weatherJson)
+        assertEquals("Gent", stored!!.location!!.name)
+        assertEquals(14.6, stored.current.tempC, 1e-9)
+        // Widget turned off or location removed on the server: `weather: null` drops it.
+        fake.pages[1] = page(2, false, """{"seq":2,"type":"weather","weather":null}""")
+        engine.pull()
+        assertNull(db.syncState().get()!!.weatherJson)
+        assertEquals(2L, db.syncState().get()!!.nextSeq)
+    }
+
+    @Test
     fun pagesAreFollowedUntilHasMoreIsFalse() = runBlocking {
         fake.pages[0] = page(1, true, up(1, placement("a", byteArrayOf(1))))
         fake.pages[1] = page(2, true, up(2, placement("b", byteArrayOf(2))))

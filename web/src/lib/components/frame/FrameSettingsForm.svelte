@@ -7,6 +7,7 @@
 	import { t, type MessageKey } from '$lib/i18n/index.svelte';
 	import { softFly } from '$lib/motion';
 	import Icon from '../Icon.svelte';
+	import LocationPicker from './LocationPicker.svelte';
 
 	let { frame }: { frame: Frame } = $props();
 
@@ -26,7 +27,9 @@
 		const c = clone(s);
 		c.slideshow = { interval_s: 30, transition: 'crossfade', order: 'received', reverse: false, fill: true, background: 'blur', ...c.slideshow };
 		c.display = { brightness: 204, sleep_schedules: [], ...c.display };
-		c.widgets = { caption: true, clock: true, ...c.widgets };
+		c.widgets = { caption: true, clock: true, weather: false, ...c.widgets };
+		c.locale = { temperature_unit: 'c', ...c.locale };
+		c.location ??= null;
 		return c;
 	}
 
@@ -125,6 +128,11 @@
 		s.days = s.days.includes(d) ? s.days.filter((x) => x !== d) : DAYS.filter((x) => x === d || s.days.includes(x));
 	}
 
+	// Without a place the frame has no weather to show; keep the switch honest.
+	$effect(() => {
+		if (form?.widgets && base?.location && !form.location && form.widgets.weather) form.widgets.weather = false;
+	});
+
 	const brightnessPct = $derived(form?.display?.brightness != null ? Math.round(((form.display.brightness - 15) / 240) * 100) : 0);
 </script>
 
@@ -215,6 +223,38 @@
 			</div>
 		</section>
 
+		<section class="card card-pad stack" aria-labelledby="wx-title">
+			<h2 id="wx-title">{t('settingsForm.weatherTitle')}</h2>
+			<p class="hint">{t('settingsForm.weatherHint')}</p>
+			<LocationPicker
+				id="s-loc"
+				bind:value={form.location}
+				onpick={() => {
+					// Picking the first place turns the weather on; that is almost always why it is set.
+					if (form?.widgets && !base?.location) form.widgets.weather = true;
+				}}
+			/>
+			<label class="switch" class:disabled={!form.location}>
+				<input type="checkbox" bind:checked={form.widgets.weather} disabled={!form.location} />
+				<span>
+					<span class="s-label">{t('settingsForm.showWeather')}</span>
+					<span class="hint">{form.location ? t('settingsForm.showWeatherHint') : t('settingsForm.needsLocation')}</span>
+				</span>
+			</label>
+			{#if form.locale}
+				<fieldset class="fs">
+					<legend class="label">{t('settingsForm.temperatureUnit')}</legend>
+					<div class="segmented">
+						<label><input type="radio" name="temperature_unit" value="c" bind:group={form.locale.temperature_unit} />{t('settingsForm.celsius')}</label>
+						<label><input type="radio" name="temperature_unit" value="f" bind:group={form.locale.temperature_unit} />{t('settingsForm.fahrenheit')}</label>
+					</div>
+				</fieldset>
+			{/if}
+			<p class="credit tiny muted">
+				<Icon name="cloud" size={14} /><a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">{t('settingsForm.weatherCredit')}</a>
+			</p>
+		</section>
+
 		<section class="card card-pad stack" aria-labelledby="sleep-title">
 			<div class="section-title">
 				<h2 id="sleep-title">{t('settingsForm.sleep')}</h2>
@@ -280,6 +320,13 @@
 		align-items: start;
 		padding-bottom: 80px;
 	}
+	.settings > section {
+		/* Grid items default to min-width: auto; long select options would widen the page on phones. */
+		min-width: 0;
+	}
+	.settings select {
+		max-width: 100%;
+	}
 	@media (min-width: 900px) {
 		.settings {
 			grid-template-columns: 1fr 1fr;
@@ -318,6 +365,18 @@
 	.s-label {
 		font-weight: 500;
 	}
+	.switch.disabled {
+		opacity: 0.6;
+	}
+	.credit {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+	}
+	.credit a {
+		color: inherit;
+	}
 	.range-row {
 		display: flex;
 		align-items: center;
@@ -330,6 +389,7 @@
 		height: 28px;
 	}
 	.schedule {
+		min-width: 0;
 		border: 1px solid var(--border);
 		border-radius: var(--r);
 		padding: var(--s-3);
@@ -349,22 +409,38 @@
 		align-items: center;
 		gap: var(--s-3);
 	}
+	@media (max-width: 480px) {
+		/* On phones the two time fields get their own row so they never truncate. */
+		.sched-top {
+			flex-wrap: wrap;
+			justify-content: space-between;
+		}
+		.sched-top .times {
+			order: 3;
+			flex: 1 1 100%;
+		}
+	}
 	.switch.compact {
 		min-height: 0;
 	}
 	.times {
+		min-width: 0;
 		display: flex;
 		align-items: flex-end;
 		gap: var(--s-2);
 		flex: 1;
 	}
 	.times label {
+		flex: 1;
+		min-width: 0;
+		max-width: 140px;
 		display: flex;
 		flex-direction: column;
 		gap: 2px;
 	}
 	.time {
-		width: 140px;
+		width: 100%;
+		min-width: 0;
 		min-height: 40px;
 		padding: 6px 10px;
 		font-variant-numeric: tabular-nums;

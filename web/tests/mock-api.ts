@@ -60,7 +60,8 @@ export function emptyState(): MockState {
 			api: 'http://localhost:4173/v1',
 			auth: { issuer: '', mobile_client_id: '', web_client_id: '', api_resource: 'http://localhost:4173/v1' },
 			limits: { max_items_per_send: 200, max_video_seconds: 300, max_upload_bytes: 2147483648, trash_retention_days: 30 },
-			dev_auth: true
+			dev_auth: true,
+			weather: true
 		},
 		me: null,
 		frames: [],
@@ -77,6 +78,14 @@ export function emptyState(): MockState {
 		ws: null
 	};
 }
+
+/** Geocoding fixtures for GET /v1/geocode (matched by case-insensitive prefix). */
+export const PLACES: S['Place'][] = [
+	{ name: 'Gent', admin1: 'Flanders', country: 'Belgium', country_code: 'BE', lat: 51.05, lon: 3.71667, timezone: 'Europe/Brussels' },
+	{ name: 'Gentbrugge', admin1: 'Flanders', country: 'Belgium', country_code: 'BE', lat: 51.03826, lon: 3.76196, timezone: 'Europe/Brussels' },
+	{ name: 'Genthin', admin1: 'Saxony-Anhalt', country: 'Germany', country_code: 'DE', lat: 52.40668, lon: 12.15920, timezone: 'Europe/Berlin' },
+	{ name: 'Amsterdam', admin1: 'North Holland', country: 'Netherlands', country_code: 'NL', lat: 52.37403, lon: 4.88969, timezone: 'Europe/Amsterdam' }
+];
 
 export function defaultSettings(version = 1): S['FrameSettings'] {
 	return {
@@ -168,6 +177,16 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 		if (path === '/v1/me' && method === 'PATCH') {
 			Object.assign(state.me!, body);
 			return json(route, 200, state.me);
+		}
+
+		// ---- geocode
+		if (path === '/v1/geocode' && method === 'GET') {
+			const q = (url.searchParams.get('q') ?? '').trim().toLowerCase();
+			if (q.length < 2) return problem(route, 422, 'validation_failed', 'q too short');
+			if (q === 'busy') return problem(route, 429, 'rate_limited', 'Too many requests');
+			if (q === 'down') return problem(route, 502, 'upstream_unavailable', 'Upstream unavailable');
+			const count = Number(url.searchParams.get('count') ?? 8);
+			return json(route, 200, PLACES.filter((p) => p.name.toLowerCase().startsWith(q)).slice(0, count));
 		}
 
 		// ---- frames

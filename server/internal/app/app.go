@@ -25,6 +25,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
+	"github.com/jeroentrappers/kinframe/server/internal/weather"
 	"github.com/jeroentrappers/kinframe/server/internal/worker"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
 )
@@ -40,6 +41,8 @@ type App struct {
 	Handler http.Handler
 	// Releases mirrors frame app releases; nil when neither GitHub nor a directory is configured.
 	Releases *releases.Mirror
+	// Weather fetches Open-Meteo weather for frames; nil when disabled.
+	Weather *weather.Service
 }
 
 // New connects to the database, applies migrations and builds the app.
@@ -98,7 +101,18 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			return nil, fmt.Errorf("frame releases: %w", err)
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror})
+	var wx *weather.Service
+	if cfg.WeatherURL != "" {
+		wx = &weather.Service{
+			Store: st, Log: log.With("component", "weather"), Refresh: cfg.WeatherRefresh, Jitter: 5 * time.Minute,
+			Client: &weather.Client{
+				ForecastURL: cfg.WeatherURL, GeocodingURL: cfg.GeocodingURL,
+				UserAgent: "kinframe/" + cfg.Version + " (+https://github.com/jeroentrappers/kinframe)",
+				HTTP:      &http.Client{Timeout: 15 * time.Second},
+			},
+		}
+	}
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx})
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +128,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
-	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror}, nil
+	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx}, nil
 }
 
 // RunBackground starts the media workers and the maintenance loop.
@@ -126,6 +140,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
+	}
+	if a.Weather != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Weather.Run(ctx) }()
 	}
 	return &wg
 }

@@ -106,3 +106,59 @@ test('wrong code shows a friendly, localized error', async ({ page }) => {
 	await expect(page.getByRole('alert')).toContainText('doesn’t match a frame');
 	await expect(code).toBeFocused();
 });
+
+test('set a frame location from place search and turn the weather on', async ({ page }) => {
+	const state = emptyState();
+	const frame = makeFrame({ name: 'Oma’s frame', role: 'owner' });
+	state.frames = [frame];
+	await mockApi(page, state);
+	await page.goto('/');
+	await page.getByLabel('Email').fill('jeroen@example.org');
+	await page.getByRole('button', { name: 'Continue' }).click();
+	await page.waitForURL(/\/frames$/);
+
+	await page.goto(`/frames/${frame.id}?tab=settings`);
+	await expect(page.getByRole('heading', { name: 'Location & weather' })).toBeVisible();
+	const weather = page.getByRole('checkbox', { name: /Show the weather/ });
+	await expect(weather).toBeDisabled();
+
+	// A friendly message when the search is rate-limited.
+	const search = page.getByRole('combobox', { name: 'Find a town or city' });
+	await search.fill('busy');
+	await expect(page.getByRole('alert')).toContainText('Too many searches');
+
+	// Debounced suggestions, keyboard selection.
+	await search.fill('gen');
+	const options = page.getByRole('listbox', { name: 'Places' }).getByRole('option');
+	await expect(options).toHaveCount(3);
+	await expect(options.first()).toContainText('Flanders, Belgium');
+	await search.press('ArrowDown');
+	await expect(options.nth(1)).toHaveAttribute('aria-selected', 'true');
+	await search.press('ArrowUp');
+	await search.press('Enter');
+	await expect(page.getByText('51.05°, 3.72°')).toBeVisible();
+	await expect(weather).toBeEnabled();
+	await expect(weather).toBeChecked();
+	const geocode = state.calls.filter((c) => c.path === '/v1/geocode');
+	expect(geocode.every((c) => c.method === 'GET')).toBe(true);
+
+	await page.getByText('°F').click();
+	await page.getByRole('button', { name: 'Save' }).click();
+	await expect(page.getByText('Settings sent to Oma’s frame')).toBeVisible();
+	const saved = state.calls.find((c) => c.method === 'PATCH' && c.path.endsWith('/settings'));
+	expect(saved?.headers?.['if-match']).toBe('"1"');
+	expect(saved?.body).toEqual({
+		location: { name: 'Gent', lat: 51.05, lon: 3.7167 },
+		widgets: { weather: true },
+		locale: { temperature_unit: 'f' }
+	});
+
+	// Removing the place sends null.
+	await page.getByRole('button', { name: 'Remove', exact: true }).click();
+	await expect(weather).toBeDisabled();
+	await page.getByRole('button', { name: 'Save' }).click();
+	await expect.poll(() => state.calls.filter((c) => c.method === 'PATCH').length).toBe(2);
+	const removed = state.calls.filter((c) => c.method === 'PATCH')[1]!;
+	expect(removed.headers?.['if-match']).toBe('"2"');
+	expect(removed.body).toEqual({ location: null, widgets: { weather: false } });
+});

@@ -24,6 +24,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
+	"github.com/jeroentrappers/kinframe/server/internal/weather"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
 )
 
@@ -44,17 +45,19 @@ type Server struct {
 	tus       *handler.UnroutedHandler
 	uploadDir string
 
-	redeemUser *ratelimit.Limiter
-	redeemIP   *ratelimit.Limiter
-	enrollIP   *ratelimit.Limiter
-	tokenIP    *ratelimit.Limiter
-	devTokenIP *ratelimit.Limiter
-	inviteUser *ratelimit.Limiter
+	redeemUser  *ratelimit.Limiter
+	redeemIP    *ratelimit.Limiter
+	enrollIP    *ratelimit.Limiter
+	tokenIP     *ratelimit.Limiter
+	devTokenIP  *ratelimit.Limiter
+	inviteUser  *ratelimit.Limiter
+	geocodeUser *ratelimit.Limiter
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
 
 	releases *releases.Mirror // nil: self-update disabled (always 204)
+	weather  *weather.Service // nil: weather disabled
 }
 
 // Deps are the collaborators a Server needs.
@@ -69,28 +72,31 @@ type Deps struct {
 	Users    auth.UserVerifier
 	Dev      *auth.DevTokens  // nil unless dev auth is enabled
 	Releases *releases.Mirror // frame app releases; nil disables self-update
+	Weather  *weather.Service // nil disables weather and /v1/geocode
 }
 
 func New(d Deps) (*Server, error) {
 	s := &Server{
-		cfg:        d.Config,
-		st:         d.Store,
-		hub:        d.Hub,
-		notify:     d.Notifier,
-		blob:       d.Blob,
-		tools:      d.Tools,
-		log:        d.Log,
-		users:      d.Users,
-		dev:        d.Dev,
-		releases:   d.Releases,
-		devices:    auth.NewDeviceTokens(d.Config.SigningKey, d.Config.PublicURL),
-		signer:     auth.NewURLSigner(d.Config.SigningKey),
-		redeemUser: ratelimit.New(10, time.Hour),
-		redeemIP:   ratelimit.New(30, time.Hour),
-		enrollIP:   ratelimit.New(20, time.Hour),
-		tokenIP:    ratelimit.New(120, time.Hour),
-		devTokenIP: ratelimit.New(120, time.Hour),
-		inviteUser: ratelimit.New(60, time.Hour),
+		cfg:         d.Config,
+		st:          d.Store,
+		hub:         d.Hub,
+		notify:      d.Notifier,
+		blob:        d.Blob,
+		tools:       d.Tools,
+		log:         d.Log,
+		users:       d.Users,
+		dev:         d.Dev,
+		releases:    d.Releases,
+		weather:     d.Weather,
+		devices:     auth.NewDeviceTokens(d.Config.SigningKey, d.Config.PublicURL),
+		signer:      auth.NewURLSigner(d.Config.SigningKey),
+		redeemUser:  ratelimit.New(10, time.Hour),
+		redeemIP:    ratelimit.New(30, time.Hour),
+		enrollIP:    ratelimit.New(20, time.Hour),
+		tokenIP:     ratelimit.New(120, time.Hour),
+		devTokenIP:  ratelimit.New(120, time.Hour),
+		inviteUser:  ratelimit.New(60, time.Hour),
+		geocodeUser: ratelimit.New(60, time.Minute),
 	}
 	if err := s.setupTus(); err != nil {
 		return nil, err

@@ -93,3 +93,26 @@ func TestLogtoConfigFile(t *testing.T) {
 		t.Fatalf("err = %v", err)
 	}
 }
+
+func TestWeatherConfig(t *testing.T) {
+	base := map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1", "KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32)}
+	get := func(extra map[string]string) func(string) string {
+		return func(k string) string {
+			if v, ok := extra[k]; ok {
+				return v
+			}
+			return base[k]
+		}
+	}
+	base["KINFRAME_DATA_DIR"] = t.TempDir()
+	c, err := load(get(nil))
+	if err != nil || c.WeatherURL != "https://api.open-meteo.com" || c.GeocodingURL != "https://geocoding-api.open-meteo.com" || c.WeatherRefresh.Minutes() != 30 {
+		t.Fatalf("defaults: %v %+v", err, c)
+	}
+	if c, err := load(get(map[string]string{"KINFRAME_WEATHER": "off"})); err != nil || c.WeatherURL != "" || c.GeocodingURL != "" {
+		t.Fatalf("off: %v %q", err, c.WeatherURL)
+	}
+	if _, err := load(get(map[string]string{"KINFRAME_WEATHER_REFRESH_MINUTES": "5"})); err == nil {
+		t.Fatal("5 minute refresh accepted")
+	}
+}

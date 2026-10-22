@@ -12,13 +12,16 @@ import app.kinframe.frame.slideshow.SlideshowController
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.system.PowerActions
 import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.weather.Weather
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -63,6 +66,11 @@ class FrameController(val g: FrameGraph) {
 
     val syncState: StateFlow<SyncStateEntity?> by lazy {
         g.db.syncState().observe().stateIn(scope, SharingStarted.Eagerly, null)
+    }
+
+    /** Last `weather` change from the server, persisted in Room so it survives a reboot while offline. */
+    val weather: StateFlow<Weather?> by lazy {
+        syncState.map { it?.weatherJson }.distinctUntilChanged().map { Weather.parse(it) }.stateIn(scope, SharingStarted.Eagerly, null)
     }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)

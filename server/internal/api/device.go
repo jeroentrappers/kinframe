@@ -311,6 +311,15 @@ func (s *Server) renderChanges(ctx context.Context, f *store.Frame, d *store.Dev
 			}})
 		case store.FeedSettings:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "settings", "settings": settingsDoc(f)})
+		case store.FeedWeather:
+			w, err := s.frameWeather(ctx, f)
+			if err != nil {
+				return nil, err
+			}
+			if w == nil && snapshot {
+				continue
+			}
+			out = append(out, map[string]any{"seq": e.Seq, "type": "weather", "weather": w})
 		case store.FeedFrame:
 			out = append(out, map[string]any{"seq": e.Seq, "type": "frame", "frame": map[string]any{
 				"name": f.Name, "location": f.Location, "owner_name": owner,

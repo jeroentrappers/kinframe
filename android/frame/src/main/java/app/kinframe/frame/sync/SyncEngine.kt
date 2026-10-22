@@ -101,7 +101,8 @@ class SyncEngine(
                         ownerName = it.ownerName ?: state.ownerName,
                     )
                 }
-                ChangeType.WEATHER -> c.weather?.let { state = state.copy(weatherJson = KinJson.encodeToString(JsonObject.serializer(), it)) }
+                // `weather: null` means no weather any more (widget off, location removed): drop what we have.
+                ChangeType.WEATHER -> state = state.copy(weatherJson = c.weather?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 ChangeType.RESET -> {
                     Log.i(TAG, "reset at seq ${c.seq}: re-syncing from 0")
                     placements.deleteAll()

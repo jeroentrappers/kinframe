@@ -174,4 +174,56 @@
     <string name="update_notice_updated">Bijgewerkt naar versie %1$s</string>
     <string name="update_notice_rolled_back">De nieuwe versie gaf problemen, dus de fotolijst is teruggegaan naar de vorige.</string>
     <string name="update_notice_needs_user">Er staat een update klaar. Tik op Installeren om verder te gaan.</string>
+
+    <!-- Weer -->
+    <string name="weather_show_forecast">Toon de weersverwachting</string>
+    <string name="weather_close">Sluiten</string>
+    <string name="weather_now">Nu</string>
+    <string name="weather_today">Vandaag</string>
+    <string name="weather_feels_like">Voelt als %1$s</string>
+    <string name="weather_high_low">max %1$s · min %2$s</string>
+    <string name="weather_wind">Wind</string>
+    <string name="weather_humidity">Vochtigheid</string>
+    <string name="weather_sunrise">Zonsopgang</string>
+    <string name="weather_sunset">Zonsondergang</string>
+    <string name="weather_next_hours">Komende 24 uur</string>
+    <string name="weather_next_days">Komende 7 dagen</string>
+    <string name="weather_updated">Bijgewerkt om %1$s</string>
+    <string-array name="weather_compass">
+        <item>N</item>
+        <item>NO</item>
+        <item>O</item>
+        <item>ZO</item>
+        <item>Z</item>
+        <item>ZW</item>
+        <item>W</item>
+        <item>NW</item>
+    </string-array>
+    <string name="wmo_clear_day">Zonnig</string>
+    <string name="wmo_clear_night">Helder</string>
+    <string name="wmo_mainly_clear_day">Overwegend zonnig</string>
+    <string name="wmo_mainly_clear_night">Overwegend helder</string>
+    <string name="wmo_partly_cloudy">Half bewolkt</string>
+    <string name="wmo_overcast">Bewolkt</string>
+    <string name="wmo_fog">Mist</string>
+    <string name="wmo_rime_fog">Aanvriezende mist</string>
+    <string name="wmo_drizzle_light">Lichte motregen</string>
+    <string name="wmo_drizzle">Motregen</string>
+    <string name="wmo_drizzle_dense">Dichte motregen</string>
+    <string name="wmo_freezing_drizzle">Aanvriezende motregen</string>
+    <string name="wmo_rain_light">Lichte regen</string>
+    <string name="wmo_rain">Regen</string>
+    <string name="wmo_rain_heavy">Zware regen</string>
+    <string name="wmo_freezing_rain">IJzel</string>
+    <string name="wmo_snow_light">Lichte sneeuw</string>
+    <string name="wmo_snow">Sneeuw</string>
+    <string name="wmo_snow_heavy">Zware sneeuw</string>
+    <string name="wmo_snow_grains">Motsneeuw</string>
+    <string name="wmo_showers_light">Lichte buien</string>
+    <string name="wmo_showers">Buien</string>
+    <string name="wmo_showers_violent">Zware buien</string>
+    <string name="wmo_snow_showers_light">Lichte sneeuwbuien</string>
+    <string name="wmo_snow_showers">Sneeuwbuien</string>
+    <string name="wmo_thunderstorm">Onweer</string>
+    <string name="wmo_thunderstorm_hail">Onweer met hagel</string>
 </resources>

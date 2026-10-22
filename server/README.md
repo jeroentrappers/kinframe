@@ -79,6 +79,19 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_FRAME_RELEASES_POLL_MINUTES` | `30` | GitHub poll interval (also polled at start; ETag, rate limits respected) |
 | `KINFRAME_FRAME_RELEASES_GITHUB_TOKEN` | — | Optional token for a higher GitHub API rate limit |
 | `KINFRAME_FRAME_RELEASES_API` | `https://api.github.com` | GitHub API base (GitHub Enterprise, tests) |
+| `KINFRAME_WEATHER` | `on` | `off` disables weather for all frames and `/v1/geocode` (discovery `weather: false`) |
+| `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
+| `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
+| `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
+
+## Weather
+
+Weather comes from [Open-Meteo](https://open-meteo.com): free, no API key, data under CC BY 4.0 ("Weather data by
+Open-Meteo.com"). The server fetches it for frames with a location and the weather widget on, caches it in
+PostgreSQL per location rounded to 2 decimals and pushes it to frames as `weather` changes
+(`docs/api/README.md` §5.4). With 30-minute refreshes each distinct location costs about 50 requests a day, well under
+Open-Meteo's free limit of 10 000 a day for non-commercial use. Failed fetches back off from 1 minute up to the refresh
+interval and keep the last good data. Place search (`GET /v1/geocode`) is cached in memory for a day.
 
 ## Frame app releases (self-update)
 
@@ -147,6 +160,7 @@ internal/ws           websocket hub (device + user), commands
 internal/settings     frame settings defaults and RFC 7396 merge patch
 internal/notify       websocket/push fan-out (UnifiedPush delivery)
 internal/releases     frame app release mirror (GitHub Releases + drop-in directory), APK manifest parser
+internal/weather      Open-Meteo client, per-location weather cache and refresh loop, place search
 internal/e2e          end-to-end tests over real HTTP
 tools/                specprep (OpenAPI 3.1 → codegen input), respgen
 ```

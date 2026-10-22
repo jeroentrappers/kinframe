@@ -66,6 +66,11 @@ type Config struct {
 	FrameReleasesToken    string // optional GitHub token
 	FrameReleasesDir      string // optional drop-in directory of APKs
 	FrameReleasesInterval time.Duration
+
+	// Weather (Open-Meteo). Empty WeatherURL disables weather and /v1/geocode.
+	WeatherURL     string
+	GeocodingURL   string
+	WeatherRefresh time.Duration
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -150,6 +155,16 @@ func load(get func(string) string) (*Config, error) {
 		FrameReleasesToken:    env("KINFRAME_FRAME_RELEASES_GITHUB_TOKEN", ""),
 		FrameReleasesDir:      env("KINFRAME_FRAME_RELEASES_DIR", ""),
 		FrameReleasesInterval: time.Duration(intv("KINFRAME_FRAME_RELEASES_POLL_MINUTES", 30)) * time.Minute,
+	}
+	c.WeatherURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_URL", "https://api.open-meteo.com"), "/")
+	c.GeocodingURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com"), "/")
+	c.WeatherRefresh = time.Duration(intv("KINFRAME_WEATHER_REFRESH_MINUTES", 30)) * time.Minute
+	switch strings.ToLower(env("KINFRAME_WEATHER", "on")) {
+	case "0", "off", "false", "no":
+		c.WeatherURL, c.GeocodingURL = "", ""
+	}
+	if c.WeatherRefresh < 15*time.Minute {
+		errs = append(errs, errors.New("KINFRAME_WEATHER_REFRESH_MINUTES must be at least 15"))
 	}
 	switch strings.ToLower(c.FrameReleasesRepo) {
 	case "off", "none", "-":
