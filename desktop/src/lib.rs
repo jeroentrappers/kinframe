@@ -14,3 +14,4 @@ pub mod queue;
 pub mod scan;
 pub mod store;
 pub mod tus;
+pub mod ui;

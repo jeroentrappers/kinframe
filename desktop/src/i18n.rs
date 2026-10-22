@@ -80,7 +80,7 @@ pub fn t(key: &str) -> &'static str {
     lookup(lang(), key)
         .or_else(|| lookup(Lang::En, key))
         .unwrap_or_else(|| {
-            debug_assert!(false, "missing i18n key {key}");
+            log::warn!("missing i18n key {key}");
             ""
         })
 }
@@ -145,6 +145,42 @@ mod tests {
                 assert_eq!(ph(v), ph(en), "{lang:?} {k}");
             }
         }
+    }
+
+    /// Every literal key passed to `t`, `tf` or `tn` in the app exists in English.
+    #[test]
+    fn every_key_used_in_the_app_exists() {
+        let sources = [
+            include_str!("ui/mod.rs"),
+            include_str!("ui/welcome.rs"),
+            include_str!("ui/frames.rs"),
+            include_str!("ui/import.rs"),
+            include_str!("ui/history.rs"),
+            include_str!("engine.rs"),
+        ];
+        let mut checked = 0;
+        for src in sources {
+            for (pat, plural) in [("t(\"", false), ("tf(\"", false), ("tn(\"", true)] {
+                for (i, _) in src.match_indices(pat) {
+                    let prev = src[..i].chars().last().unwrap_or(' ');
+                    if prev.is_alphanumeric() || prev == '_' {
+                        continue;
+                    }
+                    let rest = &src[i + pat.len()..];
+                    let key = &rest[..rest.find('"').unwrap()];
+                    let keys = if plural {
+                        vec![format!("{key}.one"), format!("{key}.other")]
+                    } else {
+                        vec![key.to_string()]
+                    };
+                    for k in keys {
+                        assert!(lookup(Lang::En, &k).is_some(), "missing i18n key {k}");
+                        checked += 1;
+                    }
+                }
+            }
+        }
+        assert!(checked > 100, "only {checked} keys found; is the scan broken?");
     }
 
     #[test]

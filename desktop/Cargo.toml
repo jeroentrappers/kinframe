@@ -52,6 +52,7 @@ env_logger = { version = "0.11", default-features = false, features = ["auto-col
 wiremock = "0.6"
 tempfile = "3"
 egui_kittest = { version = "0.37", features = ["wgpu", "snapshot"] }
+egui_system_font_provider = "0.37"
 
 [profile.release]
 lto = "thin"
