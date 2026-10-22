@@ -451,6 +451,8 @@ export const en = {
 	'settings.displayName': 'Your name',
 	'settings.displayNameHint': 'Shown on the frame next to the photos you send.',
 	'settings.nameSaved': 'Name updated',
+	'settings.welcomeTitle': 'Welcome to kinframe!',
+	'settings.welcomeBody': 'What should your family call you? This name appears on the frame next to the photos you send.',
 	'settings.email': 'Email',
 	'settings.preferences': 'Preferences',
 	'settings.language': 'Language',

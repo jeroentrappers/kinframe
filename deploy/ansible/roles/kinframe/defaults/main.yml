@@ -1,0 +1,36 @@
+# kinframe stack role: Postgres + Logto + kinframe server in one compose project, all bound to loopback.
+# A reverse proxy (nginx, Caddy, …) in front terminates TLS; that part is host-specific and not in this role.
+#
+# Every host-specific value and every secret is a variable. Secrets have no defaults on purpose:
+# the play fails fast when one is missing.
+---
+kinframe_dir: /opt/kinframe
+
+# Images
+kinframe_image: ghcr.io/jeroentrappers/kinframe-server
+kinframe_version: main            # image tag: main, sha-xxxxxxx or a release like 0.1.0
+logto_version: "1.43.0"
+postgres_version: "17-alpine"
+
+# Public names (TLS is terminated in front of these ports)
+kinframe_domain: ""                # e.g. kinframe.example.org
+logto_domain: ""                   # e.g. auth.kinframe.example.org
+logto_admin_domain: ""             # e.g. admin.auth.kinframe.example.org
+
+# Loopback ports
+kinframe_port: 8110
+logto_core_port: 8111
+logto_admin_port: 8112
+
+kinframe_server_name: kinframe     # shown in the apps before sign-in
+kinframe_log_level: info
+
+# Secrets (no defaults; supply them from a vault)
+# kinframe_postgres_superuser_password:
+# kinframe_db_password:
+# logto_db_password:
+# kinframe_signing_key:          # ≥ 32 random bytes, hex or base64; signs device tokens and media URLs
+# kinframe_smtp_host / _port / _user / _password / _from
+
+# Extra environment for the server container (e.g. bootstrap credentials).
+kinframe_extra_env: {}

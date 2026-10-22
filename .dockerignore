@@ -1,0 +1,14 @@
+# Only web/ and server/ are needed by the root Dockerfile.
+*
+!web/
+!server/
+web/node_modules
+web/build
+web/.svelte-kit
+web/test-results
+web/playwright-report
+web/screenshots
+server/bin
+server/data
+**/.env
+**/.env.*

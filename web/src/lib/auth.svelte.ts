@@ -4,6 +4,8 @@ import { discovery } from './discovery.svelte';
 import { i18n } from './i18n/index.svelte';
 
 const DEV_TOKEN_KEY = 'kinframe.devToken';
+/** Name the server gives new accounts when the access token carries no name claim. */
+export const PLACEHOLDER_NAME = 'New member';
 const NEXT_KEY = 'kinframe.next';
 
 export type AuthStatus = 'unknown' | 'signed_out' | 'signed_in';
@@ -130,7 +132,25 @@ class Auth {
 		this.expired = false;
 		if (!(await this.loadMe())) throw new Error('Could not load your profile.');
 		this.status = 'signed_in';
-		return this.takeNext();
+		const next = this.takeNext();
+		return (await this.#ensureDisplayName()) ? next : `/settings?welcome=1&next=${encodeURIComponent(next)}`;
+	}
+
+	/**
+	 * New accounts start with a placeholder name. Take the real one from the ID token;
+	 * returns false when there is none, so the caller can ask the person once.
+	 */
+	async #ensureDisplayName(): Promise<boolean> {
+		if (!this.logto || this.me?.display_name !== PLACEHOLDER_NAME) return true;
+		try {
+			const claims = await this.logto.getIdTokenClaims();
+			const name = String(claims.name ?? claims.username ?? '').trim().slice(0, 40);
+			if (!name) return false;
+			this.me = await call(api.PATCH('/v1/me', { body: { display_name: name } }));
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
 	/** Development servers only: POST /dev/token {email, name}. */

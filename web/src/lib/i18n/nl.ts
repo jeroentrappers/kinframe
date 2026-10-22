@@ -440,6 +440,8 @@ export const nl: Record<MessageKey, string> = {
 	'settings.displayName': 'Je naam',
 	'settings.displayNameHint': 'Staat op het kader bij de foto’s die je stuurt.',
 	'settings.nameSaved': 'Naam aangepast',
+	'settings.welcomeTitle': 'Welkom bij kinframe!',
+	'settings.welcomeBody': "Hoe mag je familie je noemen? Deze naam staat op het kader bij de foto's die je stuurt.",
 	'settings.email': 'E-mail',
 	'settings.preferences': 'Voorkeuren',
 	'settings.language': 'Taal',

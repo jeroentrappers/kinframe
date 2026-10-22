@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { api, authFetch, call, type User } from '$lib/api/client';
-	import { auth } from '$lib/auth.svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { auth, PLACEHOLDER_NAME, safeNext } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { squareAvatar } from '$lib/media';
@@ -11,7 +13,10 @@
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 
-	let name = $state(auth.me?.display_name ?? '');
+	// After a first sign-in without a name claim: ask once, then continue where they were going.
+	const welcome = page.url.searchParams.get('welcome') === '1';
+	const welcomeNext = safeNext(page.url.searchParams.get('next'));
+	let name = $state(auth.me?.display_name === PLACEHOLDER_NAME ? '' : (auth.me?.display_name ?? ''));
 	let saving = $state(false);
 	let uploading = $state(false);
 	let avatarInput: HTMLInputElement | undefined = $state();
@@ -23,6 +28,7 @@
 		try {
 			auth.me = await call(api.PATCH('/v1/me', { body: { display_name: name.trim() } }));
 			toasts.success(t('settings.nameSaved'));
+			if (welcome) await goto(welcomeNext);
 		} catch (err) {
 			toasts.error(problemMessage(err));
 		} finally {
@@ -90,9 +96,16 @@
 					</div>
 				</div>
 				<form class="stack grow" onsubmit={saveName}>
+					{#if welcome}
+						<div class="welcome" role="status">
+							<strong>{t('settings.welcomeTitle')}</strong>
+							<span class="muted">{t('settings.welcomeBody')}</span>
+						</div>
+					{/if}
 					<div class="field">
 						<label for="display-name">{t('settings.displayName')}</label>
-						<input id="display-name" class="input" maxlength="40" required bind:value={name} autocomplete="nickname" />
+						<!-- svelte-ignore a11y_autofocus -->
+						<input id="display-name" class="input" maxlength="40" required bind:value={name} autocomplete="nickname" autofocus={welcome} />
 						<span class="hint">{t('settings.displayNameHint')}</span>
 					</div>
 					{#if auth.me?.email}
@@ -140,6 +153,13 @@
 </div>
 
 <style>
+	.welcome {
+		display: grid;
+		gap: 4px;
+		padding: 14px 16px;
+		border-radius: var(--radius, 12px);
+		background: var(--accent-soft, color-mix(in srgb, var(--accent) 12%, transparent));
+	}
 	.narrow {
 		max-width: 760px;
 	}

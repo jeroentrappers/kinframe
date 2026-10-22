@@ -1,0 +1,53 @@
+# Managed by Ansible (kinframe role). Do not edit on the box.
+# All listeners are bound to loopback; a reverse proxy terminates TLS in front.
+name: kinframe
+
+services:
+  postgres:
+    image: postgres:{{ postgres_version }}
+    container_name: kinframe-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/kinframe/postgres-password
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Creates the kinframe and logto roles + databases on first start only.
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+      - ./secrets/postgres-password:/run/kinframe/postgres-password:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  logto:
+    image: svhd/logto:{{ logto_version }}
+    container_name: kinframe-logto
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+    # `db seed --swe` initialises the schema on the first run and skips it afterwards.
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+    env_file: ./logto.env
+    ports:
+      - "127.0.0.1:{{ logto_core_port }}:3001"
+      - "127.0.0.1:{{ logto_admin_port }}:3002"
+
+  server:
+    image: {{ kinframe_image }}:{{ kinframe_version }}
+    container_name: kinframe-server
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      logto: { condition: service_started }
+    env_file: ./kinframe.env
+    volumes:
+      - media:/data
+    ports:
+      - "127.0.0.1:{{ kinframe_port }}:8110"
+
+volumes:
+  pgdata:
+  media:

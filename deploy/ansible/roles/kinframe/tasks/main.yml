@@ -1,0 +1,101 @@
+# kinframe stack: Postgres + Logto + kinframe server via docker compose, all on loopback.
+---
+- name: Required variables are set
+  ansible.builtin.assert:
+    that:
+      - kinframe_domain | length > 0
+      - logto_domain | length > 0
+      - logto_admin_domain | length > 0
+      - kinframe_postgres_superuser_password is defined
+      - kinframe_db_password is defined
+      - logto_db_password is defined
+      - kinframe_signing_key is defined and kinframe_signing_key | length >= 43
+      - kinframe_smtp_host is defined and kinframe_smtp_password is defined
+    fail_msg: Set the domains and the secrets (see defaults/main.yml).
+    quiet: true
+
+- name: Loopback ports are free or already ours
+  ansible.builtin.shell: |
+    set -o pipefail
+    ss -Hltnp "( sport = :{{ item }} )" | grep -v -e docker-proxy -e '^$' || true
+  args: { executable: /bin/bash }
+  register: port_check
+  changed_when: false
+  failed_when: port_check.stdout | length > 0
+  loop: ["{{ kinframe_port }}", "{{ logto_core_port }}", "{{ logto_admin_port }}"]
+
+- name: Project directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ kinframe_dir }}", mode: "0750" }
+    - { path: "{{ kinframe_dir }}/initdb", mode: "0750" }
+    - { path: "{{ kinframe_dir }}/secrets", mode: "0700" }
+
+- name: Postgres superuser password
+  ansible.builtin.copy:
+    content: "{{ kinframe_postgres_superuser_password }}"
+    dest: "{{ kinframe_dir }}/secrets/postgres-password"
+    owner: "70"   # postgres uid in the alpine image
+    group: root
+    mode: "0400"
+  no_log: true
+
+- name: Render compose, env files and the first-start SQL
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ kinframe_dir }}/{{ item.dest }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - { src: docker-compose.yml.j2, dest: docker-compose.yml, mode: "0640" }
+    - { src: kinframe.env.j2, dest: kinframe.env, mode: "0600" }
+    - { src: logto.env.j2, dest: logto.env, mode: "0600" }
+    - { src: initdb.sql.j2, dest: initdb/10-kinframe.sql, mode: "0400", owner: "70" }
+  loop_control: { label: "{{ item.dest }}" }
+  no_log: true
+  register: rendered
+
+- name: Pull images
+  ansible.builtin.command:
+    cmd: docker compose pull --quiet
+    chdir: "{{ kinframe_dir }}"
+  register: pulled
+  changed_when: "'Pulled' in pulled.stderr or 'Downloaded' in pulled.stderr"
+
+- name: Start or update the stack
+  ansible.builtin.command:
+    cmd: docker compose up -d --remove-orphans
+    chdir: "{{ kinframe_dir }}"
+  register: stack_up
+  changed_when: "'Started' in stack_up.stderr or 'Created' in stack_up.stderr or 'Recreate' in stack_up.stderr"
+
+- name: Wait for Logto
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ logto_core_port }}/oidc/.well-known/openid-configuration"
+  register: logto_up
+  retries: 40
+  delay: 5
+  until: logto_up is succeeded
+  changed_when: false
+
+- name: Wait for the kinframe server
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ kinframe_port }}/.well-known/kinframe"
+    return_content: true
+  register: kinframe_up
+  retries: 30
+  delay: 3
+  until: kinframe_up is succeeded
+  changed_when: false
+
+- name: Discovery must not advertise dev auth
+  ansible.builtin.assert:
+    that: not (kinframe_up.json.dev_auth | default(false))
+    fail_msg: The server is running with dev auth enabled. Refusing to continue.
+    quiet: true

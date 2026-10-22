@@ -1,0 +1,5 @@
+-- Managed by Ansible (kinframe role). Runs once, when the Postgres volume is first initialised.
+CREATE ROLE kinframe LOGIN PASSWORD '{{ kinframe_db_password | replace("'", "''") }}';
+CREATE DATABASE kinframe OWNER kinframe;
+CREATE ROLE logto LOGIN PASSWORD '{{ logto_db_password | replace("'", "''") }}';
+CREATE DATABASE logto OWNER logto;
