@@ -108,6 +108,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
                 SleepSection(s) { patch(it) }
+                app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
                 AboutSection(c)
@@ -121,7 +122,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
 }
 
 @Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
+internal fun SectionCard(title: String, content: @Composable () -> Unit) {
     KinCard(Modifier.fillMaxWidth().widthIn(max = 1000.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             Text(title, style = Kin.type.title)
@@ -131,7 +132,7 @@ private fun SectionCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Labeled(label: String, content: @Composable () -> Unit) {
+internal fun Labeled(label: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(label, style = Kin.type.label, color = Kin.colors.inkSoft)
         content()
@@ -290,7 +291,7 @@ private fun SleepSection(s: FrameSettings, patch: (JsonObject) -> Unit) {
 }
 
 @Composable
-private fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
+internal fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
     Labeled(label) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             StepButton(KinIcons.Minus, onMinus)
@@ -308,7 +309,7 @@ private fun StepButton(icon: androidx.compose.ui.graphics.vector.ImageVector, on
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth().clip(CircleShape).clickable { onChange(!checked) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(label, style = Kin.type.body, modifier = Modifier.weight(1f))
         Switch(
