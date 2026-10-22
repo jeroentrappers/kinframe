@@ -679,8 +679,22 @@ mod tests {
             assert_eq!(j.counts().failed, 2);
             assert_eq!(j.items[0].error.as_deref(), Some(crate::i18n::t("error.tooLarge")));
         });
+        // A retry runs the failed files again (and resumes a paused job); they fail the same way, cleanly.
         engine.set_paused(job, true);
         engine.retry_failed(job);
-        engine.with_queue(|q| assert_eq!(q.job(job).unwrap().items[0].state, ItemState::Queued));
+        wait_until(&engine, |q| {
+            let j = q.job(job).unwrap();
+            !j.paused && j.is_done()
+        })
+        .await;
+        engine.with_queue(|q| assert_eq!(q.job(job).unwrap().counts().failed, 2));
+        let uploads = server
+            .received_requests()
+            .await
+            .unwrap()
+            .iter()
+            .filter(|r| r.url.path() == "/v1/uploads")
+            .count();
+        assert_eq!(uploads, 4);
     }
 }
