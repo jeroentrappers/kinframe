@@ -30,4 +30,24 @@
     <string name="settings_pin_set">Pincode instellen</string>
     <string name="settings_pin_change">Pincode wijzigen</string>
     <string name="settings_pin_remove">Pincode verwijderen</string>
+    <!-- Verzoeken om lid te worden en meldingen -->
+    <string name="join_someone">Iemand</string>
+    <string name="join_title">%1$s wil graag lid worden</string>
+    <string name="join_body_code">%1$s heeft de code van %2$s ingevoerd. Als je het toestaat, kan %1$s foto\'s naar deze fotolijst sturen.</string>
+    <string name="join_body_invited">%1$s heeft %3$s uitgenodigd voor %2$s. Als je het toestaat, kan %3$s foto\'s naar deze fotolijst sturen.</string>
+    <string name="join_invited_by">Uitgenodigd door %s</string>
+    <string name="join_allow">Toestaan</string>
+    <string name="join_deny">Niet toestaan</string>
+    <string name="join_later">Later</string>
+    <string name="join_later_hint">Je vindt het terug bij de meldingen in het menu.</string>
+    <string name="join_pill_one">%s wil graag lid worden</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d persoon wil graag lid worden</item>
+        <item quantity="other">%d personen willen graag lid worden</item>
+    </plurals>
+    <string name="notifications_title">Meldingen</string>
+    <string name="notifications_empty">Alles bijgewerkt</string>
+    <string name="notifications_empty_body">Er wacht niets op je.</string>
+    <string name="menu_notifications">Meldingen</string>
+    <string name="action_close">Sluiten</string>
 </resources>

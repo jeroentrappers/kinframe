@@ -1924,6 +1924,26 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/join-requests:
+        get:
+            description: |
+                Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+                The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+                connect and after syncing, so requests announced while it was offline are not lost.
+            operationId: deviceListJoinRequests
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                items:
+                                    $ref: '#/components/schemas/JoinRequest'
+                                type: array
+                    description: Oldest first
+            security:
+                - deviceAuth: []
+            tags:
+                - device
     /v1/device/join-requests/{requestId}:
         post:
             operationId: deviceDecideJoin

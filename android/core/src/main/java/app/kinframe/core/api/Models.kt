@@ -280,6 +280,20 @@ data class FrameUpdate(
     val prerelease: Boolean = false,
 )
 
+/** `JoinRequest`: someone wants to join a frame whose owner asked to approve joins on the frame. */
+@Serializable
+data class JoinRequest(
+    val id: String,
+    val user: JoinRequestUser = JoinRequestUser(),
+    val via: String = "frame_code",
+    val invitedByName: String? = null,
+    val note: String? = null,
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class JoinRequestUser(val id: String? = null, val displayName: String? = null, val avatarUrl: String? = null)
+
 @Serializable
 data class Problem(
     val type: String? = null,

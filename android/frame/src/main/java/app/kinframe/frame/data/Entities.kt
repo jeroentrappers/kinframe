@@ -100,5 +100,7 @@ data class OutboxEntity(
         const val PLACEMENT_PATCH = "placement_patch"
         const val SETTINGS_PATCH = "settings_patch"
         const val REPLY = "reply"
+        /** Allow/deny of a join request; `placementId` holds the request id. */
+        const val JOIN_DECISION = "join_decision"
     }
 }

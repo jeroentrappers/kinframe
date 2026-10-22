@@ -82,6 +82,10 @@ import app.kinframe.core.design.StatusPill
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.data.PlacementEntity
+import app.kinframe.frame.join.JoinRequestLayer
+import app.kinframe.frame.join.JoinRequestsPill
+import app.kinframe.frame.join.NotificationsPanel
+import app.kinframe.frame.join.rememberJoinAvatars
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.ui.Format
@@ -113,13 +117,20 @@ fun SlideshowScreen(c: FrameController) {
     var burstSeq by remember { mutableIntStateOf(0) }
     var snack by remember { mutableStateOf<Snack?>(null) }
     var forecastOpen by remember { mutableStateOf(false) }
+    var notificationsOpen by remember { mutableStateOf(false) }
+    val joinPending by c.joins.pending.collectAsState()
+    val joinFocused by c.joins.focused.collectAsState()
+    val sync by c.syncState.collectAsState()
     val nowMs by minuteTicker(c)
     val weatherDoc by c.weather.collectAsState()
     // Shown only when enabled, located and fresh (> 6 h old means the frame has been offline a long while).
     val weather = weatherDoc?.takeIf { settings.widgets.weather && settings.location != null && !it.isStale(nowMs) }
     LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen) { ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen }
+    val joinCard = joinFocused != null
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard) {
+        ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard
+    }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
 
@@ -198,7 +209,10 @@ fun SlideshowScreen(c: FrameController) {
             onWeatherClick = { menuOpen = false; forecastOpen = true },
         )
         NewPhotosPill(c, Modifier.align(Alignment.TopCenter))
-        ConnectionPill(c, Modifier.align(Alignment.TopStart).padding(24.dp), hidden = menuOpen)
+        Column(Modifier.align(Alignment.TopStart).padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            ConnectionPill(c, Modifier, hidden = menuOpen)
+            JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
+        }
 
         burst?.let { (r, at) -> key(burstSeq) { ReactionBurst(r, at) { burst = null } } }
 
@@ -223,6 +237,8 @@ fun SlideshowScreen(c: FrameController) {
             },
             onPower = { menuOpen = false; powerOpen = true },
             onSettings = { menuOpen = false; c.openSettings() },
+            notificationCount = joinPending.size,
+            onNotifications = { menuOpen = false; notificationsOpen = true },
         )
 
         snack?.let { s ->
@@ -243,6 +259,13 @@ fun SlideshowScreen(c: FrameController) {
             visible = forecastOpen, weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
             h24 = settings.widgets.clock24h, onClose = { forecastOpen = false },
         )
+
+        NotificationsPanel(
+            visible = notificationsOpen, items = joinPending, avatars = rememberJoinAvatars(c), nowMs = nowMs,
+            onAllow = { c.joins.decide(it, approve = true) }, onDeny = { c.joins.decide(it, approve = false) },
+            onClose = { notificationsOpen = false },
+        )
+        JoinRequestLayer(c, sync?.frameName ?: stringResource(R.string.frame_default_name))
 
         if (powerOpen) PowerDialog(c, onDismiss = { powerOpen = false })
 
@@ -495,6 +518,8 @@ private fun QuickMenu(
     onDelete: (PlacementEntity) -> Unit,
     onPower: () -> Unit,
     onSettings: () -> Unit,
+    notificationCount: Int,
+    onNotifications: () -> Unit,
 ) {
     val current by c.slideshow.current.collectAsState()
     val conn by c.connection.collectAsState()
@@ -521,6 +546,16 @@ private fun QuickMenu(
                         )
                     }
                 }
+                Box {
+                    RoundAction(KinIcons.Bell, stringResource(R.string.menu_notifications)) { onTouch(); onNotifications() }
+                    if (notificationCount > 0) {
+                        Box(
+                            Modifier.align(Alignment.TopEnd).size(24.dp).clip(CircleShape).background(Kin.colors.accent),
+                            contentAlignment = Alignment.Center,
+                        ) { Text("$notificationCount", style = Kin.type.caption, color = Color.White) }
+                    }
+                }
+                Spacer(Modifier.size(14.dp))
                 RoundAction(KinIcons.Settings, stringResource(R.string.menu_settings)) { onTouch(); onSettings() }
                 Spacer(Modifier.size(14.dp))
                 RoundAction(KinIcons.Power, stringResource(R.string.menu_power)) { onTouch(); onPower() }

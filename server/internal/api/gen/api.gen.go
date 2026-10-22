@@ -2370,6 +2370,9 @@ type ServerInterface interface {
 	// (POST /v1/device/imports)
 	DeviceImport(w http.ResponseWriter, r *http.Request, params DeviceImportParams)
 
+	// (GET /v1/device/join-requests)
+	DeviceListJoinRequests(w http.ResponseWriter, r *http.Request)
+
 	// (POST /v1/device/join-requests/{requestId})
 	DeviceDecideJoin(w http.ResponseWriter, r *http.Request, requestId Id)
 
@@ -2705,6 +2708,20 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceListJoinRequests operation middleware
+func (siw *ServerInterfaceWrapper) DeviceListJoinRequests(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceListJoinRequests(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4561,6 +4578,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/code", wrapper.DeviceGetCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/heartbeat", wrapper.DeviceHeartbeat)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports", wrapper.DeviceImport)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/join-requests/{requestId}", wrapper.DeviceDecideJoin)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/members/{userId}", wrapper.DeviceRemoveMember)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/placements/{placementId}", wrapper.DevicePatchPlacement)
@@ -4742,6 +4760,27 @@ func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceListJoinRequestsRequestObject struct {
+}
+
+type DeviceListJoinRequestsResponseObject interface {
+	VisitDeviceListJoinRequestsResponse(w http.ResponseWriter) error
+}
+
+type DeviceListJoinRequests200JSONResponse []JoinRequest
+
+func (response DeviceListJoinRequests200JSONResponse) VisitDeviceListJoinRequestsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -6620,6 +6659,9 @@ type StrictServerInterface interface {
 	// (POST /v1/device/imports)
 	DeviceImport(ctx context.Context, request DeviceImportRequestObject) (DeviceImportResponseObject, error)
 
+	// (GET /v1/device/join-requests)
+	DeviceListJoinRequests(ctx context.Context, request DeviceListJoinRequestsRequestObject) (DeviceListJoinRequestsResponseObject, error)
+
 	// (POST /v1/device/join-requests/{requestId})
 	DeviceDecideJoin(ctx context.Context, request DeviceDecideJoinRequestObject) (DeviceDecideJoinResponseObject, error)
 
@@ -6985,6 +7027,30 @@ func (sh *strictHandler) DeviceImport(w http.ResponseWriter, r *http.Request, pa
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceImportResponseObject); ok {
 		if err := validResponse.VisitDeviceImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceListJoinRequests operation middleware
+func (sh *strictHandler) DeviceListJoinRequests(w http.ResponseWriter, r *http.Request) {
+	var request DeviceListJoinRequestsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceListJoinRequests(ctx, request.(DeviceListJoinRequestsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceListJoinRequests")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceListJoinRequestsResponseObject); ok {
+		if err := validResponse.VisitDeviceListJoinRequestsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

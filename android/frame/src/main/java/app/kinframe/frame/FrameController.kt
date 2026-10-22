@@ -8,6 +8,7 @@ import app.kinframe.core.api.Heartbeat
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.PinHashDto
 import app.kinframe.frame.data.SyncStateEntity
+import app.kinframe.frame.join.JoinRequests
 import app.kinframe.frame.kiosk.OwnerGate
 import app.kinframe.frame.kiosk.OwnerPin
 import app.kinframe.frame.kiosk.PinAttempts
@@ -71,6 +72,8 @@ class FrameController(val g: FrameGraph) {
         attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
     )
 
+    val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
+
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
     val settingsOpen = MutableStateFlow(false)
@@ -115,6 +118,9 @@ class FrameController(val g: FrameGraph) {
                 }
             }
             scope.launch { g.settings.settings.collect { applyTimezone() } }
+            scope.launch {
+                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online -> if (online) joins.refresh() }
+            }
             reportStateChanges()
             update.start()
         }
@@ -182,6 +188,12 @@ class FrameController(val g: FrameGraph) {
 
         override fun onPulled(result: app.kinframe.frame.sync.SyncEngine.PullResult) {
             if (result.newItems > 0) scope.launch { display.onNewPhotos() }
+            // A decision made in the app shows up as a membership change: drop the card here too.
+            if (joins.pending.value.isNotEmpty()) joins.refresh()
+        }
+
+        override fun onJoinRequest(request: JsonObject) {
+            scope.launch { joins.onEvent(request) }
         }
     }
 
@@ -190,6 +202,7 @@ class FrameController(val g: FrameGraph) {
         Log.w(TAG, "device credential revoked: wiping and returning to setup")
         stopSession()
         slideshow.reset()
+        joins.clear()
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()

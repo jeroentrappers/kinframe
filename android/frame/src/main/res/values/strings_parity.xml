@@ -31,4 +31,24 @@
     <string name="settings_pin_set">Set a PIN</string>
     <string name="settings_pin_change">Change PIN</string>
     <string name="settings_pin_remove">Remove PIN</string>
+    <!-- Join requests and notifications -->
+    <string name="join_someone">Someone</string>
+    <string name="join_title">%1$s would like to join</string>
+    <string name="join_body_code">%1$s entered the code of %2$s. If you allow it, %1$s can send photos to this frame.</string>
+    <string name="join_body_invited">%1$s invited %3$s to %2$s. If you allow it, %3$s can send photos to this frame.</string>
+    <string name="join_invited_by">Invited by %s</string>
+    <string name="join_allow">Allow</string>
+    <string name="join_deny">Don\'t allow</string>
+    <string name="join_later">Not now</string>
+    <string name="join_later_hint">It stays under notifications in the menu.</string>
+    <string name="join_pill_one">%s would like to join</string>
+    <plurals name="join_pill_many">
+        <item quantity="one">%d person would like to join</item>
+        <item quantity="other">%d people would like to join</item>
+    </plurals>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">All caught up</string>
+    <string name="notifications_empty_body">Nothing is waiting for you.</string>
+    <string name="menu_notifications">Notifications</string>
+    <string name="action_close">Close</string>
 </resources>

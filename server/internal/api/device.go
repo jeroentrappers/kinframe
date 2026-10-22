@@ -566,6 +566,22 @@ func (s *Server) DeviceSendReply(ctx context.Context, req gen.DeviceSendReplyReq
 	return noContent(), nil
 }
 
+func (s *Server) DeviceListJoinRequests(ctx context.Context, req gen.DeviceListJoinRequestsRequestObject) (gen.DeviceListJoinRequestsResponseObject, error) {
+	f, err := s.deviceFrame(ctx)
+	if err != nil {
+		return nil, err
+	}
+	jrs, err := s.st.ListPendingJoinRequests(ctx, f.ID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gen.JoinRequest, len(jrs))
+	for i := range jrs {
+		out[i] = s.joinRequestJSON(&jrs[i])
+	}
+	return ok(out), nil
+}
+
 func (s *Server) DeviceDecideJoin(ctx context.Context, req gen.DeviceDecideJoinRequestObject) (gen.DeviceDecideJoinResponseObject, error) {
 	f, err := s.deviceFrame(ctx)
 	if err != nil {
