@@ -340,7 +340,7 @@ private fun Screen(
                 ItemEditor(
                     s, editing, composer::edit, { composer.edit(null) },
                     composer::setCaption, composer::applyCaptionToAll, composer::setFill, composer::setFocal,
-                    composer::setTrim, composer::setIncludeAudio, composer::remove,
+                    composer::setTrim, composer::setIncludeAudio, composer::remove, composer::setSendLive,
                 )
             } else {
                 ComposeScreen(s, pick, composer::edit, composer::remove, composer::clear, composer::toggleFrame, composer::send,

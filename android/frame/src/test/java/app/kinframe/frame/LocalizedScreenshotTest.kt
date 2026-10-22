@@ -35,6 +35,7 @@ import app.kinframe.frame.setup.StepScaffold
 import app.kinframe.frame.slideshow.CornerWidgets
 import app.kinframe.frame.slideshow.EmptyMessage
 import app.kinframe.frame.slideshow.EmptyState
+import app.kinframe.frame.slideshow.LiveMarkContent
 import app.kinframe.frame.slideshow.NewPhotosPillContent
 import app.kinframe.frame.slideshow.QuickMenuContent
 import app.kinframe.frame.slideshow.Snack
@@ -104,6 +105,13 @@ class LocalizedScreenshotTest {
         Box(Modifier.fillMaxSize().padding(bottom = 24.dp), contentAlignment = Alignment.BottomCenter) {
             UndoSnackbar(Snack(R.string.snack_deleted, "p", 1, hidden = false), Modifier, {}, {})
         }
+    }
+
+    /** A live photo on screen: the "Live" mark (setting `on`) and the "Tap to play" hint (setting `tap`). */
+    @Test fun liveMark() = each("live_mark") {
+        Photo()
+        Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.TopEnd) { LiveMarkContent(tapHint = false) }
+        Box(Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.BottomStart) { LiveMarkContent(tapHint = true) }
     }
 
     @Test fun powerDialog() = each("power_dialog") {

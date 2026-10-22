@@ -395,7 +395,9 @@ export interface paths {
         put?: never;
         /**
          * @description tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
-         *     Upload-Metadata keys: filename, filetype, sha256 (optional).
+         *     Upload-Metadata keys: filename, filetype, sha256 (optional), prepared (optional: `photo-master-v1` or
+         *     `video-master-v1` when the client already produced a master; the server verifies it, see README §5.3
+         *     "Prepared uploads").
          */
         post: operations["tusCreateUpload"];
         delete?: never;
@@ -716,7 +718,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match. */
+        /**
+         * @description The frame-sized rendition (or poster with ?variant=poster). For a Live/Motion Photo (`item.kind: live`),
+         *     `display` is the still and `?variant=motion` the short frame-sized clip. Supports Range, ETag, If-None-Match.
+         */
         get: operations["deviceGetMedia"];
         put?: never;
         post?: never;
@@ -1243,8 +1248,13 @@ export interface components {
             /** @description false while the frame has no owner */
             claimed?: boolean;
         };
-        /** @enum {string} */
-        MediaKind: "photo" | "video";
+        /**
+         * @description `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+         *     Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+         *     `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+         * @enum {string}
+         */
+        MediaKind: "photo" | "video" | "live";
         /** @enum {string} */
         Fit: "fill" | "fit";
         /** @description Relative to the master rendition, 0..1 from top-left. */
@@ -1269,13 +1279,35 @@ export interface components {
                     start_ms?: number;
                     end_ms?: number;
                 };
-                /** @default true */
+                /**
+                 * @description For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+                 * @default true
+                 */
                 include_audio?: boolean;
                 /**
                  * Format: date-time
-                 * @description Client hint used when the file has no metadata.
+                 * @description Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+                 *     QuickTime) and send it here. Used when the stored file has no capture time.
                  */
                 captured_at?: string | null;
+                /** @description Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline. */
+                width?: number;
+                /** @description Prepared uploads only. Pixel height the client produced. */
+                height?: number;
+                /** @description Prepared videos only. Duration the client produced (±500 ms). */
+                duration_ms?: number;
+                /**
+                 * @description Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+                 *     are cut). `upload_id` must be a photo and `trim` is not allowed. The clip may be a prepared
+                 *     `video-master-v1`.
+                 */
+                live_video_upload_id?: string;
+                /**
+                 * @description `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
+                 *     still only. Without `live_video_upload_id`, the server splits such files itself.
+                 * @default true
+                 */
+                live?: boolean;
             }[];
         };
         Item: {
@@ -1300,10 +1332,23 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /**
+             * @description Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
+             *     `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
+             */
+            motion?: components["schemas"]["ItemMotion"] | null;
+            /**
              * Format: uri
              * @description Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
              */
             thumb_url?: string | null;
+        };
+        ItemMotion: {
+            /** @enum {string} */
+            status: "processing" | "ready";
+            width?: number | null;
+            height?: number | null;
+            duration_ms?: number | null;
+            has_audio?: boolean | null;
         };
         /** @enum {string} */
         PlacementStatus: "pending" | "ready" | "delivered" | "seen" | "failed" | "removed";
@@ -1437,6 +1482,13 @@ export interface components {
                 album_id?: string | null;
                 /** @default false */
                 on_this_day?: boolean;
+                /**
+                 * @description Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+                 *     tap, `off` shows the still only.
+                 * @default on
+                 * @enum {string}
+                 */
+                live_photos?: "on" | "tap" | "off";
             };
             widgets?: {
                 /** @default true */
@@ -1649,6 +1701,23 @@ export interface components {
                     height?: number;
                     /** Format: uri */
                     poster_url?: string | null;
+                };
+                /**
+                 * @description Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+                 *     clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+                 *     ignore it and show `media` as a photo.
+                 */
+                motion?: {
+                    /** Format: uri */
+                    url?: string;
+                    sha256?: string;
+                    bytes?: number;
+                    /** @example video/mp4 */
+                    mime?: string;
+                    width?: number;
+                    height?: number;
+                    duration_ms?: number;
+                    has_audio?: boolean;
                 };
             };
             id?: components["schemas"]["Id"];
@@ -2715,7 +2784,8 @@ export interface operations {
             header?: never;
             path: {
                 itemId: components["parameters"]["ItemId"];
-                variant: "thumb_256" | "thumb_512" | "master" | "poster";
+                /** @description `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). */
+                variant: "thumb_256" | "thumb_512" | "master" | "poster" | "motion";
             };
             cookie?: never;
         };
@@ -3178,7 +3248,7 @@ export interface operations {
     deviceGetMedia: {
         parameters: {
             query?: {
-                variant?: "display" | "poster" | "avatar";
+                variant?: "display" | "poster" | "avatar" | "motion";
             };
             header?: never;
             path: {
@@ -3566,6 +3636,18 @@ export interface operations {
                         items?: number;
                         storage_bytes?: number;
                         processing_queue?: number;
+                        /**
+                         * @description How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+                         *     `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+                         *     upload that did not conform and was transcoded). `reused_renditions` counts frame video
+                         *     renditions served from the master's bytes instead of a transcode.
+                         */
+                        media_pipeline?: {
+                            transcoded?: number;
+                            prepared?: number;
+                            fallback?: number;
+                            reused_renditions?: number;
+                        };
                     };
                 };
             };

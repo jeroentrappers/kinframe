@@ -592,4 +592,16 @@
     <string name="problem_feature_disabled">Dit staat uit op deze server.</string>
     <string name="problem_server_error">Er ging iets mis op de server. Probeer het opnieuw.</string>
     <string name="problem_network">Je lijkt offline te zijn. Controleer je verbinding en probeer opnieuw.</string>
+    <!-- Client-side preparation and Live/Motion Photos -->
+    <string name="outbox_preparing">%1$d van %2$d voorbereiden · %3$d%%</string>
+    <string name="live_badge">Live</string>
+    <string name="a11y_live_photo">Livefoto</string>
+    <string name="send_live_title">Bewegende foto</string>
+    <string name="send_live_still_only">Alleen als gewone foto versturen</string>
+    <string name="send_live_hint">De fotolijst speelt het korte filmpje af wanneer de foto verschijnt.</string>
+    <string name="send_live_still_hint">Alleen de foto wordt verstuurd, zonder filmpje.</string>
+    <string name="fs_live_photos">Livefoto’s</string>
+    <string name="fs_live_on">Afspelen bij tonen</string>
+    <string name="fs_live_tap">Afspelen bij tikken</string>
+    <string name="fs_live_off">Alleen foto</string>
 </resources>

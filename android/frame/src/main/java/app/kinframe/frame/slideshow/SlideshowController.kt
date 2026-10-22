@@ -67,7 +67,8 @@ sealed interface EmptyState {
     data class Downloading(val total: Int) : EmptyState
 }
 
-data class VideoState(val placementId: String, val file: File, val visible: Boolean = false)
+/** What the player shows: a video slide, or ([live]) the clip of a Live/Motion Photo over its still. */
+data class VideoState(val placementId: String, val file: File, val visible: Boolean = false, val live: Boolean = false)
 
 /**
  * Drives the slideshow: playlist, timing, pre-decoding the next slide at screen size, video playback (Media3),
@@ -93,6 +94,12 @@ class SlideshowController(private val c: FrameController) {
     val video: StateFlow<VideoState?> = _video
     private val _current = MutableStateFlow<PlacementEntity?>(null)
     val current: StateFlow<PlacementEntity?> = _current
+
+    /** The small "Live" mark on the current live photo: null (hidden), false ("Live") or true ("Tap to play"). */
+    private val _liveMark = MutableStateFlow<Boolean?>(null)
+    val liveMark: StateFlow<Boolean?> = _liveMark
+    /** The live photo whose clip is loaded (paused at its start) in the player, ready to play without a delay. */
+    private var prebufferedId: String? = null
 
     /** Set by the UI: true while the quick menu, settings or a dialog is open (auto-advance pauses). */
     val paused = MutableStateFlow(false)
@@ -195,7 +202,7 @@ class SlideshowController(private val c: FrameController) {
     private suspend fun timerLoop() {
         while (true) {
             delay(250)
-            player?.let { pl -> videoVolume().let { v -> if (pl.volume != v) pl.volume = v } }
+            player?.let { pl -> playerVolume().let { v -> if (pl.volume != v) pl.volume = v } }
             val cur = _stage.value.incoming ?: continue
             if (paused.value || transitionRunning || c.display.mode.value == ScreenMode.Asleep ||
                 c.display.mode.value == ScreenMode.FadingOut || c.settingsOpen.value
@@ -207,7 +214,13 @@ class SlideshowController(private val c: FrameController) {
             if (playable.size <= 1 && playlist.pendingNew().isEmpty()) continue
             val elapsed = SystemClock.elapsedRealtime() - shownAt
             val interval = if (cur.image == null) 6_000L else settings.slideshow.intervalS.coerceIn(2, 86_400) * 1000L
-            val due = if (_video.value != null) VideoPolicy.due(settings.video.playback, videoEnded, elapsed, interval) else elapsed >= interval
+            val v = _video.value
+            val due = when {
+                // Live clip playing or fading back to the still: the interval starts once it is done.
+                v != null && v.live -> LivePolicy.due(playing = true, elapsed, interval)
+                v != null -> VideoPolicy.due(settings.video.playback, videoEnded, elapsed, interval)
+                else -> elapsed >= interval
+            }
             if (due) next(manual = false)
         }
     }
@@ -294,6 +307,30 @@ class SlideshowController(private val c: FrameController) {
         if (st.outgoing != null) _stage.value = st.copy(outgoing = null)
         val p = st.incoming?.placement ?: return
         if (p.isVideo && settings.video.autoplay && st.incoming.image != null) startVideo(p)
+        if (p.isLive && st.incoming.image != null) {
+            val alone = st.incoming.tiles.isEmpty()
+            if (LivePolicy.autoPlay(settings.slideshow.livePhotos, liveClip(p) != null, alone)) startLive(p) else updateLiveMark()
+        }
+    }
+
+    /** The downloaded clip of a live photo, or null. */
+    private fun liveClip(p: PlacementEntity): File? =
+        p.motionLocalFile?.takeIf { p.isLive }?.let { g.media.file(it) }?.takeIf { it.exists() }
+
+    private fun updateLiveMark() {
+        val inc = _stage.value.incoming
+        val p = inc?.placement?.let { playable[it.id] ?: it }
+        val ls = settings.slideshow.livePhotos
+        _liveMark.value = if (p != null && LivePolicy.showMark(ls, liveClip(p) != null, inc.tiles.isEmpty(), _video.value?.live == true)) LivePolicy.tapHint(ls) else null
+    }
+
+    /** A tap on the photo: replays the clip of a live photo. Returns true when it started. */
+    fun replayLive(): Boolean {
+        val inc = _stage.value.incoming ?: return false
+        val p = playable[inc.placement.id] ?: return false
+        if (transitionRunning || !LivePolicy.playOnTap(settings.slideshow.livePhotos, liveClip(p) != null, inc.tiles.isEmpty(), _video.value != null)) return false
+        startLive(p)
+        return true
     }
 
     /** Aspect ratio as displayed (rotation applied), or null when unknown. */
@@ -311,6 +348,8 @@ class SlideshowController(private val c: FrameController) {
      */
     private fun groupFor(p: PlacementEntity): List<PlacementEntity> {
         if (p.isVideo || screenW == 0) return listOf(p)
+        // A live photo whose clip will play stays alone, like a video.
+        if (p.isLive && p.motionLocalFile != null && settings.slideshow.livePhotos != app.kinframe.core.api.LivePhotos.OFF) return listOf(p)
         val ss = settings.slideshow
         val photos = playlist.upcoming(12).mapNotNull { playable[it] }.filter { !it.isVideo }
         if (ss.collage) {
@@ -414,7 +453,8 @@ class SlideshowController(private val c: FrameController) {
                 caption = caption,
                 density = g.app.resources.displayMetrics.density,
             )
-            val strip = if (p.isVideo) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
+            // Videos and live photos: the caption stays readable above the playing clip.
+            val strip = if (p.isVideo || p.isLive) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
             val bmp: Bitmap? = try {
                 renderer.render(request)
             } catch (e: OutOfMemoryError) {
@@ -456,6 +496,7 @@ class SlideshowController(private val c: FrameController) {
         c.scope.launch {
             delay(1_200) // after the running transition
             runCatching { obtain(p) }.getOrNull()?.let { _prepared.value = it }
+            prebufferLive(p)
         }
     }
 
@@ -477,7 +518,10 @@ class SlideshowController(private val c: FrameController) {
         player = p
         p.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED) videoEnded = true
+                if (state == Player.STATE_ENDED) {
+                    videoEnded = true
+                    if (_video.value?.live == true) finishLive()
+                }
             }
 
             override fun onRenderedFirstFrame() {
@@ -487,7 +531,9 @@ class SlideshowController(private val c: FrameController) {
             override fun onPlayerError(error: PlaybackException) {
                 Log.w(TAG, "video error: ${error.errorCodeName}")
                 videoEnded = true
+                prebufferedId = null
                 _video.value = _video.value?.copy(visible = false)
+                if (_video.value?.live == true) finishLive()
             }
         })
     }
@@ -513,13 +559,74 @@ class SlideshowController(private val c: FrameController) {
     }
 
     private fun stopVideo() {
+        _liveMark.value = null
         if (_video.value == null) return
         _video.value = null
         videoEnded = false
+        prebufferedId = null
         player?.run { stop(); clearMediaItems() }
     }
 
-    fun setVolume(percent: Int) { player?.volume = percent.coerceIn(0, 100) / 100f }
+    // ------------------------------------------------------------------ live photos
+
+    /**
+     * Loads the next slide's clip into the (single, reused) player while the current slide shows, so it starts
+     * without a decode hiccup on the RK3126. Nothing is drawn: the video layer exists only while a clip plays.
+     */
+    private fun prebufferLive(p: PlacementEntity) {
+        val file = liveClip(p) ?: return
+        if (_video.value != null || !LivePolicy.prebuffer(settings.slideshow.livePhotos, true, _current.value?.isVideo == true)) return
+        if (prebufferedId == p.id) return
+        val pl = ensurePlayer()
+        pl.repeatMode = Player.REPEAT_MODE_OFF
+        pl.volume = 0f
+        pl.playWhenReady = false
+        pl.setMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+        pl.prepare()
+        prebufferedId = p.id
+    }
+
+    private fun startLive(p: PlacementEntity) {
+        val file = liveClip(p) ?: return
+        val pl = ensurePlayer()
+        videoEnded = false
+        _liveMark.value = null
+        _video.value = VideoState(p.id, file, live = true)
+        pl.repeatMode = Player.REPEAT_MODE_OFF
+        if (prebufferedId == p.id && pl.mediaItemCount > 0) {
+            pl.seekTo(0)
+        } else {
+            pl.setMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+            pl.prepare()
+        }
+        prebufferedId = p.id
+        pl.volume = playerVolume()
+        pl.playWhenReady = c.display.mode.value != ScreenMode.Asleep
+    }
+
+    /** The clip ended: fade the video layer out over the still, then drop it; the interval starts now. */
+    private fun finishLive() {
+        val v = _video.value ?: return
+        _video.value = v.copy(visible = false)
+        c.scope.launch {
+            delay(LIVE_FADE_MS + 50)
+            if (_video.value?.placementId == v.placementId && _video.value?.live == true && videoEnded) {
+                _video.value = null
+                shownAt = SystemClock.elapsedRealtime()
+                updateLiveMark()
+            }
+        }
+    }
+
+    /** Video volume; live clips are silent unless the sender kept their sound. */
+    private fun playerVolume(): Float {
+        val v = _video.value
+        if (v != null && v.live && playable[v.placementId]?.motionHasAudio != true) return 0f
+        if (v == null) return 0f
+        return videoVolume()
+    }
+
+    fun setVolume(percent: Int) { if (_video.value?.live != true) player?.volume = percent.coerceIn(0, 100) / 100f }
 
     /**
      * The video volume now: the setting, or silence once nobody touched the frame for `auto_mute_min` minutes
@@ -541,7 +648,7 @@ class SlideshowController(private val c: FrameController) {
         val target = (settings.video.volume + delta).coerceIn(0, 100)
         c.display.onUserActivity()
         settings = settings.copy(video = settings.video.copy(volume = target))
-        player?.volume = videoVolume()
+        player?.volume = playerVolume()
         _volumeHint.value = target
         hintJob?.cancel()
         hintJob = c.scope.launch { delay(1_800); _volumeHint.value = null }
@@ -566,5 +673,9 @@ class SlideshowController(private val c: FrameController) {
         playlist.update(emptyList(), PlayOrder.RECEIVED, false)
     }
 
-    companion object { private const val TAG = "KinSlideshow" }
+    companion object {
+        private const val TAG = "KinSlideshow"
+        /** Crossfade between a live photo's clip and its still. */
+        const val LIVE_FADE_MS = 400L
+    }
 }

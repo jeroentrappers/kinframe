@@ -149,11 +149,27 @@ data class Item(
     val placeName: String? = null,
     val createdAt: String? = null,
     val thumbUrl: String? = null,
+    /** Live items only: the motion clip (README §5.3 "Live Photos"). */
+    val motion: ItemMotion? = null,
+) {
+    /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
+    val isLive: Boolean get() = kind == MediaKind.LIVE
+}
+
+@Serializable
+data class ItemMotion(
+    val status: String = "processing",
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean? = null,
 )
 
+/** Media kinds. Unknown kinds from a newer server are shown as photos. */
 object MediaKind {
     const val PHOTO = "photo"
     const val VIDEO = "video"
+    const val LIVE = "live"
 }
 
 object Reaction {
@@ -176,6 +192,19 @@ data class PlacementMedia(
     val posterUrl: String? = null,
 )
 
+/** The frame-sized motion clip of a live placement (`placement.motion`), once ready. */
+@Serializable
+data class PlacementMotion(
+    val url: String,
+    val sha256: String,
+    val bytes: Long = 0,
+    val mime: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean = false,
+)
+
 @Serializable
 data class Placement(
     val id: String,
@@ -196,6 +225,7 @@ data class Placement(
     val albumIds: List<String> = emptyList(),
     val replies: List<PlacementReply> = emptyList(),
     val media: PlacementMedia? = null,
+    val motion: PlacementMotion? = null,
 )
 
 @Serializable

@@ -40,7 +40,9 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         val names = send?.frameNames?.joinToString(", ").orEmpty()
         val count = send?.items?.size ?: 0
         val p = graph.outbox.progress.value[sendId]
-        val text = if (p != null) {
+        val text = if (p != null && p.preparing) {
+            ctx.getString(R.string.outbox_preparing, p.itemIndex + 1, p.itemCount, (p.fraction * 100).toInt())
+        } else if (p != null) {
             ctx.getString(R.string.outbox_uploading, p.itemIndex + 1, p.itemCount, (p.fraction * 100).toInt())
         } else {
             ctx.resources.getQuantityString(R.plurals.notif_sending_items, count, count)

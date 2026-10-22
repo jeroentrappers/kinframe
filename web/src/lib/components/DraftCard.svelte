@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { DraftItem } from '$lib/compose.svelte';
+	import { compose, type DraftItem } from '$lib/compose.svelte';
+	import { tm } from '$lib/i18n/media';
 	import { discovery } from '$lib/discovery.svelte';
 	import { CAPTION_MAX, captionRemaining, formatBytes, formatDuration } from '$lib/format';
 	import { coverPosition } from '$lib/logic';
@@ -21,7 +22,8 @@
 	const kept = $derived(keptSeconds(item.trim, item.durationS));
 	const aspect = $derived(item.width && item.height ? item.width / item.height : 1);
 	const pos = $derived(coverPosition(item.focal, aspect, 1));
-	const pct = $derived(item.file.size ? Math.round((item.uploaded / item.file.size) * 100) : 0);
+	const pct = $derived(item.bytes ? Math.min(100, Math.round((item.uploaded / item.bytes) * 100)) : 0);
+	const prepPct = $derived(Math.round(item.prepProgress * 100));
 	const issueText = $derived(
 		item.issue === 'too_large'
 			? t('send.issueTooLarge', { max: formatBytes(discovery.limits.max_upload_bytes, i18n.tag) })
@@ -55,14 +57,29 @@
 				<Icon name="x" size={16} stroke={2.4} />
 			</button>
 		{/if}
-		{#if item.state === 'uploading' || item.state === 'done'}
+		{#if item.live}
+			<button
+				class="live-toggle"
+				class:off={!item.sendLive}
+				aria-pressed={item.sendLive}
+				aria-label={item.sendLive ? tm('media.liveOn') : tm('media.liveOff')}
+				title={item.sendLive ? tm('media.liveOn') : tm('media.liveOff')}
+				disabled={locked}
+				onclick={() => compose.setSendLive(item.key, !item.sendLive)}
+			>
+				<Icon name="live" size={13} stroke={2} />{tm('media.live')}
+			</button>
+		{/if}
+		{#if item.state === 'preparing' || item.state === 'uploading' || item.state === 'done'}
 			<div class="upload-veil" class:done={item.state === 'done'}>
 				{#if item.state === 'done'}
 					<span class="done-check"><Icon name="check" size={20} stroke={2.6} /></span>
+				{:else if item.state === 'preparing'}
+					<span class="preparing" role="status">{prepPct > 0 ? tm('media.preparingPct', { pct: prepPct }) : tm('media.preparing')}</span>
 				{:else}
 					<span class="pct num">{pct}%</span>
 				{/if}
-				<div class="progress"><span style="width:{pct}%"></span></div>
+				<div class="progress"><span style="width:{item.state === 'preparing' ? prepPct : pct}%"></span></div>
 			</div>
 		{/if}
 	</div>
@@ -247,6 +264,41 @@
 	}
 	.upload-veil.done .progress {
 		opacity: 0;
+	}
+	.live-toggle {
+		position: absolute;
+		inset-inline-end: 8px;
+		bottom: 8px;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 3px 9px 3px 6px;
+		border: 0;
+		border-radius: var(--r-full);
+		background: rgb(20 14 10 / 0.65);
+		color: #fff;
+		font: inherit;
+		font-size: 0.74rem;
+		font-weight: 700;
+		cursor: pointer;
+		z-index: 1;
+	}
+	.live-toggle.off {
+		background: rgb(255 255 255 / 0.85);
+		color: #2a221d;
+		text-decoration: line-through;
+	}
+	.live-toggle:disabled {
+		cursor: default;
+	}
+	.live-toggle:focus-visible {
+		outline: 3px solid var(--focus);
+		outline-offset: 2px;
+	}
+	.preparing {
+		font-weight: 700;
+		font-size: 0.9rem;
+		text-align: center;
 	}
 	.pct {
 		font-weight: 700;
