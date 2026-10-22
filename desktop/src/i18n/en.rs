@@ -94,6 +94,8 @@ pub static EN: &[(&str, &str)] = &[
     ("frames.ownedBy", "{name}’s frame"),
     ("frames.sendHere", "Send photos here"),
     ("frames.cannotSend", "You can’t send to this frame."),
+    ("frames.dropToSend", "Drop to send to {name}"),
+    ("frames.dropHint", "Drop on a frame to send only there"),
     ("frames.emptyTitle", "Add your first frame"),
     (
         "frames.emptyBody",

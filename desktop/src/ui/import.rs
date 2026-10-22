@@ -6,6 +6,7 @@ use egui::{
 };
 use uuid::Uuid;
 
+use super::drop;
 use super::frames::page;
 use super::theme::{self, Palette, palette};
 use super::thumbs::{self, Source};
@@ -441,6 +442,8 @@ impl App {
             .map_or(200, |d| d.limits.max_items_per_send as usize);
         let mut start = false;
         let mut cancel = false;
+        let (hovering, hot) = (self.files_hovered, self.drop_hot.clone());
+        let mut rows = vec![];
 
         egui::Panel::right("draft-side")
             .exact_size(340.0)
@@ -458,10 +461,20 @@ impl App {
                     card(ui).show(ui, |ui| {
                         ui.set_width(ui.available_width());
                         subtitle(ui, t("import.sendTo"));
+                        if hovering {
+                            let name = sendable.iter().find(|f| hot.as_deref() == Some(&f.id)).map(|f| &f.name);
+                            let hint = match name {
+                                Some(name) => tf("frames.dropToSend", &[("name", name)]),
+                                None => t("frames.dropHint").into(),
+                            };
+                            ui.label(RichText::new(hint).color(p.primary).size(13.0));
+                        }
                         ui.add_space(2.0);
                         for f in &sendable {
                             let mut on = draft.frames.contains(&f.id);
-                            ui.horizontal(|ui| {
+                            // Reserved now, painted behind the row once its size is known.
+                            let bg = ui.painter().add(egui::Shape::Noop);
+                            let row = ui.horizontal(|ui| {
                                 if ui.checkbox(&mut on, RichText::new(&f.name).color(p.text)).changed() {
                                     if on {
                                         draft.frames.insert(f.id.clone());
@@ -473,6 +486,12 @@ impl App {
                                     status_dot(ui, f.online);
                                 });
                             });
+                            if hovering {
+                                let shape =
+                                    drop::row_target_shape(ui, row.response.rect, hot.as_deref() == Some(&f.id));
+                                ui.painter().set(bg, shape);
+                            }
+                            rows.push((f.id.clone(), row.response.rect, ui.clip_rect()));
                         }
                         if sendable.iter().any(|f| !f.online && draft.frames.contains(&f.id)) {
                             faint(ui, t("import.offlineNote"));
@@ -557,6 +576,10 @@ impl App {
                     });
                 });
             });
+
+        for (frame, rect, clip) in rows {
+            self.add_drop_target(&frame, rect, clip);
+        }
 
         egui::CentralPanel::no_frame().show(ui, |ui| {
             Frame::new()

@@ -1,6 +1,7 @@
 //! The egui application: state, background messages and the window chrome. Screens live in submodules.
 
 pub mod demo;
+mod drop;
 mod frames;
 mod history;
 mod import;
@@ -119,6 +120,8 @@ pub enum Msg {
     Scanned {
         result: ScanResult,
         title: String,
+        /// Dropped onto this frame: send there only.
+        frame: Option<String>,
     },
     History {
         page: Result<SendsPage, ApiError>,
@@ -183,6 +186,13 @@ pub struct App {
     screenshot: Option<(PathBuf, Instant)>,
     /// Files or folders passed on the command line ("Open with kinframe"), scanned once signed in.
     pub open_paths: Vec<PathBuf>,
+    /// Frames you can drop files on, recorded during layout for the next frame's hit test.
+    drop_targets: Vec<drop::DropTarget>,
+    /// Files are being dragged over the window.
+    pub files_hovered: bool,
+    /// The frame under the pointer while files are dragged over the window.
+    pub drop_hot: Option<String>,
+    pending_drop: Option<drop::PendingDrop>,
 }
 
 impl App {
@@ -278,6 +288,10 @@ impl App {
             pending_sign_in: false,
             screenshot: None,
             open_paths: vec![],
+            drop_targets: vec![],
+            files_hovered: false,
+            drop_hot: None,
+            pending_drop: None,
             discovery,
             http,
             dirs,
@@ -660,6 +674,11 @@ impl App {
 
     /// Scans picked or dropped paths in the background.
     pub fn scan(&mut self, paths: Vec<PathBuf>) {
+        self.scan_to(paths, None);
+    }
+
+    /// `scan`, then send to `frame` only instead of the usual frames.
+    pub fn scan_to(&mut self, paths: Vec<PathBuf>, frame: Option<String>) {
         if paths.is_empty() {
             return;
         }
@@ -694,7 +713,7 @@ impl App {
                 c2.request_repaint_after(Duration::from_millis(100));
             });
             if !cancel.load(Ordering::Relaxed) {
-                let _ = tx.send(Msg::Scanned { result, title });
+                let _ = tx.send(Msg::Scanned { result, title, frame });
             }
             ctx.request_repaint();
         });
@@ -874,13 +893,16 @@ impl App {
                 }
             },
             Msg::Picked(paths) => self.scan(paths),
-            Msg::Scanned { result, title } => {
+            Msg::Scanned { result, title, frame } => {
                 self.scanning = None;
                 if result.files.is_empty() {
                     self.toast(Tone::Warn, t("import.nothingFound"));
                     return;
                 }
-                let frames = self.default_frames();
+                let frames = match frame.filter(|id| self.frames.iter().any(|f| &f.id == id && f.can_send())) {
+                    Some(id) => [id].into(),
+                    None => self.default_frames(),
+                };
                 let n = result.files.len();
                 self.draft = Some(Draft {
                     title,
@@ -1106,20 +1128,6 @@ impl App {
                 c.request_repaint();
             },
         )));
-    }
-
-    fn handle_drops(&mut self, ctx: &egui::Context) {
-        let dropped: Vec<PathBuf> = ctx.input(|i| {
-            i.raw
-                .dropped_files
-                .iter()
-                .map(|f| f.path().to_path_buf())
-                .filter(|p| !p.as_os_str().is_empty())
-                .collect()
-        });
-        if !dropped.is_empty() && self.auth == AuthState::SignedIn {
-            self.scan(dropped);
-        }
     }
 
     fn shortcuts(&mut self, ctx: &egui::Context) {

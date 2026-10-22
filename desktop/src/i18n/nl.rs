@@ -97,6 +97,8 @@ pub static NL: &[(&str, &str)] = &[
     ("frames.ownedBy", "Kader van {name}"),
     ("frames.sendHere", "Foto’s hierheen sturen"),
     ("frames.cannotSend", "Je kunt niet naar dit kader sturen."),
+    ("frames.dropToSend", "Loslaten om naar {name} te sturen"),
+    ("frames.dropHint", "Laat los op een kader om alleen daarheen te sturen"),
     ("frames.emptyTitle", "Voeg je eerste kader toe"),
     (
         "frames.emptyBody",

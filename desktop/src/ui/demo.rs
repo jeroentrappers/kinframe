@@ -20,15 +20,18 @@ use crate::store::{Dirs, Settings};
 pub enum Screen {
     Welcome,
     Frames,
+    /// The Frames tab while files are dragged over it (the screenshot tool supplies the files and pointer).
+    FramesDrop,
     Draft,
     Progress,
     History,
 }
 
 impl Screen {
-    pub const ALL: [Screen; 5] = [
+    pub const ALL: [Screen; 6] = [
         Screen::Welcome,
         Screen::Frames,
+        Screen::FramesDrop,
         Screen::Draft,
         Screen::Progress,
         Screen::History,
@@ -37,6 +40,7 @@ impl Screen {
         match self {
             Screen::Welcome => "welcome",
             Screen::Frames => "frames",
+            Screen::FramesDrop => "frames-drop",
             Screen::Draft => "import-preview",
             Screen::Progress => "import-progress",
             Screen::History => "history",
@@ -330,7 +334,7 @@ pub fn app(ctx: &egui::Context, screen: Screen, dir: &std::path::Path) -> App {
             .insert(ctx, Source::File(f.path.clone()), picture(i, 160, 120));
     }
     match screen {
-        Screen::Frames => {
+        Screen::Frames | Screen::FramesDrop => {
             app.tab = Tab::Frames;
             app.code_input = "4821 39".into();
         }
