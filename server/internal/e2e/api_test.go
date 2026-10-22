@@ -544,3 +544,20 @@ func TestReplaceDevice(t *testing.T) {
 		t.Fatalf("old device: %s", r.body)
 	}
 }
+
+func TestAppleAppSiteAssociation(t *testing.T) {
+	e := newEnv(t, func(c *config.Config) { c.AppleAppIDs = []string{"TEAM.app.kinframe.family"} })
+	r := e.do(req{method: "GET", path: "/.well-known/apple-app-site-association"})
+	if r.StatusCode != 200 || r.Header.Get("Content-Type") != "application/json" {
+		t.Fatalf("aasa: %d %q %s", r.StatusCode, r.Header.Get("Content-Type"), r.body)
+	}
+	if ids := dig(r.m(t), "applinks", "details"); ids == nil {
+		t.Fatalf("aasa body: %s", r.body)
+	}
+
+	// Without app ids the file is not served (the SPA fallback answers 404 without a web dir).
+	off := newEnv(t)
+	if r := off.do(req{method: "GET", path: "/.well-known/apple-app-site-association"}); r.StatusCode != 404 {
+		t.Fatalf("aasa disabled: %d %s", r.StatusCode, r.body)
+	}
+}

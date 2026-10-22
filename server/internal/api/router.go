@@ -49,6 +49,9 @@ func (s *Server) Handler() (http.Handler, error) {
 
 	mux := http.NewServeMux()
 	mux.Handle("GET /.well-known/kinframe", api)
+	if len(s.cfg.AppleAppIDs) > 0 {
+		mux.Handle("GET /.well-known/apple-app-site-association", aasaHandler(s.cfg.AppleAppIDs))
+	}
 	mux.Handle("/v1/", s.authenticate(api))
 
 	user := s.userAuth

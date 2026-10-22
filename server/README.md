@@ -79,6 +79,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_FRAME_RELEASES_POLL_MINUTES` | `30` | GitHub poll interval (also polled at start; ETag, rate limits respected) |
 | `KINFRAME_FRAME_RELEASES_GITHUB_TOKEN` | — | Optional token for a higher GitHub API rate limit |
 | `KINFRAME_FRAME_RELEASES_API` | `https://api.github.com` | GitHub API base (GitHub Enterprise, tests) |
+| `KINFRAME_APPLE_APP_IDS` | `TEAMID.app.kinframe.family` | Comma-separated iOS app ids (`<team id>.<bundle id>`) served in `/.well-known/apple-app-site-association`, so `/f/<code>` and `/i/<token>` links open the iOS app. Set your own when you build the app under another team; `off` disables the file |
 | `KINFRAME_WEATHER` | `on` | `off` disables weather for all frames and `/v1/geocode` (discovery `weather: false`) |
 | `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
