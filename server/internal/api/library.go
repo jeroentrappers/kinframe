@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"github.com/jeroentrappers/kinframe/server/internal/settings"
 	"net/http"
 	"strconv"
 	"time"
@@ -351,7 +352,7 @@ func (s *Server) DeleteAlbum(ctx context.Context, req gen.DeleteAlbumRequestObje
 		}
 		if json.Unmarshal(f.Settings, &doc) == nil && doc.Slideshow.AlbumID != nil && *doc.Slideshow.AlbumID == req.AlbumId.String() {
 			patch := map[string]any{"slideshow": map[string]any{"album_id": nil}}
-			if _, err := s.patchSettings(ctx, req.FrameId, `"`+strconv.Itoa(f.SettingsVersion)+`"`, patch); err != nil {
+			if _, err := s.patchSettings(ctx, req.FrameId, `"`+strconv.Itoa(f.SettingsVersion)+`"`, patch, settings.ActorOther); err != nil {
 				s.log.Warn("reset slideshow album", "frame", req.FrameId, "err", err)
 			}
 		}
