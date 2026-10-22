@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- SD card and USB stick: export, import, automatic backup and restore (product spec 4.10). -->
-<resources>
+<!-- SD card and USB stick: export, import, automatic backup and restore (product spec 4.10).
+     English and Dutch only for now; the other languages follow in a translation pass. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="pin_reason_storage">to use the SD card or USB stick</string>
 
     <!-- Card on the slideshow -->

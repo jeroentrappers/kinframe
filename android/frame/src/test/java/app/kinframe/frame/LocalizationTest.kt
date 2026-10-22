@@ -29,7 +29,7 @@ class LocalizationTest {
      * New feature files that ship in English and Dutch first (marked `tools:ignore="MissingTranslation"`); the
      * translation pass adds the other languages and removes them from this list.
      */
-    private val pendingTranslation = setOf("strings_media.xml")
+    private val pendingTranslation = setOf("strings_media.xml", "strings_export.xml")
 
     private fun parse(dir: String, name: String = "strings.xml"): Strings {
         val file = File(res, "$dir/$name")
