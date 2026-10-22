@@ -594,4 +594,16 @@
     <string name="problem_feature_disabled">This is turned off on this server.</string>
     <string name="problem_server_error">Something went wrong on the server. Please try again.</string>
     <string name="problem_network">You seem to be offline. Check your connection and try again.</string>
+    <!-- Client-side preparation and Live/Motion Photos -->
+    <string name="outbox_preparing">Preparing %1$d of %2$d · %3$d%%</string>
+    <string name="live_badge">Live</string>
+    <string name="a11y_live_photo">Live photo</string>
+    <string name="send_live_title">Motion Photo</string>
+    <string name="send_live_still_only">Send as a still photo only</string>
+    <string name="send_live_hint">The frame plays the short clip when the photo appears.</string>
+    <string name="send_live_still_hint">Only the photo is sent, without its clip.</string>
+    <string name="fs_live_photos">Live photos</string>
+    <string name="fs_live_on">Play when shown</string>
+    <string name="fs_live_tap">Play on tap</string>
+    <string name="fs_live_off">Photo only</string>
 </resources>

@@ -312,6 +312,15 @@ fun Pill(text: String, bg: Color, fg: Color, modifier: Modifier = Modifier, icon
     }
 }
 
+/** The "Live" mark on Live/Motion Photos (composer, history, library). */
+@Composable
+fun LiveBadge(modifier: Modifier = Modifier) {
+    Text(
+        stringResource(R.string.live_badge), style = Kin.type.caption, color = Color.White, maxLines = 1,
+        modifier = modifier.clip(CircleShape).background(Color.Black.copy(alpha = 0.6f)).padding(horizontal = 6.dp, vertical = 1.dp),
+    )
+}
+
 @Composable
 fun RoleBadge(role: String) {
     val c = Kin.colors
