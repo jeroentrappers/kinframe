@@ -340,6 +340,10 @@ GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirro
   the screen was not switched off by hand. Before installing it verifies sha256, package name, signing certificate
   (must equal the installed app's) and that the version code is higher. With root it runs `pm install -r`; without
   root it opens the system installer and shows a notice.
+- **Public download** (no sign-in): `GET /v1/frame-app/latest?sdk=` returns the newest stable `FrameUpdate` (or
+  `204`) with `url` → `GET /v1/frame-app/apk/{code}`. The website's convert tool (`/convert`,
+  `tools/convert/README.md`) uses it to install kinframe on a stock frame over USB without a cross-origin download
+  from GitHub. The tool still checks the sha256 and pins the release signing certificate itself.
 - **Rollback**: the frame keeps the previous APK. If the crash-loop guard trips within 10 minutes after an update, it
   reinstalls the previous APK (`pm install -r -d`, root only), skips that version code from then on and reports
   `update_state: rolled_back` in the heartbeat.

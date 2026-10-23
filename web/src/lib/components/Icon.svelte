@@ -10,6 +10,8 @@
 		check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
 		x: '<path d="M18 6 6 18M6 6l12 12"/>',
 		upload: '<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+		download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+		usb: '<path d="M12 21V5"/><path d="m9 7 3-4 3 4"/><path d="M12 15 7 12V9"/><path d="m12 13 5-3V8"/><circle cx="12" cy="20" r="1.5"/><rect x="5.5" y="7" width="3" height="2.5" rx=".5"/><circle cx="17" cy="7" r="1.5"/>',
 		image: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L6 21"/>',
 		video: '<rect x="2" y="6" width="14" height="12" rx="3"/><path d="m16 10 6-3.5v11L16 14"/>',
 		folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',

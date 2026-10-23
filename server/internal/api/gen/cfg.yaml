@@ -16,6 +16,9 @@ output-options:
     # Hand-written: 200-or-204 with header parsing, and binary APK downloads with Range.
     - deviceCheckUpdate
     - deviceGetUpdateApk
+    # Hand-written: the public release check and APK download for the convert tool (same shapes as above).
+    - getFrameAppLatest
+    - getFrameAppApk
     # Hand-written: event invitation photos (binary, ETag).
     - deviceGetInvitationPhoto
     - getEventInvitationPhoto

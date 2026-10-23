@@ -82,6 +82,20 @@ func TestFrameSelfUpdate(t *testing.T) {
 	// Up to date (0.4.0 needs API 26, the frame is API 23).
 	e.expect(req{method: "GET", path: "/v1/device/update?channel=stable", token: d.token, header: map[string]string{"X-Kinframe-App": "kinframe-frame/0.2.0 (20099)"}}, 204)
 	e.expect(req{method: "GET", path: "/v1/device/update?channel=nightly", token: d.token, header: app}, 400)
+
+	// The public release check for the convert tool: no sign-in, newest stable that suits the SDK.
+	pub := e.expect(req{method: "GET", path: "/v1/frame-app/latest?sdk=23"}, 200).m(t)
+	if pub["version_code"] != float64(20099) || pub["sha256"] != u["sha256"] || pub["url"] != e.url+"/v1/frame-app/apk/20099" {
+		t.Fatalf("public latest: %v", pub)
+	}
+	if pub := e.expect(req{method: "GET", path: "/v1/frame-app/latest"}, 200).m(t); pub["version_code"] != float64(40099) {
+		t.Fatalf("public latest without sdk: %v", pub)
+	}
+	e.expect(req{method: "GET", path: "/v1/frame-app/latest?sdk=x"}, 400)
+	if r := e.expect(req{method: "GET", path: pub["url"].(string)}, 200); string(r.body) != string(stable) {
+		t.Fatal("public APK body wrong")
+	}
+	e.expect(req{method: "GET", path: "/v1/frame-app/apk/12345"}, 404)
 	e.expect(req{method: "GET", path: "/v1/device/update?skip=abc", token: d.token, header: app}, 400)
 
 	// Update state shows up in the owner's health view.
@@ -100,4 +114,6 @@ func TestSelfUpdateDisabled(t *testing.T) {
 	d := e.enroll(1280, 800)
 	e.expect(req{method: "GET", path: "/v1/device/update", token: d.token}, 204)
 	e.expect(req{method: "GET", path: "/v1/device/update/apk/1", token: d.token}, 404)
+	e.expect(req{method: "GET", path: "/v1/frame-app/latest"}, 204)
+	e.expect(req{method: "GET", path: "/v1/frame-app/apk/1"}, 404)
 }

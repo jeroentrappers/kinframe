@@ -10,7 +10,7 @@
 | `android/` | One Gradle project with modules `:core` (API client, models, Logto, design system), `:frame` (frame app: kiosk launcher on the photo frame) and `:family` (Android family app) | Kotlin, Jetpack Compose, Media3 | frames, family members |
 | `ios/` | iOS family app, with a share extension | Swift, SwiftUI (built on macOS/Xcode) | family members |
 | `web/` | Website: family web app + frame owner admin | SvelteKit (static SPA, served by the backend) | family members, owners |
-| `provisioning/` | Turn a stock Frameo device into a kinframe device | adb + shell | whoever sets up a frame |
+| `tools/convert/`, `web/` `/convert` | Turn a stock Frameo device into a kinframe device, and back (one shared step list) | adb + POSIX shell; WebUSB ADB in the browser | whoever sets up a frame |
 | `deploy/` | docker compose: backend, Postgres, Logto, reverse proxy | Docker | self-hosters |
 
 ```
