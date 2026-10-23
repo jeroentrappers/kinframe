@@ -223,7 +223,10 @@ there and re-run the play; changes made in the console's Sign-in experience → 
 run, or set `kinframe_logto_branding: false` to manage the look in the console.
 
 There are no terms or privacy links on the sign-up page until `kinframe_terms_url` / `kinframe_privacy_url` are set
-(Google, Meta and Apple want a privacy policy URL in their registrations anyway). Logto OSS refuses to hide its
+(Google, Meta and Apple want a privacy policy URL in their registrations anyway). The web app serves both texts,
+written for the hosted service: `https://kinframe.appmire.be/terms` and `https://kinframe.appmire.be/privacy`; Meta's
+user data deletion instructions URL is `https://kinframe.appmire.be/privacy#delete`. Other servers show the same pages
+with a note that they describe kinframe.appmire.be, so self-hosters should point these settings at their own texts. Logto OSS refuses to hide its
 "Powered by Logto" footer (a Logto Cloud feature), so the CSS only tones it down. Browser tab titles are Logto's step
 titles ("Sign in to your account"); the favicon is kinframe's.
 

@@ -119,6 +119,10 @@
 		<div class="container legal">
 			<SellerFooter {shop} />
 			<p class="software">{t('landing.footer')}</p>
+			<nav class="legal-links" aria-label={t('legal.links')}>
+				<a href={discovery.appUrl('/privacy') ?? '/privacy'}>{t('legal.privacy')}</a>
+				<a href={discovery.appUrl('/terms') ?? '/terms'}>{t('legal.terms')}</a>
+			</nav>
 		</div>
 	</footer>
 </div>
@@ -357,6 +361,14 @@
 	}
 	.software {
 		color: var(--text-faint);
+	}
+	.legal-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-4);
+	}
+	.legal-links a {
+		color: inherit;
 	}
 	/* On a phone the hero's own button is right below; the header keeps the brand and the language. */
 	@media (max-width: 560px) {

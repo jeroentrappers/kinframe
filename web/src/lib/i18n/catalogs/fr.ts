@@ -57,6 +57,14 @@ const fr: Catalog = {
 	'landing.f3Body': 'Open source et auto-hébergé, sans télémétrie. Chaque photo est en sécurité sur votre propre serveur.',
 	'landing.footer': 'kinframe est un logiciel libre (AGPL-3.0)',
 
+	'legal.privacy': 'Confidentialité',
+	'legal.terms': 'Conditions',
+	'legal.lastUpdated': 'Dernière mise à jour : {date}',
+	'legal.contents': 'Sommaire',
+	'legal.fallbackNote': 'Ce texte existe en anglais, néerlandais et français. Il est affiché ici en anglais.',
+	'legal.otherServer': 'Ce texte s’applique au service kinframe sur {host}. Le serveur que vous utilisez est géré par quelqu’un d’autre, qui est responsable de vos données sur ce serveur.',
+	'legal.links': 'Mentions légales',
+
 	'callback.title': 'Connexion',
 	'callback.working': 'Connexion en cours…',
 	'callback.failed': 'La connexion a échoué',

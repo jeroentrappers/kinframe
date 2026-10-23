@@ -56,6 +56,14 @@ const ro: Catalog = {
 	'landing.f3Body': 'Open source și găzduit de dvs., fără telemetrie. Fiecare fotografie este în siguranță pe propriul server.',
 	'landing.footer': 'kinframe este software liber (AGPL-3.0)',
 
+	'legal.privacy': 'Confidențialitate',
+	'legal.terms': 'Termeni',
+	'legal.lastUpdated': 'Ultima actualizare: {date}',
+	'legal.contents': 'Cuprins',
+	'legal.fallbackNote': 'Acest text este disponibil în engleză, neerlandeză și franceză. Aici este afișat în engleză.',
+	'legal.otherServer': 'Acest text se aplică serviciului kinframe de pe {host}. Serverul pe care îl folosiți acum este administrat de altcineva, care răspunde de datele dvs. de pe el.',
+	'legal.links': 'Informații juridice',
+
 	'callback.title': 'Conectare',
 	'callback.working': 'Se face conectarea…',
 	'callback.failed': 'Conectarea nu a reușit',

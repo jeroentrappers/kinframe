@@ -56,6 +56,14 @@ const fi: Catalog = {
 	'landing.f3Body': 'Avointa lähdekoodia ja oma palvelin, ei telemetriaa. Jokainen kuva on turvassa omalla palvelimellanne.',
 	'landing.footer': 'kinframe on vapaa ohjelmisto (AGPL-3.0)',
 
+	'legal.privacy': 'Tietosuoja',
+	'legal.terms': 'Käyttöehdot',
+	'legal.lastUpdated': 'Päivitetty viimeksi: {date}',
+	'legal.contents': 'Sisältö',
+	'legal.fallbackNote': 'Tämä teksti on saatavilla englanniksi, hollanniksi ja ranskaksi. Se näytetään tässä englanniksi.',
+	'legal.otherServer': 'Tämä teksti koskee kinframe-palvelua osoitteessa {host}. Palvelinta, jota käytät nyt, ylläpitää joku muu, joka vastaa sillä olevista tiedoistasi.',
+	'legal.links': 'Oikeudelliset tiedot',
+
 	'callback.title': 'Kirjaudutaan',
 	'callback.working': 'Kirjaudutaan sisään…',
 	'callback.failed': 'Kirjautuminen epäonnistui',

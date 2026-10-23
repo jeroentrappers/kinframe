@@ -56,6 +56,14 @@ const he: Catalog = {
 	'landing.f3Body': 'קוד פתוח, באירוח עצמי וללא טלמטריה. כל תמונה שמורה בבטחה בשרת שלכם.',
 	'landing.footer': 'kinframe היא תוכנה חופשית (AGPL-3.0)',
 
+	'legal.privacy': 'פרטיות',
+	'legal.terms': 'תנאים',
+	'legal.lastUpdated': 'עדכון אחרון: {date}',
+	'legal.contents': 'תוכן העניינים',
+	'legal.fallbackNote': 'הטקסט הזה זמין באנגלית, בהולנדית ובצרפתית. כאן הוא מוצג באנגלית.',
+	'legal.otherServer': 'הטקסט הזה חל על שירות kinframe בכתובת {host}. השרת שבו אתם משתמשים עכשיו מנוהל על ידי מישהו אחר, שאחראי לנתונים שלכם בו.',
+	'legal.links': 'מידע משפטי',
+
 	'callback.title': 'כניסה',
 	'callback.working': 'מתבצעת כניסה…',
 	'callback.failed': 'הכניסה נכשלה',

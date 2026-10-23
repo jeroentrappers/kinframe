@@ -57,6 +57,14 @@ const ko: Catalog = {
 	'landing.f3Body': '오픈소스에 직접 호스팅하고, 원격 측정도 없어요. 모든 사진이 내 서버에 안전하게 보관돼요.',
 	'landing.footer': 'kinframe은 자유 소프트웨어예요 (AGPL-3.0)',
 
+	'legal.privacy': '개인정보',
+	'legal.terms': '이용약관',
+	'legal.lastUpdated': '최종 업데이트: {date}',
+	'legal.contents': '목차',
+	'legal.fallbackNote': '이 문서는 영어, 네덜란드어, 프랑스어로 제공돼요. 여기서는 영어로 표시돼요.',
+	'legal.otherServer': '이 문서는 {host}의 kinframe 서비스에 적용돼요. 지금 사용 중인 서버는 다른 사람이 운영하며, 그 서버에 있는 데이터는 운영자가 책임져요.',
+	'legal.links': '법적 고지',
+
 	'callback.title': '로그인',
 	'callback.working': '로그인하는 중…',
 	'callback.failed': '로그인하지 못했어요',

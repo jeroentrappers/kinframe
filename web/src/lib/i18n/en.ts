@@ -58,6 +58,14 @@ export const en = {
 	'landing.f3Body': 'Open source and self-hosted, with no telemetry. Every photo is safe on your own server.',
 	'landing.footer': 'kinframe is free software (AGPL-3.0)',
 
+	'legal.privacy': 'Privacy',
+	'legal.terms': 'Terms',
+	'legal.lastUpdated': 'Last updated: {date}',
+	'legal.contents': 'Contents',
+	'legal.fallbackNote': 'This text is available in English, Dutch and French. It is shown here in English.',
+	'legal.otherServer': 'This text applies to the kinframe service at {host}. The server you are on now is run by someone else, who is responsible for your data on it.',
+	'legal.links': 'Legal',
+
 	'callback.title': 'Signing in',
 	'callback.working': 'Signing you in…',
 	'callback.failed': 'Sign-in didn’t work',

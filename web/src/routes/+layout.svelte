@@ -22,12 +22,14 @@
 
 	/** Routes that render without a session. Everything else (including /f/{code} and /i/{token})
 	 *  bounces to the landing page with ?next= and comes back after sign-in. */
-	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/];
+	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/, /^\/(privacy|terms)$/];
 	const isPublic = $derived(PUBLIC.some((r) => r.test(page.url.pathname)));
 	/** The TV page (/tv/{frameId}?t=…) is full screen and needs no session: the link's token is the credential. */
 	const isTv = $derived(page.url.pathname.startsWith('/tv/'));
 	/** The shop pages (/shop, /shop/cancel) have their own header, signed in or not. */
 	const isShop = $derived(/^\/shop(\/|$)/.test(page.url.pathname));
+	/** The privacy policy and terms of use, likewise readable signed in or not, with their own header. */
+	const isLegal = $derived(/^\/(privacy|terms)$/.test(page.url.pathname));
 
 	let booting = $state(true);
 
@@ -118,7 +120,7 @@
 	</div>
 {:else if discovery.storefront}
 	{#if isStorefrontPath(page.url.pathname)}{@render children()}{/if}
-{:else if isTv || isShop}
+{:else if isTv || isShop || isLegal}
 	{@render children()}
 {:else if auth.status === 'signed_in' && page.url.pathname !== '/' && page.url.pathname !== '/callback'}
 	<AppShell>{@render children()}</AppShell>
