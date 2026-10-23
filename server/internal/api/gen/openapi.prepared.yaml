@@ -1400,7 +1400,7 @@ components:
                     description: bytes
                     type: integer
                 url:
-                    description: 'Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.'
+                    description: 'Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).'
                     format: uri
                     type: string
                 version_code:
@@ -3674,6 +3674,62 @@ paths:
             security: []
             tags:
                 - devices
+    /v1/frame-app/apk/{versionCode}:
+        get:
+            description: No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+            operationId: getFrameAppApk
+            parameters:
+                - in: path
+                  name: versionCode
+                  required: true
+                  schema:
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/vnd.android.package-archive:
+                            schema:
+                                format: binary
+                                type: string
+                    description: APK bytes
+                "206":
+                    description: Partial bytes
+                "304":
+                    description: Not modified
+                "404":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - frame-app
+    /v1/frame-app/latest:
+        get:
+            description: |
+                No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+                the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+                `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+                the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+                APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+            operationId: getFrameAppLatest
+            parameters:
+                - description: The frame's Android API level; releases whose `min_sdk` is higher are skipped.
+                  in: query
+                  name: sdk
+                  schema:
+                    maximum: 1000
+                    minimum: 1
+                    type: integer
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FrameUpdate'
+                    description: The newest stable release
+                "204":
+                    description: No release available
+            security: []
+            tags:
+                - frame-app
     /v1/frames:
         get:
             description: Frames the caller is a member of (any role).
@@ -5475,6 +5531,8 @@ tags:
       name: devices
     - description: Endpoints called by the frame itself (device token).
       name: device
+    - description: Public frame app releases, for installing kinframe on a frame (the website's convert tool).
+      name: frame-app
     - description: Pre-order reservations for frames sold by the server operator (only when configured).
       name: shop
     - name: operator

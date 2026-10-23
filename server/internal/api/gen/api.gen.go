@@ -2255,7 +2255,7 @@ type FrameUpdate struct {
 	// Size bytes
 	Size int `json:"size"`
 
-	// Url Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+	// Url Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
 	Url string `json:"url"`
 
 	// VersionCode Example: 20099

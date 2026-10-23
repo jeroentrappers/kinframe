@@ -30,6 +30,10 @@
     "@fontsource-variable/fraunces": "^5.3.0",
     "@logto/browser": "^3.1.1",
     "@mediabunny/aac-encoder": "1.61.3",
+    "@yume-chan/adb": "2.6.4",
+    "@yume-chan/adb-credential-web": "2.1.0",
+    "@yume-chan/adb-daemon-webusb": "2.3.2",
+    "@yume-chan/stream-extra": "2.6.1",
     "mediabunny": "1.61.3",
     "openapi-fetch": "^0.17.0",
     "tus-js-client": "^4.3.1"

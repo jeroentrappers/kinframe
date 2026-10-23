@@ -1,6 +1,7 @@
 # Denver PFF-1024 (10.1" Frameo frame): hardware profile
 
 Probed over USB adb on 2026-10-22 using read-only commands only. The frame ships with the stock Frameo app.
+Supported by the convert tool (website `/convert`, `tools/convert/`); see [supported-devices.md](supported-devices.md).
 
 ## Summary
 

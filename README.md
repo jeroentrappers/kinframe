@@ -23,11 +23,14 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 | `android/` | Frame app and Android family app (Kotlin, Compose) *(coming)* |
 | `ios/` | iOS family app (SwiftUI) *(coming)* |
 | `desktop/` | Windows, macOS and Linux app (Rust, egui) with bulk import of whole folders |
+| `tools/convert/` | Convert a stock Frameo frame into a kinframe frame and back: command-line twin of the website's `/convert` |
 | `tools/mictest/` | Tiny APK that checks whether a frame has a working microphone |
 
 ## Components
 
-- **Frame app**: kiosk launcher for Android-based frames (Android 6+, including stock Frameo hardware).
+- **Frame app**: kiosk launcher for Android-based frames (Android 6+, including stock Frameo hardware). Install it
+  on a stock frame from the website (`/convert`, over USB in Chrome or Edge) or with `tools/convert/`; both can switch
+  the frame back. Tested frames: `docs/hardware/supported-devices.md`.
 - **Family apps**: native Android and iOS apps with share-sheet sending.
 - **Website**: send, manage frames and members, browse the library.
 - **Desktop app** (Windows, macOS, Linux): sign in, add frames, and send whole folders or albums at once, with

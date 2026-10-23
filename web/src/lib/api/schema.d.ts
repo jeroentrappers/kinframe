@@ -1349,6 +1349,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/frame-app/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+         *     the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+         *     `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+         *     the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+         *     APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+         */
+        get: operations["getFrameAppLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frame-app/apk/{versionCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match. */
+        get: operations["getFrameAppApk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/shop/reservations": {
         parameters: {
             query?: never;
@@ -2437,7 +2477,7 @@ export interface components {
             min_sdk: number;
             /**
              * Format: uri
-             * @description Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+             * @description Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
              */
             url: string;
             sha256: string;
@@ -5253,6 +5293,73 @@ export interface operations {
         };
     };
     deviceGetUpdateApk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                versionCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description APK bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.android.package-archive": string;
+                };
+            };
+            /** @description Partial bytes */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not modified */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    getFrameAppLatest: {
+        parameters: {
+            query?: {
+                /** @description The frame's Android API level; releases whose `min_sdk` is higher are skipped. */
+                sdk?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The newest stable release */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrameUpdate"];
+                };
+            };
+            /** @description No release available */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getFrameAppApk: {
         parameters: {
             query?: never;
             header?: never;
