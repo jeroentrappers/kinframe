@@ -57,6 +57,14 @@ const ja: Catalog = {
 	'landing.f3Body': 'オープンソースでセルフホスト、テレメトリーもありません。写真はすべて自分のサーバーに安全に保存されます。',
 	'landing.footer': 'kinframe はフリーソフトウェアです（AGPL-3.0）',
 
+	'legal.privacy': 'プライバシー',
+	'legal.terms': '利用規約',
+	'legal.lastUpdated': '最終更新日：{date}',
+	'legal.contents': '目次',
+	'legal.fallbackNote': 'この文書は英語、オランダ語、フランス語で用意されています。ここでは英語で表示しています。',
+	'legal.otherServer': 'この文書は {host} の kinframe サービスに適用されます。現在お使いのサーバーは別の方が運営しており、そのサーバー上のデータはその運営者が責任を負います。',
+	'legal.links': '法的情報',
+
 	'callback.title': 'ログイン',
 	'callback.working': 'ログインしています…',
 	'callback.failed': 'ログインできませんでした',

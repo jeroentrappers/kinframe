@@ -57,6 +57,14 @@ const sl: Catalog = {
 	'landing.f3Body': 'Odprtokodno in na lastnem strežniku, brez telemetrije. Vsaka fotografija je varna na vašem strežniku.',
 	'landing.footer': 'kinframe je prosto programje (AGPL-3.0)',
 
+	'legal.privacy': 'Zasebnost',
+	'legal.terms': 'Pogoji',
+	'legal.lastUpdated': 'Zadnja posodobitev: {date}',
+	'legal.contents': 'Vsebina',
+	'legal.fallbackNote': 'To besedilo je na voljo v angleščini, nizozemščini in francoščini. Tukaj je prikazano v angleščini.',
+	'legal.otherServer': 'To besedilo velja za storitev kinframe na {host}. Strežnik, ki ga zdaj uporabljate, upravlja nekdo drug, ki je odgovoren za vaše podatke na njem.',
+	'legal.links': 'Pravne informacije',
+
 	'callback.title': 'Prijava',
 	'callback.working': 'Prijavljanje…',
 	'callback.failed': 'Prijava ni uspela',

@@ -58,6 +58,14 @@ const zhTW: Catalog = {
 	'landing.f3Body': '開放原始碼、可自行架設，完全不收集使用資料。每張照片都安全地存放在你自己的伺服器上。',
 	'landing.footer': 'kinframe 是自由軟體（AGPL-3.0）',
 
+	'legal.privacy': '隱私權',
+	'legal.terms': '條款',
+	'legal.lastUpdated': '最後更新：{date}',
+	'legal.contents': '目錄',
+	'legal.fallbackNote': '本文有英文、荷蘭文和法文版本，此處顯示英文版本。',
+	'legal.otherServer': '本文適用於 {host} 上的 kinframe 服務。你目前使用的伺服器由他人營運，並由其負責你在該伺服器上的資料。',
+	'legal.links': '法律資訊',
+
 	'callback.title': '登入中',
 	'callback.working': '正在為你登入…',
 	'callback.failed': '登入失敗',

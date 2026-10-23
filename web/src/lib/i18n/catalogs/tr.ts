@@ -56,6 +56,14 @@ const tr: Catalog = {
 	'landing.f3Body': 'Açık kaynak, kendi sunucunuzda çalışır ve telemetri içermez. Her fotoğraf kendi sunucunuzda güvende.',
 	'landing.footer': 'kinframe özgür bir yazılımdır (AGPL-3.0)',
 
+	'legal.privacy': 'Gizlilik',
+	'legal.terms': 'Koşullar',
+	'legal.lastUpdated': 'Son güncelleme: {date}',
+	'legal.contents': 'İçindekiler',
+	'legal.fallbackNote': 'Bu metin İngilizce, Felemenkçe ve Fransızca olarak mevcuttur. Burada İngilizce gösteriliyor.',
+	'legal.otherServer': 'Bu metin {host} adresindeki kinframe hizmeti için geçerlidir. Şu anda kullandığınız sunucuyu başka biri işletiyor ve sunucudaki verilerinizden o sorumludur.',
+	'legal.links': 'Yasal bilgiler',
+
 	'callback.title': 'Giriş yapılıyor',
 	'callback.working': 'Giriş yapılıyor…',
 	'callback.failed': 'Giriş başarısız oldu',

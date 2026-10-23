@@ -57,6 +57,14 @@ const hr: Catalog = {
 	'landing.f3Body': 'Otvorenog koda i na vlastitom poslužitelju, bez telemetrije. Svaka je fotografija sigurna na vašem poslužitelju.',
 	'landing.footer': 'kinframe je slobodan softver (AGPL-3.0)',
 
+	'legal.privacy': 'Privatnost',
+	'legal.terms': 'Uvjeti',
+	'legal.lastUpdated': 'Zadnje ažurirano: {date}',
+	'legal.contents': 'Sadržaj',
+	'legal.fallbackNote': 'Ovaj je tekst dostupan na engleskom, nizozemskom i francuskom. Ovdje se prikazuje na engleskom.',
+	'legal.otherServer': 'Ovaj se tekst odnosi na uslugu kinframe na {host}. Poslužiteljem koji sada koristite upravlja netko drugi, tko je odgovoran za vaše podatke na njemu.',
+	'legal.links': 'Pravne informacije',
+
 	'callback.title': 'Prijava',
 	'callback.working': 'Prijavljujemo vas…',
 	'callback.failed': 'Prijava nije uspjela',

@@ -58,6 +58,14 @@ const ar: Catalog = {
 	'landing.f3Body': 'مفتوح المصدر وتستضيفه بنفسك، دون أي قياس عن بُعد. كل صورة في أمان على خادمك.',
 	'landing.footer': 'kinframe برنامج حر (AGPL-3.0)',
 
+	'legal.privacy': 'الخصوصية',
+	'legal.terms': 'الشروط',
+	'legal.lastUpdated': 'آخر تحديث: {date}',
+	'legal.contents': 'المحتويات',
+	'legal.fallbackNote': 'هذا النص متوفر بالإنجليزية والهولندية والفرنسية، ويُعرض هنا بالإنجليزية.',
+	'legal.otherServer': 'ينطبق هذا النص على خدمة kinframe على {host}. الخادم الذي تستخدمه الآن يديره شخص آخر، وهو المسؤول عن بياناتك عليه.',
+	'legal.links': 'معلومات قانونية',
+
 	'callback.title': 'تسجيل الدخول',
 	'callback.working': 'جارٍ تسجيل دخولك…',
 	'callback.failed': 'لم ينجح تسجيل الدخول',

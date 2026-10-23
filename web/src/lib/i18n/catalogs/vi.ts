@@ -58,6 +58,14 @@ const vi: Catalog = {
 	'landing.f3Body': 'Nguồn mở và tự lưu trữ, không thu thập dữ liệu sử dụng. Mọi bức ảnh đều an toàn trên máy chủ của chính bạn.',
 	'landing.footer': 'kinframe là phần mềm tự do (AGPL-3.0)',
 
+	'legal.privacy': 'Quyền riêng tư',
+	'legal.terms': 'Điều khoản',
+	'legal.lastUpdated': 'Cập nhật lần cuối: {date}',
+	'legal.contents': 'Mục lục',
+	'legal.fallbackNote': 'Văn bản này có bằng tiếng Anh, tiếng Hà Lan và tiếng Pháp. Ở đây hiển thị bằng tiếng Anh.',
+	'legal.otherServer': 'Văn bản này áp dụng cho dịch vụ kinframe tại {host}. Máy chủ bạn đang dùng do người khác vận hành, và họ chịu trách nhiệm về dữ liệu của bạn trên đó.',
+	'legal.links': 'Thông tin pháp lý',
+
 	'callback.title': 'Đăng nhập',
 	'callback.working': 'Đang đăng nhập…',
 	'callback.failed': 'Đăng nhập không thành công',

@@ -58,6 +58,14 @@ const lt: Catalog = {
 	'landing.f3Body': 'Atvirasis kodas, savas serveris ir jokios telemetrijos. Kiekviena nuotrauka saugi jūsų pačių serveryje.',
 	'landing.footer': 'kinframe yra laisvoji programinė įranga (AGPL-3.0)',
 
+	'legal.privacy': 'Privatumas',
+	'legal.terms': 'Sąlygos',
+	'legal.lastUpdated': 'Paskutinį kartą atnaujinta: {date}',
+	'legal.contents': 'Turinys',
+	'legal.fallbackNote': 'Šis tekstas yra anglų, nyderlandų ir prancūzų kalbomis. Čia jis rodomas angliškai.',
+	'legal.otherServer': 'Šis tekstas taikomas kinframe paslaugai adresu {host}. Serverį, kurį dabar naudojate, valdo kažkas kitas, ir jis atsako už jūsų duomenis jame.',
+	'legal.links': 'Teisinė informacija',
+
 	'callback.title': 'Prisijungiama',
 	'callback.working': 'Jungiama…',
 	'callback.failed': 'Prisijungti nepavyko',

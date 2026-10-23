@@ -58,6 +58,14 @@ const id: Catalog = {
 	'landing.f3Body': 'Open source dan di-host sendiri, tanpa telemetri. Setiap foto aman di server Anda sendiri.',
 	'landing.footer': 'kinframe adalah perangkat lunak bebas (AGPL-3.0)',
 
+	'legal.privacy': 'Privasi',
+	'legal.terms': 'Ketentuan',
+	'legal.lastUpdated': 'Terakhir diperbarui: {date}',
+	'legal.contents': 'Isi',
+	'legal.fallbackNote': 'Teks ini tersedia dalam bahasa Inggris, Belanda, dan Prancis. Di sini ditampilkan dalam bahasa Inggris.',
+	'legal.otherServer': 'Teks ini berlaku untuk layanan kinframe di {host}. Server yang Anda gunakan sekarang dikelola oleh pihak lain, yang bertanggung jawab atas data Anda di sana.',
+	'legal.links': 'Informasi hukum',
+
 	'callback.title': 'Login',
 	'callback.working': 'Memproses login…',
 	'callback.failed': 'Login gagal',

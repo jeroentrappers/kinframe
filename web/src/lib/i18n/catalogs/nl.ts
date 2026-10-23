@@ -57,6 +57,14 @@ const nl: Catalog = {
 	'landing.f3Body': 'Open source, zelf te hosten en zonder telemetrie. Elke foto staat veilig op jullie eigen server.',
 	'landing.footer': 'kinframe is vrije software (AGPL-3.0)',
 
+	'legal.privacy': 'Privacy',
+	'legal.terms': 'Voorwaarden',
+	'legal.lastUpdated': 'Laatst bijgewerkt: {date}',
+	'legal.contents': 'Inhoud',
+	'legal.fallbackNote': 'Deze tekst bestaat in het Engels, Nederlands en Frans. Je leest hier de Engelse versie.',
+	'legal.otherServer': 'Deze tekst geldt voor de kinframe-dienst op {host}. De server waarop je nu bent, wordt door iemand anders beheerd, die verantwoordelijk is voor je gegevens daarop.',
+	'legal.links': 'Juridisch',
+
 	'callback.title': 'Aanmelden',
 	'callback.working': 'Je wordt aangemeld…',
 	'callback.failed': 'Aanmelden is niet gelukt',

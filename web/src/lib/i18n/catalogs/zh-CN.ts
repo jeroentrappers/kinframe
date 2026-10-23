@@ -58,6 +58,14 @@ const zhCN: Catalog = {
 	'landing.f3Body': '开源、可自行部署，没有任何遥测。每张照片都安全地保存在你自己的服务器上。',
 	'landing.footer': 'kinframe 是自由软件（AGPL-3.0）',
 
+	'legal.privacy': '隐私',
+	'legal.terms': '条款',
+	'legal.lastUpdated': '最后更新：{date}',
+	'legal.contents': '目录',
+	'legal.fallbackNote': '本文有英语、荷兰语和法语版本，此处显示英语版本。',
+	'legal.otherServer': '本文适用于 {host} 上的 kinframe 服务。你当前使用的服务器由他人运营，由其负责你在该服务器上的数据。',
+	'legal.links': '法律信息',
+
 	'callback.title': '正在登录',
 	'callback.working': '正在为你登录…',
 	'callback.failed': '登录失败',

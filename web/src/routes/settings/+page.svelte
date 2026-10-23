@@ -202,7 +202,11 @@
 			<button class="btn" onclick={signOut}><Icon name="logout" size={18} />{t('settings.signOut')}</button>
 		</section>
 
-		<p class="faint tiny about">{t('settings.about')}</p>
+		<p class="faint tiny about">
+			{t('settings.about')}
+			<span aria-hidden="true">·</span> <a href="/privacy">{t('legal.privacy')}</a>
+			<span aria-hidden="true">·</span> <a href="/terms">{t('legal.terms')}</a>
+		</p>
 	</div>
 </div>
 

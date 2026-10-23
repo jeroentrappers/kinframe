@@ -159,6 +159,10 @@
 			<span>{t('landing.footer')}</span>
 			{#if discovery.doc?.version}<span class="faint">· v{discovery.doc.version}</span>{/if}
 		</p>
+		<nav class="legal-links" aria-label={t('legal.links')}>
+			<a href="/privacy">{t('legal.privacy')}</a>
+			<a href="/terms">{t('legal.terms')}</a>
+		</nav>
 	</footer>
 </div>
 {/if}
@@ -304,6 +308,14 @@
 	.software {
 		display: flex;
 		gap: 6px;
+	}
+	.legal-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-4);
+	}
+	.legal-links a {
+		color: inherit;
 	}
 	.shop-link {
 		margin-inline-end: var(--s-2);

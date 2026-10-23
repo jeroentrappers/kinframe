@@ -58,6 +58,14 @@ const lv: Catalog = {
 	'landing.f3Body': 'Atvērtais kods, pašu uzturēts serveris un bez telemetrijas. Katrs fotoattēls ir drošībā jūsu serverī.',
 	'landing.footer': 'kinframe ir brīvā programmatūra (AGPL-3.0)',
 
+	'legal.privacy': 'Privātums',
+	'legal.terms': 'Noteikumi',
+	'legal.lastUpdated': 'Pēdējoreiz atjaunināts: {date}',
+	'legal.contents': 'Saturs',
+	'legal.fallbackNote': 'Šis teksts ir pieejams angļu, nīderlandiešu un franču valodā. Šeit tas ir parādīts angliski.',
+	'legal.otherServer': 'Šis teksts attiecas uz kinframe pakalpojumu vietnē {host}. Serveri, ko pašlaik izmantojat, pārvalda kāds cits, kurš ir atbildīgs par jūsu datiem tajā.',
+	'legal.links': 'Juridiskā informācija',
+
 	'callback.title': 'Pierakstīšanās',
 	'callback.working': 'Notiek pierakstīšanās…',
 	'callback.failed': 'Pierakstīšanās neizdevās',

@@ -57,6 +57,14 @@ const sk: Catalog = {
 	'landing.f3Body': 'Open source na vlastnom serveri, bez telemetrie. Každá fotka je v bezpečí na vašom serveri.',
 	'landing.footer': 'kinframe je slobodný softvér (AGPL-3.0)',
 
+	'legal.privacy': 'Súkromie',
+	'legal.terms': 'Podmienky',
+	'legal.lastUpdated': 'Naposledy aktualizované: {date}',
+	'legal.contents': 'Obsah',
+	'legal.fallbackNote': 'Tento text je k dispozícii v angličtine, holandčine a francúzštine. Tu sa zobrazuje po anglicky.',
+	'legal.otherServer': 'Tento text platí pre službu kinframe na {host}. Server, ktorý práve používate, prevádzkuje niekto iný, kto zodpovedá za vaše údaje na ňom.',
+	'legal.links': 'Právne informácie',
+
 	'callback.title': 'Prihlasovanie',
 	'callback.working': 'Prihlasujeme vás…',
 	'callback.failed': 'Prihlásenie sa nepodarilo',

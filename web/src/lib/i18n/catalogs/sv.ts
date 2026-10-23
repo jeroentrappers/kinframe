@@ -56,6 +56,14 @@ const sv: Catalog = {
 	'landing.f3Body': 'Öppen källkod och egen server, utan telemetri. Varje foto är tryggt på er egen server.',
 	'landing.footer': 'kinframe är fri programvara (AGPL-3.0)',
 
+	'legal.privacy': 'Integritet',
+	'legal.terms': 'Villkor',
+	'legal.lastUpdated': 'Senast uppdaterad: {date}',
+	'legal.contents': 'Innehåll',
+	'legal.fallbackNote': 'Den här texten finns på engelska, nederländska och franska. Här visas den på engelska.',
+	'legal.otherServer': 'Den här texten gäller kinframe-tjänsten på {host}. Servern du använder nu drivs av någon annan, som ansvarar för dina data där.',
+	'legal.links': 'Juridiskt',
+
 	'callback.title': 'Loggar in',
 	'callback.working': 'Loggar in dig…',
 	'callback.failed': 'Inloggningen misslyckades',

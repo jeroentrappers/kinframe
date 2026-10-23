@@ -57,6 +57,14 @@ const hu: Catalog = {
 	'landing.f3Body': 'Nyílt forráskódú és saját szerveren fut, telemetria nélkül. Minden fotó biztonságban van a saját szervereden.',
 	'landing.footer': 'A kinframe szabad szoftver (AGPL-3.0)',
 
+	'legal.privacy': 'Adatvédelem',
+	'legal.terms': 'Feltételek',
+	'legal.lastUpdated': 'Utolsó frissítés: {date}',
+	'legal.contents': 'Tartalom',
+	'legal.fallbackNote': 'Ez a szöveg angolul, hollandul és franciául érhető el. Itt angolul látod.',
+	'legal.otherServer': 'Ez a szöveg a kinframe szolgáltatásra vonatkozik itt: {host}. A szervert, amelyet most használsz, valaki más üzemelteti, és ő felel a rajta lévő adataidért.',
+	'legal.links': 'Jogi információk',
+
 	'callback.title': 'Bejelentkezés',
 	'callback.working': 'Bejelentkeztetünk…',
 	'callback.failed': 'A bejelentkezés nem sikerült',
