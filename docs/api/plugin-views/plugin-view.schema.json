@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinframe.app/schemas/plugin-view-1.json",
+  "title": "kinframe plugin view, API 1",
+  "description": "What a plugin's render() and detail() return (docs/plugins.md §4). The frame draws it natively; anything that does not validate is not drawn and the previous view stays. Limits beyond what JSON Schema can express: the tree is at most 3 components deep (stack › stack › leaf), a view has at most 24 components in total (rows' values included, flow nodes not), edge ids must name nodes of the same flow, node ids are unique, sparkline min < max, strings have no line breaks or control characters, and the serialized view is at most 16 KB. The Kotlin validator (android/core/.../PluginViewParser.kt) enforces all of them.",
+  "$ref": "#/$defs/component",
+  "$defs": {
+    "component": {
+      "oneOf": [
+        { "$ref": "#/$defs/value" },
+        { "$ref": "#/$defs/rows" },
+        { "$ref": "#/$defs/gauge" },
+        { "$ref": "#/$defs/flow" },
+        { "$ref": "#/$defs/sparkline" },
+        { "$ref": "#/$defs/text" },
+        { "$ref": "#/$defs/stack" }
+      ]
+    },
+    "tone": {
+      "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children.",
+      "enum": ["neutral", "good", "warn", "bad", "accent"]
+    },
+    "icon": {
+      "description": "The fixed icon set of API 1, drawn by the frame in its line style.",
+      "enum": [
+        "bolt", "grid", "solar", "sun", "home", "battery", "battery-charging", "plug", "car", "flame", "gas", "meter",
+        "water", "thermometer", "wind", "leaf", "euro", "fan", "lightbulb",
+        "moon", "cloud", "clock", "calendar",
+        "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
+        "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right"
+      ]
+    },
+    "short": { "type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u2028\\u2029]*$" },
+    "value": {
+      "description": "Icon, big number, unit, optional label and trend arrow: ⚡ 1,2 kW ↑. Format numbers with ctx.format; a unit after a (no-break) space in `value` is drawn smaller unless `unit` is given.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "value" },
+        "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+        "unit": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 8 }] },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "icon": { "$ref": "#/$defs/icon" },
+        "trend": { "enum": ["up", "down", "flat"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "rows": {
+      "description": "Up to 4 values stacked: grid / solar / home.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "rows" },
+        "items": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/value" } },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "gauge": {
+      "description": "A ring (default) or bar from 0–100 % with a short label inside: car battery 68 %.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "gauge" },
+        "value": { "type": "number", "minimum": 0, "maximum": 100 },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 12 }] },
+        "caption": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "icon": { "$ref": "#/$defs/icon" },
+        "style": { "enum": ["ring", "bar"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "flow": {
+      "description": "Up to 5 nodes with animated arrows between them; arrow speed follows power (relative to the largest edge). The node with the most edges is drawn in the middle.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "nodes"],
+      "properties": {
+        "type": { "const": "flow" },
+        "nodes": {
+          "type": "array", "minItems": 2, "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "icon"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "icon": { "$ref": "#/$defs/icon" },
+              "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "tone": { "$ref": "#/$defs/tone" }
+            }
+          }
+        },
+        "edges": {
+          "type": "array", "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "to": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "power": { "type": "number", "minimum": 0, "description": "A magnitude; 0 draws an idle line. Swap from/to for the other direction." }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "sparkline": {
+      "description": "A small line chart of 2–96 points; null is a gap.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "points"],
+      "properties": {
+        "type": { "const": "sparkline" },
+        "points": { "type": "array", "minItems": 2, "maxItems": 96, "items": { "type": ["number", "null"] } },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+        "show_range": { "type": "boolean" },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "text": {
+      "description": "One or two short lines: Charging · full at 23:10.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "lines"],
+      "properties": {
+        "type": { "const": "text" },
+        "lines": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 60 }] } },
+        "icon": { "$ref": "#/$defs/icon" },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "stack": {
+      "description": "A vertical (default) or horizontal group. In the band the frame picks the axis: a column stacks vertically, a strip horizontally.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "stack" },
+        "items": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/component" } },
+        "direction": { "enum": ["vertical", "horizontal"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">أدوات المنزل</string>
+    <string name="plugins_note">قيم مباشرة من أجهزة شبكتك المنزلية، فوق الصور أو بجانبها. معاينة مبكرة: اضبطها هنا على الإطار.</string>
+    <string name="plugins_layout">التخطيط</string>
+    <string name="plugins_layout_off">إيقاف</string>
+    <string name="plugins_layout_overlay">في الزوايا</string>
+    <string name="plugins_layout_band">بجانب الصورة</string>
+    <string name="plugins_band_side">الجانب (أفقي)</string>
+    <string name="plugins_side_left">يسار</string>
+    <string name="plugins_side_right">يمين</string>
+    <string name="plugins_band_background">خلفية الشريط</string>
+    <string name="plugins_background_paper">ورق</string>
+    <string name="plugins_background_photo">من الصورة</string>
+    <string name="plugins_band_clock">الساعة والطقس في الشريط</string>
+    <string name="plugins_slot">الزاوية</string>
+    <string name="plugins_slot_top_left">أعلى اليسار</string>
+    <string name="plugins_slot_top_right">أعلى اليمين</string>
+    <string name="plugins_visibility">العرض</string>
+    <string name="plugins_visibility_always">دائمًا</string>
+    <string name="plugins_visibility_change">عند التغيّر</string>
+    <string name="plugins_visibility_tap">بعد النقر</string>
+    <string name="plugins_unavailable">غير متاح</string>
+    <string name="p1_name">عدّاد HomeWizard P1</string>
+    <string name="p1_address">العدّاد</string>
+    <string name="p1_searching">جارٍ البحث عن عدّادات في الشبكة…</string>
+    <string name="p1_none_found">لم يُعثر على عدّاد بعد. فعّل «Local API» للعدّاد في تطبيق HomeWizard Energy، أو اكتب عنوانه.</string>
+    <string name="p1_api_off">واجهة API المحلية متوقفة</string>
+    <string name="p1_manual">العنوان</string>
+    <string name="p1_use">استخدام</string>
+    <string name="p1_not_private">يمكن استخدام عناوين شبكتك المنزلية فقط.</string>
+    <string name="p1_style">العرض كـ</string>
+    <string name="p1_style_value">رقم</string>
+    <string name="p1_style_flow">تدفّق</string>
+    <string name="p1_warn">تمييز فوق</string>
+    <string name="p1_warn_off">أبدًا</string>
+    <string name="p1_status_ok">القراءات تصل.</string>
+    <string name="p1_status_waiting">بانتظار القراءة الأولى…</string>
+    <string name="p1_status_error">تعذّرت قراءة العدّاد: %1$s</string>
+    <string name="p1_using">استهلاك</string>
+    <string name="p1_returning">إرجاع للشبكة</string>
+    <string name="p1_grid">الشبكة</string>
+    <string name="p1_home">المنزل</string>
+    <string name="p1_last_hour">آخر ساعة</string>
+    <string name="p1_today_import">المستهلك اليوم</string>
+    <string name="p1_today_export">المُرجَع اليوم</string>
+    <string name="p1_today_gas">الغاز اليوم</string>
+</resources>

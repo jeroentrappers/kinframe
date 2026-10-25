@@ -1,0 +1,8 @@
+{
+  "$error_path": "/icon",
+  "view": {
+    "type": "value",
+    "value": "1",
+    "icon": "rocket"
+  }
+}

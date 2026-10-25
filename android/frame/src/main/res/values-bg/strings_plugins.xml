@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Домашни уиджети</string>
+    <string name="plugins_note">Текущи стойности от устройства в домашната ви мрежа, върху снимките или до тях. Ранна версия: настройва се тук, на рамката.</string>
+    <string name="plugins_layout">Оформление</string>
+    <string name="plugins_layout_off">Изключено</string>
+    <string name="plugins_layout_overlay">В ъглите</string>
+    <string name="plugins_layout_band">До снимката</string>
+    <string name="plugins_band_side">Страна (хоризонтално)</string>
+    <string name="plugins_side_left">Ляво</string>
+    <string name="plugins_side_right">Дясно</string>
+    <string name="plugins_band_background">Фон на лентата</string>
+    <string name="plugins_background_paper">Хартия</string>
+    <string name="plugins_background_photo">От снимката</string>
+    <string name="plugins_band_clock">Часовник и време в лентата</string>
+    <string name="plugins_slot">Ъгъл</string>
+    <string name="plugins_slot_top_left">Горе вляво</string>
+    <string name="plugins_slot_top_right">Горе вдясно</string>
+    <string name="plugins_visibility">Показване</string>
+    <string name="plugins_visibility_always">Винаги</string>
+    <string name="plugins_visibility_change">При промяна</string>
+    <string name="plugins_visibility_tap">След докосване</string>
+    <string name="plugins_unavailable">Не е налично</string>
+    <string name="p1_name">Електромер HomeWizard P1</string>
+    <string name="p1_address">Електромер</string>
+    <string name="p1_searching">Търсене на електромери в мрежата…</string>
+    <string name="p1_none_found">Още не е намерен електромер. Включете „Локален API“ за електромера в приложението HomeWizard Energy или въведете адреса му.</string>
+    <string name="p1_api_off">Локалният API е изключен</string>
+    <string name="p1_manual">Адрес</string>
+    <string name="p1_use">Използване</string>
+    <string name="p1_not_private">Могат да се използват само адреси от домашната ви мрежа.</string>
+    <string name="p1_style">Показване като</string>
+    <string name="p1_style_value">Число</string>
+    <string name="p1_style_flow">Поток</string>
+    <string name="p1_warn">Открояване над</string>
+    <string name="p1_warn_off">Никога</string>
+    <string name="p1_status_ok">Получават се показания.</string>
+    <string name="p1_status_waiting">Изчакване на първото показание…</string>
+    <string name="p1_status_error">Електромерът не може да се прочете: %1$s</string>
+    <string name="p1_using">Потребление</string>
+    <string name="p1_returning">Връщане към мрежата</string>
+    <string name="p1_grid">Мрежа</string>
+    <string name="p1_home">Дом</string>
+    <string name="p1_last_hour">Последния час</string>
+    <string name="p1_today_import">Потребено днес</string>
+    <string name="p1_today_export">Върнато днес</string>
+    <string name="p1_today_gas">Газ днес</string>
+</resources>

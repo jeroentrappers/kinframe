@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">วิดเจ็ตในบ้าน</string>
+    <string name="plugins_note">ค่าสดจากอุปกรณ์ในเครือข่ายบ้านของคุณ บนรูปหรือข้างรูป เวอร์ชันทดลอง: ตั้งค่าได้ที่กรอบรูปนี้</string>
+    <string name="plugins_layout">เลย์เอาต์</string>
+    <string name="plugins_layout_off">ปิด</string>
+    <string name="plugins_layout_overlay">ที่มุม</string>
+    <string name="plugins_layout_band">ข้างรูป</string>
+    <string name="plugins_band_side">ด้าน (แนวนอน)</string>
+    <string name="plugins_side_left">ซ้าย</string>
+    <string name="plugins_side_right">ขวา</string>
+    <string name="plugins_band_background">พื้นหลังแถบ</string>
+    <string name="plugins_background_paper">กระดาษ</string>
+    <string name="plugins_background_photo">จากรูป</string>
+    <string name="plugins_band_clock">นาฬิกาและสภาพอากาศในแถบ</string>
+    <string name="plugins_slot">มุม</string>
+    <string name="plugins_slot_top_left">ซ้ายบน</string>
+    <string name="plugins_slot_top_right">ขวาบน</string>
+    <string name="plugins_visibility">แสดง</string>
+    <string name="plugins_visibility_always">ตลอดเวลา</string>
+    <string name="plugins_visibility_change">เมื่อค่าเปลี่ยน</string>
+    <string name="plugins_visibility_tap">หลังแตะ</string>
+    <string name="plugins_unavailable">ไม่พร้อมใช้งาน</string>
+    <string name="p1_name">มิเตอร์ HomeWizard P1</string>
+    <string name="p1_address">มิเตอร์</string>
+    <string name="p1_searching">กำลังค้นหามิเตอร์ในเครือข่าย…</string>
+    <string name="p1_none_found">ยังไม่พบมิเตอร์ เปิด “Local API” ของมิเตอร์ในแอป HomeWizard Energy หรือพิมพ์ที่อยู่ของมิเตอร์</string>
+    <string name="p1_api_off">Local API ปิดอยู่</string>
+    <string name="p1_manual">ที่อยู่</string>
+    <string name="p1_use">ใช้</string>
+    <string name="p1_not_private">ใช้ได้เฉพาะที่อยู่ในเครือข่ายบ้านของคุณ</string>
+    <string name="p1_style">แสดงเป็น</string>
+    <string name="p1_style_value">ตัวเลข</string>
+    <string name="p1_style_flow">การไหล</string>
+    <string name="p1_warn">เน้นเมื่อเกิน</string>
+    <string name="p1_warn_off">ไม่เลย</string>
+    <string name="p1_status_ok">กำลังรับค่าที่อ่านได้</string>
+    <string name="p1_status_waiting">กำลังรอค่าแรก…</string>
+    <string name="p1_status_error">อ่านมิเตอร์ไม่ได้: %1$s</string>
+    <string name="p1_using">กำลังใช้</string>
+    <string name="p1_returning">กำลังจ่ายคืน</string>
+    <string name="p1_grid">สายส่ง</string>
+    <string name="p1_home">บ้าน</string>
+    <string name="p1_last_hour">ชั่วโมงที่ผ่านมา</string>
+    <string name="p1_today_import">ใช้วันนี้</string>
+    <string name="p1_today_export">จ่ายคืนวันนี้</string>
+    <string name="p1_today_gas">แก๊สวันนี้</string>
+</resources>

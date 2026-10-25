@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widżety domowe</string>
+    <string name="plugins_note">Bieżące wartości z urządzeń w sieci domowej, na zdjęciach lub obok nich. Wczesna wersja: ustaw to tutaj, na ramce.</string>
+    <string name="plugins_layout">Układ</string>
+    <string name="plugins_layout_off">Wyłączone</string>
+    <string name="plugins_layout_overlay">W rogach</string>
+    <string name="plugins_layout_band">Obok zdjęcia</string>
+    <string name="plugins_band_side">Strona (poziomo)</string>
+    <string name="plugins_side_left">Lewa</string>
+    <string name="plugins_side_right">Prawa</string>
+    <string name="plugins_band_background">Tło paska</string>
+    <string name="plugins_background_paper">Papier</string>
+    <string name="plugins_background_photo">Ze zdjęcia</string>
+    <string name="plugins_band_clock">Zegar i pogoda na pasku</string>
+    <string name="plugins_slot">Róg</string>
+    <string name="plugins_slot_top_left">Lewy górny</string>
+    <string name="plugins_slot_top_right">Prawy górny</string>
+    <string name="plugins_visibility">Pokazuj</string>
+    <string name="plugins_visibility_always">Zawsze</string>
+    <string name="plugins_visibility_change">Gdy się zmieni</string>
+    <string name="plugins_visibility_tap">Po dotknięciu</string>
+    <string name="plugins_unavailable">Niedostępne</string>
+    <string name="p1_name">Licznik HomeWizard P1</string>
+    <string name="p1_address">Licznik</string>
+    <string name="p1_searching">Szukanie liczników w sieci…</string>
+    <string name="p1_none_found">Nie znaleziono jeszcze licznika. Włącz „Lokalne API” dla licznika w aplikacji HomeWizard Energy lub wpisz jego adres.</string>
+    <string name="p1_api_off">Lokalne API wyłączone</string>
+    <string name="p1_manual">Adres</string>
+    <string name="p1_use">Użyj</string>
+    <string name="p1_not_private">Można używać tylko adresów z sieci domowej.</string>
+    <string name="p1_style">Pokazuj jako</string>
+    <string name="p1_style_value">Liczba</string>
+    <string name="p1_style_flow">Przepływ</string>
+    <string name="p1_warn">Wyróżnij powyżej</string>
+    <string name="p1_warn_off">Nigdy</string>
+    <string name="p1_status_ok">Odczyty napływają.</string>
+    <string name="p1_status_waiting">Czekanie na pierwszy odczyt…</string>
+    <string name="p1_status_error">Nie można odczytać licznika: %1$s</string>
+    <string name="p1_using">Pobór</string>
+    <string name="p1_returning">Oddawanie</string>
+    <string name="p1_grid">Sieć</string>
+    <string name="p1_home">Dom</string>
+    <string name="p1_last_hour">Ostatnia godzina</string>
+    <string name="p1_today_import">Pobrano dziś</string>
+    <string name="p1_today_export">Oddano dziś</string>
+    <string name="p1_today_gas">Gaz dziś</string>
+</resources>

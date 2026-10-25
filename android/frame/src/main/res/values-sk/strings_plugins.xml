@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Domáce widgety</string>
+    <string name="plugins_note">Aktuálne hodnoty zo zariadení v domácej sieti, na fotkách alebo vedľa nich. Predbežná verzia: nastavte ju tu na rámčeku.</string>
+    <string name="plugins_layout">Rozloženie</string>
+    <string name="plugins_layout_off">Vypnuté</string>
+    <string name="plugins_layout_overlay">V rohoch</string>
+    <string name="plugins_layout_band">Vedľa fotky</string>
+    <string name="plugins_band_side">Strana (na šírku)</string>
+    <string name="plugins_side_left">Vľavo</string>
+    <string name="plugins_side_right">Vpravo</string>
+    <string name="plugins_band_background">Pozadie pásu</string>
+    <string name="plugins_background_paper">Papier</string>
+    <string name="plugins_background_photo">Z fotky</string>
+    <string name="plugins_band_clock">Hodiny a počasie v páse</string>
+    <string name="plugins_slot">Roh</string>
+    <string name="plugins_slot_top_left">Vľavo hore</string>
+    <string name="plugins_slot_top_right">Vpravo hore</string>
+    <string name="plugins_visibility">Zobraziť</string>
+    <string name="plugins_visibility_always">Vždy</string>
+    <string name="plugins_visibility_change">Keď sa zmení</string>
+    <string name="plugins_visibility_tap">Po ťuknutí</string>
+    <string name="plugins_unavailable">Nedostupné</string>
+    <string name="p1_name">Elektromer HomeWizard P1</string>
+    <string name="p1_address">Elektromer</string>
+    <string name="p1_searching">Hľadajú sa elektromery v sieti…</string>
+    <string name="p1_none_found">Zatiaľ sa nenašiel žiadny elektromer. V aplikácii HomeWizard Energy zapnite pre elektromer „Miestne API“ alebo zadajte jeho adresu.</string>
+    <string name="p1_api_off">Miestne API je vypnuté</string>
+    <string name="p1_manual">Adresa</string>
+    <string name="p1_use">Použiť</string>
+    <string name="p1_not_private">Použiť sa dajú len adresy z domácej siete.</string>
+    <string name="p1_style">Zobraziť ako</string>
+    <string name="p1_style_value">Číslo</string>
+    <string name="p1_style_flow">Tok</string>
+    <string name="p1_warn">Zvýrazniť nad</string>
+    <string name="p1_warn_off">Nikdy</string>
+    <string name="p1_status_ok">Hodnoty prichádzajú.</string>
+    <string name="p1_status_waiting">Čaká sa na prvú hodnotu…</string>
+    <string name="p1_status_error">Elektromer sa nedá prečítať: %1$s</string>
+    <string name="p1_using">Odber</string>
+    <string name="p1_returning">Dodávka</string>
+    <string name="p1_grid">Sieť</string>
+    <string name="p1_home">Domov</string>
+    <string name="p1_last_hour">Posledná hodina</string>
+    <string name="p1_today_import">Dnes odobraté</string>
+    <string name="p1_today_export">Dnes dodané</string>
+    <string name="p1_today_gas">Plyn dnes</string>
+</resources>

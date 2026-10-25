@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Hemwidgetar</string>
+    <string name="plugins_note">Livevärden från enheter i ditt hemnätverk, på eller bredvid bilderna. Tidig förhandsversion: ställ in det här på ramen.</string>
+    <string name="plugins_layout">Layout</string>
+    <string name="plugins_layout_off">Av</string>
+    <string name="plugins_layout_overlay">I hörnen</string>
+    <string name="plugins_layout_band">Bredvid bilden</string>
+    <string name="plugins_band_side">Sida (liggande)</string>
+    <string name="plugins_side_left">Vänster</string>
+    <string name="plugins_side_right">Höger</string>
+    <string name="plugins_band_background">Bakgrund för bandet</string>
+    <string name="plugins_background_paper">Papper</string>
+    <string name="plugins_background_photo">Från bilden</string>
+    <string name="plugins_band_clock">Klocka och väder i bandet</string>
+    <string name="plugins_slot">Hörn</string>
+    <string name="plugins_slot_top_left">Uppe till vänster</string>
+    <string name="plugins_slot_top_right">Uppe till höger</string>
+    <string name="plugins_visibility">Visa</string>
+    <string name="plugins_visibility_always">Alltid</string>
+    <string name="plugins_visibility_change">När det ändras</string>
+    <string name="plugins_visibility_tap">Efter ett tryck</string>
+    <string name="plugins_unavailable">Inte tillgänglig</string>
+    <string name="p1_name">HomeWizard P1-mätare</string>
+    <string name="p1_address">Mätare</string>
+    <string name="p1_searching">Letar efter mätare i nätverket …</string>
+    <string name="p1_none_found">Ingen mätare hittades än. Slå på ”Lokalt API” för mätaren i appen HomeWizard Energy, eller skriv dess adress.</string>
+    <string name="p1_api_off">Lokalt API är av</string>
+    <string name="p1_manual">Adress</string>
+    <string name="p1_use">Använd</string>
+    <string name="p1_not_private">Bara adresser i ditt hemnätverk kan användas.</string>
+    <string name="p1_style">Visa som</string>
+    <string name="p1_style_value">Siffra</string>
+    <string name="p1_style_flow">Flöde</string>
+    <string name="p1_warn">Markera över</string>
+    <string name="p1_warn_off">Aldrig</string>
+    <string name="p1_status_ok">Tar emot mätvärden.</string>
+    <string name="p1_status_waiting">Väntar på första mätvärdet …</string>
+    <string name="p1_status_error">Kan inte läsa mätaren: %1$s</string>
+    <string name="p1_using">Förbrukar</string>
+    <string name="p1_returning">Levererar</string>
+    <string name="p1_grid">Nät</string>
+    <string name="p1_home">Hem</string>
+    <string name="p1_last_hour">Senaste timmen</string>
+    <string name="p1_today_import">Förbrukat i dag</string>
+    <string name="p1_today_export">Levererat i dag</string>
+    <string name="p1_today_gas">Gas i dag</string>
+</resources>

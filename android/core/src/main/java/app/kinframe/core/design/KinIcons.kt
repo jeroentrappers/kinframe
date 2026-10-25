@@ -125,6 +125,103 @@ object KinIcons {
     val Shield by lazy { line("shield", "M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z") }
     val ArrowRight by lazy { line("arrowRight", "M5 12h14", "M13 6l6 6-6 6") }
     val Clipboard by lazy { line("clipboard", "M8 4h8v3H8z", "M8 5.5H5V21h14V5.5h-3") }
+
+    // ------------------------------------------------------------------ home, energy and travel (plugin views)
+
+    val Bolt by lazy { line("bolt", "M13 2.5L4.5 13.5H11L10 21.5l8.5-11H12z") }
+    /** The electricity grid: a pylon (not the layout [Grid]). */
+    val Pylon by lazy { line("pylon", "M8.5 21L12 3l3.5 18", "M5 7.5h14", "M6.5 12h11", "M10.3 15l4.2 5", "M13.7 15l-4.2 5") }
+    val SolarPanel by lazy { line("solarPanel", "M5 4h14l2 10H3z", "M4 9h16", "M10 4l-1 10", "M14 4l1 10", "M12 14v6", "M8 20h8") }
+    val Home by lazy { line("home", "M3.5 11L12 4l8.5 7", "M5.5 9.5V20h13V9.5", "M10 20v-5h4v5") }
+    val Battery by lazy { line("battery", "M3 8h15v8H3z", "M21 10.5v3") }
+    val BatteryCharging by lazy { line("batteryCharging", "M3 8h15v8H3z", "M21 10.5v3", "M11.5 9.5l-2.5 3h3.5l-2.5 3") }
+    val Plug by lazy { line("plug", "M9 3v5", "M15 3v5", "M6 8h12v3a6 6 0 0 1-12 0z", "M12 17v4") }
+    val Car by lazy { line("car", "M4 16.5V12l2-5h12l2 5v4.5z", "M4 12h16", "M7 16.5V19", "M17 16.5V19", "M7.5 14.2h0.01", "M16.5 14.2h0.01") }
+    val Flame by lazy {
+        line("flame", "M12 21c-3.9 0-6.5-2.6-6.5-6.2 0-3.6 3-5.6 4-9.3 2.7 1.7 3.5 4.3 3.3 6.3 1-.6 1.7-1.6 2-2.8 1.8 1.6 3.7 3.8 3.7 6.1 0 3.4-2.6 5.9-6.5 5.9z")
+    }
+    /** Gas supply: a flame in the meter box. */
+    val Gas by lazy {
+        line("gas", "M5 4h14v16H5z", "M12 17c-1.8 0-3-1.2-3-2.8 0-1.6 1.4-2.6 2-4.2 1.2.8 1.6 2 1.5 2.9.5-.3.8-.7 1-1.3.8.7 1.5 1.7 1.5 2.7 0 1.5-1.2 2.7-3 2.7z")
+    }
+    val Meter by lazy { line("meter", "M3.5 17a8.5 8.5 0 1 1 17 0z", "M12 17l3.5-4.5", "M7 11.5l1 1", "M12 9v1.5") }
+    val Droplet by lazy { line("droplet", "M12 3.5s6 6.4 6 10.5a6 6 0 0 1-12 0c0-4.1 6-10.5 6-10.5z") }
+    val Thermometer by lazy { line("thermometer", "M10 14.5V5a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z", "M12 10v7") }
+    val Wind by lazy { line("wind", "M3 9h11a3 3 0 1 0-3-3", "M3 13h15a3 3 0 1 1-3 3", "M3 17h6") }
+    val Leaf by lazy { line("leaf", "M6 18C4 10 10 4 20 4c0 10-6 15-14 14z", "M6 18l7-7") }
+    val Euro by lazy { line("euro", "M17.5 6.5A7 7 0 1 0 17.5 17.5", "M4 10.5h9", "M4 13.5h9") }
+    val Fan by lazy {
+        line(
+            "fan", "M12 12C12 9 13 6 15 6C17 6 17 9 12 12", "M12 12C14.6 13.5 16.7 15.9 15.7 17.6C14.7 19.3 12.1 17.8 12 12",
+            "M12 12C9.4 13.5 6.3 14.1 5.3 12.4C4.3 10.7 6.9 9.2 12 12",
+        )
+    }
+    val Lightbulb by lazy { line("lightbulb", "M9 18h6", "M10 21h4", "M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z") }
+    val Cloud by lazy { line("cloud", "M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6.2 11 3.5 3.5 0 0 0 7 18z") }
+    val CalendarDay by lazy { line("calendarDay", "M4 6h16v14H4z", "M4 10h16", "M8 3v4", "M16 3v4") }
+    val WashingMachine by lazy { line("washingMachine", "M5 3h14v18H5z", "M5 7h14", "M12 10a4 4 0 1 0 0 8a4 4 0 1 0 0-8z", "M8 5h0.01") }
+    val Door by lazy { line("door", "M6 21V3h12v18", "M4 21h16", "M14.5 12h0.01") }
+    val Bike by lazy {
+        line(
+            "bike", "M6 13a4 4 0 1 0 0 8a4 4 0 1 0 0-8z", "M18 13a4 4 0 1 0 0 8a4 4 0 1 0 0-8z", "M6 17l4-7h6.5L18 17", "M10 10l3 7h-7",
+            "M8.5 7h3", "M15 6.5h2.5l-1 3.5",
+        )
+    }
+    val Bus by lazy { line("bus", "M5 4h14v13H5z", "M5 11h14", "M7 17v3", "M17 17v3", "M8 14h0.01", "M16 14h0.01") }
+    val Train by lazy {
+        line("train", "M7 3h10a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2z", "M5 10h14", "M8 21l2-4", "M16 21l-2-4", "M9 13.5h0.01", "M15 13.5h0.01")
+    }
+    val Warning by lazy { line("warning", "M12 4L2.5 20h19z", "M12 10v4", "M12 17h0.01") }
+    val ArrowUp by lazy { line("arrowUp", "M12 19V5", "M6 11l6-6 6 6") }
+    val ArrowDown by lazy { line("arrowDown", "M12 5v14", "M6 13l6 6 6-6") }
+    val ArrowLeft by lazy { line("arrowLeft", "M19 12H5", "M11 6l-6 6 6 6") }
+}
+
+/** The API 1 plugin icon names (`app.kinframe.core.plugin.PluginIconNames`) drawn with [KinIcons]. */
+object PluginIcons {
+    fun of(name: String?): ImageVector? = when (name) {
+        "bolt" -> KinIcons.Bolt
+        "grid" -> KinIcons.Pylon
+        "solar" -> KinIcons.SolarPanel
+        "sun" -> KinIcons.Sun
+        "home" -> KinIcons.Home
+        "battery" -> KinIcons.Battery
+        "battery-charging" -> KinIcons.BatteryCharging
+        "plug" -> KinIcons.Plug
+        "car" -> KinIcons.Car
+        "flame" -> KinIcons.Flame
+        "gas" -> KinIcons.Gas
+        "meter" -> KinIcons.Meter
+        "water" -> KinIcons.Droplet
+        "thermometer" -> KinIcons.Thermometer
+        "wind" -> KinIcons.Wind
+        "leaf" -> KinIcons.Leaf
+        "euro" -> KinIcons.Euro
+        "fan" -> KinIcons.Fan
+        "lightbulb" -> KinIcons.Lightbulb
+        "moon" -> KinIcons.Moon
+        "cloud" -> KinIcons.Cloud
+        "clock" -> KinIcons.Clock
+        "calendar" -> KinIcons.CalendarDay
+        "washing-machine" -> KinIcons.WashingMachine
+        "trash" -> KinIcons.Trash
+        "door" -> KinIcons.Door
+        "lock" -> KinIcons.Lock
+        "bike" -> KinIcons.Bike
+        "bus" -> KinIcons.Bus
+        "train" -> KinIcons.Train
+        "user" -> KinIcons.User
+        "wifi" -> KinIcons.Wifi
+        "bell" -> KinIcons.Bell
+        "info" -> KinIcons.Info
+        "warning" -> KinIcons.Warning
+        "check" -> KinIcons.Check
+        "arrow-up" -> KinIcons.ArrowUp
+        "arrow-down" -> KinIcons.ArrowDown
+        "arrow-left" -> KinIcons.ArrowLeft
+        "arrow-right" -> KinIcons.ArrowRight
+        else -> null
+    }
 }
 
 /** Tinted icon with a default size. */

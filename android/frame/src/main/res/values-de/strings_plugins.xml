@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Haus-Widgets</string>
+    <string name="plugins_note">Live-Werte von Geräten in deinem Heimnetz, auf oder neben den Fotos. Frühe Vorschau: hier am Bilderrahmen einrichten.</string>
+    <string name="plugins_layout">Anordnung</string>
+    <string name="plugins_layout_off">Aus</string>
+    <string name="plugins_layout_overlay">In den Ecken</string>
+    <string name="plugins_layout_band">Neben dem Foto</string>
+    <string name="plugins_band_side">Seite (Querformat)</string>
+    <string name="plugins_side_left">Links</string>
+    <string name="plugins_side_right">Rechts</string>
+    <string name="plugins_band_background">Hintergrund der Leiste</string>
+    <string name="plugins_background_paper">Papier</string>
+    <string name="plugins_background_photo">Aus dem Foto</string>
+    <string name="plugins_band_clock">Uhr und Wetter in der Leiste</string>
+    <string name="plugins_slot">Ecke</string>
+    <string name="plugins_slot_top_left">Oben links</string>
+    <string name="plugins_slot_top_right">Oben rechts</string>
+    <string name="plugins_visibility">Anzeigen</string>
+    <string name="plugins_visibility_always">Immer</string>
+    <string name="plugins_visibility_change">Wenn sich etwas ändert</string>
+    <string name="plugins_visibility_tap">Nach Antippen</string>
+    <string name="plugins_unavailable">Nicht verfügbar</string>
+    <string name="p1_name">HomeWizard P1-Zähler</string>
+    <string name="p1_address">Zähler</string>
+    <string name="p1_searching">Zähler im Netzwerk werden gesucht …</string>
+    <string name="p1_none_found">Noch kein Zähler gefunden. Schalte in der HomeWizard-Energy-App „Lokale API“ für den Zähler ein oder gib seine Adresse ein.</string>
+    <string name="p1_api_off">Lokale API ist aus</string>
+    <string name="p1_manual">Adresse</string>
+    <string name="p1_use">Verwenden</string>
+    <string name="p1_not_private">Nur Adressen in deinem Heimnetz sind möglich.</string>
+    <string name="p1_style">Anzeigen als</string>
+    <string name="p1_style_value">Zahl</string>
+    <string name="p1_style_flow">Fluss</string>
+    <string name="p1_warn">Hervorheben über</string>
+    <string name="p1_warn_off">Nie</string>
+    <string name="p1_status_ok">Messwerte kommen an.</string>
+    <string name="p1_status_waiting">Warte auf den ersten Messwert …</string>
+    <string name="p1_status_error">Zähler nicht lesbar: %1$s</string>
+    <string name="p1_using">Bezug</string>
+    <string name="p1_returning">Einspeisung</string>
+    <string name="p1_grid">Netz</string>
+    <string name="p1_home">Haus</string>
+    <string name="p1_last_hour">Letzte Stunde</string>
+    <string name="p1_today_import">Heute bezogen</string>
+    <string name="p1_today_export">Heute eingespeist</string>
+    <string name="p1_today_gas">Gas heute</string>
+</resources>

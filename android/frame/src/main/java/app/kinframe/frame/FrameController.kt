@@ -105,6 +105,9 @@ class FrameController(val g: FrameGraph) {
     /** Calendars, event invitations, countdowns and the timed calendar view (product spec 4.9). */
     val calendar by lazy { app.kinframe.frame.calendar.CalendarController(this) }
 
+    /** Live widgets from devices on the home network (docs/plugins.md, step 1: built-in widgets). */
+    val plugins by lazy { app.kinframe.frame.plugins.FramePlugins(this) }
+
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
     val settingsOpen = MutableStateFlow(false)

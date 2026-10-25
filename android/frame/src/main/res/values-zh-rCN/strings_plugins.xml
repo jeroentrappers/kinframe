@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">家居小组件</string>
+    <string name="plugins_note">在照片上或照片旁显示家庭网络中设备的实时数值。抢先预览：在这台相框上设置。</string>
+    <string name="plugins_layout">布局</string>
+    <string name="plugins_layout_off">关闭</string>
+    <string name="plugins_layout_overlay">在角落</string>
+    <string name="plugins_layout_band">在照片旁</string>
+    <string name="plugins_band_side">侧边（横屏）</string>
+    <string name="plugins_side_left">左</string>
+    <string name="plugins_side_right">右</string>
+    <string name="plugins_band_background">条带背景</string>
+    <string name="plugins_background_paper">纸张</string>
+    <string name="plugins_background_photo">取自照片</string>
+    <string name="plugins_band_clock">在条带中显示时钟和天气</string>
+    <string name="plugins_slot">角落</string>
+    <string name="plugins_slot_top_left">左上</string>
+    <string name="plugins_slot_top_right">右上</string>
+    <string name="plugins_visibility">显示</string>
+    <string name="plugins_visibility_always">始终</string>
+    <string name="plugins_visibility_change">数值变化时</string>
+    <string name="plugins_visibility_tap">轻触后</string>
+    <string name="plugins_unavailable">不可用</string>
+    <string name="p1_name">HomeWizard P1 电表</string>
+    <string name="p1_address">电表</string>
+    <string name="p1_searching">正在网络中查找电表…</string>
+    <string name="p1_none_found">尚未找到电表。请在 HomeWizard Energy 应用中为电表开启“本地 API”，或输入其地址。</string>
+    <string name="p1_api_off">本地 API 已关闭</string>
+    <string name="p1_manual">地址</string>
+    <string name="p1_use">使用</string>
+    <string name="p1_not_private">只能使用家庭网络中的地址。</string>
+    <string name="p1_style">显示方式</string>
+    <string name="p1_style_value">数字</string>
+    <string name="p1_style_flow">能量流</string>
+    <string name="p1_warn">高于此值时突出显示</string>
+    <string name="p1_warn_off">从不</string>
+    <string name="p1_status_ok">正在接收读数。</string>
+    <string name="p1_status_waiting">正在等待第一个读数…</string>
+    <string name="p1_status_error">无法读取电表：%1$s</string>
+    <string name="p1_using">用电中</string>
+    <string name="p1_returning">回馈中</string>
+    <string name="p1_grid">电网</string>
+    <string name="p1_home">家</string>
+    <string name="p1_last_hour">过去一小时</string>
+    <string name="p1_today_import">今日用电</string>
+    <string name="p1_today_export">今日回馈</string>
+    <string name="p1_today_gas">今日燃气</string>
+</resources>
