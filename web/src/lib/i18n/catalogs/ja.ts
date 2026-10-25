@@ -322,6 +322,8 @@ const ja: Catalog = {
 	'library.someFailed.other': '{count} 件を変更できませんでした。',
 	'library.pending': '承認待ち',
 	'library.from': '{name} さんから',
+	'library.viaFrameo': '{name} · Frameo 経由',
+	'library.viaFrameoNoName': 'Frameo 経由',
 	'library.photo': '写真',
 	'library.received': '{when} に受信',
 
@@ -1123,6 +1125,7 @@ const ja: Catalog = {
 	'convert.hintIncompatible': '別の鍵で署名された kinframe がすでにインストールされています。先に元のアプリに戻してから（データは残さずに）、もう一度インストールしてください。',
 	'convert.doneTitle': 'あと少しです',
 	'convert.doneBody': 'フレームで kinframe が起動するようになりました。フレームの案内（言語、Wi-Fi、タイムゾーン）に沿って進めると、最後にコードが表示されます。',
+	'convert.doneImport': 'Frameo でフレームに送られた写真は、フレームを追加すると、キャプションと送信者ごと自動でインポートされます。',
 	'convert.doneAdd': 'コードでフレームを追加',
 	'convert.doneRevertTitle': '元のアプリに戻りました',
 	'convert.doneRevertBody': 'フレームは元のアプリで再起動しました。ケーブルを抜いてもかまいません。',

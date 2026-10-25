@@ -23,8 +23,15 @@ unifiedpush = "3.3.5"
 coil = "3.6.3"
 firebaseMessaging = "26.0.1"
 tink = "1.23.0"
+realm = "10.19.0"
+androidxTestRunner = "1.7.0"
+androidxTestJunit = "1.3.0"
 
 [libraries]
+# Frame only: reads the Realm database Frameo leaves on a converted frame (docs/spec/frameo-import.md).
+realm-android = { module = "io.realm:realm-android-library", version.ref = "realm" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestJunit" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }

@@ -902,6 +902,7 @@ convert() {
 		say ""
 		say "Done. Follow the setup on the frame (language, Wi-Fi, time zone)."
 		say "At the end it shows a code: enter it at $_server/frames/add to add the frame to your family."
+		say "Photos sent to the frame with Frameo are then imported automatically, with their captions and senders."
 		say "The log is in $LOG_FILE."
 	fi
 }

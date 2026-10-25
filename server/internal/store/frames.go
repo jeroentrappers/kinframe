@@ -368,3 +368,13 @@ func (tx *Tx) DecideJoinRequest(ctx context.Context, id uuid.UUID, status string
 	_, err := tx.Exec(ctx, `UPDATE join_requests SET status = $2, decided_at = now() WHERE id = $1`, id, status)
 	return err
 }
+
+// FrameOwnerID returns the user id of the frame's owner.
+func (s *Store) FrameOwnerID(ctx context.Context, q db.DBTX, frameID uuid.UUID) (uuid.UUID, error) {
+	var id uuid.UUID
+	err := q.QueryRow(ctx, `SELECT user_id FROM memberships WHERE frame_id = $1 AND role = 'owner'`, frameID).Scan(&id)
+	if db.NotFound(err) {
+		return uuid.Nil, ErrNotFound
+	}
+	return id, err
+}

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Bilder fra Frameo</string>
+    <string name="frameo_found">Bilder og videoer fra Frameo på denne rammen: %d. Importer dem for å beholde dem, med bildetekster og avsendere.</string>
+    <string name="frameo_import">Importer</string>
+    <string name="frameo_importing">Importerer bilder fra Frameo</string>
+    <string name="frameo_preparing">Gjør klar…</string>
+    <string name="frameo_waiting">Fortsetter når rammen er på nett.</string>
+    <string name="frameo_stop">Stopp</string>
+    <string name="frameo_done_title">Bilder fra Frameo importert</string>
+    <string name="frameo_count">%1$d av %2$d</string>
+    <string name="frameo_done_imported">Importert: %d</string>
+    <string name="frameo_done_already">Allerede på rammen: %d</string>
+    <string name="frameo_done_failed">Ikke importert: %d</string>
+    <string name="frameo_no_permission">Tilgang til lagringen trengs for å lese bildene fra Frameo.</string>
+    <string name="credit_via_frameo">%1$s · via Frameo</string>
+    <string name="credit_frameo">via Frameo</string>
+</resources>

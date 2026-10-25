@@ -354,6 +354,8 @@ const pl: Catalog = {
 	'library.someFailed.other': 'Nie udało się zmienić {count} elementu.',
 	'library.pending': 'Czeka na zgodę',
 	'library.from': 'Od: {name}',
+	'library.viaFrameo': '{name} · przez Frameo',
+	'library.viaFrameoNoName': 'przez Frameo',
 	'library.photo': 'Zdjęcie',
 	'library.received': 'Otrzymano {when}',
 
@@ -1180,6 +1182,7 @@ const pl: Catalog = {
 	'convert.hintIncompatible': 'Zainstalowana jest już aplikacja kinframe podpisana innym kluczem. Najpierw wróć do oryginalnej aplikacji (bez zachowywania danych), a potem zainstaluj ponownie.',
 	'convert.doneTitle': 'Prawie gotowe',
 	'convert.doneBody': 'Ramka uruchamia teraz kinframe. Wykonaj kroki wyświetlane na ramce (język, Wi-Fi, strefa czasowa). Na koniec ramka pokaże kod.',
+	'convert.doneImport': 'Zdjęcia wysłane do ramki przez Frameo zostaną automatycznie zaimportowane po dodaniu ramki, razem z podpisami i nadawcami.',
 	'convert.doneAdd': 'Dodaj ramkę za pomocą kodu',
 	'convert.doneRevertTitle': 'Oryginalna aplikacja wróciła',
 	'convert.doneRevertBody': 'Ramka uruchomiła się ponownie z oryginalną aplikacją. Możesz odłączyć kabel.',

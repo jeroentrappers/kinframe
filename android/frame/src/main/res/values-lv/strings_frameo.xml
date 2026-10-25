@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotoattēli no Frameo</string>
+    <string name="frameo_found">Fotoattēli un video no Frameo šajā rāmī: %d. Importējiet tos, lai saglabātu ar parakstiem un sūtītājiem.</string>
+    <string name="frameo_import">Importēt</string>
+    <string name="frameo_importing">Importē fotoattēlus no Frameo</string>
+    <string name="frameo_preparing">Sagatavo…</string>
+    <string name="frameo_waiting">Turpināsies, kad rāmis būs tiešsaistē.</string>
+    <string name="frameo_stop">Apturēt</string>
+    <string name="frameo_done_title">Fotoattēli no Frameo importēti</string>
+    <string name="frameo_count">%1$d no %2$d</string>
+    <string name="frameo_done_imported">Importēti: %d</string>
+    <string name="frameo_done_already">Jau rāmī: %d</string>
+    <string name="frameo_done_failed">Neimportēti: %d</string>
+    <string name="frameo_no_permission">Lai nolasītu fotoattēlus no Frameo, nepieciešama piekļuve krātuvei.</string>
+    <string name="credit_via_frameo">%1$s · caur Frameo</string>
+    <string name="credit_frameo">caur Frameo</string>
+</resources>

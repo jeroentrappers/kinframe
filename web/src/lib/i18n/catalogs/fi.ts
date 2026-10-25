@@ -315,6 +315,8 @@ const fi: Catalog = {
 	'library.someFailed.other': '{count} kohteen muuttaminen epäonnistui.',
 	'library.pending': 'Odottaa hyväksyntää',
 	'library.from': 'Lähettäjä: {name}',
+	'library.viaFrameo': '{name} · Frameon kautta',
+	'library.viaFrameoNoName': 'Frameon kautta',
 	'library.photo': 'Kuva',
 	'library.received': 'Vastaanotettu {when}',
 
@@ -1107,6 +1109,7 @@ const fi: Catalog = {
 	'convert.hintIncompatible': 'Kuvakehykseen on jo asennettu toisella avaimella allekirjoitettu kinframe. Palaa ensin alkuperäiseen sovellukseen (säilyttämättä tietoja) ja asenna sitten uudelleen.',
 	'convert.doneTitle': 'Melkein valmista',
 	'convert.doneBody': 'Kuvakehyksessä käynnistyy nyt kinframe. Seuraa kuvakehyksen ohjeita (kieli, Wi-Fi, aikavyöhyke). Lopuksi se näyttää koodin.',
+	'convert.doneImport': 'Frameon kautta kuvakehykseen lähetetyt kuvat tuodaan automaattisesti, kun lisäät kuvakehyksen, kuvateksteineen ja lähettäjineen.',
 	'convert.doneAdd': 'Lisää kuvakehys sen koodilla',
 	'convert.doneRevertTitle': 'Alkuperäinen sovellus on palautettu',
 	'convert.doneRevertBody': 'Kuvakehys käynnistyi uudelleen alkuperäisellä sovelluksella. Voit irrottaa kaapelin.',

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotók a Frameo alkalmazásból</string>
+    <string name="frameo_found">Fotók és videók a Frameo alkalmazásból ezen a képkereten: %d. Importáld őket, hogy feliratukkal és küldőjükkel együtt megmaradjanak.</string>
+    <string name="frameo_import">Importálás</string>
+    <string name="frameo_importing">Fotók importálása a Frameo alkalmazásból</string>
+    <string name="frameo_preparing">Előkészítés…</string>
+    <string name="frameo_waiting">Folytatódik, amikor a képkeret online lesz.</string>
+    <string name="frameo_stop">Leállítás</string>
+    <string name="frameo_done_title">A Frameo-fotók importálva</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">Importálva: %d</string>
+    <string name="frameo_done_already">Már a képkereten: %d</string>
+    <string name="frameo_done_failed">Nem sikerült: %d</string>
+    <string name="frameo_no_permission">A Frameo-fotók olvasásához tárhely-hozzáférés kell.</string>
+    <string name="credit_via_frameo">%1$s · a Frameo alkalmazásból</string>
+    <string name="credit_frameo">a Frameo alkalmazásból</string>
+</resources>

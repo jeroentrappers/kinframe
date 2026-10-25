@@ -739,6 +739,21 @@ func (e ItemMotionStatus) Valid() bool {
 	}
 }
 
+// Defines values for ItemOrigin.
+const (
+	Frameo ItemOrigin = "frameo"
+)
+
+// Valid indicates whether the value is a known member of the ItemOrigin enum.
+func (e ItemOrigin) Valid() bool {
+	switch e {
+	case Frameo:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for JoinRequestVia.
 const (
 	JoinRequestViaFrameCode JoinRequestVia = "frame_code"
@@ -1270,6 +1285,30 @@ const (
 func (e WeatherUnitsWindSpeed) Valid() bool {
 	switch e {
 	case Kmh:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeviceImportParamsRotation.
+const (
+	DeviceImportParamsRotationN0   DeviceImportParamsRotation = 0
+	DeviceImportParamsRotationN180 DeviceImportParamsRotation = 180
+	DeviceImportParamsRotationN270 DeviceImportParamsRotation = 270
+	DeviceImportParamsRotationN90  DeviceImportParamsRotation = 90
+)
+
+// Valid indicates whether the value is a known member of the DeviceImportParamsRotation enum.
+func (e DeviceImportParamsRotation) Valid() bool {
+	switch e {
+	case DeviceImportParamsRotationN0:
+		return true
+	case DeviceImportParamsRotationN180:
+		return true
+	case DeviceImportParamsRotationN270:
+		return true
+	case DeviceImportParamsRotationN90:
 		return true
 	default:
 		return false
@@ -2360,6 +2399,13 @@ type Item struct {
 	// Id UUIDv7
 	Id Id `json:"id"`
 
+	// ImportedFrom Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+	// then the frame; clients show `imported_sender_name` instead, e.g. "Anna · via Frameo".
+	ImportedFrom *ItemOrigin `json:"imported_from,omitempty"`
+
+	// ImportedSenderName The original sender's display name in that app, when known.
+	ImportedSenderName *string `json:"imported_sender_name,omitempty"`
+
 	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
 	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
 	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
@@ -2394,6 +2440,9 @@ type ItemMotion struct {
 
 // ItemMotionStatus defines model for ItemMotion.Status.
 type ItemMotionStatus string
+
+// ItemOrigin An app a frame can import leftover photos from.
+type ItemOrigin string
 
 // JoinRequest defines model for JoinRequest.
 type JoinRequest struct {
@@ -3156,14 +3205,44 @@ type DeviceGetChangesParams struct {
 // DeviceImportParams defines parameters for DeviceImport.
 type DeviceImportParams struct {
 	// Caption Caption to restore (e.g. from a kinframe export manifest).
-	Caption     *string    `form:"caption,omitempty" json:"caption,omitempty"`
-	XFilename   string     `json:"X-Filename"`
-	XCapturedAt *time.Time `json:"X-Captured-At,omitempty"`
+	Caption *string `form:"caption,omitempty" json:"caption,omitempty"`
+
+	// Source The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it.
+	Source *ItemOrigin `form:"source,omitempty" json:"source,omitempty"`
+
+	// SourceKey Stable id of the file in that app (for Frameo, its file name). Unique per frame and source.
+	SourceKey *string `form:"source_key,omitempty" json:"source_key,omitempty"`
+
+	// SenderName The original sender's display name in that app.
+	SenderName *string `form:"sender_name,omitempty" json:"sender_name,omitempty"`
+
+	// ReceivedAt When the old app received the file; becomes the placement's `received_at` (not in the future).
+	ReceivedAt *time.Time `form:"received_at,omitempty" json:"received_at,omitempty"`
+	Fit        *Fit       `form:"fit,omitempty" json:"fit,omitempty"`
+
+	// FocalX Focal point, as a fraction of the width (with `focal_y`).
+	FocalX *float32 `form:"focal_x,omitempty" json:"focal_x,omitempty"`
+	FocalY *float32 `form:"focal_y,omitempty" json:"focal_y,omitempty"`
+
+	// Hidden Import the placement hidden (it was hidden from the slideshow in the old app).
+	Hidden *bool `form:"hidden,omitempty" json:"hidden,omitempty"`
+
+	// Rotation Extra clockwise rotation chosen on the frame in the old app.
+	Rotation    *DeviceImportParamsRotation `form:"rotation,omitempty" json:"rotation,omitempty"`
+	XFilename   string                      `json:"X-Filename"`
+	XCapturedAt *time.Time                  `json:"X-Captured-At,omitempty"`
 }
+
+// DeviceImportParamsRotation defines parameters for DeviceImport.
+type DeviceImportParamsRotation int
 
 // DeviceImportCheckJSONBody defines parameters for DeviceImportCheck.
 type DeviceImportCheckJSONBody struct {
-	Sha256 []string `json:"sha256"`
+	Sha256 *[]string `json:"sha256,omitempty"`
+
+	// Source An app a frame can import leftover photos from.
+	Source     *ItemOrigin `json:"source,omitempty"`
+	SourceKeys *[]string   `json:"source_keys,omitempty"`
 }
 
 // DeviceDecideInvitationJSONBody defines parameters for DeviceDecideInvitation.
@@ -4028,6 +4107,123 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "caption"})
 		} else {
 			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "caption", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "source" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "source", r.URL.Query(), &params.Source, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "source"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "source", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "source_key" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "source_key", r.URL.Query(), &params.SourceKey, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "source_key"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "source_key", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "sender_name" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "sender_name", r.URL.Query(), &params.SenderName, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "sender_name"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sender_name", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "received_at" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "received_at", r.URL.Query(), &params.ReceivedAt, runtime.BindQueryParameterOptions{Type: "string", Format: "date-time"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "received_at"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "received_at", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "fit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "fit", r.URL.Query(), &params.Fit, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "fit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "fit", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "focal_x" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "focal_x", r.URL.Query(), &params.FocalX, runtime.BindQueryParameterOptions{Type: "number", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "focal_x"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "focal_x", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "focal_y" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "focal_y", r.URL.Query(), &params.FocalY, runtime.BindQueryParameterOptions{Type: "number", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "focal_y"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "focal_y", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "hidden" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "hidden", r.URL.Query(), &params.Hidden, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "hidden"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "hidden", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "rotation" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "rotation", r.URL.Query(), &params.Rotation, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "rotation"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "rotation", Err: err})
 		}
 		return
 	}
@@ -6995,7 +7191,8 @@ type DeviceImportCheckResponseObject interface {
 }
 
 type DeviceImportCheck200JSONResponse struct {
-	Known []string `json:"known"`
+	Known           []string  `json:"known"`
+	KnownSourceKeys *[]string `json:"known_source_keys,omitempty"`
 }
 
 func (response DeviceImportCheck200JSONResponse) VisitDeviceImportCheckResponse(w http.ResponseWriter) error {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotos de Frameo</string>
+    <string name="frameo_found">Fotos y vídeos de Frameo en este marco: %d. Impórtalos para conservarlos, con sus textos y remitentes.</string>
+    <string name="frameo_import">Importar</string>
+    <string name="frameo_importing">Importando fotos de Frameo</string>
+    <string name="frameo_preparing">Preparando…</string>
+    <string name="frameo_waiting">Continúa cuando el marco tenga conexión.</string>
+    <string name="frameo_stop">Detener</string>
+    <string name="frameo_done_title">Fotos de Frameo importadas</string>
+    <string name="frameo_count">%1$d de %2$d</string>
+    <string name="frameo_done_imported">Importadas: %d</string>
+    <string name="frameo_done_already">Ya en el marco: %d</string>
+    <string name="frameo_done_failed">No importadas: %d</string>
+    <string name="frameo_no_permission">Se necesita acceso al almacenamiento para leer las fotos de Frameo.</string>
+    <string name="credit_via_frameo">%1$s · vía Frameo</string>
+    <string name="credit_frameo">vía Frameo</string>
+</resources>

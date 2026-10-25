@@ -140,6 +140,8 @@ class SyncEngine(
             senderId = item.senderId,
             senderName = item.senderName,
             sharedByName = p.sharedByName,
+            importedFrom = item.importedFrom,
+            importedSenderName = item.importedSenderName,
             caption = item.caption,
             captionEdited = item.captionEdited,
             capturedAt = parseTime(item.capturedAt),
@@ -167,7 +169,8 @@ class SyncEngine(
             lastError = if (sameMedia) existing?.lastError else null,
             firstShownAt = existing?.firstShownAt,
             lastShownAt = existing?.lastShownAt,
-            isNew = existing?.isNew ?: (!initial && p.seenAt == null && p.status != "seen"),
+            // Photos imported from the frame's old app were seen there already: they don't jump the queue as new.
+            isNew = existing?.isNew ?: (!initial && item.importedFrom == null && p.seenAt == null && p.status != "seen"),
             evictedAt = if (sameMedia) existing?.evictedAt else null,
             albumIds = p.albumIds.joinToString(",").ifEmpty { null },
             motionUrl = mo?.url,

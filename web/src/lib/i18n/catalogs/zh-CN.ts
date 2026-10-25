@@ -322,6 +322,8 @@ const zhCN: Catalog = {
 	'library.someFailed.other': '有 {count} 项无法更改。',
 	'library.pending': '等待批准',
 	'library.from': '来自 {name}',
+	'library.viaFrameo': '{name} · 来自 Frameo',
+	'library.viaFrameoNoName': '来自 Frameo',
 	'library.photo': '照片',
 	'library.received': '收到于 {when}',
 
@@ -1123,6 +1125,7 @@ const zhCN: Catalog = {
 	'convert.hintIncompatible': '已安装了用其他密钥签名的 kinframe。请先恢复原来的应用（不保留数据），然后重新安装。',
 	'convert.doneTitle': '快好了',
 	'convert.doneBody': '相框现在会启动 kinframe。请按照相框上的步骤操作（语言、Wi-Fi、时区），最后会显示一个代码。',
+	'convert.doneImport': '通过 Frameo 发送到相框的照片会在你添加相框后自动导入，并保留说明文字和发送者。',
 	'convert.doneAdd': '用代码添加相框',
 	'convert.doneRevertTitle': '原来的应用已恢复',
 	'convert.doneRevertBody': '相框已用原来的应用重启。现在可以拔掉数据线了。',

@@ -75,6 +75,8 @@ The website and the script run the same commands, from one plan. Convert:
 | Check | `dumpsys activity activities` | Warns when kinframe isn't in front. |
 
 The frame then runs kinframe's setup (language, Wi-Fi, time zone) and shows a code; enter it at `<server>/frames/add`.
+Once it belongs to a family, the frame imports the photos and videos it received with the stock app, with their
+captions, dates and senders (the stock app's data stays on the frame for the revert; `docs/spec/frameo-import.md`).
 
 Revert: optional reinstall of a backed-up stock APK (`pm install -r -d`), optional write-back of the backed-up
 `resource.img` and `bootanimation.zip` (same steps as above, so the resource image is verified too), `su 0 pm enable` for each package that is

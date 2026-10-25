@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Kuvat Frameosta</string>
+    <string name="frameo_found">Frameon kuvia ja videoita tässä kehyksessä: %d. Tuo ne, niin ne säilyvät kuvateksteineen ja lähettäjineen.</string>
+    <string name="frameo_import">Tuo</string>
+    <string name="frameo_importing">Tuodaan kuvia Frameosta</string>
+    <string name="frameo_preparing">Valmistellaan…</string>
+    <string name="frameo_waiting">Jatkuu, kun kehys on verkossa.</string>
+    <string name="frameo_stop">Lopeta</string>
+    <string name="frameo_done_title">Kuvat tuotu Frameosta</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">Tuotu: %d</string>
+    <string name="frameo_done_already">Jo kehyksessä: %d</string>
+    <string name="frameo_done_failed">Ei tuotu: %d</string>
+    <string name="frameo_no_permission">Kuvien lukeminen Frameosta vaatii tallennustilan käyttöoikeuden.</string>
+    <string name="credit_via_frameo">%1$s · Frameon kautta</string>
+    <string name="credit_frameo">Frameon kautta</string>
+</resources>

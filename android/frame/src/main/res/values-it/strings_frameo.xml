@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Foto da Frameo</string>
+    <string name="frameo_found">Foto e video da Frameo su questa cornice: %d. Importali per conservarli, con didascalie e mittenti.</string>
+    <string name="frameo_import">Importa</string>
+    <string name="frameo_importing">Importazione delle foto da Frameo</string>
+    <string name="frameo_preparing">Preparazione…</string>
+    <string name="frameo_waiting">Riprende quando la cornice è online.</string>
+    <string name="frameo_stop">Interrompi</string>
+    <string name="frameo_done_title">Foto da Frameo importate</string>
+    <string name="frameo_count">%1$d di %2$d</string>
+    <string name="frameo_done_imported">Importate: %d</string>
+    <string name="frameo_done_already">Già sulla cornice: %d</string>
+    <string name="frameo_done_failed">Non importate: %d</string>
+    <string name="frameo_no_permission">Serve l\'accesso alla memoria per leggere le foto da Frameo.</string>
+    <string name="credit_via_frameo">%1$s · tramite Frameo</string>
+    <string name="credit_frameo">tramite Frameo</string>
+</resources>

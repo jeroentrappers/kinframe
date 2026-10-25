@@ -62,6 +62,9 @@ data class PlacementEntity(
     @ColumnInfo(defaultValue = "0") val motionNextAttemptAt: Long = 0,
     /** The member who shared this photo here from another frame; the caption reads "sender · shared by X". */
     val sharedByName: String? = null,
+    /** Imported on this frame from another app's leftover data ("frameo"); the caption credits [importedSenderName]. */
+    val importedFrom: String? = null,
+    val importedSenderName: String? = null,
 ) {
     /** A Live/Motion Photo: shown as a photo, its clip plays over it when downloaded. */
     val isLive: Boolean get() = kind == "live"

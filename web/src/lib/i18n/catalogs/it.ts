@@ -338,6 +338,8 @@ const it: Catalog = {
 	'library.someFailed.other': 'Impossibile modificare {count} elementi.',
 	'library.pending': 'In attesa di approvazione',
 	'library.from': 'Da {name}',
+	'library.viaFrameo': '{name} · tramite Frameo',
+	'library.viaFrameoNoName': 'tramite Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Ricevuta {when}',
 
@@ -1151,6 +1153,7 @@ const it: Catalog = {
 	'convert.hintIncompatible': 'È già installato un kinframe firmato con un’altra chiave. Torna prima all’app originale (senza mantenere i dati), poi installa di nuovo.',
 	'convert.doneTitle': 'Ci siamo quasi',
 	'convert.doneBody': 'Ora la cornice avvia kinframe. Segui i passaggi sulla cornice (lingua, Wi-Fi, fuso orario). Alla fine mostra un codice.',
+	'convert.doneImport': 'Le foto inviate alla cornice con Frameo vengono importate automaticamente quando aggiungi la cornice, con didascalie e mittenti.',
 	'convert.doneAdd': 'Aggiungi la cornice con il suo codice',
 	'convert.doneRevertTitle': 'L’app originale è tornata',
 	'convert.doneRevertBody': 'La cornice si è riavviata con l’app originale. Puoi scollegare il cavo.',

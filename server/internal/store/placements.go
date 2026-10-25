@@ -66,10 +66,17 @@ const placementRowSelect = `SELECT ` + placementRowCols + `, ` + itemRowCols + `
 	COALESCE((SELECT array_agg(ap.album_id ORDER BY ap.album_id) FROM album_placements ap WHERE ap.placement_id = p.id), '{}') AS album_ids
 	FROM placements p JOIN items i ON i.id = p.item_id` + itemJoins
 
+// CreatePlacement inserts a placement. A zero ReceivedAt means now; Hidden and
+// Rotation are only set by imports that carry them over from another app.
 func (tx *Tx) CreatePlacement(ctx context.Context, p Placement) error {
+	var received *time.Time
+	if !p.ReceivedAt.IsZero() {
+		received = &p.ReceivedAt
+	}
 	_, err := tx.Exec(ctx, `
-		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation, shared_by_user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration, p.SharedByUserID)
+		INSERT INTO placements (id, frame_id, item_id, send_id, status, pending_moderation, shared_by_user_id, hidden, rotation, received_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, now()))`,
+		p.ID, p.FrameID, p.ItemID, p.SendID, p.Status, p.PendingModeration, p.SharedByUserID, p.Hidden, p.Rotation, received)
 	return err
 }
 

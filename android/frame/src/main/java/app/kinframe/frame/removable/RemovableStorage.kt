@@ -239,7 +239,7 @@ class RemovableStorage(private val c: FrameController) {
         val engine = ImportEngine(
             localHashes = { withContext(Dispatchers.IO) { g.db.placements().all().mapNotNullTo(HashSet()) { it.mediaSha256?.lowercase() } } },
             serverKnown = { g.api.importCheck(it) },
-            upload = { cand, onBytes -> g.api.importFile(cand.file, cand.name, cand.mime, cand.capturedAt, cand.caption, onBytes) },
+            upload = { cand, onBytes -> g.api.importFile(cand.file, cand.name, cand.mime, cand.capturedAt, cand.caption, onProgress = onBytes) },
         )
         val result = engine.run(items, { p -> _task.value = StorageTask.Importing(volume, restore, p) }, { cancelRequested })
         Log.i(TAG, "import from ${volume.path}: $result")

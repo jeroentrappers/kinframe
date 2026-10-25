@@ -413,7 +413,7 @@ class SlideshowController(private val c: FrameController) {
         val requests = tiles.map { t ->
             val q = t.placement
             val dateMs = when (settings.slideshow.captionDate) { "taken" -> q.capturedAt ?: q.receivedAt; "none" -> null; else -> q.receivedAt }
-            val meta = listOfNotNull(Credit.line(ctx, q.senderName, q.sharedByName), dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
+            val meta = listOfNotNull(Credit.of(ctx, q), dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
                 .joinToString(" · ").ifEmpty { null }
             SlideRenderer.TileRequest(
                 g.media.file(q.localFile ?: ""), q.rotation, q.focalX, q.focalY, t.cell,
@@ -458,12 +458,12 @@ class SlideshowController(private val c: FrameController) {
         val memory = if (settings.slideshow.onThisDay) OnThisDay.yearsAgo(p.capturedAt, today, g.clock.zone) else null
         val meta = buildList {
             memory?.let { add(ctx.resources.getQuantityString(app.kinframe.frame.R.plurals.on_this_day_years, it, it)) }
-            Credit.line(ctx, name, p.sharedByName)?.let { add(it) }
+            Credit.of(ctx, p)?.let { add(it) }
             dateMs?.let { add(app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone)) }
             if (p.captionEdited) add(ctx.getString(app.kinframe.frame.R.string.caption_edited))
         }.joinToString(" · ") + (p.reaction?.let { "   " + reactionEmoji(it) } ?: "")
         if (name == null && p.caption.isNullOrBlank()) return null
-        val avatar = if (w.avatar && p.senderId != null) runCatching { Avatars.load(g, p.senderId, p.id) }.getOrNull() else null
+        val avatar = if (w.avatar && p.senderId != null && p.importedFrom == null) runCatching { Avatars.load(g, p.senderId, p.id) }.getOrNull() else null
         return SlideRenderer.CaptionSpec(
             text = p.caption?.takeIf { it.isNotBlank() },
             meta = meta,

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Frameo fotoğrafları</string>
+    <string name="frameo_found">Bu çerçevedeki Frameo fotoğraf ve videoları: %d. Açıklamaları ve gönderenleriyle saklamak için içe aktarın.</string>
+    <string name="frameo_import">İçe aktar</string>
+    <string name="frameo_importing">Frameo fotoğrafları içe aktarılıyor</string>
+    <string name="frameo_preparing">Hazırlanıyor…</string>
+    <string name="frameo_waiting">Çerçeve çevrimiçi olunca devam eder.</string>
+    <string name="frameo_stop">Durdur</string>
+    <string name="frameo_done_title">Frameo fotoğrafları içe aktarıldı</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">İçe aktarılan: %d</string>
+    <string name="frameo_done_already">Zaten çerçevede: %d</string>
+    <string name="frameo_done_failed">İçe aktarılamayan: %d</string>
+    <string name="frameo_no_permission">Frameo fotoğraflarını okumak için depolama erişimi gerekir.</string>
+    <string name="credit_via_frameo">%1$s · Frameo üzerinden</string>
+    <string name="credit_frameo">Frameo üzerinden</string>
+</resources>

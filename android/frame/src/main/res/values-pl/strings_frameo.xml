@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Zdjęcia z Frameo</string>
+    <string name="frameo_found">Zdjęcia i filmy z Frameo w tej ramce: %d. Zaimportuj je, aby je zachować z podpisami i nadawcami.</string>
+    <string name="frameo_import">Importuj</string>
+    <string name="frameo_importing">Importowanie zdjęć z Frameo</string>
+    <string name="frameo_preparing">Przygotowywanie…</string>
+    <string name="frameo_waiting">Wznowi się, gdy ramka będzie online.</string>
+    <string name="frameo_stop">Zatrzymaj</string>
+    <string name="frameo_done_title">Zaimportowano zdjęcia z Frameo</string>
+    <string name="frameo_count">%1$d z %2$d</string>
+    <string name="frameo_done_imported">Zaimportowano: %d</string>
+    <string name="frameo_done_already">Już w ramce: %d</string>
+    <string name="frameo_done_failed">Nie zaimportowano: %d</string>
+    <string name="frameo_no_permission">Do odczytu zdjęć z Frameo potrzebny jest dostęp do pamięci.</string>
+    <string name="credit_via_frameo">%1$s · przez Frameo</string>
+    <string name="credit_frameo">przez Frameo</string>
+</resources>

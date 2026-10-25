@@ -323,6 +323,8 @@ const id: Catalog = {
 	'library.someFailed.other': '{count} item tidak dapat diubah.',
 	'library.pending': 'Menunggu persetujuan',
 	'library.from': 'Dari {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Diterima {when}',
 
@@ -1124,6 +1126,7 @@ const id: Catalog = {
 	'convert.hintIncompatible': 'Sudah ada kinframe yang ditandatangani dengan kunci lain. Kembali ke aplikasi asli dulu (tanpa menyimpan data), lalu pasang lagi.',
 	'convert.doneTitle': 'Hampir selesai',
 	'convert.doneBody': 'Bingkai sekarang menjalankan kinframe. Ikuti langkah-langkah di bingkai (bahasa, Wi-Fi, zona waktu). Di akhir, bingkai menampilkan kode.',
+	'convert.doneImport': 'Foto yang dikirim ke bingkai lewat Frameo diimpor otomatis setelah Anda menambahkan bingkai, lengkap dengan keterangan dan pengirimnya.',
 	'convert.doneAdd': 'Tambahkan bingkai dengan kodenya',
 	'convert.doneRevertTitle': 'Aplikasi asli sudah kembali',
 	'convert.doneRevertBody': 'Bingkai sudah dimulai ulang dengan aplikasi aslinya. Anda bisa mencabut kabelnya.',

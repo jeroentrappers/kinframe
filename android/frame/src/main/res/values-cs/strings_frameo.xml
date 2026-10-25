@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotky z Frameo</string>
+    <string name="frameo_found">Fotky a videa z Frameo v tomto rámečku: %d. Importujte je, ať zůstanou i s popisky a odesílateli.</string>
+    <string name="frameo_import">Importovat</string>
+    <string name="frameo_importing">Importují se fotky z Frameo</string>
+    <string name="frameo_preparing">Připravuje se…</string>
+    <string name="frameo_waiting">Pokračuje, až bude rámeček online.</string>
+    <string name="frameo_stop">Zastavit</string>
+    <string name="frameo_done_title">Fotky z Frameo importovány</string>
+    <string name="frameo_count">%1$d z %2$d</string>
+    <string name="frameo_done_imported">Importováno: %d</string>
+    <string name="frameo_done_already">Už v rámečku: %d</string>
+    <string name="frameo_done_failed">Neimportováno: %d</string>
+    <string name="frameo_no_permission">Ke čtení fotek z Frameo je potřeba přístup k úložišti.</string>
+    <string name="credit_via_frameo">%1$s · přes Frameo</string>
+    <string name="credit_frameo">přes Frameo</string>
+</resources>

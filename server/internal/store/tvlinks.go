@@ -131,3 +131,36 @@ func (s *Store) PlacementOfFile(ctx context.Context, frameID uuid.UUID, sha stri
 			OR EXISTS (SELECT 1 FROM renditions r WHERE r.media_id = m.id AND r.sha256 = $2))
 		ORDER BY p.received_at DESC LIMIT 1`, frameID, sha))
 }
+
+// PlacementOfImport returns the newest placement on the frame of the item it
+// imported under this origin key, removed ones included (a re-run of an import
+// must not bring back what was deleted), or ErrNotFound.
+func (s *Store) PlacementOfImport(ctx context.Context, frameID uuid.UUID, origin, key string) (*PlacementRow, error) {
+	return one[PlacementRow](s.Pool.Query(ctx, placementRowSelect+`
+		WHERE p.frame_id = $1 AND i.sender_frame_id = $1 AND i.origin = $2 AND i.origin_key = $3
+		ORDER BY p.removed_at IS NULL DESC, p.received_at DESC LIMIT 1`, frameID, origin, key))
+}
+
+// KnownImportKeys returns the subset of origin keys the frame has imported
+// (whatever happened to the items since).
+func (s *Store) KnownImportKeys(ctx context.Context, frameID uuid.UUID, origin string, keys []string) ([]string, error) {
+	out := []string{}
+	if len(keys) == 0 {
+		return out, nil
+	}
+	rows, err := s.Pool.Query(ctx, `
+		SELECT k FROM unnest($3::text[]) AS k WHERE EXISTS (
+			SELECT 1 FROM items i WHERE i.sender_frame_id = $1 AND i.origin = $2 AND i.origin_key = k)`, frameID, origin, keys)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var k string
+		if err := rows.Scan(&k); err != nil {
+			return nil, err
+		}
+		out = append(out, k)
+	}
+	return out, rows.Err()
+}

@@ -175,6 +175,41 @@ class DeviceApiTest {
     }
 
     @Test
+    fun importFileSendsTheOrigin() = runBlocking {
+        val f = java.io.File.createTempFile("imp", ".webp").apply { writeText("x"); deleteOnExit() }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"id":"p1","item":{"id":"i1","imported_from":"frameo","imported_sender_name":"Anna"},"status":"pending"}""", 202))
+        val origin = app.kinframe.core.api.ImportOrigin(
+            source = "frameo", key = "1700000000000.webp", senderName = "Anna", receivedAt = "2023-11-14T22:13:20Z",
+            fit = "fill", focal = app.kinframe.core.api.FocalPoint(0.25, 1.5), hidden = true, rotation = 90,
+        )
+        val res = api.importFile(f, "1700000000000.webp", "image/webp", origin = origin)
+        assertEquals("frameo", res.placement.item.importedFrom)
+        assertEquals("Anna", res.placement.item.importedSenderName)
+        server.takeRequest()
+        val r = server.takeRequest().url
+        assertEquals("frameo", r.queryParameter("source"))
+        assertEquals("1700000000000.webp", r.queryParameter("source_key"))
+        assertEquals("Anna", r.queryParameter("sender_name"))
+        assertEquals("2023-11-14T22:13:20Z", r.queryParameter("received_at"))
+        assertEquals("fill", r.queryParameter("fit"))
+        assertEquals("0.25", r.queryParameter("focal_x"))
+        assertEquals("1.0", r.queryParameter("focal_y"))
+        assertEquals("true", r.queryParameter("hidden"))
+        assertEquals("90", r.queryParameter("rotation"))
+    }
+
+    @Test
+    fun importedKeysAsksBySource() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"known":[],"known_source_keys":["b.webp"]}"""))
+        assertEquals(setOf("b.webp"), api.importedKeys("frameo", listOf("a.webp", "b.webp")))
+        server.takeRequest()
+        val body = server.takeRequest().body!!.utf8()
+        assertTrue(body, body.contains(""""source":"frameo"""") && body.contains(""""source_keys":["a.webp","b.webp"]"""))
+    }
+
+    @Test
     fun importCheckBatchesAndLowercases() = runBlocking {
         val hashes = (0 until 600).map { "%064X".format(it) }
         server.enqueue(token("t1"))

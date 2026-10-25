@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Frameo の写真</string>
+    <string name="frameo_found">このフレームにある Frameo の写真と動画: %d 件。インポートすると、キャプションと送信者ごと残せます。</string>
+    <string name="frameo_import">インポート</string>
+    <string name="frameo_importing">Frameo の写真をインポートしています</string>
+    <string name="frameo_preparing">準備しています…</string>
+    <string name="frameo_waiting">フレームがオンラインになると再開します。</string>
+    <string name="frameo_stop">停止</string>
+    <string name="frameo_done_title">Frameo の写真をインポートしました</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">インポート済み: %d</string>
+    <string name="frameo_done_already">フレームに追加済み: %d</string>
+    <string name="frameo_done_failed">インポートできなかったもの: %d</string>
+    <string name="frameo_no_permission">Frameo の写真を読み込むにはストレージへのアクセスが必要です。</string>
+    <string name="credit_via_frameo">%1$s · Frameo 経由</string>
+    <string name="credit_frameo">Frameo 経由</string>
+</resources>

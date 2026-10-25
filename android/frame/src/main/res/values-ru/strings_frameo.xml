@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Фото из Frameo</string>
+    <string name="frameo_found">Фото и видео из Frameo на этой рамке: %d. Импортируйте их, чтобы сохранить вместе с подписями и отправителями.</string>
+    <string name="frameo_import">Импортировать</string>
+    <string name="frameo_importing">Импорт фото из Frameo</string>
+    <string name="frameo_preparing">Подготовка…</string>
+    <string name="frameo_waiting">Продолжится, когда рамка будет в сети.</string>
+    <string name="frameo_stop">Остановить</string>
+    <string name="frameo_done_title">Фото из Frameo импортированы</string>
+    <string name="frameo_count">%1$d из %2$d</string>
+    <string name="frameo_done_imported">Импортировано: %d</string>
+    <string name="frameo_done_already">Уже на рамке: %d</string>
+    <string name="frameo_done_failed">Не импортировано: %d</string>
+    <string name="frameo_no_permission">Чтобы прочитать фото из Frameo, нужен доступ к хранилищу.</string>
+    <string name="credit_via_frameo">%1$s · через Frameo</string>
+    <string name="credit_frameo">через Frameo</string>
+</resources>

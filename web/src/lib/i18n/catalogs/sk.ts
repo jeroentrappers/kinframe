@@ -338,6 +338,8 @@ const sk: Catalog = {
 	'library.someFailed.other': '{count} položiek sa nepodarilo zmeniť.',
 	'library.pending': 'Čaká na schválenie',
 	'library.from': 'Od: {name}',
+	'library.viaFrameo': '{name} · cez Frameo',
+	'library.viaFrameoNoName': 'cez Frameo',
 	'library.photo': 'Fotka',
 	'library.received': 'Prijaté {when}',
 
@@ -1152,6 +1154,7 @@ const sk: Catalog = {
 	'convert.hintIncompatible': 'Už je nainštalovaný kinframe podpísaný iným kľúčom. Najprv sa vráťte k pôvodnej aplikácii (bez ponechania údajov) a potom inštalujte znova.',
 	'convert.doneTitle': 'Takmer hotovo',
 	'convert.doneBody': 'Rámik teraz spúšťa kinframe. Postupujte podľa krokov na rámiku (jazyk, Wi-Fi, časové pásmo). Nakoniec zobrazí kód.',
+	'convert.doneImport': 'Fotky poslané do rámika cez Frameo sa po pridaní rámika automaticky naimportujú aj s popismi a odosielateľmi.',
 	'convert.doneAdd': 'Pridať rámik pomocou kódu',
 	'convert.doneRevertTitle': 'Pôvodná aplikácia je späť',
 	'convert.doneRevertBody': 'Rámik sa reštartoval s pôvodnou aplikáciou. Kábel môžete odpojiť.',

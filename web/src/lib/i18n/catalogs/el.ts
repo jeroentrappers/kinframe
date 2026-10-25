@@ -315,6 +315,8 @@ const el: Catalog = {
 	'library.someFailed.other': '{count} στοιχεία δεν ήταν δυνατό να αλλάξουν.',
 	'library.pending': 'Σε αναμονή έγκρισης',
 	'library.from': 'Από: {name}',
+	'library.viaFrameo': '{name} · μέσω Frameo',
+	'library.viaFrameoNoName': 'μέσω Frameo',
 	'library.photo': 'Φωτογραφία',
 	'library.received': 'Ελήφθη {when}',
 
@@ -1112,6 +1114,7 @@ const el: Catalog = {
 	'convert.hintIncompatible': 'Είναι ήδη εγκατεστημένο ένα kinframe υπογεγραμμένο με άλλο κλειδί. Επαναφέρετε πρώτα την αρχική εφαρμογή (χωρίς διατήρηση δεδομένων) και μετά εγκαταστήστε ξανά.',
 	'convert.doneTitle': 'Σχεδόν έτοιμο',
 	'convert.doneBody': 'Η κορνίζα ξεκινά τώρα το kinframe. Ακολουθήστε τα βήματα στην κορνίζα (γλώσσα, Wi-Fi, ζώνη ώρας). Στο τέλος εμφανίζει έναν κωδικό.',
+	'convert.doneImport': 'Οι φωτογραφίες που στάλθηκαν στην κορνίζα μέσω Frameo εισάγονται αυτόματα μόλις προσθέσετε την κορνίζα, με λεζάντες και αποστολείς.',
 	'convert.doneAdd': 'Προσθέστε την κορνίζα με τον κωδικό της',
 	'convert.doneRevertTitle': 'Η αρχική εφαρμογή επανήλθε',
 	'convert.doneRevertBody': 'Η κορνίζα επανεκκινήθηκε με την αρχική της εφαρμογή. Μπορείτε να αποσυνδέσετε το καλώδιο.',

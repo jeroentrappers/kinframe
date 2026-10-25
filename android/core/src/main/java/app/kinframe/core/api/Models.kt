@@ -151,6 +151,10 @@ data class Item(
     val thumbUrl: String? = null,
     /** Live items only: the motion clip (README §5.3 "Live Photos"). */
     val motion: ItemMotion? = null,
+    /** Imported on the frame from another app's leftover data ([ItemOrigin]); the sender is then the frame. */
+    val importedFrom: String? = null,
+    /** The original sender's name in that app, shown instead of the frame ("Anna · via Frameo"). */
+    val importedSenderName: String? = null,
 ) {
     /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
     val isLive: Boolean get() = kind == MediaKind.LIVE
@@ -395,7 +399,31 @@ object ReplyPreset {
 data class ImportResult(val placement: Placement, val duplicate: Boolean)
 
 @Serializable
-data class ImportCheckRequest(val sha256: List<String>)
+data class ImportCheckRequest(
+    val sha256: List<String> = emptyList(),
+    val source: String? = null,
+    val sourceKeys: List<String>? = null,
+)
 
 @Serializable
-data class ImportCheckResponse(val known: List<String> = emptyList())
+data class ImportCheckResponse(val known: List<String> = emptyList(), val knownSourceKeys: List<String> = emptyList())
+
+/** Apps a frame can import leftover photos from (`ItemOrigin`, docs/spec/frameo-import.md). */
+object ItemOrigin {
+    const val FRAMEO = "frameo"
+}
+
+/**
+ * The other-app part of `POST /device/imports`: [key] makes the import idempotent per frame; the rest is kept on the
+ * item and placement. Times are RFC 3339.
+ */
+data class ImportOrigin(
+    val source: String,
+    val key: String,
+    val senderName: String? = null,
+    val receivedAt: String? = null,
+    val fit: String? = null,
+    val focal: FocalPoint? = null,
+    val hidden: Boolean = false,
+    val rotation: Int = 0,
+)

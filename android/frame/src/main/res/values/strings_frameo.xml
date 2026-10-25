@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Importing the photos a converted Frameo frame received (docs/spec/frameo-import.md). "Frameo" is a
+     product name: keep it untranslated (it may take the language's grammar around it). -->
+<resources>
+    <string name="frameo_title">Photos from Frameo</string>
+    <string name="frameo_found">Photos and videos from Frameo on this frame: %d. Import them to keep them, with their captions and senders.</string>
+    <string name="frameo_import">Import</string>
+    <string name="frameo_importing">Importing photos from Frameo</string>
+    <string name="frameo_preparing">Getting ready…</string>
+    <string name="frameo_waiting">Continues when the frame is online.</string>
+    <string name="frameo_stop">Stop</string>
+    <string name="frameo_done_title">Photos from Frameo imported</string>
+    <string name="frameo_count">%1$d of %2$d</string>
+    <string name="frameo_done_imported">Imported: %d</string>
+    <string name="frameo_done_already">Already on the frame: %d</string>
+    <string name="frameo_done_failed">Could not be imported: %d</string>
+    <string name="frameo_no_permission">Storage access is needed to read the photos from Frameo.</string>
+    <string name="credit_via_frameo">%1$s · via Frameo</string>
+    <string name="credit_frameo">via Frameo</string>
+</resources>

@@ -116,6 +116,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
+                app.kinframe.frame.frameo.FrameoSettingsSection(c) { title, content -> SectionCard(title, content) }
                 RemovableSection(c)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))

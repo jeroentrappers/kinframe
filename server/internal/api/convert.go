@@ -165,6 +165,10 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if out.CapturedAt == nil {
 		out.CapturedAt = it.CapturedHint
 	}
+	if it.Origin != nil {
+		out.ImportedFrom = ptr(gen.ItemOrigin(*it.Origin))
+		out.ImportedSenderName = it.OriginSenderName
+	}
 	if it.IsLive() {
 		out.Kind = gen.Live
 		mo := gen.ItemMotion{Status: gen.ItemMotionStatusProcessing}

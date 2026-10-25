@@ -387,6 +387,8 @@ const ar: Catalog = {
 	'library.someFailed.other': 'تعذّر تغيير {count} عنصر.',
 	'library.pending': 'بانتظار الموافقة',
 	'library.from': 'من {name}',
+	'library.viaFrameo': '{name} · عبر Frameo',
+	'library.viaFrameoNoName': 'عبر Frameo',
 	'library.photo': 'صورة',
 	'library.received': 'تم الاستلام {when}',
 
@@ -1237,6 +1239,7 @@ const ar: Catalog = {
 	'convert.hintIncompatible': 'يوجد إصدار من kinframe موقّع بمفتاح آخر مثبّت مسبقًا. عُد أولًا إلى التطبيق الأصلي (دون الاحتفاظ بالبيانات)، ثم ثبّت من جديد.',
 	'convert.doneTitle': 'أوشكنا على الانتهاء',
 	'convert.doneBody': 'يبدأ الإطار الآن بتشغيل kinframe. اتبع الخطوات على الإطار (اللغة، Wi-Fi، المنطقة الزمنية). في النهاية يعرض رمزًا.',
+	'convert.doneImport': 'تُستورد الصور التي أُرسلت إلى الإطار عبر Frameo تلقائيًا بعد إضافة الإطار، مع أوصافها ومرسليها.',
 	'convert.doneAdd': 'أضف الإطار برمزه',
 	'convert.doneRevertTitle': 'عاد التطبيق الأصلي',
 	'convert.doneRevertBody': 'أُعيد تشغيل الإطار بتطبيقه الأصلي. يمكنك فصل الكابل.',

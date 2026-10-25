@@ -323,6 +323,8 @@ const th: Catalog = {
 	'library.someFailed.other': 'เปลี่ยน {count} รายการไม่ได้',
 	'library.pending': 'รอการอนุมัติ',
 	'library.from': 'จาก {name}',
+	'library.viaFrameo': '{name} · ผ่าน Frameo',
+	'library.viaFrameoNoName': 'ผ่าน Frameo',
 	'library.photo': 'รูป',
 	'library.received': 'ได้รับเมื่อ {when}',
 
@@ -1125,6 +1127,7 @@ const th: Catalog = {
 	'convert.hintIncompatible': 'มี kinframe ที่ลงนามด้วยคีย์อื่นติดตั้งอยู่แล้ว ให้กลับไปใช้แอปเดิมก่อน (โดยไม่เก็บข้อมูล) แล้วติดตั้งอีกครั้ง',
 	'convert.doneTitle': 'ใกล้เสร็จแล้ว',
 	'convert.doneBody': 'ตอนนี้กรอบรูปจะเปิด kinframe ทำตามขั้นตอนบนกรอบรูป (ภาษา, Wi-Fi, เขตเวลา) สุดท้ายจะแสดงรหัส',
+	'convert.doneImport': 'รูปภาพที่ส่งมายังกรอบรูปผ่าน Frameo จะถูกนำเข้าโดยอัตโนมัติเมื่อคุณเพิ่มกรอบรูป พร้อมคำบรรยายและผู้ส่ง',
 	'convert.doneAdd': 'เพิ่มกรอบรูปด้วยรหัส',
 	'convert.doneRevertTitle': 'แอปเดิมกลับมาแล้ว',
 	'convert.doneRevertBody': 'กรอบรูปรีสตาร์ทพร้อมแอปเดิมแล้ว ถอดสายได้เลย',

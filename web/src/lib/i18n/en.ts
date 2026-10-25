@@ -323,6 +323,8 @@ export const en = {
 	'library.someFailed.other': '{count} items couldn’t be changed.',
 	'library.pending': 'Awaiting approval',
 	'library.from': 'From {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Photo',
 	'library.received': 'Received {when}',
 
@@ -1127,6 +1129,7 @@ export const en = {
 	'convert.hintIncompatible': 'A kinframe signed with another key is already installed. Go back to the original app first (without keeping data), then install again.',
 	'convert.doneTitle': 'Almost there',
 	'convert.doneBody': 'The frame now starts kinframe. Follow the steps on the frame (language, Wi-Fi, time zone). At the end it shows a code.',
+	'convert.doneImport': 'Photos sent to the frame with Frameo are imported automatically once you add the frame, with their captions and senders.',
 	'convert.doneAdd': 'Add the frame with its code',
 	'convert.doneRevertTitle': 'The original app is back',
 	'convert.doneRevertBody': 'The frame restarted with its original app. You can unplug the cable.',

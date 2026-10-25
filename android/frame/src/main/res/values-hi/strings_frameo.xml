@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Frameo से फ़ोटो</string>
+    <string name="frameo_found">इस फ़्रेम पर Frameo से फ़ोटो और वीडियो: %d. कैप्शन और भेजने वालों के साथ रखने के लिए इन्हें इंपोर्ट करें।</string>
+    <string name="frameo_import">इंपोर्ट करें</string>
+    <string name="frameo_importing">Frameo से फ़ोटो इंपोर्ट हो रही हैं</string>
+    <string name="frameo_preparing">तैयारी हो रही है…</string>
+    <string name="frameo_waiting">फ़्रेम ऑनलाइन होने पर जारी रहेगा।</string>
+    <string name="frameo_stop">रोकें</string>
+    <string name="frameo_done_title">Frameo से फ़ोटो इंपोर्ट हो गईं</string>
+    <string name="frameo_count">%2$d में से %1$d</string>
+    <string name="frameo_done_imported">इंपोर्ट हुए: %d</string>
+    <string name="frameo_done_already">पहले से फ़्रेम पर: %d</string>
+    <string name="frameo_done_failed">इंपोर्ट नहीं हुए: %d</string>
+    <string name="frameo_no_permission">Frameo की फ़ोटो पढ़ने के लिए स्टोरेज की अनुमति चाहिए।</string>
+    <string name="credit_via_frameo">%1$s · Frameo के ज़रिए</string>
+    <string name="credit_frameo">Frameo के ज़रिए</string>
+</resources>

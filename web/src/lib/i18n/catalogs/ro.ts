@@ -331,6 +331,8 @@ const ro: Catalog = {
 	'library.someFailed.other': '{count} de elemente nu au putut fi modificate.',
 	'library.pending': 'În așteptarea aprobării',
 	'library.from': 'De la {name}',
+	'library.viaFrameo': '{name} · prin Frameo',
+	'library.viaFrameoNoName': 'prin Frameo',
 	'library.photo': 'Fotografie',
 	'library.received': 'Primită {when}',
 
@@ -1140,6 +1142,7 @@ const ro: Catalog = {
 	'convert.hintIncompatible': 'Este deja instalat un kinframe semnat cu altă cheie. Reveniți mai întâi la aplicația originală (fără a păstra datele), apoi instalați din nou.',
 	'convert.doneTitle': 'Aproape gata',
 	'convert.doneBody': 'Rama pornește acum kinframe. Urmați pașii de pe ramă (limbă, Wi-Fi, fus orar). La final, aceasta afișează un cod.',
+	'convert.doneImport': 'Fotografiile trimise pe ramă prin Frameo sunt importate automat după ce adăugați rama, cu descrierile și expeditorii lor.',
 	'convert.doneAdd': 'Adăugați rama cu codul ei',
 	'convert.doneRevertTitle': 'Aplicația originală a revenit',
 	'convert.doneRevertBody': 'Rama a repornit cu aplicația originală. Puteți deconecta cablul.',

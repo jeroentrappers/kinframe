@@ -322,6 +322,8 @@ const hu: Catalog = {
 	'library.someFailed.other': '{count} elemet nem sikerült módosítani.',
 	'library.pending': 'Jóváhagyásra vár',
 	'library.from': 'Küldő: {name}',
+	'library.viaFrameo': '{name} · a Frameo alkalmazásból',
+	'library.viaFrameoNoName': 'a Frameo alkalmazásból',
 	'library.photo': 'Fotó',
 	'library.received': 'Érkezett: {when}',
 
@@ -1123,6 +1125,7 @@ const hu: Catalog = {
 	'convert.hintIncompatible': 'Már telepítve van egy másik kulccsal aláírt kinframe. Előbb állj vissza az eredeti alkalmazásra (az adatok megtartása nélkül), majd telepítsd újra.',
 	'convert.doneTitle': 'Mindjárt kész',
 	'convert.doneBody': 'A képkeret most már a kinframe-mel indul. Kövesd a lépéseket a képkereten (nyelv, Wi-Fi, időzóna). A végén megjelenik egy kód.',
+	'convert.doneImport': 'A Frameo alkalmazással a képkeretre küldött fotók automatikusan bekerülnek, amint hozzáadod a képkeretet, feliratukkal és küldőjükkel együtt.',
 	'convert.doneAdd': 'Képkeret hozzáadása a kódjával',
 	'convert.doneRevertTitle': 'Visszakerült az eredeti alkalmazás',
 	'convert.doneRevertBody': 'A képkeret újraindult az eredeti alkalmazással. Kihúzhatod a kábelt.',

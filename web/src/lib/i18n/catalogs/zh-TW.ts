@@ -322,6 +322,8 @@ const zhTW: Catalog = {
 	'library.someFailed.other': '有 {count} 個項目無法變更。',
 	'library.pending': '等待核准',
 	'library.from': '來自 {name}',
+	'library.viaFrameo': '{name} · 透過 Frameo',
+	'library.viaFrameoNoName': '透過 Frameo',
 	'library.photo': '照片',
 	'library.received': '收到時間：{when}',
 
@@ -1123,6 +1125,7 @@ const zhTW: Catalog = {
 	'convert.hintIncompatible': '已安裝以其他金鑰簽署的 kinframe。請先恢復原本的應用程式（不保留資料），然後再重新安裝。',
 	'convert.doneTitle': '快完成了',
 	'convert.doneBody': '相框現在會啟動 kinframe。請依照相框上的步驟操作（語言、Wi-Fi、時區），最後會顯示一組代碼。',
+	'convert.doneImport': '透過 Frameo 傳送到相框的相片，會在你新增相框後自動匯入，並保留說明文字和傳送者。',
 	'convert.doneAdd': '用代碼新增相框',
 	'convert.doneRevertTitle': '原本的應用程式已恢復',
 	'convert.doneRevertBody': '相框已用原本的應用程式重新啟動。現在可以拔掉傳輸線了。',
