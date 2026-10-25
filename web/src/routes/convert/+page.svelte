@@ -475,6 +475,7 @@
 						<span class="big-icon ok"><Icon name="sparkle" size={30} /></span>
 						<h2>{t('convert.doneTitle')}</h2>
 						<p>{t('convert.doneBody')}</p>
+						<p>{t('convert.doneImport')}</p>
 						<a class="btn btn-primary btn-lg" href={addUrl}><Icon name="plus" size={18} />{t('convert.doneAdd')}</a>
 					{:else if outcome.ok}
 						<span class="big-icon ok"><Icon name="check" size={30} /></span>

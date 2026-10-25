@@ -322,6 +322,8 @@ const bg: Catalog = {
 	'library.someFailed.other': '{count} елемента не можаха да бъдат променени.',
 	'library.pending': 'Чака одобрение',
 	'library.from': 'От {name}',
+	'library.viaFrameo': '{name} · чрез Frameo',
+	'library.viaFrameoNoName': 'чрез Frameo',
 	'library.photo': 'Снимка',
 	'library.received': 'Получено {when}',
 
@@ -1114,6 +1116,7 @@ const bg: Catalog = {
 	'convert.hintIncompatible': 'Вече е инсталиран kinframe, подписан с друг ключ. Първо върнете оригиналното приложение (без да запазвате данните), след това инсталирайте отново.',
 	'convert.doneTitle': 'Почти готово',
 	'convert.doneBody': 'Рамката вече стартира kinframe. Следвайте стъпките на рамката (език, Wi-Fi, часова зона). Накрая тя показва код.',
+	'convert.doneImport': 'Снимките, изпратени до рамката чрез Frameo, се импортират автоматично, когато добавите рамката, заедно с надписите и подателите им.',
 	'convert.doneAdd': 'Добавете рамката с кода ѝ',
 	'convert.doneRevertTitle': 'Оригиналното приложение е върнато',
 	'convert.doneRevertBody': 'Рамката се рестартира с оригиналното си приложение. Можете да извадите кабела.',

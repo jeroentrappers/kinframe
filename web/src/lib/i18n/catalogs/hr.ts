@@ -338,6 +338,8 @@ const hr: Catalog = {
 	'library.someFailed.other': '{count} stavki nije se moglo promijeniti.',
 	'library.pending': 'Čeka odobrenje',
 	'library.from': 'Pošiljatelj: {name}',
+	'library.viaFrameo': '{name} · putem Frameo',
+	'library.viaFrameoNoName': 'putem Frameo',
 	'library.photo': 'Fotografija',
 	'library.received': 'Primljeno {when}',
 
@@ -1141,6 +1143,7 @@ const hr: Catalog = {
 	'convert.hintIncompatible': 'Već je instaliran kinframe potpisan drugim ključem. Najprije vratite izvornu aplikaciju (bez zadržavanja podataka), a zatim ponovno instalirajte.',
 	'convert.doneTitle': 'Još malo',
 	'convert.doneBody': 'Okvir sada pokreće kinframe. Slijedite korake na okviru (jezik, Wi-Fi, vremenska zona). Na kraju prikazuje kôd.',
+	'convert.doneImport': 'Fotografije poslane na okvir putem Frameo automatski se uvoze kad dodate okvir, zajedno s opisima i pošiljateljima.',
 	'convert.doneAdd': 'Dodajte okvir pomoću kôda',
 	'convert.doneRevertTitle': 'Izvorna aplikacija je vraćena',
 	'convert.doneRevertBody': 'Okvir se ponovno pokrenuo s izvornom aplikacijom. Možete iskopčati kabel.',

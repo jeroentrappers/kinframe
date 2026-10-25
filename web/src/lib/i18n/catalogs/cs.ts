@@ -338,6 +338,8 @@ const cs: Catalog = {
 	'library.someFailed.other': '{count} položek se nepodařilo změnit.',
 	'library.pending': 'Čeká na schválení',
 	'library.from': 'Od: {name}',
+	'library.viaFrameo': '{name} · přes Frameo',
+	'library.viaFrameoNoName': 'přes Frameo',
 	'library.photo': 'Fotka',
 	'library.received': 'Přijato {when}',
 
@@ -1142,6 +1144,7 @@ const cs: Catalog = {
 	'convert.hintIncompatible': 'Už je nainstalován kinframe podepsaný jiným klíčem. Nejdřív se vraťte k původní aplikaci (bez ponechání dat) a pak instalujte znovu.',
 	'convert.doneTitle': 'Skoro hotovo',
 	'convert.doneBody': 'Rámeček teď spouští kinframe. Postupujte podle kroků na rámečku (jazyk, Wi-Fi, časové pásmo). Nakonec zobrazí kód.',
+	'convert.doneImport': 'Fotky poslané do rámečku přes Frameo se po přidání rámečku automaticky naimportují i s popisky a odesílateli.',
 	'convert.doneAdd': 'Přidat rámeček pomocí kódu',
 	'convert.doneRevertTitle': 'Původní aplikace je zpět',
 	'convert.doneRevertBody': 'Rámeček se restartoval s původní aplikací. Kabel můžete odpojit.',

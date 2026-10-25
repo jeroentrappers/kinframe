@@ -339,6 +339,8 @@ const lt: Catalog = {
 	'library.someFailed.other': '{count} elementų pakeisti nepavyko.',
 	'library.pending': 'Laukia patvirtinimo',
 	'library.from': 'Nuo {name}',
+	'library.viaFrameo': '{name} · per Frameo',
+	'library.viaFrameoNoName': 'per Frameo',
 	'library.photo': 'Nuotrauka',
 	'library.received': 'Gauta {when}',
 
@@ -1142,6 +1144,7 @@ const lt: Catalog = {
 	'convert.hintIncompatible': 'Jau įdiegta kitu raktu pasirašyta kinframe. Pirmiausia grįžkite prie originalios programėlės (nepalikdami duomenų), tada įdiekite dar kartą.',
 	'convert.doneTitle': 'Beveik baigta',
 	'convert.doneBody': 'Dabar rėmelis paleidžia kinframe. Atlikite rėmelyje rodomus veiksmus (kalba, Wi-Fi, laiko juosta). Pabaigoje bus parodytas kodas.',
+	'convert.doneImport': 'Per Frameo į rėmelį atsiųstos nuotraukos bus importuotos automatiškai, kai pridėsite rėmelį, kartu su aprašais ir siuntėjais.',
 	'convert.doneAdd': 'Pridėti rėmelį pagal jo kodą',
 	'convert.doneRevertTitle': 'Originali programėlė grąžinta',
 	'convert.doneRevertBody': 'Rėmelis pasileido iš naujo su originalia programėle. Galite ištraukti kabelį.',

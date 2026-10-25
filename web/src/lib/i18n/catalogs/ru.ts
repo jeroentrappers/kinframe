@@ -347,6 +347,8 @@ const ru: Catalog = {
 	'library.someFailed.other': 'Не удалось изменить {count} файла.',
 	'library.pending': 'Ждёт одобрения',
 	'library.from': 'От {name}',
+	'library.viaFrameo': '{name} · через Frameo',
+	'library.viaFrameoNoName': 'через Frameo',
 	'library.photo': 'Фото',
 	'library.received': 'Получено {when}',
 
@@ -1158,6 +1160,7 @@ const ru: Catalog = {
 	'convert.hintIncompatible': 'Уже установлен kinframe, подписанный другим ключом. Сначала верните исходное приложение (без сохранения данных), затем установите снова.',
 	'convert.doneTitle': 'Почти готово',
 	'convert.doneBody': 'Теперь рамка запускает kinframe. Следуйте шагам на рамке (язык, Wi-Fi, часовой пояс). В конце она покажет код.',
+	'convert.doneImport': 'Фото, отправленные на рамку через Frameo, импортируются автоматически, когда вы добавите рамку, вместе с подписями и отправителями.',
 	'convert.doneAdd': 'Добавить рамку по коду',
 	'convert.doneRevertTitle': 'Исходное приложение возвращено',
 	'convert.doneRevertBody': 'Рамка перезапустилась с исходным приложением. Кабель можно отключить.',

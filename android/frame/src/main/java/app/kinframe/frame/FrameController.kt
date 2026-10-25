@@ -97,6 +97,9 @@ class FrameController(val g: FrameGraph) {
     /** SD card and USB stick: export, import, automatic backup, restore (product spec 4.10). */
     val removable by lazy { app.kinframe.frame.removable.RemovableStorage(this) }
 
+    /** The photos a converted Frameo frame received, brought into kinframe (docs/spec/frameo-import.md). */
+    val frameo by lazy { app.kinframe.frame.frameo.FrameoImport(this) }
+
     val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
 
     /** Calendars, event invitations, countdowns and the timed calendar view (product spec 4.9). */
@@ -159,6 +162,7 @@ class FrameController(val g: FrameGraph) {
             reportStateChanges()
             update.start()
             removable.start()
+            frameo.start()
             scope.launch {
                 delay(30_000)
                 while (true) {
@@ -301,6 +305,7 @@ class FrameController(val g: FrameGraph) {
         slideshow.reset()
         joins.clear()
         calendar.clear()
+        frameo.reset()
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()

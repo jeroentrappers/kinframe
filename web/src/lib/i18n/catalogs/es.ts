@@ -331,6 +331,8 @@ const es: Catalog = {
 	'library.someFailed.other': 'No se han podido cambiar {count} elementos.',
 	'library.pending': 'Pendiente de aprobación',
 	'library.from': 'De {name}',
+	'library.viaFrameo': '{name} · vía Frameo',
+	'library.viaFrameoNoName': 'vía Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Recibida {when}',
 
@@ -1130,6 +1132,7 @@ const es: Catalog = {
 	'convert.hintIncompatible': 'Ya hay instalado un kinframe firmado con otra clave. Vuelve primero a la app original (sin conservar los datos) y luego instala de nuevo.',
 	'convert.doneTitle': 'Ya casi está',
 	'convert.doneBody': 'El marco ahora abre kinframe. Sigue los pasos en el marco (idioma, Wi-Fi, zona horaria). Al final muestra un código.',
+	'convert.doneImport': 'Las fotos enviadas al marco con Frameo se importan automáticamente cuando añades el marco, con sus textos y remitentes.',
 	'convert.doneAdd': 'Añadir el marco con su código',
 	'convert.doneRevertTitle': 'La app original ha vuelto',
 	'convert.doneRevertBody': 'El marco se ha reiniciado con su app original. Ya puedes desconectar el cable.',

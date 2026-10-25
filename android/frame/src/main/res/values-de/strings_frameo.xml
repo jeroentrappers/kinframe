@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotos aus Frameo</string>
+    <string name="frameo_found">Fotos und Videos aus Frameo auf diesem Rahmen: %d. Importiere sie, um sie mit Bildtext und Absender zu behalten.</string>
+    <string name="frameo_import">Importieren</string>
+    <string name="frameo_importing">Fotos aus Frameo werden importiert</string>
+    <string name="frameo_preparing">Wird vorbereitet…</string>
+    <string name="frameo_waiting">Geht weiter, sobald der Rahmen online ist.</string>
+    <string name="frameo_stop">Stoppen</string>
+    <string name="frameo_done_title">Fotos aus Frameo importiert</string>
+    <string name="frameo_count">%1$d von %2$d</string>
+    <string name="frameo_done_imported">Importiert: %d</string>
+    <string name="frameo_done_already">Schon auf dem Rahmen: %d</string>
+    <string name="frameo_done_failed">Nicht importiert: %d</string>
+    <string name="frameo_no_permission">Für die Fotos aus Frameo braucht kinframe Zugriff auf den Speicher.</string>
+    <string name="credit_via_frameo">%1$s · über Frameo</string>
+    <string name="credit_frameo">über Frameo</string>
+</resources>

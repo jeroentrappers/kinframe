@@ -463,6 +463,14 @@ revocable share token.
 - Restoring a kinframe export from a stick (written by the frame: original-quality files named
   `YYYY-MM-DD_sender_caption.ext` plus a `kinframe-export.json` manifest) uses the same endpoints, with captions
   from the manifest. Files that came from this frame's own renditions are recognised and skipped.
+- A converted Frameo frame imports the photos its old app received (`docs/spec/frameo-import.md`) through the same
+  endpoint with `?source=frameo&source_key=<Frameo file name>` plus `sender_name`, `received_at`, `fit`,
+  `focal_x`/`focal_y`, `hidden` and `rotation` from the old app's database.
+  - One item per frame and source key: a known key returns `200` with that placement, even after it was removed, so
+    a re-run never duplicates or brings back deleted photos. `imports/check {source, source_keys}` answers
+    `known_source_keys`, so a resumed import only uploads what is missing.
+  - The frame stays the sender, the frame's owner owns the media, and the item carries `imported_from: frameo` and
+    `imported_sender_name`; clients show "Anna · via Frameo" where they would show the sender.
 
 ### 5.11 Pre-order shop (optional)
 

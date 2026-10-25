@@ -20,6 +20,7 @@
 	import AlbumPickerDialog from './AlbumPickerDialog.svelte';
 	import AlbumScheduleDialog from './AlbumScheduleDialog.svelte';
 	import Memories from './Memories.svelte';
+	import { senderLabel } from '$lib/sender';
 
 	type View = 'visible' | 'hidden' | 'trashed';
 	type Action = 'hide' | 'unhide' | 'trash' | 'restore';
@@ -618,7 +619,7 @@
 				data-index={i}
 				animate:flip={{ duration: reducedMotion() ? 0 : 180 }}
 			>
-				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: p.item.sender_name ?? '' })}>
+				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: senderLabel(p.item) })}>
 					<Thumb itemId={p.item.id} variant="thumb_256" kind={p.item.kind} radius="0" />
 				</button>
 				{#if arranging}
@@ -703,7 +704,7 @@
 	</div>
 {/if}
 
-<Dialog bind:open={viewerOpen} title={viewing?.item.sender_name ? t('library.from', { name: viewing.item.sender_name }) : t('library.photo')} size="md">
+<Dialog bind:open={viewerOpen} title={viewing && senderLabel(viewing.item) ? t('library.from', { name: senderLabel(viewing.item) }) : t('library.photo')} size="md">
 	{#if viewing}
 		<div class="viewer stack">
 			<div class="big">

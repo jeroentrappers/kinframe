@@ -230,16 +230,40 @@ class DeviceApi(
         mime: String?,
         capturedAt: String? = null,
         caption: String? = null,
+        origin: ImportOrigin? = null,
         onProgress: ((Long) -> Unit)? = null,
     ): ImportResult = authed {
         val u = endpoint("device/imports").newBuilder().apply {
             if (!caption.isNullOrBlank()) addQueryParameter("caption", caption.take(280))
+            if (origin != null) {
+                addQueryParameter("source", origin.source)
+                addQueryParameter("source_key", origin.key.take(200))
+                origin.senderName?.takeIf { it.isNotBlank() }?.let { addQueryParameter("sender_name", it.take(100)) }
+                origin.receivedAt?.let { addQueryParameter("received_at", it) }
+                origin.fit?.let { addQueryParameter("fit", it) }
+                origin.focal?.let {
+                    addQueryParameter("focal_x", it.x.coerceIn(0.0, 1.0).toString())
+                    addQueryParameter("focal_y", it.y.coerceIn(0.0, 1.0).toString())
+                }
+                if (origin.hidden) addQueryParameter("hidden", "true")
+                if (origin.rotation != 0) addQueryParameter("rotation", origin.rotation.toString())
+            }
         }.build()
         url(u).header("X-Filename", asciiHeader(filename)).apply { if (capturedAt != null) header("X-Captured-At", capturedAt) }
             .post(FileBody(file, (mime ?: "application/octet-stream").toMediaTypeOrNull(), onProgress))
     }.use { r ->
         if (!r.isSuccessful) r.throwForStatus()
         ImportResult(KinJson.decodeFromString(Placement.serializer(), r.body.string()), duplicate = r.code == 200)
+    }
+
+    /** `POST /device/imports/check` with source keys: which of them this frame imported before (batches of 500). */
+    suspend fun importedKeys(source: String, keys: Collection<String>): Set<String> {
+        val out = HashSet<String>()
+        for (chunk in keys.distinct().chunked(500)) {
+            out += authed { url(endpoint("device/imports/check")).post(body(ImportCheckRequest(source = source, sourceKeys = chunk), ImportCheckRequest.serializer())) }
+                .decode(ImportCheckResponse.serializer()).knownSourceKeys
+        }
+        return out
     }
 
     /** `POST /device/imports/check`: which of these sha256 hashes the frame already has (asked in batches of 500). */

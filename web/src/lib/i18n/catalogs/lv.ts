@@ -339,6 +339,8 @@ const lv: Catalog = {
 	'library.someFailed.other': '{count} vienumus neizdevās mainīt.',
 	'library.pending': 'Gaida apstiprinājumu',
 	'library.from': 'No {name}',
+	'library.viaFrameo': '{name} · caur Frameo',
+	'library.viaFrameoNoName': 'caur Frameo',
 	'library.photo': 'Fotoattēls',
 	'library.received': 'Saņemts {when}',
 
@@ -1143,6 +1145,7 @@ const lv: Catalog = {
 	'convert.hintIncompatible': 'Jau ir instalēta kinframe, kas parakstīta ar citu atslēgu. Vispirms atgriezieties pie sākotnējās lietotnes (nepaturot datus), pēc tam instalējiet vēlreiz.',
 	'convert.doneTitle': 'Gandrīz gatavs',
 	'convert.doneBody': 'Tagad rāmis palaiž kinframe. Izpildiet rāmī redzamos soļus (valoda, Wi-Fi, laika josla). Beigās tiks parādīts kods.',
+	'convert.doneImport': 'Ar Frameo uz rāmi nosūtītie fotoattēli tiks importēti automātiski, kad pievienosiet rāmi, kopā ar parakstiem un sūtītājiem.',
 	'convert.doneAdd': 'Pievienot rāmi ar tā kodu',
 	'convert.doneRevertTitle': 'Sākotnējā lietotne ir atpakaļ',
 	'convert.doneRevertBody': 'Rāmis restartējās ar sākotnējo lietotni. Varat atvienot kabeli.',

@@ -322,6 +322,8 @@ const de: Catalog = {
 	'library.someFailed.other': '{count} Elemente konnten nicht geändert werden.',
 	'library.pending': 'Wartet auf Freigabe',
 	'library.from': 'Von {name}',
+	'library.viaFrameo': '{name} · über Frameo',
+	'library.viaFrameoNoName': 'über Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Empfangen {when}',
 
@@ -1109,6 +1111,7 @@ const de: Catalog = {
 	'convert.hintIncompatible': 'Es ist schon ein kinframe installiert, das mit einem anderen Schlüssel signiert ist. Geh zuerst zurück zur ursprünglichen App (ohne Daten zu behalten) und installiere dann erneut.',
 	'convert.doneTitle': 'Fast geschafft',
 	'convert.doneBody': 'Der Rahmen startet jetzt kinframe. Folge den Schritten auf dem Rahmen (Sprache, Wi-Fi, Zeitzone). Am Ende zeigt er einen Code an.',
+	'convert.doneImport': 'Fotos, die per Frameo an den Rahmen geschickt wurden, werden automatisch importiert, sobald du den Rahmen hinzufügst – mit Bildtext und Absender.',
 	'convert.doneAdd': 'Rahmen mit seinem Code hinzufügen',
 	'convert.doneRevertTitle': 'Die ursprüngliche App ist zurück',
 	'convert.doneRevertBody': 'Der Rahmen wurde mit seiner ursprünglichen App neu gestartet. Du kannst das Kabel abziehen.',

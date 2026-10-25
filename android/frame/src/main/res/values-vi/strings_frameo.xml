@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Ảnh từ Frameo</string>
+    <string name="frameo_found">Ảnh và video từ Frameo trên khung ảnh này: %d. Hãy nhập để giữ lại, kèm chú thích và người gửi.</string>
+    <string name="frameo_import">Nhập</string>
+    <string name="frameo_importing">Đang nhập ảnh từ Frameo</string>
+    <string name="frameo_preparing">Đang chuẩn bị…</string>
+    <string name="frameo_waiting">Sẽ tiếp tục khi khung ảnh có mạng.</string>
+    <string name="frameo_stop">Dừng</string>
+    <string name="frameo_done_title">Đã nhập ảnh từ Frameo</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">Đã nhập: %d</string>
+    <string name="frameo_done_already">Đã có trên khung ảnh: %d</string>
+    <string name="frameo_done_failed">Không nhập được: %d</string>
+    <string name="frameo_no_permission">Cần quyền truy cập bộ nhớ để đọc ảnh từ Frameo.</string>
+    <string name="credit_via_frameo">%1$s · qua Frameo</string>
+    <string name="credit_frameo">qua Frameo</string>
+</resources>

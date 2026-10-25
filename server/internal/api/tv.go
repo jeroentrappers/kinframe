@@ -219,7 +219,7 @@ func (s *Server) tvSlide(r *store.PlacementRow) (gen.TvSlide, bool) {
 	}
 	sl := gen.TvSlide{
 		PlacementId: r.Placement.ID, Kind: gen.MediaKind(r.Kind), Url: s.signedURL(*r.MasterKey, tvMediaTTL), Mime: mime,
-		Caption: r.Caption, SenderName: r.SenderName, CapturedAt: r.CapturedAt, ReceivedAt: r.ReceivedAt,
+		Caption: r.Caption, SenderName: tvSenderName(&r.ItemRow), CapturedAt: r.CapturedAt, ReceivedAt: r.ReceivedAt,
 		DurationMs: r.DurationMS,
 	}
 	if sl.CapturedAt == nil {
@@ -255,4 +255,12 @@ func dedupeIDs(ids []uuid.UUID) []uuid.UUID {
 // tvPublicPath reports whether a request path is the public slideshow endpoint.
 func tvPublicPath(r *http.Request) bool {
 	return r.Method == http.MethodGet && len(r.URL.Path) > len("/v1/tv/") && r.URL.Path[:len("/v1/tv/")] == "/v1/tv/"
+}
+
+// tvSenderName: an item imported from another app shows its original sender.
+func tvSenderName(r *store.ItemRow) string {
+	if r.OriginSenderName != nil && *r.OriginSenderName != "" {
+		return *r.OriginSenderName
+	}
+	return r.SenderName
 }

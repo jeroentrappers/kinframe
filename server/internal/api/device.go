@@ -749,6 +749,18 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		return nil, problem.New(problem.UploadTooLarge, "imports are limited to 512 MiB")
 	}
 	sha := hex.EncodeToString(hasher.Sum(nil))
+	imp := importOrigin(req.Params)
+	// A file imported from another app's data before (a re-run after a reboot,
+	// network loss or on purpose): return that placement, even if it was removed.
+	if imp.key != nil {
+		if prev, err := s.st.PlacementOfImport(ctx, f.ID, *imp.origin, *imp.key); err == nil {
+			cleanup()
+			return ok(s.placementJSON(prev)), nil
+		} else if err != store.ErrNotFound {
+			cleanup()
+			return nil, err
+		}
+	}
 	// The same file again (a re-import, or a restore from a kinframe export of
 	// this frame): return what the frame already has.
 	if dup, err := s.st.PlacementOfFile(ctx, f.ID, sha); err == nil {
@@ -768,20 +780,51 @@ func (s *Server) DeviceImport(ctx context.Context, req gen.DeviceImportRequestOb
 		caption = ptr(strings.TrimSpace(*c))
 	}
 	mediaID, itemID, placementID := store.NewID(), store.NewID(), store.NewID()
+	m := store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true, SourceSHA256: &sha}
+	it := store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, Caption: caption, CapturedHint: req.Params.XCapturedAt}
+	pl := store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending"}
+	if req.Params.Fit != nil {
+		it.Fit = ptr(string(*req.Params.Fit))
+	}
+	if req.Params.FocalX != nil && req.Params.FocalY != nil {
+		it.FocalX, it.FocalY = ptr(float64(*req.Params.FocalX)), ptr(float64(*req.Params.FocalY))
+	}
+	if req.Params.Hidden != nil {
+		pl.Hidden = *req.Params.Hidden
+	}
+	if req.Params.Rotation != nil {
+		pl.Rotation = int(*req.Params.Rotation)
+	}
+	if imp.origin != nil {
+		it.Origin, it.OriginKey, it.OriginSenderName = imp.origin, imp.key, imp.senderName
+		if imp.receivedAt != nil {
+			pl.ReceivedAt = *imp.receivedAt
+		}
+		// The frame is the sender (as for every import on the frame); its owner owns the media.
+		if owner, err := s.st.FrameOwnerID(ctx, s.st.Q(), f.ID); err == nil {
+			m.OwnerUserID = &owner
+		}
+	}
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
-		if err := tx.CreateMedia(ctx, store.Media{ID: mediaID, Kind: string(kind), SourcePath: &path, SourceMime: &mime, IncludeAudio: true, SourceSHA256: &sha}); err != nil {
+		if err := tx.CreateMedia(ctx, m); err != nil {
 			return err
 		}
-		if err := tx.CreateItem(ctx, store.Item{ID: itemID, MediaID: mediaID, SenderFrameID: &f.ID, Caption: caption, CapturedHint: req.Params.XCapturedAt}); err != nil {
+		if err := tx.CreateItem(ctx, it); err != nil {
 			return err
 		}
-		if err := tx.CreatePlacement(ctx, store.Placement{ID: placementID, FrameID: f.ID, ItemID: itemID, Status: "pending"}); err != nil {
+		if err := tx.CreatePlacement(ctx, pl); err != nil {
 			return err
 		}
 		return tx.Enqueue(ctx, store.JobProcessMedia, map[string]any{"media_id": mediaID})
 	})
 	if err != nil {
 		cleanup()
+		// The same source file uploaded twice at once: the first one won.
+		if imp.key != nil && db.IsUniqueViolation(err, "items_origin_key_unique") {
+			if prev, perr := s.st.PlacementOfImport(ctx, f.ID, *imp.origin, *imp.key); perr == nil {
+				return ok(s.placementJSON(prev)), nil
+			}
+		}
 		return nil, err
 	}
 	row, err := s.st.GetPlacementRow(ctx, s.st.Q(), placementID, &f.ID)
@@ -798,11 +841,51 @@ func (s *Server) DeviceImportCheck(ctx context.Context, req gen.DeviceImportChec
 	if err != nil {
 		return nil, err
 	}
-	known, err := s.st.KnownFileHashes(ctx, f.ID, req.Body.Sha256)
+	var hashes []string
+	if req.Body.Sha256 != nil {
+		hashes = *req.Body.Sha256
+	}
+	known, err := s.st.KnownFileHashes(ctx, f.ID, hashes)
 	if err != nil {
 		return nil, err
 	}
-	return ok(map[string]any{"known": known}), nil
+	out := map[string]any{"known": known}
+	if req.Body.Source != nil && req.Body.SourceKeys != nil {
+		keys, err := s.st.KnownImportKeys(ctx, f.ID, string(*req.Body.Source), *req.Body.SourceKeys)
+		if err != nil {
+			return nil, err
+		}
+		out["known_source_keys"] = keys
+	}
+	return ok(out), nil
+}
+
+// importSource is the other-app part of a device import (docs/spec/frameo-import.md).
+type importSource struct {
+	origin, key, senderName *string
+	receivedAt              *time.Time
+}
+
+// importOrigin reads the source parameters; they are ignored without `source`.
+func importOrigin(p gen.DeviceImportParams) importSource {
+	if p.Source == nil {
+		return importSource{}
+	}
+	out := importSource{origin: ptr(string(*p.Source))}
+	if p.SourceKey != nil && strings.TrimSpace(*p.SourceKey) != "" {
+		out.key = ptr(strings.TrimSpace(*p.SourceKey))
+	}
+	if p.SenderName != nil && strings.TrimSpace(*p.SenderName) != "" {
+		out.senderName = ptr(strings.TrimSpace(*p.SenderName))
+	}
+	if p.ReceivedAt != nil {
+		t := p.ReceivedAt.UTC()
+		if now := time.Now().UTC(); t.After(now) {
+			t = now
+		}
+		out.receivedAt = &t
+	}
+	return out
 }
 
 // placementIDs are the ids a push about a placement carries (README §6.3).

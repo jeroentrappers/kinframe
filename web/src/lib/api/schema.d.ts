@@ -1189,9 +1189,16 @@ export interface paths {
         put?: never;
         /**
          * @description Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
-         *     Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+         *     Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB). The file
+         *     takes the same processing as any upload (renditions, location metadata stripped).
          *     The server hashes the body: if this frame already has a live placement of the same file (source, master or
          *     rendition sha256), nothing is created and the existing placement is returned with `200`.
+         *
+         *     **Imports from another app's leftover data** (`source`, docs/spec/frameo-import.md): `source_key` makes the
+         *     import idempotent per frame. If this frame imported that key before, the placement of that item is returned
+         *     with `200`, even when it was removed since (`status: removed`), so a re-run never brings back what the family
+         *     deleted. The item keeps `sender_name`, `received_at`, fit, focal point and hidden state from the old app, and
+         *     the frame's owner owns the media.
          */
         post: operations["deviceImport"];
         delete?: never;
@@ -1211,7 +1218,9 @@ export interface paths {
         put?: never;
         /**
          * @description Which of these file hashes this frame already has (a live placement whose source, master or frame
-         *     rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading.
+         *     rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading. With `source` and
+         *     `source_keys`, also which of those keys this frame has imported before (removed items included, see
+         *     `deviceImport`), so a resumed import only uploads what is missing.
          */
         post: operations["deviceImportCheck"];
         delete?: never;
@@ -2039,6 +2048,13 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /**
+             * @description Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+             *     then the frame; clients show `imported_sender_name` instead, e.g. "Anna · via Frameo".
+             */
+            imported_from?: components["schemas"]["ItemOrigin"] | null;
+            /** @description The original sender's display name in that app, when known. */
+            imported_sender_name?: string | null;
+            /**
              * @description Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
              *     `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
              */
@@ -2049,6 +2065,11 @@ export interface components {
              */
             thumb_url?: string | null;
         };
+        /**
+         * @description An app a frame can import leftover photos from.
+         * @enum {string}
+         */
+        ItemOrigin: "frameo";
         ItemMotion: {
             /** @enum {string} */
             status: "processing" | "ready";
@@ -5056,6 +5077,22 @@ export interface operations {
             query?: {
                 /** @description Caption to restore (e.g. from a kinframe export manifest). */
                 caption?: string;
+                /** @description The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it. */
+                source?: components["schemas"]["ItemOrigin"];
+                /** @description Stable id of the file in that app (for Frameo, its file name). Unique per frame and source. */
+                source_key?: string;
+                /** @description The original sender's display name in that app. */
+                sender_name?: string;
+                /** @description When the old app received the file; becomes the placement's `received_at` (not in the future). */
+                received_at?: string;
+                fit?: components["schemas"]["Fit"];
+                /** @description Focal point, as a fraction of the width (with `focal_y`). */
+                focal_x?: number;
+                focal_y?: number;
+                /** @description Import the placement hidden (it was hidden from the slideshow in the old app). */
+                hidden?: boolean;
+                /** @description Extra clockwise rotation chosen on the frame in the old app. */
+                rotation?: 0 | 90 | 180 | 270;
             };
             header: {
                 "X-Filename": string;
@@ -5101,7 +5138,9 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    sha256: string[];
+                    sha256?: string[];
+                    source?: components["schemas"]["ItemOrigin"];
+                    source_keys?: string[];
                 };
             };
         };
@@ -5114,6 +5153,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         known: string[];
+                        known_source_keys?: string[];
                     };
                 };
             };

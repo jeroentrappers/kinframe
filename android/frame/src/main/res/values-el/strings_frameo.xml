@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Φωτογραφίες από το Frameo</string>
+    <string name="frameo_found">Φωτογραφίες και βίντεο από το Frameo σε αυτή την κορνίζα: %d. Εισαγάγετέ τα για να τα κρατήσετε, με λεζάντες και αποστολείς.</string>
+    <string name="frameo_import">Εισαγωγή</string>
+    <string name="frameo_importing">Εισαγωγή φωτογραφιών από το Frameo</string>
+    <string name="frameo_preparing">Προετοιμασία…</string>
+    <string name="frameo_waiting">Συνεχίζει μόλις η κορνίζα συνδεθεί.</string>
+    <string name="frameo_stop">Διακοπή</string>
+    <string name="frameo_done_title">Οι φωτογραφίες από το Frameo εισήχθησαν</string>
+    <string name="frameo_count">%1$d από %2$d</string>
+    <string name="frameo_done_imported">Εισήχθησαν: %d</string>
+    <string name="frameo_done_already">Ήδη στην κορνίζα: %d</string>
+    <string name="frameo_done_failed">Δεν εισήχθησαν: %d</string>
+    <string name="frameo_no_permission">Χρειάζεται πρόσβαση στον αποθηκευτικό χώρο για τις φωτογραφίες από το Frameo.</string>
+    <string name="credit_via_frameo">%1$s · μέσω Frameo</string>
+    <string name="credit_frameo">μέσω Frameo</string>
+</resources>

@@ -354,6 +354,8 @@ const sl: Catalog = {
 	'library.someFailed.other': '{count} elementov ni bilo mogoče spremeniti.',
 	'library.pending': 'Čaka na odobritev',
 	'library.from': 'Pošiljatelj: {name}',
+	'library.viaFrameo': '{name} · prek Frameo',
+	'library.viaFrameoNoName': 'prek Frameo',
 	'library.photo': 'Fotografija',
 	'library.received': 'Prejeto {when}',
 
@@ -1170,6 +1172,7 @@ const sl: Catalog = {
 	'convert.hintIncompatible': 'Nameščen je že kinframe, podpisan z drugim ključem. Najprej vrnite prvotno aplikacijo (brez ohranjanja podatkov), nato namestite znova.',
 	'convert.doneTitle': 'Skoraj končano',
 	'convert.doneBody': 'Okvir zdaj zažene kinframe. Sledite korakom na okvirju (jezik, Wi-Fi, časovni pas). Na koncu prikaže kodo.',
+	'convert.doneImport': 'Fotografije, poslane na okvir prek Frameo, se samodejno uvozijo, ko dodate okvir, skupaj z napisi in pošiljatelji.',
 	'convert.doneAdd': 'Dodajte okvir s kodo',
 	'convert.doneRevertTitle': 'Prvotna aplikacija je vrnjena',
 	'convert.doneRevertBody': 'Okvir se je znova zagnal s prvotno aplikacijo. Kabel lahko odklopite.',

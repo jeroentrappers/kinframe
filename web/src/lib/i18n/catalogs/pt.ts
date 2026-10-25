@@ -331,6 +331,8 @@ const pt: Catalog = {
 	'library.someFailed.other': 'Não foi possível alterar {count} itens.',
 	'library.pending': 'Aguardando aprovação',
 	'library.from': 'De {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Recebida {when}',
 
@@ -1130,6 +1132,7 @@ const pt: Catalog = {
 	'convert.hintIncompatible': 'Já existe um kinframe instalado assinado com outra chave. Volte primeiro ao app original (sem manter os dados) e depois instale de novo.',
 	'convert.doneTitle': 'Quase lá',
 	'convert.doneBody': 'Agora o porta-retrato abre o kinframe. Siga os passos no porta-retrato (idioma, Wi-Fi, fuso horário). No final, ele mostra um código.',
+	'convert.doneImport': 'As fotos enviadas ao porta-retrato pelo Frameo são importadas automaticamente quando você adiciona o porta-retrato, com legendas e remetentes.',
 	'convert.doneAdd': 'Adicionar o porta-retrato com o código',
 	'convert.doneRevertTitle': 'O app original voltou',
 	'convert.doneRevertBody': 'O porta-retrato reiniciou com o app original. Você já pode desconectar o cabo.',

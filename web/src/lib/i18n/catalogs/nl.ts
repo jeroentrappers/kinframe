@@ -317,6 +317,8 @@ const nl: Catalog = {
 	'library.someFailed.other': '{count} items konden niet aangepast worden.',
 	'library.pending': 'Wacht op goedkeuring',
 	'library.from': 'Van {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Foto',
 	'library.received': 'Ontvangen {when}',
 
@@ -1104,6 +1106,7 @@ const nl: Catalog = {
 	'convert.hintIncompatible': 'Er staat al een kinframe op die met een andere sleutel ondertekend is. Ga eerst terug naar de originele app (zonder gegevens te bewaren) en installeer daarna opnieuw.',
 	'convert.doneTitle': 'Bijna klaar',
 	'convert.doneBody': 'Het kader start nu kinframe. Volg de stappen op het kader (taal, Wi-Fi, tijdzone). Op het einde verschijnt een code.',
+	'convert.doneImport': 'Foto\'s die met Frameo naar het kader gestuurd zijn, worden automatisch geïmporteerd zodra je het kader toevoegt, met hun onderschriften en afzenders.',
 	'convert.doneAdd': 'Kader toevoegen met de code',
 	'convert.doneRevertTitle': 'De originele app is terug',
 	'convert.doneRevertBody': 'Het kader is herstart met de originele app. Je kunt de kabel loskoppelen.',

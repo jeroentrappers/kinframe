@@ -322,6 +322,8 @@ const ko: Catalog = {
 	'library.someFailed.other': '항목 {count}개를 변경하지 못했어요.',
 	'library.pending': '승인 대기 중',
 	'library.from': '보낸 사람: {name}',
+	'library.viaFrameo': '{name} · Frameo 경유',
+	'library.viaFrameoNoName': 'Frameo 경유',
 	'library.photo': '사진',
 	'library.received': '{when}에 받음',
 
@@ -1113,6 +1115,7 @@ const ko: Catalog = {
 	'convert.hintIncompatible': '다른 키로 서명된 kinframe이 이미 설치되어 있어요. 먼저 원래 앱으로 되돌린 다음(데이터 유지 없이) 다시 설치하세요.',
 	'convert.doneTitle': '거의 다 됐어요',
 	'convert.doneBody': '이제 액자에서 kinframe이 시작돼요. 액자의 안내(언어, Wi-Fi, 시간대)를 따라 진행하세요. 마지막에 코드가 표시돼요.',
+	'convert.doneImport': 'Frameo로 액자에 보낸 사진은 액자를 추가하면 설명과 보낸 사람까지 자동으로 가져와요.',
 	'convert.doneAdd': '코드로 액자 추가',
 	'convert.doneRevertTitle': '원래 앱으로 돌아왔어요',
 	'convert.doneRevertBody': '액자가 원래 앱으로 다시 시작됐어요. 케이블을 뽑아도 돼요.',

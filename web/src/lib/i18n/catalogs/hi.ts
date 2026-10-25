@@ -323,6 +323,8 @@ const hi: Catalog = {
 	'library.someFailed.other': '{count} आइटम बदले नहीं जा सके।',
 	'library.pending': 'मंज़ूरी का इंतज़ार',
 	'library.from': '{name} से',
+	'library.viaFrameo': '{name} · Frameo के ज़रिए',
+	'library.viaFrameoNoName': 'Frameo के ज़रिए',
 	'library.photo': 'फ़ोटो',
 	'library.received': '{when} मिली',
 
@@ -1114,6 +1116,7 @@ const hi: Catalog = {
 	'convert.hintIncompatible': 'किसी दूसरी कुंजी से साइन किया गया kinframe पहले से इंस्टॉल है। पहले मूल ऐप पर वापस जाएं (डेटा रखे बिना), फिर दोबारा इंस्टॉल करें।',
 	'convert.doneTitle': 'बस थोड़ा और',
 	'convert.doneBody': 'फ़्रेम अब kinframe के साथ शुरू होता है। फ़्रेम पर दिए चरण पूरे करें (भाषा, Wi-Fi, टाइम ज़ोन)। आखिर में यह एक कोड दिखाएगा।',
+	'convert.doneImport': 'Frameo से फ़्रेम पर भेजी गई फ़ोटो, फ़्रेम जोड़ते ही कैप्शन और भेजने वालों के साथ अपने-आप इंपोर्ट हो जाती हैं।',
 	'convert.doneAdd': 'फ़्रेम को उसके कोड से जोड़ें',
 	'convert.doneRevertTitle': 'मूल ऐप वापस आ गया',
 	'convert.doneRevertBody': 'फ़्रेम अपने मूल ऐप के साथ रीस्टार्ट हो गया। अब आप केबल निकाल सकते हैं।',

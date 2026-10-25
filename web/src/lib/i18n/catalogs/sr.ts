@@ -338,6 +338,8 @@ const sr: Catalog = {
 	'library.someFailed.other': '{count} ставки није могло да се промени.',
 	'library.pending': 'Чека одобрење',
 	'library.from': 'Од: {name}',
+	'library.viaFrameo': '{name} · преко Frameo',
+	'library.viaFrameoNoName': 'преко Frameo',
 	'library.photo': 'Фотографија',
 	'library.received': 'Примљено {when}',
 
@@ -1142,6 +1144,7 @@ const sr: Catalog = {
 	'convert.hintIncompatible': 'Већ је инсталиран kinframe потписан другим кључем. Прво вратите оригиналну апликацију (без задржавања података), па поново инсталирајте.',
 	'convert.doneTitle': 'Још само мало',
 	'convert.doneBody': 'Рам сада покреће kinframe. Пратите кораке на раму (језик, Wi-Fi, временска зона). На крају приказује код.',
+	'convert.doneImport': 'Фотографије послате на рам преко Frameo аутоматски се увозе када додате рам, заједно са описима и пошиљаоцима.',
 	'convert.doneAdd': 'Додајте рам помоћу кода',
 	'convert.doneRevertTitle': 'Оригинална апликација је враћена',
 	'convert.doneRevertBody': 'Рам се поново покренуо са оригиналном апликацијом. Можете да искључите кабл.',

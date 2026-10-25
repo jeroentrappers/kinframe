@@ -315,6 +315,8 @@ const nb: Catalog = {
 	'library.someFailed.other': '{count} elementer kunne ikke endres.',
 	'library.pending': 'Venter på godkjenning',
 	'library.from': 'Fra {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Bilde',
 	'library.received': 'Mottatt {when}',
 
@@ -1097,6 +1099,7 @@ const nb: Catalog = {
 	'convert.hintIncompatible': 'En kinframe som er signert med en annen nøkkel, er allerede installert. Gå først tilbake til originalappen (uten å beholde data), og installer deretter på nytt.',
 	'convert.doneTitle': 'Snart ferdig',
 	'convert.doneBody': 'Fotorammen starter nå kinframe. Følg trinnene på fotorammen (språk, Wi-Fi, tidssone). Til slutt viser den en kode.',
+	'convert.doneImport': 'Bilder som er sendt til fotorammen med Frameo, importeres automatisk når du legger til fotorammen, med bildetekster og avsendere.',
 	'convert.doneAdd': 'Legg til fotorammen med koden',
 	'convert.doneRevertTitle': 'Originalappen er tilbake',
 	'convert.doneRevertBody': 'Fotorammen har startet på nytt med originalappen. Du kan koble fra kabelen.',

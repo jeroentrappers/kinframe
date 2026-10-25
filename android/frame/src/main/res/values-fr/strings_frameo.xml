@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Photos de Frameo</string>
+    <string name="frameo_found">Photos et vidéos de Frameo sur ce cadre : %d. Importez-les pour les garder, avec leurs légendes et leurs expéditeurs.</string>
+    <string name="frameo_import">Importer</string>
+    <string name="frameo_importing">Importation des photos de Frameo</string>
+    <string name="frameo_preparing">Préparation…</string>
+    <string name="frameo_waiting">Reprend dès que le cadre est en ligne.</string>
+    <string name="frameo_stop">Arrêter</string>
+    <string name="frameo_done_title">Photos de Frameo importées</string>
+    <string name="frameo_count">%1$d sur %2$d</string>
+    <string name="frameo_done_imported">Importées : %d</string>
+    <string name="frameo_done_already">Déjà sur le cadre : %d</string>
+    <string name="frameo_done_failed">Non importées : %d</string>
+    <string name="frameo_no_permission">L\'accès au stockage est nécessaire pour lire les photos de Frameo.</string>
+    <string name="credit_via_frameo">%1$s · via Frameo</string>
+    <string name="credit_frameo">via Frameo</string>
+</resources>

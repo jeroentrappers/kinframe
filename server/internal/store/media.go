@@ -278,13 +278,20 @@ type Item struct {
 	CapturedHint  *time.Time `db:"captured_hint"`
 	// MotionMediaID is the clip of a Live/Motion Photo.
 	MotionMediaID *uuid.UUID `db:"motion_media_id"`
+	// Origin, OriginSenderName and OriginKey describe an item a frame imported
+	// from another app's leftover data (docs/spec/frameo-import.md).
+	Origin           *string `db:"origin"`
+	OriginSenderName *string `db:"origin_sender_name"`
+	OriginKey        *string `db:"origin_key"`
 }
 
 func (tx *Tx) CreateItem(ctx context.Context, it Item) error {
 	_, err := tx.Exec(ctx, `
-		INSERT INTO items (id, media_id, sender_user_id, sender_frame_id, caption, focal_x, focal_y, fit, captured_hint, motion_media_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
-		it.ID, it.MediaID, it.SenderUserID, it.SenderFrameID, it.Caption, it.FocalX, it.FocalY, it.Fit, it.CapturedHint, it.MotionMediaID)
+		INSERT INTO items (id, media_id, sender_user_id, sender_frame_id, caption, focal_x, focal_y, fit, captured_hint, motion_media_id,
+			origin, origin_sender_name, origin_key)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+		it.ID, it.MediaID, it.SenderUserID, it.SenderFrameID, it.Caption, it.FocalX, it.FocalY, it.Fit, it.CapturedHint, it.MotionMediaID,
+		it.Origin, it.OriginSenderName, it.OriginKey)
 	return err
 }
 
@@ -324,6 +331,9 @@ type ItemRow struct {
 	MotionDurationMS *int       `db:"motion_duration_ms"`
 	MotionHasAudio   *bool      `db:"motion_has_audio"`
 	MotionMasterKey  *string    `db:"motion_master_key"`
+	// Imported from another app (Item.Origin).
+	Origin           *string `db:"origin"`
+	OriginSenderName *string `db:"origin_sender_name"`
 }
 
 // IsLive reports whether the item is a Live/Motion Photo whose clip has not failed.
@@ -338,7 +348,7 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	m.kind, m.status AS media_status, m.failure_code, m.width, m.height, m.duration_ms, m.has_audio, m.captured_at,
 	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
 	mm.height AS motion_height, mm.duration_ms AS motion_duration_ms, mm.has_audio AS motion_has_audio,
-	mm.master_key AS motion_master_key`
+	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name`
 
 const itemJoins = ` JOIN media m ON m.id = i.media_id LEFT JOIN media mm ON mm.id = i.motion_media_id
 	LEFT JOIN users su ON su.id = i.sender_user_id LEFT JOIN frames sf ON sf.id = i.sender_frame_id`

@@ -338,6 +338,8 @@ const fr: Catalog = {
 	'library.someFailed.other': '{count} éléments n’ont pas pu être modifiés.',
 	'library.pending': 'En attente de validation',
 	'library.from': 'De {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Photo',
 	'library.received': 'Reçue {when}',
 
@@ -1142,6 +1144,7 @@ const fr: Catalog = {
 	'convert.hintIncompatible': 'Un kinframe signé avec une autre clé est déjà installé. Revenez d’abord à l’application d’origine (sans conserver les données), puis réinstallez.',
 	'convert.doneTitle': 'Presque fini',
 	'convert.doneBody': 'Le cadre démarre maintenant kinframe. Suivez les étapes sur le cadre (langue, Wi-Fi, fuseau horaire). À la fin, il affiche un code.',
+	'convert.doneImport': 'Les photos envoyées au cadre avec Frameo sont importées automatiquement dès que vous ajoutez le cadre, avec leurs légendes et leurs expéditeurs.',
 	'convert.doneAdd': 'Ajouter le cadre avec son code',
 	'convert.doneRevertTitle': 'L’application d’origine est de retour',
 	'convert.doneRevertBody': 'Le cadre a redémarré avec son application d’origine. Vous pouvez débrancher le câble.',

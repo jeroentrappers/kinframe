@@ -315,6 +315,8 @@ const tr: Catalog = {
 	'library.someFailed.other': '{count} öğe değiştirilemedi.',
 	'library.pending': 'Onay bekliyor',
 	'library.from': 'Gönderen: {name}',
+	'library.viaFrameo': '{name} · Frameo üzerinden',
+	'library.viaFrameoNoName': 'Frameo üzerinden',
 	'library.photo': 'Fotoğraf',
 	'library.received': 'Alındı: {when}',
 
@@ -1102,6 +1104,7 @@ const tr: Catalog = {
 	'convert.hintIncompatible': 'Başka bir anahtarla imzalanmış bir kinframe zaten yüklü. Önce orijinal uygulamaya dönün (verileri tutmadan), ardından yeniden yükleyin.',
 	'convert.doneTitle': 'Neredeyse bitti',
 	'convert.doneBody': 'Çerçeve artık kinframe ile açılıyor. Çerçevedeki adımları izleyin (dil, Wi-Fi, saat dilimi). Sonunda bir kod gösterir.',
+	'convert.doneImport': 'Frameo ile çerçeveye gönderilen fotoğraflar, çerçeveyi eklediğinizde açıklamaları ve gönderenleriyle birlikte otomatik olarak içe aktarılır.',
 	'convert.doneAdd': 'Çerçeveyi koduyla ekle',
 	'convert.doneRevertTitle': 'Orijinal uygulama geri geldi',
 	'convert.doneRevertBody': 'Çerçeve orijinal uygulamasıyla yeniden başladı. Kabloyu çıkarabilirsiniz.',

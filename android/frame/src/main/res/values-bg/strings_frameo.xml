@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Снимки от Frameo</string>
+    <string name="frameo_found">Снимки и видеоклипове от Frameo на тази рамка: %d. Импортирайте ги, за да ги запазите с надписите и подателите им.</string>
+    <string name="frameo_import">Импортиране</string>
+    <string name="frameo_importing">Импортиране на снимки от Frameo</string>
+    <string name="frameo_preparing">Подготовка…</string>
+    <string name="frameo_waiting">Продължава, когато рамката е онлайн.</string>
+    <string name="frameo_stop">Спиране</string>
+    <string name="frameo_done_title">Снимките от Frameo са импортирани</string>
+    <string name="frameo_count">%1$d от %2$d</string>
+    <string name="frameo_done_imported">Импортирани: %d</string>
+    <string name="frameo_done_already">Вече в рамката: %d</string>
+    <string name="frameo_done_failed">Неимпортирани: %d</string>
+    <string name="frameo_no_permission">За четене на снимките от Frameo е нужен достъп до хранилището.</string>
+    <string name="credit_via_frameo">%1$s · чрез Frameo</string>
+    <string name="credit_frameo">чрез Frameo</string>
+</resources>

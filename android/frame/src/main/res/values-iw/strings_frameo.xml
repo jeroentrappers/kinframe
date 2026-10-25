@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">תמונות מ-Frameo</string>
+    <string name="frameo_found">תמונות וסרטונים מ-Frameo במסגרת הזו: %d. אפשר לייבא אותם כדי לשמור אותם עם הכיתובים והשולחים.</string>
+    <string name="frameo_import">ייבוא</string>
+    <string name="frameo_importing">מייבאים תמונות מ-Frameo</string>
+    <string name="frameo_preparing">מתכוננים…</string>
+    <string name="frameo_waiting">ימשיך כשהמסגרת תהיה מחוברת.</string>
+    <string name="frameo_stop">עצירה</string>
+    <string name="frameo_done_title">התמונות מ-Frameo יובאו</string>
+    <string name="frameo_count">%1$d מתוך %2$d</string>
+    <string name="frameo_done_imported">יובאו: %d</string>
+    <string name="frameo_done_already">כבר במסגרת: %d</string>
+    <string name="frameo_done_failed">לא יובאו: %d</string>
+    <string name="frameo_no_permission">נדרשת גישה לאחסון כדי לקרוא את התמונות מ-Frameo.</string>
+    <string name="credit_via_frameo">%1$s · דרך Frameo</string>
+    <string name="credit_frameo">דרך Frameo</string>
+</resources>

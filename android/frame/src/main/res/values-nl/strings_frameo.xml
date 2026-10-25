@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Foto\'s van Frameo</string>
+    <string name="frameo_found">Foto\'s en video\'s van Frameo op deze fotolijst: %d. Importeer ze om ze te houden, met hun onderschriften en afzenders.</string>
+    <string name="frameo_import">Importeren</string>
+    <string name="frameo_importing">Foto\'s van Frameo importeren</string>
+    <string name="frameo_preparing">Even geduld…</string>
+    <string name="frameo_waiting">Gaat verder zodra de fotolijst online is.</string>
+    <string name="frameo_stop">Stoppen</string>
+    <string name="frameo_done_title">Foto\'s van Frameo geïmporteerd</string>
+    <string name="frameo_count">%1$d van %2$d</string>
+    <string name="frameo_done_imported">Geïmporteerd: %d</string>
+    <string name="frameo_done_already">Al op de fotolijst: %d</string>
+    <string name="frameo_done_failed">Niet gelukt: %d</string>
+    <string name="frameo_no_permission">Toegang tot de opslag is nodig om de foto\'s van Frameo te lezen.</string>
+    <string name="credit_via_frameo">%1$s · via Frameo</string>
+    <string name="credit_frameo">via Frameo</string>
+</resources>

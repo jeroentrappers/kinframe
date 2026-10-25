@@ -322,6 +322,8 @@ const da: Catalog = {
 	'library.someFailed.other': '{count} elementer kunne ikke ændres.',
 	'library.pending': 'Afventer godkendelse',
 	'library.from': 'Fra {name}',
+	'library.viaFrameo': '{name} · via Frameo',
+	'library.viaFrameoNoName': 'via Frameo',
 	'library.photo': 'Billede',
 	'library.received': 'Modtaget {when}',
 
@@ -1109,6 +1111,7 @@ const da: Catalog = {
 	'convert.hintIncompatible': 'En kinframe, der er signeret med en anden nøgle, er allerede installeret. Gå først tilbage til den oprindelige app (uden at beholde data), og installér så igen.',
 	'convert.doneTitle': 'Næsten færdig',
 	'convert.doneBody': 'Rammen starter nu kinframe. Følg trinene på rammen (sprog, Wi-Fi, tidszone). Til sidst viser den en kode.',
+	'convert.doneImport': 'Billeder, der er sendt til rammen med Frameo, importeres automatisk, når du tilføjer rammen, med billedtekster og afsendere.',
 	'convert.doneAdd': 'Tilføj rammen med dens kode',
 	'convert.doneRevertTitle': 'Den oprindelige app er tilbage',
 	'convert.doneRevertBody': 'Rammen er genstartet med sin oprindelige app. Du kan tage kablet ud.',

@@ -323,6 +323,8 @@ const vi: Catalog = {
 	'library.someFailed.other': 'Không thể thay đổi {count} mục.',
 	'library.pending': 'Đang chờ duyệt',
 	'library.from': 'Từ {name}',
+	'library.viaFrameo': '{name} · qua Frameo',
+	'library.viaFrameoNoName': 'qua Frameo',
 	'library.photo': 'Ảnh',
 	'library.received': 'Đã nhận {when}',
 
@@ -1115,6 +1117,7 @@ const vi: Catalog = {
 	'convert.hintIncompatible': 'Đã có một bản kinframe ký bằng khóa khác được cài. Hãy quay lại ứng dụng gốc trước (không giữ dữ liệu), rồi cài lại.',
 	'convert.doneTitle': 'Sắp xong rồi',
 	'convert.doneBody': 'Khung ảnh giờ sẽ khởi động kinframe. Làm theo các bước trên khung ảnh (ngôn ngữ, Wi-Fi, múi giờ). Cuối cùng khung ảnh sẽ hiện một mã.',
+	'convert.doneImport': 'Ảnh đã gửi đến khung ảnh qua Frameo sẽ tự động được nhập khi bạn thêm khung ảnh, kèm chú thích và người gửi.',
 	'convert.doneAdd': 'Thêm khung ảnh bằng mã',
 	'convert.doneRevertTitle': 'Ứng dụng gốc đã trở lại',
 	'convert.doneRevertBody': 'Khung ảnh đã khởi động lại với ứng dụng gốc. Bạn có thể rút cáp.',

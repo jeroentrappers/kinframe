@@ -331,6 +331,8 @@ const he: Catalog = {
 	'library.someFailed.other': 'לא ניתן היה לשנות {count} פריטים.',
 	'library.pending': 'ממתין לאישור',
 	'library.from': 'מאת {name}',
+	'library.viaFrameo': '{name} · דרך Frameo',
+	'library.viaFrameoNoName': 'דרך Frameo',
 	'library.photo': 'תמונה',
 	'library.received': 'התקבלה {when}',
 
@@ -1129,6 +1131,7 @@ const he: Catalog = {
 	'convert.hintIncompatible': 'כבר מותקנת גרסת kinframe שנחתמה במפתח אחר. יש לחזור קודם לאפליקציה המקורית (בלי לשמור נתונים), ואז להתקין שוב.',
 	'convert.doneTitle': 'כמעט סיימנו',
 	'convert.doneBody': 'המסגרת מפעילה עכשיו את kinframe. יש לבצע את השלבים שמופיעים במסגרת (שפה, Wi-Fi, אזור זמן). בסוף יוצג קוד.',
+	'convert.doneImport': 'תמונות שנשלחו למסגרת דרך Frameo מיובאות אוטומטית אחרי הוספת המסגרת, עם הכיתובים והשולחים.',
 	'convert.doneAdd': 'הוספת המסגרת עם הקוד שלה',
 	'convert.doneRevertTitle': 'האפליקציה המקורית חזרה',
 	'convert.doneRevertBody': 'המסגרת הופעלה מחדש עם האפליקציה המקורית. אפשר לנתק את הכבל.',
