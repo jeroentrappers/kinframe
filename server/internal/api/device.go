@@ -61,7 +61,10 @@ func (s *Server) EnrollDevice(ctx context.Context, req gen.EnrollDeviceRequestOb
 		ScreenW: b.Screen.Width, ScreenH: b.Screen.Height, DensityDPI: b.Screen.DensityDpi,
 		DecodeW: decode.W, DecodeH: decode.H,
 		AppVersion: b.App.Version, AppVersionCode: b.App.VersionCode, AppChannel: channel,
-		Locale: b.Locale, Timezone: b.Timezone,
+		Locale: b.Locale, Timezone: b.Timezone, Kind: "android",
+	}
+	if b.Kind != nil {
+		d.Kind = string(*b.Kind)
 	}
 	if b.Screen.Orientation != nil {
 		o := string(*b.Screen.Orientation)

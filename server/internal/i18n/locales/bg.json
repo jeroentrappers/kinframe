@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "на тази покана вече е отговорено или е оттеглена",
   "timed events can last at most 31 days": "събитията с час могат да траят най-много 31 дни",
   "timed events need a start and an end": "събитията с час трябва да имат начало и край",
-  "upload not found, incomplete or already used": "каченият файл не е намерен, не е завършен или вече е използван"
+  "upload not found, incomplete or already used": "каченият файл не е намерен, не е завършен или вече е използван",
+  "too many TVs are mirroring this frame": "твърде много телевизори вече показват тази рамка",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "огледалната връзка показва цялата рамка: без album_id, placement_ids или kind"
  }
 }

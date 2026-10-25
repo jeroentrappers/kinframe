@@ -274,6 +274,24 @@ func (e DeviceEnrollAppChannel) Valid() bool {
 	}
 }
 
+// Defines values for DeviceKind.
+const (
+	Android DeviceKind = "android"
+	Browser DeviceKind = "browser"
+)
+
+// Valid indicates whether the value is a known member of the DeviceKind enum.
+func (e DeviceKind) Valid() bool {
+	switch e {
+	case Android:
+		return true
+	case Browser:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for EventInvitationStatus.
 const (
 	EventInvitationStatusAccepted  EventInvitationStatus = "accepted"
@@ -417,19 +435,19 @@ func (e FrameSettingsDisplayBrightnessMode) Valid() bool {
 
 // Defines values for FrameSettingsDisplayTextScale.
 const (
-	N1   FrameSettingsDisplayTextScale = 1
-	N115 FrameSettingsDisplayTextScale = 1.15
-	N13  FrameSettingsDisplayTextScale = 1.3
+	FrameSettingsDisplayTextScaleN1   FrameSettingsDisplayTextScale = 1
+	FrameSettingsDisplayTextScaleN115 FrameSettingsDisplayTextScale = 1.15
+	FrameSettingsDisplayTextScaleN13  FrameSettingsDisplayTextScale = 1.3
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsDisplayTextScale enum.
 func (e FrameSettingsDisplayTextScale) Valid() bool {
 	switch e {
-	case N1:
+	case FrameSettingsDisplayTextScaleN1:
 		return true
-	case N115:
+	case FrameSettingsDisplayTextScaleN115:
 		return true
-	case N13:
+	case FrameSettingsDisplayTextScaleN13:
 		return true
 	default:
 		return false
@@ -477,19 +495,19 @@ func (e FrameSettingsLocaleTemperatureUnit) Valid() bool {
 
 // Defines values for FrameSettingsSlideshowBackground.
 const (
-	Black   FrameSettingsSlideshowBackground = "black"
-	Blur    FrameSettingsSlideshowBackground = "blur"
-	Palette FrameSettingsSlideshowBackground = "palette"
+	FrameSettingsSlideshowBackgroundBlack   FrameSettingsSlideshowBackground = "black"
+	FrameSettingsSlideshowBackgroundBlur    FrameSettingsSlideshowBackground = "blur"
+	FrameSettingsSlideshowBackgroundPalette FrameSettingsSlideshowBackground = "palette"
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsSlideshowBackground enum.
 func (e FrameSettingsSlideshowBackground) Valid() bool {
 	switch e {
-	case Black:
+	case FrameSettingsSlideshowBackgroundBlack:
 		return true
-	case Blur:
+	case FrameSettingsSlideshowBackgroundBlur:
 		return true
-	case Palette:
+	case FrameSettingsSlideshowBackgroundPalette:
 		return true
 	default:
 		return false
@@ -561,19 +579,19 @@ func (e FrameSettingsSlideshowOrder) Valid() bool {
 
 // Defines values for FrameSettingsSlideshowTransition.
 const (
-	Crossfade FrameSettingsSlideshowTransition = "crossfade"
-	Kenburns  FrameSettingsSlideshowTransition = "kenburns"
-	Slide     FrameSettingsSlideshowTransition = "slide"
+	FrameSettingsSlideshowTransitionCrossfade FrameSettingsSlideshowTransition = "crossfade"
+	FrameSettingsSlideshowTransitionKenburns  FrameSettingsSlideshowTransition = "kenburns"
+	FrameSettingsSlideshowTransitionSlide     FrameSettingsSlideshowTransition = "slide"
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsSlideshowTransition enum.
 func (e FrameSettingsSlideshowTransition) Valid() bool {
 	switch e {
-	case Crossfade:
+	case FrameSettingsSlideshowTransitionCrossfade:
 		return true
-	case Kenburns:
+	case FrameSettingsSlideshowTransitionKenburns:
 		return true
-	case Slide:
+	case FrameSettingsSlideshowTransitionSlide:
 		return true
 	default:
 		return false
@@ -787,6 +805,210 @@ func (e MediaKind) Valid() bool {
 	case Photo:
 		return true
 	case Video:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsBackground.
+const (
+	MirrorSettingsBackgroundBlack   MirrorSettingsBackground = "black"
+	MirrorSettingsBackgroundBlur    MirrorSettingsBackground = "blur"
+	MirrorSettingsBackgroundPalette MirrorSettingsBackground = "palette"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsBackground enum.
+func (e MirrorSettingsBackground) Valid() bool {
+	switch e {
+	case MirrorSettingsBackgroundBlack:
+		return true
+	case MirrorSettingsBackgroundBlur:
+		return true
+	case MirrorSettingsBackgroundPalette:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsCaptionDate.
+const (
+	MirrorSettingsCaptionDateNone     MirrorSettingsCaptionDate = "none"
+	MirrorSettingsCaptionDateReceived MirrorSettingsCaptionDate = "received"
+	MirrorSettingsCaptionDateTaken    MirrorSettingsCaptionDate = "taken"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsCaptionDate enum.
+func (e MirrorSettingsCaptionDate) Valid() bool {
+	switch e {
+	case MirrorSettingsCaptionDateNone:
+		return true
+	case MirrorSettingsCaptionDateReceived:
+		return true
+	case MirrorSettingsCaptionDateTaken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsTransition.
+const (
+	MirrorSettingsTransitionCrossfade MirrorSettingsTransition = "crossfade"
+	MirrorSettingsTransitionKenburns  MirrorSettingsTransition = "kenburns"
+	MirrorSettingsTransitionSlide     MirrorSettingsTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsTransition enum.
+func (e MirrorSettingsTransition) Valid() bool {
+	switch e {
+	case MirrorSettingsTransitionCrossfade:
+		return true
+	case MirrorSettingsTransitionKenburns:
+		return true
+	case MirrorSettingsTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorShowingTransition.
+const (
+	MirrorShowingTransitionCrossfade MirrorShowingTransition = "crossfade"
+	MirrorShowingTransitionCut       MirrorShowingTransition = "cut"
+	MirrorShowingTransitionSlide     MirrorShowingTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the MirrorShowingTransition enum.
+func (e MirrorShowingTransition) Valid() bool {
+	switch e {
+	case MirrorShowingTransitionCrossfade:
+		return true
+	case MirrorShowingTransitionCut:
+		return true
+	case MirrorShowingTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorStateScreen.
+const (
+	MirrorStateScreenDimmed   MirrorStateScreen = "dimmed"
+	MirrorStateScreenOff      MirrorStateScreen = "off"
+	MirrorStateScreenOn       MirrorStateScreen = "on"
+	MirrorStateScreenSleeping MirrorStateScreen = "sleeping"
+	MirrorStateScreenUnknown  MirrorStateScreen = "unknown"
+)
+
+// Valid indicates whether the value is a known member of the MirrorStateScreen enum.
+func (e MirrorStateScreen) Valid() bool {
+	switch e {
+	case MirrorStateScreenDimmed:
+		return true
+	case MirrorStateScreenOff:
+		return true
+	case MirrorStateScreenOn:
+		return true
+	case MirrorStateScreenSleeping:
+		return true
+	case MirrorStateScreenUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorStateType.
+const (
+	MirrorStateTypeMirror MirrorStateType = "mirror"
+)
+
+// Valid indicates whether the value is a known member of the MirrorStateType enum.
+func (e MirrorStateType) Valid() bool {
+	switch e {
+	case MirrorStateTypeMirror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingDirection.
+const (
+	NowShowingDirectionMinus1 NowShowingDirection = -1
+	NowShowingDirectionN1     NowShowingDirection = 1
+)
+
+// Valid indicates whether the value is a known member of the NowShowingDirection enum.
+func (e NowShowingDirection) Valid() bool {
+	switch e {
+	case NowShowingDirectionMinus1:
+		return true
+	case NowShowingDirectionN1:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingScreen.
+const (
+	NowShowingScreenDimmed   NowShowingScreen = "dimmed"
+	NowShowingScreenOff      NowShowingScreen = "off"
+	NowShowingScreenOn       NowShowingScreen = "on"
+	NowShowingScreenSleeping NowShowingScreen = "sleeping"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingScreen enum.
+func (e NowShowingScreen) Valid() bool {
+	switch e {
+	case NowShowingScreenDimmed:
+		return true
+	case NowShowingScreenOff:
+		return true
+	case NowShowingScreenOn:
+		return true
+	case NowShowingScreenSleeping:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingTransition.
+const (
+	NowShowingTransitionCrossfade NowShowingTransition = "crossfade"
+	NowShowingTransitionCut       NowShowingTransition = "cut"
+	NowShowingTransitionSlide     NowShowingTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingTransition enum.
+func (e NowShowingTransition) Valid() bool {
+	switch e {
+	case NowShowingTransitionCrossfade:
+		return true
+	case NowShowingTransitionCut:
+		return true
+	case NowShowingTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingType.
+const (
+	NowShowingTypeNowShowing NowShowingType = "now_showing"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingType enum.
+func (e NowShowingType) Valid() bool {
+	switch e {
+	case NowShowingTypeNowShowing:
 		return true
 	default:
 		return false
@@ -1212,14 +1434,17 @@ func (e SleepScheduleMode) Valid() bool {
 
 // Defines values for TvLinkPurpose.
 const (
-	TvLinkPurposeCast TvLinkPurpose = "cast"
-	TvLinkPurposeTv   TvLinkPurpose = "tv"
+	TvLinkPurposeCast   TvLinkPurpose = "cast"
+	TvLinkPurposeMirror TvLinkPurpose = "mirror"
+	TvLinkPurposeTv     TvLinkPurpose = "tv"
 )
 
 // Valid indicates whether the value is a known member of the TvLinkPurpose enum.
 func (e TvLinkPurpose) Valid() bool {
 	switch e {
 	case TvLinkPurposeCast:
+		return true
+	case TvLinkPurposeMirror:
 		return true
 	case TvLinkPurposeTv:
 		return true
@@ -1230,8 +1455,9 @@ func (e TvLinkPurpose) Valid() bool {
 
 // Defines values for TvLinkCreatePurpose.
 const (
-	TvLinkCreatePurposeCast TvLinkCreatePurpose = "cast"
-	TvLinkCreatePurposeTv   TvLinkCreatePurpose = "tv"
+	TvLinkCreatePurposeCast   TvLinkCreatePurpose = "cast"
+	TvLinkCreatePurposeMirror TvLinkCreatePurpose = "mirror"
+	TvLinkCreatePurposeTv     TvLinkCreatePurpose = "tv"
 )
 
 // Valid indicates whether the value is a known member of the TvLinkCreatePurpose enum.
@@ -1239,7 +1465,33 @@ func (e TvLinkCreatePurpose) Valid() bool {
 	switch e {
 	case TvLinkCreatePurposeCast:
 		return true
+	case TvLinkCreatePurposeMirror:
+		return true
 	case TvLinkCreatePurposeTv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TvSlideRotation.
+const (
+	TvSlideRotationN0   TvSlideRotation = 0
+	TvSlideRotationN180 TvSlideRotation = 180
+	TvSlideRotationN270 TvSlideRotation = 270
+	TvSlideRotationN90  TvSlideRotation = 90
+)
+
+// Valid indicates whether the value is a known member of the TvSlideRotation enum.
+func (e TvSlideRotation) Valid() bool {
+	switch e {
+	case TvSlideRotationN0:
+		return true
+	case TvSlideRotationN180:
+		return true
+	case TvSlideRotationN270:
+		return true
+	case TvSlideRotationN90:
 		return true
 	default:
 		return false
@@ -1940,13 +2192,23 @@ type DeviceEnroll struct {
 		RamMb             *int   `json:"ram_mb,omitempty"`
 		StorageTotalBytes *int   `json:"storage_total_bytes,omitempty"`
 	} `json:"hardware"`
-	Locale   *string `json:"locale,omitempty"`
-	Screen   Screen  `json:"screen"`
-	Timezone *string `json:"timezone,omitempty"`
+
+	// Kind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	Kind     *DeviceKind `json:"kind,omitempty"`
+	Locale   *string     `json:"locale,omitempty"`
+	Screen   Screen      `json:"screen"`
+	Timezone *string     `json:"timezone,omitempty"`
 }
 
 // DeviceEnrollAppChannel defines model for DeviceEnroll.App.Channel.
 type DeviceEnrollAppChannel string
+
+// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+type DeviceKind string
 
 // DeviceState defines model for DeviceState.
 type DeviceState struct {
@@ -2066,6 +2328,11 @@ type Frame struct {
 	ApproveJoinsOnFrame *bool        `json:"approve_joins_on_frame,omitempty"`
 	CreatedAt           *time.Time   `json:"created_at,omitempty"`
 	DefaultPermissions  *Permissions `json:"default_permissions,omitempty"`
+
+	// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
 	// Id UUIDv7
 	Id                     Id          `json:"id"`
@@ -2266,6 +2533,11 @@ type FrameSettingsPatch = map[string]interface{}
 // FrameSummary defines model for FrameSummary.
 type FrameSummary struct {
 	AppVersion *string `json:"app_version,omitempty"`
+
+	// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
 	// Id UUIDv7
 	Id          Id          `json:"id"`
@@ -2493,6 +2765,144 @@ type Member struct {
 	// UserId UUIDv7
 	UserId Id `json:"user_id"`
 }
+
+// MirrorSettings The frame settings a mirroring TV needs to look like the frame.
+type MirrorSettings struct {
+	Background   MirrorSettingsBackground   `json:"background"`
+	Caption      *bool                      `json:"caption,omitempty"`
+	CaptionDate  *MirrorSettingsCaptionDate `json:"caption_date,omitempty"`
+	Clock        *bool                      `json:"clock,omitempty"`
+	Clock24h     *bool                      `json:"clock_24h,omitempty"`
+	Date         *bool                      `json:"date,omitempty"`
+	Fill         bool                       `json:"fill"`
+	IntervalS    int                        `json:"interval_s"`
+	Timezone     *string                    `json:"timezone,omitempty"`
+	Transition   MirrorSettingsTransition   `json:"transition"`
+	TransitionMs int                        `json:"transition_ms"`
+}
+
+// MirrorSettingsBackground defines model for MirrorSettings.Background.
+type MirrorSettingsBackground string
+
+// MirrorSettingsCaptionDate defines model for MirrorSettings.CaptionDate.
+type MirrorSettingsCaptionDate string
+
+// MirrorSettingsTransition defines model for MirrorSettings.Transition.
+type MirrorSettingsTransition string
+
+// MirrorShowing defines model for MirrorShowing.
+type MirrorShowing struct {
+	Direction *int  `json:"direction,omitempty"`
+	HoldMs    *int  `json:"hold_ms,omitempty"`
+	KenBurns  *bool `json:"ken_burns,omitempty"`
+
+	// PlacementId UUIDv7
+	PlacementId Id `json:"placement_id"`
+
+	// Slides One per photo on screen; a collage or pair has several.
+	Slides []TvSlide `json:"slides"`
+
+	// StartedAt Server clock. Compare with `server_time` of the same message.
+	StartedAt    time.Time               `json:"started_at"`
+	Transition   MirrorShowingTransition `json:"transition"`
+	TransitionMs int                     `json:"transition_ms"`
+	Video        *struct {
+		// At Server clock at which `position_ms` was the position.
+		At         time.Time `json:"at"`
+		Live       *bool     `json:"live,omitempty"`
+		Playing    bool      `json:"playing"`
+		PositionMs int       `json:"position_ms"`
+	} `json:"video,omitempty"`
+}
+
+// MirrorShowingTransition defines model for MirrorShowing.Transition.
+type MirrorShowingTransition string
+
+// MirrorState Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+// connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+type MirrorState struct {
+	// ExpiresAt When the link stops working.
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId   Id       `json:"frame_id"`
+	FrameName string   `json:"frame_name"`
+	Next      *TvSlide `json:"next,omitempty"`
+
+	// Online The frame is connected.
+	Online bool `json:"online"`
+
+	// Screen `off`/`sleeping`: show a calm "the frame is asleep" screen.
+	Screen     MirrorStateScreen `json:"screen"`
+	ServerTime time.Time         `json:"server_time"`
+
+	// Settings The frame settings a mirroring TV needs to look like the frame.
+	Settings *MirrorSettings `json:"settings,omitempty"`
+
+	// Showing Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show).
+	Showing *MirrorShowing  `json:"showing,omitempty"`
+	Type    MirrorStateType `json:"type"`
+}
+
+// MirrorStateScreen `off`/`sleeping`: show a calm "the frame is asleep" screen.
+type MirrorStateScreen string
+
+// MirrorStateType defines model for MirrorState.Type.
+type MirrorStateType string
+
+// NowShowing Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+// now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+// video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+// the frame's clock; the server only uses differences between them.
+type NowShowing struct {
+	// Direction 1: the slide came in as "next", -1: as "previous".
+	Direction *NowShowingDirection `json:"direction,omitempty"`
+
+	// HoldMs How long the slide is expected to stay.
+	HoldMs *int `json:"hold_ms,omitempty"`
+
+	// KenBurns The slide moves (Ken Burns): deterministic per placement and focal point.
+	KenBurns *bool `json:"ken_burns,omitempty"`
+
+	// NextPlacementId What the frame expects to show next (for preloading).
+	NextPlacementId *Id `json:"next_placement_id,omitempty"`
+
+	// PlacementId The slide on screen (the first tile of a collage or pair); null while nothing shows.
+	PlacementId *Id `json:"placement_id,omitempty"`
+
+	// PlacementIds Every photo on screen (collage or pair), first = `placement_id`.
+	PlacementIds *[]Id            `json:"placement_ids,omitempty"`
+	Screen       NowShowingScreen `json:"screen"`
+	SentAt       time.Time        `json:"sent_at"`
+
+	// StartedAt When the transition to this slide started.
+	StartedAt    *time.Time            `json:"started_at,omitempty"`
+	Transition   *NowShowingTransition `json:"transition,omitempty"`
+	TransitionMs *int                  `json:"transition_ms,omitempty"`
+	Type         NowShowingType        `json:"type"`
+
+	// Video The playing video, or a live photo's clip, while it is on screen.
+	Video *struct {
+		// Live The clip of a live photo (played over its still).
+		Live    *bool `json:"live,omitempty"`
+		Playing bool  `json:"playing"`
+
+		// PositionMs Playback position at `sent_at`.
+		PositionMs int `json:"position_ms"`
+	} `json:"video,omitempty"`
+}
+
+// NowShowingDirection 1: the slide came in as "next", -1: as "previous".
+type NowShowingDirection int
+
+// NowShowingScreen defines model for NowShowing.Screen.
+type NowShowingScreen string
+
+// NowShowingTransition defines model for NowShowing.Transition.
+type NowShowingTransition string
+
+// NowShowingType defines model for NowShowing.Type.
+type NowShowingType string
 
 // Permissions defines model for Permissions.
 type Permissions struct {
@@ -2984,7 +3394,7 @@ type TvLink struct {
 	Purpose        TvLinkPurpose `json:"purpose"`
 	Token          string        `json:"token"`
 
-	// Url The TV page: <public URL>/tv/<frameId>?t=<token>
+	// Url The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
 	Url string `json:"url"`
 }
 
@@ -3006,11 +3416,15 @@ type TvLinkCreate struct {
 	// PlacementIds Only these placements, in this order (a selection). Empty or absent = the whole visible library.
 	PlacementIds *[]Id `json:"placement_ids,omitempty"`
 
-	// Purpose Informational; cast links are short-lived.
+	// Purpose `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+	// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+	// `placement_ids` or `kind`, because it shows whatever the frame shows.
 	Purpose *TvLinkCreatePurpose `json:"purpose,omitempty"`
 }
 
-// TvLinkCreatePurpose Informational; cast links are short-lived.
+// TvLinkCreatePurpose `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+// `placement_ids` or `kind`, because it shows whatever the frame shows.
 type TvLinkCreatePurpose string
 
 // TvSlide defines model for TvSlide.
@@ -3018,7 +3432,13 @@ type TvSlide struct {
 	Caption    *string    `json:"caption,omitempty"`
 	CapturedAt *time.Time `json:"captured_at,omitempty"`
 	DurationMs *int       `json:"duration_ms,omitempty"`
-	Height     int        `json:"height"`
+
+	// Fit The placement's fit override, else the item's; null = the frame setting.
+	Fit *Fit `json:"fit,omitempty"`
+
+	// FocalPoint The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+	Height     int         `json:"height"`
 
 	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
 	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
@@ -3032,13 +3452,19 @@ type TvSlide struct {
 	PlacementId Id        `json:"placement_id"`
 	PosterUrl   *string   `json:"poster_url,omitempty"`
 	ReceivedAt  time.Time `json:"received_at"`
-	SenderName  string    `json:"sender_name"`
-	ThumbUrl    *string   `json:"thumb_url,omitempty"`
+
+	// Rotation Clockwise rotation set on the frame for this placement.
+	Rotation   *TvSlideRotation `json:"rotation,omitempty"`
+	SenderName string           `json:"sender_name"`
+	ThumbUrl   *string          `json:"thumb_url,omitempty"`
 
 	// Url Absolute signed URL of the master rendition (Range supported).
 	Url   string `json:"url"`
 	Width int    `json:"width"`
 }
+
+// TvSlideRotation Clockwise rotation set on the frame for this placement.
+type TvSlideRotation int
 
 // TvSlideshow defines model for TvSlideshow.
 type TvSlideshow struct {

@@ -14,8 +14,10 @@ export const DEFAULT_TV_INTERVAL = 10;
 /** What to show: a selection, one album or the whole visible library. */
 export type TvScope = { kind: 'selection'; ids: string[] } | { kind: 'album'; albumId: string; name: string } | { kind: 'all' };
 
-export function linkBody(scope: TvScope, interval: number, purpose: 'tv' | 'cast'): TvLinkCreate {
+export function linkBody(scope: TvScope, interval: number, purpose: 'tv' | 'cast' | 'mirror'): TvLinkCreate {
 	const body: TvLinkCreate = { interval_seconds: interval, purpose, expires_in_hours: purpose === 'cast' ? 6 : 12 };
+	// A mirror shows whatever the frame shows: it has no scope of its own.
+	if (purpose === 'mirror') return body;
 	if (scope.kind === 'selection') body.placement_ids = scope.ids.slice(0, 500);
 	if (scope.kind === 'album') body.album_id = scope.albumId;
 	return body;

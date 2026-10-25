@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "此邀请已被回复或已撤回",
   "timed events can last at most 31 days": "有具体时间的日程最长持续 31 天",
   "timed events need a start and an end": "有具体时间的日程需要开始和结束时间",
-  "upload not found, incomplete or already used": "上传未找到、未完成或已被使用"
+  "upload not found, incomplete or already used": "上传未找到、未完成或已被使用",
+  "too many TVs are mirroring this frame": "镜像此相框的电视过多",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "镜像链接显示整个相框：不能带 album_id、placement_ids 或 kind"
  }
 }

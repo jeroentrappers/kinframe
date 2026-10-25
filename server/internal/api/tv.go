@@ -34,6 +34,9 @@ func (s *Server) tvLinkJSON(l *store.TvLink) gen.TvLink {
 		Purpose: gen.TvLinkPurpose(l.Purpose), AlbumId: l.AlbumID, IntervalSeconds: l.IntervalSeconds,
 		CreatedByName: l.CreatedByName, ExpiresAt: l.ExpiresAt, CreatedAt: l.CreatedAt,
 	}
+	if l.Purpose == "mirror" {
+		out.Url += "&mode=mirror"
+	}
 	if l.Kind != nil {
 		out.Kind = ptr(gen.MediaKind(*l.Kind))
 	}
@@ -75,6 +78,16 @@ func (s *Server) CreateTvLink(ctx context.Context, req gen.CreateTvLinkRequestOb
 	var ids []uuid.UUID
 	if b.PlacementIds != nil && len(*b.PlacementIds) > 0 {
 		ids = dedupeIDs(*b.PlacementIds)
+	}
+	if b.Purpose != nil && *b.Purpose == gen.TvLinkCreatePurposeMirror {
+		// A mirror shows whatever the frame shows, so only someone who may see the
+		// whole library can create one, and it has no scope of its own.
+		if err := requirePerm(m, m.Effective().SeeLibrary, "see_library"); err != nil {
+			return nil, err
+		}
+		if len(ids) > 0 || b.AlbumId != nil || b.Kind != nil {
+			return nil, problem.Validation("purpose", "scope", "a mirror link shows the whole frame: no album_id, placement_ids or kind")
+		}
 	}
 	if !m.Effective().SeeLibrary {
 		// Without see_library a link may only show the caller's own placements.
@@ -139,6 +152,7 @@ func (s *Server) RevokeTvLink(ctx context.Context, req gen.RevokeTvLinkRequestOb
 	if err := s.st.RevokeTvLink(ctx, req.FrameId, req.LinkId); err != nil {
 		return nil, err
 	}
+	s.mirrorEndLink(l.FrameID, l.Token)
 	return noContent(), nil
 }
 
@@ -149,21 +163,14 @@ func (s *Server) GetTvSlideshow(ctx context.Context, req gen.GetTvSlideshowReque
 		p.RetryAfter = retry
 		return nil, p
 	}
-	gone := problem.New(problem.NotFound, "this TV link is not valid")
-	l, err := s.st.GetTvLinkByToken(ctx, req.Token)
-	if err == store.ErrNotFound || (err == nil && l.RevokedAt != nil) {
-		return nil, gone
-	}
+	l, err := s.liveTvLink(ctx, req.Token)
 	if err != nil {
 		return nil, err
-	}
-	if !time.Now().Before(l.ExpiresAt) {
-		return nil, problem.New(problem.LinkExpired, "")
 	}
 	// The creator must still be a member; without see_library only their own items show.
 	m, err := s.st.GetMembership(ctx, s.st.Q(), l.FrameID, l.CreatedBy)
 	if err == store.ErrNotFound {
-		return nil, gone
+		return nil, problem.New(problem.NotFound, "this TV link is not valid")
 	}
 	if err != nil {
 		return nil, err
@@ -205,6 +212,22 @@ func (s *Server) GetTvSlideshow(ctx context.Context, req gen.GetTvSlideshowReque
 	return ok(out), nil
 }
 
+// liveTvLink returns an unrevoked, unexpired link: 404 for unknown or revoked
+// tokens, 410 once it expired.
+func (s *Server) liveTvLink(ctx context.Context, token string) (*store.TvLink, error) {
+	l, err := s.st.GetTvLinkByToken(ctx, token)
+	if err == store.ErrNotFound || (err == nil && l.RevokedAt != nil) {
+		return nil, problem.New(problem.NotFound, "this TV link is not valid")
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !time.Now().Before(l.ExpiresAt) {
+		return nil, problem.New(problem.LinkExpired, "")
+	}
+	return l, nil
+}
+
 // tvSlide renders a placement as a slide; items without a master yet are skipped.
 func (s *Server) tvSlide(r *store.PlacementRow) (gen.TvSlide, bool) {
 	if r.MasterKey == nil || r.MediaStatus != "ready" {
@@ -236,6 +259,20 @@ func (s *Server) tvSlide(r *store.PlacementRow) (gen.TvSlide, bool) {
 	}
 	if r.Thumb512Key != nil {
 		sl.ThumbUrl = ptr(s.signedURL(*r.Thumb512Key, tvMediaTTL))
+	}
+	// What the frame uses: the placement's overrides, else the item's own values.
+	if r.FocalOverrideX != nil && r.FocalOverrideY != nil {
+		sl.FocalPoint = &gen.FocalPoint{X: float32(*r.FocalOverrideX), Y: float32(*r.FocalOverrideY)}
+	} else if r.FocalX != nil && r.FocalY != nil {
+		sl.FocalPoint = &gen.FocalPoint{X: float32(*r.FocalX), Y: float32(*r.FocalY)}
+	}
+	if r.FitOverride != nil {
+		sl.Fit = ptr(gen.Fit(*r.FitOverride))
+	} else if r.Fit != nil {
+		sl.Fit = ptr(gen.Fit(*r.Fit))
+	}
+	if r.Rotation != 0 {
+		sl.Rotation = ptr(gen.TvSlideRotation(r.Rotation))
 	}
 	return sl, true
 }

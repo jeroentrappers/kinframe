@@ -161,6 +161,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
+	hub.OnNowShowing = srv.NowShowing
 	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal}, nil
 }
 

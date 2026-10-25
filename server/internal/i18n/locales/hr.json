@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "na ovu je pozivnicu već odgovoreno ili je povučena",
   "timed events can last at most 31 days": "događaji s vremenom mogu trajati najviše 31 dan",
   "timed events need a start and an end": "događaji s vremenom trebaju početak i kraj",
-  "upload not found, incomplete or already used": "prijenos nije pronađen, nepotpun je ili je već iskorišten"
+  "upload not found, incomplete or already used": "prijenos nije pronađen, nepotpun je ili je već iskorišten",
+  "too many TVs are mirroring this frame": "previše televizora već zrcali ovaj okvir",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "zrcalna poveznica prikazuje cijeli okvir: bez album_id, placement_ids ili kind"
  }
 }

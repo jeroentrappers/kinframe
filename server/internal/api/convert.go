@@ -77,6 +77,12 @@ func (s *Server) frameSummary(v *store.FrameView) gen.FrameSummary {
 		AppVersion:  v.AppVersion,
 		NeedsUpdate: ptr(v.AppVersionCode != nil && s.cfg.MinFrameAppVersion > 0 && *v.AppVersionCode < s.cfg.MinFrameAppVersion),
 	}
+	if v.DeviceKind != nil {
+		fs.DeviceKind = ptr(gen.DeviceKind(*v.DeviceKind))
+		if *v.DeviceKind == "browser" {
+			fs.NeedsUpdate = ptr(false) // the web app updates itself
+		}
+	}
 	if fs.Online {
 		fs.LastSeenAt = ptr(time.Now().UTC().Truncate(time.Second))
 	}
@@ -95,7 +101,7 @@ func (s *Server) frameJSON(v *store.FrameView) gen.Frame {
 	return gen.Frame{
 		Id: fs.Id, Name: fs.Name, Location: fs.Location, OwnerName: fs.OwnerName, Role: fs.Role,
 		Permissions: fs.Permissions, Online: fs.Online, LastSeenAt: fs.LastSeenAt, Screen: fs.Screen,
-		AppVersion: fs.AppVersion, NeedsUpdate: fs.NeedsUpdate,
+		AppVersion: fs.AppVersion, NeedsUpdate: fs.NeedsUpdate, DeviceKind: fs.DeviceKind,
 		DefaultPermissions:     ptr(permsJSON(v.DefaultPermissions)),
 		ApproveJoinsOnFrame:    ptr(v.ApproveJoinsOnFrame),
 		InviteRequiresApproval: ptr(v.InviteRequiresApproval),

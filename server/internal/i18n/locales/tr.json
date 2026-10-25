@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "bu davet zaten yanıtlandı veya geri çekildi",
   "timed events can last at most 31 days": "saatli etkinlikler en fazla 31 gün sürebilir",
   "timed events need a start and an end": "saatli etkinliklerin bir başlangıcı ve bitişi olmalı",
-  "upload not found, incomplete or already used": "yükleme bulunamadı, eksik ya da zaten kullanılmış"
+  "upload not found, incomplete or already used": "yükleme bulunamadı, eksik ya da zaten kullanılmış",
+  "too many TVs are mirroring this frame": "bu çerçeveyi yansıtan çok fazla TV var",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "yansıtma bağlantısı çerçevenin tamamını gösterir: album_id, placement_ids veya kind olmadan"
  }
 }

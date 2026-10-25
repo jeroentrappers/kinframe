@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "la această invitație s-a răspuns deja sau a fost retrasă",
   "timed events can last at most 31 days": "evenimentele cu oră pot dura cel mult 31 de zile",
   "timed events need a start and an end": "evenimentele cu oră au nevoie de un început și un sfârșit",
-  "upload not found, incomplete or already used": "încărcarea nu a fost găsită, este incompletă sau a fost deja folosită"
+  "upload not found, incomplete or already used": "încărcarea nu a fost găsită, este incompletă sau a fost deja folosită",
+  "too many TVs are mirroring this frame": "prea multe televizoare oglindesc deja această ramă",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "un link de oglindire arată toată rama: fără album_id, placement_ids sau kind"
  }
 }

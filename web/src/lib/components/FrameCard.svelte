@@ -52,6 +52,7 @@
 	<div class="body">
 		<div class="title-row">
 			<h2><a href="/frames/{frame.id}">{frame.name}</a></h2>
+			{#if frame.device_kind === 'browser'}<span class="badge browser" title={t('frames.browserBadge')}><Icon name="globe" size={13} />{t('frames.browserBadge')}</span>{/if}
 			<RoleBadge role={frame.role} />
 		</div>
 		{#if frame.location}
@@ -79,6 +80,18 @@
 </article>
 
 <style>
+	.badge.browser {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		border-radius: var(--r-full, 999px);
+		background: var(--surface-2);
+		color: var(--text-muted);
+		font-size: 0.75rem;
+		font-weight: 650;
+		white-space: nowrap;
+	}
 	.frame-card {
 		position: relative;
 		overflow: hidden;

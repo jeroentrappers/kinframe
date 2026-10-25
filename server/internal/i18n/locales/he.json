@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "כבר ענו על ההזמנה הזו או שהיא בוטלה",
   "timed events can last at most 31 days": "אירועים עם שעה יכולים להימשך 31 ימים לכל היותר",
   "timed events need a start and an end": "לאירועים עם שעה נדרשות שעת התחלה ושעת סיום",
-  "upload not found, incomplete or already used": "ההעלאה לא נמצאה, לא הושלמה או שכבר נעשה בה שימוש"
+  "upload not found, incomplete or already used": "ההעלאה לא נמצאה, לא הושלמה או שכבר נעשה בה שימוש",
+  "too many TVs are mirroring this frame": "יותר מדי טלוויזיות כבר משקפות את המסגרת הזו",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "קישור שיקוף מציג את כל המסגרת: בלי album_id,‏ placement_ids או kind"
  }
 }

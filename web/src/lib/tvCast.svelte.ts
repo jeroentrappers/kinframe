@@ -4,6 +4,7 @@
 //   presentation Presentation API: the TV shows the /tv page; commands go over the connection.
 //   remote       Remote Playback API for a single video.
 import { api, apiUrl, call, ApiError } from './api/client';
+import { MirrorConnection, mirrorUrl, type MirrorState } from './tvMirror';
 import {
 	castMedia,
 	DEFAULT_TV_INTERVAL,
@@ -71,8 +72,13 @@ export async function fetchSlideshow(token: string): Promise<TvSlideshow> {
 	return body as TvSlideshow;
 }
 
-export async function createTvLink(frameId: string, scope: TvScope, interval: number, purpose: 'tv' | 'cast'): Promise<TvLink> {
+export async function createTvLink(frameId: string, scope: TvScope, interval: number, purpose: 'tv' | 'cast' | 'mirror'): Promise<TvLink> {
 	return call(api.POST('/v1/frames/{frameId}/tv-links', { params: { path: { frameId } }, body: linkBody(scope, interval, purpose) }));
+}
+
+/** Moves the physical frame (README §5.6): the remote of a mirror. Needs change_settings. */
+export async function frameCommand(frameId: string, type: 'next' | 'previous'): Promise<void> {
+	await call(api.POST('/v1/frames/{frameId}/commands', { params: { path: { frameId } }, body: { type } }));
 }
 
 export async function revokeTvLink(frameId: string, linkId: string): Promise<void> {
@@ -88,6 +94,8 @@ export class TvController {
 	interval = $state(DEFAULT_TV_INTERVAL);
 	device = $state<string | null>(null);
 	error = $state<unknown>(null);
+	/** The TV mirrors the physical frame: it follows the frame, and next/previous move the frame. */
+	mirroring = $state(false);
 	frameName = '';
 
 	readonly support = detectSupport(typeof window === 'undefined' ? undefined : (window as never));
@@ -100,6 +108,7 @@ export class TvController {
 	#conn: PresentationConnection | null = null;
 	#video: HTMLVideoElement | null = null;
 	#unlisten: (() => void)[] = [];
+	#mirror: MirrorConnection | null = null;
 
 	get current(): TvSlide | undefined {
 		return this.slides[this.index];
@@ -130,8 +139,52 @@ export class TvController {
 		}
 	}
 
+	/**
+	 * Mirror the frame on a TV: the Presentation API shows the TV page in mirror mode; with
+	 * Google Cast the Default Media Receiver gets each photo the frame shows.
+	 */
+	async startMirror(mode: 'cast' | 'presentation', frameId: string): Promise<void> {
+		await this.stop();
+		this.error = null;
+		this.status = 'connecting';
+		this.mode = mode;
+		this.mirroring = true;
+		this.playing = true;
+		this.#frameId = frameId;
+		try {
+			this.#link = await createTvLink(frameId, { kind: 'all' }, DEFAULT_TV_INTERVAL, 'mirror');
+			if (mode === 'presentation') return await this.#startPresentation(this.#link);
+			await this.#startCast();
+			let shown = '';
+			this.#mirror = new MirrorConnection(mirrorUrl(apiUrl(''), location.origin, this.#link.token), {
+				state: (st: MirrorState) => {
+					const slides = st.showing?.slides ?? [];
+					this.frameName = st.frame_name;
+					this.slides = slides;
+					this.index = 0;
+					const key = slides[0] ? `${slides[0].placement_id}@${st.showing?.started_at}` : '';
+					if (key && key !== shown) {
+						shown = key;
+						void this.#loadCurrent();
+					}
+				},
+				ended: () => void this.stop(),
+				connected: () => {}
+			});
+			this.#mirror.start();
+		} catch (e) {
+			if (e !== 'cancel') console.warn('mirror on TV failed', e);
+			this.error = e;
+			await this.stop();
+			throw e;
+		}
+	}
+
 	async stop(): Promise<void> {
 		this.#clearTimer();
+		this.#mirror?.stop();
+		this.#mirror = null;
+		this.mirroring = false;
 		for (const off of this.#unlisten.splice(0)) off();
 		const link = this.#link;
 		this.#link = null;
@@ -200,13 +253,14 @@ export class TvController {
 
 	#schedule() {
 		this.#clearTimer();
-		if (!this.playing || this.mode !== 'cast') return;
+		if (!this.playing || this.mode !== 'cast' || this.mirroring) return;
 		// Videos advance when the receiver reports the end; the timer is only a safety net.
 		const ms = this.current?.kind === 'video' ? dwellMs(this.current, this.interval) + 10_000 : dwellMs(this.current, this.interval);
 		this.#timer = setTimeout(() => this.#go(1), ms);
 	}
 
 	async #go(dir: 1 | -1) {
+		if (this.mirroring) return frameCommand(this.#frameId, dir === 1 ? 'next' : 'previous').catch((e) => (this.error = e));
 		if (this.mode === 'presentation') return this.#send({ cmd: dir === 1 ? 'next' : 'prev' });
 		if (this.mode !== 'cast' || this.slides.length === 0) return;
 		this.index = step(this.index, this.slides.length, dir);
@@ -284,7 +338,7 @@ export class TvController {
 		const listener = (alive: boolean) => {
 			if (ms.playerState === w.chrome.cast.media.PlayerState.IDLE && ms.idleReason === w.chrome.cast.media.IdleReason.FINISHED) {
 				ms.removeUpdateListener(listener);
-				if (this.playing) void this.#go(1);
+				if (this.playing && !this.mirroring) void this.#go(1);
 			} else if (!alive) ms.removeUpdateListener(listener);
 		};
 		ms.addUpdateListener(listener);

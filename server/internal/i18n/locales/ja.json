@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "この招待はすでに応答済みか、取り消されています",
   "timed events can last at most 31 days": "時刻指定の予定の期間は最長 31 日です",
   "timed events need a start and an end": "時刻指定の予定には開始と終了が必要です",
-  "upload not found, incomplete or already used": "アップロードが見つからないか、未完了か、すでに使用されています"
+  "upload not found, incomplete or already used": "アップロードが見つからないか、未完了か、すでに使用されています",
+  "too many TVs are mirroring this frame": "このフレームをミラーしているテレビが多すぎます",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "ミラーリンクはフレーム全体を表示します: album_id、placement_ids、kind は指定できません"
  }
 }

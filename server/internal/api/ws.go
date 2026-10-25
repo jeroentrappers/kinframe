@@ -54,6 +54,7 @@ func (s *Server) DeviceConnection(deviceID uuid.UUID, frameID *uuid.UUID, online
 	if frameID == nil {
 		return
 	}
+	s.mirrorOnline(*frameID, online)
 	members, err := s.st.MemberIDs(ctx, *frameID, false)
 	if err != nil {
 		s.log.Warn("frame members", "err", err)

@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "uz šo ielūgumu jau ir atbildēts vai tas ir atsaukts",
   "timed events can last at most 31 days": "notikumi ar laiku var ilgt ne vairāk kā 31 dienu",
   "timed events need a start and an end": "notikumiem ar laiku nepieciešams sākums un beigas",
-  "upload not found, incomplete or already used": "augšupielāde nav atrasta, nav pabeigta vai jau izmantota"
+  "upload not found, incomplete or already used": "augšupielāde nav atrasta, nav pabeigta vai jau izmantota",
+  "too many TVs are mirroring this frame": "pārāk daudz televizoru jau spoguļo šo rāmi",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "spoguļa saite rāda visu rāmi: bez album_id, placement_ids vai kind"
  }
 }

@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "na túto pozvánku už bolo odpovedané alebo bola stiahnutá",
   "timed events can last at most 31 days": "udalosti s časom môžu trvať najviac 31 dní",
   "timed events need a start and an end": "udalosti s časom potrebujú začiatok a koniec",
-  "upload not found, incomplete or already used": "nahraný súbor sa nenašiel, je neúplný alebo už bol použitý"
+  "upload not found, incomplete or already used": "nahraný súbor sa nenašiel, je neúplný alebo už bol použitý",
+  "too many TVs are mirroring this frame": "tento rámik už zrkadlí príliš veľa televízorov",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "zrkadlový odkaz ukazuje celý rámik: bez album_id, placement_ids alebo kind"
  }
 }

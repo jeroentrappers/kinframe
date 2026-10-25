@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "this invitation was already answered or withdrawn",
   "timed events can last at most 31 days": "timed events can last at most 31 days",
   "timed events need a start and an end": "timed events need a start and an end",
-  "upload not found, incomplete or already used": "upload not found, incomplete or already used"
+  "upload not found, incomplete or already used": "upload not found, incomplete or already used",
+  "too many TVs are mirroring this frame": "too many TVs are mirroring this frame",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "a mirror link shows the whole frame: no album_id, placement_ids or kind"
  }
 }

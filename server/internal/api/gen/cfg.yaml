@@ -26,3 +26,5 @@ output-options:
     - devToken
     # Hand-written: CSV download.
     - operatorExportReservations
+    # Hand-written: the TV mirror websocket.
+    - tvMirror

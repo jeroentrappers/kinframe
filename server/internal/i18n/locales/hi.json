@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "इस न्योते का जवाब पहले ही दिया जा चुका है या इसे वापस लिया जा चुका है",
   "timed events can last at most 31 days": "तय समय वाले इवेंट ज़्यादा से ज़्यादा 31 दिन के हो सकते हैं",
   "timed events need a start and an end": "तय समय वाले इवेंट के लिए शुरू और खत्म होने का समय ज़रूरी है",
-  "upload not found, incomplete or already used": "अपलोड नहीं मिला, अधूरा है या पहले ही इस्तेमाल हो चुका है"
+  "upload not found, incomplete or already used": "अपलोड नहीं मिला, अधूरा है या पहले ही इस्तेमाल हो चुका है",
+  "too many TVs are mirroring this frame": "बहुत सारे टीवी पहले से इस फ़्रेम को मिरर कर रहे हैं",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "मिरर लिंक पूरा फ़्रेम दिखाता है: album_id, placement_ids या kind नहीं"
  }
 }
