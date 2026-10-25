@@ -16,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.design.Kin
 import app.kinframe.core.plugin.PluginView
@@ -53,22 +55,70 @@ class PluginScreenshotTest {
     private val now = WeatherFixtures.nowMs
     private val weather = WeatherFixtures.gent()
 
-    private fun stage(name: String, layout: PluginLayoutConfig, vararg instances: InstanceState, detail: InstanceState? = null, detailView: PluginView? = null, seed: Int = 0) =
+    private fun stage(
+        name: String, layout: PluginLayoutConfig, vararg instances: InstanceState, detail: InstanceState? = null, detailView: PluginView? = null,
+        seed: Int = 0, pair: Boolean = false,
+    ) =
         Screenshots.shot("plugins_$name") {
             androidx.compose.foundation.layout.BoxWithConstraints {
-                val img = androidx.compose.runtime.remember { placeholderPhoto(constraints.maxWidth, constraints.maxHeight, seed) }
-                PluginStage(layout, instances.toList(), "14:20", "Sunday 25 October", weather, now, photoImage = img, detail = detail, detailView = detailView) {
+                val w = constraints.maxWidth
+                val h = constraints.maxHeight
+                val img = androidx.compose.runtime.remember {
+                    if (!pair) placeholderPhoto(w, h, seed) else {
+                        // Two photos side by side as the slideshow renders them, at the photo area's size.
+                        val area = (BandGeometry.compute(w, h, 1f, layout.side) as? BandGeometry.Band)?.photo ?: PxRect(0, 0, w, h)
+                        pairPhoto(area.width, area.height, seed)
+                    }
+                }
+                PluginStage(
+                    layout, instances.toList(), "14:20", "Sunday 25 October", weather, now, shortDate = "Sun\n25 Oct",
+                    photoImage = img, detail = detail, detailView = detailView,
+                ) {
                     androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
                 }
             }
         }
 
+    /** A pair (two portrait photos on a landscape area, two landscape ones on a portrait area) with sender lines. */
+    private fun pairPhoto(w: Int, h: Int, seed: Int): androidx.compose.ui.graphics.ImageBitmap {
+        val landscape = w >= h
+        val dir = kotlin.io.path.createTempDirectory("pair").toFile()
+        fun file(i: Int): File {
+            val pw = if (landscape) 600 else 1200
+            val ph = if (landscape) 900 else 800
+            val f = File(dir, "p$i.png")
+            f.outputStream().use { placeholderPhoto(pw, ph, seed + i).asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+            return f
+        }
+        val tiles = app.kinframe.frame.slideshow.Collage.cells(2, landscape).mapIndexed { i, cell ->
+            app.kinframe.frame.slideshow.SlideRenderer.TileRequest(
+                file(i), 0, null, null, cell,
+                label = listOf("Anna · Yesterday", "Line Van Gavere · via Frameo · 5 days ago")[i],
+                caption = "Autumn walk in the woods".takeIf { i == 1 },
+            )
+        }
+        return app.kinframe.frame.slideshow.SlideRenderer().renderTiles(tiles, w, h, 1f, app.kinframe.frame.slideshow.CornerReserve.None).asImageBitmap()
+    }
+
     private val band = PluginLayoutConfig(PluginLayoutMode.Band, BandSide.Right)
     private val overlay = PluginLayoutConfig(PluginLayoutMode.Overlay)
 
     @Test fun bandLandscapePaper() = stage(
-        "band_landscape_paper", band.copy(clockInBand = true),
+        "band_landscape_paper", band,
         previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),
+    )
+
+    /** The Denver as used: a portrait pair, the band on the left over the photo's colours, the P1 dial in it. */
+    @Test fun bandLandscapePairLeft() = stage(
+        "band_landscape_pair_left", band.copy(side = BandSide.Left, background = BandBackground.Photo),
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), seed = 1, pair = true,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun bandPortraitPair() = stage(
+        "band_portrait_pair", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("value-returning"), Slot.TopRight),
+        seed = 2, pair = true,
     )
 
     @Test fun bandLandscapePhotoLeft() = stage(
@@ -83,7 +133,7 @@ class PluginScreenshotTest {
 
     @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
     fun bandPortraitPaper() = stage(
-        "band_portrait_paper", band.copy(clockInBand = true),
+        "band_portrait_paper", band,
         previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),
         seed = 2,
     )
@@ -124,7 +174,7 @@ class PluginScreenshotTest {
 
     @Test @Config(qualifiers = "w960dp-h540dp-land-xhdpi")
     fun bandFullHd() = stage(
-        "band_1920x1080", band.copy(clockInBand = true),
+        "band_1920x1080", band,
         previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("gauge-car"), Slot.TopRight),
     )
 
@@ -158,7 +208,7 @@ class PluginScreenshotTest {
     )
 
     @Test fun stationBandColumn() = stage(
-        "station_band_column", band.copy(clockInBand = true),
+        "station_band_column", band,
         previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
         previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
     )

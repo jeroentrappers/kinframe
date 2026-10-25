@@ -13,7 +13,6 @@
     <string name="plugins_band_background">Фон полосы</string>
     <string name="plugins_background_paper">Бумага</string>
     <string name="plugins_background_photo">Из фото</string>
-    <string name="plugins_band_clock">Часы и погода на полосе</string>
     <string name="plugins_slot">Угол</string>
     <string name="plugins_slot_top_left">Вверху слева</string>
     <string name="plugins_slot_top_right">Вверху справа</string>

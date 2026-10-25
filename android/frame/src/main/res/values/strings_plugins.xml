@@ -13,7 +13,6 @@
     <string name="plugins_band_background">Band background</string>
     <string name="plugins_background_paper">Paper</string>
     <string name="plugins_background_photo">From the photo</string>
-    <string name="plugins_band_clock">Clock and weather in the band</string>
     <string name="plugins_slot">Corner</string>
     <string name="plugins_slot_top_left">Top left</string>
     <string name="plugins_slot_top_right">Top right</string>

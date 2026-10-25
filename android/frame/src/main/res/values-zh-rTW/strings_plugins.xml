@@ -13,7 +13,6 @@
     <string name="plugins_band_background">條帶背景</string>
     <string name="plugins_background_paper">紙張</string>
     <string name="plugins_background_photo">取自相片</string>
-    <string name="plugins_band_clock">在條帶中顯示時鐘和天氣</string>
     <string name="plugins_slot">角落</string>
     <string name="plugins_slot_top_left">左上</string>
     <string name="plugins_slot_top_right">右上</string>

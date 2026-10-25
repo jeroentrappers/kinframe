@@ -32,6 +32,7 @@ enum class Visibility { @SerialName("always") Always, @SerialName("on_change") O
 data class PluginLayoutConfig(
     val mode: PluginLayoutMode = PluginLayoutMode.Off,
     val side: BandSide = BandSide.Right,
+    /** Read for compatibility with stored layouts, no longer used: whenever the band shows, it holds the clock. */
     @SerialName("clock_in_band") val clockInBand: Boolean = false,
     val background: BandBackground = BandBackground.Paper,
 )

@@ -23,6 +23,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -90,7 +92,6 @@ fun PluginSettingsSection(c: FrameController) {
                     layout.background, { prefs.setLayout(layout.copy(background = it)) },
                 )
             }
-            SwitchRow(stringResource(R.string.plugins_band_clock), layout.clockInBand) { prefs.setLayout(layout.copy(clockInBand = it)) }
         }
         if (layout.mode != PluginLayoutMode.Off) {
             val p1 = instances.firstOrNull { it.instanceId == FramePlugins.P1_INSTANCE }
@@ -224,11 +225,12 @@ private fun HomeWizardSettings(c: FrameController, cfg: InstanceConfig, update: 
 private fun ManualAddress(current: String?, onUse: (String) -> Unit) {
     var text by remember(current) { mutableStateOf(current.orEmpty()) }
     var error by remember { mutableStateOf(false) }
+    val dismiss = rememberKeyboardDismiss()
     fun submit() {
         val url = LocalAddress.baseUrl(text)
         // An IP address must be private here; a name (p1meter.local) is checked when it resolves.
         error = url == null || LocalAddress.literalIsPrivate(url.host) == false
-        if (!error) onUse(text.trim())
+        if (!error) { onUse(text.trim()); dismiss() }
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
@@ -307,10 +309,11 @@ private fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, upda
 private fun StationCodeField(current: String?, onUse: (String) -> Unit) {
     var text by remember(current) { mutableStateOf(current.orEmpty()) }
     var error by remember { mutableStateOf(false) }
+    val dismiss = rememberKeyboardDismiss()
     fun submit() {
         val code = StationCode.parse(text)
         error = code == null
-        if (code != null) { text = code; onUse(code) }
+        if (code != null) { text = code; onUse(code); dismiss() }
     }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         OutlinedTextField(
@@ -326,4 +329,15 @@ private fun StationCodeField(current: String?, onUse: (String) -> Unit) {
         )
         KinButton(stringResource(R.string.p1_use), { submit() }, style = KinButtonStyle.Secondary, enabled = text.isNotBlank() && text.trim() != current)
     }
+}
+
+/**
+ * Hides the soft keyboard and drops the text field's focus: the frame has no navigation bar, so on the Denver there
+ * is no other way to put the keyboard away once a value is entered.
+ */
+@Composable
+internal fun rememberKeyboardDismiss(): () -> Unit {
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
+    return remember(keyboard, focus) { { keyboard?.hide(); focus.clearFocus() } }
 }

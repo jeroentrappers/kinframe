@@ -5,6 +5,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,6 +83,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var choosingPin by remember { mutableStateOf(false) }
+    val dismissKeyboard = app.kinframe.frame.plugins.rememberKeyboardDismiss()
     LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
 
     fun patch(p: JsonObject) {
@@ -95,7 +97,9 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
         Modifier.fillMaxSize().background(Kin.colors.paper)
             .pointerInput(Unit) {
                 awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis(); c.gate.touch() } }
-            },
+            }
+            // A tap beside a text field puts the keyboard away (the frame has no back button on screen).
+            .pointerInput(Unit) { detectTapGestures(onTap = { dismissKeyboard() }) },
     ) {
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 40.dp, top = 20.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {

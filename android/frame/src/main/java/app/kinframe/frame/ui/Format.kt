@@ -43,6 +43,10 @@ object Format {
     fun longDate(nowMs: Long, zone: ZoneId, locale: Locale): String =
         skeleton(locale, "EEEEdMMMM", nowMs, zone).replaceFirstChar { it.titlecase(locale) }
 
+    /** The date in the narrow band column, two short lines: "Zo" / "25 okt". */
+    fun shortDate(nowMs: Long, zone: ZoneId, locale: Locale): String =
+        skeleton(locale, "EEE", nowMs, zone).trimEnd('.').replaceFirstChar { it.titlecase(locale) } + "\n" + skeleton(locale, "dMMM", nowMs, zone)
+
     /** Localised date from a skeleton via ICU (correct order and month case, e.g. "donderdag 22 oktober"). */
     private fun skeleton(locale: Locale, skeleton: String, epochMs: Long, zone: ZoneId): String {
         val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, skeleton)

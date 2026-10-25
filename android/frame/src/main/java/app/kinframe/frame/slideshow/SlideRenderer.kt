@@ -58,6 +58,9 @@ class SlideRenderer {
     companion object {
         /** Warm near-black between collage tiles (the theme's `night`). */
         val TILE_BACKGROUND: Int = Color.rgb(28, 23, 20)
+        /** Gap between (and around) the tiles of a pair or collage, and their corner radius; the band layout uses them too. */
+        const val TILE_GAP_DP = 8f
+        const val TILE_RADIUS_DP = 14f
     }
 
     /** Caption strip for video slides, drawn above the playing video (bottom [stripHeight] px of the screen). */
@@ -162,8 +165,8 @@ class SlideRenderer {
         val out = Bitmap.createBitmap(screenW, screenH, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
         canvas.drawColor(TILE_BACKGROUND)
-        val gap = 8f * density
-        val radius = 14f * density
+        val gap = TILE_GAP_DP * density
+        val radius = TILE_RADIUS_DP * density
         for (t in tiles) {
             val dst = RectF(
                 t.cell.left * screenW + gap / 2 + if (t.cell.left == 0f) gap / 2 else 0f,

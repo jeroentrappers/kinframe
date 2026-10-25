@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kinframe.core.design.Kin
@@ -28,8 +30,11 @@ import app.kinframe.frame.weather.WeatherIcon
  * the column in landscape, at the end of the strip in portrait.
  */
 @Composable
-fun BandClock(form: ViewForm, palette: PluginPalette, clock: String?, date: String?, weather: Weather?, nowMs: Long, unit: String, onPaper: Boolean) {
-    if (clock == null && weather == null) return
+fun BandClock(
+    form: ViewForm, palette: PluginPalette, clock: String?, date: String?, weather: Weather?, nowMs: Long, unit: String, onPaper: Boolean,
+    shortDate: String? = null,
+) {
+    if (clock == null && date == null && weather == null) return
     val now = weather?.nowConditions(nowMs)
     val color = palette.text
     val scale = Kin.type.body.fontSize.value / 19f
@@ -43,6 +48,12 @@ fun BandClock(form: ViewForm, palette: PluginPalette, clock: String?, date: Stri
             if (clock != null) {
                 Text(clock, style = Kin.type.title.copy(color = color, shadow = palette.shadow, fontSize = (22 * scale).sp, fontWeight = FontWeight.Normal), maxLines = 1)
             }
+            (shortDate ?: date)?.let {
+                Text(
+                    it, style = Kin.type.caption.copy(color = palette.soft, shadow = palette.shadow, fontSize = (13 * scale).sp, lineHeight = (16 * scale).sp),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     } else {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -51,9 +62,9 @@ fun BandClock(form: ViewForm, palette: PluginPalette, clock: String?, date: Stri
                 WeatherIcon(WeatherCodes.glyph(now.code, now.isDay), 40.dp, onPaper = onPaper)
                 Text(Units.tempLabel(now.tempC, unit), style = Kin.type.title.copy(color = color, shadow = palette.shadow, fontWeight = FontWeight.Light))
             }
-            if (clock != null) {
+            if (clock != null || date != null) {
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(clock, style = Kin.type.headline.copy(color = color, shadow = palette.shadow, fontWeight = FontWeight.Light, fontSize = (30 * scale).sp, lineHeight = (34 * scale).sp), maxLines = 1)
+                    if (clock != null) Text(clock, style = Kin.type.headline.copy(color = color, shadow = palette.shadow, fontWeight = FontWeight.Light, fontSize = (30 * scale).sp, lineHeight = (34 * scale).sp), maxLines = 1)
                     date?.let { Text(it, style = Kin.type.caption.copy(color = palette.soft, shadow = palette.shadow), maxLines = 1) }
                 }
             }
