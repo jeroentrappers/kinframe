@@ -77,7 +77,9 @@ object PluginViewParser {
         }
 
         fun value(o: JsonObject, path: String): ValueView {
-            allowOnly(o, path, setOf("type", "value", "unit", "label", "icon", "trend", "tone"))
+            allowOnly(o, path, setOf("type", "value", "unit", "label", "icon", "icon_rotation", "trend", "tone"))
+            val rotation = number(o, "icon_rotation", path)
+            if (rotation != null && (rotation < 0f || rotation > 360f)) fail("$path/icon_rotation", "expected degrees from 0 to 360")
             return ValueView(
                 value = string(o, "value", path, ViewLimits.MAX_VALUE, required = true)!!,
                 unit = string(o, "unit", path, ViewLimits.MAX_UNIT),
@@ -85,6 +87,7 @@ object PluginViewParser {
                 icon = icon(o, path),
                 trend = string(o, "trend", path, 8)?.let { Trend.of(it) ?: fail("$path/trend", "expected up, down or flat") },
                 tone = tone(o, path),
+                iconRotation = rotation,
             )
         }
 

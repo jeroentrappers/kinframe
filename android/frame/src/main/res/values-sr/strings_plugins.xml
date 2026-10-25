@@ -46,4 +46,30 @@
     <string name="p1_today_import">Потрошено данас</string>
     <string name="p1_today_export">Предато данас</string>
     <string name="p1_today_gas">Гас данас</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Метеоролошка станица</string>
+    <string name="ws_station">Станица</string>
+    <string name="ws_code">Weathercloud станица</string>
+    <string name="ws_code_help">Код станице или веза ка њеној Weathercloud страници.</string>
+    <string name="ws_code_invalid">Овде нема кода Weathercloud станице. Копирајте везу странице станице.</string>
+    <string name="ws_unofficial">Weathercloud нема званични API: рам чита исте јавне податке као веб-страница станице, највише на сваких 5 минута. То може престати да ради ако Weathercloud промени свој сајт.</string>
+    <string name="ws_style_compact">Температура</string>
+    <string name="ws_style_rows">Све вредности</string>
+    <string name="ws_wind_unit">Ветар у</string>
+    <string name="ws_wind_auto">Аутоматски</string>
+    <string name="ws_interval">Провера на сваких</string>
+    <string name="ws_use_for_weather">Користи моју метеоролошку станицу за тренутну температуру</string>
+    <string name="ws_use_for_weather_note">Иконица времена и данашња најнижа и највиша температура и даље долазе из прогнозе.</string>
+    <string name="ws_status_error">Станицу није могуће очитати: %1$s</string>
+    <string name="ws_status_quiet">Станица већ неко време није послала ново мерење.</string>
+    <string name="ws_temperature">Температура</string>
+    <string name="ws_dew_point">Тачка росе</string>
+    <string name="ws_gusts">Удари</string>
+    <string name="ws_rain_today">Киша данас</string>
+    <string name="ws_pressure">Притисак</string>
+    <string name="ws_sunlight">Сунчева светлост</string>
+    <string name="ws_uv_index">UV индекс</string>
+    <string name="ws_updated_now">Управо ажурирано</string>
+    <string name="ws_updated_ago">Ажурирано пре %1$s</string>
+    <string name="ws_no_reading_since">Нема новог мерења од %1$s</string>
 </resources>

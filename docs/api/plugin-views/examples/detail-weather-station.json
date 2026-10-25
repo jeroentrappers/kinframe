@@ -1,0 +1,163 @@
+{
+  "type": "stack",
+  "items": [
+    {
+      "type": "stack",
+      "direction": "horizontal",
+      "items": [
+        {
+          "type": "value",
+          "icon": "thermometer",
+          "value": "12,8°",
+          "label": "Affligem · 40 m",
+          "trend": "up"
+        },
+        {
+          "type": "text",
+          "lines": [
+            "Updated 4 min ago",
+            "Feels like 11°"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "stack",
+      "direction": "horizontal",
+      "items": [
+        {
+          "type": "sparkline",
+          "label": "Temperature · 24 h",
+          "show_range": true,
+          "points": [
+            6.5,
+            5.9,
+            5.6,
+            5.4,
+            5.4,
+            5.7,
+            6.1,
+            6.7,
+            7.4,
+            8.2,
+            9.0,
+            9.8,
+            10.6,
+            11.3,
+            11.9,
+            12.3,
+            12.6,
+            12.6,
+            12.4,
+            12.1,
+            11.5,
+            10.9,
+            10.1,
+            9.3,
+            8.4,
+            7.6,
+            6.9,
+            6.3,
+            5.8,
+            5.5,
+            5.4,
+            5.5
+          ]
+        },
+        {
+          "type": "sparkline",
+          "label": "Pressure · 24 h",
+          "show_range": true,
+          "points": [
+            995.5,
+            995.4,
+            995.2,
+            995.1,
+            994.9,
+            994.7,
+            994.5,
+            994.2,
+            993.9,
+            993.6,
+            993.2,
+            992.9,
+            992.6,
+            992.4,
+            992.1,
+            991.9,
+            991.7,
+            991.6,
+            991.5,
+            991.3,
+            991.2,
+            991.1,
+            990.9,
+            990.7,
+            990.5,
+            990.3,
+            990.0,
+            989.7,
+            989.4,
+            989.0,
+            988.7,
+            988.4
+          ]
+        }
+      ]
+    },
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "water",
+          "value": "56 %",
+          "label": "Humidity"
+        },
+        {
+          "type": "value",
+          "icon": "water",
+          "value": "4,2°",
+          "label": "Dew point"
+        },
+        {
+          "type": "value",
+          "icon": "direction",
+          "icon_rotation": 73,
+          "value": "2,3 m/s",
+          "label": "Wind · W"
+        },
+        {
+          "type": "value",
+          "icon": "wind",
+          "value": "5,1 m/s",
+          "label": "Gusts"
+        }
+      ]
+    },
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "rain",
+          "value": "15,1 mm",
+          "label": "Rain today · 2,0 mm/h"
+        },
+        {
+          "type": "value",
+          "icon": "meter",
+          "value": "989 hPa",
+          "label": "Pressure",
+          "trend": "down"
+        },
+        {
+          "type": "value",
+          "icon": "sun",
+          "value": "32 W/m²",
+          "label": "Sunlight · UV 0"
+        }
+      ]
+    }
+  ]
+}

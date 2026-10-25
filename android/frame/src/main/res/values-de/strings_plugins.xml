@@ -46,4 +46,30 @@
     <string name="p1_today_import">Heute bezogen</string>
     <string name="p1_today_export">Heute eingespeist</string>
     <string name="p1_today_gas">Gas heute</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Wetterstation</string>
+    <string name="ws_station">Station</string>
+    <string name="ws_code">Weathercloud-Station</string>
+    <string name="ws_code_help">Der Code der Station oder der Link zu ihrer Weathercloud-Seite.</string>
+    <string name="ws_code_invalid">Hier ist kein Weathercloud-Stationscode enthalten. Kopiere den Link der Stationsseite.</string>
+    <string name="ws_unofficial">Weathercloud hat keine offizielle API: Der Bilderrahmen liest dieselben öffentlichen Daten wie die Webseite der Station, höchstens alle 5 Minuten. Das kann aufhören zu funktionieren, wenn Weathercloud seine Website ändert.</string>
+    <string name="ws_style_compact">Temperatur</string>
+    <string name="ws_style_rows">Alle Werte</string>
+    <string name="ws_wind_unit">Wind in</string>
+    <string name="ws_wind_auto">Automatisch</string>
+    <string name="ws_interval">Abfragen alle</string>
+    <string name="ws_use_for_weather">Meine Wetterstation für die aktuelle Temperatur verwenden</string>
+    <string name="ws_use_for_weather_note">Wettersymbol sowie Tiefst- und Höchstwert von heute kommen weiter aus der Vorhersage.</string>
+    <string name="ws_status_error">Station nicht lesbar: %1$s</string>
+    <string name="ws_status_quiet">Die Station hat seit einer Weile keinen neuen Messwert gesendet.</string>
+    <string name="ws_temperature">Temperatur</string>
+    <string name="ws_dew_point">Taupunkt</string>
+    <string name="ws_gusts">Böen</string>
+    <string name="ws_rain_today">Regen heute</string>
+    <string name="ws_pressure">Luftdruck</string>
+    <string name="ws_sunlight">Sonnenlicht</string>
+    <string name="ws_uv_index">UV-Index</string>
+    <string name="ws_updated_now">Gerade aktualisiert</string>
+    <string name="ws_updated_ago">Vor %1$s aktualisiert</string>
+    <string name="ws_no_reading_since">Kein neuer Messwert seit %1$s</string>
 </resources>

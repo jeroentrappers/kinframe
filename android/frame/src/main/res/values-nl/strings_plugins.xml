@@ -46,4 +46,30 @@
     <string name="p1_today_import">Vandaag verbruikt</string>
     <string name="p1_today_export">Vandaag teruggeleverd</string>
     <string name="p1_today_gas">Gas vandaag</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Weerstation</string>
+    <string name="ws_station">Station</string>
+    <string name="ws_code">Weathercloud-station</string>
+    <string name="ws_code_help">De code van het station, of de link naar de Weathercloud-pagina ervan.</string>
+    <string name="ws_code_invalid">Hierin staat geen Weathercloud-stationscode. Kopieer de link van de pagina van het station.</string>
+    <string name="ws_unofficial">Weathercloud heeft geen officiële API: de fotolijst leest dezelfde openbare gegevens als de webpagina van het station, hoogstens om de 5 minuten. Dat kan stoppen als Weathercloud zijn site verandert.</string>
+    <string name="ws_style_compact">Temperatuur</string>
+    <string name="ws_style_rows">Alle waarden</string>
+    <string name="ws_wind_unit">Wind in</string>
+    <string name="ws_wind_auto">Automatisch</string>
+    <string name="ws_interval">Controleer elke</string>
+    <string name="ws_use_for_weather">Gebruik mijn weerstation voor de huidige temperatuur</string>
+    <string name="ws_use_for_weather_note">Het weericoon en de laagste en hoogste temperatuur van vandaag blijven van de weersverwachting komen.</string>
+    <string name="ws_status_error">Kan het station niet uitlezen: %1$s</string>
+    <string name="ws_status_quiet">Het station heeft al een tijdje geen nieuwe meting gestuurd.</string>
+    <string name="ws_temperature">Temperatuur</string>
+    <string name="ws_dew_point">Dauwpunt</string>
+    <string name="ws_gusts">Windstoten</string>
+    <string name="ws_rain_today">Regen vandaag</string>
+    <string name="ws_pressure">Luchtdruk</string>
+    <string name="ws_sunlight">Zonlicht</string>
+    <string name="ws_uv_index">UV-index</string>
+    <string name="ws_updated_now">Net bijgewerkt</string>
+    <string name="ws_updated_ago">%1$s geleden bijgewerkt</string>
+    <string name="ws_no_reading_since">Geen nieuwe meting sinds %1$s</string>
 </resources>

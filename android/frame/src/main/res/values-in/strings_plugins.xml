@@ -46,4 +46,30 @@
     <string name="p1_today_import">Dipakai hari ini</string>
     <string name="p1_today_export">Dikembalikan hari ini</string>
     <string name="p1_today_gas">Gas hari ini</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Stasiun cuaca</string>
+    <string name="ws_station">Stasiun</string>
+    <string name="ws_code">Stasiun Weathercloud</string>
+    <string name="ws_code_help">Kode stasiun, atau tautan ke halaman Weathercloud-nya.</string>
+    <string name="ws_code_invalid">Tidak ada kode stasiun Weathercloud di sini. Salin tautan halaman stasiun.</string>
+    <string name="ws_unofficial">Weathercloud tidak punya API resmi: bingkai membaca data publik yang sama dengan halaman web stasiun, paling sering setiap 5 menit. Ini bisa berhenti berfungsi jika Weathercloud mengubah situsnya.</string>
+    <string name="ws_style_compact">Suhu</string>
+    <string name="ws_style_rows">Semua nilai</string>
+    <string name="ws_wind_unit">Angin dalam</string>
+    <string name="ws_wind_auto">Otomatis</string>
+    <string name="ws_interval">Periksa setiap</string>
+    <string name="ws_use_for_weather">Gunakan stasiun cuaca saya untuk suhu saat ini</string>
+    <string name="ws_use_for_weather_note">Ikon cuaca serta suhu terendah dan tertinggi hari ini tetap dari prakiraan.</string>
+    <string name="ws_status_error">Tidak dapat membaca stasiun: %1$s</string>
+    <string name="ws_status_quiet">Stasiun belum mengirim pembacaan baru selama beberapa waktu.</string>
+    <string name="ws_temperature">Suhu</string>
+    <string name="ws_dew_point">Titik embun</string>
+    <string name="ws_gusts">Embusan</string>
+    <string name="ws_rain_today">Hujan hari ini</string>
+    <string name="ws_pressure">Tekanan udara</string>
+    <string name="ws_sunlight">Sinar matahari</string>
+    <string name="ws_uv_index">Indeks UV</string>
+    <string name="ws_updated_now">Baru saja diperbarui</string>
+    <string name="ws_updated_ago">Diperbarui %1$s lalu</string>
+    <string name="ws_no_reading_since">Tidak ada pembacaan baru sejak %1$s</string>
 </resources>

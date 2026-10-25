@@ -46,4 +46,30 @@
     <string name="p1_today_import">今日用電</string>
     <string name="p1_today_export">今日回送</string>
     <string name="p1_today_gas">今日瓦斯</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">氣象站</string>
+    <string name="ws_station">氣象站</string>
+    <string name="ws_code">Weathercloud 氣象站</string>
+    <string name="ws_code_help">氣象站的代碼，或其 Weathercloud 頁面的連結。</string>
+    <string name="ws_code_invalid">這裡沒有 Weathercloud 氣象站代碼。請複製該氣象站頁面的連結。</string>
+    <string name="ws_unofficial">Weathercloud 沒有官方 API：相框讀取的是與氣象站網頁相同的公開資料，最多每 5 分鐘一次。如果 Weathercloud 變更其網站，此功能可能會失效。</string>
+    <string name="ws_style_compact">氣溫</string>
+    <string name="ws_style_rows">所有數值</string>
+    <string name="ws_wind_unit">風速單位</string>
+    <string name="ws_wind_auto">自動</string>
+    <string name="ws_interval">檢查間隔</string>
+    <string name="ws_use_for_weather">目前氣溫使用我的氣象站</string>
+    <string name="ws_use_for_weather_note">天氣圖示以及今天的最低和最高氣溫仍來自天氣預報。</string>
+    <string name="ws_status_error">無法讀取氣象站：%1$s</string>
+    <string name="ws_status_quiet">氣象站已有一段時間沒有傳送新讀數。</string>
+    <string name="ws_temperature">氣溫</string>
+    <string name="ws_dew_point">露點</string>
+    <string name="ws_gusts">陣風</string>
+    <string name="ws_rain_today">今日雨量</string>
+    <string name="ws_pressure">氣壓</string>
+    <string name="ws_sunlight">日照</string>
+    <string name="ws_uv_index">紫外線指數</string>
+    <string name="ws_updated_now">剛剛更新</string>
+    <string name="ws_updated_ago">%1$s前更新</string>
+    <string name="ws_no_reading_since">自 %1$s 起沒有新讀數</string>
 </resources>

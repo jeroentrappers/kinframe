@@ -52,6 +52,17 @@ class PluginViewParserTest {
         assertEquals(ValueView("1,2 kW", null, "Using", "bolt", Trend.Up, Tone.Warn), v)
     }
 
+    @Test fun parsesAnIconRotation() {
+        val v = valid("""{"type":"value","icon":"direction","icon_rotation":73,"value":"2,3 m/s"}""") as ValueView
+        assertEquals(73f, v.iconRotation)
+        assertEquals(null, (valid("""{"type":"value","value":"1"}""") as ValueView).iconRotation)
+        assertEquals("/icon_rotation", invalid("""{"type":"value","value":"1","icon_rotation":-10}""").path)
+        assertEquals("/icon_rotation", invalid("""{"type":"value","value":"1","icon_rotation":"90"}""").path)
+        assertEquals("/items/0/icon_rotation", invalid("""{"type":"rows","items":[{"type":"value","value":"1","icon_rotation":400}]}""").path)
+        // Only values turn their icon.
+        assertEquals("/icon_rotation", invalid("""{"type":"text","lines":["a"],"icon":"direction","icon_rotation":10}""").path)
+    }
+
     @Test fun parsesAFlowWithEdgeIndexes() {
         val f = valid(dir.resolve("examples/flow-solar-home-grid.json").readText()) as FlowView
         assertEquals(listOf("solar", "home", "grid"), f.nodes.map { it.id })

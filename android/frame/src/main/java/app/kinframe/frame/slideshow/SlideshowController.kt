@@ -152,6 +152,25 @@ class SlideshowController(private val c: FrameController) {
         }
     }
 
+    /** The clock/weather corner as last measured by the UI (null until then: estimated from the settings). */
+    @Volatile private var measuredCorner: CornerReserve? = null
+
+    private fun corner(): CornerReserve = measuredCorner
+        ?: CornerReserve.estimate(settings.widgets.clock || settings.widgets.date, settings.widgets.weather && settings.location != null)
+
+    /**
+     * Called by the UI with the size of the clock and weather block in the bottom-right corner (dp, margins included;
+     * 0 × 0 when it isn't shown), so captions and pair/collage labels end before it. Re-renders the current slide when
+     * that changes what it needs.
+     */
+    fun setCornerBlock(widthDp: Float, heightDp: Float) {
+        val r = CornerReserve.quantized(widthDp, heightDp)
+        if (r == measuredCorner) return
+        val before = corner()
+        measuredCorner = r
+        if (r != before && screenW > 0 && settings.widgets.caption) c.scope.launch { rerenderCurrent(onlyIfChanged = true) }
+    }
+
     /** Called by the UI with the real drawing size; re-renders on rotation. */
     fun setScreenSize(w: Int, h: Int) {
         if (w <= 0 || h <= 0 || (w == screenW && h == screenH)) return
@@ -407,7 +426,7 @@ class SlideshowController(private val c: FrameController) {
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
         val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}" } +
-            "|$withLabels|${screenW}x$screenH"
+            "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }
         val requests = tiles.map { t ->
@@ -422,7 +441,7 @@ class SlideshowController(private val c: FrameController) {
         }
         val slide = withContext(renderDispatcher) {
             val bmp = try {
-                renderer.renderTiles(requests, screenW, screenH, g.app.resources.displayMetrics.density)
+                renderer.renderTiles(requests, screenW, screenH, g.app.resources.displayMetrics.density, corner())
             } catch (e: OutOfMemoryError) {
                 Log.e(TAG, "OOM rendering collage"); cache.clear(); System.gc(); null
             }
@@ -471,14 +490,14 @@ class SlideshowController(private val c: FrameController) {
             initials = if (w.avatar && name != null) Avatars.initials(name) else null,
             avatarColor = Avatars.color(p.senderId ?: name ?: ""),
             textScale = settings.display.textScale.toFloat().coerceIn(1f, 1.3f),
-            rightInsetDp = if (w.clock || w.date) 340f else 36f,
+            corner = corner(),
         )
     }
 
     private suspend fun obtain(p: PlacementEntity): Slide {
         val caption = captionSpec(p)
         val separate = caption != null && !p.isVideo && settings.slideshow.transition == "kenburns"
-        val key = renderKey(p) + "|$separate|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.rightInsetDp}" }
+        val key = renderKey(p) + "|$separate|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.corner}" }
         cache[key]?.let { return it }
         val slide = withContext(renderDispatcher) {
             val file = g.media.file(p.localFile ?: "")
@@ -548,13 +567,14 @@ class SlideshowController(private val c: FrameController) {
         }
     }
 
-    private suspend fun rerenderCurrent() {
+    private suspend fun rerenderCurrent(onlyIfChanged: Boolean = false) {
         val inc = _stage.value.incoming ?: return
         val p = playable[inc.placement.id] ?: return
         val group = inc.tiles.mapNotNull { playable[it.placement.id] }
         navLock.withLock {
             val slide = if (group.size > 1 && group.size == inc.tiles.size) obtainGroup(group) else obtain(p)
             val st = _stage.value
+            if (onlyIfChanged && slide.key == st.incoming?.key) return@withLock
             if (_preview.value?.slideKey == st.incoming?.key && slide.key != st.incoming?.key) {
                 // The previewed slide fades into the sharp one (the preview is cleared when that is done).
                 transitionRunning = true

@@ -46,4 +46,30 @@
     <string name="p1_today_import">Dnes odebráno</string>
     <string name="p1_today_export">Dnes dodáno</string>
     <string name="p1_today_gas">Plyn dnes</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Meteostanice</string>
+    <string name="ws_station">Stanice</string>
+    <string name="ws_code">Stanice Weathercloud</string>
+    <string name="ws_code_help">Kód stanice nebo odkaz na její stránku na Weathercloud.</string>
+    <string name="ws_code_invalid">Není tu žádný kód stanice Weathercloud. Zkopírujte odkaz na stránku stanice.</string>
+    <string name="ws_unofficial">Weathercloud nemá oficiální API: rámeček čte stejná veřejná data jako webová stránka stanice, nejvýše jednou za 5 minut. Může to přestat fungovat, když Weathercloud změní svůj web.</string>
+    <string name="ws_style_compact">Teplota</string>
+    <string name="ws_style_rows">Všechny hodnoty</string>
+    <string name="ws_wind_unit">Vítr v</string>
+    <string name="ws_wind_auto">Automaticky</string>
+    <string name="ws_interval">Kontrolovat každých</string>
+    <string name="ws_use_for_weather">Pro aktuální teplotu použít mou meteostanici</string>
+    <string name="ws_use_for_weather_note">Ikona počasí a dnešní minimum a maximum dál pocházejí z předpovědi.</string>
+    <string name="ws_status_error">Stanici nelze přečíst: %1$s</string>
+    <string name="ws_status_quiet">Stanice už nějakou dobu neposlala nové měření.</string>
+    <string name="ws_temperature">Teplota</string>
+    <string name="ws_dew_point">Rosný bod</string>
+    <string name="ws_gusts">Nárazy</string>
+    <string name="ws_rain_today">Srážky dnes</string>
+    <string name="ws_pressure">Tlak</string>
+    <string name="ws_sunlight">Sluneční svit</string>
+    <string name="ws_uv_index">UV index</string>
+    <string name="ws_updated_now">Právě aktualizováno</string>
+    <string name="ws_updated_ago">Aktualizováno před %1$s</string>
+    <string name="ws_no_reading_since">Žádné nové měření od %1$s</string>
 </resources>

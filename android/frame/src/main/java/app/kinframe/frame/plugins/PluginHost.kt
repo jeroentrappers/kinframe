@@ -172,8 +172,7 @@ class PluginHost(
                 is ViewResult.Invalid -> { r.error = v.toString(); r.ctx.log(v.toString()) }
             }
             publishFromWorker()
-            // Back off after failures: 2×, 4×… the interval, at most a minute.
-            val wait = if (r.failures == 0) refreshMs else (refreshMs shl (r.failures - 1).coerceAtMost(4)).coerceAtMost(MAX_BACKOFF_MS)
+            val wait = backoffMs(refreshMs, r.failures)
             kotlinx.coroutines.withTimeoutOrNull(wait) { r.wake.receive() }
         }
     }
@@ -191,14 +190,15 @@ class PluginHost(
         _states.value = running.values.map { r ->
             val refreshMs = r.instance.refreshSeconds.coerceAtLeast(MIN_REFRESH_S) * 1000L
             val age = if (r.lastGoodAt == 0L) Long.MAX_VALUE else t - r.lastGoodAt
+            val dataOld = dataIsOld(r.ctx.dataTime, r.instance.staleAfterSeconds, t)
             val status = when {
-                r.view != null && age <= 3 * refreshMs -> InstanceStatus.Ok
+                r.view != null && age <= 3 * refreshMs && !dataOld -> InstanceStatus.Ok
                 r.view != null -> InstanceStatus.Stale
                 r.failures >= 3 -> InstanceStatus.Unavailable
                 else -> InstanceStatus.Loading
             }
             val expired = when {
-                r.view != null -> age > HIDE_AFTER_MS
+                r.view != null -> age > hideAfterMs(refreshMs)
                 status == InstanceStatus.Unavailable -> t - r.startedAt > HIDE_AFTER_MS
                 else -> true
             }
@@ -220,5 +220,23 @@ class PluginHost(
         private const val TAG = "KinFramePlugins"
 
         fun log(id: String, msg: String) = Log.i(TAG, "[$id] $msg")
+
+        /**
+         * The wait before the next call: the refresh interval, and after failures 2×, 4×… of it, at most a minute, or
+         * at most 4× the interval for plugins that refresh less often than every 15 s (a slow internet API is never
+         * asked more often after an error than when it works).
+         */
+        fun backoffMs(refreshMs: Long, failures: Int): Long {
+            if (failures == 0) return refreshMs
+            val cap = maxOf(MAX_BACKOFF_MS, refreshMs * 4)
+            return (refreshMs shl (failures - 1).coerceAtMost(4)).coerceAtMost(cap)
+        }
+
+        /** A last good view older than this is hidden: 15 minutes, or longer for slow refresh intervals. */
+        fun hideAfterMs(refreshMs: Long): Long = maxOf(HIDE_AFTER_MS, 3 * refreshMs + 60_000L)
+
+        /** The source's own measurement is older than the plugin allows ([PluginInstance.staleAfterSeconds]). */
+        fun dataIsOld(dataTime: Long?, staleAfterSeconds: Int?, now: Long): Boolean =
+            dataTime != null && staleAfterSeconds != null && now - dataTime > staleAfterSeconds * 1000L
     }
 }

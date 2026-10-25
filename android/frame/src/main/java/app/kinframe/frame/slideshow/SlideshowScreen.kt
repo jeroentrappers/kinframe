@@ -134,6 +134,7 @@ import app.kinframe.frame.plugins.Slot
 import app.kinframe.frame.plugins.anyVisible
 import app.kinframe.frame.plugins.inSlot
 import app.kinframe.frame.weather.Weather
+import app.kinframe.frame.weather.withStation
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -166,7 +167,9 @@ fun SlideshowScreen(c: FrameController) {
     val nowMs by minuteTicker(c)
     val weatherDoc by c.weather.collectAsState()
     // Shown only when enabled, located and fresh (> 6 h old means the frame has been offline a long while).
+    val stationNow by c.plugins.stationNow.collectAsState()
     val weather = weatherDoc?.takeIf { settings.widgets.weather && settings.location != null && !it.isStale(nowMs) }
+        ?.withStation(stationNow, nowMs)
     LaunchedEffect(weather == null) { if (weather == null) forecastOpen = false }
 
     val joinCard = joinFocused != null
@@ -790,7 +793,8 @@ private fun ClockWidget(
     CornerWidgets(
         clock = if (showClock) Format.clock(now, c.g.clock.zone, h24, locale) else null,
         date = if (showDate) Format.longDate(now, c.g.clock.zone, locale) else null,
-        weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onClockClick = onClockClick, onWeatherClick = onWeatherClick,
+        weather = weather, nowMs = now, unit = unit, onPaper = onPaper, onClockClick = onClockClick,
+        onBlockSize = { w, h -> c.slideshow.setCornerBlock(w, h) }, onWeatherClick = onWeatherClick,
     )
 }
 

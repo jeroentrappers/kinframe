@@ -46,4 +46,30 @@
     <string name="p1_today_import">Потребено днес</string>
     <string name="p1_today_export">Върнато днес</string>
     <string name="p1_today_gas">Газ днес</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Метеостанция</string>
+    <string name="ws_station">Станция</string>
+    <string name="ws_code">Станция в Weathercloud</string>
+    <string name="ws_code_help">Кодът на станцията или връзката към страницата ѝ в Weathercloud.</string>
+    <string name="ws_code_invalid">Тук няма код на станция от Weathercloud. Копирайте връзката към страницата на станцията.</string>
+    <string name="ws_unofficial">Weathercloud няма официален API: рамката чете същите публични данни като уеб страницата на станцията, най-често на всеки 5 минути. Това може да спре да работи, ако Weathercloud промени сайта си.</string>
+    <string name="ws_style_compact">Температура</string>
+    <string name="ws_style_rows">Всички стойности</string>
+    <string name="ws_wind_unit">Вятър в</string>
+    <string name="ws_wind_auto">Автоматично</string>
+    <string name="ws_interval">Проверка на всеки</string>
+    <string name="ws_use_for_weather">Използване на моята метеостанция за текущата температура</string>
+    <string name="ws_use_for_weather_note">Иконата на времето и днешните минимум и максимум остават от прогнозата.</string>
+    <string name="ws_status_error">Станцията не може да се прочете: %1$s</string>
+    <string name="ws_status_quiet">Станцията не е изпращала ново измерване от известно време.</string>
+    <string name="ws_temperature">Температура</string>
+    <string name="ws_dew_point">Точка на оросяване</string>
+    <string name="ws_gusts">Пориви</string>
+    <string name="ws_rain_today">Дъжд днес</string>
+    <string name="ws_pressure">Налягане</string>
+    <string name="ws_sunlight">Слънчева светлина</string>
+    <string name="ws_uv_index">UV индекс</string>
+    <string name="ws_updated_now">Току-що обновено</string>
+    <string name="ws_updated_ago">Обновено преди %1$s</string>
+    <string name="ws_no_reading_since">Няма ново измерване от %1$s</string>
 </resources>

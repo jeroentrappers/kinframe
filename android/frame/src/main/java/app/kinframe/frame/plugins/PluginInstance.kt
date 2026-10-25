@@ -21,6 +21,12 @@ interface PluginInstance {
     /** `manifest.refresh.default_seconds`. */
     val refreshSeconds: Int
 
+    /**
+     * How old the *data* may be before the view is greyed, for sources that report when they measured
+     * ([PluginContext.dataTime]); null = only the host's rule (no good view for 3× the refresh interval).
+     */
+    val staleAfterSeconds: Int? get() = null
+
     /** Called once when the instance starts or its settings change. The first view, or null while loading. */
     suspend fun start(ctx: PluginContext): JsonElement? = null
 
@@ -50,7 +56,14 @@ class PluginContext(
     val now: () -> Long,
     val zone: () -> ZoneId,
     val invalidate: () -> Unit,
-)
+) {
+    /**
+     * `ctx.dataTime`: when the source measured what the last view shows (epoch ms), for sources that only update every
+     * few minutes (a weather station). The host greys the view once this is older than
+     * [PluginInstance.staleAfterSeconds], even while fetching still works.
+     */
+    @Volatile var dataTime: Long? = null
+}
 
 class PluginHttpException(val status: Int, message: String) : IOException(message)
 
@@ -59,7 +72,13 @@ class PluginHttpException(val status: Int, message: String) : IOException(messag
  * the manifest permissions, local-only requests resolve through [LocalAddress.dns], no redirects are followed, a 10 s
  * timeout and a 1 MB response limit.
  */
-class PluginHttp(base: OkHttpClient, private val allowed: (okhttp3.HttpUrl) -> Boolean, localOnly: Boolean) {
+class PluginHttp(
+    base: OkHttpClient,
+    private val allowed: (okhttp3.HttpUrl) -> Boolean,
+    localOnly: Boolean,
+    /** Sent with every request, so a service can tell who is calling (and contact the project if it misbehaves). */
+    private val userAgent: String = DEFAULT_USER_AGENT,
+) {
     private val client = base.newBuilder()
         .followRedirects(false).followSslRedirects(false)
         .callTimeout(10, TimeUnit.SECONDS).connectTimeout(5, TimeUnit.SECONDS).readTimeout(8, TimeUnit.SECONDS)
@@ -67,9 +86,12 @@ class PluginHttp(base: OkHttpClient, private val allowed: (okhttp3.HttpUrl) -> B
         .apply { if (localOnly) dns(LocalAddress.dns) }
         .build()
 
-    suspend fun get(url: okhttp3.HttpUrl): String = withContext(Dispatchers.IO) {
+    /** GET [url]; [headers] may add request headers (not `Host`, `Cookie` or `Authorization`-like ones the host sets). */
+    suspend fun get(url: okhttp3.HttpUrl, headers: Map<String, String> = emptyMap()): String = withContext(Dispatchers.IO) {
         if (!allowed(url)) throw SecurityException("not allowed: ${url.host}")
-        client.newCall(Request.Builder().url(url).header("Accept", "application/json").build()).execute().use { r ->
+        val req = Request.Builder().url(url).header("Accept", "application/json").header("User-Agent", userAgent)
+        headers.forEach { (k, v) -> if (k.lowercase() !in RESERVED) req.header(k, v) }
+        client.newCall(req.build()).execute().use { r ->
             if (!r.isSuccessful) throw PluginHttpException(r.code, "HTTP ${r.code}")
             val body = r.body
             val len = body.contentLength()
@@ -81,5 +103,9 @@ class PluginHttp(base: OkHttpClient, private val allowed: (okhttp3.HttpUrl) -> B
         }
     }
 
-    companion object { const val MAX_BYTES = 1024 * 1024 }
+    companion object {
+        const val MAX_BYTES = 1024 * 1024
+        const val DEFAULT_USER_AGENT = "kinframe-frame (+https://github.com/jeroentrappers/kinframe)"
+        private val RESERVED = setOf("host", "user-agent", "cookie", "content-length", "transfer-encoding", "connection")
+    }
 }

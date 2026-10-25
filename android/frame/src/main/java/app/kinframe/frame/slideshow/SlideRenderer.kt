@@ -47,8 +47,8 @@ class SlideRenderer {
         val initials: String?,
         val avatarColor: Int,
         val textScale: Float = 1f,
-        /** Space kept free on the right for the clock widget, in dp. */
-        val rightInsetDp: Float = 340f,
+        /** The clock and weather block in the bottom-right corner, kept clear ([CaptionSafeArea]). */
+        val corner: CornerReserve = CornerReserve.estimate(clockOrDate = true, weather = false),
     )
 
     class UndecodableException(msg: String) : Exception(msg)
@@ -158,7 +158,7 @@ class SlideRenderer {
      * fills its cell around its focal point, with soft rounded corners and an even gap on a warm dark background.
      * Photos are decoded one at a time at the cell's size and recycled right away.
      */
-    fun renderTiles(tiles: List<TileRequest>, screenW: Int, screenH: Int, density: Float): Bitmap {
+    fun renderTiles(tiles: List<TileRequest>, screenW: Int, screenH: Int, density: Float, corner: CornerReserve = CornerReserve.None): Bitmap {
         val out = Bitmap.createBitmap(screenW, screenH, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
         canvas.drawColor(TILE_BACKGROUND)
@@ -184,7 +184,7 @@ class SlideRenderer {
             } else {
                 canvas.drawColor(Color.rgb(46, 38, 33))
             }
-            if (t.label != null || t.caption != null) drawTileLabel(canvas, dst, t, density)
+            if (t.label != null || t.caption != null) drawTileLabel(canvas, dst, t, density, CaptionSafeArea.tile(dst.left, dst.right, dst.bottom, screenW, screenH, 16f * density, corner, density))
             canvas.restore()
         }
         // Painted edge to edge: opaque, so the GPU can skip blending (a large saving on the Mali-400).
@@ -192,10 +192,13 @@ class SlideRenderer {
         return out
     }
 
-    /** Caption (one line) and sender line at the bottom of a tile, over a soft scrim. */
-    private fun drawTileLabel(canvas: Canvas, dst: RectF, t: TileRequest, density: Float) {
+    /**
+     * Caption (one line) and sender line at the bottom of a tile, over a soft scrim; [box] keeps them clear of the
+     * clock in the bottom-right tile (narrower, or lifted above it).
+     */
+    private fun drawTileLabel(canvas: Canvas, dst: RectF, t: TileRequest, density: Float, box: CaptionSafeArea.Box) {
         val pad = 16f * density
-        val width = (dst.width() - 2 * pad).toInt().coerceAtLeast(1)
+        val width = box.maxWidth
         val metaPaint = android.text.TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(230, 255, 255, 255); textSize = 16f * density
             setShadowLayer(6f, 0f, 1f, Color.argb(153, 0, 0, 0))
@@ -209,11 +212,11 @@ class SlideRenderer {
         val lineCap = capPaint.fontSpacing
         val lineMeta = metaPaint.fontSpacing
         val textH = (if (cap != null) lineCap else 0f) + (if (meta != null) lineMeta else 0f)
-        val scrimTop = dst.bottom - textH - pad * 2.5f
+        val scrimTop = maxOf(dst.top, box.bottom - textH - pad * 1.5f)
         canvas.drawRect(dst.left, scrimTop, dst.right, dst.bottom, Paint().apply {
             shader = android.graphics.LinearGradient(0f, scrimTop, 0f, dst.bottom, Color.TRANSPARENT, Color.argb(150, 0, 0, 0), android.graphics.Shader.TileMode.CLAMP)
         })
-        var y = dst.bottom - pad - textH
+        var y = box.bottom - textH
         if (cap != null) { canvas.drawText(cap, dst.left + pad, y - capPaint.ascent(), capPaint); y += lineCap }
         if (meta != null) canvas.drawText(meta, dst.left + pad, y - metaPaint.ascent(), metaPaint)
     }
@@ -267,17 +270,18 @@ object CaptionPainter {
         val dp = density
         val sp = density * c.textScale
         val hasText = !c.text.isNullOrBlank()
-        val scrimH = (if (hasText) 260f else 180f) * dp
+        val left = 36f * dp
+        val avatarSize = 52f * dp
+        val textLeft = if (c.initials != null) left + avatarSize + 16f * dp else left
+        // Beside the clock and weather block, or lifted above it when there is no room beside it.
+        val box = CaptionSafeArea.single(w, h, textLeft, h - 32f * dp, c.corner, dp)
+        val bottom = box.bottom
+        val maxTextW = box.maxWidth
+        val scrimH = (if (hasText) 260f else 180f) * dp + (h - 32f * dp - bottom)
         val scrim = Paint().apply {
             shader = android.graphics.LinearGradient(0f, h - scrimH, 0f, h.toFloat(), Color.TRANSPARENT, Color.argb(140, 0, 0, 0), android.graphics.Shader.TileMode.CLAMP)
         }
         canvas.drawRect(0f, h - scrimH, w.toFloat(), h.toFloat(), scrim)
-
-        val left = 36f * dp
-        val bottom = h - 32f * dp
-        val avatarSize = 52f * dp
-        val textLeft = if (c.initials != null) left + avatarSize + 16f * dp else left
-        val maxTextW = (w - textLeft - c.rightInsetDp * dp).toInt().coerceAtLeast((160 * dp).toInt())
 
         val metaPaint = android.text.TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(230, 255, 255, 255); textSize = 19f * sp
@@ -331,9 +335,15 @@ object CaptionPainter {
     private fun layout(text: CharSequence, paint: android.text.TextPaint, width: Int, maxLines: Int): android.text.StaticLayout {
         val full = android.text.StaticLayout(text, paint, width, android.text.Layout.Alignment.ALIGN_NORMAL, 1.1f, 0f, false)
         if (full.lineCount <= maxLines) return full
-        val end = full.getLineEnd(maxLines - 1)
-        val cut = text.subSequence(0, (end - 1).coerceAtLeast(0)).toString().trimEnd() + "…"
-        return android.text.StaticLayout(cut, paint, width, android.text.Layout.Alignment.ALIGN_NORMAL, 1.1f, 0f, false)
+        // Cut after the last line that fits and add "…"; the ellipsis can push the last word onto one more line, so
+        // drop words until it fits.
+        var cut = text.subSequence(0, (full.getLineEnd(maxLines - 1) - 1).coerceAtLeast(0)).toString().trimEnd()
+        while (true) {
+            val l = android.text.StaticLayout("$cut…", paint, width, android.text.Layout.Alignment.ALIGN_NORMAL, 1.1f, 0f, false)
+            val space = cut.lastIndexOf(' ')
+            if (l.lineCount <= maxLines || space <= 0) return l
+            cut = cut.substring(0, space).trimEnd()
+        }
     }
 }
 

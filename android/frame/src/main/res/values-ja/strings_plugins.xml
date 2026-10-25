@@ -46,4 +46,30 @@
     <string name="p1_today_import">今日の使用量</string>
     <string name="p1_today_export">今日の売電量</string>
     <string name="p1_today_gas">今日のガス</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">気象ステーション</string>
+    <string name="ws_station">ステーション</string>
+    <string name="ws_code">Weathercloud ステーション</string>
+    <string name="ws_code_help">ステーションのコード、または Weathercloud ページのリンク。</string>
+    <string name="ws_code_invalid">Weathercloud のステーションコードが見つかりません。ステーションのページのリンクをコピーしてください。</string>
+    <string name="ws_unofficial">Weathercloud には公式の API がありません。フォトフレームはステーションのウェブページと同じ公開データを、最短 5 分ごとに読み取ります。Weathercloud がサイトを変更すると動作しなくなる場合があります。</string>
+    <string name="ws_style_compact">気温</string>
+    <string name="ws_style_rows">すべての値</string>
+    <string name="ws_wind_unit">風速の単位</string>
+    <string name="ws_wind_auto">自動</string>
+    <string name="ws_interval">確認の間隔</string>
+    <string name="ws_use_for_weather">現在の気温に自分の気象ステーションを使う</string>
+    <string name="ws_use_for_weather_note">天気アイコンと今日の最低・最高気温は引き続き予報から表示します。</string>
+    <string name="ws_status_error">ステーションを読み取れません：%1$s</string>
+    <string name="ws_status_quiet">ステーションからしばらく新しい測定値が届いていません。</string>
+    <string name="ws_temperature">気温</string>
+    <string name="ws_dew_point">露点</string>
+    <string name="ws_gusts">最大瞬間風速</string>
+    <string name="ws_rain_today">今日の雨量</string>
+    <string name="ws_pressure">気圧</string>
+    <string name="ws_sunlight">日射</string>
+    <string name="ws_uv_index">UV 指数</string>
+    <string name="ws_updated_now">たった今更新</string>
+    <string name="ws_updated_ago">%1$s前に更新</string>
+    <string name="ws_no_reading_since">%1$s以降、新しい測定値はありません</string>
 </resources>

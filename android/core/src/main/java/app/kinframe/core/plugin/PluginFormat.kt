@@ -12,7 +12,13 @@ import kotlin.math.abs
  * Number and unit are joined with a no-break space; [ValueView] splits that unit off to draw it smaller.
  * Not thread-safe (NumberFormat); create one per thread or per plugin host.
  */
-class PluginFormat(val locale: Locale, private val zone: ZoneId = ZoneId.systemDefault(), private val h24: Boolean = true) {
+class PluginFormat(
+    val locale: Locale,
+    private val zone: ZoneId = ZoneId.systemDefault(),
+    private val h24: Boolean = true,
+    /** The frame's `locale.temperature_unit`: "c" or "f". */
+    val temperatureUnit: String = "c",
+) {
     private val nf = NumberFormat.getNumberInstance(locale).apply { isGroupingUsed = true }
 
     private fun num(v: Double, decimals: Int): String {
@@ -54,9 +60,15 @@ class PluginFormat(val locale: Locale, private val zone: ZoneId = ZoneId.systemD
     /** 0–100: "68 %", localised ("68 %" in French, "%68" in Turkish). */
     fun percent(value: Double): String = NumberFormat.getPercentInstance(locale).apply { maximumFractionDigits = 0 }.format(value / 100)
 
-    /** Celsius in, the frame's unit out: "12°" / "54°". */
-    fun temperature(celsius: Double, unit: String = "c"): String =
-        num(if (unit == "f") celsius * 9 / 5 + 32 else celsius, 0) + "°"
+    /** Celsius in, the frame's unit out: "12°" / "54°", or "12,8°" with [decimals] = 1. */
+    fun temperature(celsius: Double, unit: String = temperatureUnit, decimals: Int = 0): String =
+        num(if (unit.equals("f", ignoreCase = true)) celsius * 9 / 5 + 32 else celsius, decimals.coerceIn(0, 3)) + "°"
+
+    /** Any number in the frame's language, with an optional unit: "2,3 m/s", "989 hPa", "1.024". */
+    fun number(value: Double, decimals: Int = 0, unit: String? = null): String {
+        val n = num(value, decimals.coerceIn(0, 6))
+        return if (unit.isNullOrEmpty()) n else join(n, unit)
+    }
 
     /** Seconds: "45 s", "12 min", "2 h 15 min". */
     fun duration(seconds: Long): String {

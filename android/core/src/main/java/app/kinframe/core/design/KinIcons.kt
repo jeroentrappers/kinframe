@@ -175,6 +175,13 @@ object KinIcons {
     val ArrowUp by lazy { line("arrowUp", "M12 19V5", "M6 11l6-6 6 6") }
     val ArrowDown by lazy { line("arrowDown", "M12 5v14", "M6 13l6 6 6-6") }
     val ArrowLeft by lazy { line("arrowLeft", "M19 12H5", "M11 6l-6 6 6 6") }
+    /** Rain: a cloud with three slanted drops. */
+    val Rain by lazy { line("rain", "M7 14h10a3.5 3.5 0 0 0 .5-7A5.5 5.5 0 0 0 6.6 8.3 3 3 0 0 0 7 14z", "M8.5 17.5l-1 2.5", "M12.5 17.5l-1 2.5", "M16.5 17.5l-1 2.5") }
+    /**
+     * A vane arrow pointing up (north at rotation 0), with a fletched tail so it reads as a direction rather than a
+     * trend; meant to be turned by `icon_rotation` (wind direction, heading).
+     */
+    val Direction by lazy { line("direction", "M12 19V3.5", "M7.5 8L12 3.5 16.5 8", "M8.5 21.5l3.5-3 3.5 3") }
 }
 
 /** The API 1 plugin icon names (`app.kinframe.core.plugin.PluginIconNames`) drawn with [KinIcons]. */
@@ -203,6 +210,8 @@ object PluginIcons {
         "cloud" -> KinIcons.Cloud
         "clock" -> KinIcons.Clock
         "calendar" -> KinIcons.CalendarDay
+        "rain" -> KinIcons.Rain
+        "direction" -> KinIcons.Direction
         "washing-machine" -> KinIcons.WashingMachine
         "trash" -> KinIcons.Trash
         "door" -> KinIcons.Door
