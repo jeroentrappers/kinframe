@@ -28,13 +28,16 @@ object ViewJson {
         put("type", "rows"); put("items", JsonArray(items)); tone(tone)
     }
 
-    fun gauge(percent: Float, label: String? = null, caption: String? = null, icon: String? = null, style: GaugeStyle = GaugeStyle.Ring, tone: Tone = Tone.Neutral) =
-        buildJsonObject {
-            put("type", "gauge"); put("value", percent)
-            label?.let { put("label", it) }; caption?.let { put("caption", it) }; icon?.let { put("icon", it) }
-            if (style != GaugeStyle.Ring) put("style", style.json)
-            tone(tone)
-        }
+    fun gauge(
+        percent: Float, label: String? = null, caption: String? = null, icon: String? = null, style: GaugeStyle = GaugeStyle.Ring,
+        tone: Tone = Tone.Neutral, negativeTone: Tone? = null,
+    ) = buildJsonObject {
+        put("type", "gauge"); put("value", percent)
+        label?.let { put("label", it) }; caption?.let { put("caption", it) }; icon?.let { put("icon", it) }
+        if (style != GaugeStyle.Ring) put("style", style.json)
+        tone(tone)
+        negativeTone?.let { put("negative_tone", it.json) }
+    }
 
     fun node(id: String, icon: String, value: String? = null, label: String? = null, tone: Tone = Tone.Neutral) = buildJsonObject {
         put("id", id); put("icon", icon); value?.let { put("value", it) }; label?.let { put("label", it) }; tone(tone)

@@ -32,6 +32,8 @@
     <string name="p1_not_private">Lze použít jen adresy z domácí sítě.</string>
     <string name="p1_style">Zobrazit jako</string>
     <string name="p1_style_value">Číslo</string>
+    <string name="p1_style_gauge">Ukazatel</string>
+    <string name="p1_max">Plný rozsah</string>
     <string name="p1_style_flow">Tok</string>
     <string name="p1_warn">Zvýraznit nad</string>
     <string name="p1_warn_off">Nikdy</string>

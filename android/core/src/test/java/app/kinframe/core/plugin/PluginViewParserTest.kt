@@ -144,6 +144,15 @@ class PluginViewParserTest {
         assertEquals("", invalid(big).path)
     }
 
+    @Test fun dialIsTwoSided() {
+        val d = PluginViewParser.parse(ViewJson.gauge(-40f, label = "1.600 W", style = GaugeStyle.Dial, tone = Tone.Info, negativeTone = Tone.Good))
+        val g = (d as ViewResult.Valid).view as GaugeView
+        assertEquals(-40f, g.percent)
+        assertEquals(Tone.Good, g.negativeTone)
+        assertEquals("/value", invalid("""{"type":"gauge","value":-101,"style":"dial"}""").path)
+        assertEquals("/negative_tone", invalid("""{"type":"gauge","value":10,"style":"bar","negative_tone":"good"}""").path)
+    }
+
     @Test fun builtWithViewJsonRoundTrips() {
         val j = ViewJson.stack(
             listOf(

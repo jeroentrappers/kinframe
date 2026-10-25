@@ -2,7 +2,7 @@
 // this file. The JSON schema next to it (plugin-view.schema.json) and the frame's validator are the authority.
 // Limits: 3 components deep (stack › stack › leaf), 24 components per view, 16 KB serialized, no line breaks.
 
-export type Tone = 'neutral' | 'good' | 'warn' | 'bad' | 'accent';
+export type Tone = 'neutral' | 'good' | 'warn' | 'bad' | 'accent' | 'info';
 
 export type Icon =
   | 'bolt' | 'grid' | 'solar' | 'sun' | 'home' | 'battery' | 'battery-charging' | 'plug' | 'car' | 'flame' | 'gas'
@@ -32,15 +32,20 @@ export interface RowsView {
   tone?: Tone;
 }
 
-/** 0–100 %, ring (default) or bar. `label` ≤ 12 chars (default "68%"), `caption` ≤ 32. */
+/**
+ * 0–100 %, ring (default) or bar. `label` ≤ 12 chars (default "68%"), `caption` ≤ 32.
+ * A `dial` is two-sided: -100–100 %, zero at the top, positive clockwise in `tone`, negative anticlockwise in
+ * `negative_tone` (default `tone`); "1.240 W" draws the unit small below the number. Only a dial takes `negative_tone`.
+ */
 export interface GaugeView {
   type: 'gauge';
   value: number;
   label?: string;
   caption?: string;
   icon?: Icon;
-  style?: 'ring' | 'bar';
+  style?: 'ring' | 'bar' | 'dial';
   tone?: Tone;
+  negative_tone?: Tone;
 }
 
 export interface FlowNode {

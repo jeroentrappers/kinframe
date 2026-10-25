@@ -39,6 +39,7 @@ import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.plugins.homewizard.FoundMeter
 import app.kinframe.frame.plugins.homewizard.HomeWizardDiscovery
+import app.kinframe.frame.plugins.homewizard.HomeWizardViews
 import app.kinframe.frame.plugins.station.StationCode
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.plugins.station.WeathercloudSource
@@ -182,11 +183,23 @@ private fun HomeWizardSettings(c: FrameController, cfg: InstanceConfig, update: 
     InstancePlacement(cfg, update)
     Labeled(stringResource(R.string.p1_style)) {
         ChoiceChips(
-            listOf("value" to stringResource(R.string.p1_style_value), "flow" to stringResource(R.string.p1_style_flow)),
+            listOf(
+                "value" to stringResource(R.string.p1_style_value),
+                "gauge" to stringResource(R.string.p1_style_gauge),
+                "flow" to stringResource(R.string.p1_style_flow),
+            ),
             setting("style") ?: "value", { update(withSetting("style", JsonPrimitive(it))) },
         )
     }
-    Labeled(stringResource(R.string.p1_warn)) {
+    if (setting("style") == "gauge") Labeled(stringResource(R.string.p1_max)) {
+        val f = remember { c.plugins.format() }
+        val current = (cfg.settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: HomeWizardViews.DEFAULT_MAX_W.toInt()
+        ChoiceChips(
+            listOf(2000, 3000, 4000, 5000, 6000, 8000, 10000).map { it to f.number(it.toDouble(), unit = "W") },
+            current, { update(withSetting("max_w", JsonPrimitive(it))) },
+            Modifier.horizontalScroll(rememberScrollState()),
+        )
+    } else Labeled(stringResource(R.string.p1_warn)) {
         val f = remember { c.plugins.format() }
         val current = (cfg.settings["warn_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: 0
         ChoiceChips(

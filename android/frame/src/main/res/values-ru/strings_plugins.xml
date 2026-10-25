@@ -32,6 +32,8 @@
     <string name="p1_not_private">Можно использовать только адреса из домашней сети.</string>
     <string name="p1_style">Показывать как</string>
     <string name="p1_style_value">Число</string>
+    <string name="p1_style_gauge">Шкала</string>
+    <string name="p1_max">Полная шкала</string>
     <string name="p1_style_flow">Поток</string>
     <string name="p1_warn">Выделять выше</string>
     <string name="p1_warn_off">Никогда</string>

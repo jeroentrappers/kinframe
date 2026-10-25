@@ -32,6 +32,8 @@
     <string name="p1_not_private">Csak az otthoni hálózat címei használhatók.</string>
     <string name="p1_style">Megjelenítés módja</string>
     <string name="p1_style_value">Szám</string>
+    <string name="p1_style_gauge">Mérő</string>
+    <string name="p1_max">Teljes skála</string>
     <string name="p1_style_flow">Áramlás</string>
     <string name="p1_warn">Kiemelés e fölött</string>
     <string name="p1_warn_off">Soha</string>

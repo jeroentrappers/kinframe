@@ -32,6 +32,8 @@
     <string name="p1_not_private">Se pot folosi doar adrese din rețeaua de acasă.</string>
     <string name="p1_style">Afișează ca</string>
     <string name="p1_style_value">Număr</string>
+    <string name="p1_style_gauge">Indicator</string>
+    <string name="p1_max">Scală completă</string>
     <string name="p1_style_flow">Flux</string>
     <string name="p1_warn">Evidențiază peste</string>
     <string name="p1_warn_off">Niciodată</string>

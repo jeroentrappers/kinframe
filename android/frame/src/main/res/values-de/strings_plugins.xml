@@ -32,6 +32,8 @@
     <string name="p1_not_private">Nur Adressen in deinem Heimnetz sind möglich.</string>
     <string name="p1_style">Anzeigen als</string>
     <string name="p1_style_value">Zahl</string>
+    <string name="p1_style_gauge">Anzeige</string>
+    <string name="p1_max">Skalenende</string>
     <string name="p1_style_flow">Fluss</string>
     <string name="p1_warn">Hervorheben über</string>
     <string name="p1_warn_off">Nie</string>

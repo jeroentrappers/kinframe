@@ -32,6 +32,8 @@
     <string name="p1_not_private">Only addresses on your home network can be used.</string>
     <string name="p1_style">Show as</string>
     <string name="p1_style_value">Number</string>
+    <string name="p1_style_gauge">Gauge</string>
+    <string name="p1_max">Full scale</string>
     <string name="p1_style_flow">Flow</string>
     <string name="p1_warn">Highlight above</string>
     <string name="p1_warn_off">Never</string>

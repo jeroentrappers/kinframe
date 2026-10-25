@@ -32,6 +32,8 @@
     <string name="p1_not_private">Bara adresser i ditt hemnätverk kan användas.</string>
     <string name="p1_style">Visa som</string>
     <string name="p1_style_value">Siffra</string>
+    <string name="p1_style_gauge">Mätare</string>
+    <string name="p1_max">Full skala</string>
     <string name="p1_style_flow">Flöde</string>
     <string name="p1_warn">Markera över</string>
     <string name="p1_warn_off">Aldrig</string>

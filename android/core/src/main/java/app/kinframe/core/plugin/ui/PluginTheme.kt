@@ -42,6 +42,7 @@ data class PluginPalette(
     val warn: Color,
     val bad: Color,
     val accent: Color,
+    val info: Color,
     val shadow: Shadow?,
 ) {
     fun tone(t: Tone): Color = when (t) {
@@ -50,6 +51,7 @@ data class PluginPalette(
         Tone.Warn -> warn
         Tone.Bad -> bad
         Tone.Accent -> accent
+        Tone.Info -> info
     }
 
     companion object {
@@ -61,14 +63,18 @@ data class PluginPalette(
             warn = Color(0xFFFFD27A),
             bad = Color(0xFFFFA092),
             accent = Color(0xFFF8BC98),
+            info = Color(0xFFD3BBF7),
             shadow = Shadow(Color(0x99000000), Offset(0f, 2f), 8f),
         )
 
         fun onPaper(c: KinColors) = PluginPalette(
-            text = c.ink, soft = c.inkSoft, faint = c.line, good = c.sage, warn = c.warn, bad = c.danger, accent = c.accent, shadow = null,
+            text = c.ink, soft = c.inkSoft, faint = c.line, good = if (c.isDark) c.sage else PaperGreen, warn = c.warn, bad = c.danger, accent = c.accent, info = c.violet, shadow = null,
         )
     }
 }
+
+/** Sage reads grey at widget size; a plugin's `good` on paper is a clear green that still passes AA on paper. */
+private val PaperGreen = Color(0xFF2E7D46)
 
 /** Sizes per form. The frame is read from across the room: corner values are a little smaller than the clock. */
 @Immutable

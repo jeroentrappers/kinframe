@@ -32,6 +32,8 @@
     <string name="p1_not_private">Seules les adresses de votre réseau domestique sont acceptées.</string>
     <string name="p1_style">Afficher comme</string>
     <string name="p1_style_value">Nombre</string>
+    <string name="p1_style_gauge">Jauge</string>
+    <string name="p1_max">Pleine échelle</string>
     <string name="p1_style_flow">Flux</string>
     <string name="p1_warn">Signaler au-dessus de</string>
     <string name="p1_warn_off">Jamais</string>

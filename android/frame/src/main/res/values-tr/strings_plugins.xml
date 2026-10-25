@@ -32,6 +32,8 @@
     <string name="p1_not_private">Yalnızca ev ağınızdaki adresler kullanılabilir.</string>
     <string name="p1_style">Gösterim</string>
     <string name="p1_style_value">Sayı</string>
+    <string name="p1_style_gauge">Gösterge</string>
+    <string name="p1_max">Tam ölçek</string>
     <string name="p1_style_flow">Akış</string>
     <string name="p1_warn">Şunun üzerinde vurgula</string>
     <string name="p1_warn_off">Asla</string>

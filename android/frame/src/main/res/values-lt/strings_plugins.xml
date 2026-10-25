@@ -32,6 +32,8 @@
     <string name="p1_not_private">Galima naudoti tik namų tinklo adresus.</string>
     <string name="p1_style">Rodyti kaip</string>
     <string name="p1_style_value">Skaičius</string>
+    <string name="p1_style_gauge">Matuoklis</string>
+    <string name="p1_max">Visa skalė</string>
     <string name="p1_style_flow">Srautas</string>
     <string name="p1_warn">Paryškinti virš</string>
     <string name="p1_warn_off">Niekada</string>

@@ -32,6 +32,8 @@
     <string name="p1_not_private">ホームネットワーク内のアドレスのみ使用できます。</string>
     <string name="p1_style">表示形式</string>
     <string name="p1_style_value">数値</string>
+    <string name="p1_style_gauge">メーター</string>
+    <string name="p1_max">フルスケール</string>
     <string name="p1_style_flow">フロー</string>
     <string name="p1_warn">強調するしきい値</string>
     <string name="p1_warn_off">しない</string>

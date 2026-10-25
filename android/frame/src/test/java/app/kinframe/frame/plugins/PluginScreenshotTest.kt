@@ -132,6 +132,24 @@ class PluginScreenshotTest {
 
     private val station = "Weather station"
 
+    @Test fun p1DialBand() = stage(
+        "p1_dial_band", band,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+    )
+
+    @Test fun p1DialOverlay() = stage(
+        "p1_dial_overlay", overlay,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+        seed = 2,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun p1DialStrip() = stage(
+        "p1_dial_strip", band,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+        seed = 1,
+    )
+
     @Test fun stationCorners() = stage(
         "station_overlay_landscape", overlay,
         previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),

@@ -60,6 +60,7 @@ import app.kinframe.core.plugin.TextView
 import app.kinframe.core.plugin.Tone
 import app.kinframe.core.plugin.Trend
 import app.kinframe.core.plugin.ValueView
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -258,7 +259,9 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
     }
     val ring = @Composable {
         val track = p.faint
-        Box(Modifier.size(m.gauge).drawBehind {
+        if (g.style == GaugeStyle.Dial) {
+            Dial(g, form, p, m, tone)
+        } else Box(Modifier.size(m.gauge).drawBehind {
             val sw = m.gaugeStroke.toPx()
             val inset = sw / 2
             val arcSize = Size(size.width - sw, size.height - sw)
@@ -287,6 +290,37 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
         }
     }
 }
+
+/**
+ * The two-sided gauge: an open 240° ring with a tick at the top for zero. Positive values sweep clockwise in the
+ * gauge's tone, negative ones anticlockwise in its negative tone; the label's trailing unit is drawn small below.
+ */
+@Composable
+private fun Dial(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
+    val target = g.percent.coerceIn(-100f, 100f) / 100f
+    val sweep by animateFloatAsState(target, tween(700, easing = FastOutSlowInEasing), label = "dial")
+    val color = if (target < 0f) p.tone(g.negativeTone ?: tone) else if (tone == Tone.Neutral) p.text else p.tone(tone)
+    val track = p.faint
+    val tick = p.soft
+    val (number, unit) = PluginFormat.splitUnit(g.label ?: "${g.percent.roundToInt()}%")
+    Box(Modifier.size(m.gauge * 1.2f).drawBehind {
+        val sw = m.gaugeStroke.toPx()
+        val inset = sw / 2
+        val arcSize = Size(size.width - sw, size.height - sw)
+        drawArc(track, -90f - SPAN, 2 * SPAN, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
+        val a = abs(sweep) * SPAN
+        if (a > 0.5f) drawArc(color, if (sweep < 0f) -90f - a else -90f, a, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
+        drawLine(tick, Offset(size.width / 2, 0f), Offset(size.width / 2, sw * 1.4f), strokeWidth = sw * 0.3f)
+    }, contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = m.gaugeStroke)) {
+            if (form == ViewForm.Detail) PIcon(g.icon, m.icon * 0.5f, p.soft)
+            Text(number, style = m.nodeValue.on(p.text, p), maxLines = 1)
+            unit?.let { Text(it, style = m.label.copy(fontSize = m.label.fontSize * 0.85f, lineHeight = m.label.fontSize).on(p.soft, p), maxLines = 1) }
+        }
+    }
+}
+
+private const val SPAN = 120f
 
 // ------------------------------------------------------------------------------------------------ sparkline
 

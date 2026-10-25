@@ -1,5 +1,6 @@
 package app.kinframe.frame.plugins.homewizard
 
+import app.kinframe.core.plugin.GaugeStyle
 import app.kinframe.core.plugin.PluginFormat
 import app.kinframe.core.plugin.Tone
 import app.kinframe.core.plugin.Trend
@@ -54,7 +55,8 @@ object HomeWizardData {
  * The built-in HomeWizard P1 widget (docs/plugins.md §9.2), written against [PluginInstance] so the QuickJS plugin
  * `kinframe.homewizard-p1` can replace it. Polls the meter every 5 s on the home network only.
  *
- * Settings: `host` (address as typed or discovered), `style` ("value" or "flow"), `warn_w` (0 = off).
+ * Settings: `host` (address as typed or discovered), `style` ("value", "flow" or "gauge"), `warn_w` (0 = off; value
+ * and flow), `max_w` (the gauge's full scale either way, default 4000 W).
  */
 class HomeWizardP1 : PluginInstance {
     override val refreshSeconds = 5
@@ -81,6 +83,8 @@ class HomeWizardP1 : PluginInstance {
 data class P1Today(val importKwh: Double?, val exportKwh: Double?, val gasM3: Double?)
 
 object HomeWizardViews {
+    const val DEFAULT_MAX_W = 4000.0
+
     fun main(r: P1Reading, trend: Trend?, settings: JsonObject, f: PluginFormat, t: (String) -> String): JsonObject {
         val p = r.activePowerW ?: 0.0
         val warnW = (settings["warn_w"] as? JsonPrimitive)?.doubleOrNull ?: 0.0
@@ -91,6 +95,13 @@ object HomeWizardViews {
             else -> Tone.Neutral
         }
         val style = (settings["style"] as? JsonPrimitive)?.contentOrNull
+        if (style == "gauge") {
+            val maxW = (settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.takeIf { it > 0 } ?: DEFAULT_MAX_W
+            return ViewJson.gauge(
+                (p / maxW * 100).coerceIn(-100.0, 100.0).toFloat(), label = f.number(abs(p), unit = "W"), style = GaugeStyle.Dial,
+                tone = Tone.Info, negativeTone = Tone.Good,
+            )
+        }
         if (style == "flow") {
             return ViewJson.flow(
                 listOf(

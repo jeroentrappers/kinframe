@@ -216,13 +216,13 @@ components come with a new API version.
 |---|---|---|
 | `value` | Icon, big number, unit, optional label and trend arrow | `⚡ 1,2 kW  ↑` |
 | `rows` | Up to 4 `value`s stacked | grid / solar / home |
-| `gauge` | Ring or bar from 0–100 % with a label inside | car battery 68 % |
+| `gauge` | Ring or bar from 0–100 % with a label inside, or a two-sided `dial` (−100–100 %, zero at the top) | car battery 68 %; grid 1.240 W |
 | `flow` | Up to 5 nodes (icon + value) with animated arrows between them, speed by power | solar → home ← grid |
 | `sparkline` | A small line chart of up to 96 points, optional min/max | power over the last 24 h |
 | `text` | One or two short lines (max 60 chars each) | "Charging · full at 23:10" |
 | `stack` | Vertical or horizontal group of the above, max depth 2 | gauge + text |
 
-Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`), which maps to the frame's palette, and an
+Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`, `info` (violet)), which maps to the frame's palette, and an
 icon from a fixed set of line icons (home, sun, grid, battery, car, plug, flame, water, thermometer, wind, leaf,
 euro, rain, ...; 42 so far, more can be added within API 1). A `value` can turn its icon with `icon_rotation` (0–360
 degrees clockwise): the `direction` icon is a vane arrow pointing north, for a wind direction or a heading.
@@ -335,8 +335,9 @@ two helpers the forms can use:
   per-phase power, today's import/export and gas. The newer authenticated local API (v2, HTTPS with a token issued by
   pressing the meter's button) is supported when the meter offers it; the plugin's setup tells the owner to press the
   button and the frame requests the token, storing it as a `secret`.
-- **View:** `value` with the current power, `tone` good when exporting and warn above a threshold the owner sets.
-  Detail card: per-phase rows and today's totals. No cloud account, no Home Assistant needed.
+- **View:** `value` with the current power, `tone` good when exporting and warn above a threshold the owner sets; or a
+  `dial` gauge: violet (`info`) clockwise while using, green (`good`) anticlockwise while returning, only the watts in
+  the middle, full scale set by the owner (default 4000 W either way). Detail card: per-phase rows and today's totals. No cloud account, no Home Assistant needed.
 
 ### 9.3 Electric car via Home Assistant (`kinframe.ha-ev`), e.g. a Kia EV3
 
@@ -494,7 +495,8 @@ everything else are refused. No redirects are followed; 10 s timeout; 1 MB respo
 returning), `active_power_l1_w`…`l3_w`, `total_power_import_kwh`/`export_kwh` (or the sum of the `_t1`/`_t2` tariff
 totals on older firmware) and `total_gas_m3`. The v1 API only has running totals, so *today* is counted from the
 first reading of the day (kept in `ctx.store`). Main view: a `value` (bolt "Using" / sun "Returning", trend arrow on a
-10 % change over 30 s, `good` when returning, `warn` above the owner's threshold) or, as an option, a `flow` grid ⇄ home.
+10 % change over 30 s, `good` when returning, `warn` above the owner's threshold), a `dial` gauge (setting `max_w`, the
+full scale, default 4000 W; past it the arc stays full and the number keeps counting) or a `flow` grid ⇄ home.
 Detail: the value, the last hour as a sparkline (96 buckets), per-phase rows and today's used, returned and gas.
 Discovery browses `_hwenergy._tcp` with NsdManager while the settings are open (resolving one service at a time, as
 Android 6 requires), shows "Local API is off" from the TXT record, and picks the meter when there is exactly one. The

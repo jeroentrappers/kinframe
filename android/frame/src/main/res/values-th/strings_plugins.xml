@@ -32,6 +32,8 @@
     <string name="p1_not_private">ใช้ได้เฉพาะที่อยู่ในเครือข่ายบ้านของคุณ</string>
     <string name="p1_style">แสดงเป็น</string>
     <string name="p1_style_value">ตัวเลข</string>
+    <string name="p1_style_gauge">มาตรวัด</string>
+    <string name="p1_max">สเกลเต็ม</string>
     <string name="p1_style_flow">การไหล</string>
     <string name="p1_warn">เน้นเมื่อเกิน</string>
     <string name="p1_warn_off">ไม่เลย</string>

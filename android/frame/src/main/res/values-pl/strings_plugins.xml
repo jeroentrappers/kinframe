@@ -32,6 +32,8 @@
     <string name="p1_not_private">Można używać tylko adresów z sieci domowej.</string>
     <string name="p1_style">Pokazuj jako</string>
     <string name="p1_style_value">Liczba</string>
+    <string name="p1_style_gauge">Wskaźnik</string>
+    <string name="p1_max">Pełna skala</string>
     <string name="p1_style_flow">Przepływ</string>
     <string name="p1_warn">Wyróżnij powyżej</string>
     <string name="p1_warn_off">Nigdy</string>

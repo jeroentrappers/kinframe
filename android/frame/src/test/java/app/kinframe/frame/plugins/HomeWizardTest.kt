@@ -1,6 +1,8 @@
 package app.kinframe.frame.plugins
 
 import app.kinframe.core.plugin.FlowView
+import app.kinframe.core.plugin.GaugeStyle
+import app.kinframe.core.plugin.GaugeView
 import app.kinframe.core.plugin.PluginFormat
 import app.kinframe.core.plugin.PluginViewParser
 import app.kinframe.core.plugin.RowsView
@@ -83,6 +85,25 @@ class HomeWizardTest {
         assertEquals("returning", export.label)
         assertEquals(Tone.Good, export.tone)
         assertEquals("sun", export.icon)
+    }
+
+    @Test fun gaugeStyleIsATwoSidedDialInWatts() {
+        val gauge = JsonObject(mapOf("style" to JsonPrimitive("gauge")))
+        val using = parse(HomeWizardViews.main(HomeWizardData.parse(threePhase), null, gauge, f, t)) as GaugeView
+        assertEquals(GaugeStyle.Dial, using.style)
+        assertEquals("1.203${nbsp}W", using.label)
+        assertEquals(1203f / 40f, using.percent, 0.01f)
+        assertEquals(Tone.Info, using.tone)
+        assertEquals(Tone.Good, using.negativeTone)
+
+        val scaled = JsonObject(mapOf("style" to JsonPrimitive("gauge"), "max_w" to JsonPrimitive(2000)))
+        val returning = parse(HomeWizardViews.main(HomeWizardData.parse("""{"active_power_w":-900}"""), null, scaled, f, t)) as GaugeView
+        assertEquals("900${nbsp}W", returning.label)
+        assertEquals(-45f, returning.percent, 0.01f)
+
+        val over = parse(HomeWizardViews.main(HomeWizardData.parse("""{"active_power_w":5200}"""), null, gauge, f, t)) as GaugeView
+        assertEquals(100f, over.percent, 0.01f)
+        assertEquals("5.200${nbsp}W", over.label)
     }
 
     @Test fun flowStyleArrowsFollowTheDirection() {

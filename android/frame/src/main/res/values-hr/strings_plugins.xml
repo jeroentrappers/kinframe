@@ -32,6 +32,8 @@
     <string name="p1_not_private">Mogu se koristiti samo adrese iz kućne mreže.</string>
     <string name="p1_style">Prikaži kao</string>
     <string name="p1_style_value">Broj</string>
+    <string name="p1_style_gauge">Mjerač</string>
+    <string name="p1_max">Puna skala</string>
     <string name="p1_style_flow">Tok</string>
     <string name="p1_warn">Istakni iznad</string>
     <string name="p1_warn_off">Nikad</string>

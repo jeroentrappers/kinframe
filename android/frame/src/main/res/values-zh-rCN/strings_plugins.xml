@@ -32,6 +32,8 @@
     <string name="p1_not_private">只能使用家庭网络中的地址。</string>
     <string name="p1_style">显示方式</string>
     <string name="p1_style_value">数字</string>
+    <string name="p1_style_gauge">仪表</string>
+    <string name="p1_max">满量程</string>
     <string name="p1_style_flow">能量流</string>
     <string name="p1_warn">高于此值时突出显示</string>
     <string name="p1_warn_off">从不</string>

@@ -32,6 +32,8 @@
     <string name="p1_not_private">يمكن استخدام عناوين شبكتك المنزلية فقط.</string>
     <string name="p1_style">العرض كـ</string>
     <string name="p1_style_value">رقم</string>
+    <string name="p1_style_gauge">مقياس</string>
+    <string name="p1_max">الحد الأقصى للمقياس</string>
     <string name="p1_style_flow">تدفّق</string>
     <string name="p1_warn">تمييز فوق</string>
     <string name="p1_warn_off">أبدًا</string>

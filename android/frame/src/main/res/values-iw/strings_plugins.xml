@@ -32,6 +32,8 @@
     <string name="p1_not_private">אפשר להשתמש רק בכתובות מהרשת הביתית.</string>
     <string name="p1_style">הצגה בתור</string>
     <string name="p1_style_value">מספר</string>
+    <string name="p1_style_gauge">מד</string>
+    <string name="p1_max">סקאלה מלאה</string>
     <string name="p1_style_flow">זרימה</string>
     <string name="p1_warn">הדגשה מעל</string>
     <string name="p1_warn_off">אף פעם</string>
