@@ -18,6 +18,7 @@ reactions back. There are no paywalls, no telemetry, and the server is yours.
 | `docs/hardware/` | Hardware profiles of tested frames |
 | `docs/i18n.md` | The 36 languages: where texts live, adding strings, right-to-left, glossary per language |
 | `docs/clean-room.md` | How kinframe was specified without copying Frameo |
+| `docs/plugins.md` | Design of the plugin system: live overlays (energy, car, ...) contributed by others |
 | `server/` | Go backend *(coming)* |
 | `web/` | SvelteKit website *(coming)* |
 | `android/` | Frame app and Android family app (Kotlin, Compose) *(coming)* |
