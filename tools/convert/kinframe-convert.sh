@@ -30,6 +30,11 @@ SUPPORTED_ABIS='armeabi-v7a arm64-v8a'
 SET_HOME_MIN_SDK='24'
 WORK_DIR='/data/local/tmp/kinframe-convert'
 INSTALL_NEWER_PRESENT='INSTALL_FAILED_VERSION_DOWNGRADE'
+BOOT_BRAND='kinframe'
+BOOT_ASSETS='/frame-boot'
+BOOT_ANIMATION='/system/media/bootanimation.zip'
+RESOURCE_BACKUP='resource.img'
+BOOT_ANIMATION_BACKUP='bootanimation.zip'
 # Command templates: {name} in plan.ts is $name here (filled by fill(), never by the shell).
 CMD_getprop='getprop'
 CMD_rootCheck='su 0 id'
@@ -53,6 +58,19 @@ CMD_enable='su 0 pm enable $pkg'
 CMD_uninstall='pm uninstall $frame'
 CMD_uninstallKeepData='pm uninstall -k $frame'
 CMD_uninstallRoot='su 0 pm uninstall $frame'
+CMD_findResource='ls /dev/block/platform/*/by-name/resource'
+CMD_mounts='mount'
+CMD_readResource='su 0 dd if=$resource of=$work/$file bs=1048576'
+CMD_readable='su 0 chmod 644 $work/$file'
+CMD_writeResource='su 0 dd if=$work/$file of=$resource bs=1048576'
+CMD_sync='su 0 sync'
+CMD_flushResource='su 0 blockdev --flushbufs $resource'
+CMD_removeFile='su 0 rm -f $work/$file'
+CMD_remountRw='su 0 mount -o remount,rw $system /system'
+CMD_copyBootAnimation='su 0 cp $work/bootanimation.zip /system/media/bootanimation.zip'
+CMD_chmodBootAnimation='su 0 chmod 644 /system/media/bootanimation.zip'
+CMD_remountRo='su 0 mount -o remount,ro $system /system'
+CMD_sha1BootAnimation='sha1sum /system/media/bootanimation.zip'
 # <<< shared plan
 
 # ---------------------------------------------------------------- options
@@ -67,6 +85,11 @@ FULL_BACKUP=0
 BACKUP_DIR=''
 KEEP_DATA=0
 RESTORE_APK=''
+BOOT=1
+BOOT_DIR=''
+RESTORE_RESOURCE=''
+RESTORE_BOOTANIMATION=''
+OFFLINE=''
 LOCAL_APK=''
 PINNED_CERT=$RELEASE_CERT_SHA256
 SERIAL=''
@@ -84,12 +107,21 @@ Turns a stock Frameo photo frame into a kinframe frame over USB (adb), or revert
   --language CODE      Frame language (en, nl, de, fr, …). Default: the frame asks.
   --force              Continue on a model that hasn't been tested yet.
   --no-backup          Skip the backup of the Frameo app and its data.
+  --no-boot-logo       Leave the start-up logo and animation alone. Otherwise they are replaced with kinframe's,
+                       after the originals are saved to the backup directory (also with --no-backup).
+                       The logo lives in a boot partition: it is read back and checked, and on any mismatch the
+                       original is written back at once.
+  --boot-assets DIR    Use logo.bmp and bootanimation.zip from DIR (default: download them from the server).
   --full-backup        Also copy every eMMC partition except user data (slow, read-only).
   --backup-dir DIR     Where backups go (default: ./kinframe-backup-<serial>-<date>).
   --apk FILE           Install this kinframe APK instead of downloading the latest release.
   --cert SHA256        Expected signing certificate (default: the kinframe release certificate).
   --keep-data          With --revert: keep kinframe's data on the frame.
   --restore-apk FILE   With --revert: reinstall this backed-up Frameo APK first.
+  --restore-resource FILE       With --revert: write this backed-up resource.img (start-up logo) back.
+  --restore-bootanimation FILE  With --revert: put this backed-up bootanimation.zip back.
+  --check-resource FILE         No frame needed: check a resource image and list its entries.
+  --patch-resource IN LOGO OUT  No frame needed: write OUT, which is IN with its boot logos replaced by LOGO.
   -s SERIAL            The frame's adb serial, when more than one device is connected.
   --log FILE           Log file (default: ./kinframe-convert-<date>.log). Share it when asking for help.
   -h, --help           This help.
@@ -113,6 +145,16 @@ while [ $# -gt 0 ]; do
 	--language) [ $# -ge 2 ] || die_usage "--language needs a code"; LANGUAGE=$2; shift ;;
 	--force) FORCE=1 ;;
 	--no-backup) BACKUP=0 ;;
+	--no-boot-logo) BOOT=0 ;;
+	--boot-assets) [ $# -ge 2 ] || die_usage "--boot-assets needs a directory"; BOOT_DIR=$2; shift ;;
+	--restore-resource) [ $# -ge 2 ] || die_usage "--restore-resource needs a file"; RESTORE_RESOURCE=$2; shift ;;
+	--restore-bootanimation) [ $# -ge 2 ] || die_usage "--restore-bootanimation needs a file"; RESTORE_BOOTANIMATION=$2; shift ;;
+	--check-resource) [ $# -ge 2 ] || die_usage "--check-resource needs a file"; OFFLINE='check'; OFF_IN=$2; shift ;;
+	--patch-resource)
+		[ $# -ge 4 ] || die_usage "--patch-resource needs IN LOGO OUT"
+		OFFLINE='patch'; OFF_IN=$2; OFF_LOGO=$3; OFF_OUT=$4
+		shift 3
+		;;
 	--full-backup) FULL_BACKUP=1 ;;
 	--backup-dir) [ $# -ge 2 ] || die_usage "--backup-dir needs a directory"; BACKUP_DIR=$2; shift ;;
 	--apk) [ $# -ge 2 ] || die_usage "--apk needs a file"; LOCAL_APK=$2; shift ;;
@@ -128,6 +170,8 @@ while [ $# -gt 0 ]; do
 done
 
 # ---------------------------------------------------------------- output and log
+
+[ -n "$OFFLINE" ] && LOG_FILE=/dev/null
 
 : >"$LOG_FILE" || { printf 'kinframe-convert: cannot write %s\n' "$LOG_FILE" >&2; exit 2; }
 TMP=$(mktemp -d "${TMPDIR:-/tmp}/kinframe-convert.XXXXXX") || exit 2
@@ -168,6 +212,152 @@ fill() {
 	contains "$_t" '$' && fail "command template not filled: $_t"
 	printf '%s' "$_t"
 }
+
+# ---------------------------------------------------------------- resource images (boot logo)
+#
+# The resource partition of Rockchip frames is an "RSCE" image: a header block, one 512-byte block per entry
+# ("ENTR", a 256-byte name, u32 content offset in blocks, u32 size in bytes, optional u32 hash size + hash) and
+# the contents, each on a block boundary. Same rules as web/src/lib/convert/rsce.ts (rsce.test.ts and plan.test.ts
+# check this implementation against it).
+
+# u8 FILE OFFSET / u32 FILE OFFSET: unsigned little-endian numbers, byte by byte (independent of the host's order).
+u8() { od -An -tu1 -j "$2" -N1 "$1" | tr -d ' \n'; }
+u32() {
+	# shellcheck disable=SC2046 # split the four numbers into $1..$4
+	set -- $(od -An -tu1 -j "$2" -N4 "$1")
+	echo $(($1 + $2 * 256 + $3 * 65536 + $4 * 16777216))
+}
+# put_u32 FILE OFFSET VALUE
+put_u32() {
+	_pv=$3
+	_bytes=''
+	for _k in 1 2 3 4; do
+		_bytes="$_bytes\\$(printf '%03o' $((_pv % 256)))"
+		_pv=$((_pv / 256))
+	done
+	# shellcheck disable=SC2059 # the format is the octal escapes built above
+	printf "$_bytes" | dd of="$1" bs=1 seek="$2" conv=notrunc 2>/dev/null
+}
+size_of() { wc -c <"$1" | tr -d ' '; }
+blocks_of() { echo $((($1 + 511) / 512)); }
+# entry_name FILE OFFSET: the NUL-terminated name at OFFSET.
+entry_name() { dd if="$1" bs=1 skip="$2" count=256 2>/dev/null | tr '\000' '\n' | head -n 1; }
+# extract FILE BLOCK SIZE OUT: an entry's content.
+extract() { dd if="$1" bs=512 skip="$2" count="$(blocks_of "$3")" 2>/dev/null | head -c "$3" >"$4"; }
+
+# rsce_parse FILE: checks a resource image like parseResource(); sets RS_N, RS_TABLE, RS_ESIZE, RS_CONTENT and
+# RS_NAME_i, RS_BLOCK_i, RS_SIZE_i, RS_HASH_i. Returns 1 with the reason in RS_PROBLEM.
+rsce_parse() {
+	RS_PROBLEM=''
+	_len=$(size_of "$1")
+	if [ "$_len" -lt 512 ] || [ "$(dd if="$1" bs=1 count=4 2>/dev/null)" != RSCE ]; then
+		RS_PROBLEM='not a Rockchip resource image (no RSCE header)'
+		return 1
+	fi
+	_hs=$(u8 "$1" 8)
+	RS_TABLE=$(u8 "$1" 9)
+	RS_ESIZE=$(u8 "$1" 10)
+	RS_N=$(u32 "$1" 12)
+	if [ "$_hs" -lt 1 ] || [ "$RS_ESIZE" -lt 1 ] || [ "$RS_TABLE" -lt "$_hs" ]; then RS_PROBLEM='bad RSCE header'; return 1; fi
+	if [ "$RS_N" -lt 1 ] || [ "$RS_N" -gt 256 ]; then RS_PROBLEM="bad RSCE entry count $RS_N"; return 1; fi
+	RS_CONTENT=$((RS_TABLE + RS_N * RS_ESIZE))
+	if [ $((RS_CONTENT * 512)) -gt "$_len" ]; then RS_PROBLEM='RSCE entry table is cut off'; return 1; fi
+	_i=0
+	while [ $_i -lt "$RS_N" ]; do
+		_o=$(((RS_TABLE + _i * RS_ESIZE) * 512))
+		if [ "$(dd if="$1" bs=1 skip=$_o count=4 2>/dev/null)" != ENTR ]; then RS_PROBLEM="RSCE entry $_i has no ENTR tag"; return 1; fi
+		_name=$(entry_name "$1" $((_o + 4)))
+		case $_name in '' | *[!!-~]*) RS_PROBLEM="RSCE entry $_i has a bad name"; return 1 ;; esac
+		_blk=$(u32 "$1" $((_o + 260)))
+		_sz=$(u32 "$1" $((_o + 264)))
+		_hash=0
+		[ $((RS_ESIZE * 512)) -ge 272 ] && _hash=$(u32 "$1" $((_o + 268)))
+		if [ "$_blk" -lt "$RS_CONTENT" ] || [ $((_blk * 512 + _sz)) -gt "$_len" ]; then RS_PROBLEM="RSCE entry $_name is out of bounds"; return 1; fi
+		eval "RS_NAME_$_i=\$_name RS_BLOCK_$_i=\$_blk RS_SIZE_$_i=\$_sz RS_HASH_$_i=\$_hash"
+		_i=$((_i + 1))
+	done
+	return 0
+}
+
+# check_resource FILE: valid, with a device tree, whole blocks (resourceProblem()). Reason in RS_PROBLEM.
+check_resource() {
+	rsce_parse "$1" || return 1
+	_i=0
+	while [ $_i -lt "$RS_N" ]; do
+		eval "_name=\$RS_NAME_$_i"
+		case $_name in *.dtb) [ $(($(size_of "$1") % 512)) = 0 ] && return 0; RS_PROBLEM='the resource image is not a whole number of 512-byte blocks'; return 1 ;; esac
+		_i=$((_i + 1))
+	done
+	RS_PROBLEM='no device tree (.dtb) in the resource image'
+	return 1
+}
+
+# bmp_format FILE [OFFSET]: "width height bpp compression" of a BMP, or nothing.
+bmp_format() {
+	_b=${2:-0}
+	[ "$(dd if="$1" bs=1 skip="$_b" count=2 2>/dev/null)" = BM ] || return 1
+	[ "$(u32 "$1" $((_b + 14)))" -ge 40 ] || return 1
+	printf '%s %s %s %s\n' "$(u32 "$1" $((_b + 18)))" "$(u32 "$1" $((_b + 22)))" "$(od -An -tu2 -j $((_b + 28)) -N2 "$1" | tr -d ' ')" "$(u32 "$1" $((_b + 30)))"
+}
+
+# brand_resource IN LOGO OUT: brandResource(): IN with logo.bmp and logo_kernel.bmp replaced by LOGO, which must
+# have the same size, depth and compression. Contents are laid out again from the first block after the table, in
+# table order; the image keeps its length. Returns 1 with the reason in RS_PROBLEM.
+brand_resource() {
+	check_resource "$1" || return 1
+	_new=$(bmp_format "$2") || { RS_PROBLEM='the new logo is not a BMP file'; return 1; }
+	_len=$(size_of "$1")
+	_found=0
+	dd if=/dev/zero of="$3" bs=512 count=$((_len / 512)) 2>/dev/null || { RS_PROBLEM="cannot write $3"; return 1; }
+	dd if="$1" of="$3" bs=512 count="$RS_CONTENT" conv=notrunc 2>/dev/null
+	_at=$RS_CONTENT
+	_i=0
+	while [ $_i -lt "$RS_N" ]; do
+		eval "_name=\$RS_NAME_$_i _blk=\$RS_BLOCK_$_i _sz=\$RS_SIZE_$_i _hash=\$RS_HASH_$_i"
+		_src="$TMP/entry"
+		case $_name in
+		logo.bmp | logo_kernel.bmp)
+			_old=$(bmp_format "$1" $((_blk * 512))) || { RS_PROBLEM="$_name on the frame is not a BMP file"; return 1; }
+			[ "$_old" = "$_new" ] || { RS_PROBLEM="$_name on the frame is $_old (width height bits compression); the new logo is $_new"; return 1; }
+			[ "$_hash" = 0 ] || { RS_PROBLEM="$_name carries a hash; replacing it is not supported"; return 1; }
+			_src=$2
+			_found=1
+			;;
+		*) extract "$1" "$_blk" "$_sz" "$_src" ;;
+		esac
+		_sz=$(size_of "$_src")
+		[ $((_at * 512 + _sz)) -le "$_len" ] || { RS_PROBLEM='the new resource image does not fit in the partition'; return 1; }
+		dd if="$_src" of="$3" bs=512 seek="$_at" conv=notrunc 2>/dev/null
+		_o=$(((RS_TABLE + _i * RS_ESIZE) * 512))
+		put_u32 "$3" $((_o + 260)) "$_at"
+		put_u32 "$3" $((_o + 264)) "$_sz"
+		_at=$((_at + $(blocks_of "$_sz")))
+		_i=$((_i + 1))
+	done
+	[ $_found = 1 ] || { RS_PROBLEM='no boot logo in the resource image'; return 1; }
+	return 0
+}
+
+# Offline modes: no frame, no adb.
+case $OFFLINE in
+check)
+	if check_resource "$OFF_IN"; then
+		_i=0
+		while [ $_i -lt "$RS_N" ]; do
+			eval "printf '%s\tblock %s\t%s bytes\n' \"\$RS_NAME_$_i\" \"\$RS_BLOCK_$_i\" \"\$RS_SIZE_$_i\""
+			_i=$((_i + 1))
+		done
+		exit 0
+	fi
+	printf 'kinframe-convert: %s: %s\n' "$OFF_IN" "$RS_PROBLEM" >&2
+	exit 1
+	;;
+patch)
+	brand_resource "$OFF_IN" "$OFF_LOGO" "$OFF_OUT" && exit 0
+	printf 'kinframe-convert: %s\n' "$RS_PROBLEM" >&2
+	exit 1
+	;;
+esac
 
 # ---------------------------------------------------------------- adb
 
@@ -289,9 +479,18 @@ identify() {
 	rd "$(fill "$CMD_rootCheck")"
 	ROOT=0
 	contains "$OUT" 'uid=0' && ROOT=1
+	rd "$(fill "$CMD_findResource")"
+	RESOURCE_DEV=$(printf '%s\n' "$OUT" | grep -E '^/dev/block/platform/[^/[:space:]]+/by-name/resource$' | head -n 1)
+	log "\$ $CMD_mounts"
+	SYSTEM_DEV=$(adb_sh "$CMD_mounts" | awk '$2 == "/system" { print $1; exit } $3 == "/system" && $2 == "on" { print $1; exit }')
+	BOOT_LOGO_OK=0
+	BOOT_ANIM_OK=0
+	if [ $ROOT = 1 ] && [ -n "$RESOURCE_DEV" ]; then BOOT_LOGO_OK=1; fi
+	case $SYSTEM_DEV in /dev/block/dm-*) ;; /dev/block/*) [ $ROOT = 1 ] && BOOT_ANIM_OK=1 ;; esac
 
 	say "  device:      $BRAND $MODEL ($KEY), $(getp ro.product.manufacturer), $(getp ro.board.platform)"
 	say "  android:     $(getp ro.build.version.release) (API $SDK), ABIs: $ABIS, root: $([ $ROOT = 1 ] && echo yes || echo no)"
+	say "  boot:        resource ${RESOURCE_DEV:-none}, /system on ${SYSTEM_DEV:-?}"
 	log "  fingerprint: $(getp ro.build.fingerprint)"
 	STATES=''
 	for _p in $FRAME_PACKAGE $DISABLE_PACKAGES; do
@@ -447,6 +646,144 @@ full_backup() {
 	wr "$(fill "$CMD_cleanup")"
 }
 
+# ---------------------------------------------------------------- start-up branding (boot logo and animation)
+
+sha1_of() {
+	if command -v sha1sum >/dev/null 2>&1; then sha1sum "$1" | cut -d' ' -f1
+	elif command -v shasum >/dev/null 2>&1; then shasum -a 1 "$1" | cut -d' ' -f1
+	else openssl dgst -sha1 "$1" | sed 's/.*= *//'
+	fi
+}
+
+ensure_backup_dir() {
+	[ -n "$BACKUP_DIR" ] || BACKUP_DIR="kinframe-backup-${DEV_SERIAL:-frame}-$(date +%Y%m%d-%H%M%S)"
+	[ "$DRY_RUN" = 1 ] || mkdir -p "$BACKUP_DIR" || fail "cannot create $BACKUP_DIR"
+}
+
+# read_resource NAME DEST: copies the resource partition to DEST via a file in the work directory.
+read_resource() {
+	wr "$(fill "$CMD_mkWork")"
+	wr "$(fill "$CMD_readResource" "resource=$RESOURCE_DEV" "file=$1")"
+	[ "$DRY_RUN" = 1 ] || contains "$OUT" 'records out' || return 1
+	wr "$(fill "$CMD_readable" "file=$1")"
+	pull "$WORK_DIR/$1" "$2"
+}
+
+# The originals, before anything changes: the boot animation and the whole resource partition.
+boot_backup() {
+	ensure_backup_dir
+	step "Back up the start-up logo and animation ($BACKUP_DIR)"
+	if [ "$BOOT_ANIM_OK" = 1 ]; then
+		pull "$BOOT_ANIMATION" "$BACKUP_DIR/$BOOT_ANIMATION_BACKUP" || fail "could not copy $BOOT_ANIMATION"
+	fi
+	if [ "$BOOT_LOGO_OK" = 1 ]; then
+		read_resource "$RESOURCE_BACKUP" "$BACKUP_DIR/$RESOURCE_BACKUP" || fail "could not copy the resource partition $RESOURCE_DEV"
+		wr "$(fill "$CMD_removeFile" "file=$RESOURCE_BACKUP")"
+		if [ "$DRY_RUN" = 0 ]; then
+			check_resource "$BACKUP_DIR/$RESOURCE_BACKUP" || fail "the resource partition is not a resource image we know ($RS_PROBLEM). Run again with --no-boot-logo."
+		fi
+	fi
+	[ "$DRY_RUN" = 1 ] || say "  saved in $BACKUP_DIR"
+}
+
+# fetch_boot SERVER: logo.bmp and bootanimation.zip into $TMP/boot (from --boot-assets, or the server's static files
+# checked against its manifest).
+fetch_boot() {
+	step "Download the start-up logo and animation"
+	BOOT_FILES="$TMP/boot"
+	mkdir -p "$BOOT_FILES"
+	if [ -n "$BOOT_DIR" ]; then
+		cp "$BOOT_DIR/logo.bmp" "$BOOT_DIR/bootanimation.zip" "$BOOT_FILES/" || fail "no logo.bmp and bootanimation.zip in $BOOT_DIR"
+		say "  using $BOOT_DIR"
+	else
+		_ok=0
+		for _base in "$1" "$DEFAULT_SERVER"; do
+			_url="$_base$BOOT_ASSETS/$BOOT_BRAND"
+			if ! curl -fsSL -o "$BOOT_FILES/manifest.json" "$_url/manifest.json" ||
+				! curl -fsSL -o "$BOOT_FILES/logo.bmp" "$_url/logo.bmp" ||
+				! curl -fsSL -o "$BOOT_FILES/bootanimation.zip" "$_url/bootanimation.zip"; then
+				continue
+			fi
+			# manifest.json lists the logo first, then the boot animation.
+			_sums=$(sed -n 's/.*"sha256": *"\([0-9a-f]*\)".*/\1/p' "$BOOT_FILES/manifest.json")
+			if [ "$(sha256_of "$BOOT_FILES/logo.bmp") $(sha256_of "$BOOT_FILES/bootanimation.zip")" = "$(printf '%s' "$_sums" | tr '\n' ' ')" ]; then
+				_ok=1
+				say "  from $_url"
+				break
+			fi
+			log "checksums do not match the manifest at $_url"
+		done
+		[ $_ok = 1 ] || fail "could not download the start-up logo and animation. Run again with --no-boot-logo, or use --boot-assets."
+	fi
+	bmp_format "$BOOT_FILES/logo.bmp" >/dev/null || fail "the boot logo is not a BMP file"
+	[ "$(dd if="$BOOT_FILES/bootanimation.zip" bs=1 count=2 2>/dev/null)" = PK ] || fail "the boot animation is not a zip file"
+	log "boot logo sha256 $(sha256_of "$BOOT_FILES/logo.bmp"), boot animation sha256 $(sha256_of "$BOOT_FILES/bootanimation.zip")"
+}
+
+# flash_resource IMAGE: writes a resource image to the resource partition like the website's flashResource():
+# refuses an invalid image, reads the partition first (the way back), writes, flushes, reads back, compares sha256,
+# and on a mismatch writes the previous content back at once.
+flash_resource() {
+	check_resource "$1" || fail "refusing to write $1: $RS_PROBLEM"
+	if [ "$DRY_RUN" = 1 ]; then
+		say "  would write $1 to $RESOURCE_DEV, read it back and compare"
+		return 0
+	fi
+	read_resource resource-current.img "$TMP/resource-current.img" || fail "could not read $RESOURCE_DEV"
+	[ "$(size_of "$TMP/resource-current.img")" = "$(size_of "$1")" ] ||
+		fail "the resource partition is $(size_of "$TMP/resource-current.img") bytes, the image $(size_of "$1"): not written"
+	_before=$(sha256_of "$TMP/resource-current.img")
+	_want=$(sha256_of "$1")
+	log "resource partition sha256 $_before, new image sha256 $_want"
+	if [ "$_before" = "$_want" ]; then
+		say "  the resource partition already has this image"
+		wr "$(fill "$CMD_removeFile" "file=resource-current.img")"
+		return 0
+	fi
+	push "$1" "$WORK_DIR/resource-new.img" || fail "could not copy the resource image to the frame"
+	wr "$(fill "$CMD_writeResource" "resource=$RESOURCE_DEV" "file=resource-new.img")"
+	wr "$(fill "$CMD_sync")"
+	wr "$(fill "$CMD_flushResource" "resource=$RESOURCE_DEV")"
+	read_resource resource-check.img "$TMP/resource-check.img"
+	_got=$(sha256_of "$TMP/resource-check.img" 2>/dev/null)
+	log "read back sha256 $_got"
+	if [ "$_got" = "$_want" ]; then
+		say "  written and verified (sha256 $(printf '%s' "$_want" | cut -c1-12)…)"
+		for _f in resource-new.img resource-check.img resource-current.img; do wr "$(fill "$CMD_removeFile" "file=$_f")"; done
+		return 0
+	fi
+	warn "the resource partition did not read back correctly; writing the previous content back"
+	wr "$(fill "$CMD_writeResource" "resource=$RESOURCE_DEV" "file=resource-current.img")"
+	wr "$(fill "$CMD_sync")"
+	wr "$(fill "$CMD_flushResource" "resource=$RESOURCE_DEV")"
+	rm -f "$TMP/resource-check.img"
+	read_resource resource-check.img "$TMP/resource-check.img"
+	_again=$(sha256_of "$TMP/resource-check.img" 2>/dev/null)
+	log "read back sha256 $_again"
+	if [ "$_again" = "$_before" ]; then
+		for _f in resource-new.img resource-check.img resource-current.img; do wr "$(fill "$CMD_removeFile" "file=$_f")"; done
+		fail "the new boot logo did not read back correctly; the previous one was written back and checked. Nothing else was changed."
+	fi
+	fail "the resource partition could not be restored (sha256 $_again, expected $_before). Do NOT restart the frame. Write the backup back first: see docs/hardware/denver-pff-1024.md. A copy is on the frame at $WORK_DIR/resource-current.img."
+}
+
+# write_bootanimation FILE: push, remount /system writable, copy, make readable, remount read-only, check sha1.
+write_bootanimation() {
+	wr "$(fill "$CMD_mkWork")"
+	push "$1" "$WORK_DIR/bootanimation.zip" || fail "could not copy the boot animation to the frame"
+	wr "$(fill "$CMD_remountRw" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || fail "could not make /system writable: $OUT"
+	wr "$(fill "$CMD_copyBootAnimation")"
+	wr "$(fill "$CMD_chmodBootAnimation")"
+	wr "$(fill "$CMD_remountRo" "system=$SYSTEM_DEV")"
+	[ -z "$OUT" ] || warn "could not make /system read-only again ($OUT); it will be after the restart"
+	wr "$(fill "$CMD_removeFile" "file=bootanimation.zip")"
+	[ "$DRY_RUN" = 1 ] && return 0
+	rd "$(fill "$CMD_sha1BootAnimation")"
+	[ "${OUT%% *}" = "$(sha1_of "$1")" ] || fail "the boot animation on the frame is not the one copied ($OUT)"
+	say "  boot animation in place"
+}
+
 # ---------------------------------------------------------------- convert
 
 convert() {
@@ -468,7 +805,36 @@ convert() {
 	if [ -n "$LANGUAGE" ]; then safe_arg "$LANGUAGE" || fail "not a valid language code: $LANGUAGE"; fi
 
 	[ "$BACKUP" = 1 ] && backup
+	BOOT_NOW=0
+	if [ "$BOOT" = 1 ]; then
+		if [ "$BOOT_LOGO_OK" = 1 ] || [ "$BOOT_ANIM_OK" = 1 ]; then
+			BOOT_NOW=1
+		else
+			say ""
+			say "  This frame's start-up logo and animation can't be replaced; leaving them alone."
+		fi
+	fi
+	[ "$BOOT_NOW" = 1 ] && boot_backup
 	fetch_release
+
+	# Start-up branding right after the downloads and before the app changes, so a failure leaves the frame as it was.
+	if [ "$BOOT_NOW" = 1 ]; then
+		fetch_boot "$_server"
+		if [ "$BOOT_LOGO_OK" = 1 ]; then
+			step "Write the start-up logo (resource partition $RESOURCE_DEV)"
+			if [ "$DRY_RUN" = 1 ]; then
+				say "  would put the boot logo into $BACKUP_DIR/$RESOURCE_BACKUP, write it, read it back and compare"
+			else
+				brand_resource "$BACKUP_DIR/$RESOURCE_BACKUP" "$BOOT_FILES/logo.bmp" "$TMP/resource-$BOOT_BRAND.img" ||
+					fail "boot logo not changed: $RS_PROBLEM. Run again with --no-boot-logo."
+				flash_resource "$TMP/resource-$BOOT_BRAND.img"
+			fi
+		fi
+		if [ "$BOOT_ANIM_OK" = 1 ]; then
+			step "Write the start-up animation"
+			write_bootanimation "$BOOT_FILES/bootanimation.zip"
+		fi
+	fi
 
 	step "Install kinframe"
 	wr "$(fill "$CMD_mkWork")"
@@ -553,6 +919,20 @@ revert() {
 		push "$RESTORE_APK" "$WORK_DIR/restore.apk" || warn "could not copy $RESTORE_APK"
 		wr_expect "$(fill "$CMD_restoreFrameo")" 'Success' || warn "reinstalling the Frameo APK failed: $OUT"
 		wr "$(fill "$CMD_cleanup")"
+	fi
+
+	if [ -n "$RESTORE_RESOURCE" ]; then
+		step "Write the backed-up start-up logo back"
+		[ -f "$RESTORE_RESOURCE" ] || fail "no such file: $RESTORE_RESOURCE"
+		[ "$BOOT_LOGO_OK" = 1 ] || fail "this frame has no resource partition to write $RESTORE_RESOURCE to"
+		flash_resource "$RESTORE_RESOURCE"
+	fi
+	if [ -n "$RESTORE_BOOTANIMATION" ]; then
+		step "Put the backed-up start-up animation back"
+		[ -f "$RESTORE_BOOTANIMATION" ] || fail "no such file: $RESTORE_BOOTANIMATION"
+		[ "$(dd if="$RESTORE_BOOTANIMATION" bs=1 count=2 2>/dev/null)" = PK ] || fail "$RESTORE_BOOTANIMATION is not a zip file"
+		[ "$BOOT_ANIM_OK" = 1 ] || fail "/system on this frame can't be changed"
+		write_bootanimation "$RESTORE_BOOTANIMATION"
 	fi
 
 	step "Enable Frameo and the firmware updaters"

@@ -1,6 +1,19 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { DEFAULT_SERVER, FRAME_PACKAGE, FRAMEO_PACKAGE, WORK_DIR, planConvert, planRevert, type StepId } from './plan';
-import { identifyFrame, isReadOnly, runPlan, type FrameShell, type RunHooks, type StepStatus } from './runner';
+import {
+	BOOT_ANIMATION_BACKUP,
+	COMMANDS,
+	DEFAULT_SERVER,
+	FRAME_PACKAGE,
+	FRAMEO_PACKAGE,
+	RESOURCE_BACKUP,
+	WORK_DIR,
+	planConvert,
+	planRevert,
+	type StepId
+} from './plan';
+import { bootAssetsProblem, identifyFrame, isReadOnly, runPlan, type FrameShell, type RunHooks, type StepStatus } from './runner';
+import { brandResource, buildResource } from './rsce';
 
 const GETPROP = ['[ro.product.brand]: [denver]', '[ro.product.device]: [PFF_1024]', '[ro.product.model]: [Frame]', '[ro.build.version.sdk]: [23]', '[ro.product.cpu.abilist]: [armeabi-v7a,armeabi]'].join('\r\n');
 
@@ -177,5 +190,201 @@ describe('runPlan', () => {
 		const { h, statuses } = hooks(frame);
 		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false }), h, { continueOnError: false });
 		expect(statuses.provision).toBe('warn');
+	});
+});
+
+// ---------------------------------------------------------------- start-up branding
+
+const RESOURCE = '/dev/block/platform/1021c000.rksdmmc/by-name/resource';
+const SYSTEM = '/dev/block/platform/1021c000.rksdmmc/by-name/system';
+
+function bmp(extra: number): Uint8Array {
+	const b = new Uint8Array(54 + extra).fill(0x33);
+	const v = new DataView(b.buffer);
+	b.set([0x42, 0x4d]);
+	v.setUint32(14, 40, true);
+	v.setInt32(18, 800, true);
+	v.setInt32(22, 1280, true);
+	v.setUint16(28, 8, true);
+	v.setUint32(30, 1, true);
+	return b;
+}
+const DTB = Uint8Array.from({ length: 5000 }, (_, i) => (i * 7) & 0xff);
+const STOCK = buildResource(
+	[
+		{ name: 'rk-kernel.dtb', data: DTB },
+		{ name: 'logo.bmp', data: bmp(3000) },
+		{ name: 'logo_kernel.bmp', data: bmp(3000) }
+	],
+	256 * 1024
+);
+const LOGO = bmp(1200);
+const ANIM = new Uint8Array([0x50, 0x4b, 3, 4, 9, 9, 9]);
+const STOCK_ANIM = new Uint8Array([0x50, 0x4b, 3, 4, 1, 1, 1]);
+const sha1 = (b: Uint8Array) => createHash('sha1').update(b).digest('hex');
+
+/** A frame with a resource partition, /system and a work directory, as files. */
+class BootFrame extends FakeFrame {
+	partition: Uint8Array = STOCK.slice();
+	files = new Map<string, Uint8Array>([['/system/media/bootanimation.zip', STOCK_ANIM]]);
+	systemRw = false;
+	writes = 0;
+	/** Corrupts the n-th partition write (1-based), 0 for never; or every write. */
+	corrupt = 0;
+	corruptAll = false;
+	constructor() {
+		super(() => undefined, { [FRAMEO_PACKAGE]: true });
+	}
+	override async shell(cmd: string) {
+		this.calls.push(cmd);
+		if (cmd === COMMANDS.findResource) return `${RESOURCE}\r\n`;
+		if (cmd === 'mount') return `${SYSTEM} /system ext4 ro,seclabel 0 0\r\n`;
+		let m = /^su 0 dd if=(\S+) of=(\S+) bs=1048576$/.exec(cmd);
+		if (m) {
+			if (m[1] === RESOURCE) this.files.set(m[2]!, this.partition.slice());
+			else {
+				const data = this.files.get(m[1]!)!.slice();
+				if (++this.writes === this.corrupt || this.corruptAll) data[1000] = data[1000]! ^ 0xff;
+				this.partition = data;
+			}
+			return '256+0 records in\r\n256+0 records out\r\n';
+		}
+		if (cmd.startsWith('su 0 mount -o remount,')) {
+			this.systemRw = cmd.includes('remount,rw');
+			return '';
+		}
+		m = /^su 0 cp (\S+) (\S+)$/.exec(cmd);
+		if (m) {
+			if (!this.systemRw) return 'cp: /system/media/bootanimation.zip: Read-only file system\r\n';
+			this.files.set(m[2]!, this.files.get(m[1]!)!);
+			return '';
+		}
+		if (cmd === COMMANDS.sha1BootAnimation) return `${sha1(this.files.get('/system/media/bootanimation.zip')!)}  /system/media/bootanimation.zip\r\n`;
+		return super.shell(cmd).then((out) => (this.calls.pop(), out));
+	}
+	override async push(remote: string, data?: Uint8Array) {
+		this.pushed.push(remote);
+		if (data) this.files.set(remote, data.slice());
+	}
+	override async pull(remote: string) {
+		this.calls.push(`pull ${remote}`);
+		const f = this.files.get(remote);
+		if (!f) throw new Error(`no ${remote}`);
+		return f.slice();
+	}
+}
+
+describe('start-up branding', () => {
+	const fetchBoot = async () => ({ logo: LOGO, bootanimation: ANIM });
+
+	it('backs up, writes and verifies the boot logo and animation', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		expect(id.facts).toMatchObject({ resource: RESOURCE, system: SYSTEM });
+		const { h, statuses, files } = hooks(frame, { fetchBoot });
+		const saved: Record<string, Uint8Array> = {};
+		h.file = (name, data) => ((saved[name] = data), files.push(name));
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r).toEqual({ ok: true, failed: [] });
+		expect(files).toEqual([BOOT_ANIMATION_BACKUP, RESOURCE_BACKUP]);
+		expect(saved[RESOURCE_BACKUP]).toEqual(STOCK);
+		expect(saved[BOOT_ANIMATION_BACKUP]).toEqual(STOCK_ANIM);
+		expect(frame.partition).toEqual(brandResource(STOCK, LOGO));
+		expect(frame.files.get('/system/media/bootanimation.zip')).toEqual(ANIM);
+		expect(frame.systemRw).toBe(false);
+		expect(statuses.bootLogo).toBe('done');
+		expect(statuses.bootAnimation).toBe('done');
+		// The partition is written once, after the backup was pulled.
+		const write = frame.calls.findIndex((c) => c.includes(`of=${RESOURCE}`));
+		expect(frame.calls.findIndex((c) => c === `pull ${WORK_DIR}/${RESOURCE_BACKUP}`)).toBeLessThan(write);
+		expect(frame.calls.filter((c) => c.includes(`of=${RESOURCE}`))).toHaveLength(1);
+		expect(frame.calls).toContain(`su 0 blockdev --flushbufs ${RESOURCE}`);
+	});
+
+	it('writes the original back when the read-back does not match, and stops before the app changes', async () => {
+		const frame = new BootFrame();
+		frame.corrupt = 1;
+		const id = await identifyFrame(frame, { log: () => {} });
+		const { h, statuses } = hooks(frame, { fetchBoot });
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r.failed).toEqual(['bootLogo']);
+		expect(frame.partition).toEqual(STOCK);
+		expect(frame.calls.filter((c) => c.includes(`of=${RESOURCE}`))).toHaveLength(2);
+		expect(statuses.install).toBe('skipped');
+		expect(frame.calls.some((c) => c.startsWith('pm install'))).toBe(false);
+	});
+
+	it('reports when even the original could not be written back', async () => {
+		const frame = new BootFrame();
+		frame.corruptAll = true; // the way back fails too
+		const id = await identifyFrame(frame, { log: () => {} });
+		const details: string[] = [];
+		const { h } = hooks(frame, { fetchBoot, step: (_id, _s, d) => d && details.push(d) });
+		await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(details.join(' ')).toMatch(/Do not restart the frame/);
+	});
+
+	it('refuses a logo the frame cannot show, without writing anything', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		const wrong = bmp(100);
+		new DataView(wrong.buffer).setInt32(18, 1280, true);
+		const { h, statuses } = hooks(frame, { fetchBoot: async () => ({ logo: wrong, bootanimation: ANIM }) });
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r.failed).toEqual(['bootLogo']);
+		expect(statuses.bootAnimation).toBe('skipped');
+		expect(frame.calls.some((c) => c.includes(`of=${RESOURCE}`))).toBe(false);
+		expect(frame.partition).toEqual(STOCK);
+	});
+
+	it('fails the animation step when the copy did not land, and leaves /system read-only', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		frame.shell = ((orig) => async (cmd: string) => (cmd.startsWith('su 0 cp') ? (frame.calls.push(cmd), 'cp: write error: No space left on device\r\n') : orig(cmd)))(frame.shell.bind(frame));
+		const { h, statuses } = hooks(frame, { fetchBoot });
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r.failed).toEqual(['bootAnimation']);
+		expect(statuses.bootLogo).toBe('done');
+		expect(frame.systemRw).toBe(false);
+	});
+
+	it('revert writes back a valid backup and refuses anything else', async () => {
+		const frame = new BootFrame();
+		frame.partition = brandResource(STOCK, LOGO);
+		frame.files.set('/system/media/bootanimation.zip', ANIM);
+		const id = await identifyFrame(frame, { log: () => {} });
+		const opts = { keepData: false, restoreFrameo: false, restoreBootLogo: true, restoreBootAnimation: true };
+		const ok = hooks(frame, { restoreBoot: () => ({ resource: STOCK, bootanimation: STOCK_ANIM }) });
+		await runPlan(frame, planRevert(id, opts), ok.h, { continueOnError: true });
+		expect(ok.statuses.bootLogo).toBe('done');
+		expect(ok.statuses.bootAnimation).toBe('done');
+		expect(frame.partition).toEqual(STOCK);
+		expect(frame.files.get('/system/media/bootanimation.zip')).toEqual(STOCK_ANIM);
+
+		const bad = new BootFrame();
+		const before = bad.partition.slice();
+		const noDtb = buildResource([{ name: 'logo.bmp', data: bmp(10) }], STOCK.length);
+		const b = hooks(bad, { restoreBoot: () => ({ resource: noDtb }) });
+		await runPlan(bad, planRevert(await identifyFrame(bad, { log: () => {} }), { ...opts, restoreBootAnimation: false }), b.h, { continueOnError: true });
+		expect(b.statuses.bootLogo).toBe('failed');
+		expect(bad.calls.some((c) => c.includes(`of=${RESOURCE}`))).toBe(false);
+		expect(bad.partition).toEqual(before);
+	});
+
+	it('a dry run neither reads the partition nor writes anything', async () => {
+		const frame = new BootFrame();
+		const id = await identifyFrame(frame, { log: () => {} });
+		frame.calls = [];
+		const { h, statuses } = hooks(frame, { dryRun: true, fetchBoot });
+		const r = await runPlan(frame, planConvert(id, { server: DEFAULT_SERVER, backup: false, bootBranding: true }), h, { continueOnError: false });
+		expect(r.ok).toBe(true);
+		expect(frame.calls).toEqual([]);
+		expect(statuses.bootLogo).toBe('dry');
+	});
+
+	it('only accepts a BMP logo and a zip animation', () => {
+		expect(bootAssetsProblem({ logo: LOGO, bootanimation: ANIM })).toBeNull();
+		expect(bootAssetsProblem({ logo: ANIM, bootanimation: ANIM })).toMatch(/BMP/);
+		expect(bootAssetsProblem({ logo: LOGO, bootanimation: LOGO })).toMatch(/zip/);
 	});
 });

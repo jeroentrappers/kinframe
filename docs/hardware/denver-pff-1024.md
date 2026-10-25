@@ -24,10 +24,84 @@ Supported by the convert tool (website `/convert`, `tools/convert/`); see [suppo
 | Storage | 16 GB eMMC, 12.8 GB `/data` (12.3 GB free). Unencrypted. | Room for roughly 30k frame-sized photos. |
 | Removable | vold config has an SD card slot (`sdcard1`) and two USB host ports (vfat). USB-C is OTG/host (`usb.host`). | Import and backup to microSD or USB stick is possible. |
 | Power | **Mains only, no battery.** `/sys/class/power_supply` is empty and healthd logs "No charger supplies found / No battery devices found". The dumpsys battery values (AC, 100%, 0 V, 42.4 °C) are placeholders. The device tree's RK818 PMIC/charger node is a board-template leftover that never probes. | Pulling the plug is a hard power cut: atomic writes (temp file + rename) and a WAL-mode SQLite index are required. Power-on boots straight into kinframe as the home app. No battery logic. |
-| Root | **`/system/xbin/su` gives root to the adb shell user** (uid 0). `ro.secure=1`, `ro.debuggable=0`, dm-verity on `/system`. | No Magisk needed. Provisioning can disable Frameo and the OTA apps, set kinframe as home and grant permissions over adb. |
+| Root | **`/system/xbin/su` gives root to the adb shell user** (uid 0). `ro.secure=1`, `ro.debuggable=0`. `/system` is mounted read-only straight from its block device (no dm-verity device in `mount`), so root can remount it read-write. | No Magisk needed. Provisioning can disable Frameo and the OTA apps, set kinframe as home and grant permissions over adb. |
 | Updaters | `com.adups.fota` and `com.adups.fota.sysoper` (Adups firmware updates). Frameo app v1.32.16 (versionCode 80320) under `/data/app`, self-updated 2026-10-21. | Disable both Adups packages and Frameo during provisioning. |
 | Other preinstalled | `com.cghs.stresstest`, `com.DeviceTest` (factory test apps), OpenWnn IME, Pico TTS, WebView | Leave alone or disable. |
 | Locale | `nl-NL`, `Europe/Amsterdam` | |
+
+## Boot chain
+
+What the screen shows from power-on until the home app, and where it comes from (read-only probes, 2026-10-25):
+
+1. **Bootloader** (Rockchip U-Boot, `uboot` partition) loads the **resource partition** and shows `logo.bmp` from it.
+2. **Kernel** (`kernel` partition, with the ramdisk in `boot`) starts with the device tree `rk-kernel.dtb` from the
+   same resource partition and shows `logo_kernel.bmp` (the stock firmware has the same "DENVER" image twice).
+3. **Android** shows `/system/media/bootanimation.zip` until `sys.boot_completed`; there is no `/oem` copy. The stock
+   one is the photo frame app's (870×432 frames on white, four parts).
+4. The **home app** starts (the stock app, or kinframe after converting).
+
+**The resource partition** is a Rockchip "RSCE" image: a 512-byte header (`RSCE`, header size 1 block, table at
+block 1, 1 block per entry, 3 entries), one block per entry (`ENTR`, a 256-byte name, content offset in blocks,
+size in bytes; no per-entry hashes on this frame) and the contents on block boundaries, zero-filled to 16 MiB:
+
+| Entry | Block | Size | Format |
+|---|---|---|---|
+| `rk-kernel.dtb` | 4 | 105 148 bytes | Flattened device tree v17. **The kernel can't start without it.** |
+| `logo.bmp` | 210 | 30 276 bytes | Windows BMP, **800×1280** (the panel's native portrait scan-out), 8 bits per pixel, 256-colour palette, **BI_RLE8** with encoded runs only, an end-of-line marker after every row, bottom-up |
+| `logo_kernel.bmp` | 270 | 30 276 bytes | the same |
+
+The panel is mounted rotated (`ro.sf.hwrotation=270`): Android draws 1280×800 landscape, but the bootloader and
+kernel draw the native 800×1280 picture, so a logo that should look upright in landscape is stored rotated 90°
+counter-clockwise. kinframe's logo (`tools/brand/boot/build.py`) follows exactly this format, and the convert tool
+refuses to write a logo whose size, depth or compression differs from the frame's own.
+
+**Partitions** (`/dev/block/platform/1021c000.rksdmmc/by-name/`, eMMC `mmcblk0`, 512-byte sectors as Linux sees them):
+
+| Name | Device | Start sector | Size |
+|---|---|---|---|
+| uboot | mmcblk0p1 | 16384 | 4 MiB |
+| misc | mmcblk0p2 | 24576 | 4 MiB |
+| resource | mmcblk0p3 | 32768 | 16 MiB |
+| kernel | mmcblk0p4 | 65536 | 12 MiB |
+| boot | mmcblk0p5 | 90112 | 12 MiB |
+| recovery | mmcblk0p6 | 114688 | 32 MiB |
+| backup | mmcblk0p7 | 180224 | 64 MiB |
+| cache, metadata, kpanic, system, radical_update, userdata | mmcblk0p8–p13 | | |
+
+The device nodes belong to `radio:radio` with mode 660, so reading them needs root. The frame has `dd`, `sync`,
+`blockdev`, `md5sum` and `sha1sum` (toolbox/toybox) but no `sha256sum`: the convert tool compares sha256 on the
+computer after pulling the read-back.
+
+## Recovering a damaged resource partition
+
+The convert tool backs the partition up as `resource.img` before writing it, verifies the write and writes the
+backup back itself on a mismatch. If a write was still interrupted (power cut, cable pulled) the frame may not boot:
+without the device tree the kernel can't start. The bootloader lives in its own partition and is not touched.
+
+1. **The frame still runs Android** (nothing restarted yet): put the backup back over adb.
+   `sh tools/convert/kinframe-convert.sh --revert --restore-resource kinframe-backup-…/resource.img` does it with the
+   same verify-and-roll-back steps, or by hand:
+   ```sh
+   adb push resource.img /data/local/tmp/resource.img
+   adb shell su 0 dd if=/data/local/tmp/resource.img of=/dev/block/platform/1021c000.rksdmmc/by-name/resource bs=1048576
+   adb shell su 0 sync
+   ```
+   then read it back (`su 0 dd if=… of=/data/local/tmp/check.img`, `su 0 chmod 644 …`, `adb pull`) and compare the
+   sha256 with the backup's before restarting.
+2. **The frame no longer boots**: use Rockchip's USB flashing modes with
+   [`rkdeveloptool`](https://github.com/rockchip-linux/rkdeveloptool) (or Rockchip's `upgrade_tool` / RKDevTool on
+   Windows). *Not yet tried on this frame*; the outline is the usual one for RK312x:
+   - **Loader mode** (the bootloader's USB download mode): hold the volume-up key while connecting the USB cable
+     (or `adb reboot loader` while it still runs). `rkdeveloptool ld` lists the device as `Loader`.
+   - **Maskrom mode**, if the bootloader itself doesn't respond: the boot ROM's mode, reached by shorting the eMMC
+     clock (or a maskrom test point) to ground while connecting USB. Then `rkdeveloptool db <rk312x loader .bin>`
+     first (Rockchip's `rk312x_loader_*.bin` from the rkbin repository).
+   - Write the backup by partition name: `rkdeveloptool wlx resource resource.img` (needs a build with `wlx`), or
+     look the partition's start up with `rkdeveloptool ppt` and use `rkdeveloptool wl <start> resource.img`. Note
+     that the start sectors Linux reports (32768 for resource) can differ from the loader's numbering on Rockchip's
+     older "parameter" layouts, so use the loader's table, not the table above. Then `rkdeveloptool rd`.
+3. The convert script's `--full-backup` copies every partition except user data (`mmcblk0p3.img` is the resource
+   partition), which is the last resort for the other boot partitions as well.
 
 ## Presence detection
 

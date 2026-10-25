@@ -45,6 +45,15 @@ export const SET_HOME_MIN_SDK = 24;
 export const INSTALL_NEWER_PRESENT = 'INSTALL_FAILED_VERSION_DOWNGRADE';
 /** Scratch directory on the frame (the adb shell user owns /data/local/tmp). Removed after use. */
 export const WORK_DIR = '/data/local/tmp/kinframe-convert';
+/** The start-up branding put on the frame (tools/brand/boot): kinframe now; a retail brand can be added later. */
+export const BOOT_BRAND = 'kinframe';
+/** Where a kinframe server serves the start-up branding: `<server><BOOT_ASSETS>/<brand>/{logo.bmp,bootanimation.zip}`. */
+export const BOOT_ASSETS = '/frame-boot';
+/** The Android boot animation (Android 6 has no /oem copy). */
+export const BOOT_ANIMATION = '/system/media/bootanimation.zip';
+/** Backup file names for the start-up branding: the whole resource partition and the stock boot animation. */
+export const RESOURCE_BACKUP = 'resource.img';
+export const BOOT_ANIMATION_BACKUP = 'bootanimation.zip';
 
 /**
  * Every shell command the tools run on the frame, as templates. `{name}` placeholders are filled by `fill()`; the
@@ -75,7 +84,21 @@ export const COMMANDS = {
 	enable: 'su 0 pm enable {pkg}',
 	uninstall: 'pm uninstall {frame}',
 	uninstallKeepData: 'pm uninstall -k {frame}',
-	uninstallRoot: 'su 0 pm uninstall {frame}'
+	uninstallRoot: 'su 0 pm uninstall {frame}',
+	// start-up branding (boot logo in the resource partition, boot animation in /system)
+	findResource: 'ls /dev/block/platform/*/by-name/resource',
+	mounts: 'mount',
+	readResource: 'su 0 dd if={resource} of={work}/{file} bs=1048576',
+	readable: 'su 0 chmod 644 {work}/{file}',
+	writeResource: 'su 0 dd if={work}/{file} of={resource} bs=1048576',
+	sync: 'su 0 sync',
+	flushResource: 'su 0 blockdev --flushbufs {resource}',
+	removeFile: 'su 0 rm -f {work}/{file}',
+	remountRw: 'su 0 mount -o remount,rw {system} /system',
+	copyBootAnimation: 'su 0 cp {work}/bootanimation.zip /system/media/bootanimation.zip',
+	chmodBootAnimation: 'su 0 chmod 644 /system/media/bootanimation.zip',
+	remountRo: 'su 0 mount -o remount,ro {system} /system',
+	sha1BootAnimation: 'sha1sum /system/media/bootanimation.zip'
 } as const;
 
 export type CommandName = keyof typeof COMMANDS;
@@ -143,6 +166,10 @@ export interface DeviceFacts {
 	serial: string;
 	root: boolean;
 	packages: Record<string, PackageState>;
+	/** The resource partition (boot logos) by name, or empty when the frame has none. */
+	resource: string;
+	/** The block device /system is mounted from (empty when unknown). */
+	system: string;
 }
 
 /** Why a frame is not (or not known to be) supported. */
@@ -198,8 +225,27 @@ export function packageState(pmPath: string, dumpsys: string): PackageState {
 	return { installed: true, paths, versionName: info.versionName, versionCode: info.versionCode, enabled: info.enabled === 'missing' ? 'enabled' : info.enabled };
 }
 
-/** Device facts from getprop output, the root check and package states. */
-export function deviceFacts(getprop: string, rootCheck: string, packages: Record<string, PackageState>): DeviceFacts {
+/** The resource partition from the `findResource` listing (`/dev/block/platform/<controller>/by-name/resource`), or empty. */
+export function parseResourcePath(out: string): string {
+	return out.split(/\r?\n/).map((l) => l.trim()).find((l) => /^\/dev\/block\/platform\/[^/\s]+\/by-name\/resource$/.test(l)) ?? '';
+}
+
+/** The block device /system is mounted from, from `mount` output (`<dev> /system ext4 ro,…` or `<dev> on /system type …`). */
+export function parseSystemDevice(out: string): string {
+	for (const line of out.split(/\r?\n/)) {
+		const m = /^(\S+)\s+(?:on\s+)?\/system\s/.exec(line.trim());
+		if (m) return m[1]!;
+	}
+	return '';
+}
+
+/** Device facts from getprop output, the root check, package states and (optionally) the boot partition probes. */
+export function deviceFacts(
+	getprop: string,
+	rootCheck: string,
+	packages: Record<string, PackageState>,
+	boot: { findResource?: string; mounts?: string } = {}
+): DeviceFacts {
 	const p = parseGetprop(getprop);
 	const abilist = (p['ro.product.cpu.abilist'] ?? '').split(',').filter(Boolean);
 	const abis = abilist.length ? abilist : [p['ro.product.cpu.abi'], p['ro.product.cpu.abi2']].filter((a): a is string => Boolean(a));
@@ -215,7 +261,9 @@ export function deviceFacts(getprop: string, rootCheck: string, packages: Record
 		fingerprint: p['ro.build.fingerprint'] ?? '',
 		serial: p['ro.serialno'] ?? '',
 		root: /uid=0\b/.test(rootCheck),
-		packages
+		packages,
+		resource: parseResourcePath(boot.findResource ?? ''),
+		system: parseSystemDevice(boot.mounts ?? '')
 	};
 }
 
@@ -241,6 +289,17 @@ export function canConvert(id: Identification, force: boolean): boolean {
 	return id.verdict === 'supported' || (id.verdict === 'untested' && force);
 }
 
+/**
+ * Whether the boot logo can be replaced: root and a resource partition. Whether the boot animation can be: root and a
+ * plain (not dm-verity) /system, which may be remounted writable.
+ */
+export function bootLogoPossible(f: DeviceFacts): boolean {
+	return f.root && f.resource !== '';
+}
+export function bootAnimationPossible(f: DeviceFacts): boolean {
+	return f.root && /^\/dev\/block\//.test(f.system) && !/\/dm-\d+$/.test(f.system);
+}
+
 /** Reverting needs root (to enable the disabled packages) and nothing else: it must work on any half-converted frame. */
 export function canRevert(id: Identification): boolean {
 	return id.facts.root;
@@ -262,15 +321,33 @@ export type Action =
 			fallback?: string;
 	  }
 	| { kind: 'pull'; remote: string; name: string }
-	| { kind: 'push'; remote: string; source: 'release' | 'restore' }
+	| { kind: 'push'; remote: string; source: PushSource }
 	| { kind: 'fetch' }
+	/** Downloads the start-up branding (boot logo, boot animation) and checks its format. */
+	| { kind: 'fetchBoot' }
+	/** Builds the branded resource image from the backed-up one (`RESOURCE_BACKUP`) and the downloaded logo. */
+	| { kind: 'brandResource' }
+	/**
+	 * Writes the resource image (the branded one, or the backup chosen when reverting) to the resource partition:
+	 * refuses one that isn't a valid resource image with a device tree or doesn't match the partition size, reads the
+	 * partition first, writes, reads it back and compares sha256. On a mismatch it writes the previous content back.
+	 */
+	| { kind: 'flashResource'; resource: string }
+	/** Checks the boot animation on the frame is the one pushed (sha1sum: the frame has no sha256sum). */
+	| { kind: 'verifyBootAnimation' }
 	| { kind: 'reboot' }
 	| { kind: 'waitBoot' }
 	| { kind: 'checkHome'; expect: 'kinframe' | 'other' };
 
+/** Data the runner pushes: the kinframe APK, a Frameo APK chosen for revert, or a boot animation. */
+export type PushSource = 'release' | 'restore' | 'bootanimation';
+
 export type StepId =
 	| 'backup'
+	| 'bootBackup'
 	| 'download'
+	| 'bootLogo'
+	| 'bootAnimation'
 	| 'install'
 	| 'permissions'
 	| 'disable'
@@ -294,6 +371,11 @@ export interface ConvertOptions {
 	language?: string;
 	/** Pull the Frameo APK(s) and its data before changing anything. */
 	backup: boolean;
+	/**
+	 * Replace the boot logo (resource partition) and the boot animation with kinframe's, where the frame allows it.
+	 * The originals are always backed up first.
+	 */
+	bootBranding?: boolean;
 }
 
 export interface RevertOptions {
@@ -301,6 +383,10 @@ export interface RevertOptions {
 	keepData: boolean;
 	/** A backed-up Frameo APK is pushed and installed over the current one (if Frameo updated itself meanwhile). */
 	restoreFrameo: boolean;
+	/** A backed-up resource image (`RESOURCE_BACKUP`) is written back to the resource partition. */
+	restoreBootLogo?: boolean;
+	/** A backed-up boot animation (`BOOT_ANIMATION_BACKUP`) is copied back to /system. */
+	restoreBootAnimation?: boolean;
 }
 
 const sh = (cmd: string, extra: Partial<Extract<Action, { kind: 'shell' }>> = {}): Action => ({ kind: 'shell', cmd, modifies: true, ...extra });
@@ -308,6 +394,34 @@ const sh = (cmd: string, extra: Partial<Extract<Action, { kind: 'shell' }>> = {}
 /** Backup file name for a pulled APK path: `/data/app/net.frameo.frame-2/base.apk` → `net.frameo.frame-base.apk`. */
 export function backupName(pkg: string, path: string): string {
 	return `${pkg}-${path.split('/').pop() ?? 'base.apk'}`;
+}
+
+/** Copies a partition to the work directory and pulls it as `name` (binary data through su is not clean). */
+function readPartition(resource: string, name: string): Action[] {
+	return [
+		sh(fill('mkWork')),
+		sh(fill('readResource', { resource, file: name }), { ok: ['records out'] }),
+		sh(fill('readable', { file: name })),
+		{ kind: 'pull', remote: `${WORK_DIR}/${name}`, name },
+		sh(fill('removeFile', { file: name }), { optional: true })
+	];
+}
+
+/**
+ * Puts the boot animation in place: push, remount /system writable, copy, make it readable, remount read-only, check.
+ * The copy may fail without stopping the step, so /system is always remounted read-only; the check then fails it.
+ */
+function writeBootAnimation(system: string): Action[] {
+	return [
+		sh(fill('mkWork')),
+		{ kind: 'push', remote: `${WORK_DIR}/bootanimation.zip`, source: 'bootanimation' },
+		sh(fill('remountRw', { system })),
+		sh(fill('copyBootAnimation'), { optional: true }),
+		sh(fill('chmodBootAnimation'), { optional: true }),
+		sh(fill('remountRo', { system })),
+		{ kind: 'verifyBootAnimation' },
+		sh(fill('removeFile', { file: 'bootanimation.zip' }), { optional: true })
+	];
 }
 
 /**
@@ -335,7 +449,19 @@ export function planConvert(id: Identification, opts: ConvertOptions): Step[] {
 		steps.push({ id: 'backup', actions });
 	}
 
-	steps.push({ id: 'download', actions: [{ kind: 'fetch' }] });
+	// Start-up branding: back up both originals before anything changes, then write them right after the downloads,
+	// before the app changes, so a failure leaves the frame as it was.
+	const logo = Boolean(opts.bootBranding) && bootLogoPossible(f);
+	const anim = Boolean(opts.bootBranding) && bootAnimationPossible(f);
+	if (logo || anim) {
+		const actions: Action[] = [];
+		if (anim) actions.push({ kind: 'pull', remote: BOOT_ANIMATION, name: BOOT_ANIMATION_BACKUP });
+		if (logo) actions.push(...readPartition(f.resource, RESOURCE_BACKUP));
+		steps.push({ id: 'bootBackup', actions });
+	}
+	steps.push({ id: 'download', actions: [{ kind: 'fetch' }, ...(logo || anim ? [{ kind: 'fetchBoot' } as const] : [])] });
+	if (logo) steps.push({ id: 'bootLogo', actions: [{ kind: 'brandResource' }, { kind: 'flashResource', resource: f.resource }] });
+	if (anim) steps.push({ id: 'bootAnimation', actions: writeBootAnimation(f.system) });
 	steps.push({
 		id: 'install',
 		actions: [sh(fill('mkWork')), { kind: 'push', remote: `${WORK_DIR}/kinframe.apk`, source: 'release' }, sh(fill('install'), { ok: ['Success', INSTALL_NEWER_PRESENT] })]
@@ -383,6 +509,12 @@ export function planRevert(id: Identification, opts: RevertOptions): Step[] {
 			]
 		});
 	}
+	if (opts.restoreBootLogo && bootLogoPossible(f)) {
+		steps.push({ id: 'bootLogo', actions: [{ kind: 'flashResource', resource: f.resource }] });
+	}
+	if (opts.restoreBootAnimation && bootAnimationPossible(f)) {
+		steps.push({ id: 'bootAnimation', actions: writeBootAnimation(f.system) });
+	}
 	const toEnable = DISABLE_PACKAGES.filter((p) => f.packages[p]?.installed && f.packages[p]?.enabled === 'disabled');
 	if (toEnable.length) {
 		steps.push({ id: 'enable', actions: toEnable.map((pkg) => sh(fill('enable', { pkg }), { ok: ['enabled'] })) });
@@ -403,6 +535,8 @@ export function identifyCommands(): string[] {
 	return [
 		fill('getprop'),
 		fill('rootCheck'),
+		fill('findResource'),
+		fill('mounts'),
 		...[FRAME_PACKAGE, ...DISABLE_PACKAGES].flatMap((pkg) => [fill('packagePath', { pkg }), fill('packageInfo', { pkg })])
 	];
 }

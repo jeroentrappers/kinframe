@@ -5,13 +5,18 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { i18n, LOCALES, t, type Locale, type MessageKey } from '$lib/i18n/index.svelte';
 	import { toasts } from '$lib/toast.svelte';
-	import { checkApk, formatFingerprint, isZip } from '$lib/convert/apk';
+	import { checkApk, formatFingerprint, isZip, sha256Hex } from '$lib/convert/apk';
+	import { resourceProblem } from '$lib/convert/rsce';
 	import {
+		BOOT_ASSETS,
+		BOOT_BRAND,
 		DEFAULT_SERVER,
 		FRAME_PACKAGE,
 		FRAMEO_PACKAGE,
 		RELEASE_CERT_SHA256,
 		RELEASES_REPO,
+		bootAnimationPossible,
+		bootLogoPossible,
 		canConvert,
 		canRevert,
 		normalizeServerUrl,
@@ -23,7 +28,7 @@
 		type Step,
 		type StepId
 	} from '$lib/convert/plan';
-	import { identifyFrame, runPlan, type StepStatus } from '$lib/convert/runner';
+	import { identifyFrame, runPlan, type BootAssets, type StepStatus } from '$lib/convert/runner';
 	import type { WebUsbFrame } from '$lib/convert/adb';
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
@@ -59,6 +64,11 @@
 	let keepData = $state(false);
 	let restoreFile = $state<File | null>(null);
 	let restoreBytes = $state.raw<Uint8Array | undefined>(undefined);
+	let bootBranding = $state(true);
+	let resourceFile = $state<File | null>(null);
+	let resourceBytes = $state.raw<Uint8Array | undefined>(undefined);
+	let animFile = $state<File | null>(null);
+	let animBytes = $state.raw<Uint8Array | undefined>(undefined);
 
 	// Progress
 	let steps = $state<Step[]>([]);
@@ -72,7 +82,9 @@
 	const server = $derived(serverChoice === 'this' ? thisServer : normalizeServerUrl(otherServer));
 	const serverHost = $derived(new URL(thisServer).host);
 	const allowed = $derived(id ? (mode === 'convert' ? canConvert(id, force) : canRevert(id)) : false);
-	const canStart = $derived(allowed && (mode === 'revert' || server !== null) && (mode === 'convert' || !restoreFile || Boolean(restoreBytes)));
+	const bootPossible = $derived(id ? bootLogoPossible(id.facts) || bootAnimationPossible(id.facts) : false);
+	const restoreFilesOk = $derived((!restoreFile || Boolean(restoreBytes)) && (!resourceFile || Boolean(resourceBytes)) && (!animFile || Boolean(animBytes)));
+	const canStart = $derived(allowed && (mode === 'revert' || server !== null) && (mode === 'convert' || restoreFilesOk));
 	const logText = $derived(logLines.join('\n'));
 
 	onMount(() => {
@@ -144,6 +156,29 @@
 		}
 	}
 
+	/** A backed-up resource image: only kept when it is a valid resource image with a device tree. */
+	async function chooseResource(e: Event) {
+		const file = (e.currentTarget as HTMLInputElement).files?.[0] ?? null;
+		resourceFile = file;
+		resourceBytes = undefined;
+		if (file) {
+			const bytes = new Uint8Array(await file.arrayBuffer());
+			const problem = resourceProblem(bytes);
+			if (problem) log(`${file.name}: ${problem}`);
+			else resourceBytes = bytes;
+		}
+	}
+
+	async function chooseAnimation(e: Event) {
+		const file = (e.currentTarget as HTMLInputElement).files?.[0] ?? null;
+		animFile = file;
+		animBytes = undefined;
+		if (file) {
+			const bytes = new Uint8Array(await file.arrayBuffer());
+			animBytes = isZip(bytes) ? bytes : undefined;
+		}
+	}
+
 	function saveFile(name: string, data: Uint8Array, type = 'application/octet-stream') {
 		const url = URL.createObjectURL(new Blob([data as BlobPart], { type }));
 		const a = document.createElement('a');
@@ -174,18 +209,34 @@
 		return bytes;
 	}
 
+	/** The start-up branding from this server's static files, checked against its manifest. */
+	async function fetchBoot(): Promise<BootAssets> {
+		const base = `${BOOT_ASSETS}/${BOOT_BRAND}`;
+		const res = await fetch(`${base}/manifest.json`, { cache: 'no-store' });
+		if (!res.ok) throw new Error(`boot branding: HTTP ${res.status}`);
+		const manifest = (await res.json()) as Record<'logo' | 'bootanimation', { file: string; sha256: string }>;
+		const get = async (entry: { file: string; sha256: string }) => {
+			const r = await fetch(`${base}/${entry.file}`);
+			if (!r.ok) throw new Error(`boot branding: HTTP ${r.status}`);
+			const bytes = new Uint8Array(await r.arrayBuffer());
+			if ((await sha256Hex(bytes)) !== entry.sha256) throw new Error(`boot branding: ${entry.file} does not match its sha256`);
+			return bytes;
+		};
+		return { logo: await get(manifest.logo), bootanimation: await get(manifest.bootanimation) };
+	}
+
 	async function start() {
 		if (!frame || !id || !adb || !canStart) return;
 		const a = adb;
 		const current = frame;
 		steps =
 			mode === 'convert'
-				? planConvert(id, { server: server!, language: language || undefined, backup })
-				: planRevert(id, { keepData, restoreFrameo: Boolean(restoreBytes) });
+				? planConvert(id, { server: server!, language: language || undefined, backup, bootBranding: bootBranding && bootPossible })
+				: planRevert(id, { keepData, restoreFrameo: Boolean(restoreBytes), restoreBootLogo: Boolean(resourceBytes), restoreBootAnimation: Boolean(animBytes) });
 		statuses = Object.fromEntries(steps.map((s) => [s.id, { status: 'pending' as StepStatus }]));
 		outcome = null;
 		verified = null;
-		log(`\n# ${mode}${dryRun ? ' (dry run)' : ''}${mode === 'convert' ? `, server ${server}, language ${language || '(frame asks)'}, backup ${backup}` : `, keep data ${keepData}, restore apk ${restoreFile?.name ?? 'no'}`}${force ? ', forced' : ''}`);
+		log(`\n# ${mode}${dryRun ? ' (dry run)' : ''}${mode === 'convert' ? `, server ${server}, language ${language || '(frame asks)'}, backup ${backup}, boot branding ${bootBranding && bootPossible}` : `, keep data ${keepData}, restore apk ${restoreFile?.name ?? 'no'}, restore boot logo ${resourceFile?.name ?? 'no'}, restore boot animation ${animFile?.name ?? 'no'}`}${force ? ', forced' : ''}`);
 		phase = 'running';
 		try {
 			outcome = await runPlan(
@@ -198,6 +249,8 @@
 					file: (name, data) => backups.push({ name, size: data.length, url: saveFile(name, data) }),
 					fetchRelease,
 					restoreApk: () => restoreBytes,
+					fetchBoot,
+					restoreBoot: () => ({ resource: resourceBytes, bootanimation: animBytes }),
 					reconnect: async () => {
 						const next = await a.reconnect(current.serial);
 						frame = next;
@@ -414,6 +467,15 @@
 										<label class="check"><input type="checkbox" bind:checked={backup} />{t('convert.backup')}</label>
 										<p class="hint indent">{t('convert.backupHint')}</p>
 									</div>
+									{#if bootPossible}
+										<div>
+											<label class="check"><input type="checkbox" bind:checked={bootBranding} />{t('convert.bootBranding')}</label>
+											<p class="hint indent">{t('convert.bootBrandingHint')}</p>
+											{#if bootBranding && bootLogoPossible(id.facts)}
+												<p class="callout callout-warn indent-callout"><Icon name="alert" size={20} />{t('convert.bootBrandingWarn')}</p>
+											{/if}
+										</div>
+									{/if}
 								{:else}
 									<div>
 										<label class="check"><input type="checkbox" bind:checked={keepData} />{t('convert.keepData')}</label>
@@ -424,6 +486,20 @@
 										<input id="restore-apk" type="file" accept=".apk,application/vnd.android.package-archive" onchange={chooseRestore} />
 										<p class="hint">{t('convert.restoreApkHint')}</p>
 									</div>
+									{#if bootLogoPossible(id.facts)}
+										<div class="field">
+											<label class="label" for="restore-resource">{t('convert.restoreBootLogo')} <span class="faint">({t('common.optional')})</span></label>
+											<input id="restore-resource" type="file" accept=".img,application/octet-stream" onchange={chooseResource} />
+											{#if resourceFile && !resourceBytes}<p class="error-text" role="alert">{t('convert.restoreBootInvalid')}</p>{/if}
+										</div>
+									{/if}
+									{#if bootAnimationPossible(id.facts)}
+										<div class="field">
+											<label class="label" for="restore-anim">{t('convert.restoreBootAnimation')} <span class="faint">({t('common.optional')})</span></label>
+											<input id="restore-anim" type="file" accept=".zip,application/zip" onchange={chooseAnimation} />
+										</div>
+									{/if}
+									{#if bootPossible}<p class="hint">{t('convert.restoreBootHint')}</p>{/if}
 								{/if}
 								<label class="check"><input type="checkbox" bind:checked={dryRun} />{t('convert.dryRun')}</label>
 							</fieldset>
@@ -628,6 +704,10 @@
 	}
 	.indent {
 		padding-inline-start: 1.6em;
+	}
+	.indent-callout {
+		margin-top: var(--s-2);
+		margin-inline-start: 1.6em;
 	}
 	.field {
 		width: 100%;
