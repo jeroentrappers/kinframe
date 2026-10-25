@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Mājas logrīki</string>
+    <string name="plugins_note">Tiešraides vērtības no mājas tīkla ierīcēm uz fotoattēliem vai blakus tiem. Agrīns priekšskatījums: iestatiet to šeit, rāmī.</string>
+    <string name="plugins_layout">Izkārtojums</string>
+    <string name="plugins_layout_off">Izslēgts</string>
+    <string name="plugins_layout_overlay">Stūros</string>
+    <string name="plugins_layout_band">Blakus fotoattēlam</string>
+    <string name="plugins_band_side">Puse (ainava)</string>
+    <string name="plugins_side_left">Pa kreisi</string>
+    <string name="plugins_side_right">Pa labi</string>
+    <string name="plugins_band_background">Joslas fons</string>
+    <string name="plugins_background_paper">Papīrs</string>
+    <string name="plugins_background_photo">No fotoattēla</string>
+    <string name="plugins_band_clock">Pulkstenis un laikapstākļi joslā</string>
+    <string name="plugins_slot">Stūris</string>
+    <string name="plugins_slot_top_left">Augšā pa kreisi</string>
+    <string name="plugins_slot_top_right">Augšā pa labi</string>
+    <string name="plugins_visibility">Rādīt</string>
+    <string name="plugins_visibility_always">Vienmēr</string>
+    <string name="plugins_visibility_change">Kad mainās</string>
+    <string name="plugins_visibility_tap">Pēc pieskāriena</string>
+    <string name="plugins_unavailable">Nav pieejams</string>
+    <string name="p1_name">HomeWizard P1 skaitītājs</string>
+    <string name="p1_address">Skaitītājs</string>
+    <string name="p1_searching">Meklē skaitītājus tīklā…</string>
+    <string name="p1_none_found">Skaitītājs vēl nav atrasts. Lietotnē HomeWizard Energy ieslēdziet skaitītājam “Lokālā API” vai ievadiet tā adresi.</string>
+    <string name="p1_api_off">Lokālā API ir izslēgta</string>
+    <string name="p1_manual">Adrese</string>
+    <string name="p1_use">Izmantot</string>
+    <string name="p1_not_private">Var izmantot tikai mājas tīkla adreses.</string>
+    <string name="p1_style">Rādīt kā</string>
+    <string name="p1_style_value">Skaitlis</string>
+    <string name="p1_style_flow">Plūsma</string>
+    <string name="p1_warn">Izcelt virs</string>
+    <string name="p1_warn_off">Nekad</string>
+    <string name="p1_status_ok">Tiek saņemti rādījumi.</string>
+    <string name="p1_status_waiting">Gaida pirmo rādījumu…</string>
+    <string name="p1_status_error">Nevar nolasīt skaitītāju: %1$s</string>
+    <string name="p1_using">Patēriņš</string>
+    <string name="p1_returning">Nodošana tīklā</string>
+    <string name="p1_grid">Tīkls</string>
+    <string name="p1_home">Mājas</string>
+    <string name="p1_last_hour">Pēdējā stunda</string>
+    <string name="p1_today_import">Šodien patērēts</string>
+    <string name="p1_today_export">Šodien nodots</string>
+    <string name="p1_today_gas">Gāze šodien</string>
+</resources>

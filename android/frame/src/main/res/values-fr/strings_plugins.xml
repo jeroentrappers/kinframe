@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widgets maison</string>
+    <string name="plugins_note">Valeurs en direct des appareils de votre réseau domestique, sur ou à côté des photos. Aperçu anticipé : à régler ici sur le cadre.</string>
+    <string name="plugins_layout">Disposition</string>
+    <string name="plugins_layout_off">Désactivé</string>
+    <string name="plugins_layout_overlay">Dans les coins</string>
+    <string name="plugins_layout_band">À côté de la photo</string>
+    <string name="plugins_band_side">Côté (paysage)</string>
+    <string name="plugins_side_left">Gauche</string>
+    <string name="plugins_side_right">Droite</string>
+    <string name="plugins_band_background">Fond du bandeau</string>
+    <string name="plugins_background_paper">Papier</string>
+    <string name="plugins_background_photo">Tiré de la photo</string>
+    <string name="plugins_band_clock">Horloge et météo dans le bandeau</string>
+    <string name="plugins_slot">Coin</string>
+    <string name="plugins_slot_top_left">En haut à gauche</string>
+    <string name="plugins_slot_top_right">En haut à droite</string>
+    <string name="plugins_visibility">Afficher</string>
+    <string name="plugins_visibility_always">Toujours</string>
+    <string name="plugins_visibility_change">Quand la valeur change</string>
+    <string name="plugins_visibility_tap">Après un appui</string>
+    <string name="plugins_unavailable">Indisponible</string>
+    <string name="p1_name">Compteur HomeWizard P1</string>
+    <string name="p1_address">Compteur</string>
+    <string name="p1_searching">Recherche de compteurs sur le réseau…</string>
+    <string name="p1_none_found">Aucun compteur trouvé. Activez « API locale » pour le compteur dans l’app HomeWizard Energy, ou saisissez son adresse.</string>
+    <string name="p1_api_off">API locale désactivée</string>
+    <string name="p1_manual">Adresse</string>
+    <string name="p1_use">Utiliser</string>
+    <string name="p1_not_private">Seules les adresses de votre réseau domestique sont acceptées.</string>
+    <string name="p1_style">Afficher comme</string>
+    <string name="p1_style_value">Nombre</string>
+    <string name="p1_style_flow">Flux</string>
+    <string name="p1_warn">Signaler au-dessus de</string>
+    <string name="p1_warn_off">Jamais</string>
+    <string name="p1_status_ok">Mesures reçues.</string>
+    <string name="p1_status_waiting">En attente de la première mesure…</string>
+    <string name="p1_status_error">Impossible de lire le compteur : %1$s</string>
+    <string name="p1_using">Consommation</string>
+    <string name="p1_returning">Injection</string>
+    <string name="p1_grid">Réseau</string>
+    <string name="p1_home">Maison</string>
+    <string name="p1_last_hour">Dernière heure</string>
+    <string name="p1_today_import">Consommé aujourd’hui</string>
+    <string name="p1_today_export">Injecté aujourd’hui</string>
+    <string name="p1_today_gas">Gaz aujourd’hui</string>
+</resources>

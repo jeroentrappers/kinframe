@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Kodin widgetit</string>
+    <string name="plugins_note">Reaaliaikaisia arvoja kotiverkon laitteista kuvien päällä tai vieressä. Varhainen esiversio: asetetaan täällä kehyksessä.</string>
+    <string name="plugins_layout">Asettelu</string>
+    <string name="plugins_layout_off">Pois</string>
+    <string name="plugins_layout_overlay">Kulmissa</string>
+    <string name="plugins_layout_band">Kuvan vieressä</string>
+    <string name="plugins_band_side">Puoli (vaaka)</string>
+    <string name="plugins_side_left">Vasen</string>
+    <string name="plugins_side_right">Oikea</string>
+    <string name="plugins_band_background">Palkin tausta</string>
+    <string name="plugins_background_paper">Paperi</string>
+    <string name="plugins_background_photo">Kuvasta</string>
+    <string name="plugins_band_clock">Kello ja sää palkissa</string>
+    <string name="plugins_slot">Kulma</string>
+    <string name="plugins_slot_top_left">Ylhäällä vasemmalla</string>
+    <string name="plugins_slot_top_right">Ylhäällä oikealla</string>
+    <string name="plugins_visibility">Näytä</string>
+    <string name="plugins_visibility_always">Aina</string>
+    <string name="plugins_visibility_change">Kun arvo muuttuu</string>
+    <string name="plugins_visibility_tap">Napautuksen jälkeen</string>
+    <string name="plugins_unavailable">Ei saatavilla</string>
+    <string name="p1_name">HomeWizard P1 -mittari</string>
+    <string name="p1_address">Mittari</string>
+    <string name="p1_searching">Etsitään mittareita verkosta…</string>
+    <string name="p1_none_found">Mittaria ei vielä löytynyt. Ota mittarin ”Paikallinen API” käyttöön HomeWizard Energy -sovelluksessa tai kirjoita sen osoite.</string>
+    <string name="p1_api_off">Paikallinen API ei ole käytössä</string>
+    <string name="p1_manual">Osoite</string>
+    <string name="p1_use">Käytä</string>
+    <string name="p1_not_private">Vain kotiverkon osoitteita voi käyttää.</string>
+    <string name="p1_style">Näytä muodossa</string>
+    <string name="p1_style_value">Luku</string>
+    <string name="p1_style_flow">Virtaus</string>
+    <string name="p1_warn">Korosta yli</string>
+    <string name="p1_warn_off">Ei koskaan</string>
+    <string name="p1_status_ok">Lukemia tulee.</string>
+    <string name="p1_status_waiting">Odotetaan ensimmäistä lukemaa…</string>
+    <string name="p1_status_error">Mittaria ei voi lukea: %1$s</string>
+    <string name="p1_using">Kulutus</string>
+    <string name="p1_returning">Syöttö verkkoon</string>
+    <string name="p1_grid">Sähköverkko</string>
+    <string name="p1_home">Koti</string>
+    <string name="p1_last_hour">Viime tunti</string>
+    <string name="p1_today_import">Kulutettu tänään</string>
+    <string name="p1_today_export">Syötetty tänään</string>
+    <string name="p1_today_gas">Kaasu tänään</string>
+</resources>

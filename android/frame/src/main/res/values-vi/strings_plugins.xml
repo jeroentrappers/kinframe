@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Tiện ích trong nhà</string>
+    <string name="plugins_note">Giá trị trực tiếp từ thiết bị trong mạng gia đình, trên hoặc cạnh ảnh. Bản xem trước: thiết lập ngay tại khung ảnh này.</string>
+    <string name="plugins_layout">Bố cục</string>
+    <string name="plugins_layout_off">Tắt</string>
+    <string name="plugins_layout_overlay">Ở các góc</string>
+    <string name="plugins_layout_band">Cạnh ảnh</string>
+    <string name="plugins_band_side">Phía (ngang)</string>
+    <string name="plugins_side_left">Trái</string>
+    <string name="plugins_side_right">Phải</string>
+    <string name="plugins_band_background">Nền dải</string>
+    <string name="plugins_background_paper">Giấy</string>
+    <string name="plugins_background_photo">Từ ảnh</string>
+    <string name="plugins_band_clock">Đồng hồ và thời tiết trong dải</string>
+    <string name="plugins_slot">Góc</string>
+    <string name="plugins_slot_top_left">Trên bên trái</string>
+    <string name="plugins_slot_top_right">Trên bên phải</string>
+    <string name="plugins_visibility">Hiển thị</string>
+    <string name="plugins_visibility_always">Luôn luôn</string>
+    <string name="plugins_visibility_change">Khi thay đổi</string>
+    <string name="plugins_visibility_tap">Sau khi chạm</string>
+    <string name="plugins_unavailable">Không khả dụng</string>
+    <string name="p1_name">Đồng hồ đo HomeWizard P1</string>
+    <string name="p1_address">Đồng hồ đo</string>
+    <string name="p1_searching">Đang tìm đồng hồ đo trong mạng…</string>
+    <string name="p1_none_found">Chưa tìm thấy đồng hồ đo. Hãy bật “API cục bộ” cho đồng hồ đo trong ứng dụng HomeWizard Energy hoặc nhập địa chỉ của nó.</string>
+    <string name="p1_api_off">API cục bộ đang tắt</string>
+    <string name="p1_manual">Địa chỉ</string>
+    <string name="p1_use">Dùng</string>
+    <string name="p1_not_private">Chỉ có thể dùng địa chỉ trong mạng gia đình.</string>
+    <string name="p1_style">Hiển thị dạng</string>
+    <string name="p1_style_value">Số</string>
+    <string name="p1_style_flow">Dòng chảy</string>
+    <string name="p1_warn">Làm nổi bật khi trên</string>
+    <string name="p1_warn_off">Không bao giờ</string>
+    <string name="p1_status_ok">Đang nhận số đo.</string>
+    <string name="p1_status_waiting">Đang chờ số đo đầu tiên…</string>
+    <string name="p1_status_error">Không đọc được đồng hồ đo: %1$s</string>
+    <string name="p1_using">Đang dùng</string>
+    <string name="p1_returning">Đang trả lưới</string>
+    <string name="p1_grid">Lưới điện</string>
+    <string name="p1_home">Nhà</string>
+    <string name="p1_last_hour">Giờ qua</string>
+    <string name="p1_today_import">Đã dùng hôm nay</string>
+    <string name="p1_today_export">Đã trả hôm nay</string>
+    <string name="p1_today_gas">Gas hôm nay</string>
+</resources>

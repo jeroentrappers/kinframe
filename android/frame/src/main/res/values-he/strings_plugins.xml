@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">ווידג׳טים לבית</string>
+    <string name="plugins_note">ערכים חיים ממכשירים ברשת הביתית, על התמונות או לצידן. גרסה מוקדמת: מגדירים כאן במסגרת.</string>
+    <string name="plugins_layout">פריסה</string>
+    <string name="plugins_layout_off">כבוי</string>
+    <string name="plugins_layout_overlay">בפינות</string>
+    <string name="plugins_layout_band">ליד התמונה</string>
+    <string name="plugins_band_side">צד (לרוחב)</string>
+    <string name="plugins_side_left">שמאל</string>
+    <string name="plugins_side_right">ימין</string>
+    <string name="plugins_band_background">רקע הפס</string>
+    <string name="plugins_background_paper">נייר</string>
+    <string name="plugins_background_photo">מהתמונה</string>
+    <string name="plugins_band_clock">שעון ומזג אוויר בפס</string>
+    <string name="plugins_slot">פינה</string>
+    <string name="plugins_slot_top_left">למעלה משמאל</string>
+    <string name="plugins_slot_top_right">למעלה מימין</string>
+    <string name="plugins_visibility">הצגה</string>
+    <string name="plugins_visibility_always">תמיד</string>
+    <string name="plugins_visibility_change">כשמשתנה</string>
+    <string name="plugins_visibility_tap">אחרי הקשה</string>
+    <string name="plugins_unavailable">לא זמין</string>
+    <string name="p1_name">מונה HomeWizard P1</string>
+    <string name="p1_address">מונה</string>
+    <string name="p1_searching">מחפש מונים ברשת…</string>
+    <string name="p1_none_found">עדיין לא נמצא מונה. יש להפעיל את „Local API” עבור המונה באפליקציית HomeWizard Energy, או להקליד את הכתובת שלו.</string>
+    <string name="p1_api_off">ה-API המקומי כבוי</string>
+    <string name="p1_manual">כתובת</string>
+    <string name="p1_use">שימוש</string>
+    <string name="p1_not_private">אפשר להשתמש רק בכתובות מהרשת הביתית.</string>
+    <string name="p1_style">הצגה בתור</string>
+    <string name="p1_style_value">מספר</string>
+    <string name="p1_style_flow">זרימה</string>
+    <string name="p1_warn">הדגשה מעל</string>
+    <string name="p1_warn_off">אף פעם</string>
+    <string name="p1_status_ok">הקריאות מתקבלות.</string>
+    <string name="p1_status_waiting">ממתין לקריאה הראשונה…</string>
+    <string name="p1_status_error">לא ניתן לקרוא את המונה: %1$s</string>
+    <string name="p1_using">צריכה</string>
+    <string name="p1_returning">החזרה לרשת</string>
+    <string name="p1_grid">רשת החשמל</string>
+    <string name="p1_home">בית</string>
+    <string name="p1_last_hour">השעה האחרונה</string>
+    <string name="p1_today_import">נצרך היום</string>
+    <string name="p1_today_export">הוחזר היום</string>
+    <string name="p1_today_gas">גז היום</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Domači gradniki</string>
+    <string name="plugins_note">Sprotne vrednosti iz naprav v domačem omrežju, na fotografijah ali ob njih. Zgodnji predogled: nastavite ga tukaj na okvirju.</string>
+    <string name="plugins_layout">Postavitev</string>
+    <string name="plugins_layout_off">Izklopljeno</string>
+    <string name="plugins_layout_overlay">V kotih</string>
+    <string name="plugins_layout_band">Ob fotografiji</string>
+    <string name="plugins_band_side">Stran (ležeče)</string>
+    <string name="plugins_side_left">Levo</string>
+    <string name="plugins_side_right">Desno</string>
+    <string name="plugins_band_background">Ozadje pasu</string>
+    <string name="plugins_background_paper">Papir</string>
+    <string name="plugins_background_photo">Iz fotografije</string>
+    <string name="plugins_band_clock">Ura in vreme v pasu</string>
+    <string name="plugins_slot">Kot</string>
+    <string name="plugins_slot_top_left">Zgoraj levo</string>
+    <string name="plugins_slot_top_right">Zgoraj desno</string>
+    <string name="plugins_visibility">Prikaži</string>
+    <string name="plugins_visibility_always">Vedno</string>
+    <string name="plugins_visibility_change">Ko se spremeni</string>
+    <string name="plugins_visibility_tap">Po dotiku</string>
+    <string name="plugins_unavailable">Ni na voljo</string>
+    <string name="p1_name">Števec HomeWizard P1</string>
+    <string name="p1_address">Števec</string>
+    <string name="p1_searching">Iskanje števcev v omrežju …</string>
+    <string name="p1_none_found">Števca še ni bilo mogoče najti. V aplikaciji HomeWizard Energy za števec vklopite »Lokalni API« ali vnesite njegov naslov.</string>
+    <string name="p1_api_off">Lokalni API je izklopljen</string>
+    <string name="p1_manual">Naslov</string>
+    <string name="p1_use">Uporabi</string>
+    <string name="p1_not_private">Uporabite lahko le naslove iz domačega omrežja.</string>
+    <string name="p1_style">Prikaži kot</string>
+    <string name="p1_style_value">Število</string>
+    <string name="p1_style_flow">Tok</string>
+    <string name="p1_warn">Poudari nad</string>
+    <string name="p1_warn_off">Nikoli</string>
+    <string name="p1_status_ok">Meritve prihajajo.</string>
+    <string name="p1_status_waiting">Čakanje na prvo meritev …</string>
+    <string name="p1_status_error">Števca ni mogoče prebrati: %1$s</string>
+    <string name="p1_using">Poraba</string>
+    <string name="p1_returning">Oddaja</string>
+    <string name="p1_grid">Omrežje</string>
+    <string name="p1_home">Dom</string>
+    <string name="p1_last_hour">Zadnja ura</string>
+    <string name="p1_today_import">Danes porabljeno</string>
+    <string name="p1_today_export">Danes oddano</string>
+    <string name="p1_today_gas">Plin danes</string>
+</resources>

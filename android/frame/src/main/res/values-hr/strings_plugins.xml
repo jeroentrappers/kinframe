@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Kućni widgeti</string>
+    <string name="plugins_note">Trenutačne vrijednosti s uređaja u kućnoj mreži, na fotografijama ili pokraj njih. Rani pregled: postavite ga ovdje na okviru.</string>
+    <string name="plugins_layout">Raspored</string>
+    <string name="plugins_layout_off">Isključeno</string>
+    <string name="plugins_layout_overlay">U kutovima</string>
+    <string name="plugins_layout_band">Pokraj fotografije</string>
+    <string name="plugins_band_side">Strana (vodoravno)</string>
+    <string name="plugins_side_left">Lijevo</string>
+    <string name="plugins_side_right">Desno</string>
+    <string name="plugins_band_background">Pozadina trake</string>
+    <string name="plugins_background_paper">Papir</string>
+    <string name="plugins_background_photo">Iz fotografije</string>
+    <string name="plugins_band_clock">Sat i vrijeme u traci</string>
+    <string name="plugins_slot">Kut</string>
+    <string name="plugins_slot_top_left">Gore lijevo</string>
+    <string name="plugins_slot_top_right">Gore desno</string>
+    <string name="plugins_visibility">Prikaži</string>
+    <string name="plugins_visibility_always">Uvijek</string>
+    <string name="plugins_visibility_change">Kad se promijeni</string>
+    <string name="plugins_visibility_tap">Nakon dodira</string>
+    <string name="plugins_unavailable">Nije dostupno</string>
+    <string name="p1_name">Brojilo HomeWizard P1</string>
+    <string name="p1_address">Brojilo</string>
+    <string name="p1_searching">Traženje brojila u mreži…</string>
+    <string name="p1_none_found">Brojilo još nije pronađeno. U aplikaciji HomeWizard Energy uključite „Lokalni API” za brojilo ili upišite njegovu adresu.</string>
+    <string name="p1_api_off">Lokalni API je isključen</string>
+    <string name="p1_manual">Adresa</string>
+    <string name="p1_use">Koristi</string>
+    <string name="p1_not_private">Mogu se koristiti samo adrese iz kućne mreže.</string>
+    <string name="p1_style">Prikaži kao</string>
+    <string name="p1_style_value">Broj</string>
+    <string name="p1_style_flow">Tok</string>
+    <string name="p1_warn">Istakni iznad</string>
+    <string name="p1_warn_off">Nikad</string>
+    <string name="p1_status_ok">Očitanja stižu.</string>
+    <string name="p1_status_waiting">Čeka se prvo očitanje…</string>
+    <string name="p1_status_error">Brojilo nije moguće očitati: %1$s</string>
+    <string name="p1_using">Potrošnja</string>
+    <string name="p1_returning">Predaja u mrežu</string>
+    <string name="p1_grid">Mreža</string>
+    <string name="p1_home">Dom</string>
+    <string name="p1_last_hour">Zadnji sat</string>
+    <string name="p1_today_import">Potrošeno danas</string>
+    <string name="p1_today_export">Predano danas</string>
+    <string name="p1_today_gas">Plin danas</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widgets da casa</string>
+    <string name="plugins_note">Valores ao vivo de dispositivos da sua rede doméstica, sobre ou ao lado das fotos. Prévia: configure aqui no porta-retratos.</string>
+    <string name="plugins_layout">Layout</string>
+    <string name="plugins_layout_off">Desativado</string>
+    <string name="plugins_layout_overlay">Nos cantos</string>
+    <string name="plugins_layout_band">Ao lado da foto</string>
+    <string name="plugins_band_side">Lado (paisagem)</string>
+    <string name="plugins_side_left">Esquerda</string>
+    <string name="plugins_side_right">Direita</string>
+    <string name="plugins_band_background">Fundo da faixa</string>
+    <string name="plugins_background_paper">Papel</string>
+    <string name="plugins_background_photo">Da foto</string>
+    <string name="plugins_band_clock">Relógio e clima na faixa</string>
+    <string name="plugins_slot">Canto</string>
+    <string name="plugins_slot_top_left">Superior esquerdo</string>
+    <string name="plugins_slot_top_right">Superior direito</string>
+    <string name="plugins_visibility">Mostrar</string>
+    <string name="plugins_visibility_always">Sempre</string>
+    <string name="plugins_visibility_change">Quando mudar</string>
+    <string name="plugins_visibility_tap">Após um toque</string>
+    <string name="plugins_unavailable">Indisponível</string>
+    <string name="p1_name">Medidor HomeWizard P1</string>
+    <string name="p1_address">Medidor</string>
+    <string name="p1_searching">Procurando medidores na rede…</string>
+    <string name="p1_none_found">Nenhum medidor encontrado. Ative “API local” do medidor no app HomeWizard Energy ou digite o endereço.</string>
+    <string name="p1_api_off">API local desativada</string>
+    <string name="p1_manual">Endereço</string>
+    <string name="p1_use">Usar</string>
+    <string name="p1_not_private">Só é possível usar endereços da sua rede doméstica.</string>
+    <string name="p1_style">Mostrar como</string>
+    <string name="p1_style_value">Número</string>
+    <string name="p1_style_flow">Fluxo</string>
+    <string name="p1_warn">Destacar acima de</string>
+    <string name="p1_warn_off">Nunca</string>
+    <string name="p1_status_ok">Recebendo leituras.</string>
+    <string name="p1_status_waiting">Aguardando a primeira leitura…</string>
+    <string name="p1_status_error">Não foi possível ler o medidor: %1$s</string>
+    <string name="p1_using">Consumo</string>
+    <string name="p1_returning">Injeção</string>
+    <string name="p1_grid">Rede</string>
+    <string name="p1_home">Casa</string>
+    <string name="p1_last_hour">Última hora</string>
+    <string name="p1_today_import">Consumido hoje</string>
+    <string name="p1_today_export">Injetado hoje</string>
+    <string name="p1_today_gas">Gás hoje</string>
+</resources>

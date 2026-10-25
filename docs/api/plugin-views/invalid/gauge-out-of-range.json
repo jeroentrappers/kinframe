@@ -1,0 +1,7 @@
+{
+  "$error_path": "/value",
+  "view": {
+    "type": "gauge",
+    "value": 104
+  }
+}

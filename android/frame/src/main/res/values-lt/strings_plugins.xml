@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Namų valdikliai</string>
+    <string name="plugins_note">Tiesioginės vertės iš namų tinklo įrenginių ant nuotraukų arba šalia jų. Ankstyva versija: nustatoma čia, rėmelyje.</string>
+    <string name="plugins_layout">Išdėstymas</string>
+    <string name="plugins_layout_off">Išjungta</string>
+    <string name="plugins_layout_overlay">Kampuose</string>
+    <string name="plugins_layout_band">Šalia nuotraukos</string>
+    <string name="plugins_band_side">Pusė (gulsčiai)</string>
+    <string name="plugins_side_left">Kairė</string>
+    <string name="plugins_side_right">Dešinė</string>
+    <string name="plugins_band_background">Juostos fonas</string>
+    <string name="plugins_background_paper">Popierius</string>
+    <string name="plugins_background_photo">Iš nuotraukos</string>
+    <string name="plugins_band_clock">Laikrodis ir orai juostoje</string>
+    <string name="plugins_slot">Kampas</string>
+    <string name="plugins_slot_top_left">Viršuje kairėje</string>
+    <string name="plugins_slot_top_right">Viršuje dešinėje</string>
+    <string name="plugins_visibility">Rodyti</string>
+    <string name="plugins_visibility_always">Visada</string>
+    <string name="plugins_visibility_change">Kai pasikeičia</string>
+    <string name="plugins_visibility_tap">Palietus</string>
+    <string name="plugins_unavailable">Nepasiekiama</string>
+    <string name="p1_name">HomeWizard P1 skaitiklis</string>
+    <string name="p1_address">Skaitiklis</string>
+    <string name="p1_searching">Ieškoma skaitiklių tinkle…</string>
+    <string name="p1_none_found">Skaitiklis dar nerastas. Programėlėje HomeWizard Energy įjunkite skaitiklio „Vietinę API“ arba įveskite jo adresą.</string>
+    <string name="p1_api_off">Vietinė API išjungta</string>
+    <string name="p1_manual">Adresas</string>
+    <string name="p1_use">Naudoti</string>
+    <string name="p1_not_private">Galima naudoti tik namų tinklo adresus.</string>
+    <string name="p1_style">Rodyti kaip</string>
+    <string name="p1_style_value">Skaičius</string>
+    <string name="p1_style_flow">Srautas</string>
+    <string name="p1_warn">Paryškinti virš</string>
+    <string name="p1_warn_off">Niekada</string>
+    <string name="p1_status_ok">Gaunami rodmenys.</string>
+    <string name="p1_status_waiting">Laukiama pirmojo rodmens…</string>
+    <string name="p1_status_error">Nepavyksta nuskaityti skaitiklio: %1$s</string>
+    <string name="p1_using">Vartojimas</string>
+    <string name="p1_returning">Atidavimas</string>
+    <string name="p1_grid">Tinklas</string>
+    <string name="p1_home">Namai</string>
+    <string name="p1_last_hour">Paskutinė valanda</string>
+    <string name="p1_today_import">Suvartota šiandien</string>
+    <string name="p1_today_export">Atiduota šiandien</string>
+    <string name="p1_today_gas">Dujos šiandien</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Ev widget’ları</string>
+    <string name="plugins_note">Ev ağınızdaki cihazlardan anlık değerler, fotoğrafların üzerinde ya da yanında. Erken önizleme: burada, çerçevede ayarlanır.</string>
+    <string name="plugins_layout">Düzen</string>
+    <string name="plugins_layout_off">Kapalı</string>
+    <string name="plugins_layout_overlay">Köşelerde</string>
+    <string name="plugins_layout_band">Fotoğrafın yanında</string>
+    <string name="plugins_band_side">Taraf (yatay)</string>
+    <string name="plugins_side_left">Sol</string>
+    <string name="plugins_side_right">Sağ</string>
+    <string name="plugins_band_background">Şerit arka planı</string>
+    <string name="plugins_background_paper">Kâğıt</string>
+    <string name="plugins_background_photo">Fotoğraftan</string>
+    <string name="plugins_band_clock">Saat ve hava durumu şeritte</string>
+    <string name="plugins_slot">Köşe</string>
+    <string name="plugins_slot_top_left">Sol üst</string>
+    <string name="plugins_slot_top_right">Sağ üst</string>
+    <string name="plugins_visibility">Göster</string>
+    <string name="plugins_visibility_always">Her zaman</string>
+    <string name="plugins_visibility_change">Değiştiğinde</string>
+    <string name="plugins_visibility_tap">Dokunduktan sonra</string>
+    <string name="plugins_unavailable">Kullanılamıyor</string>
+    <string name="p1_name">HomeWizard P1 sayacı</string>
+    <string name="p1_address">Sayaç</string>
+    <string name="p1_searching">Ağda sayaç aranıyor…</string>
+    <string name="p1_none_found">Henüz sayaç bulunamadı. HomeWizard Energy uygulamasında sayaç için “Yerel API”yi açın veya adresini yazın.</string>
+    <string name="p1_api_off">Yerel API kapalı</string>
+    <string name="p1_manual">Adres</string>
+    <string name="p1_use">Kullan</string>
+    <string name="p1_not_private">Yalnızca ev ağınızdaki adresler kullanılabilir.</string>
+    <string name="p1_style">Gösterim</string>
+    <string name="p1_style_value">Sayı</string>
+    <string name="p1_style_flow">Akış</string>
+    <string name="p1_warn">Şunun üzerinde vurgula</string>
+    <string name="p1_warn_off">Asla</string>
+    <string name="p1_status_ok">Ölçümler geliyor.</string>
+    <string name="p1_status_waiting">İlk ölçüm bekleniyor…</string>
+    <string name="p1_status_error">Sayaç okunamıyor: %1$s</string>
+    <string name="p1_using">Tüketim</string>
+    <string name="p1_returning">Şebekeye veriliyor</string>
+    <string name="p1_grid">Şebeke</string>
+    <string name="p1_home">Ev</string>
+    <string name="p1_last_hour">Son bir saat</string>
+    <string name="p1_today_import">Bugün tüketilen</string>
+    <string name="p1_today_export">Bugün verilen</string>
+    <string name="p1_today_gas">Bugün gaz</string>
+</resources>

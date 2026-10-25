@@ -113,6 +113,26 @@ import app.kinframe.frame.ui.PowerDialog
 import app.kinframe.frame.ui.QrCode
 import app.kinframe.frame.ui.SettingsScreen
 import app.kinframe.frame.weather.ForecastOverlay
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.layout
+import app.kinframe.core.plugin.PluginView
+import app.kinframe.core.plugin.animates
+import app.kinframe.core.plugin.ui.LocalPluginClock
+import app.kinframe.core.plugin.ui.rememberPluginClock
+import app.kinframe.frame.plugins.BandBackground
+import app.kinframe.frame.plugins.BandClock
+import app.kinframe.frame.plugins.BandGeometry
+import app.kinframe.frame.plugins.CornerSlot
+import app.kinframe.frame.plugins.InstanceState
+import app.kinframe.frame.plugins.PluginBand
+import app.kinframe.frame.plugins.PluginDetailCard
+import app.kinframe.frame.plugins.PluginLayoutMode
+import app.kinframe.frame.plugins.PxRect
+import app.kinframe.frame.plugins.Slot
+import app.kinframe.frame.plugins.anyVisible
+import app.kinframe.frame.plugins.inSlot
 import app.kinframe.frame.weather.Weather
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -160,9 +180,31 @@ fun SlideshowScreen(c: FrameController) {
     val storageOpen by c.removable.panelOpen.collectAsState()
     // The calendar shows the forecast whenever the frame has fresh weather.
     val calendarWeather = weatherDoc?.takeIf { settings.location != null && !it.isStale(nowMs) }
-    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen, addSomeoneOpen) {
+    // Plugin widgets (docs/plugins.md): overlay corners or the band beside a 3:2 photo.
+    val plugins = c.plugins
+    DisposableEffect(Unit) {
+        plugins.start()
+        plugins.slideshowUp.value = true
+        onDispose { plugins.slideshowUp.value = false }
+    }
+    val pluginLayout by plugins.layout.collectAsState()
+    val pluginStates by plugins.states.collectAsState()
+    var detailFor by remember { mutableStateOf<InstanceState?>(null) }
+    var detailView by remember { mutableStateOf<PluginView?>(null) }
+    val openDetail: (InstanceState) -> Unit = { s ->
+        menuOpen = false
+        detailView = null
+        detailFor = s
+        scope.launch { detailView = plugins.host.detail(s.config.instanceId) }
+    }
+    val displayMode by c.display.mode.collectAsState()
+    val awake = displayMode != ScreenMode.Asleep && displayMode != ScreenMode.FadingOut
+    // Set by the swipe gesture below; hoisted so the corner widgets can step aside while a finger drags the photo.
+    var dragSeq by remember { mutableLongStateOf(-1L) }
+
+    LaunchedEffect(menuOpen, powerOpen, settingsOpen, forecastOpen, notificationsOpen, joinCard, calendarBusy, storageOpen, addSomeoneOpen, detailFor) {
         ss.paused.value = menuOpen || powerOpen || settingsOpen || forecastOpen || notificationsOpen || joinCard || calendarBusy || storageOpen ||
-            addSomeoneOpen
+            addSomeoneOpen || detailFor != null
     }
     // Quick menu auto-hides after 15 s without interaction (product spec §6).
     LaunchedEffect(menuOpen, menuTouch) { if (menuOpen) { delay(15_000); menuOpen = false } }
@@ -177,10 +219,14 @@ fun SlideshowScreen(c: FrameController) {
 
     // No full-screen background here: on the Mali-400 every full-screen fill costs fill rate during the fade.
     // The slides are opaque; black is drawn only when there is nothing else.
+    val pluginClock = rememberPluginClock(running = awake && pluginLayout.mode != PluginLayoutMode.Off && pluginStates.any { it.shown && it.view?.animates() == true })
+    CompositionLocalProvider(LocalPluginClock provides pluginClock) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
         // Hybrid view: the calendar takes a side panel (landscape) or a bottom panel (portrait) and the slideshow
         // simply renders smaller beside it; nothing is blended over the photo.
         val landscape = maxWidth > maxHeight
+        val screenW = maxWidth
+        val screenH = maxHeight
         val hybrid = settings.widgets.calendarSidebar && calendarData != null
         val panel = when {
             !hybrid -> 0.dp
@@ -190,10 +236,58 @@ fun SlideshowScreen(c: FrameController) {
         val photoW = if (landscape) maxWidth - panel else maxWidth
         val photoH = if (landscape) maxHeight else maxHeight - panel
         val density = LocalDensity.current
-        Box(Modifier.size(photoW, photoH)) {
+        val fullWpx = with(density) { photoW.roundToPx() }
+        val fullHpx = with(density) { photoH.roundToPx() }
+        // Band layout (docs/plugins.md §2.1): the photo shrinks to 3:2 and the band holds the widgets. Not beside the
+        // calendar sidebar (no room), and screens without room for a band (4:3) use the corners instead.
+        val band = remember(fullWpx, fullHpx, pluginLayout.mode, pluginLayout.side, hybrid) {
+            if (pluginLayout.mode != PluginLayoutMode.Band || hybrid) null
+            else BandGeometry.compute(fullWpx, fullHpx, density.density, pluginLayout.side) as? BandGeometry.Band
+        }
+        val overlayMode = pluginLayout.mode == PluginLayoutMode.Overlay || (pluginLayout.mode == PluginLayoutMode.Band && band == null)
+        val clockInBand = band != null && pluginLayout.clockInBand && (settings.widgets.clock || weather != null)
+        val paper = stage.incoming == null && empty != null
+        val bandWanted = band != null && awake && !paper && (clockInBand || pluginStates.anyVisible())
+        // The band opens and closes in the layout/draw phase only (no recomposition per frame). The slides are rendered
+        // for the settled area; while the band moves they are scaled to cover it, and re-rendered once it has settled.
+        val bandAnim = remember { Animatable(if (bandWanted) 1f else 0f) }
+        var bandComposed by remember { mutableStateOf(bandWanted) }
+        var bandSettled by remember { mutableStateOf(bandWanted) }
+        LaunchedEffect(bandWanted) {
+            if (bandWanted) bandComposed = true
+            bandAnim.animateTo(if (bandWanted) 1f else 0f, tween(BAND_ANIM_MS, easing = FastOutSlowInEasing))
+            if (!bandWanted) bandComposed = false
+            if (bandSettled != bandWanted) delay(BAND_SETTLE_MS)
+            bandSettled = bandWanted
+        }
+        val renderBand = band?.takeIf { bandSettled }
+        val wPx = renderBand?.photo?.width ?: fullWpx
+        val hPx = renderBand?.photo?.height ?: fullHpx
+        val fullRect = PxRect(0, 0, fullWpx, fullHpx)
+        val areaBuf = remember { IntArray(4) }
+        fun area(): IntArray {
+            if (band == null) { areaBuf[0] = 0; areaBuf[1] = 0; areaBuf[2] = fullWpx; areaBuf[3] = fullHpx }
+            else BandGeometry.animatedPhoto(fullRect, band, bandAnim.value, areaBuf)
+            return areaBuf
+        }
+        // Overlay widgets step aside while a finger drags the photo, a slide transition runs, a video plays with sound
+        // or new photos are waiting (docs/plugins.md §2); with the quick menu open they move below its top bar.
+        val video by ss.video.collectAsState()
+        val newCount by ss.newCount.collectAsState()
+        val liveMark by ss.liveMark.collectAsState()
+        val overlayHidden = dragSeq == stage.seq || (stage.kind == TransitionKind.Slide && stage.outgoing != null) ||
+            (video?.let { !it.live && !it.held } == true && settings.video.volume > 0) || newCount > 0 || paper
+        val menuShift by animateFloatAsState(if (menuOpen) 1f else 0f, tween(260), label = "pluginMenuShift")
+        Box(
+            Modifier.size(photoW, photoH)
+                .layout { m, _ ->
+                    val a = area()
+                    val p = m.measure(androidx.compose.ui.unit.Constraints.fixed(a[2], a[3]))
+                    layout(fullWpx, fullHpx) { p.place(a[0], a[1]) }
+                }
+                .clipToBounds(),
+        ) {
         if (stage.incoming == null && empty == null) Box(Modifier.fillMaxSize().background(Color.Black))
-        val wPx = with(density) { photoW.roundToPx() }
-        val hPx = with(density) { photoH.roundToPx() }
         LaunchedEffect(wPx, hPx) { ss.setScreenSize(wPx, hPx) }
 
         // A fresh Animatable per stage, created in the same composition that introduces the incoming slide, so its very
@@ -225,7 +319,6 @@ fun SlideshowScreen(c: FrameController) {
             dragAnim?.cancel()
             dragAnim = scope.launch { animate(dragValue, 0f, animationSpec = spec) { v, _ -> dragValue = v }; after() }
         }
-        var dragSeq by remember { mutableLongStateOf(-1L) }
         var neighborDir by remember { mutableIntStateOf(0) }
         val currentSeq by rememberUpdatedState(stage.seq)
         // Recomputed when a neighbour finishes rendering, so it can appear in the middle of a drag.
@@ -245,9 +338,19 @@ fun SlideshowScreen(c: FrameController) {
 
         Box(
             Modifier
-                .fillMaxSize()
+                .layout { m, cs ->
+                    val p = m.measure(androidx.compose.ui.unit.Constraints.fixed(wPx, hPx))
+                    layout(cs.maxWidth, cs.maxHeight) {
+                        if (p.width == cs.maxWidth && p.height == cs.maxHeight) p.place(0, 0)
+                        else p.placeWithLayer((cs.maxWidth - wPx) / 2, (cs.maxHeight - hPx) / 2) {
+                            val k = BandGeometry.coverScale(wPx, hPx, cs.maxWidth, cs.maxHeight)
+                            scaleX = k; scaleY = k
+                        }
+                    }
+                }
                 .pointerInputTaps(
                     onTap = { pos ->
+                        plugins.host.tapped()
                         if (!menuOpen) {
                             ss.selectAt(pos.x / wPx, pos.y / hPx)
                             // A live photo plays its clip again; the menu opens as usual.
@@ -374,23 +477,53 @@ fun SlideshowScreen(c: FrameController) {
             if (stage.incoming == null) empty?.let { EmptyStateView(c, it) }
         }
 
+        val clockMoved = clockInBand && bandWanted
         ClockWidget(
-            c, nowMs, settings.widgets.clock, settings.widgets.date, settings.widgets.clock24h, weather, settings.locale.temperatureUnit,
+            c, nowMs, settings.widgets.clock && !clockMoved, settings.widgets.date && !clockMoved, settings.widgets.clock24h,
+            weather.takeIf { !clockMoved }, settings.locale.temperatureUnit,
             onPaper = stage.incoming == null && empty != null,
             onWeatherClick = { menuOpen = false; forecastOpen = true },
             onClockClick = { menuOpen = false; c.calendar.openCalendar() },
         )
-        if (settings.widgets.countdowns && !menuOpen) {
+        // Top-right corner: countdowns, then the plugin widgets of that slot below them.
+        Column(
+            Modifier.align(Alignment.TopEnd).padding(top = 28.dp, end = 40.dp).offset { IntOffset(0, (menuShift * MENU_SHIFT_DP * density.density).roundToInt()) },
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(18.dp),
+        ) {
+            if (settings.widgets.countdowns && !menuOpen && !paper) {
+                val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
+                CountdownWidgets(items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(), onPaper = false, onClick = { c.calendar.openCalendar() })
+            }
+            if (overlayMode) {
+                CornerSlot(pluginStates.inSlot(Slot.TopRight), end = true, screenWidth = screenW, screenHeight = screenH, hidden = overlayHidden || liveMark != null, onTap = openDetail)
+            }
+        }
+        if (settings.widgets.countdowns && !menuOpen && paper) {
             val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
-            val paper = stage.incoming == null && empty != null
+            // On the paper empty state the clock has the top corner.
             CountdownWidgets(
                 items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(),
-                onPaper = paper, onClick = { c.calendar.openCalendar() },
-                // Top corner on photos; on the paper empty state the clock has the top corner.
-                modifier = if (paper) Modifier.align(Alignment.BottomEnd).padding(bottom = 28.dp, end = 40.dp)
-                else Modifier.align(Alignment.TopEnd).padding(top = 28.dp, end = 40.dp),
+                onPaper = true, onClick = { c.calendar.openCalendar() },
+                modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = 28.dp, end = 40.dp),
             )
         }
+        }
+        if (bandComposed && band != null) {
+            PluginBand(
+                band, fraction = { bandAnim.value }, states = pluginStates, background = pluginLayout.background,
+                photo = stage.incoming?.image, onTap = openDetail,
+                clock = if (!clockInBand) null else { form, palette ->
+                    val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
+                    BandClock(
+                        form, palette,
+                        clock = if (settings.widgets.clock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
+                        date = if (settings.widgets.date) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
+                        weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
+                        onPaper = pluginLayout.background == BandBackground.Paper,
+                    )
+                },
+            )
         }
         if (hybrid) {
             CalendarSidebar(
@@ -408,6 +541,14 @@ fun SlideshowScreen(c: FrameController) {
             app.kinframe.frame.frameo.FrameoSlideshowCard(c, hidden = menuOpen || joinCard || settingsOpen)
             JoinRequestsPill(if (menuOpen || joinCard) emptyList() else joinPending, Modifier) { notificationsOpen = true }
             InvitationsPill(if (menuOpen || calendarBusy || joinCard) emptyList() else invitations, Modifier) { c.calendar.reopen() }
+            if (overlayMode) {
+                // Top-left plugin slot, below the status cards and pills that share this corner.
+                CornerSlot(
+                    pluginStates.inSlot(Slot.TopLeft), end = false, screenWidth = screenW, screenHeight = screenH, hidden = overlayHidden || joinCard,
+                    onTap = openDetail,
+                    modifier = Modifier.offset { IntOffset(0, (menuShift * MENU_SHIFT_DP * density.density).roundToInt()) },
+                )
+            }
         }
 
         burst?.let { (r, at) -> key(burstSeq) { ReactionBurst(r, at) { burst = null } } }
@@ -456,6 +597,8 @@ fun SlideshowScreen(c: FrameController) {
             }
         }
 
+        PluginDetailCard(detailFor, detailView) { detailFor = null }
+
         ForecastOverlay(
             visible = forecastOpen, weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
             h24 = settings.widgets.clock24h, onClose = { forecastOpen = false },
@@ -480,7 +623,14 @@ fun SlideshowScreen(c: FrameController) {
         IdentifyOverlay(c)
         SleepOverlay(c)
     }
+    }
 }
+
+private const val BAND_ANIM_MS = 450
+/** After the band has moved, wait this long before re-rendering the slides for the new area (it may move back). */
+private const val BAND_SETTLE_MS = 1_200L
+/** Height of the quick menu's top bar: corner widgets move below it while the menu is open. */
+private const val MENU_SHIFT_DP = 112
 
 const val UNDO_MS = 6_500L
 
@@ -528,7 +678,17 @@ private fun SlideLayer(slide: Slide, layer: GraphicsLayerScope.() -> Unit) {
                 compositingStrategy = CompositingStrategy.ModulateAlpha
                 layer()
             },
-        ) { drawImage(img) }
+        ) {
+            // A slide rendered for the previous area size (the band just opened or closed) covers the new one until its
+            // re-render arrives.
+            if (img.width == size.width.roundToInt() && img.height == size.height.roundToInt()) drawImage(img)
+            else {
+                val k = maxOf(size.width / img.width, size.height / img.height)
+                val dw = (img.width * k).roundToInt()
+                val dh = (img.height * k).roundToInt()
+                drawImage(img, dstOffset = IntOffset(((size.width - dw) / 2).roundToInt(), ((size.height - dh) / 2).roundToInt()), dstSize = androidx.compose.ui.unit.IntSize(dw, dh))
+            }
+        }
     } else {
         Box(Modifier.fillMaxSize().graphicsLayer(layer).background(Color(0xFF1C1714)), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Home widgets</string>
+    <string name="plugins_note">Live values from devices on your home network, on or beside the photos. Early preview: set up here on the frame.</string>
+    <string name="plugins_layout">Layout</string>
+    <string name="plugins_layout_off">Off</string>
+    <string name="plugins_layout_overlay">In the corners</string>
+    <string name="plugins_layout_band">Beside the photo</string>
+    <string name="plugins_band_side">Side (landscape)</string>
+    <string name="plugins_side_left">Left</string>
+    <string name="plugins_side_right">Right</string>
+    <string name="plugins_band_background">Band background</string>
+    <string name="plugins_background_paper">Paper</string>
+    <string name="plugins_background_photo">From the photo</string>
+    <string name="plugins_band_clock">Clock and weather in the band</string>
+    <string name="plugins_slot">Corner</string>
+    <string name="plugins_slot_top_left">Top left</string>
+    <string name="plugins_slot_top_right">Top right</string>
+    <string name="plugins_visibility">Show</string>
+    <string name="plugins_visibility_always">Always</string>
+    <string name="plugins_visibility_change">When it changes</string>
+    <string name="plugins_visibility_tap">After a tap</string>
+    <string name="plugins_unavailable">Unavailable</string>
+    <string name="p1_name">HomeWizard P1 meter</string>
+    <string name="p1_address">Meter</string>
+    <string name="p1_searching">Looking for meters on the network…</string>
+    <string name="p1_none_found">No meter found yet. Switch on “Local API” for the meter in the HomeWizard Energy app, or type its address.</string>
+    <string name="p1_api_off">Local API is off</string>
+    <string name="p1_manual">Address</string>
+    <string name="p1_use">Use</string>
+    <string name="p1_not_private">Only addresses on your home network can be used.</string>
+    <string name="p1_style">Show as</string>
+    <string name="p1_style_value">Number</string>
+    <string name="p1_style_flow">Flow</string>
+    <string name="p1_warn">Highlight above</string>
+    <string name="p1_warn_off">Never</string>
+    <string name="p1_status_ok">Receiving readings.</string>
+    <string name="p1_status_waiting">Waiting for the first reading…</string>
+    <string name="p1_status_error">Can’t read the meter: %1$s</string>
+    <string name="p1_using">Using</string>
+    <string name="p1_returning">Returning</string>
+    <string name="p1_grid">Grid</string>
+    <string name="p1_home">Home</string>
+    <string name="p1_last_hour">Last hour</string>
+    <string name="p1_today_import">Used today</string>
+    <string name="p1_today_export">Returned today</string>
+    <string name="p1_today_gas">Gas today</string>
+</resources>

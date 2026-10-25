@@ -1,0 +1,7 @@
+{
+  "type": "gauge",
+  "style": "bar",
+  "value": 41,
+  "icon": "battery",
+  "caption": "Home battery"
+}

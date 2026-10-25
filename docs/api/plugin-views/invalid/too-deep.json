@@ -1,0 +1,24 @@
+{
+  "$error_path": "/items/0/items/0/items/0",
+  "view": {
+    "type": "stack",
+    "items": [
+      {
+        "type": "stack",
+        "items": [
+          {
+            "type": "stack",
+            "items": [
+              {
+                "type": "text",
+                "lines": [
+                  "x"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

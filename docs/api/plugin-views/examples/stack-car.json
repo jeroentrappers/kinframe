@@ -1,0 +1,19 @@
+{
+  "type": "stack",
+  "direction": "horizontal",
+  "items": [
+    {
+      "type": "gauge",
+      "value": 68,
+      "icon": "car"
+    },
+    {
+      "type": "text",
+      "lines": [
+        "Kia EV3 · charging",
+        "Full at 23:10"
+      ],
+      "tone": "good"
+    }
+  ]
+}
