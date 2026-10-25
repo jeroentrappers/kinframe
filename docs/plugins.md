@@ -357,8 +357,10 @@ Assistant plugins.
    (departures, energy prices). Start with the two corners and see what people ask for.
 2. **Family-wide or per frame?** Settings are per frame. A family with two frames in one house types the Home
    Assistant token twice; "copy from another frame" in the app may be enough.
-3. **Plugins on the TV page.** The browser frame (`/tv`) can't reach the home network from the server, but the
-   browser itself is often on it. Running the same plugins in a Web Worker there is possible later.
+3. **Plugins on the TV page.** The browser frame (`/tv/frame`) can't reach the home network from the server, but the
+   browser itself is often on it. Running the same plugins in a Web Worker there is possible later. The browser
+   frame's device protocol lives in `web/src/lib/device/` (`FrameEngine.on('changes' | 'slide' | 'command')` gives
+   a runtime the same moments a frame-side plugin host sees), so a runtime can hook in there.
 4. **Notifications.** "Car fully charged" as a full-screen message would be useful but also annoying; leave it out of
    API 1.
 5. **Review capacity.** Hand review of every new plugin and permission change is the safety net; it needs at least two

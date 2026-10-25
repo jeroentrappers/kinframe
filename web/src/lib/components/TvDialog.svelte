@@ -5,7 +5,10 @@
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import { DEFAULT_TV_INTERVAL, TV_INTERVALS, type TvLink, type TvScope } from '$lib/tv';
-	import { createTvLink, revokeTvLink, tvCast, type TvMode } from '$lib/tvCast.svelte';
+	import { createTvLink, frameCommand, revokeTvLink, tvCast, type TvMode } from '$lib/tvCast.svelte';
+	import { goto } from '$app/navigation';
+	import { browserFrameUrl, makeThisBrowserAFrame, redeemCode } from '$lib/browserFrameSetup';
+	import { can, frames } from '$lib/frames.svelte';
 	import Dialog from './Dialog.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
 
@@ -25,6 +28,13 @@
 	} = $props();
 
 	let interval = $state<number>(DEFAULT_TV_INTERVAL);
+	/** What the TV does: the library at its own pace, the frame live, or a frame of its own. */
+	let tvMode = $state<'show' | 'mirror' | 'frame'>('show');
+	let code = $state('');
+	let claiming = $state<'here' | 'code' | null>(null);
+	const frame = $derived(frames.get(frameId));
+	const canMirror = $derived(!frame || can(frame, 'see_library'));
+	const canRemote = $derived(!!frame && can(frame, 'change_settings'));
 	let busy = $state<TvMode | 'link' | null>(null);
 	let link = $state<TvLink | null>(null);
 	let active = $state<TvLink[]>([]);
@@ -75,10 +85,61 @@
 		return e instanceof DOMException && (e.name === 'AbortError' || e.name === 'NotAllowedError');
 	}
 
+	async function startMirror(mode: 'cast' | 'presentation') {
+		busy = mode;
+		try {
+			await tvCast.startMirror(mode, frameId);
+		} catch (e) {
+			if (cancelled(e)) return;
+			toasts.error(problemMessage(e));
+		} finally {
+			busy = null;
+		}
+	}
+
+	async function remote(type: 'next' | 'previous') {
+		try {
+			await frameCommand(frameId, type);
+		} catch {
+			toasts.error(t('tv.mirrorFailed'));
+		}
+	}
+
+	async function useThisBrowser() {
+		claiming = 'here';
+		try {
+			await makeThisBrowserAFrame(i18n.locale);
+			void frames.load(true);
+			open = false;
+			await goto('/tv/frame');
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		} finally {
+			claiming = null;
+		}
+	}
+
+	async function claimCode(e: SubmitEvent) {
+		e.preventDefault();
+		const c = code.replace(/\D/g, '');
+		if (c.length !== 8) return;
+		claiming = 'code';
+		try {
+			const r = await redeemCode(c);
+			code = '';
+			void frames.load(true);
+			toasts.success(t('tv.frameAdded', { name: r.frame.name }));
+		} catch (err) {
+			toasts.error(problemMessage(err));
+		} finally {
+			claiming = null;
+		}
+	}
+
 	async function makeLink() {
 		busy = 'link';
 		try {
-			link = await createTvLink(frameId, scope, interval, 'tv');
+			link = await createTvLink(frameId, scope, interval, tvMode === 'mirror' ? 'mirror' : 'tv');
 			void loadActive();
 		} catch (e) {
 			toasts.error(problemMessage(e));
@@ -119,7 +180,13 @@
 			singleVideo && sup.remotePlayback && { mode: 'remote' as const, icon: 'video' as IconName, title: t('tv.remote'), hint: t('tv.remoteHint') }
 		].filter(Boolean) as { mode: TvMode; icon: IconName; title: string; hint: string }[]
 	);
-	const others = $derived(active.filter((l) => l.purpose === 'tv' && l.id !== link?.id));
+	const others = $derived(active.filter((l) => (l.purpose === 'tv' || l.purpose === 'mirror') && l.id !== link?.id));
+	const MODES = $derived([
+		{ id: 'show' as const, icon: 'image' as IconName, title: t('tv.modeShow'), hint: t('tv.modeShowHint') },
+		{ id: 'mirror' as const, icon: 'cast' as IconName, title: t('tv.modeMirror'), hint: t('tv.modeMirrorHint', { frame: frameName }) },
+		{ id: 'frame' as const, icon: 'tv' as IconName, title: t('tv.modeFrame'), hint: t('tv.modeFrameHint') }
+	]);
+	const origin = typeof location === 'undefined' ? '' : location.origin;
 </script>
 
 <Dialog bind:open title={t('tv.title')} size="md">
@@ -142,12 +209,14 @@
 			</section>
 			<div class="controls" role="toolbar" aria-label={t('tv.title')}>
 				<button class="btn btn-icon" onclick={() => tvCast.prev()} aria-label={t('tv.prev')} title={t('tv.prev')} disabled={tvCast.mode === 'remote'}><Icon name="prev" size={18} /></button>
-				<button class="btn btn-icon btn-primary play" onclick={() => tvCast.toggle()} aria-label={tvCast.playing ? t('tv.pause') : t('tv.play')} title={tvCast.playing ? t('tv.pause') : t('tv.play')}>
-					<Icon name={tvCast.playing ? 'pause' : 'play'} size={20} stroke={tvCast.playing ? 2 : 0} />
-				</button>
+				{#if !tvCast.mirroring}
+					<button class="btn btn-icon btn-primary play" onclick={() => tvCast.toggle()} aria-label={tvCast.playing ? t('tv.pause') : t('tv.play')} title={tvCast.playing ? t('tv.pause') : t('tv.play')}>
+						<Icon name={tvCast.playing ? 'pause' : 'play'} size={20} stroke={tvCast.playing ? 2 : 0} />
+					</button>
+				{/if}
 				<button class="btn btn-icon" onclick={() => tvCast.next()} aria-label={t('tv.next')} title={t('tv.next')} disabled={tvCast.mode === 'remote'}><Icon name="next" size={18} /></button>
 				<span class="spacer"></span>
-				{#if tvCast.mode !== 'remote'}
+				{#if tvCast.mode !== 'remote' && !tvCast.mirroring}
 					<label class="visually-hidden" for="tv-interval-live">{t('tv.interval')}</label>
 					<select id="tv-interval-live" class="input select" value={tvCast.interval} onchange={(e) => tvCast.setInterval(Number((e.currentTarget as HTMLSelectElement).value))}>
 						{#each TV_INTERVALS as s (s)}<option value={s}>{t('tv.seconds', { n: s })}</option>{/each}
@@ -156,6 +225,75 @@
 				<button class="btn btn-danger-ghost" onclick={stop}><Icon name="x" size={16} />{t('tv.stop')}</button>
 			</div>
 		{:else}
+			<div class="modes" role="radiogroup" aria-label={t('tv.title')}>
+				{#each MODES as m (m.id)}
+					<label class="mode" class:on={tvMode === m.id}>
+						<input type="radio" name="tv-mode" value={m.id} bind:group={tvMode} onchange={() => (link = null)} />
+						<span class="way-icon"><Icon name={m.icon} size={20} /></span>
+						<span class="way-text"><strong>{m.title}</strong><span class="muted small">{m.hint}</span></span>
+					</label>
+				{/each}
+			</div>
+		{/if}
+
+		{#if !live && tvMode === 'mirror'}
+			{#if !canMirror}
+				<p class="callout small"><Icon name="info" size={18} />{t('tv.mirrorNeedsLibrary', { frame: frameName })}</p>
+			{:else}
+				<ul class="ways" role="list">
+					{#if sup.cast || sup.presentation}
+						<li>
+							<button class="way" onclick={() => startMirror(sup.cast ? 'cast' : 'presentation')} disabled={busy !== null}>
+								<span class="way-icon"><Icon name={sup.cast ? 'cast' : 'tv'} size={22} /></span>
+								<span class="way-text"><strong>{sup.cast ? t('tv.cast') : t('tv.present')}</strong><span class="muted small">{sup.cast ? t('tv.castHint') : t('tv.presentHint')}</span></span>
+								{#if busy === 'cast' || busy === 'presentation'}<span class="spinner" aria-hidden="true"></span>{:else}<Icon name="chevronRight" size={18} />{/if}
+							</button>
+						</li>
+					{/if}
+					<li>
+						<button class="way" onclick={makeLink} disabled={busy !== null}>
+							<span class="way-icon"><Icon name="globe" size={22} /></span>
+							<span class="way-text"><strong>{t('tv.link')}</strong><span class="muted small">{t('tv.linkHint')}</span></span>
+							{#if busy === 'link'}<span class="spinner" aria-hidden="true"></span>{:else}<Icon name="chevronRight" size={18} />{/if}
+						</button>
+					</li>
+				</ul>
+			{/if}
+		{/if}
+
+		{#if tvMode === 'mirror' && canRemote && (live ? tvCast.mirroring : true)}
+			<div class="controls" role="toolbar" aria-label={t('tv.mirrorRemote')}>
+				<span class="muted small grow">{t('tv.mirrorRemote')}</span>
+				<button class="btn btn-icon" onclick={() => remote('previous')} aria-label={t('tv.prev')} title={t('tv.prev')}><Icon name="prev" size={18} /></button>
+				<button class="btn btn-icon" onclick={() => remote('next')} aria-label={t('tv.next')} title={t('tv.next')}><Icon name="next" size={18} /></button>
+			</div>
+		{/if}
+
+		{#if !live && tvMode === 'frame'}
+			<ul class="ways" role="list">
+				<li>
+					<button class="way" onclick={useThisBrowser} disabled={claiming !== null}>
+						<span class="way-icon"><Icon name="maximize" size={22} /></span>
+						<span class="way-text"><strong>{t('tv.frameHere')}</strong><span class="muted small">{t('tv.frameHereHint')}</span></span>
+						{#if claiming === 'here'}<span class="spinner" aria-hidden="true"></span>{:else}<Icon name="chevronRight" size={18} />{/if}
+					</button>
+				</li>
+			</ul>
+			<form class="card card-pad stack-sm" onsubmit={claimCode}>
+				<strong>{t('tv.frameElsewhere')}</strong>
+				<span class="muted small">{t('tv.frameElsewhereHint', { url: browserFrameUrl(origin).replace(/^https?:\/\//, '') })}</span>
+				<div class="row-wrap">
+					<label class="visually-hidden" for="tv-frame-code">{t('tv.frameCode')}</label>
+					<input id="tv-frame-code" class="input code-input num" inputmode="numeric" autocomplete="off" placeholder="1234 5678" maxlength="9" bind:value={code} aria-label={t('tv.frameCode')} />
+					<button class="btn btn-primary" type="submit" disabled={claiming !== null || code.replace(/\D/g, '').length !== 8}>
+						{#if claiming === 'code'}<span class="spinner" aria-hidden="true"></span>{/if}{t('tv.frameAdd')}
+					</button>
+				</div>
+			</form>
+			<p class="muted small">{t('tv.frameNote')}</p>
+		{/if}
+
+		{#if !live && tvMode === 'show'}
 			<p class="scope"><Icon name={scope.kind === 'album' ? 'album' : 'image'} size={18} />{scopeLabel}</p>
 
 			<div class="field">
@@ -228,6 +366,36 @@
 		gap: 8px;
 		font-weight: 600;
 		margin: 0;
+	}
+	.modes {
+		display: grid;
+		gap: 8px;
+	}
+	.mode {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 10px 12px;
+		border-radius: var(--r);
+		border: 1px solid var(--border);
+		cursor: pointer;
+	}
+	.mode.on {
+		border-color: var(--primary);
+		background: var(--accent-soft);
+	}
+	.mode input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+	.mode:has(input:focus-visible) {
+		outline: 2px solid var(--primary);
+		outline-offset: 2px;
+	}
+	.code-input {
+		max-width: 12ch;
+		letter-spacing: 0.1em;
 	}
 	.ways {
 		list-style: none;

@@ -117,6 +117,7 @@ type FrameView struct {
 	DensityDPI     *int        `db:"density_dpi"`
 	Orientation    *string     `db:"orientation"`
 	LastSeenAt     *time.Time  `db:"last_seen_at"`
+	DeviceKind     *string     `db:"device_kind"`
 	MemberCount    int         `db:"member_count"`
 	PlacementCount int         `db:"placement_count"`
 }
@@ -126,7 +127,7 @@ const frameViewSelect = `
 		f.moderation, f.settings, f.settings_version, f.settings_field_versions, f.latest_seq, f.feed_floor_seq, f.created_at, f.deleted_at,
 		m.role, m.permissions,
 		ou.display_name AS owner_name, ou.id AS owner_id,
-		d.app_version, d.app_version_code, d.screen_w, d.screen_h, d.density_dpi, d.orientation, d.last_seen_at,
+		d.app_version, d.app_version_code, d.screen_w, d.screen_h, d.density_dpi, d.orientation, d.last_seen_at, d.kind AS device_kind,
 		(SELECT count(*) FROM memberships mm WHERE mm.frame_id = f.id)::int AS member_count,
 		(SELECT count(*) FROM placements p WHERE p.frame_id = f.id AND p.removed_at IS NULL)::int AS placement_count
 	FROM frames f

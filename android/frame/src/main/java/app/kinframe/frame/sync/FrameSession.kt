@@ -78,12 +78,14 @@ class FrameSession(
 
     @Volatile private var revoked = false
     private var lastStateJson: String? = null
+    @Volatile private var lastNowShowing: NowShowing? = null
     private var stateJob: Job? = null
 
     private val ws: ReconnectingWebSocket = ReconnectingWebSocket(http, scope, { api.webSocketRequest() }, object : ReconnectingWebSocket.Listener {
         override fun onOpen() {
             _connection.value = Connection.Online
             lastStateJson?.let { send(it) }
+            lastNowShowing?.let { send(it.toJson(clock.nowMs())) }
         }
 
         override fun onMessage(text: String) = handleMessage(text)
@@ -246,6 +248,15 @@ class FrameSession(
             // Send the latest value if it changed during the quiet period.
             lastStateJson?.let { if (it != json) send(it) }
         }
+    }
+
+    /**
+     * `now_showing` message (README §6.1, see [NowShowing]): sent right away, since a mirroring TV should change slides
+     * together with the frame, and again after a reconnect.
+     */
+    fun reportNowShowing(now: NowShowing) {
+        lastNowShowing = now
+        send(now.toJson(clock.nowMs()))
     }
 
     private fun revoke() {

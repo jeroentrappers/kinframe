@@ -235,6 +235,9 @@
 
 		<section class="card card-pad stack" aria-labelledby="disp-title">
 			<h2 id="disp-title">{t('settingsForm.display')}</h2>
+			{#if frame.device_kind === 'browser'}
+				<p class="hint">{t('settingsForm.browserNote')}</p>
+			{:else}
 			<div class="field">
 				<label for="s-bright" class="row"><span>{t('settingsForm.brightness')}</span><span class="spacer"></span><span class="num muted">{brightnessPct}%</span></label>
 				<div class="range-row">
@@ -243,6 +246,7 @@
 					<Icon name="sun" size={20} />
 				</div>
 			</div>
+			{/if}
 			{#if form.locale}
 				<div class="field">
 					<label for="s-lang" class="label">{t('settingsForm.frameLanguage')}</label>

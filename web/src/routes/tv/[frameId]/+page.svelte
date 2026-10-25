@@ -11,9 +11,12 @@
 	import { fetchSlideshow } from '$lib/tvCast.svelte';
 	import Icon from '$components/Icon.svelte';
 	import Logo from '$components/Logo.svelte';
+	import MirrorView from '$components/tv/MirrorView.svelte';
 
 	const token = $derived(page.url.searchParams.get('t') ?? '');
 	const frameId = $derived(page.params.frameId ?? '');
+	/** A mirror link follows the physical frame live instead of running its own slideshow. */
+	const mirror = page.url.searchParams.get('mode') === 'mirror';
 
 	let show = $state<TvSlideshow | null>(null);
 	let slides = $state<TvSlide[]>([]);
@@ -151,7 +154,8 @@
 	}
 
 	onMount(() => {
-		void load(true);
+		if (mirror) loading = false;
+		else void load(true);
 		poke();
 		const clock = setInterval(() => (now = new Date()), 15_000);
 		// Keep the TV awake while the slideshow runs.
@@ -194,13 +198,15 @@
 	const dur = reducedMotion() ? 0 : 900;
 </script>
 
-<svelte:head><title>{show ? t('tv.pageTitle', { frame: show.frame_name }) : 'kinframe'}</title></svelte:head>
+<svelte:head>{#if !mirror}<title>{show ? t('tv.pageTitle', { frame: show.frame_name }) : 'kinframe'}</title>{/if}</svelte:head>
 <svelte:window onkeydown={onKey} onpointermove={poke} />
 
 <!-- Taps only reveal the controls; keys are handled on the window. -->
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <main class="tv" class:hide-cursor={!chrome} onclick={poke}>
-	{#if loading}
+	{#if mirror && !failure}
+		<MirrorView {token} onended={(reason) => (failure = reason === 'expired' ? 'expired' : 'invalid')} />
+	{:else if loading}
 		<div class="center"><Logo size={56} /></div>
 	{:else if failure}
 		<div class="center notice">

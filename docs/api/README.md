@@ -71,6 +71,12 @@ frame                                   server
   device except to `/devices/token`.
 - **Revocation**: the owner removes the frame, or uses "Move to new frame". All tokens for that device are rejected
   from then on, and the websocket is closed with code `4401`.
+- **Browser frames**: a web browser can enroll as a frame (`kind: "browser"` in the enroll body, the TV page
+  `/tv/frame`). It speaks this same protocol. It keeps its credential in `localStorage` (scoped to the API origin),
+  never self-updates (`GET /device/update` answers 204) and is exempt from `426 app_update_required`. Because
+  browsers cannot set headers on websockets or on `<img>`/`<video>`, `GET /device/ws` and `GET /device/media/{id}`
+  also accept the access token as `?access_token=`; no other device call does. Frames show `device_kind` in
+  `FrameSummary` so apps can label them ("Browser"); they are removed like any frame.
 - The token is refreshed when less than 5 minutes remain. A `401` with `code: device_revoked` makes the frame wipe its
   credential and return to the setup wizard. A `401 token_expired` means: refresh and retry once.
 
@@ -445,6 +451,9 @@ revocable share token.
   - The creator's membership and `see_library` are re-checked on every fetch, so leaving the frame or losing the
     permission narrows or kills the link.
   - Revoked or unknown tokens return `404 not_found`; expired ones return `410 link_expired`.
+- **Mirror links** (`purpose: "mirror"`) follow the physical frame live instead (§6.4). They need `see_library`
+  (a mirror shows whatever the frame shows) and take no `album_id`, `placement_ids` or `kind`. Their `url` adds
+  `&mode=mirror`.
 - **Web senders**:
   - Chromium browsers use the Google Cast Web Sender SDK with the **Default Media Receiver**, so no receiver app
     registration is needed. The sender drives the slideshow: it loads one slide URL per interval and offers
@@ -534,6 +543,7 @@ exponential back-off from 1 s up to 60 s, with ±20 % jitter.
 | S→F | `revoked` | — | Wipe credential, back to setup. Followed by close `4401`. |
 | F→S | `state` | `screen: on/off/dimmed`, `showing_placement_id`, `brightness`, `volume` | Sent on change, at most every 2 s. |
 | F→S | `command_result` | `id`, `ok`, `error_code` | Result of a command. |
+| F→S | `now_showing` | schema `NowShowing`: `placement_id`, `placement_ids`, `started_at`, `transition`, `transition_ms`, `direction`, `ken_burns`, `hold_ms`, `video {position_ms, playing, live}`, `next_placement_id`, `screen`, `sent_at` | What the screen shows (TV mirror, §6.4). Sent on every slide change (timer, swipe, remote commands, the "N new" card), when a video starts, pauses or ends, every 15 s while one plays, when the screen sleeps or wakes, and again after a reconnect. Times are the frame's clock; the server only uses their differences. |
 
 Health data (Wi-Fi RSSI, storage, uptime, app version, temperature if known) goes to `POST /v1/device/heartbeat`
 every 5 minutes, not over the websocket.
@@ -567,6 +577,24 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
   Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)
   once everything they shared to a frame has arrived.
+
+### 6.4 TV mirror: `GET /v1/tv/{token}/mirror` (no sign-in, a `mirror` TV link)
+
+- The server keeps the latest `now_showing` of every connected frame in memory (nothing is stored) and drops it when
+  the frame disconnects.
+- A TV page connects with a mirror token and gets a `MirrorState` (`type: "mirror"`) right away and after every change:
+  `online`, `screen`, the frame settings it needs to look the same (`MirrorSettings`: interval, transition, Ken Burns,
+  fill, background, caption, clock), `showing` (the slides on screen as `TvSlide`s with fresh signed URLs, `started_at`
+  and the video position at `at`, both in server time; compare with the message's `server_time`) and `next` (to
+  preload). Frame reports are coalesced to at most one render every 250 ms per frame.
+- Ken Burns is deterministic per placement id and focal point (`TvSlide.focal_point`), so the TV computes the same
+  motion as the frame from `started_at`.
+- Limits: at most 8 viewers per frame (`429`), connects count against the TV link rate limit per IP. Every minute the
+  link and its creator's `see_library` are re-checked; a revoked or expired link gets `{type: "ended", reason}` and
+  close code `4401` (revoking closes it at once). Unknown or non-mirror tokens get `404`, expired ones `410` (a plain
+  `GET` of the URL tells a browser why the upgrade failed).
+- The remote in the app moves the frame itself (`POST /frames/{id}/commands` `next`/`previous`, `change_settings`), and
+  the TV follows.
 
 ## 7. Versioning
 

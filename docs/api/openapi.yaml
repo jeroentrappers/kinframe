@@ -817,6 +817,22 @@ paths:
         '200': { description: Slideshow, content: { application/json: { schema: { $ref: '#/components/schemas/TvSlideshow' } } } }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/tv/{token}/mirror:
+    get:
+      tags: [tv]
+      operationId: tvMirror
+      security: []
+      description: |
+        WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+        `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+        revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+        `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+      parameters:
+        - { name: token, in: path, required: true, schema: { type: string, minLength: 22, maxLength: 64 } }
+      responses:
+        '101': { description: Switching to the websocket protocol }
+        default: { $ref: '#/components/responses/Problem' }
+
   /v1/frames/{frameId}/settings:
     parameters: [ { $ref: '#/components/parameters/FrameId' } ]
     get:
@@ -2060,6 +2076,8 @@ components:
         screen: { $ref: '#/components/schemas/Screen' }
         app_version: { type: [string, 'null'] }
         needs_update: { type: boolean }
+        device_kind:
+          $ref: '#/components/schemas/DeviceKind'
 
     Frame:
       allOf:
@@ -2484,7 +2502,14 @@ components:
           description: Only these placements, in this order (a selection). Empty or absent = the whole visible library.
           items: { $ref: '#/components/schemas/Id' }
         kind: { $ref: '#/components/schemas/MediaKind' }
-        purpose: { type: string, enum: [tv, cast], default: tv, description: Informational; cast links are short-lived. }
+        purpose:
+          type: string
+          enum: [tv, cast, mirror]
+          default: tv
+          description: |
+            `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+            physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+            `placement_ids` or `kind`, because it shows whatever the frame shows.
         interval_seconds: { type: integer, minimum: 3, maximum: 600, default: 10 }
         expires_in_hours: { type: integer, minimum: 1, maximum: 168, default: 12 }
 
@@ -2495,8 +2520,8 @@ components:
         id: { $ref: '#/components/schemas/Id' }
         frame_id: { $ref: '#/components/schemas/Id' }
         token: { type: string }
-        url: { type: string, format: uri, description: 'The TV page: <public URL>/tv/<frameId>?t=<token>' }
-        purpose: { type: string, enum: [tv, cast] }
+        url: { type: string, format: uri, description: 'The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)' }
+        purpose: { type: string, enum: [tv, cast, mirror] }
         album_id: { type: [string, 'null'], format: uuid }
         placement_count: { type: [integer, 'null'], description: Size of a fixed selection; null for album/library links. }
         kind: { oneOf: [ { $ref: '#/components/schemas/MediaKind' }, { type: 'null' } ] }
@@ -2522,6 +2547,11 @@ components:
         width: { type: integer }
         height: { type: integer }
         duration_ms: { type: [integer, 'null'] }
+        focal_point:
+          oneOf: [ { $ref: '#/components/schemas/FocalPoint' }, { type: 'null' } ]
+          description: The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+        fit: { oneOf: [ { $ref: '#/components/schemas/Fit' }, { type: 'null' } ], description: 'The placement''s fit override, else the item''s; null = the frame setting.' }
+        rotation: { type: integer, enum: [0, 90, 180, 270], description: Clockwise rotation set on the frame for this placement. }
 
     TvSlideshow:
       type: object
@@ -2534,6 +2564,94 @@ components:
         expires_at: { type: string, format: date-time, description: When the link itself stops working. }
         refresh_after: { type: string, format: date-time, description: Refetch before the media URLs expire. }
         slides: { type: array, maxItems: 500, items: { $ref: '#/components/schemas/TvSlide' } }
+
+    NowShowing:
+      type: object
+      description: |
+        Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+        now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+        video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+        the frame's clock; the server only uses differences between them.
+      required: [type, sent_at, screen]
+      properties:
+        type: { type: string, enum: [now_showing] }
+        placement_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: The slide on screen (the first tile of a collage or pair); null while nothing shows. }
+        placement_ids: { type: array, maxItems: 6, items: { $ref: '#/components/schemas/Id' }, description: 'Every photo on screen (collage or pair), first = `placement_id`.' }
+        started_at: { type: string, format: date-time, description: When the transition to this slide started. }
+        transition: { type: string, enum: [crossfade, slide, cut] }
+        transition_ms: { type: integer, minimum: 0, maximum: 5000 }
+        direction: { type: integer, enum: [-1, 1], description: '1: the slide came in as "next", -1: as "previous".' }
+        ken_burns: { type: boolean, description: 'The slide moves (Ken Burns): deterministic per placement and focal point.' }
+        hold_ms: { type: integer, description: How long the slide is expected to stay. }
+        video:
+          type: [object, 'null']
+          description: The playing video, or a live photo's clip, while it is on screen.
+          required: [position_ms, playing]
+          properties:
+            position_ms: { type: integer, minimum: 0, description: Playback position at `sent_at`. }
+            playing: { type: boolean }
+            live: { type: boolean, description: The clip of a live photo (played over its still). }
+        next_placement_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ], description: What the frame expects to show next (for preloading). }
+        screen: { type: string, enum: ['on', 'off', dimmed, sleeping] }
+        sent_at: { type: string, format: date-time }
+
+    MirrorSettings:
+      type: object
+      description: The frame settings a mirroring TV needs to look like the frame.
+      required: [interval_s, transition, transition_ms, fill, background]
+      properties:
+        interval_s: { type: integer }
+        transition: { type: string, enum: [crossfade, slide, kenburns] }
+        transition_ms: { type: integer }
+        fill: { type: boolean }
+        background: { type: string, enum: [blur, black, palette] }
+        caption: { type: boolean }
+        caption_date: { type: string, enum: [taken, received, none] }
+        clock: { type: boolean }
+        date: { type: boolean }
+        clock_24h: { type: boolean }
+        timezone: { type: string }
+
+    MirrorShowing:
+      type: object
+      required: [placement_id, slides, started_at, transition, transition_ms]
+      properties:
+        placement_id: { $ref: '#/components/schemas/Id' }
+        slides: { type: array, maxItems: 6, items: { $ref: '#/components/schemas/TvSlide' }, description: 'One per photo on screen; a collage or pair has several.' }
+        started_at: { type: string, format: date-time, description: Server clock. Compare with `server_time` of the same message. }
+        transition: { type: string, enum: [crossfade, slide, cut] }
+        transition_ms: { type: integer }
+        direction: { type: integer }
+        ken_burns: { type: boolean }
+        hold_ms: { type: integer }
+        video:
+          type: [object, 'null']
+          required: [position_ms, playing, at]
+          properties:
+            position_ms: { type: integer }
+            playing: { type: boolean }
+            live: { type: boolean }
+            at: { type: string, format: date-time, description: Server clock at which `position_ms` was the position. }
+
+    MirrorState:
+      type: object
+      description: |
+        Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+        connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+      required: [type, server_time, frame_id, frame_name, online, screen, expires_at]
+      properties:
+        type: { type: string, enum: [mirror] }
+        server_time: { type: string, format: date-time }
+        frame_id: { $ref: '#/components/schemas/Id' }
+        frame_name: { type: string }
+        online: { type: boolean, description: The frame is connected. }
+        screen: { type: string, enum: ['on', 'off', dimmed, sleeping, unknown], description: '`off`/`sleeping`: show a calm "the frame is asleep" screen.' }
+        settings: { $ref: '#/components/schemas/MirrorSettings' }
+        showing:
+          oneOf: [ { $ref: '#/components/schemas/MirrorShowing' }, { type: 'null' } ]
+          description: Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show).
+        next: { oneOf: [ { $ref: '#/components/schemas/TvSlide' }, { type: 'null' } ] }
+        expires_at: { type: string, format: date-time, description: When the link stops working. }
 
     SleepSchedule:
       type: object
@@ -2758,6 +2876,16 @@ components:
             channel: { type: string, enum: [stable, beta], default: stable }
         locale: { type: string }
         timezone: { type: string }
+        kind: { $ref: '#/components/schemas/DeviceKind' }
+
+    DeviceKind:
+      type: string
+      enum: [android, browser]
+      default: android
+      description: |
+        What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+        page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+        `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
 
     DeviceState:
       type: object

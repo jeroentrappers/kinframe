@@ -688,6 +688,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/tv/{token}/mirror": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+         *     `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+         *     revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+         *     `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+         */
+        get: operations["tvMirror"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/settings": {
         parameters: {
             query?: never;
@@ -1827,6 +1849,7 @@ export interface components {
             screen?: components["schemas"]["Screen"];
             app_version?: string | null;
             needs_update?: boolean;
+            device_kind?: components["schemas"]["DeviceKind"];
         };
         Frame: components["schemas"]["FrameSummary"] & {
             default_permissions?: components["schemas"]["Permissions"];
@@ -2182,11 +2205,13 @@ export interface components {
             placement_ids?: components["schemas"]["Id"][];
             kind?: components["schemas"]["MediaKind"];
             /**
-             * @description Informational; cast links are short-lived.
+             * @description `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+             *     physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+             *     `placement_ids` or `kind`, because it shows whatever the frame shows.
              * @default tv
              * @enum {string}
              */
-            purpose?: "tv" | "cast";
+            purpose?: "tv" | "cast" | "mirror";
             /** @default 10 */
             interval_seconds?: number;
             /** @default 12 */
@@ -2198,11 +2223,11 @@ export interface components {
             token: string;
             /**
              * Format: uri
-             * @description The TV page: <public URL>/tv/<frameId>?t=<token>
+             * @description The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
              */
             url: string;
             /** @enum {string} */
-            purpose: "tv" | "cast";
+            purpose: "tv" | "cast" | "mirror";
             /** Format: uuid */
             album_id?: string | null;
             /** @description Size of a fixed selection; null for album/library links. */
@@ -2238,6 +2263,15 @@ export interface components {
             width: number;
             height: number;
             duration_ms?: number | null;
+            /** @description The placement's focal point (its override, else the item's), for filling the screen and Ken Burns. */
+            focal_point?: components["schemas"]["FocalPoint"] | null;
+            /** @description The placement's fit override, else the item's; null = the frame setting. */
+            fit?: components["schemas"]["Fit"] | null;
+            /**
+             * @description Clockwise rotation set on the frame for this placement.
+             * @enum {integer}
+             */
+            rotation?: 0 | 90 | 180 | 270;
         };
         TvSlideshow: {
             frame_id: components["schemas"]["Id"];
@@ -2255,6 +2289,122 @@ export interface components {
              */
             refresh_after: string;
             slides: components["schemas"]["TvSlide"][];
+        };
+        /**
+         * @description Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+         *     now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+         *     video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+         *     the frame's clock; the server only uses differences between them.
+         */
+        NowShowing: {
+            /** @enum {string} */
+            type: "now_showing";
+            /** @description The slide on screen (the first tile of a collage or pair); null while nothing shows. */
+            placement_id?: components["schemas"]["Id"] | null;
+            /** @description Every photo on screen (collage or pair), first = `placement_id`. */
+            placement_ids?: components["schemas"]["Id"][];
+            /**
+             * Format: date-time
+             * @description When the transition to this slide started.
+             */
+            started_at?: string;
+            /** @enum {string} */
+            transition?: "crossfade" | "slide" | "cut";
+            transition_ms?: number;
+            /**
+             * @description 1: the slide came in as "next", -1: as "previous".
+             * @enum {integer}
+             */
+            direction?: -1 | 1;
+            /** @description The slide moves (Ken Burns): deterministic per placement and focal point. */
+            ken_burns?: boolean;
+            /** @description How long the slide is expected to stay. */
+            hold_ms?: number;
+            /** @description The playing video, or a live photo's clip, while it is on screen. */
+            video?: {
+                /** @description Playback position at `sent_at`. */
+                position_ms: number;
+                playing: boolean;
+                /** @description The clip of a live photo (played over its still). */
+                live?: boolean;
+            } | null;
+            /** @description What the frame expects to show next (for preloading). */
+            next_placement_id?: components["schemas"]["Id"] | null;
+            /** @enum {string} */
+            screen: "on" | "off" | "dimmed" | "sleeping";
+            /** Format: date-time */
+            sent_at: string;
+        };
+        /** @description The frame settings a mirroring TV needs to look like the frame. */
+        MirrorSettings: {
+            interval_s: number;
+            /** @enum {string} */
+            transition: "crossfade" | "slide" | "kenburns";
+            transition_ms: number;
+            fill: boolean;
+            /** @enum {string} */
+            background: "blur" | "black" | "palette";
+            caption?: boolean;
+            /** @enum {string} */
+            caption_date?: "taken" | "received" | "none";
+            clock?: boolean;
+            date?: boolean;
+            clock_24h?: boolean;
+            timezone?: string;
+        };
+        MirrorShowing: {
+            placement_id: components["schemas"]["Id"];
+            /** @description One per photo on screen; a collage or pair has several. */
+            slides: components["schemas"]["TvSlide"][];
+            /**
+             * Format: date-time
+             * @description Server clock. Compare with `server_time` of the same message.
+             */
+            started_at: string;
+            /** @enum {string} */
+            transition: "crossfade" | "slide" | "cut";
+            transition_ms: number;
+            direction?: number;
+            ken_burns?: boolean;
+            hold_ms?: number;
+            video?: {
+                position_ms: number;
+                playing: boolean;
+                live?: boolean;
+                /**
+                 * Format: date-time
+                 * @description Server clock at which `position_ms` was the position.
+                 */
+                at: string;
+            } | null;
+        };
+        /**
+         * @description Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+         *     connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+         */
+        MirrorState: {
+            /** @enum {string} */
+            type: "mirror";
+            /** Format: date-time */
+            server_time: string;
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            /** @description The frame is connected. */
+            online: boolean;
+            /**
+             * @description `off`/`sleeping`: show a calm "the frame is asleep" screen.
+             * @enum {string}
+             */
+            screen: "on" | "off" | "dimmed" | "sleeping" | "unknown";
+            settings?: components["schemas"]["MirrorSettings"];
+            /** @description Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show). */
+            showing?: components["schemas"]["MirrorShowing"] | null;
+            next?: components["schemas"]["TvSlide"] | null;
+            /**
+             * Format: date-time
+             * @description When the link stops working.
+             */
+            expires_at: string;
         };
         SleepSchedule: {
             id: components["schemas"]["Id"];
@@ -2549,7 +2699,16 @@ export interface components {
             };
             locale?: string;
             timezone?: string;
+            kind?: components["schemas"]["DeviceKind"];
         };
+        /**
+         * @description What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+         *     page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+         *     `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+         * @default android
+         * @enum {string}
+         */
+        DeviceKind: "android" | "browser";
         DeviceState: {
             device_id: components["schemas"]["Id"];
             claimed: boolean;
@@ -4268,6 +4427,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TvSlideshow"];
                 };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    tvMirror: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Switching to the websocket protocol */
+            101: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             default: components["responses"]["Problem"];
         };

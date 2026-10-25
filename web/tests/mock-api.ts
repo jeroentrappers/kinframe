@@ -528,7 +528,7 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 					id: uid('7'),
 					frame_id: m[1]!,
 					token,
-					url: `http://localhost:4173/tv/${m[1]!}?t=${token}`,
+					url: `http://localhost:4173/tv/${m[1]!}?t=${token}${b.purpose === 'mirror' ? '&mode=mirror' : ''}`,
 					purpose: b.purpose ?? 'tv',
 					album_id: b.album_id ?? null,
 					placement_count: b.placement_ids?.length ? b.placement_ids.length : null,

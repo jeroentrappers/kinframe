@@ -21,9 +21,11 @@
 		{#if tvCast.mode !== 'remote'}
 			<button class="btn btn-ghost btn-icon btn-sm" onclick={() => tvCast.prev()} aria-label={t('tv.prev')}><Icon name="prev" size={16} /></button>
 		{/if}
-		<button class="btn btn-ghost btn-icon btn-sm" onclick={() => tvCast.toggle()} aria-label={tvCast.playing ? t('tv.pause') : t('tv.play')}>
-			<Icon name={tvCast.playing ? 'pause' : 'play'} size={16} stroke={tvCast.playing ? 2 : 0} />
-		</button>
+		{#if !tvCast.mirroring}
+			<button class="btn btn-ghost btn-icon btn-sm" onclick={() => tvCast.toggle()} aria-label={tvCast.playing ? t('tv.pause') : t('tv.play')}>
+				<Icon name={tvCast.playing ? 'pause' : 'play'} size={16} stroke={tvCast.playing ? 2 : 0} />
+			</button>
+		{/if}
 		{#if tvCast.mode !== 'remote'}
 			<button class="btn btn-ghost btn-icon btn-sm" onclick={() => tvCast.next()} aria-label={t('tv.next')}><Icon name="next" size={16} /></button>
 		{/if}

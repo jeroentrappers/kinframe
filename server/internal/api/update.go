@@ -76,6 +76,11 @@ func (s *Server) updateChannel(r *http.Request, d *store.Device) string {
 // deviceCheckUpdate implements GET /v1/device/update (README §5.7).
 func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 	d := deviceFrom(r.Context())
+	if d.IsBrowser() {
+		// A browser frame is the web app: it never installs APKs.
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	q := r.URL.Query()
 	channel := q.Get("channel")
 	switch channel {

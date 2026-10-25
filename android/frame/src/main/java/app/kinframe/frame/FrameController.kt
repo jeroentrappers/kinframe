@@ -160,6 +160,7 @@ class FrameController(val g: FrameGraph) {
             }
             calendar.start()
             reportStateChanges()
+            app.kinframe.frame.sync.NowShowingReporter(this@FrameController).start()
             update.start()
             removable.start()
             frameo.start()

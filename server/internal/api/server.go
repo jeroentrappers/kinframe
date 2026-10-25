@@ -71,6 +71,8 @@ type Server struct {
 	weather  *weather.Service  // nil: weather disabled
 	calendar *calendar.Service // nil: calendars disabled
 	sealer   *calendar.Sealer
+
+	mirror mirrorHub // TV mirror: the latest now_showing per frame and its viewers
 }
 
 // Deps are the collaborators a Server needs.

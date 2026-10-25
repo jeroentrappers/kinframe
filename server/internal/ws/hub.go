@@ -126,6 +126,8 @@ type Hub struct {
 	OnDevice func(deviceID uuid.UUID, frameID *uuid.UUID, online bool)
 	// OnState receives "state" messages from frames.
 	OnState func(deviceID uuid.UUID, msg json.RawMessage)
+	// OnNowShowing receives "now_showing" messages from claimed frames (TV mirror).
+	OnNowShowing func(frameID uuid.UUID, msg json.RawMessage)
 
 	mu      sync.Mutex
 	devices map[uuid.UUID]*deviceConn
@@ -221,6 +223,13 @@ func (h *Hub) readDevice(ctx context.Context, dc *deviceConn) {
 		case "state":
 			if h.OnState != nil {
 				h.OnState(dc.deviceID, b)
+			}
+		case "now_showing":
+			h.mu.Lock()
+			fid := dc.frameID
+			h.mu.Unlock()
+			if fid != nil && h.OnNowShowing != nil {
+				h.OnNowShowing(*fid, b)
 			}
 		case "command_result":
 			h.mu.Lock()
@@ -384,4 +393,38 @@ func (h *Hub) SendToUser(userID uuid.UUID, msg any) bool {
 		}
 	}
 	return sent
+}
+
+// Viewer is a send-only websocket subscriber, such as a TV mirroring a frame.
+// Messages from the client are read and discarded.
+type Viewer struct{ c *conn }
+
+// Send queues a message; false if the viewer is gone (or too slow and dropped).
+func (v *Viewer) Send(b []byte) bool { return v.c.enqueue(b) }
+
+// Close closes the viewer with a code after flushing what is queued.
+func (v *Viewer) Close(code websocket.StatusCode, why string) { v.c.close(code, why) }
+
+// Done is closed once the viewer's connection is closing.
+func (v *Viewer) Done() <-chan struct{} { return v.c.closed }
+
+// ServeViewer accepts a viewer websocket, calls start (register the viewer and
+// queue its first message there) and runs until the connection closes.
+func ServeViewer(w http.ResponseWriter, r *http.Request, start func(v *Viewer)) {
+	c, err := accept(w, r)
+	if err != nil {
+		return
+	}
+	c.SetReadLimit(4 << 10)
+	v := &Viewer{c: newConn(c)}
+	ctx := c.CloseRead(r.Context())
+	go func() {
+		select {
+		case <-ctx.Done():
+			v.c.close(websocket.StatusNormalClosure, "")
+		case <-v.c.closed:
+		}
+	}()
+	start(v)
+	v.c.writer(ctx)
 }

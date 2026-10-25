@@ -66,6 +66,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/frames/{frameId}/events/{invitationId}/photo", user(http.HandlerFunc(s.getEventInvitationPhoto)))
 	mux.Handle("GET /v1/operator/reservations.csv", user(http.HandlerFunc(s.exportReservations)))
 	mux.HandleFunc("GET /v1/ws", s.userWS)
+	mux.HandleFunc("GET /v1/tv/{token}/mirror", s.tvMirrorWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
 	mux.HandleFunc("GET /avatars/{user}/{file}", s.avatarFile)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -173,9 +174,19 @@ func versionExempt(path string) bool {
 	return deviceVersionExempt[path] || strings.HasPrefix(path, "/v1/device/update/apk/")
 }
 
+// deviceQueryTokenPath reports whether a device call may carry its token in the
+// query string (`access_token`): a browser frame cannot set headers on a
+// websocket or on the <img>/<video> elements that load its media.
+func deviceQueryTokenPath(r *http.Request) bool {
+	return r.Method == http.MethodGet && (r.URL.Path == "/v1/device/ws" || strings.HasPrefix(r.URL.Path, "/v1/device/media/"))
+}
+
 func (s *Server) deviceAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := bearer(r)
+		if token == "" && deviceQueryTokenPath(r) {
+			token = r.URL.Query().Get("access_token")
+		}
 		if token == "" {
 			problem.Write(w, r, problem.New(problem.Unauthorized, "missing device token"))
 			return
@@ -194,7 +205,7 @@ func (s *Server) deviceAuth(next http.Handler) http.Handler {
 			s.writeError(w, r, err)
 			return
 		}
-		if s.cfg.MinFrameAppVersion > 0 && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
+		if s.cfg.MinFrameAppVersion > 0 && !d.IsBrowser() && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
 			problem.Write(w, r, problem.New(problem.AppUpdateRequired, ""))
 			return
 		}
