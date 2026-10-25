@@ -81,10 +81,20 @@ data class GaugeView(
     val style: GaugeStyle = GaugeStyle.Ring,
     override val tone: Tone = Tone.Neutral,
     val negativeTone: Tone? = null,
+    /** Up to three small values under the gauge, e.g. today's ↑ 11,8 / ↓ 14,5 kWh beside the live power. */
+    val sub: List<SubValue> = emptyList(),
 ) : PluginView
 
+/** A small secondary value: an optional icon (an arrow) and text in a tone. */
 @Immutable
-data class FlowNode(val id: String, val icon: String, val value: String? = null, val label: String? = null, val tone: Tone = Tone.Neutral)
+data class SubValue(val value: String, val icon: String? = null, val tone: Tone = Tone.Neutral)
+
+/** [percent]: an optional ring around the node's circle (0–100), e.g. a home battery's charge. */
+@Immutable
+data class FlowNode(
+    val id: String, val icon: String, val value: String? = null, val label: String? = null, val tone: Tone = Tone.Neutral,
+    val percent: Float? = null,
+)
 
 /** An arrow from node [from] to node [to] (indexes into [FlowView.nodes]); its speed follows [power]. 0 = idle. */
 @Immutable
@@ -118,6 +128,77 @@ data class StackView(
     override val tone: Tone = Tone.Neutral,
 ) : PluginView
 
+/**
+ * A picture the plugin points to (album art, a camera snapshot, a map tile): [src] is an http(s) URL the frame fetches
+ * through the plugin's own network permissions, size-limited and decoded small, and caches. Drawn square or round at a
+ * size set by the form. Until it has loaded, a quiet placeholder.
+ */
+@Immutable
+data class ImageView(
+    val src: String,
+    val shape: ImageShape = ImageShape.Square,
+    /** Read out by accessibility services; not drawn. */
+    val description: String? = null,
+    override val tone: Tone = Tone.Neutral,
+) : PluginView
+
+enum class ImageShape(val json: String) {
+    Square("square"), Round("round");
+
+    companion object {
+        fun of(json: String): ImageShape? = entries.firstOrNull { it.json == json }
+    }
+}
+
+/**
+ * "Nothing to show right now" (the music stopped, no bin day this week): the widget is hidden and its place in the
+ * band is freed. Only as the whole view. Returning null instead means "no new view" and keeps the last one.
+ */
+@Immutable
+data object NoneView : PluginView {
+    override val tone: Tone get() = Tone.Neutral
+}
+
+/** One button: [id] goes back to the plugin's `action(ctx, id)` handler. */
+@Immutable
+data class ActionItem(val id: String, val icon: String, val label: String? = null, val tone: Tone = Tone.Neutral, val primary: Boolean = false)
+
+/**
+ * A row of round icon buttons (play/pause, next, volume). Tappable in the detail card only; the corner and the band
+ * don't draw them, so a widget never turns the photo into a remote control. Needs `permissions.actions` in the
+ * manifest (checked by the host).
+ */
+@Immutable
+data class ActionsView(val items: List<ActionItem>, override val tone: Tone = Tone.Neutral) : PluginView
+
+/**
+ * A thin progress bar with an optional label: a track's position, a wash cycle. While [running], the frame moves it on
+ * by itself at one unit per second from [value] measured at [at] (epoch ms), so a plugin that refreshes every 10 s
+ * still shows a smoothly moving bar. [time]: show "1:23 / 3:45" (units are seconds).
+ */
+@Immutable
+data class ProgressView(
+    val value: Float,
+    val max: Float,
+    /** The start of the track (default 0): a range like today's low to high temperature. */
+    val min: Float = 0f,
+    /** Bar: filled up to the value. Marker: a dot on the track (where today's temperature sits in its range). */
+    val style: ProgressStyle = ProgressStyle.Bar,
+    val at: Long? = null,
+    val running: Boolean = false,
+    val label: String? = null,
+    val time: Boolean = false,
+    override val tone: Tone = Tone.Neutral,
+) : PluginView
+
+enum class ProgressStyle(val json: String) {
+    Bar("bar"), Marker("marker");
+
+    companion object {
+        fun of(json: String): ProgressStyle? = entries.firstOrNull { it.json == json }
+    }
+}
+
 /** The limits a view must stay within (docs/plugins.md §4). The schema in docs/api mirrors these numbers. */
 object ViewLimits {
     const val API = 1
@@ -142,6 +223,12 @@ object ViewLimits {
     const val MAX_GAUGE_LABEL = 12
     const val MAX_NODE_TEXT = 16
     const val MAX_ID = 24
+    const val MAX_ACTIONS = 5
+    const val MAX_SUB = 3
+    const val MAX_SUB_TEXT = 12
+    const val MAX_ACTION_LABEL = 16
+    const val MAX_SRC = 2048
+    const val MAX_DESCRIPTION = 60
     /** Edge power and sparkline values: anything bigger is a bug, not a measurement. */
     const val MAX_MAGNITUDE = 1e12f
 }
@@ -162,9 +249,24 @@ object PluginIconNames {
         "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
         // generic
         "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right",
+        // media and controls
+        "music", "play", "pause", "skip-next", "skip-previous", "volume-up", "volume-down", "volume-off", "power",
     )
     private val set = all.toHashSet()
     fun isKnown(name: String) = name in set
+}
+
+/** Every image [ImageView.src] in this view, for the host to fetch. */
+fun PluginView.imageSources(): List<String> = when (this) {
+    is ImageView -> listOf(src)
+    is StackView -> items.flatMap { it.imageSources() }
+    else -> emptyList()
+}
+
+fun PluginView.hasActions(): Boolean = when (this) {
+    is ActionsView -> true
+    is StackView -> items.any { it.hasActions() }
+    else -> false
 }
 
 /** Whether drawing this view needs the animation clock (moving flow arrows). */

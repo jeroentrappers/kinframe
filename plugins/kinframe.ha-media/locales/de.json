@@ -1,0 +1,2 @@
+{ "@name": "Läuft gerade", "previous": "Zurück", "play": "Abspielen", "pause": "Pause", "next": "Weiter", "quieter": "Leiser", "louder": "Lauter",
+  "volume": "Lautstärke {n}", "token_refused": "Home Assistant lehnt das Token ab", "album_art": "Albumcover" }

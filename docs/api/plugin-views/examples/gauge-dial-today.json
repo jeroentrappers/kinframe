@@ -1,0 +1,20 @@
+{
+  "type": "gauge",
+  "value": 9,
+  "label": "350 W",
+  "style": "dial",
+  "tone": "info",
+  "negative_tone": "good",
+  "sub": [
+    {
+      "value": "11,8",
+      "icon": "arrow-up",
+      "tone": "good"
+    },
+    {
+      "value": "14,5 kWh",
+      "icon": "arrow-down",
+      "tone": "info"
+    }
+  ]
+}

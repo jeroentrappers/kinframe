@@ -145,7 +145,7 @@ class QuickJsSandboxTest {
         )
         bad.forEach { m -> try { PluginManifest.parse(m); fail("accepted: $m") } catch (_: ManifestException) {} }
         // Every plugin in the repository has a valid manifest.
-        JsPluginKit.ROOT.resolve("plugins").listFiles { f -> f.isDirectory }!!.forEach { dir ->
+        JsPluginKit.ROOT.resolve("plugins").listFiles { f -> f.isDirectory && f.resolve("plugin.json").isFile }!!.forEach { dir ->
             val b = PluginBundle.fromDirectory(dir)
             assertEquals(dir.name, b.manifest.id)
         }

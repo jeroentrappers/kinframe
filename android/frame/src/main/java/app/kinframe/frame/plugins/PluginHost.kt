@@ -1,6 +1,13 @@
 package app.kinframe.frame.plugins
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Process
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import app.kinframe.core.plugin.NoneView
+import app.kinframe.core.plugin.hasActions
+import app.kinframe.core.plugin.imageSources
 import android.util.Log
 import app.kinframe.core.plugin.PluginView
 import app.kinframe.core.plugin.PluginViewParser
@@ -40,6 +47,8 @@ data class InstanceState(
     val shown: Boolean,
     val lastGoodAt: Long,
     val error: String?,
+    /** Decoded pictures of the instance's `image` views, by source URL. */
+    val images: Map<String, ImageBitmap> = emptyMap(),
 )
 
 /**
@@ -69,6 +78,9 @@ class PluginHost(
         var startedAt: Long = 0L,
         @Volatile var failures: Int = 0,
         @Volatile var error: String? = null,
+        /** Small LRU of decoded pictures; only touched on the plugin thread, published as a copy. */
+        val images: LinkedHashMap<String, ImageBitmap> = LinkedHashMap(8, 0.75f, true),
+        @Volatile var imagesShown: Map<String, ImageBitmap> = emptyMap(),
         val wake: kotlinx.coroutines.channels.Channel<Unit> = kotlinx.coroutines.channels.Channel(kotlinx.coroutines.channels.Channel.CONFLATED),
     )
 
@@ -107,10 +119,33 @@ class PluginHost(
         return withContext(thread) {
             val json = runCatching { withTimeout(CALL_TIMEOUT_MS) { r.instance.detail(r.ctx) } }.getOrNull() ?: return@withContext null
             when (val v = PluginViewParser.parse(json)) {
-                is ViewResult.Valid -> v.view
+                is ViewResult.Valid -> if (permitted(r, v.view)) v.view.also { loadImages(r, it) } else null
                 is ViewResult.Invalid -> { r.ctx.log("detail: $v"); null }
             }
+        }.also { publish() }
+    }
+
+    /** A view with buttons from a plugin without `permissions.actions` is refused like an invalid one. */
+    private fun permitted(r: Running, view: PluginView): Boolean {
+        if (!view.hasActions() || r.instance.allowsActions) return true
+        r.error = "actions need permissions.actions in the manifest"
+        r.ctx.log(r.error!!)
+        return false
+    }
+
+    /** Fetches and decodes the pictures [view] shows that aren't cached yet (on the plugin thread). */
+    private suspend fun loadImages(r: Running, view: PluginView) {
+        val wanted = view.imageSources()
+        if (wanted.isEmpty()) return
+        for (src in wanted) {
+            if (r.images.containsKey(src)) { r.images[src]; continue }
+            val bytes = runCatching { withTimeout(CALL_TIMEOUT_MS) { r.instance.image(r.ctx, src) } }
+                .onFailure { r.ctx.log("image: ${it.message}") }.getOrNull() ?: continue
+            val bmp = runCatching { decodeImage(bytes, MAX_IMAGE_PX) }.getOrNull() ?: continue
+            r.images[src] = bmp
+            while (r.images.size > MAX_IMAGES) r.images.remove(r.images.keys.first())
         }
+        r.imagesShown = HashMap(r.images)
     }
 
     /**
@@ -181,7 +216,8 @@ class PluginHost(
             }
             first = false
             if (json != null) when (val v = PluginViewParser.parse(json)) {
-                is ViewResult.Valid -> {
+                is ViewResult.Valid -> if (permitted(r, v.view)) {
+                    loadImages(r, v.view)
                     val t = now()
                     if (v.view != r.view) r.changedAt = t
                     r.view = v.view
@@ -228,11 +264,14 @@ class PluginHost(
                 Visibility.OnChange -> r.changedAt != 0L && t - r.changedAt < VISIBLE_MS
                 Visibility.OnTap -> t < tapUntil
             }
-            InstanceState(r.config, r.name, r.view, status, shown = !expired && modeAllows, lastGoodAt = r.lastGoodAt, error = r.error)
+            InstanceState(r.config, r.name, r.view, status, shown = !expired && modeAllows && r.view !is NoneView, lastGoodAt = r.lastGoodAt, error = r.error, images = r.imagesShown)
         }.sortedWith(compareBy({ it.config.slot.ordinal }, { it.config.order }))
     }
 
     companion object {
+        const val MAX_IMAGES = 6
+        /** Album art is drawn at most 168 dp (the detail card); this keeps a 2× screen sharp and memory small. */
+        const val MAX_IMAGE_PX = 336
         const val VISIBLE_MS = 30_000L
         const val HIDE_AFTER_MS = 15 * 60_000L
         const val CALL_TIMEOUT_MS = 10_000L
@@ -251,6 +290,25 @@ class PluginHost(
             if (failures == 0) return refreshMs
             val cap = maxOf(MAX_BACKOFF_MS, refreshMs * 4)
             return (refreshMs shl (failures - 1).coerceAtMost(4)).coerceAtMost(cap)
+        }
+
+        /**
+         * Decodes [bytes] no larger than about [maxPx] on the long side: subsampled while decoding (cheap on the
+         * RK3126), then scaled the rest of the way.
+         */
+        fun decodeImage(bytes: ByteArray, maxPx: Int): ImageBitmap? {
+            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+            if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+            var sample = 1
+            while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxPx) sample *= 2
+            val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample }) ?: return null
+            val long = maxOf(bmp.width, bmp.height)
+            val out = if (long > maxPx) {
+                val k = maxPx.toFloat() / long
+                Bitmap.createScaledBitmap(bmp, (bmp.width * k).toInt().coerceAtLeast(1), (bmp.height * k).toInt().coerceAtLeast(1), true).also { if (it != bmp) bmp.recycle() }
+            } else bmp
+            return out.asImageBitmap()
         }
 
         /** A last good view older than this is hidden: 15 minutes, or longer for slow refresh intervals. */

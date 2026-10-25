@@ -3,7 +3,7 @@
   "$id": "https://kinframe.app/schemas/plugin-view-1.json",
   "title": "kinframe plugin view, API 1",
   "description": "What a plugin's render() and detail() return (docs/plugins.md §4). The frame draws it natively; anything that does not validate is not drawn and the previous view stays. Limits beyond what JSON Schema can express: the tree is at most 3 components deep (stack › stack › leaf), a view has at most 24 components in total (rows' values included, flow nodes not), edge ids must name nodes of the same flow, node ids are unique, sparkline min < max, strings have no line breaks or control characters, and the serialized view is at most 16 KB. The Kotlin validator (android/core/.../PluginViewParser.kt) enforces all of them.",
-  "$ref": "#/$defs/component",
+  "oneOf": [{ "$ref": "#/$defs/component" }, { "$ref": "#/$defs/none" }],
   "$defs": {
     "component": {
       "oneOf": [
@@ -13,8 +13,64 @@
         { "$ref": "#/$defs/flow" },
         { "$ref": "#/$defs/sparkline" },
         { "$ref": "#/$defs/text" },
-        { "$ref": "#/$defs/stack" }
+        { "$ref": "#/$defs/stack" },
+        { "$ref": "#/$defs/image" },
+        { "$ref": "#/$defs/actions" },
+        { "$ref": "#/$defs/progress" }
       ]
+    },
+    "none": {
+      "description": "Nothing to show right now (the music stopped): the widget is hidden and its place in the band freed. Only as the whole view. Returning null instead keeps the last view.",
+      "type": "object", "additionalProperties": false, "required": ["type"],
+      "properties": { "type": { "const": "none" } }
+    },
+    "image": {
+      "description": "A picture (album art, a snapshot) from an http(s) URL the plugin's own network permissions allow. The frame fetches it (at most 768 KB), decodes it small and caches it; a quiet placeholder until then. Square (rounded corners) or round; the size comes from the form.",
+      "type": "object", "additionalProperties": false, "required": ["type", "src"],
+      "properties": {
+        "type": { "const": "image" },
+        "src": { "type": "string", "pattern": "^https?://", "maxLength": 2048 },
+        "shape": { "enum": ["square", "round"] },
+        "description": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 60 }] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "actions": {
+      "description": "Round icon buttons that call the plugin's action(ctx, id) handler. Tappable in the detail card only (the corner and the band don't draw them). Needs permissions.actions in the manifest.",
+      "type": "object", "additionalProperties": false, "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "actions" },
+        "items": {
+          "type": "array", "minItems": 1, "maxItems": 5,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["id", "icon"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "icon": { "$ref": "#/$defs/icon" },
+              "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "tone": { "$ref": "#/$defs/tone" },
+              "primary": { "type": "boolean" }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "progress": {
+      "description": "A thin bar from min (default 0) to max, or a marker dot on the track. While running, the frame moves the value on by one per second from `at` (epoch ms), so a track's position moves smoothly between refreshes; `time` shows seconds as 1:23 / 3:45.",
+      "type": "object", "additionalProperties": false, "required": ["type", "value", "max"],
+      "properties": {
+        "type": { "const": "progress" },
+        "value": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "at": { "type": "number" },
+        "running": { "type": "boolean" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "time": { "type": "boolean" },
+        "style": { "enum": ["bar", "marker"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
     },
     "tone": {
       "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children.",
@@ -27,7 +83,8 @@
         "water", "thermometer", "wind", "leaf", "euro", "fan", "lightbulb",
         "moon", "cloud", "clock", "calendar", "rain", "direction",
         "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
-        "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right"
+        "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right",
+        "music", "play", "pause", "skip-next", "skip-previous", "volume-up", "volume-down", "volume-off", "power"
       ]
     },
     "short": { "type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u2028\\u2029]*$" },
@@ -77,7 +134,19 @@
         "icon": { "$ref": "#/$defs/icon" },
         "style": { "enum": ["ring", "bar", "dial"] },
         "tone": { "$ref": "#/$defs/tone" },
-        "negative_tone": { "$ref": "#/$defs/tone" }
+        "negative_tone": { "$ref": "#/$defs/tone" },
+        "sub": {
+          "description": "Up to three small values under a ring or dial: today's ↑ 11,8 / ↓ 14,5 kWh beside the live power.",
+          "type": "array", "minItems": 1, "maxItems": 3,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["value"],
+            "properties": {
+              "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 12 }] },
+              "icon": { "$ref": "#/$defs/icon" },
+              "tone": { "$ref": "#/$defs/tone" }
+            }
+          }
+        }
       }
     },
     "flow": {
@@ -98,7 +167,8 @@
               "icon": { "$ref": "#/$defs/icon" },
               "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
               "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
-              "tone": { "$ref": "#/$defs/tone" }
+              "tone": { "$ref": "#/$defs/tone" },
+              "percent": { "description": "A ring around the node (0–100), e.g. a home battery's charge.", "type": "number", "minimum": 0, "maximum": 100 }
             }
           }
         },

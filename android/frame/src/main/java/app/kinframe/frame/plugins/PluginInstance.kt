@@ -44,6 +44,12 @@ interface PluginInstance {
 
     /** Called before the instance is stopped. */
     suspend fun stop(ctx: PluginContext) {}
+
+    /** Whether its views may contain `actions` (the manifest's `permissions.actions`). */
+    val allowsActions: Boolean get() = false
+
+    /** The bytes of an `image` view's [src], fetched with the plugin's own network permissions; null if it has none. */
+    suspend fun image(ctx: PluginContext, src: String): ByteArray? = null
 }
 
 /** `ctx`: the plugin's whole world (docs/plugins.md §3.2). */

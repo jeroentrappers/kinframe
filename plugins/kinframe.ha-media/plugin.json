@@ -1,0 +1,18 @@
+{
+  "id": "kinframe.ha-media",
+  "name": "Now playing (Home Assistant)",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "What a speaker is playing, with album art, through Home Assistant (Spotify, Sonos, Cast, …), and buttons to skip and change the volume in the detail card.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 2, "default_seconds": 15 },
+  "permissions": { "http": ["settings.base_url"], "websocket": ["settings.base_url"], "actions": true },
+  "settings": [
+    { "key": "base_url", "type": "url", "label": "Home Assistant address", "required": true, "local_only": true, "discover": "_home-assistant._tcp" },
+    { "key": "token", "type": "secret", "label": "Long-lived access token", "required": true },
+    { "key": "entity", "type": "entity", "label": "Speaker or player", "domain": "media_player", "required": true },
+    { "key": "show_paused", "type": "boolean", "label": "Keep showing while paused", "default": true }
+  ]
+}

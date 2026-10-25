@@ -5,6 +5,27 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import app.kinframe.core.design.Kin
+import app.kinframe.core.plugin.ActionsView
+import app.kinframe.core.plugin.ImageShape
+import app.kinframe.core.plugin.ImageView
+import app.kinframe.core.plugin.NoneView
+import app.kinframe.core.plugin.ProgressStyle
+import app.kinframe.core.plugin.ProgressView
+import app.kinframe.core.plugin.SubValue
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,6 +109,10 @@ private fun Component(view: PluginView, form: ViewForm, p: PluginPalette, m: For
         is SparklineView -> Sparkline(view, form, p, m, tone)
         is TextView -> Lines(view, form, p, m, tone)
         is StackView -> Stack(view, form, p, m, tone)
+        is ImageView -> PImage(view, form, p)
+        is ActionsView -> Actions(view, form, p, tone)
+        is ProgressView -> Progress(view, form, p, m, tone)
+        NoneView -> Unit
     }
 }
 
@@ -274,13 +299,20 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
             }
         }
     }
+    val ringAndSubs = @Composable {
+        if (g.sub.isEmpty() || form == ViewForm.Strip) ring()
+        else Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            ring()
+            SubValues(g.sub, form, p, m, tone)
+        }
+    }
     when (form) {
         ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            ring()
+            ringAndSubs()
             g.caption?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis) }
         }
         else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(m.gap + 4.dp)) {
-            ring()
+            ringAndSubs()
             if (g.caption != null || (form.compact && g.icon != null)) {
                 Column {
                     if (form.compact) PIcon(g.icon, m.icon * 0.8f, p.soft)
@@ -289,6 +321,21 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
             }
         }
     }
+}
+
+/** Small values under a gauge: an arrow (or other icon) in the value's tone, the number in text colour. */
+@Composable
+private fun SubValues(sub: List<SubValue>, form: ViewForm, p: PluginPalette, m: FormMetrics, inherited: Tone) {
+    val style = m.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium).on(p.text, p)
+    val item = @Composable { s: SubValue ->
+        val t = if (s.tone == Tone.Neutral) inherited else s.tone
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            PIcon(s.icon, m.icon * 0.45f, if (t == Tone.Neutral) p.soft else p.tone(t))
+            Text(s.value, style = style, maxLines = 1)
+        }
+    }
+    if (form == ViewForm.Column) Column(horizontalAlignment = Alignment.CenterHorizontally) { sub.forEach { item(it) } }
+    else Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) { sub.forEach { item(it) } }
 }
 
 /**
@@ -430,6 +477,94 @@ private fun Lines(t: TextView, form: ViewForm, p: PluginPalette, m: FormMetrics,
     }
 }
 
+// ------------------------------------------------------------------------------------------------ image
+
+@Composable
+private fun PImage(v: ImageView, form: ViewForm, p: PluginPalette) {
+    val size = when (form) { ViewForm.Detail -> 168.dp; ViewForm.Corner -> 76.dp; else -> 56.dp }
+    val shape = if (v.shape == ImageShape.Round) CircleShape else RoundedCornerShape(if (form == ViewForm.Detail) 12.dp else 8.dp)
+    val bitmap = LocalPluginImages.current(v.src)
+    val described = Modifier.size(size).clip(shape).semantics { v.description?.let { contentDescription = it } }
+    if (bitmap != null) {
+        Image(bitmap, null, described, contentScale = ContentScale.Crop)
+    } else {
+        // Loading or failed: a quiet tile, so the layout doesn't jump when the picture arrives.
+        Box(described.background(p.faint))
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ actions
+
+@Composable
+private fun Actions(a: ActionsView, form: ViewForm, p: PluginPalette, tone: Tone) {
+    // Buttons only in the detail card: on the photo or in the band a tap opens the card instead.
+    if (form != ViewForm.Detail) return
+    val run = LocalPluginActions.current
+    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        a.items.forEach { item ->
+            val t = if (item.tone == Tone.Neutral) tone else item.tone
+            val c = if (t == Tone.Neutral) p.text else p.tone(t)
+            val size = if (item.primary) 64.dp else 52.dp
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier.size(size).clip(CircleShape)
+                        .background(if (item.primary) c else p.faint.copy(alpha = 0.6f))
+                        .then(if (run != null) Modifier.clickable(onClickLabel = item.label ?: item.id) { run(item.id) } else Modifier.graphicsLayer { alpha = 0.4f })
+                        .semantics { contentDescription = item.label ?: item.id; role = Role.Button },
+                    contentAlignment = Alignment.Center,
+                ) { PIcon(item.icon, if (item.primary) 30.dp else 24.dp, if (item.primary) p.onTone else c) }
+                item.label?.let { Text(it, style = Kin.type.caption.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(top = 4.dp)) }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ progress
+
+@Composable
+private fun Progress(v: ProgressView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
+    val color = if (tone == Tone.Neutral) p.text else p.tone(tone)
+    // A running bar moves on by itself, one unit per second since `at`; ticking once a second only while it runs.
+    val now by produceState(System.currentTimeMillis(), v) {
+        while (v.running) { value = System.currentTimeMillis(); delay(1_000) }
+    }
+    val current = if (v.running && v.at != null) (v.value + (now - v.at) / 1000f).coerceIn(v.min, v.max) else v.value
+    val fraction = ((current - v.min) / (v.max - v.min)).coerceIn(0f, 1f)
+    val width = when (form) { ViewForm.Column -> 60.dp; ViewForm.Strip -> 120.dp; ViewForm.Detail -> 360.dp; else -> 200.dp }
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp), horizontalAlignment = if (form == ViewForm.Column) Alignment.CenterHorizontally else Alignment.Start) {
+        if (form != ViewForm.Column) v.label?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = width)) }
+        val track = p.faint
+        if (v.style == ProgressStyle.Marker) {
+            // A dot on the track: where the value sits between min and max (today's temperature in its range).
+            Canvas(Modifier.size(width, 10.dp)) {
+                val h = 3.dp.toPx()
+                drawRoundRect(track, Offset(0f, (size.height - h) / 2), Size(size.width, h), CornerRadius(h / 2))
+                val r = size.height / 2
+                drawCircle(color, r, Offset(r + (size.width - 2 * r) * fraction, size.height / 2))
+            }
+        } else Canvas(Modifier.size(width, if (form.compact) 3.dp else 4.dp)) {
+            val r = CornerRadius(size.height / 2)
+            drawRoundRect(track, cornerRadius = r)
+            drawRoundRect(color, size = Size(size.width * fraction, size.height), cornerRadius = r)
+        }
+        if (v.time && form != ViewForm.Column) {
+            Row(Modifier.width(width), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(clockText(current), style = m.label.on(p.soft, p), maxLines = 1)
+                Text(clockText(v.max), style = m.label.on(p.soft, p), maxLines = 1)
+            }
+        }
+    }
+}
+
+/** Seconds as "3:07" or "1:02:07". */
+internal fun clockText(seconds: Float): String {
+    val s = seconds.toLong().coerceAtLeast(0)
+    val h = s / 3600
+    val mm = (s % 3600) / 60
+    val ss = s % 60
+    return if (h > 0) "%d:%02d:%02d".format(h, mm, ss) else "%d:%02d".format(mm, ss)
+}
+
 // ------------------------------------------------------------------------------------------------ stack
 
 @Composable
@@ -483,7 +618,18 @@ private fun Flow(f: FlowView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
                     Box(
                         Modifier.size(circle).drawBehind {
                             val sw = 2.dp.toPx()
-                            drawCircle(c, size.minDimension / 2 - sw / 2, style = Stroke(sw))
+                            val pct = n.percent
+                            if (pct == null) {
+                                drawCircle(c, size.minDimension / 2 - sw / 2, style = Stroke(sw))
+                            } else {
+                                // A charge ring: the faint track and the filled share, from the top, clockwise.
+                                val rw = 3.dp.toPx()
+                                drawCircle(line, size.minDimension / 2 - rw / 2, style = Stroke(rw))
+                                drawArc(
+                                    c, -90f, 3.6f * pct.coerceIn(0f, 100f), false, Offset(rw / 2, rw / 2),
+                                    Size(size.width - rw, size.height - rw), style = Stroke(rw, cap = StrokeCap.Round),
+                                )
+                            }
                         },
                         contentAlignment = Alignment.Center,
                     ) { PIcon(n.icon, m.nodeIcon, c) }

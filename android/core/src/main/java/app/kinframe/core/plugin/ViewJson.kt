@@ -39,9 +39,26 @@ object ViewJson {
         negativeTone?.let { put("negative_tone", it.json) }
     }
 
-    fun node(id: String, icon: String, value: String? = null, label: String? = null, tone: Tone = Tone.Neutral) = buildJsonObject {
+    fun node(id: String, icon: String, value: String? = null, label: String? = null, tone: Tone = Tone.Neutral, percent: Float? = null) = buildJsonObject {
         put("id", id); put("icon", icon); value?.let { put("value", it) }; label?.let { put("label", it) }; tone(tone)
+        percent?.let { put("percent", it) }
     }
+
+    fun image(src: String, shape: ImageShape = ImageShape.Square, description: String? = null) = buildJsonObject {
+        put("type", "image"); put("src", src); if (shape != ImageShape.Square) put("shape", shape.json); description?.let { put("description", it) }
+    }
+
+    fun action(id: String, icon: String, label: String? = null, primary: Boolean = false) = buildJsonObject {
+        put("id", id); put("icon", icon); label?.let { put("label", it) }; if (primary) put("primary", true)
+    }
+
+    fun actions(items: List<JsonObject>) = buildJsonObject { put("type", "actions"); put("items", JsonArray(items)) }
+
+    fun progress(value: Float, max: Float, at: Long? = null, running: Boolean = false, label: String? = null, time: Boolean = false, tone: Tone = Tone.Neutral) =
+        buildJsonObject {
+            put("type", "progress"); put("value", value); put("max", max); at?.let { put("at", it) }
+            if (running) put("running", true); label?.let { put("label", it) }; if (time) put("time", true); tone(tone)
+        }
 
     fun edge(from: String, to: String, power: Float) = buildJsonObject { put("from", from); put("to", to); put("power", power) }
 

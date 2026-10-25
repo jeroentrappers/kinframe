@@ -42,6 +42,8 @@ data class PluginManifest(
         val options: List<String>,
         val discover: String?,
         val help: String?,
+        /** An `entity` setting that takes a list (several solar inverters summed into one node). */
+        val multiple: Boolean = false,
     )
 
     fun setting(key: String): SettingSpec? = settings.firstOrNull { it.key == key }
@@ -103,6 +105,9 @@ data class PluginManifest(
                     options = (s["options"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull } ?: emptyList(),
                     discover = str("discover", s, required = false),
                     help = str("help", s, required = false, max = 400),
+                    multiple = ((s["multiple"] as? JsonPrimitive)?.booleanOrNull ?: false).also { m ->
+                        if (m && type != "entity") throw ManifestException("settings[$i]: only entity settings can be multiple")
+                    },
                 )
             }
             if (settings.map { it.key }.toSet().size != settings.size) throw ManifestException("duplicate setting keys")

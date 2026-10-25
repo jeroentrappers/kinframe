@@ -1,0 +1,3 @@
+{ "@name": "Energiestroom", "solar": "Zon", "grid": "Net", "home": "Huis", "battery": "Batterij", "car": "Auto",
+  "importing": "Afname", "exporting": "Teruglevering", "charging": "Laden", "discharging": "Ontladen", "last_hour": "Net, laatste uur",
+  "token_refused": "Home Assistant weigert het token", "not_found": "Sensor niet gevonden: {id}" }

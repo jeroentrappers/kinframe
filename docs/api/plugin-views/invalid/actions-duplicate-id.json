@@ -1,0 +1,16 @@
+{
+  "$error_path": "/items",
+  "view": {
+    "type": "actions",
+    "items": [
+      {
+        "id": "a",
+        "icon": "play"
+      },
+      {
+        "id": "a",
+        "icon": "pause"
+      }
+    ]
+  }
+}

@@ -171,6 +171,15 @@ object KinIcons {
     val Train by lazy {
         line("train", "M7 3h10a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2z", "M5 10h14", "M8 21l2-4", "M16 21l-2-4", "M9 13.5h0.01", "M15 13.5h0.01")
     }
+    // Media: a note, transport controls and the speaker (plugin views: now playing).
+    private const val SPEAKER = "M4 9.5h3.5L12 5.5v13l-4.5-4H4z"
+    val Music by lazy { line("music", "M9 17.5V5.5l11-2v12", "M6.5 15a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z", "M17.5 13a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5z") }
+    val Pause by lazy { line("pause", "M8.5 5.5v13", "M15.5 5.5v13") }
+    val SkipNext by lazy { line("skipNext", "M5.5 6v12l9-6z", "M18.5 6v12", filled = true) }
+    val SkipPrevious by lazy { line("skipPrevious", "M18.5 6v12l-9-6z", "M5.5 6v12", filled = true) }
+    val VolumeUp by lazy { line("volumeUp", SPEAKER, "M15.5 9a4 4 0 0 1 0 6", "M18.5 6.5a7.5 7.5 0 0 1 0 11") }
+    val VolumeDown by lazy { line("volumeDown", SPEAKER, "M15.5 9a4 4 0 0 1 0 6") }
+    val VolumeOff by lazy { line("volumeOff", SPEAKER, "M16 9.5l5 5", "M21 9.5l-5 5") }
     val Warning by lazy { line("warning", "M12 4L2.5 20h19z", "M12 10v4", "M12 17h0.01") }
     val ArrowUp by lazy { line("arrowUp", "M12 19V5", "M6 11l6-6 6 6") }
     val ArrowDown by lazy { line("arrowDown", "M12 5v14", "M6 13l6 6 6-6") }
@@ -229,6 +238,15 @@ object PluginIcons {
         "arrow-down" -> KinIcons.ArrowDown
         "arrow-left" -> KinIcons.ArrowLeft
         "arrow-right" -> KinIcons.ArrowRight
+        "music" -> KinIcons.Music
+        "play" -> KinIcons.Play
+        "pause" -> KinIcons.Pause
+        "skip-next" -> KinIcons.SkipNext
+        "skip-previous" -> KinIcons.SkipPrevious
+        "volume-up" -> KinIcons.VolumeUp
+        "volume-down" -> KinIcons.VolumeDown
+        "volume-off" -> KinIcons.VolumeOff
+        "power" -> KinIcons.Power
         else -> null
     }
 }

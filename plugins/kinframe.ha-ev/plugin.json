@@ -1,0 +1,27 @@
+{
+  "id": "kinframe.ha-ev",
+  "name": "Car battery (Home Assistant)",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "An electric car's charge, range and charging state from Home Assistant; also any battery with a level sensor.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 5, "default_seconds": 60, "stale_seconds": 21600 },
+  "permissions": { "http": ["settings.base_url"], "websocket": ["settings.base_url"] },
+  "settings": [
+    { "key": "base_url", "type": "url", "label": "Home Assistant address", "required": true, "local_only": true, "discover": "_home-assistant._tcp" },
+    { "key": "token", "type": "secret", "label": "Long-lived access token", "required": true },
+    { "key": "name", "type": "text", "label": "Name", "placeholder": "EV3" },
+    { "key": "preset", "type": "choice", "label": "Integration", "options": ["kia_hyundai", "custom"], "default": "kia_hyundai",
+      "help": "Kia Connect / Hyundai Bluelink: type the car's entity prefix below and the sensors are found by name." },
+    { "key": "prefix", "type": "text", "label": "Entity prefix (Kia/Hyundai)", "placeholder": "ev3" },
+    { "key": "battery_level", "type": "entity", "label": "Battery level", "domain": "sensor", "unit": "%" },
+    { "key": "range", "type": "entity", "label": "Range", "domain": "sensor" },
+    { "key": "charging", "type": "entity", "label": "Charging", "domain": "binary_sensor" },
+    { "key": "plugged", "type": "entity", "label": "Plugged in", "domain": "binary_sensor" },
+    { "key": "charge_minutes", "type": "entity", "label": "Time to full (minutes)", "domain": "sensor" },
+    { "key": "charge_power", "type": "entity", "label": "Charging power", "domain": "sensor" },
+    { "key": "updated", "type": "entity", "label": "Last update from the car (timestamp)", "domain": "sensor" }
+  ]
+}

@@ -95,7 +95,7 @@ function today(h, r) {
   return { imp: since(r.importKwh, h.day && h.day.imp), exp: since(r.exportKwh, h.day && h.day.exp), gas: since(r.gasM3, h.day && h.day.gas) };
 }
 
-export function main(r, tr, settings, ctx) {
+export function main(r, tr, settings, ctx, day) {
   const f = ctx.format, t = (k) => ctx.t(k);
   const p = r.activePowerW === null ? 0 : r.activePowerW;
   const warnW = typeof settings.warn_w === 'number' ? settings.warn_w : 0;
@@ -103,10 +103,17 @@ export function main(r, tr, settings, ctx) {
   const tone = exporting ? 'good' : warnW > 0 && p > warnW ? 'warn' : undefined;
   if (settings.style === 'gauge') {
     const maxW = typeof settings.max_w === 'number' && settings.max_w > 0 ? settings.max_w : DEFAULT_MAX_W;
-    return {
+    const g = {
       type: 'gauge', value: Math.max(-100, Math.min(100, (p / maxW) * 100)), label: f.number(Math.abs(p), 0, 'W'),
       style: 'dial', tone: 'info', negative_tone: 'good',
     };
+    // Today's totals under the dial: returned (green, up) and used (violet, down).
+    if (day && day.imp !== null) {
+      g.sub = [];
+      if (day.exp !== null) g.sub.push({ value: f.number(day.exp, 1), icon: 'arrow-up', tone: 'good' });
+      g.sub.push({ value: f.number(day.imp, 1, 'kWh'), icon: 'arrow-down', tone: 'info' });
+    }
+    return g;
   }
   if (settings.style === 'flow') {
     return {
@@ -150,7 +157,7 @@ export default {
     const h = history(ctx);
     add(h, r, ctx.now());
     updateDay(h, r, ctx);
-    return main(r, trend(h), ctx.settings, ctx);
+    return main(r, trend(h), ctx.settings, ctx, today(h, r));
   },
 
   async detail(ctx) {

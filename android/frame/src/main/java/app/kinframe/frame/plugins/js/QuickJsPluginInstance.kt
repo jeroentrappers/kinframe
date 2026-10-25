@@ -99,6 +99,10 @@ class QuickJsPluginInstance(
         return call("action", ctx, Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(id)))
     }
 
+    override val allowsActions: Boolean get() = manifest.permissions.actions
+
+    override suspend fun image(ctx: PluginContext, src: String): ByteArray = net.bytes(src, emptyMap(), MAX_IMAGE_BYTES)
+
     override suspend fun stop(ctx: PluginContext) {
         try {
             if (js != null) call("stop", ctx)
@@ -261,6 +265,9 @@ class QuickJsPluginInstance(
     }
 
     companion object {
+        /** An `image` view's picture: album art and thumbnails, not photos. */
+        const val MAX_IMAGE_BYTES = 768 * 1024
+
         fun reconnectMs(attempt: Int): Long = (2_000L shl attempt.coerceAtMost(5)).coerceAtMost(60_000L)
     }
 }

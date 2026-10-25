@@ -1,0 +1,2 @@
+{ "@name": "En cours de lecture", "previous": "Précédent", "play": "Lecture", "pause": "Pause", "next": "Suivant", "quieter": "Moins fort", "louder": "Plus fort",
+  "volume": "Volume {n}", "token_refused": "Home Assistant refuse le jeton", "album_art": "Pochette" }

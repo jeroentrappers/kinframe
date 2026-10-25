@@ -1,0 +1,7 @@
+{
+  "$error_path": "/src",
+  "view": {
+    "type": "image",
+    "src": "file:///sdcard/x.png"
+  }
+}

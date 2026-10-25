@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -44,6 +45,8 @@ data class PluginPalette(
     val accent: Color,
     val info: Color,
     val shadow: Shadow?,
+    /** Icons on a filled (primary) button. */
+    val onTone: Color = Color.White,
 ) {
     fun tone(t: Tone): Color = when (t) {
         Tone.Neutral -> text
@@ -127,6 +130,15 @@ internal fun metricsFor(form: ViewForm): FormMetrics {
         }
     }
 }
+
+/**
+ * The pictures of `image` views, by [app.kinframe.core.plugin.ImageView.src]: fetched and decoded by the host, null
+ * while loading or when they failed. The app provides it per instance.
+ */
+val LocalPluginImages = compositionLocalOf<(String) -> androidx.compose.ui.graphics.ImageBitmap?> { { null } }
+
+/** Runs an `actions` button's id through the plugin; null where views aren't interactive (buttons drawn disabled). */
+val LocalPluginActions = compositionLocalOf<((String) -> Unit)?> { null }
 
 /**
  * One clock for every animated flow on screen, in seconds. It ticks at about 25 frames per second instead of every

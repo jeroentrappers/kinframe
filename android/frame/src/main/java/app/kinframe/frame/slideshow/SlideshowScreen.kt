@@ -605,7 +605,20 @@ fun SlideshowScreen(c: FrameController) {
             }
         }
 
-        PluginDetailCard(detailFor, detailView) { detailFor = null }
+        // The live state (its pictures load after the card opens), and buttons that run the plugin's actions.
+        val detailLive = detailFor?.let { d -> pluginStates.firstOrNull { it.config.instanceId == d.config.instanceId } ?: d }
+        // A new main view (a WebSocket update, the next track) refreshes an open card's detail too.
+        LaunchedEffect(detailLive?.view) {
+            val d = detailFor ?: return@LaunchedEffect
+            if (detailView != null) detailView = plugins.host.detail(d.config.instanceId) ?: detailView
+        }
+        PluginDetailCard(detailLive, detailView, onClose = { detailFor = null }, onAction = { id ->
+            val target = detailFor ?: return@PluginDetailCard
+            scope.launch {
+                plugins.host.action(target.config.instanceId, id)
+                detailView = plugins.host.detail(target.config.instanceId)
+            }
+        })
 
         ForecastOverlay(
             visible = forecastOpen, weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,

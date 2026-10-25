@@ -1,0 +1,3 @@
+{ "@name": "Energiefluss", "solar": "Solar", "grid": "Netz", "home": "Haus", "battery": "Batterie", "car": "Auto",
+  "importing": "Bezug", "exporting": "Einspeisung", "charging": "Laden", "discharging": "Entladen", "last_hour": "Netz, letzte Stunde",
+  "token_refused": "Home Assistant lehnt das Token ab", "not_found": "Sensor nicht gefunden: {id}" }

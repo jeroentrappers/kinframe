@@ -1,0 +1,3 @@
+{ "@name": "Flux d'énergie", "solar": "Solaire", "grid": "Réseau", "home": "Maison", "battery": "Batterie", "car": "Voiture",
+  "importing": "Prélèvement", "exporting": "Injection", "charging": "Charge", "discharging": "Décharge", "last_hour": "Réseau, dernière heure",
+  "token_refused": "Home Assistant refuse le jeton", "not_found": "Capteur introuvable : {id}" }

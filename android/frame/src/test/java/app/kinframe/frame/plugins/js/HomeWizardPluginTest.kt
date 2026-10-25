@@ -81,6 +81,10 @@ class HomeWizardPluginTest {
         assertEquals(1203f / 40f, using.percent, 0.01f)
         assertEquals(Tone.Info, using.tone)
         assertEquals(Tone.Good, using.negativeTone)
+        // The first reading of the day: nothing used or returned yet.
+        assertEquals(listOf("0,0", "0,0${nbsp}kWh"), using.sub.map { it.value })
+        assertEquals(listOf("arrow-up", "arrow-down"), using.sub.map { it.icon })
+        assertEquals(listOf(Tone.Good, Tone.Info), using.sub.map { it.tone })
 
         meter("""{"active_power_w":-900}""")
         val returning = kit("style" to "gauge", "max_w" to 2000).view() as GaugeView
