@@ -13,7 +13,6 @@
     <string name="plugins_band_background">Bakgrund för bandet</string>
     <string name="plugins_background_paper">Papper</string>
     <string name="plugins_background_photo">Från bilden</string>
-    <string name="plugins_band_clock">Klocka och väder i bandet</string>
     <string name="plugins_slot">Hörn</string>
     <string name="plugins_slot_top_left">Uppe till vänster</string>
     <string name="plugins_slot_top_right">Uppe till höger</string>

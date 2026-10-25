@@ -38,6 +38,8 @@ fun PluginStage(
     weather: Weather?,
     nowMs: Long,
     unit: String = "c",
+    /** The band column's two-line date ("Sun" / "25 Oct"); the strip uses [date]. */
+    shortDate: String? = null,
     photoImage: ImageBitmap? = null,
     detail: InstanceState? = null,
     detailView: PluginView? = null,
@@ -55,7 +57,7 @@ fun PluginStage(
             val screenH = maxHeight
             val band = if (layout.mode == PluginLayoutMode.Band) BandGeometry.compute(w, h, d.density, layout.side) as? BandGeometry.Band else null
             val overlay = layout.mode == PluginLayoutMode.Overlay || (layout.mode == PluginLayoutMode.Band && band == null)
-            val clockInBand = band != null && layout.clockInBand
+            val clockInBand = band != null && (clock != null || date != null || weather != null)
             val open = band != null && (clockInBand || states.anyVisible())
             val area = if (open) band!!.photo else PxRect(0, 0, w, h)
             Box(
@@ -65,6 +67,7 @@ fun PluginStage(
                 }.clipToBounds(),
             ) {
                 photo()
+                if (open) Box(Modifier.fillMaxSize().bandGridFrame { 1f })
                 CornerWidgets(
                     clock.takeIf { !(clockInBand && open) }, date.takeIf { !(clockInBand && open) }, weather.takeIf { !(clockInBand && open) },
                     nowMs, unit, onPaper = false,
@@ -83,7 +86,7 @@ fun PluginStage(
                 PluginBand(
                     band, fraction = { 1f }, states = states, background = layout.background, photo = photoImage, onTap = onTap,
                     clock = if (!clockInBand) null else { form, palette ->
-                        BandClock(form, palette, clock, date, weather, nowMs, unit, onPaper = layout.background == BandBackground.Paper)
+                        BandClock(form, palette, clock, date, weather, nowMs, unit, onPaper = layout.background == BandBackground.Paper, shortDate = shortDate)
                     },
                 )
             }

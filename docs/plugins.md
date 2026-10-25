@@ -85,9 +85,15 @@ The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/
   from the caption.
 - **Band background:** the frame's paper colour, or a blurred, darkened edge of the current photo for a softer look
   (owner's choice). It cross-fades with the photo.
-- **Empty band:** without any plugin instances, or when all are hidden (night, *on tap*, *only when the value
-  changes*), the band collapses and the photo goes back to full screen, animated. The clock and weather can optionally
-  move into the band so the photo has no overlays at all.
+- **Clock in the band:** whenever the band shows, the clock, date and weather move into it (foot of the column, end
+  of the strip), so the photo has no overlays at all and captions keep the whole bottom of the photo. In the narrow
+  column the date is two short lines ("Sun" / "25 Oct"). Older layouts' `clock_in_band` is still read and ignored.
+- **One grid:** the band is a cell of the same grid as a pair or collage: the warm dark background, an 8 dp gap
+  around and between the cells and 14 dp rounded corners. The photo area gets the same frame (drawn over it as four
+  thin bars and four corner masks, so nothing clips the moving photo layers on the Mali-400); on a pair it lands
+  exactly on the gap and corners already in the rendered bitmap.
+- **Empty band:** with the clock, date and weather all off and no plugin instances, or with all of them hidden (night,
+  *on tap*, *only when the value changes*), the band collapses and the photo goes back to full screen, animated.
 - Other screen shapes keep the rule: a 16:9 frame gets a wider band (3:2 of 1920×1080 leaves 300 px), a 4:3 frame
   has no room and uses the overlay layout.
 
@@ -465,8 +471,8 @@ settled the slides are re-rendered for the new size. That re-render costs a few 
 the band opens or closes, so *always* is the better visibility mode for widgets in the band; *when it changes* or *after
 a tap* suit the corners. Band background: paper, or "from the photo": the photo's edge next to the band shrunk to a
 few pixels and stretched back with bilinear filtering (a blur without a blur pass), darkened, cross-fading with the
-photo. *Clock and weather in the band* moves them to the foot of the column or the end of the strip (the band then
-never collapses while awake).
+photo. The clock, date and weather always move into an open band (foot of the column or end of the strip), so with
+any of them on the band never collapses while awake.
 
 **Visibility.** Overlay corners fade out while a finger drags the photo or a slide transition runs, while a video
 plays with sound (video volume above 0), while new photos are waiting (the "N new" pill, our new-photo moment) and on

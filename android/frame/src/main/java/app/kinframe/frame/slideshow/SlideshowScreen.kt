@@ -131,6 +131,7 @@ import app.kinframe.frame.plugins.PluginDetailCard
 import app.kinframe.frame.plugins.PluginLayoutMode
 import app.kinframe.frame.plugins.PxRect
 import app.kinframe.frame.plugins.Slot
+import app.kinframe.frame.plugins.bandGridFrame
 import app.kinframe.frame.plugins.anyVisible
 import app.kinframe.frame.plugins.inSlot
 import app.kinframe.frame.weather.Weather
@@ -248,7 +249,8 @@ fun SlideshowScreen(c: FrameController) {
             else BandGeometry.compute(fullWpx, fullHpx, density.density, pluginLayout.side) as? BandGeometry.Band
         }
         val overlayMode = pluginLayout.mode == PluginLayoutMode.Overlay || (pluginLayout.mode == PluginLayoutMode.Band && band == null)
-        val clockInBand = band != null && pluginLayout.clockInBand && (settings.widgets.clock || weather != null)
+        // Whenever the band shows, it holds the clock, date and weather too, so the photo carries no overlay at all.
+        val clockInBand = band != null && (settings.widgets.clock || settings.widgets.date || weather != null)
         val paper = stage.incoming == null && empty != null
         val bandWanted = band != null && awake && !paper && (clockInBand || pluginStates.anyVisible())
         // The band opens and closes in the layout/draw phase only (no recomposition per frame). The slides are rendered
@@ -479,6 +481,8 @@ fun SlideshowScreen(c: FrameController) {
             TextureWarmup(c)
             if (stage.incoming == null) empty?.let { EmptyStateView(c, it) }
         }
+        // With the band open, the photo area is a cell of the same grid as the band (gap and rounded corners).
+        if (band != null) Box(Modifier.fillMaxSize().bandGridFrame { bandAnim.value })
 
         val clockMoved = clockInBand && bandWanted
         ClockWidget(
@@ -522,6 +526,7 @@ fun SlideshowScreen(c: FrameController) {
                         form, palette,
                         clock = if (settings.widgets.clock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
                         date = if (settings.widgets.date) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
+                        shortDate = if (settings.widgets.date) Format.shortDate(nowMs, c.g.clock.zone, locale) else null,
                         weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
                         onPaper = pluginLayout.background == BandBackground.Paper,
                     )

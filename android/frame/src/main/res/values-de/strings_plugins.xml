@@ -13,7 +13,6 @@
     <string name="plugins_band_background">Hintergrund der Leiste</string>
     <string name="plugins_background_paper">Papier</string>
     <string name="plugins_background_photo">Aus dem Foto</string>
-    <string name="plugins_band_clock">Uhr und Wetter in der Leiste</string>
     <string name="plugins_slot">Ecke</string>
     <string name="plugins_slot_top_left">Oben links</string>
     <string name="plugins_slot_top_right">Oben rechts</string>

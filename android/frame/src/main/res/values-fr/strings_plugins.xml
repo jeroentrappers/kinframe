@@ -13,7 +13,6 @@
     <string name="plugins_band_background">Fond du bandeau</string>
     <string name="plugins_background_paper">Papier</string>
     <string name="plugins_background_photo">Tiré de la photo</string>
-    <string name="plugins_band_clock">Horloge et météo dans le bandeau</string>
     <string name="plugins_slot">Coin</string>
     <string name="plugins_slot_top_left">En haut à gauche</string>
     <string name="plugins_slot_top_right">En haut à droite</string>

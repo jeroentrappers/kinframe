@@ -205,34 +205,45 @@ fun PluginBand(
                 }
             },
     ) {
-        if (background == BandBackground.Paper) Box(Modifier.fillMaxSize().background(paper))
-        else PhotoWash(photo, band.edge)
-        val items = states.forBand()
-        if (band.vertical) {
-            Column(
-                Modifier.fillMaxSize().padding(vertical = 24.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
-                    ScaleToFit(maxWidth - 4.dp, maxHeight, wrapFactor = 1f) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                            items.forEachIndexed { i, s -> BandItem(s, form, palette, onTap, divider = i > 0, verticalBand = true) }
+        // A cell of the photo grid (BandGrid): the gap on its outer sides (the photo area's frame gives the gap on the
+        // inner one) and rounded corners, clipped once at layer level.
+        val gap = BandGrid.Gap
+        val cell = when (band.edge) {
+            BandGeometry.Edge.Left -> Modifier.padding(start = gap, top = gap, bottom = gap)
+            BandGeometry.Edge.Right -> Modifier.padding(end = gap, top = gap, bottom = gap)
+            BandGeometry.Edge.Top -> Modifier.padding(start = gap, top = gap, end = gap)
+        }
+        Box(Modifier.fillMaxSize().background(BandGrid.Background))
+        Box(Modifier.fillMaxSize().then(cell).graphicsLayer { shape = BandGrid.CardShape; clip = true }) {
+            if (background == BandBackground.Paper) Box(Modifier.fillMaxSize().background(paper))
+            else PhotoWash(photo, band.edge)
+            val items = states.forBand()
+            if (band.vertical) {
+                Column(
+                    Modifier.fillMaxSize().padding(vertical = 24.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                        ScaleToFit(maxWidth - 4.dp, maxHeight, wrapFactor = 1f) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                                items.forEachIndexed { i, s -> BandItem(s, form, palette, onTap, divider = i > 0, verticalBand = true) }
+                            }
                         }
                     }
+                    clock?.invoke(form, palette)
                 }
-                clock?.invoke(form, palette)
-            }
-        } else {
-            Row(Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-                BoxWithConstraints(Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.CenterStart) {
-                    // A strip that is a little too full shrinks (to 0.75 at most) rather than cutting off the last widget.
-                    ScaleToFit(maxWidth, maxHeight, wrapFactor = 1.33f) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                            items.forEachIndexed { i, s -> BandItem(s, form, palette, onTap, divider = i > 0, verticalBand = false) }
+            } else {
+                Row(Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    BoxWithConstraints(Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.CenterStart) {
+                        // A strip that is a little too full shrinks (to 0.75 at most) rather than cutting off the last widget.
+                        ScaleToFit(maxWidth, maxHeight, wrapFactor = 1.33f) {
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                                items.forEachIndexed { i, s -> BandItem(s, form, palette, onTap, divider = i > 0, verticalBand = false) }
+                            }
                         }
                     }
+                    clock?.invoke(form, palette)
                 }
-                clock?.invoke(form, palette)
             }
         }
     }

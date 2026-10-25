@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
  * docs/api/plugin-views (debug assets) over neutral placeholder photos that cross-fade and zoom like the slideshow.
  *
  *     adb shell am start -n app.kinframe.frame/.debug.PluginPreviewActivity \
- *       --es layout band|overlay|off --es side left|right --es bg paper|photo --ez clock true \
+ *       --es layout band|overlay|off --es side left|right --es bg paper|photo \
  *       --es a flow-solar-home-grid --es b value-using --es orient land|port --ez sim true --ez detail false --ez cycle true
  *
  * Tap: opens (or closes) the detail card of the first widget. Instance b cycles through b, value-returning and
@@ -63,7 +63,6 @@ class PluginPreviewActivity : ComponentActivity() {
         val layout = PluginLayoutConfig(
             mode = when (x.getStringExtra("layout")) { "overlay" -> PluginLayoutMode.Overlay; "off" -> PluginLayoutMode.Off; else -> PluginLayoutMode.Band },
             side = if (x.getStringExtra("side") == "left") BandSide.Left else BandSide.Right,
-            clockInBand = x.getBooleanExtra("clock", false),
             background = if (x.getStringExtra("bg") == "photo") BandBackground.Photo else BandBackground.Paper,
         )
         val a = x.getStringExtra("a") ?: "flow-solar-home-grid"

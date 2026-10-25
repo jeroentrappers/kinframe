@@ -13,7 +13,6 @@
     <string name="plugins_band_background">띠 배경</string>
     <string name="plugins_background_paper">종이</string>
     <string name="plugins_background_photo">사진에서</string>
-    <string name="plugins_band_clock">띠에 시계와 날씨 표시</string>
     <string name="plugins_slot">모서리</string>
     <string name="plugins_slot_top_left">왼쪽 위</string>
     <string name="plugins_slot_top_right">오른쪽 위</string>
