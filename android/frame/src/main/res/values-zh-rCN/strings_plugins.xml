@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">风速单位</string>
     <string name="ws_wind_auto">自动</string>
     <string name="ws_interval">检查间隔</string>
-    <string name="ws_use_for_weather">当前气温使用我的气象站</string>
-    <string name="ws_use_for_weather_note">天气图标以及今天的最低和最高气温仍来自天气预报。</string>
     <string name="ws_status_error">无法读取气象站：%1$s</string>
     <string name="ws_status_quiet">气象站已有一段时间没有发送新读数。</string>
     <string name="ws_temperature">气温</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">刚刚更新</string>
     <string name="ws_updated_ago">%1$s前更新</string>
     <string name="ws_no_reading_since">自 %1$s 起没有新读数</string>
+    <string name="wx_section">天气</string>
+    <string name="wx_forecast">天气预报</string>
+    <string name="wx_forecast_sub">来自互联网，按相框位置（Open-Meteo）</string>
+    <string name="wx_forecast_no_location">请先在 kinframe 应用中设置相框位置。</string>
+    <string name="wx_station">我的气象站</string>
+    <string name="wx_station_sub">你自己的气象站（PWS），通过 Weathercloud</string>
+    <string name="wx_both_note">两者都开启时，时钟旁显示气象站的温度，以及预报中的天空状况和今日最低、最高气温。</string>
 </resources>

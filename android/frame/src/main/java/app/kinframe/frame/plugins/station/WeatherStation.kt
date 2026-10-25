@@ -9,6 +9,7 @@ import app.kinframe.frame.plugins.PluginContext
 import app.kinframe.frame.plugins.PluginInstance
 import app.kinframe.frame.plugins.PluginStore
 import app.kinframe.frame.weather.Units
+import app.kinframe.frame.weather.WeatherSources
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -23,12 +24,12 @@ import kotlin.math.roundToInt
  * widget so a JavaScript plugin (`kinframe.weather-station`) can replace it.
  *
  * Settings: `source` ("weathercloud"), `device` (the station code, or its page's link), `wind_unit` ("auto", "ms",
- * "kmh", "mph", "bft"), `style` ("compact" or "rows"), `interval_min` (5–30) and `use_for_weather` (the frame's weather
- * corner shows the station's temperature).
+ * "kmh", "mph", "bft"), `style` ("compact" or "rows") and `interval_min` (5–30). The host adds `hide_temp` while the
+ * forecast weather is on: the clock's weather block then shows the station's temperature, so the widget leaves it out.
  */
 class WeatherStation(
     settings: JsonObject,
-    /** Every good reading, for "use my weather station for the current temperature". */
+    /** Every good reading: the clock's weather block shows the station's temperature while the forecast is on. */
     private val onReading: (StationReading) -> Unit = {},
     /** Tests point the source at a fake server. */
     private val sourceFor: (JsonObject) -> StationSource? = ::defaultSource,
@@ -45,9 +46,10 @@ class WeatherStation(
         ctx.dataTime = r.atMs ?: ctx.now()
         onReading(r)
         val unit = WindUnit.of(ctx.settings)
+        val withTemp = setting(ctx.settings, WeatherSources.HIDE_TEMP) != "true"
         return when (setting(ctx.settings, "style")) {
-            "rows" -> StationViews.rows(r, st.history.tempTrend(), st.history.pressureTrend(), unit, ctx.format(), ctx.t)
-            else -> StationViews.compact(r, st.history.tempTrend(), unit, ctx.format(), ctx.t)
+            "rows" -> StationViews.rows(r, st.history.tempTrend(), st.history.pressureTrend(), unit, ctx.format(), ctx.t, withTemp)
+            else -> StationViews.compact(r, st.history.tempTrend(), unit, ctx.format(), ctx.t, withTemp)
         }
     }
 
@@ -250,19 +252,40 @@ internal class StationState(val history: StationHistory) {
  * compass_0 … compass_7.
  */
 object StationViews {
-    fun compact(r: StationReading, trend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String): JsonObject {
+    /**
+     * The temperature with humidity and wind below it. Without the temperature (the clock shows it), humidity leads
+     * and the wind is the label, or the wind alone when the station has no humidity.
+     */
+    fun compact(r: StationReading, trend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String, withTemp: Boolean = true): JsonObject {
+        if (!withTemp) {
+            val wind = windShort(r, unit, f, t)
+            val h = r.humidityPct
+            return when {
+                h != null -> ViewJson.value(f.percent(h), label = wind?.let { fit(it) }, icon = "water")
+                wind != null -> wind(r, unit, f, t)!!
+                else -> ViewJson.value("–", icon = "water")
+            }
+        }
         val line = listOfNotNull(r.humidityPct?.let { f.percent(it) }, windShort(r, unit, f, t)).joinToString(" · ")
         return ViewJson.value(temp(r.tempC, f), label = fit(line).ifEmpty { null }, icon = "thermometer", trend = trend)
     }
 
-    fun rows(r: StationReading, tempTrend: Trend?, pressureTrend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String): JsonObject {
+    fun rows(
+        r: StationReading, tempTrend: Trend?, pressureTrend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String,
+        withTemp: Boolean = true,
+    ): JsonObject {
         val first = listOfNotNull(
-            ViewJson.value(temp(r.tempC, f), label = fit(t("temperature")), icon = "thermometer", trend = tempTrend),
+            ViewJson.value(temp(r.tempC, f), label = fit(t("temperature")), icon = "thermometer", trend = tempTrend).takeIf { withTemp },
             humidity(r, f, t),
             wind(r, unit, f, t),
         )
         val second = listOfNotNull(rain(r, f, t), pressure(r, pressureTrend, f, t), sun(r, f, t))
-        return if (second.isEmpty()) ViewJson.rows(first) else ViewJson.stack(listOf(ViewJson.rows(first), ViewJson.rows(second)))
+        val groups = listOf(first, second).filter { it.isNotEmpty() }.map { ViewJson.rows(it) }
+        return when (groups.size) {
+            0 -> ViewJson.value("–", icon = "thermometer")
+            1 -> groups[0]
+            else -> ViewJson.stack(groups)
+        }
     }
 
     fun detail(r: StationReading, info: StationInfo?, h: StationHistory, unit: WindUnit, f: PluginFormat, t: (String) -> String, nowMs: Long): JsonObject {

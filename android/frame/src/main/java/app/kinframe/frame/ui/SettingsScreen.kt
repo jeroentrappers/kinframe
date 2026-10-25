@@ -58,6 +58,7 @@ import app.kinframe.core.design.KinButtonStyle
 import app.kinframe.core.design.KinCard
 import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
+import app.kinframe.core.design.KinShapeM
 import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.kiosk.OwnerGate
@@ -115,6 +116,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 SlideshowSection(c, s, ::section)
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
+                app.kinframe.frame.weather.WeatherSettingsSection(c, s) { patch(it) }
                 SleepSection(s) { patch(it) }
                 app.kinframe.frame.plugins.PluginSettingsSection(c)
                 app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
@@ -331,11 +333,17 @@ private fun StepButton(icon: androidx.compose.ui.graphics.vector.ImageVector, on
 }
 
 @Composable
-internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().clip(CircleShape).clickable { onChange(!checked) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = Kin.type.body, modifier = Modifier.weight(1f))
+internal fun SwitchRow(label: String, checked: Boolean, subtitle: String? = null, enabled: Boolean = true, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(if (subtitle == null) CircleShape else KinShapeM).clickable(enabled = enabled) { onChange(!checked) }.padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = 16.dp)) {
+            Text(label, style = Kin.type.body, color = if (enabled) Kin.colors.ink else Kin.colors.inkFaint)
+            subtitle?.let { Text(it, style = Kin.type.caption, color = Kin.colors.inkSoft) }
+        }
         Switch(
-            checked, onChange,
+            checked, onChange, enabled = enabled,
             colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
         )
     }
