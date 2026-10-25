@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">Szél mértékegysége</string>
     <string name="ws_wind_auto">Automatikus</string>
     <string name="ws_interval">Ellenőrzés</string>
-    <string name="ws_use_for_weather">Saját időjárás-állomásom használata az aktuális hőmérséklethez</string>
-    <string name="ws_use_for_weather_note">Az időjárás ikonja és a mai legalacsonyabb és legmagasabb érték továbbra is az előrejelzésből jön.</string>
     <string name="ws_status_error">Az állomás nem olvasható: %1$s</string>
     <string name="ws_status_quiet">Az állomás egy ideje nem küldött új mérést.</string>
     <string name="ws_temperature">Hőmérséklet</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">Épp most frissült</string>
     <string name="ws_updated_ago">%1$s ezelőtt frissült</string>
     <string name="ws_no_reading_since">%1$s óta nincs új mérés</string>
+    <string name="wx_section">Időjárás</string>
+    <string name="wx_forecast">Időjárás-előrejelzés</string>
+    <string name="wx_forecast_sub">Az internetről, a képkeret helyére (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">Előbb add meg a képkeret helyét a kinframe appban.</string>
+    <string name="wx_station">Saját meteorológiai állomásom</string>
+    <string name="wx_station_sub">Saját meteorológiai állomásod (PWS) a Weathercloudon át</string>
+    <string name="wx_both_note">Ha mindkettő be van kapcsolva, az óra az állomásod hőmérsékletét mutatja az előrejelzés égboltjával és napi minimumával, maximumával.</string>
 </resources>

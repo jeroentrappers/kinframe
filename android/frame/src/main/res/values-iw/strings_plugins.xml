@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">רוח ביחידות</string>
     <string name="ws_wind_auto">אוטומטי</string>
     <string name="ws_interval">בדיקה כל</string>
-    <string name="ws_use_for_weather">שימוש בתחנת מזג האוויר שלי לטמפרטורה הנוכחית</string>
-    <string name="ws_use_for_weather_note">סמל מזג האוויר והטמפרטורות הנמוכה והגבוהה של היום ממשיכים להגיע מהתחזית.</string>
     <string name="ws_status_error">לא ניתן לקרוא את התחנה: %1$s</string>
     <string name="ws_status_quiet">התחנה לא שלחה מדידה חדשה כבר זמן מה.</string>
     <string name="ws_temperature">טמפרטורה</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">עודכן הרגע</string>
     <string name="ws_updated_ago">עודכן לפני %1$s</string>
     <string name="ws_no_reading_since">אין מדידה חדשה מאז %1$s</string>
+    <string name="wx_section">מזג אוויר</string>
+    <string name="wx_forecast">תחזית מזג אוויר</string>
+    <string name="wx_forecast_sub">מהאינטרנט, למיקום של המסגרת (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">יש להגדיר קודם את מיקום המסגרת באפליקציית kinframe.</string>
+    <string name="wx_station">תחנת מזג האוויר שלי</string>
+    <string name="wx_station_sub">תחנת מזג אוויר משלך (PWS) דרך Weathercloud</string>
+    <string name="wx_both_note">כששניהם פעילים, השעון מציג את הטמפרטורה מהתחנה שלך עם מצב השמיים והמינימום והמקסימום היומיים מהתחזית.</string>
 </resources>

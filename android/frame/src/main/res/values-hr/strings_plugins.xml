@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">Vjetar u</string>
     <string name="ws_wind_auto">Automatski</string>
     <string name="ws_interval">Provjera svakih</string>
-    <string name="ws_use_for_weather">Koristi moju meteorološku stanicu za trenutačnu temperaturu</string>
-    <string name="ws_use_for_weather_note">Ikona vremena te današnja najniža i najviša temperatura i dalje dolaze iz prognoze.</string>
     <string name="ws_status_error">Stanicu nije moguće očitati: %1$s</string>
     <string name="ws_status_quiet">Stanica već neko vrijeme nije poslala novo mjerenje.</string>
     <string name="ws_temperature">Temperatura</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">Upravo ažurirano</string>
     <string name="ws_updated_ago">Ažurirano prije %1$s</string>
     <string name="ws_no_reading_since">Nema novog mjerenja od %1$s</string>
+    <string name="wx_section">Vrijeme</string>
+    <string name="wx_forecast">Vremenska prognoza</string>
+    <string name="wx_forecast_sub">S interneta, za lokaciju okvira (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">Najprije postavite lokaciju okvira u aplikaciji kinframe.</string>
+    <string name="wx_station">Moja meteostanica</string>
+    <string name="wx_station_sub">Vaša vlastita meteostanica (PWS) putem Weathercloud</string>
+    <string name="wx_both_note">Kad su uključene obje, sat prikazuje temperaturu vaše stanice s nebom te dnevnim minimumom i maksimumom iz prognoze.</string>
 </resources>
