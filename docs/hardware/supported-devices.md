@@ -15,11 +15,18 @@ A frame can run kinframe when **all** of these hold. The tools check them before
 | ADB can be turned on | The frame shows up in `adb devices` | It's the only way in without opening the frame. |
 | Root for the adb shell (`su 0 id` prints `uid=0`) | `su 0 id` | Needed to turn off the stock app and the firmware updaters with `pm disable-user`. Without that, the stock app and kinframe compete for the home screen and the updater may undo the change. |
 
+Optional, for kinframe's start-up screen (the tools skip what a frame doesn't allow and still convert it):
+
+| Feature | Needs | Checked by |
+|---|---|---|
+| Boot logo | Root and a Rockchip resource partition (`/dev/block/platform/*/by-name/resource`) holding an RSCE image with a device tree and `logo.bmp` / `logo_kernel.bmp` in the same format as kinframe's (800×1280, 8-bit, RLE8). | `ls` of the by-name link; the backup is parsed before anything is written, and the format compared. |
+| Boot animation | Root and a `/system` that is not a dm-verity device, so it can be remounted writable. | `mount`. |
+
 ## Status
 
 | Frame | `brand/device` | Status | Notes |
 |---|---|---|---|
-| Denver PFF-1024 (10.1", 1280×800) | `denver/PFF_1024` | **Supported** (tested) | Rockchip RK3126, Android 6.0.1, root via `/system/xbin/su`. Profile: [denver-pff-1024.md](denver-pff-1024.md). |
+| Denver PFF-1024 (10.1", 1280×800) | `denver/PFF_1024` | **Supported** (tested) | Rockchip RK3126, Android 6.0.1, root via `/system/xbin/su`. Boot logo and animation replacement is implemented but not yet tried on a frame (boot chain and recovery: [denver-pff-1024.md](denver-pff-1024.md#boot-chain)). Profile: [denver-pff-1024.md](denver-pff-1024.md). |
 | Other Frameo frames on Android 6+ with adb root | — | **Untested** | Meet the requirements, so they will probably work. The tools refuse them unless you confirm (website checkbox, CLI `--force`). Run a dry run first and please report the result. |
 | Frames on Android 5 or older | — | **Unsupported** | Below the frame app's `minSdk`. |
 | Frames where `su` is missing in the adb shell | — | **Unsupported** | The stock app can't be turned off reliably. |

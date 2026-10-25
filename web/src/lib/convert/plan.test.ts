@@ -1,7 +1,16 @@
-import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { brandResource, buildResource } from './rsce';
 import {
 	APPOPS_ALLOW,
+	BOOT_ANIMATION,
+	BOOT_ANIMATION_BACKUP,
+	BOOT_ASSETS,
+	BOOT_BRAND,
+	RESOURCE_BACKUP,
 	COMMANDS,
 	DEFAULT_SERVER,
 	DISABLE_PACKAGES,
@@ -18,6 +27,8 @@ import {
 	SUPPORTED_MODELS,
 	WORK_DIR,
 	backupName,
+	bootAnimationPossible,
+	bootLogoPossible,
 	canConvert,
 	canRevert,
 	deviceFacts,
@@ -28,6 +39,8 @@ import {
 	packageState,
 	parseDumpsysPackage,
 	parseGetprop,
+	parseResourcePath,
+	parseSystemDevice,
 	planConvert,
 	planRevert,
 	versionCodeForTag,
@@ -70,12 +83,16 @@ const FRAMEO_DUMPSYS = [
 	'    User 0:  installed=true hidden=false stopped=false notLaunched=false enabled=3'
 ].join('\r\n');
 
+const RESOURCE = '/dev/block/platform/1021c000.rksdmmc/by-name/resource';
+const SYSTEM = '/dev/block/platform/1021c000.rksdmmc/by-name/system';
+const MOUNTS = ['rootfs / rootfs ro,seclabel,relatime 0 0', `${SYSTEM} /system ext4 ro,seclabel,noatime 0 0`, '/dev/block/mmcblk0p13 /data ext4 rw 0 0'].join('\r\n');
+
 const installed = (over: Partial<PackageState> = {}): PackageState => ({ installed: true, enabled: 'enabled', paths: ['/system/app/x.apk'], ...over });
 const missing: PackageState = { installed: false, enabled: 'missing', paths: [] };
 
 function facts(over: Partial<DeviceFacts> = {}, packages: Record<string, PackageState> = {}): DeviceFacts {
 	return {
-		...deviceFacts(GETPROP, ROOT, {}),
+		...deviceFacts(GETPROP, ROOT, {}, { findResource: `${RESOURCE}\r\n`, mounts: MOUNTS }),
 		packages: {
 			[FRAME_PACKAGE]: missing,
 			[FRAMEO_PACKAGE]: installed({ paths: ['/data/app/net.frameo.frame-2/base.apk'], versionName: 'v1.32.16', versionCode: 80320 }),
@@ -115,6 +132,22 @@ describe('parsing', () => {
 		expect(f).toMatchObject({ brand: 'denver', device: 'PFF_1024', sdk: 23, abis: ['armeabi-v7a', 'armeabi'], root: true, serial: '36339301' });
 		expect(deviceFacts(GETPROP, NO_ROOT, {}).root).toBe(false);
 		expect(deviceFacts('[ro.product.cpu.abi]: [arm64-v8a]', ROOT, {}).abis).toEqual(['arm64-v8a']);
+	});
+
+	it('finds the resource partition and the /system device', () => {
+		expect(parseResourcePath(`${RESOURCE}\r\n`)).toBe(RESOURCE);
+		expect(parseResourcePath('/dev/block/platform/*/by-name/resource: No such file or directory\r\n')).toBe('');
+		expect(parseSystemDevice(MOUNTS)).toBe(SYSTEM);
+		expect(parseSystemDevice('/dev/block/dm-0 on /system type ext4 (ro,seclabel)')).toBe('/dev/block/dm-0');
+		expect(parseSystemDevice('')).toBe('');
+		const f = deviceFacts(GETPROP, ROOT, {}, { findResource: RESOURCE, mounts: MOUNTS });
+		expect(f).toMatchObject({ resource: RESOURCE, system: SYSTEM });
+		expect(bootLogoPossible(f) && bootAnimationPossible(f)).toBe(true);
+		expect(bootLogoPossible({ ...f, root: false })).toBe(false);
+		expect(bootLogoPossible({ ...f, resource: '' })).toBe(false);
+		// dm-verity: /system can't be remounted writable.
+		expect(bootAnimationPossible({ ...f, system: '/dev/block/dm-0' })).toBe(false);
+		expect(bootAnimationPossible({ ...f, system: '' })).toBe(false);
 	});
 
 	it('finds the activity in front', () => {
@@ -252,6 +285,59 @@ describe('convert plan', () => {
 	});
 });
 
+describe('start-up branding', () => {
+	const opts = { server: DEFAULT_SERVER, backup: true, bootBranding: true };
+	const flat = (steps: Step[]) => steps.flatMap((s) => s.actions);
+
+	it('backs up both originals first and writes them before the app changes', () => {
+		const steps = planConvert(identify(facts()), opts);
+		expect(ids(steps)).toEqual(['backup', 'bootBackup', 'download', 'bootLogo', 'bootAnimation', 'install', 'permissions', 'disable', 'home', 'cleanup', 'reboot', 'provision']);
+		const backup = steps.find((s) => s.id === 'bootBackup')!;
+		expect(backup.actions.filter((a) => a.kind === 'pull').map((a) => a.kind === 'pull' && [a.remote, a.name])).toEqual([
+			[BOOT_ANIMATION, BOOT_ANIMATION_BACKUP],
+			[`${WORK_DIR}/${RESOURCE_BACKUP}`, RESOURCE_BACKUP]
+		]);
+		expect(shellCmds([backup])).toContain(`su 0 dd if=${RESOURCE} of=${WORK_DIR}/${RESOURCE_BACKUP} bs=1048576`);
+		// Nothing writes before both backups are pulled.
+		const all = flat(steps);
+		const lastBackupPull = all.findIndex((a) => a.kind === 'pull' && a.name === RESOURCE_BACKUP);
+		const firstWrite = all.findIndex((a) => a.kind === 'flashResource' || (a.kind === 'shell' && /remount|of=\/dev|pm (install|disable)/.test(a.cmd)));
+		expect(lastBackupPull).toBeGreaterThan(-1);
+		expect(firstWrite).toBeGreaterThan(lastBackupPull);
+		expect(steps.find((s) => s.id === 'download')!.actions).toEqual([{ kind: 'fetch' }, { kind: 'fetchBoot' }]);
+		expect(steps.find((s) => s.id === 'bootLogo')!.actions).toEqual([{ kind: 'brandResource' }, { kind: 'flashResource', resource: RESOURCE }]);
+	});
+
+	it('remounts /system writable only around the copy, and checks the result', () => {
+		const anim = planConvert(identify(facts()), opts).find((s) => s.id === 'bootAnimation')!;
+		expect(shellCmds([anim])).toEqual([
+			`mkdir -p ${WORK_DIR}`,
+			`su 0 mount -o remount,rw ${SYSTEM} /system`,
+			`su 0 cp ${WORK_DIR}/bootanimation.zip ${BOOT_ANIMATION}`,
+			`su 0 chmod 644 ${BOOT_ANIMATION}`,
+			`su 0 mount -o remount,ro ${SYSTEM} /system`,
+			`su 0 rm -f ${WORK_DIR}/bootanimation.zip`
+		]);
+		expect(anim.actions.map((a) => a.kind)).toContain('verifyBootAnimation');
+	});
+
+	it('is optional, and leaves out what the frame does not allow', () => {
+		expect(ids(planConvert(identify(facts()), { ...opts, bootBranding: false })).filter((i) => i.startsWith('boot'))).toEqual([]);
+		expect(ids(planConvert(identify(facts({ resource: '' })), opts)).filter((i) => i.startsWith('boot'))).toEqual(['bootBackup', 'bootAnimation']);
+		expect(ids(planConvert(identify(facts({ system: '/dev/block/dm-0' })), opts)).filter((i) => i.startsWith('boot'))).toEqual(['bootBackup', 'bootLogo']);
+		// The boot backup happens even without the app backup.
+		expect(ids(planConvert(identify(facts()), { ...opts, backup: false }))[0]).toBe('bootBackup');
+	});
+
+	it('revert puts back what was chosen', () => {
+		const id = identify(facts());
+		expect(ids(planRevert(id, { keepData: false, restoreFrameo: false })).filter((i) => i.startsWith('boot'))).toEqual([]);
+		const steps = planRevert(id, { keepData: false, restoreFrameo: false, restoreBootLogo: true, restoreBootAnimation: true });
+		expect(ids(steps).slice(0, 2)).toEqual(['bootLogo', 'bootAnimation']);
+		expect(steps[0]!.actions).toEqual([{ kind: 'flashResource', resource: RESOURCE }]);
+	});
+});
+
 describe('revert plan', () => {
 	const converted = () =>
 		facts({}, {
@@ -323,7 +409,12 @@ describe('CLI shared plan (tools/convert/kinframe-convert.sh)', () => {
 			SUPPORTED_ABIS: SUPPORTED_ABIS.join(' '),
 			SET_HOME_MIN_SDK: String(SET_HOME_MIN_SDK),
 			WORK_DIR,
-			INSTALL_NEWER_PRESENT
+			INSTALL_NEWER_PRESENT,
+			BOOT_BRAND,
+			BOOT_ASSETS,
+			BOOT_ANIMATION,
+			RESOURCE_BACKUP,
+			BOOT_ANIMATION_BACKUP
 		});
 	});
 
@@ -335,5 +426,61 @@ describe('CLI shared plan (tools/convert/kinframe-convert.sh)', () => {
 
 	it('uses every command template', () => {
 		for (const name of Object.keys(COMMANDS)) expect(script, name).toMatch(new RegExp(`\\$CMD_${name}\\b`));
+	});
+});
+
+// ---------------------------------------------------------------- the CLI's resource patcher must match rsce.ts
+
+describe('CLI resource patcher (kinframe-convert.sh --patch-resource)', () => {
+	const script = new URL('../../../../tools/convert/kinframe-convert.sh', import.meta.url).pathname;
+	const bmp = (extra: number, width = 800) => {
+		const b = new Uint8Array(54 + extra).fill(0x5a);
+		const v = new DataView(b.buffer);
+		b.set([0x42, 0x4d]);
+		v.setUint32(14, 40, true);
+		v.setInt32(18, width, true);
+		v.setInt32(22, 1280, true);
+		v.setUint16(28, 8, true);
+		v.setUint32(30, 1, true);
+		return b;
+	};
+	const dtb = Uint8Array.from({ length: 3000 }, (_, i) => (i * 13) & 0xff);
+	const image = buildResource(
+		[
+			{ name: 'rk-kernel.dtb', data: dtb },
+			{ name: 'logo.bmp', data: bmp(2000) },
+			{ name: 'logo_kernel.bmp', data: bmp(2000) }
+		],
+		64 * 1024
+	);
+
+	function cli(args: string[], files: Record<string, Uint8Array>): { out?: Uint8Array; error?: string } {
+		const dir = mkdtempSync(join(tmpdir(), 'kinframe-rsce-'));
+		try {
+			for (const [n, d] of Object.entries(files)) writeFileSync(join(dir, n), d);
+			execFileSync('sh', [script, ...args.map((a) => (a in files || a === 'out.img' ? join(dir, a) : a))], { cwd: dir, stdio: 'pipe', env: { ...process.env, TMPDIR: dir } });
+			return { out: args.includes('out.img') ? new Uint8Array(readFileSync(join(dir, 'out.img'))) : undefined };
+		} catch (e) {
+			return { error: String((e as { stderr?: Buffer }).stderr ?? e) };
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	}
+
+	it('produces the same bytes as brandResource()', () => {
+		for (const logo of [bmp(2000), bmp(700), bmp(5000)]) {
+			const r = cli(['--patch-resource', 'in.img', 'logo.bmp', 'out.img'], { 'in.img': image, 'logo.bmp': logo });
+			expect(r.error).toBeUndefined();
+			expect(Buffer.compare(Buffer.from(r.out!), Buffer.from(brandResource(image, logo)))).toBe(0);
+		}
+	});
+
+	it('refuses what brandResource() refuses', () => {
+		expect(cli(['--patch-resource', 'in.img', 'logo.bmp', 'out.img'], { 'in.img': image, 'logo.bmp': bmp(100, 1280) }).error).toMatch(/logo.bmp on the frame is/);
+		const noDtb = buildResource([{ name: 'logo.bmp', data: bmp(100) }], 16 * 1024);
+		expect(cli(['--patch-resource', 'in.img', 'logo.bmp', 'out.img'], { 'in.img': noDtb, 'logo.bmp': bmp(100) }).error).toMatch(/device tree/);
+		expect(cli(['--check-resource', 'in.img'], { 'in.img': noDtb }).error).toMatch(/device tree/);
+		expect(cli(['--check-resource', 'in.img'], { 'in.img': new Uint8Array(4096) }).error).toMatch(/RSCE/);
+		expect(cli(['--check-resource', 'in.img'], { 'in.img': image }).error).toBeUndefined();
 	});
 });

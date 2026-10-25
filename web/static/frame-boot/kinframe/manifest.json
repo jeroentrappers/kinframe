@@ -1,0 +1,22 @@
+{
+  "brand": "kinframe",
+  "logo": {
+    "file": "logo.bmp",
+    "size": 20196,
+    "sha256": "58da8d2c6e7de58c9087943800e68ee4a6016d925cc42ab7ec3895277c4c23f7",
+    "width": 800,
+    "height": 1280,
+    "bpp": 8,
+    "compression": "rle8"
+  },
+  "bootanimation": {
+    "file": "bootanimation.zip",
+    "size": 121926,
+    "sha256": "d5f860281476def7c040b4647e5920ea56def7d7765a50ba33d179ea9a15d1ca",
+    "frame": [
+      720,
+      336
+    ],
+    "fps": 20
+  }
+}
