@@ -128,10 +128,46 @@ class PluginScreenshotTest {
         previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("gauge-car"), Slot.TopRight),
     )
 
+    // ------------------------------------------------------------------ weather station (§9.4)
+
+    private val station = "Weather station"
+
+    @Test fun stationCorners() = stage(
+        "station_overlay_landscape", overlay,
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+        seed = 3,
+    )
+
+    @Test fun stationBandColumn() = stage(
+        "station_band_column", band.copy(clockInBand = true),
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationBandStrip() = stage(
+        "station_band_strip", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+        seed = 1,
+    )
+
+    @Test fun stationDetail() {
+        val s = previewInstance("ws", view("weather-station-compact"), Slot.TopLeft, name = station)
+        stage("station_detail", overlay, s, detail = s, detailView = view("detail-weather-station"), seed = 3)
+    }
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationDetailPortrait() {
+        val s = previewInstance("ws", view("weather-station-compact"), Slot.TopLeft, name = station)
+        stage("station_detail_portrait", band, s, detail = s, detailView = view("detail-weather-station"), seed = 2)
+    }
+
     /** Every example in every form: corner and detail (on photo and on paper) and the two compact band forms. */
-    @Test @Config(qualifiers = "w1280dp-h1600dp-port-mdpi")
+    @Test @Config(qualifiers = "w1280dp-h1900dp-port-mdpi")
     fun gallery() = Screenshots.shot("plugins_gallery") {
-        val names = examples.list()!!.filter { it.endsWith(".json") && it != "detail-p1.json" }.sorted().map { it.removeSuffix(".json") }
+        val names = examples.list()!!.filter { it.endsWith(".json") && !it.startsWith("detail-") }.sorted().map { it.removeSuffix(".json") }
         Row(Modifier.fillMaxSize()) {
             Box(Modifier.width(560.dp).fillMaxHeight()) {
                 FakePhoto(1)

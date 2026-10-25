@@ -95,9 +95,9 @@ private fun Component(view: PluginView, form: ViewForm, p: PluginPalette, m: For
 private fun TextStyle.on(color: Color, p: PluginPalette) = copy(color = color, shadow = p.shadow)
 
 @Composable
-private fun PIcon(name: String?, size: Dp, tint: Color, modifier: Modifier = Modifier) {
+private fun PIcon(name: String?, size: Dp, tint: Color, modifier: Modifier = Modifier, rotation: Float? = null) {
     val icon = PluginIcons.of(name) ?: return
-    Icon(icon, null, modifier.size(size), tint = tint)
+    Icon(icon, null, (if (rotation != null && rotation != 0f) modifier.graphicsLayer { rotationZ = rotation } else modifier).size(size), tint = tint)
 }
 
 /**
@@ -161,7 +161,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
     val iconTint = if (tone == Tone.Neutral) p.soft else strong
     when (form) {
         ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            PIcon(v.icon, m.icon, iconTint)
+            PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
             RollingText(number, m.value.on(strong, p))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 unit?.let { Text(it, style = m.unit.on(p.soft, p), maxLines = 1) }
@@ -169,7 +169,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
             }
         }
         ViewForm.Strip -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(m.gap)) {
-            PIcon(v.icon, m.icon, iconTint)
+            PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
             Column {
                 Row(verticalAlignment = Alignment.Bottom) {
                     RollingText(number, m.value.on(strong, p))
@@ -180,7 +180,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
             }
         }
         else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(m.gap)) {
-            PIcon(v.icon, m.icon, iconTint)
+            PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
             Column {
                 Row(verticalAlignment = Alignment.Bottom) {
                     RollingText(number, m.value.on(strong, p))
@@ -201,8 +201,10 @@ private fun Rows(r: RowsView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
         ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
             r.items.forEach { Component(it, form, p, m, tone) }
         }
+        // The strip is one short line: values side by side with their icons, labels left out (as in the column), so
+        // a table of several values still fits next to the other widgets.
         ViewForm.Strip -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
-            r.items.forEach { Component(it, form, p, m, tone) }
+            r.items.forEach { Component(it.copy(label = null), form, p, m, tone) }
         }
         else -> {
             // A small table: icon and label at the start, value and unit at the end.
@@ -212,7 +214,7 @@ private fun Rows(r: RowsView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
                     val t = if (v.tone == Tone.Neutral) tone else v.tone
                     val (number, unit) = if (v.unit != null) v.value to v.unit else PluginFormat.splitUnit(v.value)
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        PIcon(v.icon, m.icon * 0.7f, if (t == Tone.Neutral) p.soft else p.tone(t))
+                        PIcon(v.icon, m.icon * 0.7f, if (t == Tone.Neutral) p.soft else p.tone(t), rotation = v.iconRotation)
                         v.label?.let {
                             Text(it, style = m.label.on(p.soft, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 10.dp).widthIn(max = 220.dp))
                         }

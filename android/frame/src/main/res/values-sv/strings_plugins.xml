@@ -46,4 +46,30 @@
     <string name="p1_today_import">Förbrukat i dag</string>
     <string name="p1_today_export">Levererat i dag</string>
     <string name="p1_today_gas">Gas i dag</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Väderstation</string>
+    <string name="ws_station">Station</string>
+    <string name="ws_code">Weathercloud-station</string>
+    <string name="ws_code_help">Stationens kod eller länken till dess Weathercloud-sida.</string>
+    <string name="ws_code_invalid">Det finns ingen Weathercloud-stationskod här. Kopiera länken till stationens sida.</string>
+    <string name="ws_unofficial">Weathercloud har inget officiellt API: ramen läser samma offentliga data som stationens webbsida, högst var 5:e minut. Det kan sluta fungera om Weathercloud ändrar sin webbplats.</string>
+    <string name="ws_style_compact">Temperatur</string>
+    <string name="ws_style_rows">Alla värden</string>
+    <string name="ws_wind_unit">Vind i</string>
+    <string name="ws_wind_auto">Automatiskt</string>
+    <string name="ws_interval">Kontrollera var</string>
+    <string name="ws_use_for_weather">Använd min väderstation för aktuell temperatur</string>
+    <string name="ws_use_for_weather_note">Vädersymbolen och dagens lägsta och högsta kommer fortfarande från prognosen.</string>
+    <string name="ws_status_error">Kan inte läsa stationen: %1$s</string>
+    <string name="ws_status_quiet">Stationen har inte skickat någon ny mätning på ett tag.</string>
+    <string name="ws_temperature">Temperatur</string>
+    <string name="ws_dew_point">Daggpunkt</string>
+    <string name="ws_gusts">Byar</string>
+    <string name="ws_rain_today">Regn i dag</string>
+    <string name="ws_pressure">Lufttryck</string>
+    <string name="ws_sunlight">Solljus</string>
+    <string name="ws_uv_index">UV-index</string>
+    <string name="ws_updated_now">Uppdaterad nyss</string>
+    <string name="ws_updated_ago">Uppdaterad för %1$s sedan</string>
+    <string name="ws_no_reading_since">Ingen ny mätning sedan %1$s</string>
 </resources>

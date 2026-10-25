@@ -46,4 +46,30 @@
     <string name="p1_today_import">Kulutettu tänään</string>
     <string name="p1_today_export">Syötetty tänään</string>
     <string name="p1_today_gas">Kaasu tänään</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Sääasema</string>
+    <string name="ws_station">Asema</string>
+    <string name="ws_code">Weathercloud-asema</string>
+    <string name="ws_code_help">Aseman koodi tai linkki sen Weathercloud-sivulle.</string>
+    <string name="ws_code_invalid">Tässä ei ole Weathercloud-aseman koodia. Kopioi aseman sivun linkki.</string>
+    <string name="ws_unofficial">Weathercloudilla ei ole virallista rajapintaa: kehys lukee samat julkiset tiedot kuin aseman verkkosivu, enintään 5 minuutin välein. Tämä voi lakata toimimasta, jos Weathercloud muuttaa sivustoaan.</string>
+    <string name="ws_style_compact">Lämpötila</string>
+    <string name="ws_style_rows">Kaikki arvot</string>
+    <string name="ws_wind_unit">Tuuli yksikössä</string>
+    <string name="ws_wind_auto">Automaattinen</string>
+    <string name="ws_interval">Tarkista</string>
+    <string name="ws_use_for_weather">Käytä omaa sääasemaani nykyiseen lämpötilaan</string>
+    <string name="ws_use_for_weather_note">Sääkuvake sekä tämän päivän alin ja ylin tulevat edelleen ennusteesta.</string>
+    <string name="ws_status_error">Asemaa ei voi lukea: %1$s</string>
+    <string name="ws_status_quiet">Asema ei ole lähettänyt uutta mittausta vähään aikaan.</string>
+    <string name="ws_temperature">Lämpötila</string>
+    <string name="ws_dew_point">Kastepiste</string>
+    <string name="ws_gusts">Puuskat</string>
+    <string name="ws_rain_today">Sade tänään</string>
+    <string name="ws_pressure">Ilmanpaine</string>
+    <string name="ws_sunlight">Auringonvalo</string>
+    <string name="ws_uv_index">UV-indeksi</string>
+    <string name="ws_updated_now">Päivitetty juuri</string>
+    <string name="ws_updated_ago">Päivitetty %1$s sitten</string>
+    <string name="ws_no_reading_since">Ei uutta mittausta klo %1$s jälkeen</string>
 </resources>

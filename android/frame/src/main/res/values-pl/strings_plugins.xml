@@ -46,4 +46,30 @@
     <string name="p1_today_import">Pobrano dziś</string>
     <string name="p1_today_export">Oddano dziś</string>
     <string name="p1_today_gas">Gaz dziś</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Stacja pogodowa</string>
+    <string name="ws_station">Stacja</string>
+    <string name="ws_code">Stacja Weathercloud</string>
+    <string name="ws_code_help">Kod stacji lub link do jej strony w Weathercloud.</string>
+    <string name="ws_code_invalid">Nie ma tu kodu stacji Weathercloud. Skopiuj link do strony stacji.</string>
+    <string name="ws_unofficial">Weathercloud nie ma oficjalnego API: ramka odczytuje te same publiczne dane co strona internetowa stacji, najwyżej co 5 minut. Może to przestać działać, jeśli Weathercloud zmieni swoją witrynę.</string>
+    <string name="ws_style_compact">Temperatura</string>
+    <string name="ws_style_rows">Wszystkie wartości</string>
+    <string name="ws_wind_unit">Wiatr w</string>
+    <string name="ws_wind_auto">Automatycznie</string>
+    <string name="ws_interval">Sprawdzaj co</string>
+    <string name="ws_use_for_weather">Używaj mojej stacji pogodowej do bieżącej temperatury</string>
+    <string name="ws_use_for_weather_note">Ikona pogody oraz dzisiejsza najniższa i najwyższa temperatura nadal pochodzą z prognozy.</string>
+    <string name="ws_status_error">Nie można odczytać stacji: %1$s</string>
+    <string name="ws_status_quiet">Stacja od jakiegoś czasu nie wysłała nowego pomiaru.</string>
+    <string name="ws_temperature">Temperatura</string>
+    <string name="ws_dew_point">Punkt rosy</string>
+    <string name="ws_gusts">Porywy</string>
+    <string name="ws_rain_today">Deszcz dzisiaj</string>
+    <string name="ws_pressure">Ciśnienie</string>
+    <string name="ws_sunlight">Nasłonecznienie</string>
+    <string name="ws_uv_index">Indeks UV</string>
+    <string name="ws_updated_now">Zaktualizowano przed chwilą</string>
+    <string name="ws_updated_ago">Zaktualizowano %1$s temu</string>
+    <string name="ws_no_reading_since">Brak nowego pomiaru od %1$s</string>
 </resources>

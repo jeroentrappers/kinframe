@@ -46,4 +46,30 @@
     <string name="p1_today_import">आज खपत</string>
     <string name="p1_today_export">आज वापस</string>
     <string name="p1_today_gas">आज गैस</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">मौसम स्टेशन</string>
+    <string name="ws_station">स्टेशन</string>
+    <string name="ws_code">Weathercloud स्टेशन</string>
+    <string name="ws_code_help">स्टेशन का कोड, या उसके Weathercloud पेज का लिंक।</string>
+    <string name="ws_code_invalid">इसमें कोई Weathercloud स्टेशन कोड नहीं है। स्टेशन के पेज का लिंक कॉपी करें।</string>
+    <string name="ws_unofficial">Weathercloud का कोई आधिकारिक API नहीं है: फ़्रेम वही सार्वजनिक डेटा पढ़ता है जो स्टेशन के वेब पेज पर है, ज़्यादा से ज़्यादा हर 5 मिनट में। अगर Weathercloud अपनी साइट बदलता है तो यह काम करना बंद कर सकता है।</string>
+    <string name="ws_style_compact">तापमान</string>
+    <string name="ws_style_rows">सभी मान</string>
+    <string name="ws_wind_unit">हवा की इकाई</string>
+    <string name="ws_wind_auto">अपने आप</string>
+    <string name="ws_interval">जाँचें हर</string>
+    <string name="ws_use_for_weather">मौजूदा तापमान के लिए मेरा मौसम स्टेशन इस्तेमाल करें</string>
+    <string name="ws_use_for_weather_note">मौसम का आइकन और आज का न्यूनतम और अधिकतम पूर्वानुमान से ही आते रहेंगे।</string>
+    <string name="ws_status_error">स्टेशन पढ़ा नहीं जा सका: %1$s</string>
+    <string name="ws_status_quiet">स्टेशन ने कुछ समय से नई रीडिंग नहीं भेजी है।</string>
+    <string name="ws_temperature">तापमान</string>
+    <string name="ws_dew_point">ओस बिंदु</string>
+    <string name="ws_gusts">झोंके</string>
+    <string name="ws_rain_today">आज की बारिश</string>
+    <string name="ws_pressure">वायुदाब</string>
+    <string name="ws_sunlight">धूप</string>
+    <string name="ws_uv_index">UV सूचकांक</string>
+    <string name="ws_updated_now">अभी अपडेट हुआ</string>
+    <string name="ws_updated_ago">%1$s पहले अपडेट हुआ</string>
+    <string name="ws_no_reading_since">%1$s से कोई नई रीडिंग नहीं</string>
 </resources>

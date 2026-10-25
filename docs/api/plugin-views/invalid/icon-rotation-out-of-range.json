@@ -1,0 +1,11 @@
+{
+  "$error_path": "/items/2/icon_rotation",
+  "view": {
+    "type": "rows",
+    "items": [
+      { "type": "value", "icon": "thermometer", "value": "12,8°", "label": "Temperature" },
+      { "type": "value", "icon": "water", "value": "56 %", "label": "Humidity" },
+      { "type": "value", "icon": "direction", "icon_rotation": 433, "value": "2,3 m/s", "label": "Wind · W" }
+    ]
+  }
+}

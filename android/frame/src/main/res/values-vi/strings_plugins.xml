@@ -46,4 +46,30 @@
     <string name="p1_today_import">Đã dùng hôm nay</string>
     <string name="p1_today_export">Đã trả hôm nay</string>
     <string name="p1_today_gas">Gas hôm nay</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Trạm thời tiết</string>
+    <string name="ws_station">Trạm</string>
+    <string name="ws_code">Trạm Weathercloud</string>
+    <string name="ws_code_help">Mã của trạm, hoặc đường liên kết đến trang Weathercloud của trạm.</string>
+    <string name="ws_code_invalid">Không có mã trạm Weathercloud trong nội dung này. Hãy sao chép đường liên kết trang của trạm.</string>
+    <string name="ws_unofficial">Weathercloud không có API chính thức: khung ảnh đọc cùng dữ liệu công khai như trang web của trạm, tối đa 5 phút một lần. Tính năng này có thể ngừng hoạt động nếu Weathercloud thay đổi trang web.</string>
+    <string name="ws_style_compact">Nhiệt độ</string>
+    <string name="ws_style_rows">Tất cả giá trị</string>
+    <string name="ws_wind_unit">Đơn vị gió</string>
+    <string name="ws_wind_auto">Tự động</string>
+    <string name="ws_interval">Kiểm tra mỗi</string>
+    <string name="ws_use_for_weather">Dùng trạm thời tiết của tôi cho nhiệt độ hiện tại</string>
+    <string name="ws_use_for_weather_note">Biểu tượng thời tiết cùng nhiệt độ thấp nhất và cao nhất hôm nay vẫn lấy từ dự báo.</string>
+    <string name="ws_status_error">Không đọc được trạm: %1$s</string>
+    <string name="ws_status_quiet">Trạm đã lâu không gửi số đo mới.</string>
+    <string name="ws_temperature">Nhiệt độ</string>
+    <string name="ws_dew_point">Điểm sương</string>
+    <string name="ws_gusts">Gió giật</string>
+    <string name="ws_rain_today">Mưa hôm nay</string>
+    <string name="ws_pressure">Áp suất</string>
+    <string name="ws_sunlight">Ánh nắng</string>
+    <string name="ws_uv_index">Chỉ số UV</string>
+    <string name="ws_updated_now">Vừa cập nhật</string>
+    <string name="ws_updated_ago">Cập nhật %1$s trước</string>
+    <string name="ws_no_reading_since">Không có số đo mới từ %1$s</string>
 </resources>

@@ -13,10 +13,14 @@ import kotlinx.serialization.json.put
  * JSON (and [PluginViewParser]) keeps built-ins honest: they get exactly what a JavaScript plugin gets.
  */
 object ViewJson {
-    fun value(value: String, unit: String? = null, label: String? = null, icon: String? = null, trend: Trend? = null, tone: Tone = Tone.Neutral) =
+    fun value(
+        value: String, unit: String? = null, label: String? = null, icon: String? = null, trend: Trend? = null, tone: Tone = Tone.Neutral,
+        iconRotation: Float? = null,
+    ) =
         buildJsonObject {
             put("type", "value"); put("value", value)
             unit?.let { put("unit", it) }; label?.let { put("label", it) }; icon?.let { put("icon", it) }
+            iconRotation?.let { put("icon_rotation", it) }
             trend?.let { put("trend", it.json) }; tone(tone)
         }
 

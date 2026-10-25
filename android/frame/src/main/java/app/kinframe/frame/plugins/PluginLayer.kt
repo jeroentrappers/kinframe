@@ -225,7 +225,8 @@ fun PluginBand(
         } else {
             Row(Modifier.fillMaxSize().padding(horizontal = 28.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.CenterStart) {
-                    ScaleToFit(maxWidth, maxHeight, wrapFactor = 1f) {
+                    // A strip that is a little too full shrinks (to 0.75 at most) rather than cutting off the last widget.
+                    ScaleToFit(maxWidth, maxHeight, wrapFactor = 1.33f) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
                             items.forEachIndexed { i, s -> BandItem(s, form, palette, onTap, divider = i > 0, verticalBand = false) }
                         }
@@ -330,7 +331,8 @@ fun PluginDetailCard(state: InstanceState?, detail: PluginView?, onClose: () -> 
                 Spacer(Modifier.height(20.dp))
                 val v = detail ?: s.view
                 if (v != null) {
-                    ScaleToFit(maxW - 72.dp, maxH - 120.dp) { PluginViewContent(v, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    // Wide cards (two charts side by side) scale down on a portrait screen instead of squeezing their last column.
+                    ScaleToFit(maxW - 72.dp, maxH - 120.dp, wrapFactor = 2f) { PluginViewContent(v, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
                 } else {
                     Text(stringResource(R.string.plugins_unavailable), style = Kin.type.body, color = Kin.colors.inkSoft)
                 }

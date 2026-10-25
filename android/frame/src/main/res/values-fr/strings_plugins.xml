@@ -46,4 +46,30 @@
     <string name="p1_today_import">Consommé aujourd’hui</string>
     <string name="p1_today_export">Injecté aujourd’hui</string>
     <string name="p1_today_gas">Gaz aujourd’hui</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Station météo</string>
+    <string name="ws_station">Station</string>
+    <string name="ws_code">Station Weathercloud</string>
+    <string name="ws_code_help">Le code de la station ou le lien vers sa page Weathercloud.</string>
+    <string name="ws_code_invalid">Aucun code de station Weathercloud ici. Copiez le lien de la page de la station.</string>
+    <string name="ws_unofficial">Weathercloud n’a pas d’API officielle : le cadre lit les mêmes données publiques que la page web de la station, au plus toutes les 5 minutes. Cela peut cesser de fonctionner si Weathercloud modifie son site.</string>
+    <string name="ws_style_compact">Température</string>
+    <string name="ws_style_rows">Toutes les valeurs</string>
+    <string name="ws_wind_unit">Vent en</string>
+    <string name="ws_wind_auto">Automatique</string>
+    <string name="ws_interval">Vérifier toutes les</string>
+    <string name="ws_use_for_weather">Utiliser ma station météo pour la température actuelle</string>
+    <string name="ws_use_for_weather_note">L’icône météo et les minimales et maximales du jour viennent toujours des prévisions.</string>
+    <string name="ws_status_error">Impossible de lire la station : %1$s</string>
+    <string name="ws_status_quiet">La station n’a pas envoyé de nouvelle mesure depuis un moment.</string>
+    <string name="ws_temperature">Température</string>
+    <string name="ws_dew_point">Point de rosée</string>
+    <string name="ws_gusts">Rafales</string>
+    <string name="ws_rain_today">Pluie aujourd’hui</string>
+    <string name="ws_pressure">Pression</string>
+    <string name="ws_sunlight">Ensoleillement</string>
+    <string name="ws_uv_index">Indice UV</string>
+    <string name="ws_updated_now">Mis à jour à l’instant</string>
+    <string name="ws_updated_ago">Mis à jour il y a %1$s</string>
+    <string name="ws_no_reading_since">Aucune nouvelle mesure depuis %1$s</string>
 </resources>

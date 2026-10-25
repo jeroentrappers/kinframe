@@ -46,4 +46,30 @@
     <string name="p1_today_import">Brugt i dag</string>
     <string name="p1_today_export">Leveret i dag</string>
     <string name="p1_today_gas">Gas i dag</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Vejrstation</string>
+    <string name="ws_station">Station</string>
+    <string name="ws_code">Weathercloud-station</string>
+    <string name="ws_code_help">Stationens kode eller linket til dens Weathercloud-side.</string>
+    <string name="ws_code_invalid">Der er ingen Weathercloud-stationskode her. Kopiér linket til stationens side.</string>
+    <string name="ws_unofficial">Weathercloud har ingen officiel API: rammen læser de samme offentlige data som stationens webside, højst hvert 5. minut. Det kan holde op med at virke, hvis Weathercloud ændrer sit websted.</string>
+    <string name="ws_style_compact">Temperatur</string>
+    <string name="ws_style_rows">Alle værdier</string>
+    <string name="ws_wind_unit">Vind i</string>
+    <string name="ws_wind_auto">Automatisk</string>
+    <string name="ws_interval">Tjek hvert</string>
+    <string name="ws_use_for_weather">Brug min vejrstation til den aktuelle temperatur</string>
+    <string name="ws_use_for_weather_note">Vejrikonet og dagens laveste og højeste kommer stadig fra vejrudsigten.</string>
+    <string name="ws_status_error">Kan ikke læse stationen: %1$s</string>
+    <string name="ws_status_quiet">Stationen har ikke sendt en ny måling i et stykke tid.</string>
+    <string name="ws_temperature">Temperatur</string>
+    <string name="ws_dew_point">Dugpunkt</string>
+    <string name="ws_gusts">Vindstød</string>
+    <string name="ws_rain_today">Regn i dag</string>
+    <string name="ws_pressure">Lufttryk</string>
+    <string name="ws_sunlight">Sollys</string>
+    <string name="ws_uv_index">UV-indeks</string>
+    <string name="ws_updated_now">Opdateret lige nu</string>
+    <string name="ws_updated_ago">Opdateret for %1$s siden</string>
+    <string name="ws_no_reading_since">Ingen ny måling siden %1$s</string>
 </resources>

@@ -46,4 +46,30 @@
     <string name="p1_today_import">Dnes odobraté</string>
     <string name="p1_today_export">Dnes dodané</string>
     <string name="p1_today_gas">Plyn dnes</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Meteostanica</string>
+    <string name="ws_station">Stanica</string>
+    <string name="ws_code">Stanica Weathercloud</string>
+    <string name="ws_code_help">Kód stanice alebo odkaz na jej stránku na Weathercloud.</string>
+    <string name="ws_code_invalid">Nie je tu žiadny kód stanice Weathercloud. Skopírujte odkaz na stránku stanice.</string>
+    <string name="ws_unofficial">Weathercloud nemá oficiálne API: rámček číta rovnaké verejné údaje ako webová stránka stanice, najviac raz za 5 minút. Môže to prestať fungovať, ak Weathercloud zmení svoj web.</string>
+    <string name="ws_style_compact">Teplota</string>
+    <string name="ws_style_rows">Všetky hodnoty</string>
+    <string name="ws_wind_unit">Vietor v</string>
+    <string name="ws_wind_auto">Automaticky</string>
+    <string name="ws_interval">Kontrolovať každých</string>
+    <string name="ws_use_for_weather">Na aktuálnu teplotu použiť moju meteostanicu</string>
+    <string name="ws_use_for_weather_note">Ikona počasia a dnešné minimum a maximum naďalej pochádzajú z predpovede.</string>
+    <string name="ws_status_error">Stanicu sa nedá prečítať: %1$s</string>
+    <string name="ws_status_quiet">Stanica už nejaký čas neposlala nové meranie.</string>
+    <string name="ws_temperature">Teplota</string>
+    <string name="ws_dew_point">Rosný bod</string>
+    <string name="ws_gusts">Nárazy</string>
+    <string name="ws_rain_today">Zrážky dnes</string>
+    <string name="ws_pressure">Tlak</string>
+    <string name="ws_sunlight">Slnečné svetlo</string>
+    <string name="ws_uv_index">UV index</string>
+    <string name="ws_updated_now">Práve aktualizované</string>
+    <string name="ws_updated_ago">Aktualizované pred %1$s</string>
+    <string name="ws_no_reading_since">Žiadne nové meranie od %1$s</string>
 </resources>

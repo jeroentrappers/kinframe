@@ -46,4 +46,30 @@
     <string name="p1_today_import">Suvartota šiandien</string>
     <string name="p1_today_export">Atiduota šiandien</string>
     <string name="p1_today_gas">Dujos šiandien</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Meteorologinė stotelė</string>
+    <string name="ws_station">Stotelė</string>
+    <string name="ws_code">Weathercloud stotelė</string>
+    <string name="ws_code_help">Stotelės kodas arba nuoroda į jos Weathercloud puslapį.</string>
+    <string name="ws_code_invalid">Čia nėra Weathercloud stotelės kodo. Nukopijuokite stotelės puslapio nuorodą.</string>
+    <string name="ws_unofficial">Weathercloud neturi oficialios API: rėmelis skaito tuos pačius viešus duomenis kaip stotelės tinklalapis, ne dažniau kaip kas 5 minutes. Tai gali nustoti veikti, jei Weathercloud pakeis savo svetainę.</string>
+    <string name="ws_style_compact">Temperatūra</string>
+    <string name="ws_style_rows">Visos vertės</string>
+    <string name="ws_wind_unit">Vėjas</string>
+    <string name="ws_wind_auto">Automatiškai</string>
+    <string name="ws_interval">Tikrinti kas</string>
+    <string name="ws_use_for_weather">Naudoti mano meteorologinę stotelę dabartinei temperatūrai</string>
+    <string name="ws_use_for_weather_note">Orų piktograma ir šiandienos žemiausia bei aukščiausia temperatūra ir toliau imamos iš prognozės.</string>
+    <string name="ws_status_error">Nepavyksta nuskaityti stotelės: %1$s</string>
+    <string name="ws_status_quiet">Stotelė jau kurį laiką neatsiuntė naujo matavimo.</string>
+    <string name="ws_temperature">Temperatūra</string>
+    <string name="ws_dew_point">Rasos taškas</string>
+    <string name="ws_gusts">Gūsiai</string>
+    <string name="ws_rain_today">Lietus šiandien</string>
+    <string name="ws_pressure">Slėgis</string>
+    <string name="ws_sunlight">Saulės šviesa</string>
+    <string name="ws_uv_index">UV indeksas</string>
+    <string name="ws_updated_now">Ką tik atnaujinta</string>
+    <string name="ws_updated_ago">Atnaujinta prieš %1$s</string>
+    <string name="ws_no_reading_since">Naujo matavimo nėra nuo %1$s</string>
 </resources>

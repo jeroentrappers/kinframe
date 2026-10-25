@@ -46,4 +46,30 @@
     <string name="p1_today_import">ใช้วันนี้</string>
     <string name="p1_today_export">จ่ายคืนวันนี้</string>
     <string name="p1_today_gas">แก๊สวันนี้</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">สถานีตรวจอากาศ</string>
+    <string name="ws_station">สถานี</string>
+    <string name="ws_code">สถานี Weathercloud</string>
+    <string name="ws_code_help">รหัสสถานี หรือลิงก์ไปยังหน้า Weathercloud ของสถานี</string>
+    <string name="ws_code_invalid">ไม่พบรหัสสถานี Weathercloud ในข้อความนี้ คัดลอกลิงก์หน้าของสถานีมาแทน</string>
+    <string name="ws_unofficial">Weathercloud ไม่มี API อย่างเป็นทางการ กรอบรูปจะอ่านข้อมูลสาธารณะชุดเดียวกับหน้าเว็บของสถานี อย่างมากทุก 5 นาที และอาจใช้งานไม่ได้หาก Weathercloud เปลี่ยนเว็บไซต์</string>
+    <string name="ws_style_compact">อุณหภูมิ</string>
+    <string name="ws_style_rows">ค่าทั้งหมด</string>
+    <string name="ws_wind_unit">หน่วยลม</string>
+    <string name="ws_wind_auto">อัตโนมัติ</string>
+    <string name="ws_interval">ตรวจสอบทุก</string>
+    <string name="ws_use_for_weather">ใช้สถานีตรวจอากาศของฉันสำหรับอุณหภูมิปัจจุบัน</string>
+    <string name="ws_use_for_weather_note">ไอคอนสภาพอากาศและอุณหภูมิต่ำสุดและสูงสุดของวันนี้ยังมาจากพยากรณ์อากาศ</string>
+    <string name="ws_status_error">อ่านสถานีไม่ได้: %1$s</string>
+    <string name="ws_status_quiet">สถานีไม่ได้ส่งค่าใหม่มาสักพักแล้ว</string>
+    <string name="ws_temperature">อุณหภูมิ</string>
+    <string name="ws_dew_point">จุดน้ำค้าง</string>
+    <string name="ws_gusts">ลมกระโชก</string>
+    <string name="ws_rain_today">ฝนวันนี้</string>
+    <string name="ws_pressure">ความกดอากาศ</string>
+    <string name="ws_sunlight">แสงแดด</string>
+    <string name="ws_uv_index">ดัชนี UV</string>
+    <string name="ws_updated_now">เพิ่งอัปเดต</string>
+    <string name="ws_updated_ago">อัปเดตเมื่อ %1$s ที่แล้ว</string>
+    <string name="ws_no_reading_since">ไม่มีค่าใหม่ตั้งแต่ %1$s</string>
 </resources>

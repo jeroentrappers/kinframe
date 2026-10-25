@@ -46,4 +46,30 @@
     <string name="p1_today_import">Šodien patērēts</string>
     <string name="p1_today_export">Šodien nodots</string>
     <string name="p1_today_gas">Gāze šodien</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Meteostacija</string>
+    <string name="ws_station">Stacija</string>
+    <string name="ws_code">Weathercloud stacija</string>
+    <string name="ws_code_help">Stacijas kods vai saite uz tās Weathercloud lapu.</string>
+    <string name="ws_code_invalid">Šeit nav Weathercloud stacijas koda. Nokopējiet stacijas lapas saiti.</string>
+    <string name="ws_unofficial">Weathercloud nav oficiālas API: rāmis nolasa tos pašus publiskos datus kā stacijas tīmekļa lapa, ne biežāk kā ik pēc 5 minūtēm. Tas var pārstāt darboties, ja Weathercloud maina savu vietni.</string>
+    <string name="ws_style_compact">Temperatūra</string>
+    <string name="ws_style_rows">Visas vērtības</string>
+    <string name="ws_wind_unit">Vējš</string>
+    <string name="ws_wind_auto">Automātiski</string>
+    <string name="ws_interval">Pārbaudīt ik pēc</string>
+    <string name="ws_use_for_weather">Izmantot manu meteostaciju pašreizējai temperatūrai</string>
+    <string name="ws_use_for_weather_note">Laikapstākļu ikona un šodienas zemākā un augstākā temperatūra joprojām nāk no prognozes.</string>
+    <string name="ws_status_error">Nevar nolasīt staciju: %1$s</string>
+    <string name="ws_status_quiet">Stacija kādu laiku nav sūtījusi jaunu mērījumu.</string>
+    <string name="ws_temperature">Temperatūra</string>
+    <string name="ws_dew_point">Rasas punkts</string>
+    <string name="ws_gusts">Brāzmas</string>
+    <string name="ws_rain_today">Lietus šodien</string>
+    <string name="ws_pressure">Spiediens</string>
+    <string name="ws_sunlight">Saules gaisma</string>
+    <string name="ws_uv_index">UV indekss</string>
+    <string name="ws_updated_now">Tikko atjaunināts</string>
+    <string name="ws_updated_ago">Atjaunināts pirms %1$s</string>
+    <string name="ws_no_reading_since">Nav jauna mērījuma kopš %1$s</string>
 </resources>

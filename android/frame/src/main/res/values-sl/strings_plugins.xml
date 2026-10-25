@@ -46,4 +46,30 @@
     <string name="p1_today_import">Danes porabljeno</string>
     <string name="p1_today_export">Danes oddano</string>
     <string name="p1_today_gas">Plin danes</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Vremenska postaja</string>
+    <string name="ws_station">Postaja</string>
+    <string name="ws_code">Postaja Weathercloud</string>
+    <string name="ws_code_help">Koda postaje ali povezava do njene strani na Weathercloudu.</string>
+    <string name="ws_code_invalid">Tu ni kode postaje Weathercloud. Kopirajte povezavo do strani postaje.</string>
+    <string name="ws_unofficial">Weathercloud nima uradnega API-ja: okvir bere iste javne podatke kot spletna stran postaje, največ vsakih 5 minut. To lahko preneha delovati, če Weathercloud spremeni svoje spletno mesto.</string>
+    <string name="ws_style_compact">Temperatura</string>
+    <string name="ws_style_rows">Vse vrednosti</string>
+    <string name="ws_wind_unit">Veter v</string>
+    <string name="ws_wind_auto">Samodejno</string>
+    <string name="ws_interval">Preveri vsakih</string>
+    <string name="ws_use_for_weather">Za trenutno temperaturo uporabi mojo vremensko postajo</string>
+    <string name="ws_use_for_weather_note">Vremenska ikona ter današnja najnižja in najvišja temperatura še naprej prihajajo iz napovedi.</string>
+    <string name="ws_status_error">Postaje ni mogoče prebrati: %1$s</string>
+    <string name="ws_status_quiet">Postaja že nekaj časa ni poslala nove meritve.</string>
+    <string name="ws_temperature">Temperatura</string>
+    <string name="ws_dew_point">Rosišče</string>
+    <string name="ws_gusts">Sunki</string>
+    <string name="ws_rain_today">Dež danes</string>
+    <string name="ws_pressure">Tlak</string>
+    <string name="ws_sunlight">Sončna svetloba</string>
+    <string name="ws_uv_index">UV-indeks</string>
+    <string name="ws_updated_now">Pravkar posodobljeno</string>
+    <string name="ws_updated_ago">Posodobljeno pred %1$s</string>
+    <string name="ws_no_reading_since">Ni nove meritve od %1$s</string>
 </resources>

@@ -7,7 +7,7 @@ export type Tone = 'neutral' | 'good' | 'warn' | 'bad' | 'accent';
 export type Icon =
   | 'bolt' | 'grid' | 'solar' | 'sun' | 'home' | 'battery' | 'battery-charging' | 'plug' | 'car' | 'flame' | 'gas'
   | 'meter' | 'water' | 'thermometer' | 'wind' | 'leaf' | 'euro' | 'fan' | 'lightbulb'
-  | 'moon' | 'cloud' | 'clock' | 'calendar'
+  | 'moon' | 'cloud' | 'clock' | 'calendar' | 'rain' | 'direction'
   | 'washing-machine' | 'trash' | 'door' | 'lock' | 'bike' | 'bus' | 'train' | 'user' | 'wifi' | 'bell'
   | 'info' | 'warning' | 'check' | 'arrow-up' | 'arrow-down' | 'arrow-left' | 'arrow-right';
 
@@ -19,6 +19,8 @@ export interface ValueView {
   unit?: string;
   label?: string;
   icon?: Icon;
+  /** Turns the icon clockwise, 0–360 degrees: the `direction` needle (north = up) shows a wind direction or heading. */
+  icon_rotation?: number;
   trend?: 'up' | 'down' | 'flat';
   tone?: Tone;
 }

@@ -1,0 +1,54 @@
+{
+  "type": "stack",
+  "items": [
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "thermometer",
+          "value": "12,8°",
+          "label": "Temperature",
+          "trend": "up"
+        },
+        {
+          "type": "value",
+          "icon": "water",
+          "value": "56 %",
+          "label": "Humidity · dew point 4,2°"
+        },
+        {
+          "type": "value",
+          "icon": "direction",
+          "icon_rotation": 73,
+          "value": "8 km/h",
+          "label": "Wind · W · gusts 18 km/h"
+        }
+      ]
+    },
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "rain",
+          "value": "15,1 mm",
+          "label": "Rain today"
+        },
+        {
+          "type": "value",
+          "icon": "meter",
+          "value": "989 hPa",
+          "label": "Pressure",
+          "trend": "down"
+        },
+        {
+          "type": "value",
+          "icon": "sun",
+          "value": "32 W/m²",
+          "label": "Sunlight · UV 0"
+        }
+      ]
+    }
+  ]
+}

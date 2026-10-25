@@ -46,4 +46,30 @@
     <string name="p1_today_import">오늘 사용량</string>
     <string name="p1_today_export">오늘 역송량</string>
     <string name="p1_today_gas">오늘 가스</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">기상 관측소</string>
+    <string name="ws_station">관측소</string>
+    <string name="ws_code">Weathercloud 관측소</string>
+    <string name="ws_code_help">관측소 코드 또는 Weathercloud 페이지 링크예요.</string>
+    <string name="ws_code_invalid">Weathercloud 관측소 코드가 없어요. 관측소 페이지의 링크를 복사해 주세요.</string>
+    <string name="ws_unofficial">Weathercloud에는 공식 API가 없어요. 액자는 관측소 웹페이지와 같은 공개 데이터를 최대 5분마다 읽어요. Weathercloud가 사이트를 바꾸면 작동하지 않을 수 있어요.</string>
+    <string name="ws_style_compact">기온</string>
+    <string name="ws_style_rows">모든 값</string>
+    <string name="ws_wind_unit">풍속 단위</string>
+    <string name="ws_wind_auto">자동</string>
+    <string name="ws_interval">확인 간격</string>
+    <string name="ws_use_for_weather">현재 기온에 내 기상 관측소 사용</string>
+    <string name="ws_use_for_weather_note">날씨 아이콘과 오늘의 최저·최고 기온은 계속 예보에서 가져와요.</string>
+    <string name="ws_status_error">관측소를 읽을 수 없어요: %1$s</string>
+    <string name="ws_status_quiet">관측소가 한동안 새 측정값을 보내지 않았어요.</string>
+    <string name="ws_temperature">기온</string>
+    <string name="ws_dew_point">이슬점</string>
+    <string name="ws_gusts">돌풍</string>
+    <string name="ws_rain_today">오늘 강수량</string>
+    <string name="ws_pressure">기압</string>
+    <string name="ws_sunlight">햇빛</string>
+    <string name="ws_uv_index">자외선 지수</string>
+    <string name="ws_updated_now">방금 업데이트됨</string>
+    <string name="ws_updated_ago">%1$s 전에 업데이트됨</string>
+    <string name="ws_no_reading_since">%1$s 이후 새 측정값 없음</string>
 </resources>

@@ -46,4 +46,30 @@
     <string name="p1_today_import">Спожито сьогодні</string>
     <string name="p1_today_export">Віддано сьогодні</string>
     <string name="p1_today_gas">Газ сьогодні</string>
+    <!-- Weather station widget (docs/plugins.md §9.4) -->
+    <string name="ws_name">Метеостанція</string>
+    <string name="ws_station">Станція</string>
+    <string name="ws_code">Станція Weathercloud</string>
+    <string name="ws_code_help">Код станції або посилання на її сторінку в Weathercloud.</string>
+    <string name="ws_code_invalid">Тут немає коду станції Weathercloud. Скопіюйте посилання на сторінку станції.</string>
+    <string name="ws_unofficial">Weathercloud не має офіційного API: рамка читає ті самі відкриті дані, що й вебсторінка станції, не частіше ніж раз на 5 хвилин. Це може перестати працювати, якщо Weathercloud змінить свій сайт.</string>
+    <string name="ws_style_compact">Температура</string>
+    <string name="ws_style_rows">Усі значення</string>
+    <string name="ws_wind_unit">Вітер у</string>
+    <string name="ws_wind_auto">Автоматично</string>
+    <string name="ws_interval">Перевіряти кожні</string>
+    <string name="ws_use_for_weather">Використовувати мою метеостанцію для поточної температури</string>
+    <string name="ws_use_for_weather_note">Значок погоди та сьогоднішні мінімум і максимум і далі беруться з прогнозу.</string>
+    <string name="ws_status_error">Не вдається прочитати станцію: %1$s</string>
+    <string name="ws_status_quiet">Станція вже деякий час не надсилала нових вимірювань.</string>
+    <string name="ws_temperature">Температура</string>
+    <string name="ws_dew_point">Точка роси</string>
+    <string name="ws_gusts">Пориви</string>
+    <string name="ws_rain_today">Дощ сьогодні</string>
+    <string name="ws_pressure">Тиск</string>
+    <string name="ws_sunlight">Сонячне світло</string>
+    <string name="ws_uv_index">УФ-індекс</string>
+    <string name="ws_updated_now">Щойно оновлено</string>
+    <string name="ws_updated_ago">Оновлено %1$s тому</string>
+    <string name="ws_no_reading_since">Немає нових вимірювань з %1$s</string>
 </resources>

@@ -21,11 +21,11 @@
       "enum": ["neutral", "good", "warn", "bad", "accent"]
     },
     "icon": {
-      "description": "The fixed icon set of API 1, drawn by the frame in its line style.",
+      "description": "The fixed icon set of API 1, drawn by the frame in its line style. `direction` is a needle pointing up (north), meant to be turned with a value's `icon_rotation`.",
       "enum": [
         "bolt", "grid", "solar", "sun", "home", "battery", "battery-charging", "plug", "car", "flame", "gas", "meter",
         "water", "thermometer", "wind", "leaf", "euro", "fan", "lightbulb",
-        "moon", "cloud", "clock", "calendar",
+        "moon", "cloud", "clock", "calendar", "rain", "direction",
         "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
         "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right"
       ]
@@ -42,6 +42,10 @@
         "unit": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 8 }] },
         "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
         "icon": { "$ref": "#/$defs/icon" },
+        "icon_rotation": {
+          "type": "number", "minimum": 0, "maximum": 360,
+          "description": "Turns the icon clockwise by this many degrees, e.g. the `direction` needle for a wind direction (pointing where the wind blows to). Absent: upright."
+        },
         "trend": { "enum": ["up", "down", "flat"] },
         "tone": { "$ref": "#/$defs/tone" }
       }

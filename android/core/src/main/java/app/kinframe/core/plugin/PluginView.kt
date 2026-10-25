@@ -57,6 +57,11 @@ data class ValueView(
     val icon: String? = null,
     val trend: Trend? = null,
     override val tone: Tone = Tone.Neutral,
+    /**
+     * Turns [icon] clockwise by this many degrees (0–360), e.g. the `direction` arrow for a wind direction. Null draws
+     * it upright.
+     */
+    val iconRotation: Float? = null,
 ) : PluginView
 
 /** Up to four [ValueView]s stacked: grid / solar / home. */
@@ -148,7 +153,7 @@ object PluginIconNames {
         "bolt", "grid", "solar", "sun", "home", "battery", "battery-charging", "plug", "car", "flame", "gas", "meter",
         "water", "thermometer", "wind", "leaf", "euro", "fan", "lightbulb",
         // weather and time
-        "moon", "cloud", "clock", "calendar",
+        "moon", "cloud", "clock", "calendar", "rain", "direction",
         // home and travel
         "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
         // generic

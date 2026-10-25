@@ -1,7 +1,7 @@
 # Plugins: design
 
-Status: **design; step 1 is built** (the view format, its native components, the overlay and band layouts and a
-built-in HomeWizard P1 widget, configured on the frame; see §12). This document is the contract plugin authors and
+Status: **design; step 1 is built** (the view format, its native components, the overlay and band layouts and two
+built-in widgets, HomeWizard P1 and a weather station, configured on the frame; see §12). This document is the contract plugin authors and
 the kinframe apps will build against. Open questions are listed in §11.
 
 ## 1. What a plugin is
@@ -135,6 +135,9 @@ ha-energy-flow/
 - **`id`** is reverse-DNS-like and unique in the registry. `community.` is the prefix for third-party plugins,
   `kinframe.` for the ones the project maintains.
 - **`api`** is the plugin API version (section 4). The frame refuses plugins for an API it doesn't know.
+- **`refresh`**: `default_seconds` between `render` calls, `min_seconds` as the floor for `invalidate()`, and optional
+  `stale_seconds`: how old the source's own measurement (`ctx.dataTime`) may be before the widget is greyed (a weather
+  station that uploads every 10 minutes: 1800).
 - **`permissions`** lists what the code may do, and every network permission names the **setting** that holds the
   address. The plugin can't hard-code hosts: it can only talk to what the owner typed in. This is the main safety rule.
   - `local_only: true` on a URL setting makes the frame refuse anything that doesn't resolve to a private address
@@ -193,10 +196,11 @@ export default {
 | `settings` | The owner's settings, secrets included, read-only. |
 | `state` | A plain object the plugin may keep between calls (lost on restart). |
 | `store` | Small persistent key-value storage, 64 KB per instance (e.g. yesterday's total). |
-| `http.get/post(url, options)` | Fetch. Only URLs allowed by `permissions.http`. JSON or text body. 10 s timeout, 1 MB response limit. |
+| `http.get/post(url, options)` | Fetch. Only URLs allowed by `permissions.http`. JSON or text body, optional request headers (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls). 10 s timeout, 1 MB response limit. |
 | `ws.connect(url, handlers)` | One WebSocket per instance, same rules. The frame reconnects with backoff and calls `onOpen` again. |
 | `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message). Throttled to `refresh.min_seconds`. |
-| `format.power/energy/percent/temperature/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". |
+| `format.power/energy/percent/temperature/number/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". `temperature` follows the frame's °C/°F (optionally with decimals); `number(value, decimals, unit)` for anything else ("2,3 m/s"). |
+| `dataTime` | Optional: when the source measured what the view shows (epoch ms). For sources that update every few minutes; the frame greys the view when it is older than `manifest.refresh.stale_seconds`, even while fetching works. |
 | `t(key, vars)` | The plugin's own translated strings from `locales/`. |
 | `log(...)` | Goes to the frame's diagnostics, visible to the owner, never uploaded with secrets in it. |
 | `now()`, `timezone` | The frame's clock and time zone. |
@@ -220,7 +224,8 @@ components come with a new API version.
 
 Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`), which maps to the frame's palette, and an
 icon from a fixed set of line icons (home, sun, grid, battery, car, plug, flame, water, thermometer, wind, leaf,
-euro, ...; 40 in the first version, more can be added within API 1).
+euro, rain, ...; 42 so far, more can be added within API 1). A `value` can turn its icon with `icon_rotation` (0–360
+degrees clockwise): the `direction` icon is a vane arrow pointing north, for a wind direction or a heading.
 
 The exact format is [`docs/api/plugin-views/plugin-view.schema.json`](api/plugin-views/plugin-view.schema.json) (JSON
 Schema) and [`plugin-view.d.ts`](api/plugin-views/plugin-view.d.ts) (TypeScript types for the plugin kit), with
@@ -310,7 +315,7 @@ two helpers the forms can use:
 - `npx @kinframe/plugin-kit push --frame <code>`: sends the plugin to a frame in developer mode.
 - TypeScript types for `ctx` and the views, so authors get autocompletion even in plain JS.
 
-## 9. The first three plugins (maintained by the project, `kinframe.*`)
+## 9. The first plugins (maintained by the project, `kinframe.*`)
 
 ### 9.1 Home Assistant energy flow (`kinframe.ha-energy`)
 
@@ -345,6 +350,44 @@ two helpers the forms can use:
   value changes* is a good default: the car appears in the corner while it charges and when it's unplugged.
 - Because this one only reads Home Assistant entities, it is effectively "any battery gauge": a home battery or an
   e-bike works with the same plugin and a different preset.
+
+### 9.4 Weather station (`kinframe.weather-station`), e.g. Weathercloud
+
+- **Settings:** the station (`source`, for now only `weathercloud`, and `device`: the station's code, or the link to
+  its public page, `https://app.weathercloud.net/d<code>` → `<code>`), a style (*Temperature*: one value, or *All
+  values*), wind in km/h (mph with °F), m/s or Beaufort, how often to check (every 5, 10, 15 or 30 minutes; 5 is the
+  minimum) and *Use my weather station for the current temperature* (below). Pressure is always hPa, temperatures
+  follow the frame's °C/°F.
+- **Data, and the catch:** Weathercloud has **no published API**. Its own web app loads
+  `GET https://app.weathercloud.net/device/values?code=<code>` (with `X-Requested-With: XMLHttpRequest`):
+  `{"epoch":1792941451,"bar":988.8,"temp":12.8,"hum":56,"wdir":253,"wspd":2.3,"dew":4.2,"heat":12.8,"rainrate":0,
+  "rain":15.1,"uvi":0,"solarrad":31.7,"wspdavg":2.3,"wdiravg":253}` (°C, %, hPa, m/s, degrees the wind comes *from*,
+  mm today, mm/h, W/m², UV index; `epoch` is the measurement time, about every 10 minutes), and
+  `GET /device/info/<code>` for the station's city and altitude (numbers there come as strings). Because this is
+  unofficial it can change or stop without notice; the settings say so. To be a good citizen the widget asks at most
+  every 5 minutes, only while the screen is on, backs off after errors (2×, 4× the interval), asks for the station's
+  place only when the detail card opens (at most once a day), and sends a `User-Agent` naming kinframe. Permission:
+  the fixed host `https://app.weathercloud.net` only.
+- **Sources are pluggable** (`StationSource`): readings are normalised to metric (`StationReading`), so an Ecowitt
+  gateway's local API (`local_only`), the Weather Underground PWS API with the owner's key (a `secret`), or a station
+  that uploads to the kinframe server ("custom server" upload in the station's own app, received and relayed by the
+  server) can be added as another source without touching the views.
+- **Views:** *Temperature*: a `value` with the temperature (one decimal), a trend arrow when it moved 0.5° or more in
+  the last hour, and a small line "56 % · W 8 km/h" (no direction in calm air). *All values*: two `rows` tables:
+  temperature, humidity with dew point, wind (a `direction` arrow turned to where the wind blows, the compass point
+  and gusts when the station reports them); rain today (and the rate while it rains), pressure with its 3-hour
+  tendency (rising/falling by 1 hPa or more, else steady) and sunlight/UV. In the portrait strip the tables show
+  icons and values only. Detail card: temperature with the station's city and altitude, "Updated 4 min ago" (or "No
+  new reading since 13:05"), "feels like" when it differs, 24-hour temperature and pressure sparklines, and every
+  value. Labels longer than the view limits (some translations) are shortened with "…", never rejected.
+- **History:** the last 26 hours of temperature and pressure, one sample per 5 minutes at most, are kept in
+  `ctx.store` (a few KB), so trends and charts survive a restart.
+- **Stale:** the widget sets `ctx.dataTime` to the station's `epoch`; a reading older than 30 minutes greys the
+  widget even while Weathercloud answers (the station is offline). Fetch errors follow the host's rules.
+- **Use my weather station for the current temperature:** the frame's bottom-right weather shows the station's
+  temperature instead of the forecast's while the station's reading is fresh (30 minutes); the icon, condition and
+  today's lowest and highest stay from Open-Meteo. It needs the widget to be on (it is what reads the station).
+- Screenshots: [`docs/plugins/`](plugins/) `station_*.png`.
 
 ## 10. Changes to kinframe
 
@@ -385,10 +428,11 @@ QuickJS, registry, server API or app UI yet.
 |---|---|
 | View model, strict JSON parser/validator, `ctx.format`, JSON builder for built-ins | `android/core/.../core/plugin/` (`PluginView.kt`, `PluginViewParser.kt`, `PluginFormat.kt`, `ViewJson.kt`) |
 | Compose components (all forms), palette, shared animation clock, scale-to-fit | `android/core/.../core/plugin/ui/` (in core so the family app can use them for the live preview in step 3) |
-| Icons | 40 new line icons in `KinIcons` (drawn for kinframe), mapped by name in `PluginIcons` |
+| Icons | 42 line icons in `KinIcons` (drawn for kinframe), mapped by name in `PluginIcons` |
 | Schema, TypeScript types, examples, invalid examples | `docs/api/plugin-views/` (the tests read them; debug builds package them as assets) |
 | Host, `PluginInstance`/`PluginContext`, `ctx.http` with `local_only`, layout geometry, overlay/band/detail UI | `android/frame/.../frame/plugins/` |
 | Built-in HomeWizard P1 widget and mDNS discovery | `android/frame/.../frame/plugins/homewizard/` |
+| Built-in weather station widget (Weathercloud) | `android/frame/.../frame/plugins/station/` |
 | Frame-local settings (Settings → Home widgets, behind the owner PIN) | `PluginSettingsSection.kt`, stored in the `plugins` SharedPreferences in the shape of §10's `plugins: [...]` |
 | Dev preview (debug builds) | `PluginPreviewActivity` (`adb shell am start -n app.kinframe.frame/.debug.PluginPreviewActivity --es layout band ...`), a "Demo widgets" switch that cycles the examples, and `PluginScreenshotTest` |
 
@@ -400,7 +444,9 @@ value) and *strip* (the portrait band: side by side). A band of 180 dp or more (
 1920×1080 frame, uses the corner form scaled to fit. In the band the frame picks a `stack`'s axis (column: vertical,
 strip: horizontal). A `flow` in the corner puts the node with the most edges in the middle and the others at its start,
 end, top and bottom; in the band the nodes form a line with that hub in the middle, and an edge that would have to
-cross another node is shown as a short animated arrow beside its far node instead of a line around it.
+cross another node is shown as a short animated arrow beside its far node instead of a line around it. In the strip,
+`rows` show icons and values without their labels (as the column does), and a strip that is a little too full
+shrinks to at most 0.75 instead of cutting off its last widget.
 
 **Animation and cost.** Value changes roll (old value up and out, new one in, 380 ms) and gauges sweep, both read in
 `graphicsLayer`/draw lambdas only. Flow arrows are chevrons moving along each edge at 10–60 dp/s by the square root of
@@ -432,8 +478,11 @@ arrives. The detail card pauses the slideshow, shows the instance name as its ti
 **Host rules.** One background thread at background priority for all instances; 10 s per call; a view that doesn't
 validate is not drawn and doesn't count as a failure (the previous view stays, the reason is logged and shown in the
 settings); a throw or timeout is a failure, and failures back off (2×, 4×, … the refresh interval, at most 60 s).
-Status: greyed after 3× the refresh interval without a good view, "unavailable" (a discreet icon) after 3 failures
-with nothing to show, hidden after 15 minutes. `invalidate()` wakes the instance at once (the throttle to
+Status: greyed after 3× the refresh interval without a good view, or once the source's own measurement
+(`ctx.dataTime`) is older than the plugin's `staleAfterSeconds`; "unavailable" (a discreet icon) after 3 failures
+with nothing to show; hidden after 15 minutes (or 3× the interval plus a minute for slow plugins). Plugins that refresh
+less often than every 15 s back off to at most 4× their interval instead of a minute, so an error never makes them ask
+more often. `invalidate()` wakes the instance at once (the throttle to
 `refresh.min_seconds` comes with step 2).
 
 **`local_only`.** Enforced in OkHttp's DNS step: every address a name resolves to must be private, checked when the
@@ -451,11 +500,21 @@ Discovery browses `_hwenergy._tcp` with NsdManager while the settings are open (
 Android 6 requires), shows "Local API is off" from the TXT record, and picks the meter when there is exactly one. The
 v2 API (HTTPS + token) is not supported yet.
 
+**Weather station (built in).** As §9.4. Polls `GET https://app.weathercloud.net/device/values?code=<code>` with
+`X-Requested-With: XMLHttpRequest` every 5–30 minutes; `PluginHttp` takes an `allowed` predicate per plugin (here only
+that host over HTTPS, not `local_only`) and request headers, and sends `User-Agent: kinframe-frame/<version>
+(+https://github.com/jeroentrappers/kinframe)`. Numbers may be JSON numbers or strings; implausible values (humidity
+over 100 %, pressure 0) are dropped. The settings accept the code, `d<code>` or any link containing `/d<code>` or
+`code=<code>`. *Use my weather station for the current temperature* is a frame-local instance setting
+(`use_for_weather`); `FramePlugins.stationNow` carries the reading to the slideshow, which overrides the forecast's
+current temperature (`Weather.withStation`) while it is at most 30 minutes old.
+
 **Changes to the design above.** None of substance; these are additions or decisions the design left open: the band
 fallbacks (64 dp minimum, not beside the calendar sidebar), render-after-settle for the band animation, unknown
-properties are rejected, edge power is a magnitude, the first icon set has 40 icons, compact flows use direction
-arrows for non-adjacent edges, and the new-photo celebration is the "N new" moment (the frame has no separate
-celebration animation).
+properties are rejected, edge power is a magnitude, the icon set has 42 icons (40 plus `rain` and `direction`, added
+with `icon_rotation` on `value` for the weather station before API 1 went to third parties), `ctx.format.number`,
+`ctx.dataTime` and request headers in `ctx.http.get`, compact flows use direction arrows for non-adjacent edges, and
+the new-photo celebration is the "N new" moment (the frame has no separate celebration animation).
 
 **Performance (emulator only, not yet measured on the Denver).** The dev preview with neutral placeholder photos that
 cross-fade (800 ms) and zoom continuously like Ken Burns, on an Android 6 x86_64 emulator at 1280×800 mdpi, 4 cores,
@@ -481,9 +540,10 @@ be confirmed on the frame, together with swipe smoothness and the cross-fade wit
 The emulator says nothing about the Mali-400's fill rate. Reproduce with the dev preview
 (`--es layout band|overlay|off --ez sim true|false`) and `adb shell dumpsys gfxinfo app.kinframe.frame framestats`.
 
-**Screenshots.** [`docs/plugins/`](plugins/): `band_*`, `overlay_*`, `detail_landscape.png`, `gallery.png` (every example
-in the corner, column and strip forms) and `detail_forms.png` come from `PluginScreenshotTest` (Robolectric, 1280×800
-and 800×1280 mdpi, 1920×1080 xhdpi); `emulator_*` are from the dev preview on the emulator.
+**Screenshots.** [`docs/plugins/`](plugins/): `band_*`, `overlay_*`, `station_*` (the weather station in the corners,
+the band column and strip, and its detail card), `detail_landscape.png`, `gallery.png` (every example in the corner,
+column and strip forms) and `detail_forms.png` come from `PluginScreenshotTest` (Robolectric, 1280×800 and 800×1280
+mdpi, 1920×1080 xhdpi); `emulator_*` are from the dev preview on the emulator.
 
 **What step 2 (the QuickJS host) plugs into.** `PluginInstance` is the seam: a QuickJS-backed implementation calls
 `start`/`render`/`detail`/`stop` in the script and returns their JSON; `PluginHost` already validates it, keeps the last
