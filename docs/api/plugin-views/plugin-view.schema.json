@@ -18,7 +18,7 @@
     },
     "tone": {
       "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children.",
-      "enum": ["neutral", "good", "warn", "bad", "accent"]
+      "enum": ["neutral", "good", "warn", "bad", "accent", "info"]
     },
     "icon": {
       "description": "The fixed icon set of API 1, drawn by the frame in its line style. `direction` is a needle pointing up (north), meant to be turned with a value's `icon_rotation`.",
@@ -62,18 +62,22 @@
       }
     },
     "gauge": {
-      "description": "A ring (default) or bar from 0–100 % with a short label inside: car battery 68 %.",
+      "description": "A ring (default) or bar from 0–100 % with a short label inside: car battery 68 %. A dial is two-sided: zero at the top, -100–100 %, positive clockwise in `tone`, negative anticlockwise in `negative_tone` (grid use vs return); a trailing unit in its label is drawn small below the number.",
       "type": "object",
       "additionalProperties": false,
       "required": ["type", "value"],
+      "if": { "properties": { "style": { "const": "dial" } }, "required": ["style"] },
+      "then": { "properties": { "value": { "minimum": -100 } } },
+      "else": { "properties": { "value": { "minimum": 0 }, "negative_tone": false } },
       "properties": {
         "type": { "const": "gauge" },
-        "value": { "type": "number", "minimum": 0, "maximum": 100 },
+        "value": { "type": "number", "minimum": -100, "maximum": 100 },
         "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 12 }] },
         "caption": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
         "icon": { "$ref": "#/$defs/icon" },
-        "style": { "enum": ["ring", "bar"] },
-        "tone": { "$ref": "#/$defs/tone" }
+        "style": { "enum": ["ring", "bar", "dial"] },
+        "tone": { "$ref": "#/$defs/tone" },
+        "negative_tone": { "$ref": "#/$defs/tone" }
       }
     },
     "flow": {

@@ -32,6 +32,8 @@
     <string name="p1_not_private">Solo se pueden usar direcciones de tu red doméstica.</string>
     <string name="p1_style">Mostrar como</string>
     <string name="p1_style_value">Número</string>
+    <string name="p1_style_gauge">Indicador</string>
+    <string name="p1_max">Escala máxima</string>
     <string name="p1_style_flow">Flujo</string>
     <string name="p1_warn">Resaltar por encima de</string>
     <string name="p1_warn_off">Nunca</string>

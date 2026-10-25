@@ -32,6 +32,8 @@
     <string name="p1_not_private">Hanya alamat di jaringan rumah Anda yang bisa digunakan.</string>
     <string name="p1_style">Tampilkan sebagai</string>
     <string name="p1_style_value">Angka</string>
+    <string name="p1_style_gauge">Pengukur</string>
+    <string name="p1_max">Skala penuh</string>
     <string name="p1_style_flow">Aliran</string>
     <string name="p1_warn">Sorot di atas</string>
     <string name="p1_warn_off">Tidak pernah</string>

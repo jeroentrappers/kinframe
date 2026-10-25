@@ -32,6 +32,8 @@
     <string name="p1_not_private">Alleen adressen in je thuisnetwerk kunnen gebruikt worden.</string>
     <string name="p1_style">Tonen als</string>
     <string name="p1_style_value">Getal</string>
+    <string name="p1_style_gauge">Meter</string>
+    <string name="p1_max">Volle schaal</string>
     <string name="p1_style_flow">Stroom</string>
     <string name="p1_warn">Markeren boven</string>
     <string name="p1_warn_off">Nooit</string>

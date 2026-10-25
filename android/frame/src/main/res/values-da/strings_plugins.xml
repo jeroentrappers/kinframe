@@ -32,6 +32,8 @@
     <string name="p1_not_private">Kun adresser på dit hjemmenetværk kan bruges.</string>
     <string name="p1_style">Vis som</string>
     <string name="p1_style_value">Tal</string>
+    <string name="p1_style_gauge">Måler</string>
+    <string name="p1_max">Fuld skala</string>
     <string name="p1_style_flow">Strøm</string>
     <string name="p1_warn">Fremhæv over</string>
     <string name="p1_warn_off">Aldrig</string>

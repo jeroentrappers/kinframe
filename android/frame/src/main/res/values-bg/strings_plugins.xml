@@ -32,6 +32,8 @@
     <string name="p1_not_private">Могат да се използват само адреси от домашната ви мрежа.</string>
     <string name="p1_style">Показване като</string>
     <string name="p1_style_value">Число</string>
+    <string name="p1_style_gauge">Уред</string>
+    <string name="p1_max">Пълна скала</string>
     <string name="p1_style_flow">Поток</string>
     <string name="p1_warn">Открояване над</string>
     <string name="p1_warn_off">Никога</string>

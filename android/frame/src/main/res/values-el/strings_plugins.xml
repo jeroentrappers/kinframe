@@ -32,6 +32,8 @@
     <string name="p1_not_private">Μπορούν να χρησιμοποιηθούν μόνο διευθύνσεις του οικιακού δικτύου.</string>
     <string name="p1_style">Εμφάνιση ως</string>
     <string name="p1_style_value">Αριθμός</string>
+    <string name="p1_style_gauge">Δείκτης</string>
+    <string name="p1_max">Πλήρης κλίμακα</string>
     <string name="p1_style_flow">Ροή</string>
     <string name="p1_warn">Επισήμανση πάνω από</string>
     <string name="p1_warn_off">Ποτέ</string>

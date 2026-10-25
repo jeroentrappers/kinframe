@@ -32,6 +32,8 @@
     <string name="p1_not_private">Uporabite lahko le naslove iz domačega omrežja.</string>
     <string name="p1_style">Prikaži kot</string>
     <string name="p1_style_value">Število</string>
+    <string name="p1_style_gauge">Merilnik</string>
+    <string name="p1_max">Polna skala</string>
     <string name="p1_style_flow">Tok</string>
     <string name="p1_warn">Poudari nad</string>
     <string name="p1_warn_off">Nikoli</string>

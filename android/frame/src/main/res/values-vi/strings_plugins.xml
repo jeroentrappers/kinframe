@@ -32,6 +32,8 @@
     <string name="p1_not_private">Chỉ có thể dùng địa chỉ trong mạng gia đình.</string>
     <string name="p1_style">Hiển thị dạng</string>
     <string name="p1_style_value">Số</string>
+    <string name="p1_style_gauge">Đồng hồ đo</string>
+    <string name="p1_max">Toàn thang</string>
     <string name="p1_style_flow">Dòng chảy</string>
     <string name="p1_warn">Làm nổi bật khi trên</string>
     <string name="p1_warn_off">Không bao giờ</string>

@@ -32,6 +32,8 @@
     <string name="p1_not_private">Var izmantot tikai mājas tīkla adreses.</string>
     <string name="p1_style">Rādīt kā</string>
     <string name="p1_style_value">Skaitlis</string>
+    <string name="p1_style_gauge">Mērītājs</string>
+    <string name="p1_max">Pilna skala</string>
     <string name="p1_style_flow">Plūsma</string>
     <string name="p1_warn">Izcelt virs</string>
     <string name="p1_warn_off">Nekad</string>

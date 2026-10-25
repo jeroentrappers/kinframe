@@ -32,6 +32,8 @@
     <string name="p1_not_private">Vain kotiverkon osoitteita voi käyttää.</string>
     <string name="p1_style">Näytä muodossa</string>
     <string name="p1_style_value">Luku</string>
+    <string name="p1_style_gauge">Mittari</string>
+    <string name="p1_max">Täysi asteikko</string>
     <string name="p1_style_flow">Virtaus</string>
     <string name="p1_warn">Korosta yli</string>
     <string name="p1_warn_off">Ei koskaan</string>

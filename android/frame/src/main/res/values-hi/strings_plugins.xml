@@ -32,6 +32,8 @@
     <string name="p1_not_private">सिर्फ़ आपके घर के नेटवर्क के पते इस्तेमाल किए जा सकते हैं।</string>
     <string name="p1_style">इस रूप में दिखाएँ</string>
     <string name="p1_style_value">संख्या</string>
+    <string name="p1_style_gauge">गेज</string>
+    <string name="p1_max">पूरा पैमाना</string>
     <string name="p1_style_flow">प्रवाह</string>
     <string name="p1_warn">इससे ऊपर हाइलाइट करें</string>
     <string name="p1_warn_off">कभी नहीं</string>

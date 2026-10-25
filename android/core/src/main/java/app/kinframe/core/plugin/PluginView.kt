@@ -15,7 +15,7 @@ sealed interface PluginView {
 
 /** Maps to the frame's palette; plugins never pick colours. */
 enum class Tone(val json: String) {
-    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent");
+    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent"), Info("info");
 
     companion object {
         fun of(json: String): Tone? = entries.firstOrNull { it.json == json }
@@ -31,7 +31,7 @@ enum class Trend(val json: String) {
 }
 
 enum class GaugeStyle(val json: String) {
-    Ring("ring"), Bar("bar");
+    Ring("ring"), Bar("bar"), Dial("dial");
 
     companion object {
         fun of(json: String): GaugeStyle? = entries.firstOrNull { it.json == json }
@@ -68,7 +68,10 @@ data class ValueView(
 @Immutable
 data class RowsView(val items: List<ValueView>, override val tone: Tone = Tone.Neutral) : PluginView
 
-/** A ring or bar from 0–100 % with a short label inside: car battery 68 %. */
+/**
+ * A ring or bar from 0–100 % with a short label inside: car battery 68 %. A [GaugeStyle.Dial] is two-sided: zero at
+ * the top, −100–100 %, positive clockwise in [tone] and negative anticlockwise in [negativeTone] (grid use vs return).
+ */
 @Immutable
 data class GaugeView(
     val percent: Float,
@@ -77,6 +80,7 @@ data class GaugeView(
     val icon: String? = null,
     val style: GaugeStyle = GaugeStyle.Ring,
     override val tone: Tone = Tone.Neutral,
+    val negativeTone: Tone? = null,
 ) : PluginView
 
 @Immutable

@@ -105,16 +105,23 @@ object PluginViewParser {
         }
 
         fun gauge(o: JsonObject, path: String): GaugeView {
-            allowOnly(o, path, setOf("type", "value", "label", "caption", "icon", "style", "tone"))
+            allowOnly(o, path, setOf("type", "value", "label", "caption", "icon", "style", "tone", "negative_tone"))
+            val style = string(o, "style", path, 8)?.let { GaugeStyle.of(it) ?: fail("$path/style", "expected ring, bar or dial") } ?: GaugeStyle.Ring
             val v = number(o, "value", path, required = true)!!
-            if (v < 0f || v > 100f) fail("$path/value", "expected a percentage from 0 to 100")
+            if (style == GaugeStyle.Dial) {
+                if (v < -100f || v > 100f) fail("$path/value", "expected a percentage from -100 to 100")
+            } else {
+                if (v < 0f || v > 100f) fail("$path/value", "expected a percentage from 0 to 100")
+                if ("negative_tone" in o) fail("$path/negative_tone", "only a dial has a negative side")
+            }
             return GaugeView(
                 percent = v,
                 label = string(o, "label", path, ViewLimits.MAX_GAUGE_LABEL),
                 caption = string(o, "caption", path, ViewLimits.MAX_LABEL),
                 icon = icon(o, path),
-                style = string(o, "style", path, 8)?.let { GaugeStyle.of(it) ?: fail("$path/style", "expected ring or bar") } ?: GaugeStyle.Ring,
+                style = style,
                 tone = tone(o, path),
+                negativeTone = if ("negative_tone" in o) tone(o, path, "negative_tone") else null,
             )
         }
 
@@ -230,8 +237,8 @@ object PluginViewParser {
             return f
         }
 
-        fun tone(o: JsonObject, path: String): Tone =
-            string(o, "tone", path, 8)?.let { Tone.of(it) ?: fail("$path/tone", "expected neutral, good, warn, bad or accent") } ?: Tone.Neutral
+        fun tone(o: JsonObject, path: String, key: String = "tone"): Tone =
+            string(o, key, path, 8)?.let { Tone.of(it) ?: fail("$path/$key", "expected neutral, good, warn, bad, accent or info") } ?: Tone.Neutral
 
         fun icon(o: JsonObject, path: String, required: Boolean = false): String? {
             val name = string(o, "icon", path, 24, required) ?: return null

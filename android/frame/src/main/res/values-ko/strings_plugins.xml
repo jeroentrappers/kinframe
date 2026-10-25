@@ -32,6 +32,8 @@
     <string name="p1_not_private">홈 네트워크 주소만 사용할 수 있어요.</string>
     <string name="p1_style">표시 방식</string>
     <string name="p1_style_value">숫자</string>
+    <string name="p1_style_gauge">게이지</string>
+    <string name="p1_max">최대 눈금</string>
     <string name="p1_style_flow">흐름</string>
     <string name="p1_warn">강조 기준</string>
     <string name="p1_warn_off">안 함</string>
