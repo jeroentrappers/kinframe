@@ -1,0 +1,11 @@
+{
+  "@name": "Števec HomeWizard P1",
+  "grid": "Omrežje",
+  "home": "Dom",
+  "last_hour": "Zadnja ura",
+  "returning": "Oddaja",
+  "today_export": "Danes oddano",
+  "today_gas": "Plin danes",
+  "today_import": "Danes porabljeno",
+  "using": "Poraba"
+}

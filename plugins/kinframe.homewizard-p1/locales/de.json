@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1-Zähler",
+  "grid": "Netz",
+  "home": "Haus",
+  "last_hour": "Letzte Stunde",
+  "returning": "Einspeisung",
+  "today_export": "Heute eingespeist",
+  "today_gas": "Gas heute",
+  "today_import": "Heute bezogen",
+  "using": "Bezug"
+}

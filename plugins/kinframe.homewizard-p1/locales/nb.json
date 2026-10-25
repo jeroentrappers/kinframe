@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1-måler",
+  "grid": "Nett",
+  "home": "Hjem",
+  "last_hour": "Siste time",
+  "returning": "Leverer tilbake",
+  "today_export": "Levert i dag",
+  "today_gas": "Gass i dag",
+  "today_import": "Brukt i dag",
+  "using": "Forbruk"
+}

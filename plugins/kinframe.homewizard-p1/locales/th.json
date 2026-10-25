@@ -1,0 +1,11 @@
+{
+  "@name": "มิเตอร์ HomeWizard P1",
+  "grid": "สายส่ง",
+  "home": "บ้าน",
+  "last_hour": "ชั่วโมงที่ผ่านมา",
+  "returning": "กำลังจ่ายคืน",
+  "today_export": "จ่ายคืนวันนี้",
+  "today_gas": "แก๊สวันนี้",
+  "today_import": "ใช้วันนี้",
+  "using": "กำลังใช้"
+}

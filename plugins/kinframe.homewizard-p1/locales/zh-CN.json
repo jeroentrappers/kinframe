@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 电表",
+  "grid": "电网",
+  "home": "家",
+  "last_hour": "过去一小时",
+  "returning": "回馈中",
+  "today_export": "今日回馈",
+  "today_gas": "今日燃气",
+  "today_import": "今日用电",
+  "using": "用电中"
+}

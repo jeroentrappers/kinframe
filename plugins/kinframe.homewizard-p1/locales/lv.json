@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 skaitītājs",
+  "grid": "Tīkls",
+  "home": "Mājas",
+  "last_hour": "Pēdējā stunda",
+  "returning": "Nodošana tīklā",
+  "today_export": "Šodien nodots",
+  "today_gas": "Gāze šodien",
+  "today_import": "Šodien patērēts",
+  "using": "Patēriņš"
+}

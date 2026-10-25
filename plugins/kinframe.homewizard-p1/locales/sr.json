@@ -1,0 +1,11 @@
+{
+  "@name": "Бројило HomeWizard P1",
+  "grid": "Мрежа",
+  "home": "Дом",
+  "last_hour": "Последњи сат",
+  "returning": "Предаја у мрежу",
+  "today_export": "Предато данас",
+  "today_gas": "Гас данас",
+  "today_import": "Потрошено данас",
+  "using": "Потрошња"
+}

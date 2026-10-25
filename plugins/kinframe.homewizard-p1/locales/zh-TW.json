@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 電錶",
+  "grid": "電網",
+  "home": "家",
+  "last_hour": "過去一小時",
+  "returning": "回送中",
+  "today_export": "今日回送",
+  "today_gas": "今日瓦斯",
+  "today_import": "今日用電",
+  "using": "用電中"
+}

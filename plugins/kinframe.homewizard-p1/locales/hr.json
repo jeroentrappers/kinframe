@@ -1,0 +1,11 @@
+{
+  "@name": "Brojilo HomeWizard P1",
+  "grid": "Mreža",
+  "home": "Dom",
+  "last_hour": "Zadnji sat",
+  "returning": "Predaja u mrežu",
+  "today_export": "Predano danas",
+  "today_gas": "Plin danas",
+  "today_import": "Potrošeno danas",
+  "using": "Potrošnja"
+}

@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 メーター",
+  "grid": "電力網",
+  "home": "家",
+  "last_hour": "過去 1 時間",
+  "returning": "売電中",
+  "today_export": "今日の売電量",
+  "today_gas": "今日のガス",
+  "today_import": "今日の使用量",
+  "using": "使用中"
+}

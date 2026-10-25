@@ -1,0 +1,11 @@
+{
+  "@name": "Счётчик HomeWizard P1",
+  "grid": "Сеть",
+  "home": "Дом",
+  "last_hour": "Последний час",
+  "returning": "Отдача в сеть",
+  "today_export": "Отдано сегодня",
+  "today_gas": "Газ сегодня",
+  "today_import": "Потреблено сегодня",
+  "using": "Потребление"
+}

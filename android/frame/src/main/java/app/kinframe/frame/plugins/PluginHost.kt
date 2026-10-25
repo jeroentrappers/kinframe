@@ -113,6 +113,27 @@ class PluginHost(
         }
     }
 
+    /**
+     * The owner tapped a plugin's button (docs/plugins.md §4.2): runs its `action` handler on the plugin thread. A view
+     * it returns is shown at once; either way the instance renders again right after.
+     */
+    suspend fun action(instanceId: String, actionId: String): PluginView? {
+        val r = running[instanceId] ?: return null
+        val view = withContext(thread) {
+            val json = runCatching { withTimeout(CALL_TIMEOUT_MS) { r.instance.action(r.ctx, actionId) } }
+                .onFailure { r.ctx.log("action $actionId failed: ${it.message}") }.getOrNull()
+            json?.let { (PluginViewParser.parse(it) as? ViewResult.Valid)?.view }
+        }
+        if (view != null) {
+            if (view != r.view) r.changedAt = now()
+            r.view = view
+            r.lastGoodAt = now()
+        }
+        r.wake.trySend(Unit)
+        publish()
+        return view
+    }
+
     private fun reconcile() {
         val want = if (active && awake) configs.associateBy { it.instanceId } else emptyMap()
         // Stop what is gone or changed.

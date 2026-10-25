@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 mérő",
+  "grid": "Hálózat",
+  "home": "Otthon",
+  "last_hour": "Utolsó óra",
+  "returning": "Visszatáplálás",
+  "today_export": "Ma visszatáplált",
+  "today_gas": "Gáz ma",
+  "today_import": "Ma fogyasztott",
+  "using": "Fogyasztás"
+}

@@ -1,0 +1,11 @@
+{
+  "@name": "Contatore HomeWizard P1",
+  "grid": "Rete",
+  "home": "Casa",
+  "last_hour": "Ultima ora",
+  "returning": "Immissione",
+  "today_export": "Immessi oggi",
+  "today_gas": "Gas oggi",
+  "today_import": "Consumati oggi",
+  "using": "Consumo"
+}

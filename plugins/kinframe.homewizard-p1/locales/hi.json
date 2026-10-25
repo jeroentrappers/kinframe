@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 मीटर",
+  "grid": "ग्रिड",
+  "home": "घर",
+  "last_hour": "पिछला घंटा",
+  "returning": "ग्रिड को वापस",
+  "today_export": "आज वापस",
+  "today_gas": "आज गैस",
+  "today_import": "आज खपत",
+  "using": "खपत"
+}

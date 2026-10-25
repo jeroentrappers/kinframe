@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 sayacı",
+  "grid": "Şebeke",
+  "home": "Ev",
+  "last_hour": "Son bir saat",
+  "returning": "Şebekeye veriliyor",
+  "today_export": "Bugün verilen",
+  "today_gas": "Bugün gaz",
+  "today_import": "Bugün tüketilen",
+  "using": "Tüketim"
+}

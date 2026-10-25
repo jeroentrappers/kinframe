@@ -6,7 +6,10 @@ import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.Locales
 import app.kinframe.frame.R
-import app.kinframe.frame.plugins.homewizard.HomeWizardP1
+import app.kinframe.frame.plugins.js.PluginBundle
+import app.kinframe.frame.plugins.js.PluginNet
+import app.kinframe.frame.plugins.js.PluginPermissions
+import app.kinframe.frame.plugins.js.QuickJsPluginInstance
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.schedule.ScreenMode
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,16 +21,16 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
- * The frame's plugin feature, step 1 (docs/plugins.md §10): built-in widgets only, configured on the frame. Owns the
- * [PluginHost] and starts instances when the slideshow is up and the screen is awake.
+ * The frame's plugin feature (docs/plugins.md §10): JavaScript plugins in the QuickJS host (step 2; for now only the
+ * bundles built into the APK) and the remaining Kotlin built-ins, configured on the frame. Owns the [PluginHost] and
+ * starts instances when the slideshow is up and the screen is awake.
  */
 class FramePlugins(private val c: FrameController) {
     private val g = c.g
     val prefs = PluginPrefs(g.app)
 
-    /** Plugins whose instances can be created (built in for now; step 2 adds downloaded bundles). */
+    /** Kotlin widgets that aren't JavaScript plugins yet. Everything else comes from a bundle ([bundle]). */
     private val builtIns: Map<String, (InstanceConfig) -> PluginInstance> = buildMap {
-        put(HOMEWIZARD_P1) { _ -> HomeWizardP1() }
         put(WEATHER_STATION) { cfg ->
             WeatherStation(cfg.settings, onReading = { r ->
                 val t = r.tempC
@@ -41,8 +44,25 @@ class FramePlugins(private val c: FrameController) {
         scope = c.scope,
         now = { g.clock.nowMs() },
         contextFor = { cfg, invalidate -> contextFor(cfg, invalidate) },
-        factory = { cfg -> builtIns[cfg.pluginId]?.let { it(cfg) to nameOf(cfg.pluginId) } },
+        factory = { cfg -> (builtIns[cfg.pluginId]?.invoke(cfg) ?: script(cfg))?.let { it to nameOf(cfg.pluginId) } },
     )
+
+    private val bundles = HashMap<String, PluginBundle?>()
+    private val prelude: String by lazy { g.app.assets.open("plugin-host/prelude.js").bufferedReader().use { it.readText() } }
+
+    /** A plugin bundle shipped in the APK (assets `plugins/<id>/`), or null. A broken bundle is logged and skipped. */
+    fun bundle(pluginId: String): PluginBundle? = synchronized(bundles) {
+        bundles.getOrPut(pluginId) {
+            runCatching { PluginBundle.fromAssets(g.app.assets, pluginId) }
+                .onFailure { Log.w("KinFramePlugins", "bundle $pluginId: ${it.message}") }.getOrNull()
+        }
+    }
+
+    private fun script(cfg: InstanceConfig): PluginInstance? {
+        val b = bundle(cfg.pluginId) ?: return null
+        val net = PluginNet(g.http, PluginPermissions(b.manifest, b.manifest.withDefaults(cfg.settings)), userAgent = USER_AGENT)
+        return QuickJsPluginInstance(b, prelude, net)
+    }
 
     val states: StateFlow<List<InstanceState>> get() = host.states
     val layout: StateFlow<PluginLayoutConfig> get() = prefs.layout
@@ -81,7 +101,7 @@ class FramePlugins(private val c: FrameController) {
         HOMEWIZARD_P1 -> Locales.wrap(g.app).getString(R.string.p1_name)
         WEATHER_STATION -> Locales.wrap(g.app).getString(R.string.ws_name)
         DEMO -> "Demo"
-        else -> pluginId
+        else -> bundle(pluginId)?.name(Locales.effective(g.app)) ?: pluginId
     }
 
     fun format(): PluginFormat {
@@ -146,6 +166,8 @@ class FramePlugins(private val c: FrameController) {
 
     companion object {
         const val HOMEWIZARD_P1 = "kinframe.homewizard-p1"
+        /** The P1 dial's full scale when the owner hasn't picked one (the plugin's `max_w` default). */
+        const val P1_DEFAULT_MAX_W = 4000
         const val P1_INSTANCE = "builtin-homewizard-p1"
         const val WEATHER_STATION = "kinframe.weather-station"
         const val STATION_INSTANCE = "builtin-weather-station"

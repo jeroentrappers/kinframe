@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 skaitiklis",
+  "grid": "Tinklas",
+  "home": "Namai",
+  "last_hour": "Paskutinė valanda",
+  "returning": "Atidavimas",
+  "today_export": "Atiduota šiandien",
+  "today_gas": "Dujos šiandien",
+  "today_import": "Suvartota šiandien",
+  "using": "Vartojimas"
+}

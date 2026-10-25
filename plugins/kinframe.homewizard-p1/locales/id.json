@@ -1,0 +1,11 @@
+{
+  "@name": "Meteran HomeWizard P1",
+  "grid": "Jaringan",
+  "home": "Rumah",
+  "last_hour": "Satu jam terakhir",
+  "returning": "Dikembalikan",
+  "today_export": "Dikembalikan hari ini",
+  "today_gas": "Gas hari ini",
+  "today_import": "Dipakai hari ini",
+  "using": "Pemakaian"
+}

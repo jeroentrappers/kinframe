@@ -1,0 +1,11 @@
+{
+  "@name": "Contador HomeWizard P1",
+  "grid": "Red",
+  "home": "Casa",
+  "last_hour": "Última hora",
+  "returning": "Vertido",
+  "today_export": "Vertido hoy",
+  "today_gas": "Gas hoy",
+  "today_import": "Consumido hoy",
+  "using": "Consumo"
+}

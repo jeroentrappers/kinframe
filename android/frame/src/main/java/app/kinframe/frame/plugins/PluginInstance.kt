@@ -36,6 +36,12 @@ interface PluginInstance {
     /** The detail card on tap, or null if the plugin has none. */
     suspend fun detail(ctx: PluginContext): JsonElement? = null
 
+    /**
+     * The owner tapped a button the plugin drew (an `action` in its view, docs/plugins.md §4.2). Returns a fresh view
+     * to show at once (the host still calls [render] afterwards), or null.
+     */
+    suspend fun action(ctx: PluginContext, id: String): JsonElement? = null
+
     /** Called before the instance is stopped. */
     suspend fun stop(ctx: PluginContext) {}
 }

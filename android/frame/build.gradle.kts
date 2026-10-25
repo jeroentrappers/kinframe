@@ -94,6 +94,39 @@ ksp {
     arg("room.generateKotlin", "true")
 }
 
+/**
+ * Built-in plugin bundles (docs/plugins.md §3): the repository's `plugins/<id>/` folders, shipped as assets
+ * `plugins/<id>/` with only what the frame runs (manifest, code, translations; no fixtures or READMEs).
+ */
+abstract class BundlePlugins @javax.inject.Inject constructor(private val fs: FileSystemOperations) : DefaultTask() {
+    @get:InputDirectory @get:PathSensitive(PathSensitivity.RELATIVE) abstract val source: DirectoryProperty
+    @get:OutputDirectory abstract val output: DirectoryProperty
+
+    @TaskAction fun bundle() {
+        fs.sync {
+            from(source) { include("*/plugin.json", "*/main.js", "*/locales/*.json") }
+            into(output.dir("plugins"))
+        }
+    }
+}
+
+val bundlePlugins = tasks.register<BundlePlugins>("bundlePlugins") {
+    source.set(layout.projectDirectory.dir("../../plugins"))
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.sources.assets?.addGeneratedSourceDirectory(bundlePlugins, BundlePlugins::output)
+    }
+}
+
+// JVM unit tests run the plugins in the desktop build of the same QuickJS binding (the Android .so can't load there).
+configurations.matching { it.name.endsWith("UnitTestRuntimeClasspath") }.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("io.github.dokar3:quickjs-kt-android")).using(module(libs.quickjs.kt.jvm.get().toString()))
+    }
+}
+
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(project(":core"))
@@ -107,6 +140,8 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.zxing.core)
     implementation(libs.realm.android)
+    // The plugin host's JavaScript engine (docs/plugins.md §5): QuickJS with coroutine-friendly bindings.
+    implementation(libs.quickjs.kt)
 
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)

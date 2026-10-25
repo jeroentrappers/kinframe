@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 -mittari",
+  "grid": "Sähköverkko",
+  "home": "Koti",
+  "last_hour": "Viime tunti",
+  "returning": "Syöttö verkkoon",
+  "today_export": "Syötetty tänään",
+  "today_gas": "Kaasu tänään",
+  "today_import": "Kulutettu tänään",
+  "using": "Kulutus"
+}

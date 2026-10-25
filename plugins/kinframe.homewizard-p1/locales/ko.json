@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1 계량기",
+  "grid": "전력망",
+  "home": "집",
+  "last_hour": "최근 1시간",
+  "returning": "역송 중",
+  "today_export": "오늘 역송량",
+  "today_gas": "오늘 가스",
+  "today_import": "오늘 사용량",
+  "using": "사용 중"
+}

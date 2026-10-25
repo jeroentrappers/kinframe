@@ -1,0 +1,11 @@
+{
+  "@name": "Compteur HomeWizard P1",
+  "grid": "Réseau",
+  "home": "Maison",
+  "last_hour": "Dernière heure",
+  "returning": "Injection",
+  "today_export": "Injecté aujourd’hui",
+  "today_gas": "Gaz aujourd’hui",
+  "today_import": "Consommé aujourd’hui",
+  "using": "Consommation"
+}

@@ -1,0 +1,11 @@
+{
+  "@name": "Medidor HomeWizard P1",
+  "grid": "Rede",
+  "home": "Casa",
+  "last_hour": "Última hora",
+  "returning": "Injeção",
+  "today_export": "Injetado hoje",
+  "today_gas": "Gás hoje",
+  "today_import": "Consumido hoje",
+  "using": "Consumo"
+}

@@ -1,0 +1,11 @@
+{
+  "@name": "Elektromer HomeWizard P1",
+  "grid": "Sieť",
+  "home": "Domov",
+  "last_hour": "Posledná hodina",
+  "returning": "Dodávka",
+  "today_export": "Dnes dodané",
+  "today_gas": "Plyn dnes",
+  "today_import": "Dnes odobraté",
+  "using": "Odber"
+}

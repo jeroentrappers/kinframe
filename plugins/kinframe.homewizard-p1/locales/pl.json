@@ -1,0 +1,11 @@
+{
+  "@name": "Licznik HomeWizard P1",
+  "grid": "Sieć",
+  "home": "Dom",
+  "last_hour": "Ostatnia godzina",
+  "returning": "Oddawanie",
+  "today_export": "Oddano dziś",
+  "today_gas": "Gaz dziś",
+  "today_import": "Pobrano dziś",
+  "using": "Pobór"
+}

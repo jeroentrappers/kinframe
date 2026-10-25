@@ -1,0 +1,11 @@
+{
+  "@name": "Đồng hồ đo HomeWizard P1",
+  "grid": "Lưới điện",
+  "home": "Nhà",
+  "last_hour": "Giờ qua",
+  "returning": "Đang trả lưới",
+  "today_export": "Đã trả hôm nay",
+  "today_gas": "Gas hôm nay",
+  "today_import": "Đã dùng hôm nay",
+  "using": "Đang dùng"
+}

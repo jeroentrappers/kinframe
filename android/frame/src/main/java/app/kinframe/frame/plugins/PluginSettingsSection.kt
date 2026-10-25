@@ -41,7 +41,6 @@ import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.plugins.homewizard.FoundMeter
 import app.kinframe.frame.plugins.homewizard.HomeWizardDiscovery
-import app.kinframe.frame.plugins.homewizard.HomeWizardViews
 import app.kinframe.frame.plugins.station.StationCode
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.plugins.station.WeathercloudSource
@@ -194,7 +193,7 @@ private fun HomeWizardSettings(c: FrameController, cfg: InstanceConfig, update: 
     }
     if (setting("style") == "gauge") Labeled(stringResource(R.string.p1_max)) {
         val f = remember { c.plugins.format() }
-        val current = (cfg.settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: HomeWizardViews.DEFAULT_MAX_W.toInt()
+        val current = (cfg.settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: FramePlugins.P1_DEFAULT_MAX_W
         ChoiceChips(
             listOf(2000, 3000, 4000, 5000, 6000, 8000, 10000).map { it to f.number(it.toDouble(), unit = "W") },
             current, { update(withSetting("max_w", JsonPrimitive(it))) },

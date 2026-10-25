@@ -1,0 +1,11 @@
+{
+  "@name": "מונה HomeWizard P1",
+  "grid": "רשת החשמל",
+  "home": "בית",
+  "last_hour": "השעה האחרונה",
+  "returning": "החזרה לרשת",
+  "today_export": "הוחזר היום",
+  "today_gas": "גז היום",
+  "today_import": "נצרך היום",
+  "using": "צריכה"
+}

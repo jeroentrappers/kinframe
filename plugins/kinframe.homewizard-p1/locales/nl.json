@@ -1,0 +1,11 @@
+{
+  "@name": "HomeWizard P1-meter",
+  "grid": "Net",
+  "home": "Huis",
+  "last_hour": "Laatste uur",
+  "returning": "Teruglevering",
+  "today_export": "Vandaag teruggeleverd",
+  "today_gas": "Gas vandaag",
+  "today_import": "Vandaag verbruikt",
+  "using": "Verbruik"
+}
