@@ -53,6 +53,43 @@ The bottom of the screen is taken by the caption (left) and the clock and weathe
 - **Tap:** tapping a widget can open its **detail card**, a larger version the plugin describes the same way, closed
   by tapping outside it or after 20 s.
 
+### 2.1 Layout mode: overlay or band
+
+Corners on top of the photo are fine for one small value, but they cover part of it. The owner can instead choose the
+**band** layout per frame: the slideshow shrinks to a **3:2** area (2:3 in portrait) and the space that frees up holds
+the plugins, so nothing covers the photo.
+
+The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/16 of the long side:
+
+```
+ landscape 1280×800                          portrait 800×1280
+┌───────────────────────────────┬──────┐     ┌──────────────────────┐
+│                               │ band │     │ band  800×80         │
+│        photo 1200×800  (3:2)  │ 80×  │     ├──────────────────────┤
+│                               │ 800  │     │                      │
+│                               │      │     │  photo 800×1200      │
+│ caption           clock · wx  │      │     │       (2:3)          │
+└───────────────────────────────┴──────┘     │                      │
+                                             │ caption   clock · wx │
+                                             └──────────────────────┘
+```
+
+- **Why 3:2:** it is the shape of most camera photos, and close to phone photos (4:3), so in fill mode a typical
+  landscape photo loses almost nothing to cropping. On a 16:10 screen today it loses 6 % of its height; in the 3:2 area
+  it fits exactly.
+- **What goes in the band:** the same plugin views, laid out for a narrow column (landscape: widgets stacked, icon
+  above value) or a strip (portrait: widgets side by side, `top-left` slot first, then `top-right`). The view
+  components (section 4) each have a compact form for this; plugins don't do anything different.
+- **Side:** the owner picks left or right for the column in landscape; the portrait strip is always at the top, away
+  from the caption.
+- **Band background:** the frame's paper colour, or a blurred, darkened edge of the current photo for a softer look
+  (owner's choice). It cross-fades with the photo.
+- **Empty band:** without any plugin instances, or when all are hidden (night, *on tap*, *only when the value
+  changes*), the band collapses and the photo goes back to full screen, animated. The clock and weather can optionally
+  move into the band so the photo has no overlays at all.
+- Other screen shapes keep the rule: a 16:9 frame gets a wider band (3:2 of 1920×1080 leaves 300 px), a 4:3 frame
+  has no room and uses the overlay layout.
+
 ## 3. What a plugin is made of
 
 ```
