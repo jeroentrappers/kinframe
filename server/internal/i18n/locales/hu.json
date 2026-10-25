@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "erre a meghívóra már válaszoltak, vagy visszavonták",
   "timed events can last at most 31 days": "az időponthoz kötött események legfeljebb 31 napig tarthatnak",
   "timed events need a start and an end": "az időponthoz kötött eseményekhez kezdés és befejezés kell",
-  "upload not found, incomplete or already used": "a feltöltés nem található, hiányos vagy már fel lett használva"
+  "upload not found, incomplete or already used": "a feltöltés nem található, hiányos vagy már fel lett használva",
+  "too many TVs are mirroring this frame": "túl sok tévé tükrözi már ezt a képkeretet",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "a tükrözési link az egész képkeretet mutatja: nincs album_id, placement_ids vagy kind"
  }
 }

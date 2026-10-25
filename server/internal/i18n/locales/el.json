@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "η πρόσκληση έχει ήδη απαντηθεί ή ανακληθεί",
   "timed events can last at most 31 days": "τα συμβάντα με ώρα μπορούν να διαρκούν έως 31 ημέρες",
   "timed events need a start and an end": "τα συμβάντα με ώρα χρειάζονται έναρξη και λήξη",
-  "upload not found, incomplete or already used": "η μεταφόρτωση δεν βρέθηκε, είναι ημιτελής ή έχει ήδη χρησιμοποιηθεί"
+  "upload not found, incomplete or already used": "η μεταφόρτωση δεν βρέθηκε, είναι ημιτελής ή έχει ήδη χρησιμοποιηθεί",
+  "too many TVs are mirroring this frame": "πάρα πολλές τηλεοράσεις καθρεφτίζουν ήδη αυτή την κορνίζα",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "ο σύνδεσμος καθρεφτισμού δείχνει όλη την κορνίζα: χωρίς album_id, placement_ids ή kind"
  }
 }

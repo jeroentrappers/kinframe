@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "이미 응답했거나 취소된 초대예요",
   "timed events can last at most 31 days": "시간이 정해진 일정은 최대 31일까지 지속될 수 있어요",
   "timed events need a start and an end": "시간이 정해진 일정에는 시작과 종료가 필요해요",
-  "upload not found, incomplete or already used": "업로드를 찾을 수 없거나, 완료되지 않았거나, 이미 사용되었어요"
+  "upload not found, incomplete or already used": "업로드를 찾을 수 없거나, 완료되지 않았거나, 이미 사용되었어요",
+  "too many TVs are mirroring this frame": "이 액자를 미러링하는 TV가 너무 많습니다",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "미러 링크는 액자 전체를 보여 줍니다: album_id, placement_ids, kind를 쓸 수 없습니다"
  }
 }

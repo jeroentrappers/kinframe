@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "kutsuun on jo vastattu tai se on peruttu",
   "timed events can last at most 31 days": "kellonaikaan sidottu tapahtuma voi kestää enintään 31 päivää",
   "timed events need a start and an end": "kellonaikaan sidotulla tapahtumalla on oltava alku ja loppu",
-  "upload not found, incomplete or already used": "latausta ei löytynyt, se on keskeneräinen tai jo käytetty"
+  "upload not found, incomplete or already used": "latausta ei löytynyt, se on keskeneräinen tai jo käytetty",
+  "too many TVs are mirroring this frame": "liian moni televisio peilaa jo tätä kehystä",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "peilauslinkki näyttää koko kehyksen: ei album_id-, placement_ids- tai kind-arvoa"
  }
 }

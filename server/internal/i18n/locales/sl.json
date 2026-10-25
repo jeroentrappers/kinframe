@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "na to povabilo je bilo že odgovorjeno ali pa je bilo umaknjeno",
   "timed events can last at most 31 days": "dogodki z uro lahko trajajo največ 31 dni",
   "timed events need a start and an end": "dogodki z uro potrebujejo začetek in konec",
-  "upload not found, incomplete or already used": "naložene datoteke ni mogoče najti, ni popolna ali je že bila uporabljena"
+  "upload not found, incomplete or already used": "naložene datoteke ni mogoče najti, ni popolna ali je že bila uporabljena",
+  "too many TVs are mirroring this frame": "ta okvir že zrcali preveč televizorjev",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "zrcalna povezava prikazuje cel okvir: brez album_id, placement_ids ali kind"
  }
 }

@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "คำเชิญนี้ได้รับการตอบหรือถูกถอนไปแล้ว",
   "timed events can last at most 31 days": "กิจกรรมที่ระบุเวลายาวได้ไม่เกิน 31 วัน",
   "timed events need a start and an end": "กิจกรรมที่ระบุเวลาต้องมีเวลาเริ่มและเวลาสิ้นสุด",
-  "upload not found, incomplete or already used": "ไม่พบการอัปโหลด อัปโหลดไม่ครบ หรือถูกใช้ไปแล้ว"
+  "upload not found, incomplete or already used": "ไม่พบการอัปโหลด อัปโหลดไม่ครบ หรือถูกใช้ไปแล้ว",
+  "too many TVs are mirroring this frame": "มีทีวีสะท้อนกรอบรูปนี้อยู่มากเกินไป",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "ลิงก์สะท้อนแสดงทั้งกรอบรูป: ไม่มี album_id, placement_ids หรือ kind"
  }
 }

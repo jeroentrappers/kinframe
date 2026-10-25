@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "cette invitation a déjà reçu une réponse ou a été retirée",
   "timed events can last at most 31 days": "les événements avec horaire durent au maximum 31 jours",
   "timed events need a start and an end": "les événements avec horaire nécessitent un début et une fin",
-  "upload not found, incomplete or already used": "envoi introuvable, incomplet ou déjà utilisé"
+  "upload not found, incomplete or already used": "envoi introuvable, incomplet ou déjà utilisé",
+  "too many TVs are mirroring this frame": "trop de téléviseurs reproduisent déjà ce cadre",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "un lien miroir montre tout le cadre : pas d'album_id, de placement_ids ni de kind"
  }
 }

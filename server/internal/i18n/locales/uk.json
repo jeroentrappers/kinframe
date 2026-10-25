@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "на це запрошення вже відповіли або його відкликано",
   "timed events can last at most 31 days": "подія з часом може тривати не більше 31 дня",
   "timed events need a start and an end": "для події з часом потрібні початок і кінець",
-  "upload not found, incomplete or already used": "завантаження не знайдено, не завершено або вже використано"
+  "upload not found, incomplete or already used": "завантаження не знайдено, не завершено або вже використано",
+  "too many TVs are mirroring this frame": "цю рамку вже віддзеркалює забагато телевізорів",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "дзеркальне посилання показує всю рамку: без album_id, placement_ids чи kind"
  }
 }

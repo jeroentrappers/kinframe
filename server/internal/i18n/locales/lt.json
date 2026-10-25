@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "į šį kvietimą jau atsakyta arba jis atšauktas",
   "timed events can last at most 31 days": "įvykiai su laiku gali trukti ne ilgiau kaip 31 dieną",
   "timed events need a start and an end": "įvykiams su laiku reikia pradžios ir pabaigos",
-  "upload not found, incomplete or already used": "įkėlimas nerastas, nebaigtas arba jau panaudotas"
+  "upload not found, incomplete or already used": "įkėlimas nerastas, nebaigtas arba jau panaudotas",
+  "too many TVs are mirroring this frame": "per daug televizorių jau atspindi šį rėmelį",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "veidrodinė nuoroda rodo visą rėmelį: be album_id, placement_ids ar kind"
  }
 }

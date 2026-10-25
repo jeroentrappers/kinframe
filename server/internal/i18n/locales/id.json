@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "undangan ini sudah dijawab atau ditarik",
   "timed events can last at most 31 days": "acara berjam paling lama 31 hari",
   "timed events need a start and an end": "acara berjam perlu waktu mulai dan selesai",
-  "upload not found, incomplete or already used": "unggahan tidak ditemukan, belum lengkap, atau sudah dipakai"
+  "upload not found, incomplete or already used": "unggahan tidak ditemukan, belum lengkap, atau sudah dipakai",
+  "too many TVs are mirroring this frame": "terlalu banyak TV yang sudah mencerminkan bingkai ini",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "tautan cermin menampilkan seluruh bingkai: tanpa album_id, placement_ids, atau kind"
  }
 }

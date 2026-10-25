@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "inbjudan har redan besvarats eller återkallats",
   "timed events can last at most 31 days": "händelser med tid kan pågå högst 31 dagar",
   "timed events need a start and an end": "händelser med tid måste ha en start och ett slut",
-  "upload not found, incomplete or already used": "uppladdningen hittades inte, är ofullständig eller redan använd"
+  "upload not found, incomplete or already used": "uppladdningen hittades inte, är ofullständig eller redan använd",
+  "too many TVs are mirroring this frame": "för många tv-apparater speglar redan den här ramen",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "en spegellänk visar hela ramen: inget album_id, placement_ids eller kind"
  }
 }

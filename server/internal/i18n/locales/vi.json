@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "lời mời này đã được trả lời hoặc đã bị rút lại",
   "timed events can last at most 31 days": "sự kiện có giờ chỉ kéo dài tối đa 31 ngày",
   "timed events need a start and an end": "sự kiện có giờ cần có thời gian bắt đầu và kết thúc",
-  "upload not found, incomplete or already used": "không tìm thấy tệp tải lên, tệp chưa đầy đủ hoặc đã được dùng"
+  "upload not found, incomplete or already used": "không tìm thấy tệp tải lên, tệp chưa đầy đủ hoặc đã được dùng",
+  "too many TVs are mirroring this frame": "có quá nhiều TV đang phản chiếu khung này",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "liên kết phản chiếu hiển thị cả khung: không có album_id, placement_ids hoặc kind"
  }
 }

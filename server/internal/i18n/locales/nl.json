@@ -148,6 +148,8 @@
   "this invitation was already answered or withdrawn": "deze uitnodiging is al beantwoord of ingetrokken",
   "timed events can last at most 31 days": "afspraken met een uur duren hoogstens 31 dagen",
   "timed events need a start and an end": "afspraken met een uur hebben een begin en een einde nodig",
-  "upload not found, incomplete or already used": "upload niet gevonden, onvolledig of al gebruikt"
+  "upload not found, incomplete or already used": "upload niet gevonden, onvolledig of al gebruikt",
+  "too many TVs are mirroring this frame": "te veel tv's tonen deze fotolijst al",
+  "a mirror link shows the whole frame: no album_id, placement_ids or kind": "een spiegellink toont de hele fotolijst: geen album_id, placement_ids of kind"
  }
 }
