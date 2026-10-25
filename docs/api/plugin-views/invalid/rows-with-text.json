@@ -1,0 +1,14 @@
+{
+  "$error_path": "/items/0",
+  "view": {
+    "type": "rows",
+    "items": [
+      {
+        "type": "text",
+        "lines": [
+          "no"
+        ]
+      }
+    ]
+  }
+}

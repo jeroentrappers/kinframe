@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Huiswidgets</string>
+    <string name="plugins_note">Live waarden van toestellen in je thuisnetwerk, op of naast de foto’s. Vroege preview: stel het hier op de fotolijst in.</string>
+    <string name="plugins_layout">Indeling</string>
+    <string name="plugins_layout_off">Uit</string>
+    <string name="plugins_layout_overlay">In de hoeken</string>
+    <string name="plugins_layout_band">Naast de foto</string>
+    <string name="plugins_band_side">Kant (liggend)</string>
+    <string name="plugins_side_left">Links</string>
+    <string name="plugins_side_right">Rechts</string>
+    <string name="plugins_band_background">Achtergrond van de band</string>
+    <string name="plugins_background_paper">Papier</string>
+    <string name="plugins_background_photo">Uit de foto</string>
+    <string name="plugins_band_clock">Klok en weer in de band</string>
+    <string name="plugins_slot">Hoek</string>
+    <string name="plugins_slot_top_left">Linksboven</string>
+    <string name="plugins_slot_top_right">Rechtsboven</string>
+    <string name="plugins_visibility">Tonen</string>
+    <string name="plugins_visibility_always">Altijd</string>
+    <string name="plugins_visibility_change">Als het verandert</string>
+    <string name="plugins_visibility_tap">Na een tik</string>
+    <string name="plugins_unavailable">Niet beschikbaar</string>
+    <string name="p1_name">HomeWizard P1-meter</string>
+    <string name="p1_address">Meter</string>
+    <string name="p1_searching">Meters zoeken in het netwerk…</string>
+    <string name="p1_none_found">Nog geen meter gevonden. Zet “Lokale API” aan voor de meter in de HomeWizard Energy-app, of typ het adres.</string>
+    <string name="p1_api_off">Lokale API staat uit</string>
+    <string name="p1_manual">Adres</string>
+    <string name="p1_use">Gebruiken</string>
+    <string name="p1_not_private">Alleen adressen in je thuisnetwerk kunnen gebruikt worden.</string>
+    <string name="p1_style">Tonen als</string>
+    <string name="p1_style_value">Getal</string>
+    <string name="p1_style_flow">Stroom</string>
+    <string name="p1_warn">Markeren boven</string>
+    <string name="p1_warn_off">Nooit</string>
+    <string name="p1_status_ok">Metingen komen binnen.</string>
+    <string name="p1_status_waiting">Wachten op de eerste meting…</string>
+    <string name="p1_status_error">Kan de meter niet uitlezen: %1$s</string>
+    <string name="p1_using">Verbruik</string>
+    <string name="p1_returning">Teruglevering</string>
+    <string name="p1_grid">Net</string>
+    <string name="p1_home">Huis</string>
+    <string name="p1_last_hour">Laatste uur</string>
+    <string name="p1_today_import">Vandaag verbruikt</string>
+    <string name="p1_today_export">Vandaag teruggeleverd</string>
+    <string name="p1_today_gas">Gas vandaag</string>
+</resources>

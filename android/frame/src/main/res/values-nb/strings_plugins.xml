@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Hjemmewidgeter</string>
+    <string name="plugins_note">Direkteverdier fra enheter på hjemmenettverket, på eller ved siden av bildene. Tidlig forhåndsversjon: still det inn her på rammen.</string>
+    <string name="plugins_layout">Oppsett</string>
+    <string name="plugins_layout_off">Av</string>
+    <string name="plugins_layout_overlay">I hjørnene</string>
+    <string name="plugins_layout_band">Ved siden av bildet</string>
+    <string name="plugins_band_side">Side (liggende)</string>
+    <string name="plugins_side_left">Venstre</string>
+    <string name="plugins_side_right">Høyre</string>
+    <string name="plugins_band_background">Bakgrunn for båndet</string>
+    <string name="plugins_background_paper">Papir</string>
+    <string name="plugins_background_photo">Fra bildet</string>
+    <string name="plugins_band_clock">Klokke og vær i båndet</string>
+    <string name="plugins_slot">Hjørne</string>
+    <string name="plugins_slot_top_left">Øverst til venstre</string>
+    <string name="plugins_slot_top_right">Øverst til høyre</string>
+    <string name="plugins_visibility">Vis</string>
+    <string name="plugins_visibility_always">Alltid</string>
+    <string name="plugins_visibility_change">Når det endres</string>
+    <string name="plugins_visibility_tap">Etter et trykk</string>
+    <string name="plugins_unavailable">Ikke tilgjengelig</string>
+    <string name="p1_name">HomeWizard P1-måler</string>
+    <string name="p1_address">Måler</string>
+    <string name="p1_searching">Ser etter målere på nettverket …</string>
+    <string name="p1_none_found">Fant ingen måler ennå. Slå på «Lokal API» for måleren i HomeWizard Energy-appen, eller skriv inn adressen.</string>
+    <string name="p1_api_off">Lokal API er av</string>
+    <string name="p1_manual">Adresse</string>
+    <string name="p1_use">Bruk</string>
+    <string name="p1_not_private">Bare adresser på hjemmenettverket ditt kan brukes.</string>
+    <string name="p1_style">Vis som</string>
+    <string name="p1_style_value">Tall</string>
+    <string name="p1_style_flow">Flyt</string>
+    <string name="p1_warn">Fremhev over</string>
+    <string name="p1_warn_off">Aldri</string>
+    <string name="p1_status_ok">Mottar målinger.</string>
+    <string name="p1_status_waiting">Venter på første måling …</string>
+    <string name="p1_status_error">Kan ikke lese måleren: %1$s</string>
+    <string name="p1_using">Forbruk</string>
+    <string name="p1_returning">Leverer tilbake</string>
+    <string name="p1_grid">Nett</string>
+    <string name="p1_home">Hjem</string>
+    <string name="p1_last_hour">Siste time</string>
+    <string name="p1_today_import">Brukt i dag</string>
+    <string name="p1_today_export">Levert i dag</string>
+    <string name="p1_today_gas">Gass i dag</string>
+</resources>

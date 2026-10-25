@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">घर के विजेट</string>
+    <string name="plugins_note">आपके घर के नेटवर्क के उपकरणों से लाइव मान, फ़ोटो पर या उनके बगल में। शुरुआती झलक: इसे यहीं फ़्रेम पर सेट करें।</string>
+    <string name="plugins_layout">लेआउट</string>
+    <string name="plugins_layout_off">बंद</string>
+    <string name="plugins_layout_overlay">कोनों में</string>
+    <string name="plugins_layout_band">फ़ोटो के बगल में</string>
+    <string name="plugins_band_side">तरफ़ (लैंडस्केप)</string>
+    <string name="plugins_side_left">बाएँ</string>
+    <string name="plugins_side_right">दाएँ</string>
+    <string name="plugins_band_background">पट्टी का बैकग्राउंड</string>
+    <string name="plugins_background_paper">कागज़</string>
+    <string name="plugins_background_photo">फ़ोटो से</string>
+    <string name="plugins_band_clock">घड़ी और मौसम पट्टी में</string>
+    <string name="plugins_slot">कोना</string>
+    <string name="plugins_slot_top_left">ऊपर बाएँ</string>
+    <string name="plugins_slot_top_right">ऊपर दाएँ</string>
+    <string name="plugins_visibility">दिखाएँ</string>
+    <string name="plugins_visibility_always">हमेशा</string>
+    <string name="plugins_visibility_change">बदलने पर</string>
+    <string name="plugins_visibility_tap">टैप करने के बाद</string>
+    <string name="plugins_unavailable">उपलब्ध नहीं</string>
+    <string name="p1_name">HomeWizard P1 मीटर</string>
+    <string name="p1_address">मीटर</string>
+    <string name="p1_searching">नेटवर्क पर मीटर खोजे जा रहे हैं…</string>
+    <string name="p1_none_found">अभी तक कोई मीटर नहीं मिला। HomeWizard Energy ऐप में मीटर के लिए “Local API” चालू करें, या उसका पता लिखें।</string>
+    <string name="p1_api_off">लोकल API बंद है</string>
+    <string name="p1_manual">पता</string>
+    <string name="p1_use">इस्तेमाल करें</string>
+    <string name="p1_not_private">सिर्फ़ आपके घर के नेटवर्क के पते इस्तेमाल किए जा सकते हैं।</string>
+    <string name="p1_style">इस रूप में दिखाएँ</string>
+    <string name="p1_style_value">संख्या</string>
+    <string name="p1_style_flow">प्रवाह</string>
+    <string name="p1_warn">इससे ऊपर हाइलाइट करें</string>
+    <string name="p1_warn_off">कभी नहीं</string>
+    <string name="p1_status_ok">रीडिंग आ रही हैं।</string>
+    <string name="p1_status_waiting">पहली रीडिंग का इंतज़ार…</string>
+    <string name="p1_status_error">मीटर पढ़ा नहीं जा सका: %1$s</string>
+    <string name="p1_using">खपत</string>
+    <string name="p1_returning">ग्रिड को वापस</string>
+    <string name="p1_grid">ग्रिड</string>
+    <string name="p1_home">घर</string>
+    <string name="p1_last_hour">पिछला घंटा</string>
+    <string name="p1_today_import">आज खपत</string>
+    <string name="p1_today_export">आज वापस</string>
+    <string name="p1_today_gas">आज गैस</string>
+</resources>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">집 위젯</string>
+    <string name="plugins_note">홈 네트워크 기기의 실시간 값을 사진 위나 옆에 표시해요. 미리 보기 버전: 여기 액자에서 설정해요.</string>
+    <string name="plugins_layout">레이아웃</string>
+    <string name="plugins_layout_off">끄기</string>
+    <string name="plugins_layout_overlay">모서리에</string>
+    <string name="plugins_layout_band">사진 옆에</string>
+    <string name="plugins_band_side">위치(가로)</string>
+    <string name="plugins_side_left">왼쪽</string>
+    <string name="plugins_side_right">오른쪽</string>
+    <string name="plugins_band_background">띠 배경</string>
+    <string name="plugins_background_paper">종이</string>
+    <string name="plugins_background_photo">사진에서</string>
+    <string name="plugins_band_clock">띠에 시계와 날씨 표시</string>
+    <string name="plugins_slot">모서리</string>
+    <string name="plugins_slot_top_left">왼쪽 위</string>
+    <string name="plugins_slot_top_right">오른쪽 위</string>
+    <string name="plugins_visibility">표시</string>
+    <string name="plugins_visibility_always">항상</string>
+    <string name="plugins_visibility_change">바뀔 때</string>
+    <string name="plugins_visibility_tap">탭한 후</string>
+    <string name="plugins_unavailable">사용할 수 없음</string>
+    <string name="p1_name">HomeWizard P1 계량기</string>
+    <string name="p1_address">계량기</string>
+    <string name="p1_searching">네트워크에서 계량기를 찾는 중…</string>
+    <string name="p1_none_found">아직 계량기를 찾지 못했어요. HomeWizard Energy 앱에서 계량기의 ‘로컬 API’를 켜거나 주소를 입력하세요.</string>
+    <string name="p1_api_off">로컬 API가 꺼져 있어요</string>
+    <string name="p1_manual">주소</string>
+    <string name="p1_use">사용</string>
+    <string name="p1_not_private">홈 네트워크 주소만 사용할 수 있어요.</string>
+    <string name="p1_style">표시 방식</string>
+    <string name="p1_style_value">숫자</string>
+    <string name="p1_style_flow">흐름</string>
+    <string name="p1_warn">강조 기준</string>
+    <string name="p1_warn_off">안 함</string>
+    <string name="p1_status_ok">측정값을 받고 있어요.</string>
+    <string name="p1_status_waiting">첫 측정값을 기다리는 중…</string>
+    <string name="p1_status_error">계량기를 읽을 수 없어요: %1$s</string>
+    <string name="p1_using">사용 중</string>
+    <string name="p1_returning">역송 중</string>
+    <string name="p1_grid">전력망</string>
+    <string name="p1_home">집</string>
+    <string name="p1_last_hour">최근 1시간</string>
+    <string name="p1_today_import">오늘 사용량</string>
+    <string name="p1_today_export">오늘 역송량</string>
+    <string name="p1_today_gas">오늘 가스</string>
+</resources>

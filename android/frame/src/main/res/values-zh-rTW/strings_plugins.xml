@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">居家小工具</string>
+    <string name="plugins_note">在相片上或相片旁顯示家用網路中裝置的即時數值。搶先預覽：在這台相框上設定。</string>
+    <string name="plugins_layout">版面</string>
+    <string name="plugins_layout_off">關閉</string>
+    <string name="plugins_layout_overlay">在角落</string>
+    <string name="plugins_layout_band">在相片旁</string>
+    <string name="plugins_band_side">側邊（橫向）</string>
+    <string name="plugins_side_left">左</string>
+    <string name="plugins_side_right">右</string>
+    <string name="plugins_band_background">條帶背景</string>
+    <string name="plugins_background_paper">紙張</string>
+    <string name="plugins_background_photo">取自相片</string>
+    <string name="plugins_band_clock">在條帶中顯示時鐘和天氣</string>
+    <string name="plugins_slot">角落</string>
+    <string name="plugins_slot_top_left">左上</string>
+    <string name="plugins_slot_top_right">右上</string>
+    <string name="plugins_visibility">顯示</string>
+    <string name="plugins_visibility_always">一律</string>
+    <string name="plugins_visibility_change">數值變化時</string>
+    <string name="plugins_visibility_tap">輕觸後</string>
+    <string name="plugins_unavailable">無法使用</string>
+    <string name="p1_name">HomeWizard P1 電錶</string>
+    <string name="p1_address">電錶</string>
+    <string name="p1_searching">正在網路中尋找電錶…</string>
+    <string name="p1_none_found">尚未找到電錶。請在 HomeWizard Energy App 中為電錶開啟「本機 API」，或輸入其位址。</string>
+    <string name="p1_api_off">本機 API 已關閉</string>
+    <string name="p1_manual">位址</string>
+    <string name="p1_use">使用</string>
+    <string name="p1_not_private">只能使用家用網路中的位址。</string>
+    <string name="p1_style">顯示方式</string>
+    <string name="p1_style_value">數字</string>
+    <string name="p1_style_flow">能量流</string>
+    <string name="p1_warn">高於此值時醒目顯示</string>
+    <string name="p1_warn_off">永不</string>
+    <string name="p1_status_ok">正在接收讀數。</string>
+    <string name="p1_status_waiting">正在等待第一筆讀數…</string>
+    <string name="p1_status_error">無法讀取電錶：%1$s</string>
+    <string name="p1_using">用電中</string>
+    <string name="p1_returning">回送中</string>
+    <string name="p1_grid">電網</string>
+    <string name="p1_home">家</string>
+    <string name="p1_last_hour">過去一小時</string>
+    <string name="p1_today_import">今日用電</string>
+    <string name="p1_today_export">今日回送</string>
+    <string name="p1_today_gas">今日瓦斯</string>
+</resources>

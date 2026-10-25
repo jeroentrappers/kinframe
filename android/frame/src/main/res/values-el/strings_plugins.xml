@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widget για το σπίτι</string>
+    <string name="plugins_note">Ζωντανές τιμές από συσκευές του οικιακού σας δικτύου, πάνω ή δίπλα στις φωτογραφίες. Πρώιμη έκδοση: ρυθμίζεται εδώ, στην κορνίζα.</string>
+    <string name="plugins_layout">Διάταξη</string>
+    <string name="plugins_layout_off">Ανενεργό</string>
+    <string name="plugins_layout_overlay">Στις γωνίες</string>
+    <string name="plugins_layout_band">Δίπλα στη φωτογραφία</string>
+    <string name="plugins_band_side">Πλευρά (οριζόντια)</string>
+    <string name="plugins_side_left">Αριστερά</string>
+    <string name="plugins_side_right">Δεξιά</string>
+    <string name="plugins_band_background">Φόντο λωρίδας</string>
+    <string name="plugins_background_paper">Χαρτί</string>
+    <string name="plugins_background_photo">Από τη φωτογραφία</string>
+    <string name="plugins_band_clock">Ρολόι και καιρός στη λωρίδα</string>
+    <string name="plugins_slot">Γωνία</string>
+    <string name="plugins_slot_top_left">Πάνω αριστερά</string>
+    <string name="plugins_slot_top_right">Πάνω δεξιά</string>
+    <string name="plugins_visibility">Εμφάνιση</string>
+    <string name="plugins_visibility_always">Πάντα</string>
+    <string name="plugins_visibility_change">Όταν αλλάζει</string>
+    <string name="plugins_visibility_tap">Μετά από πάτημα</string>
+    <string name="plugins_unavailable">Μη διαθέσιμο</string>
+    <string name="p1_name">Μετρητής HomeWizard P1</string>
+    <string name="p1_address">Μετρητής</string>
+    <string name="p1_searching">Αναζήτηση μετρητών στο δίκτυο…</string>
+    <string name="p1_none_found">Δεν βρέθηκε ακόμη μετρητής. Ενεργοποιήστε το «Τοπικό API» για τον μετρητή στην εφαρμογή HomeWizard Energy ή πληκτρολογήστε τη διεύθυνσή του.</string>
+    <string name="p1_api_off">Το τοπικό API είναι ανενεργό</string>
+    <string name="p1_manual">Διεύθυνση</string>
+    <string name="p1_use">Χρήση</string>
+    <string name="p1_not_private">Μπορούν να χρησιμοποιηθούν μόνο διευθύνσεις του οικιακού δικτύου.</string>
+    <string name="p1_style">Εμφάνιση ως</string>
+    <string name="p1_style_value">Αριθμός</string>
+    <string name="p1_style_flow">Ροή</string>
+    <string name="p1_warn">Επισήμανση πάνω από</string>
+    <string name="p1_warn_off">Ποτέ</string>
+    <string name="p1_status_ok">Λαμβάνονται μετρήσεις.</string>
+    <string name="p1_status_waiting">Αναμονή για την πρώτη μέτρηση…</string>
+    <string name="p1_status_error">Δεν είναι δυνατή η ανάγνωση του μετρητή: %1$s</string>
+    <string name="p1_using">Κατανάλωση</string>
+    <string name="p1_returning">Επιστροφή στο δίκτυο</string>
+    <string name="p1_grid">Δίκτυο</string>
+    <string name="p1_home">Σπίτι</string>
+    <string name="p1_last_hour">Τελευταία ώρα</string>
+    <string name="p1_today_import">Κατανάλωση σήμερα</string>
+    <string name="p1_today_export">Επιστροφή σήμερα</string>
+    <string name="p1_today_gas">Αέριο σήμερα</string>
+</resources>

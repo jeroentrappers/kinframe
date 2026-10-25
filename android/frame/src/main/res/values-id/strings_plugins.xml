@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widget rumah</string>
+    <string name="plugins_note">Nilai langsung dari perangkat di jaringan rumah Anda, di atas atau di samping foto. Pratinjau awal: atur di sini, di bingkai.</string>
+    <string name="plugins_layout">Tata letak</string>
+    <string name="plugins_layout_off">Nonaktif</string>
+    <string name="plugins_layout_overlay">Di sudut</string>
+    <string name="plugins_layout_band">Di samping foto</string>
+    <string name="plugins_band_side">Sisi (lanskap)</string>
+    <string name="plugins_side_left">Kiri</string>
+    <string name="plugins_side_right">Kanan</string>
+    <string name="plugins_band_background">Latar pita</string>
+    <string name="plugins_background_paper">Kertas</string>
+    <string name="plugins_background_photo">Dari foto</string>
+    <string name="plugins_band_clock">Jam dan cuaca di pita</string>
+    <string name="plugins_slot">Sudut</string>
+    <string name="plugins_slot_top_left">Kiri atas</string>
+    <string name="plugins_slot_top_right">Kanan atas</string>
+    <string name="plugins_visibility">Tampilkan</string>
+    <string name="plugins_visibility_always">Selalu</string>
+    <string name="plugins_visibility_change">Saat berubah</string>
+    <string name="plugins_visibility_tap">Setelah diketuk</string>
+    <string name="plugins_unavailable">Tidak tersedia</string>
+    <string name="p1_name">Meteran HomeWizard P1</string>
+    <string name="p1_address">Meteran</string>
+    <string name="p1_searching">Mencari meteran di jaringan…</string>
+    <string name="p1_none_found">Belum ada meteran yang ditemukan. Aktifkan “API Lokal” untuk meteran di aplikasi HomeWizard Energy, atau ketik alamatnya.</string>
+    <string name="p1_api_off">API Lokal nonaktif</string>
+    <string name="p1_manual">Alamat</string>
+    <string name="p1_use">Gunakan</string>
+    <string name="p1_not_private">Hanya alamat di jaringan rumah Anda yang bisa digunakan.</string>
+    <string name="p1_style">Tampilkan sebagai</string>
+    <string name="p1_style_value">Angka</string>
+    <string name="p1_style_flow">Aliran</string>
+    <string name="p1_warn">Sorot di atas</string>
+    <string name="p1_warn_off">Tidak pernah</string>
+    <string name="p1_status_ok">Pembacaan diterima.</string>
+    <string name="p1_status_waiting">Menunggu pembacaan pertama…</string>
+    <string name="p1_status_error">Tidak dapat membaca meteran: %1$s</string>
+    <string name="p1_using">Pemakaian</string>
+    <string name="p1_returning">Dikembalikan</string>
+    <string name="p1_grid">Jaringan</string>
+    <string name="p1_home">Rumah</string>
+    <string name="p1_last_hour">Satu jam terakhir</string>
+    <string name="p1_today_import">Dipakai hari ini</string>
+    <string name="p1_today_export">Dikembalikan hari ini</string>
+    <string name="p1_today_gas">Gas hari ini</string>
+</resources>

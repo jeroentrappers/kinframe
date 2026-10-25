@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Widgeturi pentru casă</string>
+    <string name="plugins_note">Valori în timp real de la dispozitivele din rețeaua de acasă, peste fotografii sau lângă ele. Previzualizare timpurie: se configurează aici, pe ramă.</string>
+    <string name="plugins_layout">Aranjare</string>
+    <string name="plugins_layout_off">Dezactivat</string>
+    <string name="plugins_layout_overlay">În colțuri</string>
+    <string name="plugins_layout_band">Lângă fotografie</string>
+    <string name="plugins_band_side">Latura (peisaj)</string>
+    <string name="plugins_side_left">Stânga</string>
+    <string name="plugins_side_right">Dreapta</string>
+    <string name="plugins_band_background">Fundalul benzii</string>
+    <string name="plugins_background_paper">Hârtie</string>
+    <string name="plugins_background_photo">Din fotografie</string>
+    <string name="plugins_band_clock">Ceas și vreme în bandă</string>
+    <string name="plugins_slot">Colț</string>
+    <string name="plugins_slot_top_left">Stânga sus</string>
+    <string name="plugins_slot_top_right">Dreapta sus</string>
+    <string name="plugins_visibility">Afișare</string>
+    <string name="plugins_visibility_always">Mereu</string>
+    <string name="plugins_visibility_change">Când se schimbă</string>
+    <string name="plugins_visibility_tap">După o atingere</string>
+    <string name="plugins_unavailable">Indisponibil</string>
+    <string name="p1_name">Contor HomeWizard P1</string>
+    <string name="p1_address">Contor</string>
+    <string name="p1_searching">Se caută contoare în rețea…</string>
+    <string name="p1_none_found">Nu s-a găsit încă niciun contor. Activați „API local” pentru contor în aplicația HomeWizard Energy sau introduceți adresa lui.</string>
+    <string name="p1_api_off">API local dezactivat</string>
+    <string name="p1_manual">Adresă</string>
+    <string name="p1_use">Folosește</string>
+    <string name="p1_not_private">Se pot folosi doar adrese din rețeaua de acasă.</string>
+    <string name="p1_style">Afișează ca</string>
+    <string name="p1_style_value">Număr</string>
+    <string name="p1_style_flow">Flux</string>
+    <string name="p1_warn">Evidențiază peste</string>
+    <string name="p1_warn_off">Niciodată</string>
+    <string name="p1_status_ok">Se primesc citiri.</string>
+    <string name="p1_status_waiting">Se așteaptă prima citire…</string>
+    <string name="p1_status_error">Contorul nu poate fi citit: %1$s</string>
+    <string name="p1_using">Consum</string>
+    <string name="p1_returning">Injectare</string>
+    <string name="p1_grid">Rețea</string>
+    <string name="p1_home">Casă</string>
+    <string name="p1_last_hour">Ultima oră</string>
+    <string name="p1_today_import">Consumat azi</string>
+    <string name="p1_today_export">Injectat azi</string>
+    <string name="p1_today_gas">Gaz azi</string>
+</resources>

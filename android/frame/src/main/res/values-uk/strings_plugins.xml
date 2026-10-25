@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Домашні віджети</string>
+    <string name="plugins_note">Поточні значення з пристроїв у вашій домашній мережі — на фото або поруч. Рання версія: налаштовується тут, на рамці.</string>
+    <string name="plugins_layout">Розташування</string>
+    <string name="plugins_layout_off">Вимк.</string>
+    <string name="plugins_layout_overlay">У кутах</string>
+    <string name="plugins_layout_band">Поруч із фото</string>
+    <string name="plugins_band_side">Сторона (альбомна)</string>
+    <string name="plugins_side_left">Ліворуч</string>
+    <string name="plugins_side_right">Праворуч</string>
+    <string name="plugins_band_background">Фон смуги</string>
+    <string name="plugins_background_paper">Папір</string>
+    <string name="plugins_background_photo">З фото</string>
+    <string name="plugins_band_clock">Годинник і погода на смузі</string>
+    <string name="plugins_slot">Кут</string>
+    <string name="plugins_slot_top_left">Угорі ліворуч</string>
+    <string name="plugins_slot_top_right">Угорі праворуч</string>
+    <string name="plugins_visibility">Показувати</string>
+    <string name="plugins_visibility_always">Завжди</string>
+    <string name="plugins_visibility_change">Коли змінюється</string>
+    <string name="plugins_visibility_tap">Після дотику</string>
+    <string name="plugins_unavailable">Недоступно</string>
+    <string name="p1_name">Лічильник HomeWizard P1</string>
+    <string name="p1_address">Лічильник</string>
+    <string name="p1_searching">Пошук лічильників у мережі…</string>
+    <string name="p1_none_found">Лічильник ще не знайдено. Увімкніть «Локальний API» для лічильника в застосунку HomeWizard Energy або введіть його адресу.</string>
+    <string name="p1_api_off">Локальний API вимкнено</string>
+    <string name="p1_manual">Адреса</string>
+    <string name="p1_use">Використати</string>
+    <string name="p1_not_private">Можна використовувати лише адреси з домашньої мережі.</string>
+    <string name="p1_style">Показувати як</string>
+    <string name="p1_style_value">Число</string>
+    <string name="p1_style_flow">Потік</string>
+    <string name="p1_warn">Виділяти понад</string>
+    <string name="p1_warn_off">Ніколи</string>
+    <string name="p1_status_ok">Показники надходять.</string>
+    <string name="p1_status_waiting">Очікування першого показника…</string>
+    <string name="p1_status_error">Не вдається прочитати лічильник: %1$s</string>
+    <string name="p1_using">Споживання</string>
+    <string name="p1_returning">Віддача в мережу</string>
+    <string name="p1_grid">Мережа</string>
+    <string name="p1_home">Дім</string>
+    <string name="p1_last_hour">Остання година</string>
+    <string name="p1_today_import">Спожито сьогодні</string>
+    <string name="p1_today_export">Віддано сьогодні</string>
+    <string name="p1_today_gas">Газ сьогодні</string>
+</resources>

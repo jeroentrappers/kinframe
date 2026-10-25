@@ -64,6 +64,8 @@ android {
         compose = true
         buildConfig = true
     }
+    // Debug builds carry the plugin view examples (docs/api/plugin-views) for the demo widget and the dev preview.
+    sourceSets.getByName("debug").assets.directories += "../../docs/api/plugin-views"
     testOptions {
         unitTests.isReturnDefaultValues = true
         // App resources in Robolectric tests (strings for the weather screenshot tests).

@@ -1,0 +1,23 @@
+{
+  "$error_path": "/edges/0/to",
+  "view": {
+    "type": "flow",
+    "nodes": [
+      {
+        "id": "a",
+        "icon": "sun"
+      },
+      {
+        "id": "b",
+        "icon": "home"
+      }
+    ],
+    "edges": [
+      {
+        "from": "a",
+        "to": "c",
+        "power": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">Otthoni widgetek</string>
+    <string name="plugins_note">Élő értékek az otthoni hálózat eszközeiről, a fotókon vagy mellettük. Korai előzetes: itt, a képkereten állítható be.</string>
+    <string name="plugins_layout">Elrendezés</string>
+    <string name="plugins_layout_off">Ki</string>
+    <string name="plugins_layout_overlay">A sarkokban</string>
+    <string name="plugins_layout_band">A fotó mellett</string>
+    <string name="plugins_band_side">Oldal (fekvő)</string>
+    <string name="plugins_side_left">Bal</string>
+    <string name="plugins_side_right">Jobb</string>
+    <string name="plugins_band_background">A sáv háttere</string>
+    <string name="plugins_background_paper">Papír</string>
+    <string name="plugins_background_photo">A fotóból</string>
+    <string name="plugins_band_clock">Óra és időjárás a sávban</string>
+    <string name="plugins_slot">Sarok</string>
+    <string name="plugins_slot_top_left">Bal felső</string>
+    <string name="plugins_slot_top_right">Jobb felső</string>
+    <string name="plugins_visibility">Megjelenítés</string>
+    <string name="plugins_visibility_always">Mindig</string>
+    <string name="plugins_visibility_change">Ha változik</string>
+    <string name="plugins_visibility_tap">Koppintás után</string>
+    <string name="plugins_unavailable">Nem érhető el</string>
+    <string name="p1_name">HomeWizard P1 mérő</string>
+    <string name="p1_address">Mérő</string>
+    <string name="p1_searching">Mérők keresése a hálózaton…</string>
+    <string name="p1_none_found">Még nincs mérő. Kapcsold be a mérő „Helyi API” beállítását a HomeWizard Energy alkalmazásban, vagy írd be a címét.</string>
+    <string name="p1_api_off">A helyi API ki van kapcsolva</string>
+    <string name="p1_manual">Cím</string>
+    <string name="p1_use">Használat</string>
+    <string name="p1_not_private">Csak az otthoni hálózat címei használhatók.</string>
+    <string name="p1_style">Megjelenítés módja</string>
+    <string name="p1_style_value">Szám</string>
+    <string name="p1_style_flow">Áramlás</string>
+    <string name="p1_warn">Kiemelés e fölött</string>
+    <string name="p1_warn_off">Soha</string>
+    <string name="p1_status_ok">Érkeznek a mérések.</string>
+    <string name="p1_status_waiting">Várakozás az első mérésre…</string>
+    <string name="p1_status_error">A mérő nem olvasható: %1$s</string>
+    <string name="p1_using">Fogyasztás</string>
+    <string name="p1_returning">Visszatáplálás</string>
+    <string name="p1_grid">Hálózat</string>
+    <string name="p1_home">Otthon</string>
+    <string name="p1_last_hour">Utolsó óra</string>
+    <string name="p1_today_import">Ma fogyasztott</string>
+    <string name="p1_today_export">Ma visszatáplált</string>
+    <string name="p1_today_gas">Gáz ma</string>
+</resources>

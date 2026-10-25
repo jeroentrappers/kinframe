@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home widgets (plugins, docs/plugins.md): frame-local settings and the built-in HomeWizard P1 widget -->
+    <string name="plugins_title">おうちウィジェット</string>
+    <string name="plugins_note">ホームネットワーク上の機器の値を、写真の上または横にリアルタイムで表示します。先行プレビュー：このフォトフレームで設定します。</string>
+    <string name="plugins_layout">レイアウト</string>
+    <string name="plugins_layout_off">オフ</string>
+    <string name="plugins_layout_overlay">四隅</string>
+    <string name="plugins_layout_band">写真の横</string>
+    <string name="plugins_band_side">位置（横向き）</string>
+    <string name="plugins_side_left">左</string>
+    <string name="plugins_side_right">右</string>
+    <string name="plugins_band_background">帯の背景</string>
+    <string name="plugins_background_paper">紙</string>
+    <string name="plugins_background_photo">写真から</string>
+    <string name="plugins_band_clock">時計と天気を帯に表示</string>
+    <string name="plugins_slot">隅</string>
+    <string name="plugins_slot_top_left">左上</string>
+    <string name="plugins_slot_top_right">右上</string>
+    <string name="plugins_visibility">表示</string>
+    <string name="plugins_visibility_always">常に</string>
+    <string name="plugins_visibility_change">変化したとき</string>
+    <string name="plugins_visibility_tap">タップ後</string>
+    <string name="plugins_unavailable">利用できません</string>
+    <string name="p1_name">HomeWizard P1 メーター</string>
+    <string name="p1_address">メーター</string>
+    <string name="p1_searching">ネットワーク上のメーターを探しています…</string>
+    <string name="p1_none_found">メーターが見つかりません。HomeWizard Energy アプリでメーターの「ローカル API」をオンにするか、アドレスを入力してください。</string>
+    <string name="p1_api_off">ローカル API がオフです</string>
+    <string name="p1_manual">アドレス</string>
+    <string name="p1_use">使用</string>
+    <string name="p1_not_private">ホームネットワーク内のアドレスのみ使用できます。</string>
+    <string name="p1_style">表示形式</string>
+    <string name="p1_style_value">数値</string>
+    <string name="p1_style_flow">フロー</string>
+    <string name="p1_warn">強調するしきい値</string>
+    <string name="p1_warn_off">しない</string>
+    <string name="p1_status_ok">測定値を受信しています。</string>
+    <string name="p1_status_waiting">最初の測定値を待っています…</string>
+    <string name="p1_status_error">メーターを読み取れません：%1$s</string>
+    <string name="p1_using">使用中</string>
+    <string name="p1_returning">売電中</string>
+    <string name="p1_grid">電力網</string>
+    <string name="p1_home">家</string>
+    <string name="p1_last_hour">過去 1 時間</string>
+    <string name="p1_today_import">今日の使用量</string>
+    <string name="p1_today_export">今日の売電量</string>
+    <string name="p1_today_gas">今日のガス</string>
+</resources>
