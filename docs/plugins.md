@@ -404,8 +404,8 @@ two helpers the forms can use:
 - **Settings:** the station (`source`, for now only `weathercloud`, and `device`: the station's code, or the link to
   its public page, `https://app.weathercloud.net/d<code>` → `<code>`), a style (*Temperature*: one value, or *All
   values*), wind in km/h (mph with °F), m/s or Beaufort, how often to check (every 5, 10, 15 or 30 minutes; 5 is the
-  minimum) and *Use my weather station for the current temperature* (below). Pressure is always hPa, temperatures
-  follow the frame's °C/°F.
+  minimum). Pressure is always hPa, temperatures follow the frame's °C/°F. The widget is switched on in the frame's
+  Settings → **Weather**, next to the forecast (below).
 - **Data, and the catch:** Weathercloud has **no published API**. Its own web app loads
   `GET https://app.weathercloud.net/device/values?code=<code>` (with `X-Requested-With: XMLHttpRequest`):
   `{"epoch":1792941451,"bar":988.8,"temp":12.8,"hum":56,"wdir":253,"wspd":2.3,"dew":4.2,"heat":12.8,"rainrate":0,
@@ -432,10 +432,21 @@ two helpers the forms can use:
   `ctx.store` (a few KB), so trends and charts survive a restart.
 - **Stale:** the widget sets `ctx.dataTime` to the station's `epoch`; a reading older than 30 minutes greys the
   widget even while Weathercloud answers (the station is offline). Fetch errors follow the host's rules.
-- **Use my weather station for the current temperature:** the frame's bottom-right weather shows the station's
-  temperature instead of the forecast's while the station's reading is fresh (30 minutes); the icon, condition and
-  today's lowest and highest stay from Open-Meteo. It needs the widget to be on (it is what reads the station).
-- Screenshots: [`docs/plugins/`](plugins/) `station_*.png`.
+- **Two weather sources, two switches.** The frame's Settings → **Weather** has *Weather forecast* (from the
+  internet for the frame's location, Open-Meteo: `widgets.weather`, synced like every setting and also in the apps,
+  off without a location) and *My weather station* (this widget, frame-local) side by side. The temperature is shown
+  once:
+
+  | Forecast | Station | Clock's weather block | Station widget |
+  |---|---|---|---|
+  | on | off | forecast icon, temperature, low/high | — |
+  | off | on | nothing | its temperature, humidity, wind (as set) |
+  | on | on | forecast icon and low/high with the **station's** temperature (while its reading is under 30 minutes old, else the forecast's) | everything **except** the temperature: *Temperature* style leads with humidity (the wind as its label), *All values* drops the temperature row |
+
+  This replaces the earlier opt-in *Use my weather station for the current temperature* (`use_for_weather`, now
+  ignored). The host passes `hide_temp: true` in the widget's settings while the forecast is on, so a plugin
+  version of the widget gets the same hint.
+- Screenshots: [`docs/plugins/`](plugins/) `station_*.png`, `weather_both_on.png`, `weather_station_only.png`, `settings_weather.png`.
 
 ### 9.5 Now playing via Home Assistant (`kinframe.ha-media`)
 
@@ -615,9 +626,11 @@ v2 API (HTTPS + token) is not supported yet.
 that host over HTTPS, not `local_only`) and request headers, and sends `User-Agent: kinframe-frame/<version>
 (+https://github.com/jeroentrappers/kinframe)`. Numbers may be JSON numbers or strings; implausible values (humidity
 over 100 %, pressure 0) are dropped. The settings accept the code, `d<code>` or any link containing `/d<code>` or
-`code=<code>`. *Use my weather station for the current temperature* is a frame-local instance setting
-(`use_for_weather`); `FramePlugins.stationNow` carries the reading to the slideshow, which overrides the forecast's
-current temperature (`Weather.withStation`) while it is at most 30 minutes old.
+`code=<code>`. The two weather switches live in `weather/WeatherSettingsSection.kt`; `WeatherSources` holds the
+rule above (`forecastOn`, and `forHost`, which adds `hide_temp` to the station instance while the forecast is on, so
+the host restarts it with the new view). `FramePlugins.stationNow` carries every reading to the slideshow, which
+shows it instead of the forecast's current temperature (`Weather.withStation`) while it is at most 30 minutes old;
+with the forecast off there is no weather block to put it in.
 
 **Changes to the design above.** None of substance; these are additions or decisions the design left open: the band
 fallbacks (64 dp minimum, not beside the calendar sidebar), render-after-settle for the band animation, unknown

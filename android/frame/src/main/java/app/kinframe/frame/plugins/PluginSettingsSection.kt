@@ -97,13 +97,7 @@ fun PluginSettingsSection(c: FrameController) {
                 ?: InstanceConfig(FramePlugins.P1_INSTANCE, FramePlugins.HOMEWIZARD_P1, enabled = false, settings = JsonObject(mapOf("style" to JsonPrimitive("value"))))
             SwitchRow(stringResource(R.string.p1_name), p1.enabled) { prefs.upsert(p1.copy(enabled = it)) }
             if (p1.enabled) HomeWizardSettings(c, p1) { prefs.upsert(it) }
-            val ws = instances.firstOrNull { it.instanceId == FramePlugins.STATION_INSTANCE }
-                ?: InstanceConfig(
-                    FramePlugins.STATION_INSTANCE, FramePlugins.WEATHER_STATION, slot = Slot.TopLeft, enabled = false,
-                    settings = JsonObject(mapOf("source" to JsonPrimitive(WeathercloudSource.ID), "style" to JsonPrimitive("compact"))),
-                )
-            SwitchRow(stringResource(R.string.ws_name), ws.enabled) { prefs.upsert(ws.copy(enabled = it)) }
-            if (ws.enabled) WeatherStationSettings(c, ws) { prefs.upsert(it) }
+            // The weather station is switched on in the Weather section (next to the forecast).
             if (BuildConfig.DEBUG) {
                 val demo = instances.firstOrNull { it.instanceId == FramePlugins.DEMO_INSTANCE }
                     ?: InstanceConfig(FramePlugins.DEMO_INSTANCE, FramePlugins.DEMO, slot = Slot.TopLeft, enabled = false)
@@ -247,9 +241,17 @@ private fun ManualAddress(current: String?, onUse: (String) -> Unit) {
     }
 }
 
+/** The built-in weather station's instance, or a new disabled one with the defaults. */
+fun stationConfig(instances: List<InstanceConfig>): InstanceConfig =
+    instances.firstOrNull { it.instanceId == FramePlugins.STATION_INSTANCE }
+        ?: InstanceConfig(
+            FramePlugins.STATION_INSTANCE, FramePlugins.WEATHER_STATION, slot = Slot.TopLeft, enabled = false,
+            settings = JsonObject(mapOf("source" to JsonPrimitive(WeathercloudSource.ID), "style" to JsonPrimitive("compact"))),
+        )
+
 /** The built-in weather station (docs/plugins.md §9.4): the station, units, look and how often to ask. */
 @Composable
-private fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, update: (InstanceConfig) -> Unit) {
+internal fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, update: (InstanceConfig) -> Unit) {
     fun setting(key: String) = (cfg.settings[key] as? JsonPrimitive)?.contentOrNull
     fun withSetting(key: String, value: JsonPrimitive?) =
         cfg.copy(settings = JsonObject(if (value == null) cfg.settings - key else cfg.settings + (key to value)))
@@ -284,12 +286,6 @@ private fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, upda
             current, { update(withSetting("interval_min", if (it == WeatherStation.MIN_INTERVAL_MIN) null else JsonPrimitive(it))) },
             Modifier.horizontalScroll(rememberScrollState()),
         )
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        SwitchRow(stringResource(R.string.ws_use_for_weather), setting("use_for_weather") == "true") {
-            update(withSetting("use_for_weather", if (it) JsonPrimitive(true) else null))
-        }
-        Text(stringResource(R.string.ws_use_for_weather_note), style = Kin.type.caption, color = Kin.colors.inkSoft)
     }
     val states by c.plugins.states.collectAsState()
     val st = states.firstOrNull { it.config.instanceId == cfg.instanceId }

@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">हवा की इकाई</string>
     <string name="ws_wind_auto">अपने आप</string>
     <string name="ws_interval">जाँचें हर</string>
-    <string name="ws_use_for_weather">मौजूदा तापमान के लिए मेरा मौसम स्टेशन इस्तेमाल करें</string>
-    <string name="ws_use_for_weather_note">मौसम का आइकन और आज का न्यूनतम और अधिकतम पूर्वानुमान से ही आते रहेंगे।</string>
     <string name="ws_status_error">स्टेशन पढ़ा नहीं जा सका: %1$s</string>
     <string name="ws_status_quiet">स्टेशन ने कुछ समय से नई रीडिंग नहीं भेजी है।</string>
     <string name="ws_temperature">तापमान</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">अभी अपडेट हुआ</string>
     <string name="ws_updated_ago">%1$s पहले अपडेट हुआ</string>
     <string name="ws_no_reading_since">%1$s से कोई नई रीडिंग नहीं</string>
+    <string name="wx_section">मौसम</string>
+    <string name="wx_forecast">मौसम का पूर्वानुमान</string>
+    <string name="wx_forecast_sub">इंटरनेट से, फ़्रेम की जगह के लिए (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">पहले kinframe ऐप में फ़्रेम की जगह सेट करें।</string>
+    <string name="wx_station">मेरा मौसम स्टेशन</string>
+    <string name="wx_station_sub">आपका अपना मौसम स्टेशन (PWS), Weathercloud के ज़रिए</string>
+    <string name="wx_both_note">दोनों चालू होने पर घड़ी आपके स्टेशन का तापमान, पूर्वानुमान के आसमान और आज के न्यूनतम व अधिकतम के साथ दिखाती है।</string>
 </resources>

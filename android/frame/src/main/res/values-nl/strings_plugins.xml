@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">Wind in</string>
     <string name="ws_wind_auto">Automatisch</string>
     <string name="ws_interval">Controleer elke</string>
-    <string name="ws_use_for_weather">Gebruik mijn weerstation voor de huidige temperatuur</string>
-    <string name="ws_use_for_weather_note">Het weericoon en de laagste en hoogste temperatuur van vandaag blijven van de weersverwachting komen.</string>
     <string name="ws_status_error">Kan het station niet uitlezen: %1$s</string>
     <string name="ws_status_quiet">Het station heeft al een tijdje geen nieuwe meting gestuurd.</string>
     <string name="ws_temperature">Temperatuur</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">Net bijgewerkt</string>
     <string name="ws_updated_ago">%1$s geleden bijgewerkt</string>
     <string name="ws_no_reading_since">Geen nieuwe meting sinds %1$s</string>
+    <string name="wx_section">Weer</string>
+    <string name="wx_forecast">Weersverwachting</string>
+    <string name="wx_forecast_sub">Van het internet, voor de locatie van het kader (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">Stel eerst de locatie van het kader in de kinframe-app in.</string>
+    <string name="wx_station">Mijn weerstation</string>
+    <string name="wx_station_sub">Je eigen weerstation (PWS) via Weathercloud</string>
+    <string name="wx_both_note">Met beide aan toont de klok de temperatuur van je weerstation, met de lucht en de laagste en hoogste temperatuur uit de verwachting.</string>
 </resources>

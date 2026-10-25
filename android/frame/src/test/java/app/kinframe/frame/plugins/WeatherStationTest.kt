@@ -304,7 +304,7 @@ class WeatherStationTest {
             val store = HashMap<String, String>()
             var now = measured + 3 * 60_000L
             val settings = JsonObject(
-                mapOf("device" to JsonPrimitive("https://app.weathercloud.net/d9287156658"), "wind_unit" to JsonPrimitive("ms"), "use_for_weather" to JsonPrimitive(true)),
+                mapOf("device" to JsonPrimitive("https://app.weathercloud.net/d9287156658"), "wind_unit" to JsonPrimitive("ms")),
             )
             val ctx = PluginContext(
                 instanceId = "ws", settings = settings, state = HashMap(),

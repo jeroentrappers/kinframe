@@ -447,8 +447,8 @@
     <string name="fs_remove_schedule">Remove this sleep time</string>
     <string name="fs_weather_title">Location &amp; weather</string>
     <string name="fs_weather_hint">Where the frame is. Used for the weather and to dim the screen after sunset.</string>
-    <string name="fs_show_weather">Show the weather</string>
-    <string name="fs_show_weather_hint">Current weather next to the clock. Tap it on the frame for the forecast.</string>
+    <string name="fs_show_weather">Weather forecast</string>
+    <string name="fs_show_weather_hint">From the internet, for the frame’s location (Open-Meteo). Your own weather station is switched on on the frame itself: Settings → Weather.</string>
     <string name="fs_needs_location">Choose a place first.</string>
     <string name="fs_temperature_unit">Temperature</string>
     <string name="fs_celsius">°C</string>

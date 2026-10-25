@@ -12,6 +12,7 @@ import app.kinframe.frame.plugins.js.PluginPermissions
 import app.kinframe.frame.plugins.js.QuickJsPluginInstance
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.schedule.ScreenMode
+import app.kinframe.frame.weather.WeatherSources
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,7 +35,7 @@ class FramePlugins(private val c: FrameController) {
         put(WEATHER_STATION) { cfg ->
             WeatherStation(cfg.settings, onReading = { r ->
                 val t = r.tempC
-                if (useForWeather(cfg) && t != null) _stationNow.value = StationNow(t, r.atMs ?: g.clock.nowMs())
+                if (t != null) _stationNow.value = StationNow(t, r.atMs ?: g.clock.nowMs())
             })
         }
         if (BuildConfig.DEBUG) put(DEMO) { _ -> DemoFixtures(g.app) }
@@ -73,8 +74,8 @@ class FramePlugins(private val c: FrameController) {
     private val _stationNow = MutableStateFlow<StationNow?>(null)
 
     /**
-     * The weather station's latest temperature while "use my weather station for the current temperature" is on (and
-     * the widget runs); null otherwise. The weather corner shows it instead of the forecast service's (§9.4).
+     * The weather station's latest temperature while its widget runs; null otherwise. With the forecast on too, the
+     * clock's weather block shows it instead of the forecast service's, so the temperature appears once (§9.4).
      */
     val stationNow: StateFlow<StationNow?> = _stationNow
 
@@ -84,11 +85,12 @@ class FramePlugins(private val c: FrameController) {
         if (started) return
         started = true
         c.scope.launch {
-            combine(prefs.instances, prefs.layout) { list, l -> if (l.mode == PluginLayoutMode.Off) emptyList() else list }
+            val forecastOn = g.settings.settings.map { WeatherSources.forecastOn(it) }.distinctUntilChanged()
+            combine(prefs.instances, prefs.layout, forecastOn) { list, l, fc -> if (l.mode == PluginLayoutMode.Off) emptyList() else WeatherSources.forHost(list, fc) }
                 .distinctUntilChanged().collect { host.apply(it) }
         }
         c.scope.launch {
-            combine(prefs.instances, prefs.layout) { list, l -> l.mode != PluginLayoutMode.Off && list.any { it.enabled && useForWeather(it) } }
+            combine(prefs.instances, prefs.layout) { list, l -> l.mode != PluginLayoutMode.Off && list.any { it.enabled && it.pluginId == WEATHER_STATION } }
                 .distinctUntilChanged().collect { on -> if (!on) _stationNow.value = null }
         }
         c.scope.launch {
@@ -173,8 +175,6 @@ class FramePlugins(private val c: FrameController) {
         const val STATION_INSTANCE = "builtin-weather-station"
         val USER_AGENT = "kinframe-frame/${BuildConfig.VERSION_NAME} (+https://github.com/jeroentrappers/kinframe)"
 
-        fun useForWeather(cfg: InstanceConfig): Boolean =
-            cfg.pluginId == WEATHER_STATION && (cfg.settings["use_for_weather"] as? kotlinx.serialization.json.JsonPrimitive)?.content == "true"
         /** Debug builds: cycles the example views from docs/api/plugin-views (dev preview). */
         const val DEMO = "kinframe.demo"
         const val DEMO_INSTANCE = "debug-demo"

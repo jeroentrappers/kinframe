@@ -30,6 +30,7 @@ import app.kinframe.core.plugin.ui.ViewForm
 import app.kinframe.frame.FakePhoto
 import app.kinframe.frame.Screenshots
 import app.kinframe.frame.weather.WeatherFixtures
+import app.kinframe.frame.weather.withStation
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -58,7 +59,7 @@ class PluginScreenshotTest {
 
     private fun stage(
         name: String, layout: PluginLayoutConfig, vararg instances: InstanceState, detail: InstanceState? = null, detailView: PluginView? = null,
-        seed: Int = 0, pair: Boolean = false,
+        seed: Int = 0, pair: Boolean = false, weatherNow: app.kinframe.frame.weather.Weather? = weather,
     ) =
         Screenshots.shot("plugins_$name") {
             androidx.compose.foundation.layout.BoxWithConstraints {
@@ -72,7 +73,7 @@ class PluginScreenshotTest {
                     }
                 }
                 PluginStage(
-                    layout, instances.toList(), "14:20", "Sunday 25 October", weather, now, shortDate = "Sun\n25 Oct",
+                    layout, instances.toList(), "14:20", "Sunday 25 October", weatherNow, now, shortDate = "Sun\n25 Oct",
                     photoImage = img, detail = detail, detailView = detailView,
                 ) {
                     androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
@@ -207,6 +208,41 @@ class PluginScreenshotTest {
         previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
         seed = 3,
     )
+
+    /** A station reading as the widget renders it, with or without its temperature (§9.4: the forecast shows it). */
+    private fun stationView(rows: Boolean, withTemp: Boolean): PluginView {
+        val r = app.kinframe.frame.plugins.station.StationReading(
+            now, tempC = 10.3, humidityPct = 68.0, windMs = 0.9, windDirDeg = 239.0, pressureHpa = 995.6, rainTodayMm = 15.1, solarWm2 = 0.0, uvIndex = 0.0,
+        )
+        val f = app.kinframe.core.plugin.PluginFormat(java.util.Locale.forLanguageTag("nl"), java.time.ZoneId.of("Europe/Brussels"))
+        val t: (String) -> String = { k -> mapOf("temperature" to "Temperatuur", "humidity" to "Luchtvochtigheid", "wind" to "Wind", "rain_today" to "Regen vandaag", "pressure" to "Luchtdruk", "sunlight" to "Zonlicht", "dew_point" to "Dauwpunt", "compass_5" to "ZW")[k] ?: k }
+        val j = if (rows) app.kinframe.frame.plugins.station.StationViews.rows(r, null, null, app.kinframe.frame.plugins.station.WindUnit.Kmh, f, t, withTemp)
+        else app.kinframe.frame.plugins.station.StationViews.compact(r, null, app.kinframe.frame.plugins.station.WindUnit.Kmh, f, t, withTemp)
+        return (PluginViewParser.parse(j) as ViewResult.Valid).view
+    }
+
+    /** Forecast and station both on: the clock block shows the station's 10,3° with the forecast's sky; the widget has no temperature. */
+    @Test fun weatherBothOn() = stage(
+        "weather_both_on", band.copy(side = BandSide.Right, background = BandBackground.Photo),
+        previewInstance("a", stationView(rows = true, withTemp = false), Slot.TopLeft, name = station),
+        weatherNow = weather.withStationNow(10.3), pair = true, seed = 2,
+    )
+
+    /** Only the station: no forecast weather in the clock block; the widget carries the temperature. */
+    @Test fun weatherStationOnly() = stage(
+        "weather_station_only", band.copy(side = BandSide.Right, background = BandBackground.Photo),
+        previewInstance("a", stationView(rows = true, withTemp = true), Slot.TopLeft, name = station),
+        weatherNow = null, pair = true, seed = 2,
+    )
+
+    /** Both on, compact style: humidity leads, the wind is its label. */
+    @Test fun weatherBothOnCompact() = stage(
+        "weather_both_on_compact", band,
+        previewInstance("a", stationView(rows = false, withTemp = false), Slot.TopLeft, name = station),
+        weatherNow = weather.withStationNow(10.3),
+    )
+
+    private fun app.kinframe.frame.weather.Weather.withStationNow(c: Double) = withStation(StationNow(c, now), now)
 
     @Test fun stationBandColumn() = stage(
         "station_band_column", band,

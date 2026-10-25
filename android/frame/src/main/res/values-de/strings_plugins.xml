@@ -59,8 +59,6 @@
     <string name="ws_wind_unit">Wind in</string>
     <string name="ws_wind_auto">Automatisch</string>
     <string name="ws_interval">Abfragen alle</string>
-    <string name="ws_use_for_weather">Meine Wetterstation für die aktuelle Temperatur verwenden</string>
-    <string name="ws_use_for_weather_note">Wettersymbol sowie Tiefst- und Höchstwert von heute kommen weiter aus der Vorhersage.</string>
     <string name="ws_status_error">Station nicht lesbar: %1$s</string>
     <string name="ws_status_quiet">Die Station hat seit einer Weile keinen neuen Messwert gesendet.</string>
     <string name="ws_temperature">Temperatur</string>
@@ -73,4 +71,11 @@
     <string name="ws_updated_now">Gerade aktualisiert</string>
     <string name="ws_updated_ago">Vor %1$s aktualisiert</string>
     <string name="ws_no_reading_since">Kein neuer Messwert seit %1$s</string>
+    <string name="wx_section">Wetter</string>
+    <string name="wx_forecast">Wettervorhersage</string>
+    <string name="wx_forecast_sub">Aus dem Internet, für den Standort des Rahmens (Open-Meteo)</string>
+    <string name="wx_forecast_no_location">Lege zuerst den Standort des Rahmens in der kinframe-App fest.</string>
+    <string name="wx_station">Meine Wetterstation</string>
+    <string name="wx_station_sub">Deine eigene Wetterstation (PWS) über Weathercloud</string>
+    <string name="wx_both_note">Sind beide an, zeigt die Uhr die Temperatur deiner Station mit dem Himmel und den Tiefst- und Höchstwerten der Vorhersage.</string>
 </resources>

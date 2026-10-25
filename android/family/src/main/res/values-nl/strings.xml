@@ -445,8 +445,8 @@
     <string name="fs_remove_schedule">Deze slaaptijd verwijderen</string>
     <string name="fs_weather_title">Locatie &amp; weer</string>
     <string name="fs_weather_hint">Waar het kader staat. Voor het weer en om het scherm na zonsondergang te dimmen.</string>
-    <string name="fs_show_weather">Toon het weer</string>
-    <string name="fs_show_weather_hint">Het huidige weer naast de klok. Tik erop op het kader voor de verwachting.</string>
+    <string name="fs_show_weather">Weersverwachting</string>
+    <string name="fs_show_weather_hint">Van het internet, voor de locatie van het kader (Open-Meteo). Een eigen weerstation zet je aan op het kader zelf: Instellingen → Weer.</string>
     <string name="fs_needs_location">Kies eerst een plaats.</string>
     <string name="fs_temperature_unit">Temperatuur</string>
     <string name="fs_celsius">°C</string>
