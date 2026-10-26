@@ -58,7 +58,8 @@ class QuickJsSandboxTest {
     }
 
     @Test fun anEndlessLoopIsInterruptedAndTheInstanceKeepsWorking() = runBlocking {
-        val k = kit("""let spin = true; export default { async render(ctx) { if (spin) { spin = false; while (true) {} } return { type: 'text', lines: ['alive'] }; } }""")
+        val k = kit("""let n = 0; export default { async render(ctx) { if (++n == 2) { while (true) {} } return { type: 'text', lines: ['alive'] }; } }""")
+        assertEquals("alive", text(k.render()))
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 50 ms"))
         assertEquals("alive", text(k.render()))
@@ -73,8 +74,17 @@ class QuickJsSandboxTest {
     }
 
     @Test fun anEndlessLoopAfterAnAwaitIsStillInterrupted() = runBlocking {
-        server.enqueue(MockResponse.Builder().body("{}").build())
-        val k = kit("""export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); while (true) {} } }""")
+        repeat(2) { server.enqueue(MockResponse.Builder().body("{}").build()) }
+        val k = kit("""let n = 0; export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); if (++n == 2) { while (true) {} } return null; } }""")
+        k.render()
+        val why = failure(k)
+        assertTrue(why, why.contains("took longer than 50 ms"))
+    }
+
+    @Test fun theFirstRenderAfterABootHasTheStartBudget() = runBlocking {
+        // A cold runtime on the frame: the first call starts threads and loads classes.
+        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 120) {} return { type: 'text', lines: ['warm'] }; } }""")
+        assertEquals("warm", text(k.render()))
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 50 ms"))
     }

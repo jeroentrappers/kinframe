@@ -39,7 +39,10 @@ data class SandboxLimits(
     val memoryBytes: Long = 8L * 1024 * 1024,
     /** JavaScript execution time per call; time spent awaiting `ctx.http` doesn't count. */
     val cpuMsPerCall: Long = 50,
-    /** Compiling and running the module once at start. */
+    /**
+     * Compiling and running the module once at start, and every call until the first render has finished: on a slow
+     * core (the Denver's Cortex-A7) that first call also starts threads and loads classes.
+     */
     val cpuMsAtStart: Long = 1_000,
     val stackBytes: Long = 256L * 1024,
 )
@@ -69,6 +72,7 @@ class QuickJsPluginInstance(
 
     private var result: String? = null
     private var defined = false
+    private var warm = false
     private var error: String? = null
 
     private var socket: WebSocket? = null
@@ -167,6 +171,7 @@ class QuickJsPluginInstance(
             asyncFunction("http") { a -> awaiting { http(a) } }
         }
         js = q
+        warm = false
         q.evaluate<Any?>(prelude, "prelude.js")
         q.addModule("main", bundle.mainJs)
         q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
@@ -179,7 +184,8 @@ class QuickJsPluginInstance(
         result = null; error = null; defined = true
         val t0 = System.nanoTime()
         synchronized(clock) { waitedNs = 0L; if (waits > 0) waitStartNs = t0 }
-        val budgetNs = limits.cpuMsPerCall * 1_000_000
+        val budgetMs = if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart
+        val budgetNs = budgetMs * 1_000_000
         var overran = false
         try {
             coroutineScope {
@@ -195,10 +201,10 @@ class QuickJsPluginInstance(
                 try { run.await() } finally { watchdog.cancel() }
             }
         } catch (e: CancellationException) {
-            if (overran) throw PluginScriptException("$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript")
+            if (overran) throw PluginScriptException("$name: took longer than $budgetMs ms of JavaScript")
             throw e
         } catch (e: QuickJsInterruptedException) {
-            throw PluginScriptException("$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript")
+            throw PluginScriptException("$name: took longer than $budgetMs ms of JavaScript")
         } catch (e: com.dokar.quickjs.QuickJsException) {
             // Out of memory and the like leave the runtime in an unknown state: start over next time.
             if (e.message?.contains("out of memory") == true) close()
@@ -209,7 +215,8 @@ class QuickJsPluginInstance(
             if (name == "render") logRender(ctx, q)
         }
         // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
-        error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript" else "$name: $it") }
+        error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than $budgetMs ms of JavaScript" else "$name: $it") }
+        if (name == "render") warm = true
         result?.let { Json.parseToJsonElement(it) }
     }
 

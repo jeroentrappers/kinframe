@@ -692,7 +692,9 @@ library is 382 KB compressed for armeabi-v7a and 413 KB for arm64-v8a; both stay
 fall back to 32-bit libraries).
 
 **Sandbox.** One runtime per instance (nothing shared between instances), 8 MB heap, 256 KB stack, 50 ms of
-JavaScript per call (1 s once at start, for compiling the module). The host counts that time itself: its clock stops
+JavaScript per call (1 s at start, for compiling the module and for every call until the first render has finished:
+on the Denver that cold first render took about 68 ms, since it also starts threads and loads classes). The host
+counts that time itself: its clock stops
 while a `ctx.http` call is in flight, and a watchdog on its own thread checks it every 5 ms and cancels the call when
 it's over budget, which interrupts the JavaScript. (The first beta on the Denver used QuickJS's own limit, which
 counts the wait too: a P1 answer slower than 50 ms over Wi-Fi failed about one render in 60.) An endless loop is
@@ -739,7 +741,9 @@ plugin starts in 5.7 ms and renders in 0.16 ms (`QuickJsOnDeviceTest`). The RK31
 slower than a desktop core, so expect 1–4 ms per render and well under 100 ms to start: far inside the budget, and
 negligible next to drawing. On the Denver (0.7.0-beta.1, the P1 as a dial): the runtime boots in 68 ms with a
 104 KB heap, which grows to about 128 KB; a render including the HTTP request to the meter takes 68 ms at p50 and
-up to 283 ms, nearly all of it the network. The host logs these per instance every 60 renders (`KinFramePlugins`).
+up to 283 ms, nearly all of it the network. Without the network (0.7.0-beta.2, the host's clock: JavaScript plus the
+bridge around it) a render takes 9.7 ms at p50. The host logs these per instance every 60 renders
+(`KinFramePlugins`).
 
 **Screenshots** (views straight from the plugins, run in QuickJS on the fixtures; a drawn stand-in for album art):
 [`docs/plugins/`](plugins/) `js_band_column.png` (energy flow with the battery ring, now playing), `js_strip.png`
