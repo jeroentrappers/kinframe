@@ -64,6 +64,21 @@ class QuickJsSandboxTest {
         assertEquals("alive", text(k.render()))
     }
 
+    @Test fun waitingForTheNetworkDoesNotCountAsJavaScript() = runBlocking {
+        // A slow answer (Wi-Fi on the frame) followed by a little work: the 50 ms are for JavaScript, not for the wait.
+        repeat(2) { server.enqueue(MockResponse.Builder().body("""{"v":1}""").bodyDelay(300, java.util.concurrent.TimeUnit.MILLISECONDS).build()) }
+        val k = kit("""export default { async render(ctx) { const r = await ctx.http.get(ctx.settings.base_url + '/x'); let n = 0; for (let i = 0; i < 20000; i++) n += i % 7; return { type: 'text', lines: ['v' + r.json().v] }; } }""")
+        assertEquals("v1", text(k.render()))
+        assertEquals("v1", text(k.render()))
+    }
+
+    @Test fun anEndlessLoopAfterAnAwaitIsStillInterrupted() = runBlocking {
+        server.enqueue(MockResponse.Builder().body("{}").build())
+        val k = kit("""export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); while (true) {} } }""")
+        val why = failure(k)
+        assertTrue(why, why.contains("took longer than 50 ms"))
+    }
+
     @Test fun runningOutOfMemoryFailsAndRestartsTheRuntime() = runBlocking {
         val k = kit("""export default { async render(ctx) { if (!ctx.store.get('boom')) { ctx.store.set('boom', '1'); const a = []; for (;;) a.push(new Array(100000).fill(1)); } return { type: 'text', lines: ['fresh ' + ('x' in ctx.state)] }; } }""")
         assertTrue(failure(k).contains("out of memory"))

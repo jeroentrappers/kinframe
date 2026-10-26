@@ -683,16 +683,21 @@ mdpi, 1920×1080 xhdpi); `emulator_*` are from the dev preview on the emulator.
 
 **Engine.** [quickjs-kt](https://github.com/dokar3/quickjs-kt) 1.0.15 (Apache-2.0, maintained, QuickJS 2026-06):
 minSdk 23, prebuilt for armeabi-v7a, arm64-v8a, x86 and x86_64, a desktop build for JVM unit tests (so the tests run
-the real engine), coroutine-friendly async bindings, memory and stack limits, and an execution-time limit that counts
-only time spent running JavaScript, which is exactly the "50 ms per call, awaiting I/O excluded" rule. Building
+the real engine), coroutine-friendly async bindings, memory and stack limits, and an interrupt that cancelling a call triggers. (Its
+own execution-time limit is wall clock from the start of an evaluation, awaits included, so the host keeps the
+budget itself; see *Sandbox*.) Building
 QuickJS-ng with the NDK and our own JNI would have given the same at the cost of maintaining the glue; Zipline and
 the older `app.cash.quickjs` target Kotlin/JS modules or are unmaintained. The APK grows by about **0.8 MB** (the
 library is 382 KB compressed for armeabi-v7a and 413 KB for arm64-v8a; both stay, since a 64-bit-only device can't
 fall back to 32-bit libraries).
 
 **Sandbox.** One runtime per instance (nothing shared between instances), 8 MB heap, 256 KB stack, 50 ms of
-JavaScript per call (1 s once at start, for compiling the module). An endless loop is interrupted (an interrupt inside
-an async function arrives as a rejected promise, which the host still reports as "took longer than 50 ms"); running
+JavaScript per call (1 s once at start, for compiling the module). The host counts that time itself: its clock stops
+while a `ctx.http` call is in flight, and a watchdog on its own thread checks it every 5 ms and cancels the call when
+it's over budget, which interrupts the JavaScript. (The first beta on the Denver used QuickJS's own limit, which
+counts the wait too: a P1 answer slower than 50 ms over Wi-Fi failed about one render in 60.) An endless loop is
+interrupted, also after an await (an interrupt inside an async function arrives as a rejected promise, which the host
+still reports as "took longer than 50 ms"); running
 out of memory fails the call and the runtime is rebuilt on the next one. A 10 s wall-clock limit per call stays (the
 host's), and cancelling a call interrupts it. The raw bindings are hidden behind `ctx` (the global `__kf` is removed
 after the prelude). What QuickJS can't contain is a crash in native code, which would take the app down; that's the
@@ -732,7 +737,9 @@ reset after a successful open), calling `onOpen` again.
 energy flow 0.11 ms, car 0.05 ms, now playing 0.05 ms (p50, `PluginTimingTest`). On an Android 6 emulator the P1
 plugin starts in 5.7 ms and renders in 0.16 ms (`QuickJsOnDeviceTest`). The RK3126's Cortex-A7 is roughly 10–20×
 slower than a desktop core, so expect 1–4 ms per render and well under 100 ms to start: far inside the budget, and
-negligible next to drawing. Not yet measured on the Denver itself.
+negligible next to drawing. On the Denver (0.7.0-beta.1, the P1 as a dial): the runtime boots in 68 ms with a
+104 KB heap, which grows to about 128 KB; a render including the HTTP request to the meter takes 68 ms at p50 and
+up to 283 ms, nearly all of it the network. The host logs these per instance every 60 renders (`KinFramePlugins`).
 
 **Screenshots** (views straight from the plugins, run in QuickJS on the fixtures; a drawn stand-in for album art):
 [`docs/plugins/`](plugins/) `js_band_column.png` (energy flow with the battery ring, now playing), `js_strip.png`

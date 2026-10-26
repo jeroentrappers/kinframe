@@ -8,13 +8,16 @@ import com.dokar.quickjs.binding.asyncFunction
 import com.dokar.quickjs.binding.define
 import com.dokar.quickjs.binding.function
 import com.dokar.quickjs.evaluate
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -81,8 +84,20 @@ class QuickJsPluginInstance(
     @Volatile var lastCallMs: Double = 0.0
         private set
 
-    /** Wall-clock times of recent renders (awaited I/O included), logged in batches with the heap size. */
-    private val renderMs = ArrayList<Double>(RENDER_LOG_EVERY)
+    /** Milliseconds of JavaScript in the last finished call, awaited I/O left out (what the budget counts). */
+    @Volatile var lastJsMs: Double = 0.0
+        private set
+
+    /** Recent renders (wall clock, JavaScript only), logged in batches with the heap size. */
+    private val renderMs = ArrayList<Pair<Double, Double>>(RENDER_LOG_EVERY)
+
+    // The JavaScript clock: QuickJS's own deadline is wall clock from the start of a call, awaits included, so a
+    // slow answer from the network would count against the budget. The host keeps time itself and stops it while
+    // a `ctx.http` call is in flight.
+    private val clock = Any()
+    private var waits = 0
+    private var waitStartNs = 0L
+    private var waitedNs = 0L
 
     override suspend fun start(ctx: PluginContext): JsonElement? {
         boot(ctx)
@@ -149,13 +164,13 @@ class QuickJsPluginInstance(
             function("ws_connect") { a -> connect(ctx, a[0].toString()); null }
             function("ws_send") { a -> socket?.send(a[0].toString()); null }
             function("ws_close") { _ -> socketWanted = false; socket?.close(1000, null); socket = null; null }
-            asyncFunction("http") { a -> http(a) }
+            asyncFunction("http") { a -> awaiting { http(a) } }
         }
         js = q
         q.evaluate<Any?>(prelude, "prelude.js")
         q.addModule("main", bundle.mainJs)
         q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
-        q.evaluationTimeoutMillis = limits.cpuMsPerCall
+        q.evaluationTimeoutMillis = 0 // from here on the host's watchdog keeps the budget (see call)
         ctx.log(String.format(Locale.ROOT, "booted in %.1f ms, heap %d KB", (System.nanoTime() - t0) / 1e6, q.memoryUsage.memoryUsedSize / 1024))
     }
 
@@ -163,8 +178,25 @@ class QuickJsPluginInstance(
         val q = js ?: return@withLock null
         result = null; error = null; defined = true
         val t0 = System.nanoTime()
+        synchronized(clock) { waitedNs = 0L; if (waits > 0) waitStartNs = t0 }
+        val budgetNs = limits.cpuMsPerCall * 1_000_000
+        var overran = false
         try {
-            q.evaluate<Any?>(if (arg == null) "__kf_call('$name')" else "__kf_call('$name', $arg)", "$name.js")
+            coroutineScope {
+                val run = async { q.evaluate<Any?>(if (arg == null) "__kf_call('$name')" else "__kf_call('$name', $arg)", "$name.js") }
+                // Cancelling the evaluation interrupts the JavaScript (quickjs-kt hooks cancellation to its interrupt).
+                // The watchdog runs on its own thread: the evaluation may hold the caller's.
+                val watchdog = launch(Dispatchers.Default) {
+                    while (true) {
+                        delay(WATCHDOG_MS)
+                        if (jsNs(t0) > budgetNs) { overran = true; run.cancel(); break }
+                    }
+                }
+                try { run.await() } finally { watchdog.cancel() }
+            }
+        } catch (e: CancellationException) {
+            if (overran) throw PluginScriptException("$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript")
+            throw e
         } catch (e: QuickJsInterruptedException) {
             throw PluginScriptException("$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript")
         } catch (e: com.dokar.quickjs.QuickJsException) {
@@ -173,6 +205,7 @@ class QuickJsPluginInstance(
             throw PluginScriptException("$name: ${e.message}")
         } finally {
             lastCallMs = (System.nanoTime() - t0) / 1e6
+            lastJsMs = jsNs(t0) / 1e6
             if (name == "render") logRender(ctx, q)
         }
         // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
@@ -181,12 +214,28 @@ class QuickJsPluginInstance(
     }
 
     private fun logRender(ctx: PluginContext, q: QuickJs) {
-        renderMs += lastCallMs
+        renderMs += lastCallMs to lastJsMs
         if (renderMs.size < RENDER_LOG_EVERY) return
-        renderMs.sort()
+        val wall = renderMs.map { it.first }.sorted()
+        val js = renderMs.map { it.second }.sorted()
         val heap = runCatching { q.memoryUsage.memoryUsedSize / 1024 }.getOrDefault(-1L)
-        ctx.log(String.format(Locale.ROOT, "render p50 %.1f ms, max %.1f ms over %d, heap %d KB", renderMs[renderMs.size / 2], renderMs.last(), renderMs.size, heap))
+        ctx.log(String.format(Locale.ROOT, "%d renders: JavaScript p50 %.1f ms, max %.1f ms; with I/O p50 %.1f ms, max %.1f ms; heap %d KB",
+            renderMs.size, js[js.size / 2], js.last(), wall[wall.size / 2], wall.last(), heap))
         renderMs.clear()
+    }
+
+    private fun jsNs(t0: Long): Long = synchronized(clock) {
+        val now = System.nanoTime()
+        now - t0 - waitedNs - (if (waits > 0) now - waitStartNs else 0L)
+    }
+
+    private suspend fun <T> awaiting(block: suspend () -> T): T {
+        synchronized(clock) { if (waits++ == 0) waitStartNs = System.nanoTime() }
+        try {
+            return block()
+        } finally {
+            synchronized(clock) { if (--waits == 0) waitedNs += System.nanoTime() - waitStartNs }
+        }
     }
 
     private suspend fun http(a: Array<Any?>): String {
@@ -284,6 +333,7 @@ class QuickJsPluginInstance(
         /** An `image` view's picture: album art and thumbnails, not photos. */
         const val MAX_IMAGE_BYTES = 768 * 1024
         const val RENDER_LOG_EVERY = 60
+        private const val WATCHDOG_MS = 5L
 
         fun reconnectMs(attempt: Int): Long = (2_000L shl attempt.coerceAtMost(5)).coerceAtMost(60_000L)
     }
