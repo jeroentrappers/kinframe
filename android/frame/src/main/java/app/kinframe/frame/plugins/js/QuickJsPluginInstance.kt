@@ -29,6 +29,7 @@ import kotlinx.serialization.json.put
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
+import java.util.Locale
 
 /** The sandbox's limits (docs/plugins.md §5). */
 data class SandboxLimits(
@@ -80,6 +81,9 @@ class QuickJsPluginInstance(
     @Volatile var lastCallMs: Double = 0.0
         private set
 
+    /** Wall-clock times of recent renders (awaited I/O included), logged in batches with the heap size. */
+    private val renderMs = ArrayList<Double>(RENDER_LOG_EVERY)
+
     override suspend fun start(ctx: PluginContext): JsonElement? {
         boot(ctx)
         return call("start", ctx)
@@ -120,6 +124,7 @@ class QuickJsPluginInstance(
 
     private suspend fun boot(ctx: PluginContext) {
         close()
+        val t0 = System.nanoTime()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
         val q = QuickJs.create(Dispatchers.IO)
         q.memoryLimit = limits.memoryBytes
@@ -151,6 +156,7 @@ class QuickJsPluginInstance(
         q.addModule("main", bundle.mainJs)
         q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
         q.evaluationTimeoutMillis = limits.cpuMsPerCall
+        ctx.log(String.format(Locale.ROOT, "booted in %.1f ms, heap %d KB", (System.nanoTime() - t0) / 1e6, q.memoryUsage.memoryUsedSize / 1024))
     }
 
     private suspend fun call(name: String, ctx: PluginContext, arg: String? = null): JsonElement? = calls.withLock {
@@ -167,10 +173,20 @@ class QuickJsPluginInstance(
             throw PluginScriptException("$name: ${e.message}")
         } finally {
             lastCallMs = (System.nanoTime() - t0) / 1e6
+            if (name == "render") logRender(ctx, q)
         }
         // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
         error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than ${limits.cpuMsPerCall} ms of JavaScript" else "$name: $it") }
         result?.let { Json.parseToJsonElement(it) }
+    }
+
+    private fun logRender(ctx: PluginContext, q: QuickJs) {
+        renderMs += lastCallMs
+        if (renderMs.size < RENDER_LOG_EVERY) return
+        renderMs.sort()
+        val heap = runCatching { q.memoryUsage.memoryUsedSize / 1024 }.getOrDefault(-1L)
+        ctx.log(String.format(Locale.ROOT, "render p50 %.1f ms, max %.1f ms over %d, heap %d KB", renderMs[renderMs.size / 2], renderMs.last(), renderMs.size, heap))
+        renderMs.clear()
     }
 
     private suspend fun http(a: Array<Any?>): String {
@@ -267,6 +283,7 @@ class QuickJsPluginInstance(
     companion object {
         /** An `image` view's picture: album art and thumbnails, not photos. */
         const val MAX_IMAGE_BYTES = 768 * 1024
+        const val RENDER_LOG_EVERY = 60
 
         fun reconnectMs(attempt: Int): Long = (2_000L shl attempt.coerceAtMost(5)).coerceAtMost(60_000L)
     }
