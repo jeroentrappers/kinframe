@@ -113,10 +113,9 @@ export function views(p, ctx) {
   return { main, detail: { type: 'stack', items: items.slice(0, 4) } };
 }
 
-async function player(ctx) {
+function player(ctx) {
   const h = ha(ctx);
   const id = ctx.settings.entity;
-  if (!h.live) await haPoll(ctx, [id]);
   if (h.error === 'token') throw new Error(ctx.t('token_refused'));
   return read(h.entities[id], h.base, ctx.now());
 }
@@ -136,15 +135,19 @@ export default {
     haSubscribe(ctx, [ctx.settings.entity]);
     return null;
   },
-  async render(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return null;
-    return views(await player(ctx), ctx).main;
+  async update(ctx) {
+    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return;
+    if (!ha(ctx).live) await haPoll(ctx, [ctx.settings.entity]);
   },
-  async detail(ctx) {
-    return views(await player(ctx), ctx).detail;
+  render(ctx) {
+    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return null;
+    return views(player(ctx), ctx).main;
+  },
+  detail(ctx) {
+    return views(player(ctx), ctx).detail;
   },
   async action(ctx, id) {
-    const p = await player(ctx);
+    const p = player(ctx);
     if (!p) return null;
     const e = ha(ctx).entities[ctx.settings.entity];
     if (id === 'previous') await call(ctx, 'media_previous_track');

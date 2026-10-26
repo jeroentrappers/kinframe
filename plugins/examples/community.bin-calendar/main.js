@@ -25,10 +25,13 @@ export function view(events, ctx) {
 }
 
 export default {
-  async render(ctx) {
-    if (!ctx.settings.calendar_url) return null;
+  async update(ctx) {
+    if (!ctx.settings.calendar_url) return;
     const r = await ctx.http.get(ctx.settings.calendar_url);
     if (!r.ok) throw new Error('calendar: HTTP ' + r.status);
-    return view(parseIcs(r.text), ctx);
+    ctx.state.events = parseIcs(r.text);
+  },
+  render(ctx) {
+    return ctx.state.events ? view(ctx.state.events, ctx) : null;
   },
 };

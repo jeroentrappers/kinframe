@@ -30,7 +30,13 @@ interface PluginInstance {
     /** Called once when the instance starts or its settings change. The first view, or null while loading. */
     suspend fun start(ctx: PluginContext): JsonElement? = null
 
-    /** Called every [refreshSeconds] (and after [PluginContext.invalidate]). Throwing counts as a failure. */
+    /**
+     * Fetches what [render] shows, every [refreshSeconds], right before [render]. The only call that waits for the
+     * network on a timer, so drawing never does. Throwing counts as a failure (and skips that [render]).
+     */
+    suspend fun update(ctx: PluginContext) {}
+
+    /** Called after every [update] and after [PluginContext.invalidate]. Throwing counts as a failure. */
     suspend fun render(ctx: PluginContext): JsonElement?
 
     /** The detail card on tap, or null if the plugin has none. */

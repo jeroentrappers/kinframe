@@ -127,10 +127,8 @@ export function views(c, ctx) {
   return { main, detail };
 }
 
-async function current(ctx) {
+function current(ctx) {
   const h = ha(ctx);
-  const ids = Object.values(entities(ctx.settings)).filter(Boolean);
-  if (!h.live) await haPoll(ctx, ids);
   if (h.error === 'token') throw new Error(ctx.t('token_refused'));
   const c = read(ctx.settings, h.entities, ctx.now());
   if (c.level === null) return null;
@@ -144,13 +142,17 @@ export default {
     haSubscribe(ctx, Object.values(entities(ctx.settings)).filter(Boolean));
     return null;
   },
-  async render(ctx) {
+  async update(ctx) {
+    if (!ctx.settings.base_url || !ctx.settings.token) return;
+    if (!ha(ctx).live) await haPoll(ctx, Object.values(entities(ctx.settings)).filter(Boolean));
+  },
+  render(ctx) {
     if (!ctx.settings.base_url || !ctx.settings.token) return null;
-    const v = await current(ctx);
+    const v = current(ctx);
     return v && v.main;
   },
-  async detail(ctx) {
-    const v = await current(ctx);
+  detail(ctx) {
+    const v = current(ctx);
     return v && v.detail;
   },
 };

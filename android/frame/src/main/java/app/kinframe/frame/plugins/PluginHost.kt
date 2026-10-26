@@ -53,8 +53,9 @@ data class InstanceState(
 
 /**
  * Runs plugin instances (docs/plugins.md §5): all of them on one low-priority background thread, so a plugin never
- * stalls the slideshow. Calls `render` every refresh interval, validates what comes back, keeps the last good view,
- * backs off on failures, and works out per instance whether it is shown (visibility mode, stale, hidden).
+ * stalls the slideshow. Calls `update` and then `render` every refresh interval (`render` alone after `invalidate()`),
+ * validates what comes back, keeps the last good view, backs off on failures, and works out per instance whether it
+ * is shown (visibility mode, stale, hidden).
  */
 class PluginHost(
     private val scope: CoroutineScope,
@@ -206,9 +207,18 @@ class PluginHost(
     private suspend fun loop(r: Running) {
         val refreshMs = r.instance.refreshSeconds.coerceAtLeast(MIN_REFRESH_S) * 1000L
         var first = true
+        // update() keeps its own clock: invalidate() wakes the loop for a render only, however often it comes.
+        var nextFetchMs = 0L
         while (true) {
+            val fetch = monoMs() >= nextFetchMs
             val json: JsonElement? = try {
-                withTimeout(CALL_TIMEOUT_MS) { if (first) r.instance.start(r.ctx) ?: r.instance.render(r.ctx) else r.instance.render(r.ctx) }
+                withTimeout(CALL_TIMEOUT_MS) {
+                    (if (first) r.instance.start(r.ctx) else null) ?: run {
+                        // On the timer: fetch, then draw. After invalidate(): draw from what the plugin has.
+                        if (fetch) r.instance.update(r.ctx)
+                        r.instance.render(r.ctx)
+                    }
+                }
             } catch (e: CancellationException) {
                 if (e is TimeoutCancellationException) { fail(r, "timed out"); null } else throw e
             } catch (e: Throwable) {
@@ -229,15 +239,17 @@ class PluginHost(
                 is ViewResult.Invalid -> { r.error = v.toString(); r.ctx.log(v.toString()) }
             }
             publishFromWorker()
-            val wait = backoffMs(refreshMs, r.failures)
-            kotlinx.coroutines.withTimeoutOrNull(wait) { r.wake.receive() }
+            if (fetch) nextFetchMs = monoMs() + backoffMs(refreshMs, r.failures)
+            kotlinx.coroutines.withTimeoutOrNull((nextFetchMs - monoMs()).coerceAtLeast(1)) { r.wake.receive() }
         }
     }
+
+    private fun monoMs(): Long = System.nanoTime() / 1_000_000
 
     private fun fail(r: Running, why: String) {
         r.failures++
         r.error = why
-        r.ctx.log("render failed (${r.failures}): $why")
+        r.ctx.log("failed (${r.failures}): $why")
     }
 
     private fun publishFromWorker() = scope.launch { publish() }

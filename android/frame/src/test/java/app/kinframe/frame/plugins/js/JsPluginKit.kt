@@ -54,7 +54,10 @@ class JsPluginKit(
         QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits)
     }
 
-    suspend fun render(): JsonElement? = instance.render(ctx)
+    /** What the host does on its timer: `update`, then `render`. */
+    suspend fun render(): JsonElement? { instance.update(ctx); return instance.render(ctx) }
+    /** What the host does after `invalidate()`: `render` alone, from what the plugin already has. */
+    suspend fun renderOnly(): JsonElement? = instance.render(ctx)
     suspend fun view(): PluginView = parse(render() ?: error("render returned null"))
     suspend fun detail(): PluginView = parse(instance.detail(ctx) ?: error("detail returned null"))
 

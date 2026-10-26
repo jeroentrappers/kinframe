@@ -107,11 +107,11 @@ export function main(r, tr, settings, ctx, day) {
       type: 'gauge', value: Math.max(-100, Math.min(100, (p / maxW) * 100)), label: f.number(Math.abs(p), 0, 'W'),
       style: 'dial', tone: 'info', negative_tone: 'good',
     };
-    // Today's totals under the dial: returned (green, up) and used (violet, down).
+    // Today's kWh under the dial, returned (green, up) and used (violet, down); no unit, the column is too narrow.
     if (day && day.imp !== null) {
       g.sub = [];
       if (day.exp !== null) g.sub.push({ value: f.number(day.exp, 1), icon: 'arrow-up', tone: 'good' });
-      g.sub.push({ value: f.number(day.imp, 1, 'kWh'), icon: 'arrow-down', tone: 'info' });
+      g.sub.push({ value: f.number(day.imp, 1), icon: 'arrow-down', tone: 'info' });
     }
     return g;
   }
@@ -148,16 +148,21 @@ function baseUrl(host) {
 }
 
 export default {
-  async render(ctx) {
+  async update(ctx) {
     const host = ctx.settings.host;
-    if (!host) return null;
+    if (!host) return;
     const res = await ctx.http.get(baseUrl(host) + '/api/v1/data', { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const r = parse(res.json());
     const h = history(ctx);
     add(h, r, ctx.now());
     updateDay(h, r, ctx);
-    return main(r, trend(h), ctx.settings, ctx, today(h, r));
+  },
+
+  render(ctx) {
+    const h = history(ctx);
+    if (!h.last) return null;
+    return main(h.last, trend(h), ctx.settings, ctx, today(h, h.last));
   },
 
   async detail(ctx) {

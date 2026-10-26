@@ -28,12 +28,15 @@ export function board(json, ctx) {
 }
 
 export default {
-  async render(ctx) {
+  async update(ctx) {
     const st = encodeURIComponent(String(ctx.settings.station || '').trim());
-    if (!st) return null;
+    if (!st) return;
     const lang = ctx.language.slice(0, 2);
     const r = await ctx.http.get(`https://api.irail.be/v1/liveboard/?station=${st}&format=json&arrdep=departure&lang=${['nl', 'fr', 'de', 'en'].includes(lang) ? lang : 'en'}`);
     if (!r.ok) throw new Error('iRail: HTTP ' + r.status);
-    return board(r.json(), ctx);
+    ctx.state.board = r.json();
+  },
+  render(ctx) {
+    return ctx.state.board ? board(ctx.state.board, ctx) : null;
   },
 };

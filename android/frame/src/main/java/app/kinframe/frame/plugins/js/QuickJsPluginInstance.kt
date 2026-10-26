@@ -92,8 +92,11 @@ class QuickJsPluginInstance(
     @Volatile var lastJsMs: Double = 0.0
         private set
 
-    /** Recent renders (wall clock, JavaScript only), logged in batches with the heap size. */
-    private val renderMs = ArrayList<Pair<Double, Double>>(RENDER_LOG_EVERY)
+    /** Recent calls per name: (wall clock, JavaScript only), logged every [RENDER_LOG_EVERY] renders with the heap size. */
+    private val timings = HashMap<String, ArrayList<Pair<Double, Double>>>()
+
+    /** The call running now when it may not use the network (`render`, `detail`), else null. */
+    @Volatile private var offline: String? = null
 
     // The JavaScript clock: QuickJS's own deadline is wall clock from the start of a call, awaits included, so a
     // slow answer from the network would count against the budget. The host keeps time itself and stops it while
@@ -106,6 +109,11 @@ class QuickJsPluginInstance(
     override suspend fun start(ctx: PluginContext): JsonElement? {
         boot(ctx)
         return call("start", ctx)
+    }
+
+    override suspend fun update(ctx: PluginContext) {
+        if (js == null) boot(ctx)
+        call("update", ctx)
     }
 
     override suspend fun render(ctx: PluginContext): JsonElement? {
@@ -175,23 +183,39 @@ class QuickJsPluginInstance(
         q.evaluate<Any?>(prelude, "prelude.js")
         q.addModule("main", bundle.mainJs)
         q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
-        q.evaluationTimeoutMillis = 0 // from here on the host's watchdog keeps the budget (see call)
+        q.evaluationTimeoutMillis = 0 // from here on the host's watchdog keeps the budget (see budgeted)
         ctx.log(String.format(Locale.ROOT, "booted in %.1f ms, heap %d KB", (System.nanoTime() - t0) / 1e6, q.memoryUsage.memoryUsedSize / 1024))
     }
 
     private suspend fun call(name: String, ctx: PluginContext, arg: String? = null): JsonElement? = calls.withLock {
         val q = js ?: return@withLock null
         result = null; error = null; defined = true
+        val budgetMs = if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart
+        offline = name.takeIf { it in OFFLINE_CALLS }
+        try {
+            budgeted(q, ctx, name, if (arg == null) "__kf_call('$name')" else "__kf_call('$name', $arg)", budgetMs)
+        } finally {
+            offline = null
+        }
+        // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
+        error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than $budgetMs ms of JavaScript" else "$name: $it") }
+        if (name == "render") warm = true
+        result?.let { Json.parseToJsonElement(it) }
+    }
+
+    /**
+     * Evaluates [script] within [budgetMs] of JavaScript. Cancelling the evaluation interrupts the JavaScript
+     * (quickjs-kt hooks cancellation to its interrupt); the watchdog runs on its own thread, since the evaluation may
+     * hold the caller's.
+     */
+    private suspend fun budgeted(q: QuickJs, ctx: PluginContext, name: String, script: String, budgetMs: Long) {
         val t0 = System.nanoTime()
         synchronized(clock) { waitedNs = 0L; if (waits > 0) waitStartNs = t0 }
-        val budgetMs = if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart
         val budgetNs = budgetMs * 1_000_000
         var overran = false
         try {
             coroutineScope {
-                val run = async { q.evaluate<Any?>(if (arg == null) "__kf_call('$name')" else "__kf_call('$name', $arg)", "$name.js") }
-                // Cancelling the evaluation interrupts the JavaScript (quickjs-kt hooks cancellation to its interrupt).
-                // The watchdog runs on its own thread: the evaluation may hold the caller's.
+                val run = async { q.evaluate<Any?>(script, "$name.js") }
                 val watchdog = launch(Dispatchers.Default) {
                     while (true) {
                         delay(WATCHDOG_MS)
@@ -212,23 +236,25 @@ class QuickJsPluginInstance(
         } finally {
             lastCallMs = (System.nanoTime() - t0) / 1e6
             lastJsMs = jsNs(t0) / 1e6
-            if (name == "render") logRender(ctx, q)
+            logTiming(ctx, q, name)
         }
-        // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
-        error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than $budgetMs ms of JavaScript" else "$name: $it") }
-        if (name == "render") warm = true
-        result?.let { Json.parseToJsonElement(it) }
     }
 
-    private fun logRender(ctx: PluginContext, q: QuickJs) {
-        renderMs += lastCallMs to lastJsMs
-        if (renderMs.size < RENDER_LOG_EVERY) return
-        val wall = renderMs.map { it.first }.sorted()
-        val js = renderMs.map { it.second }.sorted()
+    private fun logTiming(ctx: PluginContext, q: QuickJs, name: String) {
+        if (name != "render" && name != "update") return
+        timings.getOrPut(name) { ArrayList() } += lastCallMs to lastJsMs
+        val renders = timings["render"] ?: return
+        if (renders.size < RENDER_LOG_EVERY) return
+        fun p50(l: List<Double>) = l.sorted()[l.size / 2]
         val heap = runCatching { q.memoryUsage.memoryUsedSize / 1024 }.getOrDefault(-1L)
-        ctx.log(String.format(Locale.ROOT, "%d renders: JavaScript p50 %.1f ms, max %.1f ms; with I/O p50 %.1f ms, max %.1f ms; heap %d KB",
-            renderMs.size, js[js.size / 2], js.last(), wall[wall.size / 2], wall.last(), heap))
-        renderMs.clear()
+        val line = StringBuilder(String.format(Locale.ROOT, "%d renders: p50 %.1f ms, max %.1f ms",
+            renders.size, p50(renders.map { it.first }), renders.maxOf { it.first }))
+        timings["update"]?.takeIf { it.isNotEmpty() }?.let { u ->
+            line.append(String.format(Locale.ROOT, "; %d updates: JavaScript p50 %.1f ms, max %.1f ms, with the network p50 %.1f ms, max %.1f ms",
+                u.size, p50(u.map { it.second }), u.maxOf { it.second }, p50(u.map { it.first }), u.maxOf { it.first }))
+        }
+        ctx.log(line.append("; heap ").append(heap).append(" KB").toString())
+        timings.clear()
     }
 
     private fun jsNs(t0: Long): Long = synchronized(clock) {
@@ -246,6 +272,7 @@ class QuickJsPluginInstance(
     }
 
     private suspend fun http(a: Array<Any?>): String {
+        offline?.let { throw SecurityException("$it can't use the network: fetch in update() and keep the data in ctx.state") }
         val method = a[0].toString()
         val url = a[1].toString()
         val o = (a.getOrNull(2) as? String)?.let { Json.parseToJsonElement(it) as? JsonObject } ?: JsonObject(emptyMap())
@@ -274,7 +301,7 @@ class QuickJsPluginInstance(
                     calls.withLock {
                         val q = js ?: return@withLock
                         val arg = data?.let { Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(it)) } ?: "null"
-                        q.evaluate<Any?>("__kf_ws_event('$type', $arg)", "ws.js")
+                        budgeted(q, ctx, "ws $type", "__kf_ws_event('$type', $arg)", if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart)
                     }
                 }.onFailure { ctx.log("ws $type: ${it.message}") }
             }
@@ -340,6 +367,9 @@ class QuickJsPluginInstance(
         /** An `image` view's picture: album art and thumbnails, not photos. */
         const val MAX_IMAGE_BYTES = 768 * 1024
         const val RENDER_LOG_EVERY = 60
+
+        /** Calls that draw: they work from what `update` fetched, so the frame never waits for the network to draw. */
+        val OFFLINE_CALLS = setOf("render", "detail")
         private const val WATCHDOG_MS = 5L
 
         fun reconnectMs(attempt: Int): Long = (2_000L shl attempt.coerceAtMost(5)).coerceAtMost(60_000L)

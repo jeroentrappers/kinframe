@@ -22,13 +22,14 @@ export function view(json, ctx) {
   return { main, detail };
 }
 
-async function load(ctx) {
-  const r = await ctx.http.get('https://api.energy-charts.info/price?bzn=' + encodeURIComponent(ctx.settings.zone || 'BE'));
-  if (!r.ok) throw new Error('Energy-Charts: HTTP ' + r.status);
-  return view(r.json(), ctx);
-}
+const current = (ctx) => (ctx.state.prices ? view(ctx.state.prices, ctx) : null);
 
 export default {
-  async render(ctx) { const v = await load(ctx); return v && v.main; },
-  async detail(ctx) { const v = await load(ctx); return v && v.detail; },
+  async update(ctx) {
+    const r = await ctx.http.get('https://api.energy-charts.info/price?bzn=' + encodeURIComponent(ctx.settings.zone || 'BE'));
+    if (!r.ok) throw new Error('Energy-Charts: HTTP ' + r.status);
+    ctx.state.prices = r.json();
+  },
+  render(ctx) { const v = current(ctx); return v && v.main; },
+  detail(ctx) { const v = current(ctx); return v && v.detail; },
 };

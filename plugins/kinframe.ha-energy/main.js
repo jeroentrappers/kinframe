@@ -1,6 +1,6 @@
 // Home Assistant energy flow (docs/plugins.md §9.1). Power sensors are mapped per node in the settings, because
 // Home Assistant's Energy dashboard only knows energy (kWh) statistics, not live power. Several solar inverters are
-// summed. Live updates come over the WebSocket API (subscribe_entities); until it is up, render() reads the REST API.
+// summed. Live updates come over the WebSocket API (subscribe_entities); until it is up, update() reads the REST API.
 
 // ---- Home Assistant connection (the same in every kinframe.ha-* plugin until plugins can share modules, §11) ----
 
@@ -162,11 +162,15 @@ export default {
     return null;
   },
 
-  async render(ctx) {
+  async update(ctx) {
+    if (!ctx.settings.base_url || !ctx.settings.token) return;
+    if (!ha(ctx).live) await haPoll(ctx, entityIds(ctx.settings));
+  },
+
+  render(ctx) {
     if (!ctx.settings.base_url || !ctx.settings.token) return null;
     const h = ha(ctx);
     const ids = entityIds(ctx.settings);
-    if (!h.live) await haPoll(ctx, ids);
     if (h.error === 'token') throw new Error(ctx.t('token_refused'));
     const missing = ids.find((id) => h.entities[id] && h.entities[id].missing);
     if (missing) throw new Error(ctx.t('not_found', { id: missing }));
@@ -178,7 +182,7 @@ export default {
     return view(m, ctx, false);
   },
 
-  async detail(ctx) {
+  detail(ctx) {
     const h = ha(ctx);
     const m = snapshot(ctx.settings, h.entities);
     return view(m, ctx, true);

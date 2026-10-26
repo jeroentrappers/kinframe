@@ -15,11 +15,14 @@ export function view(json, ctx) {
 }
 
 export default {
-  async render(ctx) {
+  async update(ctx) {
     const { latitude, longitude } = ctx.settings;
-    if (typeof latitude !== 'number' || typeof longitude !== 'number') return null;
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') return;
     const r = await ctx.http.get(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=european_aqi,pm2_5,pm10`);
     if (!r.ok) throw new Error('Open-Meteo: HTTP ' + r.status);
-    return view(r.json(), ctx);
+    ctx.state.data = r.json();
+  },
+  render(ctx) {
+    return ctx.state.data ? view(ctx.state.data, ctx) : null;
   },
 };

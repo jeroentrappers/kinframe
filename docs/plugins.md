@@ -142,7 +142,7 @@ ha-energy-flow/
 - **`id`** is reverse-DNS-like and unique in the registry. `community.` is the prefix for third-party plugins,
   `kinframe.` for the ones the project maintains.
 - **`api`** is the plugin API version (section 4). The frame refuses plugins for an API it doesn't know.
-- **`refresh`**: `default_seconds` between `render` calls, `min_seconds` as the floor for `invalidate()`, and optional
+- **`refresh`**: `default_seconds` between `update` calls, `min_seconds` as the floor for `invalidate()`, and optional
   `stale_seconds`: how old the source's own measurement (`ctx.dataTime`) may be before the widget is greyed (a weather
   station that uploads every 10 minutes: 1800).
 - **`permissions`** lists what the code may do, and every network permission names the **setting** that holds the
@@ -158,7 +158,10 @@ ha-energy-flow/
 
 ### 3.2 Code
 
-`main.js` exports one object. Everything is async and returns plain data.
+`main.js` exports one object and returns plain data. Fetching and drawing are separate: **`update`** is the only
+call on a timer that may use the network and keeps what it got in `ctx.state`; **`render`** and **`detail`** draw from
+that and can't use the network (`ctx.http` throws there), so the frame never waits for a slow device to draw, and the
+50 ms budget for drawing is all computation.
 
 ```js
 export default {
@@ -171,8 +174,15 @@ export default {
     return null;
   },
 
-  // Called every `refresh` seconds and after ctx.invalidate(). Return the view to draw.
-  async render(ctx) {
+  // Called every `refresh` seconds, right before render: fetch, and keep the data in ctx.state.
+  async update(ctx) {
+    if (ctx.state.live) return; // the WebSocket keeps ctx.state current
+    const r = await ctx.http.get(ctx.settings.base_url + '/api/states', { headers: { Authorization: 'Bearer ' + ctx.settings.token } });
+    ctx.state.solar = /* … */ 0;
+  },
+
+  // Called after every update and after ctx.invalidate(). Draw from ctx.state; no network here.
+  render(ctx) {
     const s = ctx.state;
     return {
       type: 'flow',
@@ -203,9 +213,9 @@ export default {
 | `settings` | The owner's settings, secrets included, read-only. |
 | `state` | A plain object the plugin may keep between calls (lost on restart). |
 | `store` | Small persistent key-value storage, 64 KB per instance (e.g. yesterday's total): `get/set` strings, `getJson/setJson`. Over the limit, `set` throws. |
-| `http.get(url, options)`, `http.post(url, body, options)` | Fetch. Only URLs allowed by `permissions.http`. Resolves to `{ status, ok, contentType, text, json() }`; a non-2xx status doesn't throw (the plugin decides). `options.headers` (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls); a `body` object is sent as JSON. 10 s timeout, 1 MB response limit, no redirects. |
+| `http.get(url, options)`, `http.post(url, body, options)` | Fetch, in `start`, `update`, `action` and WebSocket handlers (not in `render` or `detail`). Only URLs allowed by `permissions.http`. Resolves to `{ status, ok, contentType, text, json() }`; a non-2xx status doesn't throw (the plugin decides). `options.headers` (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls); a `body` object is sent as JSON. 10 s timeout, 1 MB response limit, no redirects. |
 | `ws.connect(url, handlers)` | One WebSocket per instance, same rules. The frame reconnects with backoff and calls `onOpen` again. |
-| `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message). Throttled to `refresh.min_seconds`. |
+| `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message), without an `update`. Throttled to `refresh.min_seconds`. |
 | `format.power/energy/percent/temperature/number/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". `temperature` follows the frame's °C/°F (optionally with decimals); `number(value, decimals, unit)` for anything else ("2,3 m/s"). |
 | `dataTime` | Optional: when the source measured what the view shows (epoch ms). For sources that update every few minutes; the frame greys the view when it is older than `manifest.refresh.stale_seconds`, even while fetching works. |
 | `t(key, vars)` | The plugin's own translated strings from `locales/`. |
@@ -299,7 +309,8 @@ future TV or tablet frame, and animations (flow arrows, value changes) are done 
 - **Runtime:** each instance runs in its own **QuickJS** runtime (small, embeddable, has memory limits and an
   interrupt handler for CPU limits, runs fine on armeabi-v7a and Android 6). A plugin gets **8 MB** of heap and **50 ms
   of JavaScript per call** (time spent awaiting `ctx.http` doesn't count); over the limit, the call is aborted and
-  counted as a failure. All instances share one background thread at low priority, so a plugin can never stall the
+  counted as a failure. On the timer the host calls `update` and then `render`; a failed `update` skips that render
+  and the last view stays. All instances share one background thread at low priority, so a plugin can never stall the
   slideshow's main thread. Details of the implementation: §13.
 - **Network:** every `ctx.http` and `ctx.ws` call goes through the host, which checks the URL against the manifest's
   permissions and `local_only` before opening a socket, follows no redirects to other hosts, and rate-limits to
@@ -709,7 +720,10 @@ engine's own robustness, not something the host can isolate in one process.
 *script* (`__kf_call('render')`) whose result comes back through a binding, because evaluating a promise doesn't
 return its value, and because evaluating a new module per call would keep every module in memory (measured: +450 KB
 per 500 calls as modules, flat as scripts). Calls are serialised per instance; a WebSocket message waits for a running
-render.
+render, and its handler has the same budget as a call. `update` runs on its own clock (every refresh interval, longer
+after failures), so frequent `invalidate()`s from a WebSocket only cause renders and never hold off an update. While
+`render` or `detail` runs, the `http` binding refuses with "render can't use the network: fetch in update()". The
+host logs, per instance and every 60 renders, the render times and the update times with and without the network.
 
 **Network.** `PluginPermissions` turns the manifest's entries into origins (`settings.<key>` through
 `LocalAddress.baseUrl`, or a fixed https origin). A request must match one (scheme, host, port, under the setting's
