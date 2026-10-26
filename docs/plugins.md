@@ -756,7 +756,9 @@ slower than a desktop core, so expect 1–4 ms per render and well under 100 ms 
 negligible next to drawing. On the Denver (0.7.0-beta.1, the P1 as a dial): the runtime boots in 68 ms with a
 104 KB heap, which grows to about 128 KB; a render including the HTTP request to the meter takes 68 ms at p50 and
 up to 283 ms, nearly all of it the network. Without the network (0.7.0-beta.2, the host's clock: JavaScript plus the
-bridge around it) a render takes 9.7 ms at p50. The host logs these per instance every 60 renders
+bridge around it) a render takes 9.7 ms at p50. With fetching and drawing split (0.7.0-beta.4, 60 cycles): render
+6.5 ms at p50, 35 ms at most, never waiting for the network; update 5.3 ms of JavaScript at p50 (69.5 ms for the cold
+first one, under the start budget), 66.5 ms at p50 and up to 246 ms with the network; no failures. The host logs these per instance every 60 renders
 (`KinFramePlugins`).
 
 **Screenshots** (views straight from the plugins, run in QuickJS on the fixtures; a drawn stand-in for album art):
