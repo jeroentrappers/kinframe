@@ -119,7 +119,7 @@ test('set a frame location from place search and turn the weather on', async ({ 
 
 	await page.goto(`/frames/${frame.id}?tab=settings`);
 	await expect(page.getByRole('heading', { name: 'Location & weather' })).toBeVisible();
-	const weather = page.getByRole('checkbox', { name: /Show the weather/ });
+	const weather = page.getByRole('checkbox', { name: /Weather forecast/ });
 	await expect(weather).toBeDisabled();
 
 	// A friendly message when the search is rate-limited.
