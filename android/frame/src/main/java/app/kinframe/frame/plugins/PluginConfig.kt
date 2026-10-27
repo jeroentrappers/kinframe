@@ -16,9 +16,12 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
-/** Off: no widgets. Overlay: top corners of the photo. Band: a 3:2 photo and a band beside or above it (§2.1). */
+/**
+ * Off: no widgets. Overlay: top corners of the photo. Band: a 3:2 photo and a band beside or above it (§2.1). Split:
+ * a photo on half the screen, the other half shared by the dashboard and a second photo (§2.2).
+ */
 @Serializable
-enum class PluginLayoutMode { @SerialName("off") Off, @SerialName("overlay") Overlay, @SerialName("band") Band }
+enum class PluginLayoutMode { @SerialName("off") Off, @SerialName("overlay") Overlay, @SerialName("band") Band, @SerialName("split") Split }
 
 @Serializable
 enum class BandSide { @SerialName("left") Left, @SerialName("right") Right }

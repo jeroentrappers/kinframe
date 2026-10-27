@@ -8,12 +8,13 @@ import (
 	"testing"
 )
 
-// The repository's real manifests, as the frame app reports them.
+// Copies of the repository's manifests (plugins/<id>/plugin.json), as the frame app reports them; the server's tests
+// build without the rest of the repository.
 func catalogOf(t *testing.T, ids ...string) map[string]any {
 	t.Helper()
 	var plugins []any
 	for _, id := range ids {
-		raw, err := os.ReadFile(filepath.Join("..", "..", "..", "plugins", id, "plugin.json"))
+		raw, err := os.ReadFile(filepath.Join("testdata", "plugins", id+".json"))
 		if err != nil {
 			t.Fatal(err)
 		}

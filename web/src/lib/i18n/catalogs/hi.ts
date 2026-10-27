@@ -1248,6 +1248,9 @@ const hi: Catalog = {
 	'plugins.entityAdd': '{id} जोड़ें',
 	'plugins.entityRemove': '{name} हटाएँ',
 	'plugins.entityNoMatch': 'कुछ नहीं मिला। आप एंटिटी id लिख सकते हैं।',
+	'plugins.tzSearch': 'कोई शहर या क्षेत्र खोजें',
+	'plugins.tzResults': 'समय क्षेत्र',
+	'plugins.tzNoMatch': 'कोई समय क्षेत्र मेल नहीं खाता।',
 	'plugins.entityNone': 'पता और टोकन सेव करें: फिर फ़्रेम जो पाता है उसकी सूची दिखाएगा।',
 	'plugins.choiceNone': 'कोई नहीं',
 	'plugins.errRequired': 'इसे भरें।',
@@ -1255,6 +1258,7 @@ const hi: Catalog = {
 	'plugins.errColor': '#ff8800 जैसा कोई रंग लिखें।',
 	'plugins.errUrl': 'http://192.168.1.20 जैसा कोई पता लिखें।',
 	'plugins.errEnum': 'विकल्पों में से एक चुनें।',
+	'plugins.errTimezone': 'सूची से कोई समय क्षेत्र चुनें।',
 	'plugins.errUnknown': 'फ़्रेम पर प्लगइन में अब यह सेटिंग नहीं है।',
 	'plugins.errType': 'यह इस सेटिंग में फ़िट नहीं होता।'
 };

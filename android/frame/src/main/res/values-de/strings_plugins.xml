@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Aus</string>
     <string name="plugins_layout_overlay">In den Ecken</string>
     <string name="plugins_layout_band">Neben dem Foto</string>
+    <string name="plugins_layout_split">Zwei Fotos und eine Übersicht</string>
+    <string name="plugins_split_side">Seite der Übersicht</string>
     <string name="plugins_band_side">Seite (Querformat)</string>
     <string name="plugins_side_left">Links</string>
     <string name="plugins_side_right">Rechts</string>

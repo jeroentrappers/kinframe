@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">끄기</string>
     <string name="plugins_layout_overlay">모서리에</string>
     <string name="plugins_layout_band">사진 옆에</string>
+    <string name="plugins_layout_split">사진 두 장과 대시보드</string>
+    <string name="plugins_split_side">대시보드 위치</string>
     <string name="plugins_band_side">위치(가로)</string>
     <string name="plugins_side_left">왼쪽</string>
     <string name="plugins_side_right">오른쪽</string>

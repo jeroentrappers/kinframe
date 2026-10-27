@@ -1249,6 +1249,9 @@ const vi: Catalog = {
 	'plugins.entityAdd': 'Thêm {id}',
 	'plugins.entityRemove': 'Bỏ {name}',
 	'plugins.entityNoMatch': 'Không có kết quả. Bạn có thể nhập id thực thể.',
+	'plugins.tzSearch': 'Tìm thành phố hoặc khu vực',
+	'plugins.tzResults': 'Múi giờ',
+	'plugins.tzNoMatch': 'Không có múi giờ nào khớp.',
 	'plugins.entityNone': 'Lưu địa chỉ và token: khung ảnh sẽ liệt kê những gì nó tìm thấy.',
 	'plugins.choiceNone': 'Không',
 	'plugins.errRequired': 'Hãy điền ô này.',
@@ -1256,6 +1259,7 @@ const vi: Catalog = {
 	'plugins.errColor': 'Hãy nhập màu như #ff8800.',
 	'plugins.errUrl': 'Hãy nhập địa chỉ như http://192.168.1.20.',
 	'plugins.errEnum': 'Hãy chọn một trong các lựa chọn.',
+	'plugins.errTimezone': 'Hãy chọn một múi giờ trong danh sách.',
 	'plugins.errUnknown': 'Tiện ích trên khung ảnh không còn cài đặt này.',
 	'plugins.errType': 'Giá trị này không hợp với cài đặt này.'
 };

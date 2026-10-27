@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">כבוי</string>
     <string name="plugins_layout_overlay">בפינות</string>
     <string name="plugins_layout_band">ליד התמונה</string>
+    <string name="plugins_layout_split">שתי תמונות ולוח מידע</string>
+    <string name="plugins_split_side">צד לוח המידע</string>
     <string name="plugins_band_side">צד (לרוחב)</string>
     <string name="plugins_side_left">שמאל</string>
     <string name="plugins_side_right">ימין</string>

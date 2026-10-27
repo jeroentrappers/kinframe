@@ -1243,6 +1243,9 @@ const de: Catalog = {
 	'plugins.entityAdd': '{id} hinzufügen',
 	'plugins.entityRemove': '{name} entfernen',
 	'plugins.entityNoMatch': 'Nichts gefunden. Du kannst die Entitäts-ID auch eintippen.',
+	'plugins.tzSearch': 'Suche nach einer Stadt oder Region',
+	'plugins.tzResults': 'Zeitzonen',
+	'plugins.tzNoMatch': 'Keine Zeitzone gefunden.',
 	'plugins.entityNone': 'Speichere Adresse und Token: Der Rahmen listet dann auf, was er findet.',
 	'plugins.choiceNone': 'Keine',
 	'plugins.errRequired': 'Bitte ausfüllen.',
@@ -1250,6 +1253,7 @@ const de: Catalog = {
 	'plugins.errColor': 'Gib eine Farbe wie #ff8800 ein.',
 	'plugins.errUrl': 'Gib eine Adresse wie http://192.168.1.20 ein.',
 	'plugins.errEnum': 'Wähle eine der Optionen.',
+	'plugins.errTimezone': 'Wähle eine Zeitzone aus der Liste.',
 	'plugins.errUnknown': 'Das Plugin auf dem Rahmen hat diese Einstellung nicht mehr.',
 	'plugins.errType': 'Das passt nicht zu dieser Einstellung.'
 };

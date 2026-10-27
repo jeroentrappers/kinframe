@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">إيقاف</string>
     <string name="plugins_layout_overlay">في الزوايا</string>
     <string name="plugins_layout_band">بجانب الصورة</string>
+    <string name="plugins_layout_split">صورتان ولوحة معلومات</string>
+    <string name="plugins_split_side">جهة لوحة المعلومات</string>
     <string name="plugins_band_side">الجانب (أفقي)</string>
     <string name="plugins_side_left">يسار</string>
     <string name="plugins_side_right">يمين</string>

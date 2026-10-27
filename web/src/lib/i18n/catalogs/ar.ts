@@ -1365,6 +1365,9 @@ const ar: Catalog = {
 	'plugins.entityAdd': 'إضافة {id}',
 	'plugins.entityRemove': 'إزالة {name}',
 	'plugins.entityNoMatch': 'لا نتائج. يمكنك كتابة معرّف الكيان.',
+	'plugins.tzSearch': 'ابحث عن مدينة أو منطقة',
+	'plugins.tzResults': 'المناطق الزمنية',
+	'plugins.tzNoMatch': 'لا توجد منطقة زمنية مطابقة.',
 	'plugins.entityNone': 'احفظ العنوان والرمز: سيعرض الإطار بعدها ما يجده.',
 	'plugins.choiceNone': 'بلا',
 	'plugins.errRequired': 'املأ هذا الحقل.',
@@ -1372,6 +1375,7 @@ const ar: Catalog = {
 	'plugins.errColor': 'اكتب لونًا مثل #ff8800.',
 	'plugins.errUrl': 'اكتب عنوانًا مثل http://192.168.1.20.',
 	'plugins.errEnum': 'اختر أحد الخيارات.',
+	'plugins.errTimezone': 'اختر منطقة زمنية من القائمة.',
 	'plugins.errUnknown': 'لم يعد هذا الإعداد موجودًا في الإضافة على الإطار.',
 	'plugins.errType': 'هذه القيمة لا تناسب هذا الإعداد.'
 };

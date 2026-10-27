@@ -1248,6 +1248,9 @@ const bg: Catalog = {
 	'plugins.entityAdd': 'Добавяне на {id}',
 	'plugins.entityRemove': 'Премахване на {name}',
 	'plugins.entityNoMatch': 'Няма резултати. Можете да въведете id на обекта.',
+	'plugins.tzSearch': 'Търсете град или регион',
+	'plugins.tzResults': 'Часови зони',
+	'plugins.tzNoMatch': 'Няма съвпадаща часова зона.',
 	'plugins.entityNone': 'Запазете адреса и токена: рамката ще покаже какво намира.',
 	'plugins.choiceNone': 'Няма',
 	'plugins.errRequired': 'Попълнете това поле.',
@@ -1255,6 +1258,7 @@ const bg: Catalog = {
 	'plugins.errColor': 'Въведете цвят, напр. #ff8800.',
 	'plugins.errUrl': 'Въведете адрес, напр. http://192.168.1.20.',
 	'plugins.errEnum': 'Изберете една от опциите.',
+	'plugins.errTimezone': 'Изберете часова зона от списъка.',
 	'plugins.errUnknown': 'Плъгинът на рамката вече няма тази настройка.',
 	'plugins.errType': 'Това не пасва на тази настройка.'
 };

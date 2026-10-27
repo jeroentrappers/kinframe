@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">關閉</string>
     <string name="plugins_layout_overlay">在角落</string>
     <string name="plugins_layout_band">在相片旁</string>
+    <string name="plugins_layout_split">兩張相片和資訊面板</string>
+    <string name="plugins_split_side">資訊面板的位置</string>
     <string name="plugins_band_side">側邊（橫向）</string>
     <string name="plugins_side_left">左</string>
     <string name="plugins_side_right">右</string>

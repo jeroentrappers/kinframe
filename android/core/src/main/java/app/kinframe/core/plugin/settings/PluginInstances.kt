@@ -83,6 +83,8 @@ data class InstanceFieldError(val key: String?, val field: String, val code: Str
     companion object {
         const val REQUIRED = "required"
         const val TYPE = "type"
+        /** A `timezone` setting holding an id that isn't a known time zone. */
+        const val TIMEZONE = "timezone"
     }
 }
 
@@ -175,13 +177,17 @@ object PluginSettings {
 
     /**
      * The client-side check, the same as the server's: an enabled instance needs every `required` setting without a
-     * `default` filled in, and those secrets set (or being set). Also flags a number field holding text.
+     * `default` filled in, and those secrets set (or being set). Also flags a number field holding text and a time zone
+     * field holding an id that isn't a known zone (empty is fine unless required).
      */
     fun check(plugin: FormPlugin, d: PluginInstanceDraft): List<InstanceFieldError> {
         val out = mutableListOf<InstanceFieldError>()
         plugin.settings.forEach { s ->
             val v = d.settings[s.key]
             if (s.type == SettingType.NUMBER && v is JsonPrimitive && v.isString) out += InstanceFieldError(s.key, "settings", InstanceFieldError.TYPE)
+            if (s.type == SettingType.TIMEZONE && !isEmpty(v) && !(v is JsonPrimitive && v.isString && TimeZones.known(v.content))) {
+                out += InstanceFieldError(s.key, "settings", InstanceFieldError.TIMEZONE)
+            }
         }
         if (!d.enabled) return out
         plugin.settings.filter { it.mustFill }.forEach { s ->

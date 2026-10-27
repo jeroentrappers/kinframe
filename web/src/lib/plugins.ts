@@ -12,7 +12,7 @@ export type DiscoveredService = Schemas['DiscoveredService'];
 
 export type Slot = 'top-left' | 'top-right';
 export type Visibility = 'always' | 'on_change' | 'on_tap';
-export type SettingType = 'text' | 'number' | 'boolean' | 'choice' | 'url' | 'secret' | 'entity' | 'color' | 'duration';
+export type SettingType = 'text' | 'number' | 'boolean' | 'choice' | 'url' | 'secret' | 'entity' | 'color' | 'duration' | 'timezone';
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 
 export const SLOTS: readonly Slot[] = ['top-left', 'top-right'];
@@ -311,7 +311,7 @@ export function instanceComplete(m: Manifest, inst: PluginInstance): boolean {
 	return missingRequired(m, draftOf(m, inst)).length === 0;
 }
 
-export type FieldProblem = 'required' | 'number' | 'color' | 'url' | 'enum';
+export type FieldProblem = 'required' | 'number' | 'color' | 'url' | 'enum' | 'timezone';
 
 const COLOR = /^#[0-9a-fA-F]{6}$/;
 const HOST = /^(\[[0-9a-fA-F:.]+\]|[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?)*\.?)(:\d{1,5})?$/;
@@ -341,6 +341,7 @@ export function fieldProblems(m: Manifest, d: Draft, enabled: boolean = d.enable
 		else if (s.type === 'color' && t !== '' && !COLOR.test(t)) out[s.key] = 'color';
 		else if (s.type === 'url' && t !== '' && !validUrl(t)) out[s.key] = 'url';
 		else if (s.type === 'choice' && t !== '' && !(s.options ?? []).includes(t)) out[s.key] = 'enum';
+		else if (s.type === 'timezone' && t !== '' && !knownTimeZone(t)) out[s.key] = 'timezone';
 	}
 	if (enabled) for (const k of missingRequired(m, d)) out[k] ??= 'required';
 	return out;
@@ -402,6 +403,170 @@ export function applyPreset(m: Manifest, id: string, d: Draft): Draft | null {
 		values[k] = toField(spec, filled);
 	}
 	return { ...d, values };
+}
+
+// ------------------------------------------------------------------ time zones (`timezone` settings)
+
+/** Used when the browser can't list its zones (`Intl.supportedValuesOf` is from 2022). */
+const FALLBACK_ZONES = [
+	'Africa/Cairo', 'Africa/Johannesburg', 'Africa/Lagos', 'Africa/Nairobi', 'America/Anchorage', 'America/Argentina/Buenos_Aires',
+	'America/Bogota', 'America/Chicago', 'America/Denver', 'America/Halifax', 'America/Los_Angeles', 'America/Mexico_City',
+	'America/New_York', 'America/Sao_Paulo', 'America/Toronto', 'Asia/Bangkok', 'Asia/Dubai', 'Asia/Hong_Kong', 'Asia/Jakarta',
+	'Asia/Jerusalem', 'Asia/Kolkata', 'Asia/Manila', 'Asia/Seoul', 'Asia/Shanghai', 'Asia/Singapore', 'Asia/Tokyo',
+	'Atlantic/Reykjavik', 'Australia/Perth', 'Australia/Sydney', 'Europe/Amsterdam', 'Europe/Athens', 'Europe/Berlin',
+	'Europe/Brussels', 'Europe/Istanbul', 'Europe/Lisbon', 'Europe/London', 'Europe/Madrid', 'Europe/Moscow', 'Europe/Paris',
+	'Europe/Rome', 'Europe/Stockholm', 'Europe/Warsaw', 'Pacific/Auckland', 'Pacific/Honolulu'
+];
+
+/**
+ * Browsers list some zones by an old name (CLDR's canonical one, "Asia/Calcutta"); people look for today's, and the
+ * frame knows both. Only renames from 2016 or before, so an older frame's time zone data has the new name too.
+ */
+const RENAMED: Record<string, string> = {
+	'Africa/Asmera': 'Africa/Asmara',
+	'America/Buenos_Aires': 'America/Argentina/Buenos_Aires',
+	'America/Catamarca': 'America/Argentina/Catamarca',
+	'America/Coral_Harbour': 'America/Atikokan',
+	'America/Cordoba': 'America/Argentina/Cordoba',
+	'America/Indianapolis': 'America/Indiana/Indianapolis',
+	'America/Jujuy': 'America/Argentina/Jujuy',
+	'America/Louisville': 'America/Kentucky/Louisville',
+	'America/Mendoza': 'America/Argentina/Mendoza',
+	'Asia/Calcutta': 'Asia/Kolkata',
+	'Asia/Katmandu': 'Asia/Kathmandu',
+	'Asia/Rangoon': 'Asia/Yangon',
+	'Asia/Saigon': 'Asia/Ho_Chi_Minh',
+	'Atlantic/Faeroe': 'Atlantic/Faroe',
+	'Pacific/Ponape': 'Pacific/Pohnpei',
+	'Pacific/Truk': 'Pacific/Chuuk'
+};
+
+/** A region id ("Europe/Brussels"), not `Etc/GMT+5`, `SystemV/…` or a bare alias ("EST", "UTC"). */
+export function isRegionZone(id: string): boolean {
+	return id.includes('/') && !id.startsWith('Etc/') && !id.startsWith('SystemV/');
+}
+
+const ZONE_ID = /^[A-Za-z][A-Za-z0-9_+-]*(\/[A-Za-z0-9_+-]+)*$/;
+const formats = new Map<string, Intl.DateTimeFormat | null>();
+
+/** The zone's calendar formatter (cached), or null when the browser doesn't know `id`. */
+function zoneFormat(id: string): Intl.DateTimeFormat | null {
+	let f = formats.get(id);
+	if (f === undefined) {
+		try {
+			f = ZONE_ID.test(id)
+				? new Intl.DateTimeFormat('en-US', {
+						timeZone: id,
+						hourCycle: 'h23',
+						year: 'numeric',
+						month: 'numeric',
+						day: 'numeric',
+						hour: 'numeric',
+						minute: 'numeric',
+						second: 'numeric'
+					})
+				: null;
+		} catch {
+			f = null;
+		}
+		formats.set(id, f);
+	}
+	return f;
+}
+
+/** Whether `id` is a time zone id the browser knows ("Asia/Tokyo", also "UTC" or an older name; not "+01:00"). */
+export function knownTimeZone(id: string): boolean {
+	return zoneFormat(id) !== null;
+}
+
+/** The zones a `timezone` setting offers, by id: the browser's region zones under today's names. */
+export function timeZoneIds(list: () => string[] = () => Intl.supportedValuesOf('timeZone')): string[] {
+	let ids: string[];
+	try {
+		ids = list();
+	} catch {
+		ids = [];
+	}
+	if (!ids.length) ids = FALLBACK_ZONES;
+	const out = new Set<string>();
+	for (const id of ids) {
+		if (!isRegionZone(id)) continue;
+		const now = RENAMED[id];
+		out.add(now && knownTimeZone(now) ? now : id);
+	}
+	return [...out].sort();
+}
+
+/** "New York" for "America/New_York". */
+export function zoneCity(id: string): string {
+	return (id.split('/').pop() ?? id).replaceAll('_', ' ');
+}
+
+/** "America", "America / Argentina" for "America/Argentina/Buenos_Aires"; empty for "UTC". */
+export function zoneRegion(id: string): string {
+	return id
+		.split('/')
+		.slice(0, -1)
+		.filter(Boolean)
+		.map((p) => p.replaceAll('_', ' '))
+		.join(' / ');
+}
+
+/** Minutes ahead of UTC in zone `id` at `at`, or null when the browser doesn't know it. */
+export function zoneOffsetMinutes(id: string, at: Date = new Date()): number | null {
+	const f = zoneFormat(id);
+	if (!f) return null;
+	const p: Record<string, number> = {};
+	for (const x of f.formatToParts(at)) if (x.type !== 'literal') p[x.type] = Number(x.value);
+	const wall = Date.UTC(p.year!, p.month! - 1, p.day!, p.hour! % 24, p.minute!, p.second!);
+	const instant = Math.floor(at.getTime() / 1000) * 1000;
+	return Math.round((wall - instant) / 60000);
+}
+
+/** "UTC−4" (a real minus sign), "UTC+5:30", "UTC" for no offset. */
+export function formatUtcOffset(minutes: number): string {
+	if (minutes === 0) return 'UTC';
+	const abs = Math.abs(minutes);
+	const h = Math.floor(abs / 60);
+	const m = abs % 60;
+	return `UTC${minutes < 0 ? '\u2212' : '+'}${h}${m ? `:${String(m).padStart(2, '0')}` : ''}`;
+}
+
+export interface TimeZoneOption {
+	/** The IANA id, what is stored. */
+	id: string;
+	/** "New York" */
+	city: string;
+	/** "America" */
+	region: string;
+	/** "UTC−4"; empty for a zone the browser doesn't know. */
+	offset: string;
+	/** "America · UTC−4": the line under the city. */
+	detail: string;
+}
+
+/** How a zone shows in the picker at `at`; an unknown id still gets its city and region. */
+export function timeZoneOption(id: string, at: Date = new Date()): TimeZoneOption {
+	const city = zoneCity(id);
+	const region = zoneRegion(id);
+	const mins = zoneOffsetMinutes(id, at);
+	const offset = mins === null ? '' : formatUtcOffset(mins);
+	return { id, city, region, offset, detail: [region, offset].filter(Boolean).join(' · ') };
+}
+
+/** Every offered zone at `at`, by city. */
+export function timeZoneOptions(at: Date = new Date(), ids: string[] = timeZoneIds()): TimeZoneOption[] {
+	return ids.map((id) => timeZoneOption(id, at)).sort((a, b) => a.city.localeCompare(b.city, 'en') || a.id.localeCompare(b.id));
+}
+
+/** The options with every word of `query` in their city, region or id ("new york", "tokyo", "america/"). */
+export function filterTimeZones(options: TimeZoneOption[], query = ''): TimeZoneOption[] {
+	const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+	if (!words.length) return options;
+	return options.filter((o) => {
+		const hay = `${o.city} ${o.region} ${o.id} ${o.id.replaceAll('_', ' ')}`.toLowerCase();
+		return words.every((w) => hay.includes(w));
+	});
 }
 
 // ------------------------------------------------------------------ discovery (§6.2)

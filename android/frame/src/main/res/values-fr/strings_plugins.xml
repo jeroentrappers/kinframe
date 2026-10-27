@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Désactivé</string>
     <string name="plugins_layout_overlay">Dans les coins</string>
     <string name="plugins_layout_band">À côté de la photo</string>
+    <string name="plugins_layout_split">Deux photos et un tableau de bord</string>
+    <string name="plugins_split_side">Côté du tableau de bord</string>
     <string name="plugins_band_side">Côté (paysage)</string>
     <string name="plugins_side_left">Gauche</string>
     <string name="plugins_side_right">Droite</string>

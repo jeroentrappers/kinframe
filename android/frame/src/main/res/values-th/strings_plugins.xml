@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">ปิด</string>
     <string name="plugins_layout_overlay">ที่มุม</string>
     <string name="plugins_layout_band">ข้างรูป</string>
+    <string name="plugins_layout_split">รูปสองรูปและแดชบอร์ด</string>
+    <string name="plugins_split_side">ด้านของแดชบอร์ด</string>
     <string name="plugins_band_side">ด้าน (แนวนอน)</string>
     <string name="plugins_side_left">ซ้าย</string>
     <string name="plugins_side_right">ขวา</string>

@@ -1247,6 +1247,9 @@ const zhTW: Catalog = {
 	'plugins.entityAdd': '新增 {id}',
 	'plugins.entityRemove': '移除{name}',
 	'plugins.entityNoMatch': '沒有相符項目。你可以直接輸入實體 ID。',
+	'plugins.tzSearch': '搜尋城市或地區',
+	'plugins.tzResults': '時區',
+	'plugins.tzNoMatch': '沒有相符的時區。',
 	'plugins.entityNone': '儲存位址和權杖後，相框會列出它找到的項目。',
 	'plugins.choiceNone': '無',
 	'plugins.errRequired': '請填寫此欄位。',
@@ -1254,6 +1257,7 @@ const zhTW: Catalog = {
 	'plugins.errColor': '請輸入顏色，例如 #ff8800。',
 	'plugins.errUrl': '請輸入位址，例如 http://192.168.1.20。',
 	'plugins.errEnum': '請選擇其中一個選項。',
+	'plugins.errTimezone': '請從清單中選擇時區。',
 	'plugins.errUnknown': '相框上的外掛程式已不再有此設定。',
 	'plugins.errType': '此值不適用於該設定。'
 };

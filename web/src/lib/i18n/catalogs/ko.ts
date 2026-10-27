@@ -1247,6 +1247,9 @@ const ko: Catalog = {
 	'plugins.entityAdd': '{id} 추가',
 	'plugins.entityRemove': '{name} 빼기',
 	'plugins.entityNoMatch': '일치하는 항목이 없어요. 엔티티 ID를 직접 입력할 수 있어요.',
+	'plugins.tzSearch': '도시 또는 지역 검색',
+	'plugins.tzResults': '시간대',
+	'plugins.tzNoMatch': '일치하는 시간대가 없습니다.',
 	'plugins.entityNone': '주소와 토큰을 저장하면 액자가 찾은 항목을 보여 줘요.',
 	'plugins.choiceNone': '없음',
 	'plugins.errRequired': '입력하세요.',
@@ -1254,6 +1257,7 @@ const ko: Catalog = {
 	'plugins.errColor': '#ff8800 같은 색을 입력하세요.',
 	'plugins.errUrl': 'http://192.168.1.20 같은 주소를 입력하세요.',
 	'plugins.errEnum': '옵션 중 하나를 고르세요.',
+	'plugins.errTimezone': '목록에서 시간대를 선택하세요.',
 	'plugins.errUnknown': '액자의 플러그인에 이 설정이 더 이상 없어요.',
 	'plugins.errType': '이 설정에 맞지 않는 값이에요.'
 };

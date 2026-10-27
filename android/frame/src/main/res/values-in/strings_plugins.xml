@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Nonaktif</string>
     <string name="plugins_layout_overlay">Di sudut</string>
     <string name="plugins_layout_band">Di samping foto</string>
+    <string name="plugins_layout_split">Dua foto dan dasbor</string>
+    <string name="plugins_split_side">Sisi dasbor</string>
     <string name="plugins_band_side">Sisi (lanskap)</string>
     <string name="plugins_side_left">Kiri</string>
     <string name="plugins_side_right">Kanan</string>

@@ -1276,6 +1276,9 @@ const hr: Catalog = {
 	'plugins.entityAdd': 'Dodaj {id}',
 	'plugins.entityRemove': 'Ukloni {name}',
 	'plugins.entityNoMatch': 'Nema rezultata. Možete upisati id entiteta.',
+	'plugins.tzSearch': 'Potražite grad ili regiju',
+	'plugins.tzResults': 'Vremenske zone',
+	'plugins.tzNoMatch': 'Nijedna vremenska zona ne odgovara.',
 	'plugins.entityNone': 'Spremite adresu i token: okvir će zatim navesti što pronađe.',
 	'plugins.choiceNone': 'Ništa',
 	'plugins.errRequired': 'Ispunite ovo polje.',
@@ -1283,6 +1286,7 @@ const hr: Catalog = {
 	'plugins.errColor': 'Upišite boju, npr. #ff8800.',
 	'plugins.errUrl': 'Upišite adresu, npr. http://192.168.1.20.',
 	'plugins.errEnum': 'Odaberite jednu od mogućnosti.',
+	'plugins.errTimezone': 'Odaberite vremensku zonu s popisa.',
 	'plugins.errUnknown': 'Dodatak na okviru više nema ovu postavku.',
 	'plugins.errType': 'Ovo ne odgovara ovoj postavci.'
 };

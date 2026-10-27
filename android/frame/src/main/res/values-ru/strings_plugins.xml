@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Выкл.</string>
     <string name="plugins_layout_overlay">В углах</string>
     <string name="plugins_layout_band">Рядом с фото</string>
+    <string name="plugins_layout_split">Две фотографии и панель</string>
+    <string name="plugins_split_side">Сторона панели</string>
     <string name="plugins_band_side">Сторона (альбомная)</string>
     <string name="plugins_side_left">Слева</string>
     <string name="plugins_side_right">Справа</string>

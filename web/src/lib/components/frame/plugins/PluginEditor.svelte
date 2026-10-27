@@ -41,6 +41,7 @@
 	import Dialog from '../../Dialog.svelte';
 	import Icon from '../../Icon.svelte';
 	import EntityPicker from './EntityPicker.svelte';
+	import TimeZonePicker from './TimeZonePicker.svelte';
 
 	let {
 		open = $bindable(false),
@@ -101,6 +102,7 @@
 		color: 'plugins.errColor',
 		url: 'plugins.errUrl',
 		enum: 'plugins.errEnum',
+		timezone: 'plugins.errTimezone',
 		unknown: 'plugins.errUnknown'
 	};
 	const problemText = (code: string) => t(PROBLEM[code] ?? 'plugins.errType');
@@ -365,6 +367,14 @@
 							invalid={!!problems[s.key]}
 							describedby={describedBy(s)}
 							bind:value={() => (Array.isArray(draft.values[s.key]) ? (draft.values[s.key] as string[]) : []), (v) => setValue(s.key, v)}
+						/>
+					{:else if s.type === 'timezone'}
+						<TimeZonePicker
+							id={fid(s.key)}
+							placeholder={settingPlaceholder(plugin, s, loc)}
+							invalid={!!problems[s.key]}
+							describedby={describedBy(s)}
+							bind:value={() => str(s.key), (v) => setValue(s.key, v)}
 						/>
 					{:else if s.type === 'secret'}
 						{@const sec = draft.secrets[s.key]!}

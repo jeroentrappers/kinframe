@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">オフ</string>
     <string name="plugins_layout_overlay">四隅</string>
     <string name="plugins_layout_band">写真の横</string>
+    <string name="plugins_layout_split">写真2枚とダッシュボード</string>
+    <string name="plugins_split_side">ダッシュボードの位置</string>
     <string name="plugins_band_side">位置（横向き）</string>
     <string name="plugins_side_left">左</string>
     <string name="plugins_side_right">右</string>

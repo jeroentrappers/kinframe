@@ -67,6 +67,8 @@ import app.kinframe.core.plugin.settings.PluginInstanceDraft
 import app.kinframe.core.plugin.settings.PluginLayout
 import app.kinframe.core.plugin.settings.PluginSettings
 import app.kinframe.core.plugin.settings.SettingType
+import app.kinframe.core.plugin.settings.TimeZoneOption
+import app.kinframe.core.plugin.settings.TimeZones
 import app.kinframe.core.plugin.settings.Slots
 import app.kinframe.core.plugin.settings.Visibility
 import app.kinframe.family.R
@@ -348,6 +350,7 @@ fun PluginEditorContent(plugin: FormPlugin?, editor: PluginEditor, report: Frame
 private fun errorText(e: InstanceFieldError): String = when (e.code) {
     InstanceFieldError.REQUIRED -> stringResource(R.string.plugins_err_required)
     InstanceFieldError.TYPE -> stringResource(R.string.plugins_err_type)
+    InstanceFieldError.TIMEZONE -> stringResource(R.string.plugins_err_timezone)
     "enum" -> stringResource(if (e.field == "slot") R.string.plugins_err_slot else R.string.plugins_err_enum)
     "unknown" -> stringResource(R.string.plugins_err_unknown)
     "secret" -> stringResource(R.string.plugins_err_secret)
@@ -434,6 +437,7 @@ private fun SettingField(
         }
         SettingType.SECRET -> SecretField(s.key, label, help, error, d, onChange)
         SettingType.ENTITY -> EntityField(s, label, help, error, PluginSettings.entityIds(value), entities) { ids -> set(PluginSettings.entityValue(s, ids)) }
+        SettingType.TIMEZONE -> TimeZoneField(label, help, error, (value as? JsonPrimitive)?.contentOrNull?.takeIf { it.isNotBlank() }) { id -> set(id?.let(::JsonPrimitive)) }
         else -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             // text, number, url, color, duration: a text field that keeps what's typed while the value it means is unchanged.
             var text by remember(d.instanceId, s.key) { mutableStateOf(PluginSettings.text(value)) }
@@ -593,5 +597,49 @@ private fun EntityField(
         if (q.contains('.') && q !in ids && all.none { it.entityId == q }) {
             TextButton({ pick(q) }) { Text(stringResource(R.string.plugins_entity_use, q), color = c.accent) }
         }
+    }
+}
+
+/** A `timezone` setting: the chosen zone as its city with region and UTC offset, and a search by city, region or id. */
+@Composable
+private fun TimeZoneField(label: String, help: String?, error: String?, id: String?, onPick: (String?) -> Unit) {
+    val c = Kin.colors
+    val options = remember { TimeZones.options() }
+    var query by remember { mutableStateOf("") }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        FieldLabel(label, help, error)
+        if (id != null) {
+            // An id this phone doesn't know (stored elsewhere) still shows, as written.
+            val o = options.firstOrNull { it.id == id } ?: TimeZones.option(id)
+            Row(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(c.accentSoft).padding(start = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+                    Text(o.city, style = Kin.type.bodyStrong, color = c.onAccentSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(if (o.offsetSeconds == null) o.id else o.detail, style = Kin.type.caption, color = c.onAccentSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                IconButton({ onPick(null) }) { Icon(KinIcons.Close, stringResource(R.string.plugins_timezone_clear, o.city), tint = c.onAccentSoft) }
+            }
+        }
+        KinTextField(query, { query = it }, stringResource(R.string.plugins_timezone_search), trailing = { Icon(KinIcons.Search, null, tint = c.inkSoft) })
+        val q = query.trim()
+        val matches = when {
+            q.isNotEmpty() -> TimeZones.search(options, q).take(12)
+            // Nothing chosen yet: offer this phone's own zone.
+            id == null -> options.filter { it.id == java.time.ZoneId.systemDefault().id }
+            else -> emptyList()
+        }
+        matches.filter { it.id != id }.forEach { o -> TimeZoneRow(o) { onPick(o.id); query = "" } }
+        if (q.isNotEmpty() && matches.isEmpty()) Text(stringResource(R.string.plugins_timezone_no_match), style = Kin.type.caption, color = c.inkSoft)
+    }
+}
+
+@Composable
+private fun TimeZoneRow(o: TimeZoneOption, onClick: () -> Unit) {
+    val c = Kin.colors
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable(role = Role.Button, onClick = onClick).padding(horizontal = 10.dp, vertical = 8.dp)) {
+        Text(o.city, style = Kin.type.body, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(o.detail, style = Kin.type.caption, color = c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }

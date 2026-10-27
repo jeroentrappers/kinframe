@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Kapalı</string>
     <string name="plugins_layout_overlay">Köşelerde</string>
     <string name="plugins_layout_band">Fotoğrafın yanında</string>
+    <string name="plugins_layout_split">İki fotoğraf ve bir pano</string>
+    <string name="plugins_split_side">Panonun tarafı</string>
     <string name="plugins_band_side">Taraf (yatay)</string>
     <string name="plugins_side_left">Sol</string>
     <string name="plugins_side_right">Sağ</string>

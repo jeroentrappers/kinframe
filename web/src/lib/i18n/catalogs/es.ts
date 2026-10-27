@@ -1265,6 +1265,9 @@ const es: Catalog = {
 	'plugins.entityAdd': 'Añadir {id}',
 	'plugins.entityRemove': 'Quitar {name}',
 	'plugins.entityNoMatch': 'Sin resultados. Puedes escribir el id de la entidad.',
+	'plugins.tzSearch': 'Busca una ciudad o región',
+	'plugins.tzResults': 'Zonas horarias',
+	'plugins.tzNoMatch': 'Ninguna zona horaria coincide.',
 	'plugins.entityNone': 'Guarda la dirección y el token: el marco mostrará lo que encuentre.',
 	'plugins.choiceNone': 'Ninguno',
 	'plugins.errRequired': 'Rellena este campo.',
@@ -1272,6 +1275,7 @@ const es: Catalog = {
 	'plugins.errColor': 'Escribe un color como #ff8800.',
 	'plugins.errUrl': 'Escribe una dirección como http://192.168.1.20.',
 	'plugins.errEnum': 'Elige una de las opciones.',
+	'plugins.errTimezone': 'Elige una zona horaria de la lista.',
 	'plugins.errUnknown': 'El plugin del marco ya no tiene este ajuste.',
 	'plugins.errType': 'Esto no encaja con este ajuste.'
 };

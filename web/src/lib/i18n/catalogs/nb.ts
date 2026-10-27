@@ -1231,6 +1231,9 @@ const nb: Catalog = {
 	'plugins.entityAdd': 'Legg til {id}',
 	'plugins.entityRemove': 'Fjern {name}',
 	'plugins.entityNoMatch': 'Ingen treff. Du kan skrive enhets-ID-en.',
+	'plugins.tzSearch': 'Søk etter en by eller region',
+	'plugins.tzResults': 'Tidssoner',
+	'plugins.tzNoMatch': 'Ingen tidssone passer.',
 	'plugins.entityNone': 'Lagre adressen og tokenet: Da viser fotorammen hva den finner.',
 	'plugins.choiceNone': 'Ingen',
 	'plugins.errRequired': 'Fyll inn dette.',
@@ -1238,6 +1241,7 @@ const nb: Catalog = {
 	'plugins.errColor': 'Skriv en farge som #ff8800.',
 	'plugins.errUrl': 'Skriv en adresse som http://192.168.1.20.',
 	'plugins.errEnum': 'Velg ett av alternativene.',
+	'plugins.errTimezone': 'Velg en tidssone fra listen.',
 	'plugins.errUnknown': 'Programtillegget på fotorammen har ikke denne innstillingen lenger.',
 	'plugins.errType': 'Dette passer ikke til denne innstillingen.'
 };

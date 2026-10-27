@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Dezactivat</string>
     <string name="plugins_layout_overlay">În colțuri</string>
     <string name="plugins_layout_band">Lângă fotografie</string>
+    <string name="plugins_layout_split">Două fotografii și un panou</string>
+    <string name="plugins_split_side">Partea panoului</string>
     <string name="plugins_band_side">Latura (peisaj)</string>
     <string name="plugins_side_left">Stânga</string>
     <string name="plugins_side_right">Dreapta</string>

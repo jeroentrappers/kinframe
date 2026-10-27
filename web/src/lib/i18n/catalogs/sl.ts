@@ -1306,6 +1306,9 @@ const sl: Catalog = {
 	'plugins.entityAdd': 'Dodaj {id}',
 	'plugins.entityRemove': 'Odstrani {name}',
 	'plugins.entityNoMatch': 'Ni zadetkov. Id entitete lahko vpišete sami.',
+	'plugins.tzSearch': 'Poiščite mesto ali regijo',
+	'plugins.tzResults': 'Časovni pasovi',
+	'plugins.tzNoMatch': 'Noben časovni pas se ne ujema.',
 	'plugins.entityNone': 'Shranite naslov in žeton: okvir bo nato navedel, kar najde.',
 	'plugins.choiceNone': 'Brez',
 	'plugins.errRequired': 'Izpolnite to polje.',
@@ -1313,6 +1316,7 @@ const sl: Catalog = {
 	'plugins.errColor': 'Vpišite barvo, npr. #ff8800.',
 	'plugins.errUrl': 'Vpišite naslov, npr. http://192.168.1.20.',
 	'plugins.errEnum': 'Izberite eno od možnosti.',
+	'plugins.errTimezone': 'Izberite časovni pas s seznama.',
 	'plugins.errUnknown': 'Vtičnik na okvirju te nastavitve nima več.',
 	'plugins.errType': 'To se ne ujema s to nastavitvijo.'
 };

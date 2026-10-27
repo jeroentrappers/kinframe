@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Wyłączone</string>
     <string name="plugins_layout_overlay">W rogach</string>
     <string name="plugins_layout_band">Obok zdjęcia</string>
+    <string name="plugins_layout_split">Dwa zdjęcia i panel</string>
+    <string name="plugins_split_side">Strona panelu</string>
     <string name="plugins_band_side">Strona (poziomo)</string>
     <string name="plugins_side_left">Lewa</string>
     <string name="plugins_side_right">Prawa</string>

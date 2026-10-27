@@ -1294,6 +1294,9 @@ const uk: Catalog = {
 	'plugins.entityAdd': 'Додати {id}',
 	'plugins.entityRemove': 'Прибрати {name}',
 	'plugins.entityNoMatch': 'Нічого не знайдено. Можна ввести id сутності вручну.',
+	'plugins.tzSearch': 'Знайдіть місто або регіон',
+	'plugins.tzResults': 'Часові пояси',
+	'plugins.tzNoMatch': 'Жоден часовий пояс не підходить.',
 	'plugins.entityNone': 'Збережіть адресу й токен: рамка покаже, що знайде.',
 	'plugins.choiceNone': 'Немає',
 	'plugins.errRequired': 'Заповніть це поле.',
@@ -1301,6 +1304,7 @@ const uk: Catalog = {
 	'plugins.errColor': 'Введіть колір, наприклад #ff8800.',
 	'plugins.errUrl': 'Введіть адресу, наприклад http://192.168.1.20.',
 	'plugins.errEnum': 'Виберіть один із варіантів.',
+	'plugins.errTimezone': 'Виберіть часовий пояс зі списку.',
 	'plugins.errUnknown': 'Плагін на рамці більше не має цього налаштування.',
 	'plugins.errType': 'Це не підходить для цього налаштування.'
 };

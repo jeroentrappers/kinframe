@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Isključeno</string>
     <string name="plugins_layout_overlay">U kutovima</string>
     <string name="plugins_layout_band">Pokraj fotografije</string>
+    <string name="plugins_layout_split">Dvije fotografije i pregled</string>
+    <string name="plugins_split_side">Strana pregleda</string>
     <string name="plugins_band_side">Strana (vodoravno)</string>
     <string name="plugins_side_left">Lijevo</string>
     <string name="plugins_side_right">Desno</string>

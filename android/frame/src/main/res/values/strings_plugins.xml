@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Off</string>
     <string name="plugins_layout_overlay">In the corners</string>
     <string name="plugins_layout_band">Beside the photo</string>
+    <string name="plugins_layout_split">Two photos and a dashboard</string>
+    <string name="plugins_split_side">Dashboard side</string>
     <string name="plugins_band_side">Side (landscape)</string>
     <string name="plugins_side_left">Left</string>
     <string name="plugins_side_right">Right</string>

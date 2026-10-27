@@ -91,7 +91,9 @@ class QuickJsSandboxTest {
 
     @Test fun overTheTargetIsLoggedNotInterrupted() = runBlocking {
         // 50 ms is the target; a garbage collection on a slow frame can take that long, so only 250 ms interrupts.
-        val k = kit("""export default { render(ctx) { const t = Date.now(); while (Date.now() - t < 80) {} return { type: 'text', lines: ['ok'] }; } }""")
+        // The loop waits 150 ms of wall time: the budget counts CPU time, which on a busy machine is less than the wall
+        // time, and it must still be over 50 ms and under 250 ms.
+        val k = kit("""export default { render(ctx) { const t = Date.now(); while (Date.now() - t < 150) {} return { type: 'text', lines: ['ok'] }; } }""")
         k.render()
         assertEquals("ok", text(k.render()))
         assertTrue(k.logs.toString(), k.logs.any { it.startsWith("render used") && it.endsWith("(target 50 ms)") })

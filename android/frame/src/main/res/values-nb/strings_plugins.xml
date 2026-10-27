@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Av</string>
     <string name="plugins_layout_overlay">I hjørnene</string>
     <string name="plugins_layout_band">Ved siden av bildet</string>
+    <string name="plugins_layout_split">To bilder og en oversikt</string>
+    <string name="plugins_split_side">Oversiktens side</string>
     <string name="plugins_band_side">Side (liggende)</string>
     <string name="plugins_side_left">Venstre</string>
     <string name="plugins_side_right">Høyre</string>

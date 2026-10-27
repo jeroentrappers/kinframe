@@ -175,6 +175,73 @@ test('presets ask for their placeholder first; remove asks first', async ({ page
 	expect(after.map((x) => x.instance_id)).toEqual(['p-p1meter001']);
 });
 
+test('time zone settings: search by city, show region and offset, keep an unknown id visible', async ({ page }) => {
+	const { state, frame } = setup();
+	const clock = {
+		id: 'test.clock',
+		name: 'Clocks',
+		version: '1.0.0',
+		settings: [
+			{ key: 'city_1', type: 'timezone', label: 'First city', required: true },
+			{ key: 'city_2', type: 'timezone', label: 'Second city' },
+			{ key: 'city_3', type: 'timezone', label: 'Third city' }
+		]
+	};
+	state.plugins[frame.id]!.catalog!.push({ manifest: clock as unknown as S['CatalogPlugin']['manifest'] });
+	state.settings[frame.id] = {
+		...defaultSettings(),
+		plugins: {
+			instances: [
+				{
+					instance_id: 'p-clock00001',
+					plugin_id: 'test.clock',
+					enabled: true,
+					settings: { city_1: 'Asia/Tokyo', city_3: 'Mars/Olympus_Mons' } as unknown as S['PluginInstance']['settings']
+				}
+			]
+		}
+	};
+	await mockApi(page, state);
+	await signIn(page);
+	await page.goto(`/frames/${frame.id}?tab=settings`);
+	const section = page.getByRole('region', { name: 'Plugins' });
+	await section.getByRole('button', { name: 'Edit Clocks' }).click();
+	const editor = page.getByRole('dialog', { name: 'Clocks' });
+
+	const first = editor.getByRole('combobox', { name: 'First city' });
+	await expect(first).toHaveValue('Tokyo');
+	await expect(editor.getByText('Asia · UTC+9')).toBeVisible();
+	// A stored id this browser doesn't know shows as written, marked.
+	const third = editor.getByRole('combobox', { name: 'Third city' });
+	await expect(third).toHaveValue('Mars/Olympus_Mons');
+	await expect(editor.getByText('Pick a time zone from the list.')).toBeVisible();
+
+	const second = editor.getByRole('combobox', { name: 'Second city' });
+	await second.fill('new york');
+	const options = page.getByRole('listbox', { name: 'Time zones' }).getByRole('option');
+	await expect(options).toHaveCount(1);
+	await expect(options.first()).toContainText('New York');
+	await expect(options.first()).toContainText(/America · UTC\u2212[45]/);
+	await shot(page, 'plugins-07-timezone');
+	await options.first().click();
+	await expect(second).toHaveValue('New York');
+
+	// Search by region, pick with the keyboard; clearing a field clears the setting.
+	await third.fill('');
+	await expect(editor.getByText('Pick a time zone from the list.')).toBeHidden();
+	await third.fill('pacific');
+	await expect(page.getByRole('listbox', { name: 'Time zones' }).getByRole('option').first()).toBeVisible();
+	await third.fill('auckland');
+	await third.press('ArrowDown');
+	await third.press('Enter');
+	await expect(third).toHaveValue('Auckland');
+
+	await editor.getByRole('button', { name: 'Save' }).click();
+	await expect(editor).toBeHidden();
+	const saved = (patches(state)[0]!.body as { plugins: { instances: S['PluginInstance'][] } }).plugins.instances[0]!;
+	expect(saved.settings).toEqual({ city_1: 'Asia/Tokyo', city_2: 'America/New_York', city_3: 'Pacific/Auckland' });
+});
+
 test('an older frame app asks to be updated', async ({ page }) => {
 	const { state, frame } = setup(null);
 	await mockApi(page, state);

@@ -131,6 +131,9 @@ import app.kinframe.frame.plugins.PluginDetailCard
 import app.kinframe.frame.plugins.PluginLayoutMode
 import app.kinframe.frame.plugins.PxRect
 import app.kinframe.frame.plugins.Slot
+import app.kinframe.frame.plugins.SplitDashboard
+import app.kinframe.frame.plugins.SplitGeometry
+import app.kinframe.frame.plugins.inSplitCell
 import app.kinframe.frame.plugins.bandGridFrame
 import app.kinframe.frame.plugins.anyVisible
 import app.kinframe.frame.plugins.inSlot
@@ -231,7 +234,9 @@ fun SlideshowScreen(c: FrameController) {
         val landscape = maxWidth > maxHeight
         val screenW = maxWidth
         val screenH = maxHeight
-        val hybrid = settings.widgets.calendarSidebar && calendarData != null
+        // Split layout (docs/plugins.md §2.2): two photos and the dashboard share the screen; it has its own agenda.
+        val splitMode = pluginLayout.mode == PluginLayoutMode.Split
+        val hybrid = settings.widgets.calendarSidebar && calendarData != null && !splitMode
         val panel = when {
             !hybrid -> 0.dp
             landscape -> (maxWidth * 0.3f).coerceIn(340.dp, 420.dp)
@@ -252,6 +257,10 @@ fun SlideshowScreen(c: FrameController) {
         // Whenever the band shows, it holds the clock, date and weather too, so the photo carries no overlay at all.
         val clockInBand = band != null && (settings.widgets.clock || settings.widgets.date || weather != null)
         val paper = stage.incoming == null && empty != null
+        LaunchedEffect(splitMode, pluginLayout.side) { ss.setSplit(if (splitMode) pluginLayout.side else null) }
+        // The dashboard shows with the split slides; a video or a lone photo takes the whole screen meanwhile.
+        val splitShown = splitMode && awake && !paper && stage.incoming?.split == true
+        val splitAlpha by animateFloatAsState(if (splitShown) 1f else 0f, tween(400), label = "splitDashboard")
         val bandWanted = band != null && awake && !paper && (clockInBand || pluginStates.anyVisible())
         // The band opens and closes in the layout/draw phase only (no recomposition per frame). The slides are rendered
         // for the settled area; while the band moves they are scaled to cover it, and re-rendered once it has settled.
@@ -484,7 +493,7 @@ fun SlideshowScreen(c: FrameController) {
         // With the band open, the photo area is a cell of the same grid as the band (gap and rounded corners).
         if (band != null) Box(Modifier.fillMaxSize().bandGridFrame { bandAnim.value })
 
-        val clockMoved = clockInBand && bandWanted
+        val clockMoved = (clockInBand && bandWanted) || splitShown
         ClockWidget(
             c, nowMs, settings.widgets.clock && !clockMoved, settings.widgets.date && !clockMoved, settings.widgets.clock24h,
             weather.takeIf { !clockMoved }, settings.locale.temperatureUnit,
@@ -498,7 +507,7 @@ fun SlideshowScreen(c: FrameController) {
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            if (settings.widgets.countdowns && !menuOpen && !paper) {
+            if (settings.widgets.countdowns && !menuOpen && !paper && !splitShown) {
                 val items = remember(calendarData, nowMs) { calendarData?.upcomingCountdowns(nowMs).orEmpty() }
                 CountdownWidgets(items, java.time.Instant.ofEpochMilli(nowMs).atZone(c.calendar.zone).toLocalDate(), onPaper = false, onClick = { c.calendar.openCalendar() })
             }
@@ -531,6 +540,23 @@ fun SlideshowScreen(c: FrameController) {
                         onPaper = pluginLayout.background == BandBackground.Paper,
                     )
                 },
+            )
+        }
+        if (splitMode && splitAlpha > 0f) {
+            val cells = SplitGeometry.cells(landscape, pluginLayout.side)
+            val locale = ConfigurationCompat.getLocales(androidx.compose.ui.platform.LocalConfiguration.current)[0] ?: Locale.ROOT
+            SplitDashboard(
+                states = pluginStates,
+                clock = if (settings.widgets.clock) Format.clock(nowMs, c.g.clock.zone, settings.widgets.clock24h, locale) else null,
+                date = if (settings.widgets.date) Format.longDate(nowMs, c.g.clock.zone, locale) else null,
+                weather = weather, nowMs = nowMs, unit = settings.locale.temperatureUnit,
+                calendar = calendarData, zone = c.calendar.zone, h24 = settings.widgets.clock24h,
+                onWidget = openDetail, onEvent = { c.calendar.showEvent(it) },
+                onClock = { menuOpen = false; c.calendar.openCalendar() },
+                onWeather = { menuOpen = false; forecastOpen = true },
+                modifier = Modifier
+                    .inSplitCell(cells.dashboard, screenW, screenH)
+                    .graphicsLayer { alpha = splitAlpha },
             )
         }
         if (hybrid) {

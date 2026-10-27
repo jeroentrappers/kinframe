@@ -1306,6 +1306,9 @@ const pl: Catalog = {
 	'plugins.entityAdd': 'Dodaj {id}',
 	'plugins.entityRemove': 'Usuń {name}',
 	'plugins.entityNoMatch': 'Brak wyników. Możesz wpisać id encji.',
+	'plugins.tzSearch': 'Wyszukaj miasto lub region',
+	'plugins.tzResults': 'Strefy czasowe',
+	'plugins.tzNoMatch': 'Brak pasującej strefy czasowej.',
 	'plugins.entityNone': 'Zapisz adres i token: ramka pokaże wtedy, co znajdzie.',
 	'plugins.choiceNone': 'Brak',
 	'plugins.errRequired': 'Wypełnij to pole.',
@@ -1313,6 +1316,7 @@ const pl: Catalog = {
 	'plugins.errColor': 'Wpisz kolor, np. #ff8800.',
 	'plugins.errUrl': 'Wpisz adres, np. http://192.168.1.20.',
 	'plugins.errEnum': 'Wybierz jedną z opcji.',
+	'plugins.errTimezone': 'Wybierz strefę czasową z listy.',
 	'plugins.errUnknown': 'Wtyczka na ramce nie ma już tego ustawienia.',
 	'plugins.errType': 'To nie pasuje do tego ustawienia.'
 };

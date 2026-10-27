@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Ανενεργό</string>
     <string name="plugins_layout_overlay">Στις γωνίες</string>
     <string name="plugins_layout_band">Δίπλα στη φωτογραφία</string>
+    <string name="plugins_layout_split">Δύο φωτογραφίες και πίνακας</string>
+    <string name="plugins_split_side">Πλευρά του πίνακα</string>
     <string name="plugins_band_side">Πλευρά (οριζόντια)</string>
     <string name="plugins_side_left">Αριστερά</string>
     <string name="plugins_side_right">Δεξιά</string>

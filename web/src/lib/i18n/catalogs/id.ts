@@ -1248,6 +1248,9 @@ const id: Catalog = {
 	'plugins.entityAdd': 'Tambah {id}',
 	'plugins.entityRemove': 'Hapus {name}',
 	'plugins.entityNoMatch': 'Tidak ada yang cocok. Anda bisa mengetik id entitas.',
+	'plugins.tzSearch': 'Cari kota atau wilayah',
+	'plugins.tzResults': 'Zona waktu',
+	'plugins.tzNoMatch': 'Tidak ada zona waktu yang cocok.',
 	'plugins.entityNone': 'Simpan alamat dan token: bingkai lalu menampilkan apa yang ditemukannya.',
 	'plugins.choiceNone': 'Tidak ada',
 	'plugins.errRequired': 'Isi kolom ini.',
@@ -1255,6 +1258,7 @@ const id: Catalog = {
 	'plugins.errColor': 'Ketik warna seperti #ff8800.',
 	'plugins.errUrl': 'Ketik alamat seperti http://192.168.1.20.',
 	'plugins.errEnum': 'Pilih salah satu opsi.',
+	'plugins.errTimezone': 'Pilih zona waktu dari daftar.',
 	'plugins.errUnknown': 'Plugin di bingkai tidak lagi punya pengaturan ini.',
 	'plugins.errType': 'Ini tidak cocok untuk pengaturan ini.'
 };

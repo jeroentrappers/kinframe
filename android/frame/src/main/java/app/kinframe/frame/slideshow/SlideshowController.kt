@@ -42,6 +42,8 @@ data class Slide(
     val kenBurns: KenBurns.Params? = null,
     /** The caption is not in [image] but only in [captionStrip], so Ken Burns zooms the photo and not the text. */
     val captionSeparate: Boolean = false,
+    /** The split layout's two photos: [image] leaves the dashboard's quarter of the screen empty. */
+    val split: Boolean = false,
 ) {
     val ids: List<String> get() = if (tiles.isEmpty()) listOf(placement.id) else tiles.map { it.placement.id }
 }
@@ -124,6 +126,8 @@ class SlideshowController(private val c: FrameController) {
     private var settings = FrameSettings.DEFAULT
     private var screenW = 0
     private var screenH = 0
+    /** The split layout's side while it is on (docs/plugins.md §2.2), else null. */
+    private var splitSide: app.kinframe.frame.plugins.BandSide? = null
     private var shownAt = 0L
     private var transitionRunning = false
     private var videoEnded = false
@@ -170,6 +174,20 @@ class SlideshowController(private val c: FrameController) {
         measuredCorner = r
         if (r != before && screenW > 0 && settings.widgets.caption) c.scope.launch { rerenderCurrent(onlyIfChanged = true) }
     }
+
+    /**
+     * Called by the UI with the split layout's side, or null when it is off: two photos per slide around the
+     * dashboard. Re-renders what is on screen.
+     */
+    fun setSplit(side: app.kinframe.frame.plugins.BandSide?) {
+        if (side == splitSide) return
+        splitSide = side
+        cache.clear()
+        if (screenW > 0) c.scope.launch { rerenderCurrent() }
+    }
+
+    private fun splitCells(): app.kinframe.frame.plugins.SplitGeometry.Cells? =
+        splitSide?.let { app.kinframe.frame.plugins.SplitGeometry.cells(screenW >= screenH, it) }
 
     /** Called by the UI with the real drawing size; re-renders on rotation. */
     fun setScreenSize(w: Int, h: Int) {
@@ -406,6 +424,11 @@ class SlideshowController(private val c: FrameController) {
         if (p.isLive && p.motionLocalFile != null && settings.slideshow.livePhotos != app.kinframe.core.api.LivePhotos.OFF) return listOf(p)
         val ss = settings.slideshow
         val photos = playlist.upcoming(12).mapNotNull { playable[it] }.filter { !it.isVideo }
+        splitCells()?.let { cells ->
+            // Split layout: always two photos, each in the cell its shape fits (a portrait in the tall one).
+            val partner = Collage.splitPartner(aspect(p) ?: 1f, listOf(cells.big, cells.small), photos.map { it.id to aspect(it) }, screenW, screenH)
+            return photos.firstOrNull { it.id == partner }?.let { listOf(p, it) } ?: listOf(p)
+        }
         if (ss.collage) {
             val n = Collage.count(ss.collageMax, photos.size + 1)
             if (n >= 2) return listOf(p) + photos.take(n - 1)
@@ -422,11 +445,12 @@ class SlideshowController(private val c: FrameController) {
 
     private suspend fun obtainGroup(group: List<PlacementEntity>): Slide {
         val aspects = group.map { aspect(it) ?: 1f }
-        val placed = Collage.place(aspects, screenW, screenH)
+        val split = splitCells()?.takeIf { group.size == 2 }
+        val placed = if (split != null) Collage.placeInto(listOf(split.big, split.small), aspects, screenW, screenH) else Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
         val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}" } +
-            "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}"
+            "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}|split=${split != null}:$splitSide"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }
         val requests = tiles.map { t ->
@@ -445,7 +469,7 @@ class SlideshowController(private val c: FrameController) {
             } catch (e: OutOfMemoryError) {
                 Log.e(TAG, "OOM rendering collage"); cache.clear(); System.gc(); null
             }
-            Slide(group.first(), bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, tiles = tiles)
+            Slide(group.first(), bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, tiles = tiles, split = split != null)
         }
         cache[key] = slide
         // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.

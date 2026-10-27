@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Изключено</string>
     <string name="plugins_layout_overlay">В ъглите</string>
     <string name="plugins_layout_band">До снимката</string>
+    <string name="plugins_layout_split">Две снимки и табло</string>
+    <string name="plugins_split_side">Страна на таблото</string>
     <string name="plugins_band_side">Страна (хоризонтално)</string>
     <string name="plugins_side_left">Ляво</string>
     <string name="plugins_side_right">Дясно</string>

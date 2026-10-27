@@ -6,6 +6,12 @@ import {
 	draftOf,
 	fieldProblems,
 	filterEntities,
+	filterTimeZones,
+	formatUtcOffset,
+	knownTimeZone,
+	timeZoneIds,
+	timeZoneOption,
+	timeZoneOptions,
 	instanceComplete,
 	instanceFrom,
 	instancesPatch,
@@ -347,3 +353,76 @@ describe('saving', () => {
 		expect(mapErrors(undefined, 0)).toEqual({ fields: {}, instance: {}, other: [] });
 	});
 });
+
+describe('timezone settings', () => {
+	const clock: Manifest = {
+		id: 'x.clock',
+		name: 'Clock',
+		version: '1.0.0',
+		settings: [
+			{ key: 'city_1', type: 'timezone', label: 'City 1', required: true },
+			{ key: 'city_2', type: 'timezone', label: 'City 2' }
+		]
+	};
+	const inst = (settings: Record<string, unknown>): PluginInstance => ({ ...newInstance(clock, []), settings: settings as PluginInstance['settings'] });
+	const july = new Date('2026-07-01T12:00:00Z');
+
+	it('checks that a value is a known zone; empty is fine unless required', () => {
+		expect(fieldProblems(clock, draftOf(clock, inst({})), false)).toEqual({});
+		expect(fieldProblems(clock, draftOf(clock, inst({})), true)).toEqual({ city_1: 'required' });
+		expect(fieldProblems(clock, draftOf(clock, inst({ city_1: 'Asia/Tokyo', city_2: 'Europe/Brussels' })), true)).toEqual({});
+		expect(fieldProblems(clock, draftOf(clock, inst({ city_2: 'Mars/Olympus_Mons' })), false)).toEqual({ city_2: 'timezone' });
+		expect(fieldProblems(clock, draftOf(clock, inst({ city_2: '+01:00' })), false)).toEqual({ city_2: 'timezone' });
+		expect(settingsOf(clock, draftOf(clock, inst({ city_1: ' Asia/Tokyo ', city_2: '' })))).toEqual({ city_1: 'Asia/Tokyo' });
+		expect(knownTimeZone('UTC')).toBe(true);
+		expect(knownTimeZone('Asia/Calcutta')).toBe(true);
+		expect(knownTimeZone('')).toBe(false);
+	});
+
+	it('shows a zone as its city, with region and UTC offset', () => {
+		expect(timeZoneOption('America/New_York', july)).toEqual({
+			id: 'America/New_York',
+			city: 'New York',
+			region: 'America',
+			offset: 'UTC\u22124',
+			detail: 'America · UTC\u22124'
+		});
+		expect(timeZoneOption('America/Argentina/Buenos_Aires', july).region).toBe('America / Argentina');
+		expect(timeZoneOption('Asia/Kolkata', july).offset).toBe('UTC+5:30');
+		expect(timeZoneOption('Asia/Kathmandu', july).offset).toBe('UTC+5:45');
+		expect(timeZoneOption('Europe/Brussels', new Date('2026-01-15T12:00:00Z')).offset).toBe('UTC+1');
+		expect(timeZoneOption('Pacific/Chatham', new Date('2026-01-15T12:00:00Z')).offset).toBe('UTC+13:45');
+		expect(formatUtcOffset(0)).toBe('UTC');
+		expect(formatUtcOffset(-210)).toBe('UTC\u22123:30');
+		// An id the browser doesn't know still shows.
+		expect(timeZoneOption('Mars/Olympus_Mons', july)).toMatchObject({ city: 'Olympus Mons', region: 'Mars', offset: '', detail: 'Mars' });
+	});
+
+	it('lists region zones under today’s names, with a fallback', () => {
+		const ids = timeZoneIds();
+		expect(ids).toContain('Europe/Brussels');
+		expect(ids).toContain('Asia/Kolkata');
+		expect(ids).not.toContain('Asia/Calcutta');
+		expect(ids.every((id) => id.includes('/') && !id.startsWith('Etc/'))).toBe(true);
+		expect(timeZoneIds(() => ['UTC', 'Etc/GMT+5', 'Asia/Calcutta', 'Asia/Kolkata', 'Europe/Paris'])).toEqual(['Asia/Kolkata', 'Europe/Paris']);
+		const fallback = timeZoneIds(() => {
+			throw new TypeError('not supported');
+		});
+		expect(fallback).toContain('Asia/Tokyo');
+		expect(fallback.length).toBeGreaterThan(20);
+	});
+
+	it('searches by city, region or id', () => {
+		const all = timeZoneOptions(july);
+		expect(all.length).toBe(timeZoneIds().length);
+		expect(all[0]!.city <= all[1]!.city).toBe(true);
+		expect(filterTimeZones(all, 'new york').map((o) => o.id)).toEqual(['America/New_York']);
+		expect(filterTimeZones(all, 'NEW_YORK').map((o) => o.id)).toEqual(['America/New_York']);
+		expect(filterTimeZones(all, 'tokyo').map((o) => o.id)).toEqual(['Asia/Tokyo']);
+		expect(filterTimeZones(all, 'kolkata').map((o) => o.id)).toEqual(['Asia/Kolkata']);
+		expect(filterTimeZones(all, 'australia').length).toBeGreaterThan(3);
+		expect(filterTimeZones(all, 'america/argentina').every((o) => o.id.startsWith('America/Argentina/'))).toBe(true);
+		expect(filterTimeZones(all, '  ')).toBe(all);
+	});
+});
+

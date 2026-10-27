@@ -1247,6 +1247,9 @@ const hu: Catalog = {
 	'plugins.entityAdd': '{id} hozzáadása',
 	'plugins.entityRemove': '{name} eltávolítása',
 	'plugins.entityNoMatch': 'Nincs találat. Az entitás azonosítóját beírhatod.',
+	'plugins.tzSearch': 'Keress várost vagy régiót',
+	'plugins.tzResults': 'Időzónák',
+	'plugins.tzNoMatch': 'Nincs egyező időzóna.',
 	'plugins.entityNone': 'Mentsd a címet és a tokent: a képkeret ezután listázza, amit talál.',
 	'plugins.choiceNone': 'Nincs',
 	'plugins.errRequired': 'Töltsd ki ezt a mezőt.',
@@ -1254,6 +1257,7 @@ const hu: Catalog = {
 	'plugins.errColor': 'Írj be egy színt, pl. #ff8800.',
 	'plugins.errUrl': 'Írj be egy címet, pl. http://192.168.1.20.',
 	'plugins.errEnum': 'Válassz a lehetőségek közül.',
+	'plugins.errTimezone': 'Válassz időzónát a listából.',
 	'plugins.errUnknown': 'A képkereten lévő bővítménynek már nincs ilyen beállítása.',
 	'plugins.errType': 'Ez nem illik ehhez a beállításhoz.'
 };

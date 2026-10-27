@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Tắt</string>
     <string name="plugins_layout_overlay">Ở các góc</string>
     <string name="plugins_layout_band">Cạnh ảnh</string>
+    <string name="plugins_layout_split">Hai ảnh và bảng tổng quan</string>
+    <string name="plugins_split_side">Phía bảng tổng quan</string>
     <string name="plugins_band_side">Phía (ngang)</string>
     <string name="plugins_side_left">Trái</string>
     <string name="plugins_side_right">Phải</string>

@@ -1231,6 +1231,9 @@ const fi: Catalog = {
 	'plugins.entityAdd': 'Lisää {id}',
 	'plugins.entityRemove': 'Poista {name}',
 	'plugins.entityNoMatch': 'Ei osumia. Voit kirjoittaa entiteetin tunnuksen.',
+	'plugins.tzSearch': 'Hae kaupunkia tai aluetta',
+	'plugins.tzResults': 'Aikavyöhykkeet',
+	'plugins.tzNoMatch': 'Yksikään aikavyöhyke ei vastaa hakua.',
 	'plugins.entityNone': 'Tallenna osoite ja tunnus: kuvakehys näyttää sitten, mitä se löytää.',
 	'plugins.choiceNone': 'Ei mitään',
 	'plugins.errRequired': 'Täytä tämä.',
@@ -1238,6 +1241,7 @@ const fi: Catalog = {
 	'plugins.errColor': 'Kirjoita väri, esim. #ff8800.',
 	'plugins.errUrl': 'Kirjoita osoite, esim. http://192.168.1.20.',
 	'plugins.errEnum': 'Valitse jokin vaihtoehdoista.',
+	'plugins.errTimezone': 'Valitse aikavyöhyke luettelosta.',
 	'plugins.errUnknown': 'Kuvakehyksen laajennuksessa ei ole enää tätä asetusta.',
 	'plugins.errType': 'Tämä ei sovi tähän asetukseen.'
 };

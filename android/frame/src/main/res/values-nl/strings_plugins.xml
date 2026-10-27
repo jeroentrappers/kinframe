@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Uit</string>
     <string name="plugins_layout_overlay">In de hoeken</string>
     <string name="plugins_layout_band">Naast de foto</string>
+    <string name="plugins_layout_split">Twee foto’s en een overzicht</string>
+    <string name="plugins_split_side">Kant van het overzicht</string>
     <string name="plugins_band_side">Kant (liggend)</string>
     <string name="plugins_side_left">Links</string>
     <string name="plugins_side_right">Rechts</string>

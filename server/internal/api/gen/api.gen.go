@@ -516,6 +516,7 @@ const (
 	FrameSettingsPluginsLayoutModeBand    FrameSettingsPluginsLayoutMode = "band"
 	FrameSettingsPluginsLayoutModeOff     FrameSettingsPluginsLayoutMode = "off"
 	FrameSettingsPluginsLayoutModeOverlay FrameSettingsPluginsLayoutMode = "overlay"
+	FrameSettingsPluginsLayoutModeSplit   FrameSettingsPluginsLayoutMode = "split"
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutMode enum.
@@ -526,6 +527,8 @@ func (e FrameSettingsPluginsLayoutMode) Valid() bool {
 	case FrameSettingsPluginsLayoutModeOff:
 		return true
 	case FrameSettingsPluginsLayoutModeOverlay:
+		return true
+	case FrameSettingsPluginsLayoutModeSplit:
 		return true
 	default:
 		return false
@@ -2588,10 +2591,10 @@ type FrameSettings struct {
 		Layout    *struct {
 			Background *FrameSettingsPluginsLayoutBackground `json:"background,omitempty"`
 
-			// Mode Off, the photo's top corners, or a band beside or above a 3:2 photo.
+			// Mode Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
 			Mode *FrameSettingsPluginsLayoutMode `json:"mode,omitempty"`
 
-			// Side Where the band goes in landscape.
+			// Side Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
 			Side *FrameSettingsPluginsLayoutSide `json:"side,omitempty"`
 		} `json:"layout,omitempty"`
 	} `json:"plugins,omitempty"`
@@ -2662,10 +2665,10 @@ type FrameSettingsLocaleTemperatureUnit string
 // FrameSettingsPluginsLayoutBackground defines model for FrameSettings.Plugins.Layout.Background.
 type FrameSettingsPluginsLayoutBackground string
 
-// FrameSettingsPluginsLayoutMode Off, the photo's top corners, or a band beside or above a 3:2 photo.
+// FrameSettingsPluginsLayoutMode Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
 type FrameSettingsPluginsLayoutMode string
 
-// FrameSettingsPluginsLayoutSide Where the band goes in landscape.
+// FrameSettingsPluginsLayoutSide Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
 type FrameSettingsPluginsLayoutSide string
 
 // FrameSettingsSlideshowBackground defines model for FrameSettings.Slideshow.Background.

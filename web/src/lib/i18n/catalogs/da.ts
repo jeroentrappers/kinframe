@@ -1243,6 +1243,9 @@ const da: Catalog = {
 	'plugins.entityAdd': 'Tilføj {id}',
 	'plugins.entityRemove': 'Fjern {name}',
 	'plugins.entityNoMatch': 'Ingen match. Du kan skrive entitets-id’et.',
+	'plugins.tzSearch': 'Søg efter en by eller region',
+	'plugins.tzResults': 'Tidszoner',
+	'plugins.tzNoMatch': 'Ingen tidszone passer.',
 	'plugins.entityNone': 'Gem adressen og tokenet: Så viser rammen, hvad den finder.',
 	'plugins.choiceNone': 'Ingen',
 	'plugins.errRequired': 'Udfyld dette.',
@@ -1250,6 +1253,7 @@ const da: Catalog = {
 	'plugins.errColor': 'Skriv en farve som #ff8800.',
 	'plugins.errUrl': 'Skriv en adresse som http://192.168.1.20.',
 	'plugins.errEnum': 'Vælg en af mulighederne.',
+	'plugins.errTimezone': 'Vælg en tidszone på listen.',
 	'plugins.errUnknown': 'Pluginnet på rammen har ikke længere denne indstilling.',
 	'plugins.errType': 'Det passer ikke til denne indstilling.'
 };

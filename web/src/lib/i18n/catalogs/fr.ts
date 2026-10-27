@@ -1277,6 +1277,9 @@ const fr: Catalog = {
 	'plugins.entityAdd': 'Ajouter {id}',
 	'plugins.entityRemove': 'Retirer {name}',
 	'plugins.entityNoMatch': 'Aucun résultat. Vous pouvez taper l’identifiant de l’entité.',
+	'plugins.tzSearch': 'Rechercher une ville ou une région',
+	'plugins.tzResults': 'Fuseaux horaires',
+	'plugins.tzNoMatch': 'Aucun fuseau horaire ne correspond.',
 	'plugins.entityNone': 'Enregistrez l’adresse et le jeton : le cadre listera ensuite ce qu’il trouve.',
 	'plugins.choiceNone': 'Aucun',
 	'plugins.errRequired': 'Remplissez ce champ.',
@@ -1284,6 +1287,7 @@ const fr: Catalog = {
 	'plugins.errColor': 'Tapez une couleur comme #ff8800.',
 	'plugins.errUrl': 'Tapez une adresse comme http://192.168.1.20.',
 	'plugins.errEnum': 'Choisissez une des options.',
+	'plugins.errTimezone': 'Choisissez un fuseau horaire dans la liste.',
 	'plugins.errUnknown': 'Le plugin du cadre n’a plus ce réglage.',
 	'plugins.errType': 'Cette valeur ne convient pas à ce réglage.'
 };

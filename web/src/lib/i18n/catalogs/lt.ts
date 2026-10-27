@@ -1277,6 +1277,9 @@ const lt: Catalog = {
 	'plugins.entityAdd': 'Pridėti {id}',
 	'plugins.entityRemove': 'Pašalinti {name}',
 	'plugins.entityNoMatch': 'Nieko nerasta. Galite įvesti objekto id.',
+	'plugins.tzSearch': 'Ieškokite miesto ar regiono',
+	'plugins.tzResults': 'Laiko juostos',
+	'plugins.tzNoMatch': 'Neatitinka jokia laiko juosta.',
 	'plugins.entityNone': 'Išsaugokite adresą ir žetoną: rėmelis parodys, ką randa.',
 	'plugins.choiceNone': 'Nėra',
 	'plugins.errRequired': 'Užpildykite šį lauką.',
@@ -1284,6 +1287,7 @@ const lt: Catalog = {
 	'plugins.errColor': 'Įveskite spalvą, pvz., #ff8800.',
 	'plugins.errUrl': 'Įveskite adresą, pvz., http://192.168.1.20.',
 	'plugins.errEnum': 'Pasirinkite vieną iš parinkčių.',
+	'plugins.errTimezone': 'Pasirinkite laiko juostą iš sąrašo.',
 	'plugins.errUnknown': 'Rėmelio papildinys šio nustatymo nebeturi.',
 	'plugins.errType': 'Tai netinka šiam nustatymui.'
 };

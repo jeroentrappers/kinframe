@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Išjungta</string>
     <string name="plugins_layout_overlay">Kampuose</string>
     <string name="plugins_layout_band">Šalia nuotraukos</string>
+    <string name="plugins_layout_split">Dvi nuotraukos ir suvestinė</string>
+    <string name="plugins_split_side">Suvestinės pusė</string>
     <string name="plugins_band_side">Pusė (gulsčiai)</string>
     <string name="plugins_side_left">Kairė</string>
     <string name="plugins_side_right">Dešinė</string>

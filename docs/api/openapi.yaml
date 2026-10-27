@@ -2856,8 +2856,8 @@ components:
             layout:
               type: object
               properties:
-                mode: { type: string, enum: ['off', overlay, band], default: 'off', description: 'Off, the photo''s top corners, or a band beside or above a 3:2 photo.' }
-                side: { type: string, enum: [left, right], default: right, description: Where the band goes in landscape. }
+                mode: { type: string, enum: ['off', overlay, band, split], default: 'off', description: 'Off, the photo''s top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.' }
+                side: { type: string, enum: [left, right], default: right, description: 'Where the band goes in landscape; for split, the side of the dashboard''s half (landscape) or of the dashboard itself (portrait).' }
                 background: { type: string, enum: [paper, photo], default: paper }
             instances:
               type: array

@@ -1276,6 +1276,9 @@ const it: Catalog = {
 	'plugins.entityAdd': 'Aggiungi {id}',
 	'plugins.entityRemove': 'Rimuovi {name}',
 	'plugins.entityNoMatch': 'Nessun risultato. Puoi digitare l’id dell’entità.',
+	'plugins.tzSearch': 'Cerca una città o una regione',
+	'plugins.tzResults': 'Fusi orari',
+	'plugins.tzNoMatch': 'Nessun fuso orario corrisponde.',
 	'plugins.entityNone': 'Salva l’indirizzo e il token: la cornice elencherà ciò che trova.',
 	'plugins.choiceNone': 'Nessuno',
 	'plugins.errRequired': 'Compila questo campo.',
@@ -1283,6 +1286,7 @@ const it: Catalog = {
 	'plugins.errColor': 'Digita un colore come #ff8800.',
 	'plugins.errUrl': 'Digita un indirizzo come http://192.168.1.20.',
 	'plugins.errEnum': 'Scegli una delle opzioni.',
+	'plugins.errTimezone': 'Scegli un fuso orario dall’elenco.',
 	'plugins.errUnknown': 'Il plugin sulla cornice non ha più questa impostazione.',
 	'plugins.errType': 'Questo valore non va bene per questa impostazione.'
 };

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">बंद</string>
     <string name="plugins_layout_overlay">कोनों में</string>
     <string name="plugins_layout_band">फ़ोटो के बगल में</string>
+    <string name="plugins_layout_split">दो फ़ोटो और एक डैशबोर्ड</string>
+    <string name="plugins_split_side">डैशबोर्ड की तरफ़</string>
     <string name="plugins_band_side">तरफ़ (लैंडस्केप)</string>
     <string name="plugins_side_left">बाएँ</string>
     <string name="plugins_side_right">दाएँ</string>

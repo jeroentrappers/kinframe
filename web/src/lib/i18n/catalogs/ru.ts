@@ -1294,6 +1294,9 @@ const ru: Catalog = {
 	'plugins.entityAdd': 'Добавить {id}',
 	'plugins.entityRemove': 'Убрать {name}',
 	'plugins.entityNoMatch': 'Ничего не найдено. Можно ввести id объекта вручную.',
+	'plugins.tzSearch': 'Найдите город или регион',
+	'plugins.tzResults': 'Часовые пояса',
+	'plugins.tzNoMatch': 'Подходящий часовой пояс не найден.',
 	'plugins.entityNone': 'Сохраните адрес и токен: рамка покажет, что найдёт.',
 	'plugins.choiceNone': 'Нет',
 	'plugins.errRequired': 'Заполните это поле.',
@@ -1301,6 +1304,7 @@ const ru: Catalog = {
 	'plugins.errColor': 'Введите цвет, например #ff8800.',
 	'plugins.errUrl': 'Введите адрес, например http://192.168.1.20.',
 	'plugins.errEnum': 'Выберите один из вариантов.',
+	'plugins.errTimezone': 'Выберите часовой пояс из списка.',
 	'plugins.errUnknown': 'У плагина на рамке больше нет этой настройки.',
 	'plugins.errType': 'Это не подходит для этой настройки.'
 };

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Pois</string>
     <string name="plugins_layout_overlay">Kulmissa</string>
     <string name="plugins_layout_band">Kuvan vieressä</string>
+    <string name="plugins_layout_split">Kaksi kuvaa ja kooste</string>
+    <string name="plugins_split_side">Koosteen puoli</string>
     <string name="plugins_band_side">Puoli (vaaka)</string>
     <string name="plugins_side_left">Vasen</string>
     <string name="plugins_side_right">Oikea</string>

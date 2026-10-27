@@ -1236,6 +1236,9 @@ const tr: Catalog = {
 	'plugins.entityAdd': '{id} ekle',
 	'plugins.entityRemove': '{name} kaldır',
 	'plugins.entityNoMatch': 'Sonuç yok. Varlık kimliğini yazabilirsiniz.',
+	'plugins.tzSearch': 'Şehir veya bölge arayın',
+	'plugins.tzResults': 'Saat dilimleri',
+	'plugins.tzNoMatch': 'Eşleşen saat dilimi yok.',
 	'plugins.entityNone': 'Adresi ve token’ı kaydedin: çerçeve bulduklarını listeler.',
 	'plugins.choiceNone': 'Yok',
 	'plugins.errRequired': 'Bu alanı doldurun.',
@@ -1243,6 +1246,7 @@ const tr: Catalog = {
 	'plugins.errColor': '#ff8800 gibi bir renk yazın.',
 	'plugins.errUrl': 'http://192.168.1.20 gibi bir adres yazın.',
 	'plugins.errEnum': 'Seçeneklerden birini seçin.',
+	'plugins.errTimezone': 'Listeden bir saat dilimi seçin.',
 	'plugins.errUnknown': 'Çerçevedeki eklentide artık bu ayar yok.',
 	'plugins.errType': 'Bu, bu ayara uymuyor.'
 };

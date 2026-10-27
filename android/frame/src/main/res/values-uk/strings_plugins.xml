@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Вимк.</string>
     <string name="plugins_layout_overlay">У кутах</string>
     <string name="plugins_layout_band">Поруч із фото</string>
+    <string name="plugins_layout_split">Два фото й панель</string>
+    <string name="plugins_split_side">Бік панелі</string>
     <string name="plugins_band_side">Сторона (альбомна)</string>
     <string name="plugins_side_left">Ліворуч</string>
     <string name="plugins_side_right">Праворуч</string>

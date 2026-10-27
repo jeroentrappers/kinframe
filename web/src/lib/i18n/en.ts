@@ -1252,6 +1252,9 @@ export const en = {
 	'plugins.entityAdd': 'Add {id}',
 	'plugins.entityRemove': 'Remove {name}',
 	'plugins.entityNoMatch': 'No match. You can type the entity id.',
+	'plugins.tzSearch': 'Search for a city or region',
+	'plugins.tzResults': 'Time zones',
+	'plugins.tzNoMatch': 'No time zone matches.',
 	'plugins.entityNone': 'Save the address and token: the frame then lists what it finds.',
 	'plugins.choiceNone': 'None',
 	'plugins.errRequired': 'Fill this in.',
@@ -1259,6 +1262,7 @@ export const en = {
 	'plugins.errColor': 'Type a colour like #ff8800.',
 	'plugins.errUrl': 'Type an address like http://192.168.1.20.',
 	'plugins.errEnum': 'Pick one of the options.',
+	'plugins.errTimezone': 'Pick a time zone from the list.',
 	'plugins.errUnknown': 'The plugin on the frame no longer has this setting.',
 	'plugins.errType': 'This doesn’t fit this setting.'
 } as const;

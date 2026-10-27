@@ -58,6 +58,10 @@
     <string name="plugins_removed">Plugin removed</string>
     <string name="plugins_saved">Plugin settings sent to the frame</string>
     <string name="plugins_fix_fields">Check the fields marked in red.</string>
+    <string name="plugins_timezone_search">Search for a city or region</string>
+    <string name="plugins_timezone_no_match">No time zone matches.</string>
+    <string name="plugins_timezone_clear">Clear %1$s</string>
+    <string name="plugins_err_timezone">Pick a time zone from the list</string>
     <string name="plugins_err_required">Fill this in</string>
     <string name="plugins_err_type">This value doesn’t fit here</string>
     <string name="plugins_err_enum">Pick one of the options</string>

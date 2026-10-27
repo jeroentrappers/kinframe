@@ -1249,6 +1249,9 @@ const th: Catalog = {
 	'plugins.entityAdd': 'เพิ่ม {id}',
 	'plugins.entityRemove': 'นำ {name} ออก',
 	'plugins.entityNoMatch': 'ไม่พบรายการที่ตรงกัน คุณพิมพ์ id ของเอนทิตีเองได้',
+	'plugins.tzSearch': 'ค้นหาเมืองหรือภูมิภาค',
+	'plugins.tzResults': 'เขตเวลา',
+	'plugins.tzNoMatch': 'ไม่พบเขตเวลาที่ตรงกัน',
 	'plugins.entityNone': 'บันทึกที่อยู่และโทเค็น แล้วกรอบรูปจะแสดงสิ่งที่พบ',
 	'plugins.choiceNone': 'ไม่มี',
 	'plugins.errRequired': 'กรอกช่องนี้',
@@ -1256,6 +1259,7 @@ const th: Catalog = {
 	'plugins.errColor': 'พิมพ์สี เช่น #ff8800',
 	'plugins.errUrl': 'พิมพ์ที่อยู่ เช่น http://192.168.1.20',
 	'plugins.errEnum': 'เลือกหนึ่งตัวเลือก',
+	'plugins.errTimezone': 'เลือกเขตเวลาจากรายการ',
 	'plugins.errUnknown': 'ปลั๊กอินบนกรอบรูปไม่มีการตั้งค่านี้แล้ว',
 	'plugins.errType': 'ค่านี้ไม่เหมาะกับการตั้งค่านี้'
 };

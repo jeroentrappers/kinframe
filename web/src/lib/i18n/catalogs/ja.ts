@@ -1247,6 +1247,9 @@ const ja: Catalog = {
 	'plugins.entityAdd': '{id}を追加',
 	'plugins.entityRemove': '{name}を外す',
 	'plugins.entityNoMatch': '一致するものがありません。エンティティIDを直接入力できます。',
+	'plugins.tzSearch': '都市名または地域名で検索',
+	'plugins.tzResults': 'タイムゾーン',
+	'plugins.tzNoMatch': '一致するタイムゾーンがありません。',
 	'plugins.entityNone': 'アドレスとトークンを保存すると、フレームが見つけたものを一覧表示します。',
 	'plugins.choiceNone': 'なし',
 	'plugins.errRequired': '入力してください。',
@@ -1254,6 +1257,7 @@ const ja: Catalog = {
 	'plugins.errColor': '#ff8800 のような色を入力してください。',
 	'plugins.errUrl': 'http://192.168.1.20 のようなアドレスを入力してください。',
 	'plugins.errEnum': '選択肢から選んでください。',
+	'plugins.errTimezone': 'リストからタイムゾーンを選んでください。',
 	'plugins.errUnknown': 'フレームのプラグインにはこの設定がなくなりました。',
 	'plugins.errType': 'この設定に合わない値です。'
 };

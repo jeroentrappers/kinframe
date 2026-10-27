@@ -1231,6 +1231,9 @@ const sv: Catalog = {
 	'plugins.entityAdd': 'Lägg till {id}',
 	'plugins.entityRemove': 'Ta bort {name}',
 	'plugins.entityNoMatch': 'Inga träffar. Du kan skriva entitets-id:t.',
+	'plugins.tzSearch': 'Sök efter en stad eller region',
+	'plugins.tzResults': 'Tidszoner',
+	'plugins.tzNoMatch': 'Ingen tidszon matchar.',
 	'plugins.entityNone': 'Spara adressen och token: då listar fotoramen vad den hittar.',
 	'plugins.choiceNone': 'Ingen',
 	'plugins.errRequired': 'Fyll i detta.',
@@ -1238,6 +1241,7 @@ const sv: Catalog = {
 	'plugins.errColor': 'Skriv en färg som #ff8800.',
 	'plugins.errUrl': 'Skriv en adress som http://192.168.1.20.',
 	'plugins.errEnum': 'Välj ett av alternativen.',
+	'plugins.errTimezone': 'Välj en tidszon i listan.',
 	'plugins.errUnknown': 'Tillägget på fotoramen har inte längre den här inställningen.',
 	'plugins.errType': 'Det passar inte den här inställningen.'
 };

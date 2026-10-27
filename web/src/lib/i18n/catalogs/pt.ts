@@ -1265,6 +1265,9 @@ const pt: Catalog = {
 	'plugins.entityAdd': 'Adicionar {id}',
 	'plugins.entityRemove': 'Remover {name}',
 	'plugins.entityNoMatch': 'Nada encontrado. Você pode digitar o id da entidade.',
+	'plugins.tzSearch': 'Procure uma cidade ou região',
+	'plugins.tzResults': 'Fusos horários',
+	'plugins.tzNoMatch': 'Nenhum fuso horário corresponde.',
 	'plugins.entityNone': 'Salve o endereço e o token: o porta-retrato lista o que encontrar.',
 	'plugins.choiceNone': 'Nenhum',
 	'plugins.errRequired': 'Preencha este campo.',
@@ -1272,6 +1275,7 @@ const pt: Catalog = {
 	'plugins.errColor': 'Digite uma cor como #ff8800.',
 	'plugins.errUrl': 'Digite um endereço como http://192.168.1.20.',
 	'plugins.errEnum': 'Escolha uma das opções.',
+	'plugins.errTimezone': 'Escolha um fuso horário da lista.',
 	'plugins.errUnknown': 'O plugin no porta-retrato não tem mais esta configuração.',
 	'plugins.errType': 'Isso não serve para esta configuração.'
 };

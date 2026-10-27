@@ -71,9 +71,18 @@ fun PluginSettingsSection(c: FrameController) {
                     PluginLayoutMode.Off to stringResource(R.string.plugins_layout_off),
                     PluginLayoutMode.Overlay to stringResource(R.string.plugins_layout_overlay),
                     PluginLayoutMode.Band to stringResource(R.string.plugins_layout_band),
+                    PluginLayoutMode.Split to stringResource(R.string.plugins_layout_split),
                 ),
                 layout.mode, { prefs.setLayout(layout.copy(mode = it)) },
             )
+        }
+        if (layout.mode == PluginLayoutMode.Split) {
+            Labeled(stringResource(R.string.plugins_split_side)) {
+                ChoiceChips(
+                    listOf(BandSide.Left to stringResource(R.string.plugins_side_left), BandSide.Right to stringResource(R.string.plugins_side_right)),
+                    layout.side, { prefs.setLayout(layout.copy(side = it)) },
+                )
+            }
         }
         if (layout.mode == PluginLayoutMode.Band) {
             Labeled(stringResource(R.string.plugins_band_side)) {

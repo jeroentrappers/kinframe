@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Ki</string>
     <string name="plugins_layout_overlay">A sarkokban</string>
     <string name="plugins_layout_band">A fotó mellett</string>
+    <string name="plugins_layout_split">Két fotó és egy áttekintő</string>
+    <string name="plugins_split_side">Az áttekintő oldala</string>
     <string name="plugins_band_side">Oldal (fekvő)</string>
     <string name="plugins_side_left">Bal</string>
     <string name="plugins_side_right">Jobb</string>

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Fra</string>
     <string name="plugins_layout_overlay">I hjørnerne</string>
     <string name="plugins_layout_band">Ved siden af billedet</string>
+    <string name="plugins_layout_split">To billeder og et overblik</string>
+    <string name="plugins_split_side">Overblikkets side</string>
     <string name="plugins_band_side">Side (liggende)</string>
     <string name="plugins_side_left">Venstre</string>
     <string name="plugins_side_right">Højre</string>

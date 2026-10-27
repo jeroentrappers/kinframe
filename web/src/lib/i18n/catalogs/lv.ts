@@ -1278,6 +1278,9 @@ const lv: Catalog = {
 	'plugins.entityAdd': 'Pievienot {id}',
 	'plugins.entityRemove': 'Noņemt {name}',
 	'plugins.entityNoMatch': 'Nekas nav atrasts. Varat ievadīt entītijas id.',
+	'plugins.tzSearch': 'Meklējiet pilsētu vai reģionu',
+	'plugins.tzResults': 'Laika joslas',
+	'plugins.tzNoMatch': 'Neviena laika josla neatbilst.',
 	'plugins.entityNone': 'Saglabājiet adresi un marķieri: rāmis parādīs, ko atrod.',
 	'plugins.choiceNone': 'Nav',
 	'plugins.errRequired': 'Aizpildiet šo lauku.',
@@ -1285,6 +1288,7 @@ const lv: Catalog = {
 	'plugins.errColor': 'Ievadiet krāsu, piem., #ff8800.',
 	'plugins.errUrl': 'Ievadiet adresi, piem., http://192.168.1.20.',
 	'plugins.errEnum': 'Izvēlieties vienu no iespējām.',
+	'plugins.errTimezone': 'Izvēlieties laika joslu no saraksta.',
 	'plugins.errUnknown': 'Rāmja spraudnim vairs nav šī iestatījuma.',
 	'plugins.errType': 'Tas neatbilst šim iestatījumam.'
 };

@@ -249,4 +249,61 @@ class PluginSettingsTest {
         assertEquals("power", r.instances.single().entities!!.single().deviceClass)
         assertEquals("http://192.168.1.20", r.services["_hwenergy._tcp"]!!.single().url)
     }
+
+    private val clock: FormPlugin = FormPlugin.read(CatalogPlugin(obj("""{"id":"x.clock","name":"Clock","version":"1.0.0","settings":[
+        {"key":"city_1","type":"timezone","label":"City 1","required":true},
+        {"key":"city_2","type":"timezone","label":"City 2"}]}"""), emptyMap()))!!
+
+    @Test
+    fun timezoneSettings() {
+        assertEquals(SettingType.TIMEZONE, clock.setting("city_1")!!.type)
+        val off = PluginSettings.newInstance(clock)
+        // Empty is fine unless required.
+        assertTrue(PluginSettings.check(clock, off).isEmpty())
+        assertEquals(listOf(InstanceFieldError("city_1", "settings", "required")), PluginSettings.check(clock, off.copy(enabled = true)))
+        assertTrue(PluginSettings.check(clock, off.copy(enabled = true, settings = obj("""{"city_1":"Asia/Tokyo","city_2":"UTC"}"""))).isEmpty())
+        // A value must be a known zone, also while off.
+        assertEquals(
+            listOf(InstanceFieldError("city_2", "settings", "timezone")),
+            PluginSettings.check(clock, off.copy(settings = obj("""{"city_2":"Mars/Olympus_Mons"}"""))),
+        )
+        assertEquals(listOf("city_2"), PluginSettings.check(clock, off.copy(settings = obj("""{"city_2":5}"""))).map { it.key })
+    }
+
+    @Test
+    fun timezonePresentation() {
+        val now = java.time.Instant.parse("2026-07-01T12:00:00Z")
+        val ny = TimeZones.option("America/New_York", now)
+        assertEquals("New York", ny.city)
+        assertEquals("America", ny.region)
+        assertEquals("UTC\u22124", ny.offset)
+        assertEquals("America · UTC\u22124", ny.detail)
+        assertEquals("America / Argentina", TimeZones.option("America/Argentina/Buenos_Aires", now).region)
+        assertEquals("UTC+5:30", TimeZones.option("Asia/Kolkata", now).offset)
+        assertEquals("UTC+5:45", TimeZones.option("Asia/Kathmandu", now).offset)
+        assertEquals("UTC", TimeZones.formatOffset(0))
+        // Winter time in Brussels.
+        assertEquals("UTC+1", TimeZones.option("Europe/Brussels", java.time.Instant.parse("2026-01-15T12:00:00Z")).offset)
+        // An id this device doesn't know still shows, without an offset.
+        val unknown = TimeZones.option("Mars/Olympus_Mons", now)
+        assertEquals("Olympus Mons", unknown.city)
+        assertNull(unknown.offsetSeconds)
+        assertEquals("Mars", unknown.detail)
+
+        assertTrue(TimeZones.known("Asia/Tokyo"))
+        assertTrue(TimeZones.known("UTC"))
+        assertFalse(TimeZones.known("asia/tokyo"))
+        assertFalse(TimeZones.known(""))
+        assertTrue("Europe/Brussels" in TimeZones.pickable)
+        assertTrue(TimeZones.pickable.none { it.startsWith("Etc/") || it.startsWith("SystemV/") || '/' !in it })
+
+        val all = TimeZones.options(now)
+        assertEquals(TimeZones.pickable.size, all.size)
+        assertEquals(listOf("America/New_York"), TimeZones.search(all, "new york").map { it.id })
+        assertEquals(listOf("America/New_York"), TimeZones.search(all, "NEW_YORK").map { it.id })
+        assertTrue(TimeZones.search(all, "tokyo").any { it.id == "Asia/Tokyo" })
+        assertTrue(TimeZones.search(all, "argentina").all { it.id.startsWith("America/Argentina/") })
+        assertTrue(TimeZones.search(all, "australia").size > 3)
+        assertEquals(all, TimeZones.search(all, "  "))
+    }
 }

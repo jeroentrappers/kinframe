@@ -57,6 +57,10 @@
     <string name="plugins_removed">Plug-in verwijderd</string>
     <string name="plugins_saved">Plug-in-instellingen naar het kader gestuurd</string>
     <string name="plugins_fix_fields">Kijk de rood gemarkeerde velden na.</string>
+    <string name="plugins_timezone_search">Zoek een stad of regio</string>
+    <string name="plugins_timezone_no_match">Geen tijdzone gevonden.</string>
+    <string name="plugins_timezone_clear">%1$s wissen</string>
+    <string name="plugins_err_timezone">Kies een tijdzone uit de lijst</string>
     <string name="plugins_err_required">Vul dit in</string>
     <string name="plugins_err_type">Deze waarde past hier niet</string>
     <string name="plugins_err_enum">Kies een van de opties</string>

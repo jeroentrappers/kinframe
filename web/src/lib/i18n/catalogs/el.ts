@@ -1236,6 +1236,9 @@ const el: Catalog = {
 	'plugins.entityAdd': 'Προσθήκη {id}',
 	'plugins.entityRemove': 'Αφαίρεση {name}',
 	'plugins.entityNoMatch': 'Κανένα αποτέλεσμα. Μπορείτε να πληκτρολογήσετε το id της οντότητας.',
+	'plugins.tzSearch': 'Αναζητήστε πόλη ή περιοχή',
+	'plugins.tzResults': 'Ζώνες ώρας',
+	'plugins.tzNoMatch': 'Δεν βρέθηκε ζώνη ώρας.',
 	'plugins.entityNone': 'Αποθηκεύστε τη διεύθυνση και το token: η κορνίζα θα δείξει τι βρίσκει.',
 	'plugins.choiceNone': 'Κανένα',
 	'plugins.errRequired': 'Συμπληρώστε αυτό το πεδίο.',
@@ -1243,6 +1246,7 @@ const el: Catalog = {
 	'plugins.errColor': 'Πληκτρολογήστε ένα χρώμα, π.χ. #ff8800.',
 	'plugins.errUrl': 'Πληκτρολογήστε μια διεύθυνση, π.χ. http://192.168.1.20.',
 	'plugins.errEnum': 'Επιλέξτε μία από τις επιλογές.',
+	'plugins.errTimezone': 'Επιλέξτε ζώνη ώρας από τη λίστα.',
 	'plugins.errUnknown': 'Το πρόσθετο στην κορνίζα δεν έχει πια αυτή τη ρύθμιση.',
 	'plugins.errType': 'Αυτό δεν ταιριάζει σε αυτή τη ρύθμιση.'
 };

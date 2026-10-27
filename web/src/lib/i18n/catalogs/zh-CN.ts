@@ -1247,6 +1247,9 @@ const zhCN: Catalog = {
 	'plugins.entityAdd': '添加 {id}',
 	'plugins.entityRemove': '移除{name}',
 	'plugins.entityNoMatch': '没有匹配项。你可以直接输入实体 ID。',
+	'plugins.tzSearch': '搜索城市或地区',
+	'plugins.tzResults': '时区',
+	'plugins.tzNoMatch': '没有匹配的时区。',
 	'plugins.entityNone': '保存地址和令牌后，相框会列出它找到的内容。',
 	'plugins.choiceNone': '无',
 	'plugins.errRequired': '请填写此项。',
@@ -1254,6 +1257,7 @@ const zhCN: Catalog = {
 	'plugins.errColor': '请输入颜色，例如 #ff8800。',
 	'plugins.errUrl': '请输入地址，例如 http://192.168.1.20。',
 	'plugins.errEnum': '请选择其中一个选项。',
+	'plugins.errTimezone': '请从列表中选择时区。',
 	'plugins.errUnknown': '相框上的插件已不再有此设置。',
 	'plugins.errType': '此值不适用于该设置。'
 };

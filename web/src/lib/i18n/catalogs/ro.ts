@@ -1265,6 +1265,9 @@ const ro: Catalog = {
 	'plugins.entityAdd': 'Adăugați {id}',
 	'plugins.entityRemove': 'Eliminați {name}',
 	'plugins.entityNoMatch': 'Niciun rezultat. Puteți scrie id-ul entității.',
+	'plugins.tzSearch': 'Căutați un oraș sau o regiune',
+	'plugins.tzResults': 'Fusuri orare',
+	'plugins.tzNoMatch': 'Niciun fus orar nu se potrivește.',
 	'plugins.entityNone': 'Salvați adresa și tokenul: rama va lista apoi ce găsește.',
 	'plugins.choiceNone': 'Niciuna',
 	'plugins.errRequired': 'Completați acest câmp.',
@@ -1272,6 +1275,7 @@ const ro: Catalog = {
 	'plugins.errColor': 'Scrieți o culoare, de ex. #ff8800.',
 	'plugins.errUrl': 'Scrieți o adresă, de ex. http://192.168.1.20.',
 	'plugins.errEnum': 'Alegeți una dintre opțiuni.',
+	'plugins.errTimezone': 'Alegeți un fus orar din listă.',
 	'plugins.errUnknown': 'Pluginul de pe ramă nu mai are această setare.',
 	'plugins.errType': 'Valoarea nu se potrivește acestei setări.'
 };

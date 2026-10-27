@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Desativado</string>
     <string name="plugins_layout_overlay">Nos cantos</string>
     <string name="plugins_layout_band">Ao lado da foto</string>
+    <string name="plugins_layout_split">Duas fotos e um painel</string>
+    <string name="plugins_split_side">Lado do painel</string>
     <string name="plugins_band_side">Lado (paisagem)</string>
     <string name="plugins_side_left">Esquerda</string>
     <string name="plugins_side_right">Direita</string>

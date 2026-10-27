@@ -2690,13 +2690,13 @@ export interface components {
             plugins?: {
                 layout?: {
                     /**
-                     * @description Off, the photo's top corners, or a band beside or above a 3:2 photo.
+                     * @description Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
                      * @default off
                      * @enum {string}
                      */
-                    mode?: "off" | "overlay" | "band";
+                    mode?: "off" | "overlay" | "band" | "split";
                     /**
-                     * @description Where the band goes in landscape.
+                     * @description Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
                      * @default right
                      * @enum {string}
                      */

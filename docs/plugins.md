@@ -98,6 +98,27 @@ The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/
 - Other screen shapes keep the rule: a 16:9 frame gets a wider band (3:2 of 1920×1080 leaves 300 px), a 4:3 frame
   has no room and uses the overlay layout.
 
+### 2.2 Split layout: two photos and a dashboard
+
+`plugins.layout.mode: "split"` divides the screen in three: one photo on half of it, and the other half shared by the
+**dashboard** and a second photo. The dashboard holds the clock, date and weather, up to four plugin widgets (in
+their corner form, on paper) and what the calendar has for the next 48 hours (whole rows only, as many as fit; a
+dashboard without a calendar gives the widgets the room). The clock, countdowns and corner widgets don't show on the
+photos meanwhile, and the calendar sidebar stays off.
+
+| Screen | Big photo | Second photo | Dashboard |
+|---|---|---|---|
+| Landscape (1280×800) | a tall half (0.8), left or right | a wide quarter (1.6) under the dashboard | the other half's top quarter |
+| Portrait (800×1280) | the wide top half (1.25) | a tall quarter (0.63) | the other bottom quarter |
+
+`side` puts the dashboard's half on the left or right (landscape), or the dashboard left or right of the second photo
+(portrait). Each slide is two photos chosen so their shapes fit: the photo whose turn it is takes the cell it fits
+best, and the first of the next photos with the other orientation joins it (the next photo of any shape when none of
+the coming ones fits). They are drawn by the same tile renderer as collages and pairs, in the same grid of gaps and
+rounded corners, with the dashboard as the third cell. Videos and live photos that play still take the whole screen;
+the dashboard fades out for them and back in after. Screenshots: `frame/build/screenshots/split_*.png`
+(`SplitScreenshotTest`).
+
 ## 3. What a plugin is made of
 
 ```

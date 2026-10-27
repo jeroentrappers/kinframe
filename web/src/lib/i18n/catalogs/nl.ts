@@ -1238,6 +1238,9 @@ const nl: Catalog = {
 	'plugins.entityAdd': '{id} toevoegen',
 	'plugins.entityRemove': '{name} verwijderen',
 	'plugins.entityNoMatch': 'Niets gevonden. Je kunt de entiteit-id ook typen.',
+	'plugins.tzSearch': 'Zoek een stad of regio',
+	'plugins.tzResults': 'Tijdzones',
+	'plugins.tzNoMatch': 'Geen tijdzone gevonden.',
 	'plugins.entityNone': 'Bewaar het adres en het token: het kader toont dan wat het vindt.',
 	'plugins.choiceNone': 'Geen',
 	'plugins.errRequired': 'Vul dit in.',
@@ -1245,6 +1248,7 @@ const nl: Catalog = {
 	'plugins.errColor': 'Typ een kleur zoals #ff8800.',
 	'plugins.errUrl': 'Typ een adres zoals http://192.168.1.20.',
 	'plugins.errEnum': 'Kies een van de opties.',
+	'plugins.errTimezone': 'Kies een tijdzone uit de lijst.',
 	'plugins.errUnknown': 'De plug-in op het kader heeft deze instelling niet meer.',
 	'plugins.errType': 'Dit past niet bij deze instelling.'
 };

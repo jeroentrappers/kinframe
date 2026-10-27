@@ -22,6 +22,8 @@ object SettingType {
     const val ENTITY = "entity"
     const val COLOR = "color"
     const val DURATION = "duration"
+    /** An IANA time zone id, "Asia/Tokyo" ([TimeZones]). */
+    const val TIMEZONE = "timezone"
 }
 
 object Slots {

@@ -1277,6 +1277,9 @@ const sk: Catalog = {
 	'plugins.entityAdd': 'Pridať {id}',
 	'plugins.entityRemove': 'Odstrániť {name}',
 	'plugins.entityNoMatch': 'Nič sa nenašlo. Id entity môžete napísať ručne.',
+	'plugins.tzSearch': 'Vyhľadajte mesto alebo oblasť',
+	'plugins.tzResults': 'Časové pásma',
+	'plugins.tzNoMatch': 'Žiadne časové pásmo nezodpovedá.',
 	'plugins.entityNone': 'Uložte adresu a token: rámik potom vypíše, čo nájde.',
 	'plugins.choiceNone': 'Žiadna',
 	'plugins.errRequired': 'Vyplňte toto pole.',
@@ -1284,6 +1287,7 @@ const sk: Catalog = {
 	'plugins.errColor': 'Zadajte farbu, napr. #ff8800.',
 	'plugins.errUrl': 'Zadajte adresu, napr. http://192.168.1.20.',
 	'plugins.errEnum': 'Vyberte jednu z možností.',
+	'plugins.errTimezone': 'Vyberte časové pásmo zo zoznamu.',
 	'plugins.errUnknown': 'Plugin na rámiku už toto nastavenie nemá.',
 	'plugins.errType': 'Táto hodnota sa k nastaveniu nehodí.'
 };

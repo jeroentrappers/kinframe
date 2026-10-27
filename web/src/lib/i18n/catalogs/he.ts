@@ -1264,6 +1264,9 @@ const he: Catalog = {
 	'plugins.entityAdd': 'הוספת {id}',
 	'plugins.entityRemove': 'הסרת {name}',
 	'plugins.entityNoMatch': 'אין תוצאות. אפשר להקליד את מזהה הישות.',
+	'plugins.tzSearch': 'חיפוש עיר או אזור',
+	'plugins.tzResults': 'אזורי זמן',
+	'plugins.tzNoMatch': 'אין אזור זמן תואם.',
 	'plugins.entityNone': 'שמרו את הכתובת והטוקן: המסגרת תציג אז את מה שהיא מוצאת.',
 	'plugins.choiceNone': 'ללא',
 	'plugins.errRequired': 'מלאו את השדה הזה.',
@@ -1271,6 +1274,7 @@ const he: Catalog = {
 	'plugins.errColor': 'הקלידו צבע כמו ‎#ff8800.',
 	'plugins.errUrl': 'הקלידו כתובת כמו http://192.168.1.20.',
 	'plugins.errEnum': 'בחרו אחת מהאפשרויות.',
+	'plugins.errTimezone': 'יש לבחור אזור זמן מהרשימה.',
 	'plugins.errUnknown': 'לתוסף במסגרת כבר אין את ההגדרה הזו.',
 	'plugins.errType': 'הערך לא מתאים להגדרה הזו.'
 };
