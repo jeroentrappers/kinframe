@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -266,7 +267,7 @@ private fun Rows(r: RowsView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
         else -> {
             // A small table: icon and label at the start, value and unit at the end.
             val rowValue = m.value.copy(fontSize = m.value.fontSize * 0.62f, lineHeight = m.value.lineHeight * 0.62f, fontWeight = androidx.compose.ui.text.font.FontWeight.Normal)
-            Column(Modifier.width(IntrinsicSize.Max), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.width(IntrinsicSize.Max), verticalArrangement = Arrangement.spacedBy(if (form == ViewForm.Detail) 10.dp else 6.dp)) {
                 r.items.forEach { v ->
                     val t = if (v.tone == Tone.Neutral) tone else v.tone
                     val (number, unit) = if (v.unit != null) v.value to v.unit else PluginFormat.splitUnit(v.value)
@@ -720,7 +721,31 @@ private fun Stack(s: StackView, form: ViewForm, p: PluginPalette, m: FormMetrics
         else -> s.direction == StackDirection.Vertical
     }
     val gap = if (form.compact) 10.dp else 16.dp
-    if (vertical) {
+    if (vertical && form == ViewForm.Detail) {
+        // A wide detail card puts two tables that follow each other side by side, so a card with several groups of
+        // values fills its width instead of running down one half of it.
+        // (Natural widths, not weights: the card scales its content to fit, so stretching would only shrink it.)
+        BoxWithConstraints {
+            val pair = maxWidth >= 560.dp
+            Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+                var i = 0
+                while (i < s.items.size) {
+                    val a = s.items[i]
+                    val b = s.items.getOrNull(i + 1)
+                    if (pair && a is RowsView && b is RowsView) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(48.dp)) {
+                            Component(a, form, p, m, tone)
+                            Component(b, form, p, m, tone)
+                        }
+                        i += 2
+                    } else {
+                        Component(a, form, p, m, tone)
+                        i += 1
+                    }
+                }
+            }
+        }
+    } else if (vertical) {
         Column(
             verticalArrangement = Arrangement.spacedBy(gap),
             horizontalAlignment = if (form == ViewForm.Column) Alignment.CenterHorizontally else Alignment.Start,

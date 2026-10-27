@@ -26,6 +26,8 @@ class JsPluginKit(
     val language: String = "nl",
     val limits: SandboxLimits = SandboxLimits(),
     val policy: LocalPolicy = LoopbackIsHome,
+    /** The JavaScript budget's clock: the thread's CPU time, as on the frame; tests of the budget rules pass [WallClockCpu]. */
+    val cpu: ThreadCpu = JvmThreadCpu,
 ) {
     val store = HashMap<String, String>()
     val logs = ArrayList<String>()
@@ -53,7 +55,7 @@ class JsPluginKit(
     }
 
     val instance: QuickJsPluginInstance by lazy {
-        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits, JvmThreadCpu, LIBRARIES)
+        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits, cpu, LIBRARIES)
     }
 
     /** What the host does on its timer: `update`, then `render`. */
@@ -67,6 +69,12 @@ class JsPluginKit(
 
     companion object {
         /** The JVM's own per-thread CPU time, standing in for `/proc/self/task/<tid>/schedstat`. */
+        /** Counts wall time as CPU time: deterministic budgets on a busy CI machine, where a busy loop gets little CPU. */
+        val WallClockCpu = object : ThreadCpu {
+            override fun current(): Long = 1L
+            override fun nanos(thread: Long): Long = System.nanoTime()
+        }
+
         val JvmThreadCpu = object : ThreadCpu {
             private val bean = java.lang.management.ManagementFactory.getThreadMXBean()
             override fun current(): Long = Thread.currentThread().id

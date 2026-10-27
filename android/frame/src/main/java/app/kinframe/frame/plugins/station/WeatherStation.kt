@@ -2,6 +2,7 @@ package app.kinframe.frame.plugins.station
 
 import app.kinframe.core.plugin.PluginFormat
 import app.kinframe.core.plugin.StackDirection
+import app.kinframe.core.plugin.Tone
 import app.kinframe.core.plugin.Trend
 import app.kinframe.core.plugin.ViewJson
 import app.kinframe.core.plugin.ViewLimits
@@ -248,68 +249,92 @@ internal class StationState(val history: StationHistory) {
  */
 object StationViews {
     /**
-     * The temperature with humidity and wind below it. Without the temperature (the clock shows it), humidity leads
-     * and the wind is the label, or the wind alone when the station has no humidity.
+     * Short (the *Temperature* style): the temperature with today's low and high, then the wind and, while it rains,
+     * the rain, else the humidity. Without the temperature (the clock shows it) the wind leads.
      */
     fun compact(r: StationReading, trend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String, withTemp: Boolean = true): JsonObject {
+        val second = raining(r, f) ?: r.humidityPct?.let { f.percent(it) }
         if (!withTemp) {
-            val wind = windShort(r, unit, f, t)
-            val h = r.humidityPct
-            return when {
-                h != null -> ViewJson.value(f.percent(h), label = wind?.let { fit(it) }, icon = "water")
-                wind != null -> wind(r, unit, f, t)!!
-                else -> ViewJson.value("–", icon = "water")
-            }
+            val w = wind(r, unit, f, t, withGusts = false, label = second)
+            return w ?: r.humidityPct?.let { ViewJson.value(f.percent(it), label = fit(t("humidity")), icon = "water") } ?: ViewJson.value("–", icon = "wind")
         }
-        val line = listOfNotNull(r.humidityPct?.let { f.percent(it) }, windShort(r, unit, f, t)).joinToString(" · ")
+        val line = listOfNotNull(range(r, f), windShort(r, unit, f, t), second).joinToString(" · ")
         return ViewJson.value(temp(r.tempC, f), label = fit(line).ifEmpty { null }, icon = "thermometer", trend = trend)
     }
 
+    /**
+     * Everything that matters now (the *All values* style): the temperature on top, then at most four rows picked by
+     * what is worth saying: the wind always, rain only on a day it rained, the humidity, the pressure only while it
+     * rises or falls, UV only from 3 up. The sunlight in W/m² and the dew point are in the detail card.
+     */
     fun rows(
         r: StationReading, tempTrend: Trend?, pressureTrend: Trend?, unit: WindUnit, f: PluginFormat, t: (String) -> String,
         withTemp: Boolean = true,
     ): JsonObject {
-        val first = listOfNotNull(
-            ViewJson.value(temp(r.tempC, f), label = fit(t("temperature")), icon = "thermometer", trend = tempTrend).takeIf { withTemp },
-            humidity(r, f, t),
+        val list = listOfNotNull(
             wind(r, unit, f, t),
-        )
-        val second = listOfNotNull(rain(r, f, t), pressure(r, pressureTrend, f, t), sun(r, f, t))
-        val groups = listOf(first, second).filter { it.isNotEmpty() }.map { ViewJson.rows(it) }
-        return when (groups.size) {
-            0 -> ViewJson.value("–", icon = "thermometer")
-            1 -> groups[0]
-            else -> ViewJson.stack(groups)
+            rain(r, f, t, onlyIfAny = true),
+            humidity(r, f, t, withDew = false),
+            pressure(r, pressureTrend, f, t, onlyIfMoving = true),
+            uv(r, f, t),
+        ).take(ROWS)
+        val head = if (withTemp && r.tempC != null) {
+            val label = listOfNotNull(range(r, f), feelsLike(r, f, t)).joinToString(" · ").ifEmpty { null }
+            ViewJson.value(temp(r.tempC, f), label = label?.let { fit(it) }, icon = "thermometer", trend = tempTrend)
+        } else null
+        return when {
+            head != null && list.isNotEmpty() -> ViewJson.stack(listOf(head, ViewJson.rows(list)))
+            head != null -> head
+            list.isNotEmpty() -> ViewJson.rows(list)
+            else -> ViewJson.value("–", icon = "thermometer")
         }
     }
 
     fun detail(r: StationReading, info: StationInfo?, h: StationHistory, unit: WindUnit, f: PluginFormat, t: (String) -> String, nowMs: Long): JsonObject {
         val place = listOfNotNull(info?.city, info?.altitudeM?.let { f.number(it, 0, "m") }).joinToString(" · ").ifEmpty { null }
-        val head = ViewJson.value(temp(r.tempC, f), label = place?.let { fit(it) }, icon = "thermometer", trend = h.tempTrend())
-        val lines = listOfNotNull(
-            updated(r.atMs, nowMs, f, t),
-            r.feelsLikeC?.takeIf { r.tempC != null && abs(it - r.tempC) >= 1.0 }?.let { arg(t("feels_like"), f.temperature(it)) },
-        ).map { fit(it, ViewLimits.MAX_TEXT_LINE) }
+        val headLabel = listOfNotNull(range(r, f), place).joinToString(" · ").ifEmpty { null }
+        val head = ViewJson.value(temp(r.tempC, f), label = headLabel?.let { fit(it) }, icon = "thermometer", trend = h.tempTrend())
+        val lines = listOfNotNull(updated(r.atMs, nowMs, f, t), feelsLike(r, f, t)).map { fit(it, ViewLimits.MAX_TEXT_LINE) }
         val items = mutableListOf<JsonElement>(
             if (lines.isEmpty()) head else ViewJson.stack(listOf(head, ViewJson.text(lines)), StackDirection.Horizontal),
         )
         val end = (r.atMs ?: nowMs) / 1000
         val charts = listOfNotNull(
-            h.tempSeries(end).takeIf { s -> s.count { it != null } >= 2 }?.let { ViewJson.sparkline(it, label = fit("${t("temperature")} · 24 h"), showRange = true) },
-            h.pressureSeries(end).takeIf { s -> s.count { it != null } >= 2 }?.let { ViewJson.sparkline(it, label = fit("${t("pressure")} · 24 h"), showRange = true) },
+            h.tempSeries(end).takeIf { s -> s.count { it != null } >= 2 }?.let {
+                ViewJson.sparkline(it, label = fit("${t("temperature")} · 24 h"), showRange = true, tone = Tone.Heat)
+            },
+            h.pressureSeries(end).takeIf { s -> s.count { it != null } >= 2 }?.let {
+                ViewJson.sparkline(it, label = fit("${t("pressure")} · 24 h"), showRange = true, tone = Tone.Info)
+            },
         )
         if (charts.isNotEmpty()) items += ViewJson.stack(charts, StackDirection.Horizontal)
+        // Two tables, side by side in a wide card: the air on one side, rain, pressure and sun on the other.
         val air = listOfNotNull(
             humidity(r, f, t, withDew = false),
-            r.dewPointC?.let { ViewJson.value(f.temperature(it, decimals = 1), label = fit(t("dew_point")), icon = "water") },
-            wind(r, unit, f, t, withGusts = false),
-            gusts(r, unit, f, t),
+            r.dewPointC?.let { ViewJson.value(f.temperature(it, decimals = 1), label = fit(t("dew_point").replaceFirstChar { c -> c.titlecase() }), icon = "water") },
+            wind(r, unit, f, t),
         )
         val rest = listOfNotNull(rain(r, f, t), pressure(r, h.pressureTrend(), f, t), sun(r, f, t))
         if (air.isNotEmpty()) items += ViewJson.rows(air)
         if (rest.isNotEmpty()) items += ViewJson.rows(rest)
         return ViewJson.stack(items.take(ViewLimits.MAX_STACK_ITEMS))
     }
+
+    private const val ROWS = 4
+
+    /** "↓6,1° ↑12,4°": today's low and high, when the server sent them and they differ from now. */
+    private fun range(r: StationReading, f: PluginFormat): String? {
+        val lo = r.todayMinC ?: return null
+        val hi = r.todayMaxC ?: return null
+        if (hi - lo < 0.5) return null
+        return "↓${f.temperature(lo)} ↑${f.temperature(hi)}"
+    }
+
+    private fun feelsLike(r: StationReading, f: PluginFormat, t: (String) -> String): String? =
+        r.feelsLikeC?.takeIf { r.tempC != null && abs(it - r.tempC) >= 1.0 }?.let { arg(t("feels_like"), f.temperature(it)) }
+
+    /** "2,0 mm/h" while it rains, else null. */
+    private fun raining(r: StationReading, f: PluginFormat): String? = r.rainRateMmH?.takeIf { it >= 0.1 }?.let { f.number(it, 1, "mm/h") }
 
     // ------------------------------------------------------------------ pieces
 
@@ -318,10 +343,10 @@ object StationViews {
     private fun humidity(r: StationReading, f: PluginFormat, t: (String) -> String, withDew: Boolean = true): JsonObject? {
         val h = r.humidityPct ?: return null
         val dew = r.dewPointC?.takeIf { withDew }?.let { "${t("dew_point")} ${f.temperature(it, decimals = 1)}" }
-        return ViewJson.value(f.percent(h), label = fit(listOfNotNull(t("humidity"), dew).joinToString(" · ")), icon = "water")
+        return ViewJson.value(f.percent(h), label = fit(listOfNotNull(t("humidity"), dew).joinToString(" · ")), icon = "water", tone = Tone.Water)
     }
 
-    /** "ZW 2,3 m/s" (current wind, else the 10-minute average); no direction in calm air. */
+    /** "ZW 8 km/h" (current wind, else the 10-minute average); no direction in calm air. */
     private fun windShort(r: StationReading, unit: WindUnit, f: PluginFormat, t: (String) -> String): String? {
         val ms = r.windMs ?: r.windAvgMs ?: return null
         val dir = direction(r)?.takeIf { ms >= CALM_MS }?.let { t("compass_${StationUnits.sector(it)}") }
@@ -330,37 +355,45 @@ object StationViews {
 
     private fun direction(r: StationReading) = if (r.windMs != null) r.windDirDeg ?: r.windAvgDirDeg else r.windAvgDirDeg ?: r.windDirDeg
 
-    /** Speed, with an arrow pointing where the wind blows to (the station reports where it comes from). */
-    private fun wind(r: StationReading, unit: WindUnit, f: PluginFormat, t: (String) -> String, withGusts: Boolean = true): JsonObject? {
+    /**
+     * Speed, with an arrow pointing where the wind blows to (the station reports where it comes from), the compass
+     * point and gusts when they are clearly stronger ([label] replaces that line).
+     */
+    private fun wind(r: StationReading, unit: WindUnit, f: PluginFormat, t: (String) -> String, withGusts: Boolean = true, label: String? = null): JsonObject? {
         val ms = r.windMs ?: r.windAvgMs ?: return null
         val dir = direction(r)?.takeIf { ms >= CALM_MS }
-        val label = listOfNotNull(
-            t("wind"),
-            dir?.let { t("compass_${StationUnits.sector(it)}") },
-            r.gustMs?.takeIf { withGusts && it > ms }?.let { "${t("gusts")} ${StationUnits.wind(it, unit, f)}" },
+        val line = label ?: listOfNotNull(
+            dir?.let { t("compass_${StationUnits.sector(it)}") } ?: t("wind"),
+            r.gustMs?.takeIf { withGusts && it >= ms + GUSTY_MS }?.let { "${t("gusts")} ${StationUnits.wind(it, unit, f)}" },
         ).joinToString(" · ")
         return ViewJson.value(
-            StationUnits.wind(ms, unit, f), label = fit(label),
+            StationUnits.wind(ms, unit, f), label = fit(line),
             icon = if (dir != null) "direction" else "wind", iconRotation = dir?.let { ((it + 180.0) % 360.0).toFloat() },
         )
     }
 
-    private fun gusts(r: StationReading, unit: WindUnit, f: PluginFormat, t: (String) -> String): JsonObject? {
-        val g = r.gustMs ?: return null
-        return ViewJson.value(StationUnits.wind(g, unit, f), label = fit(t("gusts")), icon = "wind")
-    }
-
-    private fun rain(r: StationReading, f: PluginFormat, t: (String) -> String): JsonObject? {
+    /** Today's rain (with the rate while it rains); with [onlyIfAny] nothing on a dry day. */
+    private fun rain(r: StationReading, f: PluginFormat, t: (String) -> String, onlyIfAny: Boolean = false): JsonObject? {
         val mm = r.rainTodayMm ?: return null
-        val rate = r.rainRateMmH?.takeIf { it > 0.0 }?.let { f.number(it, 1, "mm/h") }
-        return ViewJson.value(f.number(mm, 1, "mm"), label = fit(listOfNotNull(t("rain_today"), rate).joinToString(" · ")), icon = "rain")
+        val rate = raining(r, f)
+        if (onlyIfAny && mm < 0.1 && rate == null) return null
+        return ViewJson.value(f.number(mm, 1, "mm"), label = fit(listOfNotNull(t("rain_today"), rate).joinToString(" · ")), icon = "rain", tone = Tone.Water)
     }
 
-    private fun pressure(r: StationReading, trend: Trend?, f: PluginFormat, t: (String) -> String): JsonObject? {
+    /** With [onlyIfMoving] only while it rises or falls (1 hPa in 3 hours). */
+    private fun pressure(r: StationReading, trend: Trend?, f: PluginFormat, t: (String) -> String, onlyIfMoving: Boolean = false): JsonObject? {
         val p = r.pressureHpa ?: return null
+        if (onlyIfMoving && trend != Trend.Up && trend != Trend.Down) return null
         return ViewJson.value(f.number(p, 0, "hPa"), label = fit(t("pressure")), icon = "meter", trend = trend)
     }
 
+    /** UV from 3 up (where it starts to matter), highlighted from 6. */
+    private fun uv(r: StationReading, f: PluginFormat, t: (String) -> String): JsonObject? {
+        val u = r.uvIndex?.takeIf { it >= 3.0 } ?: return null
+        return ViewJson.value(f.number(u, 0), label = fit(t("uv_index")), icon = "sun", tone = if (u >= 6.0) Tone.Warn else Tone.Neutral)
+    }
+
+    /** Sunlight and UV, for the detail card. */
     private fun sun(r: StationReading, f: PluginFormat, t: (String) -> String): JsonObject? {
         val uv = r.uvIndex?.let { "UV ${f.number(it, 0)}" }
         r.solarWm2?.let { w ->
@@ -390,4 +423,6 @@ object StationViews {
     }
 
     private const val CALM_MS = 0.5
+    /** Gusts are worth mentioning from about 9 km/h above the wind. */
+    private const val GUSTY_MS = 2.5
 }
