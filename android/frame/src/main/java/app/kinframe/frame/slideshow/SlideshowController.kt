@@ -592,10 +592,12 @@ class SlideshowController(private val c: FrameController) {
     }
 
     private suspend fun rerenderCurrent(onlyIfChanged: Boolean = false) {
-        val inc = _stage.value.incoming ?: return
-        val p = playable[inc.placement.id] ?: return
-        val group = inc.tiles.mapNotNull { playable[it.placement.id] }
+        // What is on screen is read under the lock: a slide being put together meanwhile (the first one after a start,
+        // while the layout changes) is waited for, and re-rendered, instead of missed.
         navLock.withLock {
+            val inc = _stage.value.incoming ?: return
+            val p = playable[inc.placement.id] ?: return
+            val group = inc.tiles.mapNotNull { playable[it.placement.id] }
             val slide = if (group.size > 1 && group.size == inc.tiles.size) obtainGroup(group) else obtain(p)
             val st = _stage.value
             if (onlyIfChanged && slide.key == st.incoming?.key) return@withLock
