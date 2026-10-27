@@ -2884,6 +2884,7 @@ components:
         settings:
           type: object
           maxProperties: 40
+          additionalProperties: true
           description: The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
         secrets:
           type: object
@@ -2905,6 +2906,7 @@ components:
       properties:
         manifest:
           type: object
+          additionalProperties: true
           description: The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
         locales:
           type: object

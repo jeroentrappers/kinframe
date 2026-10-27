@@ -540,6 +540,7 @@ components:
                         the manifest itself, with `en` for option labels.
                     type: object
                 manifest:
+                    additionalProperties: true
                     description: The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
                     type: object
             required:
@@ -2331,6 +2332,7 @@ components:
                     readOnly: true
                     type: array
                 settings:
+                    additionalProperties: true
                     description: The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
                     maxProperties: 40
                     type: object

@@ -2742,7 +2742,9 @@ export interface components {
              */
             enabled?: boolean;
             /** @description The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids). */
-            settings?: Record<string, never>;
+            settings?: {
+                [key: string]: unknown;
+            };
             /**
              * @description Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
              *     frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
@@ -2756,10 +2758,13 @@ export interface components {
         /** @description A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`). */
         CatalogPlugin: {
             /** @description The plugin's `plugin.json` as-is (docs/plugins.md §3.1). */
-            manifest: Record<string, never>;
+            manifest: {
+                [key: string]: unknown;
+            };
             /**
              * @description Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
-             *     `@setting.<key>.help`, `@option.<key>.<value>`, `@preset.<id>`). English is the manifest itself.
+             *     `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+             *     the manifest itself, with `en` for option labels.
              */
             locales?: {
                 [key: string]: {
@@ -2787,7 +2792,7 @@ export interface components {
             updated_at?: string | null;
             /**
              * @description Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
-             *     picker, docs/plugins.md §6.1). Absent when the plugin has no entity settings or the connection failed.
+             *     picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
              */
             entities?: components["schemas"]["DiscoveredEntity"][];
         };
