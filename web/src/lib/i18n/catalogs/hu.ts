@@ -1262,7 +1262,26 @@ const hu: Catalog = {
 	'plugins.errEnum': 'Válassz a lehetőségek közül.',
 	'plugins.errTimezone': 'Válassz időzónát a listából.',
 	'plugins.errUnknown': 'A képkereten lévő bővítménynek már nincs ilyen beállítása.',
-	'plugins.errType': 'Ez nem illik ehhez a beállításhoz.'
+	'plugins.errType': 'Ez nem illik ehhez a beállításhoz.',
+	'plugins.groupBuiltin': 'Beépített',
+	'plugins.groupCommunity': 'Közösségi',
+	'plugins.groupCommunityHint': 'Mások készítették. Minden új bővítményt, és minden változást abban, mit tehet, közzététel előtt átnéznek.',
+	'plugins.byAuthor': 'készítette: {name}',
+	'plugins.versionNumber': '{version} verzió',
+	'plugins.confirmTitle': 'Hozzáadod: {name}?',
+	'plugins.confirmBody': 'Ez a bővítmény a közösségtől származik, nem a kinframe-től. Mit tehet:',
+	'plugins.permAddresses': 'Csatlakozik a megadott címekhez: {settings}',
+	'plugins.permActions': 'Gombokat mutat a képkereten, amelyek változtatnak valamit, például bekapcsolnak egy aljzatot',
+	'plugins.permNone': 'Csak megjelenik a képkereten; semmihez sem csatlakozik',
+	'plugins.updateAsks': 'Elérhető frissítés: {version} — ezt kéri:',
+	'plugins.updateFewer': 'Elérhető frissítés: {version} — kevesebbet kér, mint eddig.',
+	'plugins.updateApprove': 'Jóváhagyás',
+	'plugins.updateDismiss': 'Most nem',
+	'plugins.updateApproved': 'A(z) {version} frissítés jóváhagyva',
+	'plugins.updateWaiting': 'Egy frissítés a jóváhagyásodra vár',
+	'plugins.withdrawn': 'Visszavonva a közösségi nyilvántartásból: {reason}',
+	'plugins.withdrawnHint': 'Már nem fut a képkereten. Eltávolíthatod.',
+	'plugins.runsVersion': 'A képkeret a(z) {version} verziót futtatja.'
 };
 
 export default hu;

@@ -1280,7 +1280,26 @@ const pt: Catalog = {
 	'plugins.errEnum': 'Escolha uma das opções.',
 	'plugins.errTimezone': 'Escolha um fuso horário da lista.',
 	'plugins.errUnknown': 'O plugin no porta-retrato não tem mais esta configuração.',
-	'plugins.errType': 'Isso não serve para esta configuração.'
+	'plugins.errType': 'Isso não serve para esta configuração.',
+	'plugins.groupBuiltin': 'Integrados',
+	'plugins.groupCommunity': 'Comunidade',
+	'plugins.groupCommunityHint': 'Feitos por outras pessoas. Cada plugin novo, e cada mudança no que ele pode fazer, é revisado antes de ser publicado.',
+	'plugins.byAuthor': 'por {name}',
+	'plugins.versionNumber': 'versão {version}',
+	'plugins.confirmTitle': 'Adicionar {name}?',
+	'plugins.confirmBody': 'Este plugin vem da comunidade, não do kinframe. O que ele pode fazer:',
+	'plugins.permAddresses': 'Acessa os endereços que você preencher: {settings}',
+	'plugins.permActions': 'Mostra botões no porta-retrato que mudam coisas, como ligar uma tomada',
+	'plugins.permNone': 'Só aparece no porta-retrato; não acessa nada',
+	'plugins.updateAsks': 'Atualização para {version} disponível — ela pede:',
+	'plugins.updateFewer': 'Atualização para {version} disponível — ela pede menos do que antes.',
+	'plugins.updateApprove': 'Aprovar',
+	'plugins.updateDismiss': 'Agora não',
+	'plugins.updateApproved': 'Atualização para {version} aprovada',
+	'plugins.updateWaiting': 'Uma atualização aguarda sua aprovação',
+	'plugins.withdrawn': 'Retirado do registro da comunidade: {reason}',
+	'plugins.withdrawnHint': 'Ele não roda mais no porta-retrato. Você pode removê-lo.',
+	'plugins.runsVersion': 'O porta-retrato roda a versão {version}.'
 };
 
 export default pt;

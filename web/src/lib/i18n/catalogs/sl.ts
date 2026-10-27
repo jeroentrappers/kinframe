@@ -1321,7 +1321,26 @@ const sl: Catalog = {
 	'plugins.errEnum': 'Izberite eno od možnosti.',
 	'plugins.errTimezone': 'Izberite časovni pas s seznama.',
 	'plugins.errUnknown': 'Vtičnik na okvirju te nastavitve nima več.',
-	'plugins.errType': 'To se ne ujema s to nastavitvijo.'
+	'plugins.errType': 'To se ne ujema s to nastavitvijo.',
+	'plugins.groupBuiltin': 'Vgrajeni',
+	'plugins.groupCommunity': 'Skupnost',
+	'plugins.groupCommunityHint': 'Izdelali so jih drugi. Vsak nov vtičnik in vsaka sprememba tega, kaj sme početi, se pred objavo pregleda.',
+	'plugins.byAuthor': 'avtor: {name}',
+	'plugins.versionNumber': 'različica {version}',
+	'plugins.confirmTitle': 'Dodam {name}?',
+	'plugins.confirmBody': 'Ta vtičnik prihaja iz skupnosti, ne od kinframe. Kaj sme početi:',
+	'plugins.permAddresses': 'Povezuje se z naslovi, ki jih vpišete: {settings}',
+	'plugins.permActions': 'Na okvirju prikazuje gumbe, ki nekaj spremenijo, na primer vklopijo vtičnico',
+	'plugins.permNone': 'Samo prikazuje se na okvirju; z ničimer se ne povezuje',
+	'plugins.updateAsks': 'Na voljo je posodobitev na {version} — prosi za:',
+	'plugins.updateFewer': 'Na voljo je posodobitev na {version} — prosi za manj kot prej.',
+	'plugins.updateApprove': 'Odobri',
+	'plugins.updateDismiss': 'Ne zdaj',
+	'plugins.updateApproved': 'Posodobitev na {version} odobrena',
+	'plugins.updateWaiting': 'Posodobitev čaka na vašo odobritev',
+	'plugins.withdrawn': 'Umaknjen iz registra skupnosti: {reason}',
+	'plugins.withdrawnHint': 'Na okvirju ne deluje več. Lahko ga odstranite.',
+	'plugins.runsVersion': 'Okvir uporablja različico {version}.'
 };
 
 export default sl;

@@ -1279,7 +1279,26 @@ const he: Catalog = {
 	'plugins.errEnum': 'בחרו אחת מהאפשרויות.',
 	'plugins.errTimezone': 'יש לבחור אזור זמן מהרשימה.',
 	'plugins.errUnknown': 'לתוסף במסגרת כבר אין את ההגדרה הזו.',
-	'plugins.errType': 'הערך לא מתאים להגדרה הזו.'
+	'plugins.errType': 'הערך לא מתאים להגדרה הזו.',
+	'plugins.groupBuiltin': 'מובנים',
+	'plugins.groupCommunity': 'קהילה',
+	'plugins.groupCommunityHint': 'נוצרו על ידי אחרים. כל תוסף חדש, וכל שינוי במה שמותר לו לעשות, נבדקים לפני הפרסום.',
+	'plugins.byAuthor': 'מאת {name}',
+	'plugins.versionNumber': 'גרסה {version}',
+	'plugins.confirmTitle': 'להוסיף את {name}?',
+	'plugins.confirmBody': 'התוסף הזה מגיע מהקהילה, לא מ-kinframe. מה מותר לו לעשות:',
+	'plugins.permAddresses': 'מתחבר לכתובות שתמלאו: {settings}',
+	'plugins.permActions': 'מציג במסגרת כפתורים שמשנים דברים, למשל מדליקים שקע',
+	'plugins.permNone': 'רק מוצג במסגרת; לא מתחבר לשום דבר',
+	'plugins.updateAsks': 'עדכון לגרסה {version} זמין — הוא מבקש:',
+	'plugins.updateFewer': 'עדכון לגרסה {version} זמין — הוא מבקש פחות מקודם.',
+	'plugins.updateApprove': 'אישור',
+	'plugins.updateDismiss': 'לא עכשיו',
+	'plugins.updateApproved': 'העדכון לגרסה {version} אושר',
+	'plugins.updateWaiting': 'עדכון ממתין לאישורך',
+	'plugins.withdrawn': 'הוסר ממאגר הקהילה: {reason}',
+	'plugins.withdrawnHint': 'הוא כבר לא פועל במסגרת. אפשר להסיר אותו.',
+	'plugins.runsVersion': 'המסגרת מריצה את גרסה {version}.'
 };
 
 export default he;

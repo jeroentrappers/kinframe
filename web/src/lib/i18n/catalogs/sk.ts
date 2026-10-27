@@ -1292,7 +1292,26 @@ const sk: Catalog = {
 	'plugins.errEnum': 'Vyberte jednu z možností.',
 	'plugins.errTimezone': 'Vyberte časové pásmo zo zoznamu.',
 	'plugins.errUnknown': 'Plugin na rámiku už toto nastavenie nemá.',
-	'plugins.errType': 'Táto hodnota sa k nastaveniu nehodí.'
+	'plugins.errType': 'Táto hodnota sa k nastaveniu nehodí.',
+	'plugins.groupBuiltin': 'Vstavané',
+	'plugins.groupCommunity': 'Komunita',
+	'plugins.groupCommunityHint': 'Vytvorené inými ľuďmi. Každý nový plugin a každá zmena toho, čo smie robiť, sa pred zverejnením kontroluje.',
+	'plugins.byAuthor': 'autor: {name}',
+	'plugins.versionNumber': 'verzia {version}',
+	'plugins.confirmTitle': 'Pridať {name}?',
+	'plugins.confirmBody': 'Tento plugin pochádza od komunity, nie od kinframe. Čo smie robiť:',
+	'plugins.permAddresses': 'Pripája sa k adresám, ktoré vyplníte: {settings}',
+	'plugins.permActions': 'Zobrazuje na rámiku tlačidlá, ktoré niečo menia, napríklad zapínajú zásuvku',
+	'plugins.permNone': 'Len sa zobrazuje na rámiku; k ničomu sa nepripája',
+	'plugins.updateAsks': 'Je dostupná aktualizácia na {version} — žiada o:',
+	'plugins.updateFewer': 'Je dostupná aktualizácia na {version} — žiada o menej ako doteraz.',
+	'plugins.updateApprove': 'Schváliť',
+	'plugins.updateDismiss': 'Teraz nie',
+	'plugins.updateApproved': 'Aktualizácia na {version} schválená',
+	'plugins.updateWaiting': 'Aktualizácia čaká na vaše schválenie',
+	'plugins.withdrawn': 'Stiahnuté z komunitného registra: {reason}',
+	'plugins.withdrawnHint': 'Na rámiku už nebeží. Môžete ho odstrániť.',
+	'plugins.runsVersion': 'Rámik používa verziu {version}.'
 };
 
 export default sk;

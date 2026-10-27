@@ -1246,7 +1246,26 @@ const fi: Catalog = {
 	'plugins.errEnum': 'Valitse jokin vaihtoehdoista.',
 	'plugins.errTimezone': 'Valitse aikavyöhyke luettelosta.',
 	'plugins.errUnknown': 'Kuvakehyksen laajennuksessa ei ole enää tätä asetusta.',
-	'plugins.errType': 'Tämä ei sovi tähän asetukseen.'
+	'plugins.errType': 'Tämä ei sovi tähän asetukseen.',
+	'plugins.groupBuiltin': 'Sisäänrakennetut',
+	'plugins.groupCommunity': 'Yhteisö',
+	'plugins.groupCommunityHint': 'Muiden tekemiä. Jokainen uusi laajennus ja jokainen muutos siihen, mitä laajennus saa tehdä, tarkistetaan ennen julkaisua.',
+	'plugins.byAuthor': 'tekijä {name}',
+	'plugins.versionNumber': 'versio {version}',
+	'plugins.confirmTitle': 'Lisätäänkö {name}?',
+	'plugins.confirmBody': 'Tämä laajennus tulee yhteisöltä, ei kinframelta. Mitä se saa tehdä:',
+	'plugins.permAddresses': 'Ottaa yhteyden täyttämiisi osoitteisiin: {settings}',
+	'plugins.permActions': 'Näyttää kuvakehyksessä painikkeita, jotka muuttavat asioita, kuten kytkevät pistorasian',
+	'plugins.permNone': 'Näkyy vain kuvakehyksessä; ei ota yhteyttä mihinkään',
+	'plugins.updateAsks': 'Päivitys versioon {version} saatavilla — se pyytää:',
+	'plugins.updateFewer': 'Päivitys versioon {version} saatavilla — se pyytää vähemmän kuin ennen.',
+	'plugins.updateApprove': 'Hyväksy',
+	'plugins.updateDismiss': 'Ei nyt',
+	'plugins.updateApproved': 'Päivitys versioon {version} hyväksytty',
+	'plugins.updateWaiting': 'Päivitys odottaa hyväksyntääsi',
+	'plugins.withdrawn': 'Poistettu yhteisön rekisteristä: {reason}',
+	'plugins.withdrawnHint': 'Se ei enää toimi kuvakehyksessä. Voit poistaa sen.',
+	'plugins.runsVersion': 'Kuvakehyksessä toimii versio {version}.'
 };
 
 export default fi;

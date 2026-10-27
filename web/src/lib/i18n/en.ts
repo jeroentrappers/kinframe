@@ -1267,7 +1267,27 @@ export const en = {
 	'plugins.errEnum': 'Pick one of the options.',
 	'plugins.errTimezone': 'Pick a time zone from the list.',
 	'plugins.errUnknown': 'The plugin on the frame no longer has this setting.',
-	'plugins.errType': 'This doesn’t fit this setting.'
+	'plugins.errType': 'This doesn’t fit this setting.',
+	// community plugins from the registry (docs/plugins.md §7)
+	'plugins.groupBuiltin': 'Built in',
+	'plugins.groupCommunity': 'Community',
+	'plugins.groupCommunityHint': 'Made by other people. Every new plugin, and every change to what one may do, is reviewed before it is published.',
+	'plugins.byAuthor': 'by {name}',
+	'plugins.versionNumber': 'version {version}',
+	'plugins.confirmTitle': 'Add {name}?',
+	'plugins.confirmBody': 'This plugin comes from the community, not from kinframe. What it may do:',
+	'plugins.permAddresses': 'Reaches the addresses you fill in: {settings}',
+	'plugins.permActions': 'Shows buttons on the frame that change things, like switching a socket',
+	'plugins.permNone': 'Only shows on the frame; it reaches nothing',
+	'plugins.updateAsks': 'Update to {version} available — it asks for:',
+	'plugins.updateFewer': 'Update to {version} available — it asks for less than before.',
+	'plugins.updateApprove': 'Approve',
+	'plugins.updateDismiss': 'Not now',
+	'plugins.updateApproved': 'Update to {version} approved',
+	'plugins.updateWaiting': 'An update waits for your approval',
+	'plugins.withdrawn': 'Withdrawn from the community registry: {reason}',
+	'plugins.withdrawnHint': 'It no longer runs on the frame. You can remove it.',
+	'plugins.runsVersion': 'The frame runs version {version}.'
 } as const;
 
 export type MessageKey = keyof typeof en;

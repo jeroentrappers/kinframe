@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +65,8 @@ import app.kinframe.core.plugin.settings.FormPreset
 import app.kinframe.core.plugin.settings.FormSetting
 import app.kinframe.core.plugin.settings.InstanceFieldError
 import app.kinframe.core.plugin.settings.InstanceStatus
+import app.kinframe.core.plugin.settings.PendingUpdate
+import app.kinframe.core.plugin.settings.Permission
 import app.kinframe.core.plugin.settings.PluginInstanceDraft
 import app.kinframe.core.plugin.settings.PluginLayout
 import app.kinframe.core.plugin.settings.PluginSettings
@@ -99,13 +103,16 @@ private fun languageTag(): String = LocalConfiguration.current.locales[0].toLang
 fun PluginsSection(state: PluginsState, vm: PluginsViewModel) {
     PluginsSectionContent(state, vm::setLayout, vm::setEnabled, vm::edit, vm::openAdd, { vm.load() })
     if (state.adding) AddPluginSheet(state, vm::add, vm::closeAdd)
+    state.confirming?.let { p -> ConfirmAddDialog(p, vm::confirmAdd, vm::cancelAdd) }
     val e = state.editor
     if (e != null) {
         Dialog(onDismissRequest = vm::closeEditor, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
             Box(Modifier.fillMaxSize().background(Kin.colors.paper)) {
                 PluginEditorContent(
                     state.plugin(e.draft.pluginId), e, state.report, state.saving,
-                    PluginEditorActions(vm::update, vm::saveEditor, vm::closeEditor, vm::askRemove, vm::remove),
+                    PluginEditorActions(vm::update, vm::saveEditor, vm::closeEditor, vm::askRemove, vm::remove,
+                        onApproveUpdate = { v -> vm.approveUpdate(e.draft.instanceId, v) }, onDismissUpdate = { v -> vm.dismissUpdate(e.draft.instanceId, v) }),
+                    dismissedUpdates = state.dismissedUpdates,
                 )
             }
         }
@@ -181,7 +188,10 @@ fun PluginsSectionContent(
         instances.forEachIndexed { i, d ->
             if (i > 0) HorizontalDivider(color = c.line)
             val plugin = state.plugin(d.pluginId)
-            InstanceRow(d, plugin?.name(tag) ?: d.pluginId, PluginSettings.status(d, state.report, plugin != null), !state.saving, { onToggle(d.instanceId, it) }, { onEdit(d.instanceId) })
+            val update = PluginSettings.pendingUpdate(plugin, d, state.report?.instances?.firstOrNull { it.instanceId == d.instanceId })
+                ?.takeIf { !state.updateDismissed(d.instanceId, it.version) }
+            InstanceRow(d, plugin?.name(tag) ?: d.pluginId, PluginSettings.status(d, state.report, plugin != null), update != null, !state.saving,
+                { onToggle(d.instanceId, it) }, { onEdit(d.instanceId) })
         }
     }
     if (instances.size >= PluginSettings.MAX_INSTANCES) {
@@ -190,7 +200,7 @@ fun PluginsSectionContent(
 }
 
 @Composable
-private fun InstanceRow(d: PluginInstanceDraft, name: String, status: InstanceStatus, enabled: Boolean, onToggle: (Boolean) -> Unit, onEdit: () -> Unit) {
+private fun InstanceRow(d: PluginInstanceDraft, name: String, status: InstanceStatus, update: Boolean, enabled: Boolean, onToggle: (Boolean) -> Unit, onEdit: () -> Unit) {
     val c = Kin.colors
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = onEdit).padding(horizontal = 8.dp, vertical = 10.dp),
@@ -203,7 +213,12 @@ private fun InstanceRow(d: PluginInstanceDraft, name: String, status: InstanceSt
                 is InstanceStatus.Failed -> Text(status.message, style = Kin.type.caption, color = c.danger, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 InstanceStatus.Waiting -> Text(stringResource(R.string.plugins_status_waiting), style = Kin.type.caption, color = c.inkFaint)
                 InstanceStatus.NotOnFrame -> Text(stringResource(R.string.plugins_status_not_on_frame), style = Kin.type.caption, color = c.warn)
+                is InstanceStatus.Withdrawn -> Text(stringResource(R.string.plugins_withdrawn, status.reason), style = Kin.type.caption, color = c.danger, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 InstanceStatus.Off, InstanceStatus.Running -> Unit
+            }
+            if (update && status !is InstanceStatus.Withdrawn) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Icon(KinIcons.Shield, null, Modifier.size(14.dp), tint = c.accent)
+                Text(stringResource(R.string.plugins_update_waiting), style = Kin.type.caption, color = c.accent)
             }
         }
         Switch(
@@ -230,6 +245,8 @@ private fun AddPluginSheet(state: PluginsState, onPick: (FormPlugin) -> Unit, on
 fun PluginCatalogContent(catalog: List<FormPlugin>, onPick: (FormPlugin) -> Unit) {
     val c = Kin.colors
     val tag = languageTag()
+    val sorted = catalog.sortedBy { it.name(tag).lowercase() }
+    val (builtin, community) = sorted.partition { !it.community }
     Column(
         Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp).padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -237,27 +254,102 @@ fun PluginCatalogContent(catalog: List<FormPlugin>, onPick: (FormPlugin) -> Unit
         Text(stringResource(R.string.plugins_catalog_title), style = Kin.type.title, color = c.ink)
         if (catalog.isEmpty()) Text(stringResource(R.string.plugins_catalog_empty), style = Kin.type.body, color = c.inkSoft)
         Column(Modifier.heightIn(max = 520.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            catalog.sortedBy { it.name(tag).lowercase() }.forEach { p ->
-                Column(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, c.line, RoundedCornerShape(14.dp))
-                        .clickable(role = Role.Button) { onPick(p) }.padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Text(p.name(tag), style = Kin.type.bodyStrong, color = c.ink)
-                    p.description(tag)?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
-                    val hosts = p.hosts.map { it.removePrefix("https://").removePrefix("http://") }
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Icon(if (hosts.isEmpty()) KinIcons.Home else KinIcons.Globe, null, Modifier.size(16.dp), tint = c.inkSoft)
-                        Text(if (hosts.isEmpty()) stringResource(R.string.plugins_local) else stringResource(R.string.plugins_reaches, hosts.joinToString(", ")),
-                            style = Kin.type.caption, color = c.inkSoft)
-                    }
-                    if (p.location) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Icon(KinIcons.MapPin, null, Modifier.size(16.dp), tint = c.inkSoft)
-                        Text(stringResource(R.string.plugins_location), style = Kin.type.caption, color = c.inkSoft)
-                    }
-                }
+            if (community.isNotEmpty() && builtin.isNotEmpty()) GroupTitle(stringResource(R.string.plugins_group_builtin))
+            builtin.forEach { CatalogEntry(it, tag, onPick) }
+            if (community.isNotEmpty()) {
+                GroupTitle(stringResource(R.string.plugins_group_community), KinIcons.People)
+                Text(stringResource(R.string.plugins_group_community_hint), style = Kin.type.caption, color = c.inkSoft)
+                community.forEach { CatalogEntry(it, tag, onPick) }
             }
         }
+    }
+}
+
+@Composable
+private fun GroupTitle(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector? = null) {
+    Row(Modifier.padding(top = 8.dp).semantics { heading() }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (icon != null) Icon(icon, null, Modifier.size(18.dp), tint = Kin.colors.inkSoft)
+        Text(text, style = Kin.type.label, color = Kin.colors.ink)
+    }
+}
+
+/** "by Jane Doe · MIT · version 1.2.0" for a community plugin. */
+@Composable
+private fun communityMeta(p: FormPlugin, withVersion: Boolean = true): String = listOfNotNull(
+    p.author?.let { stringResource(R.string.plugins_by_author, it) },
+    p.license,
+    p.version?.takeIf { withVersion && it.isNotBlank() }?.let { stringResource(R.string.plugins_version_number, it) },
+).joinToString(" · ")
+
+@Composable
+private fun CatalogEntry(p: FormPlugin, tag: String, onPick: (FormPlugin) -> Unit) {
+    val c = Kin.colors
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).border(1.dp, c.line, RoundedCornerShape(14.dp))
+            .clickable(role = Role.Button) { onPick(p) }.padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(p.name(tag), style = Kin.type.bodyStrong, color = c.ink)
+        if (p.community) communityMeta(p).takeIf { it.isNotEmpty() }?.let { Text(it, style = Kin.type.caption, color = c.inkFaint) }
+        p.description(tag)?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
+        val hosts = p.hosts.map { it.removePrefix("https://").removePrefix("http://") }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(if (hosts.isEmpty()) KinIcons.Home else KinIcons.Globe, null, Modifier.size(16.dp), tint = c.inkSoft)
+            Text(if (hosts.isEmpty()) stringResource(R.string.plugins_local) else stringResource(R.string.plugins_reaches, hosts.joinToString(", ")),
+                style = Kin.type.caption, color = c.inkSoft)
+        }
+        if (p.location) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(KinIcons.MapPin, null, Modifier.size(16.dp), tint = c.inkSoft)
+            Text(stringResource(R.string.plugins_location), style = Kin.type.caption, color = c.inkSoft)
+        }
+    }
+}
+
+/** What a plugin may do, one line each; [plugin] names the address settings by their form labels. */
+@Composable
+fun PermissionList(items: List<Permission>, plugin: FormPlugin?, showNone: Boolean = true) {
+    val c = Kin.colors
+    val tag = languageTag()
+    @Composable
+    fun line(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) = Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Icon(icon, null, Modifier.padding(top = 2.dp).size(16.dp), tint = c.inkSoft)
+        Text(text, style = Kin.type.caption, color = c.ink)
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        items.forEach { p ->
+            when (p) {
+                is Permission.Internet -> line(KinIcons.Globe, stringResource(R.string.plugins_reaches, p.hosts.joinToString(", ")))
+                is Permission.Addresses -> line(KinIcons.Wifi, stringResource(R.string.plugins_perm_addresses,
+                    p.settings.joinToString(", ") { k -> plugin?.setting(k)?.let { s -> plugin.label(s, tag) } ?: k }))
+                Permission.Location -> line(KinIcons.MapPin, stringResource(R.string.plugins_location))
+                Permission.Actions -> line(KinIcons.Power, stringResource(R.string.plugins_perm_actions))
+            }
+        }
+        if (items.isEmpty() && showNone) line(KinIcons.Check, stringResource(R.string.plugins_perm_none))
+    }
+}
+
+/** Before a community plugin is added: who made it and exactly what it may do (Add / Cancel). */
+@Composable
+fun ConfirmAddDialog(plugin: FormPlugin, onAdd: () -> Unit, onCancel: () -> Unit) {
+    val c = Kin.colors
+    val tag = languageTag()
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text(stringResource(R.string.plugins_confirm_title, plugin.name(tag))) },
+        text = { ConfirmAddContent(plugin) },
+        confirmButton = { TextButton(onAdd) { Text(stringResource(R.string.plugins_add_confirm), color = c.accent) } },
+        dismissButton = { TextButton(onCancel) { Text(stringResource(R.string.common_cancel)) } },
+    )
+}
+
+@Composable
+fun ConfirmAddContent(plugin: FormPlugin) {
+    val c = Kin.colors
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        communityMeta(plugin).takeIf { it.isNotEmpty() }?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
+        Text(stringResource(R.string.plugins_confirm_body), style = Kin.type.body, color = c.ink)
+        PermissionList(plugin.permissions.items, plugin)
     }
 }
 
@@ -270,11 +362,21 @@ class PluginEditorActions(
     val onClose: () -> Unit,
     val onAskRemove: (Boolean) -> Unit,
     val onRemove: () -> Unit,
+    /** Approves the waiting registry update with this version / puts it off for now. */
+    val onApproveUpdate: (String) -> Unit = {},
+    val onDismissUpdate: (String) -> Unit = {},
 )
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PluginEditorContent(plugin: FormPlugin?, editor: PluginEditor, report: FramePlugins?, saving: Boolean, actions: PluginEditorActions) {
+fun PluginEditorContent(
+    plugin: FormPlugin?,
+    editor: PluginEditor,
+    report: FramePlugins?,
+    saving: Boolean,
+    actions: PluginEditorActions,
+    dismissedUpdates: Set<String> = emptySet(),
+) {
     val c = Kin.colors
     val tag = languageTag()
     val d = editor.draft
@@ -288,7 +390,12 @@ fun PluginEditorContent(plugin: FormPlugin?, editor: PluginEditor, report: Frame
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (plugin == null) Note(stringResource(R.string.plugins_status_not_on_frame), tone = NoteTone.Warn)
-            if (!editor.isNew) when (val st = PluginSettings.status(d, report, plugin != null)) {
+            val status = if (editor.isNew) null else PluginSettings.status(d, report, plugin != null)
+            val update = if (editor.isNew || status is InstanceStatus.Withdrawn) null
+                else PluginSettings.pendingUpdate(plugin, d, instanceStatus)?.takeIf { "${d.instanceId}@${it.version}" !in dismissedUpdates }
+            if (status is InstanceStatus.Withdrawn) WithdrawnCard(status.reason, enabled = !saving) { actions.onAskRemove(true) }
+            if (update != null) UpdateCard(update, plugin, saving, actions)
+            when (val st = status) {
                 is InstanceStatus.Failed -> Note(st.message, tone = NoteTone.Danger, icon = KinIcons.Warning)
                 InstanceStatus.Waiting -> Note(stringResource(R.string.plugins_status_waiting))
                 else -> Unit
@@ -323,6 +430,15 @@ fun PluginEditorContent(plugin: FormPlugin?, editor: PluginEditor, report: Frame
                 if (editor.isNew) Text(stringResource(R.string.plugins_new_hint), style = Kin.type.caption, color = c.inkSoft)
                 else SwitchRow(stringResource(R.string.plugins_enabled), d.enabled, { on -> actions.onChange { it.copy(enabled = on) } }, hint = stringResource(R.string.plugins_enabled_hint))
             }
+            if (plugin != null && (plugin.community || instanceStatus?.version != null)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (plugin.community) {
+                        Pill(stringResource(R.string.plugins_group_community), c.paperDeep, c.inkSoft, icon = KinIcons.People)
+                        communityMeta(plugin, withVersion = false).takeIf { it.isNotEmpty() }?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
+                    }
+                    instanceStatus?.version?.let { Text(stringResource(R.string.plugins_runs_version, it), style = Kin.type.caption, color = c.inkSoft) }
+                }
+            }
             if (!editor.isNew) {
                 TextButton({ actions.onAskRemove(true) }, enabled = !saving) {
                     Icon(KinIcons.Trash, null, tint = c.danger); Text(stringResource(R.string.plugins_remove), color = c.danger, modifier = Modifier.padding(start = 6.dp))
@@ -351,6 +467,45 @@ fun PluginEditorContent(plugin: FormPlugin?, editor: PluginEditor, report: Frame
         actions.onChange { cur ->
             val filled = values.entries.fold(cur) { acc, (k, v) -> PluginSettings.withValue(acc, k, JsonPrimitive(v.trim())) }
             plugin.applyPreset(ask.id, filled.settings)?.let { filled.copy(settings = it) } ?: filled
+        }
+    }
+}
+
+/** A registry update that asks for other permissions: what it asks for, Approve / Not now (§7). */
+@Composable
+private fun UpdateCard(u: PendingUpdate, plugin: FormPlugin?, saving: Boolean, actions: PluginEditorActions) {
+    val c = Kin.colors
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(c.warnSoft).padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(KinIcons.Shield, null, Modifier.padding(top = 2.dp).size(18.dp), tint = c.warn)
+            Text(stringResource(if (u.fewer) R.string.plugins_update_fewer else R.string.plugins_update_asks, u.version), style = Kin.type.bodyStrong, color = c.ink)
+        }
+        if (!u.fewer) PermissionList(u.asks, plugin)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            PrimaryButton(stringResource(R.string.plugins_update_approve), { actions.onApproveUpdate(u.version) }, busy = saving)
+            QuietButton(stringResource(R.string.plugins_update_dismiss), { actions.onDismissUpdate(u.version) })
+        }
+    }
+}
+
+/** The plugin was withdrawn from the registry: why, and the suggestion to remove it. */
+@Composable
+private fun WithdrawnCard(reason: String, enabled: Boolean, onRemove: () -> Unit) {
+    val c = Kin.colors
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(c.dangerSoft).padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(KinIcons.Warning, null, Modifier.padding(top = 2.dp).size(18.dp), tint = c.danger)
+            Text(stringResource(R.string.plugins_withdrawn, reason), style = Kin.type.bodyStrong, color = c.danger)
+        }
+        Text(stringResource(R.string.plugins_withdrawn_hint), style = Kin.type.caption, color = c.ink)
+        TextButton(onRemove, enabled = enabled) {
+            Icon(KinIcons.Trash, null, tint = c.danger); Text(stringResource(R.string.plugins_remove), color = c.danger, modifier = Modifier.padding(start = 6.dp))
         }
     }
 }

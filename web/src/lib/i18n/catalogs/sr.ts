@@ -1292,7 +1292,26 @@ const sr: Catalog = {
 	'plugins.errEnum': 'Изаберите једну од могућности.',
 	'plugins.errTimezone': 'Изаберите временску зону са листе.',
 	'plugins.errUnknown': 'Додатак на раму више нема ово подешавање.',
-	'plugins.errType': 'Ово не одговара овом подешавању.'
+	'plugins.errType': 'Ово не одговара овом подешавању.',
+	'plugins.groupBuiltin': 'Уграђени',
+	'plugins.groupCommunity': 'Заједница',
+	'plugins.groupCommunityHint': 'Направили су их други људи. Сваки нови додатак и свака промена онога што сме да ради прегледају се пре објављивања.',
+	'plugins.byAuthor': 'аутор: {name}',
+	'plugins.versionNumber': 'верзија {version}',
+	'plugins.confirmTitle': 'Додати {name}?',
+	'plugins.confirmBody': 'Овај додатак долази из заједнице, не од kinframe-а. Шта сме да ради:',
+	'plugins.permAddresses': 'Повезује се са адресама које унесете: {settings}',
+	'plugins.permActions': 'Приказује на раму дугмад која нешто мењају, нпр. укључују утичницу',
+	'plugins.permNone': 'Само се приказује на раму; ни са чим се не повезује',
+	'plugins.updateAsks': 'Доступно је ажурирање на {version} — тражи:',
+	'plugins.updateFewer': 'Доступно је ажурирање на {version} — тражи мање него раније.',
+	'plugins.updateApprove': 'Одобри',
+	'plugins.updateDismiss': 'Не сада',
+	'plugins.updateApproved': 'Ажурирање на {version} одобрено',
+	'plugins.updateWaiting': 'Ажурирање чека ваше одобрење',
+	'plugins.withdrawn': 'Повучено из регистра заједнице: {reason}',
+	'plugins.withdrawnHint': 'Више не ради на раму. Можете да га уклоните.',
+	'plugins.runsVersion': 'Рам користи верзију {version}.'
 };
 
 export default sr;

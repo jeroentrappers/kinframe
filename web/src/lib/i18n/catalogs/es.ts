@@ -1280,7 +1280,26 @@ const es: Catalog = {
 	'plugins.errEnum': 'Elige una de las opciones.',
 	'plugins.errTimezone': 'Elige una zona horaria de la lista.',
 	'plugins.errUnknown': 'El plugin del marco ya no tiene este ajuste.',
-	'plugins.errType': 'Esto no encaja con este ajuste.'
+	'plugins.errType': 'Esto no encaja con este ajuste.',
+	'plugins.groupBuiltin': 'Integrados',
+	'plugins.groupCommunity': 'Comunidad',
+	'plugins.groupCommunityHint': 'Hechos por otras personas. Cada plugin nuevo, y cada cambio en lo que puede hacer, se revisa antes de publicarse.',
+	'plugins.byAuthor': 'por {name}',
+	'plugins.versionNumber': 'versión {version}',
+	'plugins.confirmTitle': '¿Añadir {name}?',
+	'plugins.confirmBody': 'Este plugin viene de la comunidad, no de kinframe. Lo que puede hacer:',
+	'plugins.permAddresses': 'Se conecta a las direcciones que escribas: {settings}',
+	'plugins.permActions': 'Muestra botones en el marco que cambian cosas, como encender un enchufe',
+	'plugins.permNone': 'Solo se muestra en el marco; no se conecta a nada',
+	'plugins.updateAsks': 'Actualización a {version} disponible: pide:',
+	'plugins.updateFewer': 'Actualización a {version} disponible: pide menos que antes.',
+	'plugins.updateApprove': 'Aprobar',
+	'plugins.updateDismiss': 'Ahora no',
+	'plugins.updateApproved': 'Actualización a {version} aprobada',
+	'plugins.updateWaiting': 'Una actualización espera tu aprobación',
+	'plugins.withdrawn': 'Retirado del registro de la comunidad: {reason}',
+	'plugins.withdrawnHint': 'Ya no funciona en el marco. Puedes quitarlo.',
+	'plugins.runsVersion': 'El marco usa la versión {version}.'
 };
 
 export default es;

@@ -44,13 +44,23 @@ export interface Preset {
 	settings: Record<string, Json>;
 }
 
+/** A manifest's `permissions` (docs/plugins.md §3.1); network entries are fixed origins or `settings.<key>`. */
+export interface Permissions {
+	http?: string[];
+	websocket?: string[];
+	location?: boolean;
+	actions?: boolean;
+}
+
 export interface Manifest {
 	id: string;
 	name: string;
 	version: string;
+	author?: { name?: string; url?: string };
+	license?: string;
 	description?: string;
 	slots?: Slot[];
-	permissions?: { http?: string[]; websocket?: string[]; location?: boolean };
+	permissions?: Permissions;
 	settings?: SettingSpec[];
 	presets?: Preset[];
 	default_visibility?: Visibility;
@@ -113,9 +123,13 @@ export function presetLabel(p: CatalogPlugin, preset: Preset, locale: string): s
 
 /** The fixed internet hosts the plugin may reach (its `permissions.http` origins, not `settings.*`). */
 export function internetHosts(m: Manifest): string[] {
+	return fixedHosts(m.permissions?.http);
+}
+
+function fixedHosts(entries: readonly string[] | undefined): string[] {
 	const out: string[] = [];
-	for (const e of m.permissions?.http ?? []) {
-		if (e.startsWith('settings.')) continue;
+	for (const e of entries ?? []) {
+		if (typeof e !== 'string' || e.startsWith('settings.')) continue;
 		let host = e;
 		try {
 			host = new URL(e).host;
@@ -129,6 +143,120 @@ export function internetHosts(m: Manifest): string[] {
 
 export function usesLocation(m: Manifest): boolean {
 	return m.permissions?.location === true;
+}
+
+// ------------------------------------------------------------------ community plugins (§7)
+
+/** A plugin from the community registry (`builtin: false`); an entry that doesn't say is the frame's own. */
+export function isCommunity(p: CatalogPlugin): boolean {
+	return p.builtin === false;
+}
+
+/** The catalog as "Add plugin" shows it: the built-in plugins first, then the community's, each by name. */
+export function catalogGroups(catalog: CatalogPlugin[] | undefined, locale: string, tag: string = locale): { builtin: CatalogPlugin[]; community: CatalogPlugin[] } {
+	const sorted = [...(catalog ?? [])].sort((a, b) => pluginName(a, locale).localeCompare(pluginName(b, locale), tag));
+	return { builtin: sorted.filter((p) => !isCommunity(p)), community: sorted.filter(isCommunity) };
+}
+
+/** One thing a plugin may do, as the owner reads it before adding a plugin or approving an update. */
+export type Permission =
+	| { kind: 'internet'; hosts: string[] }
+	| { kind: 'addresses'; settings: string[] }
+	| { kind: 'location' }
+	| { kind: 'actions' };
+
+/** The `settings.<key>` entries of the network permissions: the addresses the owner types in. */
+function addressSettings(p: Permissions | undefined): string[] {
+	const out: string[] = [];
+	for (const e of [...(p?.http ?? []), ...(p?.websocket ?? [])]) {
+		if (typeof e === 'string' && e.startsWith('settings.')) {
+			const k = e.slice('settings.'.length);
+			if (k && !out.includes(k)) out.push(k);
+		}
+	}
+	return out;
+}
+
+function hostsOf(p: Permissions | undefined): string[] {
+	return fixedHosts([...(p?.http ?? []), ...(p?.websocket ?? [])]);
+}
+
+function permissionList(hosts: string[], settings: string[], location: boolean, actions: boolean): Permission[] {
+	const out: Permission[] = [];
+	if (hosts.length) out.push({ kind: 'internet', hosts });
+	if (settings.length) out.push({ kind: 'addresses', settings });
+	if (location) out.push({ kind: 'location' });
+	if (actions) out.push({ kind: 'actions' });
+	return out;
+}
+
+/** Everything `p` allows: the internet hosts it reaches, the addresses the owner types in, location, buttons. */
+export function permissionsOf(p: Permissions | undefined): Permission[] {
+	return permissionList(hostsOf(p), addressSettings(p), p?.location === true, p?.actions === true);
+}
+
+/** What `to` allows that `from` didn't (`added`), and what it no longer does (`removed`). */
+export function permissionChanges(from: Permissions | undefined, to: Permissions | undefined): { added: Permission[]; removed: Permission[] } {
+	const diff = (a: Permissions | undefined, b: Permissions | undefined) => {
+		const hostsA = hostsOf(a);
+		const setA = addressSettings(a);
+		return permissionList(
+			hostsOf(b).filter((h) => !hostsA.includes(h)),
+			addressSettings(b).filter((k) => !setA.includes(k)),
+			b?.location === true && a?.location !== true,
+			b?.actions === true && a?.actions !== true
+		);
+	};
+	return { added: diff(from, to), removed: diff(to, from) };
+}
+
+export interface PendingUpdate {
+	version: string;
+	/** What the owner approves: the changes when the current version's manifest is known, else all of the new one's. */
+	asks: Permission[];
+	/** Whether [asks] are the changes (the catalog holds the version the frame runs). */
+	diffed: boolean;
+	/** Diffed, and the new version only drops permissions. */
+	fewer: boolean;
+}
+
+/**
+ * The newer registry version waiting for the owner's approval (§7 "On the frame"), or null. Once the instance names
+ * that version (approved, the frame not caught up yet) there is nothing left to approve.
+ */
+export function pendingUpdate(plugin: CatalogPlugin | undefined, inst: PluginInstance, st: InstanceStatus | undefined): PendingUpdate | null {
+	const u = st?.update;
+	if (!u?.version || inst.version === u.version) return null;
+	const next = u.permissions as Permissions | undefined;
+	const current = st?.version || inst.version;
+	const m = plugin ? manifestOf(plugin) : undefined;
+	if (m && current && m.version === current) {
+		const { added, removed } = permissionChanges(m.permissions, next);
+		if (added.length || removed.length) return { version: u.version, asks: added, diffed: true, fewer: added.length === 0 };
+	}
+	return { version: u.version, asks: permissionsOf(next), diffed: false, fewer: false };
+}
+
+/** The instance with update `version` approved: the frame then runs it (saved like any other instance change). */
+export function approveUpdate(inst: PluginInstance, version: string): PluginInstance {
+	return { ...inst, version };
+}
+
+/** "by Jane Doe · MIT · version 1.2.0" for a community plugin: who made it, its licence and version. */
+export function communityMeta(m: Manifest): { author?: string; license?: string; version?: string } {
+	const author = typeof m.author?.name === 'string' && m.author.name.trim() ? m.author.name.trim() : undefined;
+	const license = typeof m.license === 'string' && m.license.trim() ? m.license.trim() : undefined;
+	const version = typeof m.version === 'string' && m.version ? m.version : undefined;
+	return { author, license, version };
+}
+
+const WITHDRAWN = 'withdrawn:';
+
+/** The registry's reason when the frame reports the instance's plugin as withdrawn (`withdrawn: …`), else null. */
+export function withdrawnReason(st: InstanceStatus | undefined): string | null {
+	const e = st?.error;
+	if (!e || !e.toLowerCase().startsWith(WITHDRAWN)) return null;
+	return e.slice(WITHDRAWN.length).trim();
 }
 
 // ------------------------------------------------------------------ new instances
@@ -347,13 +475,17 @@ export function fieldProblems(m: Manifest, d: Draft, enabled: boolean = d.enable
 	return out;
 }
 
-/** The instance as it is sent: the stored one with the form applied, `secrets` only for changes, no `secrets_set`. */
-export function instanceFrom(m: Manifest, inst: PluginInstance, d: Draft, enabled: boolean = d.enabled): PluginInstance {
+/**
+ * The instance as it is sent: the stored one with the form applied, `secrets` only for changes, no `secrets_set`.
+ * A built-in plugin's version is the manifest's (informational); a registry plugin keeps the version the owner
+ * approved (`keepVersion`), so editing its settings never approves an update with other permissions on the side.
+ */
+export function instanceFrom(m: Manifest, inst: PluginInstance, d: Draft, enabled: boolean = d.enabled, keepVersion = false): PluginInstance {
 	const { secrets_set: _s, secrets: _w, ...rest } = inst;
 	const out: PluginInstance = {
 		...rest,
 		plugin_id: m.id,
-		version: m.version,
+		version: keepVersion && inst.version ? inst.version : m.version,
 		slot: d.slot,
 		visibility: d.visibility,
 		enabled,
@@ -594,10 +726,14 @@ export function statusOf(fp: FramePlugins | null | undefined, instanceId: string
 	return fp?.instances?.find((x) => x.instance_id === instanceId);
 }
 
-export type StatusKind = 'not_on_frame' | 'incomplete' | 'off' | 'error' | 'waiting' | 'running';
+export type StatusKind = 'withdrawn' | 'not_on_frame' | 'incomplete' | 'off' | 'error' | 'waiting' | 'running';
 
-/** The instance list's status line (§6.1): its error, "Waiting for the frame" before its first report, else nothing. */
+/**
+ * The instance list's status line (§6.1): withdrawn from the registry (§7), its error, "Waiting for the frame" before
+ * its first report, else nothing.
+ */
 export function statusKind(m: Manifest | undefined, inst: PluginInstance, st: InstanceStatus | undefined): StatusKind {
+	if (withdrawnReason(st) !== null) return 'withdrawn';
 	if (!m) return 'not_on_frame';
 	if (inst.enabled === false) return instanceComplete(m, inst) ? 'off' : 'incomplete';
 	if (st?.error) return 'error';

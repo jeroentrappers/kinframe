@@ -1291,7 +1291,26 @@ const hr: Catalog = {
 	'plugins.errEnum': 'Odaberite jednu od mogućnosti.',
 	'plugins.errTimezone': 'Odaberite vremensku zonu s popisa.',
 	'plugins.errUnknown': 'Dodatak na okviru više nema ovu postavku.',
-	'plugins.errType': 'Ovo ne odgovara ovoj postavci.'
+	'plugins.errType': 'Ovo ne odgovara ovoj postavci.',
+	'plugins.groupBuiltin': 'Ugrađeni',
+	'plugins.groupCommunity': 'Zajednica',
+	'plugins.groupCommunityHint': 'Izradili su ih drugi ljudi. Svaki novi dodatak i svaka promjena onoga što smije raditi pregledava se prije objave.',
+	'plugins.byAuthor': 'autor: {name}',
+	'plugins.versionNumber': 'verzija {version}',
+	'plugins.confirmTitle': 'Dodati {name}?',
+	'plugins.confirmBody': 'Ovaj dodatak dolazi iz zajednice, ne od kinframea. Što smije raditi:',
+	'plugins.permAddresses': 'Spaja se na adrese koje upišete: {settings}',
+	'plugins.permActions': 'Prikazuje na okviru gumbe koji nešto mijenjaju, npr. uključuju utičnicu',
+	'plugins.permNone': 'Samo se prikazuje na okviru; ne spaja se ni na što',
+	'plugins.updateAsks': 'Dostupno je ažuriranje na {version} — traži:',
+	'plugins.updateFewer': 'Dostupno je ažuriranje na {version} — traži manje nego prije.',
+	'plugins.updateApprove': 'Odobri',
+	'plugins.updateDismiss': 'Ne sada',
+	'plugins.updateApproved': 'Ažuriranje na {version} odobreno',
+	'plugins.updateWaiting': 'Ažuriranje čeka vaše odobrenje',
+	'plugins.withdrawn': 'Povučeno iz registra zajednice: {reason}',
+	'plugins.withdrawnHint': 'Više ne radi na okviru. Možete ga ukloniti.',
+	'plugins.runsVersion': 'Okvir koristi verziju {version}.'
 };
 
 export default hr;

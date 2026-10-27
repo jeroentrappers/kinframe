@@ -1264,7 +1264,26 @@ const th: Catalog = {
 	'plugins.errEnum': 'เลือกหนึ่งตัวเลือก',
 	'plugins.errTimezone': 'เลือกเขตเวลาจากรายการ',
 	'plugins.errUnknown': 'ปลั๊กอินบนกรอบรูปไม่มีการตั้งค่านี้แล้ว',
-	'plugins.errType': 'ค่านี้ไม่เหมาะกับการตั้งค่านี้'
+	'plugins.errType': 'ค่านี้ไม่เหมาะกับการตั้งค่านี้',
+	'plugins.groupBuiltin': 'ในตัว',
+	'plugins.groupCommunity': 'ชุมชน',
+	'plugins.groupCommunityHint': 'สร้างโดยผู้อื่น ปลั๊กอินใหม่ทุกตัว และทุกการเปลี่ยนแปลงสิ่งที่ปลั๊กอินทำได้ จะถูกตรวจสอบก่อนเผยแพร่',
+	'plugins.byAuthor': 'โดย {name}',
+	'plugins.versionNumber': 'เวอร์ชัน {version}',
+	'plugins.confirmTitle': 'เพิ่ม {name} ไหม',
+	'plugins.confirmBody': 'ปลั๊กอินนี้มาจากชุมชน ไม่ได้มาจาก kinframe สิ่งที่ทำได้:',
+	'plugins.permAddresses': 'เชื่อมต่อกับที่อยู่ที่คุณกรอก: {settings}',
+	'plugins.permActions': 'แสดงปุ่มบนกรอบรูปที่เปลี่ยนแปลงสิ่งต่างๆ เช่น เปิดปลั๊กไฟ',
+	'plugins.permNone': 'แสดงบนกรอบรูปเท่านั้น ไม่เชื่อมต่อกับสิ่งใด',
+	'plugins.updateAsks': 'มีอัปเดตเป็น {version} — ขอสิ่งต่อไปนี้:',
+	'plugins.updateFewer': 'มีอัปเดตเป็น {version} — ขอน้อยกว่าเดิม',
+	'plugins.updateApprove': 'อนุมัติ',
+	'plugins.updateDismiss': 'ไว้ทีหลัง',
+	'plugins.updateApproved': 'อนุมัติอัปเดตเป็น {version} แล้ว',
+	'plugins.updateWaiting': 'มีอัปเดตรอการอนุมัติจากคุณ',
+	'plugins.withdrawn': 'ถูกถอนออกจากทะเบียนของชุมชน: {reason}',
+	'plugins.withdrawnHint': 'ไม่ทำงานบนกรอบรูปแล้ว คุณนำออกได้',
+	'plugins.runsVersion': 'กรอบรูปใช้เวอร์ชัน {version}'
 };
 
 export default th;

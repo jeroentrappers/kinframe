@@ -306,4 +306,87 @@ class PluginSettingsTest {
         assertTrue(TimeZones.search(all, "australia").size > 3)
         assertEquals(all, TimeZones.search(all, "  "))
     }
+
+    // ---------------------------------------------------------------- community plugins (§7)
+
+    private fun community(json: String) = FormPlugin.read(CatalogPlugin(obj(json), builtin = false))!!
+
+    private val bins = """{"id":"community.bin-day","name":"Bin day","version":"1.0.0","author":{"name":"Jane Doe","url":"https://x"},"license":"MIT",
+        "permissions":{"http":["settings.calendar_url"]},"settings":[{"key":"calendar_url","type":"url","label":"Calendar address","required":true}]}"""
+
+    @Test
+    fun readsCommunityPluginsAndWhatTheyMayDo() {
+        val p = community(bins)
+        assertTrue(p.community)
+        assertEquals("Jane Doe", p.author)
+        assertEquals("MIT", p.license)
+        assertEquals(listOf(Permission.Addresses(listOf("calendar_url"))), p.permissions.items)
+        assertFalse(real("kinframe.ha-energy").community)
+        // A catalog entry that doesn't say is the frame's own.
+        assertFalse(FormPlugin.read(KinJson.decodeFromString(CatalogPlugin.serializer(), """{"manifest":{"id":"a.b"}}"""))!!.community)
+        assertEquals(listOf(Permission.Internet(listOf("air-quality-api.open-meteo.com")), Permission.Location), real("community.air-quality").permissions.items)
+        assertEquals(listOf(Permission.Addresses(listOf("host")), Permission.Actions), real("kinframe.homewizard-socket").permissions.items)
+        val ws = PluginPermissions.read(obj("""{"http":["settings.base_url","https://api.example.org/v1"],"websocket":["settings.base_url","wss://push.example.org:8443"]}"""))
+        assertEquals(listOf(Permission.Internet(listOf("api.example.org", "push.example.org:8443")), Permission.Addresses(listOf("base_url"))), ws.items)
+        assertTrue(PluginPermissions.read(null).items.isEmpty())
+    }
+
+    @Test
+    fun diffsPermissions() {
+        val from = PluginPermissions.read(obj("""{"http":["settings.calendar_url","https://a.example.org"]}"""))
+        val to = PluginPermissions.read(obj("""{"http":["settings.calendar_url","https://a.example.org","https://b.example.org"],"location":true,"actions":true}"""))
+        val (added, removed) = PluginSettings.permissionChanges(from, to)
+        assertEquals(listOf(Permission.Internet(listOf("b.example.org")), Permission.Location, Permission.Actions), added)
+        assertTrue(removed.isEmpty())
+        assertEquals(added, PluginSettings.permissionChanges(to, from).second)
+    }
+
+    @Test
+    fun newInstanceOfARegistryPluginGetsTheCatalogVersion() {
+        assertEquals("1.1.0", PluginSettings.newInstance(community(bins.replace("1.0.0", "1.1.0"))).version)
+        assertEquals("1.0.0", PluginSettings.newInstance(real("kinframe.homewizard-p1")).version)
+    }
+
+    @Test
+    fun pendingUpdateListsWhatChangedOrEverything() {
+        val v1 = community(bins)
+        val d = PluginInstanceDraft("p-bins", "community.bin-day", version = "1.0.0")
+        val perms = obj("""{"http":["settings.calendar_url","https://holidays.example.org"],"location":true}""")
+        val st = PluginInstanceStatus("p-bins", running = true, version = "1.0.0", update = app.kinframe.core.api.PluginUpdate("1.2.0", perms))
+        assertEquals(PendingUpdate("1.2.0", listOf(Permission.Internet(listOf("holidays.example.org")), Permission.Location), diffed = true, fewer = false),
+            PluginSettings.pendingUpdate(v1, d, st))
+        // The catalog holds the newer version: list everything it may do.
+        val v12 = community(bins.replace("1.0.0", "1.2.0"))
+        assertEquals(PendingUpdate("1.2.0", listOf(Permission.Internet(listOf("holidays.example.org")), Permission.Addresses(listOf("calendar_url")), Permission.Location),
+            diffed = false, fewer = false), PluginSettings.pendingUpdate(v12, d, st))
+        // Only less.
+        val less = st.copy(update = app.kinframe.core.api.PluginUpdate("1.2.0", obj("{}")))
+        assertEquals(PendingUpdate("1.2.0", emptyList(), diffed = true, fewer = true), PluginSettings.pendingUpdate(v1, d, less))
+        // Approved already, or none.
+        assertNull(PluginSettings.pendingUpdate(v1, d.copy(version = "1.2.0"), st))
+        assertNull(PluginSettings.pendingUpdate(v1, d, st.copy(update = null)))
+        assertNull(PluginSettings.pendingUpdate(v1, d, null))
+    }
+
+    @Test
+    fun approvingSetsTheVersionInTheWholeList() {
+        val a = PluginInstanceDraft("p-a", "kinframe.homewizard-p1", version = "1.0.0")
+        val b = PluginInstanceDraft("p-b", "community.bin-day", version = "1.0.0", secretsSet = setOf("x"))
+        val list = PluginSettings.approveUpdate(listOf(a, b), "p-b", "1.2.0")
+        assertEquals(listOf("1.0.0", "1.2.0"), list.map { it.version })
+        val sent = (PluginSettings.instancesPatch(list)["plugins"]!!.jsonObject["instances"] as JsonArray).map { it.jsonObject }
+        assertEquals(JsonPrimitive("1.2.0"), sent[1]["version"])
+        assertFalse("secrets_set" in sent[1])
+        assertFalse("secrets" in sent[1])
+    }
+
+    @Test
+    fun withdrawnPluginsSayWhy() {
+        assertEquals("sent the token to the wrong host", PluginSettings.withdrawnReason("withdrawn: sent the token to the wrong host"))
+        assertNull(PluginSettings.withdrawnReason("Meter not reachable"))
+        assertNull(PluginSettings.withdrawnReason(null))
+        val d = PluginInstanceDraft("p-gone", "community.gone", enabled = false)
+        val report = FramePlugins(catalogAt = "2026-10-27T10:00:00Z", instances = listOf(PluginInstanceStatus("p-gone", error = "withdrawn: broken")))
+        assertEquals(InstanceStatus.Withdrawn("broken"), PluginSettings.status(d, report, onFrame = false))
+    }
 }

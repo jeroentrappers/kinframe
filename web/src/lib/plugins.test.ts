@@ -3,6 +3,14 @@ import { describe, expect, it } from 'vitest';
 import {
 	applyInstanceOp,
 	applyPreset,
+	approveUpdate,
+	catalogGroups,
+	communityMeta,
+	isCommunity,
+	pendingUpdate,
+	permissionChanges,
+	permissionsOf,
+	withdrawnReason,
 	draftOf,
 	fieldProblems,
 	filterEntities,
@@ -426,3 +434,138 @@ describe('timezone settings', () => {
 	});
 });
 
+describe('community plugins (registry, §7)', () => {
+	const socket = manifest('kinframe.homewizard-socket');
+	const bins = manifest('examples/community.bin-calendar');
+	const community = (m: Manifest, extra: Partial<Manifest> = {}): CatalogPlugin =>
+		({ manifest: { ...m, ...extra }, builtin: false }) as unknown as CatalogPlugin;
+	const builtin = (m: Manifest): CatalogPlugin => ({ manifest: m, builtin: true }) as unknown as CatalogPlugin;
+
+	it('tells registry plugins from built-in ones and groups the catalog, built-in first, by name', () => {
+		const old = { manifest: energy } as unknown as CatalogPlugin; // an older frame that doesn't say
+		expect(isCommunity(old)).toBe(false);
+		expect(isCommunity(builtin(p1))).toBe(false);
+		expect(isCommunity(community(air))).toBe(true);
+		const g = catalogGroups([community(irail), builtin(p1), community(air), old], 'en');
+		expect(g.builtin.map((p) => (p.manifest as { id: string }).id)).toEqual(['kinframe.ha-energy', 'kinframe.homewizard-p1']);
+		expect(g.community.map((p) => (p.manifest as { id: string }).id)).toEqual(['community.air-quality', 'community.irail-departures']);
+		expect(catalogGroups(undefined, 'en')).toEqual({ builtin: [], community: [] });
+	});
+
+	it('shows author, licence and version', () => {
+		expect(communityMeta({ ...bins, author: { name: 'Jane Doe', url: 'https://x' }, license: 'MIT', version: '1.2.0' })).toEqual({
+			author: 'Jane Doe',
+			license: 'MIT',
+			version: '1.2.0'
+		});
+		expect(communityMeta({ id: 'x', name: 'X', version: '' })).toEqual({ author: undefined, license: undefined, version: undefined });
+	});
+
+	it('lists what a plugin may do: hosts, the addresses typed in, location, buttons', () => {
+		expect(permissionsOf(air.permissions)).toEqual([{ kind: 'internet', hosts: ['air-quality-api.open-meteo.com'] }, { kind: 'location' }]);
+		expect(permissionsOf(bins.permissions)).toEqual([{ kind: 'addresses', settings: ['calendar_url'] }]);
+		expect(permissionsOf(socket.permissions)).toEqual([{ kind: 'addresses', settings: ['host'] }, { kind: 'actions' }]);
+		expect(permissionsOf({ http: ['settings.base_url', 'https://api.example.org/v1'], websocket: ['settings.base_url', 'wss://push.example.org'] })).toEqual([
+			{ kind: 'internet', hosts: ['api.example.org', 'push.example.org'] },
+			{ kind: 'addresses', settings: ['base_url'] }
+		]);
+		expect(permissionsOf(undefined)).toEqual([]);
+	});
+
+	it('diffs the permissions of two versions', () => {
+		const from = { http: ['settings.calendar_url', 'https://a.example.org'] };
+		const to = { http: ['settings.calendar_url', 'https://a.example.org', 'https://b.example.org'], location: true, actions: true };
+		expect(permissionChanges(from, to)).toEqual({
+			added: [{ kind: 'internet', hosts: ['b.example.org'] }, { kind: 'location' }, { kind: 'actions' }],
+			removed: []
+		});
+		expect(permissionChanges(to, from)).toEqual({
+			added: [],
+			removed: [{ kind: 'internet', hosts: ['b.example.org'] }, { kind: 'location' }, { kind: 'actions' }]
+		});
+		expect(permissionChanges(from, { http: ['settings.url'] })).toEqual({
+			added: [{ kind: 'addresses', settings: ['url'] }],
+			removed: [{ kind: 'internet', hosts: ['a.example.org'] }, { kind: 'addresses', settings: ['calendar_url'] }]
+		});
+	});
+
+	it('gives a new instance of a registry plugin the catalog version, like a built-in one', () => {
+		const m = { ...bins, version: '1.1.0' };
+		expect(newInstance(m, []).version).toBe('1.1.0');
+		expect(newInstance(p1, []).version).toBe(p1.version);
+	});
+
+	it('keeps the approved version when a registry instance is edited; a built-in one takes the manifest’s', () => {
+		const m = { ...bins, version: '1.3.0' };
+		const stored = inst(m, { version: '1.0.0', settings: settings({ calendar_url: 'https://cal.example.org/a.ics' }) });
+		expect(instanceFrom(m, stored, draftOf(m, stored), true, true).version).toBe('1.0.0');
+		expect(instanceFrom(m, { ...stored, version: undefined }, draftOf(m, stored), true, true).version).toBe('1.3.0');
+		const b = inst(p1, { version: '0.9.0' });
+		expect(instanceFrom(p1, b, draftOf(p1, b)).version).toBe(p1.version);
+	});
+
+	describe('an update that asks for other permissions', () => {
+		const v1 = community(bins, { version: '1.0.0' });
+		const stored = inst(bins, { version: '1.0.0' });
+		const status = (extra: object = {}) => ({
+			instance_id: stored.instance_id,
+			running: true,
+			version: '1.0.0',
+			update: { version: '1.2.0', permissions: { http: ['settings.calendar_url', 'https://holidays.example.org'], location: true } },
+			...extra
+		});
+
+		it('lists what changed when the catalog holds the version the frame runs', () => {
+			expect(pendingUpdate(v1, stored, status())).toEqual({
+				version: '1.2.0',
+				asks: [{ kind: 'internet', hosts: ['holidays.example.org'] }, { kind: 'location' }],
+				diffed: true,
+				fewer: false
+			});
+		});
+
+		it('else lists everything the new version may do', () => {
+			const newest = community(bins, { version: '1.2.0' });
+			expect(pendingUpdate(newest, stored, status())).toEqual({
+				version: '1.2.0',
+				asks: [{ kind: 'internet', hosts: ['holidays.example.org'] }, { kind: 'addresses', settings: ['calendar_url'] }, { kind: 'location' }],
+				diffed: false,
+				fewer: false
+			});
+			// The frame runs 1.1.0 (same permissions as 1.0.0) while the catalog says 1.0.0: no diff either.
+			expect(pendingUpdate(v1, stored, status({ version: '1.1.0' }))?.diffed).toBe(false);
+		});
+
+		it('says when it only asks for less', () => {
+			const u = pendingUpdate(v1, stored, status({ update: { version: '1.2.0', permissions: {} } }));
+			expect(u).toMatchObject({ asks: [], diffed: true, fewer: true });
+		});
+
+		it('is gone once the instance names that version, or without an update', () => {
+			expect(pendingUpdate(v1, { ...stored, version: '1.2.0' }, status())).toBeNull();
+			expect(pendingUpdate(v1, stored, status({ update: null }))).toBeNull();
+			expect(pendingUpdate(v1, stored, undefined)).toBeNull();
+		});
+
+		it('is approved by saving the instance with that version, in the whole list', () => {
+			const other = inst(p1, { instance_id: 'p-other', secrets_set: [] });
+			const approved = approveUpdate({ ...stored, secrets_set: ['x'] }, '1.2.0');
+			expect(approved).toMatchObject({ instance_id: stored.instance_id, version: '1.2.0', settings: {} });
+			const { instances, index } = applyInstanceOp([other, { ...stored, secrets_set: ['x'] }], { kind: 'upsert', instance: approved });
+			expect(index).toBe(1);
+			expect(instances).toEqual([
+				{ instance_id: 'p-other', plugin_id: p1.id, slot: 'top-right', visibility: 'always', enabled: true, settings: {} },
+				{ instance_id: stored.instance_id, plugin_id: bins.id, slot: 'top-right', visibility: 'always', enabled: true, settings: {}, version: '1.2.0' }
+			]);
+		});
+	});
+
+	it('reads a withdrawn plugin from the frame’s error', () => {
+		const st = (error: string | null) => ({ instance_id: 'p-x', running: false, error });
+		expect(withdrawnReason(st('withdrawn: sent the token to the wrong host'))).toBe('sent the token to the wrong host');
+		expect(withdrawnReason(st('Meter not reachable'))).toBeNull();
+		expect(withdrawnReason(st(null))).toBeNull();
+		expect(statusKind(undefined, inst(bins), st('withdrawn: broken'))).toBe('withdrawn');
+		expect(statusKind(bins, inst(bins), st('withdrawn: broken'))).toBe('withdrawn');
+	});
+});

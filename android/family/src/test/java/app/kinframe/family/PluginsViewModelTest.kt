@@ -45,8 +45,9 @@ class PluginsViewModelTest {
         var conflictOnce = false
         var reject: Problem? = null
         var pluginCalls = 0
+        var report: FramePlugins = catalog
         override suspend fun settings(frameId: String) = SettingsDocument(doc)
-        override suspend fun framePlugins(frameId: String): FramePlugins { pluginCalls++; return catalog }
+        override suspend fun framePlugins(frameId: String): FramePlugins { pluginCalls++; return report }
         override suspend fun patchSettings(frameId: String, version: Int, patch: JsonObject): SettingsDocument {
             if (conflictOnce) {
                 conflictOnce = false
@@ -144,5 +145,57 @@ class PluginsViewModelTest {
         vm.remove()
         assertEquals(JsonArray(emptyList()), api.patches.single()["plugins"]!!.jsonObject["instances"])
         assertNull(vm.state.value.editor)
+    }
+
+    // ---------------------------------------------------------------- community plugins (§7)
+
+    private val bins = obj("""{"id":"community.bin-day","name":"Bin day","version":"1.1.0","author":{"name":"Jane Doe"},"license":"MIT",
+        "permissions":{"http":["settings.calendar_url"],"actions":true},"settings":[{"key":"calendar_url","type":"url","label":"Calendar address","required":true}]}""")
+
+    @Test
+    fun communityPluginsAskBeforeTheyAreAdded() {
+        val api = Server(obj("""{"version":1}"""))
+        api.report = FramePlugins(listOf(CatalogPlugin(manifest), CatalogPlugin(bins, builtin = false)), catalogAt = "2026-10-27T10:00:00Z")
+        val vm = PluginsViewModel(api, "f1")
+        val p = vm.state.value.plugin("community.bin-day")!!
+        vm.openAdd()
+        vm.add(p)
+        assertEquals(p, vm.state.value.confirming)
+        assertFalse(vm.state.value.adding)
+        assertNull(vm.state.value.editor)
+        vm.cancelAdd()
+        assertNull(vm.state.value.confirming)
+        assertNull(vm.state.value.editor)
+        vm.add(p)
+        vm.confirmAdd()
+        assertEquals("1.1.0", vm.state.value.editor!!.draft.version)
+        vm.closeEditor()
+        // Built-in plugins open their form at once.
+        vm.add(vm.state.value.plugin("kinframe.homewizard-p1")!!)
+        assertNull(vm.state.value.confirming)
+        assertNotNull(vm.state.value.editor)
+    }
+
+    @Test
+    fun approvingAnUpdateSavesTheVersionAndTheOpenFormKeepsIt() {
+        val api = Server(obj("""{"version":1,"plugins":{"instances":[
+            {"instance_id":"p-1","plugin_id":"kinframe.homewizard-p1","enabled":true,"settings":{"host":"x"}},
+            {"instance_id":"p-bins","plugin_id":"community.bin-day","version":"1.0.0","enabled":true,"settings":{"calendar_url":"https://cal.example.org/b.ics"}}]}}"""))
+        api.report = FramePlugins(listOf(CatalogPlugin(manifest), CatalogPlugin(bins, builtin = false)), catalogAt = "2026-10-27T10:00:00Z",
+            instances = listOf(app.kinframe.core.api.PluginInstanceStatus("p-bins", running = true, version = "1.0.0",
+                update = app.kinframe.core.api.PluginUpdate("1.2.0", obj("""{"http":["settings.calendar_url","https://holidays.example.org"]}""")))))
+        val vm = PluginsViewModel(api, "f1")
+        vm.edit("p-bins")
+        vm.dismissUpdate("p-bins", "1.2.0")
+        assertTrue(vm.state.value.updateDismissed("p-bins", "1.2.0"))
+        api.conflictOnce = true
+        vm.approveUpdate("p-bins", "1.2.0")
+        val sent = (api.patches.single()["plugins"]!!.jsonObject["instances"] as JsonArray).map { it.jsonObject }
+        assertEquals(listOf("p-1", "p-bins"), sent.map { (it["instance_id"] as JsonPrimitive).content })
+        assertEquals(JsonPrimitive("1.2.0"), sent[1]["version"])
+        assertEquals("1.2.0", vm.state.value.editor!!.draft.version)
+        vm.saveEditor()
+        val again = (api.patches[1]["plugins"]!!.jsonObject["instances"] as JsonArray).map { it.jsonObject }
+        assertEquals(JsonPrimitive("1.2.0"), again[1]["version"])
     }
 }

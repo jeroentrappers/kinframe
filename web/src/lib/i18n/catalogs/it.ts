@@ -1291,7 +1291,26 @@ const it: Catalog = {
 	'plugins.errEnum': 'Scegli una delle opzioni.',
 	'plugins.errTimezone': 'Scegli un fuso orario dall’elenco.',
 	'plugins.errUnknown': 'Il plugin sulla cornice non ha più questa impostazione.',
-	'plugins.errType': 'Questo valore non va bene per questa impostazione.'
+	'plugins.errType': 'Questo valore non va bene per questa impostazione.',
+	'plugins.groupBuiltin': 'Integrati',
+	'plugins.groupCommunity': 'Community',
+	'plugins.groupCommunityHint': 'Creati da altre persone. Ogni nuovo plugin, e ogni modifica a ciò che può fare, viene controllato prima della pubblicazione.',
+	'plugins.byAuthor': 'di {name}',
+	'plugins.versionNumber': 'versione {version}',
+	'plugins.confirmTitle': 'Aggiungere {name}?',
+	'plugins.confirmBody': 'Questo plugin viene dalla community, non da kinframe. Cosa può fare:',
+	'plugins.permAddresses': 'Raggiunge gli indirizzi che inserisci: {settings}',
+	'plugins.permActions': 'Mostra sulla cornice pulsanti che cambiano qualcosa, come accendere una presa',
+	'plugins.permNone': 'Si mostra solo sulla cornice; non raggiunge nulla',
+	'plugins.updateAsks': 'Aggiornamento a {version} disponibile: chiede:',
+	'plugins.updateFewer': 'Aggiornamento a {version} disponibile: chiede meno di prima.',
+	'plugins.updateApprove': 'Approva',
+	'plugins.updateDismiss': 'Non ora',
+	'plugins.updateApproved': 'Aggiornamento a {version} approvato',
+	'plugins.updateWaiting': 'Un aggiornamento attende la tua approvazione',
+	'plugins.withdrawn': 'Ritirato dal registro della community: {reason}',
+	'plugins.withdrawnHint': 'Non funziona più sulla cornice. Puoi rimuoverlo.',
+	'plugins.runsVersion': 'La cornice usa la versione {version}.'
 };
 
 export default it;

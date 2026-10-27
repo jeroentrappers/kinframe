@@ -191,6 +191,37 @@ export function makeFrame(p: Partial<S['Frame']> & { name: string }): S['Frame']
 	};
 }
 
+/**
+ * A plugin from the community registry as the frame's catalog lists it (docs/plugins.md §7): `builtin: false`, its
+ * newest version, with author and licence. It reaches the calendar address the owner types in and shows buttons.
+ */
+export function communityPlugin(version = '1.0.0'): S['CatalogPlugin'] {
+	return {
+		manifest: {
+			id: 'community.bin-day',
+			name: 'Bin day',
+			version,
+			api: 1,
+			author: { name: 'Jane Doe', url: 'https://github.com/janedoe' },
+			license: 'MIT',
+			description: 'Which bin goes out tomorrow, from your council’s calendar.',
+			slots: ['top-left', 'top-right'],
+			permissions: { http: ['settings.calendar_url'], actions: true },
+			settings: [{ key: 'calendar_url', type: 'url', label: 'Calendar address', required: true }]
+		},
+		locales: { nl: { '@name': 'Afvaldag', '@setting.calendar_url': 'Adres van de kalender' } },
+		builtin: false
+	};
+}
+
+/**
+ * The frame's report for a registry instance that runs `running` while a newer version, asking for other
+ * `permissions`, waits for the owner's approval (`PluginInstanceStatus.update`).
+ */
+export function pluginUpdate(instanceId: string, running: string, next: string, permissions: Record<string, unknown>): S['PluginInstanceStatus'] {
+	return { instance_id: instanceId, running: true, updated_at: iso(1), version: running, update: { version: next, permissions } };
+}
+
 function json(route: Route, status: number, body: unknown, headers: Record<string, string> = {}) {
 	return route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body), headers });
 }

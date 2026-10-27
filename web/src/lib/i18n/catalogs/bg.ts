@@ -1263,7 +1263,26 @@ const bg: Catalog = {
 	'plugins.errEnum': 'Изберете една от опциите.',
 	'plugins.errTimezone': 'Изберете часова зона от списъка.',
 	'plugins.errUnknown': 'Плъгинът на рамката вече няма тази настройка.',
-	'plugins.errType': 'Това не пасва на тази настройка.'
+	'plugins.errType': 'Това не пасва на тази настройка.',
+	'plugins.groupBuiltin': 'Вградени',
+	'plugins.groupCommunity': 'Общност',
+	'plugins.groupCommunityHint': 'Направени от други хора. Всеки нов плъгин и всяка промяна в това какво може да прави се преглеждат преди публикуване.',
+	'plugins.byAuthor': 'от {name}',
+	'plugins.versionNumber': 'версия {version}',
+	'plugins.confirmTitle': 'Да се добави ли {name}?',
+	'plugins.confirmBody': 'Този плъгин идва от общността, не от kinframe. Какво може да прави:',
+	'plugins.permAddresses': 'Свързва се с адресите, които въведете: {settings}',
+	'plugins.permActions': 'Показва бутони на рамката, които променят нещо, например включват контакт',
+	'plugins.permNone': 'Само се показва на рамката; не се свързва с нищо',
+	'plugins.updateAsks': 'Налична е актуализация до {version} — тя иска:',
+	'plugins.updateFewer': 'Налична е актуализация до {version} — тя иска по-малко от преди.',
+	'plugins.updateApprove': 'Одобряване',
+	'plugins.updateDismiss': 'Не сега',
+	'plugins.updateApproved': 'Актуализацията до {version} е одобрена',
+	'plugins.updateWaiting': 'Актуализация чака вашето одобрение',
+	'plugins.withdrawn': 'Оттеглен от регистъра на общността: {reason}',
+	'plugins.withdrawnHint': 'Вече не работи на рамката. Можете да го премахнете.',
+	'plugins.runsVersion': 'Рамката използва версия {version}.'
 };
 
 export default bg;

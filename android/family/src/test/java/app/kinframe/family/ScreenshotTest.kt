@@ -89,6 +89,8 @@ import app.kinframe.core.plugin.settings.FormPlugin
 import app.kinframe.core.plugin.settings.InstanceFieldError
 import app.kinframe.core.plugin.settings.PluginInstanceDraft
 import app.kinframe.family.ui.PageColumn
+import app.kinframe.family.ui.frame.ConfirmAddContent
+import app.kinframe.family.ui.frame.PluginCatalogContent
 import app.kinframe.family.ui.frame.PluginEditor
 import app.kinframe.family.ui.frame.PluginEditorActions
 import app.kinframe.family.ui.frame.PluginEditorContent
@@ -314,6 +316,43 @@ class ScreenshotTest {
         val plugin = FormPlugin.read(pluginReport.catalog[1])
         PluginEditorContent(plugin, PluginEditor(PluginInstanceDraft("p-car", "kinframe.ha-ev", secretsSet = setOf("token")), isNew = false), pluginReport, false,
             PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    /** A community plugin (registry, docs/plugins.md §7) whose newer version asks for more and waits for approval. */
+    private val binDay by lazy {
+        CatalogPlugin(KinJson.parseToJsonElement("""{"id":"community.bin-day","name":"Bin day","version":"1.0.0","api":1,
+            "author":{"name":"Jane Doe","url":"https://github.com/janedoe"},"license":"MIT",
+            "description":"Which bin goes out tomorrow, from your council’s calendar.",
+            "permissions":{"http":["settings.calendar_url"],"actions":true},
+            "settings":[{"key":"calendar_url","type":"url","label":"Calendar address","required":true}]}""").jsonObject,
+            mapOf("nl" to mapOf("@name" to "Afvaldag", "@setting.calendar_url" to "Adres van de kalender")), builtin = false)
+    }
+
+    private val binDayReport by lazy {
+        pluginReport.copy(catalog = pluginReport.catalog + binDay, instances = listOf(
+            PluginInstanceStatus("p-bins", running = true, version = "1.0.0", update = app.kinframe.core.api.PluginUpdate("1.2.0",
+                KinJson.parseToJsonElement("""{"http":["settings.calendar_url","https://holidays.example.org"],"location":true,"actions":true}""").jsonObject)),
+        ))
+    }
+
+    @Test fun pluginUpdateApproval() = both("plugin_update_approval") {
+        val draft = PluginInstanceDraft("p-bins", "community.bin-day", version = "1.0.0",
+            settings = KinJson.parseToJsonElement("""{"calendar_url":"https://cal.example.org/bins.ics"}""").jsonObject)
+        PluginEditorContent(FormPlugin.read(binDay), PluginEditor(draft, isNew = false), binDayReport, false, PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun pluginUpdateApprovalDutch() = shot("plugin_update_approval_nl_light", dark = false) {
+        val draft = PluginInstanceDraft("p-bins", "community.bin-day", version = "1.0.0")
+        PluginEditorContent(FormPlugin.read(binDay), PluginEditor(draft, isNew = false), binDayReport, false, PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    @Test fun pluginCatalogCommunity() = both("plugin_catalog_community") {
+        PageColumn { PluginCatalogContent(listOf(pluginReport.catalog[2], binDay).mapNotNull(FormPlugin::read)) {} }
+    }
+
+    @Test fun pluginConfirmAdd() = both("plugin_confirm_add") {
+        PageColumn { ConfirmAddContent(FormPlugin.read(binDay)!!) }
     }
 
     // ---------------------------------------------------------------- rendering

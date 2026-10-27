@@ -1380,7 +1380,26 @@ const ar: Catalog = {
 	'plugins.errEnum': 'اختر أحد الخيارات.',
 	'plugins.errTimezone': 'اختر منطقة زمنية من القائمة.',
 	'plugins.errUnknown': 'لم يعد هذا الإعداد موجودًا في الإضافة على الإطار.',
-	'plugins.errType': 'هذه القيمة لا تناسب هذا الإعداد.'
+	'plugins.errType': 'هذه القيمة لا تناسب هذا الإعداد.',
+	'plugins.groupBuiltin': 'مدمجة',
+	'plugins.groupCommunity': 'المجتمع',
+	'plugins.groupCommunityHint': 'صنعها آخرون. تُراجَع كل إضافة جديدة، وكل تغيير فيما يُسمح لها بفعله، قبل نشرها.',
+	'plugins.byAuthor': 'من {name}',
+	'plugins.versionNumber': 'الإصدار {version}',
+	'plugins.confirmTitle': 'إضافة {name}؟',
+	'plugins.confirmBody': 'هذه الإضافة من المجتمع، وليست من kinframe. ما يُسمح لها بفعله:',
+	'plugins.permAddresses': 'تتصل بالعناوين التي تكتبها: {settings}',
+	'plugins.permActions': 'تعرض على الإطار أزرارًا تغيّر أشياء، مثل تشغيل مقبس',
+	'plugins.permNone': 'تظهر على الإطار فقط؛ لا تتصل بأي شيء',
+	'plugins.updateAsks': 'تحديث إلى {version} متاح — يطلب:',
+	'plugins.updateFewer': 'تحديث إلى {version} متاح — يطلب أقل من قبل.',
+	'plugins.updateApprove': 'موافقة',
+	'plugins.updateDismiss': 'ليس الآن',
+	'plugins.updateApproved': 'تمت الموافقة على التحديث إلى {version}',
+	'plugins.updateWaiting': 'تحديث بانتظار موافقتك',
+	'plugins.withdrawn': 'سُحبت من سجل المجتمع: {reason}',
+	'plugins.withdrawnHint': 'لم تعد تعمل على الإطار. يمكنك إزالتها.',
+	'plugins.runsVersion': 'يشغّل الإطار الإصدار {version}.'
 };
 
 export default ar;

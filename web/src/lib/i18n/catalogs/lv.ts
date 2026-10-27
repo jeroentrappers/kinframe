@@ -1293,7 +1293,26 @@ const lv: Catalog = {
 	'plugins.errEnum': 'Izvēlieties vienu no iespējām.',
 	'plugins.errTimezone': 'Izvēlieties laika joslu no saraksta.',
 	'plugins.errUnknown': 'Rāmja spraudnim vairs nav šī iestatījuma.',
-	'plugins.errType': 'Tas neatbilst šim iestatījumam.'
+	'plugins.errType': 'Tas neatbilst šim iestatījumam.',
+	'plugins.groupBuiltin': 'Iebūvētie',
+	'plugins.groupCommunity': 'Kopiena',
+	'plugins.groupCommunityHint': 'Veidojuši citi cilvēki. Katrs jauns spraudnis un katras izmaiņas tajā, ko tas drīkst darīt, tiek pārbaudītas pirms publicēšanas.',
+	'plugins.byAuthor': 'autors: {name}',
+	'plugins.versionNumber': 'versija {version}',
+	'plugins.confirmTitle': 'Pievienot {name}?',
+	'plugins.confirmBody': 'Šis spraudnis nāk no kopienas, nevis no kinframe. Ko tas drīkst darīt:',
+	'plugins.permAddresses': 'Savienojas ar jūsu ievadītajām adresēm: {settings}',
+	'plugins.permActions': 'Rāmī rāda pogas, kas kaut ko maina, piemēram, ieslēdz kontaktligzdu',
+	'plugins.permNone': 'Tikai tiek rādīts rāmī; ne ar ko nesavienojas',
+	'plugins.updateAsks': 'Pieejams atjauninājums uz {version} — tas prasa:',
+	'plugins.updateFewer': 'Pieejams atjauninājums uz {version} — tas prasa mazāk nekā līdz šim.',
+	'plugins.updateApprove': 'Apstiprināt',
+	'plugins.updateDismiss': 'Ne tagad',
+	'plugins.updateApproved': 'Atjauninājums uz {version} apstiprināts',
+	'plugins.updateWaiting': 'Atjauninājums gaida jūsu apstiprinājumu',
+	'plugins.withdrawn': 'Atsaukts no kopienas reģistra: {reason}',
+	'plugins.withdrawnHint': 'Tas vairs nedarbojas rāmī. Varat to noņemt.',
+	'plugins.runsVersion': 'Rāmī darbojas versija {version}.'
 };
 
 export default lv;

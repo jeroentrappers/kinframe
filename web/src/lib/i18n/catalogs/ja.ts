@@ -1262,7 +1262,26 @@ const ja: Catalog = {
 	'plugins.errEnum': '選択肢から選んでください。',
 	'plugins.errTimezone': 'リストからタイムゾーンを選んでください。',
 	'plugins.errUnknown': 'フレームのプラグインにはこの設定がなくなりました。',
-	'plugins.errType': 'この設定に合わない値です。'
+	'plugins.errType': 'この設定に合わない値です。',
+	'plugins.groupBuiltin': '組み込み',
+	'plugins.groupCommunity': 'コミュニティ',
+	'plugins.groupCommunityHint': 'ほかの人が作ったものです。新しいプラグインと、できることの変更はすべて、公開前に審査されます。',
+	'plugins.byAuthor': '作者：{name}',
+	'plugins.versionNumber': 'バージョン {version}',
+	'plugins.confirmTitle': '{name}を追加しますか？',
+	'plugins.confirmBody': 'このプラグインは kinframe ではなくコミュニティによるものです。できること：',
+	'plugins.permAddresses': '入力したアドレスに接続します：{settings}',
+	'plugins.permActions': 'コンセントのオンなど、何かを変えるボタンをフレームに表示します',
+	'plugins.permNone': 'フレームに表示するだけで、どこにも接続しません',
+	'plugins.updateAsks': '{version} へのアップデートがあります — 求めているもの：',
+	'plugins.updateFewer': '{version} へのアップデートがあります — 以前より少ない権限しか求めません。',
+	'plugins.updateApprove': '承認',
+	'plugins.updateDismiss': '後で',
+	'plugins.updateApproved': '{version} へのアップデートを承認しました',
+	'plugins.updateWaiting': 'アップデートが承認を待っています',
+	'plugins.withdrawn': 'コミュニティのレジストリから取り下げられました：{reason}',
+	'plugins.withdrawnHint': 'フレームではもう動いていません。削除できます。',
+	'plugins.runsVersion': 'フレームはバージョン {version} を実行しています。'
 };
 
 export default ja;

@@ -18,12 +18,16 @@ data class FramePlugins(
     val statusAt: String? = null,
 )
 
-/** A plugin the frame can run: its `plugin.json` as-is and the manifest's translations by language tag. */
+/**
+ * A plugin the frame can run: its `plugin.json` as-is and the manifest's translations by language tag. [builtin] is
+ * false for a plugin from the community registry (its newest version, docs/plugins.md §7); an entry that doesn't say
+ * is one of the frame's own.
+ */
 @Serializable
 data class CatalogPlugin(
     val manifest: JsonObject = JsonObject(emptyMap()),
     val locales: Map<String, Map<String, String>> = emptyMap(),
-    val builtin: Boolean = false,
+    val builtin: Boolean = true,
 )
 
 @Serializable
@@ -35,6 +39,18 @@ data class PluginInstanceStatus(
     val updatedAt: String? = null,
     /** Home Assistant entities the frame sees through this instance (entity picker); null when it has none. */
     val entities: List<DiscoveredEntity>? = null,
+    /** The plugin version the frame runs (a registry plugin may run a newer one than the instance names). */
+    val version: String? = null,
+    /** A newer registry version that asks for other permissions and waits for the owner's approval. */
+    val update: PluginUpdate? = null,
+)
+
+/** A registry version waiting for approval: it runs once the owner sets the instance's `version` to it (§7). */
+@Serializable
+data class PluginUpdate(
+    val version: String,
+    /** The newer version's `permissions`, as in its manifest. */
+    val permissions: JsonObject = JsonObject(emptyMap()),
 )
 
 @Serializable

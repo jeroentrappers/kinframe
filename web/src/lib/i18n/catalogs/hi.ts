@@ -1263,7 +1263,26 @@ const hi: Catalog = {
 	'plugins.errEnum': 'विकल्पों में से एक चुनें।',
 	'plugins.errTimezone': 'सूची से कोई समय क्षेत्र चुनें।',
 	'plugins.errUnknown': 'फ़्रेम पर प्लगइन में अब यह सेटिंग नहीं है।',
-	'plugins.errType': 'यह इस सेटिंग में फ़िट नहीं होता।'
+	'plugins.errType': 'यह इस सेटिंग में फ़िट नहीं होता।',
+	'plugins.groupBuiltin': 'बिल्ट-इन',
+	'plugins.groupCommunity': 'कम्युनिटी',
+	'plugins.groupCommunityHint': 'दूसरे लोगों के बनाए हुए। हर नया प्लगइन, और वह क्या कर सकता है उसमें हर बदलाव, प्रकाशित होने से पहले जाँचा जाता है।',
+	'plugins.byAuthor': '{name} द्वारा',
+	'plugins.versionNumber': 'संस्करण {version}',
+	'plugins.confirmTitle': '{name} जोड़ें?',
+	'plugins.confirmBody': 'यह प्लगइन कम्युनिटी से है, kinframe से नहीं। यह क्या कर सकता है:',
+	'plugins.permAddresses': 'आपके भरे पतों से जुड़ता है: {settings}',
+	'plugins.permActions': 'फ़्रेम पर ऐसे बटन दिखाता है जो कुछ बदलते हैं, जैसे सॉकेट चालू करना',
+	'plugins.permNone': 'सिर्फ़ फ़्रेम पर दिखता है; किसी से नहीं जुड़ता',
+	'plugins.updateAsks': '{version} का अपडेट उपलब्ध — यह माँगता है:',
+	'plugins.updateFewer': '{version} का अपडेट उपलब्ध — यह पहले से कम माँगता है।',
+	'plugins.updateApprove': 'मंज़ूर करें',
+	'plugins.updateDismiss': 'अभी नहीं',
+	'plugins.updateApproved': '{version} का अपडेट मंज़ूर हुआ',
+	'plugins.updateWaiting': 'एक अपडेट आपकी मंज़ूरी का इंतज़ार कर रहा है',
+	'plugins.withdrawn': 'कम्युनिटी रजिस्ट्री से हटाया गया: {reason}',
+	'plugins.withdrawnHint': 'यह अब फ़्रेम पर नहीं चलता। आप इसे हटा सकते हैं।',
+	'plugins.runsVersion': 'फ़्रेम संस्करण {version} चला रहा है।'
 };
 
 export default hi;
