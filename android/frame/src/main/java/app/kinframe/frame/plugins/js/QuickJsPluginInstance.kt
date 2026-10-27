@@ -2,12 +2,14 @@ package app.kinframe.frame.plugins.js
 
 import app.kinframe.frame.plugins.PluginContext
 import app.kinframe.frame.plugins.PluginInstance
+import com.dokar.quickjs.ModuleContent
 import com.dokar.quickjs.QuickJs
 import com.dokar.quickjs.QuickJsInterruptedException
 import com.dokar.quickjs.binding.asyncFunction
 import com.dokar.quickjs.binding.define
 import com.dokar.quickjs.binding.function
 import com.dokar.quickjs.evaluate
+import com.dokar.quickjs.moduleLoader
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,6 +72,8 @@ class QuickJsPluginInstance(
     private val net: PluginNet,
     private val limits: SandboxLimits = SandboxLimits(),
     cpu: ThreadCpu = ThreadCpu.Proc,
+    /** The host's libraries a plugin may import (`kinframe/ha` → source), see [PluginLibraries]. */
+    private val libraries: PluginLibraries = PluginLibraries.NONE,
 ) : PluginInstance {
     private val manifest = bundle.manifest
     override val refreshSeconds: Int = manifest.refresh.defaultSeconds
@@ -159,7 +163,12 @@ class QuickJsPluginInstance(
         close()
         val t0 = System.nanoTime()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-        val q = QuickJs.create(Dispatchers.IO)
+        var missing: String? = null
+        // Imports resolve to the host's own libraries only; they run in this runtime with this plugin's permissions.
+        val q = QuickJs.create(Dispatchers.IO, moduleLoader {
+            load { name -> libraries.source(name)?.let { ModuleContent.Source(it) } }
+            onLoadFailed { name -> if (missing == null) missing = name }
+        })
         q.memoryLimit = limits.memoryBytes
         q.maxStackSize = limits.stackBytes
         q.evaluationTimeoutMillis = limits.cpuMsAtStart
@@ -189,8 +198,14 @@ class QuickJsPluginInstance(
         js = q
         warm = false
         q.evaluate<Any?>(prelude, "prelude.js")
-        q.addModule("main", bundle.mainJs)
-        q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
+        try {
+            q.addModule("main", bundle.mainJs)
+            q.evaluate<Any?>("import plugin from 'main'; globalThis.__plugin = plugin;", "boot.js", asModule = true)
+        } catch (e: com.dokar.quickjs.QuickJsException) {
+            val name = missing ?: throw e
+            close()
+            throw PluginScriptException("import '$name': a plugin can only import the host's libraries (${libraries.names.joinToString()})")
+        }
         q.evaluationTimeoutMillis = 0 // from here on the host's watchdog keeps the budget (see budgeted)
         ctx.log(String.format(Locale.ROOT, "booted in %.1f ms, heap %d KB", (System.nanoTime() - t0) / 1e6, q.memoryUsage.memoryUsedSize / 1024))
     }

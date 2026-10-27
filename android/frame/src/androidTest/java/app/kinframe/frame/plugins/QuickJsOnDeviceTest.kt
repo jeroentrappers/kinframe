@@ -7,6 +7,7 @@ import app.kinframe.core.plugin.PluginFormat
 import app.kinframe.core.plugin.PluginViewParser
 import app.kinframe.core.plugin.ViewResult
 import app.kinframe.frame.plugins.js.PluginBundle
+import app.kinframe.frame.plugins.js.PluginLibraries
 import app.kinframe.frame.plugins.js.PluginNet
 import app.kinframe.frame.plugins.js.PluginPermissions
 import app.kinframe.frame.plugins.js.QuickJsPluginInstance
@@ -34,16 +35,17 @@ class QuickJsOnDeviceTest {
         val assets = InstrumentationRegistry.getInstrumentation().targetContext.assets
         val p1 = PluginBundle.fromAssets(assets, "kinframe.homewizard-p1")!!
         val prelude = assets.open("plugin-host/prelude.js").bufferedReader().use { it.readText() }
+        val libraries = PluginLibraries.fromAssets(assets)
         // The P1 plugin's own view code, fed a fixed meter reading instead of polling a meter.
         val reading = """{"active_power_w":1203,"active_power_l1_w":412,"active_power_l2_w":531,"active_power_l3_w":260,"total_power_import_kwh":13779.338,"total_power_export_kwh":5114.106,"total_gas_m3":3204.581}"""
         val js = p1.mainJs.replace("export default {", "const live = {") + """
             export default {
-              async render(ctx) { const h = history(ctx); const r = parse($reading); add(h, r, ctx.now()); updateDay(h, r, ctx); return main(r, trend(h), ctx.settings, ctx); },
-              async detail(ctx) { const h = history(ctx); return detail(h.last, lastHour(h), today(h, h.last), ctx); },
+              async render(ctx) { record(ctx, parse($reading)); const c = current(ctx); return main(c.r, c.trend, ctx.settings, ctx, c.day); },
+              async detail(ctx) { const c = current(ctx); return detail(c.r, c.hour, c.day, ctx); },
             };"""
         val bundle = PluginBundle(p1.manifest, js, p1.locales)
         val settings = JsonObject(mapOf("host" to JsonPrimitive("192.168.1.50"), "style" to JsonPrimitive("gauge")))
-        val instance = QuickJsPluginInstance(bundle, prelude, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings)))
+        val instance = QuickJsPluginInstance(bundle, prelude, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings)), libraries = libraries)
         val store = HashMap<String, String>()
         var now = 1_792_900_000_000L
         val ctx = PluginContext(

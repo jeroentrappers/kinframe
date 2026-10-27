@@ -2,63 +2,7 @@
 // Home Assistant's Energy dashboard only knows energy (kWh) statistics, not live power. Several solar inverters are
 // summed. Live updates come over the WebSocket API (subscribe_entities); until it is up, update() reads the REST API.
 
-// ---- Home Assistant connection (the same in every kinframe.ha-* plugin until plugins can share modules, §11) ----
-
-function baseUrl(s) {
-  const h = String(s || '').trim().replace(/\/+$/, '');
-  return /^https?:\/\//i.test(h) ? h : 'http://' + h;
-}
-
-function ha(ctx) {
-  if (!ctx.state.ha) ctx.state.ha = { base: baseUrl(ctx.settings.base_url), entities: {}, live: false, error: null, nextId: 1 };
-  return ctx.state.ha;
-}
-
-/** Applies a subscribe_entities event: "a" adds full states, "c" changes ("+" set, "-" removed attributes), "r" removes. */
-export function applyEvent(entities, ev) {
-  for (const id in ev.a || {}) {
-    const e = ev.a[id];
-    entities[id] = { state: e.s, attributes: e.a || {}, updated: Math.round((e.lu || e.lc || 0) * 1000) };
-  }
-  for (const id in ev.c || {}) {
-    const d = ev.c[id];
-    const e = entities[id] || (entities[id] = { state: null, attributes: {}, updated: 0 });
-    const add = d['+'];
-    if (add) {
-      if ('s' in add) e.state = add.s;
-      if (add.a) Object.assign(e.attributes, add.a);
-      if (add.lu || add.lc) e.updated = Math.round((add.lu || add.lc) * 1000);
-    }
-    if (d['-'] && d['-'].a) for (const k of d['-'].a) delete e.attributes[k];
-  }
-  for (const id of ev.r || []) delete entities[id];
-}
-
-function haSubscribe(ctx, ids) {
-  const h = ha(ctx);
-  ctx.ws.connect(h.base.replace(/^http/i, 'ws') + '/api/websocket', {
-    onMessage(ws, m) {
-      if (m.type === 'auth_required') ws.send({ type: 'auth', access_token: ctx.settings.token });
-      else if (m.type === 'auth_ok') ws.send({ id: h.nextId++, type: 'subscribe_entities', entity_ids: ids });
-      else if (m.type === 'auth_invalid') { h.error = 'token'; ws.close(); }
-      else if (m.type === 'event' && m.event) { applyEvent(h.entities, m.event); h.live = true; ctx.invalidate(); }
-    },
-    onClose() { h.live = false; },
-  });
-}
-
-/** REST fallback while the WebSocket isn't live: one GET per entity. */
-async function haPoll(ctx, ids) {
-  const h = ha(ctx);
-  for (const id of ids) {
-    const r = await ctx.http.get(h.base + '/api/states/' + id, { headers: { Authorization: 'Bearer ' + ctx.settings.token } });
-    if (r.status === 401) { h.error = 'token'; break; }
-    if (r.status === 404) { h.entities[id] = { missing: true }; continue; }
-    if (!r.ok) throw new Error('Home Assistant: HTTP ' + r.status);
-    const e = r.json();
-    h.entities[id] = { state: e.state, attributes: e.attributes || {}, updated: Date.parse(e.last_updated) || 0 };
-  }
-}
+import * as ha from 'kinframe/ha';
 
 // ---- the energy model ----
 
@@ -157,21 +101,21 @@ function remember(ctx, m) {
 
 export default {
   async start(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token) return null;
-    haSubscribe(ctx, entityIds(ctx.settings));
+    if (!ha.configured(ctx)) return null;
+    ha.subscribe(ctx, entityIds(ctx.settings));
     return null;
   },
 
   async update(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token) return;
-    if (!ha(ctx).live) await haPoll(ctx, entityIds(ctx.settings));
+    if (!ha.configured(ctx)) return;
+    await ha.refresh(ctx, entityIds(ctx.settings));
   },
 
   render(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token) return null;
-    const h = ha(ctx);
+    if (!ha.configured(ctx)) return null;
+    const h = ha.connection(ctx);
     const ids = entityIds(ctx.settings);
-    if (h.error === 'token') throw new Error(ctx.t('token_refused'));
+    ha.requireToken(ctx);
     const missing = ids.find((id) => h.entities[id] && h.entities[id].missing);
     if (missing) throw new Error(ctx.t('not_found', { id: missing }));
     const m = snapshot(ctx.settings, h.entities);
@@ -183,7 +127,7 @@ export default {
   },
 
   detail(ctx) {
-    const h = ha(ctx);
+    const h = ha.connection(ctx);
     const m = snapshot(ctx.settings, h.entities);
     return view(m, ctx, true);
   },

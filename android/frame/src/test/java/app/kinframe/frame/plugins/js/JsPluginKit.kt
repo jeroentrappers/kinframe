@@ -51,7 +51,7 @@ class JsPluginKit(
     }
 
     val instance: QuickJsPluginInstance by lazy {
-        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits, JvmThreadCpu)
+        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits, JvmThreadCpu, LIBRARIES)
     }
 
     /** What the host does on its timer: `update`, then `render`. */
@@ -73,6 +73,7 @@ class JsPluginKit(
 
         val ROOT = File("../..")
         val PRELUDE: String = File("src/main/assets/plugin-host/prelude.js").readText()
+        val LIBRARIES = PluginLibraries.fromDirectory(File("src/main/assets/plugin-host/lib"))
 
         val LoopbackIsHome = LocalPolicy(Dns.SYSTEM) { host -> if (host == "127.0.0.1" || host == "localhost") true else app.kinframe.frame.plugins.LocalAddress.literalIsPrivate(host) }
 

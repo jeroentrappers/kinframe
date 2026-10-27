@@ -7,6 +7,7 @@ import app.kinframe.frame.FrameController
 import app.kinframe.frame.Locales
 import app.kinframe.frame.R
 import app.kinframe.frame.plugins.js.PluginBundle
+import app.kinframe.frame.plugins.js.PluginLibraries
 import app.kinframe.frame.plugins.js.PluginNet
 import app.kinframe.frame.plugins.js.PluginPermissions
 import app.kinframe.frame.plugins.js.QuickJsPluginInstance
@@ -50,6 +51,7 @@ class FramePlugins(private val c: FrameController) {
 
     private val bundles = HashMap<String, PluginBundle?>()
     private val prelude: String by lazy { g.app.assets.open("plugin-host/prelude.js").bufferedReader().use { it.readText() } }
+    private val libraries: PluginLibraries by lazy { PluginLibraries.fromAssets(g.app.assets) }
 
     /** A plugin bundle shipped in the APK (assets `plugins/<id>/`), or null. A broken bundle is logged and skipped. */
     fun bundle(pluginId: String): PluginBundle? = synchronized(bundles) {
@@ -62,7 +64,7 @@ class FramePlugins(private val c: FrameController) {
     private fun script(cfg: InstanceConfig): PluginInstance? {
         val b = bundle(cfg.pluginId) ?: return null
         val net = PluginNet(g.http, PluginPermissions(b.manifest, b.manifest.withDefaults(cfg.settings)), userAgent = USER_AGENT)
-        return QuickJsPluginInstance(b, prelude, net)
+        return QuickJsPluginInstance(b, prelude, net, libraries = libraries)
     }
 
     val states: StateFlow<List<InstanceState>> get() = host.states

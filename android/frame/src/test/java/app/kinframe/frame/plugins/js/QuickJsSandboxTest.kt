@@ -203,6 +203,23 @@ class QuickJsSandboxTest {
         assertTrue(failure(k).contains("sensor missing"))
     }
 
+    @Test fun aPluginImportsTheHostsLibrariesAndNothingElse() = runBlocking {
+        val ok = kit("""import { baseUrl } from 'kinframe/homewizard'; export default { render(ctx) { return { type: 'text', lines: [baseUrl('10.0.0.5/')] }; } }""")
+        assertEquals("http://10.0.0.5", text(ok.render()))
+        for (spec in listOf("kinframe/nope", "./util", "https://example.org/x.js", "/etc/passwd")) {
+            val bad = kit("""import x from '$spec'; export default { render(ctx) { return null; } }""")
+            val why = failure(bad)
+            assertTrue(why, why.contains("can only import the host's libraries") && why.contains("kinframe/ha"))
+        }
+    }
+
+    @Test fun aLibraryHasOnlyThePluginsPermissions() = runBlocking {
+        // A library reaches the network only through the ctx it is given, with the plugin's own permissions.
+        val k = kit("""import { data } from 'kinframe/homewizard'; export default { async update(ctx) { await data({ settings: { host: 'https://example.org' }, http: ctx.http }); }, render() { return { type: 'text', lines: [typeof __kf] }; } }""")
+        assertTrue(failure(k).contains("not allowed"))
+        assertEquals("undefined", text(k.renderOnly()))
+    }
+
     @Test fun manifestValidation() {
         val bad = listOf(
             """{"id":"Bad Id","name":"x","version":"1.0.0","api":1}""",

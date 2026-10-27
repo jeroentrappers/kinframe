@@ -40,7 +40,7 @@ class PluginTimingTest {
         val p1 = """{"active_power_w":1203,"active_power_l1_w":412,"active_power_l2_w":531,"active_power_l3_w":260,"total_power_import_kwh":13779.3,"total_power_export_kwh":5114.1,"total_gas_m3":3204.5}"""
         val results = listOf(
             measure("kinframe.homewizard-p1 (gauge, detail)", kit("kinframe.homewizard-p1",
-                "(() => { const h = history(ctx); const r = parse($p1); add(h, r, ctx.now()); updateDay(h, r, ctx); main(r, trend(h), ctx.settings, ctx, today(h, r)); return detail(r, lastHour(h), today(h, r), ctx); })()",
+                "(() => { record(ctx, parse($p1)); const c = current(ctx); main(c.r, c.trend, ctx.settings, ctx, c.day); return detail(c.r, c.hour, c.day, ctx); })()",
                 null, mapOf("style" to "gauge"))),
             measure("kinframe.ha-energy (flow)", kit("kinframe.ha-energy", "view(snapshot(ctx.settings, ENTS), ctx, false)", "states-sunny.json", mapOf(
                 "solar" to listOf("sensor.solis_s6_eh1p_total_pv_power_2", "sensor.omnik_hoofddak_inverter_omnik_hoofddak_current_power_production"),
