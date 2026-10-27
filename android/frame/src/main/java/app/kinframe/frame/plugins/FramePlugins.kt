@@ -2,6 +2,7 @@ package app.kinframe.frame.plugins
 
 import android.util.Log
 import app.kinframe.core.plugin.PluginFormat
+import app.kinframe.core.plugin.RelativeWords
 import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.Locales
@@ -108,7 +109,19 @@ class FramePlugins(private val c: FrameController) {
 
     fun format(): PluginFormat {
         val s = g.settings.settings.value
-        return PluginFormat(Locale.forLanguageTag(Locales.effective(g.app)), g.clock.zone, s.widgets.clock24h, s.locale.temperatureUnit)
+        return PluginFormat(Locale.forLanguageTag(Locales.effective(g.app)), g.clock.zone, s.widgets.clock24h, s.locale.temperatureUnit, relativeWords())
+    }
+
+    /** `ctx.format.day/ago/until` in the frame's language. */
+    private fun relativeWords(): RelativeWords {
+        val r = Locales.wrap(g.app)
+        return RelativeWords(
+            today = r.getString(R.string.plugin_rel_today), tomorrow = r.getString(R.string.plugin_rel_tomorrow),
+            yesterday = r.getString(R.string.plugin_rel_yesterday), justNow = r.getString(R.string.plugin_rel_just_now),
+            now = r.getString(R.string.plugin_rel_now), minutesAgo = r.getString(R.string.plugin_rel_min_ago),
+            hoursAgo = r.getString(R.string.plugin_rel_h_ago), inMinutes = r.getString(R.string.plugin_rel_in_min),
+            inHours = r.getString(R.string.plugin_rel_in_h),
+        )
     }
 
     private fun contextFor(cfg: InstanceConfig, invalidate: () -> Unit): PluginContext {
@@ -130,6 +143,12 @@ class FramePlugins(private val c: FrameController) {
             now = { g.clock.nowMs() },
             zone = { g.clock.zone },
             invalidate = invalidate,
+            location = {
+                val l = g.settings.settings.value.location
+                val lat = l?.lat
+                val lon = l?.lon
+                if (lat != null && lon != null) lat to lon else null
+            },
         )
     }
 

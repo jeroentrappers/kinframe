@@ -94,7 +94,7 @@ fun PluginSettingsSection(c: FrameController) {
         }
         if (layout.mode != PluginLayoutMode.Off) {
             val p1 = instances.firstOrNull { it.instanceId == FramePlugins.P1_INSTANCE }
-                ?: InstanceConfig(FramePlugins.P1_INSTANCE, FramePlugins.HOMEWIZARD_P1, enabled = false, settings = JsonObject(mapOf("style" to JsonPrimitive("value"))))
+                ?: newP1(c)
             SwitchRow(stringResource(R.string.p1_name), p1.enabled) { prefs.upsert(p1.copy(enabled = it)) }
             if (p1.enabled) HomeWizardSettings(c, p1) { prefs.upsert(it) }
             // The weather station is switched on in the Weather section (next to the forecast).
@@ -239,6 +239,13 @@ private fun ManualAddress(current: String?, onUse: (String) -> Unit) {
         )
         KinButton(stringResource(R.string.p1_use), { submit() }, style = KinButtonStyle.Secondary, enabled = text.isNotBlank() && text.trim() != current)
     }
+}
+
+/** A new, switched-off P1 instance with the manifest's defaults. */
+private fun newP1(c: FrameController): InstanceConfig {
+    val settings = JsonObject(mapOf("style" to JsonPrimitive("value")))
+    return c.plugins.bundle(FramePlugins.HOMEWIZARD_P1)?.let { newInstanceConfig(FramePlugins.P1_INSTANCE, it.manifest, enabled = false, settings = settings) }
+        ?: InstanceConfig(FramePlugins.P1_INSTANCE, FramePlugins.HOMEWIZARD_P1, enabled = false, settings = settings)
 }
 
 /** The built-in weather station's instance, or a new disabled one with the defaults. */

@@ -54,6 +54,21 @@ data class InstanceConfig(
 )
 
 /**
+ * A new instance of a plugin with its manifest's defaults (docs/plugins.md §3.1): top right unless the plugin only
+ * allows the other corner, and its `default_visibility`.
+ */
+fun newInstanceConfig(
+    instanceId: String,
+    manifest: app.kinframe.frame.plugins.js.PluginManifest,
+    enabled: Boolean = true,
+    settings: JsonObject = JsonObject(emptyMap()),
+): InstanceConfig = InstanceConfig(
+    instanceId = instanceId, pluginId = manifest.id, version = manifest.version,
+    slot = if (Slot.TopRight in manifest.slots) Slot.TopRight else manifest.slots.first(),
+    visibility = manifest.defaultVisibility ?: Visibility.Always, enabled = enabled, settings = settings,
+)
+
+/**
  * Frame-local plugin settings (step 1 of docs/plugins.md §10: there is no server API or app UI yet). Kept in their
  * own SharedPreferences file and edited in the frame's Settings screen behind the owner PIN.
  */

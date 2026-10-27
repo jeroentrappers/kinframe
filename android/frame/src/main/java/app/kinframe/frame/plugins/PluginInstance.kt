@@ -74,6 +74,11 @@ class PluginContext(
     val now: () -> Long,
     val zone: () -> ZoneId,
     val invalidate: () -> Unit,
+    /**
+     * The frame's place from its weather settings (latitude, longitude), or null when unset. The host gives it only to
+     * plugins with `permissions.location`, rounded to about a kilometre ([PluginLocation.coarse]).
+     */
+    val location: () -> Pair<Double, Double>? = { null },
 ) {
     /**
      * `ctx.dataTime`: when the source measured what the last view shows (epoch ms), for sources that only update every
@@ -126,4 +131,10 @@ class PluginHttp(
         const val DEFAULT_USER_AGENT = "kinframe-frame (+https://github.com/jeroentrappers/kinframe)"
         private val RESERVED = setOf("host", "user-agent", "cookie", "content-length", "transfer-encoding", "connection")
     }
+}
+
+/** `ctx.location`: coarse on purpose, two decimals (about 1 km), which is all a forecast or air quality needs. */
+object PluginLocation {
+    fun coarse(lat: Double, lon: Double): Pair<Double, Double> = round2(lat) to round2(lon)
+    private fun round2(v: Double) = Math.round(v * 100) / 100.0
 }

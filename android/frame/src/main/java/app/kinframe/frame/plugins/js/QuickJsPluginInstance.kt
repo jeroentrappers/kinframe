@@ -2,6 +2,7 @@ package app.kinframe.frame.plugins.js
 
 import app.kinframe.frame.plugins.PluginContext
 import app.kinframe.frame.plugins.PluginInstance
+import app.kinframe.frame.plugins.PluginLocation
 import com.dokar.quickjs.QuickJs
 import com.dokar.quickjs.QuickJsInterruptedException
 import com.dokar.quickjs.binding.asyncFunction
@@ -169,6 +170,7 @@ class QuickJsPluginInstance(
             function("log") { a -> ctx.log(a.firstOrNull()?.toString().orEmpty().take(2_000)) }
             function("now") { _ -> ctx.now().toDouble() }
             function("zone") { _ -> ctx.zone().id }
+            function("location") { _ -> location(ctx) }
             function("local_time") { a -> localTime(ctx, (a[0] as Number).toLong()) }
             function("language") { _ -> ctx.format().locale.toLanguageTag() }
             function("t") { a -> translate(ctx, a.getOrNull(0)?.toString().orEmpty(), a.getOrNull(1) as? String) }
@@ -344,6 +346,13 @@ class QuickJsPluginInstance(
         return s
     }
 
+    /** `ctx.location` as JSON, or null: without `permissions.location` the plugin can't tell a frame without a place. */
+    private fun location(ctx: PluginContext): String? {
+        if (!manifest.permissions.location) return null
+        val (lat, lon) = ctx.location()?.let { (la, lo) -> PluginLocation.coarse(la, lo) } ?: return null
+        return buildJsonObject { put("latitude", lat); put("longitude", lon) }.toString()
+    }
+
     private fun format(ctx: PluginContext, a: Array<Any?>): String {
         val f = ctx.format()
         fun d(i: Int) = (a.getOrNull(i) as? Number)?.toDouble() ?: Double.NaN
@@ -357,6 +366,9 @@ class QuickJsPluginInstance(
             "number" -> f.number(d(1), i(2).coerceIn(0, 6), a.getOrNull(3) as? String)
             "duration" -> f.duration(d(1).toLong())
             "time" -> f.time(d(1).toLong())
+            "day" -> f.day(d(1).toLong(), ctx.now())
+            "ago" -> f.ago(d(1).toLong(), ctx.now())
+            "until" -> f.until(d(1).toLong(), ctx.now())
             else -> throw IllegalArgumentException("format.${a[0]}")
         }
     }

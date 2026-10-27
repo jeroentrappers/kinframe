@@ -78,4 +78,14 @@
     <string name="wx_station">Ma station météo</string>
     <string name="wx_station_sub">Votre propre station météo (PWS) via Weathercloud</string>
     <string name="wx_both_note">Avec les deux activées, l’horloge affiche la température de votre station, avec le ciel et les minimales et maximales des prévisions.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Aujourd’hui</string>
+    <string name="plugin_rel_tomorrow">Demain</string>
+    <string name="plugin_rel_yesterday">Hier</string>
+    <string name="plugin_rel_just_now">à l’instant</string>
+    <string name="plugin_rel_now">maintenant</string>
+    <string name="plugin_rel_min_ago">il y a {n} min</string>
+    <string name="plugin_rel_h_ago">il y a {n} h</string>
+    <string name="plugin_rel_in_min">dans {n} min</string>
+    <string name="plugin_rel_in_h">dans {n} h</string>
 </resources>

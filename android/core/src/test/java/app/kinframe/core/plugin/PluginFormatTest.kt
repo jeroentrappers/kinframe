@@ -78,4 +78,15 @@ class PluginFormatTest {
             assertEquals(it, null, r(it))
         }
     }
+
+    @Test fun datePatternsWithoutTheYear() {
+        assertEquals("MMM d", PluginFormat.withoutYear("MMM d, y"))
+        assertEquals("d MMM", PluginFormat.withoutYear("d MMM y"))
+        assertEquals("dd.MM.", PluginFormat.withoutYear("dd.MM.y"))
+        assertEquals("MM/dd", PluginFormat.withoutYear("y/MM/dd"))
+        assertEquals("M月d日", PluginFormat.withoutYear("y年M月d日"))
+        assertEquals("d MMM", PluginFormat.withoutYear("d MMM y 'г'."))
+        assertEquals("d 'de' MMM", PluginFormat.withoutYear("d 'de' MMM 'de' y"))
+        assertEquals("d MMM", PluginFormat.withoutYear("yyyy"))
+    }
 }

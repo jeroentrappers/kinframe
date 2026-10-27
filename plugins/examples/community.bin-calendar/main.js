@@ -1,6 +1,5 @@
 // Example: bin day from a municipality's waste calendar (iCal). Shown only the day before and on the day itself;
-// otherwise the widget hides ({type: "none"}). "Today"/"Tomorrow" are the plugin's own strings: there is no relative date
-// formatting in ctx.format (§11).
+// otherwise the widget hides ({type: "none"}). "Today"/"Tomorrow" come from ctx.format.day, in the frame's language.
 
 /** All-day events: { date: "2026-10-26", what: "PMD" }. */
 export function parseIcs(text) {
@@ -17,9 +16,9 @@ export function parseIcs(text) {
 export function view(events, ctx) {
   const today = ctx.localTime().date;
   const tomorrow = ctx.localTime(ctx.now() + 86400000).date;
-  for (const [day, key] of [[today, 'today'], [tomorrow, 'tomorrow']]) {
+  for (const [day, at] of [[today, ctx.now()], [tomorrow, ctx.now() + 86400000]]) {
     const bins = events.filter((e) => e.date === day).map((e) => e.what);
-    if (bins.length) return { type: 'text', lines: [ctx.t(key), bins.join(', ').slice(0, 60)], icon: 'trash', tone: key === 'today' ? 'accent' : undefined };
+    if (bins.length) return { type: 'text', lines: [ctx.format.day(at), bins.join(', ').slice(0, 60)], icon: 'trash', tone: day === today ? 'accent' : undefined };
   }
   return { type: 'none' };
 }

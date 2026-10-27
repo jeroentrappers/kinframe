@@ -78,4 +78,14 @@
     <string name="wx_station">Trạm thời tiết của tôi</string>
     <string name="wx_station_sub">Trạm thời tiết riêng của bạn (PWS) qua Weathercloud</string>
     <string name="wx_both_note">Khi bật cả hai, đồng hồ hiển thị nhiệt độ của trạm, kèm bầu trời và nhiệt độ thấp nhất, cao nhất trong ngày từ dự báo.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Hôm nay</string>
+    <string name="plugin_rel_tomorrow">Ngày mai</string>
+    <string name="plugin_rel_yesterday">Hôm qua</string>
+    <string name="plugin_rel_just_now">vừa xong</string>
+    <string name="plugin_rel_now">bây giờ</string>
+    <string name="plugin_rel_min_ago">{n} phút trước</string>
+    <string name="plugin_rel_h_ago">{n} giờ trước</string>
+    <string name="plugin_rel_in_min">sau {n} phút</string>
+    <string name="plugin_rel_in_h">sau {n} giờ</string>
 </resources>
