@@ -134,7 +134,7 @@ class HomeAssistantPluginsTest {
         assertEquals(listOf("Aangesloten", "EV3 · 375${nbsp}km"), (main.items[1] as TextView).lines)
         assertEquals(Instant.parse("2026-10-25T11:55:32Z").toEpochMilli(), k.ctx.dataTime)
         val detail = k.detail() as StackView
-        assertEquals("8 u geleden bijgewerkt", (detail.items.last() as TextView).lines.single())
+        assertEquals("8 u geleden", (detail.items.last() as TextView).lines.single())
     }
 
     @Test fun chargingShowsWhenItIsFull() = runBlocking {

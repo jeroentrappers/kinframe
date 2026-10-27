@@ -1,9 +1,10 @@
 package app.kinframe.frame.plugins.js
 
 import app.kinframe.core.plugin.GaugeView
+import app.kinframe.core.plugin.ListView
 import app.kinframe.core.plugin.NoneView
 import app.kinframe.core.plugin.PluginFormat
-import app.kinframe.core.plugin.RowsView
+import app.kinframe.core.plugin.SparklineStyle
 import app.kinframe.core.plugin.SparklineView
 import app.kinframe.core.plugin.StackView
 import app.kinframe.core.plugin.TextView
@@ -41,20 +42,20 @@ class ExamplePluginsTest {
         return JsPluginKit(bundle, s, language = language).also { kits += it }
     }
 
-    @Test fun departuresAsRows() = runBlocking {
+    @Test fun departuresAsAList() = runBlocking {
         val k = kit("community.irail-departures", "board(FIXTURE, ctx)", "liveboard-denderleeuw.json", mapOf("count" to 3))
-        val rows = k.view() as RowsView
-        assertEquals(3, rows.items.size)
-        assertEquals("22:20", rows.items[0].value)
-        assertEquals("Brussels Airport - Za… · spoor 2", rows.items[0].label)
-        assertEquals("22:23 +3", rows.items[1].value)
-        // The destination lives in the label, which the band doesn't show: API 1 has no list component (§11).
+        val list = k.view() as ListView
+        assertEquals(3, list.rows.size)
+        val first = list.rows[0]
+        // The whole destination now, with the platform and the delay in their own fields.
+        assertEquals(listOf("22:20", "Brussels Airport - Zaventem", "spoor 2", null), listOf(first.time, first.title, first.detail, first.badge))
+        assertEquals("22:23" to "+3", list.rows[1].time to list.rows[1].badge)
     }
 
     @Test fun departuresTowards() = runBlocking {
         val k = kit("community.irail-departures", "board(FIXTURE, ctx)", "liveboard-denderleeuw.json", mapOf("towards" to "gent"))
-        val rows = k.view() as RowsView
-        assertEquals(listOf("Gent-Sint-Pieters · spoor 4"), rows.items.map { it.label })
+        val list = k.view() as ListView
+        assertEquals(listOf("Gent-Sint-Pieters"), list.rows.map { it.title })
     }
 
     @Test fun airQuality() = runBlocking {
@@ -80,8 +81,14 @@ class ExamplePluginsTest {
         val d = k.view() as StackView
         val now = d.items[0] as ValueView
         assertTrue(now.value, now.value.endsWith("€/kWh"))
-        // 100 quarter hours on the day the clocks go back, averaged down to the sparkline's 96.
-        assertEquals(96, (d.items[1] as SparklineView).points.size)
+        // All 100 quarter hours of the day the clocks go back, as bars, "now" marked and the cheapest still to come lit.
+        val chart = d.items[1] as SparklineView
+        assertEquals(100, chart.points.size)
+        assertEquals(SparklineStyle.Bars, chart.style)
+        assertEquals(10, chart.marker)
+        val cheapest = (10 until 100).minBy { chart.points[it] }
+        assertEquals(cheapest, chart.highlight)
+        assertEquals(Tone.Good, chart.highlightTone)
     }
 
     @Test fun binDayOnlyTheDayBefore() = runBlocking {

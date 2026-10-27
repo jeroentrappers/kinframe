@@ -1,3 +1,1 @@
-{ "@name": "Batterie de la voiture", "charging": "En charge", "charging_until": "En charge · pleine à {time}", "plugged": "Branchée", "range": "Autonomie",
-  "power": "Puissance de charge", "full_at": "Pleine à", "updated_now": "Mis à jour à l'instant", "updated_min": "Mis à jour il y a {n} min",
-  "updated_h": "Mis à jour il y a {n} h", "updated_d": "Mis à jour il y a {n} jours", "token_refused": "Home Assistant refuse le jeton" }
+{"@name": "Batterie de la voiture", "charging": "En charge", "charging_until": "En charge · pleine à {time}", "plugged": "Branchée", "range": "Autonomie", "power": "Puissance de charge", "full_at": "Pleine à", "token_refused": "Home Assistant refuse le jeton"}

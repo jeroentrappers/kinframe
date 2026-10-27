@@ -62,7 +62,7 @@ class HomeWizardDevicesTest {
         assertEquals("7,6", running.value)
         assertEquals("l/min", running.unit)
         assertEquals("Vandaag 12${nbsp}l", running.label)
-        assertEquals(Tone.Info, running.tone)
+        assertEquals(Tone.Water, running.tone)
     }
 
     @Test fun waterAsARingAgainstATypicalDay() = runBlocking {
@@ -75,7 +75,7 @@ class HomeWizardDevicesTest {
         assertEquals(25f, ring.percent, 0.01f)
         assertEquals("50${nbsp}l", ring.label)
         assertEquals("Vandaag", ring.caption)
-        assertEquals(Tone.Info, ring.tone)
+        assertEquals(Tone.Water, ring.tone)
         assertEquals(listOf("7,6${nbsp}l/min"), ring.sub.map { it.value })
 
         k.now += 2_000

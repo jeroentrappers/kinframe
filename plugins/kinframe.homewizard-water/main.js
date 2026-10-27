@@ -7,14 +7,14 @@
 //   - render() and detail() only draw from that, so they never wait for the device.
 //   - parse(), record(), current() and main() are exported for the tests and are plain functions of their inputs.
 //
-// Water has no colour of its own in the view API yet (docs/plugins.md §11.1, item 9): `info` stands in for it.
+// Drawn in the `water` tone (docs/plugins.md §4.3), orange (`warn`) once today passes a typical day.
 
 import { configured, data, number } from 'kinframe/homewizard';
 import { dayTotals } from 'kinframe/day';
 import { series } from 'kinframe/series';
 
 const DEFAULT_TYPICAL_L = 250;
-const TONE = 'info';
+const TONE = 'water';
 /** Below this the meter is still (it reports 0, but allow for rounding). */
 const STILL_LPM = 0.05;
 

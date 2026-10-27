@@ -1,3 +1,1 @@
-{ "@name": "Car battery", "charging": "Charging", "charging_until": "Charging · full at {time}", "plugged": "Plugged in", "range": "Range",
-  "power": "Charging power", "full_at": "Full at", "updated_now": "Updated just now", "updated_min": "Updated {n} min ago",
-  "updated_h": "Updated {n} h ago", "updated_d": "Updated {n} days ago", "token_refused": "Home Assistant refused the token" }
+{"@name": "Car battery", "charging": "Charging", "charging_until": "Charging · full at {time}", "plugged": "Plugged in", "range": "Range", "power": "Charging power", "full_at": "Full at", "token_refused": "Home Assistant refused the token"}

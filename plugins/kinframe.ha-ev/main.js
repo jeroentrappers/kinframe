@@ -39,14 +39,6 @@ export function read(s, ents, now) {
   };
 }
 
-function ago(ctx, at) {
-  const min = Math.floor((ctx.now() - at) / 60000);
-  if (min < 2) return ctx.t('updated_now');
-  if (min < 60) return ctx.t('updated_min', { n: min });
-  if (min < 48 * 60) return ctx.t('updated_h', { n: Math.floor(min / 60) });
-  return ctx.t('updated_d', { n: Math.floor(min / 1440) });
-}
-
 export function views(c, ctx) {
   const f = ctx.format, t = (k, v) => ctx.t(k, v);
   const rangeText = c.range !== null ? f.number(c.range, 0, c.rangeUnit) : null;
@@ -67,7 +59,8 @@ export function views(c, ctx) {
   if (c.charging && c.minutes) rows.push({ type: 'value', value: f.time(ctx.now() + c.minutes * 60000), label: t('full_at'), icon: 'clock' });
   const detail = { type: 'stack', items: [main] };
   if (rows.length) detail.items.push({ type: 'rows', items: rows });
-  if (c.updated) detail.items.push({ type: 'text', lines: [ago(ctx, c.updated)], icon: 'clock' });
+  // When the car last reported, in the frame's own words ("8 min ago"); the clock icon says what it is.
+  if (c.updated) detail.items.push({ type: 'text', lines: [ctx.format.ago(c.updated)], icon: 'clock' });
   return { main, detail };
 }
 

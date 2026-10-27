@@ -561,7 +561,7 @@ two helpers the forms can use:
 - **View:** `value`: today's litres, or while water runs the flow ("7,6 l/min", unit separate) with today's litres as
   its label. `gauge`: a ring of today against the typical day (orange once past it), the litres inside, the flow under
   it while water runs (after the HomeWizard Energy Display's water ring). Detail: the ring, the flow's last hour, and
-  rows for the flow now, today and the meter reading. Water has no tone of its own yet (`info`, §11.1 item 9).
+  rows for the flow now, today and the meter reading. Drawn in the `water` tone (§4.3).
 - **As a template:** a device on the home network that counts something; `parse`/`record`/`current`/`main` are plain
   exported functions, tested without the network.
 
@@ -627,9 +627,9 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
    repeat. Needs the frame's own translations (ICU's relative formatter needs API 24; the frame is API 23).
    **Built:** `ctx.format.day/ago/until` (§3.2), with nine words per language in the frame's strings
    (`plugin_rel_*`, all its languages) and weekday names and year-less short dates from the locale; bin day uses
-   it. The car (`kinframe.ha-ev`) still carries its own "Updated {n} min ago" until the shared Home Assistant
-   module lands.
-3. *Built, §4.3.* **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
+   it, and so does the car's "8 min ago" in its detail card.
+3. *Built, §4.3; electricity prices shows all quarter hours as bars, "now" marked, the cheapest still to come lit.*
+   **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
    fixture is the day the clocks went back: 100), the sparkline takes 96, so the plugin averages down; and it can't
    mark "now" or the cheapest hour, which is the whole point of a price chart. A `bars` style with a highlighted index
    (and up to 100 points) would do.

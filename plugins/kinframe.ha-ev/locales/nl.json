@@ -1,3 +1,1 @@
-{ "@name": "Autobatterij", "charging": "Laden", "charging_until": "Laden · vol om {time}", "plugged": "Aangesloten", "range": "Bereik",
-  "power": "Laadvermogen", "full_at": "Vol om", "updated_now": "Net bijgewerkt", "updated_min": "{n} min geleden bijgewerkt",
-  "updated_h": "{n} u geleden bijgewerkt", "updated_d": "{n} dagen geleden bijgewerkt", "token_refused": "Home Assistant weigert het token" }
+{"@name": "Autobatterij", "charging": "Laden", "charging_until": "Laden · vol om {time}", "plugged": "Aangesloten", "range": "Bereik", "power": "Laadvermogen", "full_at": "Vol om", "token_refused": "Home Assistant weigert het token"}

@@ -1,3 +1,1 @@
-{ "@name": "Autobatterie", "charging": "Lädt", "charging_until": "Lädt · voll um {time}", "plugged": "Angeschlossen", "range": "Reichweite",
-  "power": "Ladeleistung", "full_at": "Voll um", "updated_now": "Gerade aktualisiert", "updated_min": "Vor {n} Min. aktualisiert",
-  "updated_h": "Vor {n} Std. aktualisiert", "updated_d": "Vor {n} Tagen aktualisiert", "token_refused": "Home Assistant lehnt das Token ab" }
+{"@name": "Autobatterie", "charging": "Lädt", "charging_until": "Lädt · voll um {time}", "plugged": "Angeschlossen", "range": "Reichweite", "power": "Ladeleistung", "full_at": "Voll um", "token_refused": "Home Assistant lehnt das Token ab"}

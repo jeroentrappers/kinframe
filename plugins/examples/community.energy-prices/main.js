@@ -1,5 +1,5 @@
-// Example: day-ahead prices per quarter hour (Energy-Charts). A day has 96 quarter hours, but 92 or 100 when the clocks
-// change, while a sparkline takes at most 96 points; and a sparkline can't mark "now" or the cheapest hour (§11).
+// Example: day-ahead prices per quarter hour (Energy-Charts), as bars with "now" marked and the cheapest quarter hour
+// still to come highlighted. A day has 96 quarter hours, 92 or 100 when the clocks change; bars take up to 100.
 
 export function view(json, ctx) {
   const t = json.unix_seconds || [], p = json.price || [];
@@ -15,10 +15,10 @@ export function view(json, ctx) {
     type: 'value', value: fmt(p[i]), label: ctx.t('cheapest', { time: ctx.format.time(t[cheap] * 1000) }), icon: 'euro',
     tone: p[i] <= 0 ? 'good' : p[i] > 150 ? 'warn' : undefined,
   };
-  // Down to at most 96 points (DST days have 100): average neighbours.
-  const n = p.length, out = Math.min(96, n);
-  const pts = Array.from({ length: out }, (_, k) => { const a = Math.floor((k * n) / out), b = Math.max(a + 1, Math.floor(((k + 1) * n) / out)); let s = 0; for (let j = a; j < b; j++) s += p[j]; return kwh(s / (b - a)); });
-  const detail = { type: 'stack', items: [main, { type: 'sparkline', points: pts, label: ctx.t('today'), show_range: true }] };
+  const pts = p.slice(0, 100).map(kwh);
+  const chart = { type: 'sparkline', style: 'bars', points: pts, label: ctx.t('today'), show_range: true, tone: 'info', marker: i };
+  if (cheap < pts.length) Object.assign(chart, { highlight: cheap, highlight_tone: 'good' });
+  const detail = { type: 'stack', items: [main, chart] };
   return { main, detail };
 }
 
