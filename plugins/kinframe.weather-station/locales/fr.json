@@ -1,10 +1,7 @@
 {
   "@name": "Station météo",
-  "@description": "Les mesures en direct de votre propre station météo sur Weathercloud : température, vent, pluie, pression et ensoleillement.",
+  "@description": "Les mesures en direct de votre propre station météo, qui envoie ses données à kinframe : température, vent, pluie, pression et ensoleillement.",
   "@setting.source": "Service",
-  "@option.source.weathercloud": "Weathercloud",
-  "@setting.device": "Code de la station",
-  "@setting.device.help": "Le numéro dans l'adresse Weathercloud de la station (app.weathercloud.net/d9287156658), ou l'adresse entière.",
   "@setting.style": "Afficher en",
   "@option.style.compact": "Température",
   "@option.style.rows": "Toutes les valeurs",
@@ -14,5 +11,10 @@
   "@option.wind_unit.kmh": "km/h",
   "@option.wind_unit.mph": "mph",
   "@option.wind_unit.bft": "Beaufort",
-  "@setting.interval_min": "Vérifier toutes les … minutes (5–30)"
+  "@option.source.upload": "Envoie à kinframe",
+  "@setting.station_id": "ID de la station",
+  "@setting.station_id.help": "L’ID avec lequel votre station envoie ses données : son ID de station Weather Underground, ou celui de ses réglages de serveur personnalisé.",
+  "@setting.station_key": "Clé de la station",
+  "@setting.station_key.help": "La clé (le mot de passe) avec laquelle votre station envoie ses données : sa clé de station Weather Underground.",
+  "@setting.forward_wunderground": "Transmettre les envois à Weather Underground"
 }

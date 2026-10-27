@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Trạm thời tiết</string>
     <string name="ws_station">Trạm</string>
-    <string name="ws_code">Trạm Weathercloud</string>
-    <string name="ws_code_help">Mã của trạm, hoặc đường liên kết đến trang Weathercloud của trạm.</string>
-    <string name="ws_code_invalid">Không có mã trạm Weathercloud trong nội dung này. Hãy sao chép đường liên kết trang của trạm.</string>
-    <string name="ws_unofficial">Weathercloud không có API chính thức: khung ảnh đọc cùng dữ liệu công khai như trang web của trạm, tối đa 5 phút một lần. Tính năng này có thể ngừng hoạt động nếu Weathercloud thay đổi trang web.</string>
+    <string name="ws_upload_setup">Trạm của bạn tải số đo lên kinframe và khung ảnh đọc chúng từ đó. Nhập ID và khóa của trạm trong ứng dụng hoặc trang web kinframe: cài đặt khung ảnh → Plugin → Trạm thời tiết.</string>
     <string name="ws_style_compact">Nhiệt độ</string>
     <string name="ws_style_rows">Tất cả giá trị</string>
     <string name="ws_wind_unit">Đơn vị gió</string>
     <string name="ws_wind_auto">Tự động</string>
-    <string name="ws_interval">Kiểm tra mỗi</string>
     <string name="ws_status_error">Không đọc được trạm: %1$s</string>
     <string name="ws_status_quiet">Trạm đã lâu không gửi số đo mới.</string>
     <string name="ws_temperature">Nhiệt độ</string>

@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Μετεωρολογικός σταθμός</string>
     <string name="ws_station">Σταθμός</string>
-    <string name="ws_code">Σταθμός Weathercloud</string>
-    <string name="ws_code_help">Ο κωδικός του σταθμού ή ο σύνδεσμος της σελίδας του στο Weathercloud.</string>
-    <string name="ws_code_invalid">Δεν υπάρχει κωδικός σταθμού Weathercloud εδώ. Αντιγράψτε τον σύνδεσμο της σελίδας του σταθμού.</string>
-    <string name="ws_unofficial">Το Weathercloud δεν έχει επίσημο API: η κορνίζα διαβάζει τα ίδια δημόσια δεδομένα με την ιστοσελίδα του σταθμού, το πολύ κάθε 5 λεπτά. Μπορεί να σταματήσει να λειτουργεί αν το Weathercloud αλλάξει τον ιστότοπό του.</string>
+    <string name="ws_upload_setup">Ο σταθμός σας ανεβάζει τις μετρήσεις του στο kinframe και η κορνίζα τις διαβάζει από εκεί. Εισαγάγετε το ID και το κλειδί του σταθμού στην εφαρμογή ή στον ιστότοπο του kinframe: ρυθμίσεις κορνίζας → Πρόσθετα → Μετεωρολογικός σταθμός.</string>
     <string name="ws_style_compact">Θερμοκρασία</string>
     <string name="ws_style_rows">Όλες οι τιμές</string>
     <string name="ws_wind_unit">Άνεμος σε</string>
     <string name="ws_wind_auto">Αυτόματα</string>
-    <string name="ws_interval">Έλεγχος κάθε</string>
     <string name="ws_status_error">Δεν είναι δυνατή η ανάγνωση του σταθμού: %1$s</string>
     <string name="ws_status_quiet">Ο σταθμός δεν έχει στείλει νέα μέτρηση εδώ και λίγη ώρα.</string>
     <string name="ws_temperature">Θερμοκρασία</string>

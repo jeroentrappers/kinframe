@@ -1,10 +1,7 @@
 {
   "@name": "Weerstation",
-  "@description": "Live metingen van je eigen weerstation op Weathercloud: temperatuur, wind, regen, luchtdruk en zonlicht.",
+  "@description": "Live metingen van je eigen weerstation, dat naar kinframe uploadt: temperatuur, wind, regen, luchtdruk en zonlicht.",
   "@setting.source": "Dienst",
-  "@option.source.weathercloud": "Weathercloud",
-  "@setting.device": "Stationscode",
-  "@setting.device.help": "Het nummer in het Weathercloud-adres van het station (app.weathercloud.net/d9287156658), of het hele adres.",
   "@setting.style": "Tonen als",
   "@option.style.compact": "Temperatuur",
   "@option.style.rows": "Alle waarden",
@@ -14,5 +11,10 @@
   "@option.wind_unit.kmh": "km/u",
   "@option.wind_unit.mph": "mph",
   "@option.wind_unit.bft": "Beaufort",
-  "@setting.interval_min": "Elke … minuten kijken (5–30)"
+  "@option.source.upload": "Uploadt naar kinframe",
+  "@setting.station_id": "Stations-ID",
+  "@setting.station_id.help": "De ID waarmee je station uploadt: zijn Weather Underground-stations-ID, of die uit zijn instellingen voor een eigen server.",
+  "@setting.station_key": "Stationssleutel",
+  "@setting.station_key.help": "De sleutel (het wachtwoord) waarmee je station uploadt: zijn Weather Underground-stationssleutel.",
+  "@setting.forward_wunderground": "De uploads doorsturen naar Weather Underground"
 }

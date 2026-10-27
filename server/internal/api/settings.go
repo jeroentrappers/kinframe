@@ -103,6 +103,9 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 		if err := s.checkPlugins(ctx, tx, f, doc); err != nil {
 			return err
 		}
+		if err := s.syncStations(ctx, tx, frameID, doc); err != nil {
+			return err
+		}
 		version := f.SettingsVersion + 1
 		fv := f.SettingsFieldVersions
 		if fv == nil {

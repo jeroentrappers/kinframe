@@ -10,14 +10,14 @@ import app.kinframe.core.plugin.TextView
 import app.kinframe.core.plugin.Trend
 import app.kinframe.core.plugin.ValueView
 import app.kinframe.core.plugin.ViewResult
-import app.kinframe.frame.plugins.station.StationCode
 import app.kinframe.frame.plugins.station.StationHistory
 import app.kinframe.frame.plugins.station.StationReading
 import app.kinframe.frame.plugins.station.StationUnits
 import app.kinframe.frame.plugins.station.StationViews
 import app.kinframe.frame.plugins.station.WeatherStation
-import app.kinframe.frame.plugins.station.WeathercloudData
-import app.kinframe.frame.plugins.station.WeathercloudSource
+import app.kinframe.frame.plugins.station.StationInfo
+import app.kinframe.frame.plugins.station.UploadData
+import app.kinframe.frame.plugins.station.UploadSource
 import app.kinframe.frame.plugins.station.WindUnit
 import app.kinframe.frame.weather.WeatherFixtures
 import app.kinframe.frame.weather.withStation
@@ -40,19 +40,18 @@ import java.util.Locale
 
 /** The built-in weather station widget (docs/plugins.md §9.4): parsing, units, history, views, and a full render. */
 class WeatherStationTest {
-    /** A real `GET /device/values?code=…` from the owner's station (2026-10-25). */
-    private val values =
-        """{"epoch":1792941451,"bar":988.8,"temp":12.8,"hum":56,"wdir":253,"wspd":2.3,"dew":4.2,"heat":12.8,"rainrate":0,"rain":15.1,"uvi":0,"solarrad":31.7,"wspdavg":2.3,"wdiravg":253}"""
-
-    /** A real `GET /device/info/<code>` (values as strings, altitude as a string). */
-    private val info =
-        """{"device":{"account":0,"status":"2","city":"Affligem","image":null,"isWebcam":false,"favorite":false,"social":false,"altitude":"40.0","update":13},"values":{"temp":"12.6","hum":"58","dew":"4.5","wspdavg":"1.3","wdiravg":"307","bar":"988.8","rain":"15.1","rainrate":"0.0","solarrad":"43.7","uvi":"0.0"}}"""
+    /**
+     * `GET /v1/stations/latest` on the frame's server, for the owner's station's upload of 2026-10-23 (the values it
+     * showed on Weathercloud that day), the station's own clock included.
+     */
+    private val latest =
+        """{"received_at":"2026-10-23T09:57:35Z","reading":{"station_time":"2026-10-23T09:57:31Z","temp_c":12.8,"humidity_pct":56,"dew_point_c":4.2,"feels_like_c":12.8,"pressure_hpa":988.8,"wind_ms":2.3,"wind_dir_deg":253,"rain_rate_mm_h":0,"rain_today_mm":15.1,"solar_wm2":31.7,"uv_index":0},"today":{"temp_min_c":8.1,"temp_max_c":13.0,"gust_max_ms":6.2}}"""
 
     private val zone = ZoneId.of("Europe/Brussels")
     private val nl = PluginFormat(Locale.forLanguageTag("nl"), zone)
     private val nbsp = PluginFormat.NBSP
     private val t: (String) -> String = { key -> if (key.startsWith("compass_")) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW")[key.last() - '0'] else key }
-    private val measured = 1792941451_000L
+    private val measured = java.time.Instant.parse("2026-10-23T09:57:31Z").toEpochMilli()
 
     private fun parse(j: JsonElement): PluginView = when (val r = PluginViewParser.parse(j)) {
         is ViewResult.Valid -> r.view
@@ -61,8 +60,8 @@ class WeatherStationTest {
 
     // ------------------------------------------------------------------ parsing
 
-    @Test fun mapsTheValuesResponse() {
-        val r = WeathercloudData.parseValues(values)
+    @Test fun mapsTheLatestReading() {
+        val r = UploadData.parse(latest)
         assertEquals(measured, r.atMs)
         assertEquals(12.8, r.tempC!!, 0.0)
         assertEquals(56.0, r.humidityPct!!, 0.0)
@@ -78,44 +77,14 @@ class WeatherStationTest {
         assertNull(r.gustMs)
     }
 
-    @Test fun stringsMissingFieldsAndNonsense() {
-        // Numbers as strings (as the info endpoint sends them), a comma decimal, gaps and garbage.
-        val r = WeathercloudData.parseValues("""{"epoch":"1792941451","temp":"12.6","hum":"","bar":null,"wdir":"x","wspd":"1,5","rain":-3,"solarrad":5000,"wspdhi":7.1}""")
-        assertEquals(measured, r.atMs)
-        assertEquals(12.6, r.tempC!!, 0.0)
-        assertEquals(1.5, r.windMs!!, 0.0)
-        assertEquals(7.1, r.gustMs!!, 0.0)
-        assertNull(r.humidityPct); assertNull(r.pressureHpa); assertNull(r.windDirDeg); assertNull(r.rainTodayMm); assertNull(r.solarWm2)
-        // A station without anything but temperature, and no epoch.
-        val bare = WeathercloudData.parseValues("""{"temp":-4.5}""")
-        assertNull(bare.atMs)
+    @Test fun missingFieldsAndNonsense() {
+        // Without the station's clock the reading is as old as the upload; gaps stay gaps.
+        val bare = UploadData.parse("""{"received_at":"2026-10-23T09:57:35Z","reading":{"temp_c":-4.5}}""")
+        assertEquals(measured + 4_000L, bare.atMs)
         assertEquals(-4.5, bare.tempC!!, 0.0)
+        assertNull(bare.humidityPct)
         // Implausible values are dropped, not shown.
-        assertNull(WeathercloudData.parseValues("""{"temp":-999,"hum":150,"bar":0}""").tempC)
-        // Milliseconds instead of seconds are understood.
-        assertEquals(measured, WeathercloudData.parseValues("""{"epoch":$measured}""").atMs)
-    }
-
-    @Test fun mapsTheInfoResponse() {
-        val i = WeathercloudData.parseInfo(info)
-        assertEquals("Affligem", i.city)
-        assertEquals(40.0, i.altitudeM!!, 0.0)
-        assertNull(WeathercloudData.parseInfo("""{"device":{"city":"","altitude":null}}""").city)
-    }
-
-    @Test fun codeFromWhateverTheOwnerPastes() {
-        assertEquals("9287156658", StationCode.parse("9287156658"))
-        assertEquals("9287156658", StationCode.parse(" d9287156658 "))
-        assertEquals("9287156658", StationCode.parse("https://app.weathercloud.net/d9287156658"))
-        assertEquals("9287156658", StationCode.parse("https://app.weathercloud.net/d9287156658#current"))
-        assertEquals("9287156658", StationCode.parse("app.weathercloud.net/d9287156658/"))
-        assertEquals("9287156658", StationCode.parse("https://app.weathercloud.net/device/values?code=9287156658"))
-        assertEquals("9287156658", StationCode.parse("https://app.weathercloud.net/d9287156658?lang=nl"))
-        assertNull(StationCode.parse(""))
-        assertNull(StationCode.parse(null))
-        assertNull(StationCode.parse("hello"))
-        assertNull(StationCode.parse("12345"))
-        assertNull(StationCode.parse("https://example.com/profile"))
+        assertNull(UploadData.parse("""{"received_at":"2026-10-23T09:57:35Z","reading":{"temp_c":-999,"humidity_pct":150,"pressure_hpa":0}}""").tempC)
     }
 
     // ------------------------------------------------------------------ units
@@ -141,10 +110,8 @@ class WeatherStationTest {
         assertEquals(WindUnit.Auto, WindUnit.of(JsonObject(emptyMap())))
     }
 
-    @Test fun refreshIsFiveToThirtyMinutes() {
-        fun interval(v: Int?) = WeatherStation.intervalMinutes(JsonObject(if (v == null) emptyMap() else mapOf("interval_min" to JsonPrimitive(v))))
-        assertEquals(5, interval(null)); assertEquals(5, interval(1)); assertEquals(15, interval(15)); assertEquals(30, interval(120))
-        assertEquals(300, WeatherStation(JsonObject(emptyMap())).refreshSeconds)
+    @Test fun asksOncePerMinute() {
+        assertEquals(60, WeatherStation(JsonObject(emptyMap()), sourceFor = { null }).refreshSeconds)
     }
 
     // ------------------------------------------------------------------ history and trends
@@ -234,7 +201,7 @@ class WeatherStationTest {
     }
 
     @Test fun compactView() {
-        val r = WeathercloudData.parseValues(values)
+        val r = UploadData.parse(latest)
         val v = parse(StationViews.compact(r, Trend.Up, WindUnit.Ms, nl, t)) as ValueView
         assertEquals("12,8°", v.value)
         assertEquals("56% · W 2,3${nbsp}m/s", v.label) // 253° is WSW, nearest of 8 points: W
@@ -249,7 +216,7 @@ class WeatherStationTest {
     }
 
     @Test fun rowsView() {
-        val r = WeathercloudData.parseValues(values).copy(gustMs = 5.1, rainRateMmH = 2.0)
+        val r = UploadData.parse(latest).copy(gustMs = 5.1, rainRateMmH = 2.0)
         val s = parse(StationViews.rows(r, Trend.Down, Trend.Flat, WindUnit.Kmh, nl, t)) as StackView
         val first = s.items[0] as RowsView
         val second = s.items[1] as RowsView
@@ -268,8 +235,8 @@ class WeatherStationTest {
     }
 
     @Test fun detailView() {
-        val r = WeathercloudData.parseValues(values).copy(feelsLikeC = 10.9)
-        val d = parse(StationViews.detail(r, WeathercloudData.parseInfo(info), history(), WindUnit.Ms, nl, t, measured + 4 * 60_000L)) as StackView
+        val r = UploadData.parse(latest).copy(feelsLikeC = 10.9)
+        val d = parse(StationViews.detail(r, StationInfo(city = "Affligem", altitudeM = 40.0), history(), WindUnit.Ms, nl, t, measured + 4 * 60_000L)) as StackView
         assertEquals(4, d.items.size)
         val head = d.items[0] as StackView
         assertEquals("Affligem · 40${nbsp}m", (head.items[0] as ValueView).label)
@@ -285,75 +252,72 @@ class WeatherStationTest {
 
     @Test fun longTranslationsAreCutNotRejected() {
         val long: (String) -> String = { "Eine sehr lange Übersetzung für $it, viel zu lang" }
-        val r = WeathercloudData.parseValues(values).copy(gustMs = 9.0)
+        val r = UploadData.parse(latest).copy(gustMs = 9.0)
         parse(StationViews.compact(r, null, WindUnit.Bft, nl, long))
         parse(StationViews.rows(r, Trend.Up, Trend.Up, WindUnit.Bft, nl, long))
-        parse(StationViews.detail(r, WeathercloudData.parseInfo(info), history(), WindUnit.Bft, nl, long, measured + 50 * 60_000L))
+        parse(StationViews.detail(r, StationInfo(city = "Affligem", altitudeM = 40.0), history(), WindUnit.Bft, nl, long, measured + 50 * 60_000L))
         assertEquals(32, StationViews.fit("x".repeat(40)).length)
     }
 
-    // ------------------------------------------------------------------ the whole widget against a fake Weathercloud
+    // ------------------------------------------------------------------ the whole widget against a fake kinframe server
 
-    @Test fun rendersFromAFakeWeathercloud() = runTest {
+    @Test fun rendersFromTheFramesServer() = runTest {
         val server = MockWebServer()
         server.start()
         try {
-            server.enqueue(MockResponse.Builder().body(values).build())
-            server.enqueue(MockResponse.Builder().body(info).build())
-            server.enqueue(MockResponse.Builder().code(503).build())
+            server.enqueue(MockResponse.Builder().body(latest).build())
+            server.enqueue(MockResponse.Builder().code(404).body("{}").build())
             val store = HashMap<String, String>()
-            var now = measured + 3 * 60_000L
+            val now = measured + 3 * 60_000L
             val settings = JsonObject(
-                mapOf("device" to JsonPrimitive("https://app.weathercloud.net/d9287156658"), "wind_unit" to JsonPrimitive("ms")),
+                mapOf("source" to JsonPrimitive("upload"), "station_id" to JsonPrimitive("IAFFLI3"), "station_key" to JsonPrimitive("k3y"), "wind_unit" to JsonPrimitive("ms")),
             )
+            val latestUrl = UploadSource.latestUrl(server.url("/v1"))
             val ctx = PluginContext(
                 instanceId = "ws", settings = settings, state = HashMap(),
                 store = object : PluginStore {
                     override fun get(key: String) = store[key]
                     override fun put(key: String, value: String?) { if (value == null) store.remove(key) else store[key] = value }
                 },
-                http = PluginHttp(OkHttpClient(), allowed = { it.host == server.hostName }, localOnly = false, userAgent = "kinframe-frame/test"),
+                http = PluginHttp(OkHttpClient(), allowed = { UploadSource.allows(latestUrl, it) }, localOnly = false, userAgent = "kinframe-frame/test"),
                 format = { nl }, t = t, log = {}, now = { now }, zone = { zone }, invalidate = {},
             )
             var seen: StationReading? = null
-            val base = server.url("/")
-            val ws = WeatherStation(settings, onReading = { seen = it }, sourceFor = { s -> WeatherStation.defaultSource(s, base) })
+            val ws = WeatherStation(settings, onReading = { seen = it }, sourceFor = { s -> WeatherStation.sourceFor(s, latestUrl) })
             assertEquals(WeatherStation.STALE_S, ws.staleAfterSeconds)
 
             val v = parse(ws.render(ctx)!!) as ValueView
             assertEquals("12,8°", v.value)
             assertEquals(measured, ctx.dataTime)
             assertEquals(12.8, seen!!.tempC!!, 0.0)
-            assertTrue(store[StationHistory.KEY]!!.startsWith("1792941451,12.8,988.8"))
             val req = server.takeRequest()
-            assertEquals("/device/values", req.url.encodedPath)
-            assertEquals("9287156658", req.url.queryParameter("code"))
-            assertEquals("XMLHttpRequest", req.headers["X-Requested-With"])
+            assertEquals("/v1/stations/latest", req.url.encodedPath)
+            assertEquals("IAFFLI3", req.headers["X-Station-Id"])
+            assertEquals("k3y", req.headers["X-Station-Key"])
+            assertNull("the key never goes in the address", req.url.query)
             assertEquals("kinframe-frame/test", req.headers["User-Agent"])
-
-            now += 60_000L
-            val d = parse(ws.detail(ctx)!!) as StackView
-            assertEquals("/device/info/9287156658", server.takeRequest().url.encodedPath)
-            assertEquals("Affligem · 40${nbsp}m", ((d.items[0] as StackView).items[0] as ValueView).label)
-            // The info is cached: a second card asks nothing.
-            ws.detail(ctx)
-
+            // The detail card needs nothing more from the server.
+            parse(ws.detail(ctx)!!)
             try {
-                ws.render(ctx); fail("a 503 must fail the render (the host backs off)")
+                ws.render(ctx); fail("a 404 (not registered, or silent for 48 h) must fail the render")
             } catch (e: PluginHttpException) {
-                assertEquals(503, e.status)
+                assertEquals(404, e.status)
             }
-            assertEquals(3, server.requestCount)
+            assertEquals(2, server.requestCount)
         } finally {
             server.close()
         }
     }
 
-    @Test fun onlyWeathercloudIsReachable() {
-        assertTrue(WeatherStation.allows("https://app.weathercloud.net/device/values?code=1".toHttpUrl()))
-        assertFalse(WeatherStation.allows("http://app.weathercloud.net/device/values".toHttpUrl()))
-        assertFalse(WeatherStation.allows("https://evil.example/device/values".toHttpUrl()))
-        assertNull(WeatherStation.defaultSource(JsonObject(mapOf("device" to JsonPrimitive("nope")))))
-        assertEquals(WeathercloudSource.ID, WeatherStation.defaultSource(JsonObject(mapOf("device" to JsonPrimitive("9287156658"))))!!.id)
+    @Test fun onlyTheFramesOwnServerIsReachable() {
+        val latestUrl = UploadSource.latestUrl("https://kinframe.appmire.be/v1".toHttpUrl())
+        assertEquals("https://kinframe.appmire.be/v1/stations/latest", latestUrl.toString())
+        assertTrue(UploadSource.allows(latestUrl, latestUrl))
+        assertFalse(UploadSource.allows(latestUrl, "https://kinframe.appmire.be/v1/frames".toHttpUrl()))
+        assertFalse(UploadSource.allows(latestUrl, "http://kinframe.appmire.be/v1/stations/latest".toHttpUrl()))
+        assertFalse(UploadSource.allows(latestUrl, "https://app.weathercloud.net/device/values".toHttpUrl()))
+        assertNull("no key: nothing to ask", WeatherStation.sourceFor(JsonObject(mapOf("station_id" to JsonPrimitive("IAFFLI3"))), latestUrl))
+        assertEquals(UploadSource.ID, WeatherStation.sourceFor(JsonObject(mapOf("station_id" to JsonPrimitive("IAFFLI3"), "station_key" to JsonPrimitive("k"))), latestUrl)!!.id)
     }
+
 }

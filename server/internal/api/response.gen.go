@@ -56,6 +56,7 @@ func (r Response) VisitGetFramePluginsResponse(w http.ResponseWriter) error     
 func (r Response) VisitGetFrameSettingsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetMeResponse(w http.ResponseWriter) error                  { return r.write(w) }
 func (r Response) VisitGetSendResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitGetStationLatestResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetTvSlideshowResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitLeaveFrameResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitListAlbumsResponse(w http.ResponseWriter) error             { return r.write(w) }

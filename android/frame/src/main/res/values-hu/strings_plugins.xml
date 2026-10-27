@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Időjárás-állomás</string>
     <string name="ws_station">Állomás</string>
-    <string name="ws_code">Weathercloud-állomás</string>
-    <string name="ws_code_help">Az állomás kódja vagy a Weathercloud-oldalának linkje.</string>
-    <string name="ws_code_invalid">Ebben nincs Weathercloud-állomáskód. Másold ki az állomás oldalának linkjét.</string>
-    <string name="ws_unofficial">A Weathercloudnak nincs hivatalos API-ja: a képkeret ugyanazokat a nyilvános adatokat olvassa, mint az állomás weboldala, legfeljebb 5 percenként. Ez leállhat, ha a Weathercloud megváltoztatja az oldalát.</string>
+    <string name="ws_upload_setup">Az állomásod feltölti a méréseit a kinframe-be, a keret onnan olvassa őket. Add meg az állomás azonosítóját és kulcsát a kinframe alkalmazásban vagy a weboldalon: keret beállításai → Bővítmények → Időjárás-állomás.</string>
     <string name="ws_style_compact">Hőmérséklet</string>
     <string name="ws_style_rows">Minden érték</string>
     <string name="ws_wind_unit">Szél mértékegysége</string>
     <string name="ws_wind_auto">Automatikus</string>
-    <string name="ws_interval">Ellenőrzés</string>
     <string name="ws_status_error">Az állomás nem olvasható: %1$s</string>
     <string name="ws_status_quiet">Az állomás egy ideje nem küldött új mérést.</string>
     <string name="ws_temperature">Hőmérséklet</string>

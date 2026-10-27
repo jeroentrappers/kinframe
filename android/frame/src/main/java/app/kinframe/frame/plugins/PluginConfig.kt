@@ -144,6 +144,17 @@ class PluginPrefs(
         edit(PluginSettingsDoc.patch(localLayout.value, instances))
     }
 
+    /**
+     * Brings the instances in the frame settings in line with their plugins' manifests ([manifest]: null when the
+     * frame doesn't know the plugin), after an app update changed a manifest: see [PluginSettingsDoc.conform]. Sends
+     * one patch when anything changed.
+     */
+    fun conform(manifest: (String) -> app.kinframe.frame.plugins.js.PluginManifest?) {
+        val list = PluginSettingsDoc.instances(raw.value) ?: return
+        val fixed = list.map { i -> manifest(i.pluginId)?.let { PluginSettingsDoc.conform(i, it) } ?: i }
+        if (fixed != list) edit(PluginSettingsDoc.patch(layout.value, fixed))
+    }
+
     /** `ctx.store`: small persistent key-value storage per instance (docs/plugins.md §3.2), 64 KB each. */
     fun store(instanceId: String): PluginStore = object : PluginStore {
         override fun get(key: String): String? = sp.getString("store.$instanceId.$key", null)
@@ -174,6 +185,31 @@ object PluginSettingsDoc {
         return (p["instances"] as? JsonArray)?.mapNotNull { e ->
             runCatching { json.decodeFromJsonElement(InstanceConfig.serializer(), e) }.getOrNull()
         } ?: emptyList()
+    }
+
+    /**
+     * An instance as its plugin's [manifest] allows it: settings the manifest doesn't declare (or declares as secret)
+     * are dropped, a choice that is no longer one of the options falls back to the default, secrets the manifest
+     * doesn't have are dropped, and an instance that misses a required setting or secret is switched off (the server
+     * refuses it enabled, and the owner fills it in through the apps' form).
+     */
+    fun conform(i: InstanceConfig, manifest: app.kinframe.frame.plugins.js.PluginManifest): InstanceConfig {
+        val settings = i.settings.filter { (k, v) ->
+            val spec = manifest.setting(k) ?: return@filter false
+            when (spec.type) {
+                "secret" -> false
+                "choice" -> (v as? kotlinx.serialization.json.JsonPrimitive)?.takeIf { it.isString }?.content in spec.options
+                else -> true
+            }
+        }
+        val secrets = i.secrets.filter { (k, _) -> manifest.setting(k)?.type == "secret" }
+        val missing = manifest.settings.any { s ->
+            s.required && s.default == null && when (s.type) {
+                "secret" -> (secrets[s.key] as? kotlinx.serialization.json.JsonPrimitive)?.content.isNullOrEmpty()
+                else -> (settings[s.key] as? kotlinx.serialization.json.JsonPrimitive)?.content.isNullOrBlank() && settings[s.key] !is JsonArray
+            }
+        }
+        return i.copy(settings = JsonObject(settings), secrets = JsonObject(secrets), enabled = i.enabled && !missing)
     }
 
     /**

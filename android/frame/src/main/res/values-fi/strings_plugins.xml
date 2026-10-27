@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Sääasema</string>
     <string name="ws_station">Asema</string>
-    <string name="ws_code">Weathercloud-asema</string>
-    <string name="ws_code_help">Aseman koodi tai linkki sen Weathercloud-sivulle.</string>
-    <string name="ws_code_invalid">Tässä ei ole Weathercloud-aseman koodia. Kopioi aseman sivun linkki.</string>
-    <string name="ws_unofficial">Weathercloudilla ei ole virallista rajapintaa: kehys lukee samat julkiset tiedot kuin aseman verkkosivu, enintään 5 minuutin välein. Tämä voi lakata toimimasta, jos Weathercloud muuttaa sivustoaan.</string>
+    <string name="ws_upload_setup">Asemasi lähettää mittauksensa kinframeen, ja kehys lukee ne sieltä. Anna aseman tunnus ja avain kinframe-sovelluksessa tai verkkosivulla: kehyksen asetukset → Liitännäiset → Sääasema.</string>
     <string name="ws_style_compact">Lämpötila</string>
     <string name="ws_style_rows">Kaikki arvot</string>
     <string name="ws_wind_unit">Tuuli yksikössä</string>
     <string name="ws_wind_auto">Automaattinen</string>
-    <string name="ws_interval">Tarkista</string>
     <string name="ws_status_error">Asemaa ei voi lukea: %1$s</string>
     <string name="ws_status_quiet">Asema ei ole lähettänyt uutta mittausta vähään aikaan.</string>
     <string name="ws_temperature">Lämpötila</string>

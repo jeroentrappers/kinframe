@@ -1,20 +1,22 @@
 {
   "id": "kinframe.weather-station",
   "name": "Weather station",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "api": 1,
   "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
   "license": "Apache-2.0",
-  "description": "Live readings from your own weather station on Weathercloud: temperature, wind, rain, pressure and sunlight.",
+  "description": "Live readings from your own weather station, which uploads to kinframe: temperature, wind, rain, pressure and sunlight.",
   "slots": ["top-left", "top-right"],
-  "refresh": { "min_seconds": 300, "default_seconds": 300, "stale_seconds": 1800 },
-  "permissions": { "http": ["https://app.weathercloud.net"] },
+  "refresh": { "min_seconds": 30, "default_seconds": 60, "stale_seconds": 1800 },
+  "permissions": { "http": [] },
   "settings": [
-    { "key": "source", "type": "choice", "label": "Service", "options": ["weathercloud"], "default": "weathercloud" },
-    { "key": "device", "type": "text", "label": "Station code", "placeholder": "9287156658", "required": true,
-      "help": "The number in the station's Weathercloud address (app.weathercloud.net/d9287156658), or the whole address." },
+    { "key": "source", "type": "choice", "label": "Source", "options": ["upload"], "default": "upload" },
+    { "key": "station_id", "type": "text", "label": "Station ID", "placeholder": "IAFFLI3", "required": true,
+      "help": "The ID your station uploads with: its Weather Underground station ID, or the one you set in its custom server settings." },
+    { "key": "station_key", "type": "secret", "label": "Station key", "required": true,
+      "help": "The key (password) your station uploads with: its Weather Underground station key." },
+    { "key": "forward_wunderground", "type": "boolean", "label": "Pass the uploads on to Weather Underground", "default": true },
     { "key": "style", "type": "choice", "label": "Show", "options": ["compact", "rows"], "default": "compact" },
-    { "key": "wind_unit", "type": "choice", "label": "Wind in", "options": ["auto", "ms", "kmh", "mph", "bft"], "default": "auto" },
-    { "key": "interval_min", "type": "number", "label": "Check every (minutes, 5–30)", "default": 5 }
+    { "key": "wind_unit", "type": "choice", "label": "Wind in", "options": ["auto", "ms", "kmh", "mph", "bft"], "default": "auto" }
   ]
 }

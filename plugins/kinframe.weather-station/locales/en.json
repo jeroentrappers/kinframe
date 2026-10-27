@@ -1,11 +1,11 @@
 {
   "@name": "Weather station",
-  "@option.source.weathercloud": "Weathercloud",
   "@option.style.compact": "Temperature",
   "@option.style.rows": "All values",
   "@option.wind_unit.auto": "Automatic (km/h or mph)",
   "@option.wind_unit.ms": "m/s",
   "@option.wind_unit.kmh": "km/h",
   "@option.wind_unit.mph": "mph",
-  "@option.wind_unit.bft": "Beaufort"
+  "@option.wind_unit.bft": "Beaufort",
+  "@option.source.upload": "Uploads to kinframe"
 }

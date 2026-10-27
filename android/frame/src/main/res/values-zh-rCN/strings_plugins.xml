@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">气象站</string>
     <string name="ws_station">气象站</string>
-    <string name="ws_code">Weathercloud 气象站</string>
-    <string name="ws_code_help">气象站的代码，或其 Weathercloud 页面的链接。</string>
-    <string name="ws_code_invalid">这里没有 Weathercloud 气象站代码。请复制该气象站页面的链接。</string>
-    <string name="ws_unofficial">Weathercloud 没有官方 API：相框读取的是与气象站网页相同的公开数据，最多每 5 分钟一次。如果 Weathercloud 更改其网站，此功能可能会失效。</string>
+    <string name="ws_upload_setup">你的气象站会把读数上传到 kinframe，相框从那里读取。请在 kinframe 应用或网站中输入气象站 ID 和密钥：相框设置 → 插件 → 气象站。</string>
     <string name="ws_style_compact">气温</string>
     <string name="ws_style_rows">全部数值</string>
     <string name="ws_wind_unit">风速单位</string>
     <string name="ws_wind_auto">自动</string>
-    <string name="ws_interval">检查间隔</string>
     <string name="ws_status_error">无法读取气象站：%1$s</string>
     <string name="ws_status_quiet">气象站已有一段时间没有发送新读数。</string>
     <string name="ws_temperature">气温</string>

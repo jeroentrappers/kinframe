@@ -15,6 +15,7 @@ import app.kinframe.frame.plugins.js.PluginPermissions
 import app.kinframe.frame.plugins.js.QuickJsPluginInstance
 import app.kinframe.frame.plugins.registry.PluginRegistry
 import app.kinframe.frame.plugins.registry.RegistryStore
+import app.kinframe.frame.plugins.station.UploadSource
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.weather.WeatherSources
@@ -52,7 +53,7 @@ class FramePlugins(private val c: FrameController) {
             WeatherStation(cfg.values, onReading = { r ->
                 val t = r.tempC
                 if (t != null) _stationNow.value = StationNow(t, r.atMs ?: g.clock.nowMs())
-            })
+            }, sourceFor = { s -> WeatherStation.sourceFor(s, stationLatest()) })
         }
         if (BuildConfig.DEBUG) put(DEMO) { _ -> DemoFixtures(g.app) }
     }
@@ -179,6 +180,7 @@ class FramePlugins(private val c: FrameController) {
         val sources = catalogSources()
         val manifests = sources.mapNotNull { runCatching { app.kinframe.frame.plugins.js.PluginManifest.parse(it.manifest) }.getOrNull() }
         prefs.migrate { id -> manifests.firstOrNull { it.id == id }?.settings?.mapTo(HashSet()) { it.key } }
+        prefs.conform { id -> manifests.firstOrNull { it.id == id } }
         runCatching { g.api.putPluginCatalog(PluginReports.catalog(sources)) }
             .onFailure { Log.i("KinFramePlugins", "catalog not sent: ${it.message}") }
 
@@ -292,11 +294,14 @@ class FramePlugins(private val c: FrameController) {
         )
     }
 
+    /** Where the station's uploads are read back: the frame's own server (§9.4). */
+    private fun stationLatest() = UploadSource.latestUrl(g.api.apiBase)
+
     private fun contextFor(cfg: InstanceConfig, invalidate: () -> Unit): PluginContext {
         // The manifest's `http` permission: the HomeWizard widget reaches the home network only (`local_only`), the
-        // weather station one fixed internet host.
+        // weather station only its readings on the frame's own server.
         val http = when (cfg.pluginId) {
-            WEATHER_STATION -> PluginHttp(g.http, allowed = WeatherStation::allows, localOnly = false, userAgent = USER_AGENT)
+            WEATHER_STATION -> PluginHttp(g.http, allowed = { url -> UploadSource.allows(stationLatest(), url) }, localOnly = false, userAgent = USER_AGENT)
             else -> PluginHttp(g.http, allowed = { url -> url.scheme == "http" || url.scheme == "https" }, localOnly = true, userAgent = USER_AGENT)
         }
         return PluginContext(

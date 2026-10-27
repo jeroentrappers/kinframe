@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">氣象站</string>
     <string name="ws_station">氣象站</string>
-    <string name="ws_code">Weathercloud 氣象站</string>
-    <string name="ws_code_help">氣象站的代碼，或其 Weathercloud 頁面的連結。</string>
-    <string name="ws_code_invalid">這裡沒有 Weathercloud 氣象站代碼。請複製該氣象站頁面的連結。</string>
-    <string name="ws_unofficial">Weathercloud 沒有官方 API：相框讀取的是與氣象站網頁相同的公開資料，最多每 5 分鐘一次。如果 Weathercloud 變更其網站，此功能可能會失效。</string>
+    <string name="ws_upload_setup">你的氣象站會把讀數上傳到 kinframe，相框從那裡讀取。請在 kinframe 應用程式或網站中輸入氣象站 ID 和金鑰：相框設定 → 外掛 → 氣象站。</string>
     <string name="ws_style_compact">氣溫</string>
     <string name="ws_style_rows">所有數值</string>
     <string name="ws_wind_unit">風速單位</string>
     <string name="ws_wind_auto">自動</string>
-    <string name="ws_interval">檢查間隔</string>
     <string name="ws_status_error">無法讀取氣象站：%1$s</string>
     <string name="ws_status_quiet">氣象站已有一段時間沒有傳送新讀數。</string>
     <string name="ws_temperature">氣溫</string>

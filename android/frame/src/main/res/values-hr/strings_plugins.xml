@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Meteorološka stanica</string>
     <string name="ws_station">Stanica</string>
-    <string name="ws_code">Weathercloud stanica</string>
-    <string name="ws_code_help">Kôd stanice ili poveznica na njezinu stranicu na Weathercloudu.</string>
-    <string name="ws_code_invalid">Ovdje nema kôda Weathercloud stanice. Kopirajte poveznicu stranice stanice.</string>
-    <string name="ws_unofficial">Weathercloud nema službeni API: okvir čita iste javne podatke kao web-stranica stanice, najviše svakih 5 minuta. To može prestati raditi ako Weathercloud promijeni svoju stranicu.</string>
+    <string name="ws_upload_setup">Vaša stanica šalje mjerenja u kinframe, a okvir ih čita odande. Unesite ID i ključ stanice u aplikaciji ili na web-mjestu kinframe: postavke okvira → Dodaci → Meteorološka stanica.</string>
     <string name="ws_style_compact">Temperatura</string>
     <string name="ws_style_rows">Sve vrijednosti</string>
     <string name="ws_wind_unit">Vjetar u</string>
     <string name="ws_wind_auto">Automatski</string>
-    <string name="ws_interval">Provjera svakih</string>
     <string name="ws_status_error">Stanicu nije moguće očitati: %1$s</string>
     <string name="ws_status_quiet">Stanica već neko vrijeme nije poslala novo mjerenje.</string>
     <string name="ws_temperature">Temperatura</string>

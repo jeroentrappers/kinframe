@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">محطة الطقس</string>
     <string name="ws_station">المحطة</string>
-    <string name="ws_code">محطة Weathercloud</string>
-    <string name="ws_code_help">رمز المحطة أو رابط صفحتها على Weathercloud.</string>
-    <string name="ws_code_invalid">لا يوجد رمز محطة Weathercloud هنا. انسخ رابط صفحة المحطة.</string>
-    <string name="ws_unofficial">لا توفر Weathercloud واجهة برمجة رسمية: يقرأ الإطار البيانات العامة نفسها التي تعرضها صفحة المحطة، مرة كل 5 دقائق على الأكثر. قد يتوقف ذلك إذا غيّرت Weathercloud موقعها.</string>
+    <string name="ws_upload_setup">ترفع محطتك قراءاتها إلى kinframe ويقرؤها الإطار من هناك. أدخل معرّف المحطة ومفتاحها في تطبيق kinframe أو موقعه: إعدادات الإطار ← الإضافات ← محطة الطقس.</string>
     <string name="ws_style_compact">درجة الحرارة</string>
     <string name="ws_style_rows">كل القيم</string>
     <string name="ws_wind_unit">الرياح بوحدة</string>
     <string name="ws_wind_auto">تلقائي</string>
-    <string name="ws_interval">التحقق كل</string>
     <string name="ws_status_error">تعذّرت قراءة المحطة: %1$s</string>
     <string name="ws_status_quiet">لم ترسل المحطة قراءة جديدة منذ مدة.</string>
     <string name="ws_temperature">درجة الحرارة</string>

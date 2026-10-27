@@ -41,9 +41,8 @@ import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.plugins.homewizard.FoundMeter
 import app.kinframe.frame.plugins.homewizard.HomeWizardDiscovery
-import app.kinframe.frame.plugins.station.StationCode
 import app.kinframe.frame.plugins.station.WeatherStation
-import app.kinframe.frame.plugins.station.WeathercloudSource
+import app.kinframe.frame.plugins.station.UploadSource
 import app.kinframe.frame.plugins.station.WindUnit
 import app.kinframe.frame.ui.Labeled
 import app.kinframe.frame.ui.SectionCard
@@ -262,22 +261,22 @@ fun stationConfig(instances: List<InstanceConfig>): InstanceConfig =
     instances.firstOrNull { it.instanceId == FramePlugins.STATION_INSTANCE }
         ?: InstanceConfig(
             FramePlugins.STATION_INSTANCE, FramePlugins.WEATHER_STATION, slot = Slot.TopLeft, enabled = false,
-            settings = JsonObject(mapOf("source" to JsonPrimitive(WeathercloudSource.ID), "style" to JsonPrimitive("compact"))),
+            settings = JsonObject(mapOf("source" to JsonPrimitive(UploadSource.ID), "style" to JsonPrimitive("compact"))),
         )
 
-/** The built-in weather station (docs/plugins.md §9.4): the station, units, look and how often to ask. */
+/**
+ * The built-in weather station (docs/plugins.md §9.4): where it is set up, the look and units, and whether it works.
+ * The station ID and key are entered in the apps' plugin form, so the key isn't typed on the frame.
+ */
 @Composable
 internal fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, update: (InstanceConfig) -> Unit) {
     fun setting(key: String) = (cfg.settings[key] as? JsonPrimitive)?.contentOrNull
     fun withSetting(key: String, value: JsonPrimitive?) =
         cfg.copy(settings = JsonObject(if (value == null) cfg.settings - key else cfg.settings + (key to value)))
-    val code = StationCode.parse(setting("device"))
+    val configured = !setting("station_id").isNullOrBlank() && cfg.secrets["station_key"] != null
 
     Labeled(stringResource(R.string.ws_station)) {
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            StationCodeField(code) { update(withSetting("device", JsonPrimitive(it))) }
-            Text(stringResource(R.string.ws_unofficial), style = Kin.type.caption, color = Kin.colors.inkSoft)
-        }
+        Text(stringResource(R.string.ws_upload_setup), style = Kin.type.body, color = Kin.colors.inkSoft)
     }
     InstancePlacement(cfg, update)
     Labeled(stringResource(R.string.p1_style)) {
@@ -293,19 +292,9 @@ internal fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, upd
             Modifier.horizontalScroll(rememberScrollState()),
         )
     }
-    Labeled(stringResource(R.string.ws_interval)) {
-        val f = remember { c.plugins.format() }
-        val current = (cfg.settings["interval_min"] as? JsonPrimitive)?.intOrNull?.coerceIn(WeatherStation.MIN_INTERVAL_MIN, WeatherStation.MAX_INTERVAL_MIN)
-            ?: WeatherStation.MIN_INTERVAL_MIN
-        ChoiceChips(
-            listOf(5, 10, 15, 30).map { it to f.duration(it * 60L) },
-            current, { update(withSetting("interval_min", if (it == WeatherStation.MIN_INTERVAL_MIN) null else JsonPrimitive(it))) },
-            Modifier.horizontalScroll(rememberScrollState()),
-        )
-    }
     val states by c.plugins.states.collectAsState()
     val st = states.firstOrNull { it.config.instanceId == cfg.instanceId }
-    if (code != null && st != null) {
+    if (configured && st != null) {
         val line = when {
             st.status == InstanceStatus.Ok -> stringResource(R.string.p1_status_ok)
             st.error != null -> stringResource(R.string.ws_status_error, st.error)
@@ -313,32 +302,6 @@ internal fun WeatherStationSettings(c: FrameController, cfg: InstanceConfig, upd
             else -> stringResource(R.string.p1_status_waiting)
         }
         Text(line, style = Kin.type.body, color = if (st.status == InstanceStatus.Ok) Kin.colors.sage else Kin.colors.inkSoft)
-    }
-}
-
-@Composable
-private fun StationCodeField(current: String?, onUse: (String) -> Unit) {
-    var text by remember(current) { mutableStateOf(current.orEmpty()) }
-    var error by remember { mutableStateOf(false) }
-    val dismiss = rememberKeyboardDismiss()
-    fun submit() {
-        val code = StationCode.parse(text)
-        error = code == null
-        if (code != null) { text = code; onUse(code); dismiss() }
-    }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedTextField(
-            value = text, onValueChange = { text = it; error = false },
-            label = { Text(stringResource(R.string.ws_code)) },
-            placeholder = { Text("https://app.weathercloud.net/d1234567890") },
-            singleLine = true, isError = error,
-            supportingText = { Text(stringResource(if (error) R.string.ws_code_invalid else R.string.ws_code_help)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { submit() }),
-            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Kin.colors.accent, focusedLabelColor = Kin.colors.accent, cursorColor = Kin.colors.accent),
-            modifier = Modifier.widthIn(min = 320.dp, max = 520.dp),
-        )
-        KinButton(stringResource(R.string.p1_use), { submit() }, style = KinButtonStyle.Secondary, enabled = text.isNotBlank() && text.trim() != current)
     }
 }
 

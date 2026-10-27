@@ -89,6 +89,7 @@
   "no poster": "sin imagen de portada",
   "no such endpoint": "este endpoint no existe",
   "no such release": "esta versión no existe",
+  "no readings from this station": "no hay mediciones de esta estación",
   "plugin bundle not found": "paquete de complemento no encontrado",
   "not available (yet)": "no disponible (todavía)",
   "only the creator or an owner/admin can revoke this invite": "solo quien la creó o un propietario/administrador puede revocar esta invitación",
