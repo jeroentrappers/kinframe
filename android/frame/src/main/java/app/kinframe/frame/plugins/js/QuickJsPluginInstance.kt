@@ -37,8 +37,14 @@ import java.util.Locale
 /** The sandbox's limits (docs/plugins.md §5). */
 data class SandboxLimits(
     val memoryBytes: Long = 8L * 1024 * 1024,
-    /** JavaScript per call: CPU time of its thread, time spent awaiting `ctx.http` left out ([JsClock]). */
+    /**
+     * The target for JavaScript per call: CPU time of its thread, time spent awaiting `ctx.http` left out ([JsClock]).
+     * A call over it is logged for the author; only [cpuMsLimitPerCall] interrupts it, because on a slow frame a
+     * garbage collection on the plugin thread alone can take 50 ms.
+     */
     val cpuMsPerCall: Long = 50,
+    /** JavaScript per call before it is interrupted and counted as a failure. */
+    val cpuMsLimitPerCall: Long = 250,
     /** Wall clock per call or WebSocket message, whatever it waits for. */
     val wallMsPerCall: Long = 10_000,
     /**
@@ -192,7 +198,7 @@ class QuickJsPluginInstance(
     private suspend fun call(name: String, ctx: PluginContext, arg: String? = null): JsonElement? = calls.withLock {
         val q = js ?: return@withLock null
         result = null; error = null; defined = true
-        val budgetMs = if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart
+        val budgetMs = if (warm) limits.cpuMsLimitPerCall else limits.cpuMsAtStart
         offline = name.takeIf { it in OFFLINE_CALLS }
         try {
             budgeted(q, ctx, name, if (arg == null) "__kf_call('$name')" else "__kf_call('$name', $arg)", budgetMs)
@@ -201,6 +207,7 @@ class QuickJsPluginInstance(
         }
         // An interrupt inside an async function arrives as a rejected promise, which __kf_call catches.
         error?.let { throw PluginScriptException(if (it == "interrupted") "$name: took longer than $budgetMs ms of JavaScript" else "$name: $it") }
+        if (warm && lastJsMs > limits.cpuMsPerCall) ctx.log(String.format(Locale.ROOT, "%s used %.0f ms of JavaScript (target %d ms)", name, lastJsMs, limits.cpuMsPerCall))
         if (name == "render") warm = true
         result?.let { Json.parseToJsonElement(it) }
     }
@@ -292,7 +299,7 @@ class QuickJsPluginInstance(
                     calls.withLock {
                         val q = js ?: return@withLock
                         val arg = data?.let { Json.encodeToString(JsonPrimitive.serializer(), JsonPrimitive(it)) } ?: "null"
-                        budgeted(q, ctx, "ws $type", "__kf_ws_event('$type', $arg)", if (warm) limits.cpuMsPerCall else limits.cpuMsAtStart)
+                        budgeted(q, ctx, "ws $type", "__kf_ws_event('$type', $arg)", if (warm) limits.cpuMsLimitPerCall else limits.cpuMsAtStart)
                     }
                 }.onFailure { ctx.log("ws $type: ${it.message}") }
             }

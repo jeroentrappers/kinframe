@@ -61,7 +61,7 @@ class QuickJsSandboxTest {
         val k = kit("""let n = 0; export default { async render(ctx) { if (++n == 2) { while (true) {} } return { type: 'text', lines: ['alive'] }; } }""")
         assertEquals("alive", text(k.render()))
         val why = failure(k)
-        assertTrue(why, why.contains("took longer than 50 ms"))
+        assertTrue(why, why.contains("took longer than 250 ms"))
         assertEquals("alive", text(k.render()))
     }
 
@@ -78,15 +78,23 @@ class QuickJsSandboxTest {
         val k = kit("""let n = 0; export default { async update(ctx) { await ctx.http.get(ctx.settings.base_url + '/x'); if (++n == 2) { while (true) {} } } }""")
         k.render()
         val why = failure(k)
-        assertTrue(why, why.contains("took longer than 50 ms"))
+        assertTrue(why, why.contains("took longer than 250 ms"))
     }
 
     @Test fun theFirstRenderAfterABootHasTheStartBudget() = runBlocking {
         // A cold runtime on the frame: the first call starts threads and loads classes.
-        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 120) {} return { type: 'text', lines: ['warm'] }; } }""")
+        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 300) {} return { type: 'text', lines: ['warm'] }; } }""")
         assertEquals("warm", text(k.render()))
         val why = failure(k)
-        assertTrue(why, why.contains("took longer than 50 ms"))
+        assertTrue(why, why.contains("took longer than 250 ms"))
+    }
+
+    @Test fun overTheTargetIsLoggedNotInterrupted() = runBlocking {
+        // 50 ms is the target; a garbage collection on a slow frame can take that long, so only 250 ms interrupts.
+        val k = kit("""export default { render(ctx) { const t = Date.now(); while (Date.now() - t < 80) {} return { type: 'text', lines: ['ok'] }; } }""")
+        k.render()
+        assertEquals("ok", text(k.render()))
+        assertTrue(k.logs.toString(), k.logs.any { it.startsWith("render used") && it.endsWith("(target 50 ms)") })
     }
 
     @Test fun renderAndDetailCantUseTheNetwork() = runBlocking {
