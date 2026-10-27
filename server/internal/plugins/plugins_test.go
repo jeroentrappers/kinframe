@@ -23,7 +23,7 @@ func check(t *testing.T, in map[string]any) []Problem {
 	var round map[string]any
 	b, _ := json.Marshal(in)
 	_ = json.Unmarshal(b, &round)
-	return Check([]map[string]any{round}, c)
+	return Check([]map[string]any{round}, c.Lookup)
 }
 
 func TestTypes(t *testing.T) {
@@ -65,14 +65,14 @@ func TestRequiredAndStaleSecrets(t *testing.T) {
 	c, _ := ParseCatalog([]byte(catalogJSON))
 	in := map[string]any{"instance_id": "a", "plugin_id": "kinframe.ha-energy",
 		"settings": map[string]any{"base_url": "http://ha.local:8123"}, "secrets_sealed": map[string]any{"token": "x", "old_key": "y"}}
-	if p := Check([]map[string]any{in}, c); len(p) != 0 {
+	if p := Check([]map[string]any{in}, c.Lookup); len(p) != 0 {
 		t.Fatalf("problems: %v", p)
 	}
 	if s := in["secrets_sealed"].(map[string]any); len(s) != 1 || s["token"] == nil {
 		t.Fatalf("sealed: %v", s)
 	}
 	in = map[string]any{"instance_id": "a", "plugin_id": "kinframe.ha-energy", "settings": map[string]any{"base_url": " "}}
-	if p := Check([]map[string]any{in}, c); len(p) != 2 {
+	if p := Check([]map[string]any{in}, c.Lookup); len(p) != 2 {
 		t.Fatalf("blank url and no token: %v", p)
 	}
 }

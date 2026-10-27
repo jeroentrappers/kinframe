@@ -43,6 +43,10 @@ data class PluginsState(
     val editor: PluginEditor? = null,
     val adding: Boolean = false,
     val saving: Boolean = false,
+    /** A community plugin whose permissions are shown before it is added (Add / Cancel). */
+    val confirming: FormPlugin? = null,
+    /** Updates put off for now ("Not now"), as `<instance id>@<version>`; not kept. */
+    val dismissedUpdates: Set<String> = emptySet(),
 ) {
     val layout: PluginLayout get() = PluginSettings.layout(doc?.raw)
     val instances: List<PluginInstanceDraft> get() = PluginSettings.instances(doc?.raw)
@@ -51,11 +55,13 @@ data class PluginsState(
     /** The frame app reports no catalog yet: "Update the frame app". */
     val needsFrameUpdate: Boolean get() = report != null && report!!.catalogAt == null
     fun plugin(id: String): FormPlugin? = catalog.firstOrNull { it.id == id }
+    fun updateDismissed(instanceId: String, version: String) = "$instanceId@$version" in dismissedUpdates
 }
 
 sealed interface PluginsEvent {
     data object Saved : PluginsEvent
     data object Removed : PluginsEvent
+    data class UpdateApproved(val version: String) : PluginsEvent
     data class Error(@StringRes val message: Int) : PluginsEvent
 }
 
@@ -112,7 +118,20 @@ class PluginsViewModel(private val api: KinApi, private val frameId: String) : V
     fun openAdd() = _state.update { it.copy(adding = true) }
     fun closeAdd() = _state.update { it.copy(adding = false) }
 
+    /** Picks [plugin] in the catalog: a community plugin first shows what it may do ([confirmAdd]). */
     fun add(plugin: FormPlugin) {
+        if (plugin.community) _state.update { it.copy(adding = false, confirming = plugin) } else addNow(plugin)
+    }
+
+    fun confirmAdd() {
+        val p = state.value.confirming ?: return
+        _state.update { it.copy(confirming = null) }
+        addNow(p)
+    }
+
+    fun cancelAdd() = _state.update { it.copy(confirming = null) }
+
+    private fun addNow(plugin: FormPlugin) {
         val s = state.value
         if (s.instances.size >= PluginSettings.MAX_INSTANCES) return
         _state.update { it.copy(adding = false) }
@@ -173,6 +192,21 @@ class PluginsViewModel(private val api: KinApi, private val frameId: String) : V
             if (list.any { it.instanceId == saved.instanceId }) list.map { if (it.instanceId == saved.instanceId) saved else it } else list + saved
         }
     }
+
+    // ---------------------------------------------------------------- registry updates (§7)
+
+    /**
+     * Approves update [version] of [instanceId]: the whole list is saved with the instance naming that version. The
+     * open editor follows, so saving its settings afterwards keeps the approval.
+     */
+    fun approveUpdate(instanceId: String, version: String) {
+        saveInstances(onDone = {
+            _state.update { s -> s.copy(editor = s.editor?.let { e -> if (e.draft.instanceId == instanceId) e.copy(draft = e.draft.copy(version = version)) else e }) }
+            _events.tryEmit(PluginsEvent.UpdateApproved(version))
+        }) { list -> PluginSettings.approveUpdate(list, instanceId, version) }
+    }
+
+    fun dismissUpdate(instanceId: String, version: String) = _state.update { it.copy(dismissedUpdates = it.dismissedUpdates + "$instanceId@$version") }
 
     fun askRemove(ask: Boolean) = _state.update { s -> s.copy(editor = s.editor?.copy(confirmRemove = ask)) }
 

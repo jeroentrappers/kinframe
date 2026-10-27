@@ -96,10 +96,18 @@ data class FormPlugin(
     val hosts: List<String> = emptyList(),
     /** `permissions.location`: reads the frame's (coarse) place. */
     val location: Boolean = false,
-    val builtin: Boolean = false,
+    val builtin: Boolean = true,
+    /** `author.name` and `license`, shown for community plugins. */
+    val author: String? = null,
+    val license: String? = null,
+    /** Everything `permissions` allows, as the owner reads it before adding a community plugin. */
+    val permissions: PluginPermissions = PluginPermissions(),
     /** Language tag → `@name`, `@setting.<key>` … */
     val locales: Map<String, Map<String, String>> = emptyMap(),
 ) {
+    /** A plugin from the community registry (docs/plugins.md §7): it says what it may do before it is added. */
+    val community: Boolean get() = !builtin
+
     fun setting(key: String): FormSetting? = settings.firstOrNull { it.key == key }
     fun preset(id: String): FormPreset? = presets.firstOrNull { it.id == id }
 
@@ -175,6 +183,9 @@ data class FormPlugin(
                 settings = settings, presets = presets,
                 hosts = strings(perms["http"]).filter { !it.startsWith("settings.") },
                 location = bool(perms, "location"), builtin = c.builtin, locales = c.locales,
+                author = (m["author"] as? JsonObject)?.let { str(it, "name") }?.trim()?.takeIf { it.isNotEmpty() },
+                license = str(m, "license")?.trim()?.takeIf { it.isNotEmpty() },
+                permissions = PluginPermissions.read(perms),
             )
         }
 
@@ -187,5 +198,58 @@ data class FormPlugin(
                     (q.isEmpty() || e.entityId.lowercase(Locale.ROOT).contains(q) || e.name?.lowercase(Locale.ROOT)?.contains(q) == true)
             }
         }
+    }
+}
+
+/** One thing a plugin may do (docs/plugins.md §3.1 `permissions`), as the owner reads it. */
+sealed interface Permission {
+    /** Fixed internet hosts it reaches. */
+    data class Internet(val hosts: List<String>) : Permission
+    /** The addresses the owner types in: these settings' keys. */
+    data class Addresses(val settings: List<String>) : Permission
+    /** The frame's (coarse) place. */
+    data object Location : Permission
+    /** Buttons on the frame that change things. */
+    data object Actions : Permission
+}
+
+/** A manifest's `permissions`: hosts (from `http` and `websocket` origins), address settings, location, buttons. */
+data class PluginPermissions(
+    val hosts: List<String> = emptyList(),
+    val addresses: List<String> = emptyList(),
+    val location: Boolean = false,
+    val actions: Boolean = false,
+) {
+    /** What it allows, in the order the apps list it. */
+    val items: List<Permission> get() = buildList {
+        if (hosts.isNotEmpty()) add(Permission.Internet(hosts))
+        if (addresses.isNotEmpty()) add(Permission.Addresses(addresses))
+        if (location) add(Permission.Location)
+        if (actions) add(Permission.Actions)
+    }
+
+    /** What this allows that [other] doesn't. */
+    operator fun minus(other: PluginPermissions) = PluginPermissions(
+        hosts.filter { it !in other.hosts }, addresses.filter { it !in other.addresses },
+        location && !other.location, actions && !other.actions,
+    )
+
+    companion object {
+        fun read(o: JsonObject?): PluginPermissions {
+            if (o == null) return PluginPermissions()
+            val entries = listOf("http", "websocket").flatMap { k ->
+                (o[k] as? JsonArray).orEmpty().mapNotNull { (it as? JsonPrimitive)?.takeIf { p -> p.isString }?.content }
+            }
+            return PluginPermissions(
+                hosts = entries.filterNot { it.startsWith("settings.") }.map(::host).distinct(),
+                addresses = entries.filter { it.startsWith("settings.") }.map { it.removePrefix("settings.") }.filter { it.isNotEmpty() }.distinct(),
+                location = (o["location"] as? JsonPrimitive)?.booleanOrNull ?: false,
+                actions = (o["actions"] as? JsonPrimitive)?.booleanOrNull ?: false,
+            )
+        }
+
+        /** "api.example.org" for "https://api.example.org/v1"; as written when it isn't an address. */
+        private fun host(origin: String): String =
+            runCatching { java.net.URI(origin).rawAuthority }.getOrNull()?.takeIf { it.isNotEmpty() } ?: origin
     }
 }

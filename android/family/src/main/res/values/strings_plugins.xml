@@ -74,4 +74,25 @@
     <string name="plugins_err_not_on_frame">The frame doesn’t have this plugin</string>
     <string name="plugins_err_duplicate">Two plugins have the same ID</string>
     <string name="plugins_err_other">Not accepted (%1$s)</string>
+    <!-- Community plugins from the registry (docs/plugins.md §7). -->
+    <string name="plugins_group_builtin">Built in</string>
+    <string name="plugins_group_community">Community</string>
+    <string name="plugins_group_community_hint">Made by other people. Every new plugin, and every change to what one may do, is reviewed before it is published.</string>
+    <string name="plugins_by_author">by %1$s</string>
+    <string name="plugins_version_number">version %1$s</string>
+    <string name="plugins_confirm_title">Add %1$s?</string>
+    <string name="plugins_confirm_body">This plugin comes from the community, not from kinframe. What it may do:</string>
+    <string name="plugins_add_confirm">Add</string>
+    <string name="plugins_perm_addresses">Connects to the addresses you fill in: %1$s</string>
+    <string name="plugins_perm_actions">Shows buttons on the frame that change things, like switching a socket</string>
+    <string name="plugins_perm_none">Only shows on the frame; it connects to nothing</string>
+    <string name="plugins_update_asks">Update to %1$s available — it asks for:</string>
+    <string name="plugins_update_fewer">Update to %1$s available — it asks for less than before.</string>
+    <string name="plugins_update_approve">Approve</string>
+    <string name="plugins_update_dismiss">Not now</string>
+    <string name="plugins_update_approved">Update to %1$s approved</string>
+    <string name="plugins_update_waiting">An update waits for your approval</string>
+    <string name="plugins_withdrawn">Withdrawn from the community registry: %1$s</string>
+    <string name="plugins_withdrawn_hint">It no longer runs on the frame. You can remove it.</string>
+    <string name="plugins_runs_version">The frame runs version %1$s.</string>
 </resources>

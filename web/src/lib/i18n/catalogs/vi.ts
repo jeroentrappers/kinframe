@@ -1264,7 +1264,26 @@ const vi: Catalog = {
 	'plugins.errEnum': 'Hãy chọn một trong các lựa chọn.',
 	'plugins.errTimezone': 'Hãy chọn một múi giờ trong danh sách.',
 	'plugins.errUnknown': 'Tiện ích trên khung ảnh không còn cài đặt này.',
-	'plugins.errType': 'Giá trị này không hợp với cài đặt này.'
+	'plugins.errType': 'Giá trị này không hợp với cài đặt này.',
+	'plugins.groupBuiltin': 'Có sẵn',
+	'plugins.groupCommunity': 'Cộng đồng',
+	'plugins.groupCommunityHint': 'Do người khác làm. Mỗi tiện ích mới, và mỗi thay đổi về những gì nó được làm, đều được xem xét trước khi phát hành.',
+	'plugins.byAuthor': 'của {name}',
+	'plugins.versionNumber': 'phiên bản {version}',
+	'plugins.confirmTitle': 'Thêm {name}?',
+	'plugins.confirmBody': 'Tiện ích này đến từ cộng đồng, không phải từ kinframe. Những gì nó được làm:',
+	'plugins.permAddresses': 'Kết nối tới các địa chỉ bạn điền: {settings}',
+	'plugins.permActions': 'Hiện các nút trên khung ảnh để thay đổi thứ gì đó, như bật một ổ cắm',
+	'plugins.permNone': 'Chỉ hiển thị trên khung ảnh; không kết nối tới đâu',
+	'plugins.updateAsks': 'Có bản cập nhật lên {version} — bản này yêu cầu:',
+	'plugins.updateFewer': 'Có bản cập nhật lên {version} — bản này yêu cầu ít hơn trước.',
+	'plugins.updateApprove': 'Chấp thuận',
+	'plugins.updateDismiss': 'Để sau',
+	'plugins.updateApproved': 'Đã chấp thuận bản cập nhật lên {version}',
+	'plugins.updateWaiting': 'Một bản cập nhật đang chờ bạn chấp thuận',
+	'plugins.withdrawn': 'Đã bị rút khỏi kho cộng đồng: {reason}',
+	'plugins.withdrawnHint': 'Tiện ích không còn chạy trên khung ảnh. Bạn có thể gỡ nó.',
+	'plugins.runsVersion': 'Khung ảnh đang chạy phiên bản {version}.'
 };
 
 export default vi;

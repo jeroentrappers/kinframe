@@ -1321,7 +1321,26 @@ const pl: Catalog = {
 	'plugins.errEnum': 'Wybierz jedną z opcji.',
 	'plugins.errTimezone': 'Wybierz strefę czasową z listy.',
 	'plugins.errUnknown': 'Wtyczka na ramce nie ma już tego ustawienia.',
-	'plugins.errType': 'To nie pasuje do tego ustawienia.'
+	'plugins.errType': 'To nie pasuje do tego ustawienia.',
+	'plugins.groupBuiltin': 'Wbudowane',
+	'plugins.groupCommunity': 'Społeczność',
+	'plugins.groupCommunityHint': 'Stworzone przez innych. Każda nowa wtyczka i każda zmiana tego, co wtyczka może robić, jest sprawdzana przed publikacją.',
+	'plugins.byAuthor': 'autor: {name}',
+	'plugins.versionNumber': 'wersja {version}',
+	'plugins.confirmTitle': 'Dodać {name}?',
+	'plugins.confirmBody': 'Ta wtyczka pochodzi od społeczności, nie od kinframe. Co może robić:',
+	'plugins.permAddresses': 'Łączy się z adresami, które wpiszesz: {settings}',
+	'plugins.permActions': 'Pokazuje na ramce przyciski, które coś zmieniają, np. włączają gniazdko',
+	'plugins.permNone': 'Tylko wyświetla się na ramce; z niczym się nie łączy',
+	'plugins.updateAsks': 'Dostępna aktualizacja do {version} — prosi o:',
+	'plugins.updateFewer': 'Dostępna aktualizacja do {version} — prosi o mniej niż wcześniej.',
+	'plugins.updateApprove': 'Zatwierdź',
+	'plugins.updateDismiss': 'Nie teraz',
+	'plugins.updateApproved': 'Zatwierdzono aktualizację do {version}',
+	'plugins.updateWaiting': 'Aktualizacja czeka na Twoją zgodę',
+	'plugins.withdrawn': 'Wycofana z rejestru społeczności: {reason}',
+	'plugins.withdrawnHint': 'Nie działa już na ramce. Możesz ją usunąć.',
+	'plugins.runsVersion': 'Ramka używa wersji {version}.'
 };
 
 export default pl;

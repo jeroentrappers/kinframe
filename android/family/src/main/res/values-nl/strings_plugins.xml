@@ -73,4 +73,25 @@
     <string name="plugins_err_not_on_frame">Het kader heeft deze plug-in niet</string>
     <string name="plugins_err_duplicate">Twee plug-ins hebben dezelfde ID</string>
     <string name="plugins_err_other">Niet aanvaard (%1$s)</string>
+    <!-- Community plugins from the registry (docs/plugins.md §7). -->
+    <string name="plugins_group_builtin">Ingebouwd</string>
+    <string name="plugins_group_community">Community</string>
+    <string name="plugins_group_community_hint">Gemaakt door andere mensen. Elke nieuwe plug-in, en elke wijziging aan wat er een mag doen, wordt nagekeken voor ze verschijnt.</string>
+    <string name="plugins_by_author">door %1$s</string>
+    <string name="plugins_version_number">versie %1$s</string>
+    <string name="plugins_confirm_title">%1$s toevoegen?</string>
+    <string name="plugins_confirm_body">Deze plug-in komt uit de community, niet van kinframe. Wat hij mag doen:</string>
+    <string name="plugins_add_confirm">Toevoegen</string>
+    <string name="plugins_perm_addresses">Maakt verbinding met de adressen die je invult: %1$s</string>
+    <string name="plugins_perm_actions">Toont knoppen op het kader die iets veranderen, zoals een stopcontact schakelen</string>
+    <string name="plugins_perm_none">Toont alleen iets op het kader; maakt nergens verbinding mee</string>
+    <string name="plugins_update_asks">Update naar %1$s beschikbaar — die vraagt:</string>
+    <string name="plugins_update_fewer">Update naar %1$s beschikbaar — die vraagt minder dan voorheen.</string>
+    <string name="plugins_update_approve">Goedkeuren</string>
+    <string name="plugins_update_dismiss">Niet nu</string>
+    <string name="plugins_update_approved">Update naar %1$s goedgekeurd</string>
+    <string name="plugins_update_waiting">Een update wacht op je goedkeuring</string>
+    <string name="plugins_withdrawn">Teruggetrokken uit het community-register: %1$s</string>
+    <string name="plugins_withdrawn_hint">Hij draait niet meer op het kader. Je kunt hem verwijderen.</string>
+    <string name="plugins_runs_version">Het kader draait versie %1$s.</string>
 </resources>

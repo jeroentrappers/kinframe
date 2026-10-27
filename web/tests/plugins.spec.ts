@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import type { components } from '../src/lib/api/schema';
-import { defaultSettings, emptyState, makeFrame, mockApi, type MockState } from './mock-api';
+import { communityPlugin, defaultSettings, emptyState, makeFrame, mockApi, pluginUpdate, type MockState } from './mock-api';
 
 type S = components['schemas'];
 const manifest = (dir: string) => JSON.parse(readFileSync(new URL(`../../plugins/${dir}/plugin.json`, import.meta.url), 'utf8'));
@@ -250,4 +250,129 @@ test('an older frame app asks to be updated', async ({ page }) => {
 	const section = page.getByRole('region', { name: 'Plugins' });
 	await expect(section.getByText('Update the frame app')).toBeVisible();
 	await expect(section.getByRole('button', { name: 'Add plugin' })).toHaveCount(0);
+});
+
+test('community plugins: their own group, what they may do before adding, the version a new one gets', async ({ page }) => {
+	const { state, frame } = setup();
+	state.plugins[frame.id]!.catalog!.push(communityPlugin('1.1.0'));
+	await mockApi(page, state);
+	await signIn(page);
+	await page.goto(`/frames/${frame.id}?tab=settings`);
+	const section = page.getByRole('region', { name: 'Plugins' });
+
+	await section.getByRole('button', { name: 'Add plugin' }).click();
+	const add = page.getByRole('dialog', { name: 'Add plugin' });
+	await expect(add.getByRole('heading', { name: 'Built in' })).toBeVisible();
+	const group = add.getByRole('region', { name: 'Community' });
+	await expect(group.getByText('Bin day')).toBeVisible();
+	await expect(group.getByText('by Jane Doe · MIT · version 1.1.0')).toBeVisible();
+	await expect(group.getByText('Only reaches the addresses you fill in')).toBeVisible();
+	await expect(add.getByRole('region', { name: 'Built in' }).getByText('Bin day')).toHaveCount(0);
+	await shot(page, 'plugins-08-catalog-community');
+
+	// Adding asks first, listing exactly what it may do; Cancel adds nothing.
+	await group.getByRole('button', { name: 'Add Bin day' }).click();
+	const confirm = page.getByRole('dialog', { name: 'Add Bin day?' });
+	await expect(confirm.getByText('This plugin comes from the community, not from kinframe. What it may do:')).toBeVisible();
+	await expect(confirm.getByText('Reaches the addresses you fill in: Calendar address')).toBeVisible();
+	await expect(confirm.getByText('Shows buttons on the frame that change things')).toBeVisible();
+	await expect(confirm.getByText('Reaches the internet')).toHaveCount(0);
+	await expect(confirm.getByText('Uses the frame’s place')).toHaveCount(0);
+	await shot(page, 'plugins-09-confirm');
+	await confirm.getByRole('button', { name: 'Cancel' }).click();
+	await expect(confirm).toBeHidden();
+	await expect(page.getByRole('dialog', { name: 'Bin day' })).toHaveCount(0);
+
+	await section.getByRole('button', { name: 'Add plugin' }).click();
+	await add.getByRole('button', { name: 'Add Bin day' }).click();
+	await confirm.getByRole('button', { name: 'Add', exact: true }).click();
+	const editor = page.getByRole('dialog', { name: 'Bin day' });
+	await expect(editor.getByText('Community', { exact: true })).toBeVisible();
+	await editor.getByLabel('Calendar address').fill('https://cal.example.org/bins.ics');
+	await editor.getByRole('button', { name: 'Save' }).click();
+	await expect(editor).toBeHidden();
+	const sent = (patches(state)[0]!.body as { plugins: { instances: S['PluginInstance'][] } }).plugins.instances[0]!;
+	expect(sent).toMatchObject({ plugin_id: 'community.bin-day', version: '1.1.0', enabled: true, settings: { calendar_url: 'https://cal.example.org/bins.ics' } });
+
+	// Built-in plugins add straight away, as before.
+	await section.getByRole('button', { name: 'Add plugin' }).click();
+	await add.getByRole('button', { name: 'Add HomeWizard P1 meter' }).click();
+	await expect(page.getByRole('dialog', { name: 'HomeWizard P1 meter' })).toBeVisible();
+});
+
+test('an update asking for other permissions waits for approval; a withdrawn plugin says so', async ({ page }) => {
+	const { state, frame } = setup();
+	state.plugins[frame.id]!.catalog!.push(communityPlugin('1.0.0'));
+	state.settings[frame.id] = {
+		...defaultSettings(),
+		plugins: {
+			layout: { mode: 'overlay' },
+			instances: [
+				{
+					instance_id: 'p-bins000001',
+					plugin_id: 'community.bin-day',
+					version: '1.0.0',
+					enabled: true,
+					settings: { calendar_url: 'https://cal.example.org/bins.ics' } as unknown as S['PluginInstance']['settings']
+				},
+				{ instance_id: 'p-gone000001', plugin_id: 'community.gone', version: '0.3.0', enabled: true, settings: {} }
+			]
+		}
+	};
+	state.plugins[frame.id]!.instances = [
+		pluginUpdate('p-bins000001', '1.0.0', '1.2.0', { http: ['settings.calendar_url', 'https://holidays.example.org'], location: true, actions: true }),
+		{ instance_id: 'p-gone000001', running: false, error: 'withdrawn: sent the token to the wrong host' }
+	];
+	await mockApi(page, state);
+	await signIn(page);
+	await page.goto(`/frames/${frame.id}?tab=settings`);
+	const section = page.getByRole('region', { name: 'Plugins' });
+	await expect(section.getByText('Withdrawn from the community registry: sent the token to the wrong host')).toBeVisible();
+	await expect(section.getByRole('button', { name: 'Remove community.gone?' })).toBeVisible();
+	await expect(section.getByText('An update waits for your approval')).toBeVisible();
+	await shot(page, 'plugins-10-list-update');
+
+	// The editor names what the new version asks for beyond the one the frame runs.
+	await section.getByRole('button', { name: 'Edit Bin day' }).click();
+	const editor = page.getByRole('dialog', { name: 'Bin day' });
+	const update = editor.getByRole('region', { name: 'An update waits for your approval' });
+	await expect(update.getByText('Update to 1.2.0 available — it asks for:')).toBeVisible();
+	await expect(update.getByText('Reaches the internet: holidays.example.org')).toBeVisible();
+	await expect(update.getByText('Uses the frame’s place')).toBeVisible();
+	await expect(update.getByText('Reaches the addresses you fill in')).toHaveCount(0);
+	await expect(update.getByText('Shows buttons on the frame')).toHaveCount(0);
+	await expect(editor.getByText('The frame runs version 1.0.0.')).toBeVisible();
+	await expect(editor.getByText('by Jane Doe · MIT')).toBeVisible();
+	await shot(page, 'plugins-11-update');
+
+	// "Not now" hides it for now, in the list too; nothing is saved.
+	await update.getByRole('button', { name: 'Not now' }).click();
+	await expect(update).toBeHidden();
+	await editor.getByRole('button', { name: 'Cancel' }).click();
+	await expect(section.getByText('An update waits for your approval')).toBeHidden();
+	expect(patches(state)).toHaveLength(0);
+
+	// It isn't kept: after a reload it asks again. Someone else saved meanwhile (412): approving still works.
+	await page.reload();
+	await section.getByRole('button', { name: 'Edit Bin day' }).click();
+	state.settings[frame.id]!.version += 1;
+	await update.getByRole('button', { name: 'Approve' }).click();
+	await expect(page.getByText('Update to 1.2.0 approved')).toBeVisible();
+	await expect(update).toBeHidden();
+	const sent = patches(state);
+	expect(sent).toHaveLength(2);
+	expect(sent[0]!.headers?.['if-match']).toBe('"1"');
+	expect(sent[1]!.headers?.['if-match']).toBe('"2"');
+	const instances = (sent[1]!.body as { plugins: { instances: S['PluginInstance'][] } }).plugins.instances;
+	expect(instances.map((x) => [x.instance_id, x.version])).toEqual([
+		['p-bins000001', '1.2.0'],
+		['p-gone000001', '0.3.0']
+	]);
+	expect(instances[0]).toMatchObject({ enabled: true, settings: { calendar_url: 'https://cal.example.org/bins.ics' } });
+	expect(instances[0]).not.toHaveProperty('secrets_set');
+	// The editor stays open for the settings; saving them keeps the approved version.
+	await editor.getByRole('button', { name: 'Save' }).click();
+	await expect(editor).toBeHidden();
+	const last = (patches(state)[2]!.body as { plugins: { instances: S['PluginInstance'][] } }).plugins.instances[0]!;
+	expect(last.version).toBe('1.2.0');
 });

@@ -13,6 +13,8 @@ import app.kinframe.frame.plugins.js.PluginLibraries
 import app.kinframe.frame.plugins.js.PluginNet
 import app.kinframe.frame.plugins.js.PluginPermissions
 import app.kinframe.frame.plugins.js.QuickJsPluginInstance
+import app.kinframe.frame.plugins.registry.PluginRegistry
+import app.kinframe.frame.plugins.registry.RegistryStore
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.weather.WeatherSources
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonObject
 import java.util.Locale
@@ -65,6 +68,14 @@ class FramePlugins(private val c: FrameController) {
     private val prelude: String by lazy { g.app.assets.open("plugin-host/prelude.js").bufferedReader().use { it.readText() } }
     private val libraries: PluginLibraries by lazy { PluginLibraries.fromAssets(g.app.assets) }
 
+    /** The community registry's index and the bundles installed from it (docs/plugins.md §7). */
+    val registry = RegistryStore(java.io.File(g.app.filesDir, "plugin-registry"), PluginRegistry.publicKey(BuildConfig.PLUGIN_REGISTRY_KEY))
+
+    private val shipped: Set<String> by lazy { g.app.assets.list("plugins").orEmpty().toSet() }
+
+    /** Built into the app: a Kotlin built-in or a bundle in the APK's assets. */
+    fun isBuiltin(pluginId: String) = pluginId in builtIns || pluginId in shipped
+
     /** A plugin bundle shipped in the APK (assets `plugins/<id>/`), or null. A broken bundle is logged and skipped. */
     fun bundle(pluginId: String): PluginBundle? = synchronized(bundles) {
         bundles.getOrPut(pluginId) {
@@ -73,8 +84,36 @@ class FramePlugins(private val c: FrameController) {
         }
     }
 
+    /** The bundle an instance runs: the APK's, or the registry version the host was given ([forHost]) once installed. */
+    fun bundle(cfg: InstanceConfig): PluginBundle? {
+        if (isBuiltin(cfg.pluginId)) return bundle(cfg.pluginId)
+        if (!registry.installed(cfg.pluginId, cfg.version)) return null
+        return synchronized(bundles) {
+            bundles.getOrPut("${cfg.pluginId}@${cfg.version}") {
+                runCatching { PluginBundle.fromDirectory(registry.bundleDir(cfg.pluginId, cfg.version)) }
+                    .onFailure { Log.w("KinFramePlugins", "bundle ${cfg.pluginId} ${cfg.version}: ${it.message}") }.getOrNull()
+            }
+        }
+    }
+
+    /**
+     * The registry version an instance runs (§7: newer versions with the same permissions at once, others after the
+     * owner's approval), or null when the index has nothing runnable for it.
+     */
+    fun choice(cfg: InstanceConfig): PluginRegistry.Choice? {
+        if (isBuiltin(cfg.pluginId)) return null
+        val ix = registry.index.value ?: return PluginRegistry.Choice(null, null)
+        return PluginRegistry.choose(ix, cfg.pluginId, cfg.version.takeIf { it.isNotEmpty() && it != "builtin" })
+    }
+
+    /** What the host runs: a registry instance names the version it chose, so a new one restarts it. */
+    private fun forHost(list: List<InstanceConfig>): List<InstanceConfig> = list.mapNotNull { cfg ->
+        val ch = choice(cfg) ?: return@mapNotNull cfg
+        ch.run?.let { cfg.copy(version = it.version) }
+    }
+
     private fun script(cfg: InstanceConfig): PluginInstance? {
-        val b = bundle(cfg.pluginId) ?: return null
+        val b = bundle(cfg) ?: return null
         val net = PluginNet(g.http, PluginPermissions(b.manifest, b.manifest.withDefaults(cfg.values)), userAgent = USER_AGENT)
         return QuickJsPluginInstance(b, prelude, net, libraries = libraries)
     }
@@ -100,8 +139,9 @@ class FramePlugins(private val c: FrameController) {
         started = true
         c.scope.launch {
             val forecastOn = g.settings.settings.map { WeatherSources.forecastOn(it) }.distinctUntilChanged()
-            combine(prefs.instances, prefs.layout, forecastOn) { list, l, fc -> if (l.mode == PluginLayoutMode.Off) emptyList() else WeatherSources.forHost(list, fc) }
-                .distinctUntilChanged().collect { host.apply(it) }
+            combine(prefs.instances, prefs.layout, forecastOn, registry.index) { list, l, fc, _ ->
+                if (l.mode == PluginLayoutMode.Off) emptyList() else forHost(WeatherSources.forHost(list, fc))
+            }.distinctUntilChanged().collect { host.apply(it) }
         }
         c.scope.launch {
             combine(prefs.instances, prefs.layout) { list, l -> l.mode != PluginLayoutMode.Off && list.any { it.enabled && it.pluginId == WEATHER_STATION } }
@@ -152,6 +192,15 @@ class FramePlugins(private val c: FrameController) {
             }
         }
 
+        launch {
+            while (true) {
+                runCatching { registry.refresh(g.api) }.onFailure { Log.i("KinFramePlugins", "registry not refreshed: ${it.message}") }
+                installRegistryBundles()
+                delay(REGISTRY_EVERY_MS)
+            }
+        }
+        launch { prefs.instances.collect { installRegistryBundles() } }
+
         val entities = HashMap<String, Pair<String, Pair<Long, List<PluginReports.Entity>?>>>()
         var sent: JsonObject? = null
         var sentAt = 0L
@@ -160,9 +209,13 @@ class FramePlugins(private val c: FrameController) {
             val states = host.states.value.associateBy { it.config.instanceId }
             val reports = prefs.instances.value.map { cfg ->
                 val st = states[cfg.instanceId]
+                val ch = choice(cfg)
                 PluginReports.InstanceReport(
-                    instanceId = cfg.instanceId, running = st != null, error = st?.error,
+                    instanceId = cfg.instanceId, running = st != null,
+                    error = st?.error ?: ch?.withdrawn?.let { "withdrawn: $it" },
                     updatedAtMs = st?.lastGoodAt?.takeIf { it > 0 }, entities = entitiesFor(cfg, entities, now),
+                    version = if (ch == null) bundle(cfg.pluginId)?.manifest?.version else ch.run?.version,
+                    update = ch?.update,
                 )
             }
             val compare = PluginReports.status(reports, services.value, withTimes = false)
@@ -175,13 +228,31 @@ class FramePlugins(private val c: FrameController) {
         }
     }
 
+    private val installLock = kotlinx.coroutines.sync.Mutex()
+
+    /** Downloads what the instances' chosen registry versions need, then lets the host start them; prunes the rest. */
+    private suspend fun installRegistryBundles() = installLock.withLock {
+        val ix = registry.index.value ?: return@withLock
+        val keep = HashMap<String, MutableSet<String>>()
+        var installed = false
+        for (cfg in prefs.instances.value) {
+            val v = choice(cfg)?.run ?: continue
+            keep.getOrPut(cfg.pluginId) { HashSet() } += v.version
+            if (registry.installed(cfg.pluginId, v.version)) continue
+            runCatching { registry.ensure(g.api, cfg.pluginId, v); installed = true }
+                .onFailure { Log.w("KinFramePlugins", "install ${cfg.pluginId} ${v.version}: ${it.message}") }
+        }
+        if (ix.plugins.isNotEmpty()) registry.prune(keep)
+        if (installed) host.retry()
+    }
+
     /**
      * The Home Assistant entities an instance can see (§6.2), listed again when its address or token changes and every
      * 10 minutes; null while it has no connection or the last try failed (tried again after a minute).
      */
     private suspend fun entitiesFor(cfg: InstanceConfig, cache: HashMap<String, Pair<String, Pair<Long, List<PluginReports.Entity>?>>>, now: Long): List<PluginReports.Entity>? {
         if (cfg.pluginId in builtIns) return null
-        val manifest = bundle(cfg.pluginId)?.manifest ?: return null
+        val manifest = bundle(forHost(listOf(cfg)).firstOrNull() ?: return null)?.manifest ?: return null
         val values = manifest.withDefaults(cfg.values)
         val (base, token) = PluginReports.entityConnection(manifest, values) ?: return null
         val key = PluginReports.connectionKey(base, token)
@@ -294,6 +365,7 @@ class FramePlugins(private val c: FrameController) {
         /** Debug builds: cycles the example views from docs/api/plugin-views (dev preview). */
         const val DEMO = "kinframe.demo"
         const val DEMO_INSTANCE = "debug-demo"
+        private const val REGISTRY_EVERY_MS = 6 * 3_600_000L
         private const val DEMO_MANIFEST =
             """{"id":"kinframe.demo","name":"Demo","version":"1.0.0","api":1,"settings":[{"key":"fixture","type":"text","label":"Fixture"}]}"""
     }

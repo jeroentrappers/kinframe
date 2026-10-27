@@ -1253,7 +1253,26 @@ const nl: Catalog = {
 	'plugins.errEnum': 'Kies een van de opties.',
 	'plugins.errTimezone': 'Kies een tijdzone uit de lijst.',
 	'plugins.errUnknown': 'De plug-in op het kader heeft deze instelling niet meer.',
-	'plugins.errType': 'Dit past niet bij deze instelling.'
+	'plugins.errType': 'Dit past niet bij deze instelling.',
+	'plugins.groupBuiltin': 'Ingebouwd',
+	'plugins.groupCommunity': 'Community',
+	'plugins.groupCommunityHint': 'Gemaakt door andere mensen. Elke nieuwe plug-in, en elke wijziging aan wat er een mag doen, wordt nagekeken voor ze verschijnt.',
+	'plugins.byAuthor': 'door {name}',
+	'plugins.versionNumber': 'versie {version}',
+	'plugins.confirmTitle': '{name} toevoegen?',
+	'plugins.confirmBody': 'Deze plug-in komt uit de community, niet van kinframe. Wat hij mag doen:',
+	'plugins.permAddresses': 'Bereikt de adressen die je invult: {settings}',
+	'plugins.permActions': 'Toont knoppen op het kader die iets veranderen, zoals een stopcontact schakelen',
+	'plugins.permNone': 'Toont alleen iets op het kader; bereikt niets',
+	'plugins.updateAsks': 'Update naar {version} beschikbaar — die vraagt:',
+	'plugins.updateFewer': 'Update naar {version} beschikbaar — die vraagt minder dan voorheen.',
+	'plugins.updateApprove': 'Goedkeuren',
+	'plugins.updateDismiss': 'Niet nu',
+	'plugins.updateApproved': 'Update naar {version} goedgekeurd',
+	'plugins.updateWaiting': 'Een update wacht op je goedkeuring',
+	'plugins.withdrawn': 'Teruggetrokken uit het community-register: {reason}',
+	'plugins.withdrawnHint': 'Hij draait niet meer op het kader. Je kunt hem verwijderen.',
+	'plugins.runsVersion': 'Het kader draait versie {version}.'
 };
 
 export default nl;

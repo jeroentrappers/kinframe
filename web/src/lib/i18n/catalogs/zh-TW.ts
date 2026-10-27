@@ -1262,7 +1262,26 @@ const zhTW: Catalog = {
 	'plugins.errEnum': '請選擇其中一個選項。',
 	'plugins.errTimezone': '請從清單中選擇時區。',
 	'plugins.errUnknown': '相框上的外掛程式已不再有此設定。',
-	'plugins.errType': '此值不適用於該設定。'
+	'plugins.errType': '此值不適用於該設定。',
+	'plugins.groupBuiltin': '內建',
+	'plugins.groupCommunity': '社群',
+	'plugins.groupCommunityHint': '由其他人製作。每個新外掛程式，以及其權限的每次變更，都會在發布前經過審查。',
+	'plugins.byAuthor': '作者：{name}',
+	'plugins.versionNumber': '版本 {version}',
+	'plugins.confirmTitle': '要新增{name}嗎？',
+	'plugins.confirmBody': '此外掛程式來自社群，而非 kinframe。它可以：',
+	'plugins.permAddresses': '連線到你填寫的位址：{settings}',
+	'plugins.permActions': '在相框上顯示可改變狀態的按鈕，例如開啟插座',
+	'plugins.permNone': '只在相框上顯示；不連線到任何地方',
+	'plugins.updateAsks': '有可更新至 {version} 的版本 — 它要求：',
+	'plugins.updateFewer': '有可更新至 {version} 的版本 — 它要求的權限比以前少。',
+	'plugins.updateApprove': '核准',
+	'plugins.updateDismiss': '稍後',
+	'plugins.updateApproved': '已核准更新至 {version}',
+	'plugins.updateWaiting': '有一個更新等待你核准',
+	'plugins.withdrawn': '已從社群登錄檔撤回：{reason}',
+	'plugins.withdrawnHint': '它已不在相框上執行。你可以將其移除。',
+	'plugins.runsVersion': '相框正在執行版本 {version}。'
 };
 
 export default zhTW;

@@ -1292,7 +1292,26 @@ const fr: Catalog = {
 	'plugins.errEnum': 'Choisissez une des options.',
 	'plugins.errTimezone': 'Choisissez un fuseau horaire dans la liste.',
 	'plugins.errUnknown': 'Le plugin du cadre n’a plus ce réglage.',
-	'plugins.errType': 'Cette valeur ne convient pas à ce réglage.'
+	'plugins.errType': 'Cette valeur ne convient pas à ce réglage.',
+	'plugins.groupBuiltin': 'Intégrés',
+	'plugins.groupCommunity': 'Communauté',
+	'plugins.groupCommunityHint': 'Créés par d’autres personnes. Chaque nouveau plugin, et chaque changement de ce qu’il peut faire, est vérifié avant publication.',
+	'plugins.byAuthor': 'par {name}',
+	'plugins.versionNumber': 'version {version}',
+	'plugins.confirmTitle': 'Ajouter {name} ?',
+	'plugins.confirmBody': 'Ce plugin vient de la communauté, pas de kinframe. Ce qu’il peut faire :',
+	'plugins.permAddresses': 'Contacte les adresses que vous saisissez : {settings}',
+	'plugins.permActions': 'Affiche sur le cadre des boutons qui agissent, comme allumer une prise',
+	'plugins.permNone': 'S’affiche seulement sur le cadre ; ne contacte rien',
+	'plugins.updateAsks': 'Mise à jour vers {version} disponible — elle demande :',
+	'plugins.updateFewer': 'Mise à jour vers {version} disponible — elle demande moins qu’avant.',
+	'plugins.updateApprove': 'Approuver',
+	'plugins.updateDismiss': 'Pas maintenant',
+	'plugins.updateApproved': 'Mise à jour vers {version} approuvée',
+	'plugins.updateWaiting': 'Une mise à jour attend votre accord',
+	'plugins.withdrawn': 'Retiré du registre de la communauté : {reason}',
+	'plugins.withdrawnHint': 'Il ne fonctionne plus sur le cadre. Vous pouvez le retirer.',
+	'plugins.runsVersion': 'Le cadre utilise la version {version}.'
 };
 
 export default fr;

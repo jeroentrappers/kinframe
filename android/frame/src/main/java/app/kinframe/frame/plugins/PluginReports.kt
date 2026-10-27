@@ -96,7 +96,16 @@ object PluginReports {
     // ------------------------------------------------------------------------------------------- status
 
     /** One instance's line in the status report. */
-    data class InstanceReport(val instanceId: String, val running: Boolean, val error: String?, val updatedAtMs: Long?, val entities: List<Entity>?)
+    data class InstanceReport(
+        val instanceId: String,
+        val running: Boolean,
+        val error: String?,
+        val updatedAtMs: Long?,
+        val entities: List<Entity>?,
+        /** The plugin version it runs; [update]: a newer registry version that waits for the owner's approval. */
+        val version: String? = null,
+        val update: app.kinframe.frame.plugins.registry.PluginRegistry.Version? = null,
+    )
 
     /** The status report (`PluginStatusReport`). [withTimes] false leaves out what changes every update. */
     fun status(instances: List<InstanceReport>, services: Map<String, List<FoundService>>, withTimes: Boolean = true): JsonObject = buildJsonObject {
@@ -106,6 +115,8 @@ object PluginReports {
                 put("running", i.running)
                 put("error", i.error?.take(300)?.let(::JsonPrimitive) ?: JsonNull)
                 if (withTimes) put("updated_at", i.updatedAtMs?.let { JsonPrimitive(Instant.ofEpochMilli(it).toString()) } ?: JsonNull)
+                put("version", i.version?.let(::JsonPrimitive) ?: JsonNull)
+                put("update", i.update?.let { u -> buildJsonObject { put("version", u.version); u.permissions?.let { p -> put("permissions", p) } } } ?: JsonNull)
                 i.entities?.let { list ->
                     put("entities", JsonArray(list.map { e ->
                         buildJsonObject {

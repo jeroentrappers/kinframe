@@ -527,7 +527,7 @@ components:
             description: A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
             properties:
                 builtin:
-                    description: Part of the frame app (not a downloaded bundle).
+                    description: Part of the frame app; false for a plugin from the community registry (its newest version).
                     type: boolean
                 locales:
                     additionalProperties:
@@ -2383,13 +2383,43 @@ components:
                 running:
                     description: The instance started on the frame.
                     type: boolean
+                update:
+                    description: A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+                    nullable: true
+                    properties:
+                        permissions:
+                            additionalProperties: true
+                            description: The newer version's `permissions`.
+                            type: object
+                        version:
+                            type: string
+                    type: object
                 updated_at:
                     description: When the last update succeeded.
                     format: date-time
                     nullable: true
                     type: string
+                version:
+                    description: 'The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).'
+                    nullable: true
+                    type: string
             required:
                 - instance_id
+            type: object
+        PluginRegistry:
+            properties:
+                index:
+                    description: base64 of index.json, byte for byte as signed
+                    type: string
+                sequence:
+                    type: integer
+                signature:
+                    description: base64 DER ECDSA P-256 SHA-256 signature over those bytes
+                    type: string
+            required:
+                - index
+                - signature
+                - sequence
             type: object
         PluginStatusReport:
             description: What the frame knows about its plugins right now (`PUT /device/plugins/status`).
@@ -4095,6 +4125,31 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/plugins/bundles/{file}:
+        get:
+            description: A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`.
+            operationId: deviceGetPluginBundle
+            parameters:
+                - in: path
+                  name: file
+                  required: true
+                  schema:
+                    pattern: ^[a-z0-9][a-z0-9.-]{0,80}-\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?\.zip$
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/zip:
+                            schema:
+                                format: binary
+                                type: string
+                    description: Bundle
+                "404":
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
     /v1/device/plugins/catalog:
         put:
             description: The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one.
@@ -4108,6 +4163,27 @@ paths:
             responses:
                 "204":
                     description: Stored
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/plugins/registry:
+        get:
+            description: |
+                The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+                verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+            operationId: deviceGetPluginRegistry
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PluginRegistry'
+                    description: Signed index
+                "204":
+                    description: No registry
                 default:
                     $ref: '#/components/responses/Problem'
             security:

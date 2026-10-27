@@ -7,17 +7,23 @@
 	import { toasts } from '$lib/toast.svelte';
 	import {
 		MAX_INSTANCES,
+		catalogGroups,
+		communityMeta,
 		findPlugin,
 		instanceComplete,
 		internetHosts,
+		isCommunity,
 		manifestOf,
 		mapErrors,
 		newInstance,
 		pluginDescription,
+		pendingUpdate,
+		permissionsOf,
 		pluginName,
 		statusKind,
 		statusOf,
 		usesLocation,
+		withdrawnReason,
 		type CatalogPlugin,
 		type FramePlugins,
 		type InstanceOp,
@@ -26,6 +32,7 @@
 	} from '$lib/plugins';
 	import Dialog from '../../Dialog.svelte';
 	import Icon from '../../Icon.svelte';
+	import PermissionList from './PermissionList.svelte';
 	import PluginEditor, { type SaveResult } from './PluginEditor.svelte';
 
 	type Layout = NonNullable<NonNullable<FrameSettings['plugins']>['layout']>;
@@ -70,9 +77,8 @@
 
 	const loc = $derived(i18n.locale);
 	const noCatalog = $derived(fp != null && !fp.catalog_at);
-	const catalog = $derived(
-		[...(fp?.catalog ?? [])].sort((a, b) => pluginName(a, loc).localeCompare(pluginName(b, loc), i18n.tag))
-	);
+	const groups = $derived(catalogGroups(fp?.catalog, loc, i18n.tag));
+	const catalogEmpty = $derived(groups.builtin.length + groups.community.length === 0);
 	const full = $derived(instances.length >= MAX_INSTANCES);
 
 	// ------------------------------------------------------------ editor
@@ -98,6 +104,23 @@
 	}
 
 	let addOpen = $state(false);
+
+	// A community plugin first says what it may do (§7): Add / Cancel.
+	let confirming = $state<CatalogPlugin | null>(null);
+	let confirmOpen = $state(false);
+
+	function pick(plugin: CatalogPlugin) {
+		addOpen = false;
+		if (isCommunity(plugin)) {
+			confirming = plugin;
+			confirmOpen = true;
+		} else add(plugin);
+	}
+
+	function confirmAdd() {
+		confirmOpen = false;
+		if (confirming) add(confirming);
+	}
 
 	function add(plugin: CatalogPlugin) {
 		addOpen = false;
@@ -165,6 +188,10 @@
 			toasts.success(t('plugins.removed', { name: nameOf(inst) }));
 		} else toasts.error(problemMessage(r.error));
 	}
+
+	// Updates the owner put off for now ("Not now"), by instance and version; not kept.
+	let dismissed = $state<string[]>([]);
+	const dismissKey = (id: string, v: string) => `${id}@${v}`;
 
 	// ------------------------------------------------------------ list
 	function nameOf(inst: PluginInstance): string {
@@ -254,12 +281,15 @@
 				{@const m = plugin ? manifestOf(plugin) : undefined}
 				{@const st = statusOf(fp, inst.instance_id)}
 				{@const kind = fp && !noCatalog ? statusKind(m, inst, st) : null}
+				{@const update = pendingUpdate(plugin, inst, st)}
 				<li class="inst" class:off={inst.enabled === false}>
 					<button type="button" class="inst-main" disabled={!plugin} onclick={() => edit(inst)} aria-label={t('plugins.edit', { name: nameOf(inst) })}>
 						<span class="inst-name">{nameOf(inst)}</span>
 						<span class="inst-meta small muted">
 							<span>{t(SLOT[inst.slot ?? 'top-right'])}</span>
-							{#if kind === 'error'}
+							{#if kind === 'withdrawn'}
+								<span class="err"><Icon name="alert" size={14} />{t('plugins.withdrawn', { reason: withdrawnReason(st) ?? '' })}</span>
+							{:else if kind === 'error'}
 								<span class="err"><Icon name="alert" size={14} />{st?.error}</span>
 							{:else if kind === 'waiting'}
 								<span>· {t('plugins.statusWaiting')}</span>
@@ -267,6 +297,9 @@
 								<span class="warn">· {t('plugins.statusIncomplete')}</span>
 							{:else if kind === 'not_on_frame'}
 								<span class="warn">· {t('plugins.statusNotOnFrame')}</span>
+							{/if}
+							{#if update && kind !== 'withdrawn' && !dismissed.includes(dismissKey(inst.instance_id, update.version))}
+								<span class="update"><Icon name="shield" size={14} />{t('plugins.updateWaiting')}</span>
 							{/if}
 						</span>
 					</button>
@@ -292,33 +325,80 @@
 	{#if full}<p class="hint">{t('plugins.max', { n: MAX_INSTANCES })}</p>{/if}
 </section>
 
+{#snippet catalogEntry(p: CatalogPlugin)}
+	{@const m = manifestOf(p)}
+	{@const hosts = internetHosts(m)}
+	{@const meta = isCommunity(p) ? communityMeta(m) : null}
+	<li class="cat">
+		<div class="cat-text">
+			<span class="inst-name">{pluginName(p, loc)}</span>
+			{#if meta}
+				<span class="tiny muted meta">
+					{[meta.author ? t('plugins.byAuthor', { name: meta.author }) : '', meta.license ?? '', meta.version ? t('plugins.versionNumber', { version: meta.version }) : '']
+						.filter(Boolean)
+						.join(' · ')}
+				</span>
+			{/if}
+			{#if pluginDescription(p, loc)}<span class="small muted">{pluginDescription(p, loc)}</span>{/if}
+			<span class="perm tiny">
+				<Icon name={hosts.length ? 'globe' : 'wifi'} size={14} />
+				{hosts.length ? t('plugins.reachesInternet', { hosts: hosts.join(', ') }) : t('plugins.ownAddressesOnly')}
+			</span>
+			{#if usesLocation(m)}
+				<span class="perm tiny"><Icon name="mapPin" size={14} />{t('plugins.usesLocation')}</span>
+			{/if}
+		</div>
+		<button type="button" class="btn btn-soft btn-sm" onclick={() => pick(p)} aria-label={t('plugins.addNamed', { name: pluginName(p, loc) })}>
+			<Icon name="plus" size={16} />{t('plugins.addOne')}
+		</button>
+	</li>
+{/snippet}
+
 <Dialog bind:open={addOpen} title={t('plugins.add')} size="md">
-	{#if catalog.length === 0}
+	{#if catalogEmpty}
 		<p class="muted">{t('plugins.catalogEmpty')}</p>
 	{:else}
-		<ul class="catalog">
-			{#each catalog as p (manifestOf(p).id)}
-				{@const m = manifestOf(p)}
-				{@const hosts = internetHosts(m)}
-				<li class="cat">
-					<div class="cat-text">
-						<span class="inst-name">{pluginName(p, loc)}</span>
-						{#if pluginDescription(p, loc)}<span class="small muted">{pluginDescription(p, loc)}</span>{/if}
-						<span class="perm tiny">
-							<Icon name={hosts.length ? 'globe' : 'wifi'} size={14} />
-							{hosts.length ? t('plugins.reachesInternet', { hosts: hosts.join(', ') }) : t('plugins.ownAddressesOnly')}
-						</span>
-						{#if usesLocation(m)}
-							<span class="perm tiny"><Icon name="mapPin" size={14} />{t('plugins.usesLocation')}</span>
-						{/if}
-					</div>
-					<button type="button" class="btn btn-soft btn-sm" onclick={() => add(p)} aria-label={t('plugins.addNamed', { name: pluginName(p, loc) })}>
-						<Icon name="plus" size={16} />{t('plugins.addOne')}
-					</button>
-				</li>
-			{/each}
-		</ul>
+		<div class="stack groups">
+			{#if groups.builtin.length}
+				<section class="group" aria-labelledby="pl-g-builtin">
+					{#if groups.community.length}<h3 id="pl-g-builtin" class="group-title">{t('plugins.groupBuiltin')}</h3>{/if}
+					<ul class="catalog">
+						{#each groups.builtin as p (manifestOf(p).id)}{@render catalogEntry(p)}{/each}
+					</ul>
+				</section>
+			{/if}
+			{#if groups.community.length}
+				<section class="group" aria-labelledby="pl-g-community">
+					<h3 id="pl-g-community" class="group-title"><Icon name="users" size={16} />{t('plugins.groupCommunity')}</h3>
+					<p class="hint">{t('plugins.groupCommunityHint')}</p>
+					<ul class="catalog">
+						{#each groups.community as p (manifestOf(p).id)}{@render catalogEntry(p)}{/each}
+					</ul>
+				</section>
+			{/if}
+		</div>
 	{/if}
+</Dialog>
+
+<Dialog bind:open={confirmOpen} title={t('plugins.confirmTitle', { name: confirming ? pluginName(confirming, loc) : '' })}>
+	{#if confirming}
+		{@const meta = communityMeta(manifestOf(confirming))}
+		<div class="stack-sm">
+			{#if meta.author || meta.license || meta.version}
+				<p class="small muted confirm-meta">
+					{[meta.author ? t('plugins.byAuthor', { name: meta.author }) : '', meta.license ?? '', meta.version ? t('plugins.versionNumber', { version: meta.version }) : '']
+						.filter(Boolean)
+						.join(' · ')}
+				</p>
+			{/if}
+			<p class="confirm-body">{t('plugins.confirmBody')}</p>
+			<PermissionList items={permissionsOf(manifestOf(confirming).permissions)} plugin={confirming} empty />
+		</div>
+	{/if}
+	{#snippet footer()}
+		<button type="button" class="btn btn-ghost" onclick={() => (confirmOpen = false)}>{t('common.cancel')}</button>
+		<button type="button" class="btn btn-primary" onclick={confirmAdd}>{t('plugins.addOne')}</button>
+	{/snippet}
 </Dialog>
 
 {#if editor}
@@ -331,6 +411,8 @@
 			status={fp}
 			onsave={saveFromEditor}
 			onremove={askRemove}
+			{dismissed}
+			ondismiss={(id, v) => (dismissed = [...dismissed, dismissKey(id, v)])}
 		/>
 	{/key}
 {/if}
@@ -448,6 +530,13 @@
 		color: var(--danger);
 		overflow-wrap: anywhere;
 	}
+	.inst-meta .update {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		color: var(--primary-soft-text);
+		font-weight: 600;
+	}
 	.inst-meta .warn {
 		color: var(--text-muted);
 		font-weight: 600;
@@ -469,6 +558,32 @@
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
+	}
+	.groups {
+		gap: var(--s-4);
+	}
+	.group {
+		display: flex;
+		flex-direction: column;
+		gap: var(--s-2);
+		min-width: 0;
+	}
+	.group-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: 0.95rem;
+	}
+	.group .hint {
+		margin: 0;
+	}
+	.meta {
+		overflow-wrap: anywhere;
+	}
+	.confirm-meta,
+	.confirm-body {
+		margin: 0;
 	}
 	.perm {
 		display: inline-flex;

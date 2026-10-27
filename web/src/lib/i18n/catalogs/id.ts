@@ -1263,7 +1263,26 @@ const id: Catalog = {
 	'plugins.errEnum': 'Pilih salah satu opsi.',
 	'plugins.errTimezone': 'Pilih zona waktu dari daftar.',
 	'plugins.errUnknown': 'Plugin di bingkai tidak lagi punya pengaturan ini.',
-	'plugins.errType': 'Ini tidak cocok untuk pengaturan ini.'
+	'plugins.errType': 'Ini tidak cocok untuk pengaturan ini.',
+	'plugins.groupBuiltin': 'Bawaan',
+	'plugins.groupCommunity': 'Komunitas',
+	'plugins.groupCommunityHint': 'Dibuat oleh orang lain. Setiap plugin baru, dan setiap perubahan pada apa yang boleh dilakukannya, ditinjau sebelum diterbitkan.',
+	'plugins.byAuthor': 'oleh {name}',
+	'plugins.versionNumber': 'versi {version}',
+	'plugins.confirmTitle': 'Tambahkan {name}?',
+	'plugins.confirmBody': 'Plugin ini berasal dari komunitas, bukan dari kinframe. Yang boleh dilakukannya:',
+	'plugins.permAddresses': 'Terhubung ke alamat yang Anda isi: {settings}',
+	'plugins.permActions': 'Menampilkan tombol di bingkai yang mengubah sesuatu, misalnya menyalakan stopkontak',
+	'plugins.permNone': 'Hanya tampil di bingkai; tidak terhubung ke apa pun',
+	'plugins.updateAsks': 'Pembaruan ke {version} tersedia — meminta:',
+	'plugins.updateFewer': 'Pembaruan ke {version} tersedia — meminta lebih sedikit dari sebelumnya.',
+	'plugins.updateApprove': 'Setujui',
+	'plugins.updateDismiss': 'Nanti saja',
+	'plugins.updateApproved': 'Pembaruan ke {version} disetujui',
+	'plugins.updateWaiting': 'Ada pembaruan yang menunggu persetujuan Anda',
+	'plugins.withdrawn': 'Ditarik dari registri komunitas: {reason}',
+	'plugins.withdrawnHint': 'Plugin ini tidak lagi berjalan di bingkai. Anda bisa menghapusnya.',
+	'plugins.runsVersion': 'Bingkai menjalankan versi {version}.'
 };
 
 export default id;

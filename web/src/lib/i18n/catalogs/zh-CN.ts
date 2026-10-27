@@ -1262,7 +1262,26 @@ const zhCN: Catalog = {
 	'plugins.errEnum': '请选择其中一个选项。',
 	'plugins.errTimezone': '请从列表中选择时区。',
 	'plugins.errUnknown': '相框上的插件已不再有此设置。',
-	'plugins.errType': '此值不适用于该设置。'
+	'plugins.errType': '此值不适用于该设置。',
+	'plugins.groupBuiltin': '内置',
+	'plugins.groupCommunity': '社区',
+	'plugins.groupCommunityHint': '由其他人制作。每个新插件，以及其权限的每次变更，都会在发布前经过审核。',
+	'plugins.byAuthor': '作者：{name}',
+	'plugins.versionNumber': '版本 {version}',
+	'plugins.confirmTitle': '添加{name}？',
+	'plugins.confirmBody': '此插件来自社区，而非 kinframe。它可以：',
+	'plugins.permAddresses': '连接你填写的地址：{settings}',
+	'plugins.permActions': '在相框上显示可改变状态的按钮，例如打开插座',
+	'plugins.permNone': '只在相框上显示；不连接任何地方',
+	'plugins.updateAsks': '有可更新到 {version} 的版本 — 它请求：',
+	'plugins.updateFewer': '有可更新到 {version} 的版本 — 它请求的权限比以前少。',
+	'plugins.updateApprove': '批准',
+	'plugins.updateDismiss': '暂不',
+	'plugins.updateApproved': '已批准更新到 {version}',
+	'plugins.updateWaiting': '有一个更新等待你批准',
+	'plugins.withdrawn': '已从社区注册表撤回：{reason}',
+	'plugins.withdrawnHint': '它已不在相框上运行。你可以将其移除。',
+	'plugins.runsVersion': '相框正在运行版本 {version}。'
 };
 
 export default zhCN;

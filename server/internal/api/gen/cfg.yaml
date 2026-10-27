@@ -24,6 +24,8 @@ output-options:
     - getEventInvitationPhoto
     # Only mounted in dev auth mode.
     - devToken
+    # Hand-written: plugin bundles (binary, ETag).
+    - deviceGetPluginBundle
     # Hand-written: CSV download.
     - operatorExportReservations
     # Hand-written: the TV mirror websocket.

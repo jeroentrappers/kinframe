@@ -1262,7 +1262,26 @@ const ko: Catalog = {
 	'plugins.errEnum': '옵션 중 하나를 고르세요.',
 	'plugins.errTimezone': '목록에서 시간대를 선택하세요.',
 	'plugins.errUnknown': '액자의 플러그인에 이 설정이 더 이상 없어요.',
-	'plugins.errType': '이 설정에 맞지 않는 값이에요.'
+	'plugins.errType': '이 설정에 맞지 않는 값이에요.',
+	'plugins.groupBuiltin': '기본 제공',
+	'plugins.groupCommunity': '커뮤니티',
+	'plugins.groupCommunityHint': '다른 사람들이 만들었어요. 새 플러그인과 할 수 있는 일의 변경은 모두 공개 전에 검토돼요.',
+	'plugins.byAuthor': '만든 사람: {name}',
+	'plugins.versionNumber': '버전 {version}',
+	'plugins.confirmTitle': '{name}을(를) 추가할까요?',
+	'plugins.confirmBody': '이 플러그인은 kinframe이 아닌 커뮤니티에서 왔어요. 할 수 있는 일:',
+	'plugins.permAddresses': '입력한 주소에 연결해요: {settings}',
+	'plugins.permActions': '콘센트 켜기처럼 무언가를 바꾸는 버튼을 액자에 표시해요',
+	'plugins.permNone': '액자에 표시만 하고 아무 데도 연결하지 않아요',
+	'plugins.updateAsks': '{version}(으)로 업데이트할 수 있어요 — 요청하는 것:',
+	'plugins.updateFewer': '{version}(으)로 업데이트할 수 있어요 — 이전보다 적게 요청해요.',
+	'plugins.updateApprove': '승인',
+	'plugins.updateDismiss': '나중에',
+	'plugins.updateApproved': '{version}(으)로 업데이트를 승인했어요',
+	'plugins.updateWaiting': '업데이트가 승인을 기다리고 있어요',
+	'plugins.withdrawn': '커뮤니티 레지스트리에서 철회됨: {reason}',
+	'plugins.withdrawnHint': '이제 액자에서 실행되지 않아요. 삭제할 수 있어요.',
+	'plugins.runsVersion': '액자에서 버전 {version}을(를) 실행하고 있어요.'
 };
 
 export default ko;

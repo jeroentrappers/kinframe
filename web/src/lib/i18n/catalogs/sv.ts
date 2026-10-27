@@ -1246,7 +1246,26 @@ const sv: Catalog = {
 	'plugins.errEnum': 'Välj ett av alternativen.',
 	'plugins.errTimezone': 'Välj en tidszon i listan.',
 	'plugins.errUnknown': 'Tillägget på fotoramen har inte längre den här inställningen.',
-	'plugins.errType': 'Det passar inte den här inställningen.'
+	'plugins.errType': 'Det passar inte den här inställningen.',
+	'plugins.groupBuiltin': 'Inbyggda',
+	'plugins.groupCommunity': 'Community',
+	'plugins.groupCommunityHint': 'Gjorda av andra. Varje nytt tillägg, och varje ändring av vad ett tillägg får göra, granskas innan det publiceras.',
+	'plugins.byAuthor': 'av {name}',
+	'plugins.versionNumber': 'version {version}',
+	'plugins.confirmTitle': 'Lägga till {name}?',
+	'plugins.confirmBody': 'Det här tillägget kommer från communityn, inte från kinframe. Vad det får göra:',
+	'plugins.permAddresses': 'Ansluter till adresserna du fyller i: {settings}',
+	'plugins.permActions': 'Visar knappar på fotoramen som ändrar saker, till exempel slår på ett uttag',
+	'plugins.permNone': 'Visas bara på fotoramen; ansluter inte till något',
+	'plugins.updateAsks': 'Uppdatering till {version} finns — den ber om:',
+	'plugins.updateFewer': 'Uppdatering till {version} finns — den ber om mindre än förut.',
+	'plugins.updateApprove': 'Godkänn',
+	'plugins.updateDismiss': 'Inte nu',
+	'plugins.updateApproved': 'Uppdatering till {version} godkänd',
+	'plugins.updateWaiting': 'En uppdatering väntar på ditt godkännande',
+	'plugins.withdrawn': 'Indraget ur communityns register: {reason}',
+	'plugins.withdrawnHint': 'Det körs inte längre på fotoramen. Du kan ta bort det.',
+	'plugins.runsVersion': 'Fotoramen kör version {version}.'
 };
 
 export default sv;

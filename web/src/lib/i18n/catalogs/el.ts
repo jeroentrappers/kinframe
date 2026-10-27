@@ -1251,7 +1251,26 @@ const el: Catalog = {
 	'plugins.errEnum': 'Επιλέξτε μία από τις επιλογές.',
 	'plugins.errTimezone': 'Επιλέξτε ζώνη ώρας από τη λίστα.',
 	'plugins.errUnknown': 'Το πρόσθετο στην κορνίζα δεν έχει πια αυτή τη ρύθμιση.',
-	'plugins.errType': 'Αυτό δεν ταιριάζει σε αυτή τη ρύθμιση.'
+	'plugins.errType': 'Αυτό δεν ταιριάζει σε αυτή τη ρύθμιση.',
+	'plugins.groupBuiltin': 'Ενσωματωμένα',
+	'plugins.groupCommunity': 'Κοινότητα',
+	'plugins.groupCommunityHint': 'Φτιαγμένα από άλλους. Κάθε νέο πρόσθετο, και κάθε αλλαγή σε ό,τι επιτρέπεται να κάνει, ελέγχεται πριν δημοσιευτεί.',
+	'plugins.byAuthor': 'από {name}',
+	'plugins.versionNumber': 'έκδοση {version}',
+	'plugins.confirmTitle': 'Προσθήκη {name};',
+	'plugins.confirmBody': 'Αυτό το πρόσθετο προέρχεται από την κοινότητα, όχι από το kinframe. Τι επιτρέπεται να κάνει:',
+	'plugins.permAddresses': 'Συνδέεται στις διευθύνσεις που συμπληρώνετε: {settings}',
+	'plugins.permActions': 'Δείχνει στην κορνίζα κουμπιά που αλλάζουν κάτι, π.χ. ανάβουν μια πρίζα',
+	'plugins.permNone': 'Απλώς εμφανίζεται στην κορνίζα· δεν συνδέεται πουθενά',
+	'plugins.updateAsks': 'Διαθέσιμη ενημέρωση σε {version} — ζητά:',
+	'plugins.updateFewer': 'Διαθέσιμη ενημέρωση σε {version} — ζητά λιγότερα από πριν.',
+	'plugins.updateApprove': 'Έγκριση',
+	'plugins.updateDismiss': 'Όχι τώρα',
+	'plugins.updateApproved': 'Η ενημέρωση σε {version} εγκρίθηκε',
+	'plugins.updateWaiting': 'Μια ενημέρωση περιμένει την έγκρισή σας',
+	'plugins.withdrawn': 'Αποσύρθηκε από το μητρώο της κοινότητας: {reason}',
+	'plugins.withdrawnHint': 'Δεν τρέχει πια στην κορνίζα. Μπορείτε να το αφαιρέσετε.',
+	'plugins.runsVersion': 'Η κορνίζα τρέχει την έκδοση {version}.'
 };
 
 export default el;

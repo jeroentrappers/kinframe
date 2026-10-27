@@ -13,13 +13,17 @@
 		SEGMENTED_MAX,
 		VISIBILITIES,
 		applyPreset,
+		approveUpdate,
+		communityMeta,
 		draftOf,
 		fieldProblems,
 		instanceComplete,
 		instanceFrom,
+		isCommunity,
 		manifestOf,
 		missingRequired,
 		optionLabel,
+		pendingUpdate,
 		pluginName,
 		presetInputs,
 		presetLabel,
@@ -31,6 +35,7 @@
 		statusKind,
 		statusOf,
 		suggestions,
+		withdrawnReason,
 		type CatalogPlugin,
 		type Draft,
 		type FramePlugins,
@@ -41,6 +46,7 @@
 	import Dialog from '../../Dialog.svelte';
 	import Icon from '../../Icon.svelte';
 	import EntityPicker from './EntityPicker.svelte';
+	import PermissionList from './PermissionList.svelte';
 	import TimeZonePicker from './TimeZonePicker.svelte';
 
 	let {
@@ -50,7 +56,9 @@
 		isNew,
 		status,
 		onsave,
-		onremove
+		onremove,
+		dismissed = [],
+		ondismiss
 	}: {
 		open?: boolean;
 		plugin: CatalogPlugin;
@@ -60,6 +68,9 @@
 		status: FramePlugins | null;
 		onsave: (instance: PluginInstance) => Promise<SaveResult>;
 		onremove: (instance: PluginInstance) => void;
+		/** Updates put off for now, as `<instance id>@<version>`. */
+		dismissed?: string[];
+		ondismiss?: (instanceId: string, version: string) => void;
 	} = $props();
 
 	const uid = $props.id();
@@ -94,6 +105,10 @@
 	const firstEntityKey = $derived(specs.find((s) => s.type === 'entity')?.key);
 	const slots = $derived(slotsOf(m));
 	const presets = $derived(m.presets ?? []);
+	const community = $derived(isCommunity(plugin));
+	const meta = $derived(community ? communityMeta(m) : null);
+	const update = $derived(stored ? pendingUpdate(plugin, stored, st) : null);
+	const showUpdate = $derived(!!update && !!stored && kind !== 'withdrawn' && !dismissed.includes(`${stored.instance_id}@${update.version}`));
 
 	const fid = (key: string) => `${uid}-f-${key}`;
 	const PROBLEM: Record<string, MessageKey> = {
@@ -190,7 +205,7 @@
 		// An incomplete form is saved switched off: the frame can then list what it finds (entities) meanwhile.
 		const enabled = wanted && missing.length === 0;
 		saving = true;
-		const res = await onsave(instanceFrom(m, current, draft, enabled));
+		const res = await onsave(instanceFrom(m, current, draft, enabled, community));
 		saving = false;
 		if (!res.ok) {
 			serverErrors = res.errors?.fields ?? {};
@@ -210,6 +225,26 @@
 			toasts.success(t('plugins.saved', { name }));
 			open = false;
 		}
+	}
+
+	// ------------------------------------------------------------ registry updates (§7)
+	let approving = $state(false);
+
+	/** Approves the waiting update: the instance is saved with its version, like any other change. */
+	async function approve() {
+		if (!stored || !update || saving || approving) return;
+		const version = update.version;
+		general = null;
+		approving = true;
+		const res = await onsave(approveUpdate(stored, version));
+		approving = false;
+		if (!res.ok) {
+			general = res.message;
+			return;
+		}
+		stored = res.saved;
+		current = { ...current, version: res.saved.version };
+		toasts.success(t('plugins.updateApproved', { version }));
 	}
 
 	const VIS: Record<Visibility, MessageKey> = { always: 'plugins.visAlways', on_change: 'plugins.visOnChange', on_tap: 'plugins.visOnTap' };
@@ -236,12 +271,42 @@
 			void save();
 		}}
 	>
-		{#if kind === 'error'}
+		{#if kind === 'withdrawn'}
+			<div class="callout callout-error small" role="status">
+				<Icon name="alert" size={18} />
+				<div class="stack-sm">
+					<strong class="wrap">{t('plugins.withdrawn', { reason: withdrawnReason(st) ?? '' })}</strong>
+					<span>{t('plugins.withdrawnHint')}</span>
+					{#if stored}
+						<button type="button" class="btn btn-danger-ghost btn-sm self-start" onclick={() => stored && onremove(stored)}>
+							<Icon name="trash" size={16} />{t('plugins.remove')}
+						</button>
+					{/if}
+				</div>
+			</div>
+		{:else if kind === 'error'}
 			<p class="callout callout-error small" role="status"><Icon name="alert" size={18} /><span class="wrap">{st?.error}</span></p>
 		{:else if kind === 'waiting'}
 			<p class="callout small" role="status"><span class="spinner" aria-hidden="true"></span>{t('plugins.statusWaiting')}</p>
 		{:else if kind === 'running'}
 			<p class="callout callout-ok small" role="status"><Icon name="check" size={18} />{t('plugins.statusRunning')}</p>
+		{/if}
+		{#if showUpdate && update && stored}
+			<div class="callout callout-warn small update" role="region" aria-label={t('plugins.updateWaiting')} in:softFly>
+				<Icon name="shield" size={18} />
+				<div class="stack-sm grow">
+					<strong>{t(update.fewer ? 'plugins.updateFewer' : 'plugins.updateAsks', { version: update.version })}</strong>
+					{#if !update.fewer}<PermissionList items={update.asks} {plugin} empty />{/if}
+					<div class="row-wrap">
+						<button type="button" class="btn btn-primary btn-sm" disabled={approving || saving} onclick={approve}>
+							{#if approving}<span class="spinner" aria-hidden="true"></span>{/if}{t('plugins.updateApprove')}
+						</button>
+						<button type="button" class="btn btn-ghost btn-sm" onclick={() => stored && update && ondismiss?.(stored.instance_id, update.version)}>
+							{t('plugins.updateDismiss')}
+						</button>
+					</div>
+				</div>
+			</div>
 		{/if}
 		{#if notice}
 			<p class="callout callout-warn small" role="status" in:softFly><Icon name="info" size={18} />{notice}</p>
@@ -477,6 +542,17 @@
 			<input type="checkbox" bind:checked={draft.enabled} onchange={() => draft.enabled && stored && (showMissing = true)} />
 			<span class="s-label">{t('plugins.showSwitch')}</span>
 		</label>
+		{#if meta || st?.version}
+			<p class="tiny muted details">
+				{#if meta}
+					<span class="badge"><Icon name="users" size={12} />{t('plugins.groupCommunity')}</span>
+					<span>
+						{[meta.author ? t('plugins.byAuthor', { name: meta.author }) : '', meta.license ?? ''].filter(Boolean).join(' · ')}
+					</span>
+				{/if}
+				{#if st?.version}<span>{t('plugins.runsVersion', { version: st.version })}</span>{/if}
+			</p>
+		{/if}
 	</form>
 	{#snippet footer()}
 		{#if stored}
@@ -570,5 +646,23 @@
 	}
 	.remove {
 		margin-inline-end: auto;
+	}
+	.grow {
+		flex: 1;
+		min-width: 0;
+	}
+	.update strong {
+		overflow-wrap: anywhere;
+	}
+	.self-start {
+		align-self: flex-start;
+	}
+	.details {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 6px 10px;
+		margin: 0;
+		overflow-wrap: anywhere;
 	}
 </style>

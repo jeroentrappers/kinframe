@@ -1251,7 +1251,26 @@ const tr: Catalog = {
 	'plugins.errEnum': 'Seçeneklerden birini seçin.',
 	'plugins.errTimezone': 'Listeden bir saat dilimi seçin.',
 	'plugins.errUnknown': 'Çerçevedeki eklentide artık bu ayar yok.',
-	'plugins.errType': 'Bu, bu ayara uymuyor.'
+	'plugins.errType': 'Bu, bu ayara uymuyor.',
+	'plugins.groupBuiltin': 'Yerleşik',
+	'plugins.groupCommunity': 'Topluluk',
+	'plugins.groupCommunityHint': 'Başkaları tarafından yapıldı. Her yeni eklenti ve eklentinin yapabileceklerindeki her değişiklik yayınlanmadan önce incelenir.',
+	'plugins.byAuthor': 'yapan: {name}',
+	'plugins.versionNumber': 'sürüm {version}',
+	'plugins.confirmTitle': '{name} eklensin mi?',
+	'plugins.confirmBody': 'Bu eklenti kinframe’den değil, topluluktan geliyor. Yapabilecekleri:',
+	'plugins.permAddresses': 'Doldurduğun adreslere bağlanır: {settings}',
+	'plugins.permActions': 'Çerçevede bir şeyleri değiştiren düğmeler gösterir, örneğin bir prizi açar',
+	'plugins.permNone': 'Yalnızca çerçevede görünür; hiçbir yere bağlanmaz',
+	'plugins.updateAsks': '{version} güncellemesi var — şunları istiyor:',
+	'plugins.updateFewer': '{version} güncellemesi var — öncekinden daha azını istiyor.',
+	'plugins.updateApprove': 'Onayla',
+	'plugins.updateDismiss': 'Şimdi değil',
+	'plugins.updateApproved': '{version} güncellemesi onaylandı',
+	'plugins.updateWaiting': 'Bir güncelleme onayını bekliyor',
+	'plugins.withdrawn': 'Topluluk kaydından çekildi: {reason}',
+	'plugins.withdrawnHint': 'Artık çerçevede çalışmıyor. Kaldırabilirsin.',
+	'plugins.runsVersion': 'Çerçeve {version} sürümünü çalıştırıyor.'
 };
 
 export default tr;

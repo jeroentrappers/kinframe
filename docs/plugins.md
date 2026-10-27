@@ -509,25 +509,64 @@ reports what it found in its plugin status:
 
 ## 7. Publishing: the registry
 
-- **Where:** a public Git repository, `kinframe/plugins`. Each plugin is a folder, added and updated by pull request.
-  A plugin can also live in its author's own repository, with a small entry in the registry pointing to a tagged
-  release and its sha256.
-- **Review:** CI checks the manifest against a schema, runs the plugin against recorded fixtures in the preview tool,
-  and fails on forbidden patterns (`eval`, `Function`, obfuscated code, minified code over a size limit). A
-  maintainer reviews every new plugin and every permission change by hand; a version that only changes code within the
-  same permissions can be merged by the plugin's own maintainers after CI passes.
-- **Signing:** the registry's CI builds each release into a bundle (`plugin.json`, `main.js`, assets) and signs its
-  sha256 with the registry key. Frames only run bundles with a valid registry signature, and the kinframe server
-  mirrors the bundles (as it does for frame app releases), so frames never fetch code from an author's server.
-- **Self-hosters and developers** can switch on *developer mode* per frame (in the owner's settings, with a warning),
-  which allows unsigned bundles uploaded through the app or loaded from the preview tool. It turns itself off after
-  24 hours.
-- **Updates:** frames update plugins automatically within the same permissions. A new version that asks for **more**
-  permissions waits until the owner approves it in the app.
-- **Withdrawal:** a version can be revoked in the registry; frames stop it on the next sync and fall back to the
-  previous version or switch the instance off.
-- **Licence:** plugins in the registry must use an OSI-approved licence. They are separate works and are not covered
+Community plugins live in the public repository **[jeroentrappers/kinframe-plugins](https://github.com/jeroentrappers/kinframe-plugins)**
+(step 4). The plugins built into the frame app stay in this repository (`plugins/kinframe.*`) and ship with the app.
+
+- **Where:** one folder per plugin, `plugins/<id>/` (manifest, `main.js`, `locales/`, `fixtures/`, `README.md`),
+  added and updated by pull request. Every plugin uses an OSI-approved licence; they are separate works, not covered
   by the kinframe CLA.
+- **Review:** CI runs the plugin kit's checks on every pull request (manifest rules as the frame applies them,
+  forbidden patterns: `eval`, `Function`, dynamic `import`, imports other than `kinframe/*`, code over 256 KB) and the
+  plugin's fixture scenarios in the same QuickJS sandbox, with every view validated against the view schema. A
+  maintainer reviews every new plugin and every change to `permissions` by hand (`CODEOWNERS`); a new version needs a
+  higher `version`.
+- **Publishing:** on every merge to `main`, CI builds a bundle for each plugin version not yet published, writes the
+  index and signs it (7.1), and uploads them to the GitHub release `registry` of that repository. Published bundles
+  are never replaced; a version is withdrawn by listing it under `revoked`.
+- **Mirroring:** the kinframe server polls the index (hourly), checks its signature and sequence, downloads and checks
+  every bundle, and serves both to its frames (`GET /device/plugins/registry`, `GET /device/plugins/bundles/{file}`),
+  so frames never fetch code from GitHub or an author's server. The apps see the registry's plugins in the catalog
+  of `GET /frames/{id}/plugins` (`builtin: false`).
+- **On the frame:** an instance of a registry plugin names its `version`. The frame checks the index's signature
+  itself (the public key is in the app), downloads that bundle from its server, checks its sha256 against the signed
+  index and runs it. **Updates** within the same permissions run at once (the frame reports the version it runs);
+  a version that asks for **more** (any change to `permissions`) waits until the owner approves it in the app, which
+  sets the instance's `version`. A **revoked** version stops; the frame falls back to the newest earlier version with
+  the same permissions, or reports the instance as withdrawn.
+- **Developer mode** (unsigned bundles pushed from the kit to one frame for 24 hours) is not built yet; authors test
+  with the kit's sandbox and preview (§8).
+
+### 7.1 Formats
+
+**Bundle** `<id>-<version>.zip`: `plugin.json`, `main.js` and `locales/<tag>.json`, nothing else (no directories
+other than `locales/`, no symlinks); at most 512 KB, unpacked at most 1 MB.
+
+**Index** `index.json` (UTF-8), signed as published, byte for byte:
+
+```json
+{
+  "format": 1,
+  "sequence": 42,
+  "generated_at": "2026-10-27T12:00:00Z",
+  "plugins": [
+    { "id": "community.energy-prices",
+      "versions": [
+        { "version": "1.0.0", "api": 1, "file": "community.energy-prices-1.0.0.zip", "size": 4121,
+          "sha256": "<64 hex>", "published_at": "2026-10-27T12:00:00Z",
+          "manifest": { "...": "plugin.json as-is" },
+          "locales": { "nl": { "@name": "Stroomprijs" } } }
+      ] }
+  ],
+  "revoked": [ { "id": "community.x", "version": "1.0.1", "reason": "sent the token to the wrong host" } ]
+}
+```
+
+- `sequence` grows by one with every publication; servers and frames refuse an index with a lower sequence than the
+  last they accepted (no rollback to an older, still validly signed index).
+- `versions` are in publication order; `locales` hold only the manifest's `@` keys, for the apps' forms (§6.1).
+- **Signature** `index.json.sig`: ECDSA P-256 with SHA-256 over the exact bytes of `index.json`, DER-encoded, then
+  base64. The public key (SubjectPublicKeyInfo, DER, base64) is configured on the server (`KINFRAME_PLUGIN_REGISTRY_KEY`)
+  and built into the frame app. P-256 because Android 6 verifies it natively (it has no Ed25519).
 
 ## 8. Tooling for authors
 

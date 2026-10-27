@@ -89,6 +89,7 @@
   "no poster": "няма корична снимка",
   "no such endpoint": "няма такава крайна точка",
   "no such release": "няма такова издание",
+  "plugin bundle not found": "пакетът на приставката не е намерен",
   "not available (yet)": "(още) не е налично",
   "only the creator or an owner/admin can revoke this invite": "само създателят или собственик/администратор може да анулира тази покана",
   "only the creator or an owner/admin can revoke this link": "само създателят или собственик/администратор може да отмени тази връзка",

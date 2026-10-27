@@ -2,6 +2,7 @@ package app.kinframe.core.plugin.settings
 
 import app.kinframe.core.api.FieldError
 import app.kinframe.core.api.FramePlugins
+import app.kinframe.core.api.PluginInstanceStatus
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
@@ -96,7 +97,15 @@ sealed interface InstanceStatus {
     data object Running : InstanceStatus
     data object NotOnFrame : InstanceStatus
     data class Failed(val message: String) : InstanceStatus
+    /** Its plugin was withdrawn from the community registry, for [reason] (§7); best removed. */
+    data class Withdrawn(val reason: String) : InstanceStatus
 }
+
+/**
+ * A newer registry version waiting for the owner's approval. [asks] are the changes when the catalog holds the version
+ * the frame runs ([diffed]), else everything the new version may do; [fewer]: diffed, and it only drops permissions.
+ */
+data class PendingUpdate(val version: String, val asks: List<Permission>, val diffed: Boolean, val fewer: Boolean)
 
 /** The plugin settings form's logic (docs/plugins.md §6, §6.1), shared by the family app's screens. */
 object PluginSettings {
@@ -231,8 +240,9 @@ object PluginSettings {
         return out
     }
 
-    /** The status line of [d]: the frame's error, "waiting" before its first report, nothing when it runs. */
+    /** The status line of [d]: withdrawn, the frame's error, "waiting" before its first report, nothing when it runs. */
     fun status(d: PluginInstanceDraft, plugins: FramePlugins?, onFrame: Boolean): InstanceStatus {
+        withdrawnReason(plugins?.instances?.firstOrNull { it.instanceId == d.instanceId }?.error)?.let { return InstanceStatus.Withdrawn(it) }
         if (plugins != null && plugins.catalogAt != null && !onFrame) return InstanceStatus.NotOnFrame
         if (!d.enabled) return InstanceStatus.Off
         val s = plugins?.instances?.firstOrNull { it.instanceId == d.instanceId } ?: return InstanceStatus.Waiting
@@ -242,4 +252,36 @@ object PluginSettings {
             else -> InstanceStatus.Waiting
         }
     }
+
+    // ---------------------------------------------------------------- community plugins (§7)
+
+    private const val WITHDRAWN = "withdrawn:"
+
+    /** The registry's reason when the frame reports the plugin as withdrawn (`withdrawn: …`), else null. */
+    fun withdrawnReason(error: String?): String? =
+        error?.takeIf { it.startsWith(WITHDRAWN, ignoreCase = true) }?.substring(WITHDRAWN.length)?.trim()
+
+    /** What [to] allows that [from] doesn't ([Pair.first]), and what it no longer does ([Pair.second]). */
+    fun permissionChanges(from: PluginPermissions, to: PluginPermissions): Pair<List<Permission>, List<Permission>> =
+        (to - from).items to (from - to).items
+
+    /**
+     * The update of [d] waiting for approval, or null (none, or [d] already names that version). Diffed against the
+     * catalog's manifest when that is the version the frame runs, else the new version's permissions in full.
+     */
+    fun pendingUpdate(plugin: FormPlugin?, d: PluginInstanceDraft, st: PluginInstanceStatus?): PendingUpdate? {
+        val u = st?.update ?: return null
+        if (u.version.isBlank() || d.version == u.version) return null
+        val next = PluginPermissions.read(u.permissions)
+        val current = st.version?.takeIf { it.isNotBlank() } ?: d.version
+        if (plugin != null && current != null && plugin.version == current) {
+            val (added, removed) = permissionChanges(plugin.permissions, next)
+            if (added.isNotEmpty() || removed.isNotEmpty()) return PendingUpdate(u.version, added, diffed = true, fewer = added.isEmpty())
+        }
+        return PendingUpdate(u.version, next.items, diffed = false, fewer = false)
+    }
+
+    /** The instance list with [version] approved for instance [instanceId]: saved like any other change. */
+    fun approveUpdate(list: List<PluginInstanceDraft>, instanceId: String, version: String): List<PluginInstanceDraft> =
+        list.map { if (it.instanceId == instanceId) it.copy(version = version) else it }
 }

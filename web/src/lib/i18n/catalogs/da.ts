@@ -1258,7 +1258,26 @@ const da: Catalog = {
 	'plugins.errEnum': 'Vælg en af mulighederne.',
 	'plugins.errTimezone': 'Vælg en tidszone på listen.',
 	'plugins.errUnknown': 'Pluginnet på rammen har ikke længere denne indstilling.',
-	'plugins.errType': 'Det passer ikke til denne indstilling.'
+	'plugins.errType': 'Det passer ikke til denne indstilling.',
+	'plugins.groupBuiltin': 'Indbygget',
+	'plugins.groupCommunity': 'Fællesskab',
+	'plugins.groupCommunityHint': 'Lavet af andre. Hvert nyt plugin, og hver ændring af hvad et plugin må, bliver gennemgået før det udgives.',
+	'plugins.byAuthor': 'af {name}',
+	'plugins.versionNumber': 'version {version}',
+	'plugins.confirmTitle': 'Tilføj {name}?',
+	'plugins.confirmBody': 'Dette plugin kommer fra fællesskabet, ikke fra kinframe. Hvad det må:',
+	'plugins.permAddresses': 'Forbinder til de adresser, du udfylder: {settings}',
+	'plugins.permActions': 'Viser knapper på rammen, der ændrer noget, fx tænder en stikkontakt',
+	'plugins.permNone': 'Vises kun på rammen; forbinder ikke til noget',
+	'plugins.updateAsks': 'Opdatering til {version} tilgængelig — den beder om:',
+	'plugins.updateFewer': 'Opdatering til {version} tilgængelig — den beder om mindre end før.',
+	'plugins.updateApprove': 'Godkend',
+	'plugins.updateDismiss': 'Ikke nu',
+	'plugins.updateApproved': 'Opdatering til {version} godkendt',
+	'plugins.updateWaiting': 'En opdatering venter på din godkendelse',
+	'plugins.withdrawn': 'Trukket tilbage fra fællesskabets register: {reason}',
+	'plugins.withdrawnHint': 'Det kører ikke længere på rammen. Du kan fjerne det.',
+	'plugins.runsVersion': 'Rammen kører version {version}.'
 };
 
 export default da;

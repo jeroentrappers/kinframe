@@ -89,6 +89,7 @@
   "no poster": "fără imagine de previzualizare",
   "no such endpoint": "endpoint inexistent",
   "no such release": "versiune inexistentă",
+  "plugin bundle not found": "pachetul pluginului nu a fost găsit",
   "not available (yet)": "indisponibil (deocamdată)",
   "only the creator or an owner/admin can revoke this invite": "doar creatorul sau un proprietar/administrator poate revoca această invitație",
   "only the creator or an owner/admin can revoke this link": "doar cine a creat linkul sau un proprietar/administrator îl poate revoca",

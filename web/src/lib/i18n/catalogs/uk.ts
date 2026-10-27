@@ -1309,7 +1309,26 @@ const uk: Catalog = {
 	'plugins.errEnum': 'Виберіть один із варіантів.',
 	'plugins.errTimezone': 'Виберіть часовий пояс зі списку.',
 	'plugins.errUnknown': 'Плагін на рамці більше не має цього налаштування.',
-	'plugins.errType': 'Це не підходить для цього налаштування.'
+	'plugins.errType': 'Це не підходить для цього налаштування.',
+	'plugins.groupBuiltin': 'Вбудовані',
+	'plugins.groupCommunity': 'Спільнота',
+	'plugins.groupCommunityHint': 'Створені іншими людьми. Кожен новий плагін і кожну зміну того, що йому дозволено, перевіряють перед публікацією.',
+	'plugins.byAuthor': 'автор: {name}',
+	'plugins.versionNumber': 'версія {version}',
+	'plugins.confirmTitle': 'Додати {name}?',
+	'plugins.confirmBody': 'Цей плагін від спільноти, а не від kinframe. Що йому дозволено:',
+	'plugins.permAddresses': 'Підключається до адрес, які ви вкажете: {settings}',
+	'plugins.permActions': 'Показує на рамці кнопки, що щось змінюють, наприклад вмикають розетку',
+	'plugins.permNone': 'Лише показується на рамці; ні до чого не підключається',
+	'plugins.updateAsks': 'Доступне оновлення до {version} — воно просить:',
+	'plugins.updateFewer': 'Доступне оновлення до {version} — воно просить менше, ніж раніше.',
+	'plugins.updateApprove': 'Схвалити',
+	'plugins.updateDismiss': 'Не зараз',
+	'plugins.updateApproved': 'Оновлення до {version} схвалено',
+	'plugins.updateWaiting': 'Оновлення чекає на ваше схвалення',
+	'plugins.withdrawn': 'Відкликано з реєстру спільноти: {reason}',
+	'plugins.withdrawnHint': 'Він більше не працює на рамці. Його можна видалити.',
+	'plugins.runsVersion': 'Рамка використовує версію {version}.'
 };
 
 export default uk;

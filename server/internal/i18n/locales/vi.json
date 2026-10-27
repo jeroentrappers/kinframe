@@ -89,6 +89,7 @@
   "no poster": "không có ảnh xem trước",
   "no such endpoint": "không có endpoint này",
   "no such release": "không có bản phát hành này",
+  "plugin bundle not found": "không tìm thấy gói plugin",
   "not available (yet)": "chưa có sẵn",
   "only the creator or an owner/admin can revoke this invite": "chỉ người tạo hoặc chủ sở hữu/quản trị viên mới có thể thu hồi lời mời này",
   "only the creator or an owner/admin can revoke this link": "chỉ người tạo liên kết hoặc chủ sở hữu/quản trị viên mới có thể thu hồi liên kết này",

@@ -2,11 +2,18 @@ package api
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
+	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/plugins"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
+	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/settings"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
@@ -37,6 +44,25 @@ func (s *Server) GetFramePlugins(ctx context.Context, req gen.GetFramePluginsReq
 		var c gen.PluginCatalog
 		if err := json.Unmarshal(p.Catalog, &c); err == nil {
 			out.Catalog = c.Plugins
+		}
+	}
+	// The community registry's plugins (newest version each), unless the frame has one built in.
+	if s.registry != nil && p.CatalogAt != nil {
+		if _, _, ix := s.registry.Signed(); ix != nil {
+			have := map[string]bool{}
+			for _, c := range out.Catalog {
+				if id, _ := c.Manifest["id"].(string); id != "" {
+					have[id] = true
+				}
+			}
+			builtin := false
+			for _, v := range ix.Latest() {
+				if id, _ := v.Manifest["id"].(string); id == "" || have[id] {
+					continue
+				}
+				locales := v.Locales
+				out.Catalog = append(out.Catalog, gen.CatalogPlugin{Manifest: v.Manifest, Locales: &locales, Builtin: &builtin})
+			}
 		}
 	}
 	if len(p.Status) > 0 {
@@ -97,11 +123,12 @@ func (s *Server) checkPlugins(ctx context.Context, tx *store.Tx, f *store.Frame,
 	if !ok {
 		return nil
 	}
-	var catalog plugins.Catalog
+	var lookup plugins.Lookup
 	if p, err := s.st.GetFramePlugins(ctx, tx, f.ID); err == nil && len(p.Catalog) > 0 {
-		catalog, _ = plugins.ParseCatalog(p.Catalog)
+		catalog, _ := plugins.ParseCatalog(p.Catalog)
+		lookup = s.pluginLookup(catalog)
 	}
-	problems := plugins.Check(instances, catalog)
+	problems := plugins.Check(instances, lookup)
 	if len(problems) == 0 {
 		return nil
 	}
@@ -110,4 +137,74 @@ func (s *Server) checkPlugins(ctx context.Context, tx *store.Tx, f *store.Frame,
 		pr.WithField(p.Path, p.Reason)
 	}
 	return pr
+}
+
+// pluginLookup finds an instance's manifest: built into the frame, else the registry version it names (or the newest
+// one when it names none).
+func (s *Server) pluginLookup(builtin plugins.Catalog) plugins.Lookup {
+	var ix *registry.Index
+	if s.registry != nil {
+		_, _, ix = s.registry.Signed()
+	}
+	return func(id, version string) *plugins.Manifest {
+		if m := builtin[id]; m != nil {
+			return m
+		}
+		if ix == nil {
+			return nil
+		}
+		if version != "" && version != "builtin" {
+			if v := ix.Find(id, version); v != nil && !ix.IsRevoked(id, version) {
+				return plugins.ParseManifest(v.Manifest)
+			}
+			return nil
+		}
+		for _, v := range ix.Latest() {
+			if mid, _ := v.Manifest["id"].(string); mid == id {
+				return plugins.ParseManifest(v.Manifest)
+			}
+		}
+		return nil
+	}
+}
+
+// DeviceGetPluginRegistry: the index as signed, for the frame to verify itself.
+func (s *Server) DeviceGetPluginRegistry(ctx context.Context, _ gen.DeviceGetPluginRegistryRequestObject) (gen.DeviceGetPluginRegistryResponseObject, error) {
+	if s.registry == nil {
+		return noContent(), nil
+	}
+	raw, sig, ix := s.registry.Signed()
+	if ix == nil {
+		return noContent(), nil
+	}
+	return Response{Status: 200, Body: gen.PluginRegistry{Index: base64.StdEncoding.EncodeToString(raw), Signature: sig, Sequence: int(ix.Sequence)}}, nil
+}
+
+// deviceGetPluginBundle serves a bundle the current index lists (hand-written: binary).
+func (s *Server) deviceGetPluginBundle(w http.ResponseWriter, r *http.Request) {
+	file := r.PathValue("file")
+	path := ""
+	if s.registry != nil {
+		path = s.registry.BundlePath(file)
+	}
+	if path == "" {
+		problem.Write(w, r, problem.New(problem.NotFound, "plugin bundle not found"))
+		return
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		problem.Write(w, r, problem.New(problem.NotFound, "plugin bundle not found"))
+		return
+	}
+	sum := sha256.Sum256(b)
+	etag := `"` + hex.EncodeToString(sum[:]) + `"`
+	w.Header().Set("ETag", etag)
+	w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
+	if r.Header.Get("If-None-Match") == etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Length", strconv.Itoa(len(b)))
+	_, _ = w.Write(b)
 }

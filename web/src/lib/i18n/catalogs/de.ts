@@ -1258,7 +1258,26 @@ const de: Catalog = {
 	'plugins.errEnum': 'Wähle eine der Optionen.',
 	'plugins.errTimezone': 'Wähle eine Zeitzone aus der Liste.',
 	'plugins.errUnknown': 'Das Plugin auf dem Rahmen hat diese Einstellung nicht mehr.',
-	'plugins.errType': 'Das passt nicht zu dieser Einstellung.'
+	'plugins.errType': 'Das passt nicht zu dieser Einstellung.',
+	'plugins.groupBuiltin': 'Eingebaut',
+	'plugins.groupCommunity': 'Community',
+	'plugins.groupCommunityHint': 'Von anderen Leuten gemacht. Jedes neue Plugin und jede Änderung daran, was es darf, wird vor der Veröffentlichung geprüft.',
+	'plugins.byAuthor': 'von {name}',
+	'plugins.versionNumber': 'Version {version}',
+	'plugins.confirmTitle': '{name} hinzufügen?',
+	'plugins.confirmBody': 'Dieses Plugin stammt aus der Community, nicht von kinframe. Was es darf:',
+	'plugins.permAddresses': 'Erreicht die Adressen, die du einträgst: {settings}',
+	'plugins.permActions': 'Zeigt Knöpfe auf dem Rahmen, die etwas ändern, etwa eine Steckdose schalten',
+	'plugins.permNone': 'Zeigt nur etwas auf dem Rahmen an; erreicht nichts',
+	'plugins.updateAsks': 'Update auf {version} verfügbar — es verlangt:',
+	'plugins.updateFewer': 'Update auf {version} verfügbar — es verlangt weniger als bisher.',
+	'plugins.updateApprove': 'Zulassen',
+	'plugins.updateDismiss': 'Nicht jetzt',
+	'plugins.updateApproved': 'Update auf {version} zugelassen',
+	'plugins.updateWaiting': 'Ein Update wartet auf deine Zustimmung',
+	'plugins.withdrawn': 'Aus dem Community-Verzeichnis zurückgezogen: {reason}',
+	'plugins.withdrawnHint': 'Es läuft nicht mehr auf dem Rahmen. Du kannst es entfernen.',
+	'plugins.runsVersion': 'Der Rahmen führt Version {version} aus.'
 };
 
 export default de;

@@ -1292,7 +1292,26 @@ const lt: Catalog = {
 	'plugins.errEnum': 'Pasirinkite vieną iš parinkčių.',
 	'plugins.errTimezone': 'Pasirinkite laiko juostą iš sąrašo.',
 	'plugins.errUnknown': 'Rėmelio papildinys šio nustatymo nebeturi.',
-	'plugins.errType': 'Tai netinka šiam nustatymui.'
+	'plugins.errType': 'Tai netinka šiam nustatymui.',
+	'plugins.groupBuiltin': 'Įtaisytieji',
+	'plugins.groupCommunity': 'Bendruomenė',
+	'plugins.groupCommunityHint': 'Sukurti kitų žmonių. Kiekvienas naujas papildinys ir kiekvienas pakeitimas, ką jis gali daryti, peržiūrimas prieš paskelbiant.',
+	'plugins.byAuthor': 'autorius: {name}',
+	'plugins.versionNumber': 'versija {version}',
+	'plugins.confirmTitle': 'Pridėti {name}?',
+	'plugins.confirmBody': 'Šis papildinys yra iš bendruomenės, ne iš kinframe. Ką jis gali daryti:',
+	'plugins.permAddresses': 'Jungiasi prie jūsų įvestų adresų: {settings}',
+	'plugins.permActions': 'Rodo rėmelyje mygtukus, kurie ką nors keičia, pvz., įjungia lizdą',
+	'plugins.permNone': 'Tik rodomas rėmelyje; prie nieko nesijungia',
+	'plugins.updateAsks': 'Yra atnaujinimas į {version} — jis prašo:',
+	'plugins.updateFewer': 'Yra atnaujinimas į {version} — jis prašo mažiau nei anksčiau.',
+	'plugins.updateApprove': 'Patvirtinti',
+	'plugins.updateDismiss': 'Ne dabar',
+	'plugins.updateApproved': 'Atnaujinimas į {version} patvirtintas',
+	'plugins.updateWaiting': 'Atnaujinimas laukia jūsų patvirtinimo',
+	'plugins.withdrawn': 'Atšauktas iš bendruomenės registro: {reason}',
+	'plugins.withdrawnHint': 'Jis rėmelyje nebeveikia. Galite jį pašalinti.',
+	'plugins.runsVersion': 'Rėmelyje veikia versija {version}.'
 };
 
 export default lt;

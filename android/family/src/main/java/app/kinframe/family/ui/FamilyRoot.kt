@@ -539,6 +539,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     when (e) {
                         PluginsEvent.Saved -> toaster.show(res.getString(R.string.plugins_saved))
                         PluginsEvent.Removed -> toaster.show(res.getString(R.string.plugins_removed))
+                        is PluginsEvent.UpdateApproved -> toaster.show(res.getString(R.string.plugins_update_approved, e.version))
                         is PluginsEvent.Error -> toaster.show(res.getString(e.message))
                     }
                 }

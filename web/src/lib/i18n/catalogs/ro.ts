@@ -1280,7 +1280,26 @@ const ro: Catalog = {
 	'plugins.errEnum': 'Alegeți una dintre opțiuni.',
 	'plugins.errTimezone': 'Alegeți un fus orar din listă.',
 	'plugins.errUnknown': 'Pluginul de pe ramă nu mai are această setare.',
-	'plugins.errType': 'Valoarea nu se potrivește acestei setări.'
+	'plugins.errType': 'Valoarea nu se potrivește acestei setări.',
+	'plugins.groupBuiltin': 'Incluse',
+	'plugins.groupCommunity': 'Comunitate',
+	'plugins.groupCommunityHint': 'Făcute de alți oameni. Fiecare plugin nou și fiecare schimbare a ceea ce are voie să facă sunt verificate înainte de publicare.',
+	'plugins.byAuthor': 'de {name}',
+	'plugins.versionNumber': 'versiunea {version}',
+	'plugins.confirmTitle': 'Adăugați {name}?',
+	'plugins.confirmBody': 'Acest plugin vine din comunitate, nu de la kinframe. Ce are voie să facă:',
+	'plugins.permAddresses': 'Se conectează la adresele pe care le completați: {settings}',
+	'plugins.permActions': 'Arată pe ramă butoane care schimbă ceva, de exemplu pornesc o priză',
+	'plugins.permNone': 'Doar apare pe ramă; nu se conectează la nimic',
+	'plugins.updateAsks': 'Actualizare la {version} disponibilă — cere:',
+	'plugins.updateFewer': 'Actualizare la {version} disponibilă — cere mai puțin decât înainte.',
+	'plugins.updateApprove': 'Aprobați',
+	'plugins.updateDismiss': 'Nu acum',
+	'plugins.updateApproved': 'Actualizarea la {version} a fost aprobată',
+	'plugins.updateWaiting': 'O actualizare așteaptă aprobarea dvs.',
+	'plugins.withdrawn': 'Retras din registrul comunității: {reason}',
+	'plugins.withdrawnHint': 'Nu mai rulează pe ramă. Îl puteți elimina.',
+	'plugins.runsVersion': 'Rama rulează versiunea {version}.'
 };
 
 export default ro;

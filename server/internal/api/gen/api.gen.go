@@ -2135,7 +2135,7 @@ type CalendarView struct {
 
 // CatalogPlugin A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
 type CatalogPlugin struct {
-	// Builtin Part of the frame app (not a downloaded bundle).
+	// Builtin Part of the frame app; false for a plugin from the community registry (its newest version).
 	Builtin *bool `json:"builtin,omitempty"`
 
 	// Locales Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
@@ -3212,8 +3212,28 @@ type PluginInstanceStatus struct {
 	// Running The instance started on the frame.
 	Running *bool `json:"running,omitempty"`
 
+	// Update A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+	Update *struct {
+		// Permissions The newer version's `permissions`.
+		Permissions *map[string]interface{} `json:"permissions,omitempty"`
+		Version     *string                 `json:"version,omitempty"`
+	} `json:"update,omitempty"`
+
 	// UpdatedAt When the last update succeeded.
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// Version The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).
+	Version *string `json:"version,omitempty"`
+}
+
+// PluginRegistry defines model for PluginRegistry.
+type PluginRegistry struct {
+	// Index base64 of index.json, byte for byte as signed
+	Index    string `json:"index"`
+	Sequence int    `json:"sequence"`
+
+	// Signature base64 DER ECDSA P-256 SHA-256 signature over those bytes
+	Signature string `json:"signature"`
 }
 
 // PluginStatusReport What the frame knows about its plugins right now (`PUT /device/plugins/status`).
@@ -4360,6 +4380,9 @@ type ServerInterface interface {
 	// (PUT /v1/device/plugins/catalog)
 	DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/device/plugins/registry)
+	DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request)
+
 	// (PUT /v1/device/plugins/status)
 	DevicePutPluginStatus(w http.ResponseWriter, r *http.Request)
 
@@ -5173,6 +5196,20 @@ func (siw *ServerInterfaceWrapper) DevicePutPluginCatalog(w http.ResponseWriter,
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DevicePutPluginCatalog(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceGetPluginRegistry operation middleware
+func (siw *ServerInterfaceWrapper) DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceGetPluginRegistry(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -7613,6 +7650,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/placements/{placementId}/reaction", wrapper.DeviceSetReaction)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/placements/{placementId}/replies", wrapper.DeviceSendReply)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/catalog", wrapper.DevicePutPluginCatalog)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/plugins/registry", wrapper.DeviceGetPluginRegistry)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/status", wrapper.DevicePutPluginStatus)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/settings", wrapper.DevicePatchSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
@@ -8156,6 +8194,52 @@ type DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGetPluginRegistryRequestObject struct {
+}
+
+type DeviceGetPluginRegistryResponseObject interface {
+	VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error
+}
+
+type DeviceGetPluginRegistry200JSONResponse PluginRegistry
+
+func (response DeviceGetPluginRegistry200JSONResponse) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGetPluginRegistry204Response struct {
+}
+
+func (response DeviceGetPluginRegistry204Response) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceGetPluginRegistrydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceGetPluginRegistrydefaultApplicationProblemPlusJSONResponse) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -10959,6 +11043,9 @@ type StrictServerInterface interface {
 	// (PUT /v1/device/plugins/catalog)
 	DevicePutPluginCatalog(ctx context.Context, request DevicePutPluginCatalogRequestObject) (DevicePutPluginCatalogResponseObject, error)
 
+	// (GET /v1/device/plugins/registry)
+	DeviceGetPluginRegistry(ctx context.Context, request DeviceGetPluginRegistryRequestObject) (DeviceGetPluginRegistryResponseObject, error)
+
 	// (PUT /v1/device/plugins/status)
 	DevicePutPluginStatus(ctx context.Context, request DevicePutPluginStatusRequestObject) (DevicePutPluginStatusResponseObject, error)
 
@@ -11756,6 +11843,30 @@ func (sh *strictHandler) DevicePutPluginCatalog(w http.ResponseWriter, r *http.R
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DevicePutPluginCatalogResponseObject); ok {
 		if err := validResponse.VisitDevicePutPluginCatalogResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceGetPluginRegistry operation middleware
+func (sh *strictHandler) DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request) {
+	var request DeviceGetPluginRegistryRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceGetPluginRegistry(ctx, request.(DeviceGetPluginRegistryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceGetPluginRegistry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceGetPluginRegistryResponseObject); ok {
+		if err := validResponse.VisitDeviceGetPluginRegistryResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

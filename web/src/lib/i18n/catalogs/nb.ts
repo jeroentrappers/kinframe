@@ -1246,7 +1246,26 @@ const nb: Catalog = {
 	'plugins.errEnum': 'Velg ett av alternativene.',
 	'plugins.errTimezone': 'Velg en tidssone fra listen.',
 	'plugins.errUnknown': 'Programtillegget på fotorammen har ikke denne innstillingen lenger.',
-	'plugins.errType': 'Dette passer ikke til denne innstillingen.'
+	'plugins.errType': 'Dette passer ikke til denne innstillingen.',
+	'plugins.groupBuiltin': 'Innebygd',
+	'plugins.groupCommunity': 'Fellesskap',
+	'plugins.groupCommunityHint': 'Laget av andre. Hvert nytt programtillegg, og hver endring i hva et tillegg får gjøre, blir gjennomgått før det publiseres.',
+	'plugins.byAuthor': 'av {name}',
+	'plugins.versionNumber': 'versjon {version}',
+	'plugins.confirmTitle': 'Legge til {name}?',
+	'plugins.confirmBody': 'Dette tillegget kommer fra fellesskapet, ikke fra kinframe. Hva det får gjøre:',
+	'plugins.permAddresses': 'Kobler til adressene du fyller inn: {settings}',
+	'plugins.permActions': 'Viser knapper på fotorammen som endrer ting, for eksempel slår på en stikkontakt',
+	'plugins.permNone': 'Vises bare på fotorammen; kobler ikke til noe',
+	'plugins.updateAsks': 'Oppdatering til {version} tilgjengelig — den ber om:',
+	'plugins.updateFewer': 'Oppdatering til {version} tilgjengelig — den ber om mindre enn før.',
+	'plugins.updateApprove': 'Godkjenn',
+	'plugins.updateDismiss': 'Ikke nå',
+	'plugins.updateApproved': 'Oppdatering til {version} godkjent',
+	'plugins.updateWaiting': 'En oppdatering venter på godkjenningen din',
+	'plugins.withdrawn': 'Trukket fra fellesskapets register: {reason}',
+	'plugins.withdrawnHint': 'Det kjører ikke lenger på fotorammen. Du kan fjerne det.',
+	'plugins.runsVersion': 'Fotorammen kjører versjon {version}.'
 };
 
 export default nb;

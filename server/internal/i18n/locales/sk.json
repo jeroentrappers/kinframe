@@ -89,6 +89,7 @@
   "no poster": "chýba náhľad",
   "no such endpoint": "taký endpoint neexistuje",
   "no such release": "také vydanie neexistuje",
+  "plugin bundle not found": "balík doplnku sa nenašiel",
   "not available (yet)": "(zatiaľ) nedostupné",
   "only the creator or an owner/admin can revoke this invite": "túto pozvánku môže zrušiť iba jej autor alebo vlastník/správca",
   "only the creator or an owner/admin can revoke this link": "tento odkaz môže zrušiť iba ten, kto ho vytvoril, alebo vlastník/správca",

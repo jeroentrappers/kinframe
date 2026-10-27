@@ -1309,7 +1309,26 @@ const ru: Catalog = {
 	'plugins.errEnum': 'Выберите один из вариантов.',
 	'plugins.errTimezone': 'Выберите часовой пояс из списка.',
 	'plugins.errUnknown': 'У плагина на рамке больше нет этой настройки.',
-	'plugins.errType': 'Это не подходит для этой настройки.'
+	'plugins.errType': 'Это не подходит для этой настройки.',
+	'plugins.groupBuiltin': 'Встроенные',
+	'plugins.groupCommunity': 'Сообщество',
+	'plugins.groupCommunityHint': 'Созданы другими людьми. Каждый новый плагин и каждое изменение того, что ему разрешено, проверяются перед публикацией.',
+	'plugins.byAuthor': 'автор: {name}',
+	'plugins.versionNumber': 'версия {version}',
+	'plugins.confirmTitle': 'Добавить {name}?',
+	'plugins.confirmBody': 'Этот плагин из сообщества, а не от kinframe. Что ему разрешено:',
+	'plugins.permAddresses': 'Подключается к адресам, которые вы укажете: {settings}',
+	'plugins.permActions': 'Показывает на рамке кнопки, которые что-то меняют, например включают розетку',
+	'plugins.permNone': 'Только показывается на рамке; ни к чему не подключается',
+	'plugins.updateAsks': 'Доступно обновление до {version} — оно просит:',
+	'plugins.updateFewer': 'Доступно обновление до {version} — оно просит меньше, чем раньше.',
+	'plugins.updateApprove': 'Одобрить',
+	'plugins.updateDismiss': 'Не сейчас',
+	'plugins.updateApproved': 'Обновление до {version} одобрено',
+	'plugins.updateWaiting': 'Обновление ждёт вашего одобрения',
+	'plugins.withdrawn': 'Отозван из реестра сообщества: {reason}',
+	'plugins.withdrawnHint': 'Он больше не работает на рамке. Его можно удалить.',
+	'plugins.runsVersion': 'Рамка использует версию {version}.'
 };
 
 export default ru;
