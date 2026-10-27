@@ -523,6 +523,27 @@ components:
                     weather:
                         $ref: '#/components/schemas/Weather'
                   type: object
+        CatalogPlugin:
+            description: A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
+            properties:
+                builtin:
+                    description: Part of the frame app (not a downloaded bundle).
+                    type: boolean
+                locales:
+                    additionalProperties:
+                        additionalProperties:
+                            type: string
+                        type: object
+                    description: |
+                        Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+                        `@setting.<key>.help`, `@option.<key>.<value>`, `@preset.<id>`). English is the manifest itself.
+                    type: object
+                manifest:
+                    description: The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+                    type: object
+            required:
+                - manifest
+            type: object
         Change:
             discriminator:
                 propertyName: type
@@ -783,6 +804,32 @@ components:
                 - device_id
                 - claimed
                 - latest_seq
+            type: object
+        DiscoveredEntity:
+            properties:
+                device_class:
+                    type: string
+                entity_id:
+                    type: string
+                name:
+                    type: string
+                unit:
+                    type: string
+            required:
+                - entity_id
+            type: object
+        DiscoveredService:
+            properties:
+                name:
+                    maxLength: 100
+                    type: string
+                url:
+                    example: http://192.168.1.20
+                    maxLength: 200
+                    type: string
+            required:
+                - name
+                - url
             type: object
         Discovery:
             properties:
@@ -1046,6 +1093,35 @@ components:
                 online:
                     type: boolean
             type: object
+        FramePlugins:
+            description: The frame's plugin catalog and their status, for the apps' Plugins section.
+            properties:
+                catalog:
+                    items:
+                        $ref: '#/components/schemas/CatalogPlugin'
+                    type: array
+                catalog_at:
+                    description: When the frame last reported its catalog; null for an app that doesn't.
+                    format: date-time
+                    nullable: true
+                    type: string
+                instances:
+                    items:
+                        $ref: '#/components/schemas/PluginInstanceStatus'
+                    type: array
+                services:
+                    additionalProperties:
+                        items:
+                            $ref: '#/components/schemas/DiscoveredService'
+                        type: array
+                    type: object
+                status_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+            required:
+                - catalog
+            type: object
         FrameSettings:
             description: Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
             properties:
@@ -1209,6 +1285,44 @@ components:
                             maximum: 100
                             minimum: 0
                             type: integer
+                    type: object
+                plugins:
+                    description: |
+                        Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+                        its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+                    properties:
+                        instances:
+                            description: |
+                                Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+                                without `secrets` keeps the ones it has.
+                            items:
+                                $ref: '#/components/schemas/PluginInstance'
+                            maxItems: 8
+                            type: array
+                        layout:
+                            properties:
+                                background:
+                                    default: paper
+                                    enum:
+                                        - paper
+                                        - photo
+                                    type: string
+                                mode:
+                                    default: "off"
+                                    description: Off, the photo's top corners, or a band beside or above a 3:2 photo.
+                                    enum:
+                                        - "off"
+                                        - overlay
+                                        - band
+                                    type: string
+                                side:
+                                    default: right
+                                    description: Where the band goes in landscape.
+                                    enum:
+                                        - left
+                                        - right
+                                    type: string
+                            type: object
                     type: object
                 slideshow:
                     properties:
@@ -2168,6 +2282,128 @@ components:
                 - failed
                 - removed
             type: string
+        PluginCatalog:
+            properties:
+                plugins:
+                    items:
+                        $ref: '#/components/schemas/CatalogPlugin'
+                    maxItems: 100
+                    type: array
+            required:
+                - plugins
+            type: object
+        PluginInstance:
+            description: |
+                One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+                values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+            properties:
+                enabled:
+                    default: true
+                    description: An enabled instance needs every required setting and secret.
+                    type: boolean
+                instance_id:
+                    pattern: ^[a-z0-9][a-z0-9-]{0,47}$
+                    type: string
+                order:
+                    default: 0
+                    maximum: 99
+                    minimum: 0
+                    type: integer
+                plugin_id:
+                    example: kinframe.ha-energy
+                    maxLength: 64
+                    type: string
+                secrets:
+                    additionalProperties:
+                        maxLength: 2000
+                        nullable: true
+                        type: string
+                    description: |
+                        Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+                        frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+                    maxProperties: 8
+                    type: object
+                secrets_set:
+                    description: The secret settings that have a value.
+                    items:
+                        type: string
+                    readOnly: true
+                    type: array
+                settings:
+                    description: The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+                    maxProperties: 40
+                    type: object
+                slot:
+                    default: top-right
+                    enum:
+                        - top-left
+                        - top-right
+                    type: string
+                version:
+                    description: The plugin version the settings were made with (informational).
+                    maxLength: 40
+                    type: string
+                visibility:
+                    default: always
+                    enum:
+                        - always
+                        - on_change
+                        - on_tap
+                    type: string
+            required:
+                - instance_id
+                - plugin_id
+            type: object
+        PluginInstanceStatus:
+            properties:
+                entities:
+                    description: |
+                        Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+                        picker, docs/plugins.md §6.1). Absent when the plugin has no entity settings or the connection failed.
+                    items:
+                        $ref: '#/components/schemas/DiscoveredEntity'
+                    maxItems: 3000
+                    type: array
+                error:
+                    description: The last error
+                    maxLength: 300
+                    null when the last update and render worked.: null
+                    nullable: true
+                    type: string
+                error_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                instance_id:
+                    type: string
+                running:
+                    description: The instance started on the frame.
+                    type: boolean
+                updated_at:
+                    description: When the last update succeeded.
+                    format: date-time
+                    nullable: true
+                    type: string
+            required:
+                - instance_id
+            type: object
+        PluginStatusReport:
+            description: What the frame knows about its plugins right now (`PUT /device/plugins/status`).
+            properties:
+                instances:
+                    items:
+                        $ref: '#/components/schemas/PluginInstanceStatus'
+                    maxItems: 8
+                    type: array
+                services:
+                    additionalProperties:
+                        items:
+                            $ref: '#/components/schemas/DiscoveredService'
+                        maxItems: 50
+                        type: array
+                    description: mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+                    type: object
+            type: object
         Problem:
             properties:
                 code:
@@ -3855,6 +4091,44 @@ paths:
                 - deviceAuth: []
             tags:
                 - device
+    /v1/device/plugins/catalog:
+        put:
+            description: The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one.
+            operationId: devicePutPluginCatalog
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PluginCatalog'
+                required: true
+            responses:
+                "204":
+                    description: Stored
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
+    /v1/device/plugins/status:
+        put:
+            description: Errors, discovered entities and services (at most every 10 s). Replaces the previous report.
+            operationId: devicePutPluginStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/PluginStatusReport'
+                required: true
+            responses:
+                "204":
+                    description: Stored
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - deviceAuth: []
+            tags:
+                - device
     /v1/device/settings:
         patch:
             description: Settings changed locally on the frame. Same semantics as updateFrameSettings.
@@ -4982,6 +5256,26 @@ paths:
                     $ref: '#/components/responses/Problem'
             tags:
                 - library
+    /v1/frames/{frameId}/plugins:
+        get:
+            description: |
+                The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+                plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+                The instances themselves are in the settings (`plugins.instances`).
+            operationId: getFramePlugins
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/FramePlugins'
+                    description: Catalog and status
+                default:
+                    $ref: '#/components/responses/Problem'
+            tags:
+                - settings
+        parameters:
+            - $ref: '#/components/parameters/FrameId'
     /v1/frames/{frameId}/replace-device:
         post:
             description: |

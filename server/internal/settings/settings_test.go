@@ -2,7 +2,9 @@ package settings
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -79,5 +81,36 @@ func TestDefaults(t *testing.T) {
 	}
 	if d["slideshow"].(map[string]any)["interval_s"] != 30 {
 		t.Fatal("interval default")
+	}
+}
+
+type fakeSealer struct{ broken bool }
+
+func (f fakeSealer) Seal(s string) []byte { return []byte("sealed:" + s) }
+func (f fakeSealer) Open(b []byte) (string, error) {
+	if f.broken {
+		return "", errors.New("key changed")
+	}
+	return strings.TrimPrefix(string(b), "sealed:"), nil
+}
+
+// A secret sealed with a key the server no longer has counts as unset for people and is left out for the frame.
+func TestPluginSecretsAfterAKeyChange(t *testing.T) {
+	current := map[string]any{}
+	patch := map[string]any{"plugins": map[string]any{"instances": []any{
+		map[string]any{"instance_id": "a", "secrets": map[string]any{"token": "t1", "other": ""}},
+	}}}
+	ApplyPluginSecrets(patch, current, fakeSealer{})
+	doc := Clone(MergePatch(current, patch))
+	RenderPluginSecrets(doc, fakeSealer{}, true)
+	in := doc["plugins"].(map[string]any)["instances"].([]any)[0].(map[string]any)
+	if in["secrets"].(map[string]any)["token"] != "t1" || len(in["secrets_set"].([]any)) != 1 || in[sealedKey] != nil {
+		t.Fatalf("device: %v", in)
+	}
+	doc = Clone(MergePatch(map[string]any{}, patch))
+	RenderPluginSecrets(doc, fakeSealer{broken: true}, false)
+	in = doc["plugins"].(map[string]any)["instances"].([]any)[0].(map[string]any)
+	if len(in["secrets_set"].([]any)) != 0 || in["secrets"] != nil {
+		t.Fatalf("people after key change: %v", in)
 	}
 }

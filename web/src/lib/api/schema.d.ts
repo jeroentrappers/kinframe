@@ -729,6 +729,29 @@ export interface paths {
         patch: operations["updateFrameSettings"];
         trace?: never;
     };
+    "/v1/frames/{frameId}/plugins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+         *     plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+         *     The instances themselves are in the settings (`plugins.instances`).
+         */
+        get: operations["getFramePlugins"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/geocode": {
         parameters: {
             query?: never;
@@ -1095,6 +1118,40 @@ export interface paths {
         head?: never;
         /** @description Settings changed locally on the frame. Same semantics as updateFrameSettings. */
         patch: operations["devicePatchSettings"];
+        trace?: never;
+    };
+    "/v1/device/plugins/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one. */
+        put: operations["devicePutPluginCatalog"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/plugins/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Errors, discovered entities and services (at most every 10 s). Replaces the previous report. */
+        put: operations["devicePutPluginStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/device/placements/{placementId}": {
@@ -2626,6 +2683,147 @@ export interface components {
                  */
                 channel?: "stable" | "beta";
             };
+            /**
+             * @description Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+             *     its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+             */
+            plugins?: {
+                layout?: {
+                    /**
+                     * @description Off, the photo's top corners, or a band beside or above a 3:2 photo.
+                     * @default off
+                     * @enum {string}
+                     */
+                    mode?: "off" | "overlay" | "band";
+                    /**
+                     * @description Where the band goes in landscape.
+                     * @default right
+                     * @enum {string}
+                     */
+                    side?: "left" | "right";
+                    /**
+                     * @default paper
+                     * @enum {string}
+                     */
+                    background?: "paper" | "photo";
+                };
+                /**
+                 * @description Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+                 *     without `secrets` keeps the ones it has.
+                 */
+                instances?: components["schemas"]["PluginInstance"][];
+            };
+        };
+        /**
+         * @description One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+         *     values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+         */
+        PluginInstance: {
+            instance_id: string;
+            /** @example kinframe.ha-energy */
+            plugin_id: string;
+            /** @description The plugin version the settings were made with (informational). */
+            version?: string;
+            /**
+             * @default top-right
+             * @enum {string}
+             */
+            slot?: "top-left" | "top-right";
+            /** @default 0 */
+            order?: number;
+            /**
+             * @default always
+             * @enum {string}
+             */
+            visibility?: "always" | "on_change" | "on_tap";
+            /**
+             * @description An enabled instance needs every required setting and secret.
+             * @default true
+             */
+            enabled?: boolean;
+            /** @description The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids). */
+            settings?: Record<string, never>;
+            /**
+             * @description Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+             *     frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+             */
+            secrets?: {
+                [key: string]: string | null;
+            };
+            /** @description The secret settings that have a value. */
+            readonly secrets_set?: string[];
+        };
+        /** @description A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`). */
+        CatalogPlugin: {
+            /** @description The plugin's `plugin.json` as-is (docs/plugins.md §3.1). */
+            manifest: Record<string, never>;
+            /**
+             * @description Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+             *     `@setting.<key>.help`, `@option.<key>.<value>`, `@preset.<id>`). English is the manifest itself.
+             */
+            locales?: {
+                [key: string]: {
+                    [key: string]: string;
+                };
+            };
+            /** @description Part of the frame app (not a downloaded bundle). */
+            builtin?: boolean;
+        };
+        PluginCatalog: {
+            plugins: components["schemas"]["CatalogPlugin"][];
+        };
+        PluginInstanceStatus: {
+            instance_id: string;
+            /** @description The instance started on the frame. */
+            running?: boolean;
+            /** @description The last error */
+            error?: string | null;
+            /** Format: date-time */
+            error_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the last update succeeded.
+             */
+            updated_at?: string | null;
+            /**
+             * @description Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+             *     picker, docs/plugins.md §6.1). Absent when the plugin has no entity settings or the connection failed.
+             */
+            entities?: components["schemas"]["DiscoveredEntity"][];
+        };
+        DiscoveredEntity: {
+            entity_id: string;
+            name?: string;
+            unit?: string;
+            device_class?: string;
+        };
+        DiscoveredService: {
+            name: string;
+            /** @example http://192.168.1.20 */
+            url: string;
+        };
+        /** @description What the frame knows about its plugins right now (`PUT /device/plugins/status`). */
+        PluginStatusReport: {
+            instances?: components["schemas"]["PluginInstanceStatus"][];
+            /** @description mDNS service type (a `discover` value in a manifest) → what the frame found on its network. */
+            services?: {
+                [key: string]: components["schemas"]["DiscoveredService"][];
+            };
+        };
+        /** @description The frame's plugin catalog and their status, for the apps' Plugins section. */
+        FramePlugins: {
+            catalog: components["schemas"]["CatalogPlugin"][];
+            /**
+             * Format: date-time
+             * @description When the frame last reported its catalog; null for an app that doesn't.
+             */
+            catalog_at?: string | null;
+            instances?: components["schemas"]["PluginInstanceStatus"][];
+            services?: {
+                [key: string]: components["schemas"]["DiscoveredService"][];
+            };
+            /** Format: date-time */
+            status_at?: string | null;
         };
         /** @description PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64. */
         PinHash: {
@@ -4505,6 +4703,29 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getFramePlugins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalog and status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FramePlugins"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     geocode: {
         parameters: {
             query: {
@@ -5095,6 +5316,52 @@ export interface operations {
                 };
             };
             412: components["responses"]["Problem"];
+        };
+    };
+    devicePutPluginCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PluginCatalog"];
+            };
+        };
+        responses: {
+            /** @description Stored */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    devicePutPluginStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PluginStatusReport"];
+            };
+        };
+        responses: {
+            /** @description Stored */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
         };
     };
     devicePatchPlacement: {

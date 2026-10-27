@@ -493,6 +493,63 @@ func (e FrameSettingsLocaleTemperatureUnit) Valid() bool {
 	}
 }
 
+// Defines values for FrameSettingsPluginsLayoutBackground.
+const (
+	FrameSettingsPluginsLayoutBackgroundPaper FrameSettingsPluginsLayoutBackground = "paper"
+	FrameSettingsPluginsLayoutBackgroundPhoto FrameSettingsPluginsLayoutBackground = "photo"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutBackground enum.
+func (e FrameSettingsPluginsLayoutBackground) Valid() bool {
+	switch e {
+	case FrameSettingsPluginsLayoutBackgroundPaper:
+		return true
+	case FrameSettingsPluginsLayoutBackgroundPhoto:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsPluginsLayoutMode.
+const (
+	FrameSettingsPluginsLayoutModeBand    FrameSettingsPluginsLayoutMode = "band"
+	FrameSettingsPluginsLayoutModeOff     FrameSettingsPluginsLayoutMode = "off"
+	FrameSettingsPluginsLayoutModeOverlay FrameSettingsPluginsLayoutMode = "overlay"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutMode enum.
+func (e FrameSettingsPluginsLayoutMode) Valid() bool {
+	switch e {
+	case FrameSettingsPluginsLayoutModeBand:
+		return true
+	case FrameSettingsPluginsLayoutModeOff:
+		return true
+	case FrameSettingsPluginsLayoutModeOverlay:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsPluginsLayoutSide.
+const (
+	Left  FrameSettingsPluginsLayoutSide = "left"
+	Right FrameSettingsPluginsLayoutSide = "right"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutSide enum.
+func (e FrameSettingsPluginsLayoutSide) Valid() bool {
+	switch e {
+	case Left:
+		return true
+	case Right:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsSlideshowBackground.
 const (
 	FrameSettingsSlideshowBackgroundBlack   FrameSettingsSlideshowBackground = "black"
@@ -792,19 +849,19 @@ func (e JoinRequestVia) Valid() bool {
 
 // Defines values for MediaKind.
 const (
-	Live  MediaKind = "live"
-	Photo MediaKind = "photo"
-	Video MediaKind = "video"
+	MediaKindLive  MediaKind = "live"
+	MediaKindPhoto MediaKind = "photo"
+	MediaKindVideo MediaKind = "video"
 )
 
 // Valid indicates whether the value is a known member of the MediaKind enum.
 func (e MediaKind) Valid() bool {
 	switch e {
-	case Live:
+	case MediaKindLive:
 		return true
-	case Photo:
+	case MediaKindPhoto:
 		return true
-	case Video:
+	case MediaKindVideo:
 		return true
 	default:
 		return false
@@ -1078,6 +1135,45 @@ func (e PlacementStatus) Valid() bool {
 	case PlacementStatusRemoved:
 		return true
 	case PlacementStatusSeen:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PluginInstanceSlot.
+const (
+	TopLeft  PluginInstanceSlot = "top-left"
+	TopRight PluginInstanceSlot = "top-right"
+)
+
+// Valid indicates whether the value is a known member of the PluginInstanceSlot enum.
+func (e PluginInstanceSlot) Valid() bool {
+	switch e {
+	case TopLeft:
+		return true
+	case TopRight:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PluginInstanceVisibility.
+const (
+	Always   PluginInstanceVisibility = "always"
+	OnChange PluginInstanceVisibility = "on_change"
+	OnTap    PluginInstanceVisibility = "on_tap"
+)
+
+// Valid indicates whether the value is a known member of the PluginInstanceVisibility enum.
+func (e PluginInstanceVisibility) Valid() bool {
+	switch e {
+	case Always:
+		return true
+	case OnChange:
+		return true
+	case OnTap:
 		return true
 	default:
 		return false
@@ -2034,6 +2130,19 @@ type CalendarView struct {
 	} `json:"window"`
 }
 
+// CatalogPlugin A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
+type CatalogPlugin struct {
+	// Builtin Part of the frame app (not a downloaded bundle).
+	Builtin *bool `json:"builtin,omitempty"`
+
+	// Locales Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+	// `@setting.<key>.help`, `@option.<key>.<value>`, `@preset.<id>`). English is the manifest itself.
+	Locales *map[string]map[string]string `json:"locales,omitempty"`
+
+	// Manifest The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+	Manifest map[string]interface{} `json:"manifest"`
+}
+
 // Change defines model for Change.
 type Change struct {
 	Album    *Album    `json:"album,omitempty"`
@@ -2223,6 +2332,22 @@ type DeviceState struct {
 	ServerTime *time.Time `json:"server_time,omitempty"`
 }
 
+// DiscoveredEntity defines model for DiscoveredEntity.
+type DiscoveredEntity struct {
+	DeviceClass *string `json:"device_class,omitempty"`
+	EntityId    string  `json:"entity_id"`
+	Name        *string `json:"name,omitempty"`
+	Unit        *string `json:"unit,omitempty"`
+}
+
+// DiscoveredService defines model for DiscoveredService.
+type DiscoveredService struct {
+	Name string `json:"name"`
+
+	// Url Example: http://192.168.1.20
+	Url string `json:"url"`
+}
+
 // Discovery defines model for Discovery.
 type Discovery struct {
 	Api  string `json:"api"`
@@ -2378,6 +2503,17 @@ type FrameHealth struct {
 	Online                *bool      `json:"online,omitempty"`
 }
 
+// FramePlugins The frame's plugin catalog and their status, for the apps' Plugins section.
+type FramePlugins struct {
+	Catalog []CatalogPlugin `json:"catalog"`
+
+	// CatalogAt When the frame last reported its catalog; null for an app that doesn't.
+	CatalogAt *time.Time                      `json:"catalog_at,omitempty"`
+	Instances *[]PluginInstanceStatus         `json:"instances,omitempty"`
+	Services  *map[string][]DiscoveredService `json:"services,omitempty"`
+	StatusAt  *time.Time                      `json:"status_at,omitempty"`
+}
+
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
 type FrameSettings struct {
 	// Calendar Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
@@ -2441,6 +2577,23 @@ type FrameSettings struct {
 		Sound  *bool `json:"sound,omitempty"`
 		Volume *int  `json:"volume,omitempty"`
 	} `json:"notifications,omitempty"`
+
+	// Plugins Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+	// its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+	Plugins *struct {
+		// Instances Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+		// without `secrets` keeps the ones it has.
+		Instances *[]PluginInstance `json:"instances,omitempty"`
+		Layout    *struct {
+			Background *FrameSettingsPluginsLayoutBackground `json:"background,omitempty"`
+
+			// Mode Off, the photo's top corners, or a band beside or above a 3:2 photo.
+			Mode *FrameSettingsPluginsLayoutMode `json:"mode,omitempty"`
+
+			// Side Where the band goes in landscape.
+			Side *FrameSettingsPluginsLayoutSide `json:"side,omitempty"`
+		} `json:"layout,omitempty"`
+	} `json:"plugins,omitempty"`
 	Slideshow *struct {
 		// AlbumId null = all photos
 		AlbumId     *string                            `json:"album_id,omitempty"`
@@ -2504,6 +2657,15 @@ type FrameSettingsLocaleFirstDayOfWeek string
 
 // FrameSettingsLocaleTemperatureUnit defines model for FrameSettings.Locale.TemperatureUnit.
 type FrameSettingsLocaleTemperatureUnit string
+
+// FrameSettingsPluginsLayoutBackground defines model for FrameSettings.Plugins.Layout.Background.
+type FrameSettingsPluginsLayoutBackground string
+
+// FrameSettingsPluginsLayoutMode Off, the photo's top corners, or a band beside or above a 3:2 photo.
+type FrameSettingsPluginsLayoutMode string
+
+// FrameSettingsPluginsLayoutSide Where the band goes in landscape.
+type FrameSettingsPluginsLayoutSide string
 
 // FrameSettingsSlideshowBackground defines model for FrameSettings.Slideshow.Background.
 type FrameSettingsSlideshowBackground string
@@ -2993,6 +3155,70 @@ type PlacementRotation int
 
 // PlacementStatus defines model for PlacementStatus.
 type PlacementStatus string
+
+// PluginCatalog defines model for PluginCatalog.
+type PluginCatalog struct {
+	Plugins []CatalogPlugin `json:"plugins"`
+}
+
+// PluginInstance One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+// values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+type PluginInstance struct {
+	// Enabled An enabled instance needs every required setting and secret.
+	Enabled    *bool  `json:"enabled,omitempty"`
+	InstanceId string `json:"instance_id"`
+	Order      *int   `json:"order,omitempty"`
+
+	// PluginId Example: kinframe.ha-energy
+	PluginId string `json:"plugin_id"`
+
+	// Secrets Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+	// frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+	Secrets *map[string]*string `json:"secrets,omitempty"`
+
+	// SecretsSet The secret settings that have a value.
+	SecretsSet *[]string `json:"secrets_set,omitempty"`
+
+	// Settings The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+	Settings *map[string]interface{} `json:"settings,omitempty"`
+	Slot     *PluginInstanceSlot     `json:"slot,omitempty"`
+
+	// Version The plugin version the settings were made with (informational).
+	Version    *string                   `json:"version,omitempty"`
+	Visibility *PluginInstanceVisibility `json:"visibility,omitempty"`
+}
+
+// PluginInstanceSlot defines model for PluginInstance.Slot.
+type PluginInstanceSlot string
+
+// PluginInstanceVisibility defines model for PluginInstance.Visibility.
+type PluginInstanceVisibility string
+
+// PluginInstanceStatus defines model for PluginInstanceStatus.
+type PluginInstanceStatus struct {
+	// Entities Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+	// picker, docs/plugins.md §6.1). Absent when the plugin has no entity settings or the connection failed.
+	Entities *[]DiscoveredEntity `json:"entities,omitempty"`
+
+	// Error The last error
+	Error      *string    `json:"error,omitempty"`
+	ErrorAt    *time.Time `json:"error_at,omitempty"`
+	InstanceId string     `json:"instance_id"`
+
+	// Running The instance started on the frame.
+	Running *bool `json:"running,omitempty"`
+
+	// UpdatedAt When the last update succeeded.
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+}
+
+// PluginStatusReport What the frame knows about its plugins right now (`PUT /device/plugins/status`).
+type PluginStatusReport struct {
+	Instances *[]PluginInstanceStatus `json:"instances,omitempty"`
+
+	// Services mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+	Services *map[string][]DiscoveredService `json:"services,omitempty"`
+}
 
 // Problem defines model for Problem.
 type Problem struct {
@@ -3971,6 +4197,12 @@ type DeviceSetReactionJSONRequestBody DeviceSetReactionJSONBody
 // DeviceSendReplyJSONRequestBody defines body for DeviceSendReply for application/json ContentType.
 type DeviceSendReplyJSONRequestBody DeviceSendReplyJSONBody
 
+// DevicePutPluginCatalogJSONRequestBody defines body for DevicePutPluginCatalog for application/json ContentType.
+type DevicePutPluginCatalogJSONRequestBody = PluginCatalog
+
+// DevicePutPluginStatusJSONRequestBody defines body for DevicePutPluginStatus for application/json ContentType.
+type DevicePutPluginStatusJSONRequestBody = PluginStatusReport
+
 // DevicePatchSettingsApplicationMergePatchPlusJSONRequestBody defines body for DevicePatchSettings for application/merge-patch+json ContentType.
 type DevicePatchSettingsApplicationMergePatchPlusJSONRequestBody = FrameSettingsPatch
 
@@ -4121,6 +4353,12 @@ type ServerInterface interface {
 	// (POST /v1/device/placements/{placementId}/replies)
 	DeviceSendReply(w http.ResponseWriter, r *http.Request, placementId PlacementId)
 
+	// (PUT /v1/device/plugins/catalog)
+	DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/device/plugins/status)
+	DevicePutPluginStatus(w http.ResponseWriter, r *http.Request)
+
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(w http.ResponseWriter, r *http.Request, params DevicePatchSettingsParams)
 
@@ -4243,6 +4481,9 @@ type ServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/placements:share)
 	SharePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params SharePlacementsParams)
+
+	// (GET /v1/frames/{frameId}/plugins)
+	GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -4914,6 +5155,34 @@ func (siw *ServerInterfaceWrapper) DeviceSendReply(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceSendReply(w, r, placementId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DevicePutPluginCatalog operation middleware
+func (siw *ServerInterfaceWrapper) DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DevicePutPluginCatalog(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DevicePutPluginStatus operation middleware
+func (siw *ServerInterfaceWrapper) DevicePutPluginStatus(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DevicePutPluginStatus(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6357,6 +6626,32 @@ func (siw *ServerInterfaceWrapper) SharePlacements(w http.ResponseWriter, r *htt
 	handler.ServeHTTP(w, r)
 }
 
+// GetFramePlugins operation middleware
+func (siw *ServerInterfaceWrapper) GetFramePlugins(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFramePlugins(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ReplaceDevice operation middleware
 func (siw *ServerInterfaceWrapper) ReplaceDevice(w http.ResponseWriter, r *http.Request) {
 
@@ -7313,6 +7608,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/placements/{placementId}", wrapper.DevicePatchPlacement)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/placements/{placementId}/reaction", wrapper.DeviceSetReaction)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/placements/{placementId}/replies", wrapper.DeviceSendReply)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/catalog", wrapper.DevicePutPluginCatalog)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/status", wrapper.DevicePutPluginStatus)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/settings", wrapper.DevicePatchSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/enroll", wrapper.EnrollDevice)
@@ -7353,6 +7650,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.UpdatePlacement)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:bulk", wrapper.BulkUpdatePlacements)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:share", wrapper.SharePlacements)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/plugins", wrapper.GetFramePlugins)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/replace-device", wrapper.ReplaceDevice)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
@@ -7830,6 +8128,72 @@ type DeviceSendReply204Response struct {
 func (response DeviceSendReply204Response) VisitDeviceSendReplyResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type DevicePutPluginCatalogRequestObject struct {
+	Body *DevicePutPluginCatalogJSONRequestBody
+}
+
+type DevicePutPluginCatalogResponseObject interface {
+	VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error
+}
+
+type DevicePutPluginCatalog204Response struct {
+}
+
+func (response DevicePutPluginCatalog204Response) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DevicePutPluginStatusRequestObject struct {
+	Body *DevicePutPluginStatusJSONRequestBody
+}
+
+type DevicePutPluginStatusResponseObject interface {
+	VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error
+}
+
+type DevicePutPluginStatus204Response struct {
+}
+
+func (response DevicePutPluginStatus204Response) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type DevicePatchSettingsRequestObject struct {
@@ -9369,6 +9733,45 @@ func (response SharePlacements422ApplicationProblemPlusJSONResponse) VisitShareP
 	return err
 }
 
+type GetFramePluginsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type GetFramePluginsResponseObject interface {
+	VisitGetFramePluginsResponse(w http.ResponseWriter) error
+}
+
+type GetFramePlugins200JSONResponse FramePlugins
+
+func (response GetFramePlugins200JSONResponse) VisitGetFramePluginsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFramePluginsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFramePluginsdefaultApplicationProblemPlusJSONResponse) VisitGetFramePluginsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ReplaceDeviceRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *ReplaceDeviceJSONRequestBody
@@ -10549,6 +10952,12 @@ type StrictServerInterface interface {
 	// (POST /v1/device/placements/{placementId}/replies)
 	DeviceSendReply(ctx context.Context, request DeviceSendReplyRequestObject) (DeviceSendReplyResponseObject, error)
 
+	// (PUT /v1/device/plugins/catalog)
+	DevicePutPluginCatalog(ctx context.Context, request DevicePutPluginCatalogRequestObject) (DevicePutPluginCatalogResponseObject, error)
+
+	// (PUT /v1/device/plugins/status)
+	DevicePutPluginStatus(ctx context.Context, request DevicePutPluginStatusRequestObject) (DevicePutPluginStatusResponseObject, error)
+
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(ctx context.Context, request DevicePatchSettingsRequestObject) (DevicePatchSettingsResponseObject, error)
 
@@ -10671,6 +11080,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/placements:share)
 	SharePlacements(ctx context.Context, request SharePlacementsRequestObject) (SharePlacementsResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/plugins)
+	GetFramePlugins(ctx context.Context, request GetFramePluginsRequestObject) (GetFramePluginsResponseObject, error)
 
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(ctx context.Context, request ReplaceDeviceRequestObject) (ReplaceDeviceResponseObject, error)
@@ -11309,6 +11721,68 @@ func (sh *strictHandler) DeviceSendReply(w http.ResponseWriter, r *http.Request,
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceSendReplyResponseObject); ok {
 		if err := validResponse.VisitDeviceSendReplyResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DevicePutPluginCatalog operation middleware
+func (sh *strictHandler) DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request) {
+	var request DevicePutPluginCatalogRequestObject
+
+	var body DevicePutPluginCatalogJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DevicePutPluginCatalog(ctx, request.(DevicePutPluginCatalogRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DevicePutPluginCatalog")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DevicePutPluginCatalogResponseObject); ok {
+		if err := validResponse.VisitDevicePutPluginCatalogResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DevicePutPluginStatus operation middleware
+func (sh *strictHandler) DevicePutPluginStatus(w http.ResponseWriter, r *http.Request) {
+	var request DevicePutPluginStatusRequestObject
+
+	var body DevicePutPluginStatusJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DevicePutPluginStatus(ctx, request.(DevicePutPluginStatusRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DevicePutPluginStatus")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DevicePutPluginStatusResponseObject); ok {
+		if err := validResponse.VisitDevicePutPluginStatusResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -12518,6 +12992,32 @@ func (sh *strictHandler) SharePlacements(w http.ResponseWriter, r *http.Request,
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(SharePlacementsResponseObject); ok {
 		if err := validResponse.VisitSharePlacementsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFramePlugins operation middleware
+func (sh *strictHandler) GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request GetFramePluginsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFramePlugins(ctx, request.(GetFramePluginsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFramePlugins")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFramePluginsResponseObject); ok {
+		if err := validResponse.VisitGetFramePluginsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

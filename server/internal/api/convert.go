@@ -176,7 +176,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 		out.ImportedSenderName = it.OriginSenderName
 	}
 	if it.IsLive() {
-		out.Kind = gen.Live
+		out.Kind = gen.MediaKindLive
 		mo := gen.ItemMotion{Status: gen.ItemMotionStatusProcessing}
 		if *it.MotionStatus == "ready" {
 			mo = gen.ItemMotion{Status: gen.ItemMotionStatusReady, Width: it.MotionWidth, Height: it.MotionHeight,

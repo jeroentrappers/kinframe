@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -24,6 +25,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
+	"github.com/jeroentrappers/kinframe/server/internal/secrets"
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
@@ -71,6 +73,8 @@ type Server struct {
 	weather  *weather.Service  // nil: weather disabled
 	calendar *calendar.Service // nil: calendars disabled
 	sealer   *calendar.Sealer
+	// pluginSealer keeps plugin secrets (settings plugins.instances[].secrets) encrypted at rest.
+	pluginSealer *secrets.Sealer
 
 	mirror mirrorHub // TV mirror: the latest now_showing per frame and its viewers
 }
@@ -133,6 +137,11 @@ func New(d Deps) (*Server, error) {
 	if d.Calendar != nil {
 		s.sealer = d.Calendar.Sealer
 	}
+	ps, err := secrets.New(d.Config.SecretsKey, d.Config.SigningKey, "kinframe plugin secrets v1", "kinframe plugin secrets from signing key v1")
+	if err != nil {
+		return nil, fmt.Errorf("plugin secrets: %w", err)
+	}
+	s.pluginSealer = ps
 	if err := s.setupTus(); err != nil {
 		return nil, err
 	}
