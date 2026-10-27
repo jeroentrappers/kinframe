@@ -354,7 +354,12 @@ data class Problem(
     val status: Int? = null,
     val code: String? = null,
     val detail: String? = null,
+    /** Field-level validation errors (422): `{"field": "plugins.instances.0.settings.grid", "code": "required"}`. */
+    val errors: List<FieldError> = emptyList(),
 )
+
+@Serializable
+data class FieldError(val field: String = "", val code: String = "")
 
 /** Stable machine codes from `ProblemCode` that clients branch on. */
 object ProblemCode {

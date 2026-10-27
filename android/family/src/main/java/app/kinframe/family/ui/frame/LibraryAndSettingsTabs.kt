@@ -199,6 +199,8 @@ fun SettingsTab(
     state: SettingsFormState,
     weatherEnabled: Boolean,
     vm: FrameSettingsViewModel,
+    /** The Plugins section (saved on its own, see [PluginsViewModel]). */
+    plugins: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -308,6 +310,8 @@ fun SettingsTab(
                         Text(stringResource(R.string.fs_weather_credit), style = Kin.type.caption, color = c.inkFaint)
                     }
                 }
+
+                plugins?.invoke()
             }
         }
         if (state.dirty) {
