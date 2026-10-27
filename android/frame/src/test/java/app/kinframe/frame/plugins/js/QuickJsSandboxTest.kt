@@ -82,8 +82,9 @@ class QuickJsSandboxTest {
     }
 
     @Test fun theFirstRenderAfterABootHasTheStartBudget() = runBlocking {
-        // A cold runtime on the frame: the first call starts threads and loads classes.
-        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 300) {} return { type: 'text', lines: ['warm'] }; } }""")
+        // A cold runtime on the frame: the first call starts threads and loads classes. 700 ms of wall time: under the
+        // 1000 ms start budget even on a fast machine, and well over 250 ms of CPU time even on a busy CI runner.
+        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 700) {} return { type: 'text', lines: ['warm'] }; } }""")
         assertEquals("warm", text(k.render()))
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 250 ms"))
