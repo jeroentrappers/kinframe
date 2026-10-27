@@ -102,7 +102,8 @@ The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/
 
 `plugins.layout.mode: "split"` divides the screen in three: one photo on half of it, and the other half shared by the
 **dashboard** and a second photo. The dashboard is dark (the dark theme's surface, a shade lighter than the grid
-between the photos: a white panel glared beside the photos and at night). It holds the clock and the weather on top,
+between the photos: a white panel glared beside the photos and at night). It holds the clock, the weather now and the forecast for the next three days on top (in the clock's row when
+the dashboard is wide, on a row of its own when it is tall),
 up to four plugin widgets in their **strip** form (the band's horizontal form) flowing into rows at their own size
 (only a widget wider than the dashboard is scaled down), and what the calendar has for the next 48 hours: today and
 the following day side by side in a wide dashboard, below each other in a tall one, whole events only, as many as

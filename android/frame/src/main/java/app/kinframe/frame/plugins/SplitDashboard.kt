@@ -39,6 +39,8 @@ import app.kinframe.core.design.LocalKinColors
 import app.kinframe.core.plugin.ui.PluginPalette
 import app.kinframe.core.plugin.ui.ViewForm
 import app.kinframe.frame.calendar.CalEvent
+import app.kinframe.frame.calendar.CalendarFormat
+import app.kinframe.frame.calendar.currentLocale
 import app.kinframe.frame.calendar.CalendarData
 import app.kinframe.frame.calendar.UpcomingAgenda
 import app.kinframe.frame.slideshow.Collage
@@ -85,7 +87,12 @@ fun SplitDashboard(
         BoxWithConstraints(modifier.clip(RoundedCornerShape(14.dp)).background(Kin.colors.surface)) {
             val wide = maxWidth > maxHeight * 1.15f
             Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 18.dp)) {
-                DashboardHeader(clock, date, weather, nowMs, unit, palette, onClock, onWeather)
+                val days = remember(weather, nowMs / 3_600_000) { forecastDays(weather, nowMs, zone) }
+                DashboardHeader(clock, date, weather, nowMs, unit, palette, onClock, onWeather, forecast = if (wide) days else emptyList())
+                if (!wide && days.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    Forecast(days, unit, palette, onWeather)
+                }
                 if (widgets.isNotEmpty()) {
                     Spacer(Modifier.height(14.dp))
                     WidgetStrip(widgets, palette, onWidget)
@@ -102,9 +109,39 @@ fun SplitDashboard(
     }
 }
 
+/** The next three days after today, from the frame's forecast. */
+private fun forecastDays(weather: Weather?, nowMs: Long, zone: ZoneId): List<Weather.Day> {
+    val today = java.time.Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate()
+    return weather?.upcomingDays(nowMs).orEmpty().filter { d -> d.localDate?.isAfter(today) == true }.take(FORECAST_DAYS)
+}
+
+private const val FORECAST_DAYS = 3
+
+/** Per day its weekday, icon and high and low, side by side. */
+@Composable
+private fun Forecast(days: List<Weather.Day>, unit: String, palette: PluginPalette, onWeather: () -> Unit, modifier: Modifier = Modifier) {
+    val locale = currentLocale()
+    Row(
+        modifier.clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button, onClick = onWeather),
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        days.forEach { d ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(d.localDate?.let { CalendarFormat.weekdayShort(it, locale) }.orEmpty(), style = Kin.type.caption.copy(fontSize = 14.sp, fontWeight = FontWeight.Medium), color = palette.soft)
+                WeatherIcon(WeatherCodes.glyph(d.code, true), 30.dp, onPaper = false)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(Units.tempLabel(d.maxC, unit), style = Kin.type.caption.copy(fontSize = 15.sp, fontWeight = FontWeight.Medium), color = palette.text)
+                    Text(" " + Units.tempLabel(d.minC, unit), style = Kin.type.caption.copy(fontSize = 13.sp), color = palette.soft)
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun DashboardHeader(
     clock: String?, date: String?, weather: Weather?, nowMs: Long, unit: String, palette: PluginPalette, onClock: () -> Unit, onWeather: () -> Unit,
+    forecast: List<Weather.Day> = emptyList(),
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Column(
@@ -122,6 +159,10 @@ private fun DashboardHeader(
                 WeatherIcon(WeatherCodes.glyph(now.code, now.isDay), 52.dp, onPaper = false)
                 Text(Units.tempLabel(now.tempC, unit), style = Kin.type.headline.copy(fontSize = 36.sp, fontWeight = FontWeight.Light), color = palette.text)
             }
+        }
+        if (forecast.isNotEmpty()) {
+            Box(Modifier.padding(horizontal = 18.dp).width(1.dp).height(56.dp).background(palette.faint))
+            Forecast(forecast, unit, palette, onWeather)
         }
     }
 }
