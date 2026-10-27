@@ -100,7 +100,7 @@ data class PluginManifest(
 
     companion object {
         const val API = 1
-        val SETTING_TYPES = setOf("text", "number", "boolean", "choice", "url", "secret", "entity", "color", "duration")
+        val SETTING_TYPES = setOf("text", "number", "boolean", "choice", "url", "secret", "entity", "color", "duration", "timezone")
         private val ID = Regex("^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)+$")
         private val KEY = Regex("^[a-z][a-z0-9_]{0,31}$")
         private val VERSION = Regex("^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$")

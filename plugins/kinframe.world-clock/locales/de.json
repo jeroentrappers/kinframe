@@ -1,0 +1,13 @@
+{
+  "@name": "Weltuhr",
+  "@description": "Die Uhrzeit dort, wo Familie und Freunde wohnen: bis zu vier Orte, mit dem Tag, wenn er abweicht, und wie weit sie vor- oder nachgehen.",
+  "@setting.city_1": "Ort",
+  "@setting.name_1": "Name (leer = die Stadt)",
+  "@setting.city_2": "Zweiter Ort",
+  "@setting.name_2": "Name",
+  "@setting.city_3": "Dritter Ort",
+  "@setting.name_3": "Name",
+  "@setting.city_4": "Vierter Ort",
+  "@setting.name_4": "Name",
+  "@setting.show_difference": "Zeitunterschied anzeigen"
+}

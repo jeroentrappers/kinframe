@@ -59,7 +59,8 @@
       temperature: (c, decimals) => K.fmt('temperature', +c, decimals | 0),
       number: (v, decimals, unit) => K.fmt('number', +v, decimals | 0, unit == null ? null : String(unit)),
       duration: (seconds) => K.fmt('duration', +seconds),
-      time: (epochMs) => K.fmt('time', +epochMs),
+      // In the frame's time zone, or in `zone` (an IANA name such as "Asia/Tokyo").
+      time: (epochMs, zone) => K.fmt('time', +epochMs, zone == null ? null : String(zone)),
       // Relative to now, in the frame's language and time zone: "Today", "Tomorrow", "Thursday", "27 Oct";
       // "just now", "8 min ago", "3 h ago", then a day; "now", "in 5 min", "in 3 h", then a day.
       day: (epochMs) => K.fmt('day', +epochMs),
@@ -69,9 +70,12 @@
     t(key, vars) { return K.t(String(key), vars ? JSON.stringify(vars) : null); },
     log(...args) { K.log(args.map(str).join(' ')); },
     now() { return K.now(); },
-    // The frame's calendar for an instant (default now): { date: "2026-10-25", year, month, day, hour, minute,
-    // weekday (1 = Monday) } in the frame's time zone. QuickJS's Date only knows the device's zone.
-    localTime(epochMs) { return JSON.parse(K.local_time(epochMs === undefined ? K.now() : +epochMs)); },
+    // The calendar for an instant (default now): { date: "2026-10-25", year, month, day, hour, minute,
+    // weekday (1 = Monday), offset_minutes (from UTC), zone } in the frame's time zone, or in `zone` (an IANA name).
+    // QuickJS's Date only knows the device's zone.
+    localTime(epochMs, zone) {
+      return JSON.parse(K.local_time(epochMs == null ? K.now() : +epochMs, zone == null ? null : String(zone)));
+    },
     get timezone() { return K.zone(); },
     // { latitude, longitude } rounded to about a kilometre, from the frame's weather settings; null when the frame has
     // no place or the plugin lacks `permissions.location`.

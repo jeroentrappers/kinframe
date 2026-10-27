@@ -37,7 +37,7 @@ class PluginReportsTest {
         val ids = plugins.map { it["manifest"]!!.jsonObject["id"]!!.jsonPrimitive.content }
         assertEquals(
             listOf("kinframe.ha-energy", "kinframe.ha-ev", "kinframe.ha-media", "kinframe.homewizard-p1", "kinframe.homewizard-socket",
-                "kinframe.homewizard-water", "kinframe.weather-station"),
+                "kinframe.homewizard-water", "kinframe.weather-station", "kinframe.world-clock"),
             ids,
         )
         val p1 = plugins[ids.indexOf("kinframe.homewizard-p1")]

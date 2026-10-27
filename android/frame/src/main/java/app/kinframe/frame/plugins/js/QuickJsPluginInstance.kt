@@ -180,7 +180,7 @@ class QuickJsPluginInstance(
             function("now") { _ -> ctx.now().toDouble() }
             function("zone") { _ -> ctx.zone().id }
             function("location") { _ -> location(ctx) }
-            function("local_time") { a -> localTime(ctx, (a[0] as Number).toLong()) }
+            function("local_time") { a -> localTime(ctx, (a[0] as Number).toLong(), a.getOrNull(1) as? String) }
             function("language") { _ -> ctx.format().locale.toLanguageTag() }
             function("t") { a -> translate(ctx, a.getOrNull(0)?.toString().orEmpty(), a.getOrNull(1) as? String) }
             function("fmt") { a -> format(ctx, a) }
@@ -346,11 +346,12 @@ class QuickJsPluginInstance(
         }.getOrElse { e -> ctx.log("ws: ${e.message}"); null }
     }
 
-    private fun localTime(ctx: PluginContext, ms: Long): String {
-        val z = java.time.Instant.ofEpochMilli(ms).atZone(ctx.zone())
+    private fun localTime(ctx: PluginContext, ms: Long, zone: String?): String {
+        val z = java.time.Instant.ofEpochMilli(ms).atZone(zone?.let(::zoneOf) ?: ctx.zone())
         return buildJsonObject {
             put("date", z.toLocalDate().toString()); put("year", z.year); put("month", z.monthValue); put("day", z.dayOfMonth)
             put("hour", z.hour); put("minute", z.minute); put("weekday", z.dayOfWeek.value)
+            put("offset_minutes", z.offset.totalSeconds / 60); put("zone", z.zone.id)
         }.toString()
     }
 
@@ -380,7 +381,7 @@ class QuickJsPluginInstance(
             "temperature" -> f.temperature(d(1), decimals = i(2).coerceIn(0, 3))
             "number" -> f.number(d(1), i(2).coerceIn(0, 6), a.getOrNull(3) as? String)
             "duration" -> f.duration(d(1).toLong())
-            "time" -> f.time(d(1).toLong())
+            "time" -> f.time(d(1).toLong(), (a.getOrNull(2) as? String)?.let(::zoneOf) ?: f.zone)
             "day" -> f.day(d(1).toLong(), ctx.now())
             "ago" -> f.ago(d(1).toLong(), ctx.now())
             "until" -> f.until(d(1).toLong(), ctx.now())
@@ -402,5 +403,9 @@ class QuickJsPluginInstance(
         fun reconnectMs(attempt: Int): Long = (2_000L shl attempt.coerceAtMost(5)).coerceAtMost(60_000L)
     }
 }
+
+/** An IANA time zone a plugin names (`Asia/Tokyo`); a name the frame doesn't know is the plugin's error. */
+internal fun zoneOf(id: String): java.time.ZoneId =
+    runCatching { java.time.ZoneId.of(id) }.getOrElse { throw IllegalArgumentException("unknown time zone: $id") }
 
 class PluginScriptException(message: String) : RuntimeException(message)

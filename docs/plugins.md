@@ -175,7 +175,8 @@ ha-energy-flow/
   (`applyPreset` returns null while a placeholder's setting is still empty); `newInstanceConfig` applies
   `default_visibility` to a new instance.
 - **Setting types:** `text`, `number`, `boolean`, `choice`, `url`, `secret`, `entity` (Home Assistant entity, see
-  6.2), `color`, `duration`. Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
+  6.2), `color`, `duration`, `timezone` (an IANA name such as `Asia/Tokyo`; the forms offer a searchable list of
+  cities). Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
   the form from this list; plugins never ship their own settings UI. Labels are translated through `locales/`.
 
 ### 3.2 Code
@@ -245,7 +246,7 @@ export default {
 | `log(...)` | Goes to the frame's diagnostics, visible to the owner, never uploaded with secrets in it. |
 | `now()`, `timezone`, `language` | The frame's clock, time zone and language tag ("nl", "zh-CN"). |
 | `location` | `{ latitude, longitude }` of the frame's place (its weather settings), two decimals (about 1 km); null without `permissions.location` or when the frame has no place. Read-only. |
-| `localTime(epochMs?)` | The frame's calendar for an instant: `{ date: "2026-10-25", year, month, day, hour, minute, weekday }` (weekday 1 = Monday) in the frame's time zone. QuickJS's `Date` only knows the device's own zone. |
+| `localTime(epochMs?, zone?)` | The calendar for an instant: `{ date: "2026-10-25", year, month, day, hour, minute, weekday, offset_minutes, zone }` (weekday 1 = Monday, offset from UTC) in the frame's time zone, or in `zone` (an IANA name, `"Asia/Tokyo"`; an unknown one is an error). `format.time(epochMs, zone?)` takes the same zone. QuickJS's `Date` only knows the device's own zone. |
 
 There is no `fetch`, `XMLHttpRequest`, timers beyond what the runtime gives, file system, or access to the photos.
 `main.js` may import the host's own libraries (`import * as ha from 'kinframe/ha'`, §13.1) and nothing else.
@@ -642,6 +643,17 @@ reports what it found in its plugin status:
   button that wouldn't work.
 - **As a template:** a device with a button: the action changes the device, keeps the answer in `ctx.state`,
   invalidates and returns the widget's new view.
+
+### 9.8 World clock (`kinframe.world-clock`)
+
+- **Settings:** up to four places (`city_1`…`city_4`, type `timezone`), each with an optional name ("Anna" instead of
+  "New York"), and whether to show how far ahead or behind they are.
+- **View:** a `list`: per place its time in the frame's 12/24-hour style, its name, a sun or moon for day (7–19 h) or
+  night there, and as detail the day when it isn't the frame's ("Morgen") and the difference ("+8 h", "−4:30"),
+  dropping the difference when both don't fit a row's 16 characters. The detail card shows the same.
+- **No network and no permissions:** the frame does the time zone arithmetic (`ctx.localTime(ms, zone)`,
+  `ctx.format.time(ms, zone)`), from Android's own time zone data, so summer time is right everywhere. A template for
+  plugins that only compute.
 
 ## 10. Changes to kinframe
 

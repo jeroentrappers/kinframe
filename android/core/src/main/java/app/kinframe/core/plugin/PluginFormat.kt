@@ -19,7 +19,7 @@ import kotlin.math.abs
  */
 class PluginFormat(
     val locale: Locale,
-    private val zone: ZoneId = ZoneId.systemDefault(),
+    val zone: ZoneId = ZoneId.systemDefault(),
     private val h24: Boolean = true,
     /** The frame's `locale.temperature_unit`: "c" or "f". */
     val temperatureUnit: String = "c",
@@ -87,9 +87,9 @@ class PluginFormat(
         }
     }
 
-    /** Clock time of an instant: "23:10" or "11:10 PM". */
-    fun time(epochMs: Long): String =
-        Instant.ofEpochMilli(epochMs).atZone(zone).format(DateTimeFormatter.ofPattern(if (h24) "HH:mm" else "h:mm a", locale))
+    /** Clock time of an instant, in the frame's time zone or [in]: "23:10" or "11:10 PM". */
+    fun time(epochMs: Long, `in`: ZoneId = zone): String =
+        Instant.ofEpochMilli(epochMs).atZone(`in`).format(DateTimeFormatter.ofPattern(if (h24) "HH:mm" else "h:mm a", locale))
 
     /**
      * A day relative to [nowMs] in the frame's time zone: "Today", "Tomorrow", "Yesterday", the weekday within six days

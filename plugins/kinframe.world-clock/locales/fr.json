@@ -1,0 +1,13 @@
+{
+  "@name": "Horloge mondiale",
+  "@description": "L'heure là où vivent la famille et les amis : jusqu'à quatre lieux, avec le jour quand il diffère et l'avance ou le retard.",
+  "@setting.city_1": "Lieu",
+  "@setting.name_1": "Nom (vide = la ville)",
+  "@setting.city_2": "Deuxième lieu",
+  "@setting.name_2": "Nom",
+  "@setting.city_3": "Troisième lieu",
+  "@setting.name_3": "Nom",
+  "@setting.city_4": "Quatrième lieu",
+  "@setting.name_4": "Nom",
+  "@setting.show_difference": "Afficher l'avance ou le retard"
+}
