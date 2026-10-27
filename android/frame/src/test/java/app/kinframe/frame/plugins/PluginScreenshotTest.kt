@@ -210,6 +210,65 @@ class PluginScreenshotTest {
         seed = 1,
     )
 
+
+    /** A gusty, wet afternoon at the owner's station, with a day of history: what the redesigned views show (§9.4). */
+    private fun stationReal(kind: String, withTemp: Boolean = true, rain: Boolean = true): PluginView {
+        val r = app.kinframe.frame.plugins.station.StationReading(
+            now, tempC = 12.8, humidityPct = 81.0, dewPointC = 9.6, feelsLikeC = 10.9, windMs = 4.2, windDirDeg = 239.0, gustMs = 8.9,
+            pressureHpa = 996.0, rainTodayMm = if (rain) 6.4 else 0.0, rainRateMmH = if (rain) 1.8 else 0.0, solarWm2 = 144.0, uvIndex = 1.0,
+            todayMinC = 7.9, todayMaxC = 14.1,
+        )
+        val h = app.kinframe.frame.plugins.station.StationHistory()
+        for (i in 0 until 24 * 12) {
+            val at = now - (24 * 12 - i) * 300_000L
+            val x = i / (24.0 * 12)
+            h.add(app.kinframe.frame.plugins.station.StationReading(at, tempC = 10.5 + 3.5 * kotlin.math.sin((x - 0.25) * 2 * Math.PI), pressureHpa = 1004.0 - 8.0 * x))
+        }
+        val f = app.kinframe.core.plugin.PluginFormat(java.util.Locale.forLanguageTag("nl"), java.time.ZoneId.of("Europe/Brussels"))
+        val words = mapOf(
+            "temperature" to "Temperatuur", "humidity" to "Luchtvochtigheid", "wind" to "Wind", "gusts" to "rukwinden", "rain_today" to "Regen vandaag",
+            "pressure" to "Luchtdruk", "sunlight" to "Zonlicht", "dew_point" to "dauwpunt", "uv_index" to "UV-index", "feels_like" to "voelt als %1\$s",
+            "updated_now" to "Net bijgewerkt", "updated_ago" to "%1\$s geleden bijgewerkt", "compass_5" to "ZW",
+        )
+        val t: (String) -> String = { k -> words[k] ?: k }
+        val unit = app.kinframe.frame.plugins.station.WindUnit.Kmh
+        val v = app.kinframe.frame.plugins.station.StationViews
+        val j = when (kind) {
+            "rows" -> v.rows(r, h.tempTrend(), h.pressureTrend(), unit, f, t, withTemp)
+            "detail" -> v.detail(r, null, h, unit, f, t, now + 120_000L)
+            else -> v.compact(r, h.tempTrend(), unit, f, t, withTemp)
+        }
+        return when (val res = PluginViewParser.parse(j)) {
+            is ViewResult.Valid -> res.view
+            is ViewResult.Invalid -> error("$kind: $res")
+        }
+    }
+
+    @Test fun stationRedesignCorners() = stage(
+        "station_redesign_corners", overlay,
+        previewInstance("a", stationReal("compact"), Slot.TopLeft, name = station),
+        previewInstance("b", stationReal("rows"), Slot.TopRight, name = station),
+        seed = 3,
+    )
+
+    @Test fun stationRedesignBand() = stage(
+        "station_redesign_band", band,
+        previewInstance("a", stationReal("compact"), Slot.TopLeft, name = station),
+        previewInstance("b", stationReal("rows", rain = false), Slot.TopRight, name = station),
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationRedesignStrip() = stage(
+        "station_redesign_strip", band.copy(background = BandBackground.Photo),
+        previewInstance("a", stationReal("rows", withTemp = false), Slot.TopLeft, name = station),
+        seed = 1,
+    )
+
+    @Test fun stationRedesignDetail() {
+        val s = previewInstance("ws", stationReal("compact"), Slot.TopLeft, name = station)
+        stage("station_redesign_detail", overlay, s, detail = s, detailView = stationReal("detail"), seed = 3)
+    }
+
     @Test fun stationCorners() = stage(
         "station_overlay_landscape", overlay,
         previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),

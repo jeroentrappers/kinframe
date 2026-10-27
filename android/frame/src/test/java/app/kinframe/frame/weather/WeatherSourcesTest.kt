@@ -70,23 +70,22 @@ class WeatherSourcesTest {
         assertEquals(station, stationOnly[1])
     }
 
-    @Test fun compactWithoutTemperatureLeadsWithHumidity() {
+    @Test fun compactWithoutTemperatureLeadsWithTheWind() {
         val v = parse(StationViews.compact(r, null, WindUnit.Ms, nl, t, withTemp = false)) as ValueView
-        assertEquals("56%", v.value)
-        assertEquals("water", v.icon)
-        assertEquals("compass_6 2,3 m/s", v.label)
-        // No humidity: the wind on its own; nothing at all: a dash, still a valid view.
-        val windOnly = parse(StationViews.compact(r.copy(humidityPct = null), null, WindUnit.Ms, nl, t, withTemp = false)) as ValueView
-        assertEquals("2,3 m/s", windOnly.value)
+        assertEquals("2,3\u00A0m/s", v.value)
+        assertEquals("direction", v.icon)
+        assertEquals("56%", v.label)
+        // No wind: the humidity on its own; nothing at all: a dash, still a valid view.
+        val humidityOnly = parse(StationViews.compact(r.copy(windMs = null, windAvgMs = null), null, WindUnit.Ms, nl, t, withTemp = false)) as ValueView
+        assertEquals("56%", humidityOnly.value)
         assertEquals("–", (parse(StationViews.compact(StationReading(r.atMs), null, WindUnit.Ms, nl, t, withTemp = false)) as ValueView).value)
     }
 
     @Test fun rowsWithoutTemperatureDropOnlyThatRow() {
-        val s = parse(StationViews.rows(r, null, null, WindUnit.Ms, nl, t, withTemp = false)) as StackView
-        assertEquals(listOf("56%", "2,3 m/s"), (s.items[0] as RowsView).items.map { it.value })
-        // A station with only a thermometer: the second table alone, or a dash.
-        val tempAndRain = StationReading(r.atMs, tempC = 3.0, rainTodayMm = 1.0)
-        assertTrue(parse(StationViews.rows(tempAndRain, null, null, WindUnit.Ms, nl, t, withTemp = false)) is RowsView)
+        val rows = parse(StationViews.rows(r, null, null, WindUnit.Ms, nl, t, withTemp = false)) as RowsView
+        assertEquals(listOf("2,3\u00A0m/s", "15,1\u00A0mm", "56%"), rows.items.map { it.value })
+        // A station with only a thermometer: a dash.
         assertEquals("–", (parse(StationViews.rows(StationReading(r.atMs, tempC = 3.0), null, null, WindUnit.Ms, nl, t, withTemp = false)) as ValueView).value)
     }
+
 }

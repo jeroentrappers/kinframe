@@ -7,6 +7,7 @@ import app.kinframe.core.plugin.RowsView
 import app.kinframe.core.plugin.SparklineView
 import app.kinframe.core.plugin.StackView
 import app.kinframe.core.plugin.TextView
+import app.kinframe.core.plugin.Tone
 import app.kinframe.core.plugin.Trend
 import app.kinframe.core.plugin.ValueView
 import app.kinframe.core.plugin.ViewResult
@@ -204,34 +205,44 @@ class WeatherStationTest {
         val r = UploadData.parse(latest)
         val v = parse(StationViews.compact(r, Trend.Up, WindUnit.Ms, nl, t)) as ValueView
         assertEquals("12,8°", v.value)
-        assertEquals("56% · W 2,3${nbsp}m/s", v.label) // 253° is WSW, nearest of 8 points: W
+        // Today's low and high, the wind (253° is WSW, nearest of 8 points: W), then the humidity on a dry day.
+        assertEquals("↓8° ↑13° · W 2,3${nbsp}m/s · 56%", v.label)
         assertEquals("thermometer", v.icon)
         assertEquals(Trend.Up, v.trend)
-        // Calm air has no direction; no wind at all leaves just the humidity.
+        // While it rains the rain takes the humidity's place.
+        val wet = parse(StationViews.compact(r.copy(rainRateMmH = 2.0), null, WindUnit.Ms, nl, t)) as ValueView
+        assertEquals("↓8° ↑13° · W 2,3${nbsp}m/s · 2,0${nbsp}mm/h", wet.label)
+        // Calm air has no direction; a station with only a thermometer has no line.
         val calm = parse(StationViews.compact(r.copy(windMs = 0.2), null, WindUnit.Ms, nl, t)) as ValueView
-        assertEquals("56% · 0,2${nbsp}m/s", calm.label)
+        assertEquals("↓8° ↑13° · 0,2${nbsp}m/s · 56%", calm.label)
         val bare = parse(StationViews.compact(StationReading(measured, tempC = 3.0), null, WindUnit.Ms, nl, t)) as ValueView
         assertNull(bare.label)
         assertEquals("–", (parse(StationViews.compact(StationReading(measured), null, WindUnit.Ms, nl, t)) as ValueView).value)
     }
 
-    @Test fun rowsView() {
-        val r = UploadData.parse(latest).copy(gustMs = 5.1, rainRateMmH = 2.0)
+    @Test fun rowsViewSaysWhatMattersNow() {
+        val r = UploadData.parse(latest).copy(gustMs = 5.1, rainRateMmH = 2.0, feelsLikeC = 10.9)
         val s = parse(StationViews.rows(r, Trend.Down, Trend.Flat, WindUnit.Kmh, nl, t)) as StackView
-        val first = s.items[0] as RowsView
-        val second = s.items[1] as RowsView
-        assertEquals(listOf("12,8°", "56%", "8${nbsp}km/h"), first.items.map { it.value })
-        assertEquals("humidity · dew_point 4,2°", first.items[1].label)
-        val wind = first.items[2]
+        val head = s.items[0] as ValueView
+        assertEquals("12,8°", head.value)
+        assertEquals("↓8° ↑13° · feels_like 11°", head.label)
+        val rows = (s.items[1] as RowsView).items
+        // Wind, today's rain (it rained), humidity; the pressure is steady and UV 0 doesn't matter, so neither shows.
+        assertEquals(listOf("8${nbsp}km/h", "15,1${nbsp}mm", "56%"), rows.map { it.value })
+        val wind = rows[0]
         assertEquals("direction", wind.icon)
         assertEquals(73f, wind.iconRotation!!, 0.01f) // from 253° (WSW): the arrow points to 73°
-        assertEquals("wind · W · gusts 18${nbsp}km/h", wind.label)
-        assertEquals(listOf("15,1${nbsp}mm", "989${nbsp}hPa", "32${nbsp}W/m²"), second.items.map { it.value })
-        assertEquals("rain_today · 2,0${nbsp}mm/h", second.items[0].label)
-        assertEquals(Trend.Flat, second.items[1].trend)
-        assertEquals("sunlight · UV 0", second.items[2].label)
-        // A station with only temperature and humidity: one table.
-        assertTrue(parse(StationViews.rows(StationReading(measured, tempC = 3.0, humidityPct = 80.0), null, null, WindUnit.Auto, nl, t)) is RowsView)
+        assertEquals("W · gusts 18${nbsp}km/h", wind.label)
+        assertEquals("rain_today · 2,0${nbsp}mm/h", rows[1].label)
+        // A falling barometer and a strong sun do show, in that order, still at most four rows.
+        val sunny = UploadData.parse(latest).copy(uvIndex = 7.0)
+        val more = ((parse(StationViews.rows(sunny, null, Trend.Down, WindUnit.Kmh, nl, t)) as StackView).items[1] as RowsView).items
+        assertEquals(listOf("8${nbsp}km/h", "15,1${nbsp}mm", "56%", "989${nbsp}hPa"), more.map { it.value })
+        val dry = ((parse(StationViews.rows(sunny.copy(rainTodayMm = 0.0), null, Trend.Down, WindUnit.Kmh, nl, t)) as StackView).items[1] as RowsView).items
+        assertEquals(listOf("8${nbsp}km/h", "56%", "989${nbsp}hPa", "7"), dry.map { it.value })
+        assertEquals(Tone.Warn, dry[3].tone)
+        // Only a thermometer: the temperature alone.
+        assertTrue(parse(StationViews.rows(StationReading(measured, tempC = 3.0), null, null, WindUnit.Auto, nl, t)) is ValueView)
     }
 
     @Test fun detailView() {
@@ -239,11 +250,13 @@ class WeatherStationTest {
         val d = parse(StationViews.detail(r, StationInfo(city = "Affligem", altitudeM = 40.0), history(), WindUnit.Ms, nl, t, measured + 4 * 60_000L)) as StackView
         assertEquals(4, d.items.size)
         val head = d.items[0] as StackView
-        assertEquals("Affligem · 40${nbsp}m", (head.items[0] as ValueView).label)
+        assertEquals("↓8° ↑13° · Affligem · 40${nbsp}m", (head.items[0] as ValueView).label)
         assertEquals(listOf("updated_ago 4${nbsp}min", "feels_like 11°"), (head.items[1] as TextView).lines)
         val charts = (d.items[1] as StackView).items.map { it as SparklineView }
         assertEquals(listOf("temperature · 24 h", "pressure · 24 h"), charts.map { it.label })
+        assertEquals(listOf(Tone.Heat, Tone.Info), charts.map { it.tone })
         assertTrue(charts.all { it.showRange && it.points.size == StationHistory.BUCKETS })
+        // Two tables, side by side in a wide card: the air, then rain, pressure and sun.
         assertEquals(listOf("56%", "4,2°", "2,3${nbsp}m/s"), (d.items[2] as RowsView).items.map { it.value })
         assertEquals(listOf("15,1${nbsp}mm", "989${nbsp}hPa", "32${nbsp}W/m²"), (d.items[3] as RowsView).items.map { it.value })
         // Without history or info the card still validates.

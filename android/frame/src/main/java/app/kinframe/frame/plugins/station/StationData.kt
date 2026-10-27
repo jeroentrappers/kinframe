@@ -33,6 +33,9 @@ data class StationReading(
     val rainRateMmH: Double? = null,
     val solarWm2: Double? = null,
     val uvIndex: Double? = null,
+    /** Today's lowest and highest temperature so far (the server keeps the uploads). */
+    val todayMinC: Double? = null,
+    val todayMaxC: Double? = null,
 )
 
 /** What a source knows about the station itself (for the detail card). */
@@ -89,6 +92,7 @@ object UploadData {
     fun parse(body: String): StationReading {
         val o = json.parseToJsonElement(body).jsonObject
         val r = o["reading"] as? JsonObject ?: JsonObject(emptyMap())
+        val today = o["today"] as? JsonObject
         fun time(e: JsonElement?) = (e as? JsonPrimitive)?.contentOrNull?.let { runCatching { java.time.Instant.parse(it).toEpochMilli() }.getOrNull() }
         return StationReading(
             atMs = time(r["station_time"]) ?: time(o["received_at"]),
@@ -104,6 +108,8 @@ object UploadData {
             rainRateMmH = num(r["rain_rate_mm_h"])?.takeIf { it in 0.0..2000.0 },
             solarWm2 = num(r["solar_wm2"])?.takeIf { it in 0.0..2000.0 },
             uvIndex = num(r["uv_index"])?.takeIf { it in 0.0..25.0 },
+            todayMinC = num(today?.get("temp_min_c"))?.takeIf { it in -90.0..70.0 },
+            todayMaxC = num(today?.get("temp_max_c"))?.takeIf { it in -90.0..70.0 },
         )
     }
 
