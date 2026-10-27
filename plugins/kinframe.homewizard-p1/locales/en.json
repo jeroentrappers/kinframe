@@ -1,5 +1,8 @@
 {
   "@name": "HomeWizard P1 meter",
+  "@option.style.value": "Number",
+  "@option.style.gauge": "Dial",
+  "@option.style.flow": "Flow",
   "grid": "Grid",
   "home": "Home",
   "last_hour": "Last hour",

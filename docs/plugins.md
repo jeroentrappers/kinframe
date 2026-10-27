@@ -175,7 +175,7 @@ ha-energy-flow/
   (`applyPreset` returns null while a placeholder's setting is still empty); `newInstanceConfig` applies
   `default_visibility` to a new instance.
 - **Setting types:** `text`, `number`, `boolean`, `choice`, `url`, `secret`, `entity` (Home Assistant entity, see
-  6.1), `color`, `duration`. Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
+  6.2), `color`, `duration`. Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
   the form from this list; plugins never ship their own settings UI. Labels are translated through `locales/`.
 
 ### 3.2 Code
@@ -404,19 +404,82 @@ future TV or tablet frame, and animations (flow arrows, value changes) are done 
 ## 6. Settings in the apps
 
 The frame's settings page gets a **Plugins** section: the installed instances per slot, "Add plugin" (opens the
-catalog), and per instance its form, a live preview and the last error. The form comes from the manifest.
+catalog), and per instance its form and the last error. The form comes from the manifest; plugins never ship their
+own settings UI. A live preview in the apps is for later.
 
-### 6.1 Discovery helpers
+**Where it lives (step 3).** The instances are part of the frame settings (`plugins.layout`, `plugins.instances`,
+`docs/api/openapi.yaml`), so they travel like every other setting: a merge patch with `If-Match`, the change feed to
+the frame, `PATCH /device/settings` for changes made on the frame. `instances` is an array, so a patch replaces it
+whole: the apps send the full list every time, from the version they read.
+
+- **Secrets** (`secret` settings) never go in `settings`. People write them in `secrets` (`{"token": "…"}` sets,
+  `null` removes, a key left out keeps its value; an instance sent without `secrets` keeps all of its own, matched by
+  `instance_id`). They read back only `secrets_set: ["token"]`. The server seals them with their own key; only the
+  frame gets them back, in full, in its settings.
+- **Catalog:** the frame reports the plugins it can run (`PUT /device/plugins/catalog`: each manifest as-is, its
+  manifest translations, `builtin`), when its app starts and the catalog changed. The apps read it from
+  `GET /frames/{id}/plugins`. Until a frame reported one (an older frame app) the apps show "Update the frame app".
+- **Checks:** the server checks instances against that catalog: a plugin the frame has, a slot it allows, known
+  settings of the right type (a number for `number`, one of the `options` for `choice`, a list only for a `multiple`
+  entity, an http(s) address or a bare `host[:port]` for `url`), no secret among the plain settings, unique ids, and for an **enabled**
+  instance every `required` setting without a `default` filled in (secrets: set). Errors are `422` with fields like
+  `plugins.instances.0.settings.grid` (`unknown`, `type`, `enum`, `secret`, `required`, `not_on_frame`, `duplicate`).
+- **Status:** the frame reports per instance whether it runs, its last error and when its last update worked, plus
+  what it discovered (6.2), at most every 10 s (`PUT /device/plugins/status`). The apps show it with the instance and
+  poll `GET /frames/{id}/plugins` every few seconds while a form is open.
+
+### 6.1 The form
+
+The web app and the family app build the same form from the manifest:
+
+- **Instance list:** per instance the plugin's name, its corner, an on/off switch (`enabled`) and a status line: the
+  error, "Waiting for the frame" before its first report, or nothing when it runs. At most 8 instances.
+- **Add plugin:** the catalog with each plugin's name, description, the internet hosts it may reach (its fixed
+  `permissions.http` origins) and whether it reads the frame's location. Adding makes an instance with a new id
+  (`p-` and 10 random lowercase letters or digits), the top-right corner if the plugin allows it, the manifest's
+  `default_visibility`, and `enabled: false` until the owner saves a complete form.
+- **Fields,** in manifest order, labelled `@setting.<key>` (else the manifest's `label`), with `help`
+  (`@setting.<key>.help`) under it and `placeholder` inside:
+  - `text`, `color` (`#rrggbb`), `duration`: a text field; `number`: a number field; `boolean`: a switch;
+  - `choice`: a segmented control for up to 4 options, else a menu; option labels `@option.<key>.<value>`, else the
+    value;
+  - `url`: an address field; with `discover`, what the frame found (`services[<discover>]`) as one-tap suggestions;
+  - `secret`: a password field. When set (`secrets_set`) it shows "Set" with Change and Remove; untouched, nothing is
+    sent;
+  - `entity`: a searchable list of the entities the frame reported for this instance, filtered by `domain` (the
+    part of the entity id before the dot) and `unit` when the manifest names them, showing the friendly name with the
+    entity id under it; several for `multiple`. Typing an entity id by hand always works. Without entities yet: "Save
+    the address and token: the frame then lists what it finds."
+  - A `default` shows as the field's value until changed; empty fields are left out of `settings`.
+- **Presets:** a "Fill in for" menu (`@preset.<id>`, else `label`). Picking one first asks for the text settings
+  its `{placeholders}` need, then fills in its values (overwriting those settings).
+- **Placement:** the corner (only the manifest's `slots`), and when it shows: always, for 30 s after it changes
+  (`on_change`), or after a tap (`on_tap`).
+- **Saving** sends the whole `instances` list. A `412` means someone changed the settings meanwhile: reload and try
+  again. `422` field errors are shown at their field.
+- **Remove** asks first.
+
+**Manifest translations** live in the plugin's `locales/<tag>.json`, next to its own strings: `@name`,
+`@description`, `@setting.<key>`, `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`,
+`@preset.<id>`. The manifest's own text is the fallback. An English option label (`"@option.grid_sign.import": "Taking
+from the grid"`) goes in `locales/en.json`.
+
+### 6.2 Discovery helpers
 
 Typing IP addresses and entity IDs is where home automation integrations usually lose people, so the host offers
-two helpers the forms can use:
+two helpers the forms can use. The frame does the work, because only the frame is sure to be on that network, and
+reports what it found in its plugin status:
 
 - **Find on network:** a `url` setting may declare `"discover": "_home-assistant._tcp"` or
-  `"discover": "_hwenergy._tcp"`. The frame browses mDNS for that service and offers the results in the app's form.
-  (The frame does this, not the app, because only the frame is guaranteed to be on that network.)
-- **Entity picker:** an `entity` setting lists the Home Assistant entities that match `domain` and `unit`, fetched by
-  the frame through the plugin's own `base_url` and `token`, so the owner picks "Solar power" from a list instead of
-  typing `sensor.solaredge_ac_power`.
+  `"discover": "_hwenergy._tcp"`. The frame browses mDNS for every service type its catalog names (for a minute, every
+  10 minutes while it is connected) and reports
+  `services: {"_hwenergy._tcp": [{"name": "P1 meter", "url": "http://192.168.1.20"}]}`.
+- **Entity picker:** for an instance of a plugin with `entity` settings, once its `base_url` and `token` are set, the
+  frame asks Home Assistant through them (with the plugin's own `local_only` rule) for each entity's id, friendly
+  name, unit and device class: one template (`POST /api/template`), about 110 KB for 1,300 entities, where
+  `/api/states` would carry every attribute. It does so when the instance's settings change and every
+  10 minutes, so the owner picks "Solar power" from a list instead of typing `sensor.solaredge_ac_power`. A plugin
+  with entity settings must name its connection settings `base_url` (url) and `token` (secret).
 
 ## 7. Publishing: the registry
 
@@ -480,8 +543,9 @@ two helpers the forms can use:
 
 - **Settings:** Home Assistant URL and token (shared with 9.1 if both are installed: the app offers to reuse them),
   and entity pickers for battery level, charging state, range, charge-complete time and plug state. A preset for the
-  **Kia/Hyundai integration** (Kia Connect / Bluelink, a custom Home Assistant integration) preselects its usual
-  entities, so most owners only confirm.
+  **Kia/Hyundai integration** (Kia Connect / Bluelink, a custom Home Assistant integration) fills in its usual
+  entities from the car's entity prefix (manifest `presets`, `{prefix}`), so most owners type `ev3` and confirm. The
+  plugin still reads the prefix itself when an entity is left empty, so the preset is a convenience, not a must.
 - **Data:** Home Assistant WebSocket subscriptions, like 9.1. The car's own data reaches Home Assistant through the
   manufacturer's cloud, often only every 30–60 minutes unless charging; the widget shows how old the value is.
 - **View:** `gauge` with the battery %, `text` "Charging · full at 23:10" / "Plugged in" / "312 km". *Only when the
@@ -645,7 +709,7 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
    the frame), so a community plugin stays one reviewable file.
 6. **One Home Assistant connection per frame**, not per instance. Energy, two cars and now playing open four WebSockets
    with four copies of the same token. A host-level "integration" (shared base URL and token, entity subscriptions
-   multiplexed) would also give the settings form its entity picker (§6.1) for free.
+   multiplexed) would also give the settings form its entity picker (§6.2) for free.
 7. **Manifest defaults for the owner's choices:** a default visibility (*only when it changes* suits the car, §9.3),
    and setting **presets** (the Kia/Hyundai entity names are filled in from a prefix by the plugin itself today).
    **Built:** `default_visibility` and `presets` with `{key}` placeholders (§3.1), validated and available to the
@@ -898,11 +962,9 @@ first one, under the start budget), 66.5 ms at p50 and up to 246 ms with the net
 `js_detail_car.png` and `new_components.png` (the additions in every form); `js_homewizard_water.png` and
 `js_homewizard_socket.png` (the water meter and the socket in every form), `js_detail_socket.png` (the switch).
 
-**Still open (steps 3–5).** Settings for JavaScript plugins come from the manifest only in principle: the frame's
-settings screen still has its hand-made P1 and station sections, and the Home Assistant plugins can only be configured
-by writing their instance settings (no form, no entity picker, no secret storage yet: step 3, with the server API of
-§10). No registry, signing or plugin kit (step 4). The weather station is still Kotlin (it feeds the slideshow's own
-weather corner). `InstanceState.error` isn't reported to the server yet.
+**Still open (steps 4–5).** No registry, signing or plugin kit (step 4). The weather station is still Kotlin (it
+feeds the slideshow's own weather corner); it has a manifest so the apps can show its form (§14). The frame's own
+settings screen keeps its hand-made P1 and station sections; every other plugin is set up in the apps.
 
 ### 13.1 The host's libraries
 
@@ -959,3 +1021,34 @@ five; `buckets` gives a sparkline's points (null where there was no reading). Ke
 `kinframe/homewizard`, `kinframe/day` (its stored `day` key keeps its format, so existing frames keep today's totals)
 and `kinframe/series`; the water meter and the socket (§9.6, §9.7) are built from the same parts and written to be
 copied: their comments say what each part does and why.
+
+## 14. Step 3 as built: settings end to end
+
+| Part | Where |
+|---|---|
+| Contract: `plugins` in the frame settings, catalog, status | `docs/api/openapi.yaml` (`PluginInstance`, `CatalogPlugin`, `FramePlugins`, `PluginStatusReport`; `GET /frames/{id}/plugins`, `PUT /device/plugins/catalog`, `PUT /device/plugins/status`) |
+| Secrets: sealed per instance, `secrets_set` for people, opened for the frame | `server/internal/settings/plugins.go`, `server/internal/secrets/` (AES-256-GCM with its own HKDF key, shared with the calendar's credentials) |
+| Checks against the frame's catalog | `server/internal/plugins/` |
+| Endpoints, catalog and status storage | `server/internal/api/plugins.go`, migration `00010_plugins.sql` |
+| The frame: settings from `plugins`, local copy moved there once | `android/frame/.../plugins/PluginConfig.kt` (`PluginPrefs`, `PluginSettingsDoc`) |
+| The frame: catalog, status, entities, mDNS | `PluginReports.kt`, `ServiceBrowser.kt`, the reporting loop in `FramePlugins.kt` |
+| Manifest translations for the forms | `plugins/*/locales/*.json` (`@setting.*`, `@option.*`, `@preset.*`); the P1 in all 36 languages, the others in en/nl/de/fr |
+| Tests | `server/internal/e2e/plugins_test.go`, `server/internal/plugins/`, `server/internal/settings/`; `frame/src/test/.../plugins/PluginReportsTest.kt`, `PluginPrefsTest.kt` |
+
+**What the frame sends.** On every session start: the catalog (each `plugins/<id>/plugin.json` in the APK, about
+45 KB with translations) and, when the frame settings have no `plugins` part yet, its locally kept layout and
+instances (frames that ran the P1 or the weather station before step 3), so nothing has to be set up again. Then every
+10 s, when it changed (at least every 10 minutes): per instance whether it runs, its last error, when its last update
+worked and, for Home Assistant plugins, the entities; plus the mDNS services it found. The times are left out of the
+comparison, so a P1 that updates every second doesn't make the frame report every 10 s.
+
+**Secrets on the frame.** The frame gets them in its settings and passes them to the plugin with the other settings
+(`InstanceConfig.values`, `ctx.settings.token`). A change made on the frame sends the instances with their secrets, so
+the frame's own view keeps them while the change waits in the outbox; the server seals them again.
+
+**The weather station** is still Kotlin; `plugins/kinframe.weather-station/` holds only its manifest and
+translations (no `main.js`), so it appears in the catalog and the apps can show its form.
+
+**Checked against a real Home Assistant:** the entity template rendered 1,293 entities in 110 KB; Home Assistant
+trims the rendered text, so the last line can lack its empty trailing fields (the parser allows for that).
+

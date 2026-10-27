@@ -1,5 +1,13 @@
 {
   "@name": "Compteur d'eau HomeWizard",
+  "@description": "L'eau d'un compteur d'eau HomeWizard de la maison : le débit actuel et les litres utilisés aujourd'hui, comparés à une journée habituelle.",
+  "@setting.host": "Adresse du compteur",
+  "@setting.host.help": "Activez l'API locale du compteur dans l'app HomeWizard Energy. Le compteur doit pour cela être alimenté en USB ; sur piles, il n'envoie ses données qu'au cloud.",
+  "@setting.style": "Afficher en",
+  "@option.style.value": "Nombre",
+  "@option.style.gauge": "Anneau",
+  "@setting.typical_l": "Une journée habituelle (litres)",
+  "@setting.typical_l.help": "L'anneau est plein à ce nombre de litres ; au-delà, il devient orange.",
   "today": "Aujourd'hui",
   "flowing": "L'eau coule",
   "flow_now": "Débit actuel",

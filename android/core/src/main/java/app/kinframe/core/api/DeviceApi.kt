@@ -151,6 +151,16 @@ class DeviceApi(
         KinJson.parseToJsonElement(r.body.string()).jsonObject
     }
 
+    /** `PUT /device/plugins/catalog`: the plugins this frame can run (docs/plugins.md §6). */
+    suspend fun putPluginCatalog(catalog: JsonObject) = authed {
+        url(endpoint("device/plugins/catalog")).put(KinJson.encodeToString(JsonObject.serializer(), catalog).toRequestBody(JSON_MEDIA))
+    }.expectOk()
+
+    /** `PUT /device/plugins/status`: instance errors and what the frame discovered for the settings forms (§6.2). */
+    suspend fun putPluginStatus(status: JsonObject) = authed {
+        url(endpoint("device/plugins/status")).put(KinJson.encodeToString(JsonObject.serializer(), status).toRequestBody(JSON_MEDIA))
+    }.expectOk()
+
     suspend fun patchPlacement(placementId: String, patch: JsonObject) = authed {
         url(endpoint("device/placements/$placementId"))
             .patch(KinJson.encodeToString(JsonObject.serializer(), patch).toRequestBody(JSON_MEDIA))

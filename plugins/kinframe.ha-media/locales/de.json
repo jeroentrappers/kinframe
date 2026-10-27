@@ -1,2 +1,17 @@
-{ "@name": "Läuft gerade", "previous": "Zurück", "play": "Abspielen", "pause": "Pause", "next": "Weiter", "quieter": "Leiser", "louder": "Lauter",
-  "volume": "Lautstärke {n}", "token_refused": "Home Assistant lehnt das Token ab", "album_art": "Albumcover" }
+{
+  "@name": "Läuft gerade",
+  "@description": "Was ein Lautsprecher spielt, mit Cover, über Home Assistant (Spotify, Sonos, Cast, …), und Tasten zum Weiterschalten und für die Lautstärke in der Detailkarte.",
+  "@setting.base_url": "Adresse von Home Assistant",
+  "@setting.token": "Langlebiges Zugriffstoken",
+  "@setting.entity": "Lautsprecher oder Player",
+  "@setting.show_paused": "Auch bei Pause anzeigen",
+  "previous": "Zurück",
+  "play": "Abspielen",
+  "pause": "Pause",
+  "next": "Weiter",
+  "quieter": "Leiser",
+  "louder": "Lauter",
+  "volume": "Lautstärke {n}",
+  "token_refused": "Home Assistant lehnt das Token ab",
+  "album_art": "Albumcover"
+}

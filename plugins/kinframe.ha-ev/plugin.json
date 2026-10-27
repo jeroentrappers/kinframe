@@ -13,9 +13,8 @@
     { "key": "base_url", "type": "url", "label": "Home Assistant address", "required": true, "local_only": true, "discover": "_home-assistant._tcp" },
     { "key": "token", "type": "secret", "label": "Long-lived access token", "required": true },
     { "key": "name", "type": "text", "label": "Name", "placeholder": "EV3" },
-    { "key": "preset", "type": "choice", "label": "Integration", "options": ["kia_hyundai", "custom"], "default": "kia_hyundai",
-      "help": "Kia Connect / Hyundai Bluelink: type the car's entity prefix below and the sensors are found by name." },
-    { "key": "prefix", "type": "text", "label": "Entity prefix (Kia/Hyundai)", "placeholder": "ev3" },
+    { "key": "prefix", "type": "text", "label": "Entity prefix (Kia/Hyundai)", "placeholder": "ev3",
+      "help": "Kia Connect / Hyundai Bluelink: the start of the car's entity names; the sensors below are then found by name." },
     { "key": "battery_level", "type": "entity", "label": "Battery level", "domain": "sensor", "unit": "%" },
     { "key": "range", "type": "entity", "label": "Range", "domain": "sensor" },
     { "key": "charging", "type": "entity", "label": "Charging", "domain": "binary_sensor" },
@@ -23,5 +22,13 @@
     { "key": "charge_minutes", "type": "entity", "label": "Time to full (minutes)", "domain": "sensor" },
     { "key": "charge_power", "type": "entity", "label": "Charging power", "domain": "sensor" },
     { "key": "updated", "type": "entity", "label": "Last update from the car (timestamp)", "domain": "sensor" }
+  ],
+  "presets": [
+    { "id": "kia_hyundai", "label": "Kia / Hyundai (Kia Connect, Bluelink)",
+      "settings": {
+        "battery_level": "sensor.{prefix}_ev_battery_level", "range": "sensor.{prefix}_ev_range",
+        "charging": "binary_sensor.{prefix}_ev_battery_charge", "plugged": "binary_sensor.{prefix}_ev_battery_plug",
+        "charge_minutes": "sensor.{prefix}_estimated_charge_duration", "updated": "sensor.{prefix}_last_updated_at"
+      } }
   ]
 }

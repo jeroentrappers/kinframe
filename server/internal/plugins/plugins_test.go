@@ -43,6 +43,18 @@ func TestTypes(t *testing.T) {
 			t.Fatalf("%s: %v", name, p)
 		}
 	}
+	for _, u := range []string{"192.168.1.50", "p1.local:8080", "https://ha.example.org"} {
+		in := map[string]any{"instance_id": "a", "plugin_id": "kinframe.ha-energy", "enabled": false, "settings": map[string]any{"base_url": u}}
+		if p := check(t, in); len(p) != 0 {
+			t.Fatalf("url %s: %v", u, p)
+		}
+	}
+	for _, u := range []string{"ftp://x", "http://", "two words"} {
+		in := map[string]any{"instance_id": "a", "plugin_id": "kinframe.ha-energy", "enabled": false, "settings": map[string]any{"base_url": u}}
+		if p := check(t, in); len(p) != 1 {
+			t.Fatalf("url %s: %v", u, p)
+		}
+	}
 	if p := check(t, map[string]any{"instance_id": "a", "plugin_id": "kinframe.ha-energy", "slot": "top-right", "enabled": false}); len(p) != 1 || p[0].Path != "plugins.instances.0.slot" {
 		t.Fatalf("slot: %v", p)
 	}

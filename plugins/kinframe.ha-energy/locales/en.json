@@ -1,3 +1,21 @@
-{ "@name": "Energy flow", "solar": "Solar", "grid": "Grid", "home": "Home", "battery": "Battery", "car": "Car",
-  "importing": "Taking", "exporting": "Returning", "charging": "Charging", "discharging": "Discharging", "last_hour": "Grid, last hour",
-  "token_refused": "Home Assistant refused the token", "not_found": "Sensor not found: {id}" }
+{
+  "@name": "Energy flow",
+  "@option.grid_sign.import": "Taking from the grid",
+  "@option.grid_sign.export": "Returning to the grid",
+  "@option.battery_sign.discharging": "Discharging",
+  "@option.battery_sign.charging": "Charging",
+  "@option.style.flow": "Flow",
+  "@option.style.rows": "Rows",
+  "solar": "Solar",
+  "grid": "Grid",
+  "home": "Home",
+  "battery": "Battery",
+  "car": "Car",
+  "importing": "Taking",
+  "exporting": "Returning",
+  "charging": "Charging",
+  "discharging": "Discharging",
+  "last_hour": "Grid, last hour",
+  "token_refused": "Home Assistant refused the token",
+  "not_found": "Sensor not found: {id}"
+}

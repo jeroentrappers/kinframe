@@ -1,0 +1,18 @@
+{
+  "@name": "Weerstation",
+  "@description": "Live metingen van je eigen weerstation op Weathercloud: temperatuur, wind, regen, luchtdruk en zonlicht.",
+  "@setting.source": "Dienst",
+  "@option.source.weathercloud": "Weathercloud",
+  "@setting.device": "Stationscode",
+  "@setting.device.help": "Het nummer in het Weathercloud-adres van het station (app.weathercloud.net/d9287156658), of het hele adres.",
+  "@setting.style": "Tonen als",
+  "@option.style.compact": "Temperatuur",
+  "@option.style.rows": "Alle waarden",
+  "@setting.wind_unit": "Wind in",
+  "@option.wind_unit.auto": "Automatisch (km/u of mph)",
+  "@option.wind_unit.ms": "m/s",
+  "@option.wind_unit.kmh": "km/u",
+  "@option.wind_unit.mph": "mph",
+  "@option.wind_unit.bft": "Beaufort",
+  "@setting.interval_min": "Elke … minuten kijken (5–30)"
+}

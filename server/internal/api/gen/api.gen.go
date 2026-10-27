@@ -2136,7 +2136,8 @@ type CatalogPlugin struct {
 	Builtin *bool `json:"builtin,omitempty"`
 
 	// Locales Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
-	// `@setting.<key>.help`, `@option.<key>.<value>`, `@preset.<id>`). English is the manifest itself.
+	// `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+	// the manifest itself, with `en` for option labels.
 	Locales *map[string]map[string]string `json:"locales,omitempty"`
 
 	// Manifest The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
@@ -3197,7 +3198,7 @@ type PluginInstanceVisibility string
 // PluginInstanceStatus defines model for PluginInstanceStatus.
 type PluginInstanceStatus struct {
 	// Entities Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
-	// picker, docs/plugins.md §6.1). Absent when the plugin has no entity settings or the connection failed.
+	// picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
 	Entities *[]DiscoveredEntity `json:"entities,omitempty"`
 
 	// Error The last error

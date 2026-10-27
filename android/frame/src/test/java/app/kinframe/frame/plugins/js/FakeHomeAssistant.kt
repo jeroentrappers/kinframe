@@ -29,6 +29,7 @@ class FakeHomeAssistant(fixture: File, val token: String = "test-token") {
     val states = LinkedHashMap<String, JsonObject>()
     val serviceCalls = CopyOnWriteArrayList<Pair<String, JsonObject>>()
     val restReads = CopyOnWriteArrayList<String>()
+    @Volatile var templates = 0
     private val sockets = CopyOnWriteArrayList<WebSocket>()
     @Volatile var subscribed: List<String> = emptyList()
 
@@ -47,6 +48,17 @@ class FakeHomeAssistant(fixture: File, val token: String = "test-token") {
                     val id = path.removePrefix("/api/states/")
                     restReads += id
                     return states[id]?.let { MockResponse.Builder().body(it.toString()).build() } ?: MockResponse.Builder().code(404).body("{}").build()
+                }
+                if (path == "/api/template" && request.method == "POST") {
+                    // Renders only the frame's entity listing (docs/plugins.md §6.2), trimmed as Home Assistant does.
+                    val template = (Json.parseToJsonElement(request.body!!.utf8()).jsonObject["template"] as JsonPrimitive).content
+                    if (template != app.kinframe.frame.plugins.PluginReports.ENTITY_TEMPLATE) return MockResponse.Builder().code(400).body("{}").build()
+                    templates += 1
+                    return MockResponse.Builder().body(states.values.joinToString("") { o ->
+                        val a = o["attributes"] as? JsonObject ?: JsonObject(emptyMap())
+                        fun attr(k: String) = (a[k] as? JsonPrimitive)?.content.orEmpty()
+                        "${(o["entity_id"] as JsonPrimitive).content}\t${attr("friendly_name")}\t${attr("unit_of_measurement")}\t${attr("device_class")}\n"
+                    }.trim()).build()
                 }
                 if (path.startsWith("/api/services/") && request.method == "POST") {
                     val body = Json.parseToJsonElement(request.body!!.utf8()).jsonObject

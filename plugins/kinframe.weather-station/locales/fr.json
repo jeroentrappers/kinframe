@@ -1,0 +1,18 @@
+{
+  "@name": "Station météo",
+  "@description": "Les mesures en direct de votre propre station météo sur Weathercloud : température, vent, pluie, pression et ensoleillement.",
+  "@setting.source": "Service",
+  "@option.source.weathercloud": "Weathercloud",
+  "@setting.device": "Code de la station",
+  "@setting.device.help": "Le numéro dans l'adresse Weathercloud de la station (app.weathercloud.net/d9287156658), ou l'adresse entière.",
+  "@setting.style": "Afficher en",
+  "@option.style.compact": "Température",
+  "@option.style.rows": "Toutes les valeurs",
+  "@setting.wind_unit": "Vent en",
+  "@option.wind_unit.auto": "Automatique (km/h ou mph)",
+  "@option.wind_unit.ms": "m/s",
+  "@option.wind_unit.kmh": "km/h",
+  "@option.wind_unit.mph": "mph",
+  "@option.wind_unit.bft": "Beaufort",
+  "@setting.interval_min": "Vérifier toutes les … minutes (5–30)"
+}

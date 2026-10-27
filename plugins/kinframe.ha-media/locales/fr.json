@@ -1,2 +1,17 @@
-{ "@name": "En cours de lecture", "previous": "Précédent", "play": "Lecture", "pause": "Pause", "next": "Suivant", "quieter": "Moins fort", "louder": "Plus fort",
-  "volume": "Volume {n}", "token_refused": "Home Assistant refuse le jeton", "album_art": "Pochette" }
+{
+  "@name": "En cours de lecture",
+  "@description": "Ce que joue une enceinte, avec la pochette, via Home Assistant (Spotify, Sonos, Cast, …), et des boutons pour passer au suivant et régler le volume dans la fiche détaillée.",
+  "@setting.base_url": "Adresse de Home Assistant",
+  "@setting.token": "Jeton d'accès longue durée",
+  "@setting.entity": "Enceinte ou lecteur",
+  "@setting.show_paused": "Continuer à afficher en pause",
+  "previous": "Précédent",
+  "play": "Lecture",
+  "pause": "Pause",
+  "next": "Suivant",
+  "quieter": "Moins fort",
+  "louder": "Plus fort",
+  "volume": "Volume {n}",
+  "token_refused": "Home Assistant refuse le jeton",
+  "album_art": "Pochette"
+}

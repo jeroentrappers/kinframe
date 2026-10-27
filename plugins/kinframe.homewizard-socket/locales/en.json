@@ -1,5 +1,11 @@
 {
   "@name": "HomeWizard energy socket",
+  "@option.icon.plug": "Plug",
+  "@option.icon.washing-machine": "Washing machine",
+  "@option.icon.lightbulb": "Lamp",
+  "@option.icon.fan": "Fan",
+  "@option.icon.car": "Car",
+  "@option.icon.bolt": "Lightning bolt",
   "today": "Today",
   "on": "On",
   "off": "Off",

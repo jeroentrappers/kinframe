@@ -1,5 +1,7 @@
 {
   "@name": "HomeWizard water meter",
+  "@option.style.value": "Number",
+  "@option.style.gauge": "Ring",
   "today": "Today",
   "flowing": "Water running",
   "flow_now": "Flow now",

@@ -235,10 +235,10 @@ class QuickJsSandboxTest {
         )
         bad.forEach { m -> try { PluginManifest.parse(m); fail("accepted: $m") } catch (_: ManifestException) {} }
         PluginManifest.parse("""{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":1,"default_seconds":1},"settings":[{"key":"a","type":"url","local_only":true}],"permissions":{"http":["settings.a"]}}""")
-        // Every plugin in the repository has a valid manifest.
+        // Every plugin in the repository has a valid manifest (the weather station, still Kotlin, has only that).
         JsPluginKit.ROOT.resolve("plugins").listFiles { f -> f.isDirectory && f.resolve("plugin.json").isFile }!!.forEach { dir ->
-            val b = PluginBundle.fromDirectory(dir)
-            assertEquals(dir.name, b.manifest.id)
+            val m = if (dir.resolve("main.js").isFile) PluginBundle.fromDirectory(dir).manifest else PluginManifest.parse(dir.resolve("plugin.json").readText())
+            assertEquals(dir.name, m.id)
         }
     }
 }

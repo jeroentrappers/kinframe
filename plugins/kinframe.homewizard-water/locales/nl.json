@@ -1,5 +1,13 @@
 {
   "@name": "HomeWizard watermeter",
+  "@description": "Water van een HomeWizard watermeter in huis: hoeveel er nu stroomt en hoeveel liter er vandaag verbruikt is, tegenover een gewone dag.",
+  "@setting.host": "Adres van de meter",
+  "@setting.host.help": "Zet Lokale API aan voor de meter in de HomeWizard Energy-app. Daarvoor heeft de meter USB-voeding nodig; op batterijen meldt hij alleen aan de cloud.",
+  "@setting.style": "Tonen als",
+  "@option.style.value": "Getal",
+  "@option.style.gauge": "Ring",
+  "@setting.typical_l": "Een gewone dag (liter)",
+  "@setting.typical_l.help": "Bij zoveel liter is de ring vol; daarboven wordt hij oranje.",
   "today": "Vandaag",
   "flowing": "Er loopt water",
   "flow_now": "Debiet nu",

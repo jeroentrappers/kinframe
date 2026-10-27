@@ -1,1 +1,24 @@
-{"@name": "Batterie de la voiture", "charging": "En charge", "charging_until": "En charge · pleine à {time}", "plugged": "Branchée", "range": "Autonomie", "power": "Puissance de charge", "full_at": "Pleine à", "token_refused": "Home Assistant refuse le jeton"}
+{
+  "@name": "Batterie de la voiture",
+  "@description": "La charge, l'autonomie et l'état de recharge d'une voiture électrique depuis Home Assistant ; aussi toute batterie avec un capteur de niveau.",
+  "@setting.base_url": "Adresse de Home Assistant",
+  "@setting.token": "Jeton d'accès longue durée",
+  "@setting.name": "Nom",
+  "@setting.prefix": "Début des noms d’entités (Kia/Hyundai)",
+  "@setting.prefix.help": "Kia Connect / Hyundai Bluelink : le début des noms d’entités de la voiture ; les capteurs ci-dessous sont alors trouvés par leur nom.",
+  "@setting.battery_level": "Niveau de la batterie",
+  "@setting.range": "Autonomie",
+  "@setting.charging": "En charge",
+  "@setting.plugged": "Branchée",
+  "@setting.charge_minutes": "Temps jusqu'à la charge complète (minutes)",
+  "@setting.charge_power": "Puissance de charge",
+  "@setting.updated": "Dernière mise à jour de la voiture (horodatage)",
+  "@preset.kia_hyundai": "Kia / Hyundai (Kia Connect, Bluelink)",
+  "charging": "En charge",
+  "charging_until": "En charge · pleine à {time}",
+  "plugged": "Branchée",
+  "range": "Autonomie",
+  "power": "Puissance de charge",
+  "full_at": "Pleine à",
+  "token_refused": "Home Assistant refuse le jeton"
+}

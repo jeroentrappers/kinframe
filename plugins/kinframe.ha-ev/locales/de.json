@@ -1,1 +1,24 @@
-{"@name": "Autobatterie", "charging": "Lädt", "charging_until": "Lädt · voll um {time}", "plugged": "Angeschlossen", "range": "Reichweite", "power": "Ladeleistung", "full_at": "Voll um", "token_refused": "Home Assistant lehnt das Token ab"}
+{
+  "@name": "Autobatterie",
+  "@description": "Ladung, Reichweite und Ladezustand eines Elektroautos aus Home Assistant; auch jede Batterie mit Füllstandssensor.",
+  "@setting.base_url": "Adresse von Home Assistant",
+  "@setting.token": "Langlebiges Zugriffstoken",
+  "@setting.name": "Name",
+  "@setting.prefix": "Anfang der Entitätsnamen (Kia/Hyundai)",
+  "@setting.prefix.help": "Kia Connect / Hyundai Bluelink: der Anfang der Entitätsnamen des Autos; die Sensoren unten werden dann über den Namen gefunden.",
+  "@setting.battery_level": "Batteriestand",
+  "@setting.range": "Reichweite",
+  "@setting.charging": "Lädt",
+  "@setting.plugged": "Eingesteckt",
+  "@setting.charge_minutes": "Zeit bis voll (Minuten)",
+  "@setting.charge_power": "Ladeleistung",
+  "@setting.updated": "Letzte Meldung des Autos (Zeitstempel)",
+  "@preset.kia_hyundai": "Kia / Hyundai (Kia Connect, Bluelink)",
+  "charging": "Lädt",
+  "charging_until": "Lädt · voll um {time}",
+  "plugged": "Angeschlossen",
+  "range": "Reichweite",
+  "power": "Ladeleistung",
+  "full_at": "Voll um",
+  "token_refused": "Home Assistant lehnt das Token ab"
+}

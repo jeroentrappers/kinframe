@@ -1,5 +1,13 @@
 {
   "@name": "HomeWizard Wasserzähler",
+  "@description": "Wasser von einem HomeWizard Wasserzähler im Haus: wie viel gerade fließt und wie viele Liter heute verbraucht wurden, verglichen mit einem üblichen Tag.",
+  "@setting.host": "Adresse des Zählers",
+  "@setting.host.help": "Schalte in der HomeWizard Energy App die lokale API für den Zähler ein. Dafür braucht der Zähler USB-Strom; mit Batterien meldet er nur an die Cloud.",
+  "@setting.style": "Anzeigen als",
+  "@option.style.value": "Zahl",
+  "@option.style.gauge": "Ring",
+  "@setting.typical_l": "Ein üblicher Tag (Liter)",
+  "@setting.typical_l.help": "Bei so vielen Litern ist der Ring voll; darüber wird er orange.",
   "today": "Heute",
   "flowing": "Wasser läuft",
   "flow_now": "Durchfluss jetzt",

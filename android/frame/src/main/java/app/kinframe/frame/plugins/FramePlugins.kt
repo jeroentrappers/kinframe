@@ -1,5 +1,6 @@
 package app.kinframe.frame.plugins
 
+import android.os.SystemClock
 import android.util.Log
 import app.kinframe.core.plugin.PluginFormat
 import app.kinframe.core.plugin.RelativeWords
@@ -15,27 +16,37 @@ import app.kinframe.frame.plugins.js.QuickJsPluginInstance
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.schedule.ScreenMode
 import app.kinframe.frame.weather.WeatherSources
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonObject
 import java.util.Locale
 
 /**
  * The frame's plugin feature (docs/plugins.md §10): JavaScript plugins in the QuickJS host (step 2; for now only the
- * bundles built into the APK) and the remaining Kotlin built-ins, configured on the frame. Owns the [PluginHost] and
+ * bundles built into the APK) and the remaining Kotlin built-ins, configured in the frame settings (§6). Owns the [PluginHost] and
  * starts instances when the slideshow is up and the screen is awake.
  */
 class FramePlugins(private val c: FrameController) {
     private val g = c.g
-    val prefs = PluginPrefs(g.app)
+    val prefs = PluginPrefs(g.app, g.settings.raw, c.scope) { patch ->
+        val outbox = c.session.value?.outbox ?: return@PluginPrefs false
+        c.scope.launch { outbox.settingsPatch(patch) }
+        true
+    }
 
     /** Kotlin widgets that aren't JavaScript plugins yet. Everything else comes from a bundle ([bundle]). */
     private val builtIns: Map<String, (InstanceConfig) -> PluginInstance> = buildMap {
         put(WEATHER_STATION) { cfg ->
-            WeatherStation(cfg.settings, onReading = { r ->
+            WeatherStation(cfg.values, onReading = { r ->
                 val t = r.tempC
                 if (t != null) _stationNow.value = StationNow(t, r.atMs ?: g.clock.nowMs())
             })
@@ -64,7 +75,7 @@ class FramePlugins(private val c: FrameController) {
 
     private fun script(cfg: InstanceConfig): PluginInstance? {
         val b = bundle(cfg.pluginId) ?: return null
-        val net = PluginNet(g.http, PluginPermissions(b.manifest, b.manifest.withDefaults(cfg.settings)), userAgent = USER_AGENT)
+        val net = PluginNet(g.http, PluginPermissions(b.manifest, b.manifest.withDefaults(cfg.values)), userAgent = USER_AGENT)
         return QuickJsPluginInstance(b, prelude, net, libraries = libraries)
     }
 
@@ -96,10 +107,93 @@ class FramePlugins(private val c: FrameController) {
             combine(prefs.instances, prefs.layout) { list, l -> l.mode != PluginLayoutMode.Off && list.any { it.enabled && it.pluginId == WEATHER_STATION } }
                 .distinctUntilChanged().collect { on -> if (!on) _stationNow.value = null }
         }
+        c.scope.launch { c.session.collectLatest { s -> if (s != null) report() } }
         c.scope.launch {
             combine(slideshowUp, c.display.mode.map { it != ScreenMode.Asleep && it != ScreenMode.FadingOut }, c.settingsOpen) { up, awake, _ -> up to awake }
                 .distinctUntilChanged().collect { (up, awake) -> host.setActive(up, awake) }
         }
+    }
+
+    // ------------------------------------------------------------------------------- reports (docs/plugins.md §6)
+
+    /** The plugin folders in the APK, and in debug builds the demo widget. */
+    private fun catalogSources(): List<PluginReports.Source> {
+        val a = g.app.assets
+        val folders = a.list("plugins").orEmpty().sorted().mapNotNull { id ->
+            val manifest = runCatching { a.open("plugins/$id/plugin.json").bufferedReader().use { it.readText() } }.getOrNull() ?: return@mapNotNull null
+            val locales = a.list("plugins/$id/locales").orEmpty().filter { it.endsWith(".json") }.associate { f ->
+                f.removeSuffix(".json") to a.open("plugins/$id/locales/$f").bufferedReader().use { it.readText() }
+            }
+            PluginReports.Source(manifest, locales)
+        }
+        return if (BuildConfig.DEBUG) folders + PluginReports.Source(DEMO_MANIFEST, emptyMap()) else folders
+    }
+
+    /**
+     * While the frame has a session: moves plugin settings kept on the frame into the frame settings, sends the
+     * catalog, and then the status every 10 s when it changed (at least every 10 minutes), browsing the network for
+     * the catalog's services for a minute every 10 minutes and listing Home Assistant entities per instance.
+     */
+    private suspend fun report() = coroutineScope {
+        g.settings.raw.first { it.containsKey("version") }
+        prefs.migrate()
+        val sources = catalogSources()
+        runCatching { g.api.putPluginCatalog(PluginReports.catalog(sources)) }
+            .onFailure { Log.i("KinFramePlugins", "catalog not sent: ${it.message}") }
+
+        val services = MutableStateFlow<Map<String, List<FoundService>>>(emptyMap())
+        val types = PluginReports.serviceTypes(sources.mapNotNull { runCatching { app.kinframe.frame.plugins.js.PluginManifest.parse(it.manifest) }.getOrNull() })
+        launch {
+            val browser = ServiceBrowser(g.app)
+            while (true) {
+                for (t in types) withTimeoutOrNull(60_000) { browser.browse(t).collect { list -> services.value = services.value + (t to list) } }
+                delay(9 * 60_000L)
+            }
+        }
+
+        val entities = HashMap<String, Pair<String, Pair<Long, List<PluginReports.Entity>?>>>()
+        var sent: JsonObject? = null
+        var sentAt = 0L
+        while (true) {
+            val now = SystemClock.elapsedRealtime()
+            val states = host.states.value.associateBy { it.config.instanceId }
+            val reports = prefs.instances.value.map { cfg ->
+                val st = states[cfg.instanceId]
+                PluginReports.InstanceReport(
+                    instanceId = cfg.instanceId, running = st != null, error = st?.error,
+                    updatedAtMs = st?.lastGoodAt?.takeIf { it > 0 }, entities = entitiesFor(cfg, entities, now),
+                )
+            }
+            val compare = PluginReports.status(reports, services.value, withTimes = false)
+            if (compare != sent || now - sentAt >= 10 * 60_000L) {
+                val ok = runCatching { g.api.putPluginStatus(PluginReports.status(reports, services.value)) }
+                    .onFailure { Log.i("KinFramePlugins", "status not sent: ${it.message}") }.isSuccess
+                if (ok) { sent = compare; sentAt = now }
+            }
+            delay(10_000)
+        }
+    }
+
+    /**
+     * The Home Assistant entities an instance can see (§6.2), listed again when its address or token changes and every
+     * 10 minutes; null while it has no connection or the last try failed (tried again after a minute).
+     */
+    private suspend fun entitiesFor(cfg: InstanceConfig, cache: HashMap<String, Pair<String, Pair<Long, List<PluginReports.Entity>?>>>, now: Long): List<PluginReports.Entity>? {
+        if (cfg.pluginId in builtIns) return null
+        val manifest = bundle(cfg.pluginId)?.manifest ?: return null
+        val values = manifest.withDefaults(cfg.values)
+        val (base, token) = PluginReports.entityConnection(manifest, values) ?: return null
+        val key = PluginReports.connectionKey(base, token)
+        val cached = cache[cfg.instanceId]
+        if (cached != null && cached.first == key) {
+            val (at, list) = cached.second
+            if (now - at < if (list != null) 10 * 60_000L else 60_000L) return list
+        }
+        val net = PluginNet(g.http, PluginPermissions(manifest, values), userAgent = USER_AGENT)
+        val list = runCatching { PluginReports.fetchEntities(net, base, token) }
+            .onFailure { Log.i("KinFramePlugins", "[${cfg.instanceId}] entities: ${it.message}") }.getOrNull()
+        cache[cfg.instanceId] = key to (now to list)
+        return list
     }
 
     fun nameOf(pluginId: String): String = when (pluginId) {
@@ -135,7 +229,7 @@ class FramePlugins(private val c: FrameController) {
         }
         return PluginContext(
             instanceId = cfg.instanceId,
-            settings = cfg.settings,
+            settings = cfg.values,
             state = HashMap(),
             store = prefs.store(cfg.instanceId),
             http = http,
@@ -199,6 +293,8 @@ class FramePlugins(private val c: FrameController) {
         /** Debug builds: cycles the example views from docs/api/plugin-views (dev preview). */
         const val DEMO = "kinframe.demo"
         const val DEMO_INSTANCE = "debug-demo"
+        private const val DEMO_MANIFEST =
+            """{"id":"kinframe.demo","name":"Demo","version":"1.0.0","api":1,"settings":[{"key":"fixture","type":"text","label":"Fixture"}]}"""
     }
 }
 

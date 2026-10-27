@@ -1,2 +1,17 @@
-{ "@name": "Nu aan het spelen", "previous": "Vorige", "play": "Afspelen", "pause": "Pauze", "next": "Volgende", "quieter": "Stiller", "louder": "Luider",
-  "volume": "Volume {n}", "token_refused": "Home Assistant weigert het token", "album_art": "Albumhoes" }
+{
+  "@name": "Nu aan het spelen",
+  "@description": "Wat een speaker speelt, met de hoes, via Home Assistant (Spotify, Sonos, Cast, …), en knoppen om door te gaan en het volume te regelen in de detailkaart.",
+  "@setting.base_url": "Adres van Home Assistant",
+  "@setting.token": "Langlevend toegangstoken",
+  "@setting.entity": "Speaker of speler",
+  "@setting.show_paused": "Blijven tonen tijdens pauze",
+  "previous": "Vorige",
+  "play": "Afspelen",
+  "pause": "Pauze",
+  "next": "Volgende",
+  "quieter": "Stiller",
+  "louder": "Luider",
+  "volume": "Volume {n}",
+  "token_refused": "Home Assistant weigert het token",
+  "album_art": "Albumhoes"
+}

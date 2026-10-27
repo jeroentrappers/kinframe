@@ -186,8 +186,12 @@ func fits(s *Setting, v any) bool {
 		if strings.TrimSpace(str) == "" {
 			return true
 		}
+		// A bare host[:port] is an http address (the HomeWizard plugins' `host`).
+		if !strings.Contains(str, "://") {
+			str = "http://" + str
+		}
 		u, err := url.Parse(str)
-		return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Host != ""
+		return err == nil && (u.Scheme == "http" || u.Scheme == "https") && u.Hostname() != "" && !strings.ContainsAny(u.Host, " /")
 	}
 	return isStr
 }
