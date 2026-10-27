@@ -99,6 +99,21 @@ class PluginPrefsTest {
         again.migrate()
         assertEquals(1, sent.size)
 
+        // Settings an older version stored that no manifest declares any more stay behind (the server refuses them).
+        val legacy = MutableStateFlow(doc("""{"version": 3}"""))
+        val sentLegacy = mutableListOf<JsonObject>()
+        val old = PluginPrefs(context, legacy, scope) { patch -> sentLegacy += patch; true }
+        legacy.value = doc("""{"version": 3}""")
+        session = false
+        prefs.upsert(InstanceConfig("builtin-weather-station", "kinframe.weather-station", settings = JsonObject(mapOf(
+            "device" to JsonPrimitive("9287156658"), "use_for_weather" to JsonPrimitive(true)))))
+        session = true
+        PluginPrefs(context, legacy, scope) { patch -> sentLegacy += patch; true }
+            .migrate { id -> if (id == "kinframe.weather-station") setOf("device", "source") else null }
+        val station = PluginSettingsDoc.instances(sentLegacy.last())!!.single { it.pluginId == "kinframe.weather-station" }
+        assertEquals(setOf("device"), station.settings.keys)
+        assertTrue(old.instances.value.isNotEmpty())
+
         // From then on the frame settings win: a change made in an app shows on the frame.
         raw.value = MergePatch.apply(raw.value, doc("""{"plugins": {"instances": []}}""")).jsonObject
         withTimeout(1_000) { again.instances.first { it.isEmpty() } }

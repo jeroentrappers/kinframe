@@ -130,12 +130,18 @@ class PluginPrefs(
 
     /**
      * Puts the local plugin settings into the frame settings when those have none yet: once per session start, so a
-     * patch the server refused is tried again. [raw] must be the loaded document.
+     * patch the server refused is tried again. [raw] must be the loaded document. [settingKeys] gives a plugin's
+     * manifest settings (null when unknown): settings an older app version stored and no manifest declares any more
+     * are left behind, since the server refuses unknown settings.
      */
-    fun migrate() {
+    fun migrate(settingKeys: (String) -> Set<String>? = { null }) {
         if (PluginSettingsDoc.layout(raw.value) != null) return
         if (localInstances.value.isEmpty() && localLayout.value == PluginLayoutConfig()) return
-        edit(PluginSettingsDoc.patch(localLayout.value, localInstances.value))
+        val instances = localInstances.value.map { i ->
+            val keys = settingKeys(i.pluginId) ?: return@map i
+            i.copy(settings = JsonObject(i.settings.filterKeys { it in keys }))
+        }
+        edit(PluginSettingsDoc.patch(localLayout.value, instances))
     }
 
     /** `ctx.store`: small persistent key-value storage per instance (docs/plugins.md §3.2), 64 KB each. */

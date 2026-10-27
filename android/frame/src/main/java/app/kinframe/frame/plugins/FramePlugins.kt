@@ -136,13 +136,14 @@ class FramePlugins(private val c: FrameController) {
      */
     private suspend fun report() = coroutineScope {
         g.settings.raw.first { it.containsKey("version") }
-        prefs.migrate()
         val sources = catalogSources()
+        val manifests = sources.mapNotNull { runCatching { app.kinframe.frame.plugins.js.PluginManifest.parse(it.manifest) }.getOrNull() }
+        prefs.migrate { id -> manifests.firstOrNull { it.id == id }?.settings?.mapTo(HashSet()) { it.key } }
         runCatching { g.api.putPluginCatalog(PluginReports.catalog(sources)) }
             .onFailure { Log.i("KinFramePlugins", "catalog not sent: ${it.message}") }
 
         val services = MutableStateFlow<Map<String, List<FoundService>>>(emptyMap())
-        val types = PluginReports.serviceTypes(sources.mapNotNull { runCatching { app.kinframe.frame.plugins.js.PluginManifest.parse(it.manifest) }.getOrNull() })
+        val types = PluginReports.serviceTypes(manifests)
         launch {
             val browser = ServiceBrowser(g.app)
             while (true) {

@@ -154,3 +154,39 @@ func TestPluginSettings(t *testing.T) {
 		t.Fatalf("member: %d", r.StatusCode)
 	}
 }
+
+// A frame that ran the P1 and the weather station before step 3 moves its settings into the frame settings once;
+// these are such a frame's settings (with the station's leftover use_for_weather already dropped by the frame).
+func TestPluginSettingsFromBeforeStep3(t *testing.T) {
+	e := newEnv(t)
+	owner := e.user("o@x.org", "O")
+	d, _ := e.claim(owner)
+	e.expect(req{method: "PUT", path: "/v1/device/plugins/catalog", token: d.token,
+		body: catalogOf(t, "kinframe.homewizard-p1", "kinframe.weather-station")}, 204)
+	patch := map[string]any{"plugins": map[string]any{
+		"layout": map[string]any{"mode": "band", "side": "right", "background": "photo"},
+		"instances": []any{
+			map[string]any{"instance_id": "builtin-homewizard-p1", "plugin_id": "kinframe.homewizard-p1", "version": "builtin", "slot": "top-right",
+				"order": 0, "visibility": "on_change", "enabled": true, "secrets": map[string]any{},
+				"settings": map[string]any{"style": "gauge", "host": "192.168.1.203", "warn_w": 3000}},
+			map[string]any{"instance_id": "builtin-weather-station", "plugin_id": "kinframe.weather-station", "version": "builtin", "slot": "top-left",
+				"order": 0, "visibility": "always", "enabled": true, "secrets": map[string]any{},
+				"settings": map[string]any{"source": "weathercloud", "style": "rows", "device": "9287156658", "wind_unit": "kmh", "interval_min": 10}},
+		},
+	}}
+	raw, _ := json.Marshal(patch)
+	r := e.do(req{method: "PATCH", path: "/v1/device/settings", token: d.token, raw: raw,
+		header: map[string]string{"If-Match": `"1"`, "Content-Type": "application/merge-patch+json"}})
+	if r.StatusCode != 200 {
+		t.Fatalf("migration: %d %s", r.StatusCode, r.body)
+	}
+	// The leftover key itself is refused, naming the field.
+	bad := patch["plugins"].(map[string]any)["instances"].([]any)[1].(map[string]any)["settings"].(map[string]any)
+	bad["use_for_weather"] = true
+	raw, _ = json.Marshal(patch)
+	r = e.do(req{method: "PATCH", path: "/v1/device/settings", token: d.token, raw: raw,
+		header: map[string]string{"If-Match": `"2"`, "Content-Type": "application/merge-patch+json"}})
+	if r.StatusCode != 422 || !strings.Contains(string(r.body), "settings.use_for_weather") {
+		t.Fatalf("leftover: %d %s", r.StatusCode, r.body)
+	}
+}
