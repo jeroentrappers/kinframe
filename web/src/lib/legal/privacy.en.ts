@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacy policy',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'kinframe lets families send photos, videos and messages to a photo frame at home. This policy explains which personal data the hosted kinframe service at https://kinframe.appmire.be collects, why, who else is involved, how long it is kept and how you can have it deleted. It covers the website, the kinframe apps and frames when they use this server, the sign-in pages at auth.kinframe.appmire.be and the pre-order shop.',
 		'In short: we only use your data to run the service. There are no ads, no analytics and no tracking, and nothing is sold or shared for marketing. The servers are in Germany.'
@@ -29,6 +29,7 @@ const doc: LegalDoc = {
 						'What you send: photos and videos, captions, albums, the time a photo was taken, the original file name, and when each item was delivered to and first shown on a frame. Location and camera data (EXIF/GPS) are removed from every photo and video we store; only the capture time is kept.',
 						'Reactions and replies: hearts and quick replies sent from a frame.',
 						'Calendars: calendar links (ICS or CalDAV) you add, with an optional user name and password, and the events fetched from them; events and invitations you send to a frame (title, place, notes, an optional photo, your name). Links and passwords are stored encrypted.',
+						'Plugins (widgets on the frame): which plugins a frame uses and their settings, such as the address of a device in your home or a Home Assistant access token. Tokens and other secrets are stored encrypted and only sent to the frame. For the plugin settings in the apps, the frame also reports whether each widget works, its last error, the names and addresses of devices it found on your home network and, for Home Assistant, the names and units of your entities. We keep only the latest report.',
 						'Frame device data: the frame’s brand and model, screen size, Android and app version, language, time zone, storage use, the name and signal strength of its Wi-Fi network, uptime and the number of recent crashes. We keep only the latest report. We do not collect serial numbers, MAC addresses, battery levels or the frame’s position.',
 						'Notifications: if you turn them on, the address of your push subscription (provided by your browser or phone), a device label such as “Chrome on Android” and your language.',
 						'Shop reservations: your name, e-mail address, country, an optional postal code and note, your language, the items you reserve and the time you gave consent. No payment data and no IP addresses.',
@@ -62,13 +63,14 @@ const doc: LegalDoc = {
 				{
 					list: [
 						'Hetzner Online GmbH (Germany) hosts our server. The database and all photos and videos are stored on that server in Germany, the media in an object store we run ourselves.',
-						'Open-Meteo (open-meteo.com) provides weather forecasts and place search. Our server sends it the coordinates of a frame’s location and the place names you search for, never who you are. Your device never contacts Open-Meteo.',
+						'Open-Meteo (open-meteo.com) provides weather forecasts and place search. Our server sends it the coordinates of a frame’s location and the place names you search for, never who you are. Frames contact it themselves only for plugins that use it (see “Plugins” below).',
 						'Push services: to deliver a notification, our server sends it to the push service of your browser or phone (for example Google, Mozilla or Apple for web notifications, or the UnifiedPush distributor you chose on Android). Notifications contain short texts such as a frame name, the name of someone who asks to join, or a calendar event title, but never photos or captions. Web notifications are end-to-end encrypted; UnifiedPush messages are sent over HTTPS to your distributor, which can read them.',
 						'Sign-in providers: only if you choose to sign in with Apple, Google, Microsoft, Facebook (Meta) or GitHub. That provider then learns that you use kinframe, under its own privacy policy.',
 						'Calendar hosts: if you add a calendar link, our server fetches it from the address you gave (for example Google Calendar or iCloud) with the credentials you entered.',
+						'Plugins: a widget the frame owner adds may only talk to what it lists before it is added. Widgets for devices in your home (HomeWizard, Home Assistant) stay on your home network: nothing they read leaves it. Others contact an internet service directly from the frame: the weather station reads your station’s public page at Weathercloud (weathercloud.net), the rain radar asks Buienradar (buienradar.nl) or Open-Meteo for the rain at the frame’s location rounded to about a kilometre, and community plugins contact the hosts they list. These services see the frame’s internet address and what the widget asks for, never who you are, and handle that under their own privacy policies. Community plugins are written by other people and published in a public registry; we review them before publication and can withdraw them.',
 						'Google Cast: only if you choose to show a slideshow on a Chromecast, your browser loads Google’s Cast software and the Chromecast loads the photos from our server.',
 						'E-mail: sign-in codes and shop e-mails are sent through Appmire’s own mail server. They contain no tracking pixels.',
-						'GitHub: our server downloads kinframe app updates from GitHub Releases. No personal data is sent; frames download updates from our server only.',
+						'GitHub: our server downloads kinframe app updates and the community plugin registry from GitHub Releases. No personal data is sent; frames download updates from our server only.',
 						'Shop: reservations are handled by the seller named on the shop page and in the confirmation e-mail, who uses them only for that reservation.'
 					]
 				},
@@ -93,6 +95,7 @@ const doc: LegalDoc = {
 						'Uploads: the file you upload is deleted as soon as it has been processed; unfinished uploads after 24 hours.',
 						'Frame device data: only the latest report is kept; each new report replaces the previous one.',
 						'Push subscriptions: until you turn notifications off, sign out of the app, or the push service reports that the subscription has expired.',
+						'Plugins: their settings until the owner removes the widget or the frame; the frame’s plugin report: only the latest.',
 						'Calendars: until you remove the calendar or the frame.',
 						'Shop reservations: deleted automatically one year after the last change, or 30 days after you cancel.',
 						'Logs: the kinframe server does not log requests or IP addresses in normal operation. Our web server keeps access logs (IP address, time, address requested, browser) for at most 14 days, for security. The sign-in service keeps a record of sign-ins (time, IP address and browser) to protect your account.'

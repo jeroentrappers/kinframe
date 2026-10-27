@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacybeleid',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'Met kinframe sturen families foto’s, video’s en berichten naar een fotokader thuis. Dit beleid legt uit welke persoonsgegevens de gehoste kinframe-dienst op https://kinframe.appmire.be verzamelt, waarom, wie er nog bij betrokken is, hoelang we ze bewaren en hoe je ze kunt laten wissen. Het geldt voor de website, de kinframe-apps en kaders wanneer ze deze server gebruiken, de aanmeldpagina’s op auth.kinframe.appmire.be en de webshop voor reservaties.',
 		'Kort gezegd: we gebruiken je gegevens alleen om de dienst te laten werken. Geen advertenties, geen analytics en geen tracking, en we verkopen of delen niets voor marketing. De servers staan in Duitsland.'
@@ -29,6 +29,7 @@ const doc: LegalDoc = {
 						'Wat je stuurt: foto’s en video’s, onderschriften, albums, het moment waarop een foto genomen is, de oorspronkelijke bestandsnaam, en wanneer elk item op een kader aankwam en voor het eerst getoond werd. Locatie- en cameragegevens (EXIF/GPS) worden verwijderd uit elke foto en video die we bewaren; alleen het opnametijdstip blijft.',
 						'Reacties en antwoorden: hartjes en snelle antwoorden die vanaf een kader gestuurd worden.',
 						'Agenda’s: agendalinks (ICS of CalDAV) die je toevoegt, met een optionele gebruikersnaam en wachtwoord, en de afspraken die daaruit opgehaald worden; afspraken en uitnodigingen die je naar een kader stuurt (titel, plaats, notities, een optionele foto, je naam). Links en wachtwoorden worden versleuteld bewaard.',
+						'Plug-ins (widgets op het kader): welke plug-ins een kader gebruikt en hun instellingen, zoals het adres van een toestel bij je thuis of een toegangstoken voor Home Assistant. Tokens en andere geheimen worden versleuteld bewaard en alleen naar het kader gestuurd. Voor de plug-ininstellingen in de apps meldt het kader ook of elke widget werkt, de laatste fout, de namen en adressen van toestellen die het in je thuisnetwerk vond en, voor Home Assistant, de namen en eenheden van je entiteiten. We bewaren alleen de laatste melding.',
 						'Gegevens van het kader: merk en model, schermgrootte, Android- en appversie, taal, tijdzone, opslaggebruik, de naam en signaalsterkte van het wifinetwerk, de tijd sinds het opstarten en het aantal recente crashes. We bewaren alleen het laatste rapport. We verzamelen geen serienummers, MAC-adressen, batterijniveaus of de positie van het kader.',
 						'Meldingen: als je ze aanzet, het adres van je pushabonnement (van je browser of telefoon), een toestellabel zoals “Chrome op Android” en je taal.',
 						'Reservaties in de webshop: je naam, e-mailadres, land, een optionele postcode en opmerking, je taal, wat je reserveert en het moment waarop je toestemming gaf. Geen betaalgegevens en geen IP-adressen.',
@@ -62,13 +63,14 @@ const doc: LegalDoc = {
 				{
 					list: [
 						'Hetzner Online GmbH (Duitsland) host onze server. De database en alle foto’s en video’s staan op die server in Duitsland, de media in een objectopslag die we zelf beheren.',
-						'Open-Meteo (open-meteo.com) levert weersverwachtingen en het zoeken naar plaatsen. Onze server stuurt de coördinaten van de locatie van een kader en de plaatsnamen die je zoekt, nooit wie je bent. Je toestel maakt zelf nooit contact met Open-Meteo.',
+						'Open-Meteo (open-meteo.com) levert weersverwachtingen en het zoeken naar plaatsen. Onze server stuurt de coördinaten van de locatie van een kader en de plaatsnamen die je zoekt, nooit wie je bent. Kaders contacteren het zelf alleen voor plug-ins die het gebruiken (zie “Plug-ins” hieronder).',
 						'Pushdiensten: om een melding af te leveren stuurt onze server ze naar de pushdienst van je browser of telefoon (bijvoorbeeld Google, Mozilla of Apple voor webmeldingen, of de UnifiedPush-distributor die je op Android koos). Meldingen bevatten korte teksten zoals een kadernaam, de naam van iemand die lid wil worden of de titel van een afspraak, maar nooit foto’s of onderschriften. Webmeldingen zijn end-to-end versleuteld; UnifiedPush-berichten gaan via HTTPS naar je distributor, die ze kan lezen.',
 						'Aanmeldaanbieders: alleen als je kiest om je aan te melden met Apple, Google, Microsoft, Facebook (Meta) of GitHub. Die aanbieder weet dan dat je kinframe gebruikt, onder zijn eigen privacybeleid.',
 						'Agendadiensten: voeg je een agendalink toe, dan haalt onze server die op bij het adres dat je opgaf (bijvoorbeeld Google Agenda of iCloud), met de inloggegevens die je invulde.',
+						'Plug-ins: een widget die de eigenaar van het kader toevoegt, mag alleen praten met wat hij vóór het toevoegen vermeldt. Widgets voor toestellen bij je thuis (HomeWizard, Home Assistant) blijven in je thuisnetwerk: niets wat ze lezen verlaat het. Andere contacteren rechtstreeks vanaf het kader een internetdienst: het weerstation leest de openbare pagina van je station bij Weathercloud (weathercloud.net), de buienradar vraagt Buienradar (buienradar.nl) of Open-Meteo naar de regen op de plaats van het kader, afgerond op ongeveer een kilometer, en communityplug-ins contacteren de hosts die ze vermelden. Die diensten zien het internetadres van het kader en wat de widget vraagt, nooit wie je bent, en behandelen dat volgens hun eigen privacybeleid. Communityplug-ins zijn geschreven door anderen en verschijnen in een openbaar register; we controleren ze vóór publicatie en kunnen ze intrekken.',
 						'Google Cast: alleen als je kiest om een diavoorstelling op een Chromecast te tonen, laadt je browser de Cast-software van Google en haalt de Chromecast de foto’s bij onze server.',
 						'E-mail: aanmeldcodes en e-mails van de webshop gaan via de eigen mailserver van Appmire. Ze bevatten geen trackingpixels.',
-						'GitHub: onze server haalt updates van de kinframe-apps op bij GitHub Releases. Daarbij worden geen persoonsgegevens verstuurd; kaders halen updates alleen bij onze server.',
+						'GitHub: onze server haalt updates van de kinframe-apps en het register met communityplug-ins op bij GitHub Releases. Daarbij worden geen persoonsgegevens verstuurd; kaders halen updates alleen bij onze server.',
 						'Webshop: reservaties worden afgehandeld door de verkoper die op de shoppagina en in de bevestigingsmail vermeld staat, en die ze alleen voor die reservatie gebruikt.'
 					]
 				},
@@ -93,6 +95,7 @@ const doc: LegalDoc = {
 						'Uploads: het bestand dat je uploadt, wordt gewist zodra het verwerkt is; onvoltooide uploads na 24 uur.',
 						'Gegevens van het kader: alleen het laatste rapport wordt bewaard; elk nieuw rapport vervangt het vorige.',
 						'Pushabonnementen: tot je meldingen uitzet, je afmeldt in de app of de pushdienst laat weten dat het abonnement verlopen is.',
+						'Plug-ins: hun instellingen tot de eigenaar de widget of het kader verwijdert; de plug-inmelding van het kader: alleen de laatste.',
 						'Agenda’s: tot je de agenda of het kader verwijdert.',
 						'Reservaties in de webshop: automatisch gewist een jaar na de laatste wijziging, of 30 dagen nadat je annuleert.',
 						'Logs: de kinframe-server logt bij normale werking geen verzoeken of IP-adressen. Onze webserver houdt toegangslogs bij (IP-adres, tijdstip, opgevraagd adres, browser), hoogstens 14 dagen, voor de beveiliging. De aanmelddienst houdt aanmeldingen bij (tijdstip, IP-adres en browser) om je account te beschermen.'

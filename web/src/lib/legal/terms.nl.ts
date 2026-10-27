@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Gebruiksvoorwaarden',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'Deze voorwaarden gelden voor de gehoste kinframe-dienst op https://kinframe.appmire.be: de website, de aanmeldpagina’s en de kinframe-apps en kaders wanneer ze deze server gebruiken. Door een account aan te maken of de dienst te gebruiken, ga je ermee akkoord. Lees ook ons privacybeleid op https://kinframe.appmire.be/privacy.'
 	],
@@ -42,6 +42,15 @@ const doc: LegalDoc = {
 			body: [
 				'Je behoudt alle rechten op de foto’s, video’s, onderschriften en andere inhoud die je stuurt. Je geeft Appmire alleen de toestemming die we nodig hebben om de dienst te laten werken: je inhoud bewaren, er versies in de juiste grootte voor elk kader van maken, en ze tonen aan de kaders en mensen naar wie je ze stuurt of met wie je ze deelt. Die toestemming stopt wanneer je inhoud gewist is, behalve voor kopieën die nog een beperkte tijd in back-ups staan.',
 				'Stuur alleen inhoud die je mag delen, die legaal is en waarmee de mensen erop akkoord zouden gaan. Wees extra voorzichtig met foto’s van kinderen en van mensen die zich niet makkelijk kunnen verzetten.'
+			]
+		},
+		{
+			id: 'plugins',
+			title: 'Plug-ins',
+			body: [
+				'Eigenaars en beheerders van een kader kunnen plug-ins toevoegen: kleine widgets die informatie tonen van toestellen bij je thuis of van internetdiensten. Ingebouwde plug-ins horen bij kinframe. Communityplug-ins zijn gemaakt door anderen en verschijnen in het openbare register op https://github.com/jeroentrappers/kinframe-plugins, onder hun eigen opensourcelicenties.',
+				'We controleren elke communityplug-in vóór hij verschijnt en kunnen hem op elk moment intrekken, maar we garanderen niet dat een plug-in, of de dienst die hij gebruikt, werkt, juist is of beschikbaar blijft. Wat een plug-in toont (energieverbruik, weer, regen, vertrektijden, prijzen) is alleen voor het gemak: baseer er geen beslissingen over veiligheid, gezondheid of geld op.',
+				'Met een plug-in die een internetdienst gebruikt, word je gebruiker van die dienst onder haar eigen voorwaarden. Vul alleen tokens en wachtwoorden in van accounts en toestellen die van jou zijn.',
 			]
 		},
 		{

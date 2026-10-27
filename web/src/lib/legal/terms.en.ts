@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Terms of use',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'These terms apply to the hosted kinframe service at https://kinframe.appmire.be: the website, the sign-in pages, and the kinframe apps and frames when they use this server. By creating an account or using the service, you agree to them. Please also read our privacy policy at https://kinframe.appmire.be/privacy.'
 	],
@@ -42,6 +42,15 @@ const doc: LegalDoc = {
 			body: [
 				'You keep all rights to the photos, videos, captions and other content you send. You give Appmire only the permission we need to run the service: to store your content, make copies in the right sizes for each frame, and show it to the frames and people you send or share it with. This permission ends when your content is deleted, except for copies kept in backups for a limited time.',
 				'Only send content you have the right to share, that is legal, and that the people in it would agree to. Take extra care with photos of children and of people who cannot easily object.'
+			]
+		},
+		{
+			id: 'plugins',
+			title: 'Plugins',
+			body: [
+				'Frame owners and admins can add plugins: small widgets that show information from devices in the home or from internet services. Built-in plugins are part of kinframe. Community plugins are made by other people and published in the public registry at https://github.com/jeroentrappers/kinframe-plugins under their own open-source licences.',
+				'We review every community plugin before it is published and can withdraw it at any time, but we do not guarantee that a plugin, or the service it uses, works, is accurate or stays available. What a plugin shows (energy use, weather, rain, departures, prices) is for convenience only: do not rely on it for safety, health or financial decisions.',
+				'A plugin that uses an internet service makes you a user of that service under its own terms. Only enter tokens and passwords for accounts and devices you control.',
 			]
 		},
 		{
