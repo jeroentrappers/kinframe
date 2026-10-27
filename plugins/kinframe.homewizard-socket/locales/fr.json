@@ -1,0 +1,12 @@
+{
+  "@name": "Prise HomeWizard",
+  "today": "Aujourd'hui",
+  "on": "Allumée",
+  "off": "Éteinte",
+  "turn_on": "Allumer",
+  "turn_off": "Éteindre",
+  "locked": "Interrupteur verrouillé dans l'app HomeWizard",
+  "last_hour": "Dernière heure",
+  "voltage": "Tension",
+  "current": "Courant"
+}

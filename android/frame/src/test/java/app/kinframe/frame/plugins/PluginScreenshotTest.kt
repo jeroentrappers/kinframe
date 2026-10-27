@@ -392,6 +392,81 @@ class PluginScreenshotTest {
         stage("js_detail_car", overlay, s, detail = s, detailView = detail, seed = 1)
     }
 
+    /**
+     * The HomeWizard device plugins (water meter, energy socket) against a fake device: [readings] of `GET /api/v1/data`
+     * 5 s apart (so the detail has a last hour), the widget and the detail of the last one.
+     */
+    private fun hwViews(plugin: String, readings: List<String>, state: String? = null, vararg settings: Pair<String, Any>): Pair<PluginView, PluginView> =
+        kotlinx.coroutines.runBlocking {
+            val dir = File("../../plugins/$plugin/fixtures")
+            val d = app.kinframe.frame.plugins.js.FakeHomeWizard(dir, dir.list()!!.first { it.startsWith("data") }, state)
+            val map = mapOf("host" to kotlinx.serialization.json.JsonPrimitive(d.host)) + settings.associate { (k, v) ->
+                k to if (v is Boolean) kotlinx.serialization.json.JsonPrimitive(v) else if (v is Number) kotlinx.serialization.json.JsonPrimitive(v) else kotlinx.serialization.json.JsonPrimitive(v.toString())
+            }
+            val kit = app.kinframe.frame.plugins.js.JsPluginKit(app.kinframe.frame.plugins.js.JsPluginKit.plugin(plugin), kotlinx.serialization.json.JsonObject(map), language = "en")
+            kit.now = java.time.Instant.parse("2026-10-25T19:00:00Z").toEpochMilli()
+            try {
+                var v: PluginView? = null
+                readings.forEach { r -> d.data = r; v = kit.view(); kit.now += 5_000 }
+                v!! to kit.detail()
+            } finally { kit.close(); d.close() }
+        }
+
+    /** A shower: the meter climbs by its flow, 5 s per reading. */
+    private fun shower(): List<String> {
+        var m3 = 512.30
+        return (0 until 60).map { i ->
+            val lpm = if (i < 20) 0.0 else 7.0 + (i % 5) * 0.3
+            m3 += lpm / 12 / 1000
+            """{"wifi_ssid":"Home","wifi_strength":78,"total_liter_m3":$m3,"active_liter_lpm":$lpm,"total_liter_offset_m3":0}"""
+        }
+    }
+
+    /** A washing machine heating, then turning: the socket's power and counter, 5 s per reading. */
+    private fun wash(): List<String> {
+        var kwh = 214.20
+        return (0 until 60).map { i ->
+            val w = if (i < 15) 3.0 else if (i < 40) 2050.0 + (i % 3) * 20 else 180.0 + (i % 4) * 40
+            kwh += w / 720 / 1000
+            """{"total_power_import_kwh":$kwh,"total_power_import_t1_kwh":$kwh,"active_power_w":$w,"active_power_l1_w":$w,"active_voltage_v":231.9,"active_current_a":${"%.2f".format(java.util.Locale.ROOT, w / 231.9)}}"""
+        }
+    }
+
+    @Test fun jsWaterInEveryForm() = everyForm("plugins_js_homewizard_water", listOf(
+        "water value" to hwViews("kinframe.homewizard-water", shower()),
+        "water gauge" to hwViews("kinframe.homewizard-water", shower(), null, "style" to "gauge", "typical_l" to 150),
+    ))
+
+    @Test fun jsSocketInEveryForm() = everyForm("plugins_js_homewizard_socket", listOf(
+        "socket" to hwViews("kinframe.homewizard-socket", wash(), "state-on.json", "label" to "Washing machine", "icon" to "washing-machine"),
+        "socket locked" to hwViews("kinframe.homewizard-socket", wash().take(1), "state-locked.json"),
+    ))
+
+    /** Each widget in the column, strip and corner forms, and its detail card. */
+    private fun everyForm(name: String, rows: List<Pair<String, Pair<PluginView, PluginView>>>) {
+        Screenshots.shot(name) {
+            Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                rows.forEach { (n, views) ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+                        Text(n, color = Color.White, modifier = Modifier.width(110.dp))
+                        Box(Modifier.width(80.dp).background(Kin.colors.paper).padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
+                            PluginViewContent(views.first, ViewForm.Column, PluginPalette.onPaper(Kin.colors))
+                        }
+                        Box(Modifier.width(240.dp).background(Kin.colors.paper).padding(8.dp)) { PluginViewContent(views.first, ViewForm.Strip, PluginPalette.onPaper(Kin.colors)) }
+                        Box(Modifier.width(240.dp).background(Color(0xFF5B6B5E)).padding(8.dp)) { PluginViewContent(views.first, ViewForm.Corner, PluginPalette.OnPhoto) }
+                        Box(Modifier.width(420.dp).background(Kin.colors.surface).padding(8.dp)) { PluginViewContent(views.second, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun jsDetailSocket() {
+        val (v, detail) = hwViews("kinframe.homewizard-socket", wash(), "state-on.json", "label" to "Washing machine", "icon" to "washing-machine")
+        val s = previewInstance("s", v, Slot.TopRight, name = "Energy socket")
+        stage("js_detail_socket", band, s, detail = s, detailView = detail, seed = 3)
+    }
+
     @Test fun newComponentsInEveryForm() = Screenshots.shot("plugins_new_components") {
         val names = listOf("gauge-dial-today", "progress-temperature-range", "flow-battery-ring", "image-album-art")
         Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {

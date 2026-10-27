@@ -1,0 +1,12 @@
+{
+  "@name": "HomeWizard Energy Socket",
+  "today": "Vandaag",
+  "on": "Aan",
+  "off": "Uit",
+  "turn_on": "Inschakelen",
+  "turn_off": "Uitschakelen",
+  "locked": "Schakelaar vergrendeld in de HomeWizard-app",
+  "last_hour": "Afgelopen uur",
+  "voltage": "Spanning",
+  "current": "Stroom"
+}

@@ -1,0 +1,8 @@
+{
+  "@name": "HomeWizard Wasserzähler",
+  "today": "Heute",
+  "flowing": "Wasser läuft",
+  "flow_now": "Durchfluss jetzt",
+  "last_hour": "Letzte Stunde",
+  "meter_total": "Zählerstand"
+}

@@ -47,6 +47,12 @@ class PluginTimingTest {
                 "grid" to "sensor.p1_meter_vermogen", "battery" to "sensor.solis_s6_eh1p_battery_power_2", "battery_soc" to "sensor.solis_s6_eh1p_battery_soc_2",
                 "home" to "sensor.huisverbruik_vermogen", "ev" to "sensor.ev_laadvermogen_smartevse_w"))),
             measure("kinframe.ha-ev (detail)", kit("kinframe.ha-ev", "views(read(ctx.settings, ENTS, ctx.now()), ctx).detail", "states.json", mapOf("prefix" to "ev3"))),
+            measure("kinframe.homewizard-water (gauge, detail)", kit("kinframe.homewizard-water",
+                "(() => { record(ctx, parse(FIXTURE)); const c = current(ctx); main(c, ctx.settings, ctx); return detail(c, ctx.settings, ctx); })()",
+                "data-running.json", mapOf("style" to "gauge"))),
+            measure("kinframe.homewizard-socket (detail)", kit("kinframe.homewizard-socket",
+                "(() => { record(ctx, parse(FIXTURE)); recordState(ctx, { on: true, locked: false }); const c = current(ctx); main(c, ctx.settings, ctx); return detail(c, ctx.settings, ctx); })()",
+                "data.json", emptyMap())),
             measure("kinframe.ha-media (detail)", kit("kinframe.ha-media", "views(read(ENTS['media_player.woonkamer'], 'http://ha:8123', ctx.now()), ctx).detail", "states-playing.json", mapOf("entity" to "media_player.woonkamer"))),
         )
         results.forEach { assertTrue("render took $it ms", it < 5.0) }

@@ -1,0 +1,8 @@
+{
+  "@name": "HomeWizard water meter",
+  "today": "Today",
+  "flowing": "Water running",
+  "flow_now": "Flow now",
+  "last_hour": "Last hour",
+  "meter_total": "Meter reading"
+}
