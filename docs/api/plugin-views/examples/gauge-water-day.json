@@ -1,0 +1,8 @@
+{
+  "type": "gauge",
+  "value": 62,
+  "label": "142 l",
+  "caption": "of a usual day",
+  "icon": "water",
+  "tone": "water"
+}

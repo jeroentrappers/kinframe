@@ -1,0 +1,12 @@
+{
+  "$error_path": "/highlight",
+  "view": {
+    "type": "sparkline",
+    "points": [
+      1,
+      2,
+      3
+    ],
+    "highlight": 3
+  }
+}

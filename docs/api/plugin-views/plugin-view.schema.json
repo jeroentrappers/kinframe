@@ -16,7 +16,8 @@
         { "$ref": "#/$defs/stack" },
         { "$ref": "#/$defs/image" },
         { "$ref": "#/$defs/actions" },
-        { "$ref": "#/$defs/progress" }
+        { "$ref": "#/$defs/progress" },
+        { "$ref": "#/$defs/list" }
       ]
     },
     "none": {
@@ -73,8 +74,31 @@
       }
     },
     "tone": {
-      "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children.",
-      "enum": ["neutral", "good", "warn", "bad", "accent", "info"]
+      "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children. The first six say how good something is; water, gas and heat name a quantity (pair them with their icon: colour is never the only cue).",
+      "enum": ["neutral", "good", "warn", "bad", "accent", "info", "water", "gas", "heat"]
+    },
+    "list": {
+      "description": "Up to 5 rows of time, title, detail and badge: departures, bin days, appointments. Corner: a label and the first 3 rows; detail card: all rows; band column (too narrow for titles): the first row's icon and the times with their badges (the first title when no row has a time); band strip: the first 2 rows, one line each. A row's tone colours its badge and icon.",
+      "type": "object", "additionalProperties": false, "required": ["type", "rows"],
+      "properties": {
+        "type": { "const": "list" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "rows": {
+          "type": "array", "minItems": 1, "maxItems": 5,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["title"],
+            "properties": {
+              "title": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 40 }] },
+              "time": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 10 }] },
+              "detail": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "badge": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 10 }] },
+              "icon": { "$ref": "#/$defs/icon" },
+              "tone": { "$ref": "#/$defs/tone" }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
     },
     "icon": {
       "description": "The fixed icon set of API 1, drawn by the frame in its line style. `direction` is a needle pointing up (north), meant to be turned with a value's `icon_rotation`.",
@@ -89,7 +113,7 @@
     },
     "short": { "type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u2028\\u2029]*$" },
     "value": {
-      "description": "Icon, big number, unit, optional label and trend arrow: ⚡ 1,2 kW ↑. Format numbers with ctx.format; a unit after a (no-break) space in `value` is drawn smaller unless `unit` is given.",
+      "description": "Icon, big number, unit, optional label and trend arrow: ⚡ 1,2 kW ↑. Format numbers with ctx.format; a unit after a (no-break) space in `value` is drawn smaller unless `unit` is given. One or two decimals are drawn small and raised (21,4 → 21 with a raised ,4); the text itself is unchanged.",
       "type": "object",
       "additionalProperties": false,
       "required": ["type", "value"],
@@ -189,13 +213,17 @@
       }
     },
     "sparkline": {
-      "description": "A small line chart of 2–96 points; null is a gap.",
+      "description": "A small chart of 2–100 points (a day of quarter hours, 100 on the day the clocks go back); null is a gap. `bars` draws a bar per point from zero (or the range's nearest edge). `highlight` picks out one point in `highlight_tone` (default the chart's tone), `marker` another as \"now\" (a thin line across the chart); both are indexes of numbers, not gaps.",
       "type": "object",
       "additionalProperties": false,
       "required": ["type", "points"],
       "properties": {
         "type": { "const": "sparkline" },
-        "points": { "type": "array", "minItems": 2, "maxItems": 96, "items": { "type": ["number", "null"] } },
+        "points": { "type": "array", "minItems": 2, "maxItems": 100, "items": { "type": ["number", "null"] } },
+        "style": { "enum": ["line", "bars"] },
+        "highlight": { "type": "integer", "minimum": 0, "maximum": 99 },
+        "highlight_tone": { "$ref": "#/$defs/tone" },
+        "marker": { "type": "integer", "minimum": 0, "maximum": 99 },
         "min": { "type": "number" },
         "max": { "type": "number" },
         "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },

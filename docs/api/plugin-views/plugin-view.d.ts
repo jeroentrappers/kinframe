@@ -2,7 +2,11 @@
 // this file. The JSON schema next to it (plugin-view.schema.json) and the frame's validator are the authority.
 // Limits: 3 components deep (stack › stack › leaf), 24 components per view, 16 KB serialized, no line breaks.
 
-export type Tone = 'neutral' | 'good' | 'warn' | 'bad' | 'accent' | 'info';
+/**
+ * Semantic tones say how good something is; `water`, `gas` and `heat` name a quantity (a water meter looks like water
+ * next to electricity, which is `info`). Pair a quantity tone with its icon: colour is never the only cue.
+ */
+export type Tone = 'neutral' | 'good' | 'warn' | 'bad' | 'accent' | 'info' | 'water' | 'gas' | 'heat';
 
 export type Icon =
   | 'bolt' | 'grid' | 'solar' | 'sun' | 'home' | 'battery' | 'battery-charging' | 'plug' | 'car' | 'flame' | 'gas'
@@ -15,7 +19,10 @@ export type Icon =
 /** Icon, big number, unit, optional label and trend arrow. `value` ≤ 16 chars, `unit` ≤ 8, `label` ≤ 32. */
 export interface ValueView {
   type: 'value';
-  /** Formatted with ctx.format ("1,2 kW"); a trailing unit after a (no-break) space is drawn smaller. */
+  /**
+   * Formatted with ctx.format ("1,2 kW"); a trailing unit after a (no-break) space is drawn smaller, and one or two
+   * decimals small and raised ("21,4" as 21 with a raised ,4).
+   */
   value: string;
   unit?: string;
   label?: string;
@@ -79,7 +86,11 @@ export interface FlowView {
   tone?: Tone;
 }
 
-/** 2–96 points; null is a gap. */
+/**
+ * 2–100 points (a day of quarter hours, 100 on the day the clocks go back); null is a gap. `bars` draws a bar per point
+ * from zero. `highlight` picks out one point (the cheapest quarter hour) in `highlight_tone`, `marker` another as "now";
+ * both are indexes into `points` and must point at a number.
+ */
 export interface SparklineView {
   type: 'sparkline';
   points: (number | null)[];
@@ -88,6 +99,35 @@ export interface SparklineView {
   label?: string;
   value?: string;
   show_range?: boolean;
+  style?: 'line' | 'bars';
+  highlight?: number;
+  highlight_tone?: Tone;
+  marker?: number;
+  tone?: Tone;
+}
+
+/**
+ * One row: `title` ≤ 40 chars, `time` ≤ 10 ("22:23", "Tomorrow"), `detail` ≤ 16 after the title in a quieter colour
+ * ("spoor 2"), `badge` ≤ 10 at the end in the row's tone ("+3" in warn).
+ */
+export interface ListRow {
+  title: string;
+  time?: string;
+  detail?: string;
+  badge?: string;
+  icon?: Icon;
+  tone?: Tone;
+}
+
+/**
+ * 1–5 rows: departures, bin days, appointments. `label` ≤ 32 heads it in the corner and the detail card. The corner shows
+ * the first 3 rows, the detail card all; the band column only the first row's icon and the times with their badges;
+ * the strip the first 2 rows on one line each.
+ */
+export interface ListView {
+  type: 'list';
+  rows: ListRow[];
+  label?: string;
   tone?: Tone;
 }
 
@@ -152,6 +192,6 @@ export interface NoneView {
   type: 'none';
 }
 
-export type PluginView = ValueView | RowsView | GaugeView | FlowView | SparklineView | TextView | StackView | ImageView | ActionsView | ProgressView;
+export type PluginView = ValueView | RowsView | GaugeView | FlowView | SparklineView | TextView | StackView | ImageView | ActionsView | ProgressView | ListView;
 
 export type RootView = PluginView | NoneView;

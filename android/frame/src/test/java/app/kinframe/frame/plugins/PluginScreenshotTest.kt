@@ -270,7 +270,7 @@ class PluginScreenshotTest {
     }
 
     /** Every example in every form: corner and detail (on photo and on paper) and the two compact band forms. */
-    @Test @Config(qualifiers = "w1280dp-h1900dp-port-mdpi")
+    @Test @Config(qualifiers = "w1280dp-h2500dp-port-mdpi")
     fun gallery() = Screenshots.shot("plugins_gallery") {
         val names = examples.list()!!.filter { it.endsWith(".json") && !it.startsWith("detail-") }.sorted().map { it.removeSuffix(".json") }
         Row(Modifier.fillMaxSize()) {
@@ -412,4 +412,58 @@ class PluginScreenshotTest {
             }
         }
     }
+
+    // ---------------------------------------------------------------------------- list, bars, quantity tones, decimals
+
+    private val additions = listOf("list-departures", "list-bin-days", "sparkline-prices-bars", "rows-utilities", "gauge-water-day", "value-temperature-decimals")
+
+    /** The §11.1 additions in every form: band column and strip on paper, the corner on a photo, the detail card. */
+    @Test @Config(qualifiers = "w1280dp-h1100dp-land-mdpi")
+    fun viewApiAdditions() = additionsSheet("plugins_view_api_additions", dark = false)
+
+    /** The same on the dark palette (the family app's dark mode, the frame's night look). */
+    @Test @Config(qualifiers = "w1280dp-h1100dp-land-mdpi")
+    fun viewApiAdditionsDark() = additionsSheet("plugins_view_api_additions_dark", dark = true)
+
+    private fun additionsSheet(name: String, dark: Boolean) = Screenshots.shot(name) {
+        val c = if (dark) app.kinframe.core.design.KinPalettes.dark else Kin.colors
+        val palette = PluginPalette.onPaper(c)
+        Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            additions.forEach { n ->
+                val v = view(n)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                    Text(n, color = Color.White, modifier = Modifier.width(120.dp))
+                    Box(Modifier.width(80.dp).background(c.paper).padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
+                        PluginViewContent(v, ViewForm.Column, palette)
+                    }
+                    Box(Modifier.width(300.dp).height(64.dp).background(c.paper).padding(8.dp), contentAlignment = Alignment.CenterStart) {
+                        PluginViewContent(v, ViewForm.Strip, palette)
+                    }
+                    Box(Modifier.width(320.dp).background(Color(0xFF5B6B5E)).padding(8.dp)) { PluginViewContent(v, ViewForm.Corner, PluginPalette.OnPhoto) }
+                    Box(Modifier.width(400.dp).background(c.surface).padding(8.dp)) { PluginViewContent(v, ViewForm.Detail, palette) }
+                }
+            }
+        }
+    }
+
+    @Test fun listAndPricesBand() = stage(
+        "list_prices_band", band,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight),
+    )
+
+    @Test fun listAndPricesOverlay() = stage(
+        "list_prices_overlay", overlay,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight), seed = 2,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun listAndPricesStrip() = stage(
+        "list_prices_strip", band,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight), seed = 1,
+    )
+
+    @Test fun utilitiesBand() = stage(
+        "utilities_band", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("rows-utilities"), Slot.TopLeft), previewInstance("b", view("gauge-water-day"), Slot.TopRight), seed = 3,
+    )
 }

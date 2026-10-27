@@ -1,0 +1,12 @@
+{
+  "$error_path": "/marker",
+  "view": {
+    "type": "sparkline",
+    "points": [
+      1,
+      null,
+      3
+    ],
+    "marker": 1
+  }
+}

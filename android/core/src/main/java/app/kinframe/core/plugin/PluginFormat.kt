@@ -95,5 +95,24 @@ class PluginFormat(
             // Only short, non-numeric tails are units ("kW", "m³", "%"), not "12 34".
             return if (unit.length <= 4 && unit.none { it.isDigit() }) value.substring(0, i) to unit else value to null
         }
+
+        /**
+         * Splits a formatted number into what is drawn at full size and the decimals drawn small and raised after it,
+         * the way price tags write "12,⁹⁹": "21,4" → "21," and "4"; "1.234,5" → "1.234," and "5"; "12,8°" → "12," and
+         * "8°". The separator stays full size on the baseline, so the decimals never read as an exponent. Null when
+         * there is nothing to raise (no decimals). Locale-free: a decimal part has one or two digits after the last "," or ".", while grouping always
+         * has three ("1.234" is a thousand, not a decimal), and the whole part may only be grouped with the other
+         * separator or a space. A short trailing sign ("°", "%") stays with the decimals.
+         */
+        fun raisedDecimals(number: String): Pair<String, String>? {
+            val m = RAISED.matchEntire(number) ?: return null
+            val whole = m.groupValues[1]
+            val sep = m.groupValues[2][0]
+            if (whole.contains(sep)) return null
+            return number.substring(0, whole.length + 1) to number.substring(whole.length + 1)
+        }
+
+        // An optional sign, digits grouped in threes (".", ",", "'", spaces) or not at all, then the decimals.
+        private val RAISED = Regex("""^([-−+]?(?:\d{1,3}(?:[.,' \u00A0\u202F]\d{3})+|\d+))([.,])\d{1,2}[^\d.,\s]{0,2}$""")
     }
 }

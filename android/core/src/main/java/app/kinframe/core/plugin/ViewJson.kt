@@ -66,7 +66,10 @@ object ViewJson {
         put("type", "flow"); put("nodes", JsonArray(nodes)); put("edges", JsonArray(edges)); tone(tone)
     }
 
-    fun sparkline(points: List<Float?>, min: Float? = null, max: Float? = null, label: String? = null, value: String? = null, showRange: Boolean = false, tone: Tone = Tone.Neutral) =
+    fun sparkline(
+        points: List<Float?>, min: Float? = null, max: Float? = null, label: String? = null, value: String? = null, showRange: Boolean = false,
+        tone: Tone = Tone.Neutral, style: SparklineStyle = SparklineStyle.Line, highlight: Int? = null, highlightTone: Tone? = null, marker: Int? = null,
+    ) =
         buildJsonObject {
             put("type", "sparkline")
             put("points", JsonArray(points.map { p -> if (p == null || p.isNaN()) JsonNull else JsonPrimitive(p) }))
@@ -74,7 +77,20 @@ object ViewJson {
             label?.let { put("label", it) }; value?.let { put("value", it) }
             if (showRange) put("show_range", true)
             tone(tone)
+            if (style != SparklineStyle.Line) put("style", style.json)
+            highlight?.let { put("highlight", it) }; highlightTone?.let { put("highlight_tone", it.json) }
+            marker?.let { put("marker", it) }
         }
+
+    fun listRow(title: String, time: String? = null, detail: String? = null, badge: String? = null, icon: String? = null, tone: Tone = Tone.Neutral) =
+        buildJsonObject {
+            put("title", title); time?.let { put("time", it) }; detail?.let { put("detail", it) }
+            badge?.let { put("badge", it) }; icon?.let { put("icon", it) }; tone(tone)
+        }
+
+    fun list(rows: List<JsonObject>, label: String? = null, tone: Tone = Tone.Neutral) = buildJsonObject {
+        put("type", "list"); put("rows", JsonArray(rows)); label?.let { put("label", it) }; tone(tone)
+    }
 
     fun text(lines: List<String>, icon: String? = null, tone: Tone = Tone.Neutral) = buildJsonObject {
         put("type", "text"); put("lines", JsonArray(lines.map { JsonPrimitive(it) })); icon?.let { put("icon", it) }; tone(tone)

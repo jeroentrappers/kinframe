@@ -13,9 +13,14 @@ sealed interface PluginView {
     val tone: Tone
 }
 
-/** Maps to the frame's palette; plugins never pick colours. */
+/**
+ * Maps to the frame's palette; plugins never pick colours. The first six are semantic (how good is it); [Water],
+ * [Gas] and [Heat] name a quantity, so a water meter looks like water next to the electricity ([Info], violet) the
+ * P1 already uses. Plugins should still pair a quantity tone with its icon: colour is never the only cue.
+ */
 enum class Tone(val json: String) {
-    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent"), Info("info");
+    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent"), Info("info"),
+    Water("water"), Gas("gas"), Heat("heat");
 
     companion object {
         fun of(json: String): Tone? = entries.firstOrNull { it.json == json }
@@ -104,7 +109,12 @@ data class FlowEdge(val from: Int, val to: Int, val power: Float)
 @Immutable
 data class FlowView(val nodes: List<FlowNode>, val edges: List<FlowEdge>, override val tone: Tone = Tone.Neutral) : PluginView
 
-/** A small line chart of up to 96 points; `NaN` marks a gap (null in JSON). */
+/**
+ * A small chart of up to 100 points (a day of quarter hours, 100 on the day the clocks go back); `NaN` marks a gap
+ * (null in JSON). [SparklineStyle.Bars] draws a bar per point from zero (or the nearest edge of the range), the way a
+ * price chart reads. [highlight] picks out one point (the cheapest quarter hour) in [highlightTone], [marker] another
+ * ("now", a thin line across the chart); both are indexes into [points].
+ */
 @Immutable
 data class SparklineView(
     val points: List<Float>,
@@ -113,6 +123,45 @@ data class SparklineView(
     val label: String? = null,
     val value: String? = null,
     val showRange: Boolean = false,
+    override val tone: Tone = Tone.Neutral,
+    val style: SparklineStyle = SparklineStyle.Line,
+    val highlight: Int? = null,
+    val highlightTone: Tone? = null,
+    val marker: Int? = null,
+) : PluginView
+
+enum class SparklineStyle(val json: String) {
+    Line("line"), Bars("bars");
+
+    companion object {
+        fun of(json: String): SparklineStyle? = entries.firstOrNull { it.json == json }
+    }
+}
+
+/**
+ * One row of a [ListView]: an optional [time] ("22:23"), the [title], an optional [detail] after it in a quieter
+ * colour ("spoor 2"), and a short [badge] at the end in the row's [tone] ("+3", a delay in warn).
+ */
+@Immutable
+data class ListRow(
+    val title: String,
+    val time: String? = null,
+    val detail: String? = null,
+    val badge: String? = null,
+    val icon: String? = null,
+    val tone: Tone = Tone.Neutral,
+)
+
+/**
+ * Up to five rows of time, title and badge: train departures, the next bin days, appointments. In the corner the
+ * first three rows, in the detail card all of them; the band column, too narrow for a title, shows the first row's
+ * icon and the times of the first three rows with their badges; the strip the first two rows, one line each.
+ */
+@Immutable
+data class ListView(
+    val rows: List<ListRow>,
+    /** A heading above the rows ("Gent-Sint-Pieters"), in the corner and the detail card. */
+    val label: String? = null,
     override val tone: Tone = Tone.Neutral,
 ) : PluginView
 
@@ -214,7 +263,7 @@ object ViewLimits {
     const val MAX_FLOW_NODES = 5
     const val MAX_FLOW_EDGES = 8
     const val MIN_POINTS = 2
-    const val MAX_POINTS = 96
+    const val MAX_POINTS = 100
     const val MAX_TEXT_LINES = 2
     const val MAX_TEXT_LINE = 60
     const val MAX_VALUE = 16
@@ -229,6 +278,11 @@ object ViewLimits {
     const val MAX_ACTION_LABEL = 16
     const val MAX_SRC = 2048
     const val MAX_DESCRIPTION = 60
+    const val MAX_LIST_ROWS = 5
+    const val MAX_LIST_TITLE = 40
+    const val MAX_LIST_TIME = 10
+    const val MAX_LIST_DETAIL = 16
+    const val MAX_LIST_BADGE = 10
     /** Edge power and sparkline values: anything bigger is a bug, not a measurement. */
     const val MAX_MAGNITUDE = 1e12f
 }

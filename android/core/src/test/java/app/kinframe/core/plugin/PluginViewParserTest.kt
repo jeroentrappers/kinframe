@@ -111,8 +111,8 @@ class PluginViewParserTest {
     }
 
     @Test fun pointLimits() {
-        valid("""{"type":"sparkline","points":[${(1..96).joinToString(",")}]}""")
-        invalid("""{"type":"sparkline","points":[${(1..97).joinToString(",")}]}""")
+        valid("""{"type":"sparkline","points":[${(1..100).joinToString(",")}]}""")
+        invalid("""{"type":"sparkline","points":[${(1..101).joinToString(",")}]}""")
         invalid("""{"type":"sparkline","points":[1]}""")
         invalid("""{"type":"sparkline","points":[1,"2"]}""")
     }
@@ -186,6 +186,66 @@ class PluginViewParserTest {
         assertEquals(ViewLimits.MAX_FLOW_EDGES, maxItems("flow", "edges"))
         assertEquals(ViewLimits.MAX_POINTS, maxItems("sparkline", "points"))
         assertEquals(ViewLimits.MAX_TEXT_LINES, maxItems("text", "lines"))
+        assertEquals(ViewLimits.MAX_LIST_ROWS, maxItems("list", "rows"))
+        Tone.entries.forEach { assertTrue("d.ts lacks tone ${it.json}", dts.contains("'${it.json}'")) }
         @Suppress("UNUSED_VARIABLE") val unused = JsonArray(emptyList()) to JsonObject(emptyMap())
+    }
+
+    @Test fun parsesAList() {
+        val l = valid(dir.resolve("examples/list-departures.json").readText()) as ListView
+        assertEquals("Gent-Sint-Pieters", l.label)
+        assertEquals(4, l.rows.size)
+        assertEquals(ListRow("Brussels Airport - Zaventem", "22:23", "spoor 2", "+3", "train", Tone.Warn), l.rows[0])
+        assertEquals(ListView(listOf(ListRow("Kortrijk"))), valid("""{"type":"list","rows":[{"title":"Kortrijk"}]}"""))
+        assertEquals("/rows", invalid("""{"type":"list","rows":[]}""").path)
+        assertEquals("/rows/0/title", invalid("""{"type":"list","rows":[{"time":"22:23"}]}""").path)
+        assertEquals("/rows/0/time", invalid("""{"type":"list","rows":[{"title":"a","time":"${"x".repeat(11)}"}]}""").path)
+        assertEquals("/rows/0/badge", invalid("""{"type":"list","rows":[{"title":"a","badge":"${"x".repeat(11)}"}]}""").path)
+        assertEquals("/rows/0/detail", invalid("""{"type":"list","rows":[{"title":"a","detail":"${"x".repeat(17)}"}]}""").path)
+        assertEquals("/rows/0/icon", invalid("""{"type":"list","rows":[{"title":"a","icon":"tram"}]}""").path)
+        assertEquals("/label", invalid("""{"type":"list","label":"${"x".repeat(33)}","rows":[{"title":"a"}]}""").path)
+        // A list is a component like any other: it can sit in a stack.
+        val st = valid("""{"type":"stack","items":[{"type":"text","lines":["a"]},{"type":"list","rows":[{"title":"b"}]}]}""") as StackView
+        assertTrue(st.items[1] is ListView)
+    }
+
+    @Test fun sparklineBarsHighlightAndMarker() {
+        val s = valid(dir.resolve("examples/sparkline-prices-bars.json").readText()) as SparklineView
+        assertEquals(SparklineStyle.Bars, s.style)
+        assertEquals(100, s.points.size)
+        assertEquals(53, s.highlight)
+        assertEquals(Tone.Good, s.highlightTone)
+        assertEquals(76, s.marker)
+        assertEquals(s.points.indices.minBy { s.points[it] }, s.highlight)
+        // Defaults: a line, nothing picked out; 100 points for lines too.
+        val line = valid("""{"type":"sparkline","points":[${(1..100).joinToString(",")}]}""") as SparklineView
+        assertEquals(SparklineStyle.Line, line.style)
+        assertEquals(null, line.highlight)
+        assertEquals(null, line.marker)
+        assertEquals("/style", invalid("""{"type":"sparkline","points":[1,2],"style":"area"}""").path)
+        assertEquals("/highlight", invalid("""{"type":"sparkline","points":[1,2],"highlight":-1}""").path)
+        assertEquals("/highlight", invalid("""{"type":"sparkline","points":[1,2],"highlight":0.5}""").path)
+        assertEquals("/highlight", invalid("""{"type":"sparkline","points":[1,2],"highlight":"0"}""").path)
+        assertEquals("/marker", invalid("""{"type":"sparkline","points":[1,2],"marker":2}""").path)
+        assertEquals("/highlight_tone", invalid("""{"type":"sparkline","points":[1,2],"highlight_tone":"good"}""").path)
+        assertEquals("/highlight_tone", invalid("""{"type":"sparkline","points":[1,2],"highlight":0,"highlight_tone":"green"}""").path)
+        assertEquals("/points", invalid("""{"type":"sparkline","points":[${(1..101).joinToString(",")}]}""").path)
+    }
+
+    @Test fun quantityTones() {
+        val r = valid(dir.resolve("examples/rows-utilities.json").readText()) as RowsView
+        assertEquals(listOf(Tone.Info, Tone.Water, Tone.Gas, Tone.Heat), r.items.map { it.tone })
+        assertEquals(Tone.Water, (valid("""{"type":"gauge","value":5,"tone":"water"}""") as GaugeView).tone)
+        assertEquals(Tone.Heat, (valid("""{"type":"flow","nodes":[{"id":"a","icon":"fan","tone":"heat"},{"id":"b","icon":"home"}]}""") as FlowView).nodes[0].tone)
+        assertEquals("/tone", invalid("""{"type":"value","value":"1","tone":"electricity"}""").path)
+        val bad = invalid("""{"type":"value","value":"1","tone":"steam"}""")
+        assertTrue(bad.reason, bad.reason.contains("water, gas or heat"))
+    }
+
+    @Test fun viewJsonBuildsTheNewComponents() {
+        val l = PluginViewParser.parse(ViewJson.list(listOf(ViewJson.listRow("Kortrijk", time = "22:31", badge = "+1", tone = Tone.Warn)), label = "Gent")) as ViewResult.Valid
+        assertEquals(ListView(listOf(ListRow("Kortrijk", "22:31", badge = "+1", tone = Tone.Warn)), "Gent"), l.view)
+        val s = PluginViewParser.parse(ViewJson.sparkline(listOf(3f, 1f, 2f), style = SparklineStyle.Bars, highlight = 1, highlightTone = Tone.Good, marker = 2)) as ViewResult.Valid
+        assertEquals(SparklineView(listOf(3f, 1f, 2f), style = SparklineStyle.Bars, highlight = 1, highlightTone = Tone.Good, marker = 2), s.view)
     }
 }

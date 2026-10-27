@@ -58,4 +58,24 @@ class PluginFormatTest {
         assertEquals("12 34" to null, PluginFormat.splitUnit("12 34"))
         assertEquals("Charging" to null, PluginFormat.splitUnit("Charging"))
     }
+
+    @Test fun raisedDecimals() {
+        fun r(s: String) = PluginFormat.raisedDecimals(s)
+        // Comma and point decimals, grouped either way.
+        assertEquals("21," to "4", r("21,4"))
+        assertEquals("12." to "50", r("12.50"))
+        assertEquals("1.234," to "5", r("1.234,5"))
+        assertEquals("1,234." to "56", r("1,234.56"))
+        assertEquals("1${nbsp}234," to "5", r("1${nbsp}234,5"))
+        assertEquals("1\u202F234," to "5", r("1\u202F234,5"))
+        assertEquals("1'234." to "5", r("1'234.5"))
+        // Signs and a short trailing sign stay with the parts they belong to.
+        assertEquals("-0," to "8", r("-0,8"))
+        assertEquals("−3," to "2", r("−3,2"))
+        assertEquals("12," to "8°", r("12,8°"))
+        // Nothing to raise: whole numbers, thousands, three decimals, malformed or not a number.
+        listOf("12", "1.234", "1,234", "12.345", "1.234.5", "1,2,3", "v1.2", "", ",5", "1,", "4,5 kW", "12 34", "68%").forEach {
+            assertEquals(it, null, r(it))
+        }
+    }
 }

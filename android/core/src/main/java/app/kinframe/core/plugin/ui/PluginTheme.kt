@@ -44,6 +44,9 @@ data class PluginPalette(
     val bad: Color,
     val accent: Color,
     val info: Color,
+    val water: Color,
+    val gas: Color,
+    val heat: Color,
     val shadow: Shadow?,
     /** Icons on a filled (primary) button. */
     val onTone: Color = Color.White,
@@ -55,6 +58,9 @@ data class PluginPalette(
         Tone.Bad -> bad
         Tone.Accent -> accent
         Tone.Info -> info
+        Tone.Water -> water
+        Tone.Gas -> gas
+        Tone.Heat -> heat
     }
 
     companion object {
@@ -67,11 +73,15 @@ data class PluginPalette(
             bad = Color(0xFFFFA092),
             accent = Color(0xFFF8BC98),
             info = Color(0xFFD3BBF7),
+            water = Color(0xFFB3EEFF),
+            gas = Color(0xFFFFA3D2),
+            heat = Color(0xFFFFB066),
             shadow = Shadow(Color(0x99000000), Offset(0f, 2f), 8f),
         )
 
         fun onPaper(c: KinColors) = PluginPalette(
-            text = c.ink, soft = c.inkSoft, faint = c.line, good = if (c.isDark) c.sage else PaperGreen, warn = c.warn, bad = c.danger, accent = c.accent, info = c.violet, shadow = null,
+            text = c.ink, soft = c.inkSoft, faint = c.line, good = if (c.isDark) c.sage else PaperGreen, warn = c.warn, bad = c.danger, accent = c.accent, info = c.violet,
+            water = c.water, gas = c.gas, heat = c.heat, shadow = null,
         )
     }
 }
