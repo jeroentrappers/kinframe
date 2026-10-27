@@ -1,0 +1,21 @@
+{
+  "@name": "Regenradar",
+  "@description": "Regen in den nächsten zwei Stunden dort, wo der Bilderrahmen steht, vom Wetterradar: wann er beginnt, wann er aufhört und wie stark. Blendet sich aus, solange es trocken bleibt.",
+  "@setting.source": "Quelle",
+  "@setting.source.help": "Das Radar von Buienradar deckt Belgien, die Niederlande und das Grenzgebiet ab; anderswo wird die Viertelstundenvorhersage von Open-Meteo verwendet.",
+  "@option.source.auto": "Automatisch",
+  "@option.source.buienradar": "Buienradar",
+  "@option.source.open_meteo": "Open-Meteo",
+  "@setting.show_dry": "Auch anzeigen, wenn es trocken bleibt",
+  "rain_from": "Regen ab {time}",
+  "dry_from": "Trocken ab {time}",
+  "rain_2h": "Regen, die nächsten 2 Std.",
+  "dry_2h": "Trocken, die nächsten 2 Std.",
+  "dry": "Trocken",
+  "next_2h": "Nächste 2 Stunden",
+  "source": "Quelle: {name}",
+  "no_location": "Der Bilderrahmen hat noch keinen Ort: Lege ihn in den Wettereinstellungen des Rahmens fest",
+  "rain_from_label": "Regen ab",
+  "dry_from_label": "Trocken ab",
+  "peak": "Höchstens"
+}
