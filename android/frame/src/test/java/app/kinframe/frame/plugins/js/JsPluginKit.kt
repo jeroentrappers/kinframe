@@ -31,7 +31,9 @@ class JsPluginKit(
     val logs = ArrayList<String>()
     var now: Long = Instant.parse("2026-10-25T10:00:00Z").toEpochMilli()
     var invalidations = 0
-    val format = PluginFormat(Locale.forLanguageTag(language), ZoneId.of("Europe/Brussels"))
+    val format = PluginFormat(Locale.forLanguageTag(language), ZoneId.of("Europe/Brussels"), words = app.kinframe.frame.plugins.FrameStrings.relativeWords(language))
+    /** The frame's place (its weather settings), handed to plugins with `permissions.location`. */
+    var location: Pair<Double, Double>? = null
 
     val ctx: PluginContext by lazy {
         PluginContext(
@@ -46,7 +48,7 @@ class JsPluginKit(
             },
             http = app.kinframe.frame.plugins.PluginHttp(OkHttpClient(), { false }, localOnly = true),
             format = { format }, t = { it }, log = { logs += it }, now = { now }, zone = { ZoneId.of("Europe/Brussels") },
-            invalidate = { invalidations++ },
+            invalidate = { invalidations++ }, location = { location },
         )
     }
 

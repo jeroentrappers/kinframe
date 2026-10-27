@@ -1,10 +1,15 @@
 package app.kinframe.core.plugin
 
+import java.text.DateFormat
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.abs
 
 /**
@@ -18,6 +23,8 @@ class PluginFormat(
     private val h24: Boolean = true,
     /** The frame's `locale.temperature_unit`: "c" or "f". */
     val temperatureUnit: String = "c",
+    /** The words for [day], [ago] and [until], from the frame's translations. */
+    private val words: RelativeWords = RelativeWords.ENGLISH,
 ) {
     private val nf = NumberFormat.getNumberInstance(locale).apply { isGroupingUsed = true }
 
@@ -84,7 +91,95 @@ class PluginFormat(
     fun time(epochMs: Long): String =
         Instant.ofEpochMilli(epochMs).atZone(zone).format(DateTimeFormatter.ofPattern(if (h24) "HH:mm" else "h:mm a", locale))
 
+    /**
+     * A day relative to [nowMs] in the frame's time zone: "Today", "Tomorrow", "Yesterday", the weekday within six days
+     * either way ("Thursday"), else a short date without the year ("27 Oct", "Oct 27", "10/27").
+     */
+    fun day(epochMs: Long, nowMs: Long): String {
+        val days = ChronoUnit.DAYS.between(localDate(nowMs), localDate(epochMs))
+        return when {
+            days == 0L -> words.today
+            days == 1L -> words.tomorrow
+            days == -1L -> words.yesterday
+            abs(days) <= 6 -> pattern("EEEE").format(Date(epochMs)).replaceFirstChar { it.titlecase(locale) }
+            else -> shortDate(epochMs)
+        }
+    }
+
+    /** How long ago: "just now", "8 min ago", "3 h ago", then [day] ("Yesterday", "Monday", "12 Oct"). */
+    fun ago(epochMs: Long, nowMs: Long): String {
+        val s = (nowMs - epochMs) / 1000
+        return when {
+            s < 60 -> words.justNow
+            s < 3600 -> words.minutesAgo.replace("{n}", num((s / 60).toDouble(), 0))
+            s < 86_400 && localDate(epochMs) == localDate(nowMs) || s < 6 * 3600 -> words.hoursAgo.replace("{n}", num((s / 3600).toDouble(), 0))
+            else -> day(epochMs, nowMs)
+        }
+    }
+
+    /** How long until: "now", "in 5 min", "in 3 h", then [day] ("Tomorrow", "Friday"). Minutes round up. */
+    fun until(epochMs: Long, nowMs: Long): String {
+        val s = (epochMs - nowMs) / 1000
+        return when {
+            s < 30 -> words.now
+            s < 3600 -> words.inMinutes.replace("{n}", num(((s + 59) / 60).coerceAtMost(59).toDouble(), 0))
+            s < 86_400 && localDate(epochMs) == localDate(nowMs) || s < 6 * 3600 -> words.inHours.replace("{n}", num(Math.round(s / 3600.0).toDouble(), 0))
+            else -> day(epochMs, nowMs)
+        }
+    }
+
+    private fun localDate(epochMs: Long) = Instant.ofEpochMilli(epochMs).atZone(zone).toLocalDate()
+
+    private fun pattern(p: String) = SimpleDateFormat(p, locale).apply { timeZone = TimeZone.getTimeZone(zone.id) }
+
+    /** The locale's medium date without its year: "27 okt.", "Oct 27", "27.10.", "10/27". */
+    private fun shortDate(epochMs: Long): String {
+        val medium = (DateFormat.getDateInstance(DateFormat.MEDIUM, locale) as? SimpleDateFormat)?.toPattern()
+        return pattern(medium?.let(::withoutYear) ?: "d MMM").format(Date(epochMs))
+    }
+
     companion object {
+        /** Drops the year and the separator next to it from a date pattern: "MMM d, y" → "MMM d", "y/MM/dd" → "MM/dd". */
+        internal fun withoutYear(p: String): String {
+            // Quoted literals ('de', 'г.') stay intact; years are runs of y (or u) outside quotes.
+            val out = StringBuilder()
+            var quoted = false
+            var i = 0
+            while (i < p.length) {
+                val ch = p[i]
+                if (ch == '\'') { quoted = !quoted; out.append(ch); i++; continue }
+                if (!quoted && (ch == 'y' || ch == 'u')) {
+                    // Remove the year and the separator before it (or after it, at the start), plus a following
+                    // year suffix such as "年" or " г.".
+                    while (i < p.length && (p[i] == 'y' || p[i] == 'u')) i++
+                    var j = i
+                    while (j < p.length && p[j] == ' ') j++
+                    if (j < p.length && p[j] == '\'') {
+                        val end = p.indexOf('\'', j + 1)
+                        if (end > 0 && end - j <= 6) { i = end + 1; if (i < p.length && p[i] == '.') i++ }
+                    }
+                    if (i < p.length && p[i] in "年년") i++
+                    if (out.isEmpty()) {
+                        while (i < p.length && p[i] in " ,./-") i++
+                    } else {
+                        trimSeparators(out)
+                        // A short literal glued to the year ("'de' y") goes with it.
+                        if (out.endsWith("'")) {
+                            val start = out.lastIndexOf("'", out.length - 2)
+                            if (start >= 0 && out.length - start <= 8) { out.setLength(start); trimSeparators(out) }
+                        }
+                    }
+                    continue
+                }
+                out.append(ch); i++
+            }
+            return out.toString().trim().ifEmpty { "d MMM" }
+        }
+
+        private fun trimSeparators(sb: StringBuilder) {
+            while (sb.isNotEmpty() && sb.last() in " ,/-") sb.setLength(sb.length - 1)
+        }
+
         const val NBSP = ' '
 
         /** Splits "1,2 kW" into "1,2" and "kW" for drawing (a unit is the trailing word after a (no-break) space). */
@@ -95,5 +190,28 @@ class PluginFormat(
             // Only short, non-numeric tails are units ("kW", "m³", "%"), not "12 34".
             return if (unit.length <= 4 && unit.none { it.isDigit() }) value.substring(0, i) to unit else value to null
         }
+    }
+}
+
+/**
+ * The words of [PluginFormat.day], [PluginFormat.ago] and [PluginFormat.until] in one language; `{n}` is the number.
+ * The frame builds them from its string resources (`plugin_rel_*`), so every plugin gets them in all its languages.
+ */
+data class RelativeWords(
+    val today: String,
+    val tomorrow: String,
+    val yesterday: String,
+    val justNow: String,
+    val now: String,
+    val minutesAgo: String,
+    val hoursAgo: String,
+    val inMinutes: String,
+    val inHours: String,
+) {
+    companion object {
+        val ENGLISH = RelativeWords(
+            today = "Today", tomorrow = "Tomorrow", yesterday = "Yesterday", justNow = "just now", now = "now",
+            minutesAgo = "{n} min ago", hoursAgo = "{n} h ago", inMinutes = "in {n} min", inHours = "in {n} h",
+        )
     }
 }

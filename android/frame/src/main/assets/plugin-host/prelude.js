@@ -59,6 +59,11 @@
       number: (v, decimals, unit) => K.fmt('number', +v, decimals | 0, unit == null ? null : String(unit)),
       duration: (seconds) => K.fmt('duration', +seconds),
       time: (epochMs) => K.fmt('time', +epochMs),
+      // Relative to now, in the frame's language and time zone: "Today", "Tomorrow", "Thursday", "27 Oct";
+      // "just now", "8 min ago", "3 h ago", then a day; "now", "in 5 min", "in 3 h", then a day.
+      day: (epochMs) => K.fmt('day', +epochMs),
+      ago: (epochMs) => K.fmt('ago', +epochMs),
+      until: (epochMs) => K.fmt('until', +epochMs),
     }),
     t(key, vars) { return K.t(String(key), vars ? JSON.stringify(vars) : null); },
     log(...args) { K.log(args.map(str).join(' ')); },
@@ -67,6 +72,9 @@
     // weekday (1 = Monday) } in the frame's time zone. QuickJS's Date only knows the device's zone.
     localTime(epochMs) { return JSON.parse(K.local_time(epochMs === undefined ? K.now() : +epochMs)); },
     get timezone() { return K.zone(); },
+    // { latitude, longitude } rounded to about a kilometre, from the frame's weather settings; null when the frame has
+    // no place or the plugin lacks `permissions.location`.
+    get location() { const v = K.location(); return v == null ? null : Object.freeze(JSON.parse(v)); },
     get language() { return K.language(); },
     get dataTime() { return dataTime; },
     set dataTime(v) { dataTime = v == null ? null : +v; K.data_time(dataTime == null ? -1 : dataTime); },

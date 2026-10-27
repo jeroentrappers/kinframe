@@ -78,4 +78,14 @@
     <string name="wx_station">Моята метеостанция</string>
     <string name="wx_station_sub">Вашата собствена метеостанция (PWS) чрез Weathercloud</string>
     <string name="wx_both_note">Когато и двете са включени, часовникът показва температурата от станцията с небето и дневните минимум и максимум от прогнозата.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Днес</string>
+    <string name="plugin_rel_tomorrow">Утре</string>
+    <string name="plugin_rel_yesterday">Вчера</string>
+    <string name="plugin_rel_just_now">току-що</string>
+    <string name="plugin_rel_now">сега</string>
+    <string name="plugin_rel_min_ago">преди {n} мин</string>
+    <string name="plugin_rel_h_ago">преди {n} ч</string>
+    <string name="plugin_rel_in_min">след {n} мин</string>
+    <string name="plugin_rel_in_h">след {n} ч</string>
 </resources>

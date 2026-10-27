@@ -78,4 +78,14 @@
     <string name="wx_station">สถานีตรวจอากาศของฉัน</string>
     <string name="wx_station_sub">สถานีตรวจอากาศของคุณเอง (PWS) ผ่าน Weathercloud</string>
     <string name="wx_both_note">เมื่อเปิดทั้งสองอย่าง นาฬิกาจะแสดงอุณหภูมิจากสถานีของคุณ พร้อมสภาพท้องฟ้าและอุณหภูมิต่ำสุดสูงสุดของวันจากพยากรณ์</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">วันนี้</string>
+    <string name="plugin_rel_tomorrow">พรุ่งนี้</string>
+    <string name="plugin_rel_yesterday">เมื่อวาน</string>
+    <string name="plugin_rel_just_now">เมื่อสักครู่</string>
+    <string name="plugin_rel_now">ตอนนี้</string>
+    <string name="plugin_rel_min_ago">{n} นาทีที่แล้ว</string>
+    <string name="plugin_rel_h_ago">{n} ชม. ที่แล้ว</string>
+    <string name="plugin_rel_in_min">ในอีก {n} นาที</string>
+    <string name="plugin_rel_in_h">ในอีก {n} ชม.</string>
 </resources>

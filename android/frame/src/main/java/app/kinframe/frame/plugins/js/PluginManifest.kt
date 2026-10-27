@@ -1,6 +1,7 @@
 package app.kinframe.frame.plugins.js
 
 import app.kinframe.frame.plugins.Slot
+import app.kinframe.frame.plugins.Visibility
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -22,15 +23,57 @@ data class PluginManifest(
     val refresh: Refresh,
     val permissions: Permissions,
     val settings: List<SettingSpec>,
+    /** The visibility a new instance starts with (`default_visibility`), e.g. *only when it changes* for a car. */
+    val defaultVisibility: Visibility? = null,
+    /** Named groups of setting values the owner can pick in the settings form (`presets`). */
+    val presets: List<Preset> = emptyList(),
 ) {
+    /**
+     * A preset: [settings] fills in several settings at once. A string value may hold `{key}` placeholders for other
+     * settings the owner types ([inputs]), e.g. the Kia/Hyundai entity names from a prefix:
+     * `"battery_level": "sensor.{prefix}_ev_battery_level"`.
+     */
+    data class Preset(val id: String, val label: String, val settings: JsonObject) {
+        val inputs: List<String> = settings.values.flatMap { v ->
+            when (v) {
+                is JsonPrimitive -> if (v.isString) PLACEHOLDER.findAll(v.content).map { it.groupValues[1] }.toList() else emptyList()
+                is JsonArray -> v.flatMap { e -> (e as? JsonPrimitive)?.takeIf { it.isString }?.let { p -> PLACEHOLDER.findAll(p.content).map { it.groupValues[1] }.toList() } ?: emptyList() }
+                else -> emptyList()
+            }
+        }.distinct()
+    }
+
+    fun preset(id: String): Preset? = presets.firstOrNull { it.id == id }
+
+    /**
+     * The owner's [values] with preset [id] applied: its settings set, placeholders filled from [values]. Null when an
+     * input the preset needs is empty (the form asks for it first).
+     */
+    fun applyPreset(id: String, values: JsonObject): JsonObject? {
+        val p = preset(id) ?: return null
+        val inputs = p.inputs.associateWith { k -> (values[k] as? JsonPrimitive)?.contentOrNull?.trim().orEmpty() }
+        if (inputs.values.any { it.isEmpty() }) return null
+        fun fill(s: String) = PLACEHOLDER.replace(s) { inputs.getValue(it.groupValues[1]) }
+        val out = LinkedHashMap<String, JsonElement>(values)
+        p.settings.forEach { (k, v) ->
+            out[k] = when (v) {
+                is JsonPrimitive -> if (v.isString) JsonPrimitive(fill(v.content)) else v
+                is JsonArray -> JsonArray(v.map { e -> (e as? JsonPrimitive)?.takeIf { it.isString }?.let { JsonPrimitive(fill(it.content)) } ?: e })
+                else -> v
+            }
+        }
+        return JsonObject(out)
+    }
+
     data class Refresh(val minSeconds: Int, val defaultSeconds: Int, val staleSeconds: Int?)
 
     /**
      * Each network entry names the setting that holds the address (`settings.base_url`) or a fixed https origin
      * (`https://api.example.org`). [actions]: the plugin may be asked to run its `action(ctx, id)` handler from a
-     * button the owner taps (§4.2); off by default so a widget can't look interactive without saying so.
+     * button the owner taps (§4.2); off by default so a widget can't look interactive without saying so. [location]:
+     * `ctx.location`, the frame's place (coarse), shown to the owner before they install the plugin.
      */
-    data class Permissions(val http: List<String>, val websocket: List<String>, val actions: Boolean)
+    data class Permissions(val http: List<String>, val websocket: List<String>, val actions: Boolean, val location: Boolean = false)
 
     data class SettingSpec(
         val key: String,
@@ -64,6 +107,9 @@ data class PluginManifest(
         const val LOCAL_MIN_SECONDS = 5
         private val ORIGIN = Regex("^https://[a-z0-9.-]+(:\\d{1,5})?$")
         private val json = Json { ignoreUnknownKeys = false }
+        private val PLACEHOLDER = Regex("\\{([a-z][a-z0-9_]{0,31})\\}")
+        const val MAX_PRESETS = 12
+        private val VISIBILITY = mapOf("always" to Visibility.Always, "on_change" to Visibility.OnChange, "on_tap" to Visibility.OnTap)
 
         fun parse(text: String): PluginManifest {
             val o = runCatching { json.parseToJsonElement(text) as JsonObject }.getOrElse { throw ManifestException("not a JSON object") }
@@ -125,6 +171,7 @@ data class PluginManifest(
                 v
             } ?: emptyList()
             val actions = (p["actions"] as? JsonPrimitive)?.booleanOrNull ?: false
+            val location = p["location"]?.let { (it as? JsonPrimitive)?.booleanOrNull ?: throw ManifestException("permissions.location must be true or false") } ?: false
             val http = net("http")
             // Every few seconds is for devices in the house (a P1 meter updates every second), never for an internet
             // API that every frame would then call that often.
@@ -132,10 +179,60 @@ data class PluginManifest(
                 throw ManifestException("refresh: min_seconds below $LOCAL_MIN_SECONDS only for plugins whose http goes to local_only settings")
             }
 
+            val defaultVisibility = str("default_visibility", required = false)?.let { v ->
+                VISIBILITY[v] ?: throw ManifestException("default_visibility must be one of ${VISIBILITY.keys.joinToString()}")
+            }
+            val presets = parsePresets(o["presets"], settings)
+
             return PluginManifest(
                 id = id, name = str("name")!!, version = version, api = api, description = str("description", required = false, max = 400),
-                slots = slots, refresh = Refresh(min, def, stale), permissions = Permissions(http, net("websocket"), actions), settings = settings,
+                slots = slots, refresh = Refresh(min, def, stale), permissions = Permissions(http, net("websocket"), actions, location), settings = settings,
+                defaultVisibility = defaultVisibility, presets = presets,
             )
+        }
+
+        private fun parsePresets(e: JsonElement?, settings: List<SettingSpec>): List<Preset> {
+            if (e == null) return emptyList()
+            val arr = e as? JsonArray ?: throw ManifestException("presets must be an array")
+            if (arr.size > MAX_PRESETS) throw ManifestException("at most $MAX_PRESETS presets")
+            val presets = arr.mapIndexed { i, pe ->
+                val p = pe as? JsonObject ?: throw ManifestException("presets[$i] must be an object")
+                fun s(key: String, max: Int): String {
+                    val v = (p[key] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: throw ManifestException("presets[$i].$key must be a string")
+                    if (v.isEmpty() || v.length > max) throw ManifestException("presets[$i].$key must be 1–$max characters")
+                    return v
+                }
+                val id = s("id", 32)
+                if (!KEY.matches(id)) throw ManifestException("presets[$i].id must be snake_case")
+                val label = s("label", 60)
+                val values = p["settings"] as? JsonObject ?: throw ManifestException("presets[$i].settings must be an object")
+                if (values.isEmpty()) throw ManifestException("presets[$i].settings is empty")
+                values.forEach { (k, v) ->
+                    val spec = settings.firstOrNull { it.key == k } ?: throw ManifestException("presets[$i]: no setting $k")
+                    if (spec.type == "secret") throw ManifestException("presets[$i]: $k is a secret")
+                    if (!fits(spec, v)) throw ManifestException("presets[$i]: $k doesn't fit a ${spec.type} setting")
+                }
+                Preset(id, label, values).also { pr ->
+                    pr.inputs.forEach { k ->
+                        val spec = settings.firstOrNull { it.key == k } ?: throw ManifestException("presets[$i]: placeholder {$k} names no setting")
+                        if (spec.type != "text") throw ManifestException("presets[$i]: placeholder {$k} must be a text setting")
+                        if (k in values) throw ManifestException("presets[$i]: {$k} is set by the preset itself")
+                    }
+                }
+            }
+            if (presets.map { it.id }.toSet().size != presets.size) throw ManifestException("duplicate preset ids")
+            return presets
+        }
+
+        private fun fits(spec: SettingSpec, v: JsonElement): Boolean {
+            fun str(e: JsonElement) = (e as? JsonPrimitive)?.takeIf { it.isString }?.content
+            return when (spec.type) {
+                "number" -> (v as? JsonPrimitive)?.takeIf { !it.isString }?.contentOrNull?.toDoubleOrNull() != null
+                "boolean" -> (v as? JsonPrimitive)?.takeIf { !it.isString }?.booleanOrNull != null
+                "choice" -> str(v)?.let { it in spec.options } ?: false
+                "entity" -> str(v) != null || (spec.multiple && v is JsonArray && v.all { str(it) != null })
+                else -> str(v) != null
+            }
         }
     }
 }

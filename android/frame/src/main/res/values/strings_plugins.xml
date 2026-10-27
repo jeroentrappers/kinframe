@@ -78,4 +78,14 @@
     <string name="wx_station">My weather station</string>
     <string name="wx_station_sub">Your own weather station (PWS) via Weathercloud</string>
     <string name="wx_both_note">With both on, the clock shows your station’s temperature with the forecast’s sky and today’s low and high.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Today</string>
+    <string name="plugin_rel_tomorrow">Tomorrow</string>
+    <string name="plugin_rel_yesterday">Yesterday</string>
+    <string name="plugin_rel_just_now">just now</string>
+    <string name="plugin_rel_now">now</string>
+    <string name="plugin_rel_min_ago">{n} min ago</string>
+    <string name="plugin_rel_h_ago">{n} h ago</string>
+    <string name="plugin_rel_in_min">in {n} min</string>
+    <string name="plugin_rel_in_h">in {n} h</string>
 </resources>

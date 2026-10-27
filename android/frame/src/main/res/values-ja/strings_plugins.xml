@@ -78,4 +78,14 @@
     <string name="wx_station">自分の気象ステーション</string>
     <string name="wx_station_sub">自分の気象ステーション（PWS）、Weathercloud 経由</string>
     <string name="wx_both_note">両方オンのときは、時計の横にステーションの気温と、予報の空模様・今日の最低／最高気温を表示します。</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">今日</string>
+    <string name="plugin_rel_tomorrow">明日</string>
+    <string name="plugin_rel_yesterday">昨日</string>
+    <string name="plugin_rel_just_now">たった今</string>
+    <string name="plugin_rel_now">今</string>
+    <string name="plugin_rel_min_ago">{n}分前</string>
+    <string name="plugin_rel_h_ago">{n}時間前</string>
+    <string name="plugin_rel_in_min">{n}分後</string>
+    <string name="plugin_rel_in_h">{n}時間後</string>
 </resources>

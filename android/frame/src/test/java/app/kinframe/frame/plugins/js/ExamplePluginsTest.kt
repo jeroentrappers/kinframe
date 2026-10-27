@@ -64,6 +64,16 @@ class ExamplePluginsTest {
         assertEquals("Redelijk · PM2.5 4${nbsp}µg/m³", g.caption)
     }
 
+    @Test fun airQualityWhereTheFrameIs() = runBlocking {
+        val show = "({ type: 'text', lines: [JSON.stringify(place(ctx))] })"
+        val frame = kit("community.air-quality", show, "affligem.json").apply { location = 50.9087 to 4.1065 }
+        assertEquals("""{"latitude":50.91,"longitude":4.11}""", (frame.view() as TextView).lines.first())
+        val typed = kit("community.air-quality", show, "affligem.json", mapOf("latitude" to 51.05, "longitude" to 3.72)).apply { location = 50.9 to 4.1 }
+        assertEquals("""{"latitude":51.05,"longitude":3.72}""", (typed.view() as TextView).lines.first())
+        val nowhere = kit("community.air-quality", show, "affligem.json")
+        assertEquals("null", (nowhere.view() as TextView).lines.first())
+    }
+
     @Test fun electricityPricesFitTheSparkline() = runBlocking {
         val k = kit("community.energy-prices", "view(FIXTURE, ctx).detail", "be-2026-10-25.json")
         k.now = Instant.ofEpochSecond(1792879200L + 900 * 10).toEpochMilli()
@@ -78,7 +88,7 @@ class ExamplePluginsTest {
         val k = kit("community.bin-calendar", "view(parseIcs(FIXTURE), ctx)", "afvalkalender.ics")
         k.now = Instant.parse("2026-10-25T18:00:00Z").toEpochMilli()
         val t = k.view() as TextView
-        assertEquals(listOf("Morgen", "PMD, Papier en karton"), t.lines)
+        assertEquals(listOf("Morgen", "PMD, Papier en karton"), t.lines) // ctx.format.day, the frame's own words
         k.now = Instant.parse("2026-10-28T18:00:00Z").toEpochMilli()
         assertEquals(NoneView, k.view())
     }

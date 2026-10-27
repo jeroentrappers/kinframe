@@ -78,4 +78,14 @@
     <string name="wx_station">Moja meteostanica</string>
     <string name="wx_station_sub">Vaša vlastita meteostanica (PWS) putem Weathercloud</string>
     <string name="wx_both_note">Kad su uključene obje, sat prikazuje temperaturu vaše stanice s nebom te dnevnim minimumom i maksimumom iz prognoze.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Danas</string>
+    <string name="plugin_rel_tomorrow">Sutra</string>
+    <string name="plugin_rel_yesterday">Jučer</string>
+    <string name="plugin_rel_just_now">upravo sada</string>
+    <string name="plugin_rel_now">sada</string>
+    <string name="plugin_rel_min_ago">prije {n} min</string>
+    <string name="plugin_rel_h_ago">prije {n} h</string>
+    <string name="plugin_rel_in_min">za {n} min</string>
+    <string name="plugin_rel_in_h">za {n} h</string>
 </resources>

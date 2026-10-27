@@ -7,9 +7,9 @@
   "license": "Apache-2.0",
   "description": "The European Air Quality Index and fine dust where you live, from Open-Meteo. An example plugin.",
   "refresh": { "min_seconds": 600, "default_seconds": 1800 },
-  "permissions": { "http": ["https://air-quality-api.open-meteo.com"] },
+  "permissions": { "http": ["https://air-quality-api.open-meteo.com"], "location": true },
   "settings": [
-    { "key": "latitude", "type": "number", "label": "Latitude", "required": true },
-    { "key": "longitude", "type": "number", "label": "Longitude", "required": true }
+    { "key": "latitude", "type": "number", "label": "Latitude", "help": "Leave empty to use the frame's own place." },
+    { "key": "longitude", "type": "number", "label": "Longitude", "help": "Leave empty to use the frame's own place." }
   ]
 }
