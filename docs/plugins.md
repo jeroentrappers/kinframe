@@ -570,12 +570,23 @@ other than `locales/`, no symlinks); at most 512 KB, unpacked at most 1 MB.
 
 ## 8. Tooling for authors
 
-- `npx @kinframe/plugin-kit new my-plugin`: scaffold with the manifest, a `main.js`, a README and fixtures.
-- `npx @kinframe/plugin-kit dev`: runs the plugin in the same QuickJS sandbox on the author's computer and renders
-  its views in a browser preview at frame size, in both corners, light and dark, with the real network or with
-  recorded fixtures. It also checks the permission rules, so "works in dev" means "works on the frame".
-- `npx @kinframe/plugin-kit push --frame <code>`: sends the plugin to a frame in developer mode.
-- TypeScript types for `ctx` and the views, so authors get autocompletion even in plain JS.
+The **plugin kit** lives in the community repository (`kit/`, run as `npm run kit -- <command>`; not on npm yet), with
+an author guide (`AUTHORING.md`), the review rules (`CONTRIBUTING.md`, `PUBLISHING.md`, a DCO sign-off on every
+commit) and the four seed plugins:
+
+- `kit new <id>`: scaffold with the manifest, a `main.js` split into update/render/detail, translations, a scenario
+  and a README.
+- `kit check`: the frame's manifest rules (ported from `PluginManifest.kt`), translation keys that name real settings,
+  forbidden patterns, size limits, and fixtures that look like secrets.
+- `kit test`: runs each scenario (settings, time, location, language, stubbed HTTP, a list of steps) in QuickJS with
+  this repository's `prelude.js` and libraries (vendored, with the commit they came from), the frame's permission
+  rules, and every view checked against the view schema and the parser's own rules; compares with snapshots.
+- `kit preview`: a local page that draws each scenario's views in the frame's forms (corner, band column and strip,
+  detail card), reloading on change. Close to the frame, not pixel-exact.
+- `kit build`, `kit index`, `kit sign`, `kit verify`: the bundles and the signed index of §7.1, used by CI.
+- TypeScript declarations for `ctx` and the views, for completion in plain JavaScript (`// @ts-check`).
+
+Not built yet: developer mode and `kit push` to a frame (§7).
 
 ## 9. The first plugins (maintained by the project, `kinframe.*`)
 
