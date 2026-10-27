@@ -154,6 +154,26 @@ ha-energy-flow/
     internet through them.
   - A plugin that needs an internet API instead (e.g. a public transport departure board) declares a fixed host:
     `"http": ["https://api.example.org"]`. The catalog shows that host to the owner before they install it.
+  - `"location": true` gives the plugin `ctx.location`, the frame's place from its weather settings, rounded to about
+    a kilometre (air quality, a local forecast). Without it `ctx.location` is null, whether or not the frame has a
+    place. The catalog shows it like a host.
+- **`default_visibility`** (optional): how a new instance starts, `always` (the default), `on_change` (for 30 s after
+  the view changes: a car whose charge only moves now and then) or `on_tap`. The owner can change it per instance.
+- **`presets`** (optional, at most 12): named groups of setting values the settings form offers, so the owner picks
+  "Kia / Hyundai" instead of typing six entity names. A string value may hold `{key}` placeholders for **text**
+  settings the owner fills in first; the preset can't set those itself, nor secrets, and every value must fit its
+  setting (a number for `number`, one of the `options` for `choice`, a list only for a `multiple` entity):
+
+  ```json
+  "presets": [
+    { "id": "kia", "label": "Kia / Hyundai (Kia Connect)",
+      "settings": { "battery_level": "sensor.{prefix}_ev_battery_level", "range": "sensor.{prefix}_ev_range" } }
+  ]
+  ```
+
+  On the frame, `PluginManifest.presets` and `applyPreset(id, values)` hold this for the settings form of step 3
+  (`applyPreset` returns null while a placeholder's setting is still empty); `newInstanceConfig` applies
+  `default_visibility` to a new instance.
 - **Setting types:** `text`, `number`, `boolean`, `choice`, `url`, `secret`, `entity` (Home Assistant entity, see
   6.1), `color`, `duration`. Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
   the form from this list; plugins never ship their own settings UI. Labels are translated through `locales/`.
@@ -219,10 +239,12 @@ export default {
 | `ws.connect(url, handlers)` | One WebSocket per instance, same rules. The frame reconnects with backoff and calls `onOpen` again. |
 | `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message), without an `update`. Throttled to `refresh.min_seconds`. |
 | `format.power/energy/percent/temperature/number/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". `temperature` follows the frame's °C/°F (optionally with decimals); `number(value, decimals, unit)` for anything else ("2,3 m/s"). |
+| `format.day/ago/until(epochMs)` | Relative to now, in the frame's language and time zone. `day`: "Today", "Tomorrow", "Yesterday", the weekday within six days either way ("Friday"), else a short date without the year ("12 Nov"). `ago`: "just now", "8 min ago", "3 h ago" (today, or within 6 hours), then `day`. `until`: "now", "in 5 min" (rounded up), "in 3 h", then `day`. |
 | `dataTime` | Optional: when the source measured what the view shows (epoch ms). For sources that update every few minutes; the frame greys the view when it is older than `manifest.refresh.stale_seconds`, even while fetching works. |
 | `t(key, vars)` | The plugin's own translated strings from `locales/`. |
 | `log(...)` | Goes to the frame's diagnostics, visible to the owner, never uploaded with secrets in it. |
 | `now()`, `timezone`, `language` | The frame's clock, time zone and language tag ("nl", "zh-CN"). |
+| `location` | `{ latitude, longitude }` of the frame's place (its weather settings), two decimals (about 1 km); null without `permissions.location` or when the frame has no place. Read-only. |
 | `localTime(epochMs?)` | The frame's calendar for an instant: `{ date: "2026-10-25", year, month, day, hour, minute, weekday }` (weekday 1 = Monday) in the frame's time zone. QuickJS's `Date` only knows the device's own zone. |
 
 There is no `fetch`, `XMLHttpRequest`, timers beyond what the runtime gives, file system, or access to the photos.
@@ -522,12 +544,17 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
 2. **Relative dates and times in `ctx.format`** ("tomorrow", "Mon 27 Oct", "8 h ago"). *Bin day and the car* each
    carry their own "Today/Tomorrow" and "Updated {n} min ago" strings in every language, which every plugin would
    repeat. Needs the frame's own translations (ICU's relative formatter needs API 24; the frame is API 23).
+   **Built:** `ctx.format.day/ago/until` (§3.2), with nine words per language in the frame's strings
+   (`plugin_rel_*`, all its languages) and weekday names and year-less short dates from the locale; bin day uses
+   it. The car (`kinframe.ha-ev`) still carries its own "Updated {n} min ago" until the shared Home Assistant
+   module lands.
 3. **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
    fixture is the day the clocks went back: 100), the sparkline takes 96, so the plugin averages down; and it can't
    mark "now" or the cheapest hour, which is the whole point of a price chart. A `bars` style with a highlighted index
    (and up to 100 points) would do.
 4. **The frame's location in `ctx`** (coarse, from the weather settings). *Air quality* asks the owner to type
-   latitude and longitude although the frame already knows its place for the forecast.
+   latitude and longitude although the frame already knows its place for the forecast. **Built:** `ctx.location`
+   behind `permissions.location` (§3.1), rounded to two decimals; air quality uses it, typed coordinates still win.
 5. **Shared code between plugins.** The Home Assistant connection (auth, `subscribe_entities`, the REST fallback) is
    copied into all three `kinframe.ha-*` plugins. Plugins are one module with no imports; the plugin kit (§8) should
    bundle authors' modules into one `main.js` (esbuild), so the frame stays import-free.
@@ -536,6 +563,8 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
    multiplexed) would also give the settings form its entity picker (§6.1) for free.
 7. **Manifest defaults for the owner's choices:** a default visibility (*only when it changes* suits the car, §9.3),
    and setting **presets** (the Kia/Hyundai entity names are filled in from a prefix by the plugin itself today).
+   **Built:** `default_visibility` and `presets` with `{key}` placeholders (§3.1), validated and available to the
+   settings form of step 3; a new instance takes the default visibility.
 8. **Typography for values:** raised small decimals ("12 €67", "21 °1", as on the HomeWizard Energy Display) read well
    from across a room. It could be automatic for any `value` with decimals, frame-wide, rather than a plugin option.
 9. **Colours per quantity** (electricity violet, water blue, gas pink, solar green, heat orange) instead of only
