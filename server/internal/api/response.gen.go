@@ -26,6 +26,9 @@ func (r Response) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) err
 func (r Response) VisitDeviceDecideJoinResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitDeviceGetChangesResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitDeviceGetCodeResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
 func (r Response) VisitDeviceGetStateResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitDeviceHeartbeatResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitDeviceImportResponse(w http.ResponseWriter) error           { return r.write(w) }

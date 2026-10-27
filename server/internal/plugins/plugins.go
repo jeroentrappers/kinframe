@@ -74,11 +74,34 @@ type Problem struct {
 	Path, Reason string
 }
 
+// Lookup finds the manifest an instance runs: plugin id and the instance's
+// `version` ("" or "builtin" when it names none); nil when the plugin is unknown.
+type Lookup func(id, version string) *Manifest
+
+// Lookup over this catalog alone (the frame's built-in plugins).
+func (c Catalog) Lookup(id, _ string) *Manifest { return c[id] }
+
+// ParseManifest reads a manifest object (from the registry index).
+func ParseManifest(m map[string]any) *Manifest {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil
+	}
+	var out Manifest
+	if json.Unmarshal(b, &out) != nil || out.ID == "" {
+		return nil
+	}
+	if len(out.Slots) == 0 {
+		out.Slots = []string{"top-left", "top-right"}
+	}
+	return &out
+}
+
 // Check validates instances (as stored: secrets sealed under `secrets_sealed`)
-// against the catalog. Secrets the manifest no longer has are dropped from
-// instances. A nil catalog (a frame app that doesn't report one) checks only
-// that instance ids are unique.
-func Check(instances []map[string]any, catalog Catalog) []Problem {
+// against the plugins the frame can run. Secrets the manifest no longer has are
+// dropped from instances. A nil lookup (a frame app that doesn't report a
+// catalog) checks only that instance ids are unique.
+func Check(instances []map[string]any, lookup Lookup) []Problem {
 	var out []Problem
 	seen := map[string]bool{}
 	for i, in := range instances {
@@ -88,11 +111,12 @@ func Check(instances []map[string]any, catalog Catalog) []Problem {
 			out = append(out, Problem{at + ".instance_id", "duplicate"})
 		}
 		seen[id] = true
-		if catalog == nil {
+		if lookup == nil {
 			continue
 		}
 		pid, _ := in["plugin_id"].(string)
-		m := catalog[pid]
+		ver, _ := in["version"].(string)
+		m := lookup(pid, ver)
 		if m == nil {
 			out = append(out, Problem{at + ".plugin_id", "not_on_frame"})
 			continue

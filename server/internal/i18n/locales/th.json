@@ -89,6 +89,7 @@
   "no poster": "ไม่มีภาพตัวอย่าง",
   "no such endpoint": "ไม่มี endpoint นี้",
   "no such release": "ไม่มีรุ่นนี้",
+  "plugin bundle not found": "ไม่พบแพ็กเกจปลั๊กอิน",
   "not available (yet)": "ยังไม่พร้อมใช้งาน",
   "only the creator or an owner/admin can revoke this invite": "เฉพาะผู้สร้าง เจ้าของ หรือผู้ดูแลเท่านั้นที่เพิกถอนคำเชิญนี้ได้",
   "only the creator or an owner/admin can revoke this link": "เฉพาะผู้สร้างลิงก์หรือเจ้าของ/ผู้ดูแลเท่านั้นที่เพิกถอนลิงก์นี้ได้",

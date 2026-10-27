@@ -1137,6 +1137,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/device/plugins/registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+         *     verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+         */
+        get: operations["deviceGetPluginRegistry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/plugins/bundles/{file}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`. */
+        get: operations["deviceGetPluginBundle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/device/plugins/status": {
         parameters: {
             query?: never;
@@ -2771,7 +2808,7 @@ export interface components {
                     [key: string]: string;
                 };
             };
-            /** @description Part of the frame app (not a downloaded bundle). */
+            /** @description Part of the frame app; false for a plugin from the community registry (its newest version). */
             builtin?: boolean;
         };
         PluginCatalog: {
@@ -2790,6 +2827,16 @@ export interface components {
              * @description When the last update succeeded.
              */
             updated_at?: string | null;
+            /** @description The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions). */
+            version?: string | null;
+            /** @description A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it. */
+            update?: {
+                version?: string;
+                /** @description The newer version's `permissions`. */
+                permissions?: {
+                    [key: string]: unknown;
+                };
+            } | null;
             /**
              * @description Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
              *     picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
@@ -2806,6 +2853,13 @@ export interface components {
             name: string;
             /** @example http://192.168.1.20 */
             url: string;
+        };
+        PluginRegistry: {
+            /** @description base64 of index.json, byte for byte as signed */
+            index: string;
+            /** @description base64 DER ECDSA P-256 SHA-256 signature over those bytes */
+            signature: string;
+            sequence: number;
         };
         /** @description What the frame knows about its plugins right now (`PUT /device/plugins/status`). */
         PluginStatusReport: {
@@ -5344,6 +5398,57 @@ export interface operations {
                 content?: never;
             };
             default: components["responses"]["Problem"];
+        };
+    };
+    deviceGetPluginRegistry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Signed index */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PluginRegistry"];
+                };
+            };
+            /** @description No registry */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceGetPluginBundle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bundle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": string;
+                };
+            };
+            404: components["responses"]["Problem"];
         };
     };
     devicePutPluginStatus: {

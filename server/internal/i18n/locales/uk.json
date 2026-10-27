@@ -89,6 +89,7 @@
   "no poster": "немає обкладинки",
   "no such endpoint": "такої кінцевої точки немає",
   "no such release": "такого випуску немає",
+  "plugin bundle not found": "пакет плагіна не знайдено",
   "not available (yet)": "(поки що) недоступно",
   "only the creator or an owner/admin can revoke this invite": "відкликати це запрошення може лише його автор, власник або адміністратор",
   "only the creator or an owner/admin can revoke this link": "відкликати це посилання може лише його автор або власник/адміністратор",

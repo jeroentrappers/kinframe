@@ -89,6 +89,7 @@
   "no poster": "nema naslovne slike",
   "no such endpoint": "ta krajnja točka ne postoji",
   "no such release": "to izdanje ne postoji",
+  "plugin bundle not found": "paket dodatka nije pronađen",
   "not available (yet)": "(još) nije dostupno",
   "only the creator or an owner/admin can revoke this invite": "ovu pozivnicu može opozvati samo njezin autor ili vlasnik/administrator",
   "only the creator or an owner/admin can revoke this link": "samo osoba koja je stvorila poveznicu ili vlasnik/administrator može je opozvati",

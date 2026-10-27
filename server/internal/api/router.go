@@ -60,6 +60,7 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))
 	mux.Handle("GET /v1/device/update", s.deviceAuth(http.HandlerFunc(s.deviceCheckUpdate)))
 	mux.Handle("GET /v1/device/update/apk/{versionCode}", s.deviceAuth(http.HandlerFunc(s.deviceGetUpdateApk)))
+	mux.Handle("GET /v1/device/plugins/bundles/{file}", s.deviceAuth(http.HandlerFunc(s.deviceGetPluginBundle)))
 	mux.Handle("GET /v1/frame-app/latest", validator.middleware(http.HandlerFunc(s.frameAppLatest)))
 	mux.HandleFunc("GET /v1/frame-app/apk/{versionCode}", s.deviceGetUpdateApk)
 	mux.Handle("GET /v1/device/invitations/{invitationId}/photo", s.deviceAuth(http.HandlerFunc(s.deviceGetInvitationPhoto)))

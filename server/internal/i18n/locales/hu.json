@@ -89,6 +89,7 @@
   "no poster": "nincs előnézeti kép",
   "no such endpoint": "nincs ilyen végpont",
   "no such release": "nincs ilyen kiadás",
+  "plugin bundle not found": "a bővítménycsomag nem található",
   "not available (yet)": "(még) nem érhető el",
   "only the creator or an owner/admin can revoke this invite": "ezt a meghívót csak a létrehozója vagy egy tulajdonos/adminisztrátor vonhatja vissza",
   "only the creator or an owner/admin can revoke this link": "ezt a linket csak a létrehozója vagy egy tulajdonos/adminisztrátor vonhatja vissza",

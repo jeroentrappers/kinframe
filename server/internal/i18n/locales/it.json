@@ -89,6 +89,7 @@
   "no poster": "nessuna immagine di anteprima",
   "no such endpoint": "endpoint inesistente",
   "no such release": "release inesistente",
+  "plugin bundle not found": "pacchetto del plugin non trovato",
   "not available (yet)": "non (ancora) disponibile",
   "only the creator or an owner/admin can revoke this invite": "solo chi l’ha creato o un proprietario/admin può revocare questo invito",
   "only the creator or an owner/admin can revoke this link": "solo chi ha creato il link o un proprietario/amministratore può revocarlo",

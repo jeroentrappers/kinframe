@@ -89,6 +89,7 @@
   "no poster": "ingen affischbild",
   "no such endpoint": "endpointen finns inte",
   "no such release": "versionen finns inte",
+  "plugin bundle not found": "tilläggspaket hittades inte",
   "not available (yet)": "inte tillgängligt (än)",
   "only the creator or an owner/admin can revoke this invite": "bara den som skapade inbjudan eller en ägare/admin kan återkalla den",
   "only the creator or an owner/admin can revoke this link": "bara den som skapade länken eller en ägare/administratör kan återkalla den",

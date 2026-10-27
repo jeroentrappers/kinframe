@@ -161,6 +161,22 @@ class DeviceApi(
         url(endpoint("device/plugins/status")).put(KinJson.encodeToString(JsonObject.serializer(), status).toRequestBody(JSON_MEDIA))
     }.expectOk()
 
+    /** `GET /device/plugins/registry`: the community registry's index as signed (docs/plugins.md §7.1); null when none. */
+    suspend fun pluginRegistry(): PluginRegistryDto? = authed { url(endpoint("device/plugins/registry")).get() }.use { r ->
+        if (r.code == 204) return@use null
+        if (!r.isSuccessful) r.throwForStatus()
+        KinJson.decodeFromString(PluginRegistryDto.serializer(), r.body.string())
+    }
+
+    /** `GET /device/plugins/bundles/{file}`: a bundle's bytes, at most [maxBytes]. */
+    suspend fun pluginBundle(file: String, maxBytes: Int): ByteArray = authed { url(endpoint("device/plugins/bundles/$file")).get() }.use { r ->
+        if (!r.isSuccessful) r.throwForStatus()
+        val source = r.body.source()
+        source.request(maxBytes + 1L)
+        if (source.buffer.size > maxBytes) throw java.io.IOException("plugin bundle larger than $maxBytes bytes")
+        source.buffer.readByteArray()
+    }
+
     suspend fun patchPlacement(placementId: String, patch: JsonObject) = authed {
         url(endpoint("device/placements/$placementId"))
             .patch(KinJson.encodeToString(JsonObject.serializer(), patch).toRequestBody(JSON_MEDIA))
@@ -347,3 +363,7 @@ private class FileBody(private val file: File, private val type: MediaType?, pri
         }
     }
 }
+
+/** The registry index (base64 of the signed bytes) and its signature. */
+@kotlinx.serialization.Serializable
+data class PluginRegistryDto(val index: String, val signature: String, val sequence: Long)

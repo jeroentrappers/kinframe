@@ -89,6 +89,7 @@
   "no poster": "ei esikatselukuvaa",
   "no such endpoint": "rajapintaa ei ole olemassa",
   "no such release": "versiota ei ole olemassa",
+  "plugin bundle not found": "liitännäispakettia ei löytynyt",
   "not available (yet)": "ei (vielä) saatavilla",
   "only the creator or an owner/admin can revoke this invite": "vain kutsun luoja tai omistaja/ylläpitäjä voi perua tämän kutsun",
   "only the creator or an owner/admin can revoke this link": "vain linkin luoja tai omistaja/ylläpitäjä voi perua sen",

@@ -80,6 +80,11 @@ type Config struct {
 	FrameReleasesDir      string // optional drop-in directory of APKs
 	FrameReleasesInterval time.Duration
 
+	// Community plugin registry mirror (docs/plugins.md §7). Empty URL disables it.
+	PluginRegistryURL      string // where index.json, its .sig and the bundles are
+	PluginRegistryKey      string // base64 SubjectPublicKeyInfo of the registry's ECDSA P-256 key
+	PluginRegistryInterval time.Duration
+
 	// Weather (Open-Meteo). Empty WeatherURL disables weather and /v1/geocode.
 	WeatherURL     string
 	GeocodingURL   string
@@ -184,6 +189,10 @@ func load(get func(string) string) (*Config, error) {
 		FrameReleasesToken:    env("KINFRAME_FRAME_RELEASES_GITHUB_TOKEN", ""),
 		FrameReleasesDir:      env("KINFRAME_FRAME_RELEASES_DIR", ""),
 		FrameReleasesInterval: time.Duration(intv("KINFRAME_FRAME_RELEASES_POLL_MINUTES", 30)) * time.Minute,
+
+		PluginRegistryURL:      env("KINFRAME_PLUGIN_REGISTRY_URL", DefaultPluginRegistryURL),
+		PluginRegistryKey:      env("KINFRAME_PLUGIN_REGISTRY_KEY", DefaultPluginRegistryKey),
+		PluginRegistryInterval: time.Duration(intv("KINFRAME_PLUGIN_REGISTRY_POLL_MINUTES", 60)) * time.Minute,
 	}
 	c.WeatherURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_URL", "https://api.open-meteo.com"), "/")
 	c.GeocodingURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com"), "/")
@@ -389,3 +398,10 @@ func devKey(dataDir string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+// The public community plugin registry and its signing key (public; the private key is only in the registry's CI
+// and the operator's vault). Self-hosters can point at their own registry with their own key.
+const (
+	DefaultPluginRegistryURL = "https://github.com/jeroentrappers/kinframe-plugins/releases/download/registry"
+	DefaultPluginRegistryKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt0Z/3gbK9h78oVewOrMVTasFYG4af/w1D3eXmNJk2gCHgw8rEsrammSJXnMu6VXjp0rkz87UXXVOzaAep6fB+Q=="
+)

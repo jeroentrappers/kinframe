@@ -24,6 +24,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
+	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
@@ -42,6 +43,7 @@ type App struct {
 	Handler http.Handler
 	// Releases mirrors frame app releases; nil when neither GitHub nor a directory is configured.
 	Releases *releases.Mirror
+	Registry *registry.Mirror
 	// Weather fetches Open-Meteo weather for frames; nil when disabled.
 	Weather *weather.Service
 	// Calendar syncs frames' calendars; nil when disabled.
@@ -119,6 +121,20 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			return nil, fmt.Errorf("frame releases: %w", err)
 		}
 	}
+	var reg *registry.Mirror
+	if cfg.PluginRegistryURL != "" {
+		key, err := registry.ParsePublicKey(cfg.PluginRegistryKey)
+		if err != nil {
+			return nil, fmt.Errorf("plugin registry key: %w", err)
+		}
+		reg = &registry.Mirror{
+			BaseURL: cfg.PluginRegistryURL, Key: key, Dir: filepath.Join(cfg.DataDir, "plugin-registry"),
+			HTTP: &http.Client{Timeout: 60 * time.Second}, Interval: cfg.PluginRegistryInterval, Log: log.With("component", "plugin-registry"),
+		}
+		if err := reg.Load(); err != nil {
+			log.Warn("plugin registry cache unreadable; it is fetched again", "err", err)
+		}
+	}
 	var wx *weather.Service
 	if cfg.WeatherURL != "" {
 		wx = &weather.Service{
@@ -145,7 +161,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal})
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg})
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +178,7 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
 	hub.OnNowShowing = srv.NowShowing
-	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal}, nil
+	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg}, nil
 }
 
 // RunBackground starts the media workers and the maintenance loop.
@@ -174,6 +190,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
+	}
+	if a.Registry != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Registry.Run(ctx) }()
 	}
 	if a.Weather != nil {
 		wg.Add(1)

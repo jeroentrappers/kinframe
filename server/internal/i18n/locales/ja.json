@@ -89,6 +89,7 @@
   "no poster": "サムネイルがありません",
   "no such endpoint": "そのエンドポイントは存在しません",
   "no such release": "そのリリースは存在しません",
+  "plugin bundle not found": "プラグインのパッケージが見つかりません",
   "not available (yet)": "（まだ）利用できません",
   "only the creator or an owner/admin can revoke this invite": "この招待を無効にできるのは、作成者またはオーナー・管理者だけです",
   "only the creator or an owner/admin can revoke this link": "このリンクを無効にできるのは、作成者またはオーナー・管理者だけです",

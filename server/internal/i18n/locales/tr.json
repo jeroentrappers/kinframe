@@ -89,6 +89,7 @@
   "no poster": "kapak resmi yok",
   "no such endpoint": "böyle bir uç nokta yok",
   "no such release": "böyle bir sürüm yok",
+  "plugin bundle not found": "eklenti paketi bulunamadı",
   "not available (yet)": "(henüz) kullanılamıyor",
   "only the creator or an owner/admin can revoke this invite": "bu daveti yalnızca oluşturan kişi veya bir sahip/yönetici iptal edebilir",
   "only the creator or an owner/admin can revoke this link": "bu bağlantıyı yalnızca oluşturan kişi ya da bir sahip/yönetici iptal edebilir",

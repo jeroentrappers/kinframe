@@ -1230,6 +1230,31 @@ paths:
         '204': { description: Stored }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/device/plugins/registry:
+    get:
+      tags: [device]
+      operationId: deviceGetPluginRegistry
+      security: [ { deviceAuth: [] } ]
+      description: |
+        The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+        verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+      responses:
+        '200': { description: Signed index, content: { application/json: { schema: { $ref: '#/components/schemas/PluginRegistry' } } } }
+        '204': { description: No registry }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/device/plugins/bundles/{file}:
+    get:
+      tags: [device]
+      operationId: deviceGetPluginBundle
+      security: [ { deviceAuth: [] } ]
+      description: A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`.
+      parameters:
+        - { name: file, in: path, required: true, schema: { type: string, pattern: '^[a-z0-9][a-z0-9.-]{0,80}-\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?\.zip$' } }
+      responses:
+        '200': { description: Bundle, content: { application/zip: { schema: { type: string, contentMediaType: application/zip } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /v1/device/plugins/status:
     put:
       tags: [device]
@@ -2917,7 +2942,7 @@ components:
           additionalProperties:
             type: object
             additionalProperties: { type: string }
-        builtin: { type: boolean, description: Part of the frame app (not a downloaded bundle). }
+        builtin: { type: boolean, description: 'Part of the frame app; false for a plugin from the community registry (its newest version).' }
 
     PluginCatalog:
       type: object
@@ -2934,6 +2959,13 @@ components:
         error: { type: [string, 'null'], maxLength: 300, description: The last error, null when the last update and render worked. }
         error_at: { type: [string, 'null'], format: date-time }
         updated_at: { type: [string, 'null'], format: date-time, description: When the last update succeeded. }
+        version: { type: [string, 'null'], description: 'The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).' }
+        update:
+          type: [object, 'null']
+          description: A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+          properties:
+            version: { type: string }
+            permissions: { type: object, additionalProperties: true, description: The newer version's `permissions`. }
         entities:
           type: array
           maxItems: 3000
@@ -2957,6 +2989,14 @@ components:
       properties:
         name: { type: string, maxLength: 100 }
         url: { type: string, maxLength: 200, examples: ['http://192.168.1.20'] }
+
+    PluginRegistry:
+      type: object
+      required: [index, signature, sequence]
+      properties:
+        index: { type: string, description: 'base64 of index.json, byte for byte as signed' }
+        signature: { type: string, description: 'base64 DER ECDSA P-256 SHA-256 signature over those bytes' }
+        sequence: { type: integer }
 
     PluginStatusReport:
       type: object

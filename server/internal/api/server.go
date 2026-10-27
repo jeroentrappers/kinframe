@@ -24,6 +24,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
+	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/secrets"
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
@@ -73,6 +74,7 @@ type Server struct {
 	weather  *weather.Service  // nil: weather disabled
 	calendar *calendar.Service // nil: calendars disabled
 	sealer   *calendar.Sealer
+	registry *registry.Mirror // nil: no community plugin registry
 	// pluginSealer keeps plugin secrets (settings plugins.instances[].secrets) encrypted at rest.
 	pluginSealer *secrets.Sealer
 
@@ -94,6 +96,7 @@ type Deps struct {
 	Releases *releases.Mirror  // frame app releases; nil disables self-update
 	Weather  *weather.Service  // nil disables weather and /v1/geocode
 	Calendar *calendar.Service // nil disables calendars
+	Registry *registry.Mirror  // community plugin registry; nil disables it
 	// Mailer sends the server's own email (shop); defaults to SMTP from the
 	// config, nil when SMTP is not configured.
 	Mailer shop.Mailer
@@ -137,6 +140,7 @@ func New(d Deps) (*Server, error) {
 	if d.Calendar != nil {
 		s.sealer = d.Calendar.Sealer
 	}
+	s.registry = d.Registry
 	ps, err := secrets.New(d.Config.SecretsKey, d.Config.SigningKey, "kinframe plugin secrets v1", "kinframe plugin secrets from signing key v1")
 	if err != nil {
 		return nil, fmt.Errorf("plugin secrets: %w", err)

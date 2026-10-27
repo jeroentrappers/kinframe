@@ -101,6 +101,9 @@ class PluginHost(
         reconcile()
     }
 
+    /** Tries again to start instances whose code wasn't there yet (a registry bundle just installed). */
+    fun retry() = reconcile()
+
     /** Instances run only while the slideshow is up and the screen is awake (they stop at night and during setup). */
     fun setActive(slideshowUp: Boolean, screenAwake: Boolean) {
         active = slideshowUp

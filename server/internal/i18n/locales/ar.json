@@ -89,6 +89,7 @@
   "no poster": "لا توجد صورة مصغّرة",
   "no such endpoint": "نقطة النهاية غير موجودة",
   "no such release": "الإصدار غير موجود",
+  "plugin bundle not found": "حزمة الإضافة غير موجودة",
   "not available (yet)": "غير متاح (بعد)",
   "only the creator or an owner/admin can revoke this invite": "لا يمكن إلغاء هذه الدعوة إلا لمنشئها أو للمالك أو لمشرف",
   "only the creator or an owner/admin can revoke this link": "لا يمكن إلغاء هذا الرابط إلا لمن أنشأه أو للمالك أو المشرف",

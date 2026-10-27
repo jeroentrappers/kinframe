@@ -89,6 +89,7 @@
   "no poster": "brak miniatury",
   "no such endpoint": "nie ma takiego endpointu",
   "no such release": "nie ma takiego wydania",
+  "plugin bundle not found": "nie znaleziono pakietu wtyczki",
   "not available (yet)": "(jeszcze) niedostępne",
   "only the creator or an owner/admin can revoke this invite": "tylko twórca lub właściciel/administrator może unieważnić to zaproszenie",
   "only the creator or an owner/admin can revoke this link": "ten link może unieważnić tylko jego twórca albo właściciel/administrator",

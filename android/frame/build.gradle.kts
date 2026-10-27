@@ -30,6 +30,8 @@ android {
         // -PemulatorAbis=x86_64 adds ABIs for local emulator runs (the instrumented Frameo import test); never in releases.
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") + emulatorAbis }
         buildConfigField("String", "DEFAULT_SERVER", "\"https://kinframe.appmire.be\"")
+        // The community plugin registry's public key (docs/plugins.md §7.1): only bundles in an index it signed run.
+        buildConfigField("String", "PLUGIN_REGISTRY_KEY", "\"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt0Z/3gbK9h78oVewOrMVTasFYG4af/w1D3eXmNJk2gCHgw8rEsrammSJXnMu6VXjp0rkz87UXXVOzaAep6fB+Q==\"")
         // Instrumented tests run on an emulator only (see FrameoDatabaseTest).
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
