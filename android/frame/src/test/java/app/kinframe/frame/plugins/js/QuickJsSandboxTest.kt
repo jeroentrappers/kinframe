@@ -26,8 +26,8 @@ class QuickJsSandboxTest {
     @Before fun up() { server = MockWebServer(); server.start() }
     @After fun down() { kits.forEach { it.close() }; server.close() }
 
-    private fun kit(js: String, baseUrl: String = "http://${server.hostName}:${server.port}", policy: LocalPolicy = JsPluginKit.LoopbackIsHome, manifest: String = JsPluginKit.MANIFEST) =
-        JsPluginKit(JsPluginKit.inline(js, manifest), JsonObject(mapOf("base_url" to JsonPrimitive(baseUrl))), policy = policy).also { kits += it }
+    private fun kit(js: String, baseUrl: String = "http://${server.hostName}:${server.port}", policy: LocalPolicy = JsPluginKit.LoopbackIsHome, manifest: String = JsPluginKit.MANIFEST, cpu: ThreadCpu = JsPluginKit.JvmThreadCpu) =
+        JsPluginKit(JsPluginKit.inline(js, manifest), JsonObject(mapOf("base_url" to JsonPrimitive(baseUrl))), policy = policy, cpu = cpu).also { kits += it }
 
     private fun text(v: Any?) = (JsPluginKit.parse(v as kotlinx.serialization.json.JsonElement) as TextView).lines.first()
 
@@ -82,9 +82,9 @@ class QuickJsSandboxTest {
     }
 
     @Test fun theFirstRenderAfterABootHasTheStartBudget() = runBlocking {
-        // A cold runtime on the frame: the first call starts threads and loads classes. 700 ms of wall time: under the
-        // 1000 ms start budget even on a fast machine, and well over 250 ms of CPU time even on a busy CI runner.
-        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 700) {} return { type: 'text', lines: ['warm'] }; } }""")
+        // A cold runtime on the frame: the first call starts threads and loads classes. The budget counts wall time here
+        // (WallClockCpu), so the rule is tested and not how much CPU a busy CI runner gives the loop.
+        val k = kit("""export default { async render(ctx) { const t = Date.now(); while (Date.now() - t < 500) {} return { type: 'text', lines: ['warm'] }; } }""", cpu = JsPluginKit.WallClockCpu)
         assertEquals("warm", text(k.render()))
         val why = failure(k)
         assertTrue(why, why.contains("took longer than 250 ms"))
@@ -92,9 +92,7 @@ class QuickJsSandboxTest {
 
     @Test fun overTheTargetIsLoggedNotInterrupted() = runBlocking {
         // 50 ms is the target; a garbage collection on a slow frame can take that long, so only 250 ms interrupts.
-        // The loop waits 150 ms of wall time: the budget counts CPU time, which on a busy machine is less than the wall
-        // time, and it must still be over 50 ms and under 250 ms.
-        val k = kit("""export default { render(ctx) { const t = Date.now(); while (Date.now() - t < 150) {} return { type: 'text', lines: ['ok'] }; } }""")
+        val k = kit("""export default { render(ctx) { const t = Date.now(); while (Date.now() - t < 120) {} return { type: 'text', lines: ['ok'] }; } }""", cpu = JsPluginKit.WallClockCpu)
         k.render()
         assertEquals("ok", text(k.render()))
         assertTrue(k.logs.toString(), k.logs.any { it.startsWith("render used") && it.endsWith("(target 50 ms)") })
