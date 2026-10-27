@@ -1,0 +1,21 @@
+{
+  "@name": "Radar de pluie",
+  "@description": "La pluie des deux prochaines heures là où se trouve le cadre, d'après le radar météo : quand elle commence, quand elle s'arrête et son intensité. Se masque tant qu'il fait sec.",
+  "@setting.source": "Source",
+  "@setting.source.help": "Le radar de Buienradar couvre la Belgique, les Pays-Bas et les régions frontalières ; ailleurs, la prévision au quart d'heure d'Open-Meteo est utilisée.",
+  "@option.source.auto": "Automatique",
+  "@option.source.buienradar": "Buienradar",
+  "@option.source.open_meteo": "Open-Meteo",
+  "@setting.show_dry": "Afficher aussi quand il reste sec",
+  "rain_from": "Pluie dès {time}",
+  "dry_from": "Sec dès {time}",
+  "rain_2h": "Pluie, les 2 prochaines h",
+  "dry_2h": "Sec, les 2 prochaines h",
+  "dry": "Sec",
+  "next_2h": "2 prochaines heures",
+  "source": "Source : {name}",
+  "no_location": "Le cadre n'a pas encore de lieu : réglez-le dans les paramètres météo du cadre",
+  "rain_from_label": "Pluie dès",
+  "dry_from_label": "Sec dès",
+  "peak": "Au plus"
+}

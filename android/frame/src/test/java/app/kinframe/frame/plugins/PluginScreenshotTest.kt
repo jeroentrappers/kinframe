@@ -105,6 +105,14 @@ class PluginScreenshotTest {
     private val band = PluginLayoutConfig(PluginLayoutMode.Band, BandSide.Right)
     private val overlay = PluginLayoutConfig(PluginLayoutMode.Overlay)
 
+    /** The rain radar in the band column and an overlay corner. */
+    @Test fun bandLandscapeRain() = stage(
+        "band_landscape_rain", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("sparkline-rain"), Slot.TopLeft), previewInstance("b", view("gauge-dial-using"), Slot.TopRight), seed = 3,
+    )
+
+    @Test fun overlayRain() = stage("overlay_rain", overlay, previewInstance("a", view("sparkline-rain"), Slot.TopRight), seed = 3)
+
     @Test fun bandLandscapePaper() = stage(
         "band_landscape_paper", band,
         previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),

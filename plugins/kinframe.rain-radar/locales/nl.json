@@ -1,0 +1,21 @@
+{
+  "@name": "Buienradar",
+  "@description": "Regen in de komende twee uur waar het kader staat, van de weerradar: wanneer het begint, wanneer het stopt en hoe hard. Verbergt zich zolang het droog blijft.",
+  "@setting.source": "Bron",
+  "@setting.source.help": "De radar van Buienradar dekt België, Nederland en de grensstreek; elders wordt de kwartierverwachting van Open-Meteo gebruikt.",
+  "@option.source.auto": "Automatisch",
+  "@option.source.buienradar": "Buienradar",
+  "@option.source.open_meteo": "Open-Meteo",
+  "@setting.show_dry": "Ook tonen als het droog blijft",
+  "rain_from": "Regen vanaf {time}",
+  "dry_from": "Droog vanaf {time}",
+  "rain_2h": "Regen, de komende 2 uur",
+  "dry_2h": "Droog, de komende 2 uur",
+  "dry": "Droog",
+  "next_2h": "Komende 2 uur",
+  "source": "Bron: {name}",
+  "no_location": "Het kader heeft nog geen plaats: stel die in bij de weerinstellingen van het kader",
+  "rain_from_label": "Regen vanaf",
+  "dry_from_label": "Droog vanaf",
+  "peak": "Hoogstens"
+}

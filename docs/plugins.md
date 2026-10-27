@@ -680,6 +680,21 @@ reports what it found in its plugin status:
   `ctx.format.time(ms, zone)`), from Android's own time zone data, so summer time is right everywhere. A template for
   plugins that only compute.
 
+### 9.9 Rain radar (`kinframe.rain-radar`)
+
+- **Data:** where the frame is (`permissions.location`), the next two hours. In and around Belgium and the Netherlands
+  Buienradar's radar nowcast (`gpsgadget.buienradar.nl/data/raintext`: 24 five-minute steps, a value 0–255 per step,
+  mm/h = 10^((value − 109) / 32)); elsewhere, or when the owner picks it, Open-Meteo's 15-minute forecast (a model, not
+  radar). Every 5 minutes, which is how often the radar updates. Buienradar's data is free for non-commercial use with
+  the source named; the detail card names it. Check its terms before a commercial deployment relies on it.
+- **View:** while it stays dry the widget hides itself (`none`), unless the owner wants "Dry" shown. Otherwise bars in
+  the `water` tone (a light shower doesn't fill the chart: the scale goes at least to 2 mm/h), and as the big value
+  the time it starts or stops ("Rain from" · 11:20, "Dry from" · 12:05), which also fits the band's narrow column;
+  when it rains for the whole two hours, how hard instead. Under 0.1 mm/h counts as dry (the radar's lowest steps are
+  noise). The detail card adds the sentence, the peak and the span the bars cover.
+- **Tests** on recorded answers (`fixtures/`, a shower off the Dutch coast and a dry Affligem) and a hand-written
+  downpour; checked once against both live services.
+
 ## 10. Changes to kinframe
 
 | Part | Work |

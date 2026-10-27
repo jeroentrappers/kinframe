@@ -86,5 +86,11 @@ class SplitScreenshotTest {
     @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
     fun portraitThree() = shot("portrait_three", BandSide.Left, three)
 
+    /** The rain radar while a shower comes: its bars beside the P1 dial. */
+    @Test fun landscapeRain() = shot("landscape_rain", BandSide.Right, listOf(
+        previewInstance("r", view("sparkline-rain"), Slot.TopLeft, name = "Rain"),
+        previewInstance("b", view("gauge-dial-using"), Slot.TopRight, name = "P1"),
+    ))
+
     @Test fun landscapeOnlyCalendar() = shot("landscape_only_calendar", BandSide.Right, emptyList())
 }
