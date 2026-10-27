@@ -346,7 +346,10 @@ private fun SubValues(sub: List<SubValue>, form: ViewForm, p: PluginPalette, m: 
 private fun Dial(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
     val target = g.percent.coerceIn(-100f, 100f) / 100f
     val sweep by animateFloatAsState(target, tween(700, easing = FastOutSlowInEasing), label = "dial")
-    val color = if (target < 0f) p.tone(g.negativeTone ?: tone) else if (tone == Tone.Neutral) p.text else p.tone(tone)
+    // The colour follows the arc as it moves, not the new value: from using to returning, the purple arc shrinks back
+    // to zero and only then grows green on the other side.
+    val positive = if (tone == Tone.Neutral) p.text else p.tone(tone)
+    val negative = p.tone(g.negativeTone ?: tone)
     val track = p.faint
     val tick = p.soft
     val (number, unit) = PluginFormat.splitUnit(g.label ?: "${g.percent.roundToInt()}%")
@@ -356,7 +359,7 @@ private fun Dial(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics,
         val arcSize = Size(size.width - sw, size.height - sw)
         drawArc(track, -90f - SPAN, 2 * SPAN, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
         val a = abs(sweep) * SPAN
-        if (a > 0.5f) drawArc(color, if (sweep < 0f) -90f - a else -90f, a, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
+        if (a > 0.5f) drawArc(if (sweep < 0f) negative else positive, if (sweep < 0f) -90f - a else -90f, a, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
         drawLine(tick, Offset(size.width / 2, 0f), Offset(size.width / 2, sw * 1.4f), strokeWidth = sw * 0.3f)
     }, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = m.gaugeStroke)) {
