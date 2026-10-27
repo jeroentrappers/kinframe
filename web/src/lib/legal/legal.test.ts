@@ -32,7 +32,7 @@ describe.each(['privacy', 'terms'] as LegalKind[])('%s texts', (kind) => {
 	it('exist in every language with the same sections, anchors and date', async () => {
 		const docs = await Promise.all(LEGAL_LANGUAGES.map((l) => loadLegal(kind, l)));
 		const [en, ...others] = docs.map((d) => d.doc);
-		expect(en!.updated).toBe('2026-10-23');
+		expect(en!.updated).toBe('2026-10-27');
 		for (const d of others) {
 			expect(d.updated).toBe(en!.updated);
 			expect(d.sections.map((s) => s.id)).toEqual(en!.sections.map((s) => s.id));

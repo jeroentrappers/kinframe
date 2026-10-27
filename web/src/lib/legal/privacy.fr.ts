@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Politique de confidentialité',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'kinframe permet aux familles d’envoyer des photos, des vidéos et des messages vers un cadre photo à la maison. Cette politique explique quelles données personnelles le service kinframe hébergé sur https://kinframe.appmire.be collecte, pourquoi, qui d’autre intervient, combien de temps elles sont conservées et comment les faire supprimer. Elle couvre le site web, les applications et cadres kinframe lorsqu’ils utilisent ce serveur, les pages de connexion sur auth.kinframe.appmire.be et la boutique de précommande.',
 		'En bref : nous utilisons vos données uniquement pour faire fonctionner le service. Pas de publicité, pas de mesure d’audience, pas de pistage, et rien n’est vendu ni partagé à des fins de marketing. Les serveurs se trouvent en Allemagne.'
@@ -29,6 +29,7 @@ const doc: LegalDoc = {
 						'Ce que vous envoyez : photos et vidéos, légendes, albums, la date de prise de vue, le nom de fichier d’origine, et le moment où chaque élément est arrivé sur un cadre et y a été affiché pour la première fois. Les données de localisation et d’appareil photo (EXIF/GPS) sont supprimées de chaque photo et vidéo que nous conservons ; seule la date de prise de vue est gardée.',
 						'Réactions et réponses : les cœurs et réponses rapides envoyés depuis un cadre.',
 						'Agendas : les liens d’agenda (ICS ou CalDAV) que vous ajoutez, avec un nom d’utilisateur et un mot de passe facultatifs, et les événements qui en sont récupérés ; les événements et invitations que vous envoyez à un cadre (titre, lieu, notes, une photo facultative, votre nom). Les liens et mots de passe sont conservés chiffrés.',
+						'Plug-ins (widgets sur le cadre) : les plug-ins qu’un cadre utilise et leurs réglages, comme l’adresse d’un appareil chez vous ou un jeton d’accès Home Assistant. Les jetons et autres secrets sont conservés chiffrés et envoyés uniquement au cadre. Pour les réglages des plug-ins dans les apps, le cadre signale aussi si chaque widget fonctionne, sa dernière erreur, les noms et adresses des appareils trouvés sur votre réseau domestique et, pour Home Assistant, les noms et unités de vos entités. Nous ne gardons que le dernier rapport.',
 						'Données du cadre : marque et modèle, taille de l’écran, versions d’Android et de l’application, langue, fuseau horaire, utilisation du stockage, nom et force du signal du réseau Wi-Fi, durée de fonctionnement et nombre de plantages récents. Nous ne gardons que le dernier rapport. Nous ne collectons ni numéro de série, ni adresse MAC, ni niveau de batterie, ni la position du cadre.',
 						'Notifications : si vous les activez, l’adresse de votre abonnement push (fournie par votre navigateur ou téléphone), un libellé d’appareil comme « Chrome sur Android » et votre langue.',
 						'Réservations dans la boutique : votre nom, votre adresse e-mail, votre pays, un code postal et une remarque facultatifs, votre langue, les articles réservés et le moment de votre consentement. Aucune donnée de paiement et aucune adresse IP.',
@@ -62,13 +63,14 @@ const doc: LegalDoc = {
 				{
 					list: [
 						'Hetzner Online GmbH (Allemagne) héberge notre serveur. La base de données et toutes les photos et vidéos sont stockées sur ce serveur en Allemagne, les médias dans un stockage objet que nous gérons nous-mêmes.',
-						'Open-Meteo (open-meteo.com) fournit les prévisions météo et la recherche de lieux. Notre serveur lui envoie les coordonnées de l’emplacement d’un cadre et les noms de lieux que vous recherchez, jamais votre identité. Votre appareil ne contacte jamais Open-Meteo.',
+						'Open-Meteo (open-meteo.com) fournit les prévisions météo et la recherche de lieux. Notre serveur lui envoie les coordonnées de l’emplacement d’un cadre et les noms de lieux que vous recherchez, jamais votre identité. Les cadres ne le contactent eux-mêmes que pour les plug-ins qui l’utilisent (voir « Plug-ins » ci-dessous).',
 						'Services push : pour délivrer une notification, notre serveur l’envoie au service push de votre navigateur ou téléphone (par exemple Google, Mozilla ou Apple pour les notifications web, ou le distributeur UnifiedPush que vous avez choisi sur Android). Les notifications contiennent de courts textes comme un nom de cadre, le nom d’une personne qui demande à rejoindre ou le titre d’un événement, mais jamais de photos ni de légendes. Les notifications web sont chiffrées de bout en bout ; les messages UnifiedPush sont envoyés en HTTPS à votre distributeur, qui peut les lire.',
 						'Fournisseurs de connexion : uniquement si vous choisissez de vous connecter avec Apple, Google, Microsoft, Facebook (Meta) ou GitHub. Ce fournisseur sait alors que vous utilisez kinframe, selon sa propre politique de confidentialité.',
 						'Hébergeurs d’agenda : si vous ajoutez un lien d’agenda, notre serveur le récupère à l’adresse indiquée (par exemple Google Agenda ou iCloud) avec les identifiants que vous avez saisis.',
+						'Plug-ins : un widget ajouté par le propriétaire du cadre ne peut contacter que ce qu’il indique avant d’être ajouté. Les widgets pour des appareils chez vous (HomeWizard, Home Assistant) restent sur votre réseau domestique : rien de ce qu’ils lisent n’en sort. D’autres contactent directement depuis le cadre un service sur Internet : la station météo lit la page publique de votre station sur Weathercloud (weathercloud.net), le radar de pluie interroge Buienradar (buienradar.nl) ou Open-Meteo sur la pluie à l’emplacement du cadre, arrondi à environ un kilomètre, et les plug-ins de la communauté contactent les hôtes qu’ils indiquent. Ces services voient l’adresse Internet du cadre et ce que le widget demande, jamais qui vous êtes, et le traitent selon leur propre politique de confidentialité. Les plug-ins de la communauté sont écrits par d’autres personnes et publiés dans un registre public ; nous les vérifions avant publication et pouvons les retirer.',
 						'Google Cast : uniquement si vous choisissez d’afficher un diaporama sur un Chromecast, votre navigateur charge le logiciel Cast de Google et le Chromecast charge les photos depuis notre serveur.',
 						'E-mail : les codes de connexion et les e-mails de la boutique passent par le propre serveur de messagerie d’Appmire. Ils ne contiennent aucun pixel de suivi.',
-						'GitHub : notre serveur télécharge les mises à jour des applications kinframe depuis GitHub Releases. Aucune donnée personnelle n’est envoyée ; les cadres téléchargent les mises à jour uniquement depuis notre serveur.',
+						'GitHub : notre serveur télécharge les mises à jour des applications kinframe et le registre des plug-ins de la communauté depuis GitHub Releases. Aucune donnée personnelle n’est envoyée ; les cadres téléchargent les mises à jour uniquement depuis notre serveur.',
 						'Boutique : les réservations sont traitées par le vendeur indiqué sur la page de la boutique et dans l’e-mail de confirmation, qui les utilise uniquement pour cette réservation.'
 					]
 				},
@@ -93,6 +95,7 @@ const doc: LegalDoc = {
 						'Téléversements : le fichier que vous envoyez est supprimé dès qu’il a été traité ; les envois inachevés après 24 heures.',
 						'Données du cadre : seul le dernier rapport est conservé ; chaque nouveau rapport remplace le précédent.',
 						'Abonnements push : jusqu’à ce que vous désactiviez les notifications, vous déconnectiez de l’application ou que le service push signale que l’abonnement a expiré.',
+						'Plug-ins : leurs réglages jusqu’à ce que le propriétaire supprime le widget ou le cadre ; le rapport des plug-ins du cadre : uniquement le dernier.',
 						'Agendas : jusqu’à ce que vous supprimiez l’agenda ou le cadre.',
 						'Réservations dans la boutique : supprimées automatiquement un an après la dernière modification, ou 30 jours après votre annulation.',
 						'Journaux : en fonctionnement normal, le serveur kinframe n’enregistre ni les requêtes ni les adresses IP. Notre serveur web conserve des journaux d’accès (adresse IP, heure, adresse demandée, navigateur) pendant 14 jours au maximum, pour la sécurité. Le service de connexion garde une trace des connexions (heure, adresse IP et navigateur) pour protéger votre compte.'

@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Conditions d’utilisation',
-	updated: '2026-10-23',
+	updated: '2026-10-27',
 	intro: [
 		'Ces conditions s’appliquent au service kinframe hébergé sur https://kinframe.appmire.be : le site web, les pages de connexion, et les applications et cadres kinframe lorsqu’ils utilisent ce serveur. En créant un compte ou en utilisant le service, vous les acceptez. Lisez aussi notre politique de confidentialité sur https://kinframe.appmire.be/privacy.'
 	],
@@ -42,6 +42,15 @@ const doc: LegalDoc = {
 			body: [
 				'Vous conservez tous les droits sur les photos, vidéos, légendes et autres contenus que vous envoyez. Vous accordez à Appmire uniquement l’autorisation nécessaire pour faire fonctionner le service : stocker votre contenu, en faire des copies à la bonne taille pour chaque cadre, et le montrer aux cadres et personnes à qui vous l’envoyez ou avec qui vous le partagez. Cette autorisation prend fin lorsque votre contenu est supprimé, sauf pour les copies conservées pendant une durée limitée dans les sauvegardes.',
 				'N’envoyez que des contenus que vous avez le droit de partager, qui sont légaux et que les personnes représentées accepteraient. Soyez particulièrement attentif aux photos d’enfants et de personnes qui ne peuvent pas facilement s’y opposer.'
+			]
+		},
+		{
+			id: 'plugins',
+			title: 'Plug-ins',
+			body: [
+				'Les propriétaires et administrateurs d’un cadre peuvent ajouter des plug-ins : de petits widgets qui affichent des informations provenant d’appareils de la maison ou de services sur Internet. Les plug-ins intégrés font partie de kinframe. Les plug-ins de la communauté sont créés par d’autres personnes et publiés dans le registre public https://github.com/jeroentrappers/kinframe-plugins sous leurs propres licences libres.',
+				'Nous vérifions chaque plug-in de la communauté avant sa publication et pouvons le retirer à tout moment, mais nous ne garantissons pas qu’un plug-in, ou le service qu’il utilise, fonctionne, soit exact ou reste disponible. Ce qu’affiche un plug-in (consommation d’énergie, météo, pluie, départs, prix) n’est donné qu’à titre pratique : ne vous y fiez pas pour des décisions de sécurité, de santé ou d’argent.',
+				'Un plug-in qui utilise un service sur Internet fait de vous un utilisateur de ce service, selon ses propres conditions. N’indiquez que des jetons et mots de passe de comptes et d’appareils qui sont à vous.',
 			]
 		},
 		{
