@@ -158,7 +158,8 @@ func (s *Server) syncStations(ctx context.Context, tx *store.Tx, frameID uuid.UU
 			continue
 		}
 		values, _ := in["settings"].(map[string]any)
-		if src, _ := values["source"].(string); src != stationSource {
+		// Left out while it has the manifest's default, "upload" (the forms don't store defaults).
+		if src, _ := values["source"].(string); src != "" && src != stationSource {
 			continue
 		}
 		id, _ := values["station_id"].(string)

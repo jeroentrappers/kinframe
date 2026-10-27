@@ -51,10 +51,11 @@ func TestWeatherStationUploads(t *testing.T) {
 	if code, body := upload("IAFFLI3", "k3y"); code != 401 || !strings.HasPrefix(body, "INVALIDPASSWORDID") {
 		t.Fatalf("unregistered: %d %q", code, body)
 	}
-	// The frame's weather-station instance registers it (ID in the settings, key as a secret).
+	// The frame's weather-station instance registers it (ID in the settings, key as a secret). The apps leave out
+	// `source` while it has its default, "upload", as the form did here.
 	settings := map[string]any{"plugins": map[string]any{"instances": []any{map[string]any{
 		"instance_id": "builtin-weather-station", "plugin_id": "kinframe.weather-station", "enabled": true,
-		"settings": map[string]any{"source": "upload", "station_id": "IAFFLI3"}, "secrets": map[string]any{"station_key": "k3y"}}}}}
+		"settings": map[string]any{"station_id": "IAFFLI3"}, "secrets": map[string]any{"station_key": "k3y"}}}}}
 	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token, body: settings, header: map[string]string{"If-Match": `"1"`}}, 200)
 
 	if code, body := upload("IAFFLI3", "k3y"); code != 200 || body != "success\n" {
