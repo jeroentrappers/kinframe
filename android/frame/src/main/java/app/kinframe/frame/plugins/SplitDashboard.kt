@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,9 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -30,8 +34,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.kinframe.core.design.Kin
+import app.kinframe.core.design.KinPalettes
+import app.kinframe.core.design.LocalKinColors
 import app.kinframe.core.plugin.ui.PluginPalette
-import app.kinframe.core.plugin.ui.ScaleToFit
 import app.kinframe.core.plugin.ui.ViewForm
 import app.kinframe.frame.calendar.CalEvent
 import app.kinframe.frame.calendar.CalendarData
@@ -51,9 +56,10 @@ const val DASHBOARD_HOURS = 48
 const val DASHBOARD_WIDGETS = 4
 
 /**
- * The split layout's dashboard (docs/plugins.md §2.2): the clock, date and weather on top, then the plugin widgets and
- * the next 48 hours of the calendar, side by side in a wide cell and stacked in a tall one. On paper, as a cell of the
- * same grid as the two photos. Without a calendar the widgets take the whole body, and the other way round.
+ * The split layout's dashboard (docs/plugins.md §2.2): the clock and the weather on top, the plugin widgets in one
+ * strip below them, and the next 48 hours of the calendar (today and the next day side by side in a wide cell). Dark,
+ * a shade lighter than the grid between the photos, so it sits with them instead of glaring beside them, and stays
+ * calm at night. Without a calendar the widgets take the room, and the other way round.
  */
 @Composable
 fun SplitDashboard(
@@ -72,30 +78,24 @@ fun SplitDashboard(
     onWeather: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val palette = PluginPalette.onPaper(Kin.colors)
-    val widgets = states.filter { it.shown && (it.view != null || it.status == InstanceStatus.Unavailable) }
-        .sortedWith(compareBy({ it.config.slot.ordinal }, { it.config.order })).take(DASHBOARD_WIDGETS)
-    BoxWithConstraints(modifier.clip(RoundedCornerShape(14.dp)).background(Kin.colors.paper)) {
-        val wide = maxWidth > maxHeight * 1.15f
-        Column(Modifier.fillMaxSize().padding(horizontal = 22.dp, vertical = 18.dp)) {
-            DashboardHeader(clock, date, weather, nowMs, unit, palette, onClock, onWeather)
-            Box(Modifier.padding(vertical = 12.dp).fillMaxWidth().height(1.dp).background(Kin.colors.line))
-            val agenda = @Composable { m: Modifier ->
-                UpcomingAgenda(calendar, weather, nowMs, zone, h24, unit, hours = DASHBOARD_HOURS, maxEvents = if (wide) 5 else 6, onEvent = onEvent, modifier = m)
-            }
-            val showAgenda = calendar != null
-            when {
-                widgets.isEmpty() && showAgenda -> agenda(Modifier.weight(1f).fillMaxWidth())
-                !showAgenda -> Widgets(widgets, palette, onWidget, Modifier.weight(1f).fillMaxWidth(), columns = if (wide) 2 else 1)
-                wide -> Row(Modifier.weight(1f).fillMaxWidth()) {
-                    Widgets(widgets, palette, onWidget, Modifier.weight(1f).fillMaxHeight(), columns = 1)
-                    Box(Modifier.padding(horizontal = 16.dp).width(1.dp).fillMaxHeight().background(Kin.colors.line))
-                    agenda(Modifier.weight(1.1f).fillMaxHeight())
+    CompositionLocalProvider(LocalKinColors provides KinPalettes.dark) {
+        val palette = PluginPalette.onPaper(Kin.colors)
+        val widgets = states.filter { it.shown && (it.view != null || it.status == InstanceStatus.Unavailable) }
+            .sortedWith(compareBy({ it.config.slot.ordinal }, { it.config.order })).take(DASHBOARD_WIDGETS)
+        BoxWithConstraints(modifier.clip(RoundedCornerShape(14.dp)).background(Kin.colors.surface)) {
+            val wide = maxWidth > maxHeight * 1.15f
+            Column(Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 18.dp)) {
+                DashboardHeader(clock, date, weather, nowMs, unit, palette, onClock, onWeather)
+                if (widgets.isNotEmpty()) {
+                    Spacer(Modifier.height(14.dp))
+                    WidgetStrip(widgets, palette, onWidget)
                 }
-                else -> Column(Modifier.weight(1f).fillMaxWidth()) {
-                    Widgets(widgets, palette, onWidget, Modifier.fillMaxWidth(), columns = 1)
-                    Box(Modifier.padding(vertical = 12.dp).fillMaxWidth().height(1.dp).background(Kin.colors.line))
-                    agenda(Modifier.weight(1f).fillMaxWidth())
+                if (calendar != null) {
+                    Box(Modifier.padding(vertical = 14.dp).fillMaxWidth().height(1.dp).background(Kin.colors.line))
+                    UpcomingAgenda(
+                        calendar, weather, nowMs, zone, h24, unit, hours = DASHBOARD_HOURS, maxEvents = 8, onEvent = onEvent,
+                        modifier = Modifier.weight(1f).fillMaxWidth(), columns = if (wide) 2 else 1,
+                    )
                 }
             }
         }
@@ -110,8 +110,8 @@ private fun DashboardHeader(
         Column(
             Modifier.weight(1f).clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button, onClick = onClock),
         ) {
-            if (clock != null) Text(clock, style = Kin.type.headline.copy(fontSize = 40.sp, lineHeight = 44.sp, fontWeight = FontWeight.Normal), color = palette.text, maxLines = 1)
-            if (date != null) Text(date, style = Kin.type.caption.copy(fontSize = 15.sp), color = palette.soft, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (clock != null) Text(clock, style = Kin.type.headline.copy(fontSize = 52.sp, lineHeight = 56.sp, fontWeight = FontWeight.Light), color = palette.text, maxLines = 1)
+            if (date != null) Text(date, style = Kin.type.body.copy(fontSize = 17.sp), color = palette.soft, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         val now = weather?.nowConditions(nowMs)
         if (now != null) {
@@ -119,38 +119,63 @@ private fun DashboardHeader(
                 Modifier.clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button, onClick = onWeather),
                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                WeatherIcon(WeatherCodes.glyph(now.code, now.isDay), 44.dp, onPaper = true)
-                Text(Units.tempLabel(now.tempC, unit), style = Kin.type.title.copy(fontWeight = FontWeight.Light), color = palette.text)
+                WeatherIcon(WeatherCodes.glyph(now.code, now.isDay), 52.dp, onPaper = false)
+                Text(Units.tempLabel(now.tempC, unit), style = Kin.type.headline.copy(fontSize = 36.sp, fontWeight = FontWeight.Light), color = palette.text)
             }
         }
     }
 }
 
-/** The widgets in their corner form, scaled down when they don't fit their share of the body. */
+/**
+ * The widgets in their strip form (the band's horizontal form: compact, legible from across the room), each at its
+ * own size, flowing into rows like words: a widget that doesn't fit beside the previous one starts a new row. Only a
+ * widget wider than the whole dashboard is scaled down, and on its own.
+ */
 @Composable
-private fun Widgets(widgets: List<InstanceState>, palette: PluginPalette, onTap: (InstanceState) -> Unit, modifier: Modifier, columns: Int) {
-    BoxWithConstraints(modifier) {
-        val rows = widgets.chunked(columns)
-        val cellW = maxWidth / columns
-        val cellH = if (rows.isEmpty()) maxHeight else (maxHeight - 10.dp * (rows.size - 1)) / rows.size
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            rows.forEach { row ->
-                Row {
-                    row.forEach { s ->
-                        androidx.compose.runtime.key(s.config.instanceId) {
-                            Box(
-                                Modifier.width(cellW)
-                                    .clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button) { onTap(s) },
-                            ) {
-                                ScaleToFit(cellW, cellH) { InstanceContent(s, ViewForm.Corner, palette) }
-                            }
-                        }
+private fun WidgetStrip(widgets: List<InstanceState>, palette: PluginPalette, onTap: (InstanceState) -> Unit) {
+    Layout(
+        content = {
+            widgets.forEach { s ->
+                androidx.compose.runtime.key(s.config.instanceId) {
+                    Box(Modifier.clickable(remember { MutableInteractionSource() }, indication = null, role = Role.Button) { onTap(s) }) {
+                        InstanceContent(s, ViewForm.Strip, palette)
                     }
                 }
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+    ) { measurables, constraints ->
+        val gap = 36.dp.roundToPx()
+        val rowGap = 12.dp.roundToPx()
+        val maxW = constraints.maxWidth
+        val items = measurables.map { it.measure(Constraints(maxHeight = STRIP_HEIGHT.roundToPx())) }
+        // Where each widget goes; one wider than the dashboard gets a row of its own, scaled to fit.
+        data class Placed(val i: Int, val x: Int, val y: Int, val scale: Float)
+        val placed = ArrayList<Placed>()
+        var x = 0
+        var y = 0
+        var rowH = 0
+        items.forEachIndexed { i, p ->
+            val scale = if (p.width > maxW) maxW.toFloat() / p.width else 1f
+            val w = (p.width * scale).toInt()
+            val h = (p.height * scale).toInt()
+            if (x > 0 && x + gap + w > maxW) { y += rowH + rowGap; x = 0; rowH = 0 }
+            val left = if (x == 0) 0 else x + gap
+            placed += Placed(i, left, y, scale)
+            x = left + w
+            rowH = maxOf(rowH, h)
+        }
+        layout(maxW, if (items.isEmpty()) 0 else y + rowH) {
+            placed.forEach { (i, px, py, scale) ->
+                if (scale == 1f) items[i].place(px, py)
+                else items[i].placeWithLayer(px, py) { scaleX = scale; scaleY = scale; transformOrigin = TransformOrigin(0f, 0f) }
             }
         }
     }
 }
+
+/** A widget row's height: the band strip's (§2.1). */
+private val STRIP_HEIGHT = 76.dp
 
 /**
  * Places the dashboard in its [cell] of a [screenW] × [screenH] screen, in the same grid as the photo tiles

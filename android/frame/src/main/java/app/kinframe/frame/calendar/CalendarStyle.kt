@@ -23,9 +23,11 @@ import java.util.Locale
  */
 object CalendarPalette {
     private val surface = Color(0xFFFFFDFA)
+    /** The dark theme's surface ([app.kinframe.core.design.KinPalettes.dark]), for chips on the split dashboard. */
+    private val darkSurface = Color(0xFF231E1A)
     private val cache = HashMap<String, Swatch>()
 
-    data class Swatch(val strong: Color, val fill: Color, val fillPast: Color, val onDark: Color)
+    data class Swatch(val strong: Color, val fill: Color, val fillPast: Color, val onDark: Color, val fillOnDark: Color = fill)
 
     fun of(key: String?): Swatch = synchronized(cache) {
         cache.getOrPut(key ?: "") {
@@ -36,6 +38,7 @@ object CalendarPalette {
                 fill = strong.copy(alpha = 0.16f).compositeOver(surface),
                 fillPast = strong.copy(alpha = 0.07f).compositeOver(surface),
                 onDark = Color(s.dark),
+                fillOnDark = Color(s.dark).copy(alpha = 0.18f).compositeOver(darkSurface),
             )
         }
     }

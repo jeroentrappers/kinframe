@@ -115,28 +115,39 @@ fun UpcomingAgenda(
     maxEvents: Int,
     onEvent: (CalEvent) -> Unit,
     modifier: Modifier = Modifier,
+    /** 2: today in one column, the following days in another (a wide dashboard). */
+    columns: Int = 1,
 ) {
     val today = Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate()
     val cal = data ?: CalendarData.EMPTY
     val minute = nowMs / 60_000
     val days = remember(cal, today, minute, hours, maxEvents) { CalendarLayout.within(cal, today, nowMs, hours, maxEvents) }
     val env = remember(today, minute, h24, unit, weather) { CalendarEnv(today, nowMs, h24, unit, fadePast = false, weekNumbers = false, forecast = forecastByDate(weather, nowMs)) }
-    // One child per heading and per event, so whatever doesn't fit is left out whole.
-    val headings = ArrayList<Boolean>()
-    FitColumn(modifier, spacing = 6.dp, headings = headings) {
-        days.forEachIndexed { i, day ->
-            val isToday = i == 0 && day.date == today
-            headings += true
-            DayHeading(day, isToday, env, Modifier.padding(top = if (i == 0) 0.dp else 8.dp))
-            if (day.isEmpty) {
-                headings += false
-                NothingText(isToday)
-            }
-            day.all.forEach { e ->
-                headings += false
-                SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) }
+    @Composable
+    fun list(part: List<CalendarLayout.AgendaDay>, m: Modifier) {
+        // One child per heading and per event, so whatever doesn't fit is left out whole.
+        val headings = ArrayList<Boolean>()
+        FitColumn(m, spacing = 6.dp, headings = headings) {
+            part.forEachIndexed { i, day ->
+                val isToday = day.date == today
+                headings += true
+                DayHeading(day, isToday, env, Modifier.padding(top = if (i == 0) 0.dp else 8.dp))
+                if (day.isEmpty) {
+                    headings += false
+                    NothingText(isToday)
+                }
+                day.all.forEach { e ->
+                    headings += false
+                    SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) }
+                }
             }
         }
+    }
+    if (columns < 2 || days.size < 2) list(days, modifier)
+    else Row(modifier, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        // Today in the first column, what comes after it in the second.
+        list(days.take(1), Modifier.weight(1f).fillMaxHeight())
+        list(days.drop(1), Modifier.weight(1f).fillMaxHeight())
     }
 }
 
@@ -214,14 +225,15 @@ private fun SidebarDay(day: CalendarLayout.AgendaDay, isToday: Boolean, env: Cal
 @Composable
 private fun SidebarEvent(e: CalEvent, whenText: String, onClick: () -> Unit) {
     val sw = CalendarPalette.of(e.color)
+    val dark = Kin.colors.isDark
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(sw.fill).clickable(onClick = onClick)
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(if (dark) sw.fillOnDark else sw.fill).clickable(onClick = onClick)
             .padding(end = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(Modifier.width(5.dp).height(46.dp).background(sw.strong))
+        Box(Modifier.width(5.dp).height(46.dp).background(if (dark) sw.onDark else sw.strong))
         Column(Modifier.padding(start = 12.dp, top = 4.dp, bottom = 4.dp)) {
-            Text(whenText, style = Kin.type.caption.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium), color = sw.strong.darken(), maxLines = 1)
+            Text(whenText, style = Kin.type.caption.copy(fontSize = 13.sp, fontWeight = FontWeight.Medium), color = if (dark) sw.onDark else sw.strong.darken(), maxLines = 1)
             Text(e.title, style = Kin.type.bodyStrong.copy(fontSize = 17.sp, lineHeight = 21.sp), color = Kin.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Spacer(Modifier.weight(1f))

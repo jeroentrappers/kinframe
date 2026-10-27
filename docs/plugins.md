@@ -101,9 +101,12 @@ The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/
 ### 2.2 Split layout: two photos and a dashboard
 
 `plugins.layout.mode: "split"` divides the screen in three: one photo on half of it, and the other half shared by the
-**dashboard** and a second photo. The dashboard holds the clock, date and weather, up to four plugin widgets (in
-their corner form, on paper) and what the calendar has for the next 48 hours (whole rows only, as many as fit; a
-dashboard without a calendar gives the widgets the room). The clock, countdowns and corner widgets don't show on the
+**dashboard** and a second photo. The dashboard is dark (the dark theme's surface, a shade lighter than the grid
+between the photos: a white panel glared beside the photos and at night). It holds the clock and the weather on top,
+up to four plugin widgets in their **strip** form (the band's horizontal form) flowing into rows at their own size
+(only a widget wider than the dashboard is scaled down), and what the calendar has for the next 48 hours: today and
+the following day side by side in a wide dashboard, below each other in a tall one, whole events only, as many as
+fit. A dashboard without a calendar gives the widgets the room. The clock, countdowns and corner widgets don't show on the
 photos meanwhile, and the calendar sidebar stays off.
 
 | Screen | Big photo | Second photo | Dashboard |

@@ -66,10 +66,13 @@ class SplitScreenshotTest {
         }
     }
 
+    /** The Denver's: the weather station (all values) and the P1 dial. */
     private val two get() = listOf(
-        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft, name = "P1"),
-        previewInstance("b", view("gauge-car"), Slot.TopRight, name = "Car"),
+        previewInstance("a", view("weather-station-rows"), Slot.TopLeft, name = "Station"),
+        previewInstance("b", view("gauge-dial-using"), Slot.TopRight, name = "P1"),
     )
+
+    private val three get() = two + previewInstance("c", view("gauge-car"), Slot.TopRight, name = "Car")
 
     @Test fun landscapeRight() = shot("landscape_right", BandSide.Right, two)
 
@@ -77,6 +80,11 @@ class SplitScreenshotTest {
 
     @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
     fun portraitRight() = shot("portrait_right", BandSide.Right, two)
+
+    @Test fun landscapeThree() = shot("landscape_three", BandSide.Right, three)
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun portraitThree() = shot("portrait_three", BandSide.Left, three)
 
     @Test fun landscapeOnlyCalendar() = shot("landscape_only_calendar", BandSide.Right, emptyList())
 }
