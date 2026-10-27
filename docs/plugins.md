@@ -243,19 +243,21 @@ components come with a new API version.
 | `rows` | Up to 4 `value`s stacked | grid / solar / home |
 | `gauge` | Ring or bar from 0–100 % with a label inside, or a two-sided `dial` (−100–100 %, zero at the top) | car battery 68 %; grid 1.240 W |
 | `flow` | Up to 5 nodes (icon + value) with animated arrows between them, speed by power | solar → home ← grid |
-| `sparkline` | A small line chart of up to 96 points, optional min/max | power over the last 24 h |
+| `sparkline` | A small chart of up to 100 points, a line or `bars`, optional min/max, one `highlight`ed point and a "now" `marker` (§4.3) | power over the last 24 h; today's prices |
 | `text` | One or two short lines (max 60 chars each) | "Charging · full at 23:10" |
 | `stack` | Vertical or horizontal group of the above, max depth 2 | gauge + text |
 | `image` | A picture from an http(s) URL, square or round, size by form (§4.2) | album art |
 | `actions` | 1–5 round buttons, tappable in the detail card only (§4.2) | ⏮ ⏯ ⏭ |
 | `progress` | A thin bar from min to max, or a marker dot on the track; can move on by itself | track position, today's temperature in its range |
 | `none` | Hide the widget; only as the whole view | nothing playing |
+| `list` | Up to 5 rows of time, title, detail and badge (§4.3) | departures; bin days |
 
 A `gauge` takes up to three small `sub` values under the ring or dial (an icon, usually an arrow, in a tone, and the
 number in text colour: today's ↑ 11,8 / ↓ 14,5 kWh beside the live power). A `flow` node takes `percent`, drawn as a
 ring around it (a home battery's charge).
 
-Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`, `info` (violet)), which maps to the frame's palette, and an
+Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`, `info` (violet), and the quantity tones
+`water`, `gas` and `heat`, §4.3), which maps to the frame's palette, and an
 icon from a fixed set of line icons (home, sun, grid, battery, car, plug, flame, water, thermometer, wind, leaf,
 euro, rain, music, play, pause, skip-next, volume-up, ...; 51 so far, more can be added within API 1). A `value` can turn its icon with `icon_rotation` (0–360
 degrees clockwise): the `direction` icon is a vane arrow pointing north, for a wind direction or a heading.
@@ -265,7 +267,8 @@ Schema) and [`plugin-view.d.ts`](api/plugin-views/plugin-view.d.ts) (TypeScript 
 examples in `docs/api/plugin-views/examples/` and views that must be rejected in `invalid/`. The limits: a tree at
 most 3 components deep (`stack › stack › value`), at most 24 components per view (rows' values included), 16 KB
 serialized; `value` ≤ 16 characters, `unit` ≤ 8, labels and captions ≤ 32, a gauge label ≤ 12, flow node texts ≤ 16,
-text lines ≤ 60; 1–4 rows or stack items, 2–5 flow nodes, up to 8 edges, 2–96 sparkline points (`null` = gap). No line
+text lines ≤ 60; 1–4 rows or stack items, 2–5 flow nodes, up to 8 edges, 2–100 sparkline points (`null` = gap), 1–5
+list rows (title ≤ 40, time ≤ 10, detail ≤ 16, badge ≤ 10). No line
 breaks or control characters in any text, and unknown properties are rejected too, so a typo shows up in the preview
 instead of being ignored. Edge `power` is a magnitude (≥ 0); the direction is `from` → `to`. A view that doesn't validate (unknown component, too deep, text too long) is not drawn; the frame
 keeps the previous view and logs why. When `render` throws or times out three times in a row, the widget shows a
@@ -293,6 +296,55 @@ Added for the now-playing plugin (§9.5), and generic enough for others (a camer
   redrawing once a second only while it runs, so a track's position moves smoothly although the plugin refreshes every
   15 s. `time` shows the values as `1:23 / 3:45`.
 - **`none`** hides the widget until the next view (the music stopped).
+
+### 4.3 Lists, bars, quantity colours and raised decimals
+
+Added from what the first plugins showed (§11.1, items 1, 3, 8 and 9). Screenshots:
+[`docs/plugins/`](plugins/) `view_api_additions.png` (every form, paper and photo), `view_api_additions_dark.png`,
+`list_prices_band.png`, `list_prices_overlay.png`, `list_prices_strip.png`, `utilities_band.png`.
+
+- **`list`**: rows of `{ time?, title, detail?, badge?, icon?, tone? }` under an optional `label` (a station's name):
+  "22:23 · Brussels Airport - Zaventem · spoor 2 · **+3**". A row's tone colours its badge and icon (a delay in `warn`,
+  "Cancelled" in `bad`). By form:
+  - *corner*: the label and the first 3 rows as a small timetable; the time column is as wide as the widest time
+    ("22:23" or "Tomorrow"), the title gives way (ellipsis) before the detail and the badge;
+  - *detail card*: all 5 rows, wider;
+  - *band column* (72–80 dp, too narrow for any title): the first row's icon once, then the times of the first 3 rows
+    with badges of up to 4 characters beside them ("22:23 +3"); a longer badge colours the time in the row's tone
+    instead ("22:38" in red for a cancelled train). A list without times shows its first title (up to 3 lines);
+  - *band strip*: the first 2 rows, one line each.
+- **`sparkline`** takes up to **100** points (was 96), lines and bars alike: a day of quarter hours has 92, 96 or 100
+  of them (the clocks change), so a price plugin no longer averages. `style: "bars"` draws a bar per point from zero
+  (negative prices hang below the zero line; without a `min` the range always includes zero). `highlight` (an index)
+  picks out one point in `highlight_tone` (default the chart's tone), with a dot at its tip so the cheapest quarter hour
+  shows even at 0 c; `marker` (an index) is "now", a thin line across the chart with its bar or point at full strength.
+  With either, the other bars step back (42 % alpha on paper, 75 % on photos, where a bright sky would swallow them).
+  Both indexes must point at a number, not a gap. In the column 100 bars in 64 dp touch and read as an area, while
+  the picked-out ones stay 2 dp wide.
+- **Quantity tones** `water` (blue), `gas` (pink) and `heat` (orange) let a water meter look like water next to the
+  electricity the P1 already draws in `info` (violet). Plugins still never pick colours, and should pair a quantity
+  tone with its icon (`water`, `flame`, `thermometer`): colour is never the only cue (WCAG 1.4.1). The values and the
+  check (WCAG contrast; CIEDE2000 distance to the semantic tones after simulating protanopia, deuteranopia and
+  tritanopia with Machado et al. 2009 at full severity):
+
+  | Palette | water | gas | heat | Contrast (worst) | Closest pair, normal / protan / deutan / tritan (ΔE00) |
+  |---|---|---|---|---|---|
+  | paper | `#1B7FD1` | `#A8306E` | `#D2691E` | 3.35 (heat on paper) | 8.7 / 8.2 / 6.8 / 4.3 (all heat–accent) |
+  | dark | `#88DDF7` | `#E36FA9` | `#E8752A` | 5.51 (heat on surface) | 10.5 heat–accent / 12.5 water–info / 7.3 water–info / 5.5 gas–bad |
+  | photo | `#B3EEFF` | `#FFA3D2` | `#FFB066` | 3.08 (gas on a mid photo, `#5B6B5E`) | 9.0 heat–accent / 7.0 heat–warn / 5.0 heat–warn / 3.7 heat–bad |
+
+  Contrast is ≥ 3:1 for graphics everywhere (on photos against the darkest "mid" tone the screenshots use; text on
+  photos also has its shadow), checked in `PluginPaletteTest`. Nine hues can't all stay apart for every colour-vision
+  deficiency: the closest pairs are heat next to `accent`/`warn`/`bad` (all warm), which rarely meet in one widget,
+  and tritanopia (about 1 in 10 000) is the weakest case; the icon carries the meaning there. Water was moved to a
+  light cyan on the dark and photo palettes because a mid blue merged with `info`'s violet for protanopes (ΔE00 0.8).
+- **Raised decimals**, frame-wide and automatic, after the HomeWizard Energy Display: in a `value`'s big number, a row's
+  value and a dial's label, one or two decimals are drawn at 62 % size with their tops level with the whole digits
+  (21,⁴ °C; 3,⁸ kWh), the way price tags write "12,⁹⁹". The separator stays full size on the baseline, so "3,8" never
+  reads as 3⁸ (the first try raised the comma too, and did). Detection is locale-free (`PluginFormat.raisedDecimals`):
+  one or two digits after the last "," or ".", a whole part grouped with the *other* separator, a space or "'" in
+  threes or not at all, and an optional short sign ("°"); "1.234" (a thousand) and three decimals are left alone. It is
+  styling only, so the text, and what TalkBack reads, stays "21,4".
 
 Because the frame owns the drawing, the same view works in a corner, in the detail card, on the web preview and in a
 future TV or tablet frame, and animations (flow arrows, value changes) are done once, well, in the frame's GPU path.
@@ -516,13 +568,13 @@ the HomeWizard Energy Display's hero ring), a `marker` style and `min` on `progr
 display's temperature row), media icons, `multiple` entity settings (two inverters summed into one solar node),
 `ctx.localTime` (the P1's "today", bin day) and JSON helpers on `ctx.store`. **Proposed**, with the evidence:
 
-1. **A `list` component** (a time, a title and a trailing badge per row, a tone per row). *Departures:* `rows` hold one
+1. *Built, §4.3.* **A `list` component** (a time, a title and a trailing badge per row, a tone per row). *Departures:* `rows` hold one
    value and a 32-character label, so "22:23 +3 · Brussels Airport - Zaventem · spoor 2" had to be cut
    ("Brussels Airport - Za… · spoor 2"), and in the band, where rows drop their labels, only the times remain.
 2. **Relative dates and times in `ctx.format`** ("tomorrow", "Mon 27 Oct", "8 h ago"). *Bin day and the car* each
    carry their own "Today/Tomorrow" and "Updated {n} min ago" strings in every language, which every plugin would
    repeat. Needs the frame's own translations (ICU's relative formatter needs API 24; the frame is API 23).
-3. **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
+3. *Built, §4.3.* **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
    fixture is the day the clocks went back: 100), the sparkline takes 96, so the plugin averages down; and it can't
    mark "now" or the cheapest hour, which is the whole point of a price chart. A `bars` style with a highlighted index
    (and up to 100 points) would do.
@@ -536,9 +588,9 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
    multiplexed) would also give the settings form its entity picker (§6.1) for free.
 7. **Manifest defaults for the owner's choices:** a default visibility (*only when it changes* suits the car, §9.3),
    and setting **presets** (the Kia/Hyundai entity names are filled in from a prefix by the plugin itself today).
-8. **Typography for values:** raised small decimals ("12 €67", "21 °1", as on the HomeWizard Energy Display) read well
+8. *Built, §4.3.* **Typography for values:** raised small decimals ("12 €67", "21 °1", as on the HomeWizard Energy Display) read well
    from across a room. It could be automatic for any `value` with decimals, frame-wide, rather than a plugin option.
-9. **Colours per quantity** (electricity violet, water blue, gas pink, solar green, heat orange) instead of only
+9. *Built, §4.3.* **Colours per quantity** (electricity violet, water blue, gas pink, solar green, heat orange) instead of only
    semantic tones. `info` (violet) is effectively "electricity" already. Adding `water`, `gas`, `heat` tones would keep
    "plugins never pick colours" while letting a water widget look like water; it needs checking against both
    palettes (paper and photo) and colour-blind pairs before it goes in.
