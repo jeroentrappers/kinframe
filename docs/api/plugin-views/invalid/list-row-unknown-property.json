@@ -1,0 +1,12 @@
+{
+  "$error_path": "/rows/0/platform",
+  "view": {
+    "type": "list",
+    "rows": [
+      {
+        "title": "Kortrijk",
+        "platform": "7"
+      }
+    ]
+  }
+}

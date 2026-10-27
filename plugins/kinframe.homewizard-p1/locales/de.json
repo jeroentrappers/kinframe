@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1-Zähler",
+  "@description": "Live-Leistung eines HomeWizard P1-Zählers im Haus: Bezug, Einspeisung, pro Phase und die heutigen Summen.",
+  "@setting.host": "Adresse des Zählers",
+  "@setting.host.help": "Schalte in der HomeWizard Energy App die lokale API für den Zähler ein.",
+  "@setting.style": "Anzeigen als",
+  "@option.style.value": "Zahl",
+  "@option.style.gauge": "Zeiger",
+  "@option.style.flow": "Fluss",
+  "@setting.max_w": "Vollausschlag (W)",
+  "@setting.warn_w": "Hervorheben über (W, 0 = aus)",
+  "grid": "Netz",
+  "home": "Haus",
+  "last_hour": "Letzte Stunde",
+  "returning": "Einspeisung",
+  "today_export": "Heute eingespeist",
+  "today_gas": "Gas heute",
+  "today_import": "Heute bezogen",
+  "using": "Bezug"
+}

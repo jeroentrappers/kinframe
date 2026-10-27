@@ -197,6 +197,20 @@ object CalendarLayout {
      * The hybrid sidebar's list: today in full (finished events dropped when [hidePastToday]), then the next days
      * that have something on, until [maxDays] days with events or [maxEvents] events.
      */
+    /**
+     * The days from [today] with the events that start before [hours] from now (all-day events by their first day),
+     * at most [maxEvents]; today always, the other days only when they have something.
+     */
+    fun within(data: CalendarData, today: LocalDate, nowMs: Long, hours: Int, maxEvents: Int): List<AgendaDay> {
+        val endMs = nowMs + hours * 3_600_000L
+        val lastDay = java.time.Instant.ofEpochMilli(endMs).atZone(data.zone).toLocalDate()
+        fun before(e: CalEvent) = if (e.allDay || e.start == null) !e.firstDay.isAfter(lastDay) else e.start.toInstant().toEpochMilli() < endMs
+        val days = upcoming(data, today, nowMs, horizonDays = (lastDay.toEpochDay() - today.toEpochDay() + 1).toInt().coerceAtLeast(1), maxDays = 7, maxEvents = maxEvents)
+            .map { d -> d.copy(spanning = d.spanning.filter(::before), timed = d.timed.filter(::before)) }
+        return days.filterIndexed { i, d -> (i == 0 && d.date == today) || !d.isEmpty }
+            .ifEmpty { listOf(AgendaDay(today, emptyList(), emptyList())) }
+    }
+
     fun upcoming(data: CalendarData, today: LocalDate, nowMs: Long, horizonDays: Int = 14, maxDays: Int = 5, maxEvents: Int = 12, hidePastToday: Boolean = true): List<AgendaDay> {
         val out = ArrayList<AgendaDay>()
         var count = 0

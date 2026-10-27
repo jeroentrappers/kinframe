@@ -57,6 +57,10 @@ export interface MockState {
 	/** TV links per frame (README §5.9); `expired` tokens answer 410. */
 	tvLinks: Record<string, (S['TvLink'] & { placement_ids?: string[]; revoked?: boolean })[]>;
 	calendars: Record<string, S['CalendarSource'][]>;
+	/** GET /frames/{id}/plugins (catalog and status); settings PATCHes keep plugin secrets write-only like the server. */
+	plugins: Record<string, S['FramePlugins']>;
+	/** Plugin secrets as written (instance id → key → value), never sent back. */
+	pluginSecrets: Record<string, Record<string, string>>;
 	calendarViews: Record<string, S['CalendarView']>;
 	eventInvitations: Record<string, S['EventInvitation'][]>;
 	/** Shop reservations (README §5.11); only reachable when discovery has a shop. */
@@ -94,6 +98,8 @@ export function emptyState(): MockState {
 		replaceCodes: [],
 		tvLinks: {},
 		calendars: {},
+		plugins: {},
+		pluginSecrets: {},
 		calendarViews: {},
 		eventInvitations: {},
 		reservations: [],
@@ -698,12 +704,25 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			inv.status = 'withdrawn';
 			return route.fulfill({ status: 204 });
 		}
+		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/plugins$/))) {
+			return json(route, 200, state.plugins[m[1]!] ?? { catalog: [], catalog_at: null });
+		}
 		if ((m = path.match(/^\/v1\/frames\/([^/:]+)\/settings$/))) {
 			const s = (state.settings[m[1]!] ??= defaultSettings());
 			if (method === 'PATCH') {
 				const ifMatch = req.headers()['if-match'];
 				if (ifMatch !== `"${s.version}"`) return problem(route, 412, 'version_conflict', 'Conflict');
-				const merged = deepMerge(s as Record<string, unknown>, body as Record<string, unknown>) as S['FrameSettings'];
+				// A copy: plugin secrets are stripped below, and state.calls keeps the body as sent.
+				const merged = deepMerge(s as Record<string, unknown>, structuredClone(body) as Record<string, unknown>) as S['FrameSettings'];
+				for (const inst of merged.plugins?.instances ?? []) {
+					const kept = (state.pluginSecrets[inst.instance_id] ??= {});
+					for (const [k, v] of Object.entries(inst.secrets ?? {})) {
+						if (v) kept[k] = v;
+						else delete kept[k];
+					}
+					delete inst.secrets;
+					(inst as { secrets_set?: string[] }).secrets_set = Object.keys(kept).sort();
+				}
 				merged.version = s.version + 1;
 				state.settings[m[1]!] = merged;
 				return json(route, 200, merged);

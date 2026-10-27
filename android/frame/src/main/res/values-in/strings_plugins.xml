@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Nonaktif</string>
     <string name="plugins_layout_overlay">Di sudut</string>
     <string name="plugins_layout_band">Di samping foto</string>
+    <string name="plugins_layout_split">Dua foto dan dasbor</string>
+    <string name="plugins_split_side">Sisi dasbor</string>
     <string name="plugins_band_side">Sisi (lanskap)</string>
     <string name="plugins_side_left">Kiri</string>
     <string name="plugins_side_right">Kanan</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Stasiun cuaca saya</string>
     <string name="wx_station_sub">Stasiun cuaca Anda sendiri (PWS) melalui Weathercloud</string>
     <string name="wx_both_note">Jika keduanya aktif, jam menampilkan suhu stasiun Anda dengan kondisi langit serta suhu terendah dan tertinggi dari prakiraan.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Hari ini</string>
+    <string name="plugin_rel_tomorrow">Besok</string>
+    <string name="plugin_rel_yesterday">Kemarin</string>
+    <string name="plugin_rel_just_now">baru saja</string>
+    <string name="plugin_rel_now">sekarang</string>
+    <string name="plugin_rel_min_ago">{n} mnt lalu</string>
+    <string name="plugin_rel_h_ago">{n} jam lalu</string>
+    <string name="plugin_rel_in_min">dalam {n} mnt</string>
+    <string name="plugin_rel_in_h">dalam {n} jam</string>
 </resources>

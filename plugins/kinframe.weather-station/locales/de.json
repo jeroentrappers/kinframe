@@ -1,0 +1,18 @@
+{
+  "@name": "Wetterstation",
+  "@description": "Live-Messwerte deiner eigenen Wetterstation auf Weathercloud: Temperatur, Wind, Regen, Luftdruck und Sonnenlicht.",
+  "@setting.source": "Dienst",
+  "@option.source.weathercloud": "Weathercloud",
+  "@setting.device": "Stationscode",
+  "@setting.device.help": "Die Nummer in der Weathercloud-Adresse der Station (app.weathercloud.net/d9287156658) oder die ganze Adresse.",
+  "@setting.style": "Anzeigen als",
+  "@option.style.compact": "Temperatur",
+  "@option.style.rows": "Alle Werte",
+  "@setting.wind_unit": "Wind in",
+  "@option.wind_unit.auto": "Automatisch (km/h oder mph)",
+  "@option.wind_unit.ms": "m/s",
+  "@option.wind_unit.kmh": "km/h",
+  "@option.wind_unit.mph": "mph",
+  "@option.wind_unit.bft": "Beaufort",
+  "@setting.interval_min": "Alle … Minuten abfragen (5–30)"
+}

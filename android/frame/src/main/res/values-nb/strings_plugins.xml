@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Av</string>
     <string name="plugins_layout_overlay">I hjørnene</string>
     <string name="plugins_layout_band">Ved siden av bildet</string>
+    <string name="plugins_layout_split">To bilder og en oversikt</string>
+    <string name="plugins_split_side">Oversiktens side</string>
     <string name="plugins_band_side">Side (liggende)</string>
     <string name="plugins_side_left">Venstre</string>
     <string name="plugins_side_right">Høyre</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Min værstasjon</string>
     <string name="wx_station_sub">Din egen værstasjon (PWS) via Weathercloud</string>
     <string name="wx_both_note">Med begge på viser klokken stasjonens temperatur med himmelen og dagens laveste og høyeste fra varselet.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">I dag</string>
+    <string name="plugin_rel_tomorrow">I morgen</string>
+    <string name="plugin_rel_yesterday">I går</string>
+    <string name="plugin_rel_just_now">akkurat nå</string>
+    <string name="plugin_rel_now">nå</string>
+    <string name="plugin_rel_min_ago">for {n} min siden</string>
+    <string name="plugin_rel_h_ago">for {n} t siden</string>
+    <string name="plugin_rel_in_min">om {n} min</string>
+    <string name="plugin_rel_in_h">om {n} t</string>
 </resources>

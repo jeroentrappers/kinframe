@@ -1,0 +1,20 @@
+{
+  "@name": "عدّاد HomeWizard P1",
+  "@description": "القدرة الحية من عدّاد HomeWizard P1 في المنزل: الاستهلاك والتصدير ولكل طور ومجاميع اليوم.",
+  "@setting.host": "عنوان العدّاد",
+  "@setting.host.help": "فعّل Local API للعدّاد في تطبيق HomeWizard Energy.",
+  "@setting.style": "العرض كـ",
+  "@option.style.value": "رقم",
+  "@option.style.gauge": "مؤشر دائري",
+  "@option.style.flow": "تدفق",
+  "@setting.max_w": "كامل المقياس (واط)",
+  "@setting.warn_w": "التمييز فوق (واط، 0 = إيقاف)",
+  "grid": "الشبكة",
+  "home": "المنزل",
+  "last_hour": "آخر ساعة",
+  "returning": "إرجاع للشبكة",
+  "today_export": "المُرجَع اليوم",
+  "today_gas": "الغاز اليوم",
+  "today_import": "المستهلك اليوم",
+  "using": "استهلاك"
+}

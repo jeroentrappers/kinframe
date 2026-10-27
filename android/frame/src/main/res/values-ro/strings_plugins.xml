@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Dezactivat</string>
     <string name="plugins_layout_overlay">În colțuri</string>
     <string name="plugins_layout_band">Lângă fotografie</string>
+    <string name="plugins_layout_split">Două fotografii și un panou</string>
+    <string name="plugins_split_side">Partea panoului</string>
     <string name="plugins_band_side">Latura (peisaj)</string>
     <string name="plugins_side_left">Stânga</string>
     <string name="plugins_side_right">Dreapta</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Stația mea meteo</string>
     <string name="wx_station_sub">Propria stație meteo (PWS) prin Weathercloud</string>
     <string name="wx_both_note">Cu ambele pornite, ceasul arată temperatura stației, cu cerul și minima și maxima zilei din prognoză.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Astăzi</string>
+    <string name="plugin_rel_tomorrow">Mâine</string>
+    <string name="plugin_rel_yesterday">Ieri</string>
+    <string name="plugin_rel_just_now">chiar acum</string>
+    <string name="plugin_rel_now">acum</string>
+    <string name="plugin_rel_min_ago">acum {n} min</string>
+    <string name="plugin_rel_h_ago">acum {n} h</string>
+    <string name="plugin_rel_in_min">peste {n} min</string>
+    <string name="plugin_rel_in_h">peste {n} h</string>
 </resources>

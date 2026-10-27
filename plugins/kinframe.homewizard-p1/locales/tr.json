@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1 sayacı",
+  "@description": "Evdeki HomeWizard P1 sayacından canlı güç: tüketim, şebekeye verilen, faz başına ve bugünün toplamları.",
+  "@setting.host": "Sayacın adresi",
+  "@setting.host.help": "HomeWizard Energy uygulamasında sayaç için Local API'yi açın.",
+  "@setting.style": "Gösterim",
+  "@option.style.value": "Sayı",
+  "@option.style.gauge": "Kadran",
+  "@option.style.flow": "Akış",
+  "@setting.max_w": "Tam ölçek (W)",
+  "@setting.warn_w": "Şunun üstünü vurgula (W, 0 = kapalı)",
+  "grid": "Şebeke",
+  "home": "Ev",
+  "last_hour": "Son bir saat",
+  "returning": "Şebekeye veriliyor",
+  "today_export": "Bugün verilen",
+  "today_gas": "Bugün gaz",
+  "today_import": "Bugün tüketilen",
+  "using": "Tüketim"
+}

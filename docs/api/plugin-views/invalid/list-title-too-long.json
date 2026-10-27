@@ -1,0 +1,11 @@
+{
+  "$error_path": "/rows/0/title",
+  "view": {
+    "type": "list",
+    "rows": [
+      {
+        "title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    ]
+  }
+}

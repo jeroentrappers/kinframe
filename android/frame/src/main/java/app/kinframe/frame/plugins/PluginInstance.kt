@@ -30,14 +30,32 @@ interface PluginInstance {
     /** Called once when the instance starts or its settings change. The first view, or null while loading. */
     suspend fun start(ctx: PluginContext): JsonElement? = null
 
-    /** Called every [refreshSeconds] (and after [PluginContext.invalidate]). Throwing counts as a failure. */
+    /**
+     * Fetches what [render] shows, every [refreshSeconds], right before [render]. The only call that waits for the
+     * network on a timer, so drawing never does. Throwing counts as a failure (and skips that [render]).
+     */
+    suspend fun update(ctx: PluginContext) {}
+
+    /** Called after every [update] and after [PluginContext.invalidate]. Throwing counts as a failure. */
     suspend fun render(ctx: PluginContext): JsonElement?
 
     /** The detail card on tap, or null if the plugin has none. */
     suspend fun detail(ctx: PluginContext): JsonElement? = null
 
+    /**
+     * The owner tapped a button the plugin drew (an `action` in its view, docs/plugins.md §4.2). Returns a fresh view
+     * to show at once (the host still calls [render] afterwards), or null.
+     */
+    suspend fun action(ctx: PluginContext, id: String): JsonElement? = null
+
     /** Called before the instance is stopped. */
     suspend fun stop(ctx: PluginContext) {}
+
+    /** Whether its views may contain `actions` (the manifest's `permissions.actions`). */
+    val allowsActions: Boolean get() = false
+
+    /** The bytes of an `image` view's [src], fetched with the plugin's own network permissions; null if it has none. */
+    suspend fun image(ctx: PluginContext, src: String): ByteArray? = null
 }
 
 /** `ctx`: the plugin's whole world (docs/plugins.md §3.2). */
@@ -56,6 +74,11 @@ class PluginContext(
     val now: () -> Long,
     val zone: () -> ZoneId,
     val invalidate: () -> Unit,
+    /**
+     * The frame's place from its weather settings (latitude, longitude), or null when unset. The host gives it only to
+     * plugins with `permissions.location`, rounded to about a kilometre ([PluginLocation.coarse]).
+     */
+    val location: () -> Pair<Double, Double>? = { null },
 ) {
     /**
      * `ctx.dataTime`: when the source measured what the last view shows (epoch ms), for sources that only update every
@@ -108,4 +131,10 @@ class PluginHttp(
         const val DEFAULT_USER_AGENT = "kinframe-frame (+https://github.com/jeroentrappers/kinframe)"
         private val RESERVED = setOf("host", "user-agent", "cookie", "content-length", "transfer-encoding", "connection")
     }
+}
+
+/** `ctx.location`: coarse on purpose, two decimals (about 1 km), which is all a forecast or air quality needs. */
+object PluginLocation {
+    fun coarse(lat: Double, lon: Double): Pair<Double, Double> = round2(lat) to round2(lon)
+    private fun round2(v: Double) = Math.round(v * 100) / 100.0
 }

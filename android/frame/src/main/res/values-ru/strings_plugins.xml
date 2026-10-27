@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Выкл.</string>
     <string name="plugins_layout_overlay">В углах</string>
     <string name="plugins_layout_band">Рядом с фото</string>
+    <string name="plugins_layout_split">Две фотографии и панель</string>
+    <string name="plugins_split_side">Сторона панели</string>
     <string name="plugins_band_side">Сторона (альбомная)</string>
     <string name="plugins_side_left">Слева</string>
     <string name="plugins_side_right">Справа</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Моя метеостанция</string>
     <string name="wx_station_sub">Ваша собственная метеостанция (PWS) через Weathercloud</string>
     <string name="wx_both_note">Когда включены обе, часы показывают температуру вашей станции, а небо и дневные минимум и максимум берутся из прогноза.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Сегодня</string>
+    <string name="plugin_rel_tomorrow">Завтра</string>
+    <string name="plugin_rel_yesterday">Вчера</string>
+    <string name="plugin_rel_just_now">только что</string>
+    <string name="plugin_rel_now">сейчас</string>
+    <string name="plugin_rel_min_ago">{n} мин назад</string>
+    <string name="plugin_rel_h_ago">{n} ч назад</string>
+    <string name="plugin_rel_in_min">через {n} мин</string>
+    <string name="plugin_rel_in_h">через {n} ч</string>
 </resources>

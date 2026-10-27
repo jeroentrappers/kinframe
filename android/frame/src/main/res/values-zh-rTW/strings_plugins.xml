@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">關閉</string>
     <string name="plugins_layout_overlay">在角落</string>
     <string name="plugins_layout_band">在相片旁</string>
+    <string name="plugins_layout_split">兩張相片和資訊面板</string>
+    <string name="plugins_split_side">資訊面板的位置</string>
     <string name="plugins_band_side">側邊（橫向）</string>
     <string name="plugins_side_left">左</string>
     <string name="plugins_side_right">右</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">我的氣象站</string>
     <string name="wx_station_sub">你自己的氣象站（PWS），透過 Weathercloud</string>
     <string name="wx_both_note">兩者都開啟時，時鐘旁顯示氣象站的溫度，以及預報中的天空狀況和今日最低、最高氣溫。</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">今天</string>
+    <string name="plugin_rel_tomorrow">明天</string>
+    <string name="plugin_rel_yesterday">昨天</string>
+    <string name="plugin_rel_just_now">剛剛</string>
+    <string name="plugin_rel_now">現在</string>
+    <string name="plugin_rel_min_ago">{n} 分鐘前</string>
+    <string name="plugin_rel_h_ago">{n} 小時前</string>
+    <string name="plugin_rel_in_min">{n} 分鐘後</string>
+    <string name="plugin_rel_in_h">{n} 小時後</string>
 </resources>

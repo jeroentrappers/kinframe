@@ -1,0 +1,8 @@
+{
+  "$error_path": "/value",
+  "view": {
+    "type": "progress",
+    "value": 300,
+    "max": 245
+  }
+}

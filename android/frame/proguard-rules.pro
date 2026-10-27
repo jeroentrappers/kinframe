@@ -3,3 +3,6 @@
 -dontwarn org.conscrypt.**
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
+# QuickJS (plugin host): the native side calls back into the binding's classes by name; its own consumer rules keep
+# only a few of them.
+-keep class com.dokar.quickjs.** { *; }

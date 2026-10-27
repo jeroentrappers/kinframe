@@ -82,6 +82,9 @@ import app.kinframe.family.ui.frame.FrameSettingsViewModel
 import app.kinframe.family.ui.frame.LibraryEvent
 import app.kinframe.family.ui.frame.LibraryTab
 import app.kinframe.family.ui.frame.LibraryViewModel
+import app.kinframe.family.ui.frame.PluginsEvent
+import app.kinframe.family.ui.frame.PluginsSection
+import app.kinframe.family.ui.frame.PluginsViewModel
 import app.kinframe.family.ui.share.ShareEvent
 import app.kinframe.family.ui.share.ShareSheet
 import app.kinframe.family.ui.share.ShareSource
@@ -529,7 +532,18 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     }
                 }
             }
-            (s.frame as? Load.Ready)?.value?.let { f -> SettingsTab(f, ss, ready.server.discovery.weather, fs) }
+            val pv: PluginsViewModel = viewModel(key = "plugins-${r.frameId}-${System.identityHashCode(api)}") { PluginsViewModel(api, r.frameId) }
+            val ps by pv.state.collectAsStateWithLifecycle()
+            LaunchedEffect(pv) {
+                pv.events.collect { e ->
+                    when (e) {
+                        PluginsEvent.Saved -> toaster.show(res.getString(R.string.plugins_saved))
+                        PluginsEvent.Removed -> toaster.show(res.getString(R.string.plugins_removed))
+                        is PluginsEvent.Error -> toaster.show(res.getString(e.message))
+                    }
+                }
+            }
+            (s.frame as? Load.Ready)?.value?.let { f -> SettingsTab(f, ss, ready.server.discovery.weather, fs, plugins = { PluginsSection(ps, pv) }) }
         },
     )
 }

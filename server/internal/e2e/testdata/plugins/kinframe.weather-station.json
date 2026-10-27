@@ -1,0 +1,20 @@
+{
+  "id": "kinframe.weather-station",
+  "name": "Weather station",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "Live readings from your own weather station on Weathercloud: temperature, wind, rain, pressure and sunlight.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 300, "default_seconds": 300, "stale_seconds": 1800 },
+  "permissions": { "http": ["https://app.weathercloud.net"] },
+  "settings": [
+    { "key": "source", "type": "choice", "label": "Service", "options": ["weathercloud"], "default": "weathercloud" },
+    { "key": "device", "type": "text", "label": "Station code", "placeholder": "9287156658", "required": true,
+      "help": "The number in the station's Weathercloud address (app.weathercloud.net/d9287156658), or the whole address." },
+    { "key": "style", "type": "choice", "label": "Show", "options": ["compact", "rows"], "default": "compact" },
+    { "key": "wind_unit", "type": "choice", "label": "Wind in", "options": ["auto", "ms", "kmh", "mph", "bft"], "default": "auto" },
+    { "key": "interval_min", "type": "number", "label": "Check every (minutes, 5–30)", "default": 5 }
+  ]
+}

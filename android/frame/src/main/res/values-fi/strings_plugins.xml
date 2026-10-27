@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Pois</string>
     <string name="plugins_layout_overlay">Kulmissa</string>
     <string name="plugins_layout_band">Kuvan vieressä</string>
+    <string name="plugins_layout_split">Kaksi kuvaa ja kooste</string>
+    <string name="plugins_split_side">Koosteen puoli</string>
     <string name="plugins_band_side">Puoli (vaaka)</string>
     <string name="plugins_side_left">Vasen</string>
     <string name="plugins_side_right">Oikea</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Oma sääasemani</string>
     <string name="wx_station_sub">Oma sääasemasi (PWS) Weathercloudin kautta</string>
     <string name="wx_both_note">Kun molemmat ovat päällä, kello näyttää aseman lämpötilan sekä ennusteen taivaan ja päivän alimman ja ylimmän lämpötilan.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Tänään</string>
+    <string name="plugin_rel_tomorrow">Huomenna</string>
+    <string name="plugin_rel_yesterday">Eilen</string>
+    <string name="plugin_rel_just_now">juuri nyt</string>
+    <string name="plugin_rel_now">nyt</string>
+    <string name="plugin_rel_min_ago">{n} min sitten</string>
+    <string name="plugin_rel_h_ago">{n} t sitten</string>
+    <string name="plugin_rel_in_min">{n} min päästä</string>
+    <string name="plugin_rel_in_h">{n} t päästä</string>
 </resources>

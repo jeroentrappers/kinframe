@@ -13,9 +13,14 @@ sealed interface PluginView {
     val tone: Tone
 }
 
-/** Maps to the frame's palette; plugins never pick colours. */
+/**
+ * Maps to the frame's palette; plugins never pick colours. The first six are semantic (how good is it); [Water],
+ * [Gas] and [Heat] name a quantity, so a water meter looks like water next to the electricity ([Info], violet) the
+ * P1 already uses. Plugins should still pair a quantity tone with its icon: colour is never the only cue.
+ */
 enum class Tone(val json: String) {
-    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent"), Info("info");
+    Neutral("neutral"), Good("good"), Warn("warn"), Bad("bad"), Accent("accent"), Info("info"),
+    Water("water"), Gas("gas"), Heat("heat");
 
     companion object {
         fun of(json: String): Tone? = entries.firstOrNull { it.json == json }
@@ -81,10 +86,20 @@ data class GaugeView(
     val style: GaugeStyle = GaugeStyle.Ring,
     override val tone: Tone = Tone.Neutral,
     val negativeTone: Tone? = null,
+    /** Up to three small values under the gauge, e.g. today's ↑ 11,8 / ↓ 14,5 kWh beside the live power. */
+    val sub: List<SubValue> = emptyList(),
 ) : PluginView
 
+/** A small secondary value: an optional icon (an arrow) and text in a tone. */
 @Immutable
-data class FlowNode(val id: String, val icon: String, val value: String? = null, val label: String? = null, val tone: Tone = Tone.Neutral)
+data class SubValue(val value: String, val icon: String? = null, val tone: Tone = Tone.Neutral)
+
+/** [percent]: an optional ring around the node's circle (0–100), e.g. a home battery's charge. */
+@Immutable
+data class FlowNode(
+    val id: String, val icon: String, val value: String? = null, val label: String? = null, val tone: Tone = Tone.Neutral,
+    val percent: Float? = null,
+)
 
 /** An arrow from node [from] to node [to] (indexes into [FlowView.nodes]); its speed follows [power]. 0 = idle. */
 @Immutable
@@ -94,7 +109,12 @@ data class FlowEdge(val from: Int, val to: Int, val power: Float)
 @Immutable
 data class FlowView(val nodes: List<FlowNode>, val edges: List<FlowEdge>, override val tone: Tone = Tone.Neutral) : PluginView
 
-/** A small line chart of up to 96 points; `NaN` marks a gap (null in JSON). */
+/**
+ * A small chart of up to 100 points (a day of quarter hours, 100 on the day the clocks go back); `NaN` marks a gap
+ * (null in JSON). [SparklineStyle.Bars] draws a bar per point from zero (or the nearest edge of the range), the way a
+ * price chart reads. [highlight] picks out one point (the cheapest quarter hour) in [highlightTone], [marker] another
+ * ("now", a thin line across the chart); both are indexes into [points].
+ */
 @Immutable
 data class SparklineView(
     val points: List<Float>,
@@ -103,6 +123,45 @@ data class SparklineView(
     val label: String? = null,
     val value: String? = null,
     val showRange: Boolean = false,
+    override val tone: Tone = Tone.Neutral,
+    val style: SparklineStyle = SparklineStyle.Line,
+    val highlight: Int? = null,
+    val highlightTone: Tone? = null,
+    val marker: Int? = null,
+) : PluginView
+
+enum class SparklineStyle(val json: String) {
+    Line("line"), Bars("bars");
+
+    companion object {
+        fun of(json: String): SparklineStyle? = entries.firstOrNull { it.json == json }
+    }
+}
+
+/**
+ * One row of a [ListView]: an optional [time] ("22:23"), the [title], an optional [detail] after it in a quieter
+ * colour ("spoor 2"), and a short [badge] at the end in the row's [tone] ("+3", a delay in warn).
+ */
+@Immutable
+data class ListRow(
+    val title: String,
+    val time: String? = null,
+    val detail: String? = null,
+    val badge: String? = null,
+    val icon: String? = null,
+    val tone: Tone = Tone.Neutral,
+)
+
+/**
+ * Up to five rows of time, title and badge: train departures, the next bin days, appointments. In the corner the
+ * first three rows, in the detail card all of them; the band column, too narrow for a title, shows the first row's
+ * icon and the times of the first three rows with their badges; the strip the first two rows, one line each.
+ */
+@Immutable
+data class ListView(
+    val rows: List<ListRow>,
+    /** A heading above the rows ("Gent-Sint-Pieters"), in the corner and the detail card. */
+    val label: String? = null,
     override val tone: Tone = Tone.Neutral,
 ) : PluginView
 
@@ -117,6 +176,77 @@ data class StackView(
     val direction: StackDirection = StackDirection.Vertical,
     override val tone: Tone = Tone.Neutral,
 ) : PluginView
+
+/**
+ * A picture the plugin points to (album art, a camera snapshot, a map tile): [src] is an http(s) URL the frame fetches
+ * through the plugin's own network permissions, size-limited and decoded small, and caches. Drawn square or round at a
+ * size set by the form. Until it has loaded, a quiet placeholder.
+ */
+@Immutable
+data class ImageView(
+    val src: String,
+    val shape: ImageShape = ImageShape.Square,
+    /** Read out by accessibility services; not drawn. */
+    val description: String? = null,
+    override val tone: Tone = Tone.Neutral,
+) : PluginView
+
+enum class ImageShape(val json: String) {
+    Square("square"), Round("round");
+
+    companion object {
+        fun of(json: String): ImageShape? = entries.firstOrNull { it.json == json }
+    }
+}
+
+/**
+ * "Nothing to show right now" (the music stopped, no bin day this week): the widget is hidden and its place in the
+ * band is freed. Only as the whole view. Returning null instead means "no new view" and keeps the last one.
+ */
+@Immutable
+data object NoneView : PluginView {
+    override val tone: Tone get() = Tone.Neutral
+}
+
+/** One button: [id] goes back to the plugin's `action(ctx, id)` handler. */
+@Immutable
+data class ActionItem(val id: String, val icon: String, val label: String? = null, val tone: Tone = Tone.Neutral, val primary: Boolean = false)
+
+/**
+ * A row of round icon buttons (play/pause, next, volume). Tappable in the detail card only; the corner and the band
+ * don't draw them, so a widget never turns the photo into a remote control. Needs `permissions.actions` in the
+ * manifest (checked by the host).
+ */
+@Immutable
+data class ActionsView(val items: List<ActionItem>, override val tone: Tone = Tone.Neutral) : PluginView
+
+/**
+ * A thin progress bar with an optional label: a track's position, a wash cycle. While [running], the frame moves it on
+ * by itself at one unit per second from [value] measured at [at] (epoch ms), so a plugin that refreshes every 10 s
+ * still shows a smoothly moving bar. [time]: show "1:23 / 3:45" (units are seconds).
+ */
+@Immutable
+data class ProgressView(
+    val value: Float,
+    val max: Float,
+    /** The start of the track (default 0): a range like today's low to high temperature. */
+    val min: Float = 0f,
+    /** Bar: filled up to the value. Marker: a dot on the track (where today's temperature sits in its range). */
+    val style: ProgressStyle = ProgressStyle.Bar,
+    val at: Long? = null,
+    val running: Boolean = false,
+    val label: String? = null,
+    val time: Boolean = false,
+    override val tone: Tone = Tone.Neutral,
+) : PluginView
+
+enum class ProgressStyle(val json: String) {
+    Bar("bar"), Marker("marker");
+
+    companion object {
+        fun of(json: String): ProgressStyle? = entries.firstOrNull { it.json == json }
+    }
+}
 
 /** The limits a view must stay within (docs/plugins.md §4). The schema in docs/api mirrors these numbers. */
 object ViewLimits {
@@ -133,7 +263,7 @@ object ViewLimits {
     const val MAX_FLOW_NODES = 5
     const val MAX_FLOW_EDGES = 8
     const val MIN_POINTS = 2
-    const val MAX_POINTS = 96
+    const val MAX_POINTS = 100
     const val MAX_TEXT_LINES = 2
     const val MAX_TEXT_LINE = 60
     const val MAX_VALUE = 16
@@ -142,6 +272,17 @@ object ViewLimits {
     const val MAX_GAUGE_LABEL = 12
     const val MAX_NODE_TEXT = 16
     const val MAX_ID = 24
+    const val MAX_ACTIONS = 5
+    const val MAX_SUB = 3
+    const val MAX_SUB_TEXT = 12
+    const val MAX_ACTION_LABEL = 16
+    const val MAX_SRC = 2048
+    const val MAX_DESCRIPTION = 60
+    const val MAX_LIST_ROWS = 5
+    const val MAX_LIST_TITLE = 40
+    const val MAX_LIST_TIME = 10
+    const val MAX_LIST_DETAIL = 16
+    const val MAX_LIST_BADGE = 10
     /** Edge power and sparkline values: anything bigger is a bug, not a measurement. */
     const val MAX_MAGNITUDE = 1e12f
 }
@@ -162,9 +303,24 @@ object PluginIconNames {
         "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
         // generic
         "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right",
+        // media and controls
+        "music", "play", "pause", "skip-next", "skip-previous", "volume-up", "volume-down", "volume-off", "power",
     )
     private val set = all.toHashSet()
     fun isKnown(name: String) = name in set
+}
+
+/** Every image [ImageView.src] in this view, for the host to fetch. */
+fun PluginView.imageSources(): List<String> = when (this) {
+    is ImageView -> listOf(src)
+    is StackView -> items.flatMap { it.imageSources() }
+    else -> emptyList()
+}
+
+fun PluginView.hasActions(): Boolean = when (this) {
+    is ActionsView -> true
+    is StackView -> items.any { it.hasActions() }
+    else -> false
 }
 
 /** Whether drawing this view needs the animation clock (moving flow arrows). */

@@ -41,7 +41,6 @@ import app.kinframe.frame.FrameController
 import app.kinframe.frame.R
 import app.kinframe.frame.plugins.homewizard.FoundMeter
 import app.kinframe.frame.plugins.homewizard.HomeWizardDiscovery
-import app.kinframe.frame.plugins.homewizard.HomeWizardViews
 import app.kinframe.frame.plugins.station.StationCode
 import app.kinframe.frame.plugins.station.WeatherStation
 import app.kinframe.frame.plugins.station.WeathercloudSource
@@ -72,9 +71,18 @@ fun PluginSettingsSection(c: FrameController) {
                     PluginLayoutMode.Off to stringResource(R.string.plugins_layout_off),
                     PluginLayoutMode.Overlay to stringResource(R.string.plugins_layout_overlay),
                     PluginLayoutMode.Band to stringResource(R.string.plugins_layout_band),
+                    PluginLayoutMode.Split to stringResource(R.string.plugins_layout_split),
                 ),
                 layout.mode, { prefs.setLayout(layout.copy(mode = it)) },
             )
+        }
+        if (layout.mode == PluginLayoutMode.Split) {
+            Labeled(stringResource(R.string.plugins_split_side)) {
+                ChoiceChips(
+                    listOf(BandSide.Left to stringResource(R.string.plugins_side_left), BandSide.Right to stringResource(R.string.plugins_side_right)),
+                    layout.side, { prefs.setLayout(layout.copy(side = it)) },
+                )
+            }
         }
         if (layout.mode == PluginLayoutMode.Band) {
             Labeled(stringResource(R.string.plugins_band_side)) {
@@ -95,7 +103,7 @@ fun PluginSettingsSection(c: FrameController) {
         }
         if (layout.mode != PluginLayoutMode.Off) {
             val p1 = instances.firstOrNull { it.instanceId == FramePlugins.P1_INSTANCE }
-                ?: InstanceConfig(FramePlugins.P1_INSTANCE, FramePlugins.HOMEWIZARD_P1, enabled = false, settings = JsonObject(mapOf("style" to JsonPrimitive("value"))))
+                ?: newP1(c)
             SwitchRow(stringResource(R.string.p1_name), p1.enabled) { prefs.upsert(p1.copy(enabled = it)) }
             if (p1.enabled) HomeWizardSettings(c, p1) { prefs.upsert(it) }
             // The weather station is switched on in the Weather section (next to the forecast).
@@ -188,7 +196,7 @@ private fun HomeWizardSettings(c: FrameController, cfg: InstanceConfig, update: 
     }
     if (setting("style") == "gauge") Labeled(stringResource(R.string.p1_max)) {
         val f = remember { c.plugins.format() }
-        val current = (cfg.settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: HomeWizardViews.DEFAULT_MAX_W.toInt()
+        val current = (cfg.settings["max_w"] as? JsonPrimitive)?.doubleOrNull?.toInt() ?: FramePlugins.P1_DEFAULT_MAX_W
         ChoiceChips(
             listOf(2000, 3000, 4000, 5000, 6000, 8000, 10000).map { it to f.number(it.toDouble(), unit = "W") },
             current, { update(withSetting("max_w", JsonPrimitive(it))) },
@@ -240,6 +248,13 @@ private fun ManualAddress(current: String?, onUse: (String) -> Unit) {
         )
         KinButton(stringResource(R.string.p1_use), { submit() }, style = KinButtonStyle.Secondary, enabled = text.isNotBlank() && text.trim() != current)
     }
+}
+
+/** A new, switched-off P1 instance with the manifest's defaults. */
+private fun newP1(c: FrameController): InstanceConfig {
+    val settings = JsonObject(mapOf("style" to JsonPrimitive("value")))
+    return c.plugins.bundle(FramePlugins.HOMEWIZARD_P1)?.let { newInstanceConfig(FramePlugins.P1_INSTANCE, it.manifest, enabled = false, settings = settings) }
+        ?: InstanceConfig(FramePlugins.P1_INSTANCE, FramePlugins.HOMEWIZARD_P1, enabled = false, settings = settings)
 }
 
 /** The built-in weather station's instance, or a new disabled one with the defaults. */

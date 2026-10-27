@@ -1,0 +1,20 @@
+{
+  "@name": "Contatore HomeWizard P1",
+  "@description": "Potenza in tempo reale da un contatore HomeWizard P1 in casa: consumo, immissione, per fase e i totali di oggi.",
+  "@setting.host": "Indirizzo del contatore",
+  "@setting.host.help": "Attiva l'API locale del contatore nell'app HomeWizard Energy.",
+  "@setting.style": "Mostra come",
+  "@option.style.value": "Numero",
+  "@option.style.gauge": "Lancetta",
+  "@option.style.flow": "Flusso",
+  "@setting.max_w": "Fondo scala (W)",
+  "@setting.warn_w": "Evidenzia sopra (W, 0 = no)",
+  "grid": "Rete",
+  "home": "Casa",
+  "last_hour": "Ultima ora",
+  "returning": "Immissione",
+  "today_export": "Immessi oggi",
+  "today_gas": "Gas oggi",
+  "today_import": "Consumati oggi",
+  "using": "Consumo"
+}

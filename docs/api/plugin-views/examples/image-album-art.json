@@ -1,0 +1,18 @@
+{
+  "type": "stack",
+  "direction": "horizontal",
+  "items": [
+    {
+      "type": "image",
+      "src": "http://192.168.1.157:8123/api/media_player_proxy/media_player.living?token=EXAMPLE&cache=1",
+      "description": "Album art"
+    },
+    {
+      "type": "text",
+      "lines": [
+        "Les Cactus",
+        "Jacques Dutronc"
+      ]
+    }
+  ]
+}

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Disattivato</string>
     <string name="plugins_layout_overlay">Negli angoli</string>
     <string name="plugins_layout_band">Accanto alla foto</string>
+    <string name="plugins_layout_split">Due foto e un pannello</string>
+    <string name="plugins_split_side">Lato del pannello</string>
     <string name="plugins_band_side">Lato (orizzontale)</string>
     <string name="plugins_side_left">Sinistra</string>
     <string name="plugins_side_right">Destra</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">La mia stazione meteo</string>
     <string name="wx_station_sub">La tua stazione meteo (PWS) tramite Weathercloud</string>
     <string name="wx_both_note">Con entrambe attive, l’orologio mostra la temperatura della tua stazione con il cielo e la minima e massima delle previsioni.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Oggi</string>
+    <string name="plugin_rel_tomorrow">Domani</string>
+    <string name="plugin_rel_yesterday">Ieri</string>
+    <string name="plugin_rel_just_now">poco fa</string>
+    <string name="plugin_rel_now">ora</string>
+    <string name="plugin_rel_min_ago">{n} min fa</string>
+    <string name="plugin_rel_h_ago">{n} h fa</string>
+    <string name="plugin_rel_in_min">tra {n} min</string>
+    <string name="plugin_rel_in_h">tra {n} h</string>
 </resources>

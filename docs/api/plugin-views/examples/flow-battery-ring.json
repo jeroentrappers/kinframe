@@ -1,0 +1,60 @@
+{
+  "type": "flow",
+  "nodes": [
+    {
+      "id": "solar",
+      "icon": "solar",
+      "value": "6,6 kW",
+      "label": "Solar",
+      "tone": "good"
+    },
+    {
+      "id": "grid",
+      "icon": "grid",
+      "value": "800 W",
+      "label": "Grid",
+      "tone": "good"
+    },
+    {
+      "id": "home",
+      "icon": "home",
+      "value": "1,3 kW",
+      "label": "Home"
+    },
+    {
+      "id": "battery",
+      "icon": "battery-charging",
+      "value": "78%",
+      "label": "Battery",
+      "percent": 78
+    },
+    {
+      "id": "ev",
+      "icon": "car",
+      "value": "3,3 kW",
+      "label": "Car"
+    }
+  ],
+  "edges": [
+    {
+      "from": "solar",
+      "to": "home",
+      "power": 1300
+    },
+    {
+      "from": "solar",
+      "to": "ev",
+      "power": 3300
+    },
+    {
+      "from": "solar",
+      "to": "battery",
+      "power": 1200
+    },
+    {
+      "from": "solar",
+      "to": "grid",
+      "power": 800
+    }
+  ]
+}

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Aus</string>
     <string name="plugins_layout_overlay">In den Ecken</string>
     <string name="plugins_layout_band">Neben dem Foto</string>
+    <string name="plugins_layout_split">Zwei Fotos und eine Übersicht</string>
+    <string name="plugins_split_side">Seite der Übersicht</string>
     <string name="plugins_band_side">Seite (Querformat)</string>
     <string name="plugins_side_left">Links</string>
     <string name="plugins_side_right">Rechts</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Meine Wetterstation</string>
     <string name="wx_station_sub">Deine eigene Wetterstation (PWS) über Weathercloud</string>
     <string name="wx_both_note">Sind beide an, zeigt die Uhr die Temperatur deiner Station mit dem Himmel und den Tiefst- und Höchstwerten der Vorhersage.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Heute</string>
+    <string name="plugin_rel_tomorrow">Morgen</string>
+    <string name="plugin_rel_yesterday">Gestern</string>
+    <string name="plugin_rel_just_now">gerade eben</string>
+    <string name="plugin_rel_now">jetzt</string>
+    <string name="plugin_rel_min_ago">vor {n} Min.</string>
+    <string name="plugin_rel_h_ago">vor {n} Std.</string>
+    <string name="plugin_rel_in_min">in {n} Min.</string>
+    <string name="plugin_rel_in_h">in {n} Std.</string>
 </resources>

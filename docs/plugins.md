@@ -1,7 +1,8 @@
 # Plugins: design
 
-Status: **design; step 1 is built** (the view format, its native components, the overlay and band layouts and two
-built-in widgets, HomeWizard P1 and a weather station, configured on the frame; see §12). This document is the contract plugin authors and
+Status: **design; steps 1 and 2 are built** (the view format, its native components, the overlay and band layouts,
+and the QuickJS plugin host with the HomeWizard P1, Home Assistant energy, car and now-playing plugins in JavaScript;
+the weather station is still a Kotlin built-in; everything configured on the frame; see §12 and §13). This document is the contract plugin authors and
 the kinframe apps will build against. Open questions are listed in §11.
 
 ## 1. What a plugin is
@@ -97,6 +98,31 @@ The reference screens are 16:10, so a 3:2 photo area leaves a band of exactly 1/
 - Other screen shapes keep the rule: a 16:9 frame gets a wider band (3:2 of 1920×1080 leaves 300 px), a 4:3 frame
   has no room and uses the overlay layout.
 
+### 2.2 Split layout: two photos and a dashboard
+
+`plugins.layout.mode: "split"` divides the screen in three: one photo on half of it, and the other half shared by the
+**dashboard** and a second photo. The dashboard is dark (the dark theme's surface, a shade lighter than the grid
+between the photos: a white panel glared beside the photos and at night). It holds the clock, the weather now and the forecast for the next three days on top (in the clock's row when
+the dashboard is wide, on a row of its own when it is tall),
+up to four plugin widgets in their **strip** form (the band's horizontal form) flowing into rows at their own size
+(only a widget wider than the dashboard is scaled down), and what the calendar has for the next 48 hours: today and
+the following day side by side in a wide dashboard, below each other in a tall one, whole events only, as many as
+fit. A dashboard without a calendar gives the widgets the room. The clock, countdowns and corner widgets don't show on the
+photos meanwhile, and the calendar sidebar stays off.
+
+| Screen | Big photo | Second photo | Dashboard |
+|---|---|---|---|
+| Landscape (1280×800) | a tall half (0.8), left or right | a wide quarter (1.6) under the dashboard | the other half's top quarter |
+| Portrait (800×1280) | the wide top half (1.25) | a tall quarter (0.63) | the other bottom quarter |
+
+`side` puts the dashboard's half on the left or right (landscape), or the dashboard left or right of the second photo
+(portrait). Each slide is two photos chosen so their shapes fit: the photo whose turn it is takes the cell it fits
+best, and the first of the next photos with the other orientation joins it (the next photo of any shape when none of
+the coming ones fits). They are drawn by the same tile renderer as collages and pairs, in the same grid of gaps and
+rounded corners, with the dashboard as the third cell. Videos and live photos that play still take the whole screen;
+the dashboard fades out for them and back in after. Screenshots: `frame/build/screenshots/split_*.png`
+(`SplitScreenshotTest`).
+
 ## 3. What a plugin is made of
 
 ```
@@ -141,7 +167,9 @@ ha-energy-flow/
 - **`id`** is reverse-DNS-like and unique in the registry. `community.` is the prefix for third-party plugins,
   `kinframe.` for the ones the project maintains.
 - **`api`** is the plugin API version (section 4). The frame refuses plugins for an API it doesn't know.
-- **`refresh`**: `default_seconds` between `render` calls, `min_seconds` as the floor for `invalidate()`, and optional
+- **`refresh`**: `default_seconds` between `update` calls, `min_seconds` as the floor for `invalidate()` (at least 1;
+  below 5 only for plugins whose `http` permissions are all `local_only` settings, so no internet API is asked every
+  second by every frame), and optional
   `stale_seconds`: how old the source's own measurement (`ctx.dataTime`) may be before the widget is greyed (a weather
   station that uploads every 10 minutes: 1800).
 - **`permissions`** lists what the code may do, and every network permission names the **setting** that holds the
@@ -151,13 +179,37 @@ ha-energy-flow/
     internet through them.
   - A plugin that needs an internet API instead (e.g. a public transport departure board) declares a fixed host:
     `"http": ["https://api.example.org"]`. The catalog shows that host to the owner before they install it.
+  - `"location": true` gives the plugin `ctx.location`, the frame's place from its weather settings, rounded to about
+    a kilometre (air quality, a local forecast). Without it `ctx.location` is null, whether or not the frame has a
+    place. The catalog shows it like a host.
+- **`default_visibility`** (optional): how a new instance starts, `always` (the default), `on_change` (for 30 s after
+  the view changes: a car whose charge only moves now and then) or `on_tap`. The owner can change it per instance.
+- **`presets`** (optional, at most 12): named groups of setting values the settings form offers, so the owner picks
+  "Kia / Hyundai" instead of typing six entity names. A string value may hold `{key}` placeholders for **text**
+  settings the owner fills in first; the preset can't set those itself, nor secrets, and every value must fit its
+  setting (a number for `number`, one of the `options` for `choice`, a list only for a `multiple` entity):
+
+  ```json
+  "presets": [
+    { "id": "kia", "label": "Kia / Hyundai (Kia Connect)",
+      "settings": { "battery_level": "sensor.{prefix}_ev_battery_level", "range": "sensor.{prefix}_ev_range" } }
+  ]
+  ```
+
+  On the frame, `PluginManifest.presets` and `applyPreset(id, values)` hold this for the settings form of step 3
+  (`applyPreset` returns null while a placeholder's setting is still empty); `newInstanceConfig` applies
+  `default_visibility` to a new instance.
 - **Setting types:** `text`, `number`, `boolean`, `choice`, `url`, `secret`, `entity` (Home Assistant entity, see
-  6.1), `color`, `duration`. Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
+  6.2), `color`, `duration`, `timezone` (an IANA name such as `Asia/Tokyo`; the forms offer a searchable list of
+  cities). Each has `label`, optional `help`, `required`, `default`. The web and mobile apps render
   the form from this list; plugins never ship their own settings UI. Labels are translated through `locales/`.
 
 ### 3.2 Code
 
-`main.js` exports one object. Everything is async and returns plain data.
+`main.js` exports one object and returns plain data. Fetching and drawing are separate: **`update`** is the only
+call on a timer that may use the network and keeps what it got in `ctx.state`; **`render`** and **`detail`** draw from
+that and can't use the network (`ctx.http` throws there), so the frame never waits for a slow device to draw, and the
+50 ms budget for drawing is all computation.
 
 ```js
 export default {
@@ -170,8 +222,15 @@ export default {
     return null;
   },
 
-  // Called every `refresh` seconds and after ctx.invalidate(). Return the view to draw.
-  async render(ctx) {
+  // Called every `refresh` seconds, right before render: fetch, and keep the data in ctx.state.
+  async update(ctx) {
+    if (ctx.state.live) return; // the WebSocket keeps ctx.state current
+    const r = await ctx.http.get(ctx.settings.base_url + '/api/states', { headers: { Authorization: 'Bearer ' + ctx.settings.token } });
+    ctx.state.solar = /* … */ 0;
+  },
+
+  // Called after every update and after ctx.invalidate(). Draw from ctx.state; no network here.
+  render(ctx) {
     const s = ctx.state;
     return {
       type: 'flow',
@@ -201,17 +260,26 @@ export default {
 |---|---|
 | `settings` | The owner's settings, secrets included, read-only. |
 | `state` | A plain object the plugin may keep between calls (lost on restart). |
-| `store` | Small persistent key-value storage, 64 KB per instance (e.g. yesterday's total). |
-| `http.get/post(url, options)` | Fetch. Only URLs allowed by `permissions.http`. JSON or text body, optional request headers (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls). 10 s timeout, 1 MB response limit. |
+| `store` | Small persistent key-value storage, 64 KB per instance (e.g. yesterday's total): `get/set` strings, `getJson/setJson`. Over the limit, `set` throws. |
+| `http.get(url, options)`, `http.post(url, body, options)`, `http.put(url, body, options)` | Fetch, in `start`, `update`, `action` and WebSocket handlers (not in `render` or `detail`). Only URLs allowed by `permissions.http`. Resolves to `{ status, ok, contentType, text, json() }`; a non-2xx status doesn't throw (the plugin decides). `options.headers` (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls); a `body` object is sent as JSON. 10 s timeout, 1 MB response limit, no redirects. |
 | `ws.connect(url, handlers)` | One WebSocket per instance, same rules. The frame reconnects with backoff and calls `onOpen` again. |
-| `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message). Throttled to `refresh.min_seconds`. |
+| `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message), without an `update`. Throttled to `refresh.min_seconds`. |
 | `format.power/energy/percent/temperature/number/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". `temperature` follows the frame's °C/°F (optionally with decimals); `number(value, decimals, unit)` for anything else ("2,3 m/s"). |
+| `format.day/ago/until(epochMs)` | Relative to now, in the frame's language and time zone. `day`: "Today", "Tomorrow", "Yesterday", the weekday within six days either way ("Friday"), else a short date without the year ("12 Nov"). `ago`: "just now", "8 min ago", "3 h ago" (today, or within 6 hours), then `day`. `until`: "now", "in 5 min" (rounded up), "in 3 h", then `day`. |
 | `dataTime` | Optional: when the source measured what the view shows (epoch ms). For sources that update every few minutes; the frame greys the view when it is older than `manifest.refresh.stale_seconds`, even while fetching works. |
 | `t(key, vars)` | The plugin's own translated strings from `locales/`. |
 | `log(...)` | Goes to the frame's diagnostics, visible to the owner, never uploaded with secrets in it. |
-| `now()`, `timezone` | The frame's clock and time zone. |
+| `now()`, `timezone`, `language` | The frame's clock, time zone and language tag ("nl", "zh-CN"). |
+| `location` | `{ latitude, longitude }` of the frame's place (its weather settings), two decimals (about 1 km); null without `permissions.location` or when the frame has no place. Read-only. |
+| `localTime(epochMs?, zone?)` | The calendar for an instant: `{ date: "2026-10-25", year, month, day, hour, minute, weekday, offset_minutes, zone }` (weekday 1 = Monday, offset from UTC) in the frame's time zone, or in `zone` (an IANA name, `"Asia/Tokyo"`; an unknown one is an error). `format.time(epochMs, zone?)` takes the same zone. QuickJS's `Date` only knows the device's own zone. |
 
 There is no `fetch`, `XMLHttpRequest`, timers beyond what the runtime gives, file system, or access to the photos.
+`main.js` may import the host's own libraries (`import * as ha from 'kinframe/ha'`, §13.1) and nothing else.
+
+Besides `render`, `start`, `detail` and `stop`, a plugin with `"actions": true` in its permissions exports
+`async action(ctx, id)`: the owner tapped one of its buttons (§4.2). It may return a view to show at once; the frame
+renders again right after either way. `render` may return `{ "type": "none" }` to hide the widget (and free its place
+in the band) when there is nothing to show; `null` means "no new view" and keeps the last one.
 
 ## 4. What a plugin can draw: views (API 1)
 
@@ -224,13 +292,23 @@ components come with a new API version.
 | `rows` | Up to 4 `value`s stacked | grid / solar / home |
 | `gauge` | Ring or bar from 0–100 % with a label inside, or a two-sided `dial` (−100–100 %, zero at the top) | car battery 68 %; grid 1.240 W |
 | `flow` | Up to 5 nodes (icon + value) with animated arrows between them, speed by power | solar → home ← grid |
-| `sparkline` | A small line chart of up to 96 points, optional min/max | power over the last 24 h |
+| `sparkline` | A small chart of up to 100 points, a line or `bars`, optional min/max, one `highlight`ed point and a "now" `marker` (§4.3) | power over the last 24 h; today's prices |
 | `text` | One or two short lines (max 60 chars each) | "Charging · full at 23:10" |
 | `stack` | Vertical or horizontal group of the above, max depth 2 | gauge + text |
+| `image` | A picture from an http(s) URL, square or round, size by form (§4.2) | album art |
+| `actions` | 1–5 round buttons, tappable in the detail card only (§4.2) | ⏮ ⏯ ⏭ |
+| `progress` | A thin bar from min to max, or a marker dot on the track; can move on by itself | track position, today's temperature in its range |
+| `none` | Hide the widget; only as the whole view | nothing playing |
+| `list` | Up to 5 rows of time, title, detail and badge (§4.3) | departures; bin days |
 
-Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`, `info` (violet)), which maps to the frame's palette, and an
+A `gauge` takes up to three small `sub` values under the ring or dial (an icon, usually an arrow, in a tone, and the
+number in text colour: today's ↑ 11,8 / ↓ 14,5 kWh beside the live power). A `flow` node takes `percent`, drawn as a
+ring around it (a home battery's charge).
+
+Every component accepts `tone` (`neutral`, `good`, `warn`, `bad`, `accent`, `info` (violet), and the quantity tones
+`water`, `gas` and `heat`, §4.3), which maps to the frame's palette, and an
 icon from a fixed set of line icons (home, sun, grid, battery, car, plug, flame, water, thermometer, wind, leaf,
-euro, rain, ...; 42 so far, more can be added within API 1). A `value` can turn its icon with `icon_rotation` (0–360
+euro, rain, music, play, pause, skip-next, volume-up, ...; 51 so far, more can be added within API 1). A `value` can turn its icon with `icon_rotation` (0–360
 degrees clockwise): the `direction` icon is a vane arrow pointing north, for a wind direction or a heading.
 
 The exact format is [`docs/api/plugin-views/plugin-view.schema.json`](api/plugin-views/plugin-view.schema.json) (JSON
@@ -238,11 +316,84 @@ Schema) and [`plugin-view.d.ts`](api/plugin-views/plugin-view.d.ts) (TypeScript 
 examples in `docs/api/plugin-views/examples/` and views that must be rejected in `invalid/`. The limits: a tree at
 most 3 components deep (`stack › stack › value`), at most 24 components per view (rows' values included), 16 KB
 serialized; `value` ≤ 16 characters, `unit` ≤ 8, labels and captions ≤ 32, a gauge label ≤ 12, flow node texts ≤ 16,
-text lines ≤ 60; 1–4 rows or stack items, 2–5 flow nodes, up to 8 edges, 2–96 sparkline points (`null` = gap). No line
+text lines ≤ 60; 1–4 rows or stack items, 2–5 flow nodes, up to 8 edges, 2–100 sparkline points (`null` = gap), 1–5
+list rows (title ≤ 40, time ≤ 10, detail ≤ 16, badge ≤ 10). No line
 breaks or control characters in any text, and unknown properties are rejected too, so a typo shows up in the preview
 instead of being ignored. Edge `power` is a magnitude (≥ 0); the direction is `from` → `to`. A view that doesn't validate (unknown component, too deep, text too long) is not drawn; the frame
 keeps the previous view and logs why. When `render` throws or times out three times in a row, the widget shows a
 discreet "unavailable" state and the owner sees the error in the app.
+
+### 4.2 Pictures, buttons and moving bars
+
+Added for the now-playing plugin (§9.5), and generic enough for others (a camera snapshot, a washing machine's cycle).
+
+- **`image`** names an http(s) URL; the plugin never handles bytes. The *host* fetches it through the plugin's own
+  network permissions (so `local_only` and the allowed origins apply exactly as to `ctx.http`), at most 768 KB, decodes
+  it subsampled to at most 336 px on its long side (cheap on the RK3126; a 168 dp picture stays sharp on a 2× screen),
+  and keeps the last 6 per instance. Until it has loaded the view shows a quiet tile of the same size, so nothing jumps.
+  Sizes: 56 dp in the band, 76 dp in the corner, 168 dp in the detail card; square with rounded corners, or round.
+  An image that fails to load stays the tile and is logged; it never fails the view.
+- **`actions`** are drawn only in the **detail card**: on the photo or in the band a tap opens the card, so a widget
+  can never turn the photo into a remote control by accident, and a tap's meaning stays the same for every widget. The
+  manifest must say `"actions": true` (shown to the owner in the catalog); a view with buttons from a plugin without it
+  is refused like an invalid one. A press runs `action(ctx, id)` on the plugin thread (same CPU and time limits), the
+  card's 20 s auto-close restarts, the instance renders again and the card fetches `detail()` afresh. Buttons are 52 dp
+  (a `primary` one 64 dp, filled), with a label under them and an accessibility label. A compact control row in the
+  band is deliberately left out (§11).
+- **`progress`** is a thin bar (`min` 0 by default, `max`), or with `style: "marker"` a dot on the track. With
+  `running` and `at` (epoch ms the value was measured), the frame moves the value on by one per second until `max`,
+  redrawing once a second only while it runs, so a track's position moves smoothly although the plugin refreshes every
+  15 s. `time` shows the values as `1:23 / 3:45`.
+- **`none`** hides the widget until the next view (the music stopped).
+
+### 4.3 Lists, bars, quantity colours and raised decimals
+
+Added from what the first plugins showed (§11.1, items 1, 3, 8 and 9). Screenshots:
+[`docs/plugins/`](plugins/) `view_api_additions.png` (every form, paper and photo), `view_api_additions_dark.png`,
+`list_prices_band.png`, `list_prices_overlay.png`, `list_prices_strip.png`, `utilities_band.png`.
+
+- **`list`**: rows of `{ time?, title, detail?, badge?, icon?, tone? }` under an optional `label` (a station's name):
+  "22:23 · Brussels Airport - Zaventem · spoor 2 · **+3**". A row's tone colours its badge and icon (a delay in `warn`,
+  "Cancelled" in `bad`). By form:
+  - *corner*: the label and the first 3 rows as a small timetable; the time column is as wide as the widest time
+    ("22:23" or "Tomorrow"), the title gives way (ellipsis) before the detail and the badge;
+  - *detail card*: all 5 rows, wider;
+  - *band column* (72–80 dp, too narrow for any title): the first row's icon once, then the times of the first 3 rows
+    with badges of up to 4 characters beside them ("22:23 +3"); a longer badge colours the time in the row's tone
+    instead ("22:38" in red for a cancelled train). A list without times shows its first title (up to 3 lines);
+  - *band strip*: the first 2 rows, one line each.
+- **`sparkline`** takes up to **100** points (was 96), lines and bars alike: a day of quarter hours has 92, 96 or 100
+  of them (the clocks change), so a price plugin no longer averages. `style: "bars"` draws a bar per point from zero
+  (negative prices hang below the zero line; without a `min` the range always includes zero). `highlight` (an index)
+  picks out one point in `highlight_tone` (default the chart's tone), with a dot at its tip so the cheapest quarter hour
+  shows even at 0 c; `marker` (an index) is "now", a thin line across the chart with its bar or point at full strength.
+  With either, the other bars step back (42 % alpha on paper, 75 % on photos, where a bright sky would swallow them).
+  Both indexes must point at a number, not a gap. In the column 100 bars in 64 dp touch and read as an area, while
+  the picked-out ones stay 2 dp wide.
+- **Quantity tones** `water` (blue), `gas` (pink) and `heat` (orange) let a water meter look like water next to the
+  electricity the P1 already draws in `info` (violet). Plugins still never pick colours, and should pair a quantity
+  tone with its icon (`water`, `flame`, `thermometer`): colour is never the only cue (WCAG 1.4.1). The values and the
+  check (WCAG contrast; CIEDE2000 distance to the semantic tones after simulating protanopia, deuteranopia and
+  tritanopia with Machado et al. 2009 at full severity):
+
+  | Palette | water | gas | heat | Contrast (worst) | Closest pair, normal / protan / deutan / tritan (ΔE00) |
+  |---|---|---|---|---|---|
+  | paper | `#1B7FD1` | `#A8306E` | `#D2691E` | 3.35 (heat on paper) | 8.7 / 8.2 / 6.8 / 4.3 (all heat–accent) |
+  | dark | `#88DDF7` | `#E36FA9` | `#E8752A` | 5.51 (heat on surface) | 10.5 heat–accent / 12.5 water–info / 7.3 water–info / 5.5 gas–bad |
+  | photo | `#B3EEFF` | `#FFA3D2` | `#FFB066` | 3.08 (gas on a mid photo, `#5B6B5E`) | 9.0 heat–accent / 7.0 heat–warn / 5.0 heat–warn / 3.7 heat–bad |
+
+  Contrast is ≥ 3:1 for graphics everywhere (on photos against the darkest "mid" tone the screenshots use; text on
+  photos also has its shadow), checked in `PluginPaletteTest`. Nine hues can't all stay apart for every colour-vision
+  deficiency: the closest pairs are heat next to `accent`/`warn`/`bad` (all warm), which rarely meet in one widget,
+  and tritanopia (about 1 in 10 000) is the weakest case; the icon carries the meaning there. Water was moved to a
+  light cyan on the dark and photo palettes because a mid blue merged with `info`'s violet for protanopes (ΔE00 0.8).
+- **Raised decimals**, frame-wide and automatic, after the HomeWizard Energy Display: in a `value`'s big number, a row's
+  value and a dial's label, one or two decimals are drawn at 62 % size with their tops level with the whole digits
+  (21,⁴ °C; 3,⁸ kWh), the way price tags write "12,⁹⁹". The separator stays full size on the baseline, so "3,8" never
+  reads as 3⁸ (the first try raised the comma too, and did). Detection is locale-free (`PluginFormat.raisedDecimals`):
+  one or two digits after the last "," or ".", a whole part grouped with the *other* separator, a space or "'" in
+  threes or not at all, and an optional short sign ("°"); "1.234" (a thousand) and three decimals are left alone. It is
+  styling only, so the text, and what TalkBack reads, stays "21,4".
 
 Because the frame owns the drawing, the same view works in a corner, in the detail card, on the web preview and in a
 future TV or tablet frame, and animations (flow arrows, value changes) are done once, well, in the frame's GPU path.
@@ -258,10 +409,12 @@ future TV or tablet frame, and animations (flow arrows, value changes) are done 
                                                     │   view validator ──▶ Compose overlay
 ```
 
-- **Runtime:** each instance runs in its own **QuickJS** context (small, embeddable, has memory limits and an
+- **Runtime:** each instance runs in its own **QuickJS** runtime (small, embeddable, has memory limits and an
   interrupt handler for CPU limits, runs fine on armeabi-v7a and Android 6). A plugin gets **8 MB** of heap and **50 ms
-  of CPU per call**; over the limit, the call is aborted and counted as a failure. All instances share one background
-  thread at low priority, so a plugin can never stall the slideshow's main thread.
+  of JavaScript per call** (time spent awaiting `ctx.http` doesn't count); over the limit, the call is aborted and
+  counted as a failure. On the timer the host calls `update` and then `render`; a failed `update` skips that render
+  and the last view stays. All instances share one background thread at low priority, so a plugin can never stall the
+  slideshow's main thread. Details of the implementation: §13.
 - **Network:** every `ctx.http` and `ctx.ws` call goes through the host, which checks the URL against the manifest's
   permissions and `local_only` before opening a socket, follows no redirects to other hosts, and rate-limits to
   `refresh.min_seconds`. Plain `http://` is allowed only for private addresses (home devices rarely have TLS).
@@ -271,24 +424,88 @@ future TV or tablet frame, and animations (flow arrows, value changes) are done 
 - **Lifecycle:** instances start after the slideshow is up, stop at night (sleep schedule) and during setup, and
   restart with the new code when the plugin updates. Several instances of one plugin (e.g. two cars) are fully
   separate.
-- **Offline:** the last good view stays on screen, greyed after 3× the refresh interval, hidden after 15 minutes.
+- **Offline:** the last good view stays on screen, greyed after 3× the refresh interval (at least 15 s), hidden after
+  15 minutes.
 
 ## 6. Settings in the apps
 
 The frame's settings page gets a **Plugins** section: the installed instances per slot, "Add plugin" (opens the
-catalog), and per instance its form, a live preview and the last error. The form comes from the manifest.
+catalog), and per instance its form and the last error. The form comes from the manifest; plugins never ship their
+own settings UI. A live preview in the apps is for later.
 
-### 6.1 Discovery helpers
+**Where it lives (step 3).** The instances are part of the frame settings (`plugins.layout`, `plugins.instances`,
+`docs/api/openapi.yaml`), so they travel like every other setting: a merge patch with `If-Match`, the change feed to
+the frame, `PATCH /device/settings` for changes made on the frame. `instances` is an array, so a patch replaces it
+whole: the apps send the full list every time, from the version they read.
+
+- **Secrets** (`secret` settings) never go in `settings`. People write them in `secrets` (`{"token": "…"}` sets,
+  `null` removes, a key left out keeps its value; an instance sent without `secrets` keeps all of its own, matched by
+  `instance_id`). They read back only `secrets_set: ["token"]`. The server seals them with their own key; only the
+  frame gets them back, in full, in its settings.
+- **Catalog:** the frame reports the plugins it can run (`PUT /device/plugins/catalog`: each manifest as-is, its
+  manifest translations, `builtin`), when its app starts and the catalog changed. The apps read it from
+  `GET /frames/{id}/plugins`. Until a frame reported one (an older frame app) the apps show "Update the frame app".
+- **Checks:** the server checks instances against that catalog: a plugin the frame has, a slot it allows, known
+  settings of the right type (a number for `number`, one of the `options` for `choice`, a list only for a `multiple`
+  entity, an http(s) address or a bare `host[:port]` for `url`), no secret among the plain settings, unique ids, and for an **enabled**
+  instance every `required` setting without a `default` filled in (secrets: set). Errors are `422` with fields like
+  `plugins.instances.0.settings.grid` (`unknown`, `type`, `enum`, `secret`, `required`, `not_on_frame`, `duplicate`).
+- **Status:** the frame reports per instance whether it runs, its last error and when its last update worked, plus
+  what it discovered (6.2), at most every 10 s (`PUT /device/plugins/status`). The apps show it with the instance and
+  poll `GET /frames/{id}/plugins` every few seconds while a form is open.
+
+### 6.1 The form
+
+The web app and the family app build the same form from the manifest:
+
+- **Instance list:** per instance the plugin's name, its corner, an on/off switch (`enabled`) and a status line: the
+  error, "Waiting for the frame" before its first report, or nothing when it runs. At most 8 instances.
+- **Add plugin:** the catalog with each plugin's name, description, the internet hosts it may reach (its fixed
+  `permissions.http` origins) and whether it reads the frame's location. Adding makes an instance with a new id
+  (`p-` and 10 random lowercase letters or digits), the top-right corner if the plugin allows it, the manifest's
+  `default_visibility`, and `enabled: false` until the owner saves a complete form.
+- **Fields,** in manifest order, labelled `@setting.<key>` (else the manifest's `label`), with `help`
+  (`@setting.<key>.help`) under it and `placeholder` inside:
+  - `text`, `color` (`#rrggbb`), `duration`: a text field; `number`: a number field; `boolean`: a switch;
+  - `choice`: a segmented control for up to 4 options, else a menu; option labels `@option.<key>.<value>`, else the
+    value;
+  - `url`: an address field; with `discover`, what the frame found (`services[<discover>]`) as one-tap suggestions;
+  - `secret`: a password field. When set (`secrets_set`) it shows "Set" with Change and Remove; untouched, nothing is
+    sent;
+  - `entity`: a searchable list of the entities the frame reported for this instance, filtered by `domain` (the
+    part of the entity id before the dot) and `unit` when the manifest names them, showing the friendly name with the
+    entity id under it; several for `multiple`. Typing an entity id by hand always works. Without entities yet: "Save
+    the address and token: the frame then lists what it finds."
+  - A `default` shows as the field's value until changed; empty fields are left out of `settings`.
+- **Presets:** a "Fill in for" menu (`@preset.<id>`, else `label`). Picking one first asks for the text settings
+  its `{placeholders}` need, then fills in its values (overwriting those settings).
+- **Placement:** the corner (only the manifest's `slots`), and when it shows: always, for 30 s after it changes
+  (`on_change`), or after a tap (`on_tap`).
+- **Saving** sends the whole `instances` list. A `412` means someone changed the settings meanwhile: reload and try
+  again. `422` field errors are shown at their field.
+- **Remove** asks first.
+
+**Manifest translations** live in the plugin's `locales/<tag>.json`, next to its own strings: `@name`,
+`@description`, `@setting.<key>`, `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`,
+`@preset.<id>`. The manifest's own text is the fallback. An English option label (`"@option.grid_sign.import": "Taking
+from the grid"`) goes in `locales/en.json`.
+
+### 6.2 Discovery helpers
 
 Typing IP addresses and entity IDs is where home automation integrations usually lose people, so the host offers
-two helpers the forms can use:
+two helpers the forms can use. The frame does the work, because only the frame is sure to be on that network, and
+reports what it found in its plugin status:
 
 - **Find on network:** a `url` setting may declare `"discover": "_home-assistant._tcp"` or
-  `"discover": "_hwenergy._tcp"`. The frame browses mDNS for that service and offers the results in the app's form.
-  (The frame does this, not the app, because only the frame is guaranteed to be on that network.)
-- **Entity picker:** an `entity` setting lists the Home Assistant entities that match `domain` and `unit`, fetched by
-  the frame through the plugin's own `base_url` and `token`, so the owner picks "Solar power" from a list instead of
-  typing `sensor.solaredge_ac_power`.
+  `"discover": "_hwenergy._tcp"`. The frame browses mDNS for every service type its catalog names (for a minute, every
+  10 minutes while it is connected) and reports
+  `services: {"_hwenergy._tcp": [{"name": "P1 meter", "url": "http://192.168.1.20"}]}`.
+- **Entity picker:** for an instance of a plugin with `entity` settings, once its `base_url` and `token` are set, the
+  frame asks Home Assistant through them (with the plugin's own `local_only` rule) for each entity's id, friendly
+  name, unit and device class: one template (`POST /api/template`), about 110 KB for 1,300 entities, where
+  `/api/states` would carry every attribute. It does so when the instance's settings change and every
+  10 minutes, so the owner picks "Solar power" from a list instead of typing `sensor.solaredge_ac_power`. A plugin
+  with entity settings must name its connection settings `base_url` (url) and `token` (secret).
 
 ## 7. Publishing: the registry
 
@@ -325,6 +542,8 @@ two helpers the forms can use:
 
 ### 9.1 Home Assistant energy flow (`kinframe.ha-energy`)
 
+(As built, with what real installations need beyond this design: §13.)
+
 - **Settings:** Home Assistant URL (mDNS discovery, `local_only`), long-lived token, and entity pickers for solar,
   grid, battery and home power. If Home Assistant's own Energy dashboard is configured, the plugin reads its
   configuration (`energy/get_prefs` over the WebSocket API) and fills the sensors in automatically.
@@ -337,7 +556,8 @@ two helpers the forms can use:
 
 - **Settings:** the meter's address (mDNS `_hwenergy._tcp` discovery, `local_only`). The owner must switch on **Local
   API** for the meter in the HomeWizard Energy app.
-- **Data:** the meter's local HTTP API (`/api/v1/data`), polled every 5 s: active power (import negative for export),
+- **Data:** the meter's local HTTP API (`/api/v1/data`), polled every second (the meter's own update rate; the
+  history behind the trend arrow and the hour chart keeps one averaged sample per 5 s): active power (import negative for export),
   per-phase power, today's import/export and gas. The newer authenticated local API (v2, HTTPS with a token issued by
   pressing the meter's button) is supported when the meter offers it; the plugin's setup tells the owner to press the
   button and the frame requests the token, storing it as a `secret`.
@@ -349,8 +569,9 @@ two helpers the forms can use:
 
 - **Settings:** Home Assistant URL and token (shared with 9.1 if both are installed: the app offers to reuse them),
   and entity pickers for battery level, charging state, range, charge-complete time and plug state. A preset for the
-  **Kia/Hyundai integration** (Kia Connect / Bluelink, a custom Home Assistant integration) preselects its usual
-  entities, so most owners only confirm.
+  **Kia/Hyundai integration** (Kia Connect / Bluelink, a custom Home Assistant integration) fills in its usual
+  entities from the car's entity prefix (manifest `presets`, `{prefix}`), so most owners type `ev3` and confirm. The
+  plugin still reads the prefix itself when an entity is left empty, so the preset is a convenience, not a must.
 - **Data:** Home Assistant WebSocket subscriptions, like 9.1. The car's own data reaches Home Assistant through the
   manufacturer's cloud, often only every 30–60 minutes unless charging; the widget shows how old the value is.
 - **View:** `gauge` with the battery %, `text` "Charging · full at 23:10" / "Plugged in" / "312 km". *Only when the
@@ -407,6 +628,58 @@ two helpers the forms can use:
   version of the widget gets the same hint.
 - Screenshots: [`docs/plugins/`](plugins/) `station_*.png`, `weather_both_on.png`, `weather_station_only.png`, `settings_weather.png`.
 
+### 9.5 Now playing via Home Assistant (`kinframe.ha-media`)
+
+- **Settings:** Home Assistant URL and token, the `media_player` entity (a Spotify, Sonos or Cast player as Home
+  Assistant sees it), and whether to keep showing while paused.
+- **Data:** the player's state and attributes over `subscribe_entities` (title, artist, album, `entity_picture`, which
+  Home Assistant serves through its own `/api/media_player_proxy/…?token=…` on the same address, `media_duration`,
+  `media_position` with `media_position_updated_at`, `volume_level`, `supported_features`).
+- **View:** album art and title/artist in the corner or band; nothing (`none`) while nothing plays. Detail card:
+  larger art, title and artist · album, a progress bar that moves by itself, and buttons for what the player supports:
+  previous, play/pause (primary), next, quieter, louder (§4.2). Buttons call `media_player` services over the REST API
+  and update the card at once.
+- **Alternative:** a direct Spotify integration (§11.1, item 12).
+
+### 9.6 HomeWizard water meter (`kinframe.homewizard-water`)
+
+- **Settings:** the meter's address (`_hwenergy._tcp`, `local_only`; **Local API** on in the HomeWizard Energy app),
+  how to show it (`value` or `gauge`) and a typical day in litres (default 250). The meter's local API only works on
+  USB power; on batteries it reports to the cloud only.
+- **Data:** `GET /api/v1/data` every 2 s: `active_liter_lpm` (flow) and `total_liter_m3` (the counter). Today's litres
+  from the counter with `kinframe/day`; the flow's last hour with `kinframe/series`.
+- **View:** `value`: today's litres, or while water runs the flow ("7,6 l/min", unit separate) with today's litres as
+  its label. `gauge`: a ring of today against the typical day (orange once past it), the litres inside, the flow under
+  it while water runs (after the HomeWizard Energy Display's water ring). Detail: the ring, the flow's last hour, and
+  rows for the flow now, today and the meter reading. Drawn in the `water` tone (§4.3).
+- **As a template:** a device on the home network that counts something; `parse`/`record`/`current`/`main` are plain
+  exported functions, tested without the network.
+
+### 9.7 HomeWizard energy socket (`kinframe.homewizard-socket`)
+
+- **Settings:** the socket's address (as above), what's plugged in (a label, e.g. "Washing machine"), an icon from a
+  short list, and whether the frame may switch it (default yes).
+- **Data:** `GET /api/v1/data` every second (`active_power_w`, the import counter, voltage, current); the switch's
+  state (`GET /api/v1/state`: `power_on`, `switch_lock`) every 10 s, since it rarely changes.
+- **View:** `value`: the power with a trend arrow and the label (or today's use); "Off" while switched off. Detail: the
+  same, the last hour, rows for today, voltage and current, and a **switch** (`actions`, one primary power button)
+  that sends `PUT /api/v1/state {"power_on": …}`. The handler asks the socket for its lock first: while the
+  HomeWizard app's *switch lock* is on (or the owner turned switching off) the card says so instead of offering a
+  button that wouldn't work.
+- **As a template:** a device with a button: the action changes the device, keeps the answer in `ctx.state`,
+  invalidates and returns the widget's new view.
+
+### 9.8 World clock (`kinframe.world-clock`)
+
+- **Settings:** up to four places (`city_1`…`city_4`, type `timezone`), each with an optional name ("Anna" instead of
+  "New York"), and whether to show how far ahead or behind they are.
+- **View:** a `list`: per place its time in the frame's 12/24-hour style, its name, a sun or moon for day (7–19 h) or
+  night there, and as detail the day when it isn't the frame's ("Morgen") and the difference ("+8 h", "−4:30"),
+  dropping the difference when both don't fit a row's 16 characters. The detail card shows the same.
+- **No network and no permissions:** the frame does the time zone arithmetic (`ctx.localTime(ms, zone)`,
+  `ctx.format.time(ms, zone)`), from Android's own time zone data, so summer time is right everywhere. A template for
+  plugins that only compute.
+
 ## 10. Changes to kinframe
 
 | Part | Work |
@@ -436,6 +709,65 @@ Assistant plugins.
    API 1.
 5. **Review capacity.** Hand review of every new plugin and permission change is the safety net; it needs at least two
    maintainers with the right to approve.
+
+### 11.1 What writing the first plugins showed (step 2)
+
+Implementing every plugin of §9 and four community-style examples (`plugins/examples/`: iRail departures, air
+quality, electricity prices, bin day) against real data showed what API 1 lacked. **Added** (small and generic, each
+needed by a first-party plugin): `image`, `actions` and `progress` (§4.2, now playing), `none` (now playing, bin day),
+`percent` rings on flow nodes (the home battery), `sub` values under a gauge (the P1 dial with today's totals, after
+the HomeWizard Energy Display's hero ring), a `marker` style and `min` on `progress` (a value inside a range, the same
+display's temperature row), media icons, `multiple` entity settings (two inverters summed into one solar node),
+`ctx.localTime` (the P1's "today", bin day) and JSON helpers on `ctx.store`. **Proposed**, with the evidence:
+
+1. *Built, §4.3.* **A `list` component** (a time, a title and a trailing badge per row, a tone per row). *Departures:* `rows` hold one
+   value and a 32-character label, so "22:23 +3 · Brussels Airport - Zaventem · spoor 2" had to be cut
+   ("Brussels Airport - Za… · spoor 2"), and in the band, where rows drop their labels, only the times remain.
+2. **Relative dates and times in `ctx.format`** ("tomorrow", "Mon 27 Oct", "8 h ago"). *Bin day and the car* each
+   carry their own "Today/Tomorrow" and "Updated {n} min ago" strings in every language, which every plugin would
+   repeat. Needs the frame's own translations (ICU's relative formatter needs API 24; the frame is API 23).
+   **Built:** `ctx.format.day/ago/until` (§3.2), with nine words per language in the frame's strings
+   (`plugin_rel_*`, all its languages) and weekday names and year-less short dates from the locale; bin day uses
+   it, and so does the car's "8 min ago" in its detail card.
+3. *Built, §4.3; electricity prices shows all quarter hours as bars, "now" marked, the cheapest still to come lit.*
+   **Sparkline markers, bars and longer series.** *Electricity prices:* a day has 92, 96 or 100 quarter hours (the
+   fixture is the day the clocks went back: 100), the sparkline takes 96, so the plugin averages down; and it can't
+   mark "now" or the cheapest hour, which is the whole point of a price chart. A `bars` style with a highlighted index
+   (and up to 100 points) would do.
+4. **The frame's location in `ctx`** (coarse, from the weather settings). *Air quality* asks the owner to type
+   latitude and longitude although the frame already knows its place for the forecast. **Built:** `ctx.location`
+   behind `permissions.location` (§3.1), rounded to two decimals; air quality uses it, typed coordinates still win.
+5. **Shared code between plugins.** The Home Assistant connection (auth, `subscribe_entities`, the REST fallback) is
+   copied into all three `kinframe.ha-*` plugins. Plugins are one module with no imports; the plugin kit (§8) should
+   bundle authors' modules into one `main.js` (esbuild), so the frame stays import-free.
+   **Done** for what the project maintains: the host ships libraries a plugin may import (`kinframe/ha`,
+   `kinframe/homewizard`, `kinframe/day`, `kinframe/series`, §13.1), and the Home Assistant and HomeWizard plugins use
+   them. An author's *own* modules still get bundled into `main.js` by the plugin kit (only `kinframe/*` resolves on
+   the frame), so a community plugin stays one reviewable file.
+6. **One Home Assistant connection per frame**, not per instance. Energy, two cars and now playing open four WebSockets
+   with four copies of the same token. A host-level "integration" (shared base URL and token, entity subscriptions
+   multiplexed) would also give the settings form its entity picker (§6.2) for free.
+7. **Manifest defaults for the owner's choices:** a default visibility (*only when it changes* suits the car, §9.3),
+   and setting **presets** (the Kia/Hyundai entity names are filled in from a prefix by the plugin itself today).
+   **Built:** `default_visibility` and `presets` with `{key}` placeholders (§3.1), validated and available to the
+   settings form of step 3; a new instance takes the default visibility.
+8. *Built, §4.3.* **Typography for values:** raised small decimals ("12 €67", "21 °1", as on the HomeWizard Energy Display) read well
+   from across a room. It could be automatic for any `value` with decimals, frame-wide, rather than a plugin option.
+9. *Built, §4.3.* **Colours per quantity** (electricity violet, water blue, gas pink, solar green, heat orange) instead of only
+   semantic tones. `info` (violet) is effectively "electricity" already. Adding `water`, `gas`, `heat` tones would keep
+   "plugins never pick colours" while letting a water widget look like water; it needs checking against both
+   palettes (paper and photo) and colour-blind pairs before it goes in.
+10. **Per-day water and gas.** The P1 detail has today's gas; a HomeWizard water meter (local API `/api/v1/data`,
+    `total_liter_m3`, `active_liter_lpm`) would be a small plugin with the same day-baseline pattern, shown as a ring
+    against a typical day (the Energy Display's water ring).
+11. **Buttons outside the detail card.** A compact control row in the band (just ⏯) was left out on purpose (§4.2);
+    revisit if owners ask for it.
+12. **A direct Spotify plugin** instead of going through Home Assistant: the Web API's player endpoints need OAuth
+    (authorization code with PKCE) done in the family app or on the server, a refresh token stored as a plugin
+    `secret` (step 3), a fixed host permission for `api.spotify.com`, and **Spotify Premium** for anything that
+    controls playback (reading "currently playing" works without). Spotify's rate limits and its developer terms
+    (apps in development mode are limited to 25 users until approved) also apply. Through Home Assistant none of that
+    is kinframe's problem, and Sonos and Cast come along.
 
 ## 12. Step 1 as built (frame app)
 
@@ -566,12 +898,194 @@ the band column and strip, and its detail card), `detail_landscape.png`, `galler
 column and strip forms) and `detail_forms.png` come from `PluginScreenshotTest` (Robolectric, 1280×800 and 800×1280
 mdpi, 1920×1080 xhdpi); `emulator_*` are from the dev preview on the emulator.
 
-**What step 2 (the QuickJS host) plugs into.** `PluginInstance` is the seam: a QuickJS-backed implementation calls
-`start`/`render`/`detail`/`stop` in the script and returns their JSON; `PluginHost` already validates it, keeps the last
-good view, counts failures, backs off, applies visibility and stops instances at night. Still to do there: the 50 ms CPU
-and 8 MB heap limits (QuickJS interrupt handler and memory limit; today only a 10 s timeout per call), the `invalidate`
-throttle, `ctx.ws`, `ctx.t` from the bundle's `locales/`, URL permissions from the manifest (today `PluginHttp` takes
-an `allowed` predicate and a `localOnly` flag, which built-ins set to "local only"), the `discover` helper generalised
-from `HomeWizardDiscovery` to any service type, and reporting `InstanceState.error` to the server. The HomeWizard widget
-becomes `kinframe.homewizard-p1` in JavaScript; `HomeWizardTest` and the example views are its fixtures, and
-`PluginPrefs`/`InstanceConfig` give way to the instances in the frame settings (same shape).
+**What step 2 (the QuickJS host) plugs into.** `PluginInstance` is the seam; see §13 for how it was done.
+
+## 13. Step 2 as built: the plugin host
+
+| Part | Where |
+|---|---|
+| Manifest parser and validation, bundles, locales | `android/frame/.../frame/plugins/js/` (`PluginManifest.kt`, `PluginBundle.kt`) |
+| Permissions, `local_only`, http and WebSocket | `js/PluginNet.kt` |
+| The QuickJS instance and the `ctx` bridge | `js/QuickJsPluginInstance.kt`, `assets/plugin-host/prelude.js` |
+| The host's libraries (§13.1) | `assets/plugin-host/lib/*.js`, `js/PluginLibraries.kt` |
+| First-party plugins (shipped in the APK as assets `plugins/<id>/`) | repository `plugins/kinframe.*` (manifest, `main.js`, `locales/`, `fixtures/`) |
+| Community-style examples (tests only, not shipped) | `plugins/examples/community.*` |
+| Tests | `frame/src/test/.../plugins/js/` (sandbox, libraries, P1, HomeWizard devices and Home Assistant with fake servers, examples, timing), `androidTest/.../QuickJsOnDeviceTest` (Android 6) |
+
+**Engine.** [quickjs-kt](https://github.com/dokar3/quickjs-kt) 1.0.15 (Apache-2.0, maintained, QuickJS 2026-06):
+minSdk 23, prebuilt for armeabi-v7a, arm64-v8a, x86 and x86_64, a desktop build for JVM unit tests (so the tests run
+the real engine), coroutine-friendly async bindings, memory and stack limits, and an interrupt that cancelling a call triggers. (Its
+own execution-time limit is wall clock from the start of an evaluation, awaits included, so the host keeps the
+budget itself; see *Sandbox*.) Building
+QuickJS-ng with the NDK and our own JNI would have given the same at the cost of maintaining the glue; Zipline and
+the older `app.cash.quickjs` target Kotlin/JS modules or are unmaintained. The APK grows by about **0.8 MB** (the
+library is 382 KB compressed for armeabi-v7a and 413 KB for arm64-v8a; both stay, since a 64-bit-only device can't
+fall back to 32-bit libraries).
+
+**Sandbox.** One runtime per instance (nothing shared between instances), 8 MB heap, 256 KB stack, 50 ms of
+JavaScript per call (1 s at start, for compiling the module and for every call until the first render has finished:
+on the Denver that cold first render took about 68 ms, since it also starts threads and loads classes).
+
+The host keeps that time itself (`JsClock`): it counts the **CPU time of the thread the JavaScript runs on**
+(`/proc/self/task/<tid>/schedstat`; the prelude tells the host which thread at the start of a call), and pauses from
+the moment a `ctx.http` request starts until the JavaScript resumes after it. A watchdog on its own thread checks
+every 5 ms and cancels an over-budget call, which interrupts the JavaScript. Where CPU time can't be read it falls
+back to wall-clock time minus the requests. The history, all from the Denver:
+
+- beta.1 used QuickJS's own limit, wall clock from the start of a call with the wait for the network included: a P1
+  answer slower than 50 ms over Wi-Fi failed about one render in 60.
+- beta.2–5 used wall clock minus the requests: still about one update in 300 failed, because the plugin thread
+  runs at background priority and waits for a CPU while the slideshow decodes the next photo (that thread had spent
+  610 ms waiting for a CPU against 4.15 s running). Wall clock charged the plugin for the wait.
+- Since beta.6, CPU time: waiting for a CPU, the network, or another instance's call on the shared thread isn't
+  charged.
+
+An endless loop is interrupted, also after an await (an interrupt inside an async function arrives as a rejected
+promise, which the host still reports as "took longer than 50 ms"); running out of memory fails the call and the
+runtime is rebuilt on the next one. Every call and every WebSocket message also has a 10 s wall-clock limit, so a
+plugin that starts a request without awaiting it and then loops can't hold the thread longer than that. The raw
+bindings are hidden behind `ctx` (the global `__kf` is removed after the prelude). What QuickJS can't contain is a
+crash in native code, which would take the app down; that's the engine's own robustness, not something the host can
+isolate in one process.
+
+**Calls.** `main.js` is loaded once as an ES module (`import plugin from 'main'`); each call then evaluates a tiny
+*script* (`__kf_call('render')`) whose result comes back through a binding, because evaluating a promise doesn't
+return its value, and because evaluating a new module per call would keep every module in memory (measured: +450 KB
+per 500 calls as modules, flat as scripts). Calls are serialised per instance; a WebSocket message waits for a running
+render, and its handler has the same budget as a call. `update` runs on its own clock (every refresh interval, longer
+after failures), so frequent `invalidate()`s from a WebSocket only cause renders and never hold off an update. While
+`render` or `detail` runs, the `http` binding refuses with "render can't use the network: fetch in update()". The
+host logs, per instance and every 60 renders, the render times and the update times with and without the network.
+
+**Network.** `PluginPermissions` turns the manifest's entries into origins (`settings.<key>` through
+`LocalAddress.baseUrl`, or a fixed https origin). A request must match one (scheme, host, port, under the setting's
+path). It stays on the home network when the setting is `local_only` or the URL is plain `http://`: names resolve
+through `LocalAddress.dns`, and IP literals (which OkHttp doesn't pass to the DNS) are checked separately. WebSockets
+follow the same rules (`permissions.websocket`), ping every 30 s, and reconnect with backoff (2 s doubling to 60 s,
+reset after a successful open), calling `onOpen` again.
+
+**Plugins as built.**
+
+- `kinframe.homewizard-p1`: the Kotlin widget ported line by line (the old tests, unchanged in substance, now run
+  against the plugin in QuickJS); same plugin id and settings, so existing frames keep their configuration. The dial
+  shows today's returned and used kWh under it.
+- `kinframe.ha-energy`: power sensors mapped per node (Home Assistant's Energy dashboard only has kWh statistics),
+  several solar sensors summed, sign conventions per sensor (`grid_sign`, `battery_sign`), a house sensor without a
+  unit taken as W, the car charger split out of the house, the battery's charge as a ring. Flow allocation: solar to
+  the house, the car, the battery, then the grid; the battery next; the grid covers the rest. Live through
+  `subscribe_entities`, REST while the socket is down. No `dataTime`: Home Assistant stamps a sensor only when it
+  changes, so a quiet one (solar at night) would look stale.
+- `kinframe.ha-ev`: the Kia/Hyundai preset finds `sensor.<prefix>_ev_battery_level` and friends; any other battery
+  works with explicit sensors (the fixture's second car has only level and range). `dataTime` from the car's own
+  "last updated", greyed after 6 h.
+- `kinframe.ha-media` (§9.5): now playing through `media_player`, buttons only for what the player supports
+  (`supported_features`), volume by `volume_set` ±5 % or `volume_up/down`.
+
+**Performance.** JavaScript per render with the data in hand, JVM on a desktop core: P1 (gauge plus detail) 0.18 ms,
+energy flow 0.11 ms, car 0.05 ms, now playing 0.05 ms (p50, `PluginTimingTest`). On an Android 6 emulator the P1
+plugin starts in 5.7 ms and renders in 0.16 ms (`QuickJsOnDeviceTest`). The RK3126's Cortex-A7 is roughly 10–20×
+slower than a desktop core, so expect 1–4 ms per render and well under 100 ms to start: far inside the budget, and
+negligible next to drawing. On the Denver (0.7.0-beta.1, the P1 as a dial): the runtime boots in 68 ms with a
+104 KB heap, which grows to about 128 KB; a render including the HTTP request to the meter takes 68 ms at p50 and
+up to 283 ms, nearly all of it the network. Without the network (0.7.0-beta.2, the host's clock: JavaScript plus the
+bridge around it) a render takes 9.7 ms at p50. With fetching and drawing split (0.7.0-beta.4, 60 cycles): render
+6.5 ms at p50, 35 ms at most, never waiting for the network; update 5.3 ms of JavaScript at p50 (69.5 ms for the cold
+first one, under the start budget), 66.5 ms at p50 and up to 246 ms with the network; no failures. The host logs these per instance every 60 renders
+(`KinFramePlugins`).
+
+**Screenshots** (views straight from the plugins, run in QuickJS on the fixtures; a drawn stand-in for album art):
+[`docs/plugins/`](plugins/) `js_band_column.png` (energy flow with the battery ring, now playing), `js_strip.png`
+(car charging, P1 dial), `js_corners.png`, `js_detail_media.png` (buttons, progress), `js_detail_energy.png`,
+`js_detail_car.png` and `new_components.png` (the additions in every form); `js_homewizard_water.png` and
+`js_homewizard_socket.png` (the water meter and the socket in every form), `js_detail_socket.png` (the switch).
+
+**Still open (steps 4–5).** No registry, signing or plugin kit (step 4). The weather station is still Kotlin (it
+feeds the slideshow's own weather corner); it has a manifest so the apps can show its form (§14). The frame's own
+settings screen keeps its hand-made P1 and station sections; every other plugin is set up in the apps.
+
+### 13.1 The host's libraries
+
+Integrations of one kind repeat the same plumbing: a Home Assistant connection, a HomeWizard device's API, "how much
+today" from a meter's running total, a live value's last hour. The host ships that once, as ES modules a plugin
+imports by name:
+
+```js
+import * as ha from 'kinframe/ha';
+import { data, number } from 'kinframe/homewizard';
+import { dayTotals } from 'kinframe/day';
+import { series } from 'kinframe/series';
+```
+
+**How imports resolve.** The runtime gets a module loader that knows only the files in the APK's
+`assets/plugin-host/lib/` (`ha.js` → `kinframe/ha`). Any other specifier (`./util`, `https://…`, an unknown
+`kinframe/…`) fails the plugin's start with "import 'x': a plugin can only import the host's libraries (…)". A library
+is evaluated in the importing plugin's own runtime after the prelude, so it sees what the plugin sees: no `__kf`, and
+the network only through the `ctx` the plugin hands it, with that plugin's permissions (tested: a library given a
+foreign address is refused like the plugin itself). Libraries are part of the plugin API: within API 1 they only
+grow (new functions, new optional parameters); a change that would break a plugin waits for API 2 and a new name.
+Their code counts against the calling plugin's JavaScript budget like its own.
+
+**`kinframe/ha`** (settings `base_url`, `token`; permissions `http` and `websocket` on `settings.base_url`):
+
+| | |
+|---|---|
+| `configured(ctx)` | `base_url` and `token` are set. |
+| `subscribe(ctx, ids)` | WebSocket: auth, `subscribe_entities` for `ids`, each event applied and `ctx.invalidate()`. Call in `start`. |
+| `refresh(ctx, ids)` | REST, one GET per entity, only while the WebSocket isn't live. Call in `update`. (`poll` always polls.) |
+| `entities(ctx)`, `connection(ctx)`, `isLive(ctx)` | Entity id → `{ state, attributes, updated }` (or `{ missing: true }`); the whole connection state. |
+| `requireToken(ctx)` | Throws the plugin's `token_refused` text (English fallback) once Home Assistant refused the token. |
+| `callService(ctx, domain, service, data)` | `POST /api/services/<domain>/<service>`, for actions. |
+| `applyEvent(entities, ev)`, `baseUrl(s)` | The pieces, for tests and special cases. |
+
+**`kinframe/homewizard`** (setting `host`; permission `http` on `settings.host`, `local_only`): `configured(ctx)`,
+`data(ctx)` (`GET /api/v1/data`), `device(ctx)` (`GET /api`), `state(ctx)` / `setState(ctx, patch)` (`/api/v1/state`,
+energy sockets), and readers for its flat JSON: `number(o, key)` (null when missing or not a number), `total(o,
+prefix)` (a kWh total, or the sum of the tariff registers on older firmware), `phases(o)`, `baseUrl(host)`. A non-2xx
+answer throws "HTTP <status>".
+
+**`kinframe/day`:** `dayTotals(ctx, names, key = 'day')` → `{ record(values), since(values), date }`. `record` keeps
+the counters' values at the start of the frame's day (`ctx.localTime`, so its time zone) in `ctx.store` as
+`date|v1|v2|…`, so the baseline survives a restart; `since` gives how much each grew today (null where unknown). A
+counter that first appears later in the day counts from its first value; one that goes down (a replaced or reset
+meter) starts again from there instead of showing 0 for the rest of the day.
+
+**`kinframe/series`:** `series(ctx, name, { stepMs = 5000, samples = 720 })` → `{ add(value, time), last(), count,
+trend({ window = 6, ratio = 0.1, min = 50 }), buckets(spanMs = 1 h, n = 96) }`. Readings within one step are averaged
+into one sample, so a trend arrow and an hour chart mean the same whether the device is read every second or every
+five; `buckets` gives a sparkline's points (null where there was no reading). Kept in `ctx.state`.
+
+**Using them.** The three `kinframe.ha-*` plugins import `* as ha` (no more copies of the connection); the P1 uses
+`kinframe/homewizard`, `kinframe/day` (its stored `day` key keeps its format, so existing frames keep today's totals)
+and `kinframe/series`; the water meter and the socket (§9.6, §9.7) are built from the same parts and written to be
+copied: their comments say what each part does and why.
+
+## 14. Step 3 as built: settings end to end
+
+| Part | Where |
+|---|---|
+| Contract: `plugins` in the frame settings, catalog, status | `docs/api/openapi.yaml` (`PluginInstance`, `CatalogPlugin`, `FramePlugins`, `PluginStatusReport`; `GET /frames/{id}/plugins`, `PUT /device/plugins/catalog`, `PUT /device/plugins/status`) |
+| Secrets: sealed per instance, `secrets_set` for people, opened for the frame | `server/internal/settings/plugins.go`, `server/internal/secrets/` (AES-256-GCM with its own HKDF key, shared with the calendar's credentials) |
+| Checks against the frame's catalog | `server/internal/plugins/` |
+| Endpoints, catalog and status storage | `server/internal/api/plugins.go`, migration `00010_plugins.sql` |
+| The frame: settings from `plugins`, local copy moved there once | `android/frame/.../plugins/PluginConfig.kt` (`PluginPrefs`, `PluginSettingsDoc`) |
+| The frame: catalog, status, entities, mDNS | `PluginReports.kt`, `ServiceBrowser.kt`, the reporting loop in `FramePlugins.kt` |
+| Manifest translations for the forms | `plugins/*/locales/*.json` (`@setting.*`, `@option.*`, `@preset.*`); the P1 in all 36 languages, the others in en/nl/de/fr |
+| Tests | `server/internal/e2e/plugins_test.go`, `server/internal/plugins/`, `server/internal/settings/`; `frame/src/test/.../plugins/PluginReportsTest.kt`, `PluginPrefsTest.kt` |
+
+**What the frame sends.** On every session start: the catalog (each `plugins/<id>/plugin.json` in the APK, about
+45 KB with translations) and, when the frame settings have no `plugins` part yet, its locally kept layout and
+instances (frames that ran the P1 or the weather station before step 3), so nothing has to be set up again. Then every
+10 s, when it changed (at least every 10 minutes): per instance whether it runs, its last error, when its last update
+worked and, for Home Assistant plugins, the entities; plus the mDNS services it found. The times are left out of the
+comparison, so a P1 that updates every second doesn't make the frame report every 10 s.
+
+**Secrets on the frame.** The frame gets them in its settings and passes them to the plugin with the other settings
+(`InstanceConfig.values`, `ctx.settings.token`). A change made on the frame sends the instances with their secrets, so
+the frame's own view keeps them while the change waits in the outbox; the server seals them again.
+
+**The weather station** is still Kotlin; `plugins/kinframe.weather-station/` holds only its manifest and
+translations (no `main.js`), so it appears in the catalog and the apps can show its form.
+
+**Checked against a real Home Assistant:** the entity template rendered 1,293 entities in 110 KB; Home Assistant
+trims the rendered text, so the last line can lack its empty trailing fields (the parser allows for that).
+

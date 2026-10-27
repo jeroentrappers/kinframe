@@ -5,6 +5,30 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import app.kinframe.core.design.Kin
+import app.kinframe.core.plugin.ActionsView
+import app.kinframe.core.plugin.ImageShape
+import app.kinframe.core.plugin.ImageView
+import app.kinframe.core.plugin.ListRow
+import app.kinframe.core.plugin.ListView
+import app.kinframe.core.plugin.SparklineStyle
+import app.kinframe.core.plugin.NoneView
+import app.kinframe.core.plugin.ProgressStyle
+import app.kinframe.core.plugin.ProgressView
+import app.kinframe.core.plugin.SubValue
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +62,12 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -88,6 +117,11 @@ private fun Component(view: PluginView, form: ViewForm, p: PluginPalette, m: For
         is SparklineView -> Sparkline(view, form, p, m, tone)
         is TextView -> Lines(view, form, p, m, tone)
         is StackView -> Stack(view, form, p, m, tone)
+        is ImageView -> PImage(view, form, p)
+        is ActionsView -> Actions(view, form, p, tone)
+        is ProgressView -> Progress(view, form, p, m, tone)
+        is ListView -> PList(view, form, p, m, tone)
+        NoneView -> Unit
     }
 }
 
@@ -105,8 +139,30 @@ private fun PIcon(name: String?, size: Dp, tint: Color, modifier: Modifier = Mod
  * A text that rolls to its new value: the old one slides up and fades while the new one rises in. Both offsets are
  * read in graphicsLayer, so the 350 ms animation costs layer updates, not recompositions.
  */
+/**
+ * "21,4" with the decimal digits small and raised, their tops level with the whole digits (a price tag's "12,⁹⁹",
+ * after the HomeWizard Energy Display): the whole number reads from across the room and the decimals don't widen it.
+ * The separator stays full size on the baseline, so "3,8" never reads as 3⁸. Only styling: the text (and what
+ * accessibility services read) stays "21,4". Plain text when there are no decimals to raise.
+ */
+internal fun raised(text: String): AnnotatedString {
+    val (whole, rest) = PluginFormat.raisedDecimals(text) ?: return AnnotatedString(text)
+    return buildAnnotatedString {
+        append(whole)
+        withStyle(SpanStyle(fontSize = RAISED_SIZE, baselineShift = BaselineShift(RAISED_SHIFT))) { append(rest) }
+    }
+}
+
+/**
+ * The decimals' size, in em of the number, and their lift in em of the number: digit tops (cap height ≈ 0.71 em in
+ * Roboto) meet when lift = 0.71 × (1 − size).
+ */
+private val RAISED_SIZE = androidx.compose.ui.unit.TextUnit(0.62f, androidx.compose.ui.unit.TextUnitType.Em)
+private const val RAISED_SHIFT = 0.27f
+
 @Composable
-internal fun RollingText(text: String, style: TextStyle, modifier: Modifier = Modifier, maxLines: Int = 1, align: TextAlign? = null) {
+internal fun RollingText(text: String, style: TextStyle, modifier: Modifier = Modifier, maxLines: Int = 1, align: TextAlign? = null, raise: Boolean = false) {
+    fun show(t: String) = if (raise) raised(t) else AnnotatedString(t)
     var shown by remember { mutableStateOf(text) }
     var previous by remember { mutableStateOf<String?>(null) }
     val progress = remember { Animatable(1f) }
@@ -121,7 +177,7 @@ internal fun RollingText(text: String, style: TextStyle, modifier: Modifier = Mo
     Box(modifier) {
         previous?.let { old ->
             Text(
-                old, style = style, maxLines = maxLines, softWrap = maxLines > 1, textAlign = align, overflow = TextOverflow.Clip,
+                show(old), style = style, maxLines = maxLines, softWrap = maxLines > 1, textAlign = align, overflow = TextOverflow.Clip,
                 modifier = Modifier.graphicsLayer {
                     val v = progress.value
                     alpha = 1f - v
@@ -130,7 +186,7 @@ internal fun RollingText(text: String, style: TextStyle, modifier: Modifier = Mo
             )
         }
         Text(
-            shown, style = style, maxLines = maxLines, softWrap = maxLines > 1, textAlign = align, overflow = TextOverflow.Ellipsis,
+            show(shown), style = style, maxLines = maxLines, softWrap = maxLines > 1, textAlign = align, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.graphicsLayer {
                 if (previous != null) {
                     val v = progress.value
@@ -163,7 +219,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
     when (form) {
         ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
-            RollingText(number, m.value.on(strong, p))
+            RollingText(number, m.value.on(strong, p), raise = true)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 unit?.let { Text(it, style = m.unit.on(p.soft, p), maxLines = 1) }
                 TrendMark(v.trend, 14.dp, p.soft)
@@ -173,7 +229,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
             PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
             Column {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    RollingText(number, m.value.on(strong, p))
+                    RollingText(number, m.value.on(strong, p), raise = true)
                     unit?.let { Text(it, style = m.unit.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(start = 3.dp, bottom = 3.dp)) }
                     Box(Modifier.padding(start = 2.dp, bottom = 4.dp)) { TrendMark(v.trend, 14.dp, p.soft) }
                 }
@@ -184,7 +240,7 @@ private fun Value(v: ValueView, form: ViewForm, p: PluginPalette, m: FormMetrics
             PIcon(v.icon, m.icon, iconTint, rotation = v.iconRotation)
             Column {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    RollingText(number, m.value.on(strong, p))
+                    RollingText(number, m.value.on(strong, p), raise = true)
                     unit?.let { Text(it, style = m.unit.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(start = 5.dp, bottom = 6.dp)) }
                     Box(Modifier.padding(start = 6.dp, bottom = 9.dp)) { TrendMark(v.trend, 20.dp, p.soft) }
                 }
@@ -220,7 +276,7 @@ private fun Rows(r: RowsView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
                             Text(it, style = m.label.on(p.soft, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(start = 10.dp).widthIn(max = 220.dp))
                         }
                         Spacer(Modifier.weight(1f).widthIn(min = 20.dp))
-                        RollingText(number, rowValue.on(p.tone(t), p))
+                        RollingText(number, rowValue.on(p.tone(t), p), raise = true)
                         unit?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(start = 4.dp)) }
                         Box(Modifier.padding(start = 4.dp)) { TrendMark(v.trend, 16.dp, p.soft) }
                     }
@@ -274,13 +330,20 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
             }
         }
     }
+    val ringAndSubs = @Composable {
+        if (g.sub.isEmpty() || form == ViewForm.Strip) ring()
+        else Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            ring()
+            SubValues(g.sub, form, p, m, tone)
+        }
+    }
     when (form) {
         ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            ring()
+            ringAndSubs()
             g.caption?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis) }
         }
         else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(m.gap + 4.dp)) {
-            ring()
+            ringAndSubs()
             if (g.caption != null || (form.compact && g.icon != null)) {
                 Column {
                     if (form.compact) PIcon(g.icon, m.icon * 0.8f, p.soft)
@@ -291,6 +354,21 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
     }
 }
 
+/** Small values under a gauge: an arrow (or other icon) in the value's tone, the number in text colour. */
+@Composable
+private fun SubValues(sub: List<SubValue>, form: ViewForm, p: PluginPalette, m: FormMetrics, inherited: Tone) {
+    val style = m.label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium).on(p.text, p)
+    val item = @Composable { s: SubValue ->
+        val t = if (s.tone == Tone.Neutral) inherited else s.tone
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            PIcon(s.icon, m.icon * 0.45f, if (t == Tone.Neutral) p.soft else p.tone(t))
+            Text(s.value, style = style, maxLines = 1)
+        }
+    }
+    if (form == ViewForm.Column) Column(horizontalAlignment = Alignment.CenterHorizontally) { sub.forEach { item(it) } }
+    else Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) { sub.forEach { item(it) } }
+}
+
 /**
  * The two-sided gauge: an open 240° ring with a tick at the top for zero. Positive values sweep clockwise in the
  * gauge's tone, negative ones anticlockwise in its negative tone; the label's trailing unit is drawn small below.
@@ -299,7 +377,10 @@ private fun Gauge(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics
 private fun Dial(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
     val target = g.percent.coerceIn(-100f, 100f) / 100f
     val sweep by animateFloatAsState(target, tween(700, easing = FastOutSlowInEasing), label = "dial")
-    val color = if (target < 0f) p.tone(g.negativeTone ?: tone) else if (tone == Tone.Neutral) p.text else p.tone(tone)
+    // The colour follows the arc as it moves, not the new value: from using to returning, the purple arc shrinks back
+    // to zero and only then grows green on the other side.
+    val positive = if (tone == Tone.Neutral) p.text else p.tone(tone)
+    val negative = p.tone(g.negativeTone ?: tone)
     val track = p.faint
     val tick = p.soft
     val (number, unit) = PluginFormat.splitUnit(g.label ?: "${g.percent.roundToInt()}%")
@@ -309,12 +390,12 @@ private fun Dial(g: GaugeView, form: ViewForm, p: PluginPalette, m: FormMetrics,
         val arcSize = Size(size.width - sw, size.height - sw)
         drawArc(track, -90f - SPAN, 2 * SPAN, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
         val a = abs(sweep) * SPAN
-        if (a > 0.5f) drawArc(color, if (sweep < 0f) -90f - a else -90f, a, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
+        if (a > 0.5f) drawArc(if (sweep < 0f) negative else positive, if (sweep < 0f) -90f - a else -90f, a, false, Offset(inset, inset), arcSize, style = Stroke(sw, cap = StrokeCap.Round))
         drawLine(tick, Offset(size.width / 2, 0f), Offset(size.width / 2, sw * 1.4f), strokeWidth = sw * 0.3f)
     }, contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = m.gaugeStroke)) {
             if (form == ViewForm.Detail) PIcon(g.icon, m.icon * 0.5f, p.soft)
-            Text(number, style = m.nodeValue.on(p.text, p), maxLines = 1)
+            Text(raised(number), style = m.nodeValue.on(p.text, p), maxLines = 1)
             unit?.let { Text(it, style = m.label.copy(fontSize = m.label.fontSize * 0.85f, lineHeight = m.label.fontSize).on(p.soft, p), maxLines = 1) }
         }
     }
@@ -328,6 +409,11 @@ private const val SPAN = 120f
 private fun Sparkline(s: SparklineView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
     val color = if (tone == Tone.Neutral) p.text else p.tone(tone)
     val faint = p.faint
+    val markColor = p.soft
+    val hiColor = s.highlightTone?.let { if (it == Tone.Neutral) p.text else p.tone(it) } ?: color
+    // With a highlight or a "now" marker the other bars step back, so the two picked-out points read at a glance; on a
+    // photo (pastel tones, a bright sky behind) only a little, or they'd vanish.
+    val quiet = if (s.highlight != null || s.marker != null) color.copy(alpha = if (p.shadow != null) 0.75f else 0.42f) else color
     val chart = @Composable {
         Box(Modifier.size(m.sparkW, m.sparkH).drawWithCache {
             val pts = s.points
@@ -337,30 +423,66 @@ private fun Sparkline(s: SparklineView, form: ViewForm, p: PluginPalette, m: For
                 if (s.min == null) lo = min(lo, v)
                 if (s.max == null) hi = max(hi, v)
             }
+            val bars = s.style == SparklineStyle.Bars
+            // Bars stand on zero when the range includes it (negative prices hang below it), else on the bottom edge.
+            if (bars && s.min == null) lo = min(lo, 0f)
             if (hi - lo < 1e-6f) { hi += 1f; lo -= 1f }
             val sw = (if (form.compact) 2.dp else 2.5.dp).toPx()
             val pad = sw
             val w = size.width - 2 * pad
             val h = size.height - 2 * pad
+            val n = pts.size
+            fun y(v: Float) = pad + h * (1f - ((v.coerceIn(lo, hi) - lo) / (hi - lo)))
+            fun x(i: Int) = if (bars) pad + w * (i + 0.5f) / n else pad + w * i / (n - 1).coerceAtLeast(1)
             val path = Path()
-            var pen = false
             var lastX = 0f
             var lastY = 0f
-            val n = pts.size
-            for (i in 0 until n) {
-                val v = pts[i]
-                if (v.isNaN()) { pen = false; continue }
-                val x = pad + w * i / (n - 1).coerceAtLeast(1)
-                val y = pad + h * (1f - ((v.coerceIn(lo, hi) - lo) / (hi - lo)))
-                if (pen) path.lineTo(x, y) else path.moveTo(x, y)
-                pen = true
-                lastX = x; lastY = y
+            if (!bars) {
+                var pen = false
+                for (i in 0 until n) {
+                    val v = pts[i]
+                    if (v.isNaN()) { pen = false; continue }
+                    if (pen) path.lineTo(x(i), y(v)) else path.moveTo(x(i), y(v))
+                    pen = true
+                    lastX = x(i); lastY = y(v)
+                }
             }
+            // Thin bars at the column's size (100 in 64 dp) touch and read as an area; picked-out ones stay visible.
+            val slot = w / n
+            val barW = max(slot * 0.72f, 1f)
+            val pickW = max(barW, 2.dp.toPx())
+            val zero = y(0f.coerceIn(lo, hi))
             val stroke = Stroke(sw, cap = StrokeCap.Round, join = StrokeJoin.Round)
             onDrawBehind {
-                drawLine(faint, Offset(pad, size.height - pad), Offset(size.width - pad, size.height - pad), strokeWidth = 1.dp.toPx())
-                drawPath(path, color, style = stroke)
-                drawCircle(color, sw * 1.6f, Offset(lastX, lastY))
+                // The base line: zero for bars (negative prices hang below it), the bottom edge for a line.
+                val base = if (bars) zero else size.height - pad
+                drawLine(faint, Offset(pad, base), Offset(size.width - pad, base), strokeWidth = 1.dp.toPx())
+                s.marker?.let { i ->
+                    // "Now": a thin line across the chart, behind the data.
+                    drawLine(markColor, Offset(x(i), 0f), Offset(x(i), size.height), strokeWidth = 1.dp.toPx())
+                }
+                if (bars) {
+                    fun bar(i: Int, c: Color, bw: Float) {
+                        val v = pts[i]
+                        if (v.isNaN()) return
+                        val top = min(y(v), zero)
+                        val bottom = max(y(v), zero)
+                        drawRect(c, Offset(x(i) - bw / 2, top), Size(bw, max(bottom - top, 1f)))
+                    }
+                    for (i in 0 until n) if (i != s.highlight && i != s.marker) bar(i, quiet, barW)
+                    s.marker?.let { bar(it, color, pickW) }
+                    s.highlight?.let { i ->
+                        bar(i, hiColor, pickW)
+                        // A dot at the bar's tip, so a highlight near zero (the cheapest quarter hour) still shows.
+                        val v = pts[i]
+                        drawCircle(hiColor, pickW * 1.1f, Offset(x(i), if (y(v) <= zero) y(v) - pickW * 1.1f else y(v) + pickW * 1.1f))
+                    }
+                } else {
+                    drawPath(path, if (s.highlight != null || s.marker != null) quiet else color, style = stroke)
+                    if (s.marker == null) drawCircle(color, sw * 1.6f, Offset(lastX, lastY))
+                    s.marker?.let { i -> drawCircle(color, sw * 1.8f, Offset(x(i), y(pts[i]))) }
+                    s.highlight?.let { i -> drawCircle(hiColor, sw * 1.8f, Offset(x(i), y(pts[i]))) }
+                }
             }
         })
     }
@@ -407,6 +529,75 @@ private fun range(s: SparklineView): Pair<String, String> {
     return f(lo) to f(hi)
 }
 
+// ------------------------------------------------------------------------------------------------ list
+
+@Composable
+private fun PList(l: ListView, form: ViewForm, p: PluginPalette, m: FormMetrics, inherited: Tone) {
+    fun toneOf(r: ListRow) = if (r.tone == Tone.Neutral) inherited else r.tone
+    fun strongOf(r: ListRow) = toneOf(r).let { if (it == Tone.Neutral) p.text else p.tone(it) }
+    val medium = androidx.compose.ui.text.font.FontWeight.Medium
+    when (form) {
+        // Too narrow for a title: the first row's icon once, then the times with short badges ("+3"); a longer badge
+        // ("Cancelled") doesn't fit and colours the time instead. A list without times shows its first title.
+        ViewForm.Column -> Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            PIcon(l.rows.first().icon, m.icon, if (toneOf(l.rows.first()) == Tone.Neutral) p.soft else strongOf(l.rows.first()))
+            val timed = l.rows.filter { it.time != null }.take(3)
+            if (timed.isEmpty()) {
+                Text(l.rows.first().title, style = m.label.on(p.text, p), maxLines = 3, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis)
+            } else timed.forEach { r ->
+                val badge = r.badge?.takeIf { it.length <= COLUMN_BADGE }
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(r.time!!, style = m.nodeValue.on(if (r.badge != null && badge == null) strongOf(r) else p.text, p), maxLines = 1)
+                    badge?.let { Text(it, style = m.label.copy(fontWeight = medium).on(strongOf(r), p), maxLines = 1) }
+                }
+            }
+        }
+        // One short line per row, the first two rows.
+        ViewForm.Strip -> Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            l.rows.take(2).forEach { r ->
+                Row(Modifier.widthIn(max = 300.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    PIcon(r.icon, 18.dp, if (toneOf(r) == Tone.Neutral) p.soft else strongOf(r))
+                    r.time?.let { Text(it, style = m.label.copy(fontWeight = medium).on(p.text, p), maxLines = 1) }
+                    Text(r.title, style = m.label.on(p.text, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    r.badge?.let { Text(it, style = m.label.copy(fontWeight = medium).on(strongOf(r), p), maxLines = 1) }
+                }
+            }
+        }
+        // A small timetable: the times in a column as wide as the widest one ("22:23" or "Tomorrow"), so the titles
+        // line up; badges at the end.
+        else -> {
+            val detail = form == ViewForm.Detail
+            val rows = if (detail) l.rows else l.rows.take(3)
+            val timeStyle = m.line1.copy(fontWeight = medium).on(p.text, p)
+            androidx.compose.ui.layout.SubcomposeLayout { constraints ->
+                val timeW = subcompose("times") { rows.forEach { r -> r.time?.let { Text(it, style = timeStyle, maxLines = 1) } } }
+                    .maxOfOrNull { it.measure(Constraints()).width } ?: 0
+                val table = subcompose("table") {
+                    Column(Modifier.width(if (detail) 460.dp else 360.dp), verticalArrangement = Arrangement.spacedBy(if (detail) 10.dp else 6.dp)) {
+                        l.label?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                        rows.forEach { r ->
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                PIcon(r.icon, m.icon * 0.6f, if (toneOf(r) == Tone.Neutral) p.soft else strongOf(r), Modifier.padding(end = 8.dp))
+                                if (timeW > 0) Text(r.time ?: "", style = timeStyle, maxLines = 1, modifier = Modifier.width(timeW.toDp() + 10.dp))
+                                // Title and detail share what's left; the title gives way first, the badge keeps the end.
+                                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(r.title, style = m.line1.on(p.text, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                    r.detail?.let { Text(it, style = m.line2.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(start = 8.dp)) }
+                                }
+                                r.badge?.let { Text(it, style = m.line1.copy(fontWeight = medium).on(strongOf(r), p), maxLines = 1, modifier = Modifier.padding(start = 8.dp)) }
+                            }
+                        }
+                    }
+                }.first().measure(constraints)
+                layout(table.width, table.height) { table.place(0, 0) }
+            }
+        }
+    }
+}
+
+/** The longest badge the band column draws beside a time ("+12"); longer ones colour the time instead. */
+private const val COLUMN_BADGE = 4
+
 // ------------------------------------------------------------------------------------------------ text
 
 @Composable
@@ -428,6 +619,94 @@ private fun Lines(t: TextView, form: ViewForm, p: PluginPalette, m: FormMetrics,
             }
         }
     }
+}
+
+// ------------------------------------------------------------------------------------------------ image
+
+@Composable
+private fun PImage(v: ImageView, form: ViewForm, p: PluginPalette) {
+    val size = when (form) { ViewForm.Detail -> 168.dp; ViewForm.Corner -> 76.dp; else -> 56.dp }
+    val shape = if (v.shape == ImageShape.Round) CircleShape else RoundedCornerShape(if (form == ViewForm.Detail) 12.dp else 8.dp)
+    val bitmap = LocalPluginImages.current(v.src)
+    val described = Modifier.size(size).clip(shape).semantics { v.description?.let { contentDescription = it } }
+    if (bitmap != null) {
+        Image(bitmap, null, described, contentScale = ContentScale.Crop)
+    } else {
+        // Loading or failed: a quiet tile, so the layout doesn't jump when the picture arrives.
+        Box(described.background(p.faint))
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ actions
+
+@Composable
+private fun Actions(a: ActionsView, form: ViewForm, p: PluginPalette, tone: Tone) {
+    // Buttons only in the detail card: on the photo or in the band a tap opens the card instead.
+    if (form != ViewForm.Detail) return
+    val run = LocalPluginActions.current
+    Row(horizontalArrangement = Arrangement.spacedBy(14.dp), verticalAlignment = Alignment.CenterVertically) {
+        a.items.forEach { item ->
+            val t = if (item.tone == Tone.Neutral) tone else item.tone
+            val c = if (t == Tone.Neutral) p.text else p.tone(t)
+            val size = if (item.primary) 64.dp else 52.dp
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier.size(size).clip(CircleShape)
+                        .background(if (item.primary) c else p.faint.copy(alpha = 0.6f))
+                        .then(if (run != null) Modifier.clickable(onClickLabel = item.label ?: item.id) { run(item.id) } else Modifier.graphicsLayer { alpha = 0.4f })
+                        .semantics { contentDescription = item.label ?: item.id; role = Role.Button },
+                    contentAlignment = Alignment.Center,
+                ) { PIcon(item.icon, if (item.primary) 30.dp else 24.dp, if (item.primary) p.onTone else c) }
+                item.label?.let { Text(it, style = Kin.type.caption.on(p.soft, p), maxLines = 1, modifier = Modifier.padding(top = 4.dp)) }
+            }
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------ progress
+
+@Composable
+private fun Progress(v: ProgressView, form: ViewForm, p: PluginPalette, m: FormMetrics, tone: Tone) {
+    val color = if (tone == Tone.Neutral) p.text else p.tone(tone)
+    // A running bar moves on by itself, one unit per second since `at`; ticking once a second only while it runs.
+    val now by produceState(System.currentTimeMillis(), v) {
+        while (v.running) { value = System.currentTimeMillis(); delay(1_000) }
+    }
+    val current = if (v.running && v.at != null) (v.value + (now - v.at) / 1000f).coerceIn(v.min, v.max) else v.value
+    val fraction = ((current - v.min) / (v.max - v.min)).coerceIn(0f, 1f)
+    val width = when (form) { ViewForm.Column -> 60.dp; ViewForm.Strip -> 120.dp; ViewForm.Detail -> 360.dp; else -> 200.dp }
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp), horizontalAlignment = if (form == ViewForm.Column) Alignment.CenterHorizontally else Alignment.Start) {
+        if (form != ViewForm.Column) v.label?.let { Text(it, style = m.label.on(p.soft, p), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = width)) }
+        val track = p.faint
+        if (v.style == ProgressStyle.Marker) {
+            // A dot on the track: where the value sits between min and max (today's temperature in its range).
+            Canvas(Modifier.size(width, 10.dp)) {
+                val h = 3.dp.toPx()
+                drawRoundRect(track, Offset(0f, (size.height - h) / 2), Size(size.width, h), CornerRadius(h / 2))
+                val r = size.height / 2
+                drawCircle(color, r, Offset(r + (size.width - 2 * r) * fraction, size.height / 2))
+            }
+        } else Canvas(Modifier.size(width, if (form.compact) 3.dp else 4.dp)) {
+            val r = CornerRadius(size.height / 2)
+            drawRoundRect(track, cornerRadius = r)
+            drawRoundRect(color, size = Size(size.width * fraction, size.height), cornerRadius = r)
+        }
+        if (v.time && form != ViewForm.Column) {
+            Row(Modifier.width(width), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(clockText(current), style = m.label.on(p.soft, p), maxLines = 1)
+                Text(clockText(v.max), style = m.label.on(p.soft, p), maxLines = 1)
+            }
+        }
+    }
+}
+
+/** Seconds as "3:07" or "1:02:07". */
+internal fun clockText(seconds: Float): String {
+    val s = seconds.toLong().coerceAtLeast(0)
+    val h = s / 3600
+    val mm = (s % 3600) / 60
+    val ss = s % 60
+    return if (h > 0) "%d:%02d:%02d".format(h, mm, ss) else "%d:%02d".format(mm, ss)
 }
 
 // ------------------------------------------------------------------------------------------------ stack
@@ -483,7 +762,18 @@ private fun Flow(f: FlowView, form: ViewForm, p: PluginPalette, m: FormMetrics, 
                     Box(
                         Modifier.size(circle).drawBehind {
                             val sw = 2.dp.toPx()
-                            drawCircle(c, size.minDimension / 2 - sw / 2, style = Stroke(sw))
+                            val pct = n.percent
+                            if (pct == null) {
+                                drawCircle(c, size.minDimension / 2 - sw / 2, style = Stroke(sw))
+                            } else {
+                                // A charge ring: the faint track and the filled share, from the top, clockwise.
+                                val rw = 3.dp.toPx()
+                                drawCircle(line, size.minDimension / 2 - rw / 2, style = Stroke(rw))
+                                drawArc(
+                                    c, -90f, 3.6f * pct.coerceIn(0f, 100f), false, Offset(rw / 2, rw / 2),
+                                    Size(size.width - rw, size.height - rw), style = Stroke(rw, cap = StrokeCap.Round),
+                                )
+                            }
                         },
                         contentAlignment = Alignment.Center,
                     ) { PIcon(n.icon, m.nodeIcon, c) }

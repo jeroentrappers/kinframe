@@ -72,6 +72,15 @@ object PluginViewParser {
                 "sparkline" -> sparkline(o, path)
                 "text" -> text(o, path)
                 "stack" -> stack(o, path, depth)
+                "image" -> image(o, path)
+                "actions" -> actions(o, path)
+                "progress" -> progress(o, path)
+                "list" -> list(o, path)
+                "none" -> {
+                    if (depth != 1) fail("$path/type", "none can only be the whole view")
+                    allowOnly(o, path, setOf("type"))
+                    NoneView
+                }
                 else -> fail("$path/type", "unknown component \"$type\"")
             }
         }
@@ -105,7 +114,7 @@ object PluginViewParser {
         }
 
         fun gauge(o: JsonObject, path: String): GaugeView {
-            allowOnly(o, path, setOf("type", "value", "label", "caption", "icon", "style", "tone", "negative_tone"))
+            allowOnly(o, path, setOf("type", "value", "label", "caption", "icon", "style", "tone", "negative_tone", "sub"))
             val style = string(o, "style", path, 8)?.let { GaugeStyle.of(it) ?: fail("$path/style", "expected ring, bar or dial") } ?: GaugeStyle.Ring
             val v = number(o, "value", path, required = true)!!
             if (style == GaugeStyle.Dial) {
@@ -122,6 +131,59 @@ object PluginViewParser {
                 style = style,
                 tone = tone(o, path),
                 negativeTone = if ("negative_tone" in o) tone(o, path, "negative_tone") else null,
+                sub = if ("sub" in o) array(o, "sub", path, 1, ViewLimits.MAX_SUB).mapIndexed { i, e ->
+                    val p = "$path/sub/$i"
+                    val so = obj(e, p)
+                    allowOnly(so, p, setOf("value", "icon", "tone"))
+                    SubValue(string(so, "value", p, ViewLimits.MAX_SUB_TEXT, required = true)!!, icon(so, p), tone(so, p))
+                } else emptyList(),
+            )
+        }
+
+        fun image(o: JsonObject, path: String): ImageView {
+            allowOnly(o, path, setOf("type", "src", "shape", "description", "tone"))
+            val src = string(o, "src", path, ViewLimits.MAX_SRC, required = true)!!
+            if (!src.startsWith("https://") && !src.startsWith("http://")) fail("$path/src", "expected an http(s) URL")
+            return ImageView(
+                src = src,
+                shape = string(o, "shape", path, 8)?.let { ImageShape.of(it) ?: fail("$path/shape", "expected square or round") } ?: ImageShape.Square,
+                description = string(o, "description", path, ViewLimits.MAX_DESCRIPTION),
+                tone = tone(o, path),
+            )
+        }
+
+        fun actions(o: JsonObject, path: String): ActionsView {
+            allowOnly(o, path, setOf("type", "items", "tone"))
+            val items = array(o, "items", path, 1, ViewLimits.MAX_ACTIONS).mapIndexed { i, e ->
+                val p = "$path/items/$i"
+                val a = obj(e, p)
+                allowOnly(a, p, setOf("id", "icon", "label", "tone", "primary"))
+                val id = string(a, "id", p, ViewLimits.MAX_ID, required = true)!!
+                if (!ID.matches(id)) fail("$p/id", "expected a-z, 0-9, - and _")
+                ActionItem(
+                    id = id, icon = icon(a, p, required = true)!!, label = string(a, "label", p, ViewLimits.MAX_ACTION_LABEL),
+                    tone = tone(a, p), primary = (a["primary"] as? JsonPrimitive)?.booleanOrNull ?: false,
+                )
+            }
+            if (items.map { it.id }.toSet().size != items.size) fail("$path/items", "action ids must be unique")
+            return ActionsView(items, tone(o, path))
+        }
+
+        fun progress(o: JsonObject, path: String): ProgressView {
+            allowOnly(o, path, setOf("type", "value", "min", "max", "at", "running", "label", "time", "style", "tone"))
+            val min = number(o, "min", path) ?: 0f
+            val max = number(o, "max", path, required = true)!!
+            if (max <= min) fail("$path/max", "expected more than min")
+            val v = number(o, "value", path, required = true)!!
+            if (v < min || v > max) fail("$path/value", "expected min to max")
+            val at = o["at"]?.let { (it as? JsonPrimitive)?.takeIf { p -> !p.isString }?.content?.toDoubleOrNull()?.toLong() ?: fail("$path/at", "expected epoch milliseconds") }
+            return ProgressView(
+                value = v, max = max, min = min, at = at,
+                style = string(o, "style", path, 8)?.let { ProgressStyle.of(it) ?: fail("$path/style", "expected bar or marker") } ?: ProgressStyle.Bar,
+                running = (o["running"] as? JsonPrimitive)?.booleanOrNull ?: false,
+                label = string(o, "label", path, ViewLimits.MAX_LABEL),
+                time = (o["time"] as? JsonPrimitive)?.booleanOrNull ?: false,
+                tone = tone(o, path),
             )
         }
 
@@ -131,7 +193,7 @@ object PluginViewParser {
             val nodes = nodesJson.mapIndexed { i, e ->
                 val p = "$path/nodes/$i"
                 val n = obj(e, p)
-                allowOnly(n, p, setOf("id", "icon", "value", "label", "tone"))
+                allowOnly(n, p, setOf("id", "icon", "value", "label", "tone", "percent"))
                 val id = string(n, "id", p, ViewLimits.MAX_ID, required = true)!!
                 if (!ID.matches(id)) fail("$p/id", "ids use a-z, 0-9, - and _")
                 FlowNode(
@@ -140,6 +202,7 @@ object PluginViewParser {
                     value = string(n, "value", p, ViewLimits.MAX_NODE_TEXT),
                     label = string(n, "label", p, ViewLimits.MAX_NODE_TEXT),
                     tone = tone(n, p),
+                    percent = number(n, "percent", p)?.also { if (it < 0f || it > 100f) fail("$p/percent", "expected 0 to 100") },
                 )
             }
             val index = HashMap<String, Int>()
@@ -161,8 +224,26 @@ object PluginViewParser {
             return FlowView(nodes, edges, tone(o, path))
         }
 
+        fun list(o: JsonObject, path: String): ListView {
+            allowOnly(o, path, setOf("type", "rows", "label", "tone"))
+            val rows = array(o, "rows", path, 1, ViewLimits.MAX_LIST_ROWS).mapIndexed { i, e ->
+                val p = "$path/rows/$i"
+                val r = obj(e, p)
+                allowOnly(r, p, setOf("title", "time", "detail", "badge", "icon", "tone"))
+                ListRow(
+                    title = string(r, "title", p, ViewLimits.MAX_LIST_TITLE, required = true)!!,
+                    time = string(r, "time", p, ViewLimits.MAX_LIST_TIME),
+                    detail = string(r, "detail", p, ViewLimits.MAX_LIST_DETAIL),
+                    badge = string(r, "badge", p, ViewLimits.MAX_LIST_BADGE),
+                    icon = icon(r, p),
+                    tone = tone(r, p),
+                )
+            }
+            return ListView(rows, string(o, "label", path, ViewLimits.MAX_LABEL), tone(o, path))
+        }
+
         fun sparkline(o: JsonObject, path: String): SparklineView {
-            allowOnly(o, path, setOf("type", "points", "min", "max", "label", "value", "show_range", "tone"))
+            allowOnly(o, path, setOf("type", "points", "min", "max", "label", "value", "show_range", "tone", "style", "highlight", "highlight_tone", "marker"))
             val pts = array(o, "points", path, ViewLimits.MIN_POINTS, ViewLimits.MAX_POINTS).mapIndexed { i, e ->
                 when {
                     e is JsonNull -> Float.NaN
@@ -176,12 +257,25 @@ object PluginViewParser {
             val max = number(o, "max", path, signed = true)
             if (min != null && max != null && min >= max) fail("$path/min", "min must be below max")
             val showRange = o["show_range"]?.let { (it as? JsonPrimitive)?.takeIf { p -> !p.isString }?.booleanOrNull ?: fail("$path/show_range", "expected true or false") } ?: false
+            fun index(key: String): Int? {
+                val v = number(o, key, path) ?: return null
+                val i = v.toInt()
+                if (i.toFloat() != v || i < 0 || i >= pts.size) fail("$path/$key", "expected an index of points (0 to ${pts.size - 1})")
+                if (pts[i].isNaN()) fail("$path/$key", "points a gap (null)")
+                return i
+            }
+            val highlight = index("highlight")
+            if ("highlight_tone" in o && highlight == null) fail("$path/highlight_tone", "needs highlight")
             return SparklineView(
                 pts, min, max,
                 label = string(o, "label", path, ViewLimits.MAX_LABEL),
                 value = string(o, "value", path, ViewLimits.MAX_VALUE),
                 showRange = showRange,
                 tone = tone(o, path),
+                style = string(o, "style", path, 8)?.let { SparklineStyle.of(it) ?: fail("$path/style", "expected line or bars") } ?: SparklineStyle.Line,
+                highlight = highlight,
+                highlightTone = if ("highlight_tone" in o) tone(o, path, "highlight_tone") else null,
+                marker = index("marker"),
             )
         }
 
@@ -238,7 +332,7 @@ object PluginViewParser {
         }
 
         fun tone(o: JsonObject, path: String, key: String = "tone"): Tone =
-            string(o, key, path, 8)?.let { Tone.of(it) ?: fail("$path/$key", "expected neutral, good, warn, bad, accent or info") } ?: Tone.Neutral
+            string(o, key, path, 8)?.let { Tone.of(it) ?: fail("$path/$key", "expected neutral, good, warn, bad, accent, info, water, gas or heat") } ?: Tone.Neutral
 
         fun icon(o: JsonObject, path: String, required: Boolean = false): String? {
             val name = string(o, "icon", path, 24, required) ?: return null

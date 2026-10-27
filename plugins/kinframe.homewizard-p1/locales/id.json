@@ -1,0 +1,20 @@
+{
+  "@name": "Meteran HomeWizard P1",
+  "@description": "Daya langsung dari meteran HomeWizard P1 di rumah: pemakaian, ekspor ke jaringan, per fase, dan total hari ini.",
+  "@setting.host": "Alamat meteran",
+  "@setting.host.help": "Aktifkan Local API untuk meteran di aplikasi HomeWizard Energy.",
+  "@setting.style": "Tampilkan sebagai",
+  "@option.style.value": "Angka",
+  "@option.style.gauge": "Jarum",
+  "@option.style.flow": "Aliran",
+  "@setting.max_w": "Skala penuh (W)",
+  "@setting.warn_w": "Sorot di atas (W, 0 = mati)",
+  "grid": "Jaringan",
+  "home": "Rumah",
+  "last_hour": "Satu jam terakhir",
+  "returning": "Dikembalikan",
+  "today_export": "Dikembalikan hari ini",
+  "today_gas": "Gas hari ini",
+  "today_import": "Dipakai hari ini",
+  "using": "Pemakaian"
+}

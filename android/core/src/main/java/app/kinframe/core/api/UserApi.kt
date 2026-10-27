@@ -80,6 +80,8 @@ interface KinApi {
     /** Merge patch with `If-Match: "<version>"`; a stale version answers `412 version_conflict`. */
     suspend fun patchSettings(frameId: String, version: Int, patch: JsonObject): SettingsDocument
     suspend fun geocode(query: String, lang: String): List<Place>
+    /** `GET /frames/{id}/plugins`: the frame's plugin catalog and the status of its instances (docs/plugins.md §6). */
+    suspend fun framePlugins(frameId: String): FramePlugins
 
     /** The user websocket, `GET /v1/ws?access_token=…` (README §6.2). */
     suspend fun webSocketRequest(): Request
@@ -282,6 +284,9 @@ class HttpKinApi(
 
     override suspend fun geocode(query: String, lang: String): List<Place> =
         call { url(ep("geocode", mapOf("q" to query, "lang" to lang))).get() }.decode(ListSerializer(Place.serializer()))
+
+    override suspend fun framePlugins(frameId: String): FramePlugins =
+        call { url(ep("frames/$frameId/plugins")).get() }.decode(FramePlugins.serializer())
 
     override suspend fun webSocketRequest(): Request {
         val token = tokens.accessToken()

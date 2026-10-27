@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Uit</string>
     <string name="plugins_layout_overlay">In de hoeken</string>
     <string name="plugins_layout_band">Naast de foto</string>
+    <string name="plugins_layout_split">Twee foto’s en een overzicht</string>
+    <string name="plugins_split_side">Kant van het overzicht</string>
     <string name="plugins_band_side">Kant (liggend)</string>
     <string name="plugins_side_left">Links</string>
     <string name="plugins_side_right">Rechts</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Mijn weerstation</string>
     <string name="wx_station_sub">Je eigen weerstation (PWS) via Weathercloud</string>
     <string name="wx_both_note">Met beide aan toont de klok de temperatuur van je weerstation, met de lucht en de laagste en hoogste temperatuur uit de verwachting.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Vandaag</string>
+    <string name="plugin_rel_tomorrow">Morgen</string>
+    <string name="plugin_rel_yesterday">Gisteren</string>
+    <string name="plugin_rel_just_now">zonet</string>
+    <string name="plugin_rel_now">nu</string>
+    <string name="plugin_rel_min_ago">{n} min geleden</string>
+    <string name="plugin_rel_h_ago">{n} u geleden</string>
+    <string name="plugin_rel_in_min">over {n} min</string>
+    <string name="plugin_rel_in_h">over {n} u</string>
 </resources>

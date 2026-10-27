@@ -1,0 +1,18 @@
+{
+  "@name": "HomeWizard energy socket",
+  "@option.icon.plug": "Plug",
+  "@option.icon.washing-machine": "Washing machine",
+  "@option.icon.lightbulb": "Lamp",
+  "@option.icon.fan": "Fan",
+  "@option.icon.car": "Car",
+  "@option.icon.bolt": "Lightning bolt",
+  "today": "Today",
+  "on": "On",
+  "off": "Off",
+  "turn_on": "Switch on",
+  "turn_off": "Switch off",
+  "locked": "Switch locked in the HomeWizard app",
+  "last_hour": "Last hour",
+  "voltage": "Voltage",
+  "current": "Current"
+}

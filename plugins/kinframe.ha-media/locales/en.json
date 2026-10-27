@@ -1,0 +1,2 @@
+{ "@name": "Now playing", "previous": "Previous", "play": "Play", "pause": "Pause", "next": "Next", "quieter": "Quieter", "louder": "Louder",
+  "volume": "Volume {n}", "token_refused": "Home Assistant refused the token", "album_art": "Album art" }

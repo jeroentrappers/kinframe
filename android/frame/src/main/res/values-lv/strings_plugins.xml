@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Izslēgts</string>
     <string name="plugins_layout_overlay">Stūros</string>
     <string name="plugins_layout_band">Blakus fotoattēlam</string>
+    <string name="plugins_layout_split">Divi fotoattēli un pārskats</string>
+    <string name="plugins_split_side">Pārskata puse</string>
     <string name="plugins_band_side">Puse (ainava)</string>
     <string name="plugins_side_left">Pa kreisi</string>
     <string name="plugins_side_right">Pa labi</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Mana meteostacija</string>
     <string name="wx_station_sub">Jūsu pašu meteostacija (PWS) caur Weathercloud</string>
     <string name="wx_both_note">Ja ieslēgtas abas, pulkstenis rāda jūsu stacijas temperatūru ar prognozes debesīm un dienas zemāko un augstāko temperatūru.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Šodien</string>
+    <string name="plugin_rel_tomorrow">Rīt</string>
+    <string name="plugin_rel_yesterday">Vakar</string>
+    <string name="plugin_rel_just_now">tikko</string>
+    <string name="plugin_rel_now">tagad</string>
+    <string name="plugin_rel_min_ago">pirms {n} min</string>
+    <string name="plugin_rel_h_ago">pirms {n} h</string>
+    <string name="plugin_rel_in_min">pēc {n} min</string>
+    <string name="plugin_rel_in_h">pēc {n} h</string>
 </resources>

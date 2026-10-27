@@ -1,0 +1,240 @@
+{
+ "version": "1.4",
+ "timestamp": "1792963486",
+ "station": "Denderleeuw",
+ "stationinfo": {
+  "@id": "http://irail.be/stations/NMBS/008895802",
+  "id": "BE.NMBS.008895802",
+  "name": "Denderleeuw",
+  "locationX": "4.071825",
+  "locationY": "50.891925",
+  "standardname": "Denderleeuw"
+ },
+ "departures": {
+  "number": "6",
+  "departure": [
+   {
+    "id": "0",
+    "station": "Brussels Airport - Zaventem",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008819406",
+     "id": "BE.NMBS.008819406",
+     "name": "Brussels Airport - Zaventem",
+     "locationX": "4.482076",
+     "locationY": "50.896456",
+     "standardname": "Brussels Airport - Zaventem"
+    },
+    "time": "1792963200",
+    "delay": "0",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.IC2221",
+    "vehicleinfo": {
+     "name": "BE.NMBS.IC2221",
+     "shortname": "IC 2221",
+     "number": "2221",
+     "type": "IC",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/IC2221"
+    },
+    "platform": "2",
+    "platforminfo": {
+     "name": "2",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/low",
+     "name": "low"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/IC2221"
+   },
+   {
+    "id": "1",
+    "station": "Brussel-Noord",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008812005",
+     "id": "BE.NMBS.008812005",
+     "name": "Brussel-Noord",
+     "locationX": "4.360846",
+     "locationY": "50.859663",
+     "standardname": "Brussel-Noord/Bruxelles-Nord"
+    },
+    "time": "1792963380",
+    "delay": "180",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.S32272",
+    "vehicleinfo": {
+     "name": "BE.NMBS.S32272",
+     "shortname": "S3 2272",
+     "number": "2272",
+     "type": "S3",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/S32272"
+    },
+    "platform": "7",
+    "platforminfo": {
+     "name": "7",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/unknown",
+     "name": "unknown"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/S32272"
+   },
+   {
+    "id": "2",
+    "station": "Brussel-Luxemburg",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008811304",
+     "id": "BE.NMBS.008811304",
+     "name": "Brussel-Luxemburg",
+     "locationX": "4.373674",
+     "locationY": "50.838943",
+     "standardname": "Brussel-Luxemburg/Bruxelles-Luxembourg"
+    },
+    "time": "1792963560",
+    "delay": "0",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.S86571",
+    "vehicleinfo": {
+     "name": "BE.NMBS.S86571",
+     "shortname": "S8 6571",
+     "number": "6571",
+     "type": "S8",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/S86571"
+    },
+    "platform": "4",
+    "platforminfo": {
+     "name": "4",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/low",
+     "name": "low"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/S86571"
+   },
+   {
+    "id": "3",
+    "station": "Aalst",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008895000",
+     "id": "BE.NMBS.008895000",
+     "name": "Aalst",
+     "locationX": "4.039653",
+     "locationY": "50.942813",
+     "standardname": "Aalst"
+    },
+    "time": "1792963680",
+    "delay": "120",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.S42192",
+    "vehicleinfo": {
+     "name": "BE.NMBS.S42192",
+     "shortname": "S4 2192",
+     "number": "2192",
+     "type": "S4",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/S42192"
+    },
+    "platform": "3",
+    "platforminfo": {
+     "name": "3",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/low",
+     "name": "low"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/S42192"
+   },
+   {
+    "id": "4",
+    "station": "Zottegem",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008895208",
+     "id": "BE.NMBS.008895208",
+     "name": "Zottegem",
+     "locationX": "3.81441",
+     "locationY": "50.869102",
+     "standardname": "Zottegem"
+    },
+    "time": "1792964220",
+    "delay": "240",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.S86593",
+    "vehicleinfo": {
+     "name": "BE.NMBS.S86593",
+     "shortname": "S8 6593",
+     "number": "6593",
+     "type": "S8",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/S86593"
+    },
+    "platform": "5",
+    "platforminfo": {
+     "name": "5",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/low",
+     "name": "low"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/S86593"
+   },
+   {
+    "id": "5",
+    "station": "Gent-Sint-Pieters",
+    "stationinfo": {
+     "@id": "http://irail.be/stations/NMBS/008892007",
+     "id": "BE.NMBS.008892007",
+     "name": "Gent-Sint-Pieters",
+     "locationX": "3.710675",
+     "locationY": "51.035896",
+     "standardname": "Gent-Sint-Pieters"
+    },
+    "time": "1792964460",
+    "delay": "60",
+    "canceled": "0",
+    "left": "0",
+    "isExtra": "0",
+    "vehicle": "BE.NMBS.IC2243",
+    "vehicleinfo": {
+     "name": "BE.NMBS.IC2243",
+     "shortname": "IC 2243",
+     "number": "2243",
+     "type": "IC",
+     "locationX": "0",
+     "locationY": "0",
+     "@id": "http://irail.be/vehicle/IC2243"
+    },
+    "platform": "4",
+    "platforminfo": {
+     "name": "4",
+     "normal": "1"
+    },
+    "occupancy": {
+     "@id": "http://api.irail.be/terms/low",
+     "name": "low"
+    },
+    "departureConnection": "http://irail.be/connections/8895802/20261025/IC2243"
+   }
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+{
+  "@name": "Електромер HomeWizard P1",
+  "@description": "Мощност на живо от електромер HomeWizard P1 у дома: консумация, връщане, по фази и днешните суми.",
+  "@setting.host": "Адрес на електромера",
+  "@setting.host.help": "Включете Local API за електромера в приложението HomeWizard Energy.",
+  "@setting.style": "Показване като",
+  "@option.style.value": "Число",
+  "@option.style.gauge": "Стрелка",
+  "@option.style.flow": "Поток",
+  "@setting.max_w": "Пълна скала (W)",
+  "@setting.warn_w": "Открояване над (W, 0 = изкл.)",
+  "grid": "Мрежа",
+  "home": "Дом",
+  "last_hour": "Последния час",
+  "returning": "Връщане към мрежата",
+  "today_export": "Върнато днес",
+  "today_gas": "Газ днес",
+  "today_import": "Потребено днес",
+  "using": "Потребление"
+}

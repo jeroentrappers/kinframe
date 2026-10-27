@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1 mérő",
+  "@description": "Élő teljesítmény a ház HomeWizard P1 mérőjéről: fogyasztás, visszatáplálás, fázisonként és a mai összesítések.",
+  "@setting.host": "A mérő címe",
+  "@setting.host.help": "Kapcsold be a mérő Local API-ját a HomeWizard Energy alkalmazásban.",
+  "@setting.style": "Megjelenítés",
+  "@option.style.value": "Szám",
+  "@option.style.gauge": "Mutató",
+  "@option.style.flow": "Áramlás",
+  "@setting.max_w": "Teljes skála (W)",
+  "@setting.warn_w": "Kiemelés e fölött (W, 0 = ki)",
+  "grid": "Hálózat",
+  "home": "Otthon",
+  "last_hour": "Utolsó óra",
+  "returning": "Visszatáplálás",
+  "today_export": "Ma visszatáplált",
+  "today_gas": "Gáz ma",
+  "today_import": "Ma fogyasztott",
+  "using": "Fogyasztás"
+}

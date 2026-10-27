@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1-måler",
+  "@description": "Live effekt fra en HomeWizard P1-måler i huset: forbrug, levering, pr. fase og dagens totaler.",
+  "@setting.host": "Målerens adresse",
+  "@setting.host.help": "Slå Local API til for måleren i HomeWizard Energy-appen.",
+  "@setting.style": "Vis som",
+  "@option.style.value": "Tal",
+  "@option.style.gauge": "Viser",
+  "@option.style.flow": "Flow",
+  "@setting.max_w": "Fuld skala (W)",
+  "@setting.warn_w": "Fremhæv over (W, 0 = fra)",
+  "grid": "Net",
+  "home": "Hjem",
+  "last_hour": "Seneste time",
+  "returning": "Leverer tilbage",
+  "today_export": "Leveret i dag",
+  "today_gas": "Gas i dag",
+  "today_import": "Brugt i dag",
+  "using": "Forbrug"
+}

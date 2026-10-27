@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Išjungta</string>
     <string name="plugins_layout_overlay">Kampuose</string>
     <string name="plugins_layout_band">Šalia nuotraukos</string>
+    <string name="plugins_layout_split">Dvi nuotraukos ir suvestinė</string>
+    <string name="plugins_split_side">Suvestinės pusė</string>
     <string name="plugins_band_side">Pusė (gulsčiai)</string>
     <string name="plugins_side_left">Kairė</string>
     <string name="plugins_side_right">Dešinė</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Mano orų stotelė</string>
     <string name="wx_station_sub">Jūsų pačių orų stotelė (PWS) per Weathercloud</string>
     <string name="wx_both_note">Kai įjungtos abi, laikrodis rodo jūsų stotelės temperatūrą su prognozės dangumi ir dienos žemiausia bei aukščiausia temperatūra.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Šiandien</string>
+    <string name="plugin_rel_tomorrow">Rytoj</string>
+    <string name="plugin_rel_yesterday">Vakar</string>
+    <string name="plugin_rel_just_now">ką tik</string>
+    <string name="plugin_rel_now">dabar</string>
+    <string name="plugin_rel_min_ago">prieš {n} min.</string>
+    <string name="plugin_rel_h_ago">prieš {n} val.</string>
+    <string name="plugin_rel_in_min">po {n} min.</string>
+    <string name="plugin_rel_in_h">po {n} val.</string>
 </resources>

@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">Вимк.</string>
     <string name="plugins_layout_overlay">У кутах</string>
     <string name="plugins_layout_band">Поруч із фото</string>
+    <string name="plugins_layout_split">Два фото й панель</string>
+    <string name="plugins_split_side">Бік панелі</string>
     <string name="plugins_band_side">Сторона (альбомна)</string>
     <string name="plugins_side_left">Ліворуч</string>
     <string name="plugins_side_right">Праворуч</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">Моя метеостанція</string>
     <string name="wx_station_sub">Ваша власна метеостанція (PWS) через Weathercloud</string>
     <string name="wx_both_note">Коли ввімкнено обидві, годинник показує температуру вашої станції, а небо та денні мінімум і максимум беруться з прогнозу.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">Сьогодні</string>
+    <string name="plugin_rel_tomorrow">Завтра</string>
+    <string name="plugin_rel_yesterday">Вчора</string>
+    <string name="plugin_rel_just_now">щойно</string>
+    <string name="plugin_rel_now">зараз</string>
+    <string name="plugin_rel_min_ago">{n} хв тому</string>
+    <string name="plugin_rel_h_ago">{n} год тому</string>
+    <string name="plugin_rel_in_min">через {n} хв</string>
+    <string name="plugin_rel_in_h">через {n} год</string>
 </resources>

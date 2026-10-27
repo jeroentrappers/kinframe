@@ -7,6 +7,8 @@
     <string name="plugins_layout_off">끄기</string>
     <string name="plugins_layout_overlay">모서리에</string>
     <string name="plugins_layout_band">사진 옆에</string>
+    <string name="plugins_layout_split">사진 두 장과 대시보드</string>
+    <string name="plugins_split_side">대시보드 위치</string>
     <string name="plugins_band_side">위치(가로)</string>
     <string name="plugins_side_left">왼쪽</string>
     <string name="plugins_side_right">오른쪽</string>
@@ -78,4 +80,14 @@
     <string name="wx_station">내 기상 관측소</string>
     <string name="wx_station_sub">내 기상 관측소(PWS), Weathercloud 경유</string>
     <string name="wx_both_note">둘 다 켜면 시계에 관측소 기온과 예보의 하늘 상태, 오늘 최저·최고 기온이 표시돼요.</string>
+    <!-- ctx.format.day / ago / until (docs/plugins.md §3.2); {n} is the number -->
+    <string name="plugin_rel_today">오늘</string>
+    <string name="plugin_rel_tomorrow">내일</string>
+    <string name="plugin_rel_yesterday">어제</string>
+    <string name="plugin_rel_just_now">방금</string>
+    <string name="plugin_rel_now">지금</string>
+    <string name="plugin_rel_min_ago">{n}분 전</string>
+    <string name="plugin_rel_h_ago">{n}시간 전</string>
+    <string name="plugin_rel_in_min">{n}분 후</string>
+    <string name="plugin_rel_in_h">{n}시간 후</string>
 </resources>

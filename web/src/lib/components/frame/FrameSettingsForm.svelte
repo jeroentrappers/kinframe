@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { api, call, ApiError, type Album, type Frame, type FrameSettings, type SleepSchedule } from '$lib/api/client';
 	import { formatInterval } from '$lib/format';
-	import { mergePatchDiff, rebaseSettings, type JsonObject } from '$lib/logic';
+	import { applyMergePatch, mergePatchDiff, rebaseSettings, type JsonObject } from '$lib/logic';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, LOCALES, t, type MessageKey } from '$lib/i18n/index.svelte';
@@ -9,6 +9,7 @@
 	import { softFly } from '$lib/motion';
 	import Icon from '../Icon.svelte';
 	import LocationPicker from './LocationPicker.svelte';
+	import PluginsSection from './plugins/PluginsSection.svelte';
 
 	let { frame }: { frame: Frame } = $props();
 
@@ -33,6 +34,7 @@
 		// Older frames may store a region tag (nl-BE) or a code we don't list; show the closest language.
 		c.locale.language = matchLocale(c.locale.language) ?? 'en';
 		c.location ??= null;
+		c.plugins = { ...c.plugins, layout: { mode: 'off', side: 'right', background: 'paper', ...c.plugins?.layout } };
 		return c;
 	}
 
@@ -58,10 +60,24 @@
 			.catch(() => (albums = []));
 	});
 
+	/**
+	 * What the save bar compares and sends. Plugin instances are left out: the Plugins section saves each instance
+	 * change on its own (docs/plugins.md §6.1), so they never wait in the save bar.
+	 */
 	const strip = (s: FrameSettings): JsonObject => {
 		const { version: _v, ...rest } = clone(s) as unknown as JsonObject & { version?: number };
+		const plugins = rest.plugins as JsonObject | undefined;
+		if (plugins) delete plugins.instances;
 		return rest as JsonObject;
 	};
+
+	/** The Plugins section saved an instance: take the new version, keeping the form's unsaved changes on top. */
+	function adoptSaved(saved: FrameSettings) {
+		const pending = patch;
+		const next = withDefaults(saved);
+		base = next;
+		form = { ...(applyMergePatch(clone(next) as unknown as JsonObject, pending) as unknown as FrameSettings), version: next.version };
+	}
 	const patch = $derived(base && form ? mergePatchDiff(strip(base), strip(form)) : {});
 	const dirty = $derived(Object.keys(patch).length > 0);
 
@@ -162,189 +178,201 @@
 		<p class="callout callout-warn small" role="alert" in:softFly><Icon name="alert" size={18} />{t('settingsForm.conflict')}</p>
 	{/if}
 
-	<form
-		class="settings"
-		onsubmit={(e) => {
-			e.preventDefault();
-			void save();
-		}}
-	>
-		<section class="card card-pad stack" aria-labelledby="ss-title">
-			<h2 id="ss-title">{t('settingsForm.slideshow')}</h2>
-			<div class="two">
-				<div class="field">
-					<label for="s-int">{t('settingsForm.interval')}</label>
-					<select id="s-int" class="select" bind:value={form.slideshow.interval_s}>
-						{#each INTERVALS as s}<option value={s}>{formatInterval(s, i18n.tag)}</option>{/each}
-						{#if form.slideshow.interval_s && !INTERVALS.includes(form.slideshow.interval_s)}
-							<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s, i18n.tag)}</option>
-						{/if}
-					</select>
+	<!-- The form is display: contents so the Plugins section (with its own dialogs and forms) sits in the same grid. -->
+	<div class="settings">
+		<form
+			class="settings-form"
+			onsubmit={(e) => {
+				e.preventDefault();
+				void save();
+			}}
+		>
+			<section class="card card-pad stack" aria-labelledby="ss-title">
+				<h2 id="ss-title">{t('settingsForm.slideshow')}</h2>
+				<div class="two">
+					<div class="field">
+						<label for="s-int">{t('settingsForm.interval')}</label>
+						<select id="s-int" class="select" bind:value={form.slideshow.interval_s}>
+							{#each INTERVALS as s}<option value={s}>{formatInterval(s, i18n.tag)}</option>{/each}
+							{#if form.slideshow.interval_s && !INTERVALS.includes(form.slideshow.interval_s)}
+								<option value={form.slideshow.interval_s}>{formatInterval(form.slideshow.interval_s, i18n.tag)}</option>
+							{/if}
+						</select>
+					</div>
+					<div class="field">
+						<label for="s-order">{t('settingsForm.order')}</label>
+						<select id="s-order" class="select" bind:value={form.slideshow.order}>
+							<option value="received">{t('settingsForm.orderReceived')}</option>
+							<option value="taken">{t('settingsForm.orderTaken')}</option>
+							<option value="shuffle">{t('settingsForm.orderShuffle')}</option>
+						</select>
+					</div>
 				</div>
-				<div class="field">
-					<label for="s-order">{t('settingsForm.order')}</label>
-					<select id="s-order" class="select" bind:value={form.slideshow.order}>
-						<option value="received">{t('settingsForm.orderReceived')}</option>
-						<option value="taken">{t('settingsForm.orderTaken')}</option>
-						<option value="shuffle">{t('settingsForm.orderShuffle')}</option>
-					</select>
-				</div>
-			</div>
-			<fieldset class="fs">
-				<legend class="label">{t('settingsForm.transition')}</legend>
-				<div class="segmented">
-					{#each [['crossfade', 'settingsForm.crossfade'], ['slide', 'settingsForm.slide'], ['kenburns', 'settingsForm.kenburns']] as [v, l]}
-						<label><input type="radio" name="transition" value={v} bind:group={form.slideshow.transition} />{t(l as MessageKey)}</label>
-					{/each}
-				</div>
-			</fieldset>
-			{#if form.slideshow.order !== 'shuffle'}
-				<label class="switch"><input type="checkbox" bind:checked={form.slideshow.reverse} /><span>{t('settingsForm.reverse')}</span></label>
-			{/if}
-			<label class="switch">
-				<input type="checkbox" bind:checked={form.slideshow.fill} />
-				<span><span class="s-label">{t('settingsForm.fill')}</span><span class="hint">{t('settingsForm.fillHint')}</span></span>
-			</label>
-			{#if !form.slideshow.fill}
-				<div class="field" in:softFly>
-					<label for="s-bg">{t('settingsForm.background')}</label>
-					<select id="s-bg" class="select" bind:value={form.slideshow.background}>
-						<option value="blur">{t('settingsForm.bgBlur')}</option>
-						<option value="black">{t('settingsForm.bgBlack')}</option>
-						<option value="palette">{t('settingsForm.bgPalette')}</option>
-					</select>
-				</div>
-			{/if}
-			{#if albums.length > 0 || form.slideshow.album_id}
-				<div class="field">
-					<label for="s-album">{t('settingsForm.playAlbum')}</label>
-					<select id="s-album" class="select" bind:value={form.slideshow.album_id}>
-						<option value={null}>{t('settingsForm.allPhotos')}</option>
-						{#each albums as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
-					</select>
-					<span class="hint">{t('settingsForm.playAlbumHint')}</span>
-				</div>
-			{/if}
-			<label class="switch">
-				<input type="checkbox" bind:checked={form.slideshow.on_this_day} />
-				<span><span class="s-label">{t('settingsForm.onThisDay')}</span><span class="hint">{t('settingsForm.onThisDayHint')}</span></span>
-			</label>
-			<label class="switch"><input type="checkbox" bind:checked={form.widgets.caption} /><span>{t('settingsForm.showCaption')}</span></label>
-			<label class="switch"><input type="checkbox" bind:checked={form.widgets.clock} /><span>{t('settingsForm.showClock')}</span></label>
-		</section>
-
-		<section class="card card-pad stack" aria-labelledby="disp-title">
-			<h2 id="disp-title">{t('settingsForm.display')}</h2>
-			{#if frame.device_kind === 'browser'}
-				<p class="hint">{t('settingsForm.browserNote')}</p>
-			{:else}
-			<div class="field">
-				<label for="s-bright" class="row"><span>{t('settingsForm.brightness')}</span><span class="spacer"></span><span class="num muted">{brightnessPct}%</span></label>
-				<div class="range-row">
-					<Icon name="moon" size={18} />
-					<input id="s-bright" type="range" min="15" max="255" step="1" bind:value={form.display.brightness} aria-valuetext="{brightnessPct}%" />
-					<Icon name="sun" size={20} />
-				</div>
-			</div>
-			{/if}
-			{#if form.locale}
-				<div class="field">
-					<label for="s-lang" class="label">{t('settingsForm.frameLanguage')}</label>
-					<select id="s-lang" class="select" bind:value={form.locale.language} aria-describedby="s-lang-hint">
-						{#each LOCALES as l (l.id)}
-							<option value={l.id} lang={l.id}>{l.label}</option>
-						{/each}
-					</select>
-					<p id="s-lang-hint" class="hint">{t('settingsForm.frameLanguageHint')}</p>
-				</div>
-			{/if}
-		</section>
-
-		<section class="card card-pad stack" aria-labelledby="wx-title">
-			<h2 id="wx-title">{t('settingsForm.weatherTitle')}</h2>
-			<p class="hint">{t('settingsForm.weatherHint')}</p>
-			<LocationPicker
-				id="s-loc"
-				bind:value={form.location}
-				onpick={() => {
-					// Picking the first place turns the weather on; that is almost always why it is set.
-					if (form?.widgets && !base?.location) form.widgets.weather = true;
-				}}
-			/>
-			<label class="switch" class:disabled={!form.location}>
-				<input type="checkbox" bind:checked={form.widgets.weather} disabled={!form.location} />
-				<span>
-					<span class="s-label">{t('settingsForm.showWeather')}</span>
-					<span class="hint">{form.location ? t('settingsForm.showWeatherHint') : t('settingsForm.needsLocation')}</span>
-				</span>
-			</label>
-			{#if form.locale}
 				<fieldset class="fs">
-					<legend class="label">{t('settingsForm.temperatureUnit')}</legend>
+					<legend class="label">{t('settingsForm.transition')}</legend>
 					<div class="segmented">
-						<label><input type="radio" name="temperature_unit" value="c" bind:group={form.locale.temperature_unit} />{t('settingsForm.celsius')}</label>
-						<label><input type="radio" name="temperature_unit" value="f" bind:group={form.locale.temperature_unit} />{t('settingsForm.fahrenheit')}</label>
-					</div>
-				</fieldset>
-			{/if}
-			<p class="credit tiny muted">
-				<Icon name="cloud" size={14} /><a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">{t('settingsForm.weatherCredit')}</a>
-			</p>
-		</section>
-
-		<section class="card card-pad stack" aria-labelledby="sleep-title">
-			<div class="section-title">
-				<h2 id="sleep-title">{t('settingsForm.sleep')}</h2>
-				<button type="button" class="btn btn-ghost btn-sm" onclick={addSchedule}><Icon name="plus" size={16} />{t('settingsForm.addSchedule')}</button>
-			</div>
-			<p class="hint">{t('settingsForm.sleepHint')}</p>
-			{#if (form.display.sleep_schedules ?? []).length === 0}
-				<p class="muted small empty-sched">{t('settingsForm.noSchedules')}</p>
-			{/if}
-			{#each form.display.sleep_schedules ?? [] as s, i (s.id)}
-				<fieldset class="schedule" class:off={!s.enabled} in:softFly>
-					<legend class="visually-hidden">{t('settingsForm.scheduleN', { n: i + 1 })}</legend>
-					<div class="sched-top">
-						<label class="switch compact"><input type="checkbox" bind:checked={s.enabled} /><span class="visually-hidden">{t('settingsForm.enabled')}</span></label>
-						<div class="times">
-							<label>
-								<span class="tiny muted">{t('settingsForm.sleepAt')}</span>
-								<input class="input time" type="time" bind:value={s.sleep_at} required />
-							</label>
-							<span class="arrow" aria-hidden="true">{i18n.dir === 'rtl' ? '←' : '→'}</span>
-							<label>
-								<span class="tiny muted">{t('settingsForm.wakeAt')}</span>
-								<input class="input time" type="time" bind:value={s.wake_at} required />
-							</label>
-						</div>
-						<button type="button" class="btn btn-danger-ghost btn-icon btn-sm" aria-label={t('settingsForm.removeSchedule')} onclick={() => removeSchedule(s.id)}>
-							<Icon name="trash" size={16} />
-						</button>
-					</div>
-					<div class="days" role="group" aria-label={t('settingsForm.days')}>
-						{#each DAYS as d}
-							<button type="button" class="day" aria-pressed={s.days.includes(d)} onclick={() => toggleDay(s, d)}>{t(`day.${d}`)}</button>
+						{#each [['crossfade', 'settingsForm.crossfade'], ['slide', 'settingsForm.slide'], ['kenburns', 'settingsForm.kenburns']] as [v, l]}
+							<label><input type="radio" name="transition" value={v} bind:group={form.slideshow.transition} />{t(l as MessageKey)}</label>
 						{/each}
 					</div>
-					<div class="segmented mode">
-						<label><input type="radio" name="mode-{s.id}" value="off" bind:group={s.mode} />{t('settingsForm.modeOff')}</label>
-						<label><input type="radio" name="mode-{s.id}" value="dim" bind:group={s.mode} />{t('settingsForm.modeDim')}</label>
-					</div>
 				</fieldset>
-			{/each}
-		</section>
+				{#if form.slideshow.order !== 'shuffle'}
+					<label class="switch"><input type="checkbox" bind:checked={form.slideshow.reverse} /><span>{t('settingsForm.reverse')}</span></label>
+				{/if}
+				<label class="switch">
+					<input type="checkbox" bind:checked={form.slideshow.fill} />
+					<span><span class="s-label">{t('settingsForm.fill')}</span><span class="hint">{t('settingsForm.fillHint')}</span></span>
+				</label>
+				{#if !form.slideshow.fill}
+					<div class="field" in:softFly>
+						<label for="s-bg">{t('settingsForm.background')}</label>
+						<select id="s-bg" class="select" bind:value={form.slideshow.background}>
+							<option value="blur">{t('settingsForm.bgBlur')}</option>
+							<option value="black">{t('settingsForm.bgBlack')}</option>
+							<option value="palette">{t('settingsForm.bgPalette')}</option>
+						</select>
+					</div>
+				{/if}
+				{#if albums.length > 0 || form.slideshow.album_id}
+					<div class="field">
+						<label for="s-album">{t('settingsForm.playAlbum')}</label>
+						<select id="s-album" class="select" bind:value={form.slideshow.album_id}>
+							<option value={null}>{t('settingsForm.allPhotos')}</option>
+							{#each albums as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
+						</select>
+						<span class="hint">{t('settingsForm.playAlbumHint')}</span>
+					</div>
+				{/if}
+				<label class="switch">
+					<input type="checkbox" bind:checked={form.slideshow.on_this_day} />
+					<span><span class="s-label">{t('settingsForm.onThisDay')}</span><span class="hint">{t('settingsForm.onThisDayHint')}</span></span>
+				</label>
+				<label class="switch"><input type="checkbox" bind:checked={form.widgets.caption} /><span>{t('settingsForm.showCaption')}</span></label>
+				<label class="switch"><input type="checkbox" bind:checked={form.widgets.clock} /><span>{t('settingsForm.showClock')}</span></label>
+			</section>
 
-		{#if dirty}
-			<div class="savebar" transition:softFly={{ y: 24 }}>
-				<span class="small"><span class="dot" style="background:var(--warn)"></span> {t('settingsForm.unsaved')}</span>
-				<span class="spacer"></span>
-				<button type="button" class="btn btn-ghost btn-sm" onclick={() => base && (form = clone(base))}>{t('settingsForm.discard')}</button>
-				<button type="submit" class="btn btn-primary btn-sm" disabled={saving}>
-					{#if saving}<span class="spinner" aria-hidden="true"></span>{/if}{t('common.save')}
-				</button>
-			</div>
+			<section class="card card-pad stack" aria-labelledby="disp-title">
+				<h2 id="disp-title">{t('settingsForm.display')}</h2>
+				{#if frame.device_kind === 'browser'}
+					<p class="hint">{t('settingsForm.browserNote')}</p>
+				{:else}
+				<div class="field">
+					<label for="s-bright" class="row"><span>{t('settingsForm.brightness')}</span><span class="spacer"></span><span class="num muted">{brightnessPct}%</span></label>
+					<div class="range-row">
+						<Icon name="moon" size={18} />
+						<input id="s-bright" type="range" min="15" max="255" step="1" bind:value={form.display.brightness} aria-valuetext="{brightnessPct}%" />
+						<Icon name="sun" size={20} />
+					</div>
+				</div>
+				{/if}
+				{#if form.locale}
+					<div class="field">
+						<label for="s-lang" class="label">{t('settingsForm.frameLanguage')}</label>
+						<select id="s-lang" class="select" bind:value={form.locale.language} aria-describedby="s-lang-hint">
+							{#each LOCALES as l (l.id)}
+								<option value={l.id} lang={l.id}>{l.label}</option>
+							{/each}
+						</select>
+						<p id="s-lang-hint" class="hint">{t('settingsForm.frameLanguageHint')}</p>
+					</div>
+				{/if}
+			</section>
+
+			<section class="card card-pad stack" aria-labelledby="wx-title">
+				<h2 id="wx-title">{t('settingsForm.weatherTitle')}</h2>
+				<p class="hint">{t('settingsForm.weatherHint')}</p>
+				<LocationPicker
+					id="s-loc"
+					bind:value={form.location}
+					onpick={() => {
+						// Picking the first place turns the weather on; that is almost always why it is set.
+						if (form?.widgets && !base?.location) form.widgets.weather = true;
+					}}
+				/>
+				<label class="switch" class:disabled={!form.location}>
+					<input type="checkbox" bind:checked={form.widgets.weather} disabled={!form.location} />
+					<span>
+						<span class="s-label">{t('settingsForm.showWeather')}</span>
+						<span class="hint">{form.location ? t('settingsForm.showWeatherHint') : t('settingsForm.needsLocation')}</span>
+					</span>
+				</label>
+				{#if form.locale}
+					<fieldset class="fs">
+						<legend class="label">{t('settingsForm.temperatureUnit')}</legend>
+						<div class="segmented">
+							<label><input type="radio" name="temperature_unit" value="c" bind:group={form.locale.temperature_unit} />{t('settingsForm.celsius')}</label>
+							<label><input type="radio" name="temperature_unit" value="f" bind:group={form.locale.temperature_unit} />{t('settingsForm.fahrenheit')}</label>
+						</div>
+					</fieldset>
+				{/if}
+				<p class="credit tiny muted">
+					<Icon name="cloud" size={14} /><a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">{t('settingsForm.weatherCredit')}</a>
+				</p>
+			</section>
+
+			<section class="card card-pad stack" aria-labelledby="sleep-title">
+				<div class="section-title">
+					<h2 id="sleep-title">{t('settingsForm.sleep')}</h2>
+					<button type="button" class="btn btn-ghost btn-sm" onclick={addSchedule}><Icon name="plus" size={16} />{t('settingsForm.addSchedule')}</button>
+				</div>
+				<p class="hint">{t('settingsForm.sleepHint')}</p>
+				{#if (form.display.sleep_schedules ?? []).length === 0}
+					<p class="muted small empty-sched">{t('settingsForm.noSchedules')}</p>
+				{/if}
+				{#each form.display.sleep_schedules ?? [] as s, i (s.id)}
+					<fieldset class="schedule" class:off={!s.enabled} in:softFly>
+						<legend class="visually-hidden">{t('settingsForm.scheduleN', { n: i + 1 })}</legend>
+						<div class="sched-top">
+							<label class="switch compact"><input type="checkbox" bind:checked={s.enabled} /><span class="visually-hidden">{t('settingsForm.enabled')}</span></label>
+							<div class="times">
+								<label>
+									<span class="tiny muted">{t('settingsForm.sleepAt')}</span>
+									<input class="input time" type="time" bind:value={s.sleep_at} required />
+								</label>
+								<span class="arrow" aria-hidden="true">{i18n.dir === 'rtl' ? '←' : '→'}</span>
+								<label>
+									<span class="tiny muted">{t('settingsForm.wakeAt')}</span>
+									<input class="input time" type="time" bind:value={s.wake_at} required />
+								</label>
+							</div>
+							<button type="button" class="btn btn-danger-ghost btn-icon btn-sm" aria-label={t('settingsForm.removeSchedule')} onclick={() => removeSchedule(s.id)}>
+								<Icon name="trash" size={16} />
+							</button>
+						</div>
+						<div class="days" role="group" aria-label={t('settingsForm.days')}>
+							{#each DAYS as d}
+								<button type="button" class="day" aria-pressed={s.days.includes(d)} onclick={() => toggleDay(s, d)}>{t(`day.${d}`)}</button>
+							{/each}
+						</div>
+						<div class="segmented mode">
+							<label><input type="radio" name="mode-{s.id}" value="off" bind:group={s.mode} />{t('settingsForm.modeOff')}</label>
+							<label><input type="radio" name="mode-{s.id}" value="dim" bind:group={s.mode} />{t('settingsForm.modeDim')}</label>
+						</div>
+					</fieldset>
+				{/each}
+			</section>
+
+			{#if dirty}
+				<div class="savebar" transition:softFly={{ y: 24 }}>
+					<span class="small"><span class="dot" style="background:var(--warn)"></span> {t('settingsForm.unsaved')}</span>
+					<span class="spacer"></span>
+					<button type="button" class="btn btn-ghost btn-sm" onclick={() => base && (form = clone(base))}>{t('settingsForm.discard')}</button>
+					<button type="submit" class="btn btn-primary btn-sm" disabled={saving}>
+						{#if saving}<span class="spinner" aria-hidden="true"></span>{/if}{t('common.save')}
+					</button>
+				</div>
+			{/if}
+		</form>
+		{#if form.plugins?.layout}
+			<PluginsSection
+				frameId={frame.id}
+				bind:layout={form.plugins.layout}
+				instances={base?.plugins?.instances ?? []}
+				version={base?.version ?? form.version}
+				onsaved={adoptSaved}
+			/>
 		{/if}
-	</form>
+	</div>
 {/if}
 
 <style>
@@ -357,7 +385,10 @@
 		align-items: start;
 		padding-bottom: 80px;
 	}
-	.settings > section {
+	.settings-form {
+		display: contents;
+	}
+	.settings-form > section {
 		/* Grid items default to min-width: auto; long select options would widen the page on phones. */
 		min-width: 0;
 	}
@@ -368,7 +399,7 @@
 		.settings {
 			grid-template-columns: 1fr 1fr;
 		}
-		.settings > section:first-child {
+		.settings-form > section:first-child {
 			grid-row: span 2;
 		}
 	}

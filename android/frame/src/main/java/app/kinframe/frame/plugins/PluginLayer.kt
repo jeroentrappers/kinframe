@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,6 +62,8 @@ import app.kinframe.core.design.KinIcons
 import app.kinframe.core.design.KinShapeL
 import app.kinframe.core.plugin.PluginView
 import app.kinframe.core.plugin.ui.PluginPalette
+import app.kinframe.core.plugin.ui.LocalPluginActions
+import app.kinframe.core.plugin.ui.LocalPluginImages
 import app.kinframe.core.plugin.ui.PluginViewContent
 import app.kinframe.core.plugin.ui.ScaleToFit
 import app.kinframe.core.plugin.ui.ViewForm
@@ -75,7 +79,9 @@ fun InstanceContent(state: InstanceState, form: ViewForm, palette: PluginPalette
     val alpha by animateFloatAsState(if (stale) 0.45f else 1f, tween(600), label = "stale")
     val view = state.view
     when {
-        view != null -> PluginViewContent(view, form, palette, modifier.graphicsLayer { this.alpha = alpha })
+        view != null -> CompositionLocalProvider(LocalPluginImages provides { src -> state.images[src] }) {
+            PluginViewContent(view, form, palette, modifier.graphicsLayer { this.alpha = alpha })
+        }
         state.status == InstanceStatus.Unavailable -> UnavailableMark(form, palette, modifier)
         else -> Unit
     }
@@ -316,12 +322,14 @@ private fun edgeColours(src: ImageBitmap, edge: BandGeometry.Edge): ImageBitmap 
 
 /** The larger view on tap (§2): closed by tapping outside it or after 20 s. */
 @Composable
-fun PluginDetailCard(state: InstanceState?, detail: PluginView?, onClose: () -> Unit) {
+fun PluginDetailCard(state: InstanceState?, detail: PluginView?, onClose: () -> Unit, onAction: ((String) -> Unit)? = null) {
     AnimatedVisibility(state != null, enter = fadeIn(tween(220)) + scaleIn(tween(260), initialScale = 0.96f), exit = fadeOut(tween(200))) {
         var shown by remember { mutableStateOf(state) }
         if (state != null) shown = state
         val s = shown ?: return@AnimatedVisibility
-        LaunchedEffect(s.config.instanceId) { delay(DETAIL_MS); onClose() }
+        // Closes 20 s after it opened or after the last button press.
+        var touched by remember { mutableIntStateOf(0) }
+        LaunchedEffect(s.config.instanceId, touched) { delay(DETAIL_MS); onClose() }
         BoxWithConstraints(
             Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f))
                 .clickable(remember { MutableInteractionSource() }, indication = null, onClick = onClose),
@@ -343,7 +351,10 @@ fun PluginDetailCard(state: InstanceState?, detail: PluginView?, onClose: () -> 
                 val v = detail ?: s.view
                 if (v != null) {
                     // Wide cards (two charts side by side) scale down on a portrait screen instead of squeezing their last column.
-                    ScaleToFit(maxW - 72.dp, maxH - 120.dp, wrapFactor = 2f) { PluginViewContent(v, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    val run: ((String) -> Unit)? = onAction?.let { act -> { id -> touched++; act(id) } }
+                    CompositionLocalProvider(LocalPluginImages provides { src -> s.images[src] }, LocalPluginActions provides run) {
+                        ScaleToFit(maxW - 72.dp, maxH - 120.dp, wrapFactor = 2f) { PluginViewContent(v, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    }
                 } else {
                     Text(stringResource(R.string.plugins_unavailable), style = Kin.type.body, color = Kin.colors.inkSoft)
                 }
