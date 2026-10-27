@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">תחנת מזג אוויר</string>
     <string name="ws_station">תחנה</string>
-    <string name="ws_code">תחנת Weathercloud</string>
-    <string name="ws_code_help">קוד התחנה או הקישור לדף שלה ב-Weathercloud.</string>
-    <string name="ws_code_invalid">אין כאן קוד של תחנת Weathercloud. העתיקו את הקישור לדף התחנה.</string>
-    <string name="ws_unofficial">ל-Weathercloud אין API רשמי: המסגרת קוראת את אותם נתונים ציבוריים שמוצגים בדף האינטרנט של התחנה, לכל היותר פעם ב-5 דקות. זה עלול להפסיק לעבוד אם Weathercloud ישנה את האתר שלו.</string>
+    <string name="ws_upload_setup">התחנה שלך מעלה את המדידות שלה ל-kinframe, והמסגרת קוראת אותן משם. הזינו את מזהה התחנה ואת המפתח שלה באפליקציה או באתר של kinframe: הגדרות המסגרת ← תוספים ← תחנת מזג אוויר.</string>
     <string name="ws_style_compact">טמפרטורה</string>
     <string name="ws_style_rows">כל הערכים</string>
     <string name="ws_wind_unit">רוח ביחידות</string>
     <string name="ws_wind_auto">אוטומטי</string>
-    <string name="ws_interval">בדיקה כל</string>
     <string name="ws_status_error">לא ניתן לקרוא את התחנה: %1$s</string>
     <string name="ws_status_quiet">התחנה לא שלחה מדידה חדשה כבר זמן מה.</string>
     <string name="ws_temperature">טמפרטורה</string>

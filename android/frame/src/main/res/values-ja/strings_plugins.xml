@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">気象ステーション</string>
     <string name="ws_station">ステーション</string>
-    <string name="ws_code">Weathercloud ステーション</string>
-    <string name="ws_code_help">ステーションのコード、または Weathercloud ページのリンク。</string>
-    <string name="ws_code_invalid">Weathercloud のステーションコードが見つかりません。ステーションのページのリンクをコピーしてください。</string>
-    <string name="ws_unofficial">Weathercloud には公式の API がありません。フォトフレームはステーションのウェブページと同じ公開データを、最短 5 分ごとに読み取ります。Weathercloud がサイトを変更すると動作しなくなる場合があります。</string>
+    <string name="ws_upload_setup">ステーションは観測値を kinframe にアップロードし、フォトフレームはそこから読み取ります。kinframe のアプリまたはウェブサイトでステーション ID とキーを入力してください：フレームの設定 → プラグイン → 気象ステーション。</string>
     <string name="ws_style_compact">気温</string>
     <string name="ws_style_rows">すべての値</string>
     <string name="ws_wind_unit">風速の単位</string>
     <string name="ws_wind_auto">自動</string>
-    <string name="ws_interval">確認の間隔</string>
     <string name="ws_status_error">ステーションを読み取れません：%1$s</string>
     <string name="ws_status_quiet">ステーションからしばらく新しい測定値が届いていません。</string>
     <string name="ws_temperature">気温</string>

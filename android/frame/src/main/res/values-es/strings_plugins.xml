@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Estación meteorológica</string>
     <string name="ws_station">Estación</string>
-    <string name="ws_code">Estación de Weathercloud</string>
-    <string name="ws_code_help">El código de la estación o el enlace a su página de Weathercloud.</string>
-    <string name="ws_code_invalid">Aquí no hay ningún código de estación de Weathercloud. Copia el enlace de la página de la estación.</string>
-    <string name="ws_unofficial">Weathercloud no tiene una API oficial: el marco lee los mismos datos públicos que la página web de la estación, como mucho cada 5 minutos. Puede dejar de funcionar si Weathercloud cambia su sitio.</string>
+    <string name="ws_upload_setup">Tu estación envía sus mediciones a kinframe y el marco las lee de ahí. Introduce el ID y la clave de la estación en la app o la web de kinframe: ajustes del marco → Complementos → Estación meteorológica.</string>
     <string name="ws_style_compact">Temperatura</string>
     <string name="ws_style_rows">Todos los valores</string>
     <string name="ws_wind_unit">Viento en</string>
     <string name="ws_wind_auto">Automático</string>
-    <string name="ws_interval">Comprobar cada</string>
     <string name="ws_status_error">No se puede leer la estación: %1$s</string>
     <string name="ws_status_quiet">La estación lleva un rato sin enviar una nueva lectura.</string>
     <string name="ws_temperature">Temperatura</string>

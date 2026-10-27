@@ -3624,6 +3624,39 @@ type SleepScheduleDays string
 // SleepScheduleMode defines model for SleepSchedule.Mode.
 type SleepScheduleMode string
 
+// StationLatest defines model for StationLatest.
+type StationLatest struct {
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+
+	// Today Since midnight in the station's frame's time zone (the first registering frame).
+	Today *struct {
+		GustMaxMs *float32 `json:"gust_max_ms,omitempty"`
+		TempMaxC  *float32 `json:"temp_max_c,omitempty"`
+		TempMinC  *float32 `json:"temp_min_c,omitempty"`
+	} `json:"today,omitempty"`
+}
+
+// StationReading One upload in metric units; a value the station didn't send is absent.
+type StationReading struct {
+	DewPointC         *float32   `json:"dew_point_c,omitempty"`
+	FeelsLikeC        *float32   `json:"feels_like_c,omitempty"`
+	GustMs            *float32   `json:"gust_ms,omitempty"`
+	HumidityPct       *float32   `json:"humidity_pct,omitempty"`
+	IndoorHumidityPct *float32   `json:"indoor_humidity_pct,omitempty"`
+	IndoorTempC       *float32   `json:"indoor_temp_c,omitempty"`
+	PressureHpa       *float32   `json:"pressure_hpa,omitempty"`
+	RainRateMmH       *float32   `json:"rain_rate_mm_h,omitempty"`
+	RainTodayMm       *float32   `json:"rain_today_mm,omitempty"`
+	SolarWm2          *float32   `json:"solar_wm2,omitempty"`
+	StationTime       *time.Time `json:"station_time,omitempty"`
+	TempC             *float32   `json:"temp_c,omitempty"`
+	UvIndex           *float32   `json:"uv_index,omitempty"`
+	WindDirDeg        *float32   `json:"wind_dir_deg,omitempty"`
+	WindMs            *float32   `json:"wind_ms,omitempty"`
+}
+
 // TvLink defines model for TvLink.
 type TvLink struct {
 	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
@@ -4197,6 +4230,12 @@ type CancelShopReservationJSONBody struct {
 	Token string `json:"token"`
 }
 
+// GetStationLatestParams defines parameters for GetStationLatest.
+type GetStationLatestParams struct {
+	XStationId  string `json:"X-Station-Id"`
+	XStationKey string `json:"X-Station-Key"`
+}
+
 // DeviceAckJSONRequestBody defines body for DeviceAck for application/json ContentType.
 type DeviceAckJSONRequestBody DeviceAckJSONBody
 
@@ -4601,6 +4640,9 @@ type ServerInterface interface {
 
 	// (POST /v1/shop/reservations/cancel)
 	CancelShopReservation(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/stations/latest)
+	GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
@@ -7485,6 +7527,74 @@ func (siw *ServerInterfaceWrapper) CancelShopReservation(w http.ResponseWriter, 
 	handler.ServeHTTP(w, r)
 }
 
+// GetStationLatest operation middleware
+func (siw *ServerInterfaceWrapper) GetStationLatest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetStationLatestParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "X-Station-Id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Station-Id")]; found {
+		var XStationId string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Station-Id", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Station-Id", valueList[0], &XStationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Station-Id", Err: err})
+			return
+		}
+
+		params.XStationId = XStationId
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Station-Id is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Station-Id", Err: err})
+		return
+	}
+
+	// ------------- Required header parameter "X-Station-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Station-Key")]; found {
+		var XStationKey string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Station-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Station-Key", valueList[0], &XStationKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Station-Key", Err: err})
+			return
+		}
+
+		params.XStationKey = XStationKey
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Station-Key is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Station-Key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStationLatest(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetTvSlideshow operation middleware
 func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
 
@@ -7724,6 +7834,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations", wrapper.CreateShopReservation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/latest", wrapper.GetStationLatest)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -10944,6 +11055,58 @@ func (response CancelShopReservationdefaultApplicationProblemPlusJSONResponse) V
 	return err
 }
 
+type GetStationLatestRequestObject struct {
+	Params GetStationLatestParams
+}
+
+type GetStationLatestResponseObject interface {
+	VisitGetStationLatestResponse(w http.ResponseWriter) error
+}
+
+type GetStationLatest200JSONResponse StationLatest
+
+func (response GetStationLatest200JSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationLatest404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetStationLatest404ApplicationProblemPlusJSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationLatest429ApplicationProblemPlusJSONResponse Problem
+
+func (response GetStationLatest429ApplicationProblemPlusJSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetTvSlideshowRequestObject struct {
 	Token string `json:"token"`
 }
@@ -11264,6 +11427,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/shop/reservations/cancel)
 	CancelShopReservation(ctx context.Context, request CancelShopReservationRequestObject) (CancelShopReservationResponseObject, error)
+
+	// (GET /v1/stations/latest)
+	GetStationLatest(ctx context.Context, request GetStationLatestRequestObject) (GetStationLatestResponseObject, error)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
@@ -13986,6 +14152,32 @@ func (sh *strictHandler) CancelShopReservation(w http.ResponseWriter, r *http.Re
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(CancelShopReservationResponseObject); ok {
 		if err := validResponse.VisitCancelShopReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetStationLatest operation middleware
+func (sh *strictHandler) GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams) {
+	var request GetStationLatestRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStationLatest(ctx, request.(GetStationLatestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStationLatest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStationLatestResponseObject); ok {
+		if err := validResponse.VisitGetStationLatestResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Метеостанция</string>
     <string name="ws_station">Станция</string>
-    <string name="ws_code">Станция Weathercloud</string>
-    <string name="ws_code_help">Код станции или ссылка на её страницу в Weathercloud.</string>
-    <string name="ws_code_invalid">Здесь нет кода станции Weathercloud. Скопируйте ссылку на страницу станции.</string>
-    <string name="ws_unofficial">У Weathercloud нет официального API: рамка читает те же открытые данные, что и веб-страница станции, не чаще раза в 5 минут. Это может перестать работать, если Weathercloud изменит свой сайт.</string>
+    <string name="ws_upload_setup">Ваша станция отправляет показания в kinframe, а рамка читает их оттуда. Введите ID и ключ станции в приложении или на сайте kinframe: настройки рамки → Плагины → Метеостанция.</string>
     <string name="ws_style_compact">Температура</string>
     <string name="ws_style_rows">Все значения</string>
     <string name="ws_wind_unit">Ветер в</string>
     <string name="ws_wind_auto">Автоматически</string>
-    <string name="ws_interval">Проверять каждые</string>
     <string name="ws_status_error">Не удаётся прочитать станцию: %1$s</string>
     <string name="ws_status_quiet">Станция давно не присылала новых измерений.</string>
     <string name="ws_temperature">Температура</string>

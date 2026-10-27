@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Værstasjon</string>
     <string name="ws_station">Stasjon</string>
-    <string name="ws_code">Weathercloud-stasjon</string>
-    <string name="ws_code_help">Stasjonens kode, eller lenken til Weathercloud-siden dens.</string>
-    <string name="ws_code_invalid">Det er ingen Weathercloud-stasjonskode her. Kopier lenken til stasjonens side.</string>
-    <string name="ws_unofficial">Weathercloud har ikke noe offisielt API: rammen leser de samme offentlige dataene som stasjonens nettside, høyst hvert 5. minutt. Det kan slutte å virke hvis Weathercloud endrer nettstedet sitt.</string>
+    <string name="ws_upload_setup">Stasjonen din laster opp målingene sine til kinframe, og rammen leser dem derfra. Skriv inn stasjons-ID og -nøkkel i kinframe-appen eller på nettstedet: rammens innstillinger → Programtillegg → Værstasjon.</string>
     <string name="ws_style_compact">Temperatur</string>
     <string name="ws_style_rows">Alle verdier</string>
     <string name="ws_wind_unit">Vind i</string>
     <string name="ws_wind_auto">Automatisk</string>
-    <string name="ws_interval">Sjekk hvert</string>
     <string name="ws_status_error">Kan ikke lese stasjonen: %1$s</string>
     <string name="ws_status_quiet">Stasjonen har ikke sendt en ny måling på en stund.</string>
     <string name="ws_temperature">Temperatur</string>

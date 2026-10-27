@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Hava istasyonu</string>
     <string name="ws_station">İstasyon</string>
-    <string name="ws_code">Weathercloud istasyonu</string>
-    <string name="ws_code_help">İstasyonun kodu veya Weathercloud sayfasının bağlantısı.</string>
-    <string name="ws_code_invalid">Burada Weathercloud istasyon kodu yok. İstasyon sayfasının bağlantısını kopyalayın.</string>
-    <string name="ws_unofficial">Weathercloud’un resmî bir API’si yok: çerçeve, istasyonun web sayfasıyla aynı herkese açık verileri en fazla 5 dakikada bir okur. Weathercloud sitesini değiştirirse bu çalışmayı durdurabilir.</string>
+    <string name="ws_upload_setup">İstasyonunuz ölçümlerini kinframe’e yükler, çerçeve de onları oradan okur. İstasyon kimliğini ve anahtarını kinframe uygulamasında veya web sitesinde girin: çerçeve ayarları → Eklentiler → Hava istasyonu.</string>
     <string name="ws_style_compact">Sıcaklık</string>
     <string name="ws_style_rows">Tüm değerler</string>
     <string name="ws_wind_unit">Rüzgâr birimi</string>
     <string name="ws_wind_auto">Otomatik</string>
-    <string name="ws_interval">Kontrol sıklığı</string>
     <string name="ws_status_error">İstasyon okunamıyor: %1$s</string>
     <string name="ws_status_quiet">İstasyon bir süredir yeni ölçüm göndermedi.</string>
     <string name="ws_temperature">Sıcaklık</string>

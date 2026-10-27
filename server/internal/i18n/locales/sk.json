@@ -89,6 +89,7 @@
   "no poster": "chýba náhľad",
   "no such endpoint": "taký endpoint neexistuje",
   "no such release": "také vydanie neexistuje",
+  "no readings from this station": "z tejto stanice nie sú žiadne merania",
   "plugin bundle not found": "balík doplnku sa nenašiel",
   "not available (yet)": "(zatiaľ) nedostupné",
   "only the creator or an owner/admin can revoke this invite": "túto pozvánku môže zrušiť iba jej autor alebo vlastník/správca",

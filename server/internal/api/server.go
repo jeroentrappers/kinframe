@@ -28,6 +28,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/secrets"
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
+	"github.com/jeroentrappers/kinframe/server/internal/stations"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
@@ -75,6 +76,11 @@ type Server struct {
 	calendar *calendar.Service // nil: calendars disabled
 	sealer   *calendar.Sealer
 	registry *registry.Mirror // nil: no community plugin registry
+
+	// Weather stations that upload to kinframe (docs/plugins.md §9.4).
+	stationKey     []byte
+	stationIP      *ratelimit.Limiter
+	stationForward *stations.Forwarder
 	// pluginSealer keeps plugin secrets (settings plugins.instances[].secrets) encrypted at rest.
 	pluginSealer *secrets.Sealer
 
@@ -141,6 +147,9 @@ func New(d Deps) (*Server, error) {
 		s.sealer = d.Calendar.Sealer
 	}
 	s.registry = d.Registry
+	s.stationKey = auth.DeriveKey(d.Config.SigningKey, "weather-station")
+	s.stationIP = ratelimit.New(600, time.Hour)
+	s.stationForward = &stations.Forwarder{URL: d.Config.StationForwardURL, HTTP: &http.Client{Timeout: 10 * time.Second}, Log: d.Log.With("component", "stations")}
 	ps, err := secrets.New(d.Config.SecretsKey, d.Config.SigningKey, "kinframe plugin secrets v1", "kinframe plugin secrets from signing key v1")
 	if err != nil {
 		return nil, fmt.Errorf("plugin secrets: %w", err)

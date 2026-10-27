@@ -156,7 +156,7 @@ func TestPluginSettings(t *testing.T) {
 }
 
 // A frame that ran the P1 and the weather station before step 3 moves its settings into the frame settings once;
-// these are such a frame's settings (with the station's leftover use_for_weather already dropped by the frame).
+// these are such a frame's settings (the station already moved to uploads, its leftover use_for_weather dropped).
 func TestPluginSettingsFromBeforeStep3(t *testing.T) {
 	e := newEnv(t)
 	owner := e.user("o@x.org", "O")
@@ -170,8 +170,9 @@ func TestPluginSettingsFromBeforeStep3(t *testing.T) {
 				"order": 0, "visibility": "on_change", "enabled": true, "secrets": map[string]any{},
 				"settings": map[string]any{"style": "gauge", "host": "192.168.1.203", "warn_w": 3000}},
 			map[string]any{"instance_id": "builtin-weather-station", "plugin_id": "kinframe.weather-station", "version": "builtin", "slot": "top-left",
-				"order": 0, "visibility": "always", "enabled": true, "secrets": map[string]any{},
-				"settings": map[string]any{"source": "weathercloud", "style": "rows", "device": "9287156658", "wind_unit": "kmh", "interval_min": 10}},
+				"order": 0, "visibility": "always", "enabled": true,
+				"settings": map[string]any{"source": "upload", "style": "rows", "station_id": "IAFFLI3", "wind_unit": "kmh"},
+				"secrets":  map[string]any{"station_key": "k3y"}},
 		},
 	}}
 	raw, _ := json.Marshal(patch)

@@ -3116,6 +3116,65 @@ components:
                 - days
                 - enabled
             type: object
+        StationLatest:
+            properties:
+                reading:
+                    $ref: '#/components/schemas/StationReading'
+                received_at:
+                    format: date-time
+                    type: string
+                today:
+                    description: Since midnight in the station's frame's time zone (the first registering frame).
+                    properties:
+                        gust_max_ms:
+                            nullable: true
+                            type: number
+                        temp_max_c:
+                            nullable: true
+                            type: number
+                        temp_min_c:
+                            nullable: true
+                            type: number
+                    type: object
+            required:
+                - received_at
+                - reading
+            type: object
+        StationReading:
+            description: One upload in metric units; a value the station didn't send is absent.
+            properties:
+                dew_point_c:
+                    type: number
+                feels_like_c:
+                    type: number
+                gust_ms:
+                    type: number
+                humidity_pct:
+                    type: number
+                indoor_humidity_pct:
+                    type: number
+                indoor_temp_c:
+                    type: number
+                pressure_hpa:
+                    type: number
+                rain_rate_mm_h:
+                    type: number
+                rain_today_mm:
+                    type: number
+                solar_wm2:
+                    type: number
+                station_time:
+                    format: date-time
+                    type: string
+                temp_c:
+                    type: number
+                uv_index:
+                    type: number
+                wind_dir_deg:
+                    type: number
+                wind_ms:
+                    type: number
+            type: object
         TvLink:
             properties:
                 album_id:
@@ -6184,6 +6243,41 @@ paths:
             security: []
             tags:
                 - shop
+    /v1/stations/latest:
+        get:
+            description: |
+                The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+                frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+                key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+                pair or nothing arrived in the last 48 hours. Rate-limited per address.
+            operationId: getStationLatest
+            parameters:
+                - in: header
+                  name: X-Station-Id
+                  required: true
+                  schema:
+                    maxLength: 64
+                    type: string
+                - in: header
+                  name: X-Station-Key
+                  required: true
+                  schema:
+                    maxLength: 128
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StationLatest'
+                    description: Latest reading
+                "404":
+                    $ref: '#/components/responses/Problem'
+                "429":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - settings
     /v1/tv/{token}:
         get:
             description: |

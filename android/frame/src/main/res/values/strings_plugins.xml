@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Weather station</string>
     <string name="ws_station">Station</string>
-    <string name="ws_code">Weathercloud station</string>
-    <string name="ws_code_help">The station’s code, or the link to its Weathercloud page.</string>
-    <string name="ws_code_invalid">There is no Weathercloud station code in this. Copy the link of the station’s page.</string>
-    <string name="ws_unofficial">Weathercloud has no official API: the frame reads the same public data as the station’s web page, at most every 5 minutes. It may stop working if Weathercloud changes its site.</string>
+    <string name="ws_upload_setup">Your station uploads its readings to kinframe, and the frame reads them from there. Enter its station ID and key in the kinframe app or website: frame settings → Plugins → Weather station.</string>
     <string name="ws_style_compact">Temperature</string>
     <string name="ws_style_rows">All values</string>
     <string name="ws_wind_unit">Wind in</string>
     <string name="ws_wind_auto">Automatic</string>
-    <string name="ws_interval">Check every</string>
     <string name="ws_status_error">Can’t read the station: %1$s</string>
     <string name="ws_status_quiet">The station hasn’t sent a new reading for a while.</string>
     <string name="ws_temperature">Temperature</string>

@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Meteorologinė stotelė</string>
     <string name="ws_station">Stotelė</string>
-    <string name="ws_code">Weathercloud stotelė</string>
-    <string name="ws_code_help">Stotelės kodas arba nuoroda į jos Weathercloud puslapį.</string>
-    <string name="ws_code_invalid">Čia nėra Weathercloud stotelės kodo. Nukopijuokite stotelės puslapio nuorodą.</string>
-    <string name="ws_unofficial">Weathercloud neturi oficialios API: rėmelis skaito tuos pačius viešus duomenis kaip stotelės tinklalapis, ne dažniau kaip kas 5 minutes. Tai gali nustoti veikti, jei Weathercloud pakeis savo svetainę.</string>
+    <string name="ws_upload_setup">Jūsų stotis įkelia matavimus į kinframe, o rėmelis juos skaito iš ten. Įveskite stoties ID ir raktą kinframe programėlėje arba svetainėje: rėmelio nustatymai → Papildiniai → Orų stotis.</string>
     <string name="ws_style_compact">Temperatūra</string>
     <string name="ws_style_rows">Visos vertės</string>
     <string name="ws_wind_unit">Vėjas</string>
     <string name="ws_wind_auto">Automatiškai</string>
-    <string name="ws_interval">Tikrinti kas</string>
     <string name="ws_status_error">Nepavyksta nuskaityti stotelės: %1$s</string>
     <string name="ws_status_quiet">Stotelė jau kurį laiką neatsiuntė naujo matavimo.</string>
     <string name="ws_temperature">Temperatūra</string>

@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Stasiun cuaca</string>
     <string name="ws_station">Stasiun</string>
-    <string name="ws_code">Stasiun Weathercloud</string>
-    <string name="ws_code_help">Kode stasiun, atau tautan ke halaman Weathercloud-nya.</string>
-    <string name="ws_code_invalid">Tidak ada kode stasiun Weathercloud di sini. Salin tautan halaman stasiun.</string>
-    <string name="ws_unofficial">Weathercloud tidak punya API resmi: bingkai membaca data publik yang sama dengan halaman web stasiun, paling sering setiap 5 menit. Ini bisa berhenti berfungsi jika Weathercloud mengubah situsnya.</string>
+    <string name="ws_upload_setup">Stasiun Anda mengunggah hasil pengukurannya ke kinframe, dan bingkai membacanya dari sana. Masukkan ID dan kunci stasiun di aplikasi atau situs web kinframe: pengaturan bingkai → Plugin → Stasiun cuaca.</string>
     <string name="ws_style_compact">Suhu</string>
     <string name="ws_style_rows">Semua nilai</string>
     <string name="ws_wind_unit">Angin dalam</string>
     <string name="ws_wind_auto">Otomatis</string>
-    <string name="ws_interval">Periksa setiap</string>
     <string name="ws_status_error">Tidak dapat membaca stasiun: %1$s</string>
     <string name="ws_status_quiet">Stasiun belum mengirim pembacaan baru selama beberapa waktu.</string>
     <string name="ws_temperature">Suhu</string>

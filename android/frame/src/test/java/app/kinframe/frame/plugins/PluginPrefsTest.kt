@@ -122,4 +122,27 @@ class PluginPrefsTest {
         again.upsert(p1.copy(slot = Slot.TopLeft))
         assertEquals(Slot.TopLeft, PluginSettingsDoc.instances(raw.value)!!.single().slot)
     }
+
+    /** The Denver's station from before uploads (Weathercloud): what no manifest declares goes, and it waits switched off for its ID and key. */
+    @Test fun storedInstancesFollowTheirManifest() {
+        val manifest = app.kinframe.frame.plugins.js.PluginManifest.parse(java.io.File("../../plugins/kinframe.weather-station/plugin.json").readText())
+        val old = InstanceConfig(
+            "builtin-weather-station", "kinframe.weather-station", enabled = true,
+            settings = doc("""{"source":"weathercloud","style":"rows","device":"9287156658","wind_unit":"kmh","interval_min":10}"""),
+        )
+        val c = PluginSettingsDoc.conform(old, manifest)
+        assertEquals(setOf("style", "wind_unit"), c.settings.keys)
+        assertEquals(false, c.enabled)
+        // Filled in through the app: kept, and on.
+        val set = old.copy(
+            settings = doc("""{"source":"upload","station_id":"IAFFLI3","style":"rows","station_key":"leaked into settings"}"""),
+            secrets = doc("""{"station_key":"k3y","stale":"x"}"""),
+        )
+        val ok = PluginSettingsDoc.conform(set, manifest)
+        assertEquals(setOf("source", "station_id", "style"), ok.settings.keys)
+        assertEquals(setOf("station_key"), ok.secrets.keys)
+        assertTrue(ok.enabled)
+        // Already right: unchanged, so nothing is sent.
+        assertEquals(ok, PluginSettingsDoc.conform(ok, manifest))
+    }
 }

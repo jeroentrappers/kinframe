@@ -123,3 +123,17 @@ func RenderPluginSecrets(doc map[string]any, s Sealer, forDevice bool) {
 		}
 	}
 }
+
+// OpenSecret opens one sealed secret of a stored instance; "" when it has none.
+func OpenSecret(instance map[string]any, key string, s Sealer) (string, error) {
+	sealed, _ := instance[sealedKey].(map[string]any)
+	b64, _ := sealed[key].(string)
+	if b64 == "" {
+		return "", nil
+	}
+	box, err := base64.StdEncoding.DecodeString(b64)
+	if err != nil {
+		return "", err
+	}
+	return s.Open(box)
+}

@@ -23,18 +23,19 @@ import kotlin.math.roundToInt
  * The built-in weather station widget (docs/plugins.md §9.4), written against [PluginInstance] like the HomeWizard
  * widget so a JavaScript plugin (`kinframe.weather-station`) can replace it.
  *
- * Settings: `source` ("weathercloud"), `device` (the station code, or its page's link), `wind_unit` ("auto", "ms",
- * "kmh", "mph", "bft"), `style` ("compact" or "rows") and `interval_min` (5–30). The host adds `hide_temp` while the
- * forecast weather is on: the clock's weather block then shows the station's temperature, so the widget leaves it out.
+ * Settings: `source` ("upload": the station uploads to kinframe), `station_id` and the secret `station_key` (what
+ * the station uploads with), `wind_unit` ("auto", "ms", "kmh", "mph", "bft") and `style` ("compact" or "rows"). The
+ * host adds `hide_temp` while the forecast weather is on: the clock's weather block then shows the station's
+ * temperature, so the widget leaves it out.
  */
 class WeatherStation(
     settings: JsonObject,
     /** Every good reading: the clock's weather block shows the station's temperature while the forecast is on. */
     private val onReading: (StationReading) -> Unit = {},
-    /** Tests point the source at a fake server. */
-    private val sourceFor: (JsonObject) -> StationSource? = ::defaultSource,
+    /** Where the frame's server answers `GET /v1/stations/latest`. */
+    private val sourceFor: (JsonObject) -> StationSource?,
 ) : PluginInstance {
-    override val refreshSeconds: Int = intervalMinutes(settings) * 60
+    override val refreshSeconds: Int = REFRESH_S
     override val staleAfterSeconds: Int = STALE_S
 
     override suspend fun render(ctx: PluginContext): JsonElement? {
@@ -67,23 +68,17 @@ class WeatherStation(
     companion object {
         /** A reading older than this greys the widget (stations upload about every 10 minutes). */
         const val STALE_S = 30 * 60
-        const val MIN_INTERVAL_MIN = 5
-        const val MAX_INTERVAL_MIN = 30
+        /** Stations upload every 16 s to a minute; once a minute is plenty for a wall display. */
+        const val REFRESH_S = 60
         private const val INFO_EVERY_MS = 24 * 3_600_000L
 
-        fun intervalMinutes(settings: JsonObject): Int =
-            ((settings["interval_min"] as? JsonPrimitive)?.intOrNull ?: MIN_INTERVAL_MIN).coerceIn(MIN_INTERVAL_MIN, MAX_INTERVAL_MIN)
-
-        fun defaultSource(settings: JsonObject, weathercloudBase: HttpUrl = WeathercloudSource.BASE): StationSource? {
-            val code = StationCode.parse(setting(settings, "device")) ?: return null
-            return when (setting(settings, "source") ?: WeathercloudSource.ID) {
-                WeathercloudSource.ID -> WeathercloudSource(code, weathercloudBase)
-                else -> null
-            }
+        /** The station's source from the settings: uploads read back from [latest] on the frame's own server. */
+        fun sourceFor(settings: JsonObject, latest: HttpUrl): StationSource? {
+            if ((setting(settings, "source") ?: UploadSource.ID) != UploadSource.ID) return null
+            val id = setting(settings, "station_id")?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+            val key = setting(settings, "station_key")?.takeIf { it.isNotEmpty() } ?: return null
+            return UploadSource(latest, id, key)
         }
-
-        /** The hosts the built-in may reach (a plugin's fixed `http` permission). */
-        fun allows(url: HttpUrl): Boolean = WeathercloudSource(code = "0").allows(url)
 
         internal fun setting(settings: JsonObject, key: String) = (settings[key] as? JsonPrimitive)?.contentOrNull
     }

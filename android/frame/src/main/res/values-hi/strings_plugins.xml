@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">मौसम स्टेशन</string>
     <string name="ws_station">स्टेशन</string>
-    <string name="ws_code">Weathercloud स्टेशन</string>
-    <string name="ws_code_help">स्टेशन का कोड, या उसके Weathercloud पेज का लिंक।</string>
-    <string name="ws_code_invalid">इसमें कोई Weathercloud स्टेशन कोड नहीं है। स्टेशन के पेज का लिंक कॉपी करें।</string>
-    <string name="ws_unofficial">Weathercloud का कोई आधिकारिक API नहीं है: फ़्रेम वही सार्वजनिक डेटा पढ़ता है जो स्टेशन के वेब पेज पर है, ज़्यादा से ज़्यादा हर 5 मिनट में। अगर Weathercloud अपनी साइट बदलता है तो यह काम करना बंद कर सकता है।</string>
+    <string name="ws_upload_setup">आपका स्टेशन अपने माप kinframe पर अपलोड करता है, और फ़्रेम उन्हें वहीं से पढ़ता है। kinframe ऐप या वेबसाइट में स्टेशन की आईडी और कुंजी डालें: फ़्रेम सेटिंग → प्लग-इन → मौसम स्टेशन।</string>
     <string name="ws_style_compact">तापमान</string>
     <string name="ws_style_rows">सभी मान</string>
     <string name="ws_wind_unit">हवा की इकाई</string>
     <string name="ws_wind_auto">अपने आप</string>
-    <string name="ws_interval">जाँचें हर</string>
     <string name="ws_status_error">स्टेशन पढ़ा नहीं जा सका: %1$s</string>
     <string name="ws_status_quiet">स्टेशन ने कुछ समय से नई रीडिंग नहीं भेजी है।</string>
     <string name="ws_temperature">तापमान</string>

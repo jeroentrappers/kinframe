@@ -629,39 +629,46 @@ Not built yet: developer mode and `kit push` to a frame (§7).
 - Because this one only reads Home Assistant entities, it is effectively "any battery gauge": a home battery or an
   e-bike works with the same plugin and a different preset.
 
-### 9.4 Weather station (`kinframe.weather-station`), e.g. Weathercloud
+### 9.4 Weather station (`kinframe.weather-station`): the station uploads to kinframe
 
-- **Settings:** the station (`source`, for now only `weathercloud`, and `device`: the station's code, or the link to
-  its public page, `https://app.weathercloud.net/d<code>` → `<code>`), a style (*Temperature*: one value, or *All
-  values*), wind in km/h (mph with °F), m/s or Beaufort, how often to check (every 5, 10, 15 or 30 minutes; 5 is the
-  minimum). Pressure is always hPa, temperatures follow the frame's °C/°F. The widget is switched on in the frame's
-  Settings → **Weather**, next to the forecast (below).
-- **Data, and the catch:** Weathercloud has **no published API**. Its own web app loads
-  `GET https://app.weathercloud.net/device/values?code=<code>` (with `X-Requested-With: XMLHttpRequest`):
-  `{"epoch":1792941451,"bar":988.8,"temp":12.8,"hum":56,"wdir":253,"wspd":2.3,"dew":4.2,"heat":12.8,"rainrate":0,
-  "rain":15.1,"uvi":0,"solarrad":31.7,"wspdavg":2.3,"wdiravg":253}` (°C, %, hPa, m/s, degrees the wind comes *from*,
-  mm today, mm/h, W/m², UV index; `epoch` is the measurement time, about every 10 minutes), and
-  `GET /device/info/<code>` for the station's city and altitude (numbers there come as strings). Because this is
-  unofficial it can change or stop without notice; the settings say so. To be a good citizen the widget asks at most
-  every 5 minutes, only while the screen is on, backs off after errors (2×, 4× the interval), asks for the station's
-  place only when the detail card opens (at most once a day), and sends a `User-Agent` naming kinframe. Permission:
-  the fixed host `https://app.weathercloud.net` only.
-- **Sources are pluggable** (`StationSource`): readings are normalised to metric (`StationReading`), so an Ecowitt
-  gateway's local API (`local_only`), the Weather Underground PWS API with the owner's key (a `secret`), or a station
-  that uploads to the kinframe server ("custom server" upload in the station's own app, received and relayed by the
-  server) can be added as another source without touching the views.
+- **Settings:** `source` `upload`, the **station ID** and **station key** the station uploads with (the key is a
+  `secret`), whether to pass the uploads on to Weather Underground (on by default), a style (*Temperature*: one value,
+  or *All values*), wind in km/h (mph with °F), m/s or Beaufort. Pressure is always hPa, temperatures follow the
+  frame's °C/°F. The widget is switched on in the frame's Settings → **Weather**; the ID and key are entered in the
+  apps' plugin form, so the key isn't typed on the frame.
+- **Data:** the station uploads to the kinframe server in the **Weather Underground format**
+  (`GET /weatherstation/updateweatherstation.php?ID=…&PASSWORD=…&tempf=…`, plain HTTP, the format nearly every
+  consumer station speaks). Two ways to get it there:
+  - a station with a *custom server* setting (Ecowitt, Froggit, Ambient and others): server `kinframe.appmire.be`,
+    path `/weatherstation/updateweatherstation.php`, port 80, Weather Underground protocol;
+  - a station without one (the VEVOR 7-in-1, which only talks to `rtupdate.wunderground.com`): a local DNS override
+    (Pi-hole, router) that points `rtupdate.wunderground.com` at the kinframe server. nginx serves only that one path
+    under that name, over plain HTTP, without a certificate.
+
+  The server keeps only uploads from stations a frame registered (an HMAC of their ID and key, from the frame's
+  weather-station instance; the key itself stays in the sealed plugin secrets), stores 48 hours of readings in metric,
+  answers the station like Weather Underground does (`success`), and passes each upload on to Weather Underground
+  unchanged unless the frame turned that off, so the owner's dashboard there keeps working. The frame reads the
+  latest reading from its own server (`GET /v1/stations/latest`, the station's ID and key in headers), once a minute;
+  the Home Assistant integration ([jeroentrappers/kinframe-homeassistant](https://github.com/jeroentrappers/kinframe-homeassistant))
+  reads the same endpoint. Neither the key nor the readings appear in any log (nginx and the server log paths, not
+  queries).
+- **Why not Weathercloud any more:** until 0.7.0 the widget read Weathercloud's web app (`app.weathercloud.net`),
+  which has no published read API; its terms forbid automated access and third-party apps without written consent, so
+  that source was removed. Frames that used it keep their style and wind unit and wait, switched off, for a station ID
+  and key (the frame brings stored settings in line with the manifest, §3.1).
 - **Views:** *Temperature*: a `value` with the temperature (one decimal), a trend arrow when it moved 0.5° or more in
   the last hour, and a small line "56 % · W 8 km/h" (no direction in calm air). *All values*: two `rows` tables:
   temperature, humidity with dew point, wind (a `direction` arrow turned to where the wind blows, the compass point
   and gusts when the station reports them); rain today (and the rate while it rains), pressure with its 3-hour
   tendency (rising/falling by 1 hPa or more, else steady) and sunlight/UV. In the portrait strip the tables show
-  icons and values only. Detail card: temperature with the station's city and altitude, "Updated 4 min ago" (or "No
+  icons and values only. Detail card: temperature, "Updated 4 min ago" (or "No
   new reading since 13:05"), "feels like" when it differs, 24-hour temperature and pressure sparklines, and every
   value. Labels longer than the view limits (some translations) are shortened with "…", never rejected.
 - **History:** the last 26 hours of temperature and pressure, one sample per 5 minutes at most, are kept in
   `ctx.store` (a few KB), so trends and charts survive a restart.
-- **Stale:** the widget sets `ctx.dataTime` to the station's `epoch`; a reading older than 30 minutes greys the
-  widget even while Weathercloud answers (the station is offline). Fetch errors follow the host's rules.
+- **Stale:** the widget sets `ctx.dataTime` to the station's own clock (or when the server received the upload); a
+  reading older than 30 minutes greys the widget even while the server answers (the station is offline). Fetch errors follow the host's rules.
 - **Two weather sources, two switches.** The frame's Settings → **Weather** has *Weather forecast* (from the
   internet for the frame's location, Open-Meteo: `widgets.weather`, synced like every setting and also in the apps,
   off without a location) and *My weather station* (this widget, frame-local) side by side. The temperature is shown
@@ -847,7 +854,7 @@ QuickJS, registry, server API or app UI yet.
 | Schema, TypeScript types, examples, invalid examples | `docs/api/plugin-views/` (the tests read them; debug builds package them as assets) |
 | Host, `PluginInstance`/`PluginContext`, `ctx.http` with `local_only`, layout geometry, overlay/band/detail UI | `android/frame/.../frame/plugins/` |
 | Built-in HomeWizard P1 widget and mDNS discovery | `android/frame/.../frame/plugins/homewizard/` |
-| Built-in weather station widget (Weathercloud) | `android/frame/.../frame/plugins/station/` |
+| Built-in weather station widget (uploads to kinframe) | `android/frame/.../frame/plugins/station/` |
 | Frame-local settings (Settings → Home widgets, behind the owner PIN) | `PluginSettingsSection.kt`, stored in the `plugins` SharedPreferences in the shape of §10's `plugins: [...]` |
 | Dev preview (debug builds) | `PluginPreviewActivity` (`adb shell am start -n app.kinframe.frame/.debug.PluginPreviewActivity --es layout band ...`), a "Demo widgets" switch that cycles the examples, and `PluginScreenshotTest` |
 

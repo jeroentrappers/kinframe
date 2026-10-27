@@ -85,6 +85,9 @@ type Config struct {
 	PluginRegistryKey      string // base64 SubjectPublicKeyInfo of the registry's ECDSA P-256 key
 	PluginRegistryInterval time.Duration
 
+	// Where weather-station uploads are passed on (Weather Underground's own receiver); empty: not passed on.
+	StationForwardURL string
+
 	// Weather (Open-Meteo). Empty WeatherURL disables weather and /v1/geocode.
 	WeatherURL     string
 	GeocodingURL   string
@@ -193,6 +196,8 @@ func load(get func(string) string) (*Config, error) {
 		PluginRegistryURL:      env("KINFRAME_PLUGIN_REGISTRY_URL", DefaultPluginRegistryURL),
 		PluginRegistryKey:      env("KINFRAME_PLUGIN_REGISTRY_KEY", DefaultPluginRegistryKey),
 		PluginRegistryInterval: time.Duration(intv("KINFRAME_PLUGIN_REGISTRY_POLL_MINUTES", 60)) * time.Minute,
+
+		StationForwardURL: env("KINFRAME_STATION_FORWARD_URL", "http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php"),
 	}
 	c.WeatherURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_URL", "https://api.open-meteo.com"), "/")
 	c.GeocodingURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com"), "/")

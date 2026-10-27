@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Meteostanica</string>
     <string name="ws_station">Stanica</string>
-    <string name="ws_code">Stanica Weathercloud</string>
-    <string name="ws_code_help">Kód stanice alebo odkaz na jej stránku na Weathercloud.</string>
-    <string name="ws_code_invalid">Nie je tu žiadny kód stanice Weathercloud. Skopírujte odkaz na stránku stanice.</string>
-    <string name="ws_unofficial">Weathercloud nemá oficiálne API: rámček číta rovnaké verejné údaje ako webová stránka stanice, najviac raz za 5 minút. Môže to prestať fungovať, ak Weathercloud zmení svoj web.</string>
+    <string name="ws_upload_setup">Vaša stanica nahráva svoje merania do kinframe a rámček ich číta odtiaľ. Zadajte ID a kľúč stanice v aplikácii alebo na webe kinframe: nastavenia rámčeka → Doplnky → Meteostanica.</string>
     <string name="ws_style_compact">Teplota</string>
     <string name="ws_style_rows">Všetky hodnoty</string>
     <string name="ws_wind_unit">Vietor v</string>
     <string name="ws_wind_auto">Automaticky</string>
-    <string name="ws_interval">Kontrolovať každých</string>
     <string name="ws_status_error">Stanicu sa nedá prečítať: %1$s</string>
     <string name="ws_status_quiet">Stanica už nejaký čas neposlala nové meranie.</string>
     <string name="ws_temperature">Teplota</string>

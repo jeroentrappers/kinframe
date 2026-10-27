@@ -52,15 +52,11 @@
     <!-- Weather station widget (docs/plugins.md §9.4) -->
     <string name="ws_name">Stație meteo</string>
     <string name="ws_station">Stație</string>
-    <string name="ws_code">Stație Weathercloud</string>
-    <string name="ws_code_help">Codul stației sau linkul către pagina ei Weathercloud.</string>
-    <string name="ws_code_invalid">Aici nu există un cod de stație Weathercloud. Copiați linkul paginii stației.</string>
-    <string name="ws_unofficial">Weathercloud nu are un API oficial: rama citește aceleași date publice ca pagina web a stației, cel mult o dată la 5 minute. Poate să nu mai funcționeze dacă Weathercloud își schimbă site-ul.</string>
+    <string name="ws_upload_setup">Stația ta încarcă măsurătorile în kinframe, iar rama le citește de acolo. Introdu ID-ul și cheia stației în aplicația sau pe site-ul kinframe: setările ramei → Pluginuri → Stație meteo.</string>
     <string name="ws_style_compact">Temperatură</string>
     <string name="ws_style_rows">Toate valorile</string>
     <string name="ws_wind_unit">Vânt în</string>
     <string name="ws_wind_auto">Automat</string>
-    <string name="ws_interval">Verificare la fiecare</string>
     <string name="ws_status_error">Stația nu poate fi citită: %1$s</string>
     <string name="ws_status_quiet">Stația nu a mai trimis o măsurătoare nouă de ceva timp.</string>
     <string name="ws_temperature">Temperatură</string>

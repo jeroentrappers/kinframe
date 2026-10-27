@@ -853,6 +853,24 @@ paths:
         '412': { $ref: '#/components/responses/Problem' }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/stations/latest:
+    get:
+      tags: [settings]
+      operationId: getStationLatest
+      security: []
+      description: |
+        The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+        frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+        key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+        pair or nothing arrived in the last 48 hours. Rate-limited per address.
+      parameters:
+        - { name: X-Station-Id, in: header, required: true, schema: { type: string, maxLength: 64 } }
+        - { name: X-Station-Key, in: header, required: true, schema: { type: string, maxLength: 128 } }
+      responses:
+        '200': { description: Latest reading, content: { application/json: { schema: { $ref: '#/components/schemas/StationLatest' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
   /v1/frames/{frameId}/plugins:
     parameters: [ { $ref: '#/components/parameters/FrameId' } ]
     get:
@@ -2989,6 +3007,40 @@ components:
       properties:
         name: { type: string, maxLength: 100 }
         url: { type: string, maxLength: 200, examples: ['http://192.168.1.20'] }
+
+    StationLatest:
+      type: object
+      required: [received_at, reading]
+      properties:
+        received_at: { type: string, format: date-time }
+        reading: { $ref: '#/components/schemas/StationReading' }
+        today:
+          type: object
+          description: Since midnight in the station's frame's time zone (the first registering frame).
+          properties:
+            temp_min_c: { type: [number, 'null'] }
+            temp_max_c: { type: [number, 'null'] }
+            gust_max_ms: { type: [number, 'null'] }
+
+    StationReading:
+      type: object
+      description: One upload in metric units; a value the station didn't send is absent.
+      properties:
+        station_time: { type: string, format: date-time }
+        temp_c: { type: number }
+        humidity_pct: { type: number }
+        dew_point_c: { type: number }
+        feels_like_c: { type: number }
+        pressure_hpa: { type: number }
+        wind_ms: { type: number }
+        wind_dir_deg: { type: number }
+        gust_ms: { type: number }
+        rain_rate_mm_h: { type: number }
+        rain_today_mm: { type: number }
+        solar_wm2: { type: number }
+        uv_index: { type: number }
+        indoor_temp_c: { type: number }
+        indoor_humidity_pct: { type: number }
 
     PluginRegistry:
       type: object
