@@ -47,6 +47,7 @@
     http: Object.freeze({
       get: (url, o) => request('GET', url, o),
       post: (url, body, o) => request('POST', url, Object.assign({}, o, { body })),
+      put: (url, body, o) => request('PUT', url, Object.assign({}, o, { body })),
     }),
     ws: Object.freeze(ws),
     invalidate() { K.invalidate(); },

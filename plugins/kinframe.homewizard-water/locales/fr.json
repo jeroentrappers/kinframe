@@ -1,0 +1,8 @@
+{
+  "@name": "Compteur d'eau HomeWizard",
+  "today": "Aujourd'hui",
+  "flowing": "L'eau coule",
+  "flow_now": "Débit actuel",
+  "last_hour": "Dernière heure",
+  "meter_total": "Index du compteur"
+}

@@ -1,0 +1,12 @@
+{
+  "@name": "HomeWizard energy socket",
+  "today": "Today",
+  "on": "On",
+  "off": "Off",
+  "turn_on": "Switch on",
+  "turn_off": "Switch off",
+  "locked": "Switch locked in the HomeWizard app",
+  "last_hour": "Last hour",
+  "voltage": "Voltage",
+  "current": "Current"
+}

@@ -1,0 +1,8 @@
+{
+  "@name": "HomeWizard watermeter",
+  "today": "Vandaag",
+  "flowing": "Er loopt water",
+  "flow_now": "Debiet nu",
+  "last_hour": "Afgelopen uur",
+  "meter_total": "Meterstand"
+}

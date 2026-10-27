@@ -235,7 +235,7 @@ export default {
 | `settings` | The owner's settings, secrets included, read-only. |
 | `state` | A plain object the plugin may keep between calls (lost on restart). |
 | `store` | Small persistent key-value storage, 64 KB per instance (e.g. yesterday's total): `get/set` strings, `getJson/setJson`. Over the limit, `set` throws. |
-| `http.get(url, options)`, `http.post(url, body, options)` | Fetch, in `start`, `update`, `action` and WebSocket handlers (not in `render` or `detail`). Only URLs allowed by `permissions.http`. Resolves to `{ status, ok, contentType, text, json() }`; a non-2xx status doesn't throw (the plugin decides). `options.headers` (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls); a `body` object is sent as JSON. 10 s timeout, 1 MB response limit, no redirects. |
+| `http.get(url, options)`, `http.post(url, body, options)`, `http.put(url, body, options)` | Fetch, in `start`, `update`, `action` and WebSocket handlers (not in `render` or `detail`). Only URLs allowed by `permissions.http`. Resolves to `{ status, ok, contentType, text, json() }`; a non-2xx status doesn't throw (the plugin decides). `options.headers` (not `Host`, `Cookie` or `User-Agent`: the frame sends `kinframe-frame/<version>` so services can tell who calls); a `body` object is sent as JSON. 10 s timeout, 1 MB response limit, no redirects. |
 | `ws.connect(url, handlers)` | One WebSocket per instance, same rules. The frame reconnects with backoff and calls `onOpen` again. |
 | `invalidate()` | Ask for a `render` now (e.g. after a WebSocket message), without an `update`. Throttled to `refresh.min_seconds`. |
 | `format.power/energy/percent/temperature/number/duration/time(value)` | Formats in the frame's language and units, so plugins don't each reinvent "1,2 kW". `temperature` follows the frame's °C/°F (optionally with decimals); `number(value, decimals, unit)` for anything else ("2,3 m/s"). |
@@ -248,6 +248,7 @@ export default {
 | `localTime(epochMs?)` | The frame's calendar for an instant: `{ date: "2026-10-25", year, month, day, hour, minute, weekday }` (weekday 1 = Monday) in the frame's time zone. QuickJS's `Date` only knows the device's own zone. |
 
 There is no `fetch`, `XMLHttpRequest`, timers beyond what the runtime gives, file system, or access to the photos.
+`main.js` may import the host's own libraries (`import * as ha from 'kinframe/ha'`, §13.1) and nothing else.
 
 Besides `render`, `start`, `detail` and `stop`, a plugin with `"actions": true` in its permissions exports
 `async action(ctx, id)`: the owner tapped one of its buttons (§4.2). It may return a view to show at once; the frame
@@ -550,6 +551,34 @@ two helpers the forms can use:
   and update the card at once.
 - **Alternative:** a direct Spotify integration (§11.1, item 12).
 
+### 9.6 HomeWizard water meter (`kinframe.homewizard-water`)
+
+- **Settings:** the meter's address (`_hwenergy._tcp`, `local_only`; **Local API** on in the HomeWizard Energy app),
+  how to show it (`value` or `gauge`) and a typical day in litres (default 250). The meter's local API only works on
+  USB power; on batteries it reports to the cloud only.
+- **Data:** `GET /api/v1/data` every 2 s: `active_liter_lpm` (flow) and `total_liter_m3` (the counter). Today's litres
+  from the counter with `kinframe/day`; the flow's last hour with `kinframe/series`.
+- **View:** `value`: today's litres, or while water runs the flow ("7,6 l/min", unit separate) with today's litres as
+  its label. `gauge`: a ring of today against the typical day (orange once past it), the litres inside, the flow under
+  it while water runs (after the HomeWizard Energy Display's water ring). Detail: the ring, the flow's last hour, and
+  rows for the flow now, today and the meter reading. Water has no tone of its own yet (`info`, §11.1 item 9).
+- **As a template:** a device on the home network that counts something; `parse`/`record`/`current`/`main` are plain
+  exported functions, tested without the network.
+
+### 9.7 HomeWizard energy socket (`kinframe.homewizard-socket`)
+
+- **Settings:** the socket's address (as above), what's plugged in (a label, e.g. "Washing machine"), an icon from a
+  short list, and whether the frame may switch it (default yes).
+- **Data:** `GET /api/v1/data` every second (`active_power_w`, the import counter, voltage, current); the switch's
+  state (`GET /api/v1/state`: `power_on`, `switch_lock`) every 10 s, since it rarely changes.
+- **View:** `value`: the power with a trend arrow and the label (or today's use); "Off" while switched off. Detail: the
+  same, the last hour, rows for today, voltage and current, and a **switch** (`actions`, one primary power button)
+  that sends `PUT /api/v1/state {"power_on": …}`. The handler asks the socket for its lock first: while the
+  HomeWizard app's *switch lock* is on (or the owner turned switching off) the card says so instead of offering a
+  button that wouldn't work.
+- **As a template:** a device with a button: the action changes the device, keeps the answer in `ctx.state`,
+  invalidates and returns the widget's new view.
+
 ## 10. Changes to kinframe
 
 | Part | Work |
@@ -610,6 +639,10 @@ display's temperature row), media icons, `multiple` entity settings (two inverte
 5. **Shared code between plugins.** The Home Assistant connection (auth, `subscribe_entities`, the REST fallback) is
    copied into all three `kinframe.ha-*` plugins. Plugins are one module with no imports; the plugin kit (§8) should
    bundle authors' modules into one `main.js` (esbuild), so the frame stays import-free.
+   **Done** for what the project maintains: the host ships libraries a plugin may import (`kinframe/ha`,
+   `kinframe/homewizard`, `kinframe/day`, `kinframe/series`, §13.1), and the Home Assistant and HomeWizard plugins use
+   them. An author's *own* modules still get bundled into `main.js` by the plugin kit (only `kinframe/*` resolves on
+   the frame), so a community plugin stays one reviewable file.
 6. **One Home Assistant connection per frame**, not per instance. Energy, two cars and now playing open four WebSockets
    with four copies of the same token. A host-level "integration" (shared base URL and token, entity subscriptions
    multiplexed) would also give the settings form its entity picker (§6.1) for free.
@@ -773,9 +806,10 @@ mdpi, 1920×1080 xhdpi); `emulator_*` are from the dev preview on the emulator.
 | Manifest parser and validation, bundles, locales | `android/frame/.../frame/plugins/js/` (`PluginManifest.kt`, `PluginBundle.kt`) |
 | Permissions, `local_only`, http and WebSocket | `js/PluginNet.kt` |
 | The QuickJS instance and the `ctx` bridge | `js/QuickJsPluginInstance.kt`, `assets/plugin-host/prelude.js` |
+| The host's libraries (§13.1) | `assets/plugin-host/lib/*.js`, `js/PluginLibraries.kt` |
 | First-party plugins (shipped in the APK as assets `plugins/<id>/`) | repository `plugins/kinframe.*` (manifest, `main.js`, `locales/`, `fixtures/`) |
 | Community-style examples (tests only, not shipped) | `plugins/examples/community.*` |
-| Tests | `frame/src/test/.../plugins/js/` (sandbox, P1, Home Assistant with a fake server, examples, timing), `androidTest/.../QuickJsOnDeviceTest` (Android 6) |
+| Tests | `frame/src/test/.../plugins/js/` (sandbox, libraries, P1, HomeWizard devices and Home Assistant with fake servers, examples, timing), `androidTest/.../QuickJsOnDeviceTest` (Android 6) |
 
 **Engine.** [quickjs-kt](https://github.com/dokar3/quickjs-kt) 1.0.15 (Apache-2.0, maintained, QuickJS 2026-06):
 minSdk 23, prebuilt for armeabi-v7a, arm64-v8a, x86 and x86_64, a desktop build for JVM unit tests (so the tests run
@@ -861,10 +895,67 @@ first one, under the start budget), 66.5 ms at p50 and up to 246 ms with the net
 **Screenshots** (views straight from the plugins, run in QuickJS on the fixtures; a drawn stand-in for album art):
 [`docs/plugins/`](plugins/) `js_band_column.png` (energy flow with the battery ring, now playing), `js_strip.png`
 (car charging, P1 dial), `js_corners.png`, `js_detail_media.png` (buttons, progress), `js_detail_energy.png`,
-`js_detail_car.png` and `new_components.png` (the additions in every form).
+`js_detail_car.png` and `new_components.png` (the additions in every form); `js_homewizard_water.png` and
+`js_homewizard_socket.png` (the water meter and the socket in every form), `js_detail_socket.png` (the switch).
 
 **Still open (steps 3–5).** Settings for JavaScript plugins come from the manifest only in principle: the frame's
 settings screen still has its hand-made P1 and station sections, and the Home Assistant plugins can only be configured
 by writing their instance settings (no form, no entity picker, no secret storage yet: step 3, with the server API of
 §10). No registry, signing or plugin kit (step 4). The weather station is still Kotlin (it feeds the slideshow's own
 weather corner). `InstanceState.error` isn't reported to the server yet.
+
+### 13.1 The host's libraries
+
+Integrations of one kind repeat the same plumbing: a Home Assistant connection, a HomeWizard device's API, "how much
+today" from a meter's running total, a live value's last hour. The host ships that once, as ES modules a plugin
+imports by name:
+
+```js
+import * as ha from 'kinframe/ha';
+import { data, number } from 'kinframe/homewizard';
+import { dayTotals } from 'kinframe/day';
+import { series } from 'kinframe/series';
+```
+
+**How imports resolve.** The runtime gets a module loader that knows only the files in the APK's
+`assets/plugin-host/lib/` (`ha.js` → `kinframe/ha`). Any other specifier (`./util`, `https://…`, an unknown
+`kinframe/…`) fails the plugin's start with "import 'x': a plugin can only import the host's libraries (…)". A library
+is evaluated in the importing plugin's own runtime after the prelude, so it sees what the plugin sees: no `__kf`, and
+the network only through the `ctx` the plugin hands it, with that plugin's permissions (tested: a library given a
+foreign address is refused like the plugin itself). Libraries are part of the plugin API: within API 1 they only
+grow (new functions, new optional parameters); a change that would break a plugin waits for API 2 and a new name.
+Their code counts against the calling plugin's JavaScript budget like its own.
+
+**`kinframe/ha`** (settings `base_url`, `token`; permissions `http` and `websocket` on `settings.base_url`):
+
+| | |
+|---|---|
+| `configured(ctx)` | `base_url` and `token` are set. |
+| `subscribe(ctx, ids)` | WebSocket: auth, `subscribe_entities` for `ids`, each event applied and `ctx.invalidate()`. Call in `start`. |
+| `refresh(ctx, ids)` | REST, one GET per entity, only while the WebSocket isn't live. Call in `update`. (`poll` always polls.) |
+| `entities(ctx)`, `connection(ctx)`, `isLive(ctx)` | Entity id → `{ state, attributes, updated }` (or `{ missing: true }`); the whole connection state. |
+| `requireToken(ctx)` | Throws the plugin's `token_refused` text (English fallback) once Home Assistant refused the token. |
+| `callService(ctx, domain, service, data)` | `POST /api/services/<domain>/<service>`, for actions. |
+| `applyEvent(entities, ev)`, `baseUrl(s)` | The pieces, for tests and special cases. |
+
+**`kinframe/homewizard`** (setting `host`; permission `http` on `settings.host`, `local_only`): `configured(ctx)`,
+`data(ctx)` (`GET /api/v1/data`), `device(ctx)` (`GET /api`), `state(ctx)` / `setState(ctx, patch)` (`/api/v1/state`,
+energy sockets), and readers for its flat JSON: `number(o, key)` (null when missing or not a number), `total(o,
+prefix)` (a kWh total, or the sum of the tariff registers on older firmware), `phases(o)`, `baseUrl(host)`. A non-2xx
+answer throws "HTTP <status>".
+
+**`kinframe/day`:** `dayTotals(ctx, names, key = 'day')` → `{ record(values), since(values), date }`. `record` keeps
+the counters' values at the start of the frame's day (`ctx.localTime`, so its time zone) in `ctx.store` as
+`date|v1|v2|…`, so the baseline survives a restart; `since` gives how much each grew today (null where unknown). A
+counter that first appears later in the day counts from its first value; one that goes down (a replaced or reset
+meter) starts again from there instead of showing 0 for the rest of the day.
+
+**`kinframe/series`:** `series(ctx, name, { stepMs = 5000, samples = 720 })` → `{ add(value, time), last(), count,
+trend({ window = 6, ratio = 0.1, min = 50 }), buckets(spanMs = 1 h, n = 96) }`. Readings within one step are averaged
+into one sample, so a trend arrow and an hour chart mean the same whether the device is read every second or every
+five; `buckets` gives a sparkline's points (null where there was no reading). Kept in `ctx.state`.
+
+**Using them.** The three `kinframe.ha-*` plugins import `* as ha` (no more copies of the connection); the P1 uses
+`kinframe/homewizard`, `kinframe/day` (its stored `day` key keeps its format, so existing frames keep today's totals)
+and `kinframe/series`; the water meter and the socket (§9.6, §9.7) are built from the same parts and written to be
+copied: their comments say what each part does and why.

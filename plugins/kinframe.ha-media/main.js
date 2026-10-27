@@ -2,63 +2,7 @@
 // Cast, …): title, artist and album art in the corner or band, and in the detail card a moving progress bar and buttons
 // to skip, pause and change the volume (docs/plugins.md §4.2). Hidden ({type: "none"}) while nothing plays.
 
-// ---- Home Assistant connection (the same in every kinframe.ha-* plugin until plugins can share modules, §11) ----
-
-function baseUrl(s) {
-  const h = String(s || '').trim().replace(/\/+$/, '');
-  return /^https?:\/\//i.test(h) ? h : 'http://' + h;
-}
-
-function ha(ctx) {
-  if (!ctx.state.ha) ctx.state.ha = { base: baseUrl(ctx.settings.base_url), entities: {}, live: false, error: null, nextId: 1 };
-  return ctx.state.ha;
-}
-
-/** Applies a subscribe_entities event: "a" adds full states, "c" changes ("+" set, "-" removed attributes), "r" removes. */
-export function applyEvent(entities, ev) {
-  for (const id in ev.a || {}) {
-    const e = ev.a[id];
-    entities[id] = { state: e.s, attributes: e.a || {}, updated: Math.round((e.lu || e.lc || 0) * 1000) };
-  }
-  for (const id in ev.c || {}) {
-    const d = ev.c[id];
-    const e = entities[id] || (entities[id] = { state: null, attributes: {}, updated: 0 });
-    const add = d['+'];
-    if (add) {
-      if ('s' in add) e.state = add.s;
-      if (add.a) Object.assign(e.attributes, add.a);
-      if (add.lu || add.lc) e.updated = Math.round((add.lu || add.lc) * 1000);
-    }
-    if (d['-'] && d['-'].a) for (const k of d['-'].a) delete e.attributes[k];
-  }
-  for (const id of ev.r || []) delete entities[id];
-}
-
-function haSubscribe(ctx, ids) {
-  const h = ha(ctx);
-  ctx.ws.connect(h.base.replace(/^http/i, 'ws') + '/api/websocket', {
-    onMessage(ws, m) {
-      if (m.type === 'auth_required') ws.send({ type: 'auth', access_token: ctx.settings.token });
-      else if (m.type === 'auth_ok') ws.send({ id: h.nextId++, type: 'subscribe_entities', entity_ids: ids });
-      else if (m.type === 'auth_invalid') { h.error = 'token'; ws.close(); }
-      else if (m.type === 'event' && m.event) { applyEvent(h.entities, m.event); h.live = true; ctx.invalidate(); }
-    },
-    onClose() { h.live = false; },
-  });
-}
-
-/** REST fallback while the WebSocket isn't live: one GET per entity. */
-async function haPoll(ctx, ids) {
-  const h = ha(ctx);
-  for (const id of ids) {
-    const r = await ctx.http.get(h.base + '/api/states/' + id, { headers: { Authorization: 'Bearer ' + ctx.settings.token } });
-    if (r.status === 401) { h.error = 'token'; break; }
-    if (r.status === 404) { h.entities[id] = { missing: true }; continue; }
-    if (!r.ok) throw new Error('Home Assistant: HTTP ' + r.status);
-    const e = r.json();
-    h.entities[id] = { state: e.state, attributes: e.attributes || {}, updated: Date.parse(e.last_updated) || 0 };
-  }
-}
+import * as ha from 'kinframe/ha';
 
 // ---- the player ----
 
@@ -114,33 +58,29 @@ export function views(p, ctx) {
 }
 
 function player(ctx) {
-  const h = ha(ctx);
+  const h = ha.connection(ctx);
   const id = ctx.settings.entity;
-  if (h.error === 'token') throw new Error(ctx.t('token_refused'));
+  ha.requireToken(ctx);
   return read(h.entities[id], h.base, ctx.now());
 }
 
 /** Calls a media_player service and updates the local copy at once, so the card answers before Home Assistant does. */
-async function call(ctx, service, data) {
-  const h = ha(ctx);
-  const r = await ctx.http.post(h.base + '/api/services/media_player/' + service, Object.assign({ entity_id: ctx.settings.entity }, data || {}),
-    { headers: { Authorization: 'Bearer ' + ctx.settings.token } });
-  if (r.status === 401) throw new Error(ctx.t('token_refused'));
-  if (!r.ok) throw new Error('Home Assistant: HTTP ' + r.status);
+function call(ctx, service, data) {
+  return ha.callService(ctx, 'media_player', service, Object.assign({ entity_id: ctx.settings.entity }, data || {}));
 }
 
 export default {
   async start(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return null;
-    haSubscribe(ctx, [ctx.settings.entity]);
+    if (!ha.configured(ctx) || !ctx.settings.entity) return null;
+    ha.subscribe(ctx, [ctx.settings.entity]);
     return null;
   },
   async update(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return;
-    if (!ha(ctx).live) await haPoll(ctx, [ctx.settings.entity]);
+    if (!ha.configured(ctx) || !ctx.settings.entity) return;
+    await ha.refresh(ctx, [ctx.settings.entity]);
   },
   render(ctx) {
-    if (!ctx.settings.base_url || !ctx.settings.token || !ctx.settings.entity) return null;
+    if (!ha.configured(ctx) || !ctx.settings.entity) return null;
     return views(player(ctx), ctx).main;
   },
   detail(ctx) {
@@ -149,7 +89,7 @@ export default {
   async action(ctx, id) {
     const p = player(ctx);
     if (!p) return null;
-    const e = ha(ctx).entities[ctx.settings.entity];
+    const e = ha.connection(ctx).entities[ctx.settings.entity];
     if (id === 'previous') await call(ctx, 'media_previous_track');
     else if (id === 'next') await call(ctx, 'media_next_track');
     else if (id === 'play_pause') {
@@ -165,6 +105,6 @@ export default {
       }
     } else return null;
     ctx.invalidate();
-    return views(read(e, ha(ctx).base, ctx.now()), ctx).main;
+    return views(read(e, ha.connection(ctx).base, ctx.now()), ctx).main;
   },
 };

@@ -1,0 +1,12 @@
+{
+  "@name": "HomeWizard Steckdose",
+  "today": "Heute",
+  "on": "An",
+  "off": "Aus",
+  "turn_on": "Einschalten",
+  "turn_off": "Ausschalten",
+  "locked": "Schalter in der HomeWizard-App gesperrt",
+  "last_hour": "Letzte Stunde",
+  "voltage": "Spannung",
+  "current": "Strom"
+}
