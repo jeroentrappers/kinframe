@@ -203,9 +203,13 @@ class QuickJsSandboxTest {
             """{"id":"community.x","name":"x","version":"1.0.0","api":1,"permissions":{"http":["http://plain.example"]}}""",
             """{"id":"community.x","name":"x","version":"1.0.0","api":1,"permissions":{"http":["settings.nope"]}}""",
             """{"id":"community.x","name":"x","version":"1.0.0","api":1,"settings":[{"key":"a","type":"text"}],"permissions":{"http":["settings.a"]}}""",
-            """{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":1}}""",
+            """{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":0}}""",
+            // Every second only for devices in the house, never for an internet API.
+            """{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":1},"permissions":{"http":["https://api.example.org"]}}""",
+            """{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":1},"settings":[{"key":"a","type":"url"}],"permissions":{"http":["settings.a"]}}""",
         )
         bad.forEach { m -> try { PluginManifest.parse(m); fail("accepted: $m") } catch (_: ManifestException) {} }
+        PluginManifest.parse("""{"id":"community.x","name":"x","version":"1.0.0","api":1,"refresh":{"min_seconds":1,"default_seconds":1},"settings":[{"key":"a","type":"url","local_only":true}],"permissions":{"http":["settings.a"]}}""")
         // Every plugin in the repository has a valid manifest.
         JsPluginKit.ROOT.resolve("plugins").listFiles { f -> f.isDirectory && f.resolve("plugin.json").isFile }!!.forEach { dir ->
             val b = PluginBundle.fromDirectory(dir)

@@ -61,6 +61,7 @@ data class PluginManifest(
         private val ID = Regex("^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)+$")
         private val KEY = Regex("^[a-z][a-z0-9_]{0,31}$")
         private val VERSION = Regex("^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$")
+        const val LOCAL_MIN_SECONDS = 5
         private val ORIGIN = Regex("^https://[a-z0-9.-]+(:\\d{1,5})?$")
         private val json = Json { ignoreUnknownKeys = false }
 
@@ -89,7 +90,7 @@ data class PluginManifest(
             val min = int("min_seconds", r) ?: 5
             val def = int("default_seconds", r) ?: maxOf(min, 30)
             val stale = int("stale_seconds", r)
-            if (min < 2 || def < min || def > 86_400) throw ManifestException("refresh: need 2 ≤ min_seconds ≤ default_seconds ≤ 86400")
+            if (min < 1 || def < min || def > 86_400) throw ManifestException("refresh: need 1 ≤ min_seconds ≤ default_seconds ≤ 86400")
 
             val settings = (o["settings"] as? JsonArray ?: JsonArray(emptyList())).mapIndexed { i, e ->
                 val s = e as? JsonObject ?: throw ManifestException("settings[$i] must be an object")
@@ -124,10 +125,16 @@ data class PluginManifest(
                 v
             } ?: emptyList()
             val actions = (p["actions"] as? JsonPrimitive)?.booleanOrNull ?: false
+            val http = net("http")
+            // Every few seconds is for devices in the house (a P1 meter updates every second), never for an internet
+            // API that every frame would then call that often.
+            if (min < LOCAL_MIN_SECONDS && http.any { v -> !v.startsWith("settings.") || settings.none { it.key == v.removePrefix("settings.") && it.localOnly } }) {
+                throw ManifestException("refresh: min_seconds below $LOCAL_MIN_SECONDS only for plugins whose http goes to local_only settings")
+            }
 
             return PluginManifest(
                 id = id, name = str("name")!!, version = version, api = api, description = str("description", required = false, max = 400),
-                slots = slots, refresh = Refresh(min, def, stale), permissions = Permissions(net("http"), net("websocket"), actions), settings = settings,
+                slots = slots, refresh = Refresh(min, def, stale), permissions = Permissions(http, net("websocket"), actions), settings = settings,
             )
         }
     }

@@ -261,7 +261,7 @@ class PluginHost(
             val age = if (r.lastGoodAt == 0L) Long.MAX_VALUE else t - r.lastGoodAt
             val dataOld = dataIsOld(r.ctx.dataTime, r.instance.staleAfterSeconds, t)
             val status = when {
-                r.view != null && age <= 3 * refreshMs && !dataOld -> InstanceStatus.Ok
+                r.view != null && age <= maxOf(3 * refreshMs, MIN_STALE_MS) && !dataOld -> InstanceStatus.Ok
                 r.view != null -> InstanceStatus.Stale
                 r.failures >= 3 -> InstanceStatus.Unavailable
                 else -> InstanceStatus.Loading
@@ -288,7 +288,10 @@ class PluginHost(
         const val HIDE_AFTER_MS = 15 * 60_000L
         const val CALL_TIMEOUT_MS = 10_000L
         const val MAX_BACKOFF_MS = 60_000L
-        const val MIN_REFRESH_S = 2
+        const val MIN_REFRESH_S = 1
+
+        /** Greyed only after this long without a good view, however often the plugin refreshes (a Wi-Fi hiccup). */
+        const val MIN_STALE_MS = 15_000L
         private const val TAG = "KinFramePlugins"
 
         fun log(id: String, msg: String) = Log.i(TAG, "[$id] $msg")

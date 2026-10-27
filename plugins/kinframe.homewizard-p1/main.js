@@ -1,7 +1,9 @@
-// HomeWizard P1 meter (docs/plugins.md §9.2): polls the meter's local API v1 every 5 s on the home network.
+// HomeWizard P1 meter (docs/plugins.md §9.2): polls the meter's local API v1 every second (its own update rate) on
+// the home network.
 // Styles: "value" (the number with a trend arrow), "gauge" (a two-sided dial in watts) and "flow" (grid ⇄ home).
 
 const SAMPLES = 720; // one hour at 5 s
+const STEP_MS = 5000; // the history keeps one averaged sample per 5 s, however often the meter is read
 const BUCKETS = 96;
 const HOUR_MS = 3600000;
 const DEFAULT_MAX_W = 4000;
@@ -26,15 +28,23 @@ export function parse(o) {
 
 /** Recent samples (ctx.state) and the day's starting totals (ctx.store). */
 function history(ctx) {
-  if (!ctx.state.h) ctx.state.h = { samples: new Array(SAMPLES).fill(NaN), times: new Array(SAMPLES).fill(0), head: 0, count: 0, last: null, day: null };
+  if (!ctx.state.h) ctx.state.h = { samples: new Array(SAMPLES).fill(NaN), times: new Array(SAMPLES).fill(0), head: 0, count: 0, last: null, day: null, slotStart: 0, n: 0 };
   return ctx.state.h;
 }
 
 function add(h, r, at) {
   h.last = r;
   if (r.activePowerW === null) return;
+  const lastIdx = (h.head - 1 + SAMPLES) % SAMPLES;
+  if (h.count > 0 && at - h.slotStart < STEP_MS) {
+    h.n++;
+    h.samples[lastIdx] += (r.activePowerW - h.samples[lastIdx]) / h.n;
+    h.times[lastIdx] = at;
+    return;
+  }
   h.samples[h.head] = r.activePowerW;
   h.times[h.head] = at;
+  h.slotStart = at; h.n = 1;
   h.head = (h.head + 1) % SAMPLES;
   if (h.count < SAMPLES) h.count++;
 }

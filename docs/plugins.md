@@ -142,7 +142,9 @@ ha-energy-flow/
 - **`id`** is reverse-DNS-like and unique in the registry. `community.` is the prefix for third-party plugins,
   `kinframe.` for the ones the project maintains.
 - **`api`** is the plugin API version (section 4). The frame refuses plugins for an API it doesn't know.
-- **`refresh`**: `default_seconds` between `update` calls, `min_seconds` as the floor for `invalidate()`, and optional
+- **`refresh`**: `default_seconds` between `update` calls, `min_seconds` as the floor for `invalidate()` (at least 1;
+  below 5 only for plugins whose `http` permissions are all `local_only` settings, so no internet API is asked every
+  second by every frame), and optional
   `stale_seconds`: how old the source's own measurement (`ctx.dataTime`) may be before the widget is greyed (a weather
   station that uploads every 10 minutes: 1800).
 - **`permissions`** lists what the code may do, and every network permission names the **setting** that holds the
@@ -321,7 +323,8 @@ future TV or tablet frame, and animations (flow arrows, value changes) are done 
 - **Lifecycle:** instances start after the slideshow is up, stop at night (sleep schedule) and during setup, and
   restart with the new code when the plugin updates. Several instances of one plugin (e.g. two cars) are fully
   separate.
-- **Offline:** the last good view stays on screen, greyed after 3× the refresh interval, hidden after 15 minutes.
+- **Offline:** the last good view stays on screen, greyed after 3× the refresh interval (at least 15 s), hidden after
+  15 minutes.
 
 ## 6. Settings in the apps
 
@@ -389,7 +392,8 @@ two helpers the forms can use:
 
 - **Settings:** the meter's address (mDNS `_hwenergy._tcp` discovery, `local_only`). The owner must switch on **Local
   API** for the meter in the HomeWizard Energy app.
-- **Data:** the meter's local HTTP API (`/api/v1/data`), polled every 5 s: active power (import negative for export),
+- **Data:** the meter's local HTTP API (`/api/v1/data`), polled every second (the meter's own update rate; the
+  history behind the trend arrow and the hour chart keeps one averaged sample per 5 s): active power (import negative for export),
   per-phase power, today's import/export and gas. The newer authenticated local API (v2, HTTPS with a token issued by
   pressing the meter's button) is supported when the meter offers it; the plugin's setup tells the owner to press the
   button and the frame requests the token, storing it as a `secret`.

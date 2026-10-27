@@ -95,6 +95,8 @@ class QuickJsPluginInstance(
     /** Recent calls per name: (wall clock, JavaScript only), logged every [RENDER_LOG_EVERY] renders with the heap size. */
     private val timings = HashMap<String, ArrayList<Pair<Double, Double>>>()
 
+    private var loggedAtNs = System.nanoTime()
+
     /** The call running now when it may not use the network (`render`, `detail`), else null. */
     @Volatile private var offline: String? = null
 
@@ -244,7 +246,8 @@ class QuickJsPluginInstance(
         if (name != "render" && name != "update") return
         timings.getOrPut(name) { ArrayList() } += lastCallMs to lastJsMs
         val renders = timings["render"] ?: return
-        if (renders.size < RENDER_LOG_EVERY) return
+        if (renders.size < RENDER_LOG_EVERY || System.nanoTime() - loggedAtNs < LOG_INTERVAL_NS) return
+        loggedAtNs = System.nanoTime()
         fun p50(l: List<Double>) = l.sorted()[l.size / 2]
         val heap = runCatching { q.memoryUsage.memoryUsedSize / 1024 }.getOrDefault(-1L)
         val line = StringBuilder(String.format(Locale.ROOT, "%d renders: p50 %.1f ms, max %.1f ms",
@@ -367,6 +370,8 @@ class QuickJsPluginInstance(
         /** An `image` view's picture: album art and thumbnails, not photos. */
         const val MAX_IMAGE_BYTES = 768 * 1024
         const val RENDER_LOG_EVERY = 60
+        /** At most one timing line per 5 minutes, so a plugin refreshing every second doesn't flood the log. */
+        private const val LOG_INTERVAL_NS = 5 * 60 * 1_000_000_000L
 
         /** Calls that draw: they work from what `update` fetched, so the frame never waits for the network to draw. */
         val OFFLINE_CALLS = setOf("render", "detail")

@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "description": "Live power from a HomeWizard P1 meter on the home network: using, returning, per phase and today's totals.",
   "slots": ["top-left", "top-right"],
-  "refresh": { "min_seconds": 5, "default_seconds": 5 },
+  "refresh": { "min_seconds": 1, "default_seconds": 1 },
   "permissions": { "http": ["settings.host"] },
   "settings": [
     { "key": "host", "type": "url", "label": "Meter address", "placeholder": "192.168.1.50", "required": true,
