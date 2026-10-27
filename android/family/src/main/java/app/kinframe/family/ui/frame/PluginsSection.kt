@@ -142,15 +142,24 @@ fun PluginsSectionContent(
         Text(stringResource(R.string.plugins_layout), style = Kin.type.label, color = c.ink)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(PluginLayout.MODE_OFF to R.string.plugins_layout_off, PluginLayout.MODE_OVERLAY to R.string.plugins_layout_overlay,
-                PluginLayout.MODE_BAND to R.string.plugins_layout_band).forEach { (v, l) ->
+                PluginLayout.MODE_BAND to R.string.plugins_layout_band, PluginLayout.MODE_SPLIT to R.string.plugins_layout_split).forEach { (v, l) ->
                 ToggleChip(stringResource(l), layout.mode == v, { if (layout.mode != v) onLayout("mode", v) })
             }
         }
         Text(stringResource(when (layout.mode) {
             PluginLayout.MODE_OVERLAY -> R.string.plugins_layout_overlay_hint
             PluginLayout.MODE_BAND -> R.string.plugins_layout_band_hint
+            PluginLayout.MODE_SPLIT -> R.string.plugins_layout_split_hint
             else -> R.string.plugins_layout_off_hint
         }), style = Kin.type.caption, color = c.inkSoft)
+        if (layout.mode == PluginLayout.MODE_SPLIT) {
+            Text(stringResource(R.string.plugins_split_side), style = Kin.type.label, color = c.ink)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(PluginLayout.SIDE_LEFT to R.string.plugins_side_left, PluginLayout.SIDE_RIGHT to R.string.plugins_side_right).forEach { (v, l) ->
+                    ToggleChip(stringResource(l), layout.side == v, { if (layout.side != v) onLayout("side", v) })
+                }
+            }
+        }
         if (layout.mode == PluginLayout.MODE_BAND) {
             Text(stringResource(R.string.plugins_band_side), style = Kin.type.label, color = c.ink)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

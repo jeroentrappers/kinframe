@@ -13,6 +13,9 @@
     <string name="plugins_layout_off_hint">Plug-ins staan niet op het kader.</string>
     <string name="plugins_layout_overlay_hint">In de bovenhoeken van de foto.</string>
     <string name="plugins_layout_band_hint">De foto wordt iets kleiner en de plug-ins, klok en het weer komen in een strook ernaast (erboven op een staand kader), zodat niets de foto bedekt.</string>
+    <string name="plugins_layout_split">Twee foto’s en een overzicht</string>
+    <string name="plugins_layout_split_hint">Een foto op de helft van het scherm; de andere helft toont een tweede foto en een overzicht met de plug-ins, de klok en de komende 48 uur uit de agenda.</string>
+    <string name="plugins_split_side">Kant van het overzicht</string>
     <string name="plugins_band_side">Kant van de strook</string>
     <string name="plugins_side_left">Links</string>
     <string name="plugins_side_right">Rechts</string>

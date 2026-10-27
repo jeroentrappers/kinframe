@@ -176,12 +176,14 @@
 	const MODES: [NonNullable<Layout['mode']>, MessageKey][] = [
 		['off', 'plugins.layoutOff'],
 		['overlay', 'plugins.layoutOverlay'],
-		['band', 'plugins.layoutBand']
+		['band', 'plugins.layoutBand'],
+		['split', 'plugins.layoutSplit']
 	];
 	const MODE_HINT: Record<NonNullable<Layout['mode']>, MessageKey> = {
 		off: 'plugins.layoutOffHint',
 		overlay: 'plugins.layoutOverlayHint',
-		band: 'plugins.layoutBandHint'
+		band: 'plugins.layoutBandHint',
+		split: 'plugins.layoutSplitHint'
 	};
 </script>
 
@@ -215,6 +217,15 @@
 		</div>
 		<span class="hint">{t(MODE_HINT[layout.mode ?? 'off'])}</span>
 	</fieldset>
+	{#if layout.mode === 'split'}
+		<fieldset class="fs" in:softFly>
+			<legend class="label">{t('plugins.splitSide')}</legend>
+			<div class="segmented">
+				<label><input type="radio" name="pl-side" value="left" bind:group={layout.side} />{t('plugins.sideLeft')}</label>
+				<label><input type="radio" name="pl-side" value="right" bind:group={layout.side} />{t('plugins.sideRight')}</label>
+			</div>
+		</fieldset>
+	{/if}
 	{#if layout.mode === 'band'}
 		<div class="two" in:softFly>
 			<fieldset class="fs">

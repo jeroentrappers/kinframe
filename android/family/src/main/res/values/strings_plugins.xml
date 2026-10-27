@@ -14,6 +14,9 @@
     <string name="plugins_layout_off_hint">Plugins don’t show on the frame.</string>
     <string name="plugins_layout_overlay_hint">In the top corners of the photo.</string>
     <string name="plugins_layout_band_hint">The photo gets a little smaller and the plugins, clock and weather go in a band beside it (above it on a portrait frame), so nothing covers the photo.</string>
+    <string name="plugins_layout_split">Two photos and a dashboard</string>
+    <string name="plugins_layout_split_hint">A photo on half the screen; the other half holds a second photo and a dashboard with the plugins, the clock and the next 48 hours of the calendar.</string>
+    <string name="plugins_split_side">Dashboard side</string>
     <string name="plugins_band_side">Band side</string>
     <string name="plugins_side_left">Left</string>
     <string name="plugins_side_right">Right</string>

@@ -18,6 +18,7 @@ data class PluginLayout(val mode: String = MODE_OFF, val side: String = SIDE_RIG
         const val MODE_OFF = "off"
         const val MODE_OVERLAY = "overlay"
         const val MODE_BAND = "band"
+        const val MODE_SPLIT = "split"
         const val SIDE_LEFT = "left"
         const val SIDE_RIGHT = "right"
         const val BACKGROUND_PAPER = "paper"
