@@ -708,17 +708,29 @@ fall back to 32-bit libraries).
 
 **Sandbox.** One runtime per instance (nothing shared between instances), 8 MB heap, 256 KB stack, 50 ms of
 JavaScript per call (1 s at start, for compiling the module and for every call until the first render has finished:
-on the Denver that cold first render took about 68 ms, since it also starts threads and loads classes). The host
-counts that time itself: its clock stops
-while a `ctx.http` call is in flight, and a watchdog on its own thread checks it every 5 ms and cancels the call when
-it's over budget, which interrupts the JavaScript. (The first beta on the Denver used QuickJS's own limit, which
-counts the wait too: a P1 answer slower than 50 ms over Wi-Fi failed about one render in 60.) An endless loop is
-interrupted, also after an await (an interrupt inside an async function arrives as a rejected promise, which the host
-still reports as "took longer than 50 ms"); running
-out of memory fails the call and the runtime is rebuilt on the next one. A 10 s wall-clock limit per call stays (the
-host's), and cancelling a call interrupts it. The raw bindings are hidden behind `ctx` (the global `__kf` is removed
-after the prelude). What QuickJS can't contain is a crash in native code, which would take the app down; that's the
-engine's own robustness, not something the host can isolate in one process.
+on the Denver that cold first render took about 68 ms, since it also starts threads and loads classes).
+
+The host keeps that time itself (`JsClock`): it counts the **CPU time of the thread the JavaScript runs on**
+(`/proc/self/task/<tid>/schedstat`; the prelude tells the host which thread at the start of a call), and pauses from
+the moment a `ctx.http` request starts until the JavaScript resumes after it. A watchdog on its own thread checks
+every 5 ms and cancels an over-budget call, which interrupts the JavaScript. Where CPU time can't be read it falls
+back to wall-clock time minus the requests. The history, all from the Denver:
+
+- beta.1 used QuickJS's own limit, wall clock from the start of a call with the wait for the network included: a P1
+  answer slower than 50 ms over Wi-Fi failed about one render in 60.
+- beta.2–5 used wall clock minus the requests: still about one update in 300 failed, because the plugin thread
+  runs at background priority and waits for a CPU while the slideshow decodes the next photo (that thread had spent
+  610 ms waiting for a CPU against 4.15 s running). Wall clock charged the plugin for the wait.
+- Since beta.6, CPU time: waiting for a CPU, the network, or another instance's call on the shared thread isn't
+  charged.
+
+An endless loop is interrupted, also after an await (an interrupt inside an async function arrives as a rejected
+promise, which the host still reports as "took longer than 50 ms"); running out of memory fails the call and the
+runtime is rebuilt on the next one. Every call and every WebSocket message also has a 10 s wall-clock limit, so a
+plugin that starts a request without awaiting it and then loops can't hold the thread longer than that. The raw
+bindings are hidden behind `ctx` (the global `__kf` is removed after the prelude). What QuickJS can't contain is a
+crash in native code, which would take the app down; that's the engine's own robustness, not something the host can
+isolate in one process.
 
 **Calls.** `main.js` is loaded once as an ES module (`import plugin from 'main'`); each call then evaluates a tiny
 *script* (`__kf_call('render')`) whose result comes back through a binding, because evaluating a promise doesn't

@@ -37,8 +37,10 @@ import java.util.Locale
 /** The sandbox's limits (docs/plugins.md §5). */
 data class SandboxLimits(
     val memoryBytes: Long = 8L * 1024 * 1024,
-    /** JavaScript execution time per call; time spent awaiting `ctx.http` doesn't count. */
+    /** JavaScript per call: CPU time of its thread, time spent awaiting `ctx.http` left out ([JsClock]). */
     val cpuMsPerCall: Long = 50,
+    /** Wall clock per call or WebSocket message, whatever it waits for. */
+    val wallMsPerCall: Long = 10_000,
     /**
      * Compiling and running the module once at start, and every call until the first render has finished: on a slow
      * core (the Denver's Cortex-A7) that first call also starts threads and loads classes.
@@ -61,6 +63,7 @@ class QuickJsPluginInstance(
     private val prelude: String,
     private val net: PluginNet,
     private val limits: SandboxLimits = SandboxLimits(),
+    cpu: ThreadCpu = ThreadCpu.Proc,
 ) : PluginInstance {
     private val manifest = bundle.manifest
     override val refreshSeconds: Int = manifest.refresh.defaultSeconds
@@ -100,13 +103,8 @@ class QuickJsPluginInstance(
     /** The call running now when it may not use the network (`render`, `detail`), else null. */
     @Volatile private var offline: String? = null
 
-    // The JavaScript clock: QuickJS's own deadline is wall clock from the start of a call, awaits included, so a
-    // slow answer from the network would count against the budget. The host keeps time itself and stops it while
-    // a `ctx.http` call is in flight.
-    private val clock = Any()
-    private var waits = 0
-    private var waitStartNs = 0L
-    private var waitedNs = 0L
+    // QuickJS's own deadline is wall clock from the start of a call, awaits included; the host keeps time itself.
+    private val clock = JsClock(cpu)
 
     override suspend fun start(ctx: PluginContext): JsonElement? {
         boot(ctx)
@@ -178,7 +176,9 @@ class QuickJsPluginInstance(
             function("ws_connect") { a -> connect(ctx, a[0].toString()); null }
             function("ws_send") { a -> socket?.send(a[0].toString()); null }
             function("ws_close") { _ -> socketWanted = false; socket?.close(1000, null); socket = null; null }
-            asyncFunction("http") { a -> awaiting { http(a) } }
+            function("js_thread") { _ -> clock.onJsThread(); null }
+            function("resumed") { _ -> clock.resumed(); null }
+            asyncFunction("http") { a -> clock.waitBegins(); http(a) }
         }
         js = q
         warm = false
@@ -211,23 +211,25 @@ class QuickJsPluginInstance(
      * hold the caller's.
      */
     private suspend fun budgeted(q: QuickJs, ctx: PluginContext, name: String, script: String, budgetMs: Long) {
-        val t0 = System.nanoTime()
-        synchronized(clock) { waitedNs = 0L; if (waits > 0) waitStartNs = t0 }
+        clock.reset()
         val budgetNs = budgetMs * 1_000_000
-        var overran = false
+        val wallNs = limits.wallMsPerCall * 1_000_000
+        var overran: String? = null
         try {
             coroutineScope {
                 val run = async { q.evaluate<Any?>(script, "$name.js") }
                 val watchdog = launch(Dispatchers.Default) {
                     while (true) {
                         delay(WATCHDOG_MS)
-                        if (jsNs(t0) > budgetNs) { overran = true; run.cancel(); break }
+                        if (clock.jsNs() > budgetNs) overran = "$budgetMs ms of JavaScript"
+                        else if (clock.wallNs() > wallNs) overran = "${limits.wallMsPerCall / 1000} s"
+                        if (overran != null) { run.cancel(); break }
                     }
                 }
                 try { run.await() } finally { watchdog.cancel() }
             }
         } catch (e: CancellationException) {
-            if (overran) throw PluginScriptException("$name: took longer than $budgetMs ms of JavaScript")
+            overran?.let { throw PluginScriptException("$name: took longer than $it") }
             throw e
         } catch (e: QuickJsInterruptedException) {
             throw PluginScriptException("$name: took longer than $budgetMs ms of JavaScript")
@@ -236,8 +238,8 @@ class QuickJsPluginInstance(
             if (e.message?.contains("out of memory") == true) close()
             throw PluginScriptException("$name: ${e.message}")
         } finally {
-            lastCallMs = (System.nanoTime() - t0) / 1e6
-            lastJsMs = jsNs(t0) / 1e6
+            lastCallMs = clock.wallNs() / 1e6
+            lastJsMs = clock.jsNs() / 1e6
             logTiming(ctx, q, name)
         }
     }
@@ -258,20 +260,6 @@ class QuickJsPluginInstance(
         }
         ctx.log(line.append("; heap ").append(heap).append(" KB").toString())
         timings.clear()
-    }
-
-    private fun jsNs(t0: Long): Long = synchronized(clock) {
-        val now = System.nanoTime()
-        now - t0 - waitedNs - (if (waits > 0) now - waitStartNs else 0L)
-    }
-
-    private suspend fun <T> awaiting(block: suspend () -> T): T {
-        synchronized(clock) { if (waits++ == 0) waitStartNs = System.nanoTime() }
-        try {
-            return block()
-        } finally {
-            synchronized(clock) { if (--waits == 0) waitedNs += System.nanoTime() - waitStartNs }
-        }
     }
 
     private suspend fun http(a: Array<Any?>): String {

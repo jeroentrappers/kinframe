@@ -11,7 +11,13 @@
     let body = o.body === undefined || o.body === null ? null : o.body;
     let type = o.contentType || null;
     if (body !== null && typeof body !== 'string') { body = JSON.stringify(body); type = type || 'application/json'; }
-    const r = JSON.parse(await K.http(method, String(url), JSON.stringify({ headers: o.headers || {}, body, type })));
+    let raw;
+    try {
+      raw = await K.http(method, String(url), JSON.stringify({ headers: o.headers || {}, body, type }));
+    } finally {
+      K.resumed(); // the host's JavaScript clock runs again from here
+    }
+    const r = JSON.parse(raw);
     return {
       status: r.status,
       ok: r.status >= 200 && r.status < 300,
@@ -67,6 +73,7 @@
   });
 
   globalThis.__kf_call = async (name, arg) => {
+    K.js_thread(); // the host's JavaScript clock follows this thread
     const p = globalThis.__plugin;
     const f = p && p[name];
     if (typeof f !== 'function') { K.ret(null, false); return; }
@@ -79,6 +86,7 @@
   };
 
   globalThis.__kf_ws_event = async (type, data) => {
+    K.js_thread();
     const h = socketHandlers;
     if (!h) return;
     try {

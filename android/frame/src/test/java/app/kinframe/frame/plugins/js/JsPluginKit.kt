@@ -51,7 +51,7 @@ class JsPluginKit(
     }
 
     val instance: QuickJsPluginInstance by lazy {
-        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits)
+        QuickJsPluginInstance(bundle, PRELUDE, PluginNet(OkHttpClient(), PluginPermissions(bundle.manifest, settings), policy), limits, JvmThreadCpu)
     }
 
     /** What the host does on its timer: `update`, then `render`. */
@@ -64,6 +64,13 @@ class JsPluginKit(
     fun close() = instance.close()
 
     companion object {
+        /** The JVM's own per-thread CPU time, standing in for `/proc/self/task/<tid>/schedstat`. */
+        val JvmThreadCpu = object : ThreadCpu {
+            private val bean = java.lang.management.ManagementFactory.getThreadMXBean()
+            override fun current(): Long = Thread.currentThread().id
+            override fun nanos(thread: Long): Long = bean.getThreadCpuTime(thread)
+        }
+
         val ROOT = File("../..")
         val PRELUDE: String = File("src/main/assets/plugin-host/prelude.js").readText()
 
