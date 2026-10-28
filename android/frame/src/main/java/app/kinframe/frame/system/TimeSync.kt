@@ -125,7 +125,7 @@ open class TimeSync(
                     val reply = DatagramPacket(ByteArray(48), 48)
                     socket.receive(reply)
                     val t4 = t1 + (SystemClock.elapsedRealtime() - e1)
-                    parse(reply.data, t1, t4)
+                    parse(reply.data, buf, t1, t4)
                 }
             }.getOrNull()
         }
@@ -134,14 +134,17 @@ open class TimeSync(
             /** 1900-01-01 to 1970-01-01 in seconds. */
             private const val EPOCH_OFFSET = 2_208_988_800L
 
-            /** The offset from a 48-byte reply to a request sent at [t1] and answered at [t4], or null if unusable. */
-            fun parse(b: ByteArray, t1: Long, t4: Long): Long? {
+            /**
+             * The offset from a 48-byte reply to [request], sent at [t1] and answered at [t4], or null if unusable. The
+             * reply must echo the request's transmit timestamp byte for byte (milliseconds don't survive the round
+             * trip through NTP fractions exactly, so this compares bytes, not times).
+             */
+            fun parse(b: ByteArray, request: ByteArray, t1: Long, t4: Long): Long? {
                 val leap = (b[0].toInt() shr 6) and 3
                 val mode = b[0].toInt() and 7
                 val stratum = b[1].toInt() and 0xff
                 if (leap == 3 || mode != 4 || stratum !in 1..15) return null
-                val originate = readTimestamp(b, 24)
-                if (originate != t1) return null // not the answer to our request
+                if (!b.copyOfRange(24, 32).contentEquals(request.copyOfRange(40, 48))) return null // not our request's answer
                 val t2 = readTimestamp(b, 32)
                 val t3 = readTimestamp(b, 40)
                 if (t3 == 0L) return null

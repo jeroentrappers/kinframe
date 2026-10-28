@@ -81,19 +81,22 @@ class TimeSyncTest {
     }
 
     @Test fun ntpRepliesAreParsedAndChecked() {
-        val t1 = trueNow - 5_000 // our clock is 5 s slow
+        // Our clock is 5 s slow, and sent at .127 s: a millisecond that doesn't survive NTP's fractions exactly.
+        val t1 = trueNow - 5_123
+        val request = ByteArray(48).also { it[0] = 0x23; TimeSync.Ntp.writeTimestamp(it, 40, t1) }
         val reply = ByteArray(48)
         reply[0] = 0x24 // LI 0, version 4, mode 4 (server)
         reply[1] = 2 // stratum
-        TimeSync.Ntp.writeTimestamp(reply, 24, t1) // originate: our request
-        TimeSync.Ntp.writeTimestamp(reply, 32, trueNow + 20) // received after 20 ms on the wire
-        TimeSync.Ntp.writeTimestamp(reply, 40, trueNow + 21)
+        request.copyInto(reply, 24, 40, 48) // originate: our request's transmit timestamp, echoed
+        TimeSync.Ntp.writeTimestamp(reply, 32, trueNow - 123 + 20) // received after 20 ms on the wire
+        TimeSync.Ntp.writeTimestamp(reply, 40, trueNow - 123 + 21)
         val t4 = t1 + 41
-        val offset = TimeSync.Ntp.parse(reply, t1, t4)!!
-        assertTrue("offset $offset", offset in 4_999..5_001)
+        val offset = TimeSync.Ntp.parse(reply, request, t1, t4)!!
+        assertTrue("offset $offset", offset in 4_998..5_002)
         // Not an answer to our request, a kiss-of-death (stratum 0), or a client packet: refused.
-        assertNull(TimeSync.Ntp.parse(reply, t1 + 1, t4))
-        assertNull(TimeSync.Ntp.parse(reply.copyOf().also { it[1] = 0 }, t1, t4))
-        assertNull(TimeSync.Ntp.parse(reply.copyOf().also { it[0] = 0x23 }, t1, t4))
+        val other = ByteArray(48).also { TimeSync.Ntp.writeTimestamp(it, 40, t1 + 7) }
+        assertNull(TimeSync.Ntp.parse(reply, other, t1, t4))
+        assertNull(TimeSync.Ntp.parse(reply.copyOf().also { it[1] = 0 }, request, t1, t4))
+        assertNull(TimeSync.Ntp.parse(reply.copyOf().also { it[0] = 0x23 }, request, t1, t4))
     }
 }
