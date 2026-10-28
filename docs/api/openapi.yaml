@@ -871,6 +871,20 @@ paths:
         '404': { $ref: '#/components/responses/Problem' }
         '429': { $ref: '#/components/responses/Problem' }
 
+  /v1/stations/public:
+    get:
+      tags: [settings]
+      operationId: listPublicStations
+      security: []
+      description: |
+        The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+        latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+        on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+        seconds.
+      responses:
+        '200': { description: The public stations, content: { application/json: { schema: { $ref: '#/components/schemas/PublicStationList' } } } }
+        '429': { $ref: '#/components/responses/Problem' }
+
   /v1/stations/{stationId}/public:
     get:
       tags: [settings]
@@ -3039,6 +3053,27 @@ components:
             temp_min_c: { type: [number, 'null'] }
             temp_max_c: { type: [number, 'null'] }
             gust_max_ms: { type: [number, 'null'] }
+
+    PublicStationList:
+      type: object
+      required: [stations]
+      properties:
+        stations:
+          type: array
+          items: { $ref: '#/components/schemas/PublicStationSummary' }
+
+    PublicStationSummary:
+      type: object
+      required: [station_id, name, received_at, reading, temp_24h]
+      properties:
+        station_id: { type: string }
+        name: { type: string, description: 'The title the owner chose; empty: none.' }
+        received_at: { type: string, format: date-time }
+        reading: { $ref: '#/components/schemas/StationReading' }
+        temp_24h:
+          description: The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+          type: array
+          items: { type: [number, 'null'] }
 
     StationPublic:
       type: object

@@ -2499,6 +2499,40 @@ components:
                 - already_decided
                 - server_error
             type: string
+        PublicStationList:
+            properties:
+                stations:
+                    items:
+                        $ref: '#/components/schemas/PublicStationSummary'
+                    type: array
+            required:
+                - stations
+            type: object
+        PublicStationSummary:
+            properties:
+                name:
+                    description: 'The title the owner chose; empty: none.'
+                    type: string
+                reading:
+                    $ref: '#/components/schemas/StationReading'
+                received_at:
+                    format: date-time
+                    type: string
+                station_id:
+                    type: string
+                temp_24h:
+                    description: The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+                    items:
+                        nullable: true
+                        type: number
+                    type: array
+            required:
+                - station_id
+                - name
+                - received_at
+                - reading
+                - temp_24h
+            type: object
         PushEndpoint:
             allOf:
                 - $ref: '#/components/schemas/PushEndpointCreate'
@@ -6417,6 +6451,26 @@ paths:
                     description: Latest reading
                 "404":
                     $ref: '#/components/responses/Problem'
+                "429":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - settings
+    /v1/stations/public:
+        get:
+            description: |
+                The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+                latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+                on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+                seconds.
+            operationId: listPublicStations
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/PublicStationList'
+                    description: The public stations
                 "429":
                     $ref: '#/components/responses/Problem'
             security: []

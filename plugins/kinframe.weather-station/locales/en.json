@@ -9,7 +9,7 @@
   "@option.wind_unit.bft": "Beaufort",
   "@option.source.upload": "Uploads to kinframe",
   "@setting.public_page": "Public page",
-  "@setting.public_page.help": "Anyone with the link kinframe.appmire.be/station/<station ID> sees the station's readings and the last 48 hours as charts. Nothing about your frame or its place is shown.",
+  "@setting.public_page.help": "The station's readings and the last 48 hours as charts, for anyone, at kinframe.appmire.be/station/<station ID> and in the list of public stations at kinframe.appmire.be/stations. Nothing about your frame or its place is shown.",
   "@setting.public_name": "Title of the public page",
   "@setting.public_name.help": "For example the village or street the station is in. Empty: only the station ID."
 }

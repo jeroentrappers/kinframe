@@ -65,3 +65,34 @@ func (s *Store) AddStationReading(ctx context.Context, mac []byte, at time.Time,
 func (s *Store) StationReadings(ctx context.Context, mac []byte, since time.Time) ([]StationReading, error) {
 	return many[StationReading](s.Pool.Query(ctx, `SELECT at, reading FROM station_readings WHERE key_mac = $1 AND at >= $2 ORDER BY at`, mac, since))
 }
+
+// PublicStationLatest is a registration with a public page and its station's newest reading.
+type PublicStationLatest struct {
+	UploadID   string          `db:"upload_id"`
+	PublicName string          `db:"public_name"`
+	KeyMAC     []byte          `db:"key_mac"`
+	At         time.Time       `db:"at"`
+	Reading    json.RawMessage `db:"reading"`
+}
+
+// PublicStationsLatest returns every registration with a public page whose station sent something since `since`,
+// with its newest reading (a station named by several frames appears once per registration).
+func (s *Store) PublicStationsLatest(ctx context.Context, since time.Time) ([]PublicStationLatest, error) {
+	return many[PublicStationLatest](s.Pool.Query(ctx, `SELECT ws.upload_id, ws.public_name, ws.key_mac, r.at, r.reading
+		FROM weather_stations ws
+		JOIN LATERAL (SELECT at, reading FROM station_readings sr WHERE sr.key_mac = ws.key_mac ORDER BY at DESC LIMIT 1) r ON true
+		WHERE ws.public AND r.at >= $1`, since))
+}
+
+// HourlyTemperature is a station's mean temperature per hour since a time.
+type HourlyTemperature struct {
+	Hour  time.Time `db:"hour"`
+	TempC *float64  `db:"temp_c"`
+}
+
+// StationHourlyTemperature returns the mean temperature of each hour since `since` that had readings, oldest first.
+func (s *Store) StationHourlyTemperature(ctx context.Context, mac []byte, since time.Time) ([]HourlyTemperature, error) {
+	return many[HourlyTemperature](s.Pool.Query(ctx, `SELECT date_trunc('hour', at) AS hour, avg((reading->>'temp_c')::float8) AS temp_c
+		FROM station_readings WHERE key_mac = $1 AND at >= $2 AND reading ? 'temp_c'
+		GROUP BY 1 ORDER BY 1`, mac, since))
+}

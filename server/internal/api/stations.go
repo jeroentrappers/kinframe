@@ -1,9 +1,12 @@
 package api
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -215,6 +218,62 @@ func (s *Server) GetStationPublic(ctx context.Context, req gen.GetStationPublicR
 		Series: stations.MakeSeries(timed, start, step, int(span/step)),
 	}
 	return Response{Status: 200, Body: out, Header: http.Header{"Cache-Control": {"public, max-age=30"}}}, nil
+}
+
+// ListPublicStations: the overview of stations with a public page.
+func (s *Server) ListPublicStations(ctx context.Context, _ gen.ListPublicStationsRequestObject) (gen.ListPublicStationsResponseObject, error) {
+	if ok, retry := s.stationPage.Allow(clientIP(ctx)); !ok {
+		p := problem.New(problem.RateLimited, "")
+		p.RetryAfter = retry
+		return nil, p
+	}
+	now := time.Now().UTC()
+	regs, err := s.st.PublicStationsLatest(ctx, now.Add(-48*time.Hour))
+	if err != nil {
+		return nil, err
+	}
+	// One entry per station ID: the registration whose station reported last.
+	newest := map[string]store.PublicStationLatest{}
+	for _, r := range regs {
+		k := strings.ToUpper(r.UploadID)
+		if cur, ok := newest[k]; !ok || r.At.After(cur.At) {
+			newest[k] = r
+		}
+	}
+	type summary struct {
+		StationID  string          `json:"station_id"`
+		Name       string          `json:"name"`
+		ReceivedAt time.Time       `json:"received_at"`
+		Reading    json.RawMessage `json:"reading"`
+		Temp24h    []*float64      `json:"temp_24h"`
+	}
+	out := struct {
+		Stations []summary `json:"stations"`
+	}{Stations: []summary{}}
+	first := now.Truncate(time.Hour).Add(-23 * time.Hour)
+	for _, r := range newest {
+		hours, err := s.st.StationHourlyTemperature(ctx, r.KeyMAC, first)
+		if err != nil {
+			return nil, err
+		}
+		temps := make([]*float64, 24)
+		for _, h := range hours {
+			if i := int(h.Hour.Sub(first) / time.Hour); i >= 0 && i < 24 && h.TempC != nil {
+				v := math.Round(*h.TempC*10) / 10
+				temps[i] = &v
+			}
+		}
+		out.Stations = append(out.Stations, summary{r.UploadID, r.PublicName, r.At.UTC(), r.Reading, temps})
+	}
+	sort.Slice(out.Stations, func(i, j int) bool {
+		a, b := out.Stations[i], out.Stations[j]
+		ka, kb := strings.ToLower(cmp.Or(a.Name, a.StationID)), strings.ToLower(cmp.Or(b.Name, b.StationID))
+		if ka != kb {
+			return ka < kb
+		}
+		return a.StationID < b.StationID
+	})
+	return Response{Status: 200, Body: out, Header: http.Header{"Cache-Control": {"public, max-age=60"}}}, nil
 }
 
 func minPtr(cur, v *float64, min bool) *float64 {

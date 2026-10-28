@@ -751,6 +751,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/stations/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+         *     latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+         *     on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+         *     seconds.
+         */
+        get: operations["listPublicStations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/stations/{stationId}/public": {
         parameters: {
             query?: never;
@@ -2910,6 +2932,19 @@ export interface components {
                 gust_max_ms?: number | null;
             };
         };
+        PublicStationList: {
+            stations: components["schemas"]["PublicStationSummary"][];
+        };
+        PublicStationSummary: {
+            station_id: string;
+            /** @description The title the owner chose; empty: none. */
+            name: string;
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived. */
+            temp_24h: (number | null)[];
+        };
         StationPublic: {
             /** @description The station ID as its owner wrote it. */
             station_id: string;
@@ -4908,6 +4943,27 @@ export interface operations {
                 };
             };
             404: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+        };
+    };
+    listPublicStations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The public stations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicStationList"];
+                };
+            };
             429: components["responses"]["Problem"];
         };
     };

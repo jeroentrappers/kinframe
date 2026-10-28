@@ -52,7 +52,13 @@ const en = {
 	calm: 'calm',
 	footer:
 		'A personal weather station on {kinframe}, the open-source family photo frame. Readings arrive every minute and are kept for 48 hours.',
-	beaufort: 'Bft'
+	beaufort: 'Bft',
+	allStations: 'All stations',
+	overviewTitle: 'Weather stations',
+	overviewIntro: 'Personal weather stations whose owners share their readings. Tap one for its charts.',
+	overviewEmpty:
+		'No station shares its readings yet. Owners turn on a public page in the weather station plugin of their kinframe photo frame.',
+	last24h: 'Last 24 hours'
 };
 
 type Strings = typeof en;
@@ -108,7 +114,13 @@ const nl: Strings = {
 	calm: 'windstil',
 	footer:
 		'Een eigen weerstation op {kinframe}, de opensource-fotolijst voor families. Metingen komen elke minuut binnen en blijven 48 uur bewaard.',
-	beaufort: 'Bft'
+	beaufort: 'Bft',
+	allStations: 'Alle stations',
+	overviewTitle: 'Weerstations',
+	overviewIntro: 'Eigen weerstations waarvan de eigenaar de metingen deelt. Tik op een station voor zijn grafieken.',
+	overviewEmpty:
+		'Nog geen enkel station deelt zijn metingen. Eigenaars zetten een openbare pagina aan in de weerstation-plugin van hun kinframe-fotolijst.',
+	last24h: 'Laatste 24 uur'
 };
 
 const fr: Strings = {
@@ -162,7 +174,14 @@ const fr: Strings = {
 	calm: 'calme',
 	footer:
 		'Une station météo personnelle sur {kinframe}, le cadre photo familial open source. Les mesures arrivent chaque minute et sont conservées 48 heures.',
-	beaufort: 'Bft'
+	beaufort: 'Bft',
+	allStations: 'Toutes les stations',
+	overviewTitle: 'Stations météo',
+	overviewIntro:
+		'Des stations météo personnelles dont les propriétaires partagent les mesures. Touchez-en une pour ses graphiques.',
+	overviewEmpty:
+		'Aucune station ne partage encore ses mesures. Les propriétaires activent une page publique dans le plugin Station météo de leur cadre photo kinframe.',
+	last24h: 'Dernières 24 heures'
 };
 
 const de: Strings = {
@@ -216,7 +235,13 @@ const de: Strings = {
 	calm: 'windstill',
 	footer:
 		'Eine eigene Wetterstation auf {kinframe}, dem Open-Source-Bilderrahmen für Familien. Messwerte kommen jede Minute an und werden 48 Stunden aufbewahrt.',
-	beaufort: 'Bft'
+	beaufort: 'Bft',
+	allStations: 'Alle Stationen',
+	overviewTitle: 'Wetterstationen',
+	overviewIntro: 'Eigene Wetterstationen, deren Besitzer ihre Messwerte teilen. Tippe auf eine für ihre Diagramme.',
+	overviewEmpty:
+		'Noch teilt keine Station ihre Messwerte. Besitzer schalten eine öffentliche Seite im Wetterstation-Plugin ihres kinframe-Bilderrahmens ein.',
+	last24h: 'Letzte 24 Stunden'
 };
 
 const ALL: Record<string, Strings> = { en, nl, fr, de };

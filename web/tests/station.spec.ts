@@ -58,8 +58,32 @@ function stationPage() {
 	};
 }
 
-async function station(page: Page) {
+/** The overview: three stations, one without a title and one that stopped reporting an hour ago. */
+function stationList() {
+	const now = Date.now();
+	const hours = (base: number) =>
+		Array.from({ length: 24 }, (_, i) => (i === 5 ? null : Math.round((base + 3 * Math.sin(i / 4)) * 10) / 10));
+	const one = (id: string, name: string, temp: number, agoMs: number) => ({
+		station_id: id,
+		name,
+		received_at: new Date(now - agoMs).toISOString(),
+		reading: { temp_c: temp, humidity_pct: 83, wind_ms: 1.8, wind_dir_deg: 297, rain_today_mm: 3.2 },
+		temp_24h: hours(temp - 2)
+	});
+	return {
+		stations: [
+			one('IAFFLI3', 'Affligem', 11.8, 20_000),
+			one('IGENT12', 'Gent Muide', 12.4, 3600_000),
+			one('IAALST7', '', 10.9, 60_000)
+		]
+	};
+}
+
+async function station(page: Page, list = stationList()) {
 	await mockApi(page, emptyState());
+	await page.route(/\/v1\/stations\/public$/, (r) =>
+		r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(list) })
+	);
 	// Routes registered later win over mockApi's catch-all for /v1/.
 	await page.route(/\/v1\/stations\/[^/]+\/public$/, (r) => {
 		const id = decodeURIComponent(new URL(r.request().url()).pathname.split('/')[3] ?? '');
@@ -85,7 +109,9 @@ test.describe('weather station public page', () => {
 		await page.getByText('Show the readings as a table').click();
 		await expect(page.getByRole('table')).toBeVisible();
 		// No sideways scrolling, on a phone too.
-		const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+		const overflow = await page.evaluate(
+			() => document.documentElement.scrollWidth - document.documentElement.clientWidth
+		);
 		expect(overflow).toBeLessThanOrEqual(0);
 	});
 
@@ -93,5 +119,29 @@ test.describe('weather station public page', () => {
 		await station(page);
 		await page.goto('/station/INOPE1');
 		await expect(page.getByRole('heading', { name: 'No public page for this station' })).toBeVisible();
+	});
+
+	test('the overview lists the public stations and links to each', async ({ page }) => {
+		await station(page);
+		await page.goto('/stations');
+		await expect(page.getByRole('heading', { level: 1, name: 'Weather stations' })).toBeVisible();
+		await expect(page.getByRole('heading', { level: 2 })).toHaveCount(3);
+		await expect(page.getByRole('heading', { level: 2, name: 'IAALST7' })).toBeVisible();
+		await expect(page.getByText('Updated 1 hour ago')).toBeVisible();
+		const overflow = await page.evaluate(
+			() => document.documentElement.scrollWidth - document.documentElement.clientWidth
+		);
+		expect(overflow).toBeLessThanOrEqual(0);
+		await page.getByRole('link', { name: /Affligem/ }).click();
+		await expect(page).toHaveURL(/\/station\/IAFFLI3$/);
+		await expect(page.getByRole('heading', { level: 1, name: 'Affligem' })).toBeVisible();
+		await page.getByRole('link', { name: 'All stations' }).click();
+		await expect(page).toHaveURL(/\/stations$/);
+	});
+
+	test('the overview without public stations explains how to add one', async ({ page }) => {
+		await station(page, { stations: [] });
+		await page.goto('/stations');
+		await expect(page.getByText('No station shares its readings yet.', { exact: false })).toBeVisible();
 	});
 });
