@@ -17,6 +17,8 @@ type WeatherStation struct {
 	UploadID   string    `db:"upload_id"`
 	KeyMAC     []byte    `db:"key_mac"`
 	Forward    bool      `db:"forward"`
+	Public     bool      `db:"public"`
+	PublicName string    `db:"public_name"`
 }
 
 // SetFrameStations replaces the stations a frame registered.
@@ -25,8 +27,8 @@ func (tx *Tx) SetFrameStations(ctx context.Context, frameID uuid.UUID, stations 
 		return err
 	}
 	for _, s := range stations {
-		if _, err := tx.Exec(ctx, `INSERT INTO weather_stations (frame_id, instance_id, upload_id, key_mac, forward) VALUES ($1, $2, $3, $4, $5)`,
-			frameID, s.InstanceID, s.UploadID, s.KeyMAC, s.Forward); err != nil {
+		if _, err := tx.Exec(ctx, `INSERT INTO weather_stations (frame_id, instance_id, upload_id, key_mac, forward, public, public_name) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			frameID, s.InstanceID, s.UploadID, s.KeyMAC, s.Forward, s.Public, s.PublicName); err != nil {
 			return err
 		}
 	}
@@ -35,7 +37,13 @@ func (tx *Tx) SetFrameStations(ctx context.Context, frameID uuid.UUID, stations 
 
 // StationsByMAC returns the registrations of a station (one per frame instance that names it).
 func (s *Store) StationsByMAC(ctx context.Context, q db.DBTX, mac []byte) ([]WeatherStation, error) {
-	return many[WeatherStation](q.Query(ctx, `SELECT frame_id, instance_id, upload_id, key_mac, forward FROM weather_stations WHERE key_mac = $1`, mac))
+	return many[WeatherStation](q.Query(ctx, `SELECT frame_id, instance_id, upload_id, key_mac, forward, public, public_name FROM weather_stations WHERE key_mac = $1`, mac))
+}
+
+// PublicStations returns the registrations of a station ID whose owners turned its public page on.
+func (s *Store) PublicStations(ctx context.Context, q db.DBTX, uploadID string) ([]WeatherStation, error) {
+	return many[WeatherStation](q.Query(ctx, `SELECT frame_id, instance_id, upload_id, key_mac, forward, public, public_name FROM weather_stations
+		WHERE upper(upload_id) = upper($1) AND public ORDER BY frame_id, instance_id`, uploadID))
 }
 
 // StationReading is one upload, normalised.

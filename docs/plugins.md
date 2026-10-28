@@ -632,7 +632,8 @@ Not built yet: developer mode and `kit push` to a frame (§7).
 ### 9.4 Weather station (`kinframe.weather-station`): the station uploads to kinframe
 
 - **Settings:** `source` `upload`, the **station ID** and **station key** the station uploads with (the key is a
-  `secret`), whether to pass the uploads on to Weather Underground (on by default), a style (*Temperature*: one value,
+  `secret`), whether to pass the uploads on to Weather Underground (on by default), whether it has a public page and
+  its title (off by default; below), a style (*Temperature*: one value,
   or *All values*), wind in km/h (mph with °F), m/s or Beaufort. Pressure is always hPa, temperatures follow the
   frame's °C/°F. The widget is switched on in the frame's Settings → **Weather**; the ID and key are entered in the
   apps' plugin form, so the key isn't typed on the frame.
@@ -653,6 +654,15 @@ Not built yet: developer mode and `kit push` to a frame (§7).
   the Home Assistant integration ([jeroentrappers/kinframe-homeassistant](https://github.com/jeroentrappers/kinframe-homeassistant))
   reads the same endpoint. Neither the key nor the readings appear in any log (nginx and the server log paths, not
   queries).
+- **Public page** (2.1.0, off by default): with `public_page` on, anyone with the link
+  `https://<server>/station/<station ID>` sees the station on a page of its own, without signing in: the current
+  readings with today's low, high and strongest gust, and the last 24 or 48 hours as charts (temperature with dew
+  point, wind with gusts and direction, humidity, pressure, rain per hour, sunlight), a shared crosshair and a table
+  view. The page reads `GET /v1/stations/{id}/public`: the latest reading, today's extremes in the frame's time zone
+  and 48 hours in 5-minute steps (means; maxima for gusts, rain rate and UV; the speed-weighted mean direction),
+  rate-limited per address and cacheable for 30 seconds. It shows the optional `public_name` (a village or street)
+  and the station ID, nothing about the frame, its owner or its place; every other ID gets the same `404`, so the
+  endpoint doesn't tell which stations exist. Turning it off, or removing the instance, takes the page down at once.
 - **Why not Weathercloud any more:** until 0.7.0 the widget read Weathercloud's web app (`app.weathercloud.net`),
   which has no published read API; its terms forbid automated access and third-party apps without written consent, so
   that source was removed. Frames that used it keep their style and wind unit and wait, switched off, for a station ID

@@ -3638,6 +3638,39 @@ type StationLatest struct {
 	} `json:"today,omitempty"`
 }
 
+// StationPublic defines model for StationPublic.
+type StationPublic struct {
+	// Name The title the owner chose; empty: none.
+	Name string `json:"name"`
+
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+
+	// Series The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+	// arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+	// direction (the speed-weighted mean direction).
+	Series StationSeries `json:"series"`
+
+	// StationId The station ID as its owner wrote it.
+	StationId string `json:"station_id"`
+
+	// Timezone IANA zone of the owner's frame: what "today" means.
+	Timezone string `json:"timezone"`
+
+	// Today Since midnight in `timezone`.
+	Today struct {
+		GustMaxAt *time.Time `json:"gust_max_at,omitempty"`
+		GustMaxMs *float32   `json:"gust_max_ms,omitempty"`
+		RainMm    *float32   `json:"rain_mm,omitempty"`
+		TempMaxAt *time.Time `json:"temp_max_at,omitempty"`
+		TempMaxC  *float32   `json:"temp_max_c,omitempty"`
+		TempMinAt *time.Time `json:"temp_min_at,omitempty"`
+		TempMinC  *float32   `json:"temp_min_c,omitempty"`
+		UvMax     *float32   `json:"uv_max,omitempty"`
+	} `json:"today"`
+}
+
 // StationReading One upload in metric units; a value the station didn't send is absent.
 type StationReading struct {
 	DewPointC         *float32   `json:"dew_point_c,omitempty"`
@@ -3656,6 +3689,29 @@ type StationReading struct {
 	WindDirDeg        *float32   `json:"wind_dir_deg,omitempty"`
 	WindMs            *float32   `json:"wind_ms,omitempty"`
 }
+
+// StationSeries The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+// arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+// direction (the speed-weighted mean direction).
+type StationSeries struct {
+	DewPointC   StationValues `json:"dew_point_c"`
+	FeelsLikeC  StationValues `json:"feels_like_c"`
+	GustMs      StationValues `json:"gust_ms"`
+	HumidityPct StationValues `json:"humidity_pct"`
+	PressureHpa StationValues `json:"pressure_hpa"`
+	RainRateMmH StationValues `json:"rain_rate_mm_h"`
+	RainTodayMm StationValues `json:"rain_today_mm"`
+	SolarWm2    StationValues `json:"solar_wm2"`
+	Start       time.Time     `json:"start"`
+	StepS       int           `json:"step_s"`
+	TempC       StationValues `json:"temp_c"`
+	UvIndex     StationValues `json:"uv_index"`
+	WindDirDeg  StationValues `json:"wind_dir_deg"`
+	WindMs      StationValues `json:"wind_ms"`
+}
+
+// StationValues defines model for StationValues.
+type StationValues = []*float32
 
 // TvLink defines model for TvLink.
 type TvLink struct {
@@ -4643,6 +4699,9 @@ type ServerInterface interface {
 
 	// (GET /v1/stations/latest)
 	GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams)
+
+	// (GET /v1/stations/{stationId}/public)
+	GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
@@ -7595,6 +7654,32 @@ func (siw *ServerInterfaceWrapper) GetStationLatest(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// GetStationPublic operation middleware
+func (siw *ServerInterfaceWrapper) GetStationPublic(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "stationId" -------------
+	var stationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "stationId", r.PathValue("stationId"), &stationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "stationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStationPublic(w, r, stationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetTvSlideshow operation middleware
 func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
 
@@ -7834,6 +7919,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations", wrapper.CreateShopReservation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/{stationId}/public", wrapper.GetStationPublic)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/latest", wrapper.GetStationLatest)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
@@ -11107,6 +11193,58 @@ func (response GetStationLatest429ApplicationProblemPlusJSONResponse) VisitGetSt
 	return err
 }
 
+type GetStationPublicRequestObject struct {
+	StationId string `json:"stationId"`
+}
+
+type GetStationPublicResponseObject interface {
+	VisitGetStationPublicResponse(w http.ResponseWriter) error
+}
+
+type GetStationPublic200JSONResponse StationPublic
+
+func (response GetStationPublic200JSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationPublic404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetStationPublic404ApplicationProblemPlusJSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationPublic429ApplicationProblemPlusJSONResponse Problem
+
+func (response GetStationPublic429ApplicationProblemPlusJSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetTvSlideshowRequestObject struct {
 	Token string `json:"token"`
 }
@@ -11430,6 +11568,9 @@ type StrictServerInterface interface {
 
 	// (GET /v1/stations/latest)
 	GetStationLatest(ctx context.Context, request GetStationLatestRequestObject) (GetStationLatestResponseObject, error)
+
+	// (GET /v1/stations/{stationId}/public)
+	GetStationPublic(ctx context.Context, request GetStationPublicRequestObject) (GetStationPublicResponseObject, error)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
@@ -14178,6 +14319,32 @@ func (sh *strictHandler) GetStationLatest(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetStationLatestResponseObject); ok {
 		if err := validResponse.VisitGetStationLatestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetStationPublic operation middleware
+func (sh *strictHandler) GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string) {
+	var request GetStationPublicRequestObject
+
+	request.StationId = stationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStationPublic(ctx, request.(GetStationPublicRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStationPublic")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStationPublicResponseObject); ok {
+		if err := validResponse.VisitGetStationPublicResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

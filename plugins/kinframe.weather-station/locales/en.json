@@ -7,5 +7,9 @@
   "@option.wind_unit.kmh": "km/h",
   "@option.wind_unit.mph": "mph",
   "@option.wind_unit.bft": "Beaufort",
-  "@option.source.upload": "Uploads to kinframe"
+  "@option.source.upload": "Uploads to kinframe",
+  "@setting.public_page": "Public page",
+  "@setting.public_page.help": "Anyone with the link kinframe.appmire.be/station/<station ID> sees the station's readings and the last 48 hours as charts. Nothing about your frame or its place is shown.",
+  "@setting.public_name": "Title of the public page",
+  "@setting.public_name.help": "For example the village or street the station is in. Empty: only the station ID."
 }

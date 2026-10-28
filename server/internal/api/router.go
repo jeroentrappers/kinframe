@@ -113,7 +113,7 @@ func (s *Server) authenticate(next http.Handler) http.Handler {
 	user, device := s.userAuth(next), s.deviceAuth(next)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case strings.HasPrefix(r.URL.Path, "/v1/devices/"), tvPublicPath(r), shopPublicPath(r), r.URL.Path == "/v1/stations/latest":
+		case strings.HasPrefix(r.URL.Path, "/v1/devices/"), tvPublicPath(r), shopPublicPath(r), r.URL.Path == "/v1/stations/latest", stationPagePath(r):
 			next.ServeHTTP(w, r)
 		case strings.HasPrefix(r.URL.Path, "/v1/device/"):
 			device.ServeHTTP(w, r)
@@ -476,4 +476,9 @@ func (s *Server) spa() http.Handler {
 		}
 		http.ServeFile(w, r, index)
 	})
+}
+
+// stationPagePath: a weather station's public page (GET /v1/stations/{id}/public) needs no session.
+func stationPagePath(r *http.Request) bool {
+	return r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/stations/") && strings.HasSuffix(r.URL.Path, "/public")
 }

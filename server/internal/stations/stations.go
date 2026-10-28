@@ -143,3 +143,130 @@ func redact(s, query string) string {
 	}
 	return strings.ReplaceAll(s, query, "…")
 }
+
+// Series is a station's readings in fixed steps for charts (the public page): one value per step, null where
+// nothing arrived. Most values are the step's mean; gusts, rain rate and UV its maximum, today's rain its last
+// value, and the wind direction the mean of the step's directions weighted by wind speed.
+type Series struct {
+	Start       time.Time  `json:"start"`
+	StepS       int        `json:"step_s"`
+	TempC       []*float64 `json:"temp_c"`
+	DewPointC   []*float64 `json:"dew_point_c"`
+	FeelsLikeC  []*float64 `json:"feels_like_c"`
+	HumidityPct []*float64 `json:"humidity_pct"`
+	PressureHpa []*float64 `json:"pressure_hpa"`
+	WindMs      []*float64 `json:"wind_ms"`
+	GustMs      []*float64 `json:"gust_ms"`
+	WindDirDeg  []*float64 `json:"wind_dir_deg"`
+	RainRateMmH []*float64 `json:"rain_rate_mm_h"`
+	RainTodayMm []*float64 `json:"rain_today_mm"`
+	SolarWm2    []*float64 `json:"solar_wm2"`
+	UVIndex     []*float64 `json:"uv_index"`
+}
+
+// Timed is a reading and when it arrived.
+type Timed struct {
+	At      time.Time
+	Reading Reading
+}
+
+// MakeSeries puts readings between start and start+n*step into n steps.
+func MakeSeries(rows []Timed, start time.Time, step time.Duration, n int) Series {
+	type acc struct {
+		sum, max, last float64
+		count          int
+	}
+	type bucket struct {
+		mean                 [7]acc // temp, dew, feels, humidity, pressure, wind, solar
+		gust, rate, uv, rain acc
+		dirX, dirY           float64
+		dirs                 int
+	}
+	b := make([]bucket, n)
+	add := func(a *acc, v *float64) {
+		if v == nil {
+			return
+		}
+		if a.count == 0 || *v > a.max {
+			a.max = *v
+		}
+		a.sum += *v
+		a.last = *v
+		a.count++
+	}
+	for _, row := range rows {
+		if row.At.Before(start) {
+			continue
+		}
+		i := int(row.At.Sub(start) / step)
+		if i >= n {
+			continue
+		}
+		r, k := row.Reading, &b[i]
+		for j, v := range []*float64{r.TempC, r.DewPointC, r.FeelsLikeC, r.HumidityPct, r.PressureHpa, r.WindMs, r.SolarWm2} {
+			add(&k.mean[j], v)
+		}
+		add(&k.gust, r.GustMs)
+		add(&k.rate, r.RainRateMmH)
+		add(&k.uv, r.UVIndex)
+		add(&k.rain, r.RainTodayMm)
+		if r.WindDirDeg != nil {
+			w := 0.1 // calm readings still count, a little
+			if r.WindMs != nil && *r.WindMs > w {
+				w = *r.WindMs
+			}
+			rad := *r.WindDirDeg * math.Pi / 180
+			k.dirX += w * math.Sin(rad)
+			k.dirY += w * math.Cos(rad)
+			k.dirs++
+		}
+	}
+	round := func(v float64, decimals int) *float64 {
+		p := math.Pow(10, float64(decimals))
+		x := math.Round(v*p) / p
+		return &x
+	}
+	col := func(f func(*bucket) *float64) []*float64 {
+		out := make([]*float64, n)
+		for i := range b {
+			out[i] = f(&b[i])
+		}
+		return out
+	}
+	mean := func(j, decimals int) []*float64 {
+		return col(func(k *bucket) *float64 {
+			if a := k.mean[j]; a.count > 0 {
+				return round(a.sum/float64(a.count), decimals)
+			}
+			return nil
+		})
+	}
+	pick := func(a func(*bucket) acc, last bool) []*float64 {
+		return col(func(k *bucket) *float64 {
+			x := a(k)
+			if x.count == 0 {
+				return nil
+			}
+			if last {
+				return round(x.last, 1)
+			}
+			return round(x.max, 1)
+		})
+	}
+	return Series{
+		Start: start.UTC(), StepS: int(step / time.Second),
+		TempC: mean(0, 1), DewPointC: mean(1, 1), FeelsLikeC: mean(2, 1), HumidityPct: mean(3, 0), PressureHpa: mean(4, 1),
+		WindMs: mean(5, 1), SolarWm2: mean(6, 0),
+		GustMs:      pick(func(k *bucket) acc { return k.gust }, false),
+		RainRateMmH: pick(func(k *bucket) acc { return k.rate }, false),
+		UVIndex:     pick(func(k *bucket) acc { return k.uv }, false),
+		RainTodayMm: pick(func(k *bucket) acc { return k.rain }, true),
+		WindDirDeg: col(func(k *bucket) *float64 {
+			if k.dirs == 0 {
+				return nil
+			}
+			d := math.Mod(math.Atan2(k.dirX, k.dirY)*180/math.Pi+360, 360)
+			return round(d, 0)
+		}),
+	}
+}

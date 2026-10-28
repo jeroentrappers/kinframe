@@ -16,5 +16,9 @@
   "@setting.station_id.help": "L’ID avec lequel votre station envoie ses données : son ID de station Weather Underground, ou celui de ses réglages de serveur personnalisé.",
   "@setting.station_key": "Clé de la station",
   "@setting.station_key.help": "La clé (le mot de passe) avec laquelle votre station envoie ses données : sa clé de station Weather Underground.",
-  "@setting.forward_wunderground": "Transmettre les envois à Weather Underground"
+  "@setting.forward_wunderground": "Transmettre les envois à Weather Underground",
+  "@setting.public_page": "Page publique",
+  "@setting.public_page.help": "Toute personne ayant le lien kinframe.appmire.be/station/<ID de la station> voit les mesures de la station et les 48 dernières heures en graphiques. Rien sur votre cadre ni sur son emplacement n'est montré.",
+  "@setting.public_name": "Titre de la page publique",
+  "@setting.public_name.help": "Par exemple le village ou la rue où se trouve la station. Vide : seulement l'ID de la station."
 }

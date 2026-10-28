@@ -80,6 +80,28 @@ func TestWeatherStationUploads(t *testing.T) {
 	if r := latest("IAFFLI3", "wrong"); r.StatusCode != 404 {
 		t.Fatalf("wrong key reads: %d", r.StatusCode)
 	}
+	// The public page: only once the owner turns it on, under the title they chose.
+	page := func(id string) *resp { return e.do(req{method: "GET", path: "/v1/stations/" + id + "/public"}) }
+	if r := page("IAFFLI3"); r.StatusCode != 404 {
+		t.Fatalf("page before opt-in: %d", r.StatusCode)
+	}
+	pub := settings["plugins"].(map[string]any)["instances"].([]any)[0].(map[string]any)
+	pub["settings"].(map[string]any)["public_page"] = true
+	pub["settings"].(map[string]any)["public_name"] = " Affligem "
+	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token, body: settings, header: map[string]string{"If-Match": `"2"`}}, 200)
+	pr := page("iaffli3")
+	if pr.StatusCode != 200 || pr.Header.Get("Cache-Control") != "public, max-age=30" {
+		t.Fatalf("page: %d %s", pr.StatusCode, pr.body)
+	}
+	pm := pr.m(t)
+	temps := dig(pm, "series", "temp_c").([]any)
+	if pm["name"] != "Affligem" || pm["station_id"] != "IAFFLI3" || len(temps) != 576 || temps[len(temps)-1] != 10.0 ||
+		dig(pm, "today", "temp_max_c") != 10.0 || dig(pm, "reading", "temp_c") != 10.0 || strings.Contains(string(pr.body), frameID) {
+		t.Fatalf("page: %s", pr.body)
+	}
+	if r := page("INOPE1"); r.StatusCode != 404 {
+		t.Fatalf("unknown station: %d", r.StatusCode)
+	}
 	// Passed on, unchanged (the key included: it is Weather Underground's).
 	deadline := time.Now().Add(3 * time.Second)
 	for {
@@ -101,7 +123,7 @@ func TestWeatherStationUploads(t *testing.T) {
 	off := settings["plugins"].(map[string]any)["instances"].([]any)[0].(map[string]any)
 	off["settings"].(map[string]any)["forward_wunderground"] = false
 	delete(off, "secrets")
-	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token, body: settings, header: map[string]string{"If-Match": `"2"`}}, 200)
+	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token, body: settings, header: map[string]string{"If-Match": `"3"`}}, 200)
 	upload("IAFFLI3", "k3y")
 	time.Sleep(200 * time.Millisecond)
 	mu.Lock()
@@ -110,8 +132,11 @@ func TestWeatherStationUploads(t *testing.T) {
 	}
 	mu.Unlock()
 	e.expect(req{method: "PATCH", path: "/v1/frames/" + frameID + "/settings", token: owner.token,
-		body: map[string]any{"plugins": map[string]any{"instances": []any{}}}, header: map[string]string{"If-Match": `"3"`}}, 200)
+		body: map[string]any{"plugins": map[string]any{"instances": []any{}}}, header: map[string]string{"If-Match": `"4"`}}, 200)
 	if code, _ := upload("IAFFLI3", "k3y"); code != 401 {
 		t.Fatalf("after removal: %d", code)
+	}
+	if r := page("IAFFLI3"); r.StatusCode != 404 {
+		t.Fatalf("page after removal: %d", r.StatusCode)
 	}
 }
