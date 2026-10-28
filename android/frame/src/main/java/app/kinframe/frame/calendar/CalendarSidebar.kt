@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -115,7 +116,7 @@ fun UpcomingAgenda(
     maxEvents: Int,
     onEvent: (CalEvent) -> Unit,
     modifier: Modifier = Modifier,
-    /** 2: today in one column, the following days in another (a wide dashboard). */
+    /** 2: the days flow down the first column and on into the second (a wide dashboard). */
     columns: Int = 1,
 ) {
     val today = Instant.ofEpochMilli(nowMs).atZone(zone).toLocalDate()
@@ -123,65 +124,80 @@ fun UpcomingAgenda(
     val minute = nowMs / 60_000
     val days = remember(cal, today, minute, hours, maxEvents) { CalendarLayout.within(cal, today, nowMs, hours, maxEvents) }
     val env = remember(today, minute, h24, unit, weather) { CalendarEnv(today, nowMs, h24, unit, fadePast = false, weekNumbers = false, forecast = forecastByDate(weather, nowMs)) }
-    @Composable
-    fun list(part: List<CalendarLayout.AgendaDay>, m: Modifier) {
-        // One child per heading and per event, so whatever doesn't fit is left out whole.
-        val headings = ArrayList<Boolean>()
-        FitColumn(m, spacing = 6.dp, headings = headings) {
-            part.forEachIndexed { i, day ->
-                val isToday = day.date == today
-                headings += true
-                DayHeading(day, isToday, env, Modifier.padding(top = if (i == 0) 0.dp else 8.dp))
-                if (day.isEmpty) {
-                    headings += false
-                    NothingText(isToday)
-                }
-                day.all.forEach { e ->
-                    headings += false
-                    SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) }
-                }
+    // One child per heading and per event, so whatever doesn't fit is left out whole; they fill the first column
+    // top to bottom, then the next, like a newspaper.
+    val headings = ArrayList<Boolean>()
+    FlowColumns(modifier, columns = columns.coerceAtLeast(1), spacing = 6.dp, headingSpace = 8.dp, columnGap = 14.dp, headings = headings) {
+        days.forEach { day ->
+            val isToday = day.date == today
+            headings += true
+            DayHeading(day, isToday, env)
+            if (day.isEmpty) {
+                headings += false
+                NothingText(isToday)
+            }
+            day.all.forEach { e ->
+                headings += false
+                SidebarEvent(e, whenText(e, day.date, env)) { onEvent(e) }
             }
         }
-    }
-    if (columns < 2 || days.size < 2) list(days, modifier)
-    else Row(modifier, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        // Today in the first column, what comes after it in the second.
-        list(days.take(1), Modifier.weight(1f).fillMaxHeight())
-        list(days.drop(1), Modifier.weight(1f).fillMaxHeight())
     }
 }
 
 /**
- * A column that places its children top-down while they fit its height and leaves out the rest, whole: an agenda
- * never shows half an event. A heading (`headings[i]`) is never the last child placed.
+ * [columns] equal columns that take their children in order, top-down, the first column until the next child no
+ * longer fits its height, then the next, and leave out the rest, whole: an agenda never shows half an event. A
+ * heading (`headings[i]`) never ends a column; it moves on to the next one with its first event, and gets
+ * [headingSpace] more room above it, except at the top of a column.
  */
 @Composable
-private fun FitColumn(modifier: Modifier, spacing: androidx.compose.ui.unit.Dp, headings: List<Boolean>, content: @Composable () -> Unit) {
+private fun FlowColumns(
+    modifier: Modifier,
+    columns: Int,
+    spacing: androidx.compose.ui.unit.Dp,
+    headingSpace: androidx.compose.ui.unit.Dp,
+    columnGap: androidx.compose.ui.unit.Dp,
+    headings: List<Boolean>,
+    content: @Composable () -> Unit,
+) {
     androidx.compose.ui.layout.Layout(content, modifier) { measurables, constraints ->
         val gap = spacing.roundToPx()
-        val placeables = measurables.map { it.measure(constraints.copy(minHeight = 0)) }
+        val headGap = headingSpace.roundToPx()
+        val colGap = columnGap.roundToPx()
+        val colW = ((constraints.maxWidth - colGap * (columns - 1)) / columns).coerceAtLeast(0)
+        val placeables = measurables.map { it.measure(androidx.compose.ui.unit.Constraints(maxWidth = colW, maxHeight = constraints.maxHeight)) }
+        val col = IntArray(placeables.size) { -1 }
+        val top = IntArray(placeables.size)
+        val isHeading = { i: Int -> headings.getOrElse(i) { false } }
+        var c = 0
         var y = 0
-        var shown = 0
-        for ((i, p) in placeables.withIndex()) {
-            val top = if (i == 0) 0 else y + gap
-            if (top + p.height > constraints.maxHeight) break
-            y = top + p.height
-            shown = i + 1
-        }
-        while (shown > 0 && headings.getOrElse(shown - 1) { false }) shown--
-        layout(constraints.maxWidth, constraints.maxHeight) {
-            var top = 0
-            for (i in 0 until shown) {
-                placeables[i].place(0, top)
-                top += placeables[i].height + gap
+        var first = true
+        var i = 0
+        while (i < placeables.size && c < columns) {
+            val at = if (first) 0 else y + gap + if (isHeading(i)) headGap else 0
+            if (at + placeables[i].height <= constraints.maxHeight) {
+                col[i] = c; top[i] = at; y = at + placeables[i].height; first = false; i++
+                continue
             }
+            // Full: a heading at the bottom goes on to the next column with what follows it.
+            var back = i
+            while (back > 0 && col[back - 1] == c && isHeading(back - 1)) { back--; col[back] = -1 }
+            if (first) break // doesn't fit even an empty column
+            c++; y = 0; first = true; i = back
+        }
+        // Nothing after the last heading placed: leave it out.
+        var last = col.indexOfLast { it >= 0 }
+        while (last >= 0 && isHeading(last)) { col[last] = -1; last = col.indexOfLast { it >= 0 } }
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            placeables.forEachIndexed { k, p -> if (col[k] >= 0) p.place(col[k] * (colW + colGap), top[k]) }
         }
     }
 }
 
 @Composable
 private fun DayHeading(day: CalendarLayout.AgendaDay, isToday: Boolean, env: CalendarEnv, modifier: Modifier = Modifier) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+    // As tall as the forecast icon the other days have, so headings side by side line up.
+    Row(modifier.heightIn(min = 22.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             if (isToday) stringResource(R.string.calendar_today) else relativeDayName(day.date, env.today, currentLocale()),
             style = Kin.type.caption.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp), color = Kin.colors.inkSoft,

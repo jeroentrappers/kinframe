@@ -100,7 +100,7 @@ fun SplitDashboard(
                 if (calendar != null) {
                     Box(Modifier.padding(vertical = 14.dp).fillMaxWidth().height(1.dp).background(Kin.colors.line))
                     UpcomingAgenda(
-                        calendar, weather, nowMs, zone, h24, unit, hours = DASHBOARD_HOURS, maxEvents = 8, onEvent = onEvent,
+                        calendar, weather, nowMs, zone, h24, unit, hours = DASHBOARD_HOURS, maxEvents = 24, onEvent = onEvent,
                         modifier = Modifier.weight(1f).fillMaxWidth(), columns = if (wide) 2 else 1,
                     )
                 }
