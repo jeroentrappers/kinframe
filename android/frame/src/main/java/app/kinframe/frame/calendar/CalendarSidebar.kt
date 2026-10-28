@@ -100,6 +100,9 @@ fun CalendarSidebar(
     }
 }
 
+/** The gap between the agenda's columns; the dashboard's widgets line up with them. */
+val AGENDA_COLUMN_GAP = 14.dp
+
 /**
  * What is coming up in the next [hours] (the split layout's dashboard, docs/plugins.md §2.2): today (what's left of it)
  * and the following days, with only the events that start before then. Today always shows, if only as "nothing".
@@ -127,7 +130,7 @@ fun UpcomingAgenda(
     // One child per heading and per event, so whatever doesn't fit is left out whole; they fill the first column
     // top to bottom, then the next, like a newspaper.
     val headings = ArrayList<Boolean>()
-    FlowColumns(modifier, columns = columns.coerceAtLeast(1), spacing = 6.dp, headingSpace = 8.dp, columnGap = 14.dp, headings = headings) {
+    FlowColumns(modifier, columns = columns.coerceAtLeast(1), spacing = 6.dp, headingSpace = 8.dp, columnGap = AGENDA_COLUMN_GAP, headings = headings) {
         days.forEach { day ->
             val isToday = day.date == today
             headings += true

@@ -38,6 +38,7 @@ import app.kinframe.core.design.KinPalettes
 import app.kinframe.core.design.LocalKinColors
 import app.kinframe.core.plugin.ui.PluginPalette
 import app.kinframe.core.plugin.ui.ViewForm
+import app.kinframe.frame.calendar.AGENDA_COLUMN_GAP
 import app.kinframe.frame.calendar.CalEvent
 import app.kinframe.frame.calendar.CalendarFormat
 import app.kinframe.frame.calendar.currentLocale
@@ -95,7 +96,7 @@ fun SplitDashboard(
                 }
                 if (widgets.isNotEmpty()) {
                     Spacer(Modifier.height(14.dp))
-                    WidgetStrip(widgets, palette, onWidget)
+                    WidgetStrip(widgets, palette, onWidget, columns = if (wide) 2 else 1)
                 }
                 if (calendar != null) {
                     Box(Modifier.padding(vertical = 14.dp).fillMaxWidth().height(1.dp).background(Kin.colors.line))
@@ -169,11 +170,12 @@ private fun DashboardHeader(
 
 /**
  * The widgets in their strip form (the band's horizontal form: compact, legible from across the room), each at its
- * own size, flowing into rows like words: a widget that doesn't fit beside the previous one starts a new row. Only a
- * widget wider than the whole dashboard is scaled down, and on its own.
+ * own size. With two [columns] (a wide dashboard) they sit in the agenda's two columns, so the dashboard reads as one
+ * grid: each widget goes to the column that is shortest so far, one wider than a column spans both below them, and only
+ * a widget wider than the whole dashboard is scaled down. With one column they flow into rows like words.
  */
 @Composable
-private fun WidgetStrip(widgets: List<InstanceState>, palette: PluginPalette, onTap: (InstanceState) -> Unit) {
+private fun WidgetStrip(widgets: List<InstanceState>, palette: PluginPalette, onTap: (InstanceState) -> Unit, columns: Int = 1) {
     Layout(
         content = {
             widgets.forEach { s ->
@@ -186,31 +188,56 @@ private fun WidgetStrip(widgets: List<InstanceState>, palette: PluginPalette, on
         },
         modifier = Modifier.fillMaxWidth(),
     ) { measurables, constraints ->
-        val gap = 36.dp.roundToPx()
-        val rowGap = 12.dp.roundToPx()
         val maxW = constraints.maxWidth
         val items = measurables.map { it.measure(Constraints(maxHeight = STRIP_HEIGHT.roundToPx())) }
-        // Where each widget goes; one wider than the dashboard gets a row of its own, scaled to fit.
-        data class Placed(val i: Int, val x: Int, val y: Int, val scale: Float)
-        val placed = ArrayList<Placed>()
-        var x = 0
-        var y = 0
-        var rowH = 0
-        items.forEachIndexed { i, p ->
-            val scale = if (p.width > maxW) maxW.toFloat() / p.width else 1f
-            val w = (p.width * scale).toInt()
-            val h = (p.height * scale).toInt()
-            if (x > 0 && x + gap + w > maxW) { y += rowH + rowGap; x = 0; rowH = 0 }
-            val left = if (x == 0) 0 else x + gap
-            placed += Placed(i, left, y, scale)
-            x = left + w
-            rowH = maxOf(rowH, h)
-        }
-        layout(maxW, if (items.isEmpty()) 0 else y + rowH) {
-            placed.forEach { (i, px, py, scale) ->
+        val placed = if (columns >= 2) gridPlacement(items.map { it.width to it.height }, maxW, AGENDA_COLUMN_GAP.roundToPx(), 14.dp.roundToPx())
+        else flowPlacement(items.map { it.width to it.height }, maxW, 36.dp.roundToPx(), 12.dp.roundToPx())
+        val height = placed.indices.maxOfOrNull { i -> placed[i].y + (items[i].height * placed[i].scale).toInt() } ?: 0
+        layout(maxW, height) {
+            placed.forEachIndexed { i, (px, py, scale) ->
                 if (scale == 1f) items[i].place(px, py)
                 else items[i].placeWithLayer(px, py) { scaleX = scale; scaleY = scale; transformOrigin = TransformOrigin(0f, 0f) }
             }
+        }
+    }
+}
+
+/** Where a widget goes in the strip, and how far it is scaled down (1: not). */
+internal data class StripPlace(val x: Int, val y: Int, val scale: Float = 1f)
+
+private fun fitScale(w: Int, maxW: Int) = if (w > maxW) maxW.toFloat() / w else 1f
+
+/** Rows like words: a widget that doesn't fit beside the previous one starts a new row. */
+internal fun flowPlacement(sizes: List<Pair<Int, Int>>, maxW: Int, gap: Int, rowGap: Int): List<StripPlace> {
+    var x = 0
+    var y = 0
+    var rowH = 0
+    return sizes.map { (pw, ph) ->
+        val scale = fitScale(pw, maxW)
+        val w = (pw * scale).toInt()
+        if (x > 0 && x + gap + w > maxW) { y += rowH + rowGap; x = 0; rowH = 0 }
+        val left = if (x == 0) 0 else x + gap
+        x = left + w
+        rowH = maxOf(rowH, (ph * scale).toInt())
+        StripPlace(left, y, scale)
+    }
+}
+
+/**
+ * Two columns as wide as the agenda's, [gap] apart: each widget in the column that is shortest so far (the left one
+ * on a tie), one wider than a column across both, below everything so far.
+ */
+internal fun gridPlacement(sizes: List<Pair<Int, Int>>, maxW: Int, gap: Int, rowGap: Int): List<StripPlace> {
+    val colW = (maxW - gap) / 2
+    val bottom = intArrayOf(0, 0) // where the next widget in each column goes
+    return sizes.map { (pw, ph) ->
+        if (pw <= colW) {
+            val c = if (bottom[1] < bottom[0]) 1 else 0
+            StripPlace(c * (colW + gap), bottom[c]).also { bottom[c] += ph + rowGap }
+        } else {
+            val scale = fitScale(pw, maxW)
+            val y = bottom.max()
+            StripPlace(0, y, scale).also { bottom.fill(y + (ph * scale).toInt() + rowGap) }
         }
     }
 }

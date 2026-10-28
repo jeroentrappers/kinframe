@@ -63,4 +63,20 @@ class SplitLayoutTest {
         // Nothing from the third day on.
         assertTrue(days.flatMap { it.all }.none { it.title == "Lunch at Oma's" })
     }
+
+    @Test fun wideDashboardWidgetsLineUpWithTheAgendaColumns() {
+        // 600 wide, 14 between the columns: each column 293, the right one at 307.
+        val p = gridPlacement(listOf(160 to 50, 270 to 70, 120 to 30, 500 to 40), maxW = 600, gap = 14, rowGap = 12)
+        assertEquals(StripPlace(0, 0), p[0]) // the price, left
+        assertEquals(StripPlace(307, 0), p[1]) // the energy flow, right
+        assertEquals(StripPlace(0, 62), p[2]) // the wind under the price, not on a row of its own
+        assertEquals(StripPlace(0, 104), p[3]) // too wide for a column: across both, below everything
+        // Wider than the dashboard: scaled down to fit.
+        assertEquals(0.5f, gridPlacement(listOf(1200 to 40), 600, 14, 12)[0].scale, 0.001f)
+    }
+
+    @Test fun narrowDashboardWidgetsFlowLikeWords() {
+        val p = flowPlacement(listOf(160 to 50, 270 to 70, 120 to 30), maxW = 500, gap = 36, rowGap = 12)
+        assertEquals(listOf(StripPlace(0, 0), StripPlace(196, 0), StripPlace(0, 82)), p)
+    }
 }
