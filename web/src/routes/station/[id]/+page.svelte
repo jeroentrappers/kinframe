@@ -336,7 +336,7 @@
 					<p class="value">{#if r.pressure_hpa != null}{num(r.pressure_hpa, 1)}<small>hPa</small>{:else}–{/if}</p>
 					{#if trend}
 						<p class="detail trend {trend.kind}">
-							<span aria-hidden="true">{trend.kind === 'rising' ? '↗' : trend.kind === 'falling' ? '↘' : '→'}</span>
+							<span aria-hidden="true">{trend.kind === 'rising' ? '↗\uFE0E' : trend.kind === 'falling' ? '↘\uFE0E' : '→\uFE0E'}</span>
 							{s[trend.kind]} · {fill(s.in3h, { v: `${trend.change > 0 ? '+' : ''}${num(trend.change, 1)}` })}
 						</p>
 					{/if}
@@ -607,9 +607,10 @@
 	.tile.wind {
 		grid-column: span 2;
 	}
-	@media (max-width: 460px) {
+	/* On a phone the tiles go two by two and the wind, with its compass, takes a row of its own. */
+	@media (max-width: 520px) {
 		.tile.wind {
-			grid-column: auto;
+			grid-column: 1 / -1;
 		}
 	}
 	.tile h2 {

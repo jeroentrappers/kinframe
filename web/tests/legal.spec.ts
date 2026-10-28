@@ -8,7 +8,7 @@ test.describe('privacy policy and terms', () => {
 		await page.getByRole('link', { name: 'Privacy', exact: true }).click();
 		await expect(page).toHaveURL(/\/privacy$/);
 		await expect(page.getByRole('heading', { level: 1, name: 'Privacy policy' })).toBeVisible();
-		await expect(page.getByText('Last updated: 27 October 2026')).toBeVisible();
+		await expect(page.getByText('Last updated: 28 October 2026')).toBeVisible();
 		await expect(page.getByRole('heading', { name: /Deleting your data/ })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'jeroen@appmire.be' }).first()).toHaveAttribute('href', 'mailto:jeroen@appmire.be');
 		// This test server is not kinframe.appmire.be, so the page says whose service the text describes.
