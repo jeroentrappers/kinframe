@@ -871,6 +871,24 @@ paths:
         '404': { $ref: '#/components/responses/Problem' }
         '429': { $ref: '#/components/responses/Problem' }
 
+  /v1/stations/{stationId}/public:
+    get:
+      tags: [settings]
+      operationId: getStationPublic
+      security: []
+      description: |
+        A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+        last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+        the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+        place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+        cacheable for 30 seconds.
+      parameters:
+        - { name: stationId, in: path, required: true, schema: { type: string, maxLength: 64 } }
+      responses:
+        '200': { description: The station's page, content: { application/json: { schema: { $ref: '#/components/schemas/StationPublic' } } } }
+        '404': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
   /v1/frames/{frameId}/plugins:
     parameters: [ { $ref: '#/components/parameters/FrameId' } ]
     get:
@@ -3021,6 +3039,56 @@ components:
             temp_min_c: { type: [number, 'null'] }
             temp_max_c: { type: [number, 'null'] }
             gust_max_ms: { type: [number, 'null'] }
+
+    StationPublic:
+      type: object
+      required: [station_id, name, timezone, received_at, reading, today, series]
+      properties:
+        station_id: { type: string, description: The station ID as its owner wrote it. }
+        name: { type: string, description: 'The title the owner chose; empty: none.' }
+        timezone: { type: string, description: 'IANA zone of the owner''s frame: what "today" means.' }
+        received_at: { type: string, format: date-time }
+        reading: { $ref: '#/components/schemas/StationReading' }
+        today:
+          type: object
+          description: Since midnight in `timezone`.
+          properties:
+            temp_min_c: { type: [number, 'null'] }
+            temp_min_at: { type: [string, 'null'], format: date-time }
+            temp_max_c: { type: [number, 'null'] }
+            temp_max_at: { type: [string, 'null'], format: date-time }
+            gust_max_ms: { type: [number, 'null'] }
+            gust_max_at: { type: [string, 'null'], format: date-time }
+            rain_mm: { type: [number, 'null'] }
+            uv_max: { type: [number, 'null'] }
+        series: { $ref: '#/components/schemas/StationSeries' }
+
+    StationSeries:
+      type: object
+      description: |
+        The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+        arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+        direction (the speed-weighted mean direction).
+      required: [start, step_s, temp_c, dew_point_c, feels_like_c, humidity_pct, pressure_hpa, wind_ms, gust_ms, wind_dir_deg, rain_rate_mm_h, rain_today_mm, solar_wm2, uv_index]
+      properties:
+        start: { type: string, format: date-time }
+        step_s: { type: integer }
+        temp_c: { $ref: '#/components/schemas/StationValues' }
+        dew_point_c: { $ref: '#/components/schemas/StationValues' }
+        feels_like_c: { $ref: '#/components/schemas/StationValues' }
+        humidity_pct: { $ref: '#/components/schemas/StationValues' }
+        pressure_hpa: { $ref: '#/components/schemas/StationValues' }
+        wind_ms: { $ref: '#/components/schemas/StationValues' }
+        gust_ms: { $ref: '#/components/schemas/StationValues' }
+        wind_dir_deg: { $ref: '#/components/schemas/StationValues' }
+        rain_rate_mm_h: { $ref: '#/components/schemas/StationValues' }
+        rain_today_mm: { $ref: '#/components/schemas/StationValues' }
+        solar_wm2: { $ref: '#/components/schemas/StationValues' }
+        uv_index: { $ref: '#/components/schemas/StationValues' }
+
+    StationValues:
+      type: array
+      items: { type: [number, 'null'] }
 
     StationReading:
       type: object

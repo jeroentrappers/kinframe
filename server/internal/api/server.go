@@ -80,6 +80,7 @@ type Server struct {
 	// Weather stations that upload to kinframe (docs/plugins.md §9.4).
 	stationKey     []byte
 	stationIP      *ratelimit.Limiter
+	stationPage    *ratelimit.Limiter
 	stationForward *stations.Forwarder
 	// pluginSealer keeps plugin secrets (settings plugins.instances[].secrets) encrypted at rest.
 	pluginSealer *secrets.Sealer
@@ -149,6 +150,7 @@ func New(d Deps) (*Server, error) {
 	s.registry = d.Registry
 	s.stationKey = auth.DeriveKey(d.Config.SigningKey, "weather-station")
 	s.stationIP = ratelimit.New(600, time.Hour)
+	s.stationPage = ratelimit.New(1200, time.Hour)
 	s.stationForward = &stations.Forwarder{URL: d.Config.StationForwardURL, HTTP: &http.Client{Timeout: 10 * time.Second}, Log: d.Log.With("component", "stations")}
 	ps, err := secrets.New(d.Config.SecretsKey, d.Config.SigningKey, "kinframe plugin secrets v1", "kinframe plugin secrets from signing key v1")
 	if err != nil {

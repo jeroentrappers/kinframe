@@ -3140,6 +3140,64 @@ components:
                 - received_at
                 - reading
             type: object
+        StationPublic:
+            properties:
+                name:
+                    description: 'The title the owner chose; empty: none.'
+                    type: string
+                reading:
+                    $ref: '#/components/schemas/StationReading'
+                received_at:
+                    format: date-time
+                    type: string
+                series:
+                    $ref: '#/components/schemas/StationSeries'
+                station_id:
+                    description: The station ID as its owner wrote it.
+                    type: string
+                timezone:
+                    description: 'IANA zone of the owner''s frame: what "today" means.'
+                    type: string
+                today:
+                    description: Since midnight in `timezone`.
+                    properties:
+                        gust_max_at:
+                            format: date-time
+                            nullable: true
+                            type: string
+                        gust_max_ms:
+                            nullable: true
+                            type: number
+                        rain_mm:
+                            nullable: true
+                            type: number
+                        temp_max_at:
+                            format: date-time
+                            nullable: true
+                            type: string
+                        temp_max_c:
+                            nullable: true
+                            type: number
+                        temp_min_at:
+                            format: date-time
+                            nullable: true
+                            type: string
+                        temp_min_c:
+                            nullable: true
+                            type: number
+                        uv_max:
+                            nullable: true
+                            type: number
+                    type: object
+            required:
+                - station_id
+                - name
+                - timezone
+                - received_at
+                - reading
+                - today
+                - series
+            type: object
         StationReading:
             description: One upload in metric units; a value the station didn't send is absent.
             properties:
@@ -3175,6 +3233,62 @@ components:
                 wind_ms:
                     type: number
             type: object
+        StationSeries:
+            description: |
+                The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+                arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+                direction (the speed-weighted mean direction).
+            properties:
+                dew_point_c:
+                    $ref: '#/components/schemas/StationValues'
+                feels_like_c:
+                    $ref: '#/components/schemas/StationValues'
+                gust_ms:
+                    $ref: '#/components/schemas/StationValues'
+                humidity_pct:
+                    $ref: '#/components/schemas/StationValues'
+                pressure_hpa:
+                    $ref: '#/components/schemas/StationValues'
+                rain_rate_mm_h:
+                    $ref: '#/components/schemas/StationValues'
+                rain_today_mm:
+                    $ref: '#/components/schemas/StationValues'
+                solar_wm2:
+                    $ref: '#/components/schemas/StationValues'
+                start:
+                    format: date-time
+                    type: string
+                step_s:
+                    type: integer
+                temp_c:
+                    $ref: '#/components/schemas/StationValues'
+                uv_index:
+                    $ref: '#/components/schemas/StationValues'
+                wind_dir_deg:
+                    $ref: '#/components/schemas/StationValues'
+                wind_ms:
+                    $ref: '#/components/schemas/StationValues'
+            required:
+                - start
+                - step_s
+                - temp_c
+                - dew_point_c
+                - feels_like_c
+                - humidity_pct
+                - pressure_hpa
+                - wind_ms
+                - gust_ms
+                - wind_dir_deg
+                - rain_rate_mm_h
+                - rain_today_mm
+                - solar_wm2
+                - uv_index
+            type: object
+        StationValues:
+            items:
+                nullable: true
+                type: number
+            type: array
         TvLink:
             properties:
                 album_id:
@@ -6243,6 +6357,36 @@ paths:
             security: []
             tags:
                 - shop
+    /v1/stations/{stationId}/public:
+        get:
+            description: |
+                A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+                last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+                the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+                place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+                cacheable for 30 seconds.
+            operationId: getStationPublic
+            parameters:
+                - in: path
+                  name: stationId
+                  required: true
+                  schema:
+                    maxLength: 64
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/StationPublic'
+                    description: The station's page
+                "404":
+                    $ref: '#/components/responses/Problem'
+                "429":
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - settings
     /v1/stations/latest:
         get:
             description: |

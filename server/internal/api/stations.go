@@ -123,6 +123,100 @@ func (s *Server) GetStationLatest(ctx context.Context, req gen.GetStationLatestR
 	return Response{Status: 200, Body: out}, nil
 }
 
+// GetStationPublic: a station's public page, when its owner turned it on.
+func (s *Server) GetStationPublic(ctx context.Context, req gen.GetStationPublicRequestObject) (gen.GetStationPublicResponseObject, error) {
+	if ok, retry := s.stationPage.Allow(clientIP(ctx)); !ok {
+		p := problem.New(problem.RateLimited, "")
+		p.RetryAfter = retry
+		return nil, p
+	}
+	notFound := problem.New(problem.NotFound, "no readings from this station")
+	regs, err := s.st.PublicStations(ctx, s.st.Q(), strings.TrimSpace(req.StationId))
+	if err != nil {
+		return nil, err
+	}
+	// Several frames may name the same station; the registration whose readings are newest wins.
+	const span, step = 48 * time.Hour, 5 * time.Minute
+	now := time.Now().UTC()
+	start := now.Truncate(step).Add(step - span)
+	var reg *store.WeatherStation
+	var rows []store.StationReading
+	for i := range regs {
+		got, err := s.st.StationReadings(ctx, regs[i].KeyMAC, start)
+		if err != nil {
+			return nil, err
+		}
+		if len(got) > 0 && (len(rows) == 0 || got[len(got)-1].At.After(rows[len(rows)-1].At)) {
+			reg, rows = &regs[i], got
+		}
+	}
+	if reg == nil {
+		return nil, notFound
+	}
+	zone := time.UTC
+	if f, err := s.st.GetFrame(ctx, s.st.Q(), reg.FrameID); err == nil {
+		zone = frameZone(f)
+	}
+	local := now.In(zone)
+	midnight := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, zone)
+
+	type extreme struct {
+		v  *float64
+		at *time.Time
+	}
+	pick := func(e *extreme, v *float64, at time.Time, min bool) {
+		if v != nil && (e.v == nil || (min && *v < *e.v) || (!min && *v > *e.v)) {
+			x, t := *v, at.UTC()
+			e.v, e.at = &x, &t
+		}
+	}
+	var lo, hi, gust, uv extreme
+	var rain *float64
+	timed := make([]stations.Timed, 0, len(rows))
+	for _, row := range rows {
+		var rd stations.Reading
+		if json.Unmarshal(row.Reading, &rd) != nil {
+			continue
+		}
+		timed = append(timed, stations.Timed{At: row.At, Reading: rd})
+		if row.At.Before(midnight) {
+			continue
+		}
+		pick(&lo, rd.TempC, row.At, true)
+		pick(&hi, rd.TempC, row.At, false)
+		pick(&gust, rd.GustMs, row.At, false)
+		pick(&uv, rd.UVIndex, row.At, false)
+		if rd.RainTodayMm != nil {
+			rain = rd.RainTodayMm
+		}
+	}
+	type today struct {
+		TempMin   *float64   `json:"temp_min_c"`
+		TempMinAt *time.Time `json:"temp_min_at"`
+		TempMax   *float64   `json:"temp_max_c"`
+		TempMaxAt *time.Time `json:"temp_max_at"`
+		GustMax   *float64   `json:"gust_max_ms"`
+		GustMaxAt *time.Time `json:"gust_max_at"`
+		Rain      *float64   `json:"rain_mm"`
+		UVMax     *float64   `json:"uv_max"`
+	}
+	last := rows[len(rows)-1]
+	out := struct {
+		StationID  string          `json:"station_id"`
+		Name       string          `json:"name"`
+		Timezone   string          `json:"timezone"`
+		ReceivedAt time.Time       `json:"received_at"`
+		Reading    json.RawMessage `json:"reading"`
+		Today      today           `json:"today"`
+		Series     stations.Series `json:"series"`
+	}{
+		StationID: reg.UploadID, Name: reg.PublicName, Timezone: zone.String(), ReceivedAt: last.At.UTC(), Reading: last.Reading,
+		Today:  today{lo.v, lo.at, hi.v, hi.at, gust.v, gust.at, rain, uv.v},
+		Series: stations.MakeSeries(timed, start, step, int(span/step)),
+	}
+	return Response{Status: 200, Body: out, Header: http.Header{"Cache-Control": {"public, max-age=30"}}}, nil
+}
+
 func minPtr(cur, v *float64, min bool) *float64 {
 	if v == nil {
 		return cur
@@ -172,7 +266,10 @@ func (s *Server) syncStations(ctx context.Context, tx *store.Tx, frameID uuid.UU
 		if f, ok := values["forward_wunderground"].(bool); ok {
 			forward = f
 		}
-		regs = append(regs, store.WeatherStation{FrameID: frameID, InstanceID: iid, UploadID: strings.TrimSpace(id), KeyMAC: stations.MAC(s.stationKey, id, key), Forward: forward})
+		public, _ := values["public_page"].(bool)
+		name, _ := values["public_name"].(string)
+		regs = append(regs, store.WeatherStation{FrameID: frameID, InstanceID: iid, UploadID: strings.TrimSpace(id), KeyMAC: stations.MAC(s.stationKey, id, key),
+			Forward: forward, Public: public, PublicName: strings.TrimSpace(name)})
 	}
 	return tx.SetFrameStations(ctx, frameID, regs)
 }

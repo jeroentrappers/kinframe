@@ -729,6 +729,51 @@ export interface paths {
         patch: operations["updateFrameSettings"];
         trace?: never;
     };
+    "/v1/stations/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+         *     frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+         *     key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+         *     pair or nothing arrived in the last 48 hours. Rate-limited per address.
+         */
+        get: operations["getStationLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/stations/{stationId}/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+         *     last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+         *     the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+         *     place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+         *     cacheable for 30 seconds.
+         */
+        get: operations["getStationPublic"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/plugins": {
         parameters: {
             query?: never;
@@ -2854,6 +2899,85 @@ export interface components {
             /** @example http://192.168.1.20 */
             url: string;
         };
+        StationLatest: {
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description Since midnight in the station's frame's time zone (the first registering frame). */
+            today?: {
+                temp_min_c?: number | null;
+                temp_max_c?: number | null;
+                gust_max_ms?: number | null;
+            };
+        };
+        StationPublic: {
+            /** @description The station ID as its owner wrote it. */
+            station_id: string;
+            /** @description The title the owner chose; empty: none. */
+            name: string;
+            /** @description IANA zone of the owner's frame: what "today" means. */
+            timezone: string;
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description Since midnight in `timezone`. */
+            today: {
+                temp_min_c?: number | null;
+                /** Format: date-time */
+                temp_min_at?: string | null;
+                temp_max_c?: number | null;
+                /** Format: date-time */
+                temp_max_at?: string | null;
+                gust_max_ms?: number | null;
+                /** Format: date-time */
+                gust_max_at?: string | null;
+                rain_mm?: number | null;
+                uv_max?: number | null;
+            };
+            series: components["schemas"]["StationSeries"];
+        };
+        /**
+         * @description The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+         *     arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+         *     direction (the speed-weighted mean direction).
+         */
+        StationSeries: {
+            /** Format: date-time */
+            start: string;
+            step_s: number;
+            temp_c: components["schemas"]["StationValues"];
+            dew_point_c: components["schemas"]["StationValues"];
+            feels_like_c: components["schemas"]["StationValues"];
+            humidity_pct: components["schemas"]["StationValues"];
+            pressure_hpa: components["schemas"]["StationValues"];
+            wind_ms: components["schemas"]["StationValues"];
+            gust_ms: components["schemas"]["StationValues"];
+            wind_dir_deg: components["schemas"]["StationValues"];
+            rain_rate_mm_h: components["schemas"]["StationValues"];
+            rain_today_mm: components["schemas"]["StationValues"];
+            solar_wm2: components["schemas"]["StationValues"];
+            uv_index: components["schemas"]["StationValues"];
+        };
+        StationValues: (number | null)[];
+        /** @description One upload in metric units; a value the station didn't send is absent. */
+        StationReading: {
+            /** Format: date-time */
+            station_time?: string;
+            temp_c?: number;
+            humidity_pct?: number;
+            dew_point_c?: number;
+            feels_like_c?: number;
+            pressure_hpa?: number;
+            wind_ms?: number;
+            wind_dir_deg?: number;
+            gust_ms?: number;
+            rain_rate_mm_h?: number;
+            rain_today_mm?: number;
+            solar_wm2?: number;
+            uv_index?: number;
+            indoor_temp_c?: number;
+            indoor_humidity_pct?: number;
+        };
         PluginRegistry: {
             /** @description base64 of index.json, byte for byte as signed */
             index: string;
@@ -4760,6 +4884,55 @@ export interface operations {
             };
             412: components["responses"]["Problem"];
             default: components["responses"]["Problem"];
+        };
+    };
+    getStationLatest: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Station-Id": string;
+                "X-Station-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Latest reading */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StationLatest"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+        };
+    };
+    getStationPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The station's page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StationPublic"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
         };
     };
     getFramePlugins: {

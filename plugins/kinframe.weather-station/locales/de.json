@@ -16,5 +16,9 @@
   "@setting.station_id.help": "Die ID, mit der deine Station hochlädt: ihre Weather-Underground-Stations-ID oder die aus ihren Einstellungen für einen eigenen Server.",
   "@setting.station_key": "Stationsschlüssel",
   "@setting.station_key.help": "Der Schlüssel (das Passwort), mit dem deine Station hochlädt: ihr Weather-Underground-Stationsschlüssel.",
-  "@setting.forward_wunderground": "Die Uploads an Weather Underground weitergeben"
+  "@setting.forward_wunderground": "Die Uploads an Weather Underground weitergeben",
+  "@setting.public_page": "Öffentliche Seite",
+  "@setting.public_page.help": "Jeder mit dem Link kinframe.appmire.be/station/<Stations-ID> sieht die Messwerte der Station und die letzten 48 Stunden als Diagramme. Nichts über deinen Bilderrahmen oder seinen Standort wird gezeigt.",
+  "@setting.public_name": "Titel der öffentlichen Seite",
+  "@setting.public_name.help": "Zum Beispiel das Dorf oder die Straße, in der die Station steht. Leer: nur die Stations-ID."
 }
