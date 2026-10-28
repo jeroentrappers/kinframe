@@ -59,6 +59,8 @@
     <string name="status_card_offline_body">Rėmelyje esančios nuotraukos rodomos toliau. Naujos atkeliaus, kai tik ryšys grįš.</string>
     <string name="status_card_server_title">Nepavyksta pasiekti nuotraukų serverio</string>
     <string name="status_card_server_body">Wi-Fi veikia, bet serveris neatsako. Naujos nuotraukos atkeliaus, kai jis vėl veiks.</string>
+    <string name="status_card_clock_title">Nustatomas laikrodis</string>
+    <string name="status_card_clock_body">Rėmelis buvo paleistas iš naujo ir jo laikrodis rodo neteisingai. Netrukus jis nusistatys iš interneto.</string>
     <string name="status_card_portal_title">Šis Wi-Fi prašo prisijungti</string>
     <string name="status_card_portal_body">Atidarykite tinklo prisijungimo puslapį, kad rėmelis prisijungtų prie interneto.</string>
     <string name="status_card_portal_action">Prisijungti</string>

@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">As fotos do porta-retrato continuam passando. As novas chegam assim que a conexão voltar.</string>
     <string name="status_card_server_title">Não foi possível acessar o servidor de fotos</string>
     <string name="status_card_server_body">O Wi-Fi funciona, mas o servidor não responde. As fotos novas chegam quando ele voltar.</string>
+    <string name="status_card_clock_title">A acertar o relógio</string>
+    <string name="status_card_clock_body">A moldura reiniciou e o relógio está errado. Daqui a pouco acerta-o pela internet.</string>
     <string name="status_card_portal_title">Este Wi-Fi pede login</string>
     <string name="status_card_portal_body">Abra a página de login da rede para conectar o porta-retrato.</string>
     <string name="status_card_portal_action">Fazer login</string>

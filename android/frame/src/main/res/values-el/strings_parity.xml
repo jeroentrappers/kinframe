@@ -55,6 +55,8 @@
     <string name="status_card_offline_body">Οι φωτογραφίες της κορνίζας συνεχίζουν να προβάλλονται. Οι νέες θα έρθουν μόλις επανέλθει η σύνδεση.</string>
     <string name="status_card_server_title">Ο διακομιστής φωτογραφιών δεν είναι προσβάσιμος</string>
     <string name="status_card_server_body">Το Wi-Fi λειτουργεί, αλλά ο διακομιστής δεν απαντά. Οι νέες φωτογραφίες θα έρθουν μόλις επανέλθει.</string>
+    <string name="status_card_clock_title">Ρύθμιση ρολογιού</string>
+    <string name="status_card_clock_body">Η κορνίζα επανεκκινήθηκε και το ρολόι της είναι λάθος. Θα ρυθμιστεί από το διαδίκτυο σε λίγο.</string>
     <string name="status_card_portal_title">Αυτό το Wi-Fi ζητά σύνδεση</string>
     <string name="status_card_portal_body">Ανοίξτε τη σελίδα σύνδεσης του δικτύου για να συνδεθεί η κορνίζα.</string>
     <string name="status_card_portal_action">Σύνδεση</string>

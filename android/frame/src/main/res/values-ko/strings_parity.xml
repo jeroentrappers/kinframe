@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">액자에 있는 사진은 계속 재생돼요. 다시 연결되면 새 사진이 바로 도착해요.</string>
     <string name="status_card_server_title">사진 서버에 연결할 수 없어요</string>
     <string name="status_card_server_body">Wi-Fi는 되지만 서버가 응답하지 않아요. 서버가 돌아오면 새 사진이 도착해요.</string>
+    <string name="status_card_clock_title">시계를 맞추는 중</string>
+    <string name="status_card_clock_body">액자가 다시 시작되어 시계가 맞지 않습니다. 잠시 후 인터넷으로 시간을 맞춥니다.</string>
     <string name="status_card_portal_title">이 Wi-Fi는 로그인이 필요해요</string>
     <string name="status_card_portal_body">네트워크 로그인 페이지를 열어 액자를 인터넷에 연결하세요.</string>
     <string name="status_card_portal_action">로그인</string>

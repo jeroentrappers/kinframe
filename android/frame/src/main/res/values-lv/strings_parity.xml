@@ -57,6 +57,8 @@
     <string name="status_card_offline_body">Rāmī esošie fotoattēli turpina rādīties. Jaunie pienāks, tiklīdz savienojums atjaunosies.</string>
     <string name="status_card_server_title">Nevar sasniegt fotoattēlu serveri</string>
     <string name="status_card_server_body">Wi-Fi darbojas, bet serveris neatbild. Jaunie fotoattēli pienāks, kad tas atkal darbosies.</string>
+    <string name="status_card_clock_title">Pulkstenis tiek iestatīts</string>
+    <string name="status_card_clock_body">Rāmis tika restartēts, un tā pulkstenis rāda nepareizi. Pēc mirkļa tas iestatīsies no interneta.</string>
     <string name="status_card_portal_title">Šis Wi-Fi prasa pierakstīties</string>
     <string name="status_card_portal_body">Atveriet tīkla pierakstīšanās lapu, lai rāmis tiktu tiešsaistē.</string>
     <string name="status_card_portal_action">Pierakstīties</string>

@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Billederne på rammen bliver ved med at køre. Nye kommer, så snart den er online igen.</string>
     <string name="status_card_server_title">Kan ikke nå billedserveren</string>
     <string name="status_card_server_body">Wi-fi virker, men serveren svarer ikke. Nye billeder kommer, når den er tilbage.</string>
+    <string name="status_card_clock_title">Stiller uret</string>
+    <string name="status_card_clock_body">Rammen er genstartet, og dens ur går forkert. Den stiller det selv via internettet om et øjeblik.</string>
     <string name="status_card_portal_title">Dette wi-fi kræver, at du logger ind</string>
     <string name="status_card_portal_body">Åbn netværkets login-side for at få rammen online.</string>
     <string name="status_card_portal_action">Log ind</string>

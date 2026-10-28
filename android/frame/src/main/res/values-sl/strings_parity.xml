@@ -60,6 +60,8 @@
     <string name="status_card_offline_body">Fotografije v okvirju se še naprej prikazujejo. Nove pridejo, ko bo okvir spet povezan.</string>
     <string name="status_card_server_title">Strežnik s fotografijami ni dosegljiv</string>
     <string name="status_card_server_body">Wi-Fi deluje, vendar se strežnik ne odziva. Nove fotografije pridejo, ko bo spet dosegljiv.</string>
+    <string name="status_card_clock_title">Nastavljanje ure</string>
+    <string name="status_card_clock_body">Okvir se je znova zagnal in njegova ura ni pravilna. Čez trenutek se bo nastavila prek interneta.</string>
     <string name="status_card_portal_title">To omrežje Wi-Fi zahteva prijavo</string>
     <string name="status_card_portal_body">Odprite stran za prijavo v omrežje, da se okvir poveže z internetom.</string>
     <string name="status_card_portal_action">Prijava</string>

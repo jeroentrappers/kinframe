@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">Foto di bingkai tetap diputar. Foto baru masuk begitu bingkai online lagi.</string>
     <string name="status_card_server_title">Tidak dapat menjangkau server foto</string>
     <string name="status_card_server_body">Wi-Fi berfungsi, tetapi server tidak merespons. Foto baru masuk saat server aktif lagi.</string>
+    <string name="status_card_clock_title">Menyetel jam</string>
+    <string name="status_card_clock_body">Bingkai baru dinyalakan ulang dan jamnya salah. Sebentar lagi jam disetel dari internet.</string>
     <string name="status_card_portal_title">Wi-Fi ini meminta Anda login</string>
     <string name="status_card_portal_body">Buka halaman login jaringan agar bingkai bisa online.</string>
     <string name="status_card_portal_action">Login</string>

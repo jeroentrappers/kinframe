@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Kuvakehyksen kuvat näkyvät edelleen. Uudet tulevat heti, kun yhteys palaa.</string>
     <string name="status_card_server_title">Kuvapalvelimeen ei saada yhteyttä</string>
     <string name="status_card_server_body">Wi-Fi toimii, mutta palvelin ei vastaa. Uudet kuvat tulevat, kun se palaa.</string>
+    <string name="status_card_clock_title">Kelloa asetetaan</string>
+    <string name="status_card_clock_body">Kehys käynnistyi uudelleen ja sen kello on väärässä. Se asettuu internetistä hetken kuluttua.</string>
     <string name="status_card_portal_title">Tämä Wi-Fi vaatii kirjautumisen</string>
     <string name="status_card_portal_body">Avaa verkon kirjautumissivu, jotta kuvakehys pääsee verkkoon.</string>
     <string name="status_card_portal_action">Kirjaudu</string>

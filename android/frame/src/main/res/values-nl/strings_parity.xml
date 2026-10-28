@@ -55,6 +55,8 @@
     <string name="status_card_offline_body">De foto\'s op de fotolijst blijven spelen. Nieuwe komen binnen zodra hij weer online is.</string>
     <string name="status_card_server_title">De fotoserver is niet bereikbaar</string>
     <string name="status_card_server_body">De wifi werkt, maar de server antwoordt niet. Nieuwe foto\'s komen binnen zodra hij terug is.</string>
+    <string name="status_card_clock_title">De klok wordt gelijkgezet</string>
+    <string name="status_card_clock_body">Het kader is herstart en zijn klok loopt verkeerd. Het zet ze zo meteen gelijk via het internet.</string>
     <string name="status_card_portal_title">Deze wifi vraagt om aan te melden</string>
     <string name="status_card_portal_body">Open de aanmeldpagina van het netwerk om de fotolijst online te krijgen.</string>
     <string name="status_card_portal_action">Aanmelden</string>

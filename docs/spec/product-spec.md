@@ -203,6 +203,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Robustness | Crash-safe storage: temp file, fsync, rename, plus a WAL-mode SQLite index. Survives power loss at any moment. Crash-loop protection. |
 | Security | Outbound-only networking, TLS, revocable device credential. No inbound listeners (no adb over TCP in production). Kiosk: the user cannot leave the app without an owner PIN or adb. |
 | Root use | Optional. With root: silent updates, disabling Frameo and the OEM updater, read-only remount on shutdown, system settings. Without root: degrade gracefully on a plain Android tablet. |
+| Clock | Frames without a clock battery (the RK3126 reference) start in the past after a restart, and TLS fails until the clock is right. The app asks NTP servers itself (UDP, no certificates) at start, when the network returns, every 6 hours and every 30 s while the clock is earlier than the last time it was known to be right; it sets the system clock with root when it is more than 2 s off (a jump of more than a minute needs two servers to agree). Without root the slideshow says the clock is being set instead of "server unreachable", and the server's `hello.server_time` corrects the app's own clock once connected. |
 | Hardware capabilities | Per-board capability file (light sensor, motion sensor path, battery, rotation, max video decode). Settings appear only when the capability exists. |
 
 **Server**

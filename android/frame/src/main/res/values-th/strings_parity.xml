@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">รูปที่อยู่ในกรอบรูปยังเล่นต่อไป รูปใหม่จะมาถึงทันทีที่กลับมาออนไลน์</string>
     <string name="status_card_server_title">ติดต่อเซิร์ฟเวอร์รูปไม่ได้</string>
     <string name="status_card_server_body">Wi-Fi ใช้งานได้ แต่เซิร์ฟเวอร์ไม่ตอบสนอง รูปใหม่จะมาถึงเมื่อเซิร์ฟเวอร์กลับมา</string>
+    <string name="status_card_clock_title">กำลังตั้งนาฬิกา</string>
+    <string name="status_card_clock_body">กรอบรูปเพิ่งรีสตาร์ตและนาฬิกาไม่ถูกต้อง อีกสักครู่จะตั้งเวลาจากอินเทอร์เน็ตเอง</string>
     <string name="status_card_portal_title">Wi-Fi นี้ต้องให้ลงชื่อเข้าใช้</string>
     <string name="status_card_portal_body">เปิดหน้าลงชื่อเข้าใช้ของเครือข่ายเพื่อให้กรอบรูปออนไลน์</string>
     <string name="status_card_portal_action">ลงชื่อเข้าใช้</string>
