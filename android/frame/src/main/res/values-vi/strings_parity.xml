@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">Ảnh trên khung ảnh vẫn tiếp tục phát. Ảnh mới sẽ về ngay khi có mạng trở lại.</string>
     <string name="status_card_server_title">Không kết nối được máy chủ ảnh</string>
     <string name="status_card_server_body">Wi-Fi vẫn hoạt động nhưng máy chủ không phản hồi. Ảnh mới sẽ về khi máy chủ hoạt động lại.</string>
+    <string name="status_card_clock_title">Đang chỉnh đồng hồ</string>
+    <string name="status_card_clock_body">Khung ảnh vừa khởi động lại và đồng hồ bị sai. Lát nữa khung sẽ tự chỉnh giờ qua internet.</string>
     <string name="status_card_portal_title">Wi-Fi này yêu cầu đăng nhập</string>
     <string name="status_card_portal_body">Mở trang đăng nhập của mạng để khung ảnh kết nối Internet.</string>
     <string name="status_card_portal_action">Đăng nhập</string>

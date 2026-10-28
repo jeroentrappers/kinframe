@@ -372,7 +372,11 @@ fun SlideshowScreen(c: FrameController) {
                         }
                         menuOpen = !menuOpen; menuTouch = System.currentTimeMillis()
                     },
-                    onDoubleTap = { pos -> if (ss.current.value != null) react(Reaction.LOVE, pos) },
+                    onDoubleTap = { pos ->
+                        // In a collage the heart goes to the photo under the finger, not the last one selected.
+                        ss.selectAt(pos.x / wPx, pos.y / hPx)
+                        if (ss.current.value != null) react(Reaction.LOVE, pos)
+                    },
                 )
                 .pointerInputSwipe(
                     onStart = {

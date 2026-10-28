@@ -18,7 +18,7 @@
   "@setting.station_key.help": "De sleutel (het wachtwoord) waarmee je station uploadt: zijn Weather Underground-stationssleutel.",
   "@setting.forward_wunderground": "De uploads doorsturen naar Weather Underground",
   "@setting.public_page": "Openbare pagina",
-  "@setting.public_page.help": "Iedereen met de link kinframe.appmire.be/station/<station-ID> ziet de metingen van het station en de laatste 48 uur in grafieken. Niets over je fotolijst of waar hij staat wordt getoond.",
+  "@setting.public_page.help": "De metingen van het station en de laatste 48 uur in grafieken, voor iedereen, op kinframe.appmire.be/station/<station-ID> en in de lijst met openbare stations op kinframe.appmire.be/stations. Niets over je fotolijst of waar hij staat wordt getoond.",
   "@setting.public_name": "Titel van de openbare pagina",
   "@setting.public_name.help": "Bijvoorbeeld het dorp of de straat waar het station staat. Leeg: alleen de station-ID."
 }

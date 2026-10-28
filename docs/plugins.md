@@ -654,8 +654,10 @@ Not built yet: developer mode and `kit push` to a frame (§7).
   the Home Assistant integration ([jeroentrappers/kinframe-homeassistant](https://github.com/jeroentrappers/kinframe-homeassistant))
   reads the same endpoint. Neither the key nor the readings appear in any log (nginx and the server log paths, not
   queries).
-- **Public page** (2.1.0, off by default): with `public_page` on, anyone with the link
-  `https://<server>/station/<station ID>` sees the station on a page of its own, without signing in: the current
+- **Public page** (2.1.0, off by default): with `public_page` on, anyone sees the station at
+  `https://<server>/station/<station ID>`, without signing in, and in the list of public stations at
+  `https://<server>/stations` (`GET /v1/stations/public`: each one's latest reading and temperature per hour over 24
+  hours, sorted by title). The page has the current
   readings with today's low, high and strongest gust, and the last 24 or 48 hours as charts (temperature with dew
   point, wind with gusts and direction, humidity, pressure, rain per hour, sunlight), a shared crosshair and a table
   view. The page reads `GET /v1/stations/{id}/public`: the latest reading, today's extremes in the frame's time zone

@@ -89,8 +89,8 @@ class FrameController(val g: FrameGraph) {
 
     /** What the slideshow's status card should say, if anything. */
     val frameStatus: StateFlow<FrameStatus?> by lazy {
-        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status) { conn, login, st, net ->
-            FrameStatuses.of(conn, net.connected, login != null, st.level)
+        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status, g.time.clockWrong) { conn, login, st, net, clockWrong ->
+            FrameStatuses.of(conn, net.connected, login != null, st.level, clockWrong)
         }.stateIn(scope, SharingStarted.Eagerly, null)
     }
 
@@ -130,6 +130,7 @@ class FrameController(val g: FrameGraph) {
         scope.launch {
             g.sessionMarker.onStart()
             g.network.start()
+            g.time.start(scope) { g.network.onAvailable(it) }
             launch(Dispatchers.IO) { g.root.isAvailable() }
             if (g.sessionMarker.needsIntegrityCheck) withContext(Dispatchers.IO) { integrityCheck() }
             applyTimezone()

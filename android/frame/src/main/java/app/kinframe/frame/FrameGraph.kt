@@ -12,6 +12,7 @@ import app.kinframe.frame.data.MediaCache
 import app.kinframe.frame.data.SettingsRepository
 import app.kinframe.frame.system.CrashGuard
 import app.kinframe.frame.system.NetworkMonitor
+import app.kinframe.frame.system.TimeSync
 import app.kinframe.frame.system.RootShell
 import app.kinframe.frame.system.SessionMarker
 import app.kinframe.frame.system.TrustedClock
@@ -33,6 +34,8 @@ class FrameGraph(val app: Application) {
     val prefs = FramePrefs(app)
     val clock = TrustedClock()
     val root = RootShell()
+    /** Sets the system clock from NTP (the Denver has no clock battery). */
+    val time = TimeSync(root, app.getSharedPreferences("time", android.content.Context.MODE_PRIVATE))
     val credentials = KeystoreCredentialStore(app)
     val stateDir = File(app.filesDir, "state").apply { mkdirs() }
     val sessionMarker = SessionMarker(stateDir)

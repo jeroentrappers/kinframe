@@ -22,7 +22,7 @@
 
 	/** Routes that render without a session. Everything else (including /f/{code} and /i/{token})
 	 *  bounces to the landing page with ?next= and comes back after sign-in. */
-	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/, /^\/(privacy|terms)$/, /^\/convert$/, /^\/station\/[^/]+$/];
+	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/, /^\/(privacy|terms)$/, /^\/convert$/, /^\/station\/[^/]+$/, /^\/stations$/];
 	const isPublic = $derived(PUBLIC.some((r) => r.test(page.url.pathname)));
 	/** The TV page (/tv/{frameId}?t=…) is full screen and needs no session: the link's token is the credential. */
 	const isTv = $derived(page.url.pathname.startsWith('/tv/'));
@@ -32,8 +32,8 @@
 	const isLegal = $derived(/^\/(privacy|terms)$/.test(page.url.pathname));
 	/** So does the convert tool (/convert): it's for people who don't have a frame on kinframe yet. */
 	const isConvert = $derived(page.url.pathname === '/convert');
-	/** A weather station's public page (/station/{id}): anyone with the link, signed in or not, with its own header. */
-	const isStation = $derived(/^\/station\/[^/]+$/.test(page.url.pathname));
+	/** The public weather stations (/stations) and each one's page (/station/{id}): signed in or not, their own header. */
+	const isStation = $derived(/^\/(station\/[^/]+|stations)$/.test(page.url.pathname));
 
 	let booting = $state(true);
 

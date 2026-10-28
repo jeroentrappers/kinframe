@@ -232,6 +232,7 @@
 <div class="station">
 	<header class="top">
 		<a href="/" class="brand" aria-label="kinframe"><Logo size={26} /></a>
+		<a href="/stations" class="all">{s.allStations}</a>
 	</header>
 
 	{#if status === 'loading'}
@@ -464,6 +465,14 @@
 	.brand {
 		display: inline-flex;
 		color: inherit;
+	}
+	.top {
+		justify-content: space-between;
+	}
+	.all {
+		color: var(--text-muted);
+		font-weight: 600;
+		font-size: 0.92rem;
 	}
 	.center {
 		min-height: 50dvh;

@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">フレーム内の写真はそのまま表示されます。オンラインに戻ると新しい写真が届きます。</string>
     <string name="status_card_server_title">写真サーバーに接続できません</string>
     <string name="status_card_server_body">Wi-Fi はつながっていますが、サーバーが応答しません。復旧すると新しい写真が届きます。</string>
+    <string name="status_card_clock_title">時計を合わせています</string>
+    <string name="status_card_clock_body">フォトフレームが再起動し、時計がずれています。まもなくインターネットから自動で合わせます。</string>
     <string name="status_card_portal_title">この Wi-Fi はログインが必要です</string>
     <string name="status_card_portal_body">ネットワークのログインページを開いて、フレームをオンラインにしてください。</string>
     <string name="status_card_portal_action">ログイン</string>

@@ -69,6 +69,7 @@ func (r Response) VisitListMembersResponse(w http.ResponseWriter) error         
 func (r Response) VisitListMyFramesResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitListMySendsResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListPlacementsResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitListPublicStationsResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitListPushEndpointsResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitListTvLinksResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitOperatorGetLimitsResponse(w http.ResponseWriter) error      { return r.write(w) }

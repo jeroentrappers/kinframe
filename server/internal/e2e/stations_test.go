@@ -85,6 +85,16 @@ func TestWeatherStationUploads(t *testing.T) {
 	if r := page("IAFFLI3"); r.StatusCode != 404 {
 		t.Fatalf("page before opt-in: %d", r.StatusCode)
 	}
+	list := func() []any {
+		r := e.do(req{method: "GET", path: "/v1/stations/public"})
+		if r.StatusCode != 200 {
+			t.Fatalf("list: %d %s", r.StatusCode, r.body)
+		}
+		return r.m(t)["stations"].([]any)
+	}
+	if l := list(); len(l) != 0 {
+		t.Fatalf("listed before opt-in: %v", l)
+	}
 	pub := settings["plugins"].(map[string]any)["instances"].([]any)[0].(map[string]any)
 	pub["settings"].(map[string]any)["public_page"] = true
 	pub["settings"].(map[string]any)["public_name"] = " Affligem "
@@ -101,6 +111,16 @@ func TestWeatherStationUploads(t *testing.T) {
 	}
 	if r := page("INOPE1"); r.StatusCode != 404 {
 		t.Fatalf("unknown station: %d", r.StatusCode)
+	}
+	// The overview lists it, with its temperature per hour (the current hour last).
+	l := list()
+	if len(l) != 1 {
+		t.Fatalf("list: %v", l)
+	}
+	st := l[0].(map[string]any)
+	hours := st["temp_24h"].([]any)
+	if st["station_id"] != "IAFFLI3" || st["name"] != "Affligem" || dig(st, "reading", "temp_c") != 10.0 || len(hours) != 24 || (hours[23] != 10.0 && hours[22] != 10.0) { // the hour may just have turned
+		t.Fatalf("listed: %v", st)
 	}
 	// Passed on, unchanged (the key included: it is Weather Underground's).
 	deadline := time.Now().Add(3 * time.Second)
@@ -138,5 +158,8 @@ func TestWeatherStationUploads(t *testing.T) {
 	}
 	if r := page("IAFFLI3"); r.StatusCode != 404 {
 		t.Fatalf("page after removal: %d", r.StatusCode)
+	}
+	if l := list(); len(l) != 0 {
+		t.Fatalf("listed after removal: %v", l)
 	}
 }

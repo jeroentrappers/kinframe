@@ -32,7 +32,7 @@ import app.kinframe.core.design.KinShapeM
 import app.kinframe.frame.R
 
 /** A situation worth a calm card on the slideshow (frameo-behaviour-spec B.14: storage, network, captive portal). */
-enum class FrameStatus { Offline, ServerUnreachable, CaptivePortal, StorageCritical }
+enum class FrameStatus { Offline, ClockWrong, ServerUnreachable, CaptivePortal, StorageCritical }
 
 object FrameStatuses {
     /** The one card to show, most actionable first. [conn] is null before the frame has a session (setup). */
@@ -41,16 +41,23 @@ object FrameStatuses {
         networkUp: Boolean,
         captivePortal: Boolean,
         storage: app.kinframe.frame.storage.StoragePolicy.Level,
+        /** The clock was reset (a restart without a clock battery): TLS fails until it is set again. */
+        clockWrong: Boolean = false,
     ): FrameStatus? = when {
         networkUp && captivePortal -> FrameStatus.CaptivePortal
         !networkUp || conn == app.kinframe.frame.sync.FrameSession.Connection.Offline -> FrameStatus.Offline
+        clockWrong -> FrameStatus.ClockWrong
         conn == app.kinframe.frame.sync.FrameSession.Connection.ServerUnreachable -> FrameStatus.ServerUnreachable
         storage == app.kinframe.frame.storage.StoragePolicy.Level.Critical -> FrameStatus.StorageCritical
         else -> null
     }
 
     /** Network trouble shows after a minute (short blips don't flash a card); the others right away. */
-    fun delayMs(s: FrameStatus?): Long = if (s == FrameStatus.Offline || s == FrameStatus.ServerUnreachable) 60_000 else 0
+    fun delayMs(s: FrameStatus?): Long = when (s) {
+        FrameStatus.Offline, FrameStatus.ServerUnreachable -> 60_000
+        FrameStatus.ClockWrong -> 20_000 // with root the clock is usually set within seconds
+        else -> 0
+    }
 
     /** A dismissed storage card comes back after a day; network cards when the situation changes. */
     const val STORAGE_SNOOZE_MS = 24 * 3_600_000L
@@ -109,6 +116,10 @@ fun FrameStatusCard(status: FrameStatus?, onDismiss: () -> Unit, onAction: () ->
         when (s) {
             FrameStatus.Offline -> StatusCard(
                 KinIcons.WifiOff, stringResource(R.string.status_card_offline_title), stringResource(R.string.status_card_offline_body),
+                Kin.colors.inkSoft, onDismiss,
+            )
+            FrameStatus.ClockWrong -> StatusCard(
+                KinIcons.Clock, stringResource(R.string.status_card_clock_title), stringResource(R.string.status_card_clock_body),
                 Kin.colors.inkSoft, onDismiss,
             )
             FrameStatus.ServerUnreachable -> StatusCard(

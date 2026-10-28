@@ -3262,6 +3262,25 @@ type Problem struct {
 // ProblemCode defines model for ProblemCode.
 type ProblemCode string
 
+// PublicStationList defines model for PublicStationList.
+type PublicStationList struct {
+	Stations []PublicStationSummary `json:"stations"`
+}
+
+// PublicStationSummary defines model for PublicStationSummary.
+type PublicStationSummary struct {
+	// Name The title the owner chose; empty: none.
+	Name string `json:"name"`
+
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+	StationId  string         `json:"station_id"`
+
+	// Temp24h The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+	Temp24h []*float32 `json:"temp_24h"`
+}
+
 // PushEndpoint defines model for PushEndpoint.
 type PushEndpoint struct {
 	CreatedAt  time.Time `json:"created_at"`
@@ -4699,6 +4718,9 @@ type ServerInterface interface {
 
 	// (GET /v1/stations/latest)
 	GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams)
+
+	// (GET /v1/stations/public)
+	ListPublicStations(w http.ResponseWriter, r *http.Request)
 
 	// (GET /v1/stations/{stationId}/public)
 	GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string)
@@ -7654,6 +7676,20 @@ func (siw *ServerInterfaceWrapper) GetStationLatest(w http.ResponseWriter, r *ht
 	handler.ServeHTTP(w, r)
 }
 
+// ListPublicStations operation middleware
+func (siw *ServerInterfaceWrapper) ListPublicStations(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPublicStations(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetStationPublic operation middleware
 func (siw *ServerInterfaceWrapper) GetStationPublic(w http.ResponseWriter, r *http.Request) {
 
@@ -7921,6 +7957,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/{stationId}/public", wrapper.GetStationPublic)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/latest", wrapper.GetStationLatest)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/public", wrapper.ListPublicStations)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -11193,6 +11230,43 @@ func (response GetStationLatest429ApplicationProblemPlusJSONResponse) VisitGetSt
 	return err
 }
 
+type ListPublicStationsRequestObject struct {
+}
+
+type ListPublicStationsResponseObject interface {
+	VisitListPublicStationsResponse(w http.ResponseWriter) error
+}
+
+type ListPublicStations200JSONResponse PublicStationList
+
+func (response ListPublicStations200JSONResponse) VisitListPublicStationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListPublicStations429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ListPublicStations429ApplicationProblemPlusJSONResponse) VisitListPublicStationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetStationPublicRequestObject struct {
 	StationId string `json:"stationId"`
 }
@@ -11568,6 +11642,9 @@ type StrictServerInterface interface {
 
 	// (GET /v1/stations/latest)
 	GetStationLatest(ctx context.Context, request GetStationLatestRequestObject) (GetStationLatestResponseObject, error)
+
+	// (GET /v1/stations/public)
+	ListPublicStations(ctx context.Context, request ListPublicStationsRequestObject) (ListPublicStationsResponseObject, error)
 
 	// (GET /v1/stations/{stationId}/public)
 	GetStationPublic(ctx context.Context, request GetStationPublicRequestObject) (GetStationPublicResponseObject, error)
@@ -14319,6 +14396,30 @@ func (sh *strictHandler) GetStationLatest(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetStationLatestResponseObject); ok {
 		if err := validResponse.VisitGetStationLatestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListPublicStations operation middleware
+func (sh *strictHandler) ListPublicStations(w http.ResponseWriter, r *http.Request) {
+	var request ListPublicStationsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListPublicStations(ctx, request.(ListPublicStationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListPublicStations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListPublicStationsResponseObject); ok {
+		if err := validResponse.VisitListPublicStationsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
