@@ -11,6 +11,7 @@ import android.provider.Settings
 import android.util.Log
 import app.kinframe.frame.FrameApp
 import app.kinframe.frame.FrameController
+import app.kinframe.frame.system.DeviceMode
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -160,7 +161,7 @@ class DisplayController(private val c: FrameController) {
             delay(FADE_MS)
             _mode.value = ScreenMode.Asleep
             _windowBrightness.value = BRIGHTNESS_OFF
-            if (g.root.known) {
+            if (g.root.known && DeviceMode.isFrame(g.app)) {
                 // Android applies its minimum backlight for the "off" window value first; switch the panel's
                 // backlight fully off once that has settled. Any brightness change on wake restores it.
                 delay(1_200)
@@ -185,7 +186,8 @@ class DisplayController(private val c: FrameController) {
         _brightness.value = target
         if (_mode.value == ScreenMode.Asleep) return
         _windowBrightness.value = target / 255f
-        if (runCatching { Settings.System.canWrite(g.app) }.getOrDefault(false)) {
+        // A tablet keeps its own brightness for the other apps; the window value is enough there.
+        if (DeviceMode.isFrame(g.app) && runCatching { Settings.System.canWrite(g.app) }.getOrDefault(false)) {
             runCatching {
                 Settings.System.putInt(g.app.contentResolver, Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL)
                 Settings.System.putInt(g.app.contentResolver, Settings.System.SCREEN_BRIGHTNESS, target)

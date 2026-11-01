@@ -23,10 +23,12 @@ import kotlinx.coroutines.launch
 /**
  * The frame's only activity: a HOME launcher in immersive kiosk mode that keeps the screen on.
  * Leaving it requires the owner PIN ([app.kinframe.frame.kiosk.OwnerGate]) when one is set, or adb.
+ * On a tablet ([DeviceMode]) it is an ordinary app: not over the lock screen, in Recents, and Back leaves it.
  */
 class MainActivity : ComponentActivity() {
     private val graph by lazy { FrameApp.graph(this) }
     private var swallowGesture = false
+    private var frameMode = true
 
     /** Storage permission prompt and the folder picker for SD/USB export (see [app.kinframe.frame.removable.RemovableStorage]). */
     private val storagePermissions = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()) { res ->
@@ -44,21 +46,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        @Suppress("DEPRECATION")
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
-        )
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        applyDeviceMode()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         hideSystemBars()
         handleProvisioning(intent)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                // Kiosk: back never leaves the frame app; it closes the settings screen if open.
+                // Kiosk: back never leaves the frame app; it closes the settings screen if open. On a tablet it leaves.
                 if (graph.controller.settingsOpen.value) graph.controller.closeSettings()
+                else if (!frameMode) moveTaskToBack(true)
             }
         })
 
@@ -98,6 +96,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Choosing (or dropping) kinframe as the home app switches between frame and tablet without a restart.
+        applyDeviceMode()
         // Back from Android's settings (by the floating button or otherwise).
         app.kinframe.frame.system.ReturnButton.hide(this)
     }
@@ -129,6 +129,17 @@ class MainActivity : ComponentActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) hideSystemBars()
+    }
+
+    /** Frame: over the lock screen, turns the screen on, hidden from Recents. Tablet: none of that. */
+    private fun applyDeviceMode() {
+        frameMode = app.kinframe.frame.system.DeviceMode.isFrame(this)
+        @Suppress("DEPRECATION")
+        val lockFlags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+        if (frameMode) window.addFlags(lockFlags) else window.clearFlags(lockFlags)
+        runCatching { getSystemService(android.app.ActivityManager::class.java).appTasks.forEach { it.setExcludeFromRecents(frameMode) } }
     }
 
     private fun hideSystemBars() {
