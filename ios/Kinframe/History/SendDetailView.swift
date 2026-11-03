@@ -160,6 +160,16 @@ struct SendDetailView: View {
                     }
                     .buttonStyle(.kf(.ghost))
                     .accessibilityLabel(L("detail.editCaptionN", ["n": n]))
+                    // One item of a bigger send, on its own (web: share.actionShort).
+                    if send.items.count > 1, item.status != .failed, let source = shareSource(send, items: [item.id]) {
+                        Button {
+                            sharing = ShareRequest(source: source)
+                        } label: {
+                            Label(L("share.actionShort"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.ghost))
+                        .accessibilityLabel("\(L("share.action")) (\(n))")
+                    }
                 }
                 ForEach(send.frames, id: \.frameId) { f in
                     if let p = f.placements.first(where: { $0.itemId == item.id }) {
@@ -177,8 +187,8 @@ struct SendDetailView: View {
     }
 
     /// "Share to another frame": the first frame that still holds every item, when there's another frame to send to.
-    private func shareSource(_ send: Send) -> Sharing.Source? {
-        guard let source = Sharing.source(of: send, itemIds: Sharing.shareableItems(of: send)),
+    private func shareSource(_ send: Send, items: [String]? = nil) -> Sharing.Source? {
+        guard let source = Sharing.source(of: send, itemIds: items ?? Sharing.shareableItems(of: send)),
               !Sharing.targets(app.frames, excluding: source.frameId).isEmpty else { return nil }
         return source
     }

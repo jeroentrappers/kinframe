@@ -33,6 +33,29 @@ final class ToastCenter {
         }
     }
 
+    /// Undo instead of "are you sure" (web: toasts.deferred): `apply` right away, `commit` once the toast is gone
+    /// unless Undo was tapped, which runs `rollback`. A failed commit rolls back and shows the error.
+    func deferred(_ message: String, apply: () -> Void, rollback: @escaping () -> Void, commit: @escaping () async throws -> Void,
+                  seconds: Double = 6) {
+        apply()
+        var undone = false
+        show(message, action: .init(title: L("common.undo")) {
+            undone = true
+            rollback()
+            self.dismiss()
+        })
+        Task {
+            try? await Task.sleep(for: .seconds(seconds))
+            guard !undone else { return }
+            do {
+                try await commit()
+            } catch {
+                rollback()
+                self.error(error)
+            }
+        }
+    }
+
     func error(_ error: Error) {
         guard !(error is CancellationError) else { return }
         show(errorMessage(error), isError: true)

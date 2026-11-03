@@ -7,6 +7,8 @@ import SwiftUI
 /// portrait previews, the caption, and for videos the trim window and sound.
 struct ItemEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
+    /// "Caption applied to all 4 items", after "Use for all".
+    @State private var appliedAll: Int?
     @Bindable var model: ComposeModel
     let draftId: UUID
     let frames: [FrameSummary]
@@ -145,10 +147,18 @@ struct ItemEditorSheet: View {
             if model.drafts.count > 1, !text.isEmpty {
                 Button {
                     model.applyCaptionToAll(text)
+                    withAnimation { appliedAll = model.drafts.count }
+                    UIAccessibility.post(notification: .announcement, argument: Lp("send.appliedAll", count: model.drafts.count))
                 } label: {
                     Label(L("send.applyAll", ["n": model.drafts.count]), systemImage: "square.on.square")
                 }
                 .buttonStyle(.kf(.soft))
+                if let appliedAll {
+                    Label(Lp("send.appliedAll", count: appliedAll), systemImage: "checkmark")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(Palette.accentText)
+                        .transition(.opacity)
+                }
             }
         }
     }
@@ -314,6 +324,11 @@ struct VideoTrimSection: View {
                 }
                 .buttonStyle(.kf(.secondary))
                 Spacer()
+                // Back to the whole video, when the whole video may be sent.
+                if draft.trim != nil, duration <= Double(maxSeconds) + 0.5 {
+                    Button(L("trim.reset")) { model.update(draft.id) { $0.trim = nil } }
+                        .buttonStyle(.kf(.ghost))
+                }
             }
             if let player {
                 VideoPlayer(player: player)

@@ -112,10 +112,11 @@ final class FrameDetailModel {
         _ = try await api.call { try await $0.removeFrame(path: .init(frameId: id)).noContent }
     }
 
-    func transfer(to userId: String) async throws {
+    /// Name and location (owner and admins, `PATCH /v1/frames/{id}`).
+    func saveDetails(name: String, location: String) async throws {
         let id = id
-        _ = try await api.call { try await $0.transferOwnership(path: .init(frameId: id), body: .json(.init(userId: userId))).noContent }
-        await load()
+        let body = Operations.UpdateFrame.Input.Body.JsonPayload(name: FrameDetailsForm.clean(name), location: FrameDetailsForm.clean(location))
+        frame = try await api.call { try await $0.updateFrame(path: .init(frameId: id), body: .json(body)).ok.body.json }
     }
 }
 
@@ -237,19 +238,45 @@ struct FrameOverviewSection: View {
     @State private var confirmRemove = false
     @State private var removeMine = false
     @State private var typedName = ""
-    @State private var transferring = false
+    @State private var transferring: TransferRequest?
+    @State private var leavingAsOwner = false
+    @State private var replacing = false
+    @State private var editName = ""
+    @State private var editLocation = ""
+    @State private var savingDetails = false
 
     var body: some View {
         if let frame = model.summary {
             VStack(alignment: .leading, spacing: 16) {
                 if frame.can(\.changeSettings) { remote(frame) }
                 if let health = model.health { healthCard(health) }
-                details(frame)
+                details(frame).id("details")
+                if frame.role == .owner { ownership(frame).id("ownership") }
                 danger(frame)
             }
-            .sheet(isPresented: $transferring) {
-                TransferSheet(model: model)
+            .sheet(item: $transferring) { _ in
+                TransferSheet(api: model.api, frame: frame) { _ in Task { await model.load() } }
             }
+            .sheet(isPresented: $leavingAsOwner) {
+                TransferSheet(api: model.api, frame: frame, leaving: true)
+            }
+            .sheet(isPresented: $replacing) {
+                ReplaceDeviceSheet(api: model.api, frame: frame) { Task { await model.load() } }
+            }
+            .onAppear {
+                editName = frame.name
+                editLocation = frame.location ?? ""
+            }
+            #if DEBUG
+            .task {
+                try? await Task.sleep(for: .seconds(1.5))
+                if DebugLaunch.takeSheet("transfer") { transferring = TransferRequest() }
+                if DebugLaunch.takeSheet("replace") { replacing = true }
+                if DebugLaunch.takeSheet("leave") { leavingAsOwner = true }
+            }
+            #endif
+            .onChange(of: frame.name) { editName = frame.name }
+            .onChange(of: frame.location) { editLocation = frame.location ?? "" }
         }
     }
 
@@ -299,7 +326,7 @@ struct FrameOverviewSection: View {
             SectionHeader(L("overview.health"))
             VStack(spacing: 0) {
                 if let hb = h.lastHeartbeat {
-                    if let rssi = hb.wifiRssiDbm {
+                    if model.summary?.deviceKind != .browser, let rssi = hb.wifiRssiDbm {
                         row(L("health.wifi"), value: [hb.wifiSsid, "\(rssi) dBm"].compactMap { $0 }.joined(separator: " · "), trailing: AnyView(SignalBars(bars: Format.signalBars(rssi))))
                     }
                     if let free = hb.storageFreeBytes, let total = hb.storageTotalBytes {
@@ -327,6 +354,7 @@ struct FrameOverviewSection: View {
     private func details(_ frame: FrameSummary) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(L("overview.details"))
+            if frame.isManager { detailsForm(frame) }
             VStack(spacing: 0) {
                 row(L("overview.owner"), value: frame.ownerName ?? "–")
                 if let n = model.frame?.value2.memberCount { row(L("overview.members"), value: "\(n)") }
@@ -337,6 +365,80 @@ struct FrameOverviewSection: View {
                 }
             }
             .card(padding: 0)
+        }
+    }
+
+    /// Name and location, for the owner and admins (web: the details form).
+    private func detailsForm(_ frame: FrameSummary) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("frame.name")).font(.subheadline.weight(.semibold))
+                TextField(L("frame.name"), text: $editName)
+                    .textFieldStyle(KFFieldStyle())
+                    .submitLabel(.done)
+                    .onChange(of: editName) { if editName.count > FrameDetailsForm.maxLength { editName = String(editName.prefix(FrameDetailsForm.maxLength)) } }
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("frame.location")).font(.subheadline.weight(.semibold))
+                TextField(L("add.locationPlaceholder"), text: $editLocation)
+                    .textFieldStyle(KFFieldStyle())
+                    .submitLabel(.done)
+                    .onChange(of: editLocation) { if editLocation.count > FrameDetailsForm.maxLength { editLocation = String(editLocation.prefix(FrameDetailsForm.maxLength)) } }
+            }
+            Button {
+                Task { await saveDetails() }
+            } label: {
+                HStack(spacing: 6) {
+                    if savingDetails { ProgressView().tint(Palette.onPrimary) }
+                    Text(L("common.save"))
+                }
+            }
+            .buttonStyle(.kf(.primary))
+            .disabled(savingDetails || !FrameDetailsForm.canSave(name: editName, location: editLocation, current: frame))
+        }
+        .card(padding: 16)
+    }
+
+    private func saveDetails() async {
+        savingDetails = true
+        defer { savingDetails = false }
+        do {
+            try await model.saveDetails(name: editName, location: editLocation)
+            if let s = model.summary { app.updateFrame(s) }
+            app.toasts.show(L("common.saved"))
+        } catch {
+            app.toasts.error(error)
+        }
+    }
+
+    /// Owner only: hand the frame over, or move it to a new device.
+    private func ownership(_ frame: FrameSummary) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            SectionHeader(L("overview.ownership"))
+            VStack(alignment: .leading, spacing: 12) {
+                ownershipRow(L("transfer.title"), L("overview.transferBody"), button: L("overview.transferButton"), symbol: "crown") {
+                    transferring = TransferRequest()
+                }
+                Divider().overlay(Palette.border)
+                ownershipRow(L("replace.short"), L("overview.replaceBody"), button: L("overview.replaceButton"), symbol: "arrow.triangle.swap") {
+                    replacing = true
+                }
+            }
+            .card(padding: 16)
+        }
+    }
+
+    private func ownershipRow(_ title: String, _ body: String, button: String, symbol: String, action: @escaping () -> Void) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: symbol).font(.title3).foregroundStyle(Palette.accent).frame(width: 28).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
+                    Text(body).font(.footnote).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+                }
+                Button(button, action: action).buttonStyle(.kf(.secondary)).accessibilityLabel(title)
+            }
+            Spacer(minLength: 0)
         }
     }
 
@@ -361,8 +463,8 @@ struct FrameOverviewSection: View {
             SectionHeader(frame.role == .owner ? L("overview.dangerTitle") : L("overview.leaveTitle"))
             VStack(alignment: .leading, spacing: 12) {
                 if frame.role == .owner {
-                    Text(L("overview.transferBody")).font(.subheadline).foregroundStyle(Palette.textMuted)
-                    Button(L("overview.transferButton")) { transferring = true }.buttonStyle(.kf(.secondary))
+                    Text(L("overview.leaveBody")).font(.subheadline).foregroundStyle(Palette.textMuted)
+                    Button(L("overview.leaveButton"), role: .destructive) { leavingAsOwner = true }.buttonStyle(.kf(.dangerGhost))
                     Divider().overlay(Palette.border)
                     Text(L("overview.removeBody")).font(.subheadline).foregroundStyle(Palette.textMuted)
                     Button(L("overview.removeButton"), role: .destructive) { confirmRemove = true }.buttonStyle(.kf(.dangerGhost))
@@ -427,79 +529,5 @@ struct SignalBars: View {
         }
         .padding(.trailing, 6)
         .accessibilityHidden(true)
-    }
-}
-
-/// Hand the frame to another member (owner only). The previous owner becomes admin.
-private struct TransferSheet: View {
-    @Environment(AppModel.self) private var app
-    @Environment(\.dismiss) private var dismiss
-    let model: FrameDetailModel
-    @State private var members: [Member] = []
-    @State private var choice: String?
-    @State private var busy = false
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Group {
-                    Section {
-                        Text(L("transfer.body")).font(.subheadline).foregroundStyle(Palette.textMuted)
-                    }
-                    let eligible = members.filter { $0.role != .owner }
-                    if eligible.isEmpty {
-                        Text(L("transfer.noOne")).foregroundStyle(Palette.textMuted)
-                    } else {
-                        Section(L("transfer.pick")) {
-                            ForEach(eligible) { m in
-                                Button {
-                                    choice = m.userId
-                                } label: {
-                                    HStack {
-                                        AvatarView(name: m.displayName, url: m.avatarUrl, size: 32)
-                                        Text(m.displayName).foregroundStyle(Palette.text)
-                                        RoleBadge(role: m.role)
-                                        Spacer()
-                                        if choice == m.userId { Image(systemName: "checkmark").foregroundStyle(Palette.primary) }
-                                    }
-                                }
-                                .accessibilityAddTraits(choice == m.userId ? .isSelected : [])
-                            }
-                        }
-                    }
-                }
-                .listRowBackground(Palette.surface)
-            }
-            .scrollContentBackground(.hidden)
-            .pageBackground()
-            .navigationTitle(L("transfer.title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(L("transfer.do")) { Task { await transfer() } }
-                        .disabled(choice == nil || busy)
-                }
-            }
-            .task {
-                let id = model.id
-                members = (try? await model.api.call { try await $0.listMembers(path: .init(frameId: id)).ok.body.json }) ?? []
-                choice = members.first { $0.role == .admin }?.userId
-            }
-        }
-    }
-
-    private func transfer() async {
-        guard let choice, let name = members.first(where: { $0.userId == choice })?.displayName else { return }
-        busy = true
-        defer { busy = false }
-        do {
-            try await model.transfer(to: choice)
-            if let s = model.summary { app.updateFrame(s) }
-            app.toasts.show(L("transfer.done", ["name": name]))
-            dismiss()
-        } catch {
-            app.toasts.error(error)
-        }
     }
 }

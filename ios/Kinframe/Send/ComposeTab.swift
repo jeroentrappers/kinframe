@@ -449,9 +449,14 @@ struct DraftTile: View {
                 Label(Format.duration(seconds), systemImage: draft.trim != nil ? "scissors" : "play.fill")
                     .labelStyle(TightLabelStyle())
                     .font(.caption2.weight(.bold).monospacedDigit())
+                    .accessibilityLabel(draft.trim != nil ? L("trim.trimmedTo", ["length": Format.duration(seconds)]) : Format.duration(seconds))
             }
             if captioned { Image(systemName: "text.bubble.fill").font(.caption2) }
-            if draft.fit == .fit { Image(systemName: "rectangle.arrowtriangle.2.inward").font(.caption2) }
+            if draft.fit == .fit {
+                Label(L("send.fitShort"), systemImage: "rectangle.arrowtriangle.2.inward")
+                    .labelStyle(TightLabelStyle())
+                    .font(.caption2.weight(.bold))
+            }
             if let issue {
                 Image(systemName: "exclamationmark.triangle.fill").font(.caption2)
                     .accessibilityLabel(issue == .tooLarge ? L("send.issueTooLarge", ["max": Format.bytes(maxSize)]) : L("send.issueTooLong", ["max": Format.duration(Double(maxVideo))]))

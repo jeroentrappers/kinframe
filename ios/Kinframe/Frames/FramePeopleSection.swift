@@ -74,6 +74,10 @@ final class PeopleModel {
         _ = try await api.call { try await $0.revokeInvite(path: .init(frameId: id, inviteId: iid)).noContent }
         invites.removeAll { $0.id == iid }
     }
+
+    /// Take an invite off the list before it's revoked (undo puts the list back).
+    func hide(_ invite: Invite) { invites.removeAll { $0.id == invite.id } }
+    func restore(_ list: [Invite]) { invites = list }
 }
 
 extension Member {
@@ -91,6 +95,7 @@ struct FramePeopleSection: View {
     @State private var model: PeopleModel
     @State private var editing: Member?
     @State private var inviting = false
+    @State private var transferTo: TransferRequest?
 
     init(api: API, frame: FrameDetail) {
         self.frame = frame
@@ -109,12 +114,29 @@ struct FramePeopleSection: View {
             members
             if summary.can(\.invite) { invites }
         }
-        .task { await load() }
+        .task {
+            await load()
+            #if DEBUG
+            if DebugLaunch.takeSheet("member") { editing = model.members.first { canEdit($0) } }
+            #endif
+        }
         .onLiveEvent(app.events) { e in
             if case .joinRequest(let id, _) = e, id == frame.id { Task { await load() } }
         }
         .sheet(item: $editing) { m in
-            MemberSheet(model: model, member: m, viewerRole: summary.role)
+            MemberSheet(model: model, member: m, viewerRole: summary.role) {
+                // "Make owner": the transfer flow, with this member already picked.
+                editing = nil
+                Task {
+                    try? await Task.sleep(for: .milliseconds(450))
+                    transferTo = TransferRequest(preselect: m.userId)
+                }
+            }
+        }
+        .sheet(item: $transferTo) { request in
+            TransferSheet(api: model.api, frame: summary, preselect: request.preselect, leaving: false) { _ in
+                Task { await load() }
+            }
         }
         .sheet(isPresented: $inviting) {
             InviteCreateSheet(model: model, frameName: summary.name, approval: frame.value2.inviteRequiresApproval ?? true)
@@ -237,13 +259,22 @@ struct FramePeopleSection: View {
                             }
                             .accessibilityLabel(L("people.share"))
                         }
+                        Button {
+                            UIPasteboard.general.string = inv.url
+                            app.toasts.show(L("people.copied"))
+                        } label: {
+                            Image(systemName: "doc.on.doc").frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel(L("people.copy"))
                         Button(role: .destructive) {
-                            Task {
-                                do {
-                                    try await model.revoke(inv)
-                                    app.toasts.show(L("people.revoked"))
-                                } catch { app.toasts.error(error) }
-                            }
+                            let before = model.invites
+                            app.toasts.deferred(L("people.revoked"), apply: {
+                                withAnimation { model.hide(inv) }
+                            }, rollback: {
+                                withAnimation { model.restore(before) }
+                            }, commit: {
+                                try await model.revoke(inv)
+                            })
                         } label: {
                             Image(systemName: "xmark.circle").frame(width: 44, height: 44)
                         }
@@ -264,6 +295,8 @@ private struct MemberSheet: View {
     let model: PeopleModel
     let member: Member
     let viewerRole: Role
+    /// Owner only: hand the frame to this member.
+    var makeOwner: (() -> Void)?
     @State private var role: Member.RolePayloadForUpdate = .member
     @State private var permissions = Permissions()
     @State private var confirmRemove = false
@@ -299,6 +332,17 @@ private struct MemberSheet: View {
                                 }
                                 .tint(Palette.accent)
                             }
+                        }
+                    }
+                    if viewerRole == .owner, let makeOwner {
+                        Section {
+                            Button {
+                                makeOwner()
+                            } label: {
+                                Label(L("people.makeOwner"), systemImage: "crown")
+                            }
+                        } footer: {
+                            Text(L("overview.transferBody"))
                         }
                     }
                     Section {

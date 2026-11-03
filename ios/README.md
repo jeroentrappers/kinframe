@@ -57,6 +57,9 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfSection calendar` with `-kfScrollTo calendars\|sentEvents\|calendarSettings`, `-kfSheet calendarAdd\|calendarEvent\|calendarMonth\|calendarDetail` | The Calendar section: scroll to a part, open "Add a calendar", "Send an event", the month view or an event |
 | `-kfSharePreview … -kfComposeFrames <ids> -kfAutoSend YES` | Pick those frames in the share preview and send (the extension's path, with preparation) |
 | `-kfScrollTo display`, `-kfAlbum <id or name>`, `-kfSheet albumNew\|albumSelect\|albumPick\|albumSchedule\|albumArrange\|albumRename\|albumPlay` | On a frame page: scroll to the screen settings; open an album in the library; open the new-album sheet, select two photos, the add-to-album picker, an album's schedule, arrange or rename sheet, or play it on the frame |
+| `-kfScrollTo details\|ownership`, `-kfSheet transfer\|leave\|replace\|member [-kfTransferConfirm YES]` | On a frame page: scroll to the details or ownership, open the transfer (at its confirm step), the owner's leave, moving to a new frame, or the first member you can edit (with `-kfSection people`) |
+| `-kfSheet reservations`, `-kfScrollTo signOut` | In Settings: the operator's shop reservations (sample data on a server without a shop), the end of the page |
+| `-kfDevOperator YES` | The dev token carries the operator scope (together with `-kfReset YES` to sign in again) |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
 | `-kfSheet tv [-kfTvMode show\|mirror\|frame] [-kfTvLink YES] [-kfTvStart YES] [-kfTvStage YES]` | On a frame's Photos: open "Show on TV" in that mode, make a TV link, start the AirPlay slideshow (also without a TV), and show the TV's picture inside the sheet |
 | `-kfLanguage en\|nl\|system` | Language |

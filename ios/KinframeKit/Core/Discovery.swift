@@ -43,6 +43,8 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var weather: Bool
     /// Calendars, sent events and countdowns are on (`calendar`).
     public var calendar: Bool = false
+    /// The server runs the pre-order shop (`shop` in discovery): operators see its reservations.
+    public var shop: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -56,7 +58,7 @@ public struct Discovery: Codable, Equatable, Sendable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case name, version, api, web, auth, limits, weather, calendar
+        case name, version, api, web, auth, limits, weather, calendar, shop
         case devAuth = "dev_auth"
     }
 
@@ -71,6 +73,12 @@ public struct Discovery: Codable, Equatable, Sendable {
         devAuth = try c.decodeIfPresent(Bool.self, forKey: .devAuth) ?? false
         weather = try c.decodeIfPresent(Bool.self, forKey: .weather) ?? false
         calendar = try c.decodeIfPresent(Bool.self, forKey: .calendar) ?? false
+        // The server sends the shop's configuration (an object); we keep only whether there is one.
+        if let b = try? c.decode(Bool.self, forKey: .shop) {
+            shop = b
+        } else {
+            shop = c.contains(.shop) && (try? c.decodeNil(forKey: .shop)) == false
+        }
     }
 
     /// Logto is configured when the server published an issuer and a native client id.

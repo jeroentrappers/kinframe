@@ -94,6 +94,9 @@ struct FrameCard: View {
                         .foregroundStyle(Palette.text)
                         .lineLimit(2)
                     Spacer(minLength: 8)
+                    if frame.deviceKind == .browser {
+                        Pill(L("frames.browserBadge"), systemImage: "globe")
+                    }
                     RoleBadge(role: frame.role)
                 }
                 if let location = frame.location, !location.isEmpty {

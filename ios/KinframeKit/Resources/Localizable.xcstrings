@@ -8467,6 +8467,74 @@
         }
       }
     },
+    "ios.account.openSettings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instellingen openen"
+          }
+        }
+      }
+    },
+    "ios.account.pushBlocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are turned off for kinframe in the iPhone’s Settings. Allow them there, then come back here."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen staan uit voor kinframe in de Instellingen van je iPhone. Zet ze daar aan en kom dan terug."
+          }
+        }
+      }
+    },
+    "ios.account.pushUnavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of the app doesn’t get notifications yet. While kinframe is open, reactions and replies show up right away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze versie van de app krijgt nog geen meldingen. Zolang kinframe open is, zie je reacties en antwoorden meteen."
+          }
+        }
+      }
+    },
+    "ios.account.shop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reserve a frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een kader reserveren"
+          }
+        }
+      }
+    },
     "ios.albums.arrangeHint": {
       "extractionState": "manual",
       "localizations": {

@@ -2,6 +2,7 @@ import KinframeKit
 import OpenAPIRuntime
 import PhotosUI
 import SwiftUI
+import UserNotifications
 
 /// Profile (name, photo), language, server and sign-out.
 struct SettingsTab: View {
@@ -13,17 +14,41 @@ struct SettingsTab: View {
     @State private var confirmSignOut = false
     @State private var confirmChangeServer = false
     @State private var language = L10n.language
+    @State private var pushOn = false
+    @State private var pushStatus: UNAuthorizationStatus = .notDetermined
+    @State private var pushBusy = false
+    @State private var debugReservations = false
+    @Environment(\.openURL) private var openURL
     @FocusState private var nameFocused: Bool
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             Form {
                 Group {
                     profile
                     preferences
+                    notifications
+                    if app.me?.isOperator == true, app.discovery?.shop == true, let api = app.api {
+                        Section {
+                            NavigationLink {
+                                ReservationsView(api: api)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(L("reservations.settingsLink"))
+                                    Text(L("reservations.settingsHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                                }
+                            }
+                        }
+                    }
                     server
+                    links
                     Section {
+                        if let name = app.me?.displayName {
+                            Text(L("settings.signedInAs", ["name": name])).font(.subheadline).foregroundStyle(Palette.textMuted)
+                        }
                         Button(L("settings.signOut"), role: .destructive) { confirmSignOut = true }
+                            .id("signOut")
                     } footer: {
                         Text(L("settings.about")).frame(maxWidth: .infinity).padding(.top, 12)
                     }
@@ -31,6 +56,15 @@ struct SettingsTab: View {
                 .listRowBackground(Palette.surface)
             }
             .scrollContentBackground(.hidden)
+            #if DEBUG
+            .task {
+                if UserDefaults.standard.string(forKey: "kfScrollTo") == "signOut" {
+                    try? await Task.sleep(for: .seconds(1.5))
+                    withAnimation { proxy.scrollTo("signOut", anchor: .bottom) }
+                }
+            }
+            #endif
+            }
             .pageBackground()
             .navigationTitle(L("settings.title"))
             .confirmationDialog(L("settings.signOut"), isPresented: $confirmSignOut, titleVisibility: .hidden) {
@@ -47,6 +81,18 @@ struct SettingsTab: View {
             } message: {
                 Text(L("ios.server.changeBody"))
             }
+            #if DEBUG
+            // -kfSheet reservations: the operator screen, with sample reservations when the server has no shop.
+            .sheet(isPresented: $debugReservations) {
+                if let api = app.api {
+                    NavigationStack { ReservationsView(api: api, sample: app.discovery?.shop == true ? nil : ShopReservation.samples) }
+                }
+            }
+            .task {
+                try? await Task.sleep(for: .seconds(1.5))
+                if DebugLaunch.takeSheet("reservations") { debugReservations = true }
+            }
+            #endif
             .onAppear { name = app.me?.displayName ?? "" }
             .onChange(of: app.me?.displayName) { name = app.me?.displayName ?? "" }
             .onChange(of: avatarPick) { _, item in
@@ -119,6 +165,78 @@ struct SettingsTab: View {
             Text(L("settings.preferences"))
         } footer: {
             Text(L("ios.settings.languageHint"))
+        }
+    }
+
+    /// Notifications through APNs (web: push). The app registers only when the build has push turned on.
+    private var notifications: some View {
+        Section {
+            if !PushRegistrar.shared.enabled {
+                Label(L("ios.account.pushUnavailable"), systemImage: "bell.slash").font(.subheadline).foregroundStyle(Palette.textMuted)
+            } else {
+                Toggle(isOn: Binding(get: { pushOn }, set: { on in Task { await setPush(on) } })) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L("push.toggle"))
+                        Text(L("push.toggleHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                }
+                .tint(Palette.accent)
+                .disabled(pushBusy || pushStatus == .denied)
+                if pushStatus == .denied {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Callout(L("ios.account.pushBlocked"), kind: .warn)
+                        Button(L("ios.account.openSettings")) {
+                            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                        }
+                        .buttonStyle(.kf(.secondary))
+                    }
+                }
+            }
+        } header: {
+            Text(L("push.title"))
+        }
+        .task { await refreshPush() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            Task { await refreshPush() }
+        }
+    }
+
+    private func refreshPush() async {
+        guard PushRegistrar.shared.enabled else { return }
+        pushStatus = await PushRegistrar.shared.authorization()
+        pushOn = await PushRegistrar.shared.isOn()
+    }
+
+    private func setPush(_ on: Bool) async {
+        pushBusy = true
+        defer { pushBusy = false }
+        if on {
+            if await PushRegistrar.shared.turnOn() {
+                app.toasts.show(L("push.enabled"))
+            }
+        } else {
+            PushRegistrar.shared.turnOff(api: app.api)
+            app.toasts.show(L("push.disabled"))
+        }
+        await refreshPush()
+    }
+
+    /// Pages of the server's web app: privacy, terms and (when the server sells frames) the shop.
+    @ViewBuilder
+    private var links: some View {
+        let web = app.discovery?.web
+        if WebLinks.page("/privacy", web: web) != nil {
+            Section(L("legal.links")) {
+                if app.discovery?.shop == true, let shop = WebLinks.page("/shop", web: web) {
+                    Button { openURL(shop) } label: { Label(L("ios.account.shop"), systemImage: "cart") }
+                }
+                if let url = WebLinks.page("/privacy", web: web) {
+                    Button { openURL(url) } label: { Label(L("legal.privacy"), systemImage: "hand.raised") }
+                }
+                if let url = WebLinks.page("/terms", web: web) {
+                    Button { openURL(url) } label: { Label(L("legal.terms"), systemImage: "doc.text") }
+                }
+            }
         }
     }
 
