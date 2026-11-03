@@ -133,12 +133,7 @@ struct FrameDetailView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         header(frame)
-                        Picker(L("frame.sections"), selection: $section) {
-                            ForEach(sections(frame), id: \.self) { s in
-                                Text(title(s)).tag(s)
-                            }
-                        }
-                        .pickerStyle(.segmented)
+                        sectionPicker(frame)
                         switch section {
                         case .overview: FrameOverviewSection(model: model)
                         case .photos: FrameLibrarySection(api: model.api, frame: frame)
@@ -206,6 +201,42 @@ struct FrameDetailView: View {
                     Label(location, systemImage: "mappin").labelStyle(TightLabelStyle()).font(.subheadline).foregroundStyle(Palette.textMuted)
                 }
             }
+        }
+    }
+
+    /// The sections as a segmented control; with five of them (Calendar) a scrolling row of capsules, so long labels
+    /// (Dutch "Instellingen") aren't cut off on a phone.
+    @ViewBuilder
+    private func sectionPicker(_ frame: FrameSummary) -> some View {
+        let list = sections(frame)
+        if list.count <= 4 {
+            Picker(L("frame.sections"), selection: $section) {
+                ForEach(list, id: \.self) { s in Text(title(s)).tag(s) }
+            }
+            .pickerStyle(.segmented)
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 4) {
+                    ForEach(list, id: \.self) { s in
+                        let on = section == s
+                        Button { withAnimation(.snappy) { section = s } } label: {
+                            Text(title(s))
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 13)
+                                .frame(minHeight: 34)
+                                .foregroundStyle(on ? Palette.text : Palette.textMuted)
+                                .background(Capsule().fill(on ? Palette.surface : .clear))
+                                .shadow(color: on ? .black.opacity(0.08) : .clear, radius: 2, y: 1)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(on ? [.isSelected, .isButton] : .isButton)
+                    }
+                }
+                .padding(3)
+            }
+            .background(Capsule().fill(Palette.surface2))
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(L("frame.sections"))
         }
     }
 
