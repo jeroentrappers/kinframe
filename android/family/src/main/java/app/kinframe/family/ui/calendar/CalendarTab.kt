@@ -130,10 +130,12 @@ fun CalendarTab(
     form: SourceForm?,
     settingsState: SettingsFormState?,
     a: CalendarActions,
+    /** Open with the send-event dialog showing (screenshots). */
+    sendOpenAtStart: Boolean = false,
 ) {
     val manage = frame.can { it.changeSettings }
     val mayPut = frame.can { it.send }
-    var sendOpen by rememberSaveable { mutableStateOf(false) }
+    var sendOpen by rememberSaveable { mutableStateOf(sendOpenAtStart) }
     var removing by remember { mutableStateOf<CalendarSource?>(null) }
     var detail by remember { mutableStateOf<CalendarEvent?>(null) }
     PageColumn {
@@ -729,7 +731,7 @@ private fun FrameSettingsViewModel.setTimedViews(list: List<CalendarScheduleDto>
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun CalendarPreview(view: CalendarView, settings: SettingsFormState?, onOpen: (CalendarEvent) -> Unit) {
+fun CalendarPreview(view: CalendarView, settings: SettingsFormState?, onOpen: (CalendarEvent) -> Unit) {
     val c = Kin.colors
     val zone = CalendarLogic.zone(view.timezone)
     val now = remember { Instant.now() }
