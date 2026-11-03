@@ -11,6 +11,7 @@ struct SendDetailView: View {
     @State private var removed = false
     @State private var commitUnsend: Task<Void, Never>?
     @State private var sharing: ShareRequest?
+    @State private var tv: TvRequest?
 
     var body: some View {
         ScrollView {
@@ -27,6 +28,14 @@ struct SendDetailView: View {
                             sharing = ShareRequest(source: source)
                         } label: {
                             Label(L("share.action"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.secondary))
+                    }
+                    if let onTv = TvLogic.sendOnTv(send) {
+                        Button {
+                            tv = TvRequest(frameId: onTv.frameId, frameName: onTv.frameName, scope: .selection(onTv.placementIds))
+                        } label: {
+                            Label(L("tv.show"), systemImage: "tv")
                         }
                         .buttonStyle(.kf(.secondary))
                     }
@@ -63,6 +72,9 @@ struct SendDetailView: View {
             if let api = app.api {
                 ShareToFrameSheet(api: api, source: request.source) { Task { await model.load() } }
             }
+        }
+        .sheet(item: $tv) { r in
+            if let api = app.api { TvSheet(api: api, frameId: r.frameId, frameName: r.frameName, scope: r.scope) }
         }
         .sheet(item: $editing) { item in
             CaptionEditor(item: item, number: (model.send?.items.firstIndex { $0.id == item.id } ?? 0) + 1) { text in

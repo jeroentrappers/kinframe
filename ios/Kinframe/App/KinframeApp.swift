@@ -43,6 +43,18 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         appearance.titleTextAttributes = [.font: UIFont(descriptor: inline, size: 0)]
     }
 
+    /// An external display (an Apple TV through Screen Mirroring) gets the TV scene, which shows a slideshow there
+    /// only while "Show on TV" runs; everything else is the SwiftUI window group.
+    func application(_ application: UIApplication, configurationForConnecting session: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        if session.role == .windowExternalDisplayNonInteractive {
+            let config = UISceneConfiguration(name: "TV", sessionRole: session.role)
+            config.delegateClass = TvSceneDelegate.self
+            return config
+        }
+        return UISceneConfiguration(name: nil, sessionRole: session.role)
+    }
+
     func application(_ application: UIApplication, handleEventsForBackgroundURLSession identifier: String, completionHandler: @escaping () -> Void) {
         let done = UncheckedSendable(completionHandler)
         MainActor.assumeIsolated {
