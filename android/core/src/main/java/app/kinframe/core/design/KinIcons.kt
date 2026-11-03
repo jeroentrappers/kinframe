@@ -158,6 +158,13 @@ object KinIcons {
     }
     val Lightbulb by lazy { line("lightbulb", "M9 18h6", "M10 21h4", "M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z") }
     val Cloud by lazy { line("cloud", "M7 18h10a4 4 0 0 0 .6-8A6 6 0 0 0 6.2 11 3.5 3.5 0 0 0 7 18z") }
+    // The web app's icons (web/src/lib/components/Icon.svelte), for the features shared with it.
+    val Tv by lazy { line("tv", "M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M8 21h8M12 18v3") }
+    val Cast by lazy { line("cast", "M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6", "M2 12a9 9 0 0 1 8 8", "M2 16a5 5 0 0 1 4 4", "M2 20h.01") }
+    val Star by lazy { line("star", "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z") }
+    val Album by lazy { line("album", "M5 7h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z", "M7 3h12a2 2 0 0 1 2 2v12", "m3 17 4-4 3 3 2-2 5 5") }
+    val Crown by lazy { line("crown", "m3 8 4 4 5-7 5 7 4-4-2 11H5z") }
+    val Calendar by lazy { line("calendar", "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z", "M16 2v4M8 2v4M3 10h18") }
     val CalendarDay by lazy { line("calendarDay", "M4 6h16v14H4z", "M4 10h16", "M8 3v4", "M16 3v4") }
     val WashingMachine by lazy { line("washingMachine", "M5 3h14v18H5z", "M5 7h14", "M12 10a4 4 0 1 0 0 8a4 4 0 1 0 0-8z", "M8 5h0.01") }
     val Door by lazy { line("door", "M6 21V3h12v18", "M4 21h16", "M14.5 12h0.01") }

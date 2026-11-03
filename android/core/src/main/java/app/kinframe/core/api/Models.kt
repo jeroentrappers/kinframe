@@ -35,6 +35,8 @@ data class Discovery(
     val devAuth: Boolean = false,
     /** The server fetches weather and serves `/v1/geocode`. */
     val weather: Boolean = false,
+    /** The server syncs calendars for frames (ICS/webcal and CalDAV). */
+    val calendar: Boolean = false,
 )
 
 @Serializable
