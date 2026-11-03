@@ -594,6 +594,7 @@
     <string name="problem_feature_disabled">This is turned off on this server.</string>
     <string name="problem_server_error">Something went wrong on the server. Please try again.</string>
     <string name="problem_network">You seem to be offline. Check your connection and try again.</string>
+    <string name="problem_prepare_failed">A photo or video couldn’t be prepared on this phone, so nothing was sent. Try again, or leave that one out.</string>
     <!-- Client-side preparation and Live/Motion Photos -->
     <string name="outbox_preparing">Preparing %1$d of %2$d · %3$d%%</string>
     <string name="live_badge">Live</string>

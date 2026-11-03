@@ -10,6 +10,7 @@ import app.kinframe.core.api.SessionExpiredException
 import app.kinframe.core.api.TusResult
 import app.kinframe.core.api.TusUploader
 import app.kinframe.core.api.UploadSource
+import app.kinframe.family.send.prep.PreparationFailedException
 import kotlinx.coroutines.CancellationException
 import java.io.File
 import java.io.IOException
@@ -25,8 +26,11 @@ class SendRunner(
     private val tus: TusUploader,
     private val sourceFor: (OutboxItem) -> UploadSource,
     private val hash: (OutboxItem) -> String? = { null },
-    /** Client-side preparation (README §5.3); the default uploads originals. */
-    private val prepare: suspend (sendId: String, item: OutboxItem, onProgress: (Float) -> Unit) -> OutboxItem = { _, item, _ -> item.copy(prepState = OutboxItem.PREP_ORIGINAL) },
+    /**
+     * Client-side preparation (README §5.3). Every item goes through it before uploading; it throws
+     * [PreparationFailedException] for a file that can neither be prepared nor go as it is.
+     */
+    private val prepare: suspend (sendId: String, item: OutboxItem, onProgress: (Float) -> Unit) -> OutboxItem,
 ) {
     sealed interface Outcome {
         data class Sent(val sendId: String, val frameNames: List<String>) : Outcome
@@ -43,10 +47,10 @@ class SendRunner(
             val items = send.items
             for ((index, original) in items.withIndex()) {
                 var item = store.get(id)?.items?.firstOrNull { it.id == original.id } ?: original
-                if (item.prepState == null && item.uploadUrl != null) {
-                    // An upload of the original started before preparation existed: finish that one.
-                    item = item.copy(prepState = OutboxItem.PREP_ORIGINAL)
-                    store.updateItem(id, item.id) { it.copy(prepState = OutboxItem.PREP_ORIGINAL) }
+                if (item.needsPrepAgain) {
+                    // Queued by an older version that uploaded originals: drop that upload and prepare the file.
+                    item = item.resetPrep()
+                    store.updateItem(id, item.id) { it.resetPrep() }
                 }
                 if (item.prepState == null) {
                     // Prepare before uploading; recorded so a retry doesn't do it again.
@@ -78,6 +82,8 @@ class SendRunner(
         } catch (e: CancellationException) {
             store.update(id) { it.copy(state = OutboxState.QUEUED) }
             throw e
+        } catch (e: PreparationFailedException) {
+            fail(id, PREPARE_FAILED)
         } catch (e: SessionExpiredException) {
             fail(id, ProblemCode.UNAUTHORIZED)
         } catch (e: ApiException) {
@@ -138,6 +144,9 @@ class SendRunner(
     }
 
     companion object {
+        /** Outcome code: a file couldn't be prepared on the phone and was too large to send as it is. */
+        const val PREPARE_FAILED = "prepare_failed"
+
         /** Deletes the private copies of a finished or discarded send. */
         fun cleanup(send: OutboxSend) {
             val files = send.items.flatMap { listOfNotNull(it.localPath, it.preparedPath, it.motion?.localPath, it.motion?.preparedPath) }

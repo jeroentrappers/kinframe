@@ -592,6 +592,7 @@
     <string name="problem_feature_disabled">Dit staat uit op deze server.</string>
     <string name="problem_server_error">Er ging iets mis op de server. Probeer het opnieuw.</string>
     <string name="problem_network">Je lijkt offline te zijn. Controleer je verbinding en probeer opnieuw.</string>
+    <string name="problem_prepare_failed">Een foto of video kon niet op deze telefoon worden voorbereid, dus er is niets verstuurd. Probeer het opnieuw of laat die weg.</string>
     <!-- Client-side preparation and Live/Motion Photos -->
     <string name="outbox_preparing">%1$d van %2$d voorbereiden · %3$d%%</string>
     <string name="live_badge">Live</string>

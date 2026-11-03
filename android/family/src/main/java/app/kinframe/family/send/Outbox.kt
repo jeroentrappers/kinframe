@@ -40,7 +40,11 @@ data class OutboxItem(
     val uploadId: String? = null,
     /** Capture time read from the original before preparing (prepared files carry no metadata). */
     val capturedAt: String? = null,
-    /** Set once preparation ran: [PREP_PREPARED] or [PREP_ORIGINAL] (upload the file as is). */
+    /**
+     * Set once preparation ran: [PREP_PREPARED], or [PREP_AS_IS] when the file couldn't be prepared but is already
+     * within the master limits. [PREP_ORIGINAL] is what older versions recorded for any unprepared file; such items are
+     * prepared again before they upload.
+     */
     val prepState: String? = null,
     /** The prepared master (README §5.3 "Prepared uploads") and what it is. */
     val preparedPath: String? = null,
@@ -76,14 +80,26 @@ data class OutboxItem(
      */
     val dedupable: Boolean get() = (isPrepared && preparedTrimmed) || (trimStartMs == null && trimEndMs == null && includeAudio)
 
-    /** Records the outcome of preparing this item. */
+    /** Recorded by an older version, which uploaded originals when preparing failed: must be prepared again. */
+    val needsPrepAgain: Boolean get() =
+        (uploadId == null && (prepState == PREP_ORIGINAL || (prepState == null && uploadUrl != null))) || motion?.needsPrepAgain == true
+
+    /** Back to a fresh, unprepared item (the clip is split out again). */
+    fun resetPrep(): OutboxItem = copy(
+        prepState = null, preparedPath = null, preparedSize = null, prepared = null, preparedMime = null, preparedWidth = null,
+        preparedHeight = null, preparedDurationMs = null, preparedTrimmed = false, uploadUrl = null, uploadedBytes = 0,
+        uploadId = null, sha256 = null, motion = null,
+    )
+
+    /** Records the outcome of preparing this item; a [PrepResult.Failed] throws [PreparationFailedException]. */
     fun withPrep(r: app.kinframe.family.send.prep.PrepResult): OutboxItem = when (r) {
         is app.kinframe.family.send.prep.PrepResult.Prepared -> copy(
             prepState = PREP_PREPARED, preparedPath = r.path, preparedSize = r.size, prepared = r.profile, preparedMime = r.mime,
             preparedWidth = r.width, preparedHeight = r.height, preparedDurationMs = r.durationMs, preparedTrimmed = r.trimmed,
             sha256 = null,
         )
-        is app.kinframe.family.send.prep.PrepResult.Original -> copy(prepState = PREP_ORIGINAL)
+        is app.kinframe.family.send.prep.PrepResult.AsIs -> copy(prepState = PREP_AS_IS)
+        is app.kinframe.family.send.prep.PrepResult.Failed -> throw app.kinframe.family.send.prep.PreparationFailedException(r.reason)
     }
 
     fun toSendItem(): SendItemCreate {
@@ -107,6 +123,8 @@ data class OutboxItem(
 
     companion object {
         const val PREP_PREPARED = "prepared"
+        const val PREP_AS_IS = "as_is"
+        /** Legacy: an original uploaded because preparing failed. No longer produced. */
         const val PREP_ORIGINAL = "original"
     }
 }

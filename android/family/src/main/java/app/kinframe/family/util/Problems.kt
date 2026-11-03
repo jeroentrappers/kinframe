@@ -52,6 +52,7 @@ object Problems {
         ProblemCode.FEATURE_DISABLED -> R.string.problem_feature_disabled
         ProblemCode.SERVER_ERROR -> R.string.problem_server_error
         "network" -> R.string.problem_network
+        app.kinframe.family.send.SendRunner.PREPARE_FAILED -> R.string.problem_prepare_failed
         else -> null
     }
 

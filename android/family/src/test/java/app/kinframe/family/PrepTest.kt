@@ -45,7 +45,7 @@ class PrepTest {
         assertFalse(PrepPolicy.canPreparePhoto("image/heic", "a.heic", 27)) // no ImageDecoder: upload as is
         assertTrue(PrepPolicy.canPreparePhoto("image/heic", "a.heic", 28))
         assertFalse(PrepPolicy.canPreparePhoto("image/avif", "a.avif", 30))
-        assertFalse(PrepPolicy.canPreparePhoto("image/gif", "a.gif", 34))
+        assertTrue(PrepPolicy.canPreparePhoto("image/gif", "a.gif", 34)) // its first frame becomes the master
         assertFalse(PrepPolicy.canPrepareVideo(25))
     }
 
@@ -80,8 +80,8 @@ class PrepTest {
             """{"upload_id":"up1","include_audio":false,"captured_at":"2023-05-01T10:00:00Z","width":1920,"height":1080,"duration_ms":4000}""",
             KinJson.encodeToString(SendItemCreate.serializer(), prepared.toSendItem()),
         )
-        // Falling back to the original keeps the server-side trim.
-        val original = item.withPrep(PrepResult.Original("Transformer"))
+        // A video within the limits that goes as it is keeps the server-side trim.
+        val original = item.withPrep(PrepResult.AsIs("Transformer"))
         assertEquals(1000L, original.toSendItem().trim?.startMs)
         assertNull(original.toSendItem().width)
     }
@@ -130,6 +130,52 @@ class PrepTest {
         assertEquals((file.size - mp4.size).toLong(), range.first)
         assertEquals((file.size - 1).toLong(), range.last)
         assertTrue(MotionPhotos.isFlagged(MotionPhotos.xmpOf(file)!!))
+    }
+
+    @Test fun onlyFilesWithinTheMasterLimitsMayGoAsIs() {
+        assertTrue(PrepPolicy.photoWithinLimits(PxSize(2560, 1440)))
+        assertTrue(PrepPolicy.photoWithinLimits(PxSize(1200, 1600)))
+        assertFalse(PrepPolicy.photoWithinLimits(PxSize(2561, 1440)))
+        assertFalse(PrepPolicy.photoWithinLimits(PxSize(3024, 4032)))
+        assertFalse(PrepPolicy.photoWithinLimits(null)) // undecodable: we can't tell, so it is not sent
+        assertFalse(PrepPolicy.photoWithinLimits(PxSize(0, 0)))
+
+        assertTrue(PrepPolicy.videoWithinLimits(PxSize(1920, 1080), 30f))
+        assertTrue(PrepPolicy.videoWithinLimits(PxSize(1080, 1920), 29.97f))
+        assertTrue(PrepPolicy.videoWithinLimits(PxSize(1280, 720), 30.2f)) // measured rate, rounding
+        assertFalse(PrepPolicy.videoWithinLimits(PxSize(1920, 1080), 60f))
+        assertFalse(PrepPolicy.videoWithinLimits(PxSize(3840, 2160), 30f))
+        assertFalse(PrepPolicy.videoWithinLimits(PxSize(1920, 1200), 30f))
+        assertFalse(PrepPolicy.videoWithinLimits(PxSize(1280, 720), null)) // unknown frame rate
+        assertFalse(PrepPolicy.videoWithinLimits(null, 30f))
+    }
+
+    @Test fun frameRateComesFromFramesOverDurationThenTheDeclaredRate() {
+        assertEquals(30f, PrepPolicy.frameRate(300, 10_000, 60f)!!, 0.001f)
+        assertEquals(60f, PrepPolicy.frameRate(null, 10_000, 60f)!!, 0.001f)
+        assertNull(PrepPolicy.frameRate(0, 0, null))
+    }
+
+    @Test fun aFileThatCantBePreparedFailsUnlessItIsWithinTheLimits() {
+        assertEquals(PrepResult.AsIs("decode"), PrepPolicy.unprepared(true, "decode"))
+        assertEquals(PrepResult.Failed("decode"), PrepPolicy.unprepared(false, "decode"))
+        val item = OutboxItem("i1", "content://1", mime = "image/jpeg", name = "a.jpg", size = 10)
+        assertEquals(OutboxItem.PREP_AS_IS, item.withPrep(PrepResult.AsIs("x")).prepState)
+        assertFalse(item.withPrep(PrepResult.AsIs("x")).isPrepared)
+        val e = runCatching { item.withPrep(PrepResult.Failed("encode")) }.exceptionOrNull()
+        assertTrue(e is app.kinframe.family.send.prep.PreparationFailedException)
+    }
+
+    @Test fun itemsQueuedByOlderVersionsArePreparedAgain() {
+        val base = OutboxItem("i1", "content://1", mime = "image/jpeg", name = "a.jpg", size = 10)
+        assertFalse(base.needsPrepAgain)
+        assertTrue(base.copy(prepState = OutboxItem.PREP_ORIGINAL).needsPrepAgain)
+        assertTrue(base.copy(uploadUrl = "https://x/u/1", uploadedBytes = 4).needsPrepAgain) // original upload, pre-preparation
+        assertFalse(base.copy(prepState = OutboxItem.PREP_ORIGINAL, uploadId = "up1").needsPrepAgain) // already on the server
+        assertFalse(base.copy(prepState = OutboxItem.PREP_AS_IS).needsPrepAgain)
+        assertTrue(base.copy(prepState = OutboxItem.PREP_PREPARED, motion = base.copy(id = "m", prepState = OutboxItem.PREP_ORIGINAL)).needsPrepAgain)
+        val reset = base.copy(prepState = OutboxItem.PREP_ORIGINAL, uploadUrl = "u", uploadedBytes = 4, sha256 = "h").resetPrep()
+        assertNull(reset.prepState); assertNull(reset.uploadUrl); assertNull(reset.sha256); assertEquals(0L, reset.uploadedBytes)
     }
 
     @Test fun findsTheClipOfALegacyMicroVideo() {

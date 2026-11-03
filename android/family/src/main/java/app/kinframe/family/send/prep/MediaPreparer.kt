@@ -48,8 +48,9 @@ import kotlin.coroutines.resumeWithException
 /**
  * Client-side preparation (docs/api/README.md §5.3 "Prepared uploads"), run by the background send worker before
  * uploading: photos become a ≤ 2560 px WebP q90 without metadata, videos an H.264/AAC ≤ 1080p MP4 with trim and mute
- * applied (Media3 Transformer), and Motion Photos are split into still + clip. Anything that fails falls back to
- * uploading the original; the server verifies prepared files anyway.
+ * applied (Media3 Transformer), and Motion Photos are split into still + clip. Full originals are never uploaded: a
+ * file that can't be prepared goes as it is only when it is already within the master limits (2560 px; 1080p/30 fps),
+ * otherwise [prepare] throws [PreparationFailedException] and the send stops with an error.
  */
 class MediaPreparer(private val context: Context) {
     private val sdk get() = Build.VERSION.SDK_INT
@@ -57,7 +58,7 @@ class MediaPreparer(private val context: Context) {
 
     /**
      * Prepares [item] (and the clip of a Motion Photo it carries) into [dir]. Returns the item with its preparation
-     * recorded; never throws except for cancellation.
+     * recorded; throws [PreparationFailedException] when a file can neither be prepared nor go as it is.
      */
     suspend fun prepare(item: OutboxItem, dir: File, onProgress: (Float) -> Unit): OutboxItem = withContext(Dispatchers.IO) {
         dir.mkdirs()
@@ -74,7 +75,7 @@ class MediaPreparer(private val context: Context) {
             throw e
         } catch (e: Throwable) {
             warn("prepare ${item.kind}", e)
-            PrepResult.Original(e.javaClass.simpleName)
+            if (item.kind == MediaKind.VIDEO) videoFallback(item, e.javaClass.simpleName) else photoFallback(item, e.javaClass.simpleName)
         }
         out = out.withPrep(result)
         val motion = out.motion
@@ -85,7 +86,7 @@ class MediaPreparer(private val context: Context) {
                 throw e
             } catch (e: Throwable) {
                 warn("prepare motion", e)
-                PrepResult.Original(e.javaClass.simpleName)
+                videoFallback(motion, e.javaClass.simpleName)
             }
             out = out.copy(motion = motion.withPrep(mr))
         }
@@ -98,9 +99,25 @@ class MediaPreparer(private val context: Context) {
     private fun open(item: OutboxItem): InputStream =
         item.localPath?.let { File(it).inputStream() } ?: cr.openInputStream(Uri.parse(item.uri)) ?: error("cannot open ${item.uri}")
 
+    /** The pixel size from the file header (orientation doesn't matter for the long edge), or null. */
+    private fun photoBounds(item: OutboxItem): PxSize? = runCatching {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        open(item).use { BitmapFactory.decodeStream(it, null, bounds) }
+        PxSize(bounds.outWidth, bounds.outHeight).takeIf { it.short > 0 }
+    }.getOrNull()
+
+    private fun photoFallback(item: OutboxItem, reason: String): PrepResult =
+        PrepPolicy.unprepared(PrepPolicy.photoWithinLimits(photoBounds(item)), reason)
+
+    private fun videoFallback(item: OutboxItem, reason: String): PrepResult {
+        val uri = item.localPath?.let { Uri.fromFile(File(it)) } ?: Uri.parse(item.uri)
+        val p = probeVideo(uri)
+        return PrepPolicy.unprepared(PrepPolicy.videoWithinLimits(p.size, p.fps), reason)
+    }
+
     private fun preparePhoto(item: OutboxItem, dir: File): PrepResult {
-        if (!PrepPolicy.canPreparePhoto(item.mime, item.name, sdk)) return PrepResult.Original("type ${item.mime}")
-        val bitmap = decode(item) ?: return PrepResult.Original("decode")
+        if (!PrepPolicy.canPreparePhoto(item.mime, item.name, sdk)) return photoFallback(item, "type ${item.mime}")
+        val bitmap = decode(item) ?: return photoFallback(item, "decode")
         try {
             val target = PrepPolicy.photoTarget(PxSize(bitmap.width, bitmap.height))
             val scaled = if (target.width != bitmap.width || target.height != bitmap.height) {
@@ -110,7 +127,7 @@ class MediaPreparer(private val context: Context) {
             @Suppress("DEPRECATION")
             val format = if (Build.VERSION.SDK_INT >= 30) Bitmap.CompressFormat.WEBP_LOSSY else Bitmap.CompressFormat.WEBP
             // Bitmap.compress writes no EXIF/XMP: the master carries pixels only.
-            FileOutputStream(file).use { if (!scaled.compress(format, PrepPolicy.PHOTO_QUALITY, it)) return PrepResult.Original("encode") }
+            FileOutputStream(file).use { if (!scaled.compress(format, PrepPolicy.PHOTO_QUALITY, it)) return photoFallback(item, "encode") }
             if (scaled !== bitmap) scaled.recycle()
             return PrepResult.Prepared(file.path, file.length(), PreparedProfile.PHOTO, "image/webp", target.width, target.height)
         } finally {
@@ -161,19 +178,19 @@ class MediaPreparer(private val context: Context) {
 
     @OptIn(UnstableApi::class)
     private suspend fun prepareVideo(item: OutboxItem, dir: File, maxMs: Long?, onProgress: (Float) -> Unit): PrepResult {
-        if (!PrepPolicy.canPrepareVideo(sdk)) return PrepResult.Original("sdk")
+        if (!PrepPolicy.canPrepareVideo(sdk)) return videoFallback(item, "sdk")
         val uri = item.localPath?.let { Uri.fromFile(File(it)) } ?: Uri.parse(item.uri)
         val probe = probeVideo(uri)
         val (start, end) = PrepPolicy.clip(probe.durationMs, item.trimStartMs, item.trimEndMs, maxMs)
         val file = File(dir, "prep-${item.id}.mp4")
         val result = transcode(uri, file, probe.size, start, end, mute = !item.includeAudio, onProgress)
-        val w = result.width.takeIf { it > 0 } ?: probe.size?.let { PrepPolicy.videoTarget(it).width } ?: return PrepResult.Original("size")
-        val h = result.height.takeIf { it > 0 } ?: probe.size?.let { PrepPolicy.videoTarget(it).height } ?: return PrepResult.Original("size")
+        val w = result.width.takeIf { it > 0 } ?: probe.size?.let { PrepPolicy.videoTarget(it).width } ?: return videoFallback(item, "size")
+        val h = result.height.takeIf { it > 0 } ?: probe.size?.let { PrepPolicy.videoTarget(it).height } ?: return videoFallback(item, "size")
         val duration = result.approximateDurationMs.takeIf { it > 0 } ?: probeVideo(Uri.fromFile(file)).durationMs
         return PrepResult.Prepared(file.path, file.length(), PreparedProfile.VIDEO, "video/mp4", w, h, duration, trimmed = true)
     }
 
-    private data class Probe(val size: PxSize?, val durationMs: Long?, val dateMs: Long?)
+    private data class Probe(val size: PxSize?, val durationMs: Long?, val dateMs: Long?, val fps: Float? = null)
 
     private fun probeVideo(uri: Uri): Probe = runCatching {
         val r = MediaMetadataRetriever()
@@ -183,8 +200,11 @@ class MediaPreparer(private val context: Context) {
             val vw = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
             val vh = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
             val size = if (vw != null && vh != null) (if (rot % 180 != 0) PxSize(vh, vw) else PxSize(vw, vh)) else null
-            Probe(size, r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull(),
-                PrepPolicy.videoDate(r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)))
+            val duration = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull()
+            val frames = if (Build.VERSION.SDK_INT >= 28) r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_FRAME_COUNT)?.toIntOrNull() else null
+            val capture = r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)?.toFloatOrNull()
+            Probe(size, duration, PrepPolicy.videoDate(r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE)),
+                PrepPolicy.frameRate(frames, duration, capture))
         } finally {
             r.release()
         }
@@ -297,7 +317,7 @@ class MediaPreparer(private val context: Context) {
         )
     }
 
-    private fun warn(what: String, e: Throwable) = Log.w(TAG, "$what failed, uploading the original: ${e.message}")
+    private fun warn(what: String, e: Throwable) = Log.w(TAG, "$what failed: ${e.message}")
 
     companion object {
         private const val TAG = "MediaPreparer"

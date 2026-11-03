@@ -187,8 +187,10 @@ not conform silently takes the normal pipeline, so preparing is always safe.
   device's `max_video_decode`, ≤ 30 fps, bitrate within the rendition budget (w·h·4, max 8 Mbps, +10 %), AAC or no
   audio, faststart. The frame then downloads the master's bytes and the server transcodes nothing. This applies to
   any master, prepared or not. Photos always get their cheap per-frame-size WebP and thumbnails.
-- Clients fall back to uploading the original whenever preparation fails or is unsupported (HEIC without a decoder,
-  no WebCodecs, an encoder error). Mixed sends are fine.
+- Clients may fall back to uploading the original whenever preparation fails or is unsupported (HEIC without a
+  decoder, no WebCodecs, an encoder error). Mixed sends are fine. The Android family app never uploads full originals:
+  a file it can't prepare goes as it is only when it is already within the limits (long edge ≤ 2560 px; video
+  ≤ 1080p and ≤ 30 fps), otherwise the send stops with an error.
 - The operator sees how masters were made in `GET /v1/operator/stats` → `media_pipeline` (`transcoded`,
   `prepared`, `fallback`, `reused_renditions`); each master is also logged with its path and the rejection reason.
 

@@ -14,8 +14,9 @@ data class PxSize(val width: Int, val height: Int) {
 
 /**
  * The decisions behind client-side preparation (docs/api/README.md §5.3 "Prepared uploads"), kept free of Android
- * types so they can be unit tested. The server verifies whatever we produce and falls back to its own pipeline when
- * something doesn't conform, so every rule here errs on the side of "upload the original".
+ * types so they can be unit tested. Full originals are never uploaded: every photo and video becomes a master here.
+ * Only a file that can't be prepared but is already within the master limits ([photoWithinLimits],
+ * [videoWithinLimits]) may go as it is; anything else is an error the person sees.
  */
 object PrepPolicy {
     /** photo-master-v1: long edge at most this many pixels. */
@@ -31,12 +32,15 @@ object PrepPolicy {
     /** Live/Motion Photo clips longer than this are cut by the server; we cut them first. */
     const val MOTION_MAX_MS = 10_000L
 
-    /** Photo types we can decode and re-encode. GIF stays as is (the server keeps its first frame). */
+    /** Frame rates measured from frame count and duration land a little above 30 (29.97 sources, rounding). */
+    const val FPS_SLACK = 0.5f
+
+    /** Photo types we can decode and re-encode. A GIF becomes its first frame, which is all the server keeps of it. */
     fun canPreparePhoto(mime: String, name: String, sdk: Int): Boolean {
         val type = mime.lowercase()
         val ext = name.substringAfterLast('.', "").lowercase()
         return when {
-            type == "image/gif" || ext == "gif" -> false
+            type == "image/gif" || ext == "gif" -> true
             type == "image/heic" || type == "image/heif" || ext == "heic" || ext == "heif" -> sdk >= 28 // ImageDecoder
             type == "image/avif" || ext == "avif" -> sdk >= 31
             type == "image/jpeg" || type == "image/png" || type == "image/webp" -> true
@@ -47,6 +51,23 @@ object PrepPolicy {
 
     /** Media3 Transformer handles every container/codec the platform can decode; the server catches the rest. */
     fun canPrepareVideo(sdk: Int): Boolean = sdk >= 26
+
+    /** A photo of this size is already within photo-master-v1 (long edge ≤ 2560 px). Unknown sizes are not. */
+    fun photoWithinLimits(size: PxSize?): Boolean = size != null && size.short > 0 && size.long <= PHOTO_MAX_EDGE
+
+    /** A video already within video-master-v1 (≤ 1080p either way, ≤ 30 fps). Unknown size or frame rate is not. */
+    fun videoWithinLimits(size: PxSize?, fps: Float?): Boolean =
+        size != null && size.short > 0 && size.long <= VIDEO_MAX_LONG && size.short <= VIDEO_MAX_SHORT &&
+            fps != null && fps > 0f && fps <= VIDEO_MAX_FPS + FPS_SLACK
+
+    /** Frame rate from the container: the frame count over the duration, else the declared capture rate. */
+    fun frameRate(frameCount: Int?, durationMs: Long?, captureFps: Float?): Float? =
+        if (frameCount != null && frameCount > 0 && durationMs != null && durationMs > 0) frameCount * 1000f / durationMs
+        else captureFps?.takeIf { it > 0f }
+
+    /** What happens to a file that couldn't be prepared: as is when it is already within the limits, else an error. */
+    fun unprepared(withinLimits: Boolean, reason: String): PrepResult =
+        if (withinLimits) PrepResult.AsIs(reason) else PrepResult.Failed(reason)
 
     /** The prepared photo size: long edge ≤ 2560, never upscaled. */
     fun photoTarget(src: PxSize): PxSize {
@@ -125,6 +146,12 @@ sealed interface PrepResult {
         val trimmed: Boolean = false,
     ) : PrepResult
 
-    /** Upload the original (unsupported here, or preparing failed). */
-    data class Original(val reason: String) : PrepResult
+    /** Couldn't be prepared ([reason]), but the file is already within the master limits: upload it as is. */
+    data class AsIs(val reason: String) : PrepResult
+
+    /** Couldn't be prepared and is too large to go as is: the send stops with an error. */
+    data class Failed(val reason: String) : PrepResult
 }
+
+/** A file couldn't be prepared and isn't within the limits to go as is; never answered by uploading the original. */
+class PreparationFailedException(val reason: String) : Exception("preparation failed: $reason")

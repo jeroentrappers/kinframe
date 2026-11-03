@@ -9,6 +9,7 @@ import app.kinframe.family.send.OutboxSend
 import app.kinframe.family.send.OutboxState
 import app.kinframe.family.send.OutboxStore
 import app.kinframe.family.send.SendRunner
+import app.kinframe.family.send.prep.PrepResult
 import kotlinx.coroutines.runBlocking
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
@@ -30,6 +31,7 @@ class SendRunnerTest {
     private lateinit var runner: SendRunner
     private val tokens = object : AccessTokenSource { override suspend fun accessToken(forceRefresh: Boolean) = "t" }
     private val bytes = ByteArray(10) { it.toByte() }
+    private var prepareCalls = 0
 
     @Before
     fun setUp() {
@@ -38,7 +40,10 @@ class SendRunnerTest {
         val http = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
         val api = HttpKinApi(http, server.url("/v1"), tokens)
         val tus = TusUploader(http, server.url("/v1/uploads"), tokens, chunkSize = 6, retryDelaysMs = emptyList())
-        runner = SendRunner(store, api, tus, sourceFor = { ByteArraySource(bytes) }, hash = { "abc123" })
+        runner = SendRunner(store, api, tus, sourceFor = { ByteArraySource(bytes) }, hash = { "abc123" }, prepare = { _, item, _ ->
+            prepareCalls++
+            item.withPrep(PrepResult.AsIs("already small"))
+        })
         store.add(
             OutboxSend(
                 id = "idem-1", server = "x", frameIds = listOf("f1"), frameNames = listOf("Oma"), createdAt = 0,
@@ -141,5 +146,70 @@ class SendRunnerTest {
         val s = store.get("idem-1")!!
         assertEquals(OutboxState.FAILED, s.state)
         assertEquals("item9", s.items.single().uploadId)
+    }
+
+    private fun runnerPreparing(result: (OutboxItem) -> PrepResult) = SendRunner(
+        store, HttpKinApi(OkHttpClient(), server.url("/v1"), tokens),
+        TusUploader(OkHttpClient(), server.url("/v1/uploads"), tokens, retryDelaysMs = emptyList()),
+        sourceFor = { ByteArraySource(bytes) },
+        prepare = { _, item, _ -> prepareCalls++; item.withPrep(result(item)) },
+    )
+
+    @Test
+    fun aFileThatCantBePreparedStopsTheSendWithoutUploadingAnything() = runBlocking {
+        val r = runnerPreparing { PrepResult.Failed("decode") }
+        assertEquals(SendRunner.Outcome.Failed(SendRunner.PREPARE_FAILED), r.run("idem-1"))
+        assertEquals(0, server.requestCount)
+        val s = store.get("idem-1")!!
+        assertEquals(OutboxState.FAILED, s.state)
+        assertEquals(SendRunner.PREPARE_FAILED, s.error)
+        // Nothing recorded: a retry prepares again rather than sending the original.
+        assertNull(s.items.single().prepState)
+        assertEquals(app.kinframe.family.R.string.problem_prepare_failed, app.kinframe.family.util.Problems.byCode(s.error))
+        val retry = runnerPreparing { PrepResult.Failed("decode") }
+        assertEquals(SendRunner.Outcome.Failed(SendRunner.PREPARE_FAILED), retry.run("idem-1"))
+        assertEquals(2, prepareCalls)
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
+    fun aMotionClipThatCantBePreparedStopsTheSendToo() = runBlocking {
+        val clip = OutboxItem("i1-motion", "file:///m.mp4", localPath = "/m.mp4", mime = "video/mp4", name = "a.mp4", size = 10, kind = "video")
+        val failing = SendRunner(
+            store, HttpKinApi(OkHttpClient(), server.url("/v1"), tokens),
+            TusUploader(OkHttpClient(), server.url("/v1/uploads"), tokens, retryDelaysMs = emptyList()),
+            sourceFor = { ByteArraySource(bytes) },
+            prepare = { _, item, _ ->
+                val still = item.copy(motionPhoto = true).withPrep(PrepResult.Prepared("/p.webp", 10, "photo-master-v1", "image/webp", 800, 600))
+                still.copy(motion = clip.withPrep(PrepResult.Failed("transcode")))
+            },
+        )
+        assertEquals(SendRunner.Outcome.Failed(SendRunner.PREPARE_FAILED), failing.run("idem-1"))
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
+    fun aFileWithinTheLimitsGoesAsItIsWithoutAPreparedProfile() = runBlocking {
+        server.enqueue(created()); server.enqueue(patched(6)); server.enqueue(patched(10))
+        server.enqueue(MockResponse.Builder().code(202).body(sendJson).build())
+        assertTrue(runner.run("idem-1") is SendRunner.Outcome.Sent)
+        assertEquals(1, prepareCalls)
+        val meta = server.takeRequest().headers["Upload-Metadata"]!!
+        assertTrue(!meta.contains("prepared "))
+    }
+
+    @Test
+    fun anOriginalQueuedByAnOlderVersionIsPreparedBeforeUploading() = runBlocking {
+        // Recorded by an older version: "upload the original", half uploaded already.
+        store.updateItem("idem-1", "i1") { it.copy(prepState = OutboxItem.PREP_ORIGINAL, uploadUrl = server.url("/v1/uploads/old").toString(), uploadedBytes = 6) }
+        val r = runnerPreparing { PrepResult.Prepared("/p.webp", 10, "photo-master-v1", "image/webp", 800, 600) }
+        server.enqueue(MockResponse.Builder().code(201).addHeader("Location", "/v1/uploads/new").build())
+        server.enqueue(patched(10))
+        server.enqueue(MockResponse.Builder().code(202).body(sendJson).build())
+        assertTrue(r.run("idem-1") is SendRunner.Outcome.Sent)
+        assertEquals(1, prepareCalls)
+        val first = server.takeRequest()
+        assertEquals("POST", first.method) // a new upload, not a HEAD on the old original
+        assertTrue(first.headers["Upload-Metadata"]!!.contains("prepared " + java.util.Base64.getEncoder().encodeToString("photo-master-v1".toByteArray())))
     }
 }
