@@ -75,6 +75,15 @@ import app.kinframe.family.send.OutboxState
 import app.kinframe.family.send.SendRunner
 import app.kinframe.family.send.SendWorker
 import app.kinframe.family.ui.calendar.CalendarActions
+import app.kinframe.family.ui.tv.TvDialog
+import app.kinframe.family.ui.tv.TvDialogActions
+import app.kinframe.family.ui.tv.TvMiniBar
+import app.kinframe.family.ui.tv.TvNotice
+import app.kinframe.family.ui.tv.TvPresenter
+import app.kinframe.family.ui.tv.TvScope
+import app.kinframe.family.ui.tv.TvViewModel
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import app.kinframe.family.ui.calendar.CalendarNotice
 import app.kinframe.family.ui.calendar.CalendarTab
 import app.kinframe.family.ui.calendar.CalendarViewModel
@@ -135,6 +144,15 @@ fun Context.findActivity(): Activity? {
     }
     return null
 }
+
+/** Who may open "Show on TV" for what (web `TvDialog` props). */
+data class TvTarget(val frameId: String, val frameName: String, val canMirror: Boolean, val canRemote: Boolean, val scope: TvScope)
+
+/** Opens the "Show on TV" dialog from any screen. */
+val LocalShowOnTv = staticCompositionLocalOf<(TvTarget) -> Unit> { {} }
+
+fun tvTarget(f: app.kinframe.core.api.Frame, scope: TvScope) =
+    TvTarget(f.id, f.name, canMirror = f.can { it.seeLibrary }, canRemote = f.can { it.changeSettings }, scope = scope)
 
 @Composable
 fun FamilyRoot(graph: AppGraph, app: AppViewModel) {
@@ -287,10 +305,19 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
 
+    // Show on TV: the presenter lives in the graph, so a show keeps going while the person moves around the app.
+    val tvState by graph.tv.state.collectAsStateWithLifecycle()
+    var tvOpen by remember { mutableStateOf<TvTarget?>(null) }
+    val activity = context.findActivity()
+    DisposableEffect(activity) {
+        activity?.let { graph.tv.attach(it) }
+        onDispose { activity?.let { graph.tv.detach(it) } }
+    }
+
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris -> composer.add(uris) }
     val pick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) }
 
-    CompositionLocalProvider(LocalToaster provides toaster) {
+    CompositionLocalProvider(LocalToaster provides toaster, LocalShowOnTv provides { tvOpen = it }) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
             val showChrome = nav.stack.size == 1
@@ -326,9 +353,16 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                         }
                     },
                 ) { pad ->
-                    Box(Modifier.fillMaxSize().padding(pad)) {
-                        Screen(graph, app, ready, nav, frames, composer, history, pick)
+                    Column(Modifier.fillMaxSize().padding(pad)) {
+                        TvMiniBar(
+                            tvState,
+                            onOpen = { tvState.frameId?.let { id -> tvOpen = TvTarget(id, tvState.frameName, true, false, TvScope.All) } },
+                            onPrevious = graph.tv::previous, onToggle = graph.tv::toggle, onNext = graph.tv::next,
+                            onStop = { graph.tv.stop(); toaster.show(res.getString(R.string.tv_stopped)) },
+                        )
+                        Box(Modifier.weight(1f)) { Screen(graph, app, ready, nav, frames, composer, history, pick) }
                     }
+                    tvOpen?.let { t -> TvRoute(graph, api, t, ready, tvState, { tvOpen = null }, frames) }
                     ShareSheet(shareState, share::toggle, share::confirm, share::dismiss, share::retry)
                 }
             }
@@ -441,8 +475,17 @@ private fun Screen(
             val send = (s.send as? Load.Ready)?.value
             val source = send?.let { Sharing.source(it, it.items.filter { i -> i.status != "failed" }.map { i -> i.id }) }
             val canShare = source != null && Sharing.targets((fs.frames as? Load.Ready)?.value.orEmpty(), source.frameId).isNotEmpty()
+            // Show on TV: the send's live placements on the first frame that has them (web history detail).
+            val showOnTv = LocalShowOnTv.current
+            val tvFrame = send?.frames?.firstOrNull { f -> f.placements.any { it.status != "removed" && it.status != "failed" } }
+            val tvIds = tvFrame?.placements?.filter { it.status != "removed" && it.status != "failed" }?.map { it.placementId }.orEmpty()
+            val known = (fs.frames as? Load.Ready)?.value?.firstOrNull { it.id == tvFrame?.frameId }
             SendDetailScreen(s, { nav.pop() }, { vm.load() }, vm::startEdit, vm::onCaption, vm::saveCaption, vm::cancelEdit, vm::unsend,
-                onShare = if (canShare && send != null) { ids -> Sharing.source(send, ids)?.let(share::open) } else null)
+                onShare = if (canShare && send != null) { ids -> Sharing.source(send, ids)?.let(share::open) } else null,
+                onShowOnTv = if (tvFrame != null && tvIds.isNotEmpty()) ({
+                    showOnTv(TvTarget(tvFrame.frameId, tvFrame.frameName, canMirror = known?.can { it.seeLibrary } == true,
+                        canRemote = known?.can { it.changeSettings } == true, scope = TvScope.Selection(tvIds)))
+                }) else null)
         }
         is Route.FrameDetail -> FrameDetailRoute(graph, api, r, nav, frames, composer, ready)
     }
@@ -597,6 +640,41 @@ private fun CalendarRoute(graph: AppGraph, api: KinApi, f: app.kinframe.core.api
         }
     }
     CalendarTab(f, true, st, form, ss, CalendarActions(cal, settingsVm, me?.id, me?.displayName.orEmpty()))
+}
+
+@Composable
+private fun TvRoute(graph: AppGraph, api: KinApi, t: TvTarget, ready: Phase.Ready, tvState: TvPresenter.State, onClose: () -> Unit, frames: FramesViewModel) {
+    val context = LocalContext.current
+    val res = LocalResources.current
+    val toaster = LocalToaster.current
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    val vm: TvViewModel = viewModel(key = "tv-${t.frameId}-${t.scope.hashCode()}-${System.identityHashCode(api)}") { TvViewModel(api, t.frameId, t.scope) }
+    val st by vm.state.collectAsStateWithLifecycle()
+    LaunchedEffect(vm) {
+        vm.events.collect { e ->
+            when (e) {
+                is TvNotice.Message -> toaster.show(if (e.arg != null) res.getString(e.message, e.arg) else res.getString(e.message))
+                is TvNotice.Present -> graph.tv.start(e.link, t.frameName, st.interval)
+            }
+        }
+    }
+    TvDialog(
+        t.frameName, t.scope, t.canMirror, t.canRemote, ready.server.discovery.web, st,
+        TvDialogActions(
+            vm, tvState,
+            onCopy = { url -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(t.frameName, url))); toaster.show(res.getString(R.string.tv_copied)) } },
+            onShare = { url ->
+                val send = Intent(Intent.ACTION_SEND).apply { type = "text/plain"; putExtra(Intent.EXTRA_TEXT, url) }
+                context.startActivity(Intent.createChooser(send, res.getString(R.string.tv_title)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            },
+            onOpen = { url -> runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) } },
+            onStop = { graph.tv.stop(); toaster.show(res.getString(R.string.tv_stopped)) },
+            onPrevious = graph.tv::previous, onNext = graph.tv::next, onToggle = graph.tv::toggle,
+            onClaimed = { frames.refresh() },
+            onClose = onClose,
+        ),
+    )
 }
 
 private fun shareInvite(context: Context, res: android.content.res.Resources, invite: Invite, frameName: String) {

@@ -29,6 +29,10 @@ object Format {
     fun time(iso: String?, zone: ZoneId = ZoneId.systemDefault()): String =
         instant(iso)?.let { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault()).format(it.atZone(zone)) } ?: ""
 
+    /** Medium date and short time, e.g. "22 Oct 2026, 14:05". */
+    fun dateTime(iso: String?, zone: ZoneId = ZoneId.systemDefault()): String =
+        instant(iso)?.let { DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault()).format(it.atZone(zone)) } ?: ""
+
     /** History section header: Today / Yesterday / a date. */
     fun day(context: Context, iso: String?, today: LocalDate = LocalDate.now(), zone: ZoneId = ZoneId.systemDefault()): String {
         val d = instant(iso)?.atZone(zone)?.toLocalDate() ?: return ""

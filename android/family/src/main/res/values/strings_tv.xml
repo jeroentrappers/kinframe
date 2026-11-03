@@ -80,4 +80,7 @@
     <string name="tv_frame_add">Add frame</string>
     <string name="tv_frame_added">%1$s is ready. Send it photos like any frame.</string>
     <string name="tv_frame_note">It gets its own library, settings and people, like a frame on the wall, and you can remove it any time.</string>
+    <!-- Android only: the system's own cast route instead of the browser's Presentation API. -->
+    <string name="tv_present_hint_android">A TV connected with Cast screen (Chromecast, Google TV) or Miracast</string>
+    <string name="tv_waiting_for_screen">Connect the TV in the Cast screen settings that just opened. The show starts as soon as it is connected.</string>
 </resources>

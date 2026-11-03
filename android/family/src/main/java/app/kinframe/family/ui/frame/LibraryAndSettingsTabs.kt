@@ -119,6 +119,12 @@ fun LibraryTab(
                             ToggleChip(if (n > 0) "$label · $n" else label, state.tab == t, { onTab(t) })
                         }
                     }
+                    val showOnTv = app.kinframe.family.ui.LocalShowOnTv.current
+                    if (state.tab == LibraryTab.Visible && frame.can { it.seeLibrary } && (list?.isNotEmpty() == true)) {
+                        app.kinframe.family.ui.SecondaryButton(stringResource(R.string.tv_show), {
+                            showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.All))
+                        }, icon = KinIcons.Tv)
+                    }
                     if (!frame.can { it.seeLibrary }) Note(stringResource(R.string.library_own_only))
                     if (state.tab == LibraryTab.Trash) Note(stringResource(R.string.library_trash_note, trashDays))
                 }
@@ -175,8 +181,12 @@ fun LibraryTab(
                 if (onShare != null && state.tab != LibraryTab.Trash) {
                     IconButton(onShare, enabled = !state.busy) { Icon(KinIcons.Share, stringResource(R.string.share_action), tint = c.ink) }
                 }
+                val showOnTv = app.kinframe.family.ui.LocalShowOnTv.current
                 when (state.tab) {
                     LibraryTab.Visible -> {
+                        IconButton({ showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Selection(state.selected.toList()))) }, enabled = !state.busy) {
+                            Icon(KinIcons.Tv, stringResource(R.string.tv_show), tint = c.ink)
+                        }
                         IconButton({ onAction(BulkAction.HIDE) }, enabled = !state.busy) { Icon(KinIcons.EyeOff, stringResource(R.string.library_hide), tint = c.ink) }
                         IconButton({ onAction(BulkAction.TRASH) }, enabled = !state.busy) { Icon(KinIcons.Trash, stringResource(R.string.library_trash), tint = c.danger) }
                     }

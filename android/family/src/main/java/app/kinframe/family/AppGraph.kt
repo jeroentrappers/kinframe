@@ -31,6 +31,7 @@ import app.kinframe.family.send.OutboxStore
 import app.kinframe.family.send.SendRunner
 import app.kinframe.family.send.SendWorker
 import app.kinframe.family.util.DeepLink
+import app.kinframe.family.ui.tv.TvPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -87,6 +88,8 @@ class AppGraph(
     val outbox = OutboxStore(File(app.filesDir, "outbox.json"))
     val live = LiveEvents(http, scope, auth)
     val push = PushRegistrar(app, prefs, scope) { api.value }
+    /** Shows a frame's library on a TV connected to the phone (Cast screen / Miracast). */
+    val tv = TvPresenter(app, scope) { api.value }
 
     /** The signed-in person (from `GET /v1/me`). */
     val me = MutableStateFlow<User?>(null)

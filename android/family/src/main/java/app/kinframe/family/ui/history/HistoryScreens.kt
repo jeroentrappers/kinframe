@@ -305,6 +305,8 @@ fun SendDetailScreen(
     onUnsend: () -> Unit,
     /** "Share to another frame" for the whole send, or one item (by id); null when there is nowhere to share to. */
     onShare: ((List<String>) -> Unit)? = null,
+    /** "Show on TV" for the send's photos on the first frame that still shows them; null when there is none. */
+    onShowOnTv: (() -> Unit)? = null,
 ) {
     val c = Kin.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
@@ -332,6 +334,7 @@ fun SendDetailScreen(
                     if (!state.unsent && onShare != null && shareable.isNotEmpty()) {
                         SecondaryButton(stringResource(R.string.share_action), { onShare(shareable) }, icon = KinIcons.Share)
                     }
+                    if (!state.unsent && onShowOnTv != null) SecondaryButton(stringResource(R.string.tv_show), onShowOnTv, icon = KinIcons.Tv)
                     if (!state.unsent) QuietButton(stringResource(R.string.detail_unsend), { confirm = true }, danger = true)
                 }
             }

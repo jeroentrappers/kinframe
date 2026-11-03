@@ -80,4 +80,7 @@
     <string name="tv_frame_add">Kader toevoegen</string>
     <string name="tv_frame_added">%1$s is klaar. Stuur er foto’s naar zoals naar elk ander kader.</string>
     <string name="tv_frame_note">Het krijgt eigen foto’s, instellingen en mensen, net als een kader aan de muur, en je kunt het altijd weer verwijderen.</string>
+    <!-- Android only: the system's own cast route instead of the browser's Presentation API. -->
+    <string name="tv_present_hint_android">Een tv die verbonden is via Scherm casten (Chromecast, Google TV) of Miracast</string>
+    <string name="tv_waiting_for_screen">Verbind de tv in de instellingen voor Scherm casten die net opengingen. De voorstelling begint zodra hij verbonden is.</string>
 </resources>
