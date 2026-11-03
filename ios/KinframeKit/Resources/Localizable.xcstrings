@@ -9538,6 +9538,108 @@
         }
       }
     },
+    "ios.tv.airplay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirPlay to a TV"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Via AirPlay op een tv"
+          }
+        }
+      }
+    },
+    "ios.tv.airplayHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An Apple TV or AirPlay TV on the same Wi‑Fi. This phone is the remote."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een Apple TV of AirPlay-tv op hetzelfde wifi. Deze telefoon is de afstandsbediening."
+          }
+        }
+      }
+    },
+    "ios.tv.mirrorAirplayHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An Apple TV or AirPlay TV on the same Wi‑Fi follows {frame} live."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een Apple TV of AirPlay-tv op hetzelfde wifi volgt {frame} live."
+          }
+        }
+      }
+    },
+    "ios.tv.noScreen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Control Center, tap Screen Mirroring and choose your TV. The TV then shows the photos full screen, not your phone’s screen."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open het bedieningspaneel, tik op Synchrone weergave en kies je tv. De tv toont dan de foto’s schermvullend, niet het scherm van je telefoon."
+          }
+        }
+      }
+    },
+    "ios.tv.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link delen"
+          }
+        }
+      }
+    },
+    "ios.tv.waiting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for a TV…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wachten op een tv…"
+          }
+        }
+      }
+    },
     "ios.welcome.f1Body": {
       "extractionState": "manual",
       "localizations": {
