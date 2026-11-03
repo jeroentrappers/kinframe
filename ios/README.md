@@ -52,7 +52,8 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfStep welcome\|server\|signIn` | Start onboarding at that step |
 | `-kfTab frames\|send\|history\|settings`, `-kfFrame <id> [-kfSection overview\|photos\|people\|settings]`, `-kfSend <id>` | Open a screen |
 | `-kfOpen <url>` | Open a link, e.g. `http://localhost:8110/f/12345678` |
-| `-kfCompose /a.heic,/b.mov [-kfCaption …] [-kfComposeFrames <ids>] [-kfAutoSend YES] [-kfEditFirst YES]` | Stage files in the composer |
+| `-kfCompose /a.heic,/b.mov [-kfCaption …] [-kfComposeFrames <ids>] [-kfAutoSend YES] [-kfEditFirst YES]` | Stage files in the composer; `/still.heic+/clip.mov` stages a Live Photo |
+| `-kfScrollTo plugins`, `-kfSheet share\|photo\|pluginAdd\|pluginEdit` | On a frame page: scroll to the plugins, open the share picker, a photo, the plugin catalog or the first plugin |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
 | `-kfLanguage en\|nl\|system` | Language |
 

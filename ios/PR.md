@@ -1,5 +1,97 @@
 # iOS family app: SwiftUI app, share extension, background uploads, and Universal Links on the server
 
+## Update: up to date with main (November 2026)
+
+`origin/main` is merged in (181 commits since the branch point; one conflict in `server/internal/config/config.go`,
+where both sides added fields: kept both). The API client and the string catalog are regenerated from main, and the
+app has caught up with what the Android family app and `docs/ios-handoff.md` added since:
+
+- **Media preparation and Live Photos** (handoff "Media preparation and Live Photos"): the upload queue prepares
+  every photo as `photo-master-v1` and every video as `video-master-v1` before tus, and the composer picks Live Photos
+  with their clip, sent as `kind: live` or as a still only.
+- **Share to another frame** (handoff addendum): from the library and from a send in History, with a dry run,
+  "Already there" / "Has some", Undo and "Shared by".
+- **Plugins** in the frame settings, including the split layout ("Two photos and a dashboard") and community plugins
+  from the registry, and the slideshow's **Live photos** setting.
+
+Not added: calendars, countdowns and TV links. They are in the web app, but the Android family app has none of them
+yet (only API calls in `android/core`), so they're left for when the family apps get them.
+
+![Live Photos: composer, editor, library](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/live.png)
+![Share to another frame: picker with a dry run, a shared photo, a send shared to a second frame](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/share.png)
+![Plugins: section, catalog, editor, in Dutch](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/plugins.png)
+
+### What the update does
+
+- **Preparation** runs in the upload queue (`OutboxRunner`, an actor, not the main actor) and never in the share
+  extension. Photos: capture time from EXIF `DateTimeOriginal` + `OffsetTimeOriginal` (as UTC without an offset),
+  one ImageIO decode-and-downscale step (long edge 2560, EXIF orientation applied, never upscaled), redrawn in 8-bit
+  sRGB, written with no source properties (JPEG 0.9; WebP if ImageIO ever lists it as an encoder). Videos: an
+  `AVMutableComposition` with the trim and, when muted, without audio; a video composition that bakes the rotation in
+  and renders at most 1920×1080 and 30 fps; `AVAssetExportPreset1920x1080` to MP4 with network optimization,
+  `metadata = []` and `.forSharing()`. The send gets `captured_at`, `width`, `height`, `duration_ms` and no `trim`
+  for a prepared video. Anything ImageIO or the export can't handle is uploaded as it was. "Preparing 2 of 5 · 40%"
+  shows in the sending card. The master replaces the original in the queue; both are gone once the send is accepted.
+- **Live Photos:** the picker matches `.livePhotos`; for a Live Photo the app loads `PHLivePhoto` and writes its
+  `.pairedVideo` resource with `PHAssetResourceManager` (iCloud allowed), without asking for library access. The
+  clip is prepared like a video, muted and cut to 10 s, uploaded on its own, and sent as `live_video_upload_id`.
+  "Live" badge on the composer tile, a "Send as a still photo only" switch in the item editor, "Live" badges in
+  History and the library, and a long press there plays `GET /v1/items/{id}/media/motion`, muted (the redirect to the
+  signed URL is followed without our token; a streamed clip gets the token).
+- **The share extension** still hands originals over and starts uploading them right away, so a share keeps going
+  after the sheet closes. Items whose upload hasn't started when the app takes the job over are prepared by the app.
+- **Share to another frame:** `POST /v1/frames/{id}/placements:share` with an `Idempotency-Key`; a dry run over all
+  candidate frames (where you can send, not the source) marks "Already there" (not selectable) and "Has some". The
+  toast "Shared to …" has Undo, which purges the created placements per frame. Entry points: the library's selection
+  bar, the photo sheet, and a send's detail (source: the first frame that still has every item). "Shared by …" in the
+  photo sheet, as a mark on library tiles, and per frame in a send's delivery.
+- **Plugins:** layout (off, on the photo, beside the photo with side and background, two photos and a dashboard with
+  side), the instances with status ("Waiting for the frame", errors, "Not on this frame", withdrawn from the
+  registry, an update waiting) and on/off (an incomplete one opens its form instead), "Add plugin" with built-in and
+  community plugins, what a community plugin may do before it's added, and the editor: every manifest setting type
+  (text, number, url with what the frame found on the network, colour with a swatch, duration, choice, switch,
+  secret with Set / Change / Remove, Home Assistant entities with search, time zones with search and UTC offsets),
+  presets with `{placeholders}`, corner, visibility, approving or putting off a registry update, remove. The manifest
+  translations are used for the app's language. Every change is saved on its own with `If-Match`; a `412` is retried
+  once on the newer settings, and a `422`'s field errors show at their fields. The frame's report is refreshed every
+  3 s while the editor is open.
+- **Frame settings:** "Live photos": play when shown, play on tap, photo only.
+
+### How the update was checked
+
+- 88 unit tests, all passing (26 new): the preparation policy (sizes, bitrate, trim and the 10 s cut, EXIF times),
+  a real ImageIO run on a 4000×3000 Display P3 JPEG with GPS and orientation 6 (comes out 1920×2560, sRGB, without
+  EXIF date, GPS or orientation), the runner with a fake preparer (prepared still and muted clip uploaded with
+  `prepared`, the send body with `live_video_upload_id`, `width`, `height`, `captured_at`; a prepared video without
+  `trim` and with `duration_ms`; no preparer uploads originals; an upload the extension started isn't prepared
+  again), sharing (coverage from a dry run, targets, the source frame, "Shared by"), and the plugin settings logic
+  (manifest reading, the server's checks, presets, instance JSON keeping unknown fields and sending only changed
+  secrets, 422 field mapping, status, registry update diffs, the frame's report, entity filters, time zones).
+- Against a local dev server built from this branch (Docker, own database) with three scripted frames: a Live Photo
+  and a photo sent from the composer were uploaded prepared (the server logged `pipeline=prepared` for the still, the
+  photo and the motion clip), a share between frames with the dry-run marks, "Shared by" in History and the library,
+  and the Plugins section with a reported catalog (built-in and a community plugin), saving layout changes.
+- Screenshots above (iPhone 17 simulator, light; the plugins section also in Dutch).
+
+### Left after the update
+
+- **Device:** `DEVELOPMENT_TEAM` is still empty and the iPhone SE wasn't reachable, so the update ran on the
+  simulator only. Live Photo picking needs a real library: the simulator has no Live Photos, so the picker path
+  (`PHLivePhoto` → `.pairedVideo`) is untested; the rest of the Live path was tested with a staged still and clip.
+- Video preparation is covered by the policy tests and the dev-server run with a short clip, not by a unit test of
+  the export itself.
+- Long-press playback of a motion clip wasn't tried in the simulator (it needs a press gesture).
+- Calendars, countdowns and TV links (see above).
+
+### Questions about the update
+
+4. The share extension uploads originals so a share doesn't wait for the app. Should it rather leave the job for
+   the app to prepare (smaller uploads, but only once the app runs)?
+5. Should Live Photos get a "Live sound" switch? The handoff mentions it; the Android app has none, so the clip is
+   always sent muted for now.
+
+## The original pull request
+
 ## What this is
 
 The native iOS family app from `docs/ios-handoff.md`, at v0.1 parity with the web app: onboarding with server choice
