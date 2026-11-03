@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.kinframe.core.api.Album
@@ -176,7 +178,10 @@ class ParityScreenshotTest {
 
     @Composable
     private fun calendarTab(s: FrameSettingsViewModel, vm: CalendarViewModel? = null, sendOpen: Boolean = false) {
-        CalendarTab(owner, true, vm?.state?.value ?: CalendarState(calSources, calView, invitations), vm?.form?.value, s.state.value,
+        val st = vm?.state?.collectAsState()?.value
+        val form = vm?.form?.collectAsState()?.value
+        val ss by s.state.collectAsState()
+        CalendarTab(owner, true, st ?: CalendarState(calSources, calView, invitations), form, ss,
             CalendarActions(vm, s, "u1", "Jeroen"), sendOpenAtStart = sendOpen)
     }
 
@@ -189,7 +194,7 @@ class ParityScreenshotTest {
 
     @Test fun calendarPreview() {
         val s = settingsVm()
-        both("calendar_preview") { app.kinframe.family.ui.PageColumn { app.kinframe.family.ui.calendar.CalendarPreview(calView, s.state.value) {} } }
+        both("calendar_preview") { val ss by s.state.collectAsState(); app.kinframe.family.ui.PageColumn { app.kinframe.family.ui.calendar.CalendarPreview(calView, ss) {} } }
     }
 
     @Test fun calendarAddCaldav() {
@@ -298,7 +303,7 @@ class ParityScreenshotTest {
 
     @Test fun frameSettingsMore() {
         val vm = settingsVm()
-        both("frame_settings_more") { SettingsTab(owner, vm.state.value, true, vm) }
+        both("frame_settings_more") { val ss by vm.state.collectAsState(); SettingsTab(owner, ss, true, vm) }
     }
 
     // ---------------------------------------------------------------- rendering

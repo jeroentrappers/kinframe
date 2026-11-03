@@ -63,7 +63,8 @@ sealed interface LibraryEvent {
     data class Done(val action: String, val count: Int, val failed: Int, val undo: (() -> Unit)?) : LibraryEvent
     data class Error(@StringRes val message: Int) : LibraryEvent
     /** A toast: [message] with [args]; a plural when [count] is set. */
-    data class Message(@StringRes val message: Int, val args: List<Any> = emptyList(), val count: Int? = null, val plural: Boolean = false, val undo: (() -> Unit)? = null) : LibraryEvent
+    /** A string, or a plurals resource when [plural] is set. */
+    data class Message(val message: Int, val args: List<Any> = emptyList(), val count: Int? = null, val plural: Boolean = false, val undo: (() -> Unit)? = null) : LibraryEvent
 }
 
 /**

@@ -91,7 +91,7 @@ fun SettingsScreen(
             SectionTitle(stringResource(R.string.settings_preferences))
             Surface(Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.settings_language), style = Kin.type.label, color = c.ink)
-                app.kinframe.family.ui.frame.LanguagePicker(me.locale ?: java.util.Locale.getDefault().toLanguageTag(), onLanguage)
+                app.kinframe.family.ui.frame.LanguagePicker(me.locale ?: app.kinframe.family.ui.currentLocale().toLanguageTag(), onLanguage)
                 Text(stringResource(R.string.settings_language_hint_app), style = Kin.type.caption, color = c.inkSoft)
             }
         }

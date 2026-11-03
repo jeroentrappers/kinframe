@@ -473,3 +473,7 @@ fun ActionTile(icon: ImageVector, label: String, onClick: () -> Unit, modifier: 
         Text(label, style = Kin.type.caption, color = c.ink, textAlign = TextAlign.Center, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
+
+/** The app's current locale, read so that composables follow a language change. */
+@Composable
+fun currentLocale(): java.util.Locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]

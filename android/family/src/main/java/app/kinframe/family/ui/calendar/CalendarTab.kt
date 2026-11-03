@@ -426,7 +426,7 @@ private fun InvitationBadge(status: String) {
 
 @Composable
 private fun invitationWhen(inv: EventInvitation): String {
-    val locale = Locale.getDefault()
+    val locale = app.kinframe.family.ui.currentLocale()
     val day = DateTimeFormatter.ofPattern("EEE d MMM", locale)
     if (inv.allDay && inv.startDate != null) {
         val s = CalendarLogic.parseDate(inv.startDate) ?: return ""
@@ -508,7 +508,7 @@ private fun SendEventDialog(frameName: String, senderName: String, state: Calend
 @Composable
 private fun EventCardPreview(form: CalendarLogic.EventForm, photo: Uri?, placement: String, senderName: String) {
     val c = Kin.colors
-    val locale = Locale.getDefault()
+    val locale = app.kinframe.family.ui.currentLocale()
     val day = DateTimeFormatter.ofPattern("EEEE d MMMM", locale)
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
     val whenText = if (form.allDay) {
@@ -549,7 +549,7 @@ private fun EventCardPreview(form: CalendarLogic.EventForm, photo: Uri?, placeme
 @Composable
 private fun DateField(label: String, value: LocalDate?, min: LocalDate? = null, onChange: (LocalDate) -> Unit) {
     var open by remember { mutableStateOf(false) }
-    PickerChip(label, value?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.getDefault())).orEmpty(), KinIcons.Calendar) { open = true }
+    PickerChip(label, value?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(app.kinframe.family.ui.currentLocale())).orEmpty(), KinIcons.Calendar) { open = true }
     if (open) {
         val ds = rememberDatePickerState(
             initialSelectedDateMillis = value?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
@@ -576,7 +576,7 @@ private fun DateField(label: String, value: LocalDate?, min: LocalDate? = null, 
 private fun DateTimeField(label: String, value: LocalDateTime?, onChange: (LocalDateTime) -> Unit) {
     var step by remember { mutableStateOf(0) } // 1: date, 2: time
     var date by remember { mutableStateOf(value?.toLocalDate()) }
-    val fmt = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(Locale.getDefault())
+    val fmt = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(app.kinframe.family.ui.currentLocale())
     PickerChip(label, value?.format(fmt).orEmpty(), KinIcons.Clock) { date = value?.toLocalDate(); step = 1 }
     if (step == 1) {
         val ds = rememberDatePickerState(initialSelectedDateMillis = value?.toLocalDate()?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli())
@@ -772,7 +772,7 @@ fun CalendarPreview(view: CalendarView, settings: SettingsFormState?, onOpen: (C
             val canNext = !cursor.plusMonths(1).atDay(1).isAfter(to)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton({ cursor = cursor.minusMonths(1) }, enabled = canPrev) { Icon(KinIcons.ChevronLeft, stringResource(R.string.cal_prev), tint = c.ink) }
-                Text(cursor.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()).replaceFirstChar { it.titlecase() } + " " + cursor.year,
+                Text(cursor.month.getDisplayName(TextStyle.FULL_STANDALONE, app.kinframe.family.ui.currentLocale()).replaceFirstChar { it.titlecase() } + " " + cursor.year,
                     style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
                 IconButton({ cursor = cursor.plusMonths(1) }, enabled = canNext) { Icon(KinIcons.ChevronRight, stringResource(R.string.cal_next), tint = c.ink) }
                 TextButton({ cursor = YearMonth.from(today) }) { Text(stringResource(R.string.cal_today), color = c.accent) }
@@ -793,7 +793,7 @@ private fun AgendaDayRow(
     fadePast: Boolean, now: Instant, onOpen: (CalendarEvent) -> Unit,
 ) {
     val c = Kin.colors
-    val locale = Locale.getDefault()
+    val locale = app.kinframe.family.ui.currentLocale()
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         HorizontalDivider(color = c.line)
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -859,7 +859,7 @@ private fun weatherIcon(k: CalendarLogic.WeatherKind) = when (k) {
 @Composable
 private fun timeLabel(ev: CalendarEvent, day: LocalDate, zone: ZoneId, agendaRow: Boolean = false): String {
     val (s, e) = CalendarLogic.span(ev, zone)
-    val locale = Locale.getDefault()
+    val locale = app.kinframe.family.ui.currentLocale()
     val time = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
     fun t(iso: String?) = CalendarLogic.parseInstant(iso)?.atZone(zone)?.format(time).orEmpty()
     if (agendaRow && s != e) {
@@ -877,7 +877,7 @@ private fun MonthGrid(
     wx: Map<LocalDate, app.kinframe.core.api.WeatherDay>, unit: String, fadePast: Boolean, weekNumbers: Boolean, onOpen: (CalendarEvent) -> Unit,
 ) {
     val c = Kin.colors
-    val locale = Locale.getDefault()
+    val locale = app.kinframe.family.ui.currentLocale()
     val weeks = CalendarLogic.monthGrid(month, first)
     val byDay = CalendarLogic.eventsByDay(view.events, zone, weeks.first().first(), weeks.last().last())
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -923,7 +923,7 @@ private fun EventDetailDialog(ev: CalendarEvent, view: CalendarView?, manage: Bo
     val zone = CalendarLogic.zone(view?.timezone)
     val source = view?.sources?.firstOrNull { it.id == ev.sourceId }
     val (s, e) = CalendarLogic.span(ev, zone)
-    val dayFmt = DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())
+    val dayFmt = DateTimeFormatter.ofPattern("EEEE d MMMM", app.kinframe.family.ui.currentLocale())
     AlertDialog(
         onDismissRequest = onClose,
         title = { Text(ev.title) },

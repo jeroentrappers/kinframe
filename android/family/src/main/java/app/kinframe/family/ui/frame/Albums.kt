@@ -149,9 +149,10 @@ fun AlbumHeader(album: Album, cover: Placement?, playing: Boolean, canSettings: 
 /** "On this day": a strip of earlier years' photos taken on today's date. */
 @Composable
 fun MemoriesStrip(memories: List<Placement>, today: LocalDate, onOpen: (Placement) -> Unit) {
+    val loc = app.kinframe.family.ui.currentLocale()
     if (memories.isEmpty()) return
     val c = Kin.colors
-    val dayLabel = "${today.dayOfMonth} " + today.month.getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault())
+    val dayLabel = "${today.dayOfMonth} " + today.month.getDisplayName(TextStyle.FULL_STANDALONE, loc)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(stringResource(R.string.memories_title), style = Kin.type.bodyStrong, color = c.ink)
         Text(pluralStringResource(R.plurals.memories_subtitle, memories.size, memories.size, dayLabel), style = Kin.type.caption, color = c.inkSoft)
@@ -263,12 +264,13 @@ fun AlbumScheduleDialog(album: Album, onDismiss: () -> Unit, onSave: (from: Stri
 
 @Composable
 private fun MonthDayPicker(value: Pair<Int, Int>, dayLabel: Int, monthLabel: Int, onChange: (Pair<Int, Int>) -> Unit) {
+    val loc = app.kinframe.family.ui.currentLocale()
     val (m, d) = value
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Picker(stringResource(dayLabel), d.toString(), (1..AlbumDates.days(m)).map { it.toString() }, Modifier.width(96.dp)) { onChange(m to it.toInt()) }
-        Picker(stringResource(monthLabel), Month.of(m).getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()),
-            (1..12).map { Month.of(it).getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()) }, Modifier.weight(1f)) { name ->
-            val nm = (1..12).first { Month.of(it).getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()) == name }
+        Picker(stringResource(monthLabel), Month.of(m).getDisplayName(TextStyle.FULL_STANDALONE, loc),
+            (1..12).map { Month.of(it).getDisplayName(TextStyle.FULL_STANDALONE, loc) }, Modifier.weight(1f)) { name ->
+            val nm = (1..12).first { Month.of(it).getDisplayName(TextStyle.FULL_STANDALONE, loc) == name }
             onChange(nm to d.coerceAtMost(AlbumDates.days(nm)))
         }
     }
