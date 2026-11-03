@@ -41,6 +41,8 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var limits: Limits
     public var devAuth: Bool
     public var weather: Bool
+    /// Calendars, sent events and countdowns are on (`calendar`).
+    public var calendar: Bool = false
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -54,7 +56,7 @@ public struct Discovery: Codable, Equatable, Sendable {
     }
 
     enum CodingKeys: String, CodingKey {
-        case name, version, api, web, auth, limits, weather
+        case name, version, api, web, auth, limits, weather, calendar
         case devAuth = "dev_auth"
     }
 
@@ -68,6 +70,7 @@ public struct Discovery: Codable, Equatable, Sendable {
         limits = try c.decodeIfPresent(Limits.self, forKey: .limits) ?? .defaults
         devAuth = try c.decodeIfPresent(Bool.self, forKey: .devAuth) ?? false
         weather = try c.decodeIfPresent(Bool.self, forKey: .weather) ?? false
+        calendar = try c.decodeIfPresent(Bool.self, forKey: .calendar) ?? false
     }
 
     /// Logto is configured when the server published an issuer and a native client id.

@@ -8,6 +8,8 @@ public enum LiveEvent: Equatable, Sendable {
     case frameStatus(frameId: String, online: Bool, lastSeenAt: Date?)
     case joinRequest(frameId: String, name: String?)
     case membershipUpdated(frameId: String)
+    /// A frame accepted or declined an event sent to it.
+    case invitationDecided(frameId: String, invitation: EventInvitation)
 
     /// Parse one websocket text frame.
     public static func parse(_ data: Data) -> LiveEvent? {
@@ -33,6 +35,11 @@ public enum LiveEvent: Equatable, Sendable {
         case "membership.updated":
             guard let f = str("frame_id") else { return nil }
             return .membershipUpdated(frameId: f)
+        case "event_invitation.decided":
+            guard let f = str("frame_id"), let inv = obj["invitation"],
+                  let raw = try? JSONSerialization.data(withJSONObject: inv),
+                  let invitation = try? OutboxRunner.decoder.decode(EventInvitation.self, from: raw) else { return nil }
+            return .invitationDecided(frameId: f, invitation: invitation)
         default:
             return nil
         }

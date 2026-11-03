@@ -51,6 +51,11 @@ public struct API: Sendable {
         try await tokens.accessToken()
     }
 
+    /// After a 401 outside the generated client: a fresh token, or nil when signed out.
+    public func refreshedToken() async -> String? {
+        await tokens.refreshAfterUnauthorized()
+    }
+
     /// Absolute URL for a path on this server.
     public func url(_ path: String) -> URL {
         URL(string: path, relativeTo: baseURL)?.absoluteURL ?? baseURL.appending(path: path)
