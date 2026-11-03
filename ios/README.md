@@ -122,6 +122,10 @@ localized from the stable `code` like the web app.
 validates them against discovery `limits`. Sending creates an `OutboxJob` in `<App Group>/Outbox/<id>/` and hands it
 to the `OutboxRunner`:
 
+- first every file is prepared, one at a time: photos become `photo-master-v1` (long edge 2560, sRGB, no metadata),
+  videos and Live Photo clips `video-master-v1` (≤ 1080p, ≤ 30 fps, trim and mute baked in). Originals are never
+  uploaded: when preparing fails, a file goes as it is only if it's already within those limits, otherwise the send
+  stops with `media_unprepared`;
 - each file is uploaded with tus 1.0 at `/v1/uploads`: creation-with-upload, then `PATCH` in 4 MiB chunks, `HEAD` to
   learn the offset after an interrupted request, a fresh upload when the old one expired, and the
   `Kinframe-Existing-Item` shortcut for duplicates; three files at a time;
@@ -130,8 +134,9 @@ to the `OutboxRunner`:
   is persisted, and a response that arrives after a relaunch (`handleEventsForBackgroundURLSession`) is applied to
   the job it was tagged with. A lease in the job says which process drives it.
 
-The share extension uses the same queue: it saves the job and starts it on its own background session, then closes;
-the app takes over when the system wakes it for that session, or when it's opened.
+The share extension uses the same queue: it saves the job, prepares every file while the sheet shows "Preparing 2 of
+3", starts the uploads on its own background session, then closes; the app takes over when the system wakes it for
+that session, or when it's opened (and prepares what's left if the sheet went away early).
 
 **Live updates.** `LiveSocket` keeps `/v1/ws?access_token=…` open while the app is in the foreground, reconnecting
 with back-off (1 s to 60 s, ±20 %) and right away with a new token after close code 4401. History patches reactions

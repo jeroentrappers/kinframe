@@ -1,5 +1,133 @@
 # iOS family app: SwiftUI app, share extension, background uploads, and Universal Links on the server
 
+## Update: feature parity with the web app (November 2026)
+
+Every user-facing part of the web app (routes, frame tabs, settings sections, dialogs) was compared with the app, and
+what was missing is now in. The web app stays the reference for behaviour and wording: the shared strings come from
+its catalogs (English and Dutch), and iOS-only strings are in `ios-strings*.json` (`strings.py` now also reads one
+file per area, `ios-strings-<area>.json`).
+
+![Calendar: what the frame shows (Dutch), month, calendars and sent events, sending an event (Dutch)](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/calendar.png)
+![Show on TV: modes, a TV link, an AirPlay session with the phone as the remote](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/tv.png)
+![Albums: chips and On this day, an album, its yearly schedule, adding photos to an album](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/albums.png)
+![Ownership and moving to a new frame, transfer and leave, Settings, the operator's reservations](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/account.png)
+
+### Parity, feature by feature
+
+| Web | iOS before | iOS now |
+|---|---|---|
+| Frames list, add a frame, `/f/<code>`, `/i/<token>` | yes | plus the Browser badge and the convert hint (opens the web's `/convert` in Safari) |
+| Send (composer, framing, trim, captions) | yes | plus Fit and trim badges, "Keep the whole video", the "applied to all" note |
+| History, a send's detail | yes | plus Share per item and Show on TV |
+| Frame overview: remote, health, details | read-only details | edit name and location; owners can Leave (transfer first); Ownership: transfer (also leave, remove my photos, confirm step) and **Move to a new frame** (replace device) |
+| Frame library | photos, hide, trash, share | plus **albums** (chips, album view, play on the frame, schedule, arrange, rename, delete, add/remove, cover), **On this day**, counts, Select all, Show on TV |
+| People | yes | plus Make owner, Copy link, Undo after revoking an invite |
+| **Calendar tab**: calendars, what the frame shows, countdowns, sent events, calendar settings | none | all of it (below) |
+| Frame settings | yes, with plugins | plus play an album, On this day, the frame's language, the note for browser frames |
+| **Show on TV** (library, album, selection, photo, send) | none | TV links, mirror, another screen as a frame, AirPlay (below) |
+| Settings: profile, language, server, sign out | yes | plus Notifications (APNs), Signed in as, Privacy and Terms, Reserve a frame, and the operator's **shop reservations** |
+| Media preparation | app only | also in the share extension; originals are never uploaded |
+
+Not in the app, on purpose:
+
+- **Convert an old tablet** (`/convert`): it drives the tablet over USB from a computer (WebUSB, adb). A phone can't;
+  the add-frame screen points to the web page instead.
+- **This browser as a frame** (`/tv/frame`, "Use this browser" in the TV dialog): a phone in a pocket isn't a frame.
+  "Use another screen" (claiming the code a TV shows) is in.
+- **The TV page itself** (`/tv/<frame>`): it's what the TV opens; the app makes the links and plays to AirPlay.
+- **The storefront, shop checkout and cancel pages, the public weather station pages, the callback page**: public web
+  pages for buyers, or part of the web sign-in. The app links to the shop when the server has one; discovery says
+  nothing about public stations, so there's no link to them yet.
+- **Drag-and-drop and folder upload**: web-only ways to pick files.
+- **The web push offer card**: the app asks iOS for permission after the first send (behind the APNs flag).
+
+### Calendar
+
+The fifth section of a frame page, shown when discovery has `calendar` and you may send or change settings (with
+five sections the section picker becomes a scrolling row so Dutch labels fit).
+
+- **What the frame shows** (change_settings): a list (today and every day with events, multi-day events once) or a
+  month (week numbers, the first day of the week from the frame's locale, past days faded), the daily forecast, the
+  countdown chips, times in the frame's time zone. An event opens with its calendar, time, place, who sent it and
+  notes; managers switch **Count down on the frame** there (`PUT/DELETE …/countdowns/{eventId}`).
+- **Calendars**: add an ICS link or a CalDAV account (test the connection, pick one or more of its calendars, name
+  and colour from the 12-colour palette), show or hide, sync now, edit, remove; while a sync runs the list refreshes
+  every 3 s, like the web.
+- **Sent events**: send an event (title, all day or times in your time zone, place, note, an optional photo above or
+  behind, and a preview of the card the frame shows), see Waiting / Accepted / Declined / Withdrawn, withdraw your own
+  (managers anyone's). `event_invitation.decided` on the websocket updates the list and tells the sender with a
+  toast anywhere in the app. The photo is prepared like every upload (`PhotoUpload`: photo-master-v1, tus in the
+  foreground).
+- **Calendar on the frame**: full-screen view, start on today, fade past events, week numbers, the calendar sidebar,
+  countdown widgets, the sync window and timed views, saved as a merge patch with `If-Match` like the other settings.
+
+### Show on TV, and why AirPlay
+
+The web casts with Google Cast, the Presentation API or Remote Playback. None of these exist on iOS (the Cast web SDK
+doesn't run in WebKit). The app uses what an iPhone has:
+
+- **AirPlay through an external display scene.** When the phone is mirrored to an Apple TV (Screen Mirroring), the
+  app declares the external display role and, only while a TV session runs, puts its own window on the TV: the
+  slideshow plays natively from a `cast` link (`GET /v1/tv/{token}`, photos with caption and byline, videos to the
+  end, signed URLs refreshed in place) and the phone is the remote (previous, pause, next, interval, stop, which
+  revokes the link). A mirror loads the frame's TV page in a web view on the TV, with the frame remote on the phone.
+  Without a session the app creates no window there, so iOS keeps mirroring the phone as usual.
+- **TV links** for every other TV: "Open on the TV's browser" makes a `tv` or `mirror` link with Copy, Share (share
+  sheet) and Open, "Works until …", and the list of active links with Turn off.
+- **Use another screen as a frame**: type the code the TV's browser shows.
+
+Entry points: the library (all photos), an album, a selection, a photo, and a send in History.
+
+### Albums and On this day
+
+Album chips over the library ("All photos", each album with its count, the playing and scheduled marks, New album for
+library managers), an album in its own order with a header (cover, count, Playing, schedule), Play on the frame / Show
+all photos (`slideshow.album_id`), Arrange (drag to reorder), a yearly Schedule (from–to, clamped days, over New Year),
+Rename, Delete; add to an album (existing or new) and remove (Undo) from the selection bar and the photo sheet, Make
+cover. Album edits use `If-Match`; a `version_conflict` reloads the album and says so. Clearing a schedule needs
+`"schedule": null`, which the generated client can't send, so album writes go as plain JSON. On this day: a strip
+of photos taken on this date in earlier years, with "N years ago".
+
+### Overview, people and settings
+
+Details are editable; owners get Leave (transfer, then leave) and an Ownership section with Transfer and **Move to a
+new frame** (`POST …/replace-device` with the new frame's code: steps, the code field from add-frame, the warning,
+the done state). People: Make owner, Copy link, Undo after revoking an invite (a deferred toast like the web's).
+Settings: Notifications (a switch when APNs is built in, otherwise a line saying this version doesn't get them yet;
+with permission denied, a note and Open Settings), Signed in as, Privacy and Terms (the server's web pages), Reserve
+a frame (when the server has a shop), and for operators **Reservations**: filter, totals, CSV export through the
+share sheet, status per reservation (saved right away) and an internal note.
+
+### How it was checked
+
+- 137 unit tests, all passing (49 new since the last update): calendar dates, spans in the frame's time zone,
+  agenda, month grids, ISO weeks, countdowns, weather, colours, addresses, the send-event form, the decided event,
+  the calendar model against a stub server, the event photo upload (prepared, and refused when it can't be); TV
+  scopes, link bodies, steps, dwell, refresh and keep-place, the page URL; album ordering, schedules, On this day;
+  transfer, details, reservations and web links; and the always-prepare rules (above).
+- Against the dev server built from this branch (own database): an ICS calendar served from the Mac and synced by the
+  server, events sent and accepted by a scripted frame, a countdown, the weather for the frame's place; TV links
+  made, listed and turned off, an AirPlay session with the stage shown in the app; albums created, scheduled and
+  played on the frame, On this day with back-dated photos; the overview, transfer, move and people screens, and the
+  reservations screen against a temporary server with a shop.
+- Screenshots on the iPhone 17 simulator, English and Dutch (above).
+
+### Left after this update
+
+- **AirPlay on a real TV:** no Apple TV was at hand and the Simulator's external display couldn't be attached from
+  the command line, so the TV side was checked with the stage shown inside the sheet (`-kfTvStage YES`). The mirror's
+  TV page needs the web app, which the dev server doesn't serve.
+- Add and remove from an album, a reservation's status change, the CSV download and moving to a new frame were
+  checked against a stub server, not by tapping through on the dev server.
+- **Device:** `DEVELOPMENT_TEAM` is still empty and the iPhone wasn't available, so nothing ran on a device.
+
+### Questions about this update
+
+6. AirPlay needs Screen Mirroring to be on before "AirPlay to a TV". Is that acceptable, or should the app also offer
+   Google Cast through the native Cast SDK (a dependency and Google's terms)?
+7. Should the app link to the public weather station pages? Discovery would need to say whether the server has them.
+8. The Calendar tab adds a fifth section; should Calendar rather sit inside Settings on a phone?
+
 ## Update: up to date with main (November 2026)
 
 `origin/main` is merged in (181 commits since the branch point; one conflict in `server/internal/config/config.go`,
@@ -14,8 +142,7 @@ app has caught up with what the Android family app and `docs/ios-handoff.md` add
 - **Plugins** in the frame settings, including the split layout ("Two photos and a dashboard") and community plugins
   from the registry, and the slideshow's **Live photos** setting.
 
-Not added: calendars, countdowns and TV links. They are in the web app, but the Android family app has none of them
-yet (only API calls in `android/core`), so they're left for when the family apps get them.
+Not added in that update: calendars, countdowns and TV links (they are in now, see the parity update above).
 
 ![Live Photos: composer, editor, library](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/live.png)
 ![Share to another frame: picker with a dry run, a shared photo, a send shared to a second frame](https://raw.githubusercontent.com/jeroentrappers/kinframe/ios-app/ios/docs/screenshots/share.png)
@@ -23,7 +150,7 @@ yet (only API calls in `android/core`), so they're left for when the family apps
 
 ### What the update does
 
-- **Preparation** runs in the upload queue (`OutboxRunner`, an actor, not the main actor) and never in the share
+- **Preparation** runs in the upload queue (`OutboxRunner`, an actor, not the main actor), in the app and in the share
   extension. Photos: capture time from EXIF `DateTimeOriginal` + `OffsetTimeOriginal` (as UTC without an offset),
   one ImageIO decode-and-downscale step (long edge 2560, EXIF orientation applied, never upscaled), redrawn in 8-bit
   sRGB, written with no source properties (JPEG 0.9; WebP if ImageIO ever lists it as an encoder). Videos: an
@@ -96,7 +223,6 @@ yet (only API calls in `android/core`), so they're left for when the family apps
 - Video preparation is covered by the policy tests and the dev-server run with a short clip, not by a unit test of
   the export itself.
 - Long-press playback of a motion clip wasn't tried in the simulator (it needs a press gesture).
-- Calendars, countdowns and TV links (see above).
 
 ### Questions about the update
 
