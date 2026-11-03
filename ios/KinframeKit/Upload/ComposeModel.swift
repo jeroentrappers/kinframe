@@ -16,6 +16,13 @@ public struct Draft: Identifiable, Sendable {
     public var focal = CGPoint(x: 0.5, y: 0.5)
     public var trim: Trim?
     public var includeAudio = true
+    /// The motion clip of a Live Photo, staged next to the still.
+    public var motionFile: URL?
+    /// A Live Photo goes out live unless the person picks "send as a still photo only".
+    public var sendLive = true
+
+    /// A Live Photo that will be sent with its clip.
+    public var isLive: Bool { motionFile != nil && sendLive }
 
     public var kind: MediaKind { info?.kind ?? (ComposeRules.kind(mime: nil, filename: filename) ?? .photo) }
     public var bytes: Int64 { info?.bytes ?? 0 }
@@ -54,18 +61,27 @@ public final class ComposeModel {
     /// Take ownership of picked files (moved into staging) and probe them.
     @discardableResult
     public func add(files: [(url: URL, filename: String)]) async -> AddResult {
+        await add(media: files.map { (url: $0.url, filename: $0.filename, motion: nil) })
+    }
+
+    /// Like `add(files:)`, with the motion clip of each Live Photo (nil for other files).
+    @discardableResult
+    public func add(media files: [(url: URL, filename: String, motion: URL?)]) async -> AddResult {
         var result = AddResult()
         try? FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
         var fresh: [Draft] = []
-        for (url, name) in files {
+        for (url, name, motion) in files {
+            let discardMotion = { if let motion { try? FileManager.default.removeItem(at: motion) } }
             guard ComposeRules.kind(mime: nil, filename: name) != nil || ComposeRules.kind(mime: nil, filename: url.lastPathComponent) != nil else {
                 result.unsupported += 1
                 try? FileManager.default.removeItem(at: url)
+                discardMotion()
                 continue
             }
             guard drafts.count + fresh.count < limits.maxItemsPerSend else {
                 result.overLimit += 1
                 try? FileManager.default.removeItem(at: url)
+                discardMotion()
                 continue
             }
             let id = UUID()
@@ -79,9 +95,16 @@ public final class ComposeModel {
                     try FileManager.default.moveItem(at: url, to: dest)
                 }
             } catch {
-                guard (try? FileManager.default.copyItem(at: url, to: dest)) != nil else { result.unsupported += 1; continue }
+                guard (try? FileManager.default.copyItem(at: url, to: dest)) != nil else { result.unsupported += 1; discardMotion(); continue }
             }
-            fresh.append(Draft(id: id, file: dest, filename: MediaProbe.safeFilename(name, fallbackExtension: ext), loading: true))
+            var draft = Draft(id: id, file: dest, filename: MediaProbe.safeFilename(name, fallbackExtension: ext), loading: true)
+            if let motion {
+                let clip = staging.appending(path: "\(id.uuidString)-motion.\(motion.pathExtension.isEmpty ? "mov" : motion.pathExtension.lowercased())")
+                if (try? FileManager.default.moveItem(at: motion, to: clip)) != nil || (try? FileManager.default.copyItem(at: motion, to: clip)) != nil {
+                    draft.motionFile = clip
+                }
+            }
+            fresh.append(draft)
         }
         drafts.append(contentsOf: fresh)
         result.added = fresh.count
@@ -106,6 +129,7 @@ public final class ComposeModel {
     public func remove(_ id: UUID) {
         guard let i = drafts.firstIndex(where: { $0.id == id }) else { return }
         try? FileManager.default.removeItem(at: drafts[i].file)
+        if let motion = drafts[i].motionFile { try? FileManager.default.removeItem(at: motion) }
         drafts.remove(at: i)
     }
 
@@ -163,6 +187,18 @@ public final class ComposeModel {
             }
             let mime = d.info?.mime ?? ComposeRules.mimeType(forExtension: d.file.pathExtension)
             let upload = TusUpload(file: file, size: d.bytes, filename: d.filename, mime: mime)
+            var motion: TusUpload?
+            if let clip = d.motionFile {
+                if d.isLive {
+                    let name = "motion-\(n).\(clip.pathExtension)"
+                    try FileManager.default.moveItem(at: clip, to: dir.appending(path: name))
+                    let size = (try? dir.appending(path: name).resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+                    motion = TusUpload(file: name, size: size, filename: ((d.filename as NSString).deletingPathExtension) + "." + clip.pathExtension,
+                                       mime: ComposeRules.mimeType(forExtension: clip.pathExtension))
+                } else {
+                    try? FileManager.default.removeItem(at: clip)
+                }
+            }
             let focal = Framing.clampFocal(d.focal)
             items.append(OutboxItem(
                 upload: upload,
@@ -172,7 +208,8 @@ public final class ComposeModel {
                 focal: FocalPoint(x: focal.x, y: focal.y),
                 trim: d.kind == .video ? d.trim : nil,
                 includeAudio: d.kind == .video ? d.includeAudio : nil,
-                thumbnail: thumbnail
+                thumbnail: thumbnail,
+                motion: motion
             ))
         }
         let chosen = frames.filter { frameIds.contains($0.id) }

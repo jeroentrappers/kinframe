@@ -4,6 +4,11 @@ import Foundation
 
 /// One item of a queued send: the file being uploaded plus how it should appear on the frame.
 public struct OutboxItem: Codable, Equatable, Sendable {
+    /// Whether the file was turned into a prepared master (README §5.3) or goes as it is.
+    public enum Prep: String, Codable, Sendable {
+        case prepared, original
+    }
+
     public var upload: TusUpload
     public var kind: MediaKind
     public var caption: String?
@@ -14,9 +19,21 @@ public struct OutboxItem: Codable, Equatable, Sendable {
     public var capturedAt: Date?
     /// A small JPEG preview in the job directory, for the "sending" card.
     public var thumbnail: String?
+    /// Set once preparation ran (or was skipped); nil means "prepare before uploading".
+    public var prep: Prep?
+    /// What the prepared master is (size, duration), for the send item.
+    public var prepared: PreparedMedia?
+    /// 0…1 while the item is being prepared.
+    public var preparing: Double?
+    /// The motion clip of a Live Photo, uploaded on its own and sent as `live_video_upload_id`.
+    public var motion: TusUpload?
+    public var motionPrep: Prep?
+    /// Send the clip with its sound (Live Photos are muted by default).
+    public var liveAudio: Bool?
 
     public init(upload: TusUpload, kind: MediaKind, caption: String? = nil, fit: Fit? = nil, focal: FocalPoint? = nil,
-                trim: Trim? = nil, includeAudio: Bool? = nil, capturedAt: Date? = nil, thumbnail: String? = nil) {
+                trim: Trim? = nil, includeAudio: Bool? = nil, capturedAt: Date? = nil, thumbnail: String? = nil,
+                motion: TusUpload? = nil, liveAudio: Bool? = nil) {
         self.upload = upload
         self.kind = kind
         self.caption = caption
@@ -26,7 +43,23 @@ public struct OutboxItem: Codable, Equatable, Sendable {
         self.includeAudio = includeAudio
         self.capturedAt = capturedAt
         self.thumbnail = thumbnail
+        self.motion = motion
+        self.liveAudio = liveAudio
     }
+
+    public var isLive: Bool { motion != nil }
+
+    /// The still (or video) and, for a Live Photo, its clip are on the server.
+    public var isComplete: Bool { upload.isComplete && (motion?.isComplete ?? true) }
+
+    /// Trim and mute are part of the prepared video's bytes.
+    public var baked: Bool { prep == .prepared && prepared?.trimmed == true }
+
+    /// Duplicates can't be trimmed or muted on the server, so only files that are what the item is offer a hash.
+    public var dedupable: Bool { kind == .photo || baked || (trim == nil && includeAudio != false) }
+
+    public var totalBytes: Int64 { upload.size + (motion?.size ?? 0) }
+    public var doneBytes: Int64 { upload.bytesDone + (motion?.bytesDone ?? 0) }
 }
 
 /// A send waiting in the upload queue. Lives in the App Group so the share extension can hand sends to the app.
@@ -69,9 +102,16 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
         attempts = 0
     }
 
-    public var totalBytes: Int64 { items.reduce(0) { $0 + $1.upload.size } }
-    public var doneBytes: Int64 { items.reduce(0) { $0 + $1.upload.bytesDone } }
-    public var uploadedCount: Int { items.filter(\.upload.isComplete).count }
+    public var totalBytes: Int64 { items.reduce(0) { $0 + $1.totalBytes } }
+    public var doneBytes: Int64 { items.reduce(0) { $0 + $1.doneBytes } }
+    public var uploadedCount: Int { items.filter(\.isComplete).count }
+    public var allUploaded: Bool { items.allSatisfy(\.isComplete) }
+
+    /// The item being prepared and how far along, for "Preparing 2 of 5".
+    public var preparing: (index: Int, fraction: Double)? {
+        guard case .uploading = state, let i = items.firstIndex(where: { $0.preparing != nil }) else { return nil }
+        return (i, items[i].preparing ?? 0)
+    }
 
     /// 0…1, by bytes; the final send request counts as the last 2 %.
     public var progress: Double {
@@ -103,6 +143,10 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
                 var trim: Trim?
                 var include_audio: Bool?
                 var captured_at: String?
+                var width: Int?
+                var height: Int?
+                var duration_ms: Int?
+                var live_video_upload_id: String?
             }
             var frame_ids: [String]
             var items: [Item]
@@ -110,15 +154,30 @@ public struct OutboxJob: Codable, Identifiable, Equatable, Sendable {
         let iso = ISO8601DateFormatter()
         let items = try self.items.map { i -> Body.Item in
             guard let id = i.upload.uploadId else { throw TusError.retry }
+            var live: String?
+            if let motion = i.motion {
+                guard let clip = motion.uploadId else { throw TusError.retry }
+                live = clip
+            }
             let caption = i.caption?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let prepared = i.prep == .prepared ? i.prepared : nil
+            let includeAudio: Bool? = switch i.kind {
+            case .video: i.includeAudio
+            case .photo: live != nil && i.liveAudio == true ? true : nil
+            }
             return Body.Item(
                 upload_id: id,
                 caption: caption?.isEmpty == false ? caption : nil,
                 fit: i.fit?.rawValue,
                 focal_point: i.focal,
-                trim: i.kind == .video ? i.trim : nil,
-                include_audio: i.kind == .video ? i.includeAudio : nil,
-                captured_at: i.capturedAt.map(iso.string(from:))
+                // A prepared video already has the trim applied; the server would transcode to apply it again.
+                trim: i.kind == .video && !i.baked ? i.trim : nil,
+                include_audio: includeAudio,
+                captured_at: i.capturedAt.map(iso.string(from:)),
+                width: prepared?.width,
+                height: prepared?.height,
+                duration_ms: i.kind == .video ? prepared?.durationMs : nil,
+                live_video_upload_id: live
             )
         }
         let encoder = JSONEncoder()

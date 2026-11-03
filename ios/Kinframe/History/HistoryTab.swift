@@ -201,7 +201,7 @@ struct ItemThumb: View {
                 case .processing:
                     ProgressView()
                 case .ready:
-                    RemoteThumb(url: item.thumbUrl, kind: item.kind == .video ? .video : .photo)
+                    RemoteThumb(url: item.thumbUrl, kind: item.kind)
                 }
             }
             .clipped()

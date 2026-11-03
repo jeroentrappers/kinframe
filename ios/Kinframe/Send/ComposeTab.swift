@@ -1,8 +1,9 @@
 import KinframeKit
+import Photos
 import PhotosUI
 import SwiftUI
 
-/// A picked photo or video as a file: the original (HEIC, MOV, …), never transcoded.
+/// A picked photo or video as a file: the original (HEIC, MOV, …). The upload queue prepares it before sending.
 struct PickedMedia: Transferable {
     let url: URL
     let filename: String
@@ -18,6 +19,26 @@ struct PickedMedia: Transferable {
         let dest = dir.appending(path: "\(UUID().uuidString)-\(source.lastPathComponent)")
         try FileManager.default.copyItem(at: source, to: dest)
         return PickedMedia(url: dest, filename: source.lastPathComponent)
+    }
+
+    /// The motion clip of a Live Photo, written next to the picked files; nil for anything else.
+    static func motionClip(_ item: PhotosPickerItem) async -> URL? {
+        guard item.supportedContentTypes.contains(where: { $0.conforms(to: .livePhoto) }),
+              let live = try? await item.loadTransferable(type: PHLivePhoto.self) else { return nil }
+        let resources = PHAssetResource.assetResources(for: live)
+        guard let clip = resources.first(where: { $0.type == .pairedVideo }) ?? resources.first(where: { $0.type == .fullSizePairedVideo }) else { return nil }
+        let dir = FileManager.default.temporaryDirectory.appending(path: "picked", directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let ext = (clip.originalFilename as NSString).pathExtension
+        let dest = dir.appending(path: "\(UUID().uuidString)-motion.\(ext.isEmpty ? "mov" : ext.lowercased())")
+        let options = PHAssetResourceRequestOptions()
+        options.isNetworkAccessAllowed = true
+        do {
+            try await PHAssetResourceManager.default().writeData(for: clip, toFile: dest, options: options)
+            return dest
+        } catch {
+            return nil
+        }
     }
 }
 
@@ -90,10 +111,12 @@ struct ComposeTab: View {
             if let list = UserDefaults.standard.string(forKey: "kfCompose"), model.drafts.isEmpty {
                 UserDefaults.standard.removeObject(forKey: "kfCompose")
                 Task {
-                    let files = list.split(separator: ",").compactMap { path -> (URL, String)? in
-                        let src = URL(fileURLWithPath: String(path))
-                        guard let copy = try? PickedMedia.copy(src) else { return nil }
-                        return (copy.url, src.lastPathComponent)
+                    // "/still.heic+/clip.mov" stages a Live Photo.
+                    let files = list.split(separator: ",").compactMap { entry -> (URL, String, URL?)? in
+                        let parts = entry.split(separator: "+").map { URL(fileURLWithPath: String($0)) }
+                        guard let src = parts.first, let copy = try? PickedMedia.copy(src) else { return nil }
+                        let motion = parts.count > 1 ? (try? PickedMedia.copy(parts[1]))?.url : nil
+                        return (copy.url, src.lastPathComponent, motion)
                     }
                     await add(files)
                     if let caption = UserDefaults.standard.string(forKey: "kfCaption") { model.applyCaptionToAll(caption) }
@@ -136,7 +159,7 @@ struct ComposeTab: View {
             Text(L("ios.send.pickBody", ["max": model.limits.maxItemsPerSend]))
                 .foregroundStyle(Palette.textMuted)
                 .multilineTextAlignment(.center)
-            PhotosPicker(selection: $picks, maxSelectionCount: max(1, model.room), selectionBehavior: .ordered, matching: .any(of: [.images, .videos]), preferredItemEncoding: .current) {
+            PhotosPicker(selection: $picks, maxSelectionCount: max(1, model.room), selectionBehavior: .ordered, matching: .any(of: [.images, .videos, .livePhotos]), preferredItemEncoding: .current) {
                 Label(L("send.choose"), systemImage: "photo.on.rectangle.angled")
             }
             .buttonStyle(.kf(.primary, large: true, fill: true))
@@ -186,7 +209,7 @@ struct ComposeTab: View {
                         .overlay(ProgressView())
                 }
                 if model.room > 0 {
-                    PhotosPicker(selection: $picks, maxSelectionCount: model.room, selectionBehavior: .ordered, matching: .any(of: [.images, .videos]), preferredItemEncoding: .current) {
+                    PhotosPicker(selection: $picks, maxSelectionCount: model.room, selectionBehavior: .ordered, matching: .any(of: [.images, .videos, .livePhotos]), preferredItemEncoding: .current) {
                         Palette.primarySoft.opacity(0.6)
                             .aspectRatio(1, contentMode: .fit)
                             .overlay {
@@ -316,16 +339,20 @@ struct ComposeTab: View {
         let take = Array(items.prefix(model.room))
         let over = items.count - take.count
         importing += take.count
-        var files: [(URL, String)] = []
-        await withTaskGroup(of: PickedMedia?.self) { group in
-            for item in take {
-                group.addTask { try? await item.loadTransferable(type: PickedMedia.self) }
+        var loaded: [Int: (URL, String, URL?)] = [:]
+        await withTaskGroup(of: (Int, PickedMedia?, URL?).self) { group in
+            for (n, item) in take.enumerated() {
+                group.addTask {
+                    guard let media = try? await item.loadTransferable(type: PickedMedia.self) else { return (n, nil, nil) }
+                    return (n, media, await PickedMedia.motionClip(item))
+                }
             }
-            for await media in group {
+            for await (n, media, motion) in group {
                 importing -= 1
-                if let media { files.append((media.url, media.filename)) }
+                if let media { loaded[n] = (media.url, media.filename, motion) }
             }
         }
+        let files = loaded.keys.sorted().compactMap { loaded[$0] }
         // Keep the order they were picked in.
         await add(files)
         if over > 0 {
@@ -337,7 +364,11 @@ struct ComposeTab: View {
     }
 
     private func add(_ files: [(URL, String)]) async {
-        let result = await model.add(files: files.map { (url: $0.0, filename: $0.1) })
+        await add(files.map { ($0.0, $0.1, nil) })
+    }
+
+    private func add(_ files: [(URL, String, URL?)]) async {
+        let result = await model.add(media: files.map { (url: $0.0, filename: $0.1, motion: $0.2) })
         if result.overLimit > 0 {
             app.toasts.show(L("send.overLimit", ["max": model.limits.maxItemsPerSend, "n": result.overLimit]), isError: true)
         }
@@ -391,6 +422,7 @@ struct DraftTile: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
             .overlay(alignment: .bottomLeading) { badges }
+            .overlay(alignment: .topLeading) { if draft.isLive { LiveBadge().padding(6) } }
             .overlay(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).strokeBorder(issue != nil ? Palette.danger : .clear, lineWidth: 3))
         }
         .buttonStyle(CardButtonStyle())
@@ -470,7 +502,11 @@ struct SendingCard: View {
     private var title: String {
         switch job.state {
         case .uploading:
-            L("send.uploading", ["done": job.uploadedCount, "total": job.items.count, "pct": Int((job.progress * 100).rounded())])
+            if let p = job.preparing {
+                L("ios.send.preparing", ["n": p.index + 1, "total": job.items.count, "pct": Int((p.fraction * 100).rounded())])
+            } else {
+                L("send.uploading", ["done": job.uploadedCount, "total": job.items.count, "pct": Int((job.progress * 100).rounded())])
+            }
         case .sending, .sent:
             L("send.finishing")
         case .failed:

@@ -8,8 +8,8 @@ public enum OutboxEvent: Sendable {
     case removed(UUID)
 }
 
-/// Drives queued sends: uploads each file with tus (3 at a time, 4 MiB chunks), then creates the send with
-/// `POST /v1/sends` and a stable `Idempotency-Key`. Every step is persisted, so a job resumes after the app is
+/// Drives queued sends: prepares each file (README §5.3 "Prepared uploads"), uploads it with tus (3 at a time, 4 MiB
+/// chunks), then creates the send with `POST /v1/sends` and a stable `Idempotency-Key`. Every step is persisted, so a job resumes after the app is
 /// suspended, killed or woken for background URLSession events, and the share extension can start a job that the
 /// app finishes.
 public actor OutboxRunner {
@@ -22,6 +22,8 @@ public actor OutboxRunner {
     let owner: String
     let chunkSize: Int64
     let sleep: @Sendable (TimeInterval) async throws -> Void
+    /// Client-side preparation; nil uploads originals (the share extension: its memory limit is too small).
+    let preparer: MediaPreparing?
 
     private var server: URL?
     private var tokens: TokenProvider?
@@ -31,9 +33,10 @@ public actor OutboxRunner {
     private let emit: AsyncStream<OutboxEvent>.Continuation
 
     public init(store: OutboxStore, transport: UploadTransport, owner: String = "app-\(UUID().uuidString)",
-                chunkSize: Int64 = Tus.chunkSize,
+                chunkSize: Int64 = Tus.chunkSize, preparer: MediaPreparing? = nil,
                 sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }) {
         self.store = store
+        self.preparer = preparer
         self.transport = transport
         self.owner = owner
         self.chunkSize = chunkSize
@@ -58,7 +61,7 @@ public actor OutboxRunner {
             }
             // Network failures retry on their own the next time the queue is kicked.
             if job.state == .failed(code: "network") {
-                job = store.update(job.id) { $0.state = $0.items.allSatisfy(\.upload.isComplete) ? .sending : .uploading; $0.attempts = 0 } ?? job
+                job = store.update(job.id) { $0.state = $0.allUploaded ? .sending : .uploading; $0.attempts = 0 } ?? job
             }
             if job.isFinished || running[job.id] != nil { continue }
             if inFlight.contains(where: { $0.job == job.id }) { continue }
@@ -82,7 +85,7 @@ public actor OutboxRunner {
     /// Try a failed job again.
     public func retry(_ id: UUID) {
         guard let job = store.update(id, { j in
-            j.state = j.items.allSatisfy(\.upload.isComplete) ? .sending : .uploading
+            j.state = j.allUploaded ? .sending : .uploading
             j.attempts = 0
             j.lease = nil
         }) else { return }
@@ -107,8 +110,8 @@ public actor OutboxRunner {
     public func handleOrphan(tag: TaskTag, response: TransportResponse?, error: Error?) async {
         guard var job = store.load(tag.job) else { return }
         let endpoint = job.server.appending(path: "v1/uploads")
-        if let index = tag.item, let step = tag.step, job.items.indices.contains(index) {
-            var upload = job.items[index].upload
+        if let index = tag.item, let step = tag.step, job.items.indices.contains(index),
+           var upload = tag.motion == true ? job.items[index].motion : job.items[index].upload {
             if let response {
                 do {
                     try Tus.apply(step, to: &upload, status: response.status, headers: response.headers, endpoint: endpoint)
@@ -118,7 +121,7 @@ public actor OutboxRunner {
             } else {
                 Tus.interrupted(&upload)
             }
-            job.items[index].upload = upload
+            if tag.motion == true { job.items[index].motion = upload } else { job.items[index].upload = upload }
         } else if tag.item == nil, let response, (200..<300).contains(response.status),
                   let send = try? Self.decoder.decode(Send.self, from: response.body) {
             job.state = .sent(sendId: send.id)
@@ -160,7 +163,7 @@ public actor OutboxRunner {
     }
 
     private func uploadAll(_ job: OutboxJob, tokens: TokenProvider) async throws {
-        let pending = job.items.indices.filter { !job.items[$0].upload.isComplete }
+        let pending = job.items.indices.filter { !job.items[$0].isComplete }
         try await withThrowingTaskGroup(of: Void.self) { group in
             var next = pending.makeIterator()
             for _ in 0..<Self.parallelUploads {
@@ -182,28 +185,122 @@ public actor OutboxRunner {
         return job
     }
 
-    private func save(_ id: UUID, item index: Int, _ upload: TusUpload) throws {
+    private func save(_ id: UUID, item index: Int, motion: Bool = false, _ upload: TusUpload) throws {
+        try change(id, item: index) { item in
+            if motion { item.motion = upload } else { item.upload = upload }
+        }
+    }
+
+    /// Change one item while we still hold the lease; renews it.
+    private func change(_ id: UUID, item index: Int, _ change: @escaping (inout OutboxItem) -> Void) throws {
         var lost = false
         let job = store.update(id) { j in
             if let lease = j.lease, lease.owner != self.owner { lost = true; return }
-            j.items[index].upload = upload
+            guard j.items.indices.contains(index) else { return }
+            change(&j.items[index])
             j.lease = .init(owner: self.owner, until: Date().addingTimeInterval(Self.leaseDuration))
         }
         if lost { throw Stop.lostLease }
         if let job { emit.yield(.updated(job)) }
     }
 
-    /// Upload one file of a job until it's complete.
+    /// Prepare, then upload one item (and a Live Photo's clip) until it's complete.
     func upload(_ id: UUID, item index: Int, tokens: TokenProvider) async throws {
+        try await prepare(id, item: index, motion: false)
+        try await upload(id, item: index, motion: false, tokens: tokens)
+        if try claim(id).items[index].motion != nil {
+            try await prepare(id, item: index, motion: true)
+            try await upload(id, item: index, motion: true, tokens: tokens)
+        }
+    }
+
+    // MARK: Preparing
+
+    private var reportedPrep: [String: Double] = [:]
+
+    /// Turn the original into a prepared master once, before its upload starts. An upload that already started (or a
+    /// runner without a preparer) keeps the original; so does anything the preparer can't handle.
+    private func prepare(_ id: UUID, item index: Int, motion: Bool) async throws {
+        let job = try claim(id)
+        let item = job.items[index]
+        guard (motion ? item.motionPrep : item.prep) == nil, let upload = motion ? item.motion : item.upload else { return }
+        guard let preparer, upload.location == nil, upload.existingItemId == nil else {
+            try change(id, item: index) { if motion { $0.motionPrep = .original } else { $0.prep = .original } }
+            return
+        }
+        let dir = store.directory(id)
+        let source = dir.appending(path: upload.file)
+        if !motion { try change(id, item: index) { $0.preparing = 0 } }
+        var captured = item.capturedAt
+        if !motion, captured == nil {
+            captured = await preparer.captureDate(source, kind: item.kind)
+        }
+        let capturedAt = captured
+        let name = "prep-\(index)\(motion ? "-motion" : "")"
+        let outcome: PrepOutcome
+        if motion {
+            // The clip of a Live Photo: muted unless the sound was asked for, at most 10 s, no trim.
+            outcome = await preparer.prepareVideo(source, to: dir, name: name, trim: nil, includeAudio: item.liveAudio == true,
+                                                  maxSeconds: PrepPolicy.motionMaxSeconds) { _ in }
+        } else if item.kind == .video {
+            let key = "\(id)-\(index)"
+            outcome = await preparer.prepareVideo(source, to: dir, name: name, trim: item.trim, includeAudio: item.includeAudio != false,
+                                                  maxSeconds: nil) { [weak self] f in
+                Task { await self?.reportPreparing(id, item: index, key: key, fraction: f) }
+            }
+        } else {
+            outcome = await preparer.preparePhoto(source, to: dir, name: name)
+        }
+        try Task.checkCancellation()
+        var prepared = upload
+        var media: PreparedMedia?
+        if case .prepared(let file, let mime, let m) = outcome {
+            let size = (try? file.resourceValues(forKeys: [.fileSizeKey]).fileSize).map(Int64.init) ?? 0
+            if size > 0 {
+                prepared = TusUpload(file: file.lastPathComponent, size: size,
+                                     filename: ((upload.filename as NSString).deletingPathExtension) + "." + file.pathExtension, mime: mime)
+                prepared.prepared = m.profile
+                media = m
+            }
+        }
+        let done = media != nil
+        try change(id, item: index) { i in
+            if motion {
+                i.motion = prepared
+                i.motionPrep = done ? .prepared : .original
+            } else {
+                i.upload = prepared
+                i.prep = done ? .prepared : .original
+                i.prepared = media
+                i.preparing = nil
+                i.capturedAt = capturedAt
+            }
+        }
+        // The master replaces the original in the queue.
+        if done { try? FileManager.default.removeItem(at: source) }
+    }
+
+    private func reportPreparing(_ id: UUID, item index: Int, key: String, fraction: Double) {
+        // Persist coarse steps only: every write goes through file coordination.
+        guard fraction - (reportedPrep[key] ?? -1) >= 0.05 || fraction >= 1 else { return }
+        reportedPrep[key] = fraction
+        try? change(id, item: index) { i in if i.prep == nil { i.preparing = min(1, fraction) } }
+    }
+
+    // MARK: Uploading
+
+    /// Upload one file of a job (the item's file or its Live Photo clip) until it's complete.
+    private func upload(_ id: UUID, item index: Int, motion: Bool, tokens: TokenProvider) async throws {
+        func part(_ job: OutboxJob) -> TusUpload? { motion ? job.items[index].motion : job.items[index].upload }
         var job = try claim(id)
         let dir = store.directory(id)
         let endpoint = job.server.appending(path: "v1/uploads")
-        var upload = job.items[index].upload
+        guard var upload = part(job) else { return }
         let source = dir.appending(path: upload.file)
 
-        if upload.sha256 == nil, upload.location == nil {
+        if !motion, upload.sha256 == nil, upload.location == nil, job.items[index].dedupable {
             upload.sha256 = try? OutboxStore.sha256(of: source)
-            try save(id, item: index, upload)
+            try save(id, item: index, motion: motion, upload)
         }
 
         var failures = 0
@@ -211,8 +308,9 @@ public actor OutboxRunner {
         while true {
             try Task.checkCancellation()
             job = try claim(id)
-            let step = Tus.next(job.items[index].upload, chunkSize: chunkSize)
-            upload = job.items[index].upload
+            guard let current = part(job) else { return }
+            let step = Tus.next(current, chunkSize: chunkSize)
+            upload = current
             guard var request = Tus.request(for: step, upload: upload, endpoint: endpoint) else { return }
             guard let token = try await tokens.accessToken() else { throw APIError.unauthorized }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -220,7 +318,7 @@ public actor OutboxRunner {
             let body = try chunkFile(for: step, upload: upload, source: source, dir: dir, item: index)
             let response: TransportResponse
             do {
-                response = try await transport.perform(request, bodyFile: body?.url, tag: TaskTag(job: id, item: index, step: step))
+                response = try await transport.perform(request, bodyFile: body?.url, tag: TaskTag(job: id, item: index, step: step, motion: motion ? true : nil))
             } catch is CancellationError {
                 throw CancellationError()
             } catch let e as URLError where e.code == .cancelled {
@@ -228,7 +326,7 @@ public actor OutboxRunner {
             } catch {
                 body?.cleanup()
                 Tus.interrupted(&upload)
-                try save(id, item: index, upload)
+                try save(id, item: index, motion: motion, upload)
                 failures += 1
                 if failures >= Self.maxAttempts { throw APIError.network }
                 try await sleep(backoffDelay(attempt: failures - 1))
@@ -239,14 +337,14 @@ public actor OutboxRunner {
             do {
                 try Tus.apply(step, to: &upload, status: response.status, headers: response.headers, endpoint: endpoint)
                 failures = 0
-                try save(id, item: index, upload)
+                try save(id, item: index, motion: motion, upload)
             } catch TusError.unauthorized {
                 guard !refreshedToken, await tokens.refreshAfterUnauthorized() != nil else { throw APIError.unauthorized }
                 refreshedToken = true
             } catch TusError.failed(let e) {
                 throw e
             } catch {
-                try save(id, item: index, upload)
+                try save(id, item: index, motion: motion, upload)
                 failures += 1
                 if failures >= Self.maxAttempts { throw APIError.from(status: response.status, body: response.body) }
                 try await sleep(backoffDelay(attempt: failures - 1))
@@ -321,7 +419,9 @@ public actor OutboxRunner {
                 emit.yield(.updated(done))
                 // Media is on the server now; keep only what the history card needs until the next kick.
                 for item in done.items {
-                    try? FileManager.default.removeItem(at: store.directory(id).appending(path: item.upload.file))
+                    for file in [item.upload.file, item.motion?.file].compactMap({ $0 }) {
+                        try? FileManager.default.removeItem(at: store.directory(id).appending(path: file))
+                    }
                 }
                 return
             case 401:
@@ -333,7 +433,10 @@ public actor OutboxRunner {
                 if problem.code == "upload_not_found", !resetUploads {
                     resetUploads = true
                     job = store.update(id) { j in
-                        for i in j.items.indices where j.items[i].upload.existingItemId == nil { Tus.reset(&j.items[i].upload) }
+                        for i in j.items.indices {
+                            if j.items[i].upload.existingItemId == nil { Tus.reset(&j.items[i].upload) }
+                            if j.items[i].motion != nil { Tus.reset(&j.items[i].motion!) }
+                        }
                         j.state = .uploading
                     } ?? job
                     try await uploadAll(job, tokens: tokens)

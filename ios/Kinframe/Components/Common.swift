@@ -141,7 +141,11 @@ struct RemoteThumb: View {
             } else {
                 Image(systemName: kind == .video ? "video" : "photo").foregroundStyle(Palette.textFaint)
             }
-            if kind == .video {
+            if kind == .live {
+                LiveBadge()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(5)
+            } else if kind == .video {
                 Image(systemName: "play.fill")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.white)
@@ -153,6 +157,20 @@ struct RemoteThumb: View {
         }
         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
         .accessibilityHidden(true)
+    }
+}
+
+/// The "Live" mark on Live Photos (composer, history, library).
+struct LiveBadge: View {
+    var body: some View {
+        Label(L("ios.live.badge"), systemImage: "livephoto")
+            .labelStyle(TightLabelStyle())
+            .font(.caption2.weight(.bold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(.black.opacity(0.55)))
+            .accessibilityLabel(L("ios.live.a11y"))
     }
 }
 

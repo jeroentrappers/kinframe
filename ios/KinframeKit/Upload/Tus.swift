@@ -17,6 +17,8 @@ public struct TusUpload: Codable, Equatable, Sendable {
     public var needsHead = false
     /// The server already has this file as an item (`Kinframe-Existing-Item`): no bytes needed.
     public var existingItemId: String?
+    /// `prepared` profile of a client-prepared master (README §5.3), sent in `Upload-Metadata`.
+    public var prepared: String?
 
     public init(file: String, size: Int64, filename: String, mime: String, sha256: String? = nil) {
         self.file = file
@@ -76,9 +78,10 @@ public enum Tus {
     }
 
     /// `Upload-Metadata`: comma-separated `key base64(value)` pairs.
-    public static func metadata(filename: String, filetype: String, sha256: String?) -> String {
+    public static func metadata(filename: String, filetype: String, sha256: String?, prepared: String? = nil) -> String {
         var pairs = [("filename", filename), ("filetype", filetype)]
         if let sha256 { pairs.append(("sha256", sha256)) }
+        if let prepared { pairs.append((PreparedProfile.key, prepared)) }
         return pairs.map { "\($0.0) \(Data($0.1.utf8).base64EncodedString())" }.joined(separator: ",")
     }
 
@@ -93,7 +96,7 @@ public enum Tus {
             r = URLRequest(url: endpoint)
             r.httpMethod = "POST"
             r.setValue(String(u.size), forHTTPHeaderField: "Upload-Length")
-            r.setValue(metadata(filename: u.filename, filetype: u.mime, sha256: u.sha256), forHTTPHeaderField: "Upload-Metadata")
+            r.setValue(metadata(filename: u.filename, filetype: u.mime, sha256: u.sha256, prepared: u.prepared), forHTTPHeaderField: "Upload-Metadata")
             r.setValue("application/offset+octet-stream", forHTTPHeaderField: "Content-Type")
         case .head:
             guard let location = u.location else { return nil }

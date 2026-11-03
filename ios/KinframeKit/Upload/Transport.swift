@@ -8,11 +8,14 @@ public struct TaskTag: Codable, Equatable, Hashable, Sendable {
     /// Index into the job's items, or nil for the final `POST /v1/sends`.
     public var item: Int?
     public var step: TusStep?
+    /// The step belongs to the item's Live Photo clip.
+    public var motion: Bool?
 
-    public init(job: UUID, item: Int?, step: TusStep?) {
+    public init(job: UUID, item: Int?, step: TusStep?, motion: Bool? = nil) {
         self.job = job
         self.item = item
         self.step = step
+        self.motion = motion
     }
 
     var encoded: String { (try? JSONEncoder().encode(self)).flatMap { String(data: $0, encoding: .utf8) } ?? "" }

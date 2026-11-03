@@ -106,6 +106,8 @@ final class FakeServer: @unchecked Sendable {
         var existingItem: String?
         var rejectToken: String?
         var authHeaders: [String] = []
+        /// `Upload-Metadata` of every create, decoded.
+        var metadata: [[String: String]] = []
     }
 
     let state = OSAllocatedUnfairLock(initialState: State())
@@ -126,6 +128,12 @@ final class FakeServer: @unchecked Sendable {
                 if let existing = s.existingItem {
                     return .response(status: 201, headers: ["Location": "/v1/uploads/dup", "Kinframe-Existing-Item": existing, "Upload-Offset": "0"])
                 }
+                var meta: [String: String] = [:]
+                for pair in (r.header("Upload-Metadata") ?? "").split(separator: ",") {
+                    let kv = pair.split(separator: " ")
+                    if kv.count == 2, let d = Data(base64Encoded: String(kv[1])) { meta[String(kv[0])] = String(decoding: d, as: UTF8.self) }
+                }
+                s.metadata.append(meta)
                 let id = "u\(s.uploads.count + 1)"
                 let length = Int64(r.header("Upload-Length") ?? "0") ?? 0
                 s.uploads[id] = (length, r.body)
@@ -183,8 +191,10 @@ final class OutboxRunnerTests: XCTestCase {
         return (job, datas)
     }
 
-    func runner(_ fake: FakeServer, store: OutboxStore, tokens: StubTokens = StubTokens(), owner: String = "test") async -> OutboxRunner {
-        let runner = OutboxRunner(store: store, transport: URLSessionUploadTransport(session: fake.session), owner: owner, chunkSize: 1024, sleep: { _ in })
+    func runner(_ fake: FakeServer, store: OutboxStore, tokens: StubTokens = StubTokens(), owner: String = "test",
+                preparer: MediaPreparing? = nil) async -> OutboxRunner {
+        let runner = OutboxRunner(store: store, transport: URLSessionUploadTransport(session: fake.session), owner: owner, chunkSize: 1024,
+                                  preparer: preparer, sleep: { _ in })
         await runner.configure(server: server, tokens: tokens)
         return runner
     }

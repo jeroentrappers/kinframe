@@ -46,6 +46,10 @@ struct ItemEditorSheet: View {
                             VideoTrimSection(model: model, draft: draft, duration: duration)
                         }
 
+                        if draft.motionFile != nil {
+                            liveSection(draft)
+                        }
+
                         captionSection(draft)
                     }
                     .padding(20)
@@ -95,6 +99,26 @@ struct ItemEditorSheet: View {
                 .font(.footnote)
                 .foregroundStyle(Palette.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    /// A Live Photo: sent with its clip unless "send as a still photo only" is on.
+    private func liveSection(_ draft: Draft) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                if draft.sendLive { LiveBadge() }
+                Text(L("ios.send.liveTitle")).font(.subheadline.weight(.semibold)).foregroundStyle(Palette.text)
+            }
+            Toggle(isOn: Binding(get: { !draft.sendLive }, set: { still in model.update(draftId) { $0.sendLive = !still } })) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("ios.send.liveStillOnly"))
+                    Text(draft.sendLive ? L("ios.send.liveHint") : L("ios.send.liveStillHint"))
+                        .font(.footnote)
+                        .foregroundStyle(Palette.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .tint(Palette.accent)
         }
     }
 
