@@ -39,13 +39,16 @@ data class FrameDetailState(
     val busyCommand: String? = null,
     val creatingInvite: Boolean = false,
     val busy: Boolean = false,
+    /** "Move to a new frame" worked: the new device is this frame now. */
+    val replaced: Boolean = false,
+    @StringRes val replaceError: Int? = null,
 )
 
 /** Messages for the snackbar; the screen turns them into localized text. */
 sealed interface FrameEvent {
     data class Command(val type: String) : FrameEvent
     data class Error(@StringRes val message: Int) : FrameEvent
-    data class Message(@StringRes val message: Int, val arg: String? = null) : FrameEvent
+    data class Message(@StringRes val message: Int, val arg: String? = null, val arg2: String? = null) : FrameEvent
     data class ShareInvite(val invite: Invite) : FrameEvent
     data object Gone : FrameEvent
 }
@@ -144,6 +147,44 @@ class FrameDetailViewModel(
         _events.tryEmit(FrameEvent.Message(R.string.overview_removed, frame()?.name))
         _events.tryEmit(FrameEvent.Gone)
     }
+
+    /**
+     * Owner only: make [member] the owner (the previous owner becomes admin), then leave when [leaveAfter]. A failed
+     * leave after a good transfer says so, and the frame stays.
+     */
+    fun transfer(member: Member, leaveAfter: Boolean, removeMine: Boolean) = mutate {
+        api.transferOwnership(frameId, member.userId)
+        if (leaveAfter) {
+            try {
+                api.leaveFrame(frameId, removeMine)
+                _events.tryEmit(FrameEvent.Message(R.string.transfer_done_left, member.displayName, frame()?.name))
+                _events.tryEmit(FrameEvent.Gone)
+                return@mutate
+            } catch (e: Exception) {
+                _events.tryEmit(FrameEvent.Error(Problems.message(e)))
+            }
+        }
+        _events.tryEmit(FrameEvent.Message(R.string.transfer_done, member.displayName))
+        runCatching { api.frame(frameId) }.onSuccess { f -> _state.update { it.copy(frame = Load.Ready(f)) } }
+        loadPeople()
+    }
+
+    /** Owner only: move this frame to a new device by the 8-digit code it shows. */
+    fun replaceDevice(code: String) {
+        _state.update { it.copy(busy = true, replaceError = null) }
+        viewModelScope.launch {
+            try {
+                val f = api.replaceDevice(frameId, code)
+                _state.update { it.copy(frame = Load.Ready(f), replaced = true) }
+            } catch (e: Exception) {
+                _state.update { it.copy(replaceError = Problems.message(e)) }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
+
+    fun resetReplace() = _state.update { it.copy(replaced = false, replaceError = null) }
 
     fun decide(request: JoinRequest, approve: Boolean) = mutate {
         api.decideJoinRequest(frameId, request.id, approve)

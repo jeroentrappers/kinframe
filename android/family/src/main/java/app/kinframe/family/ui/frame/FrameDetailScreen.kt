@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -151,6 +153,11 @@ class FrameActions(
     val shareInvite: (Invite) -> Unit,
     val copyInvite: (Invite) -> Unit,
     val revokeInvite: (Invite) -> Unit,
+    /** Owner only: hand the frame to a member, optionally leaving (and removing your photos) right after. */
+    val transfer: (Member, Boolean, Boolean) -> Unit = { _, _, _ -> },
+    /** Owner only: move the frame to a new device by its code. */
+    val replaceDevice: (String) -> Unit = {},
+    val resetReplace: () -> Unit = {},
 )
 
 @Composable
@@ -160,6 +167,8 @@ private fun OverviewTab(frame: Frame, state: FrameDetailState, a: FrameActions) 
     var leaving by rememberSaveable { mutableStateOf(false) }
     var removing by rememberSaveable { mutableStateOf(false) }
     var renaming by rememberSaveable { mutableStateOf(false) }
+    var transferring by rememberSaveable { mutableStateOf<Boolean?>(null) } // true: leaving after
+    var replacing by rememberSaveable { mutableStateOf(false) }
     PageColumn {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             FrameArt(width = 112.dp, portrait = frame.screen?.orientation == "portrait")
@@ -200,9 +209,18 @@ private fun OverviewTab(frame: Frame, state: FrameDetailState, a: FrameActions) 
         state.health?.let { HealthCard(it) }
         if (frame.needsUpdate) Note(stringResource(R.string.frames_needs_update), tone = NoteTone.Warn)
         if (frame.role == FrameRole.OWNER) {
-            SectionTitle(stringResource(R.string.overview_remove_title))
-            Text(stringResource(R.string.overview_remove_body), style = Kin.type.caption, color = c.inkSoft)
-            QuietButton(stringResource(R.string.overview_remove_button), { removing = true }, danger = true)
+            SectionTitle(stringResource(R.string.overview_ownership))
+            Surface(Modifier.fillMaxWidth()) {
+                OwnerTool(KinIcons.Crown, stringResource(R.string.transfer_title), stringResource(R.string.overview_transfer_body), stringResource(R.string.overview_transfer_button)) { transferring = false }
+                HorizontalDivider(color = c.line)
+                OwnerTool(KinIcons.Frame, stringResource(R.string.replace_short), stringResource(R.string.overview_replace_body), stringResource(R.string.overview_replace_button)) { a.resetReplace(); replacing = true }
+            }
+            SectionTitle(stringResource(R.string.overview_danger_title))
+            Text(stringResource(R.string.overview_owner_leave_body), style = Kin.type.caption, color = c.inkSoft)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SecondaryButton(stringResource(R.string.overview_leave_button), { transferring = true }, icon = KinIcons.SignOut)
+                QuietButton(stringResource(R.string.overview_remove_button), { removing = true }, danger = true)
+            }
         } else {
             SectionTitle(stringResource(R.string.overview_leave_title))
             Text(stringResource(R.string.overview_leave_body), style = Kin.type.caption, color = c.inkSoft)
@@ -210,6 +228,8 @@ private fun OverviewTab(frame: Frame, state: FrameDetailState, a: FrameActions) 
         }
     }
     if (renaming) RenameDialog(frame, { renaming = false }) { n, l -> renaming = false; a.rename(n, l) }
+    transferring?.let { leaving -> TransferDialog(frame, state.members, a.me, leaving, null, { transferring = null }) { m, leave, mine -> transferring = null; a.transfer(m, leave, mine) } }
+    if (replacing) ReplaceDeviceDialog(frame, state, { replacing = false; a.resetReplace() }, a.replaceDevice)
     if (leaving) {
         var removeMine by remember { mutableStateOf(false) }
         AlertDialog(
@@ -363,7 +383,9 @@ private fun PeopleTab(frame: Frame, state: FrameDetailState, a: FrameActions) {
             SwitchRow(stringResource(R.string.people_invite_hint_approval), frame.inviteRequiresApproval ?: true, { a.setFlag("invite_requires_approval", it) })
         }
     }
-    editing?.let { m -> MemberDialog(m, frame, { editing = null }, a) }
+    var makingOwner by remember { mutableStateOf<String?>(null) }
+    editing?.let { m -> MemberDialog(m, frame, { editing = null }, a) { editing = null; makingOwner = m.userId } }
+    makingOwner?.let { id -> TransferDialog(frame, state.members, a.me, false, id, { makingOwner = null }) { m, leave, mine -> makingOwner = null; a.transfer(m, leave, mine) } }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -411,7 +433,7 @@ private fun InviteSection(frame: Frame, state: FrameDetailState, a: FrameActions
 }
 
 @Composable
-private fun MemberDialog(m: Member, frame: Frame, onDismiss: () -> Unit, a: FrameActions) {
+private fun MemberDialog(m: Member, frame: Frame, onDismiss: () -> Unit, a: FrameActions, onMakeOwner: () -> Unit) {
     val c = Kin.colors
     var role by remember { mutableStateOf(m.role) }
     var perms by remember { mutableStateOf(m.permissions) }
@@ -452,6 +474,7 @@ private fun MemberDialog(m: Member, frame: Frame, onDismiss: () -> Unit, a: Fram
                     PermissionSwitch(R.string.perm_manage_library, R.string.perm_manage_library_hint, perms.manageLibrary) { perms = perms.copy(manageLibrary = it) }
                     PermissionSwitch(R.string.perm_change_settings, R.string.perm_change_settings_hint, perms.changeSettings) { perms = perms.copy(changeSettings = it) }
                 }
+                if (frame.role == FrameRole.OWNER) QuietButton(stringResource(R.string.people_make_owner), onMakeOwner)
                 QuietButton(stringResource(R.string.people_remove), { removing = true }, danger = true)
             }
         },
@@ -465,3 +488,121 @@ private fun MemberDialog(m: Member, frame: Frame, onDismiss: () -> Unit, a: Fram
 @Composable
 private fun PermissionSwitch(title: Int, hint: Int, value: Boolean, onChange: (Boolean) -> Unit) =
     SwitchRow(stringResource(title), value, onChange, hint = stringResource(hint))
+
+@Composable
+private fun OwnerTool(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, body: String, button: String, onClick: () -> Unit) {
+    val c = Kin.colors
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Icon(icon, null, Modifier.size(20.dp), tint = c.accent)
+        Column(Modifier.weight(1f)) {
+            Text(title, style = Kin.type.bodyStrong, color = c.ink)
+            Text(body, style = Kin.type.caption, color = c.inkSoft)
+        }
+        SecondaryButton(button, onClick)
+    }
+}
+
+/**
+ * Hand the frame to another member (web `TransferDialog`): choose, then confirm. Admins come first and one is
+ * preselected; [leaving] when opened from "Leave".
+ */
+@Composable
+fun TransferDialog(frame: Frame, members: List<Member>, me: String?, leaving: Boolean, preselect: String?, onDismiss: () -> Unit, onTransfer: (Member, Boolean, Boolean) -> Unit) {
+    val c = Kin.colors
+    val candidates = members.filter { it.userId != me }.sortedWith(compareBy<Member>({ if (it.role == FrameRole.ADMIN) 0 else 1 }, { it.displayName.lowercase() }))
+    var choice by remember { mutableStateOf(preselect?.takeIf { p -> candidates.any { it.userId == p } } ?: (candidates.firstOrNull { it.role == FrameRole.ADMIN } ?: candidates.firstOrNull())?.userId) }
+    var confirm by remember { mutableStateOf(false) }
+    var leaveAfter by remember { mutableStateOf(leaving) }
+    var removeMine by remember { mutableStateOf(false) }
+    val chosen = candidates.firstOrNull { it.userId == choice }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(when {
+                confirm && chosen != null -> stringResource(R.string.transfer_confirm_title, chosen.displayName)
+                leaving -> stringResource(R.string.transfer_leave_title, frame.name)
+                else -> stringResource(R.string.transfer_title)
+            })
+        },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                when {
+                    candidates.isEmpty() -> Text(stringResource(if (leaving) R.string.transfer_no_one_leave else R.string.transfer_no_one), color = c.inkSoft)
+                    !confirm -> {
+                        Text(stringResource(if (leaving) R.string.transfer_leave_body else R.string.transfer_body), style = Kin.type.caption, color = c.inkSoft)
+                        Text(stringResource(R.string.transfer_pick), style = Kin.type.label, color = c.ink)
+                        candidates.forEach { m ->
+                            Row(Modifier.fillMaxWidth().clickable(role = Role.RadioButton) { choice = m.userId }.padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                androidx.compose.material3.RadioButton(choice == m.userId, null, colors = androidx.compose.material3.RadioButtonDefaults.colors(selectedColor = c.accent))
+                                Avatar(m.displayName, m.avatarUrl, 36.dp)
+                                Text(m.displayName, style = Kin.type.body, color = c.ink, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                RoleBadge(m.role)
+                            }
+                        }
+                        if (!leaving) CheckRow(stringResource(R.string.transfer_also_leave), leaveAfter) { leaveAfter = it }
+                        if (leaveAfter) CheckRow(stringResource(R.string.overview_remove_mine), removeMine) { removeMine = it }
+                    }
+                    chosen != null -> {
+                        Fact(KinIcons.Check, stringResource(R.string.transfer_fact_owner, chosen.displayName, frame.name))
+                        Fact(KinIcons.Check, stringResource(if (leaveAfter) R.string.transfer_fact_leave else R.string.transfer_fact_admin))
+                        Fact(KinIcons.Info, stringResource(R.string.transfer_fact_undo, chosen.displayName))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            when {
+                candidates.isEmpty() -> TextButton(onDismiss) { Text(stringResource(R.string.common_close)) }
+                !confirm -> TextButton({ confirm = true }, enabled = chosen != null) { Text(stringResource(R.string.transfer_continue)) }
+                else -> TextButton({ chosen?.let { onTransfer(it, leaveAfter, removeMine) } }) {
+                    Text(stringResource(if (leaveAfter) R.string.transfer_do_leave else R.string.transfer_do), color = c.danger)
+                }
+            }
+        },
+        dismissButton = {
+            if (confirm) TextButton({ confirm = false }) { Text(stringResource(R.string.transfer_back)) }
+            else if (candidates.isNotEmpty()) TextButton(onDismiss) { Text(stringResource(R.string.common_cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun Fact(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Icon(icon, null, Modifier.size(16.dp), tint = Kin.colors.accent)
+        Text(text, style = Kin.type.body, color = Kin.colors.ink)
+    }
+}
+
+/** "Move to a new frame" (web `ReplaceDeviceDialog`): the new device's code takes over this frame. */
+@Composable
+fun ReplaceDeviceDialog(frame: Frame, state: FrameDetailState, onDismiss: () -> Unit, onReplace: (String) -> Unit) {
+    val c = Kin.colors
+    var code by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (state.replaced) stringResource(R.string.replace_done_title) else stringResource(R.string.replace_title, frame.name)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (state.replaced) {
+                    Text(stringResource(R.string.replace_done_body, frame.name), color = c.ink)
+                } else {
+                    Text(stringResource(R.string.replace_body), style = Kin.type.body, color = c.inkSoft)
+                    listOf(stringResource(R.string.replace_step1), stringResource(R.string.replace_step2), stringResource(R.string.replace_step3, frame.name)).forEachIndexed { i, t ->
+                        Text("${i + 1}. $t", style = Kin.type.body, color = c.ink)
+                    }
+                    KinTextField(code, { v -> code = v.filter { it.isDigit() }.take(8) }, stringResource(R.string.replace_code_label), placeholder = "1234 5678",
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword),
+                        error = state.replaceError?.let { stringResource(it) })
+                    Note(stringResource(R.string.replace_warning), tone = NoteTone.Warn, icon = KinIcons.Warning)
+                }
+            }
+        },
+        confirmButton = {
+            if (state.replaced) TextButton(onDismiss) { Text(stringResource(R.string.common_done)) }
+            else TextButton({ onReplace(code) }, enabled = code.length == 8 && !state.busy) { Text(stringResource(R.string.replace_do), color = c.danger) }
+        },
+        dismissButton = { if (!state.replaced) TextButton(onDismiss) { Text(stringResource(R.string.common_cancel)) } },
+    )
+}

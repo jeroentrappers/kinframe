@@ -517,7 +517,11 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     })
                 }
                 is FrameEvent.Error -> toaster.show(res.getString(e.message))
-                is FrameEvent.Message -> toaster.show(if (e.arg != null) res.getString(e.message, e.arg) else res.getString(e.message))
+                is FrameEvent.Message -> toaster.show(when {
+                    e.arg2 != null -> res.getString(e.message, e.arg, e.arg2)
+                    e.arg != null -> res.getString(e.message, e.arg)
+                    else -> res.getString(e.message)
+                })
                 is FrameEvent.ShareInvite -> shareInvite(context, res, e.invite, (s.frame as? Load.Ready)?.value?.name.orEmpty())
                 FrameEvent.Gone -> { frames.remove(r.frameId); nav.selectTab(Route.Frames) }
             }
@@ -532,6 +536,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         shareInvite = { shareInvite(context, res, it, frameName) },
         copyInvite = { inv -> scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(frameName, inv.url))); toaster.show(res.getString(R.string.people_copied)) } },
         revokeInvite = vm::revokeInvite,
+        transfer = vm::transfer, replaceDevice = vm::replaceDevice, resetReplace = vm::resetReplace,
     )
     FrameDetailScreen(
         s, r.tab, { t -> nav.replace(r.copy(tab = t)) }, { nav.pop() }, { vm.load() },

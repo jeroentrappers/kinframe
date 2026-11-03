@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="overview_ownership">Eigendom en toestel</string>
+    <string name="overview_transfer_body">Geef de fotolijst aan iemand anders. Jij blijft beheerder.</string>
+    <string name="overview_transfer_button">Overdragen</string>
+    <string name="overview_replace_body">Een nieuwe fotolijst? Zet alles erop met de code die hij toont.</string>
+    <string name="overview_replace_button">Verhuizen</string>
+    <string name="overview_danger_title">Vertrekken of verwijderen</string>
+    <string name="overview_owner_leave_body">Om te vertrekken kies je eerst wie de nieuwe eigenaar wordt. Een fotolijst verwijderen koppelt hem los voor iedereen.</string>
+    <string name="people_make_owner">Eigenaar maken</string>
+    <string name="transfer_title">Eigendom overdragen</string>
+    <string name="transfer_leave_title">%1$s verlaten</string>
+    <string name="transfer_body">De nieuwe eigenaar kan alles, ook de fotolijst verwijderen. Beheerders doen al veel, dus zij zijn meestal de beste keuze.</string>
+    <string name="transfer_leave_body">Een fotolijst heeft altijd een eigenaar. Kies wie het overneemt voor je vertrekt.</string>
+    <string name="transfer_pick">Nieuwe eigenaar</string>
+    <string name="transfer_also_leave">Daarna de fotolijst verlaten</string>
+    <string name="transfer_no_one">Er is nog niemand anders op deze fotolijst. Nodig eerst iemand uit en maak die dan eigenaar.</string>
+    <string name="transfer_no_one_leave">Je bent de enige op deze fotolijst. Nodig iemand uit om het over te nemen, of verwijder de fotolijst.</string>
+    <string name="transfer_continue">Verder</string>
+    <string name="transfer_back">Terug</string>
+    <string name="transfer_confirm_title">%1$s eigenaar maken?</string>
+    <string name="transfer_fact_owner">%1$s wordt eigenaar van %2$s.</string>
+    <string name="transfer_fact_admin">Jij blijft op de fotolijst als beheerder.</string>
+    <string name="transfer_fact_leave">Jij verlaat de fotolijst meteen daarna.</string>
+    <string name="transfer_fact_undo">Alleen %1$s kan het eigendom teruggeven.</string>
+    <string name="transfer_do">Eigendom overdragen</string>
+    <string name="transfer_do_leave">Overdragen en vertrekken</string>
+    <string name="transfer_done">%1$s is nu de eigenaar</string>
+    <string name="transfer_done_left">%1$s is nu eigenaar van %2$s. Jij hebt de fotolijst verlaten.</string>
+    <string name="replace_short">Naar een nieuwe fotolijst verhuizen</string>
+    <string name="replace_title">%1$s naar een nieuwe fotolijst verhuizen</string>
+    <string name="replace_body">Foto’s, albums, instellingen en mensen gaan allemaal mee. Niemand hoeft de oude fotolijst aan te raken.</string>
+    <string name="replace_step1">Zet de nieuwe fotolijst aan en volg de installatie tot hij een code toont.</string>
+    <string name="replace_step2">Typ die code hieronder.</string>
+    <string name="replace_step3">De nieuwe fotolijst wordt %1$s en downloadt alles.</string>
+    <string name="replace_code_label">Code op de nieuwe fotolijst</string>
+    <string name="replace_warning">De oude fotolijst stopt meteen en gaat terug naar zijn installatiescherm.</string>
+    <string name="replace_do">Naar deze fotolijst verhuizen</string>
+    <string name="replace_done_title">Alles verhuisd</string>
+    <string name="replace_done_body">De nieuwe fotolijst is nu %1$s. Hij downloadt de foto’s en start de diavoorstelling vanzelf.</string>
+</resources>

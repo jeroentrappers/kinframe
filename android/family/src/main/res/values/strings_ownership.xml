@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="overview_ownership">Ownership and device</string>
+    <string name="overview_transfer_body">Hand the frame to someone else. You stay on as an admin.</string>
+    <string name="overview_transfer_button">Transfer</string>
+    <string name="overview_replace_body">Got a new frame? Move everything to it with the code it shows.</string>
+    <string name="overview_replace_button">Move</string>
+    <string name="overview_danger_title">Leave or remove</string>
+    <string name="overview_owner_leave_body">To leave, first choose who takes over as owner. Removing the frame disconnects it for everyone.</string>
+    <string name="people_make_owner">Make owner</string>
+    <string name="transfer_title">Transfer ownership</string>
+    <string name="transfer_leave_title">Leave %1$s</string>
+    <string name="transfer_body">The new owner can do everything, including removing the frame. Admins already manage it, so they’re usually the best choice.</string>
+    <string name="transfer_leave_body">A frame always has an owner. Choose who takes over before you leave.</string>
+    <string name="transfer_pick">New owner</string>
+    <string name="transfer_also_leave">Leave the frame afterwards</string>
+    <string name="transfer_no_one">There’s nobody else on this frame yet. Invite someone first, then make them the owner.</string>
+    <string name="transfer_no_one_leave">You’re the only one on this frame. Invite someone to take over, or remove the frame instead.</string>
+    <string name="transfer_continue">Continue</string>
+    <string name="transfer_back">Back</string>
+    <string name="transfer_confirm_title">Make %1$s the owner?</string>
+    <string name="transfer_fact_owner">%1$s becomes the owner of %2$s.</string>
+    <string name="transfer_fact_admin">You stay on the frame as an admin.</string>
+    <string name="transfer_fact_leave">You leave the frame right after.</string>
+    <string name="transfer_fact_undo">Only %1$s can give ownership back.</string>
+    <string name="transfer_do">Transfer ownership</string>
+    <string name="transfer_do_leave">Transfer and leave</string>
+    <string name="transfer_done">%1$s is now the owner</string>
+    <string name="transfer_done_left">%1$s now owns %2$s. You left the frame.</string>
+    <string name="replace_short">Move to a new frame</string>
+    <string name="replace_title">Move %1$s to a new frame</string>
+    <string name="replace_body">Photos, albums, settings and people all move over. Nobody needs to touch the old frame.</string>
+    <string name="replace_step1">Switch on the new frame and follow its setup until it shows a code.</string>
+    <string name="replace_step2">Type that code below.</string>
+    <string name="replace_step3">The new frame becomes %1$s and downloads everything.</string>
+    <string name="replace_code_label">Code on the new frame</string>
+    <string name="replace_warning">The old frame stops working right away and goes back to its setup screen.</string>
+    <string name="replace_do">Move to this frame</string>
+    <string name="replace_done_title">All moved</string>
+    <string name="replace_done_body">The new frame is now %1$s. It’s downloading the photos and will start the slideshow by itself.</string>
+</resources>
