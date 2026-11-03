@@ -29,7 +29,7 @@ final class PushRegistrar {
 
     /// Re-register at launch when permission was given earlier (tokens can change).
     func refreshRegistration() {
-        guard enabled else { return }
+        guard enabled, !UserDefaults.standard.bool(forKey: offKey) else { return }
         Task {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             if settings.authorizationStatus == .authorized { UIApplication.shared.registerForRemoteNotifications() }
@@ -50,6 +50,43 @@ final class PushRegistrar {
             }
             if let id = endpoint?.value2.id { UserDefaults.standard.set(id, forKey: endpointKey) }
         }
+    }
+
+    // MARK: The Settings switch
+
+    private let offKey = "push.off"
+
+    /// The system's answer to the permission question.
+    func authorization() async -> UNAuthorizationStatus {
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+    }
+
+    /// On for this device: permission given and not switched off in Settings.
+    func isOn() async -> Bool {
+        guard enabled, !UserDefaults.standard.bool(forKey: offKey) else { return false }
+        let status = await authorization()
+        return status == .authorized || status == .provisional
+    }
+
+    /// Ask for permission when needed and register; false when the system said no.
+    func turnOn() async -> Bool {
+        guard enabled else { return false }
+        UserDefaults.standard.set(true, forKey: askedKey)
+        var status = await authorization()
+        if status == .notDetermined {
+            _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+            status = await authorization()
+        }
+        guard status == .authorized || status == .provisional else { return false }
+        UserDefaults.standard.set(false, forKey: offKey)
+        UIApplication.shared.registerForRemoteNotifications()
+        return true
+    }
+
+    /// Stop pushes to this device: the endpoint is removed from the server.
+    func turnOff(api: API?) {
+        UserDefaults.standard.set(true, forKey: offKey)
+        unregister(api: api)
     }
 
     /// Forget this device's endpoint on sign-out.

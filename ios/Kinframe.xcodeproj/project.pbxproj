@@ -63,6 +63,7 @@
 		9DE60CFB873585DEE5B7DDC3 /* PushRegistrar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9269194C06CBB80AC1BE86E0 /* PushRegistrar.swift */; };
 		9E9167CAAB99B75EBE643466 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91B8AD88307A8BFADE6FBDB /* API.swift */; };
 		A0CBF2BCAA137BC91367E795 /* LivePlayback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68C7646C43D332BD3DDD206A /* LivePlayback.swift */; };
+		A4E07F52F222C718ADB310B1 /* ReservationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */; };
 		A7EFD5CFA75D8B5E17C340C0 /* ItemEditorSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93993AAB7D50559BF46380E5 /* ItemEditorSheet.swift */; };
 		A915ED1DB0E01CB71324EDB6 /* FrameDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CDD5D821D96018CD29538B /* FrameDetailView.swift */; };
 		B066DFC91CFCDE4AB74BF4CD /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = C35668FDF550D4D325BC1916 /* Client.swift */; };
@@ -90,6 +91,7 @@
 		ECE01A6CACC3E49030FD2395 /* ShareComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A423AF898951512C4CB770B /* ShareComposer.swift */; };
 		EF9D7C1B5655433944604940 /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 940029789BBFBA9CB5DD5B2D /* OpenAPIRuntime */; };
 		F165C6F0749BC31F5BE18B92 /* Types+Components+RequestBodies.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC72FF8B988F92A0186CCEEE /* Types+Components+RequestBodies.swift */; };
+		F202E18531BEA84CD55486B2 /* ios-strings-account.json in Resources */ = {isa = PBXBuildFile; fileRef = 30E692E828C86CCB18064467 /* ios-strings-account.json */; };
 		F218ED9D0AB0620171F030B4 /* Types+Components+Headers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11DB13FCB892D4D646303B0B /* Types+Components+Headers.swift */; };
 		F9093C7282F5D25E5BEDB757 /* Types+Components+Schemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6053E8207E3B4E2EC68B0182 /* Types+Components+Schemas.swift */; };
 		FAFA0173AD0F117C86B1028B /* OutboxMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE5C594CA00352DAFDC995 /* OutboxMonitor.swift */; };
@@ -189,6 +191,7 @@
 		1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Operations.swift"; sourceTree = "<group>"; };
 		1CBAEF8E65793E4A8FDC572F /* KinframeUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KinframeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		21FAFB345F3139690C2D96E5 /* DeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLink.swift; sourceTree = "<group>"; };
+		30E692E828C86CCB18064467 /* ios-strings-account.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-account.json"; sourceTree = "<group>"; };
 		3803BAFF209C97A1DDA0769A /* SendDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendDetailView.swift; sourceTree = "<group>"; };
 		395E28EFE78058A2D5D4CC79 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		3B4962DE7DA96805F67CF88F /* TransferSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferSheet.swift; sourceTree = "<group>"; };
@@ -211,6 +214,7 @@
 		6A17CE19AA0A7D2D51F8119F /* Transport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transport.swift; sourceTree = "<group>"; };
 		6C8449FAB6BDDAF87D7A02D9 /* Sharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sharing.swift; sourceTree = "<group>"; };
 		6D9DF6CD9D75158079385D0C /* ComposeRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeRules.swift; sourceTree = "<group>"; };
+		6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReservationsView.swift; sourceTree = "<group>"; };
 		70B7E9318696354433830BF8 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		75A57290E2DCC144619A1A20 /* KinframeShare.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KinframeShare.entitlements; sourceTree = "<group>"; };
 		7A2D51B6582B4DD276994E81 /* SettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTab.swift; sourceTree = "<group>"; };
@@ -322,6 +326,7 @@
 		0BB4B8C48531DEBE796886A7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				30E692E828C86CCB18064467 /* ios-strings-account.json */,
 				F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */,
 				5810E97DA1CD4A7D0A3539B0 /* Localizable.xcstrings */,
 			);
@@ -347,6 +352,7 @@
 		3CDC54626FABB83F2349ADEF /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */,
 				7A2D51B6582B4DD276994E81 /* SettingsTab.swift */,
 			);
 			path = Settings;
@@ -784,6 +790,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC8F40198C9CDD239DF6F68B /* Localizable.xcstrings in Resources */,
+				F202E18531BEA84CD55486B2 /* ios-strings-account.json in Resources */,
 				26600A5C56593CA1D6146FE5 /* ios-strings.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -878,6 +885,7 @@
 				87CB8A18AF93ABDD2B837798 /* PluginsModel.swift in Sources */,
 				97A7DB2E2EDFBD92F6C8EE3D /* PluginsSection.swift in Sources */,
 				9DE60CFB873585DEE5B7DDC3 /* PushRegistrar.swift in Sources */,
+				A4E07F52F222C718ADB310B1 /* ReservationsView.swift in Sources */,
 				876DA8482FC0122E54326BE2 /* RootView.swift in Sources */,
 				88071BAA05CD7AB065D70999 /* SendDetailView.swift in Sources */,
 				D2FC6B1938A3C0BD6C5EC14C /* ServerSignIn.swift in Sources */,
