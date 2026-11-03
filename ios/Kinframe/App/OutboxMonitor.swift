@@ -19,7 +19,7 @@ final class OutboxMonitor {
     private var shareTransports: [String: BackgroundUploadTransport] = [:]
 
     init() {
-        // The app prepares media before uploading; the share extension hands over originals and doesn't.
+        // The app prepares media before uploading, like the share extension; originals are never uploaded.
         runner = OutboxRunner(store: store, transport: transport, owner: "app-\(UUID().uuidString)", preparer: MediaPreparer())
         let runner = runner
         transport.setOrphanHandler { tag, response, error in

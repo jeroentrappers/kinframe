@@ -29,9 +29,9 @@ public struct PreparedMedia: Codable, Equatable, Sendable {
     }
 }
 
-/// The decisions behind client-side preparation, free of I/O so they can be unit tested. The server verifies what
-/// we produce and falls back to its own pipeline when something doesn't conform, so every rule errs on the side of
-/// "upload the original".
+/// The decisions behind client-side preparation, free of I/O so they can be unit tested. Photos and videos are always
+/// prepared on the device: an original is never uploaded, except when preparing it failed and it is already within
+/// the master's limits (long edge ≤ 2560 px for a photo, ≤ 1080p and ≤ 30 fps for a video).
 public enum PrepPolicy {
     /// photo-master-v1: long edge at most this many pixels.
     public static let photoMaxEdge = 2560
@@ -44,10 +44,22 @@ public enum PrepPolicy {
     /// Live Photo clips longer than this are cut by the server; we cut them first.
     public static let motionMaxSeconds = 10.0
 
-    /// Photo types we decode and re-encode. GIF stays as it is (the server keeps its first frame).
+    /// Photo types we decode and re-encode. A GIF becomes its first frame, which is what the server keeps of it.
     public static func canPreparePhoto(filename: String) -> Bool {
         let ext = (filename as NSString).pathExtension.lowercased()
-        return ["jpg", "jpeg", "heic", "heif", "png", "webp", "avif", "tif", "tiff", "dng"].contains(ext)
+        return ["jpg", "jpeg", "heic", "heif", "png", "webp", "avif", "tif", "tiff", "dng", "gif", "bmp"].contains(ext)
+    }
+
+    /// A photo that may go as it is when preparing it failed: its long edge is at most 2560 px.
+    public static func photoWithinLimits(width: Double, height: Double) -> Bool {
+        width > 0 && height > 0 && max(width, height) <= Double(photoMaxEdge)
+    }
+
+    /// A video that may go as it is when preparing it failed: within 1920×1080 in either orientation and at most
+    /// 30 fps (29.97 counts as 30).
+    public static func videoWithinLimits(width: Double, height: Double, fps: Double) -> Bool {
+        let long = max(width, height), short = min(width, height)
+        return short > 0 && long <= Double(videoMaxLong) && short <= Double(videoMaxShort) && fps <= Double(videoMaxFPS) + 0.5
     }
 
     /// The prepared photo size: long edge ≤ 2560, never upscaled.
@@ -115,12 +127,12 @@ public enum PrepPolicy {
 public enum PrepOutcome: Sendable {
     /// A prepared master in `file` (in the job's directory).
     case prepared(file: URL, mime: String, media: PreparedMedia)
-    /// Upload the original.
-    case original
+    /// The file couldn't be prepared (an unknown format, a decoder or export failure).
+    case failed
 }
 
-/// Turns an original into a `photo-master-v1` / `video-master-v1` master. Runs in the upload queue, never on the main
-/// actor and never in the share extension.
+/// Turns an original into a `photo-master-v1` / `video-master-v1` master. Runs in the upload queue (in the app and in
+/// the share extension), never on the main actor.
 public protocol MediaPreparing: Sendable {
     func preparePhoto(_ source: URL, to directory: URL, name: String) async -> PrepOutcome
     /// `trim` is applied and the audio dropped when `includeAudio` is false; `maxSeconds` cuts Live Photo clips.
@@ -128,6 +140,8 @@ public protocol MediaPreparing: Sendable {
                       progress: @escaping @Sendable (Double) -> Void) async -> PrepOutcome
     /// When the photo or video was taken, read from the original (prepared files carry no metadata).
     func captureDate(_ source: URL, kind: MediaKind) async -> Date?
+    /// Whether the original is already within the master's limits, so it may go as it is when preparing it failed.
+    func withinLimits(_ source: URL, kind: MediaKind) async -> Bool
 }
 
 public struct MediaPreparer: MediaPreparing {
@@ -140,7 +154,7 @@ public struct MediaPreparer: MediaPreparing {
               let src = CGImageSourceCreateWithURL(source as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
               let props = CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any],
               let w = props[kCGImagePropertyPixelWidth] as? Double, let h = props[kCGImagePropertyPixelHeight] as? Double
-        else { return .original }
+        else { return .failed }
         // Decode and downscale in one step; the EXIF orientation is applied, never upscaled.
         let target = PrepPolicy.photoTarget(CGSize(width: w, height: h))
         let options: [CFString: Any] = [
@@ -150,19 +164,19 @@ public struct MediaPreparer: MediaPreparing {
             kCGImageSourceThumbnailMaxPixelSize: Int(max(target.width, target.height)),
         ]
         guard let decoded = CGImageSourceCreateThumbnailAtIndex(src, 0, options as CFDictionary),
-              let image = Self.sRGB(decoded) else { return .original }
+              let image = Self.sRGB(decoded) else { return .failed }
 
         let webp = "org.webmproject.webp"
         let types = (CGImageDestinationCopyTypeIdentifiers() as? [String]) ?? []
         let (type, ext, mime) = types.contains(webp) ? (webp, "webp", "image/webp") : (UTType.jpeg.identifier, "jpg", "image/jpeg")
         let out = directory.appending(path: "\(name).\(ext)")
         try? FileManager.default.removeItem(at: out)
-        guard let dest = CGImageDestinationCreateWithURL(out as CFURL, type as CFString, 1, nil) else { return .original }
+        guard let dest = CGImageDestinationCreateWithURL(out as CFURL, type as CFString, 1, nil) else { return .failed }
         // No source properties: no GPS, EXIF, XMP or orientation tag. Only the encoder quality.
         CGImageDestinationAddImage(dest, image, [kCGImageDestinationLossyCompressionQuality: PrepPolicy.photoQuality] as CFDictionary)
         guard CGImageDestinationFinalize(dest) else {
             try? FileManager.default.removeItem(at: out)
-            return .original
+            return .failed
         }
         return .prepared(file: out, mime: mime, media: PreparedMedia(profile: PreparedProfile.photo, width: image.width, height: image.height))
     }
@@ -187,7 +201,7 @@ public struct MediaPreparer: MediaPreparing {
               let track = try? await asset.loadTracks(withMediaType: .video).first,
               let natural = try? await track.load(.naturalSize),
               let transform = try? await track.load(.preferredTransform)
-        else { return .original }
+        else { return .failed }
         let fps = (try? await track.load(.nominalFrameRate)) ?? 30
         let range = PrepPolicy.clip(duration: duration, trim: trim, maxSeconds: maxSeconds)
         let timeRange = CMTimeRange(start: CMTime(seconds: range.lowerBound, preferredTimescale: 600),
@@ -196,7 +210,7 @@ public struct MediaPreparer: MediaPreparing {
         // A composition with the trim applied and, when muted, no audio track.
         let composition = AVMutableComposition()
         guard let videoTrack = composition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid),
-              (try? videoTrack.insertTimeRange(timeRange, of: track, at: .zero)) != nil else { return .original }
+              (try? videoTrack.insertTimeRange(timeRange, of: track, at: .zero)) != nil else { return .failed }
         if includeAudio, let audio = try? await asset.loadTracks(withMediaType: .audio).first,
            let audioTrack = composition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid) {
             try? audioTrack.insertTimeRange(timeRange, of: audio, at: .zero)
@@ -219,7 +233,7 @@ public struct MediaPreparer: MediaPreparing {
         videoComposition.frameDuration = CMTime(value: 1, timescale: min(PrepPolicy.videoMaxFPS, max(1, Int32(fps.rounded()))))
         videoComposition.instructions = [instruction]
 
-        guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPreset1920x1080) else { return .original }
+        guard let session = AVAssetExportSession(asset: composition, presetName: AVAssetExportPreset1920x1080) else { return .failed }
         let out = directory.appending(path: "\(name).mp4")
         try? FileManager.default.removeItem(at: out)
         session.outputURL = out
@@ -246,12 +260,31 @@ public struct MediaPreparer: MediaPreparing {
         watcher.cancel()
         guard box.session.status == .completed else {
             try? FileManager.default.removeItem(at: out)
-            return .original
+            return .failed
         }
         progress(1)
         let ms = Int(((range.upperBound - range.lowerBound) * 1000).rounded())
         return .prepared(file: out, mime: "video/mp4", media: PreparedMedia(
             profile: PreparedProfile.video, width: Int(size.width), height: Int(size.height), durationMs: ms, trimmed: true))
+    }
+
+    // MARK: Limits
+
+    public func withinLimits(_ source: URL, kind: MediaKind) async -> Bool {
+        if kind == .video {
+            let asset = AVURLAsset(url: source)
+            guard let track = try? await asset.loadTracks(withMediaType: .video).first,
+                  let natural = try? await track.load(.naturalSize),
+                  let transform = try? await track.load(.preferredTransform) else { return false }
+            let fps = (try? await track.load(.nominalFrameRate)) ?? 0
+            let oriented = CGRect(origin: .zero, size: natural).applying(transform)
+            return PrepPolicy.videoWithinLimits(width: abs(oriented.width), height: abs(oriented.height), fps: Double(fps))
+        }
+        guard let src = CGImageSourceCreateWithURL(source as CFURL, [kCGImageSourceShouldCache: false] as CFDictionary),
+              let props = CGImageSourceCopyPropertiesAtIndex(src, 0, nil) as? [CFString: Any],
+              let w = props[kCGImagePropertyPixelWidth] as? Double, let h = props[kCGImagePropertyPixelHeight] as? Double
+        else { return false }
+        return PrepPolicy.photoWithinLimits(width: w, height: h)
     }
 
     // MARK: Capture time

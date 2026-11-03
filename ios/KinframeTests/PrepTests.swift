@@ -43,7 +43,21 @@ final class PrepPolicyTests: XCTestCase {
     func testOnlyDecodablePhotosArePrepared() {
         XCTAssertTrue(PrepPolicy.canPreparePhoto(filename: "IMG_1.HEIC"))
         XCTAssertTrue(PrepPolicy.canPreparePhoto(filename: "a.jpeg"))
-        XCTAssertFalse(PrepPolicy.canPreparePhoto(filename: "party.gif"))
+        XCTAssertTrue(PrepPolicy.canPreparePhoto(filename: "party.gif"))
+        XCTAssertFalse(PrepPolicy.canPreparePhoto(filename: "notes.pdf"))
+    }
+
+    func testOnlyFilesWithinTheMasterLimitsMayGoAsTheyAre() {
+        XCTAssertTrue(PrepPolicy.photoWithinLimits(width: 2560, height: 1440))
+        XCTAssertTrue(PrepPolicy.photoWithinLimits(width: 1200, height: 1600))
+        XCTAssertFalse(PrepPolicy.photoWithinLimits(width: 4032, height: 3024))
+        XCTAssertFalse(PrepPolicy.photoWithinLimits(width: 0, height: 0))
+        XCTAssertTrue(PrepPolicy.videoWithinLimits(width: 1920, height: 1080, fps: 30))
+        XCTAssertTrue(PrepPolicy.videoWithinLimits(width: 1080, height: 1920, fps: 29.97))
+        XCTAssertTrue(PrepPolicy.videoWithinLimits(width: 1280, height: 720, fps: 25))
+        XCTAssertFalse(PrepPolicy.videoWithinLimits(width: 3840, height: 2160, fps: 30), "4K")
+        XCTAssertFalse(PrepPolicy.videoWithinLimits(width: 1920, height: 1080, fps: 60), "60 fps")
+        XCTAssertFalse(PrepPolicy.videoWithinLimits(width: 1440, height: 1440, fps: 30), "square beyond 1080")
     }
 }
 
@@ -104,10 +118,32 @@ final class MediaPreparerTests: XCTestCase {
         XCTAssertEqual(props[kCGImagePropertyProfileName] as? String, "sRGB IEC61966-2.1")
     }
 
-    func testUndecodableFileFallsBackToOriginal() async throws {
+    func testUndecodableFileFailsAndIsNotWithinLimits() async throws {
         let url = dir.appending(path: "broken.jpg")
         try Data("not an image".utf8).write(to: url)
-        guard case .original = await MediaPreparer().preparePhoto(url, to: dir, name: "prep-0") else { return XCTFail("prepared garbage") }
+        guard case .failed = await MediaPreparer().preparePhoto(url, to: dir, name: "prep-0") else { return XCTFail("prepared garbage") }
+        let within = await MediaPreparer().withinLimits(url, kind: .photo)
+        XCTAssertFalse(within)
+    }
+
+    func testLimitsAreReadFromTheFile() async throws {
+        let small = dir.appending(path: "small.jpg"), large = dir.appending(path: "large.jpg")
+        try writeJPEG(small, width: 1600, height: 1200)
+        try writeJPEG(large, width: 3000, height: 2000)
+        let preparer = MediaPreparer()
+        let smallWithin = await preparer.withinLimits(small, kind: .photo)
+        let largeWithin = await preparer.withinLimits(large, kind: .photo)
+        XCTAssertTrue(smallWithin)
+        XCTAssertFalse(largeWithin)
+    }
+
+    private func writeJPEG(_ url: URL, width: Int, height: Int) throws {
+        let ctx = try XCTUnwrap(CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                                          space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue))
+        let image = try XCTUnwrap(ctx.makeImage())
+        let dest = try XCTUnwrap(CGImageDestinationCreateWithURL(url as CFURL, "public.jpeg" as CFString, 1, nil))
+        CGImageDestinationAddImage(dest, image, nil)
+        XCTAssertTrue(CGImageDestinationFinalize(dest))
     }
 }
 
@@ -131,6 +167,30 @@ struct FakePreparer: MediaPreparing {
     func captureDate(_ source: URL, kind: MediaKind) async -> Date? {
         Date(timeIntervalSince1970: 1_700_000_000)
     }
+
+    func withinLimits(_ source: URL, kind: MediaKind) async -> Bool { true }
+}
+
+/// Can't prepare anything; says whether the originals are within the limits.
+struct AsIsPreparer: MediaPreparing {
+    var within = true
+    /// Only these kinds fail (nil: everything).
+    var failing: Set<String>? = nil
+
+    func preparePhoto(_ source: URL, to directory: URL, name: String) async -> PrepOutcome {
+        failing == nil || failing!.contains("photo") ? .failed : await FakePreparer().preparePhoto(source, to: directory, name: name)
+    }
+
+    func prepareVideo(_ source: URL, to directory: URL, name: String, trim: Trim?, includeAudio: Bool, maxSeconds: Double?,
+                      progress: @escaping @Sendable (Double) -> Void) async -> PrepOutcome {
+        failing == nil || failing!.contains("video") ? .failed
+            : await FakePreparer().prepareVideo(source, to: directory, name: name, trim: trim, includeAudio: includeAudio,
+                                                maxSeconds: maxSeconds, progress: progress)
+    }
+
+    func captureDate(_ source: URL, kind: MediaKind) async -> Date? { nil }
+
+    func withinLimits(_ source: URL, kind: MediaKind) async -> Bool { within }
 }
 
 final class PreparedUploadTests: XCTestCase {
@@ -151,7 +211,7 @@ final class PreparedUploadTests: XCTestCase {
         try base.makeJob(store: store, bytes: bytes)
     }
 
-    func runner(_ fake: FakeServer, store: OutboxStore, preparer: MediaPreparing? = nil) async -> OutboxRunner {
+    func runner(_ fake: FakeServer, store: OutboxStore, preparer: MediaPreparing = AsIsPreparer()) async -> OutboxRunner {
         await base.runner(fake, store: store, preparer: preparer)
     }
 
@@ -210,24 +270,65 @@ final class PreparedUploadTests: XCTestCase {
         XCTAssertEqual(fake.state.withLock { $0.metadata.first?["prepared"] }, PreparedProfile.video)
     }
 
-    func testWithoutPreparerOriginalsGoAsTheyAre() async throws {
+    func testUnpreparableFileWithinLimitsGoesAsItIs() async throws {
         let fake = FakeServer()
         let store = OutboxStore(root: root)
         let (job, datas) = try makeJob(store: store, bytes: 800)
-        let runner = await runner(fake, store: store)
+        let runner = await runner(fake, store: store, preparer: AsIsPreparer(within: true))
         await runner.kick()
         await runner.wait(job.id)
         XCTAssertNil(fake.state.withLock { $0.metadata.first?["prepared"] })
         XCTAssertEqual(fake.state.withLock { $0.uploads["u1"]?.data }, datas[0])
         XCTAssertEqual(store.load(job.id)?.items[0].prep, .original)
+        XCTAssertEqual(store.load(job.id)?.state, .sent(sendId: "send-1"))
     }
 
-    func testStartedUploadIsNotPreparedAgain() async throws {
+    func testUnpreparableLargeFileFailsWithoutUploadingAnything() async throws {
+        let fake = FakeServer()
+        let store = OutboxStore(root: root)
+        let (job, _) = try base.makeJob(store: store, bytes: 800, captions: [nil, nil, nil])
+        let runner = await runner(fake, store: store, preparer: AsIsPreparer(within: false))
+        await runner.kick()
+        await runner.wait(job.id)
+        XCTAssertEqual(fake.log, [], "nothing goes up when a file can't be prepared")
+        XCTAssertEqual(store.load(job.id)?.state, .failed(code: "media_unprepared"))
+        XCTAssertNil(store.load(job.id)?.items[0].prep)
+        XCTAssertEqual(APIError(status: 0, code: "media_unprepared").message, L("problem.media_unprepared"))
+    }
+
+    func testLiveClipThatCantBePreparedFailsTheJob() async throws {
+        let fake = FakeServer()
+        let store = OutboxStore(root: root)
+        var (job, _) = try makeJob(store: store, bytes: 2000)
+        try Data(repeating: 1, count: 1500).write(to: store.directory(job.id).appending(path: "motion-0.mov"))
+        job.items[0].motion = TusUpload(file: "motion-0.mov", size: 1500, filename: "f0.mov", mime: "video/quicktime")
+        try store.save(job)
+        let runner = await runner(fake, store: store, preparer: AsIsPreparer(within: false, failing: ["video"]))
+        await runner.kick()
+        await runner.wait(job.id)
+        XCTAssertEqual(fake.log, [], "the still isn't uploaded before its clip is prepared")
+        XCTAssertEqual(store.load(job.id)?.state, .failed(code: "media_unprepared"))
+        XCTAssertEqual(store.load(job.id)?.items[0].prep, .prepared)
+        XCTAssertNil(store.load(job.id)?.items[0].motionPrep)
+    }
+
+    func testEveryFileIsPreparedBeforeAnyUpload() async throws {
+        let fake = FakeServer()
+        let store = OutboxStore(root: root)
+        let (job, _) = try base.makeJob(store: store, bytes: 800, captions: Array(repeating: nil, count: 5))
+        let runner = await runner(fake, store: store, preparer: FakePreparer())
+        await runner.kick()
+        await runner.wait(job.id)
+        XCTAssertEqual(store.load(job.id)?.state, .sent(sendId: "send-1"))
+        XCTAssertEqual(fake.state.withLock { $0.metadata.map { $0["prepared"] } }, Array(repeating: PreparedProfile.photo, count: 5))
+    }
+
+    func testStartedUploadOfAnOriginalStartsOverPrepared() async throws {
         let fake = FakeServer()
         let store = OutboxStore(root: root)
         let (made, datas) = try makeJob(store: store, bytes: 2048)
         var job = made
-        // The share extension started the original before the app took over.
+        // An older share extension started the original before the app took over.
         let firstKiB = datas[0].prefix(1024)
         fake.state.withLock { $0.uploads["u1"] = (2048, firstKiB) }
         job.items[0].upload.location = server.appending(path: "v1/uploads/u1")
@@ -236,8 +337,30 @@ final class PreparedUploadTests: XCTestCase {
         let runner = await runner(fake, store: store, preparer: FakePreparer())
         await runner.kick()
         await runner.wait(job.id)
-        XCTAssertEqual(fake.state.withLock { $0.uploads["u1"]?.data }, datas[0])
-        XCTAssertEqual(store.load(job.id)?.items[0].prep, .original)
+        XCTAssertNotEqual(fake.state.withLock { $0.uploads["u1"]?.data }, datas[0], "the original upload isn't finished")
+        XCTAssertTrue(fake.state.withLock { $0.uploads.values.contains { $0.data == Data(repeating: 7, count: 300) } })
+        XCTAssertEqual(store.load(job.id)?.items[0].prep, .prepared)
+        XCTAssertEqual(fake.state.withLock { $0.metadata.first?["prepared"] }, PreparedProfile.photo)
+    }
+
+    @MainActor
+    func testShareSheetWaitsUntilEveryFileIsPrepared() {
+        var job = OutboxJob(server: server, frameIds: ["f"], frameNames: ["F"], items: [
+            OutboxItem(upload: TusUpload(file: "a.jpg", size: 1, filename: "a.jpg", mime: "image/jpeg"), kind: .photo),
+            OutboxItem(upload: TusUpload(file: "b.heic", size: 1, filename: "b.heic", mime: "image/heic"), kind: .photo,
+                       motion: TusUpload(file: "b.mov", size: 1, filename: "b.mov", mime: "video/quicktime")),
+        ])
+        XCTAssertEqual(ShareModel.preparation(job), .running)
+        XCTAssertEqual(ShareModel.progressText(job), L("ios.send.preparing", ["n": 1, "total": 2, "pct": 0]))
+        job.items[0].prep = .prepared
+        job.items[1].prep = .prepared
+        job.items[1].preparing = 0.4
+        XCTAssertEqual(ShareModel.preparation(job), .running, "the Live clip is still to come")
+        XCTAssertEqual(ShareModel.progressText(job), L("ios.send.preparing", ["n": 2, "total": 2, "pct": 40]))
+        job.items[1].motionPrep = .prepared
+        XCTAssertEqual(ShareModel.preparation(job), .over(failure: nil))
+        job.state = .failed(code: "media_unprepared")
+        XCTAssertEqual(ShareModel.preparation(job), .over(failure: "media_unprepared"))
     }
 
     func testStillOnlySendsNoClip() throws {

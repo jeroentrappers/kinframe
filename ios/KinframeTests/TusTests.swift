@@ -192,7 +192,7 @@ final class OutboxRunnerTests: XCTestCase {
     }
 
     func runner(_ fake: FakeServer, store: OutboxStore, tokens: StubTokens = StubTokens(), owner: String = "test",
-                preparer: MediaPreparing? = nil) async -> OutboxRunner {
+                preparer: MediaPreparing = AsIsPreparer()) async -> OutboxRunner {
         let runner = OutboxRunner(store: store, transport: URLSessionUploadTransport(session: fake.session), owner: owner, chunkSize: 1024,
                                   preparer: preparer, sleep: { _ in })
         await runner.configure(server: server, tokens: tokens)
@@ -243,8 +243,9 @@ final class OutboxRunnerTests: XCTestCase {
         let fake = FakeServer()
         let store = OutboxStore(root: root)
         var (job, datas) = try makeJob(store: store, bytes: 2048)
-        // An earlier process created the upload and sent the first KiB, then died mid-request.
+        // An earlier process prepared the file, created the upload and sent the first KiB, then died mid-request.
         let firstKiB = datas[0].prefix(1024)
+        job.items[0].prep = .prepared
         fake.state.withLock { $0.uploads["u1"] = (2048, firstKiB) }
         job.items[0].upload.location = server.appending(path: "v1/uploads/u1")
         job.items[0].upload.offset = 0

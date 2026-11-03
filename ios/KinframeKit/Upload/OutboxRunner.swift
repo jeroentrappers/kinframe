@@ -8,8 +8,8 @@ public enum OutboxEvent: Sendable {
     case removed(UUID)
 }
 
-/// Drives queued sends: prepares each file (README §5.3 "Prepared uploads"), uploads it with tus (3 at a time, 4 MiB
-/// chunks), then creates the send with `POST /v1/sends` and a stable `Idempotency-Key`. Every step is persisted, so a job resumes after the app is
+/// Drives queued sends: prepares every file first (README §5.3 "Prepared uploads"; originals are never uploaded), then
+/// uploads them with tus (3 at a time, 4 MiB chunks), then creates the send with `POST /v1/sends` and a stable `Idempotency-Key`. Every step is persisted, so a job resumes after the app is
 /// suspended, killed or woken for background URLSession events, and the share extension can start a job that the
 /// app finishes.
 public actor OutboxRunner {
@@ -22,8 +22,8 @@ public actor OutboxRunner {
     let owner: String
     let chunkSize: Int64
     let sleep: @Sendable (TimeInterval) async throws -> Void
-    /// Client-side preparation; nil uploads originals (the share extension: its memory limit is too small).
-    let preparer: MediaPreparing?
+    /// Client-side preparation, in the app and in the share extension alike.
+    let preparer: MediaPreparing
 
     private var server: URL?
     private var tokens: TokenProvider?
@@ -33,7 +33,7 @@ public actor OutboxRunner {
     private let emit: AsyncStream<OutboxEvent>.Continuation
 
     public init(store: OutboxStore, transport: UploadTransport, owner: String = "app-\(UUID().uuidString)",
-                chunkSize: Int64 = Tus.chunkSize, preparer: MediaPreparing? = nil,
+                chunkSize: Int64 = Tus.chunkSize, preparer: MediaPreparing = MediaPreparer(),
                 sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) }) {
         self.store = store
         self.preparer = preparer
@@ -150,6 +150,7 @@ public actor OutboxRunner {
         }
         do {
             if case .uploading = job.state {
+                try await prepareAll(id)
                 try await uploadAll(job, tokens: tokens)
                 if let j = store.update(id, { $0.state = .sending }) { emit.yield(.updated(j)) }
             }
@@ -204,7 +205,7 @@ public actor OutboxRunner {
         if let job { emit.yield(.updated(job)) }
     }
 
-    /// Prepare, then upload one item (and a Live Photo's clip) until it's complete.
+    /// Upload one item (and a Live Photo's clip) until it's complete. Both are prepared already (`prepareAll`).
     func upload(_ id: UUID, item index: Int, tokens: TokenProvider) async throws {
         try await prepare(id, item: index, motion: false)
         try await upload(id, item: index, motion: false, tokens: tokens)
@@ -216,17 +217,39 @@ public actor OutboxRunner {
 
     // MARK: Preparing
 
+    /// Thrown when a file couldn't be prepared and is too large to go as it is.
+    public static let unprepared = APIError(status: 0, code: "media_unprepared")
+
     private var reportedPrep: [String: Double] = [:]
 
-    /// Turn the original into a prepared master once, before its upload starts. An upload that already started (or a
-    /// runner without a preparer) keeps the original; so does anything the preparer can't handle.
+    /// Prepare every file of a job, one at a time (memory stays low, which the share extension needs), before any
+    /// upload starts.
+    func prepareAll(_ id: UUID) async throws {
+        let count = try claim(id).items.count
+        for index in 0..<count {
+            try await prepare(id, item: index, motion: false)
+            if try claim(id).items[index].motion != nil {
+                try await prepare(id, item: index, motion: true)
+            }
+        }
+    }
+
+    /// Turn the original into a prepared master once, before its upload starts. When that fails, the original goes
+    /// as it is only if it's already within the master's limits; otherwise the job fails with `media_unprepared`.
     private func prepare(_ id: UUID, item index: Int, motion: Bool) async throws {
         let job = try claim(id)
         let item = job.items[index]
-        guard (motion ? item.motionPrep : item.prep) == nil, let upload = motion ? item.motion : item.upload else { return }
-        guard let preparer, upload.location == nil, upload.existingItemId == nil else {
+        guard (motion ? item.motionPrep : item.prep) == nil, var upload = motion ? item.motion : item.upload else { return }
+        if upload.existingItemId != nil {
+            // The server already has this file (the duplicate shortcut): nothing is uploaded.
             try change(id, item: index) { if motion { $0.motionPrep = .original } else { $0.prep = .original } }
             return
+        }
+        if upload.location != nil {
+            // An upload of the unprepared original (queued by an older version): start over with the master.
+            Tus.reset(&upload)
+            let restarted = upload
+            try change(id, item: index) { if motion { $0.motion = restarted } else { $0.upload = restarted } }
         }
         let dir = store.directory(id)
         let source = dir.appending(path: upload.file)
@@ -264,6 +287,14 @@ public actor OutboxRunner {
             }
         }
         let done = media != nil
+        if !done {
+            if case .prepared(let file, _, _) = outcome { try? FileManager.default.removeItem(at: file) }
+            guard await preparer.withinLimits(source, kind: motion ? .video : item.kind) else {
+                if !motion { try change(id, item: index) { $0.preparing = nil } }
+                throw Self.unprepared
+            }
+        }
+        try Task.checkCancellation()
         try change(id, item: index) { i in
             if motion {
                 i.motion = prepared

@@ -3,8 +3,11 @@ import UIKit
 import UniformTypeIdentifiers
 
 /// The share extension's compact composer: frames and a caption for photos and videos shared from other apps. The
-/// files go into the App Group's upload queue and the upload starts on a background session, so the sheet closes
-/// right away; the app finishes the send when the system wakes it.
+/// files go into the App Group's upload queue, which prepares every one of them here, one at a time, while the sheet
+/// shows how far it is ("Preparing 2 of 3"). Then the uploads start on a background session and the sheet closes;
+/// the app finishes the send when the system wakes it. Originals are never uploaded: a file that can't be prepared
+/// and is too large to go as it is shows an error. When the sheet is gone before preparing finished, the app
+/// prepares what's left the next time it runs.
 @MainActor
 @Observable
 public final class ShareModel {
@@ -15,6 +18,10 @@ public final class ShareModel {
     private weak var context: NSExtensionContext?
     public private(set) var phase: Phase = .loading
     public private(set) var frames: [FrameSummary] = []
+    /// "Preparing 2 of 3 · 40 %" while the queue prepares the files.
+    public private(set) var progress: String?
+    private var runner: OutboxRunner?
+    private var jobId: UUID?
     public let compose: ComposeModel
     private var preview: [URL] = []
     private let auth = AuthService()
@@ -102,12 +109,23 @@ public final class ShareModel {
             try store.save(job)
             AppGroup.defaults.set(job.frameIds, forKey: Self.lastFramesKey)
             let transport = BackgroundUploadTransport(identifier: "app.kinframe.family.share.\(UUID().uuidString)")
-            let runner = OutboxRunner(store: store, transport: transport, owner: "share-\(UUID().uuidString)")
+            let runner = OutboxRunner(store: store, transport: transport, owner: "share-\(UUID().uuidString)", preparer: MediaPreparer())
+            self.runner = runner
+            jobId = job.id
             transport.setOrphanHandler { tag, response, error in
                 Task { await runner.handleOrphan(tag: tag, response: response, error: error) }
             }
             await runner.configure(server: server.apiBase, tokens: auth)
+            progress = Self.progressText(job)
             await runner.kick()
+            if let failed = await waitUntilPrepared(job.id, runner: runner) {
+                // Nothing was uploaded: take the job out of the queue and say why.
+                await runner.cancel(job.id)
+                progress = nil
+                phase = .failed(APIError(status: 0, code: failed).message)
+                return
+            }
+            progress = nil
             // Give the first requests a moment to start; the system carries them on after the sheet closes.
             try? await Task.sleep(for: .milliseconds(800))
             UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -117,7 +135,49 @@ public final class ShareModel {
         }
     }
 
+    /// Follow the queue until every file of the job is prepared (nil), or the job failed (its code).
+    private func waitUntilPrepared(_ id: UUID, runner: OutboxRunner) async -> String? {
+        if let job = OutboxStore().load(id), case .over(let failure) = Self.preparation(job) { return failure }
+        for await event in runner.events {
+            guard case .updated(let job) = event, job.id == id else {
+                if case .removed(let gone) = event, gone == id { return "media_unprepared" }
+                continue
+            }
+            progress = Self.progressText(job)
+            if case .over(let failure) = Self.preparation(job) { return failure }
+        }
+        return nil
+    }
+
+    public enum Preparation: Equatable {
+        case running
+        /// Every file is prepared (`nil`), or the job failed with this code.
+        case over(failure: String?)
+    }
+
+    /// How far preparing a job is.
+    public static func preparation(_ job: OutboxJob) -> Preparation {
+        switch job.state {
+        case .failed(let code): return .over(failure: code)
+        case .uploading:
+            let done = job.items.allSatisfy { $0.prep != nil && ($0.motion == nil || $0.motionPrep != nil) }
+            return done ? .over(failure: nil) : .running
+        default: return .over(failure: nil)
+        }
+    }
+
+    public static func progressText(_ job: OutboxJob) -> String {
+        let p = job.preparing
+        let n = p.map { $0.index + 1 } ?? min(job.items.count, job.items.filter { $0.prep != nil }.count + 1)
+        return L("ios.send.preparing", ["n": n, "total": job.items.count, "pct": Int(((p?.fraction ?? 0) * 100).rounded())])
+    }
+
     public func cancel() {
+        if let runner, let jobId {
+            // Stop preparing and take the job out of the queue before the extension goes away.
+            OutboxStore().remove(jobId)
+            Task { await runner.cancel(jobId) }
+        }
         compose.clear()
         context?.cancelRequest(withError: NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError))
     }
@@ -145,6 +205,13 @@ public struct ShareRootView: View {
                     case .failed(let message):
                         Callout(message, kind: .error)
                     case .ready, .sending:
+                        if let progress = model.progress {
+                            HStack(spacing: 10) {
+                                ProgressView()
+                                Text(progress).font(.subheadline).foregroundStyle(Palette.textMuted)
+                            }
+                            .accessibilityElement(children: .combine)
+                        }
                         frames
                         caption
                         if model.compose.issueCount > 0 {

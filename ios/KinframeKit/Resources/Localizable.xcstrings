@@ -14536,6 +14536,23 @@
         }
       }
     },
+    "problem.media_unprepared": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A photo or video couldn’t be made ready to send, and it’s too large to send as it is."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een foto of video kon niet klaargemaakt worden om te versturen, en is te groot om zo te versturen."
+          }
+        }
+      }
+    },
     "problem.missing_permission": {
       "extractionState": "manual",
       "localizations": {

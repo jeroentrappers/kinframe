@@ -258,5 +258,9 @@
   "ios.welcome.start": {
     "en": "Get started",
     "nl": "Aan de slag"
+  },
+  "problem.media_unprepared": {
+    "en": "A photo or video couldn’t be made ready to send, and it’s too large to send as it is.",
+    "nl": "Een foto of video kon niet klaargemaakt worden om te versturen, en is te groot om zo te versturen."
   }
 }
