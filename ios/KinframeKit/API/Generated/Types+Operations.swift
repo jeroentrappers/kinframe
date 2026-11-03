@@ -4445,7 +4445,9 @@ public enum Operations {
         }
     }
     /// tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
-    /// Upload-Metadata keys: filename, filetype, sha256 (optional).
+    /// Upload-Metadata keys: filename, filetype, sha256 (optional), prepared (optional: `photo-master-v1` or
+    /// `video-master-v1` when the client already produced a master; the server verifies it, see README §5.3
+    /// "Prepared uploads").
     ///
     ///
     /// - Remark: HTTP `POST /v1/uploads`.
@@ -5175,7 +5177,9 @@ public enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
-    /// Place the same items on additional frames.
+    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
     /// - Remark: Generated from `#/paths//v1/sends/{sendId}/forward/post(forwardSend)`.
@@ -5535,14 +5539,17 @@ public enum Operations {
                     case thumb512 = "thumb_512"
                     case master = "master"
                     case poster = "poster"
+                    case motion = "motion"
                 }
+                /// `motion` is the master of a Live/Motion Photo clip (`item.kind: live`).
+                ///
                 /// - Remark: Generated from `#/paths/v1/items/{itemId}/media/{variant}/GET/path/variant`.
                 public var variant: Operations.GetItemMedia.Input.Path.VariantPayload
                 /// Creates a new `Path`.
                 ///
                 /// - Parameters:
                 ///   - itemId:
-                ///   - variant:
+                ///   - variant: `motion` is the master of a Live/Motion Photo clip (`item.kind: live`).
                 public init(
                     itemId: Components.Parameters.ItemId,
                     variant: Operations.GetItemMedia.Input.Path.VariantPayload
@@ -5705,6 +5712,12 @@ public enum Operations {
                 public var kind: Components.Schemas.MediaKind?
                 /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/GET/query/album_id`.
                 public var albumId: Components.Schemas.Id?
+                /// "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
+                /// on this month and day (`MM-DD`, the client's local date) in an earlier year than the server's current year.
+                ///
+                ///
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/GET/query/on_this_day`.
+                public var onThisDay: Swift.String?
                 /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements/GET/query/sort`.
                 @frozen public enum SortPayload: String, Codable, Hashable, Sendable, CaseIterable {
                     case receivedDesc = "received_desc"
@@ -5723,6 +5736,7 @@ public enum Operations {
                 ///   - senderId:
                 ///   - kind:
                 ///   - albumId:
+                ///   - onThisDay: "On this day" memories: only placements whose capture date (`item.captured_at`, else the client hint) falls
                 ///   - sort:
                 public init(
                     cursor: Components.Parameters.Cursor? = nil,
@@ -5731,6 +5745,7 @@ public enum Operations {
                     senderId: Components.Schemas.Id? = nil,
                     kind: Components.Schemas.MediaKind? = nil,
                     albumId: Components.Schemas.Id? = nil,
+                    onThisDay: Swift.String? = nil,
                     sort: Operations.ListPlacements.Input.Query.SortPayload? = nil
                 ) {
                     self.cursor = cursor
@@ -5739,6 +5754,7 @@ public enum Operations {
                     self.senderId = senderId
                     self.kind = kind
                     self.albumId = albumId
+                    self.onThisDay = onThisDay
                     self.sort = sort
                 }
             }
@@ -6419,6 +6435,271 @@ public enum Operations {
             }
         }
     }
+    /// Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+    /// "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+    /// a frame rendition is only made when the target's screen size has none yet.
+    ///
+    /// - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+    ///   `see_library` there or be the item's sender (or the member who shared it there).
+    /// - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+    ///   (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+    ///   placements may be shared per request.
+    /// - A target that already holds the item is skipped and reported in `skipped`.
+    /// - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+    ///   and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+    /// - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+    ///   other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+    /// - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+    ///   already have the selection.
+    /// - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/placements:share`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)`.
+    public enum SharePlacements {
+        public static let id: Swift.String = "sharePlacements"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.SharePlacements.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SharePlacements.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SharePlacements.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.SharePlacements.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody/json/placement_ids`.
+                    public var placementIds: [Components.Schemas.Id]
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody/json/frame_ids`.
+                    public var frameIds: [Components.Schemas.Id]
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody/json/dry_run`.
+                    public var dryRun: Swift.Bool?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - placementIds:
+                    ///   - frameIds:
+                    ///   - dryRun:
+                    public init(
+                        placementIds: [Components.Schemas.Id],
+                        frameIds: [Components.Schemas.Id],
+                        dryRun: Swift.Bool? = nil
+                    ) {
+                        self.placementIds = placementIds
+                        self.frameIds = frameIds
+                        self.dryRun = dryRun
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case placementIds = "placement_ids"
+                        case frameIds = "frame_ids"
+                        case dryRun = "dry_run"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/requestBody/content/application\/json`.
+                case json(Operations.SharePlacements.Input.Body.JsonPayload)
+            }
+            public var body: Operations.SharePlacements.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.SharePlacements.Input.Path,
+                headers: Operations.SharePlacements.Input.Headers = .init(),
+                body: Operations.SharePlacements.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/placements:share/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShareResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShareResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.SharePlacements.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.SharePlacements.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Created placements and skipped targets
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.SharePlacements.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.SharePlacements.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)/responses/403`.
+            ///
+            /// HTTP response code: `403 forbidden`.
+            case forbidden(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.forbidden`.
+            ///
+            /// - Throws: An error if `self` is not `.forbidden`.
+            /// - SeeAlso: `.forbidden`.
+            public var forbidden: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .forbidden(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "forbidden",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `GET /v1/frames/{frameId}/albums`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/get(listAlbums)`.
     public enum ListAlbums {
@@ -6937,6 +7218,754 @@ public enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
+    /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/get(listTvLinks)`.
+    public enum ListTvLinks {
+        public static let id: Swift.String = "listTvLinks"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListTvLinks.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListTvLinks.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListTvLinks.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListTvLinks.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListTvLinks.Input.Path,
+                headers: Operations.ListTvLinks.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.TvLink])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.TvLink] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListTvLinks.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListTvLinks.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Active TV links
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/get(listTvLinks)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListTvLinks.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListTvLinks.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/get(listTvLinks)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+    /// (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+    /// one of the caller's own placements (e.g. "Show on TV" from History).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/post(createTvLink)`.
+    public enum CreateTvLink {
+        public static let id: Swift.String = "createTvLink"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.CreateTvLink.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateTvLink.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateTvLink.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateTvLink.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.TvLinkCreate)
+            }
+            public var body: Operations.CreateTvLink.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateTvLink.Input.Path,
+                headers: Operations.CreateTvLink.Input.Headers = .init(),
+                body: Operations.CreateTvLink.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.TvLink)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TvLink {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateTvLink.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateTvLink.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/post(createTvLink)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateTvLink.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateTvLink.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/post(createTvLink)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/tv-links/{linkId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)`.
+    public enum RevokeTvLink {
+        public static let id: Swift.String = "revokeTvLink"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/{linkId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/{linkId}/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/{linkId}/DELETE/path/linkId`.
+                public var linkId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - linkId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    linkId: Components.Schemas.Id
+                ) {
+                    self.frameId = frameId
+                    self.linkId = linkId
+                }
+            }
+            public var path: Operations.RevokeTvLink.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/tv-links/{linkId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeTvLink.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeTvLink.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RevokeTvLink.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RevokeTvLink.Input.Path,
+                headers: Operations.RevokeTvLink.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RevokeTvLink.Output.NoContent)
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RevokeTvLink.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+    /// rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+    /// expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+    /// `410 link_expired` once the link has expired.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/get(getTvSlideshow)`.
+    public enum GetTvSlideshow {
+        public static let id: Swift.String = "getTvSlideshow"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/tv/{token}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/tv/{token}/GET/path/token`.
+                public var token: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - token:
+                public init(token: Swift.String) {
+                    self.token = token
+                }
+            }
+            public var path: Operations.GetTvSlideshow.Input.Path
+            /// - Remark: Generated from `#/paths/v1/tv/{token}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTvSlideshow.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTvSlideshow.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetTvSlideshow.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetTvSlideshow.Input.Path,
+                headers: Operations.GetTvSlideshow.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/tv/{token}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/tv/{token}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TvSlideshow)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TvSlideshow {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetTvSlideshow.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetTvSlideshow.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Slideshow
+            ///
+            /// - Remark: Generated from `#/paths//v1/tv/{token}/get(getTvSlideshow)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetTvSlideshow.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetTvSlideshow.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/tv/{token}/get(getTvSlideshow)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+    /// `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+    /// revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+    /// `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}/mirror`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)`.
+    public enum TvMirror {
+        public static let id: Swift.String = "tvMirror"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/tv/{token}/mirror/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/tv/{token}/mirror/GET/path/token`.
+                public var token: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - token:
+                public init(token: Swift.String) {
+                    self.token = token
+                }
+            }
+            public var path: Operations.TvMirror.Input.Path
+            /// - Remark: Generated from `#/paths/v1/tv/{token}/mirror/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TvMirror.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TvMirror.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.TvMirror.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.TvMirror.Input.Path,
+                headers: Operations.TvMirror.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct SwitchingProtocols: Sendable, Hashable {
+                /// Creates a new `SwitchingProtocols`.
+                public init() {}
+            }
+            /// Switching to the websocket protocol
+            ///
+            /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)/responses/101`.
+            ///
+            /// HTTP response code: `101 switchingProtocols`.
+            case switchingProtocols(Operations.TvMirror.Output.SwitchingProtocols)
+            /// Switching to the websocket protocol
+            ///
+            /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)/responses/101`.
+            ///
+            /// HTTP response code: `101 switchingProtocols`.
+            public static var switchingProtocols: Self {
+                .switchingProtocols(.init())
+            }
+            /// The associated value of the enum case if `self` is `.switchingProtocols`.
+            ///
+            /// - Throws: An error if `self` is not `.switchingProtocols`.
+            /// - SeeAlso: `.switchingProtocols`.
+            public var switchingProtocols: Operations.TvMirror.Output.SwitchingProtocols {
+                get throws {
+                    switch self {
+                    case let .switchingProtocols(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "switchingProtocols",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `GET /v1/frames/{frameId}/settings`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/settings/get(getFrameSettings)`.
     public enum GetFrameSettings {
@@ -7257,6 +8286,668 @@ public enum Operations {
             }
         }
     }
+    /// The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+    /// frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+    /// key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+    /// pair or nothing arrived in the last 48 hours. Rate-limited per address.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/latest`.
+    /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)`.
+    public enum GetStationLatest {
+        public static let id: Swift.String = "getStationLatest"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/stations/latest/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/stations/latest/GET/header/X-Station-Id`.
+                public var xStationId: Swift.String
+                /// - Remark: Generated from `#/paths/v1/stations/latest/GET/header/X-Station-Key`.
+                public var xStationKey: Swift.String
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetStationLatest.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - xStationId:
+                ///   - xStationKey:
+                ///   - accept:
+                public init(
+                    xStationId: Swift.String,
+                    xStationKey: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetStationLatest.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.xStationId = xStationId
+                    self.xStationKey = xStationKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetStationLatest.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.GetStationLatest.Input.Headers) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/stations/latest/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/stations/latest/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.StationLatest)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.StationLatest {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetStationLatest.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetStationLatest.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Latest reading
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetStationLatest.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetStationLatest.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+    /// latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+    /// on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+    /// seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/public/get(listPublicStations)`.
+    public enum ListPublicStations {
+        public static let id: Swift.String = "listPublicStations"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/stations/public/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPublicStations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListPublicStations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListPublicStations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.ListPublicStations.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/stations/public/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/stations/public/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PublicStationList)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PublicStationList {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListPublicStations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListPublicStations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The public stations
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/public/get(listPublicStations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListPublicStations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListPublicStations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/public/get(listPublicStations)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+    /// last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+    /// the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+    /// place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+    /// cacheable for 30 seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/{stationId}/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)`.
+    public enum GetStationPublic {
+        public static let id: Swift.String = "getStationPublic"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/stations/{stationId}/public/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/stations/{stationId}/public/GET/path/stationId`.
+                public var stationId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - stationId:
+                public init(stationId: Swift.String) {
+                    self.stationId = stationId
+                }
+            }
+            public var path: Operations.GetStationPublic.Input.Path
+            /// - Remark: Generated from `#/paths/v1/stations/{stationId}/public/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetStationPublic.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetStationPublic.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetStationPublic.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetStationPublic.Input.Path,
+                headers: Operations.GetStationPublic.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/stations/{stationId}/public/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/stations/{stationId}/public/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.StationPublic)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.StationPublic {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetStationPublic.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetStationPublic.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The station's page
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetStationPublic.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetStationPublic.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+    /// plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+    /// The instances themselves are in the settings (`plugins.instances`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/plugins`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/plugins/get(getFramePlugins)`.
+    public enum GetFramePlugins {
+        public static let id: Swift.String = "getFramePlugins"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/plugins/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/plugins/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.GetFramePlugins.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/plugins/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFramePlugins.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFramePlugins.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFramePlugins.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFramePlugins.Input.Path,
+                headers: Operations.GetFramePlugins.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/plugins/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/plugins/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FramePlugins)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FramePlugins {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFramePlugins.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFramePlugins.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Catalog and status
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/plugins/get(getFramePlugins)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFramePlugins.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFramePlugins.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/plugins/get(getFramePlugins)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
     /// server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
     /// no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
@@ -7446,6 +9137,2117 @@ public enum Operations {
             public static var allCases: [Self] {
                 [
                     .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/get(listCalendars)`.
+    public enum ListCalendars {
+        public static let id: Swift.String = "listCalendars"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListCalendars.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListCalendars.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListCalendars.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListCalendars.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListCalendars.Input.Path,
+                headers: Operations.ListCalendars.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.CalendarSource])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.CalendarSource] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListCalendars.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListCalendars.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Sources in display order; the local received-events calendar (if any) comes first.
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/get(listCalendars)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListCalendars.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListCalendars.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/get(listCalendars)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+    /// result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+    /// `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+    /// several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)`.
+    public enum CreateCalendar {
+        public static let id: Swift.String = "createCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.CreateCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateCalendar.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateCalendar.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.CalendarSourceCreate)
+            }
+            public var body: Operations.CreateCalendar.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateCalendar.Input.Path,
+                headers: Operations.CreateCalendar.Input.Headers = .init(),
+                body: Operations.CreateCalendar.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.CalendarSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.CalendarSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateCalendar.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateCalendar.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateCalendar.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateCalendar.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+    /// `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+    /// `ok: false` with `status` and `error` when the calendar cannot be read.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars:test`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)`.
+    public enum TestCalendar {
+        public static let id: Swift.String = "testCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.TestCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TestCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.TestCalendar.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.TestCalendar.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.CalendarSourceCreate)
+            }
+            public var body: Operations.TestCalendar.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.TestCalendar.Input.Path,
+                headers: Operations.TestCalendar.Input.Headers = .init(),
+                body: Operations.TestCalendar.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars:test/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CalendarTestResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.CalendarTestResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.TestCalendar.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.TestCalendar.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Outcome
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.TestCalendar.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.TestCalendar.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+    /// are kept. Changing the URL or credentials syncs right away.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/patch(updateCalendar)`.
+    public enum UpdateCalendar {
+        public static let id: Swift.String = "updateCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/path/calendarId`.
+                public var calendarId: Components.Parameters.CalendarId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - calendarId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    calendarId: Components.Parameters.CalendarId
+                ) {
+                    self.frameId = frameId
+                    self.calendarId = calendarId
+                }
+            }
+            public var path: Operations.UpdateCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateCalendar.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateCalendar.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.CalendarSourceUpdate)
+            }
+            public var body: Operations.UpdateCalendar.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateCalendar.Input.Path,
+                headers: Operations.UpdateCalendar.Input.Headers = .init(),
+                body: Operations.UpdateCalendar.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CalendarSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.CalendarSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateCalendar.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateCalendar.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/patch(updateCalendar)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateCalendar.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateCalendar.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/patch(updateCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+    /// calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)`.
+    public enum DeleteCalendar {
+        public static let id: Swift.String = "deleteCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/DELETE/path/calendarId`.
+                public var calendarId: Components.Parameters.CalendarId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - calendarId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    calendarId: Components.Parameters.CalendarId
+                ) {
+                    self.frameId = frameId
+                    self.calendarId = calendarId
+                }
+            }
+            public var path: Operations.DeleteCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteCalendar.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteCalendar.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteCalendar.Input.Path,
+                headers: Operations.DeleteCalendar.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteCalendar.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteCalendar.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Sync now (needs change_settings). Returns at once with `status: syncing`.
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars/{calendarId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/sync/post(syncCalendar)`.
+    public enum SyncCalendar {
+        public static let id: Swift.String = "syncCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/path/calendarId`.
+                public var calendarId: Components.Parameters.CalendarId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - calendarId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    calendarId: Components.Parameters.CalendarId
+                ) {
+                    self.frameId = frameId
+                    self.calendarId = calendarId
+                }
+            }
+            public var path: Operations.SyncCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SyncCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SyncCalendar.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.SyncCalendar.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.SyncCalendar.Input.Path,
+                headers: Operations.SyncCalendar.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Accepted: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/responses/202/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendars/{calendarId}/sync/POST/responses/202/content/application\/json`.
+                    case json(Components.Schemas.CalendarSource)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.CalendarSource {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.SyncCalendar.Output.Accepted.Body
+                /// Creates a new `Accepted`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.SyncCalendar.Output.Accepted.Body) {
+                    self.body = body
+                }
+            }
+            /// Sync started
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/sync/post(syncCalendar)/responses/202`.
+            ///
+            /// HTTP response code: `202 accepted`.
+            case accepted(Operations.SyncCalendar.Output.Accepted)
+            /// The associated value of the enum case if `self` is `.accepted`.
+            ///
+            /// - Throws: An error if `self` is not `.accepted`.
+            /// - SeeAlso: `.accepted`.
+            public var accepted: Operations.SyncCalendar.Output.Accepted {
+                get throws {
+                    switch self {
+                    case let .accepted(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "accepted",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/sync/post(syncCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+    /// `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+    /// day.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendar`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendar/get(getFrameCalendar)`.
+    public enum GetFrameCalendar {
+        public static let id: Swift.String = "getFrameCalendar"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendar/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendar/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.GetFrameCalendar.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendar/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameCalendar.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameCalendar.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFrameCalendar.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFrameCalendar.Input.Path,
+                headers: Operations.GetFrameCalendar.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendar/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/calendar/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.CalendarView)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.CalendarView {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFrameCalendar.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFrameCalendar.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Merged calendar
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendar/get(getFrameCalendar)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFrameCalendar.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFrameCalendar.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendar/get(getFrameCalendar)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+    /// Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+    /// frame's calendar.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)`.
+    public enum SetCountdown {
+        public static let id: Swift.String = "setCountdown"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/PUT/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/PUT/path/eventId`.
+                public var eventId: Components.Parameters.EventId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - eventId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    eventId: Components.Parameters.EventId
+                ) {
+                    self.frameId = frameId
+                    self.eventId = eventId
+                }
+            }
+            public var path: Operations.SetCountdown.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SetCountdown.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SetCountdown.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.SetCountdown.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.SetCountdown.Input.Path,
+                headers: Operations.SetCountdown.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Marked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.SetCountdown.Output.NoContent)
+            /// Marked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.SetCountdown.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)`.
+    public enum ClearCountdown {
+        public static let id: Swift.String = "clearCountdown"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/DELETE/path/eventId`.
+                public var eventId: Components.Parameters.EventId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - eventId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    eventId: Components.Parameters.EventId
+                ) {
+                    self.frameId = frameId
+                    self.eventId = eventId
+                }
+            }
+            public var path: Operations.ClearCountdown.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/countdowns/{eventId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ClearCountdown.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ClearCountdown.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ClearCountdown.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ClearCountdown.Input.Path,
+                headers: Operations.ClearCountdown.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Unmarked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.ClearCountdown.Output.NoContent)
+            /// Unmarked
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.ClearCountdown.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Events sent to this frame, newest first. Senders see their own; owner and admin see all.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/get(listEventInvitations)`.
+    public enum ListEventInvitations {
+        public static let id: Swift.String = "listEventInvitations"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListEventInvitations.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEventInvitations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEventInvitations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListEventInvitations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListEventInvitations.Input.Path,
+                headers: Operations.ListEventInvitations.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EventInvitation])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EventInvitation] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListEventInvitations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListEventInvitations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Invitations
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/get(listEventInvitations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListEventInvitations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListEventInvitations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/get(listEventInvitations)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+    /// accepted events go to the frame's local received-events calendar. The sender gets an
+    /// `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+    /// new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)`.
+    public enum SendEventToFrame {
+        public static let id: Swift.String = "sendEventToFrame"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.SendEventToFrame.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SendEventToFrame.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.SendEventToFrame.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.SendEventToFrame.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EventInvitationCreate)
+            }
+            public var body: Operations.SendEventToFrame.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.SendEventToFrame.Input.Path,
+                headers: Operations.SendEventToFrame.Input.Headers = .init(),
+                body: Operations.SendEventToFrame.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.EventInvitation)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EventInvitation {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.SendEventToFrame.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.SendEventToFrame.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Sent
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.SendEventToFrame.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.SendEventToFrame.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/events/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)`.
+    public enum WithdrawEventInvitation {
+        public static let id: Swift.String = "withdrawEventInvitation"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/DELETE/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/DELETE/path/invitationId`.
+                public var invitationId: Components.Parameters.InvitationId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - invitationId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    invitationId: Components.Parameters.InvitationId
+                ) {
+                    self.frameId = frameId
+                    self.invitationId = invitationId
+                }
+            }
+            public var path: Operations.WithdrawEventInvitation.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.WithdrawEventInvitation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.WithdrawEventInvitation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.WithdrawEventInvitation.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.WithdrawEventInvitation.Input.Path,
+                headers: Operations.WithdrawEventInvitation.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Withdrawn
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.WithdrawEventInvitation.Output.NoContent)
+            /// Withdrawn
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.WithdrawEventInvitation.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/photo/get(getEventInvitationPhoto)`.
+    public enum GetEventInvitationPhoto {
+        public static let id: Swift.String = "getEventInvitationPhoto"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/path/invitationId`.
+                public var invitationId: Components.Parameters.InvitationId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                ///   - invitationId:
+                public init(
+                    frameId: Components.Parameters.FrameId,
+                    invitationId: Components.Parameters.InvitationId
+                ) {
+                    self.frameId = frameId
+                    self.invitationId = invitationId
+                }
+            }
+            public var path: Operations.GetEventInvitationPhoto.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEventInvitationPhoto.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEventInvitationPhoto.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetEventInvitationPhoto.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetEventInvitationPhoto.Input.Path,
+                headers: Operations.GetEventInvitationPhoto.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/events/{invitationId}/photo/GET/responses/200/content/image\/webp`.
+                    case imageWebp(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.imageWebp`.
+                    ///
+                    /// - Throws: An error if `self` is not `.imageWebp`.
+                    /// - SeeAlso: `.imageWebp`.
+                    public var imageWebp: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .imageWebp(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetEventInvitationPhoto.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetEventInvitationPhoto.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Photo
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/photo/get(getEventInvitationPhoto)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetEventInvitationPhoto.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetEventInvitationPhoto.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/photo/get(getEventInvitationPhoto)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case imageWebp
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "image/webp":
+                    self = .imageWebp
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .imageWebp:
+                    return "image/webp"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .imageWebp,
                     .applicationProblemJson
                 ]
             }
@@ -8204,7 +12006,9 @@ public enum Operations {
             }
         }
     }
-    /// The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match.
+    /// The frame-sized rendition (or poster with ?variant=poster). For a Live/Motion Photo (`item.kind: live`),
+    /// `display` is the still and `?variant=motion` the short frame-sized clip. Supports Range, ETag, If-None-Match.
+    ///
     ///
     /// - Remark: HTTP `GET /v1/device/media/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/media/{placementId}/get(deviceGetMedia)`.
@@ -8231,6 +12035,7 @@ public enum Operations {
                     case display = "display"
                     case poster = "poster"
                     case avatar = "avatar"
+                    case motion = "motion"
                 }
                 /// - Remark: Generated from `#/paths/v1/device/media/{placementId}/GET/query/variant`.
                 public var variant: Operations.DeviceGetMedia.Input.Query.VariantPayload?
@@ -8697,6 +12502,583 @@ public enum Operations {
             }
         }
     }
+    /// The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/catalog`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)`.
+    public enum DevicePutPluginCatalog {
+        public static let id: Swift.String = "devicePutPluginCatalog"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/plugins/catalog/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DevicePutPluginCatalog.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DevicePutPluginCatalog.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DevicePutPluginCatalog.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/device/plugins/catalog/PUT/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/plugins/catalog/PUT/requestBody/content/application\/json`.
+                case json(Components.Schemas.PluginCatalog)
+            }
+            public var body: Operations.DevicePutPluginCatalog.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.DevicePutPluginCatalog.Input.Headers = .init(),
+                body: Operations.DevicePutPluginCatalog.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Stored
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DevicePutPluginCatalog.Output.NoContent)
+            /// Stored
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DevicePutPluginCatalog.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+    /// verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/registry`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)`.
+    public enum DeviceGetPluginRegistry {
+        public static let id: Swift.String = "deviceGetPluginRegistry"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/plugins/registry/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetPluginRegistry.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetPluginRegistry.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceGetPluginRegistry.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.DeviceGetPluginRegistry.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/plugins/registry/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/plugins/registry/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.PluginRegistry)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.PluginRegistry {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceGetPluginRegistry.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceGetPluginRegistry.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Signed index
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceGetPluginRegistry.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceGetPluginRegistry.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// No registry
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceGetPluginRegistry.Output.NoContent)
+            /// No registry
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceGetPluginRegistry.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`.
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/bundles/{file}`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/bundles/{file}/get(deviceGetPluginBundle)`.
+    public enum DeviceGetPluginBundle {
+        public static let id: Swift.String = "deviceGetPluginBundle"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/plugins/bundles/{file}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/plugins/bundles/{file}/GET/path/file`.
+                public var file: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - file:
+                public init(file: Swift.String) {
+                    self.file = file
+                }
+            }
+            public var path: Operations.DeviceGetPluginBundle.Input.Path
+            /// - Remark: Generated from `#/paths/v1/device/plugins/bundles/{file}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetPluginBundle.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetPluginBundle.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceGetPluginBundle.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeviceGetPluginBundle.Input.Path,
+                headers: Operations.DeviceGetPluginBundle.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/plugins/bundles/{file}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/plugins/bundles/{file}/GET/responses/200/content/application\/zip`.
+                    case applicationZip(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.applicationZip`.
+                    ///
+                    /// - Throws: An error if `self` is not `.applicationZip`.
+                    /// - SeeAlso: `.applicationZip`.
+                    public var applicationZip: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .applicationZip(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceGetPluginBundle.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceGetPluginBundle.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Bundle
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/bundles/{file}/get(deviceGetPluginBundle)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceGetPluginBundle.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceGetPluginBundle.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/bundles/{file}/get(deviceGetPluginBundle)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationZip
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/zip":
+                    self = .applicationZip
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationZip:
+                    return "application/zip"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationZip,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Errors, discovered entities and services (at most every 10 s). Replaces the previous report.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/status`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)`.
+    public enum DevicePutPluginStatus {
+        public static let id: Swift.String = "devicePutPluginStatus"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/plugins/status/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DevicePutPluginStatus.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DevicePutPluginStatus.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DevicePutPluginStatus.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/device/plugins/status/PUT/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/plugins/status/PUT/requestBody/content/application\/json`.
+                case json(Components.Schemas.PluginStatusReport)
+            }
+            public var body: Operations.DevicePutPluginStatus.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.DevicePutPluginStatus.Input.Headers = .init(),
+                body: Operations.DevicePutPluginStatus.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Stored
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DevicePutPluginStatus.Output.NoContent)
+            /// Stored
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DevicePutPluginStatus.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
@@ -9070,6 +13452,119 @@ public enum Operations {
             case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
+    /// Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+    /// The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+    /// connect and after syncing, so requests announced while it was offline are not lost.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/device/join-requests/get(deviceListJoinRequests)`.
+    public enum DeviceListJoinRequests {
+        public static let id: Swift.String = "deviceListJoinRequests"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/join-requests/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceListJoinRequests.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceListJoinRequests.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceListJoinRequests.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.DeviceListJoinRequests.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/join-requests/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/join-requests/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.JoinRequest])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.JoinRequest] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceListJoinRequests.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceListJoinRequests.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Oldest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/join-requests/get(deviceListJoinRequests)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceListJoinRequests.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceListJoinRequests.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `POST /v1/device/join-requests/{requestId}`.
     /// - Remark: Generated from `#/paths//v1/device/join-requests/{requestId}/post(deviceDecideJoin)`.
     public enum DeviceDecideJoin {
@@ -9321,7 +13816,16 @@ public enum Operations {
         }
     }
     /// Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
-    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB). The file
+    /// takes the same processing as any upload (renditions, location metadata stripped).
+    /// The server hashes the body: if this frame already has a live placement of the same file (source, master or
+    /// rendition sha256), nothing is created and the existing placement is returned with `200`.
+    ///
+    /// **Imports from another app's leftover data** (`source`, docs/spec/frameo-import.md): `source_key` makes the
+    /// import idempotent per frame. If this frame imported that key before, the placement of that item is returned
+    /// with `200`, even when it was removed since (`status: removed`), so a re-run never brings back what the family
+    /// deleted. The item keeps `sender_name`, `received_at`, fit, focal point and hidden state from the old app, and
+    /// the frame's owner owns the media.
     ///
     ///
     /// - Remark: HTTP `POST /v1/device/imports`.
@@ -9329,6 +13833,89 @@ public enum Operations {
     public enum DeviceImport {
         public static let id: Swift.String = "deviceImport"
         public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/imports/POST/query`.
+            public struct Query: Sendable, Hashable {
+                /// Caption to restore (e.g. from a kinframe export manifest).
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/caption`.
+                public var caption: Swift.String?
+                /// The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it.
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/source`.
+                public var source: Components.Schemas.ItemOrigin?
+                /// Stable id of the file in that app (for Frameo, its file name). Unique per frame and source.
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/source_key`.
+                public var sourceKey: Swift.String?
+                /// The original sender's display name in that app.
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/sender_name`.
+                public var senderName: Swift.String?
+                /// When the old app received the file; becomes the placement's `received_at` (not in the future).
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/received_at`.
+                public var receivedAt: Foundation.Date?
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/fit`.
+                public var fit: Components.Schemas.Fit?
+                /// Focal point, as a fraction of the width (with `focal_y`).
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/focal_x`.
+                public var focalX: Swift.Double?
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/focal_y`.
+                public var focalY: Swift.Double?
+                /// Import the placement hidden (it was hidden from the slideshow in the old app).
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/hidden`.
+                public var hidden: Swift.Bool?
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/rotation`.
+                @frozen public enum RotationPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                    case _0 = 0
+                    case _90 = 90
+                    case _180 = 180
+                    case _270 = 270
+                }
+                /// Extra clockwise rotation chosen on the frame in the old app.
+                ///
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/query/rotation`.
+                public var rotation: Operations.DeviceImport.Input.Query.RotationPayload?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - caption: Caption to restore (e.g. from a kinframe export manifest).
+                ///   - source: The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it.
+                ///   - sourceKey: Stable id of the file in that app (for Frameo, its file name). Unique per frame and source.
+                ///   - senderName: The original sender's display name in that app.
+                ///   - receivedAt: When the old app received the file; becomes the placement's `received_at` (not in the future).
+                ///   - fit:
+                ///   - focalX: Focal point, as a fraction of the width (with `focal_y`).
+                ///   - focalY:
+                ///   - hidden: Import the placement hidden (it was hidden from the slideshow in the old app).
+                ///   - rotation: Extra clockwise rotation chosen on the frame in the old app.
+                public init(
+                    caption: Swift.String? = nil,
+                    source: Components.Schemas.ItemOrigin? = nil,
+                    sourceKey: Swift.String? = nil,
+                    senderName: Swift.String? = nil,
+                    receivedAt: Foundation.Date? = nil,
+                    fit: Components.Schemas.Fit? = nil,
+                    focalX: Swift.Double? = nil,
+                    focalY: Swift.Double? = nil,
+                    hidden: Swift.Bool? = nil,
+                    rotation: Operations.DeviceImport.Input.Query.RotationPayload? = nil
+                ) {
+                    self.caption = caption
+                    self.source = source
+                    self.sourceKey = sourceKey
+                    self.senderName = senderName
+                    self.receivedAt = receivedAt
+                    self.fit = fit
+                    self.focalX = focalX
+                    self.focalY = focalY
+                    self.hidden = hidden
+                    self.rotation = rotation
+                }
+            }
+            public var query: Operations.DeviceImport.Input.Query
             /// - Remark: Generated from `#/paths/v1/device/imports/POST/header`.
             public struct Headers: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/v1/device/imports/POST/header/X-Filename`.
@@ -9362,17 +13949,71 @@ public enum Operations {
             /// Creates a new `Input`.
             ///
             /// - Parameters:
+            ///   - query:
             ///   - headers:
             ///   - body:
             public init(
+                query: Operations.DeviceImport.Input.Query = .init(),
                 headers: Operations.DeviceImport.Input.Headers,
                 body: Operations.DeviceImport.Input.Body
             ) {
+                self.query = query
                 self.headers = headers
                 self.body = body
             }
         }
         @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/imports/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/imports/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.Placement)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.Placement {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceImport.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceImport.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Duplicate; the frame already has this file
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/imports/post(deviceImport)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceImport.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceImport.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
             public struct Accepted: Sendable, Hashable {
                 /// - Remark: Generated from `#/paths/v1/device/imports/POST/responses/202/content`.
                 @frozen public enum Body: Sendable, Hashable {
@@ -9424,6 +14065,600 @@ public enum Operations {
                     }
                 }
             }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/imports/post(deviceImport)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Which of these file hashes this frame already has (a live placement whose source, master or frame
+    /// rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading. With `source` and
+    /// `source_keys`, also which of those keys this frame has imported before (removed items included, see
+    /// `deviceImport`), so a resumed import only uploads what is missing.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/device/imports/check`.
+    /// - Remark: Generated from `#/paths//v1/device/imports/check/post(deviceImportCheck)`.
+    public enum DeviceImportCheck {
+        public static let id: Swift.String = "deviceImportCheck"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceImportCheck.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceImportCheck.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceImportCheck.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody/json/sha256`.
+                    public var sha256: [Swift.String]?
+                    /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody/json/source`.
+                    public var source: Components.Schemas.ItemOrigin?
+                    /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody/json/source_keys`.
+                    public var sourceKeys: [Swift.String]?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - sha256:
+                    ///   - source:
+                    ///   - sourceKeys:
+                    public init(
+                        sha256: [Swift.String]? = nil,
+                        source: Components.Schemas.ItemOrigin? = nil,
+                        sourceKeys: [Swift.String]? = nil
+                    ) {
+                        self.sha256 = sha256
+                        self.source = source
+                        self.sourceKeys = sourceKeys
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case sha256
+                        case source
+                        case sourceKeys = "source_keys"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/requestBody/content/application\/json`.
+                case json(Operations.DeviceImportCheck.Input.Body.JsonPayload)
+            }
+            public var body: Operations.DeviceImportCheck.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.DeviceImportCheck.Input.Headers = .init(),
+                body: Operations.DeviceImportCheck.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/responses/200/content/json/known`.
+                        public var known: [Swift.String]
+                        /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/responses/200/content/json/known_source_keys`.
+                        public var knownSourceKeys: [Swift.String]?
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - known:
+                        ///   - knownSourceKeys:
+                        public init(
+                            known: [Swift.String],
+                            knownSourceKeys: [Swift.String]? = nil
+                        ) {
+                            self.known = known
+                            self.knownSourceKeys = knownSourceKeys
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case known
+                            case knownSourceKeys = "known_source_keys"
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/device/imports/check/POST/responses/200/content/application\/json`.
+                    case json(Operations.DeviceImportCheck.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.DeviceImportCheck.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceImportCheck.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceImportCheck.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The known subset
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/imports/check/post(deviceImportCheck)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceImportCheck.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceImportCheck.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/imports/check/post(deviceImportCheck)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// "Sync now" on the frame: the server re-syncs all of the frame's calendar sources. A `calendar` change follows when something changed.
+    ///
+    /// - Remark: HTTP `POST /v1/device/calendar/sync`.
+    /// - Remark: Generated from `#/paths//v1/device/calendar/sync/post(deviceSyncCalendars)`.
+    public enum DeviceSyncCalendars {
+        public static let id: Swift.String = "deviceSyncCalendars"
+        public struct Input: Sendable, Hashable {
+            /// Creates a new `Input`.
+            public init() {}
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Accepted: Sendable, Hashable {
+                /// Creates a new `Accepted`.
+                public init() {}
+            }
+            /// Sync started
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/calendar/sync/post(deviceSyncCalendars)/responses/202`.
+            ///
+            /// HTTP response code: `202 accepted`.
+            case accepted(Operations.DeviceSyncCalendars.Output.Accepted)
+            /// Sync started
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/calendar/sync/post(deviceSyncCalendars)/responses/202`.
+            ///
+            /// HTTP response code: `202 accepted`.
+            public static var accepted: Self {
+                .accepted(.init())
+            }
+            /// The associated value of the enum case if `self` is `.accepted`.
+            ///
+            /// - Throws: An error if `self` is not `.accepted`.
+            /// - SeeAlso: `.accepted`.
+            public var accepted: Operations.DeviceSyncCalendars.Output.Accepted {
+                get throws {
+                    switch self {
+                    case let .accepted(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "accepted",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// The countdown toggle in the frame's event details. A `calendar` change follows.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)`.
+    public enum DeviceSetCountdown {
+        public static let id: Swift.String = "deviceSetCountdown"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/countdowns/{eventId}/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/countdowns/{eventId}/PUT/path/eventId`.
+                public var eventId: Components.Parameters.EventId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - eventId:
+                public init(eventId: Components.Parameters.EventId) {
+                    self.eventId = eventId
+                }
+            }
+            public var path: Operations.DeviceSetCountdown.Input.Path
+            /// - Remark: Generated from `#/paths/v1/device/countdowns/{eventId}/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceSetCountdown.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceSetCountdown.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceSetCountdown.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeviceSetCountdown.Input.Path,
+                headers: Operations.DeviceSetCountdown.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Marked
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceSetCountdown.Output.NoContent)
+            /// Marked
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceSetCountdown.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `DELETE /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/delete(deviceClearCountdown)`.
+    public enum DeviceClearCountdown {
+        public static let id: Swift.String = "deviceClearCountdown"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/countdowns/{eventId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/countdowns/{eventId}/DELETE/path/eventId`.
+                public var eventId: Components.Parameters.EventId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - eventId:
+                public init(eventId: Components.Parameters.EventId) {
+                    self.eventId = eventId
+                }
+            }
+            public var path: Operations.DeviceClearCountdown.Input.Path
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            public init(path: Operations.DeviceClearCountdown.Input.Path) {
+                self.path = path
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Unmarked
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/delete(deviceClearCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceClearCountdown.Output.NoContent)
+            /// Unmarked
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/delete(deviceClearCountdown)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceClearCountdown.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+    }
+    /// Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+    /// after syncing and after an `event_invitation` websocket message, like join requests.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/get(deviceListInvitations)`.
+    public enum DeviceListInvitations {
+        public static let id: Swift.String = "deviceListInvitations"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/invitations/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceListInvitations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceListInvitations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceListInvitations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.DeviceListInvitations.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/invitations/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/invitations/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EventInvitation])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EventInvitation] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceListInvitations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceListInvitations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Pending invitations
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/get(deviceListInvitations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceListInvitations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceListInvitations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
             /// Undocumented response.
             ///
             /// A response with a code that is not documented in the OpenAPI document.
@@ -9451,6 +14686,362 @@ public enum Operations {
             public static var allCases: [Self] {
                 [
                     .json
+                ]
+            }
+        }
+    }
+    /// Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before.
+    ///
+    /// - Remark: HTTP `POST /v1/device/invitations/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)`.
+    public enum DeviceDecideInvitation {
+        public static let id: Swift.String = "deviceDecideInvitation"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/path/invitationId`.
+                public var invitationId: Components.Parameters.InvitationId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - invitationId:
+                public init(invitationId: Components.Parameters.InvitationId) {
+                    self.invitationId = invitationId
+                }
+            }
+            public var path: Operations.DeviceDecideInvitation.Input.Path
+            /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceDecideInvitation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceDecideInvitation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceDecideInvitation.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/requestBody/json/decision`.
+                    @frozen public enum DecisionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case accept = "accept"
+                        case decline = "decline"
+                    }
+                    /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/requestBody/json/decision`.
+                    public var decision: Operations.DeviceDecideInvitation.Input.Body.JsonPayload.DecisionPayload
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - decision:
+                    public init(decision: Operations.DeviceDecideInvitation.Input.Body.JsonPayload.DecisionPayload) {
+                        self.decision = decision
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case decision
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/POST/requestBody/content/application\/json`.
+                case json(Operations.DeviceDecideInvitation.Input.Body.JsonPayload)
+            }
+            public var body: Operations.DeviceDecideInvitation.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.DeviceDecideInvitation.Input.Path,
+                headers: Operations.DeviceDecideInvitation.Input.Headers = .init(),
+                body: Operations.DeviceDecideInvitation.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Decided
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeviceDecideInvitation.Output.NoContent)
+            /// Decided
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeviceDecideInvitation.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)`.
+    public enum DeviceGetInvitationPhoto {
+        public static let id: Swift.String = "deviceGetInvitationPhoto"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/photo/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/photo/GET/path/invitationId`.
+                public var invitationId: Components.Parameters.InvitationId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - invitationId:
+                public init(invitationId: Components.Parameters.InvitationId) {
+                    self.invitationId = invitationId
+                }
+            }
+            public var path: Operations.DeviceGetInvitationPhoto.Input.Path
+            /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/photo/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetInvitationPhoto.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeviceGetInvitationPhoto.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeviceGetInvitationPhoto.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeviceGetInvitationPhoto.Input.Path,
+                headers: Operations.DeviceGetInvitationPhoto.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/photo/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/device/invitations/{invitationId}/photo/GET/responses/200/content/image\/webp`.
+                    case imageWebp(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.imageWebp`.
+                    ///
+                    /// - Throws: An error if `self` is not `.imageWebp`.
+                    /// - SeeAlso: `.imageWebp`.
+                    public var imageWebp: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .imageWebp(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeviceGetInvitationPhoto.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeviceGetInvitationPhoto.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Photo
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeviceGetInvitationPhoto.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeviceGetInvitationPhoto.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotModified: Sendable, Hashable {
+                /// Creates a new `NotModified`.
+                public init() {}
+            }
+            /// Not modified
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)/responses/304`.
+            ///
+            /// HTTP response code: `304 notModified`.
+            case notModified(Operations.DeviceGetInvitationPhoto.Output.NotModified)
+            /// Not modified
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)/responses/304`.
+            ///
+            /// HTTP response code: `304 notModified`.
+            public static var notModified: Self {
+                .notModified(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notModified`.
+            ///
+            /// - Throws: An error if `self` is not `.notModified`.
+            /// - SeeAlso: `.notModified`.
+            public var notModified: Operations.DeviceGetInvitationPhoto.Output.NotModified {
+                get throws {
+                    switch self {
+                    case let .notModified(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notModified",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case imageWebp
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "image/webp":
+                    self = .imageWebp
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .imageWebp:
+                    return "image/webp"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .imageWebp,
+                    .applicationProblemJson
                 ]
             }
         }
@@ -9874,6 +15465,743 @@ public enum Operations {
             }
         }
     }
+    /// No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+    /// the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+    /// `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+    /// the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+    /// APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/latest`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)`.
+    public enum GetFrameAppLatest {
+        public static let id: Swift.String = "getFrameAppLatest"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frame-app/latest/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// The frame's Android API level; releases whose `min_sdk` is higher are skipped.
+                ///
+                /// - Remark: Generated from `#/paths/v1/frame-app/latest/GET/query/sdk`.
+                public var sdk: Swift.Int?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - sdk: The frame's Android API level; releases whose `min_sdk` is higher are skipped.
+                public init(sdk: Swift.Int? = nil) {
+                    self.sdk = sdk
+                }
+            }
+            public var query: Operations.GetFrameAppLatest.Input.Query
+            /// - Remark: Generated from `#/paths/v1/frame-app/latest/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameAppLatest.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameAppLatest.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFrameAppLatest.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.GetFrameAppLatest.Input.Query = .init(),
+                headers: Operations.GetFrameAppLatest.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frame-app/latest/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frame-app/latest/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.FrameUpdate)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.FrameUpdate {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFrameAppLatest.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFrameAppLatest.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The newest stable release
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFrameAppLatest.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFrameAppLatest.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// No release available
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.GetFrameAppLatest.Output.NoContent)
+            /// No release available
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.GetFrameAppLatest.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json
+                ]
+            }
+        }
+    }
+    /// No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/apk/{versionCode}`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)`.
+    public enum GetFrameAppApk {
+        public static let id: Swift.String = "getFrameAppApk"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frame-app/apk/{versionCode}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frame-app/apk/{versionCode}/GET/path/versionCode`.
+                public var versionCode: Swift.Int
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - versionCode:
+                public init(versionCode: Swift.Int) {
+                    self.versionCode = versionCode
+                }
+            }
+            public var path: Operations.GetFrameAppApk.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frame-app/apk/{versionCode}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameAppApk.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetFrameAppApk.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetFrameAppApk.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetFrameAppApk.Input.Path,
+                headers: Operations.GetFrameAppApk.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frame-app/apk/{versionCode}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frame-app/apk/{versionCode}/GET/responses/200/content/application\/vnd.android.package-archive`.
+                    case applicationVnd_android_packageArchive(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.applicationVnd_android_packageArchive`.
+                    ///
+                    /// - Throws: An error if `self` is not `.applicationVnd_android_packageArchive`.
+                    /// - SeeAlso: `.applicationVnd_android_packageArchive`.
+                    public var applicationVnd_android_packageArchive: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .applicationVnd_android_packageArchive(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetFrameAppApk.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetFrameAppApk.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// APK bytes
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetFrameAppApk.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetFrameAppApk.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct PartialContent: Sendable, Hashable {
+                /// Creates a new `PartialContent`.
+                public init() {}
+            }
+            /// Partial bytes
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/206`.
+            ///
+            /// HTTP response code: `206 partialContent`.
+            case partialContent(Operations.GetFrameAppApk.Output.PartialContent)
+            /// Partial bytes
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/206`.
+            ///
+            /// HTTP response code: `206 partialContent`.
+            public static var partialContent: Self {
+                .partialContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.partialContent`.
+            ///
+            /// - Throws: An error if `self` is not `.partialContent`.
+            /// - SeeAlso: `.partialContent`.
+            public var partialContent: Operations.GetFrameAppApk.Output.PartialContent {
+                get throws {
+                    switch self {
+                    case let .partialContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "partialContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotModified: Sendable, Hashable {
+                /// Creates a new `NotModified`.
+                public init() {}
+            }
+            /// Not modified
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/304`.
+            ///
+            /// HTTP response code: `304 notModified`.
+            case notModified(Operations.GetFrameAppApk.Output.NotModified)
+            /// Not modified
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/304`.
+            ///
+            /// HTTP response code: `304 notModified`.
+            public static var notModified: Self {
+                .notModified(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notModified`.
+            ///
+            /// - Throws: An error if `self` is not `.notModified`.
+            /// - SeeAlso: `.notModified`.
+            public var notModified: Operations.GetFrameAppApk.Output.NotModified {
+                get throws {
+                    switch self {
+                    case let .notModified(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notModified",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationVnd_android_packageArchive
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/vnd.android.package-archive":
+                    self = .applicationVnd_android_packageArchive
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationVnd_android_packageArchive:
+                    return "application/vnd.android.package-archive"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationVnd_android_packageArchive,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+    /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+    /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+    /// and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+    /// `items.<i>.quantity`/`maximum`, `consent`/`required`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)`.
+    public enum CreateShopReservation {
+        public static let id: Swift.String = "createShopReservation"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/shop/reservations/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateShopReservation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateShopReservation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateShopReservation.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/shop/reservations/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/reservations/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.ShopReservationCreate)
+            }
+            public var body: Operations.CreateShopReservation.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CreateShopReservation.Input.Headers = .init(),
+                body: Operations.CreateShopReservation.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/reservations/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/shop/reservations/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.ShopReservationReceipt)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShopReservationReceipt {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateShopReservation.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateShopReservation.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Reserved
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateShopReservation.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateShopReservation.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Cancels a reservation with the signed token from the link in the confirmation email (the web page
+    /// `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+    /// invalid token or a deleted reservation.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations/cancel`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/cancel/post(cancelShopReservation)`.
+    public enum CancelShopReservation {
+        public static let id: Swift.String = "cancelShopReservation"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelShopReservation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CancelShopReservation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CancelShopReservation.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/requestBody/json/token`.
+                    public var token: Swift.String
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - token:
+                    public init(token: Swift.String) {
+                        self.token = token
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case token
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/requestBody/content/application\/json`.
+                case json(Operations.CancelShopReservation.Input.Body.JsonPayload)
+            }
+            public var body: Operations.CancelShopReservation.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CancelShopReservation.Input.Headers = .init(),
+                body: Operations.CancelShopReservation.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/responses/200/content/json/reference`.
+                        public var reference: Swift.String
+                        /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/responses/200/content/json/status`.
+                        public var status: Components.Schemas.ShopReservationStatus
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - reference:
+                        ///   - status:
+                        public init(
+                            reference: Swift.String,
+                            status: Components.Schemas.ShopReservationStatus
+                        ) {
+                            self.reference = reference
+                            self.status = status
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case reference
+                            case status
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/shop/reservations/cancel/POST/responses/200/content/application\/json`.
+                    case json(Operations.CancelShopReservation.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.CancelShopReservation.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CancelShopReservation.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CancelShopReservation.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Cancelled
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/reservations/cancel/post(cancelShopReservation)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.CancelShopReservation.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.CancelShopReservation.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/reservations/cancel/post(cancelShopReservation)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// - Remark: HTTP `GET /v1/operator/stats`.
     /// - Remark: Generated from `#/paths//v1/operator/stats/get(operatorStats)`.
     public enum OperatorStats {
@@ -9917,6 +16245,55 @@ public enum Operations {
                         public var storageBytes: Swift.Int?
                         /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/processing_queue`.
                         public var processingQueue: Swift.Int?
+                        /// How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+                        /// `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+                        /// upload that did not conform and was transcoded). `reused_renditions` counts frame video
+                        /// renditions served from the master's bytes instead of a transcode.
+                        ///
+                        ///
+                        /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline`.
+                        public struct MediaPipelinePayload: Codable, Hashable, Sendable {
+                            /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline/transcoded`.
+                            public var transcoded: Swift.Int?
+                            /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline/prepared`.
+                            public var prepared: Swift.Int?
+                            /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline/fallback`.
+                            public var fallback: Swift.Int?
+                            /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline/reused_renditions`.
+                            public var reusedRenditions: Swift.Int?
+                            /// Creates a new `MediaPipelinePayload`.
+                            ///
+                            /// - Parameters:
+                            ///   - transcoded:
+                            ///   - prepared:
+                            ///   - fallback:
+                            ///   - reusedRenditions:
+                            public init(
+                                transcoded: Swift.Int? = nil,
+                                prepared: Swift.Int? = nil,
+                                fallback: Swift.Int? = nil,
+                                reusedRenditions: Swift.Int? = nil
+                            ) {
+                                self.transcoded = transcoded
+                                self.prepared = prepared
+                                self.fallback = fallback
+                                self.reusedRenditions = reusedRenditions
+                            }
+                            public enum CodingKeys: String, CodingKey {
+                                case transcoded
+                                case prepared
+                                case fallback
+                                case reusedRenditions = "reused_renditions"
+                            }
+                        }
+                        /// How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+                        /// `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+                        /// upload that did not conform and was transcoded). `reused_renditions` counts frame video
+                        /// renditions served from the master's bytes instead of a transcode.
+                        ///
+                        ///
+                        /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/json/media_pipeline`.
+                        public var mediaPipeline: Operations.OperatorStats.Output.Ok.Body.JsonPayload.MediaPipelinePayload?
                         /// Creates a new `JsonPayload`.
                         ///
                         /// - Parameters:
@@ -9926,13 +16303,15 @@ public enum Operations {
                         ///   - items:
                         ///   - storageBytes:
                         ///   - processingQueue:
+                        ///   - mediaPipeline: How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
                         public init(
                             users: Swift.Int? = nil,
                             frames: Swift.Int? = nil,
                             framesOnline: Swift.Int? = nil,
                             items: Swift.Int? = nil,
                             storageBytes: Swift.Int? = nil,
-                            processingQueue: Swift.Int? = nil
+                            processingQueue: Swift.Int? = nil,
+                            mediaPipeline: Operations.OperatorStats.Output.Ok.Body.JsonPayload.MediaPipelinePayload? = nil
                         ) {
                             self.users = users
                             self.frames = frames
@@ -9940,6 +16319,7 @@ public enum Operations {
                             self.items = items
                             self.storageBytes = storageBytes
                             self.processingQueue = processingQueue
+                            self.mediaPipeline = mediaPipeline
                         }
                         public enum CodingKeys: String, CodingKey {
                             case users
@@ -9948,6 +16328,7 @@ public enum Operations {
                             case items
                             case storageBytes = "storage_bytes"
                             case processingQueue = "processing_queue"
+                            case mediaPipeline = "media_pipeline"
                         }
                     }
                     /// - Remark: Generated from `#/paths/v1/operator/stats/GET/responses/200/content/application\/json`.
@@ -10252,6 +16633,512 @@ public enum Operations {
             public static var allCases: [Self] {
                 [
                     .json
+                ]
+            }
+        }
+    }
+    /// Shop reservations, newest first. `404 not_found` when the server has no shop.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)`.
+    public enum OperatorListReservations {
+        public static let id: Swift.String = "operatorListReservations"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/query/status`.
+                public var status: Components.Schemas.ShopReservationStatus?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - status:
+                public init(status: Components.Schemas.ShopReservationStatus? = nil) {
+                    self.status = status
+                }
+            }
+            public var query: Operations.OperatorListReservations.Input.Query
+            /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListReservations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListReservations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorListReservations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.OperatorListReservations.Input.Query = .init(),
+                headers: Operations.OperatorListReservations.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/responses/200/content/json/reservations`.
+                        public var reservations: [Components.Schemas.ShopReservation]
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - reservations:
+                        public init(reservations: [Components.Schemas.ShopReservation]) {
+                            self.reservations = reservations
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case reservations
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/GET/responses/200/content/application\/json`.
+                    case json(Operations.OperatorListReservations.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.OperatorListReservations.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorListReservations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorListReservations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Reservations
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorListReservations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorListReservations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations.csv`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations.csv/get(operatorExportReservations)`.
+    public enum OperatorExportReservations {
+        public static let id: Swift.String = "operatorExportReservations"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/reservations.csv/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations.csv/GET/query/status`.
+                public var status: Components.Schemas.ShopReservationStatus?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - status:
+                public init(status: Components.Schemas.ShopReservationStatus? = nil) {
+                    self.status = status
+                }
+            }
+            public var query: Operations.OperatorExportReservations.Input.Query
+            /// - Remark: Generated from `#/paths/v1/operator/reservations.csv/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorExportReservations.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorExportReservations.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorExportReservations.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - query:
+            ///   - headers:
+            public init(
+                query: Operations.OperatorExportReservations.Input.Query = .init(),
+                headers: Operations.OperatorExportReservations.Input.Headers = .init()
+            ) {
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations.csv/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations.csv/GET/responses/200/content/text\/csv`.
+                    case csv(OpenAPIRuntime.HTTPBody)
+                    /// The associated value of the enum case if `self` is `.csv`.
+                    ///
+                    /// - Throws: An error if `self` is not `.csv`.
+                    /// - SeeAlso: `.csv`.
+                    public var csv: OpenAPIRuntime.HTTPBody {
+                        get throws {
+                            switch self {
+                            case let .csv(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorExportReservations.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorExportReservations.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// CSV export
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations.csv/get(operatorExportReservations)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorExportReservations.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorExportReservations.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations.csv/get(operatorExportReservations)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case csv
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "text/csv":
+                    self = .csv
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .csv:
+                    return "text/csv"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .csv,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// - Remark: HTTP `PATCH /v1/operator/reservations/{reservationId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)`.
+    public enum OperatorUpdateReservation {
+        public static let id: Swift.String = "operatorUpdateReservation"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/path/reservationId`.
+                public var reservationId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - reservationId:
+                public init(reservationId: Components.Schemas.Id) {
+                    self.reservationId = reservationId
+                }
+            }
+            public var path: Operations.OperatorUpdateReservation.Input.Path
+            /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorUpdateReservation.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorUpdateReservation.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorUpdateReservation.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/json/status`.
+                    public var status: Components.Schemas.ShopReservationStatus?
+                    /// Only for the operator; never emailed.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/json/internal_note`.
+                    public var internalNote: Swift.String?
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - status:
+                    ///   - internalNote: Only for the operator; never emailed.
+                    public init(
+                        status: Components.Schemas.ShopReservationStatus? = nil,
+                        internalNote: Swift.String? = nil
+                    ) {
+                        self.status = status
+                        self.internalNote = internalNote
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case status
+                        case internalNote = "internal_note"
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/content/application\/json`.
+                case json(Operations.OperatorUpdateReservation.Input.Body.JsonPayload)
+            }
+            public var body: Operations.OperatorUpdateReservation.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.OperatorUpdateReservation.Input.Path,
+                headers: Operations.OperatorUpdateReservation.Input.Headers = .init(),
+                body: Operations.OperatorUpdateReservation.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShopReservation)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShopReservation {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorUpdateReservation.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorUpdateReservation.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorUpdateReservation.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorUpdateReservation.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
                 ]
             }
         }

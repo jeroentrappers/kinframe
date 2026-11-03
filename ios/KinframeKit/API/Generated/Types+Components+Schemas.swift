@@ -98,6 +98,7 @@ extension Components {
             case codeExpired = "code_expired"
             case inviteInvalid = "invite_invalid"
             case inviteExpired = "invite_expired"
+            case linkExpired = "link_expired"
             case alreadyMember = "already_member"
             case validationFailed = "validation_failed"
             case tooManyItems = "too_many_items"
@@ -114,6 +115,7 @@ extension Components {
             case appUpdateRequired = "app_update_required"
             case upstreamUnavailable = "upstream_unavailable"
             case featureDisabled = "feature_disabled"
+            case alreadyDecided = "already_decided"
             case serverError = "server_error"
         }
         /// - Remark: Generated from `#/components/schemas/Discovery`.
@@ -132,6 +134,12 @@ extension Components {
                 public var issuer: Swift.String
                 /// - Remark: Generated from `#/components/schemas/Discovery/auth/mobile_client_id`.
                 public var mobileClientId: Swift.String
+                /// Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+                /// (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/Discovery/auth/desktop_client_id`.
+                public var desktopClientId: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/Discovery/auth/web_client_id`.
                 public var webClientId: Swift.String
                 /// - Remark: Generated from `#/components/schemas/Discovery/auth/api_resource`.
@@ -141,22 +149,26 @@ extension Components {
                 /// - Parameters:
                 ///   - issuer:
                 ///   - mobileClientId:
+                ///   - desktopClientId: Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
                 ///   - webClientId:
                 ///   - apiResource:
                 public init(
                     issuer: Swift.String,
                     mobileClientId: Swift.String,
+                    desktopClientId: Swift.String? = nil,
                     webClientId: Swift.String,
                     apiResource: Swift.String
                 ) {
                     self.issuer = issuer
                     self.mobileClientId = mobileClientId
+                    self.desktopClientId = desktopClientId
                     self.webClientId = webClientId
                     self.apiResource = apiResource
                 }
                 public enum CodingKeys: String, CodingKey {
                     case issuer
                     case mobileClientId = "mobile_client_id"
+                    case desktopClientId = "desktop_client_id"
                     case webClientId = "web_client_id"
                     case apiResource = "api_resource"
                 }
@@ -173,6 +185,18 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/weather`.
             public var weather: Swift.Bool?
+            /// True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/calendar`.
+            public var calendar: Swift.Bool?
+            /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+            /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/webpush_public_key`.
+            public var webpushPublicKey: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Discovery/shop`.
+            public var shop: Components.Schemas.Shop?
             /// Creates a new `Discovery`.
             ///
             /// - Parameters:
@@ -184,6 +208,9 @@ extension Components {
             ///   - limits:
             ///   - devAuth: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
             ///   - weather: True when the server fetches weather for frames and serves `/v1/geocode`.
+            ///   - calendar: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+            ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
+            ///   - shop:
             public init(
                 name: Swift.String,
                 version: Swift.String,
@@ -192,7 +219,10 @@ extension Components {
                 auth: Components.Schemas.Discovery.AuthPayload,
                 limits: Components.Schemas.Limits,
                 devAuth: Swift.Bool? = nil,
-                weather: Swift.Bool? = nil
+                weather: Swift.Bool? = nil,
+                calendar: Swift.Bool? = nil,
+                webpushPublicKey: Swift.String? = nil,
+                shop: Components.Schemas.Shop? = nil
             ) {
                 self.name = name
                 self.version = version
@@ -202,6 +232,9 @@ extension Components {
                 self.limits = limits
                 self.devAuth = devAuth
                 self.weather = weather
+                self.calendar = calendar
+                self.webpushPublicKey = webpushPublicKey
+                self.shop = shop
             }
             public enum CodingKeys: String, CodingKey {
                 case name
@@ -212,6 +245,587 @@ extension Components {
                 case limits
                 case devAuth = "dev_auth"
                 case weather
+                case calendar
+                case webpushPublicKey = "webpush_public_key"
+                case shop
+            }
+        }
+        /// Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+        /// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+        /// to text; `en` is always present and is the fallback.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Shop`.
+        public struct Shop: Codable, Hashable, Sendable {
+            /// Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/brand`.
+            public var brand: Swift.String
+            /// ISO 4217
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/currency`.
+            public var currency: Swift.String
+            /// VAT included in all prices
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/vat_percent`.
+            public var vatPercent: Swift.Double
+            /// - Remark: Generated from `#/components/schemas/Shop/products`.
+            public var products: [Components.Schemas.ShopProduct]
+            /// - Remark: Generated from `#/components/schemas/Shop/shipping`.
+            public var shipping: Components.Schemas.ShopShipping
+            /// - Remark: Generated from `#/components/schemas/Shop/estimated_delivery`.
+            public var estimatedDelivery: Components.Schemas.LocalizedText?
+            /// Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+            /// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+            /// sign-in and the family app live. Absent when the operator configured none.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/domains`.
+            public var domains: [Swift.String]?
+            /// Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+            /// the shop emails in). Defaults to `en`.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/default_locale`.
+            public var defaultLocale: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Shop/seller`.
+            public struct SellerPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/name`.
+                public var name: Swift.String
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/email`.
+                public var email: Swift.String
+                /// Legal line for the footer, e.g. company, address and VAT number.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/legal`.
+                public var legal: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/privacy_url`.
+                public var privacyUrl: Swift.String?
+                /// Creates a new `SellerPayload`.
+                ///
+                /// - Parameters:
+                ///   - name:
+                ///   - email:
+                ///   - legal: Legal line for the footer, e.g. company, address and VAT number.
+                ///   - privacyUrl:
+                public init(
+                    name: Swift.String,
+                    email: Swift.String,
+                    legal: Swift.String? = nil,
+                    privacyUrl: Swift.String? = nil
+                ) {
+                    self.name = name
+                    self.email = email
+                    self.legal = legal
+                    self.privacyUrl = privacyUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case name
+                    case email
+                    case legal
+                    case privacyUrl = "privacy_url"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/Shop/seller`.
+            public var seller: Components.Schemas.Shop.SellerPayload
+            /// Creates a new `Shop`.
+            ///
+            /// - Parameters:
+            ///   - brand: Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+            ///   - currency: ISO 4217
+            ///   - vatPercent: VAT included in all prices
+            ///   - products:
+            ///   - shipping:
+            ///   - estimatedDelivery:
+            ///   - domains: Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+            ///   - defaultLocale: Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+            ///   - seller:
+            public init(
+                brand: Swift.String,
+                currency: Swift.String,
+                vatPercent: Swift.Double,
+                products: [Components.Schemas.ShopProduct],
+                shipping: Components.Schemas.ShopShipping,
+                estimatedDelivery: Components.Schemas.LocalizedText? = nil,
+                domains: [Swift.String]? = nil,
+                defaultLocale: Swift.String? = nil,
+                seller: Components.Schemas.Shop.SellerPayload
+            ) {
+                self.brand = brand
+                self.currency = currency
+                self.vatPercent = vatPercent
+                self.products = products
+                self.shipping = shipping
+                self.estimatedDelivery = estimatedDelivery
+                self.domains = domains
+                self.defaultLocale = defaultLocale
+                self.seller = seller
+            }
+            public enum CodingKeys: String, CodingKey {
+                case brand
+                case currency
+                case vatPercent = "vat_percent"
+                case products
+                case shipping
+                case estimatedDelivery = "estimated_delivery"
+                case domains
+                case defaultLocale = "default_locale"
+                case seller
+            }
+        }
+        /// Language code → text; `en` is the fallback.
+        ///
+        /// - Remark: Generated from `#/components/schemas/LocalizedText`.
+        public struct LocalizedText: Codable, Hashable, Sendable {
+            /// A container of undocumented properties.
+            public var additionalProperties: [String: Swift.String]
+            /// Creates a new `LocalizedText`.
+            ///
+            /// - Parameters:
+            ///   - additionalProperties: A container of undocumented properties.
+            public init(additionalProperties: [String: Swift.String] = .init()) {
+                self.additionalProperties = additionalProperties
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try encoder.encodeAdditionalProperties(additionalProperties)
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopProduct`.
+        public struct ShopProduct: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/id`.
+            public var id: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/name`.
+            public var name: Swift.String
+            /// Screen size label
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/size`.
+            public var size: Swift.String?
+            /// Unit price incl. VAT
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/price_cents`.
+            public var priceCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/max_qty`.
+            public var maxQty: Swift.Int
+            /// Illustration key: frame-10 or frame-15
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/image`.
+            public var image: Swift.String?
+            /// Language code → short spec bullets; `en` is the fallback.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/specs`.
+            public struct SpecsPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: [Swift.String]]
+                /// Creates a new `SpecsPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: [Swift.String]] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// Language code → short spec bullets; `en` is the fallback.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopProduct/specs`.
+            public var specs: Components.Schemas.ShopProduct.SpecsPayload?
+            /// Creates a new `ShopProduct`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - name:
+            ///   - size: Screen size label
+            ///   - priceCents: Unit price incl. VAT
+            ///   - maxQty:
+            ///   - image: Illustration key: frame-10 or frame-15
+            ///   - specs: Language code → short spec bullets; `en` is the fallback.
+            public init(
+                id: Swift.String,
+                name: Swift.String,
+                size: Swift.String? = nil,
+                priceCents: Swift.Int,
+                maxQty: Swift.Int,
+                image: Swift.String? = nil,
+                specs: Components.Schemas.ShopProduct.SpecsPayload? = nil
+            ) {
+                self.id = id
+                self.name = name
+                self.size = size
+                self.priceCents = priceCents
+                self.maxQty = maxQty
+                self.image = image
+                self.specs = specs
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+                case size
+                case priceCents = "price_cents"
+                case maxQty = "max_qty"
+                case image
+                case specs
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopShipping`.
+        public struct ShopShipping: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopShipping/countries`.
+            public var countries: [Swift.String]
+            /// Shipping cost per order incl. VAT
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopShipping/flat_cents`.
+            public var flatCents: Swift.Int
+            /// Item subtotal from which shipping is free; null = never
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopShipping/free_from_cents`.
+            public var freeFromCents: Swift.Int?
+            /// Creates a new `ShopShipping`.
+            ///
+            /// - Parameters:
+            ///   - countries:
+            ///   - flatCents: Shipping cost per order incl. VAT
+            ///   - freeFromCents: Item subtotal from which shipping is free; null = never
+            public init(
+                countries: [Swift.String],
+                flatCents: Swift.Int,
+                freeFromCents: Swift.Int? = nil
+            ) {
+                self.countries = countries
+                self.flatCents = flatCents
+                self.freeFromCents = freeFromCents
+            }
+            public enum CodingKeys: String, CodingKey {
+                case countries
+                case flatCents = "flat_cents"
+                case freeFromCents = "free_from_cents"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopReservationStatus`.
+        @frozen public enum ShopReservationStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case new = "new"
+            case contacted = "contacted"
+            case confirmed = "confirmed"
+            case cancelled = "cancelled"
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopReservationCreate`.
+        public struct ShopReservationCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/email`.
+            public var email: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/country`.
+            public var country: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/postal_code`.
+            public var postalCode: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/ItemsPayload`.
+            public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/ItemsPayload/product_id`.
+                public var productId: Swift.String
+                /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/ItemsPayload/quantity`.
+                public var quantity: Swift.Int
+                /// Creates a new `ItemsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - productId:
+                ///   - quantity:
+                public init(
+                    productId: Swift.String,
+                    quantity: Swift.Int
+                ) {
+                    self.productId = productId
+                    self.quantity = quantity
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case productId = "product_id"
+                    case quantity
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/items`.
+            public typealias ItemsPayload = [Components.Schemas.ShopReservationCreate.ItemsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/items`.
+            public var items: Components.Schemas.ShopReservationCreate.ItemsPayload
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/note`.
+            public var note: Swift.String?
+            /// Language for the emails (falls back to English)
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/locale`.
+            public var locale: Swift.String?
+            /// Must be true. The customer agrees to be contacted about this reservation.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/consent`.
+            public var consent: Swift.Bool
+            /// Honeypot; leave empty.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/website`.
+            public var website: Swift.String?
+            /// Creates a new `ShopReservationCreate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - email:
+            ///   - country:
+            ///   - postalCode:
+            ///   - items:
+            ///   - note:
+            ///   - locale: Language for the emails (falls back to English)
+            ///   - consent: Must be true. The customer agrees to be contacted about this reservation.
+            ///   - website: Honeypot; leave empty.
+            public init(
+                name: Swift.String,
+                email: Swift.String,
+                country: Swift.String,
+                postalCode: Swift.String? = nil,
+                items: Components.Schemas.ShopReservationCreate.ItemsPayload,
+                note: Swift.String? = nil,
+                locale: Swift.String? = nil,
+                consent: Swift.Bool,
+                website: Swift.String? = nil
+            ) {
+                self.name = name
+                self.email = email
+                self.country = country
+                self.postalCode = postalCode
+                self.items = items
+                self.note = note
+                self.locale = locale
+                self.consent = consent
+                self.website = website
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case email
+                case country
+                case postalCode = "postal_code"
+                case items
+                case note
+                case locale
+                case consent
+                case website
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopLine`.
+        public struct ShopLine: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopLine/product_id`.
+            public var productId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopLine/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopLine/quantity`.
+            public var quantity: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopLine/unit_cents`.
+            public var unitCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopLine/line_cents`.
+            public var lineCents: Swift.Int
+            /// Creates a new `ShopLine`.
+            ///
+            /// - Parameters:
+            ///   - productId:
+            ///   - name:
+            ///   - quantity:
+            ///   - unitCents:
+            ///   - lineCents:
+            public init(
+                productId: Swift.String,
+                name: Swift.String,
+                quantity: Swift.Int,
+                unitCents: Swift.Int,
+                lineCents: Swift.Int
+            ) {
+                self.productId = productId
+                self.name = name
+                self.quantity = quantity
+                self.unitCents = unitCents
+                self.lineCents = lineCents
+            }
+            public enum CodingKeys: String, CodingKey {
+                case productId = "product_id"
+                case name
+                case quantity
+                case unitCents = "unit_cents"
+                case lineCents = "line_cents"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt`.
+        public struct ShopReservationReceipt: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/reference`.
+            public var reference: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/status`.
+            public var status: Components.Schemas.ShopReservationStatus
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/email`.
+            public var email: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/items`.
+            public var items: [Components.Schemas.ShopLine]
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/subtotal_cents`.
+            public var subtotalCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/shipping_cents`.
+            public var shippingCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/total_cents`.
+            public var totalCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/currency`.
+            public var currency: Swift.String
+            /// Creates a new `ShopReservationReceipt`.
+            ///
+            /// - Parameters:
+            ///   - reference:
+            ///   - status:
+            ///   - email:
+            ///   - items:
+            ///   - subtotalCents:
+            ///   - shippingCents:
+            ///   - totalCents:
+            ///   - currency:
+            public init(
+                reference: Swift.String,
+                status: Components.Schemas.ShopReservationStatus,
+                email: Swift.String,
+                items: [Components.Schemas.ShopLine],
+                subtotalCents: Swift.Int,
+                shippingCents: Swift.Int,
+                totalCents: Swift.Int,
+                currency: Swift.String
+            ) {
+                self.reference = reference
+                self.status = status
+                self.email = email
+                self.items = items
+                self.subtotalCents = subtotalCents
+                self.shippingCents = shippingCents
+                self.totalCents = totalCents
+                self.currency = currency
+            }
+            public enum CodingKeys: String, CodingKey {
+                case reference
+                case status
+                case email
+                case items
+                case subtotalCents = "subtotal_cents"
+                case shippingCents = "shipping_cents"
+                case totalCents = "total_cents"
+                case currency
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShopReservation`.
+        public struct ShopReservation: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/reference`.
+            public var reference: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/status`.
+            public var status: Components.Schemas.ShopReservationStatus
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/email`.
+            public var email: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/country`.
+            public var country: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/postal_code`.
+            public var postalCode: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/note`.
+            public var note: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/locale`.
+            public var locale: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/items`.
+            public var items: [Components.Schemas.ShopLine]
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/subtotal_cents`.
+            public var subtotalCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/shipping_cents`.
+            public var shippingCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/total_cents`.
+            public var totalCents: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/currency`.
+            public var currency: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/internal_note`.
+            public var internalNote: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/updated_at`.
+            public var updatedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/cancelled_at`.
+            public var cancelledAt: Foundation.Date?
+            /// Creates a new `ShopReservation`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - reference:
+            ///   - status:
+            ///   - name:
+            ///   - email:
+            ///   - country:
+            ///   - postalCode:
+            ///   - note:
+            ///   - locale:
+            ///   - items:
+            ///   - subtotalCents:
+            ///   - shippingCents:
+            ///   - totalCents:
+            ///   - currency:
+            ///   - internalNote:
+            ///   - createdAt:
+            ///   - updatedAt:
+            ///   - cancelledAt:
+            public init(
+                id: Components.Schemas.Id,
+                reference: Swift.String,
+                status: Components.Schemas.ShopReservationStatus,
+                name: Swift.String,
+                email: Swift.String,
+                country: Swift.String,
+                postalCode: Swift.String? = nil,
+                note: Swift.String? = nil,
+                locale: Swift.String,
+                items: [Components.Schemas.ShopLine],
+                subtotalCents: Swift.Int,
+                shippingCents: Swift.Int,
+                totalCents: Swift.Int,
+                currency: Swift.String,
+                internalNote: Swift.String? = nil,
+                createdAt: Foundation.Date,
+                updatedAt: Foundation.Date,
+                cancelledAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.reference = reference
+                self.status = status
+                self.name = name
+                self.email = email
+                self.country = country
+                self.postalCode = postalCode
+                self.note = note
+                self.locale = locale
+                self.items = items
+                self.subtotalCents = subtotalCents
+                self.shippingCents = shippingCents
+                self.totalCents = totalCents
+                self.currency = currency
+                self.internalNote = internalNote
+                self.createdAt = createdAt
+                self.updatedAt = updatedAt
+                self.cancelledAt = cancelledAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case reference
+                case status
+                case name
+                case email
+                case country
+                case postalCode = "postal_code"
+                case note
+                case locale
+                case items
+                case subtotalCents = "subtotal_cents"
+                case shippingCents = "shipping_cents"
+                case totalCents = "total_cents"
+                case currency
+                case internalNote = "internal_note"
+                case createdAt = "created_at"
+                case updatedAt = "updated_at"
+                case cancelledAt = "cancelled_at"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Limits`.
@@ -561,6 +1175,8 @@ extension Components {
             public var appVersion: Swift.String?
             /// - Remark: Generated from `#/components/schemas/FrameSummary/needs_update`.
             public var needsUpdate: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/FrameSummary/device_kind`.
+            public var deviceKind: Components.Schemas.DeviceKind?
             /// Creates a new `FrameSummary`.
             ///
             /// - Parameters:
@@ -575,6 +1191,7 @@ extension Components {
             ///   - screen:
             ///   - appVersion:
             ///   - needsUpdate:
+            ///   - deviceKind:
             public init(
                 id: Components.Schemas.Id,
                 name: Swift.String,
@@ -586,7 +1203,8 @@ extension Components {
                 lastSeenAt: Foundation.Date? = nil,
                 screen: Components.Schemas.Screen? = nil,
                 appVersion: Swift.String? = nil,
-                needsUpdate: Swift.Bool? = nil
+                needsUpdate: Swift.Bool? = nil,
+                deviceKind: Components.Schemas.DeviceKind? = nil
             ) {
                 self.id = id
                 self.name = name
@@ -599,6 +1217,7 @@ extension Components {
                 self.screen = screen
                 self.appVersion = appVersion
                 self.needsUpdate = needsUpdate
+                self.deviceKind = deviceKind
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -612,6 +1231,7 @@ extension Components {
                 case screen
                 case appVersion = "app_version"
                 case needsUpdate = "needs_update"
+                case deviceKind = "device_kind"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Frame`.
@@ -795,6 +1415,22 @@ extension Components {
             public var placementsCached: Swift.Int?
             /// - Remark: Generated from `#/components/schemas/Heartbeat/placements_missing`.
             public var placementsMissing: Swift.Int?
+            /// Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/placements_evicted`.
+            public var placementsEvicted: Swift.Int?
+            /// `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/storage_state`.
+            @frozen public enum StorageStatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ok = "ok"
+                case low = "low"
+                case critical = "critical"
+            }
+            /// `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Heartbeat/storage_state`.
+            public var storageState: Components.Schemas.Heartbeat.StorageStatePayload?
             /// - Remark: Generated from `#/components/schemas/Heartbeat/screen_state`.
             @frozen public enum ScreenStatePayload: String, Codable, Hashable, Sendable, CaseIterable {
                 case on = "on"
@@ -856,6 +1492,8 @@ extension Components {
             ///   - cacheBytes:
             ///   - placementsCached:
             ///   - placementsMissing:
+            ///   - placementsEvicted: Renditions the frame removed from its cache to free space (least recently shown first); it downloads them again before they show.
+            ///   - storageState: `low`: below the frame's low-water mark, evicting. `critical`: nearly full with nothing left to evict.
             ///   - screenState:
             ///   - lastShutdownClean:
             ///   - crashCount24h:
@@ -876,6 +1514,8 @@ extension Components {
                 cacheBytes: Swift.Int? = nil,
                 placementsCached: Swift.Int? = nil,
                 placementsMissing: Swift.Int? = nil,
+                placementsEvicted: Swift.Int? = nil,
+                storageState: Components.Schemas.Heartbeat.StorageStatePayload? = nil,
                 screenState: Components.Schemas.Heartbeat.ScreenStatePayload? = nil,
                 lastShutdownClean: Swift.Bool? = nil,
                 crashCount24h: Swift.Int? = nil,
@@ -896,6 +1536,8 @@ extension Components {
                 self.cacheBytes = cacheBytes
                 self.placementsCached = placementsCached
                 self.placementsMissing = placementsMissing
+                self.placementsEvicted = placementsEvicted
+                self.storageState = storageState
                 self.screenState = screenState
                 self.lastShutdownClean = lastShutdownClean
                 self.crashCount24h = crashCount24h
@@ -917,6 +1559,8 @@ extension Components {
                 case cacheBytes = "cache_bytes"
                 case placementsCached = "placements_cached"
                 case placementsMissing = "placements_missing"
+                case placementsEvicted = "placements_evicted"
+                case storageState = "storage_state"
                 case screenState = "screen_state"
                 case lastShutdownClean = "last_shutdown_clean"
                 case crashCount24h = "crash_count_24h"
@@ -1296,10 +1940,16 @@ extension Components {
                 case claimed
             }
         }
+        /// `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+        /// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+        /// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+        ///
+        ///
         /// - Remark: Generated from `#/components/schemas/MediaKind`.
         @frozen public enum MediaKind: String, Codable, Hashable, Sendable, CaseIterable {
             case photo = "photo"
             case video = "video"
+            case live = "live"
         }
         /// - Remark: Generated from `#/components/schemas/Fit`.
         @frozen public enum Fit: String, Codable, Hashable, Sendable, CaseIterable {
@@ -1361,7 +2011,7 @@ extension Components {
                 public var focalPoint: Components.Schemas.FocalPoint?
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/fit`.
                 public var fit: Components.Schemas.Fit?
-                /// Videos only.
+                /// Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/trim`.
                 public struct TrimPayload: Codable, Hashable, Sendable {
@@ -1386,16 +2036,45 @@ extension Components {
                         case endMs = "end_ms"
                     }
                 }
-                /// Videos only.
+                /// Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
                 ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/trim`.
                 public var trim: Components.Schemas.SendCreate.ItemsPayloadPayload.TrimPayload?
+                /// For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+                ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/include_audio`.
                 public var includeAudio: Swift.Bool?
-                /// Client hint used when the file has no metadata.
+                /// Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+                /// QuickTime) and send it here. Used when the stored file has no capture time.
+                ///
                 ///
                 /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/captured_at`.
                 public var capturedAt: Foundation.Date?
+                /// Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
+                ///
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/width`.
+                public var width: Swift.Int?
+                /// Prepared uploads only. Pixel height the client produced.
+                ///
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/height`.
+                public var height: Swift.Int?
+                /// Prepared videos only. Duration the client produced (±500 ms).
+                ///
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/duration_ms`.
+                public var durationMs: Swift.Int?
+                /// Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+                /// are cut). `upload_id` must be a photo and `trim` is not allowed. The clip may be a prepared
+                /// `video-master-v1`.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/live_video_upload_id`.
+                public var liveVideoUploadId: Swift.String?
+                /// `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
+                /// still only. Without `live_video_upload_id`, the server splits such files itself.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/SendCreate/ItemsPayload/live`.
+                public var live: Swift.Bool?
                 /// Creates a new `ItemsPayloadPayload`.
                 ///
                 /// - Parameters:
@@ -1403,9 +2082,14 @@ extension Components {
                 ///   - caption:
                 ///   - focalPoint:
                 ///   - fit:
-                ///   - trim: Videos only.
-                ///   - includeAudio:
-                ///   - capturedAt: Client hint used when the file has no metadata.
+                ///   - trim: Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
+                ///   - includeAudio: For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+                ///   - capturedAt: Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+                ///   - width: Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
+                ///   - height: Prepared uploads only. Pixel height the client produced.
+                ///   - durationMs: Prepared videos only. Duration the client produced (±500 ms).
+                ///   - liveVideoUploadId: Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+                ///   - live: `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
                 public init(
                     uploadId: Swift.String,
                     caption: Swift.String? = nil,
@@ -1413,7 +2097,12 @@ extension Components {
                     fit: Components.Schemas.Fit? = nil,
                     trim: Components.Schemas.SendCreate.ItemsPayloadPayload.TrimPayload? = nil,
                     includeAudio: Swift.Bool? = nil,
-                    capturedAt: Foundation.Date? = nil
+                    capturedAt: Foundation.Date? = nil,
+                    width: Swift.Int? = nil,
+                    height: Swift.Int? = nil,
+                    durationMs: Swift.Int? = nil,
+                    liveVideoUploadId: Swift.String? = nil,
+                    live: Swift.Bool? = nil
                 ) {
                     self.uploadId = uploadId
                     self.caption = caption
@@ -1422,6 +2111,11 @@ extension Components {
                     self.trim = trim
                     self.includeAudio = includeAudio
                     self.capturedAt = capturedAt
+                    self.width = width
+                    self.height = height
+                    self.durationMs = durationMs
+                    self.liveVideoUploadId = liveVideoUploadId
+                    self.live = live
                 }
                 public enum CodingKeys: String, CodingKey {
                     case uploadId = "upload_id"
@@ -1431,6 +2125,11 @@ extension Components {
                     case trim
                     case includeAudio = "include_audio"
                     case capturedAt = "captured_at"
+                    case width
+                    case height
+                    case durationMs = "duration_ms"
+                    case liveVideoUploadId = "live_video_upload_id"
+                    case live
                 }
             }
             /// - Remark: Generated from `#/components/schemas/SendCreate/items`.
@@ -1496,6 +2195,22 @@ extension Components {
             public var placeName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/Item/created_at`.
             public var createdAt: Foundation.Date
+            /// Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+            /// then the frame; clients show `imported_sender_name` instead, e.g. "Anna · via Frameo".
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/imported_from`.
+            public var importedFrom: Components.Schemas.ItemOrigin?
+            /// The original sender's display name in that app, when known.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/imported_sender_name`.
+            public var importedSenderName: Swift.String?
+            /// Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
+            /// `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Item/motion`.
+            public var motion: Components.Schemas.ItemMotion?
             /// Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
             ///
             /// - Remark: Generated from `#/components/schemas/Item/thumb_url`.
@@ -1520,6 +2235,9 @@ extension Components {
             ///   - capturedAt:
             ///   - placeName:
             ///   - createdAt:
+            ///   - importedFrom: Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+            ///   - importedSenderName: The original sender's display name in that app, when known.
+            ///   - motion: Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
             ///   - thumbUrl: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
             public init(
                 id: Components.Schemas.Id,
@@ -1539,6 +2257,9 @@ extension Components {
                 capturedAt: Foundation.Date? = nil,
                 placeName: Swift.String? = nil,
                 createdAt: Foundation.Date,
+                importedFrom: Components.Schemas.ItemOrigin? = nil,
+                importedSenderName: Swift.String? = nil,
+                motion: Components.Schemas.ItemMotion? = nil,
                 thumbUrl: Swift.String? = nil
             ) {
                 self.id = id
@@ -1558,6 +2279,9 @@ extension Components {
                 self.capturedAt = capturedAt
                 self.placeName = placeName
                 self.createdAt = createdAt
+                self.importedFrom = importedFrom
+                self.importedSenderName = importedSenderName
+                self.motion = motion
                 self.thumbUrl = thumbUrl
             }
             public enum CodingKeys: String, CodingKey {
@@ -1578,7 +2302,62 @@ extension Components {
                 case capturedAt = "captured_at"
                 case placeName = "place_name"
                 case createdAt = "created_at"
+                case importedFrom = "imported_from"
+                case importedSenderName = "imported_sender_name"
+                case motion
                 case thumbUrl = "thumb_url"
+            }
+        }
+        /// An app a frame can import leftover photos from.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ItemOrigin`.
+        @frozen public enum ItemOrigin: String, Codable, Hashable, Sendable, CaseIterable {
+            case frameo = "frameo"
+        }
+        /// - Remark: Generated from `#/components/schemas/ItemMotion`.
+        public struct ItemMotion: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case processing = "processing"
+                case ready = "ready"
+            }
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/status`.
+            public var status: Components.Schemas.ItemMotion.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/width`.
+            public var width: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/height`.
+            public var height: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/duration_ms`.
+            public var durationMs: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/ItemMotion/has_audio`.
+            public var hasAudio: Swift.Bool?
+            /// Creates a new `ItemMotion`.
+            ///
+            /// - Parameters:
+            ///   - status:
+            ///   - width:
+            ///   - height:
+            ///   - durationMs:
+            ///   - hasAudio:
+            public init(
+                status: Components.Schemas.ItemMotion.StatusPayload,
+                width: Swift.Int? = nil,
+                height: Swift.Int? = nil,
+                durationMs: Swift.Int? = nil,
+                hasAudio: Swift.Bool? = nil
+            ) {
+                self.status = status
+                self.width = width
+                self.height = height
+                self.durationMs = durationMs
+                self.hasAudio = hasAudio
+            }
+            public enum CodingKeys: String, CodingKey {
+                case status
+                case width
+                case height
+                case durationMs = "duration_ms"
+                case hasAudio = "has_audio"
             }
         }
         /// - Remark: Generated from `#/components/schemas/PlacementStatus`.
@@ -1658,6 +2437,14 @@ extension Components {
             public var receivedAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/Placement/album_ids`.
             public var albumIds: [Components.Schemas.Id]?
+            /// The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/shared_by_user_id`.
+            public var sharedByUserId: Components.Schemas.Id?
+            /// Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+            ///
+            /// - Remark: Generated from `#/components/schemas/Placement/shared_by_name`.
+            public var sharedByName: Swift.String?
             /// Creates a new `Placement`.
             ///
             /// - Parameters:
@@ -1678,6 +2465,8 @@ extension Components {
             ///   - seenAt:
             ///   - receivedAt:
             ///   - albumIds:
+            ///   - sharedByUserId: The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+            ///   - sharedByName: Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
             public init(
                 id: Components.Schemas.Id,
                 frameId: Components.Schemas.Id,
@@ -1695,7 +2484,9 @@ extension Components {
                 deliveredAt: Foundation.Date? = nil,
                 seenAt: Foundation.Date? = nil,
                 receivedAt: Foundation.Date? = nil,
-                albumIds: [Components.Schemas.Id]? = nil
+                albumIds: [Components.Schemas.Id]? = nil,
+                sharedByUserId: Components.Schemas.Id? = nil,
+                sharedByName: Swift.String? = nil
             ) {
                 self.id = id
                 self.frameId = frameId
@@ -1714,6 +2505,8 @@ extension Components {
                 self.seenAt = seenAt
                 self.receivedAt = receivedAt
                 self.albumIds = albumIds
+                self.sharedByUserId = sharedByUserId
+                self.sharedByName = sharedByName
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -1733,6 +2526,78 @@ extension Components {
                 case seenAt = "seen_at"
                 case receivedAt = "received_at"
                 case albumIds = "album_ids"
+                case sharedByUserId = "shared_by_user_id"
+                case sharedByName = "shared_by_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/ShareResult`.
+        public struct ShareResult: Codable, Hashable, Sendable {
+            /// The placements created on the target frames (empty for a dry run).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareResult/placements`.
+            public var placements: [Components.Schemas.Placement]
+            /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload`.
+            public struct SkippedPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload/placement_id`.
+                public var placementId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload/frame_id`.
+                public var frameId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload/reason`.
+                @frozen public enum ReasonPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case alreadyOnFrame = "already_on_frame"
+                }
+                /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload/reason`.
+                public var reason: Components.Schemas.ShareResult.SkippedPayloadPayload.ReasonPayload
+                /// - Remark: Generated from `#/components/schemas/ShareResult/SkippedPayload/existing_placement_id`.
+                public var existingPlacementId: Components.Schemas.Id?
+                /// Creates a new `SkippedPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - placementId:
+                ///   - frameId:
+                ///   - reason:
+                ///   - existingPlacementId:
+                public init(
+                    placementId: Components.Schemas.Id,
+                    frameId: Components.Schemas.Id,
+                    reason: Components.Schemas.ShareResult.SkippedPayloadPayload.ReasonPayload,
+                    existingPlacementId: Components.Schemas.Id? = nil
+                ) {
+                    self.placementId = placementId
+                    self.frameId = frameId
+                    self.reason = reason
+                    self.existingPlacementId = existingPlacementId
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case placementId = "placement_id"
+                    case frameId = "frame_id"
+                    case reason
+                    case existingPlacementId = "existing_placement_id"
+                }
+            }
+            /// Source placement × target frame pairs that were not shared.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareResult/skipped`.
+            public typealias SkippedPayload = [Components.Schemas.ShareResult.SkippedPayloadPayload]
+            /// Source placement × target frame pairs that were not shared.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShareResult/skipped`.
+            public var skipped: Components.Schemas.ShareResult.SkippedPayload
+            /// Creates a new `ShareResult`.
+            ///
+            /// - Parameters:
+            ///   - placements: The placements created on the target frames (empty for a dry run).
+            ///   - skipped: Source placement × target frame pairs that were not shared.
+            public init(
+                placements: [Components.Schemas.Placement],
+                skipped: Components.Schemas.ShareResult.SkippedPayload
+            ) {
+                self.placements = placements
+                self.skipped = skipped
+            }
+            public enum CodingKeys: String, CodingKey {
+                case placements
+                case skipped
             }
         }
         /// - Remark: Generated from `#/components/schemas/Send`.
@@ -1763,6 +2628,10 @@ extension Components {
                     public var reaction: Components.Schemas.Reaction?
                     /// - Remark: Generated from `#/components/schemas/Send/FramesPayload/PlacementsPayload/replies`.
                     public var replies: [Components.Schemas.ReplyPreset]?
+                    /// Set when another member shared this item to the frame.
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/Send/FramesPayload/PlacementsPayload/shared_by_name`.
+                    public var sharedByName: Swift.String?
                     /// Creates a new `PlacementsPayloadPayload`.
                     ///
                     /// - Parameters:
@@ -1771,18 +2640,21 @@ extension Components {
                     ///   - status:
                     ///   - reaction:
                     ///   - replies:
+                    ///   - sharedByName: Set when another member shared this item to the frame.
                     public init(
                         placementId: Components.Schemas.Id,
                         itemId: Components.Schemas.Id,
                         status: Components.Schemas.PlacementStatus,
                         reaction: Components.Schemas.Reaction? = nil,
-                        replies: [Components.Schemas.ReplyPreset]? = nil
+                        replies: [Components.Schemas.ReplyPreset]? = nil,
+                        sharedByName: Swift.String? = nil
                     ) {
                         self.placementId = placementId
                         self.itemId = itemId
                         self.status = status
                         self.reaction = reaction
                         self.replies = replies
+                        self.sharedByName = sharedByName
                     }
                     public enum CodingKeys: String, CodingKey {
                         case placementId = "placement_id"
@@ -1790,6 +2662,7 @@ extension Components {
                         case status
                         case reaction
                         case replies
+                        case sharedByName = "shared_by_name"
                     }
                 }
                 /// - Remark: Generated from `#/components/schemas/Send/FramesPayload/placements`.
@@ -2045,6 +2918,825 @@ extension Components {
                 case schedule
             }
         }
+        /// - Remark: Generated from `#/components/schemas/TvLinkCreate`.
+        public struct TvLinkCreate: Codable, Hashable, Sendable {
+            /// Only this album.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/album_id`.
+            public var albumId: Swift.String?
+            /// Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/placement_ids`.
+            public var placementIds: [Components.Schemas.Id]?
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/kind`.
+            public var kind: Components.Schemas.MediaKind?
+            /// `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+            /// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+            /// `placement_ids` or `kind`, because it shows whatever the frame shows.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/purpose`.
+            @frozen public enum PurposePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case tv = "tv"
+                case cast = "cast"
+                case mirror = "mirror"
+            }
+            /// `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+            /// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+            /// `placement_ids` or `kind`, because it shows whatever the frame shows.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/purpose`.
+            public var purpose: Components.Schemas.TvLinkCreate.PurposePayload?
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/interval_seconds`.
+            public var intervalSeconds: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/TvLinkCreate/expires_in_hours`.
+            public var expiresInHours: Swift.Int?
+            /// Creates a new `TvLinkCreate`.
+            ///
+            /// - Parameters:
+            ///   - albumId: Only this album.
+            ///   - placementIds: Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+            ///   - kind:
+            ///   - purpose: `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+            ///   - intervalSeconds:
+            ///   - expiresInHours:
+            public init(
+                albumId: Swift.String? = nil,
+                placementIds: [Components.Schemas.Id]? = nil,
+                kind: Components.Schemas.MediaKind? = nil,
+                purpose: Components.Schemas.TvLinkCreate.PurposePayload? = nil,
+                intervalSeconds: Swift.Int? = nil,
+                expiresInHours: Swift.Int? = nil
+            ) {
+                self.albumId = albumId
+                self.placementIds = placementIds
+                self.kind = kind
+                self.purpose = purpose
+                self.intervalSeconds = intervalSeconds
+                self.expiresInHours = expiresInHours
+            }
+            public enum CodingKeys: String, CodingKey {
+                case albumId = "album_id"
+                case placementIds = "placement_ids"
+                case kind
+                case purpose
+                case intervalSeconds = "interval_seconds"
+                case expiresInHours = "expires_in_hours"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TvLink`.
+        public struct TvLink: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TvLink/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TvLink/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TvLink/token`.
+            public var token: Swift.String
+            /// The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLink/url`.
+            public var url: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TvLink/purpose`.
+            @frozen public enum PurposePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case tv = "tv"
+                case cast = "cast"
+                case mirror = "mirror"
+            }
+            /// - Remark: Generated from `#/components/schemas/TvLink/purpose`.
+            public var purpose: Components.Schemas.TvLink.PurposePayload
+            /// - Remark: Generated from `#/components/schemas/TvLink/album_id`.
+            public var albumId: Swift.String?
+            /// Size of a fixed selection; null for album/library links.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvLink/placement_count`.
+            public var placementCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/TvLink/kind`.
+            public var kind: Components.Schemas.MediaKind?
+            /// - Remark: Generated from `#/components/schemas/TvLink/interval_seconds`.
+            public var intervalSeconds: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/TvLink/created_by_name`.
+            public var createdByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TvLink/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/TvLink/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `TvLink`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - frameId:
+            ///   - token:
+            ///   - url: The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
+            ///   - purpose:
+            ///   - albumId:
+            ///   - placementCount: Size of a fixed selection; null for album/library links.
+            ///   - kind:
+            ///   - intervalSeconds:
+            ///   - createdByName:
+            ///   - expiresAt:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                frameId: Components.Schemas.Id,
+                token: Swift.String,
+                url: Swift.String,
+                purpose: Components.Schemas.TvLink.PurposePayload,
+                albumId: Swift.String? = nil,
+                placementCount: Swift.Int? = nil,
+                kind: Components.Schemas.MediaKind? = nil,
+                intervalSeconds: Swift.Int,
+                createdByName: Swift.String? = nil,
+                expiresAt: Foundation.Date,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.frameId = frameId
+                self.token = token
+                self.url = url
+                self.purpose = purpose
+                self.albumId = albumId
+                self.placementCount = placementCount
+                self.kind = kind
+                self.intervalSeconds = intervalSeconds
+                self.createdByName = createdByName
+                self.expiresAt = expiresAt
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case frameId = "frame_id"
+                case token
+                case url
+                case purpose
+                case albumId = "album_id"
+                case placementCount = "placement_count"
+                case kind
+                case intervalSeconds = "interval_seconds"
+                case createdByName = "created_by_name"
+                case expiresAt = "expires_at"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TvSlide`.
+        public struct TvSlide: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TvSlide/placement_id`.
+            public var placementId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TvSlide/kind`.
+            public var kind: Components.Schemas.MediaKind
+            /// Absolute signed URL of the master rendition (Range supported).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/url`.
+            public var url: Swift.String
+            /// e.g. image/webp or video/mp4
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/mime`.
+            public var mime: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TvSlide/poster_url`.
+            public var posterUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TvSlide/thumb_url`.
+            public var thumbUrl: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TvSlide/caption`.
+            public var caption: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TvSlide/sender_name`.
+            public var senderName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TvSlide/captured_at`.
+            public var capturedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/TvSlide/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/TvSlide/width`.
+            public var width: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/TvSlide/height`.
+            public var height: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/TvSlide/duration_ms`.
+            public var durationMs: Swift.Int?
+            /// The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/focal_point`.
+            public var focalPoint: Components.Schemas.FocalPoint?
+            /// The placement's fit override, else the item's; null = the frame setting.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/fit`.
+            public var fit: Components.Schemas.Fit?
+            /// Clockwise rotation set on the frame for this placement.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/rotation`.
+            @frozen public enum RotationPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _0 = 0
+                case _90 = 90
+                case _180 = 180
+                case _270 = 270
+            }
+            /// Clockwise rotation set on the frame for this placement.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlide/rotation`.
+            public var rotation: Components.Schemas.TvSlide.RotationPayload?
+            /// Creates a new `TvSlide`.
+            ///
+            /// - Parameters:
+            ///   - placementId:
+            ///   - kind:
+            ///   - url: Absolute signed URL of the master rendition (Range supported).
+            ///   - mime: e.g. image/webp or video/mp4
+            ///   - posterUrl:
+            ///   - thumbUrl:
+            ///   - caption:
+            ///   - senderName:
+            ///   - capturedAt:
+            ///   - receivedAt:
+            ///   - width:
+            ///   - height:
+            ///   - durationMs:
+            ///   - focalPoint: The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+            ///   - fit: The placement's fit override, else the item's; null = the frame setting.
+            ///   - rotation: Clockwise rotation set on the frame for this placement.
+            public init(
+                placementId: Components.Schemas.Id,
+                kind: Components.Schemas.MediaKind,
+                url: Swift.String,
+                mime: Swift.String,
+                posterUrl: Swift.String? = nil,
+                thumbUrl: Swift.String? = nil,
+                caption: Swift.String? = nil,
+                senderName: Swift.String,
+                capturedAt: Foundation.Date? = nil,
+                receivedAt: Foundation.Date,
+                width: Swift.Int,
+                height: Swift.Int,
+                durationMs: Swift.Int? = nil,
+                focalPoint: Components.Schemas.FocalPoint? = nil,
+                fit: Components.Schemas.Fit? = nil,
+                rotation: Components.Schemas.TvSlide.RotationPayload? = nil
+            ) {
+                self.placementId = placementId
+                self.kind = kind
+                self.url = url
+                self.mime = mime
+                self.posterUrl = posterUrl
+                self.thumbUrl = thumbUrl
+                self.caption = caption
+                self.senderName = senderName
+                self.capturedAt = capturedAt
+                self.receivedAt = receivedAt
+                self.width = width
+                self.height = height
+                self.durationMs = durationMs
+                self.focalPoint = focalPoint
+                self.fit = fit
+                self.rotation = rotation
+            }
+            public enum CodingKeys: String, CodingKey {
+                case placementId = "placement_id"
+                case kind
+                case url
+                case mime
+                case posterUrl = "poster_url"
+                case thumbUrl = "thumb_url"
+                case caption
+                case senderName = "sender_name"
+                case capturedAt = "captured_at"
+                case receivedAt = "received_at"
+                case width
+                case height
+                case durationMs = "duration_ms"
+                case focalPoint = "focal_point"
+                case fit
+                case rotation
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TvSlideshow`.
+        public struct TvSlideshow: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/frame_name`.
+            public var frameName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/album_name`.
+            public var albumName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/interval_seconds`.
+            public var intervalSeconds: Swift.Int
+            /// When the link itself stops working.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// Refetch before the media URLs expire.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/refresh_after`.
+            public var refreshAfter: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/TvSlideshow/slides`.
+            public var slides: [Components.Schemas.TvSlide]
+            /// Creates a new `TvSlideshow`.
+            ///
+            /// - Parameters:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - albumName:
+            ///   - intervalSeconds:
+            ///   - expiresAt: When the link itself stops working.
+            ///   - refreshAfter: Refetch before the media URLs expire.
+            ///   - slides:
+            public init(
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                albumName: Swift.String? = nil,
+                intervalSeconds: Swift.Int,
+                expiresAt: Foundation.Date,
+                refreshAfter: Foundation.Date,
+                slides: [Components.Schemas.TvSlide]
+            ) {
+                self.frameId = frameId
+                self.frameName = frameName
+                self.albumName = albumName
+                self.intervalSeconds = intervalSeconds
+                self.expiresAt = expiresAt
+                self.refreshAfter = refreshAfter
+                self.slides = slides
+            }
+            public enum CodingKeys: String, CodingKey {
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case albumName = "album_name"
+                case intervalSeconds = "interval_seconds"
+                case expiresAt = "expires_at"
+                case refreshAfter = "refresh_after"
+                case slides
+            }
+        }
+        /// Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+        /// now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+        /// video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+        /// the frame's clock; the server only uses differences between them.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/NowShowing`.
+        public struct NowShowing: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/NowShowing/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case nowShowing = "now_showing"
+            }
+            /// - Remark: Generated from `#/components/schemas/NowShowing/type`.
+            public var _type: Components.Schemas.NowShowing._TypePayload
+            /// The slide on screen (the first tile of a collage or pair); null while nothing shows.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/placement_id`.
+            public var placementId: Components.Schemas.Id?
+            /// Every photo on screen (collage or pair), first = `placement_id`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/placement_ids`.
+            public var placementIds: [Components.Schemas.Id]?
+            /// When the transition to this slide started.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/started_at`.
+            public var startedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/NowShowing/transition`.
+            @frozen public enum TransitionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case crossfade = "crossfade"
+                case slide = "slide"
+                case cut = "cut"
+            }
+            /// - Remark: Generated from `#/components/schemas/NowShowing/transition`.
+            public var transition: Components.Schemas.NowShowing.TransitionPayload?
+            /// - Remark: Generated from `#/components/schemas/NowShowing/transition_ms`.
+            public var transitionMs: Swift.Int?
+            /// 1: the slide came in as "next", -1: as "previous".
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/direction`.
+            @frozen public enum DirectionPayload: Int, Codable, Hashable, Sendable, CaseIterable {
+                case _n1 = -1
+                case _1 = 1
+            }
+            /// 1: the slide came in as "next", -1: as "previous".
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/direction`.
+            public var direction: Components.Schemas.NowShowing.DirectionPayload?
+            /// The slide moves (Ken Burns): deterministic per placement and focal point.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/ken_burns`.
+            public var kenBurns: Swift.Bool?
+            /// How long the slide is expected to stay.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/hold_ms`.
+            public var holdMs: Swift.Int?
+            /// The playing video, or a live photo's clip, while it is on screen.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/video`.
+            public struct VideoPayload: Codable, Hashable, Sendable {
+                /// Playback position at `sent_at`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/NowShowing/video/position_ms`.
+                public var positionMs: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/NowShowing/video/playing`.
+                public var playing: Swift.Bool
+                /// The clip of a live photo (played over its still).
+                ///
+                /// - Remark: Generated from `#/components/schemas/NowShowing/video/live`.
+                public var live: Swift.Bool?
+                /// Creates a new `VideoPayload`.
+                ///
+                /// - Parameters:
+                ///   - positionMs: Playback position at `sent_at`.
+                ///   - playing:
+                ///   - live: The clip of a live photo (played over its still).
+                public init(
+                    positionMs: Swift.Int,
+                    playing: Swift.Bool,
+                    live: Swift.Bool? = nil
+                ) {
+                    self.positionMs = positionMs
+                    self.playing = playing
+                    self.live = live
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case positionMs = "position_ms"
+                    case playing
+                    case live
+                }
+            }
+            /// The playing video, or a live photo's clip, while it is on screen.
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/video`.
+            public var video: Components.Schemas.NowShowing.VideoPayload?
+            /// What the frame expects to show next (for preloading).
+            ///
+            /// - Remark: Generated from `#/components/schemas/NowShowing/next_placement_id`.
+            public var nextPlacementId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/NowShowing/screen`.
+            @frozen public enum ScreenPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case on = "on"
+                case off = "off"
+                case dimmed = "dimmed"
+                case sleeping = "sleeping"
+            }
+            /// - Remark: Generated from `#/components/schemas/NowShowing/screen`.
+            public var screen: Components.Schemas.NowShowing.ScreenPayload
+            /// - Remark: Generated from `#/components/schemas/NowShowing/sent_at`.
+            public var sentAt: Foundation.Date
+            /// Creates a new `NowShowing`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - placementId: The slide on screen (the first tile of a collage or pair); null while nothing shows.
+            ///   - placementIds: Every photo on screen (collage or pair), first = `placement_id`.
+            ///   - startedAt: When the transition to this slide started.
+            ///   - transition:
+            ///   - transitionMs:
+            ///   - direction: 1: the slide came in as "next", -1: as "previous".
+            ///   - kenBurns: The slide moves (Ken Burns): deterministic per placement and focal point.
+            ///   - holdMs: How long the slide is expected to stay.
+            ///   - video: The playing video, or a live photo's clip, while it is on screen.
+            ///   - nextPlacementId: What the frame expects to show next (for preloading).
+            ///   - screen:
+            ///   - sentAt:
+            public init(
+                _type: Components.Schemas.NowShowing._TypePayload,
+                placementId: Components.Schemas.Id? = nil,
+                placementIds: [Components.Schemas.Id]? = nil,
+                startedAt: Foundation.Date? = nil,
+                transition: Components.Schemas.NowShowing.TransitionPayload? = nil,
+                transitionMs: Swift.Int? = nil,
+                direction: Components.Schemas.NowShowing.DirectionPayload? = nil,
+                kenBurns: Swift.Bool? = nil,
+                holdMs: Swift.Int? = nil,
+                video: Components.Schemas.NowShowing.VideoPayload? = nil,
+                nextPlacementId: Components.Schemas.Id? = nil,
+                screen: Components.Schemas.NowShowing.ScreenPayload,
+                sentAt: Foundation.Date
+            ) {
+                self._type = _type
+                self.placementId = placementId
+                self.placementIds = placementIds
+                self.startedAt = startedAt
+                self.transition = transition
+                self.transitionMs = transitionMs
+                self.direction = direction
+                self.kenBurns = kenBurns
+                self.holdMs = holdMs
+                self.video = video
+                self.nextPlacementId = nextPlacementId
+                self.screen = screen
+                self.sentAt = sentAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case placementId = "placement_id"
+                case placementIds = "placement_ids"
+                case startedAt = "started_at"
+                case transition
+                case transitionMs = "transition_ms"
+                case direction
+                case kenBurns = "ken_burns"
+                case holdMs = "hold_ms"
+                case video
+                case nextPlacementId = "next_placement_id"
+                case screen
+                case sentAt = "sent_at"
+            }
+        }
+        /// The frame settings a mirroring TV needs to look like the frame.
+        ///
+        /// - Remark: Generated from `#/components/schemas/MirrorSettings`.
+        public struct MirrorSettings: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/interval_s`.
+            public var intervalS: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/transition`.
+            @frozen public enum TransitionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case crossfade = "crossfade"
+                case slide = "slide"
+                case kenburns = "kenburns"
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/transition`.
+            public var transition: Components.Schemas.MirrorSettings.TransitionPayload
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/transition_ms`.
+            public var transitionMs: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/fill`.
+            public var fill: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/background`.
+            @frozen public enum BackgroundPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case blur = "blur"
+                case black = "black"
+                case palette = "palette"
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/background`.
+            public var background: Components.Schemas.MirrorSettings.BackgroundPayload
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/caption`.
+            public var caption: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/caption_date`.
+            @frozen public enum CaptionDatePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case taken = "taken"
+                case received = "received"
+                case none = "none"
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/caption_date`.
+            public var captionDate: Components.Schemas.MirrorSettings.CaptionDatePayload?
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/clock`.
+            public var clock: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/date`.
+            public var date: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/clock_24h`.
+            public var clock24h: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MirrorSettings/timezone`.
+            public var timezone: Swift.String?
+            /// Creates a new `MirrorSettings`.
+            ///
+            /// - Parameters:
+            ///   - intervalS:
+            ///   - transition:
+            ///   - transitionMs:
+            ///   - fill:
+            ///   - background:
+            ///   - caption:
+            ///   - captionDate:
+            ///   - clock:
+            ///   - date:
+            ///   - clock24h:
+            ///   - timezone:
+            public init(
+                intervalS: Swift.Int,
+                transition: Components.Schemas.MirrorSettings.TransitionPayload,
+                transitionMs: Swift.Int,
+                fill: Swift.Bool,
+                background: Components.Schemas.MirrorSettings.BackgroundPayload,
+                caption: Swift.Bool? = nil,
+                captionDate: Components.Schemas.MirrorSettings.CaptionDatePayload? = nil,
+                clock: Swift.Bool? = nil,
+                date: Swift.Bool? = nil,
+                clock24h: Swift.Bool? = nil,
+                timezone: Swift.String? = nil
+            ) {
+                self.intervalS = intervalS
+                self.transition = transition
+                self.transitionMs = transitionMs
+                self.fill = fill
+                self.background = background
+                self.caption = caption
+                self.captionDate = captionDate
+                self.clock = clock
+                self.date = date
+                self.clock24h = clock24h
+                self.timezone = timezone
+            }
+            public enum CodingKeys: String, CodingKey {
+                case intervalS = "interval_s"
+                case transition
+                case transitionMs = "transition_ms"
+                case fill
+                case background
+                case caption
+                case captionDate = "caption_date"
+                case clock
+                case date
+                case clock24h = "clock_24h"
+                case timezone
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/MirrorShowing`.
+        public struct MirrorShowing: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/placement_id`.
+            public var placementId: Components.Schemas.Id
+            /// One per photo on screen; a collage or pair has several.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/slides`.
+            public var slides: [Components.Schemas.TvSlide]
+            /// Server clock. Compare with `server_time` of the same message.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/started_at`.
+            public var startedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/transition`.
+            @frozen public enum TransitionPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case crossfade = "crossfade"
+                case slide = "slide"
+                case cut = "cut"
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/transition`.
+            public var transition: Components.Schemas.MirrorShowing.TransitionPayload
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/transition_ms`.
+            public var transitionMs: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/direction`.
+            public var direction: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/ken_burns`.
+            public var kenBurns: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/hold_ms`.
+            public var holdMs: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/video`.
+            public struct VideoPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/MirrorShowing/video/position_ms`.
+                public var positionMs: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/MirrorShowing/video/playing`.
+                public var playing: Swift.Bool
+                /// - Remark: Generated from `#/components/schemas/MirrorShowing/video/live`.
+                public var live: Swift.Bool?
+                /// Server clock at which `position_ms` was the position.
+                ///
+                /// - Remark: Generated from `#/components/schemas/MirrorShowing/video/at`.
+                public var at: Foundation.Date
+                /// Creates a new `VideoPayload`.
+                ///
+                /// - Parameters:
+                ///   - positionMs:
+                ///   - playing:
+                ///   - live:
+                ///   - at: Server clock at which `position_ms` was the position.
+                public init(
+                    positionMs: Swift.Int,
+                    playing: Swift.Bool,
+                    live: Swift.Bool? = nil,
+                    at: Foundation.Date
+                ) {
+                    self.positionMs = positionMs
+                    self.playing = playing
+                    self.live = live
+                    self.at = at
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case positionMs = "position_ms"
+                    case playing
+                    case live
+                    case at
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorShowing/video`.
+            public var video: Components.Schemas.MirrorShowing.VideoPayload?
+            /// Creates a new `MirrorShowing`.
+            ///
+            /// - Parameters:
+            ///   - placementId:
+            ///   - slides: One per photo on screen; a collage or pair has several.
+            ///   - startedAt: Server clock. Compare with `server_time` of the same message.
+            ///   - transition:
+            ///   - transitionMs:
+            ///   - direction:
+            ///   - kenBurns:
+            ///   - holdMs:
+            ///   - video:
+            public init(
+                placementId: Components.Schemas.Id,
+                slides: [Components.Schemas.TvSlide],
+                startedAt: Foundation.Date,
+                transition: Components.Schemas.MirrorShowing.TransitionPayload,
+                transitionMs: Swift.Int,
+                direction: Swift.Int? = nil,
+                kenBurns: Swift.Bool? = nil,
+                holdMs: Swift.Int? = nil,
+                video: Components.Schemas.MirrorShowing.VideoPayload? = nil
+            ) {
+                self.placementId = placementId
+                self.slides = slides
+                self.startedAt = startedAt
+                self.transition = transition
+                self.transitionMs = transitionMs
+                self.direction = direction
+                self.kenBurns = kenBurns
+                self.holdMs = holdMs
+                self.video = video
+            }
+            public enum CodingKeys: String, CodingKey {
+                case placementId = "placement_id"
+                case slides
+                case startedAt = "started_at"
+                case transition
+                case transitionMs = "transition_ms"
+                case direction
+                case kenBurns = "ken_burns"
+                case holdMs = "hold_ms"
+                case video
+            }
+        }
+        /// Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+        /// connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/MirrorState`.
+        public struct MirrorState: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/MirrorState/type`.
+            @frozen public enum _TypePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case mirror = "mirror"
+            }
+            /// - Remark: Generated from `#/components/schemas/MirrorState/type`.
+            public var _type: Components.Schemas.MirrorState._TypePayload
+            /// - Remark: Generated from `#/components/schemas/MirrorState/server_time`.
+            public var serverTime: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/MirrorState/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/MirrorState/frame_name`.
+            public var frameName: Swift.String
+            /// The frame is connected.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorState/online`.
+            public var online: Swift.Bool
+            /// `off`/`sleeping`: show a calm "the frame is asleep" screen.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorState/screen`.
+            @frozen public enum ScreenPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case on = "on"
+                case off = "off"
+                case dimmed = "dimmed"
+                case sleeping = "sleeping"
+                case unknown = "unknown"
+            }
+            /// `off`/`sleeping`: show a calm "the frame is asleep" screen.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorState/screen`.
+            public var screen: Components.Schemas.MirrorState.ScreenPayload
+            /// - Remark: Generated from `#/components/schemas/MirrorState/settings`.
+            public var settings: Components.Schemas.MirrorSettings?
+            /// Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show).
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorState/showing`.
+            public var showing: Components.Schemas.MirrorShowing?
+            /// - Remark: Generated from `#/components/schemas/MirrorState/next`.
+            public var next: Components.Schemas.TvSlide?
+            /// When the link stops working.
+            ///
+            /// - Remark: Generated from `#/components/schemas/MirrorState/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// Creates a new `MirrorState`.
+            ///
+            /// - Parameters:
+            ///   - _type:
+            ///   - serverTime:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - online: The frame is connected.
+            ///   - screen: `off`/`sleeping`: show a calm "the frame is asleep" screen.
+            ///   - settings:
+            ///   - showing: Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show).
+            ///   - next:
+            ///   - expiresAt: When the link stops working.
+            public init(
+                _type: Components.Schemas.MirrorState._TypePayload,
+                serverTime: Foundation.Date,
+                frameId: Components.Schemas.Id,
+                frameName: Swift.String,
+                online: Swift.Bool,
+                screen: Components.Schemas.MirrorState.ScreenPayload,
+                settings: Components.Schemas.MirrorSettings? = nil,
+                showing: Components.Schemas.MirrorShowing? = nil,
+                next: Components.Schemas.TvSlide? = nil,
+                expiresAt: Foundation.Date
+            ) {
+                self._type = _type
+                self.serverTime = serverTime
+                self.frameId = frameId
+                self.frameName = frameName
+                self.online = online
+                self.screen = screen
+                self.settings = settings
+                self.showing = showing
+                self.next = next
+                self.expiresAt = expiresAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case _type = "type"
+                case serverTime = "server_time"
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case online
+                case screen
+                case settings
+                case showing
+                case next
+                case expiresAt = "expires_at"
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/SleepSchedule`.
         public struct SleepSchedule: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/SleepSchedule/id`.
@@ -2109,6 +3801,61 @@ extension Components {
                 case mode
             }
         }
+        /// Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight.
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarSchedule`.
+        public struct CalendarSchedule: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/from`.
+            public var from: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/to`.
+            public var to: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/DaysPayload`.
+            @frozen public enum DaysPayloadPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case mon = "mon"
+                case tue = "tue"
+                case wed = "wed"
+                case thu = "thu"
+                case fri = "fri"
+                case sat = "sat"
+                case sun = "sun"
+            }
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/days`.
+            public typealias DaysPayload = [Components.Schemas.CalendarSchedule.DaysPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/days`.
+            public var days: Components.Schemas.CalendarSchedule.DaysPayload
+            /// - Remark: Generated from `#/components/schemas/CalendarSchedule/enabled`.
+            public var enabled: Swift.Bool
+            /// Creates a new `CalendarSchedule`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - from:
+            ///   - to:
+            ///   - days:
+            ///   - enabled:
+            public init(
+                id: Components.Schemas.Id,
+                from: Swift.String,
+                to: Swift.String,
+                days: Components.Schemas.CalendarSchedule.DaysPayload,
+                enabled: Swift.Bool
+            ) {
+                self.id = id
+                self.from = from
+                self.to = to
+                self.days = days
+                self.enabled = enabled
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case from
+                case to
+                case days
+                case enabled
+            }
+        }
         /// Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
         ///
         /// - Remark: Generated from `#/components/schemas/FrameSettings`.
@@ -2169,6 +3916,22 @@ extension Components {
                 public var albumId: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/on_this_day`.
                 public var onThisDay: Swift.Bool?
+                /// Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+                /// tap, `off` shows the still only.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/live_photos`.
+                @frozen public enum LivePhotosPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case on = "on"
+                    case tap = "tap"
+                    case off = "off"
+                }
+                /// Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+                /// tap, `off` shows the still only.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow/live_photos`.
+                public var livePhotos: Components.Schemas.FrameSettings.SlideshowPayload.LivePhotosPayload?
                 /// Creates a new `SlideshowPayload`.
                 ///
                 /// - Parameters:
@@ -2185,6 +3948,7 @@ extension Components {
                 ///   - collageMax:
                 ///   - albumId: null = all photos
                 ///   - onThisDay:
+                ///   - livePhotos: Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
                 public init(
                     intervalS: Swift.Int? = nil,
                     transition: Components.Schemas.FrameSettings.SlideshowPayload.TransitionPayload? = nil,
@@ -2198,7 +3962,8 @@ extension Components {
                     collage: Swift.Bool? = nil,
                     collageMax: Swift.Int? = nil,
                     albumId: Swift.String? = nil,
-                    onThisDay: Swift.Bool? = nil
+                    onThisDay: Swift.Bool? = nil,
+                    livePhotos: Components.Schemas.FrameSettings.SlideshowPayload.LivePhotosPayload? = nil
                 ) {
                     self.intervalS = intervalS
                     self.transition = transition
@@ -2213,6 +3978,7 @@ extension Components {
                     self.collageMax = collageMax
                     self.albumId = albumId
                     self.onThisDay = onThisDay
+                    self.livePhotos = livePhotos
                 }
                 public enum CodingKeys: String, CodingKey {
                     case intervalS = "interval_s"
@@ -2228,6 +3994,7 @@ extension Components {
                     case collageMax = "collage_max"
                     case albumId = "album_id"
                     case onThisDay = "on_this_day"
+                    case livePhotos = "live_photos"
                 }
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/slideshow`.
@@ -2248,6 +4015,14 @@ extension Components {
                 public var weather: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets/clock_24h`.
                 public var clock24h: Swift.Bool?
+                /// Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets/calendar_sidebar`.
+                public var calendarSidebar: Swift.Bool?
+                /// Countdown widgets on the slideshow (the nearest three).
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets/countdowns`.
+                public var countdowns: Swift.Bool?
                 /// Creates a new `WidgetsPayload`.
                 ///
                 /// - Parameters:
@@ -2257,13 +4032,17 @@ extension Components {
                 ///   - date:
                 ///   - weather: Current weather widget; needs `location`.
                 ///   - clock24h:
+                ///   - calendarSidebar: Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+                ///   - countdowns: Countdown widgets on the slideshow (the nearest three).
                 public init(
                     caption: Swift.Bool? = nil,
                     avatar: Swift.Bool? = nil,
                     clock: Swift.Bool? = nil,
                     date: Swift.Bool? = nil,
                     weather: Swift.Bool? = nil,
-                    clock24h: Swift.Bool? = nil
+                    clock24h: Swift.Bool? = nil,
+                    calendarSidebar: Swift.Bool? = nil,
+                    countdowns: Swift.Bool? = nil
                 ) {
                     self.caption = caption
                     self.avatar = avatar
@@ -2271,6 +4050,8 @@ extension Components {
                     self.date = date
                     self.weather = weather
                     self.clock24h = clock24h
+                    self.calendarSidebar = calendarSidebar
+                    self.countdowns = countdowns
                 }
                 public enum CodingKeys: String, CodingKey {
                     case caption
@@ -2279,6 +4060,8 @@ extension Components {
                     case date
                     case weather
                     case clock24h = "clock_24h"
+                    case calendarSidebar = "calendar_sidebar"
+                    case countdowns
                 }
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/widgets`.
@@ -2455,6 +4238,79 @@ extension Components {
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/locale`.
             public var locale: Components.Schemas.FrameSettings.LocalePayload?
+            /// Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar`.
+            public struct CalendarPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/view`.
+                @frozen public enum ViewPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case fourDay = "four_day"
+                    case week = "week"
+                    case month = "month"
+                }
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/view`.
+                public var view: Components.Schemas.FrameSettings.CalendarPayload.ViewPayload?
+                /// Week and 4-day views start on today rather than the first day of the week.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/start_on_today`.
+                public var startOnToday: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/fade_past`.
+                public var fadePast: Swift.Bool?
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/week_numbers`.
+                public var weekNumbers: Swift.Bool?
+                /// Sync window before today.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/past_days`.
+                public var pastDays: Swift.Int?
+                /// Sync window after today.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/future_days`.
+                public var futureDays: Swift.Int?
+                /// Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day.
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar/timed_views`.
+                public var timedViews: [Components.Schemas.CalendarSchedule]?
+                /// Creates a new `CalendarPayload`.
+                ///
+                /// - Parameters:
+                ///   - view:
+                ///   - startOnToday: Week and 4-day views start on today rather than the first day of the week.
+                ///   - fadePast:
+                ///   - weekNumbers:
+                ///   - pastDays: Sync window before today.
+                ///   - futureDays: Sync window after today.
+                ///   - timedViews: Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day.
+                public init(
+                    view: Components.Schemas.FrameSettings.CalendarPayload.ViewPayload? = nil,
+                    startOnToday: Swift.Bool? = nil,
+                    fadePast: Swift.Bool? = nil,
+                    weekNumbers: Swift.Bool? = nil,
+                    pastDays: Swift.Int? = nil,
+                    futureDays: Swift.Int? = nil,
+                    timedViews: [Components.Schemas.CalendarSchedule]? = nil
+                ) {
+                    self.view = view
+                    self.startOnToday = startOnToday
+                    self.fadePast = fadePast
+                    self.weekNumbers = weekNumbers
+                    self.pastDays = pastDays
+                    self.futureDays = futureDays
+                    self.timedViews = timedViews
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case view
+                    case startOnToday = "start_on_today"
+                    case fadePast = "fade_past"
+                    case weekNumbers = "week_numbers"
+                    case pastDays = "past_days"
+                    case futureDays = "future_days"
+                    case timedViews = "timed_views"
+                }
+            }
+            /// Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/calendar`.
+            public var calendar: Components.Schemas.FrameSettings.CalendarPayload?
             /// Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
             /// Changing it (or turning `widgets.weather` on) makes the server fetch weather right away.
             ///
@@ -2525,21 +4381,43 @@ extension Components {
                 public var allowRemoveMembersOnFrame: Swift.Bool?
                 /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk/owner_pin_set`.
                 public var ownerPinSet: Swift.Bool?
+                /// Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                /// The server never stores or returns the PIN: it keeps only `owner_pin_hash`, which the frame verifies
+                /// locally (opening settings, leaving the kiosk, power off/restart, Wi-Fi changes).
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk/owner_pin`.
+                public var ownerPin: Swift.String?
+                /// Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
+                /// in `PATCH /device/settings` responses); user-facing settings omit it. The frame may set or clear it
+                /// with `PATCH /device/settings` when the PIN is changed at the frame; users set it via `owner_pin`.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk/owner_pin_hash`.
+                public var ownerPinHash: Components.Schemas.PinHash?
                 /// Creates a new `KioskPayload`.
                 ///
                 /// - Parameters:
                 ///   - allowRemoveMembersOnFrame:
                 ///   - ownerPinSet:
+                ///   - ownerPin: Owner only (`403 forbidden` for anyone else). A 4–6 digit kiosk PIN for the frame, or null to remove it.
+                ///   - ownerPinHash: Salted hash of the owner PIN, null when no PIN is set. Only the frame sees it (in the change feed and
                 public init(
                     allowRemoveMembersOnFrame: Swift.Bool? = nil,
-                    ownerPinSet: Swift.Bool? = nil
+                    ownerPinSet: Swift.Bool? = nil,
+                    ownerPin: Swift.String? = nil,
+                    ownerPinHash: Components.Schemas.PinHash? = nil
                 ) {
                     self.allowRemoveMembersOnFrame = allowRemoveMembersOnFrame
                     self.ownerPinSet = ownerPinSet
+                    self.ownerPin = ownerPin
+                    self.ownerPinHash = ownerPinHash
                 }
                 public enum CodingKeys: String, CodingKey {
                     case allowRemoveMembersOnFrame = "allow_remove_members_on_frame"
                     case ownerPinSet = "owner_pin_set"
+                    case ownerPin = "owner_pin"
+                    case ownerPinHash = "owner_pin_hash"
                 }
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/kiosk`.
@@ -2570,6 +4448,97 @@ extension Components {
             }
             /// - Remark: Generated from `#/components/schemas/FrameSettings/updates`.
             public var updates: Components.Schemas.FrameSettings.UpdatesPayload?
+            /// Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+            /// its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins`.
+            public struct PluginsPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout`.
+                public struct LayoutPayload: Codable, Hashable, Sendable {
+                    /// Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/mode`.
+                    @frozen public enum ModePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case off = "off"
+                        case overlay = "overlay"
+                        case band = "band"
+                        case split = "split"
+                    }
+                    /// Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/mode`.
+                    public var mode: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.ModePayload?
+                    /// Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/side`.
+                    @frozen public enum SidePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case left = "left"
+                        case right = "right"
+                    }
+                    /// Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/side`.
+                    public var side: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.SidePayload?
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/background`.
+                    @frozen public enum BackgroundPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                        case paper = "paper"
+                        case photo = "photo"
+                    }
+                    /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout/background`.
+                    public var background: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.BackgroundPayload?
+                    /// Creates a new `LayoutPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - mode: Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+                    ///   - side: Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+                    ///   - background:
+                    public init(
+                        mode: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.ModePayload? = nil,
+                        side: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.SidePayload? = nil,
+                        background: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload.BackgroundPayload? = nil
+                    ) {
+                        self.mode = mode
+                        self.side = side
+                        self.background = background
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case mode
+                        case side
+                        case background
+                    }
+                }
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/layout`.
+                public var layout: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload?
+                /// Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+                /// without `secrets` keeps the ones it has.
+                ///
+                ///
+                /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins/instances`.
+                public var instances: [Components.Schemas.PluginInstance]?
+                /// Creates a new `PluginsPayload`.
+                ///
+                /// - Parameters:
+                ///   - layout:
+                ///   - instances: Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+                public init(
+                    layout: Components.Schemas.FrameSettings.PluginsPayload.LayoutPayload? = nil,
+                    instances: [Components.Schemas.PluginInstance]? = nil
+                ) {
+                    self.layout = layout
+                    self.instances = instances
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case layout
+                    case instances
+                }
+            }
+            /// Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+            /// its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/FrameSettings/plugins`.
+            public var plugins: Components.Schemas.FrameSettings.PluginsPayload?
             /// Creates a new `FrameSettings`.
             ///
             /// - Parameters:
@@ -2579,10 +4548,12 @@ extension Components {
             ///   - video:
             ///   - display:
             ///   - locale:
+            ///   - calendar: Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
             ///   - location: Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
             ///   - notifications:
             ///   - kiosk:
             ///   - updates:
+            ///   - plugins: Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
             public init(
                 version: Swift.Int,
                 slideshow: Components.Schemas.FrameSettings.SlideshowPayload? = nil,
@@ -2590,10 +4561,12 @@ extension Components {
                 video: Components.Schemas.FrameSettings.VideoPayload? = nil,
                 display: Components.Schemas.FrameSettings.DisplayPayload? = nil,
                 locale: Components.Schemas.FrameSettings.LocalePayload? = nil,
+                calendar: Components.Schemas.FrameSettings.CalendarPayload? = nil,
                 location: Components.Schemas.FrameSettings.LocationPayload? = nil,
                 notifications: Components.Schemas.FrameSettings.NotificationsPayload? = nil,
                 kiosk: Components.Schemas.FrameSettings.KioskPayload? = nil,
-                updates: Components.Schemas.FrameSettings.UpdatesPayload? = nil
+                updates: Components.Schemas.FrameSettings.UpdatesPayload? = nil,
+                plugins: Components.Schemas.FrameSettings.PluginsPayload? = nil
             ) {
                 self.version = version
                 self.slideshow = slideshow
@@ -2601,10 +4574,12 @@ extension Components {
                 self.video = video
                 self.display = display
                 self.locale = locale
+                self.calendar = calendar
                 self.location = location
                 self.notifications = notifications
                 self.kiosk = kiosk
                 self.updates = updates
+                self.plugins = plugins
             }
             public enum CodingKeys: String, CodingKey {
                 case version
@@ -2613,10 +4588,1084 @@ extension Components {
                 case video
                 case display
                 case locale
+                case calendar
                 case location
                 case notifications
                 case kiosk
                 case updates
+                case plugins
+            }
+        }
+        /// One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+        /// values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PluginInstance`.
+        public struct PluginInstance: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/instance_id`.
+            public var instanceId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/plugin_id`.
+            public var pluginId: Swift.String
+            /// The plugin version the settings were made with (informational).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/version`.
+            public var version: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/slot`.
+            @frozen public enum SlotPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case topLeft = "top-left"
+                case topRight = "top-right"
+            }
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/slot`.
+            public var slot: Components.Schemas.PluginInstance.SlotPayload?
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/order`.
+            public var order: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/visibility`.
+            @frozen public enum VisibilityPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case always = "always"
+                case onChange = "on_change"
+                case onTap = "on_tap"
+            }
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/visibility`.
+            public var visibility: Components.Schemas.PluginInstance.VisibilityPayload?
+            /// An enabled instance needs every required setting and secret.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/enabled`.
+            public var enabled: Swift.Bool?
+            /// The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/settings`.
+            public struct SettingsPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+                /// Creates a new `SettingsPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/settings`.
+            public var settings: Components.Schemas.PluginInstance.SettingsPayload?
+            /// Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+            /// frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/secrets`.
+            public struct SecretsPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: Swift.String?]
+                /// Creates a new `SecretsPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: Swift.String?] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+            /// frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/secrets`.
+            public var secrets: Components.Schemas.PluginInstance.SecretsPayload?
+            /// The secret settings that have a value.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstance/secrets_set`.
+            public var secretsSet: [Swift.String]?
+            /// Creates a new `PluginInstance`.
+            ///
+            /// - Parameters:
+            ///   - instanceId:
+            ///   - pluginId:
+            ///   - version: The plugin version the settings were made with (informational).
+            ///   - slot:
+            ///   - order:
+            ///   - visibility:
+            ///   - enabled: An enabled instance needs every required setting and secret.
+            ///   - settings: The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+            ///   - secrets: Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+            ///   - secretsSet: The secret settings that have a value.
+            public init(
+                instanceId: Swift.String,
+                pluginId: Swift.String,
+                version: Swift.String? = nil,
+                slot: Components.Schemas.PluginInstance.SlotPayload? = nil,
+                order: Swift.Int? = nil,
+                visibility: Components.Schemas.PluginInstance.VisibilityPayload? = nil,
+                enabled: Swift.Bool? = nil,
+                settings: Components.Schemas.PluginInstance.SettingsPayload? = nil,
+                secrets: Components.Schemas.PluginInstance.SecretsPayload? = nil,
+                secretsSet: [Swift.String]? = nil
+            ) {
+                self.instanceId = instanceId
+                self.pluginId = pluginId
+                self.version = version
+                self.slot = slot
+                self.order = order
+                self.visibility = visibility
+                self.enabled = enabled
+                self.settings = settings
+                self.secrets = secrets
+                self.secretsSet = secretsSet
+            }
+            public enum CodingKeys: String, CodingKey {
+                case instanceId = "instance_id"
+                case pluginId = "plugin_id"
+                case version
+                case slot
+                case order
+                case visibility
+                case enabled
+                case settings
+                case secrets
+                case secretsSet = "secrets_set"
+            }
+        }
+        /// A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
+        ///
+        /// - Remark: Generated from `#/components/schemas/CatalogPlugin`.
+        public struct CatalogPlugin: Codable, Hashable, Sendable {
+            /// The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+            ///
+            /// - Remark: Generated from `#/components/schemas/CatalogPlugin/manifest`.
+            public struct ManifestPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+                /// Creates a new `ManifestPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+            ///
+            /// - Remark: Generated from `#/components/schemas/CatalogPlugin/manifest`.
+            public var manifest: Components.Schemas.CatalogPlugin.ManifestPayload
+            /// Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+            /// `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+            /// the manifest itself, with `en` for option labels.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/CatalogPlugin/locales`.
+            public struct LocalesPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CatalogPlugin/locales/additionalProperties`.
+                public struct AdditionalPropertiesPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    public var additionalProperties: [String: Swift.String]
+                    /// Creates a new `AdditionalPropertiesPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    public init(additionalProperties: [String: Swift.String] = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    public init(from decoder: any Swift.Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    public func encode(to encoder: any Swift.Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: Components.Schemas.CatalogPlugin.LocalesPayload.AdditionalPropertiesPayload]
+                /// Creates a new `LocalesPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: Components.Schemas.CatalogPlugin.LocalesPayload.AdditionalPropertiesPayload] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+            /// `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+            /// the manifest itself, with `en` for option labels.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/CatalogPlugin/locales`.
+            public var locales: Components.Schemas.CatalogPlugin.LocalesPayload?
+            /// Part of the frame app; false for a plugin from the community registry (its newest version).
+            ///
+            /// - Remark: Generated from `#/components/schemas/CatalogPlugin/builtin`.
+            public var builtin: Swift.Bool?
+            /// Creates a new `CatalogPlugin`.
+            ///
+            /// - Parameters:
+            ///   - manifest: The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+            ///   - locales: Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+            ///   - builtin: Part of the frame app; false for a plugin from the community registry (its newest version).
+            public init(
+                manifest: Components.Schemas.CatalogPlugin.ManifestPayload,
+                locales: Components.Schemas.CatalogPlugin.LocalesPayload? = nil,
+                builtin: Swift.Bool? = nil
+            ) {
+                self.manifest = manifest
+                self.locales = locales
+                self.builtin = builtin
+            }
+            public enum CodingKeys: String, CodingKey {
+                case manifest
+                case locales
+                case builtin
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PluginCatalog`.
+        public struct PluginCatalog: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PluginCatalog/plugins`.
+            public var plugins: [Components.Schemas.CatalogPlugin]
+            /// Creates a new `PluginCatalog`.
+            ///
+            /// - Parameters:
+            ///   - plugins:
+            public init(plugins: [Components.Schemas.CatalogPlugin]) {
+                self.plugins = plugins
+            }
+            public enum CodingKeys: String, CodingKey {
+                case plugins
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus`.
+        public struct PluginInstanceStatus: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/instance_id`.
+            public var instanceId: Swift.String
+            /// The instance started on the frame.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/running`.
+            public var running: Swift.Bool?
+            /// The last error
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/error`.
+            public var error: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/error_at`.
+            public var errorAt: Foundation.Date?
+            /// When the last update succeeded.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/updated_at`.
+            public var updatedAt: Foundation.Date?
+            /// The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/version`.
+            public var version: Swift.String?
+            /// A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/update`.
+            public struct UpdatePayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/update/version`.
+                public var version: Swift.String?
+                /// The newer version's `permissions`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/update/permissions`.
+                public struct PermissionsPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+                    /// Creates a new `PermissionsPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    public init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    public init(from decoder: any Swift.Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    public func encode(to encoder: any Swift.Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// The newer version's `permissions`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/update/permissions`.
+                public var permissions: Components.Schemas.PluginInstanceStatus.UpdatePayload.PermissionsPayload?
+                /// Creates a new `UpdatePayload`.
+                ///
+                /// - Parameters:
+                ///   - version:
+                ///   - permissions: The newer version's `permissions`.
+                public init(
+                    version: Swift.String? = nil,
+                    permissions: Components.Schemas.PluginInstanceStatus.UpdatePayload.PermissionsPayload? = nil
+                ) {
+                    self.version = version
+                    self.permissions = permissions
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case version
+                    case permissions
+                }
+            }
+            /// A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/update`.
+            public var update: Components.Schemas.PluginInstanceStatus.UpdatePayload?
+            /// Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+            /// picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginInstanceStatus/entities`.
+            public var entities: [Components.Schemas.DiscoveredEntity]?
+            /// Creates a new `PluginInstanceStatus`.
+            ///
+            /// - Parameters:
+            ///   - instanceId:
+            ///   - running: The instance started on the frame.
+            ///   - error: The last error
+            ///   - errorAt:
+            ///   - updatedAt: When the last update succeeded.
+            ///   - version: The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).
+            ///   - update: A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+            ///   - entities: Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+            public init(
+                instanceId: Swift.String,
+                running: Swift.Bool? = nil,
+                error: Swift.String? = nil,
+                errorAt: Foundation.Date? = nil,
+                updatedAt: Foundation.Date? = nil,
+                version: Swift.String? = nil,
+                update: Components.Schemas.PluginInstanceStatus.UpdatePayload? = nil,
+                entities: [Components.Schemas.DiscoveredEntity]? = nil
+            ) {
+                self.instanceId = instanceId
+                self.running = running
+                self.error = error
+                self.errorAt = errorAt
+                self.updatedAt = updatedAt
+                self.version = version
+                self.update = update
+                self.entities = entities
+            }
+            public enum CodingKeys: String, CodingKey {
+                case instanceId = "instance_id"
+                case running
+                case error
+                case errorAt = "error_at"
+                case updatedAt = "updated_at"
+                case version
+                case update
+                case entities
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoveredEntity`.
+        public struct DiscoveredEntity: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoveredEntity/entity_id`.
+            public var entityId: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoveredEntity/name`.
+            public var name: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoveredEntity/unit`.
+            public var unit: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DiscoveredEntity/device_class`.
+            public var deviceClass: Swift.String?
+            /// Creates a new `DiscoveredEntity`.
+            ///
+            /// - Parameters:
+            ///   - entityId:
+            ///   - name:
+            ///   - unit:
+            ///   - deviceClass:
+            public init(
+                entityId: Swift.String,
+                name: Swift.String? = nil,
+                unit: Swift.String? = nil,
+                deviceClass: Swift.String? = nil
+            ) {
+                self.entityId = entityId
+                self.name = name
+                self.unit = unit
+                self.deviceClass = deviceClass
+            }
+            public enum CodingKeys: String, CodingKey {
+                case entityId = "entity_id"
+                case name
+                case unit
+                case deviceClass = "device_class"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/DiscoveredService`.
+        public struct DiscoveredService: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/DiscoveredService/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/DiscoveredService/url`.
+            public var url: Swift.String
+            /// Creates a new `DiscoveredService`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - url:
+            public init(
+                name: Swift.String,
+                url: Swift.String
+            ) {
+                self.name = name
+                self.url = url
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case url
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/StationLatest`.
+        public struct StationLatest: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/StationLatest/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/StationLatest/reading`.
+            public var reading: Components.Schemas.StationReading
+            /// Since midnight in the station's frame's time zone (the first registering frame).
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationLatest/today`.
+            public struct TodayPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/StationLatest/today/temp_min_c`.
+                public var tempMinC: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationLatest/today/temp_max_c`.
+                public var tempMaxC: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationLatest/today/gust_max_ms`.
+                public var gustMaxMs: Swift.Double?
+                /// Creates a new `TodayPayload`.
+                ///
+                /// - Parameters:
+                ///   - tempMinC:
+                ///   - tempMaxC:
+                ///   - gustMaxMs:
+                public init(
+                    tempMinC: Swift.Double? = nil,
+                    tempMaxC: Swift.Double? = nil,
+                    gustMaxMs: Swift.Double? = nil
+                ) {
+                    self.tempMinC = tempMinC
+                    self.tempMaxC = tempMaxC
+                    self.gustMaxMs = gustMaxMs
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case tempMinC = "temp_min_c"
+                    case tempMaxC = "temp_max_c"
+                    case gustMaxMs = "gust_max_ms"
+                }
+            }
+            /// Since midnight in the station's frame's time zone (the first registering frame).
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationLatest/today`.
+            public var today: Components.Schemas.StationLatest.TodayPayload?
+            /// Creates a new `StationLatest`.
+            ///
+            /// - Parameters:
+            ///   - receivedAt:
+            ///   - reading:
+            ///   - today: Since midnight in the station's frame's time zone (the first registering frame).
+            public init(
+                receivedAt: Foundation.Date,
+                reading: Components.Schemas.StationReading,
+                today: Components.Schemas.StationLatest.TodayPayload? = nil
+            ) {
+                self.receivedAt = receivedAt
+                self.reading = reading
+                self.today = today
+            }
+            public enum CodingKeys: String, CodingKey {
+                case receivedAt = "received_at"
+                case reading
+                case today
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PublicStationList`.
+        public struct PublicStationList: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PublicStationList/stations`.
+            public var stations: [Components.Schemas.PublicStationSummary]
+            /// Creates a new `PublicStationList`.
+            ///
+            /// - Parameters:
+            ///   - stations:
+            public init(stations: [Components.Schemas.PublicStationSummary]) {
+                self.stations = stations
+            }
+            public enum CodingKeys: String, CodingKey {
+                case stations
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PublicStationSummary`.
+        public struct PublicStationSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PublicStationSummary/station_id`.
+            public var stationId: Swift.String
+            /// The title the owner chose; empty: none.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PublicStationSummary/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PublicStationSummary/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/PublicStationSummary/reading`.
+            public var reading: Components.Schemas.StationReading
+            /// The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PublicStationSummary/temp_24h`.
+            public var temp24h: [Swift.Double?]
+            /// Creates a new `PublicStationSummary`.
+            ///
+            /// - Parameters:
+            ///   - stationId:
+            ///   - name: The title the owner chose; empty: none.
+            ///   - receivedAt:
+            ///   - reading:
+            ///   - temp24h: The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+            public init(
+                stationId: Swift.String,
+                name: Swift.String,
+                receivedAt: Foundation.Date,
+                reading: Components.Schemas.StationReading,
+                temp24h: [Swift.Double?]
+            ) {
+                self.stationId = stationId
+                self.name = name
+                self.receivedAt = receivedAt
+                self.reading = reading
+                self.temp24h = temp24h
+            }
+            public enum CodingKeys: String, CodingKey {
+                case stationId = "station_id"
+                case name
+                case receivedAt = "received_at"
+                case reading
+                case temp24h = "temp_24h"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/StationPublic`.
+        public struct StationPublic: Codable, Hashable, Sendable {
+            /// The station ID as its owner wrote it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationPublic/station_id`.
+            public var stationId: Swift.String
+            /// The title the owner chose; empty: none.
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationPublic/name`.
+            public var name: Swift.String
+            /// IANA zone of the owner's frame: what "today" means.
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationPublic/timezone`.
+            public var timezone: Swift.String
+            /// - Remark: Generated from `#/components/schemas/StationPublic/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/StationPublic/reading`.
+            public var reading: Components.Schemas.StationReading
+            /// Since midnight in `timezone`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationPublic/today`.
+            public struct TodayPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/temp_min_c`.
+                public var tempMinC: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/temp_min_at`.
+                public var tempMinAt: Foundation.Date?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/temp_max_c`.
+                public var tempMaxC: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/temp_max_at`.
+                public var tempMaxAt: Foundation.Date?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/gust_max_ms`.
+                public var gustMaxMs: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/gust_max_at`.
+                public var gustMaxAt: Foundation.Date?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/rain_mm`.
+                public var rainMm: Swift.Double?
+                /// - Remark: Generated from `#/components/schemas/StationPublic/today/uv_max`.
+                public var uvMax: Swift.Double?
+                /// Creates a new `TodayPayload`.
+                ///
+                /// - Parameters:
+                ///   - tempMinC:
+                ///   - tempMinAt:
+                ///   - tempMaxC:
+                ///   - tempMaxAt:
+                ///   - gustMaxMs:
+                ///   - gustMaxAt:
+                ///   - rainMm:
+                ///   - uvMax:
+                public init(
+                    tempMinC: Swift.Double? = nil,
+                    tempMinAt: Foundation.Date? = nil,
+                    tempMaxC: Swift.Double? = nil,
+                    tempMaxAt: Foundation.Date? = nil,
+                    gustMaxMs: Swift.Double? = nil,
+                    gustMaxAt: Foundation.Date? = nil,
+                    rainMm: Swift.Double? = nil,
+                    uvMax: Swift.Double? = nil
+                ) {
+                    self.tempMinC = tempMinC
+                    self.tempMinAt = tempMinAt
+                    self.tempMaxC = tempMaxC
+                    self.tempMaxAt = tempMaxAt
+                    self.gustMaxMs = gustMaxMs
+                    self.gustMaxAt = gustMaxAt
+                    self.rainMm = rainMm
+                    self.uvMax = uvMax
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case tempMinC = "temp_min_c"
+                    case tempMinAt = "temp_min_at"
+                    case tempMaxC = "temp_max_c"
+                    case tempMaxAt = "temp_max_at"
+                    case gustMaxMs = "gust_max_ms"
+                    case gustMaxAt = "gust_max_at"
+                    case rainMm = "rain_mm"
+                    case uvMax = "uv_max"
+                }
+            }
+            /// Since midnight in `timezone`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/StationPublic/today`.
+            public var today: Components.Schemas.StationPublic.TodayPayload
+            /// - Remark: Generated from `#/components/schemas/StationPublic/series`.
+            public var series: Components.Schemas.StationSeries
+            /// Creates a new `StationPublic`.
+            ///
+            /// - Parameters:
+            ///   - stationId: The station ID as its owner wrote it.
+            ///   - name: The title the owner chose; empty: none.
+            ///   - timezone: IANA zone of the owner's frame: what "today" means.
+            ///   - receivedAt:
+            ///   - reading:
+            ///   - today: Since midnight in `timezone`.
+            ///   - series:
+            public init(
+                stationId: Swift.String,
+                name: Swift.String,
+                timezone: Swift.String,
+                receivedAt: Foundation.Date,
+                reading: Components.Schemas.StationReading,
+                today: Components.Schemas.StationPublic.TodayPayload,
+                series: Components.Schemas.StationSeries
+            ) {
+                self.stationId = stationId
+                self.name = name
+                self.timezone = timezone
+                self.receivedAt = receivedAt
+                self.reading = reading
+                self.today = today
+                self.series = series
+            }
+            public enum CodingKeys: String, CodingKey {
+                case stationId = "station_id"
+                case name
+                case timezone
+                case receivedAt = "received_at"
+                case reading
+                case today
+                case series
+            }
+        }
+        /// The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+        /// arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+        /// direction (the speed-weighted mean direction).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/StationSeries`.
+        public struct StationSeries: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/StationSeries/start`.
+            public var start: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/StationSeries/step_s`.
+            public var stepS: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/StationSeries/temp_c`.
+            public var tempC: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/dew_point_c`.
+            public var dewPointC: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/feels_like_c`.
+            public var feelsLikeC: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/humidity_pct`.
+            public var humidityPct: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/pressure_hpa`.
+            public var pressureHpa: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/wind_ms`.
+            public var windMs: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/gust_ms`.
+            public var gustMs: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/wind_dir_deg`.
+            public var windDirDeg: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/rain_rate_mm_h`.
+            public var rainRateMmH: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/rain_today_mm`.
+            public var rainTodayMm: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/solar_wm2`.
+            public var solarWm2: Components.Schemas.StationValues
+            /// - Remark: Generated from `#/components/schemas/StationSeries/uv_index`.
+            public var uvIndex: Components.Schemas.StationValues
+            /// Creates a new `StationSeries`.
+            ///
+            /// - Parameters:
+            ///   - start:
+            ///   - stepS:
+            ///   - tempC:
+            ///   - dewPointC:
+            ///   - feelsLikeC:
+            ///   - humidityPct:
+            ///   - pressureHpa:
+            ///   - windMs:
+            ///   - gustMs:
+            ///   - windDirDeg:
+            ///   - rainRateMmH:
+            ///   - rainTodayMm:
+            ///   - solarWm2:
+            ///   - uvIndex:
+            public init(
+                start: Foundation.Date,
+                stepS: Swift.Int,
+                tempC: Components.Schemas.StationValues,
+                dewPointC: Components.Schemas.StationValues,
+                feelsLikeC: Components.Schemas.StationValues,
+                humidityPct: Components.Schemas.StationValues,
+                pressureHpa: Components.Schemas.StationValues,
+                windMs: Components.Schemas.StationValues,
+                gustMs: Components.Schemas.StationValues,
+                windDirDeg: Components.Schemas.StationValues,
+                rainRateMmH: Components.Schemas.StationValues,
+                rainTodayMm: Components.Schemas.StationValues,
+                solarWm2: Components.Schemas.StationValues,
+                uvIndex: Components.Schemas.StationValues
+            ) {
+                self.start = start
+                self.stepS = stepS
+                self.tempC = tempC
+                self.dewPointC = dewPointC
+                self.feelsLikeC = feelsLikeC
+                self.humidityPct = humidityPct
+                self.pressureHpa = pressureHpa
+                self.windMs = windMs
+                self.gustMs = gustMs
+                self.windDirDeg = windDirDeg
+                self.rainRateMmH = rainRateMmH
+                self.rainTodayMm = rainTodayMm
+                self.solarWm2 = solarWm2
+                self.uvIndex = uvIndex
+            }
+            public enum CodingKeys: String, CodingKey {
+                case start
+                case stepS = "step_s"
+                case tempC = "temp_c"
+                case dewPointC = "dew_point_c"
+                case feelsLikeC = "feels_like_c"
+                case humidityPct = "humidity_pct"
+                case pressureHpa = "pressure_hpa"
+                case windMs = "wind_ms"
+                case gustMs = "gust_ms"
+                case windDirDeg = "wind_dir_deg"
+                case rainRateMmH = "rain_rate_mm_h"
+                case rainTodayMm = "rain_today_mm"
+                case solarWm2 = "solar_wm2"
+                case uvIndex = "uv_index"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/StationValues`.
+        public typealias StationValues = [Swift.Double?]
+        /// One upload in metric units; a value the station didn't send is absent.
+        ///
+        /// - Remark: Generated from `#/components/schemas/StationReading`.
+        public struct StationReading: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/StationReading/station_time`.
+            public var stationTime: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/StationReading/temp_c`.
+            public var tempC: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/humidity_pct`.
+            public var humidityPct: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/dew_point_c`.
+            public var dewPointC: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/feels_like_c`.
+            public var feelsLikeC: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/pressure_hpa`.
+            public var pressureHpa: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/wind_ms`.
+            public var windMs: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/wind_dir_deg`.
+            public var windDirDeg: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/gust_ms`.
+            public var gustMs: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/rain_rate_mm_h`.
+            public var rainRateMmH: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/rain_today_mm`.
+            public var rainTodayMm: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/solar_wm2`.
+            public var solarWm2: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/uv_index`.
+            public var uvIndex: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/indoor_temp_c`.
+            public var indoorTempC: Swift.Double?
+            /// - Remark: Generated from `#/components/schemas/StationReading/indoor_humidity_pct`.
+            public var indoorHumidityPct: Swift.Double?
+            /// Creates a new `StationReading`.
+            ///
+            /// - Parameters:
+            ///   - stationTime:
+            ///   - tempC:
+            ///   - humidityPct:
+            ///   - dewPointC:
+            ///   - feelsLikeC:
+            ///   - pressureHpa:
+            ///   - windMs:
+            ///   - windDirDeg:
+            ///   - gustMs:
+            ///   - rainRateMmH:
+            ///   - rainTodayMm:
+            ///   - solarWm2:
+            ///   - uvIndex:
+            ///   - indoorTempC:
+            ///   - indoorHumidityPct:
+            public init(
+                stationTime: Foundation.Date? = nil,
+                tempC: Swift.Double? = nil,
+                humidityPct: Swift.Double? = nil,
+                dewPointC: Swift.Double? = nil,
+                feelsLikeC: Swift.Double? = nil,
+                pressureHpa: Swift.Double? = nil,
+                windMs: Swift.Double? = nil,
+                windDirDeg: Swift.Double? = nil,
+                gustMs: Swift.Double? = nil,
+                rainRateMmH: Swift.Double? = nil,
+                rainTodayMm: Swift.Double? = nil,
+                solarWm2: Swift.Double? = nil,
+                uvIndex: Swift.Double? = nil,
+                indoorTempC: Swift.Double? = nil,
+                indoorHumidityPct: Swift.Double? = nil
+            ) {
+                self.stationTime = stationTime
+                self.tempC = tempC
+                self.humidityPct = humidityPct
+                self.dewPointC = dewPointC
+                self.feelsLikeC = feelsLikeC
+                self.pressureHpa = pressureHpa
+                self.windMs = windMs
+                self.windDirDeg = windDirDeg
+                self.gustMs = gustMs
+                self.rainRateMmH = rainRateMmH
+                self.rainTodayMm = rainTodayMm
+                self.solarWm2 = solarWm2
+                self.uvIndex = uvIndex
+                self.indoorTempC = indoorTempC
+                self.indoorHumidityPct = indoorHumidityPct
+            }
+            public enum CodingKeys: String, CodingKey {
+                case stationTime = "station_time"
+                case tempC = "temp_c"
+                case humidityPct = "humidity_pct"
+                case dewPointC = "dew_point_c"
+                case feelsLikeC = "feels_like_c"
+                case pressureHpa = "pressure_hpa"
+                case windMs = "wind_ms"
+                case windDirDeg = "wind_dir_deg"
+                case gustMs = "gust_ms"
+                case rainRateMmH = "rain_rate_mm_h"
+                case rainTodayMm = "rain_today_mm"
+                case solarWm2 = "solar_wm2"
+                case uvIndex = "uv_index"
+                case indoorTempC = "indoor_temp_c"
+                case indoorHumidityPct = "indoor_humidity_pct"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/PluginRegistry`.
+        public struct PluginRegistry: Codable, Hashable, Sendable {
+            /// base64 of index.json, byte for byte as signed
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginRegistry/index`.
+            public var index: Swift.String
+            /// base64 DER ECDSA P-256 SHA-256 signature over those bytes
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginRegistry/signature`.
+            public var signature: Swift.String
+            /// - Remark: Generated from `#/components/schemas/PluginRegistry/sequence`.
+            public var sequence: Swift.Int
+            /// Creates a new `PluginRegistry`.
+            ///
+            /// - Parameters:
+            ///   - index: base64 of index.json, byte for byte as signed
+            ///   - signature: base64 DER ECDSA P-256 SHA-256 signature over those bytes
+            ///   - sequence:
+            public init(
+                index: Swift.String,
+                signature: Swift.String,
+                sequence: Swift.Int
+            ) {
+                self.index = index
+                self.signature = signature
+                self.sequence = sequence
+            }
+            public enum CodingKeys: String, CodingKey {
+                case index
+                case signature
+                case sequence
+            }
+        }
+        /// What the frame knows about its plugins right now (`PUT /device/plugins/status`).
+        ///
+        /// - Remark: Generated from `#/components/schemas/PluginStatusReport`.
+        public struct PluginStatusReport: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PluginStatusReport/instances`.
+            public var instances: [Components.Schemas.PluginInstanceStatus]?
+            /// mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginStatusReport/services`.
+            public struct ServicesPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: [Components.Schemas.DiscoveredService]]
+                /// Creates a new `ServicesPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: [Components.Schemas.DiscoveredService]] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+            ///
+            /// - Remark: Generated from `#/components/schemas/PluginStatusReport/services`.
+            public var services: Components.Schemas.PluginStatusReport.ServicesPayload?
+            /// Creates a new `PluginStatusReport`.
+            ///
+            /// - Parameters:
+            ///   - instances:
+            ///   - services: mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+            public init(
+                instances: [Components.Schemas.PluginInstanceStatus]? = nil,
+                services: Components.Schemas.PluginStatusReport.ServicesPayload? = nil
+            ) {
+                self.instances = instances
+                self.services = services
+            }
+            public enum CodingKeys: String, CodingKey {
+                case instances
+                case services
+            }
+        }
+        /// The frame's plugin catalog and their status, for the apps' Plugins section.
+        ///
+        /// - Remark: Generated from `#/components/schemas/FramePlugins`.
+        public struct FramePlugins: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/catalog`.
+            public var catalog: [Components.Schemas.CatalogPlugin]
+            /// When the frame last reported its catalog; null for an app that doesn't.
+            ///
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/catalog_at`.
+            public var catalogAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/instances`.
+            public var instances: [Components.Schemas.PluginInstanceStatus]?
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/services`.
+            public struct ServicesPayload: Codable, Hashable, Sendable {
+                /// A container of undocumented properties.
+                public var additionalProperties: [String: [Components.Schemas.DiscoveredService]]
+                /// Creates a new `ServicesPayload`.
+                ///
+                /// - Parameters:
+                ///   - additionalProperties: A container of undocumented properties.
+                public init(additionalProperties: [String: [Components.Schemas.DiscoveredService]] = .init()) {
+                    self.additionalProperties = additionalProperties
+                }
+                public init(from decoder: any Swift.Decoder) throws {
+                    additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                }
+                public func encode(to encoder: any Swift.Encoder) throws {
+                    try encoder.encodeAdditionalProperties(additionalProperties)
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/services`.
+            public var services: Components.Schemas.FramePlugins.ServicesPayload?
+            /// - Remark: Generated from `#/components/schemas/FramePlugins/status_at`.
+            public var statusAt: Foundation.Date?
+            /// Creates a new `FramePlugins`.
+            ///
+            /// - Parameters:
+            ///   - catalog:
+            ///   - catalogAt: When the frame last reported its catalog; null for an app that doesn't.
+            ///   - instances:
+            ///   - services:
+            ///   - statusAt:
+            public init(
+                catalog: [Components.Schemas.CatalogPlugin],
+                catalogAt: Foundation.Date? = nil,
+                instances: [Components.Schemas.PluginInstanceStatus]? = nil,
+                services: Components.Schemas.FramePlugins.ServicesPayload? = nil,
+                statusAt: Foundation.Date? = nil
+            ) {
+                self.catalog = catalog
+                self.catalogAt = catalogAt
+                self.instances = instances
+                self.services = services
+                self.statusAt = statusAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case catalog
+                case catalogAt = "catalog_at"
+                case instances
+                case services
+                case statusAt = "status_at"
+            }
+        }
+        /// PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/PinHash`.
+        public struct PinHash: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/PinHash/alg`.
+            @frozen public enum AlgPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pbkdf2Sha256 = "pbkdf2-sha256"
+            }
+            /// - Remark: Generated from `#/components/schemas/PinHash/alg`.
+            public var alg: Components.Schemas.PinHash.AlgPayload
+            /// - Remark: Generated from `#/components/schemas/PinHash/iterations`.
+            public var iterations: Swift.Int
+            /// base64
+            ///
+            /// - Remark: Generated from `#/components/schemas/PinHash/salt`.
+            public var salt: Swift.String
+            /// base64 of 32 bytes
+            ///
+            /// - Remark: Generated from `#/components/schemas/PinHash/hash`.
+            public var hash: Swift.String
+            /// Creates a new `PinHash`.
+            ///
+            /// - Parameters:
+            ///   - alg:
+            ///   - iterations:
+            ///   - salt: base64
+            ///   - hash: base64 of 32 bytes
+            public init(
+                alg: Components.Schemas.PinHash.AlgPayload,
+                iterations: Swift.Int,
+                salt: Swift.String,
+                hash: Swift.String
+            ) {
+                self.alg = alg
+                self.iterations = iterations
+                self.salt = salt
+                self.hash = hash
+            }
+            public enum CodingKeys: String, CodingKey {
+                case alg
+                case iterations
+                case salt
+                case hash
             }
         }
         /// A frame app release mirrored by the server.
@@ -2629,7 +5678,7 @@ extension Components {
             public var versionCode: Swift.Int
             /// - Remark: Generated from `#/components/schemas/FrameUpdate/min_sdk`.
             public var minSdk: Swift.Int
-            /// Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+            /// Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
             ///
             /// - Remark: Generated from `#/components/schemas/FrameUpdate/url`.
             public var url: Swift.String
@@ -2653,7 +5702,7 @@ extension Components {
             ///   - versionName:
             ///   - versionCode:
             ///   - minSdk:
-            ///   - url: Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+            ///   - url: Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
             ///   - sha256:
             ///   - size: bytes
             ///   - releaseNotes:
@@ -2866,6 +5915,8 @@ extension Components {
             public var locale: Swift.String?
             /// - Remark: Generated from `#/components/schemas/DeviceEnroll/timezone`.
             public var timezone: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/DeviceEnroll/kind`.
+            public var kind: Components.Schemas.DeviceKind?
             /// Creates a new `DeviceEnroll`.
             ///
             /// - Parameters:
@@ -2874,18 +5925,21 @@ extension Components {
             ///   - app:
             ///   - locale:
             ///   - timezone:
+            ///   - kind:
             public init(
                 hardware: Components.Schemas.DeviceEnroll.HardwarePayload,
                 screen: Components.Schemas.Screen,
                 app: Components.Schemas.DeviceEnroll.AppPayload,
                 locale: Swift.String? = nil,
-                timezone: Swift.String? = nil
+                timezone: Swift.String? = nil,
+                kind: Components.Schemas.DeviceKind? = nil
             ) {
                 self.hardware = hardware
                 self.screen = screen
                 self.app = app
                 self.locale = locale
                 self.timezone = timezone
+                self.kind = kind
             }
             public enum CodingKeys: String, CodingKey {
                 case hardware
@@ -2893,7 +5947,18 @@ extension Components {
                 case app
                 case locale
                 case timezone
+                case kind
             }
+        }
+        /// What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+        /// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+        /// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/DeviceKind`.
+        @frozen public enum DeviceKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case android = "android"
+            case browser = "browser"
         }
         /// - Remark: Generated from `#/components/schemas/DeviceState`.
         public struct DeviceState: Codable, Hashable, Sendable {
@@ -2963,6 +6028,7 @@ extension Components {
                 case member_remove = "member.remove"
                 case frame = "frame"
                 case weather = "weather"
+                case calendar = "calendar"
                 case reset = "reset"
             }
             /// - Remark: Generated from `#/components/schemas/Change/type`.
@@ -3032,15 +6098,92 @@ extension Components {
                     ///
                     /// - Remark: Generated from `#/components/schemas/Change/placement/value2/media`.
                     public var media: Components.Schemas.Change.PlacementPayload.Value2Payload.MediaPayload?
+                    /// Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+                    /// clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+                    /// ignore it and show `media` as a photo.
+                    ///
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion`.
+                    public struct MotionPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/url`.
+                        public var url: Swift.String?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/sha256`.
+                        public var sha256: Swift.String?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/bytes`.
+                        public var bytes: Swift.Int?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/mime`.
+                        public var mime: Swift.String?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/width`.
+                        public var width: Swift.Int?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/height`.
+                        public var height: Swift.Int?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/duration_ms`.
+                        public var durationMs: Swift.Int?
+                        /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion/has_audio`.
+                        public var hasAudio: Swift.Bool?
+                        /// Creates a new `MotionPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - url:
+                        ///   - sha256:
+                        ///   - bytes:
+                        ///   - mime:
+                        ///   - width:
+                        ///   - height:
+                        ///   - durationMs:
+                        ///   - hasAudio:
+                        public init(
+                            url: Swift.String? = nil,
+                            sha256: Swift.String? = nil,
+                            bytes: Swift.Int? = nil,
+                            mime: Swift.String? = nil,
+                            width: Swift.Int? = nil,
+                            height: Swift.Int? = nil,
+                            durationMs: Swift.Int? = nil,
+                            hasAudio: Swift.Bool? = nil
+                        ) {
+                            self.url = url
+                            self.sha256 = sha256
+                            self.bytes = bytes
+                            self.mime = mime
+                            self.width = width
+                            self.height = height
+                            self.durationMs = durationMs
+                            self.hasAudio = hasAudio
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case url
+                            case sha256
+                            case bytes
+                            case mime
+                            case width
+                            case height
+                            case durationMs = "duration_ms"
+                            case hasAudio = "has_audio"
+                        }
+                    }
+                    /// Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+                    /// clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+                    /// ignore it and show `media` as a photo.
+                    ///
+                    ///
+                    /// - Remark: Generated from `#/components/schemas/Change/placement/value2/motion`.
+                    public var motion: Components.Schemas.Change.PlacementPayload.Value2Payload.MotionPayload?
                     /// Creates a new `Value2Payload`.
                     ///
                     /// - Parameters:
                     ///   - media: Frame rendition to download (present on placement.upsert when status is ready).
-                    public init(media: Components.Schemas.Change.PlacementPayload.Value2Payload.MediaPayload? = nil) {
+                    ///   - motion: Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+                    public init(
+                        media: Components.Schemas.Change.PlacementPayload.Value2Payload.MediaPayload? = nil,
+                        motion: Components.Schemas.Change.PlacementPayload.Value2Payload.MotionPayload? = nil
+                    ) {
                         self.media = media
+                        self.motion = motion
                     }
                     public enum CodingKeys: String, CodingKey {
                         case media
+                        case motion
                     }
                 }
                 /// - Remark: Generated from `#/components/schemas/Change/placement/value2`.
@@ -3144,6 +6287,8 @@ extension Components {
             public var frame: Components.Schemas.Change.FramePayload?
             /// - Remark: Generated from `#/components/schemas/Change/weather`.
             public var weather: Components.Schemas.Weather?
+            /// - Remark: Generated from `#/components/schemas/Change/calendar`.
+            public var calendar: Components.Schemas.Calendar?
             /// Creates a new `Change`.
             ///
             /// - Parameters:
@@ -3156,6 +6301,7 @@ extension Components {
             ///   - member:
             ///   - frame:
             ///   - weather:
+            ///   - calendar:
             public init(
                 seq: Swift.Int,
                 _type: Components.Schemas.Change._TypePayload,
@@ -3165,7 +6311,8 @@ extension Components {
                 album: Components.Schemas.Album? = nil,
                 member: Components.Schemas.Change.MemberPayload? = nil,
                 frame: Components.Schemas.Change.FramePayload? = nil,
-                weather: Components.Schemas.Weather? = nil
+                weather: Components.Schemas.Weather? = nil,
+                calendar: Components.Schemas.Calendar? = nil
             ) {
                 self.seq = seq
                 self._type = _type
@@ -3176,6 +6323,7 @@ extension Components {
                 self.member = member
                 self.frame = frame
                 self.weather = weather
+                self.calendar = calendar
             }
             public enum CodingKeys: String, CodingKey {
                 case seq
@@ -3187,6 +6335,7 @@ extension Components {
                 case member
                 case frame
                 case weather
+                case calendar
             }
         }
         /// Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -3512,6 +6661,922 @@ extension Components {
                 case current
                 case hourly
                 case daily
+            }
+        }
+        /// Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+        /// everywhere).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarColor`.
+        @frozen public enum CalendarColor: String, Codable, Hashable, Sendable, CaseIterable {
+            case coral = "coral"
+            case tangerine = "tangerine"
+            case amber = "amber"
+            case olive = "olive"
+            case mint = "mint"
+            case sage = "sage"
+            case teal = "teal"
+            case sky = "sky"
+            case ocean = "ocean"
+            case lavender = "lavender"
+            case plum = "plum"
+            case rose = "rose"
+        }
+        /// `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarSourceKind`.
+        @frozen public enum CalendarSourceKind: String, Codable, Hashable, Sendable, CaseIterable {
+            case ics = "ics"
+            case caldav = "caldav"
+            case local = "local"
+        }
+        /// `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarSyncStatus`.
+        @frozen public enum CalendarSyncStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case ok = "ok"
+            case syncing = "syncing"
+            case failed = "failed"
+            case authFailed = "auth_failed"
+            case disabled = "disabled"
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarSource`.
+        public struct CalendarSource: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/kind`.
+            public var kind: Components.Schemas.CalendarSourceKind
+            /// Display name. Empty for the local calendar until renamed: clients show "Received events".
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/color`.
+            public var color: Components.Schemas.CalendarColor
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/enabled`.
+            public var enabled: Swift.Bool
+            /// Redacted URL for display. Null for `local`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/url_hint`.
+            public var urlHint: Swift.String?
+            /// CalDAV only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/username`.
+            public var username: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/has_password`.
+            public var hasPassword: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/status`.
+            public var status: Components.Schemas.CalendarSyncStatus
+            /// Short reason of the last failed sync (English).
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/last_error`.
+            public var lastError: Swift.String?
+            /// Last successful sync.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/last_synced_at`.
+            public var lastSyncedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/last_attempt_at`.
+            public var lastAttemptAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/next_sync_at`.
+            public var nextSyncAt: Foundation.Date?
+            /// Events of this source in the frame's window.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/event_count`.
+            public var eventCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/CalendarSource/created_at`.
+            public var createdAt: Foundation.Date?
+            /// Creates a new `CalendarSource`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - name: Display name. Empty for the local calendar until renamed: clients show "Received events".
+            ///   - color:
+            ///   - enabled:
+            ///   - urlHint: Redacted URL for display. Null for `local`.
+            ///   - username: CalDAV only.
+            ///   - hasPassword:
+            ///   - status:
+            ///   - lastError: Short reason of the last failed sync (English).
+            ///   - lastSyncedAt: Last successful sync.
+            ///   - lastAttemptAt:
+            ///   - nextSyncAt:
+            ///   - eventCount: Events of this source in the frame's window.
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.CalendarSourceKind,
+                name: Swift.String,
+                color: Components.Schemas.CalendarColor,
+                enabled: Swift.Bool,
+                urlHint: Swift.String? = nil,
+                username: Swift.String? = nil,
+                hasPassword: Swift.Bool? = nil,
+                status: Components.Schemas.CalendarSyncStatus,
+                lastError: Swift.String? = nil,
+                lastSyncedAt: Foundation.Date? = nil,
+                lastAttemptAt: Foundation.Date? = nil,
+                nextSyncAt: Foundation.Date? = nil,
+                eventCount: Swift.Int? = nil,
+                createdAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.name = name
+                self.color = color
+                self.enabled = enabled
+                self.urlHint = urlHint
+                self.username = username
+                self.hasPassword = hasPassword
+                self.status = status
+                self.lastError = lastError
+                self.lastSyncedAt = lastSyncedAt
+                self.lastAttemptAt = lastAttemptAt
+                self.nextSyncAt = nextSyncAt
+                self.eventCount = eventCount
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case name
+                case color
+                case enabled
+                case urlHint = "url_hint"
+                case username
+                case hasPassword = "has_password"
+                case status
+                case lastError = "last_error"
+                case lastSyncedAt = "last_synced_at"
+                case lastAttemptAt = "last_attempt_at"
+                case nextSyncAt = "next_sync_at"
+                case eventCount = "event_count"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate`.
+        public struct CalendarSourceCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/kind`.
+            @frozen public enum KindPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ics = "ics"
+                case caldav = "caldav"
+            }
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/kind`.
+            public var kind: Components.Schemas.CalendarSourceCreate.KindPayload
+            /// `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/url`.
+            public var url: Swift.String
+            /// Defaults to the calendar's own name
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/name`.
+            public var name: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/color`.
+            public var color: Components.Schemas.CalendarColor?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/enabled`.
+            public var enabled: Swift.Bool?
+            /// CalDAV only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/username`.
+            public var username: Swift.String?
+            /// CalDAV only; use an app-specific password.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/password`.
+            public var password: Swift.String?
+            /// CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceCreate/calendar_url`.
+            public var calendarUrl: Swift.String?
+            /// Creates a new `CalendarSourceCreate`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - url: `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.
+            ///   - name: Defaults to the calendar's own name
+            ///   - color:
+            ///   - enabled:
+            ///   - username: CalDAV only.
+            ///   - password: CalDAV only; use an app-specific password.
+            ///   - calendarUrl: CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`.
+            public init(
+                kind: Components.Schemas.CalendarSourceCreate.KindPayload,
+                url: Swift.String,
+                name: Swift.String? = nil,
+                color: Components.Schemas.CalendarColor? = nil,
+                enabled: Swift.Bool? = nil,
+                username: Swift.String? = nil,
+                password: Swift.String? = nil,
+                calendarUrl: Swift.String? = nil
+            ) {
+                self.kind = kind
+                self.url = url
+                self.name = name
+                self.color = color
+                self.enabled = enabled
+                self.username = username
+                self.password = password
+                self.calendarUrl = calendarUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case url
+                case name
+                case color
+                case enabled
+                case username
+                case password
+                case calendarUrl = "calendar_url"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate`.
+        public struct CalendarSourceUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/name`.
+            public var name: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/color`.
+            public var color: Components.Schemas.CalendarColor?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/enabled`.
+            public var enabled: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/url`.
+            public var url: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/username`.
+            public var username: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/password`.
+            public var password: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceUpdate/calendar_url`.
+            public var calendarUrl: Swift.String?
+            /// Creates a new `CalendarSourceUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - color:
+            ///   - enabled:
+            ///   - url:
+            ///   - username:
+            ///   - password:
+            ///   - calendarUrl:
+            public init(
+                name: Swift.String? = nil,
+                color: Components.Schemas.CalendarColor? = nil,
+                enabled: Swift.Bool? = nil,
+                url: Swift.String? = nil,
+                username: Swift.String? = nil,
+                password: Swift.String? = nil,
+                calendarUrl: Swift.String? = nil
+            ) {
+                self.name = name
+                self.color = color
+                self.enabled = enabled
+                self.url = url
+                self.username = username
+                self.password = password
+                self.calendarUrl = calendarUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case color
+                case enabled
+                case url
+                case username
+                case password
+                case calendarUrl = "calendar_url"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarTestResult`.
+        public struct CalendarTestResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/ok`.
+            public var ok: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case ok = "ok"
+                case failed = "failed"
+                case authFailed = "auth_failed"
+            }
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/status`.
+            public var status: Components.Schemas.CalendarTestResult.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/error`.
+            public var error: Swift.String?
+            /// The calendar's own name
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/calendar_name`.
+            public var calendarName: Swift.String?
+            /// Events in the next 30 days.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/event_count`.
+            public var eventCount: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload`.
+            public struct CalendarsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload/url`.
+                public var url: Swift.String
+                /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload/name`.
+                public var name: Swift.String
+                /// The server's colour (hex)
+                ///
+                /// - Remark: Generated from `#/components/schemas/CalendarTestResult/CalendarsPayload/color`.
+                public var color: Swift.String?
+                /// Creates a new `CalendarsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - url:
+                ///   - name:
+                ///   - color: The server's colour (hex)
+                public init(
+                    url: Swift.String,
+                    name: Swift.String,
+                    color: Swift.String? = nil
+                ) {
+                    self.url = url
+                    self.name = name
+                    self.color = color
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case url
+                    case name
+                    case color
+                }
+            }
+            /// CalDAV only. Calendars on the account that hold events.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/calendars`.
+            public typealias CalendarsPayload = [Components.Schemas.CalendarTestResult.CalendarsPayloadPayload]
+            /// CalDAV only. Calendars on the account that hold events.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarTestResult/calendars`.
+            public var calendars: Components.Schemas.CalendarTestResult.CalendarsPayload?
+            /// Creates a new `CalendarTestResult`.
+            ///
+            /// - Parameters:
+            ///   - ok:
+            ///   - status:
+            ///   - error:
+            ///   - calendarName: The calendar's own name
+            ///   - eventCount: Events in the next 30 days.
+            ///   - calendars: CalDAV only. Calendars on the account that hold events.
+            public init(
+                ok: Swift.Bool,
+                status: Components.Schemas.CalendarTestResult.StatusPayload,
+                error: Swift.String? = nil,
+                calendarName: Swift.String? = nil,
+                eventCount: Swift.Int? = nil,
+                calendars: Components.Schemas.CalendarTestResult.CalendarsPayload? = nil
+            ) {
+                self.ok = ok
+                self.status = status
+                self.error = error
+                self.calendarName = calendarName
+                self.eventCount = eventCount
+                self.calendars = calendars
+            }
+            public enum CodingKeys: String, CodingKey {
+                case ok
+                case status
+                case error
+                case calendarName = "calendar_name"
+                case eventCount = "event_count"
+                case calendars
+            }
+        }
+        /// Stable id of one event occurrence (a hash of source, UID and occurrence start).
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarEventId`.
+        public typealias CalendarEventId = Swift.String
+        /// One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+        /// all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/CalendarEvent`.
+        public struct CalendarEvent: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/id`.
+            public var id: Components.Schemas.CalendarEventId
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/source_id`.
+            public var sourceId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/all_day`.
+            public var allDay: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/start_at`.
+            public var startAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/end_at`.
+            public var endAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/start_date`.
+            public var startDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/end_date`.
+            public var endDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/location`.
+            public var location: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/notes`.
+            public var notes: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/recurring`.
+            public var recurring: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/countdown`.
+            public var countdown: Swift.Bool?
+            /// Received events only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/sender_name`.
+            public var senderName: Swift.String?
+            /// Received events only; the photo is at `/v1/device/invitations/{id}/photo`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/invitation_id`.
+            public var invitationId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/has_photo`.
+            public var hasPhoto: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/CalendarEvent/photo_placement`.
+            public var photoPlacement: Components.Schemas.EventPhotoPlacement?
+            /// Creates a new `CalendarEvent`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - sourceId:
+            ///   - title:
+            ///   - allDay:
+            ///   - startAt:
+            ///   - endAt:
+            ///   - startDate:
+            ///   - endDate:
+            ///   - location:
+            ///   - notes:
+            ///   - recurring:
+            ///   - countdown:
+            ///   - senderName: Received events only.
+            ///   - invitationId: Received events only; the photo is at `/v1/device/invitations/{id}/photo`.
+            ///   - hasPhoto:
+            ///   - photoPlacement:
+            public init(
+                id: Components.Schemas.CalendarEventId,
+                sourceId: Components.Schemas.Id,
+                title: Swift.String,
+                allDay: Swift.Bool,
+                startAt: Foundation.Date? = nil,
+                endAt: Foundation.Date? = nil,
+                startDate: Swift.String? = nil,
+                endDate: Swift.String? = nil,
+                location: Swift.String? = nil,
+                notes: Swift.String? = nil,
+                recurring: Swift.Bool? = nil,
+                countdown: Swift.Bool? = nil,
+                senderName: Swift.String? = nil,
+                invitationId: Components.Schemas.Id? = nil,
+                hasPhoto: Swift.Bool? = nil,
+                photoPlacement: Components.Schemas.EventPhotoPlacement? = nil
+            ) {
+                self.id = id
+                self.sourceId = sourceId
+                self.title = title
+                self.allDay = allDay
+                self.startAt = startAt
+                self.endAt = endAt
+                self.startDate = startDate
+                self.endDate = endDate
+                self.location = location
+                self.notes = notes
+                self.recurring = recurring
+                self.countdown = countdown
+                self.senderName = senderName
+                self.invitationId = invitationId
+                self.hasPhoto = hasPhoto
+                self.photoPlacement = photoPlacement
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case sourceId = "source_id"
+                case title
+                case allDay = "all_day"
+                case startAt = "start_at"
+                case endAt = "end_at"
+                case startDate = "start_date"
+                case endDate = "end_date"
+                case location
+                case notes
+                case recurring
+                case countdown
+                case senderName = "sender_name"
+                case invitationId = "invitation_id"
+                case hasPhoto = "has_photo"
+                case photoPlacement = "photo_placement"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo`.
+        public struct CalendarSourceInfo: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/kind`.
+            public var kind: Components.Schemas.CalendarSourceKind
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/color`.
+            public var color: Components.Schemas.CalendarColor
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/status`.
+            public var status: Components.Schemas.CalendarSyncStatus
+            /// - Remark: Generated from `#/components/schemas/CalendarSourceInfo/last_synced_at`.
+            public var lastSyncedAt: Foundation.Date?
+            /// Creates a new `CalendarSourceInfo`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - kind:
+            ///   - name:
+            ///   - color:
+            ///   - status:
+            ///   - lastSyncedAt:
+            public init(
+                id: Components.Schemas.Id,
+                kind: Components.Schemas.CalendarSourceKind,
+                name: Swift.String,
+                color: Components.Schemas.CalendarColor,
+                status: Components.Schemas.CalendarSyncStatus,
+                lastSyncedAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.kind = kind
+                self.name = name
+                self.color = color
+                self.status = status
+                self.lastSyncedAt = lastSyncedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case kind
+                case name
+                case color
+                case status
+                case lastSyncedAt = "last_synced_at"
+            }
+        }
+        /// A marked event, even when it lies outside the window.
+        ///
+        /// - Remark: Generated from `#/components/schemas/Countdown`.
+        public struct Countdown: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Countdown/event_id`.
+            public var eventId: Components.Schemas.CalendarEventId
+            /// - Remark: Generated from `#/components/schemas/Countdown/source_id`.
+            public var sourceId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/Countdown/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/Countdown/all_day`.
+            public var allDay: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/Countdown/start_at`.
+            public var startAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/Countdown/start_date`.
+            public var startDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/Countdown/color`.
+            public var color: Components.Schemas.CalendarColor
+            /// Creates a new `Countdown`.
+            ///
+            /// - Parameters:
+            ///   - eventId:
+            ///   - sourceId:
+            ///   - title:
+            ///   - allDay:
+            ///   - startAt:
+            ///   - startDate:
+            ///   - color:
+            public init(
+                eventId: Components.Schemas.CalendarEventId,
+                sourceId: Components.Schemas.Id? = nil,
+                title: Swift.String,
+                allDay: Swift.Bool,
+                startAt: Foundation.Date? = nil,
+                startDate: Swift.String? = nil,
+                color: Components.Schemas.CalendarColor
+            ) {
+                self.eventId = eventId
+                self.sourceId = sourceId
+                self.title = title
+                self.allDay = allDay
+                self.startAt = startAt
+                self.startDate = startDate
+                self.color = color
+            }
+            public enum CodingKeys: String, CodingKey {
+                case eventId = "event_id"
+                case sourceId = "source_id"
+                case title
+                case allDay = "all_day"
+                case startAt = "start_at"
+                case startDate = "start_date"
+                case color
+            }
+        }
+        /// Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+        /// list, deduplicated across sources by UID and start, sorted by start.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/Calendar`.
+        public struct Calendar: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/Calendar/generated_at`.
+            public var generatedAt: Foundation.Date
+            /// The frame's time zone (`locale.timezone`), used for the window and all-day events.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Calendar/timezone`.
+            public var timezone: Swift.String
+            /// - Remark: Generated from `#/components/schemas/Calendar/window`.
+            public struct WindowPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Calendar/window/from`.
+                public var from: Swift.String
+                /// Inclusive.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Calendar/window/to`.
+                public var to: Swift.String
+                /// Creates a new `WindowPayload`.
+                ///
+                /// - Parameters:
+                ///   - from:
+                ///   - to: Inclusive.
+                public init(
+                    from: Swift.String,
+                    to: Swift.String
+                ) {
+                    self.from = from
+                    self.to = to
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case from
+                    case to
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/Calendar/window`.
+            public var window: Components.Schemas.Calendar.WindowPayload
+            /// - Remark: Generated from `#/components/schemas/Calendar/sources`.
+            public var sources: [Components.Schemas.CalendarSourceInfo]
+            /// - Remark: Generated from `#/components/schemas/Calendar/events`.
+            public var events: [Components.Schemas.CalendarEvent]
+            /// Marked events that have not passed yet, nearest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Calendar/countdowns`.
+            public var countdowns: [Components.Schemas.Countdown]
+            /// Creates a new `Calendar`.
+            ///
+            /// - Parameters:
+            ///   - generatedAt:
+            ///   - timezone: The frame's time zone (`locale.timezone`), used for the window and all-day events.
+            ///   - window:
+            ///   - sources:
+            ///   - events:
+            ///   - countdowns: Marked events that have not passed yet, nearest first.
+            public init(
+                generatedAt: Foundation.Date,
+                timezone: Swift.String,
+                window: Components.Schemas.Calendar.WindowPayload,
+                sources: [Components.Schemas.CalendarSourceInfo],
+                events: [Components.Schemas.CalendarEvent],
+                countdowns: [Components.Schemas.Countdown]
+            ) {
+                self.generatedAt = generatedAt
+                self.timezone = timezone
+                self.window = window
+                self.sources = sources
+                self.events = events
+                self.countdowns = countdowns
+            }
+            public enum CodingKeys: String, CodingKey {
+                case generatedAt = "generated_at"
+                case timezone
+                case window
+                case sources
+                case events
+                case countdowns
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/CalendarView`.
+        public struct CalendarView: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/CalendarView/value1`.
+            public var value1: Components.Schemas.Calendar
+            /// - Remark: Generated from `#/components/schemas/CalendarView/value2`.
+            public struct Value2Payload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/CalendarView/value2/weather`.
+                public var weather: Components.Schemas.Weather?
+                /// Creates a new `Value2Payload`.
+                ///
+                /// - Parameters:
+                ///   - weather:
+                public init(weather: Components.Schemas.Weather? = nil) {
+                    self.weather = weather
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case weather
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/CalendarView/value2`.
+            public var value2: Components.Schemas.CalendarView.Value2Payload
+            /// Creates a new `CalendarView`.
+            ///
+            /// - Parameters:
+            ///   - value1:
+            ///   - value2:
+            public init(
+                value1: Components.Schemas.Calendar,
+                value2: Components.Schemas.CalendarView.Value2Payload
+            ) {
+                self.value1 = value1
+                self.value2 = value2
+            }
+            public init(from decoder: any Swift.Decoder) throws {
+                self.value1 = try .init(from: decoder)
+                self.value2 = try .init(from: decoder)
+            }
+            public func encode(to encoder: any Swift.Encoder) throws {
+                try self.value1.encode(to: encoder)
+                try self.value2.encode(to: encoder)
+            }
+        }
+        /// `top`: the photo above the event details. `background`: the photo fills the card behind them.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EventPhotoPlacement`.
+        @frozen public enum EventPhotoPlacement: String, Codable, Hashable, Sendable, CaseIterable {
+            case top = "top"
+            case background = "background"
+        }
+        /// Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`).
+        ///
+        /// - Remark: Generated from `#/components/schemas/EventInvitationCreate`.
+        public struct EventInvitationCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/all_day`.
+            public var allDay: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/start_at`.
+            public var startAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/end_at`.
+            public var endAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/start_date`.
+            public var startDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/end_date`.
+            public var endDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/location`.
+            public var location: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/notes`.
+            public var notes: Swift.String?
+            /// A finished tus upload holding an image.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/photo_upload_id`.
+            public var photoUploadId: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitationCreate/photo_placement`.
+            public var photoPlacement: Components.Schemas.EventPhotoPlacement?
+            /// Creates a new `EventInvitationCreate`.
+            ///
+            /// - Parameters:
+            ///   - title:
+            ///   - allDay:
+            ///   - startAt:
+            ///   - endAt:
+            ///   - startDate:
+            ///   - endDate:
+            ///   - location:
+            ///   - notes:
+            ///   - photoUploadId: A finished tus upload holding an image.
+            ///   - photoPlacement:
+            public init(
+                title: Swift.String,
+                allDay: Swift.Bool? = nil,
+                startAt: Foundation.Date? = nil,
+                endAt: Foundation.Date? = nil,
+                startDate: Swift.String? = nil,
+                endDate: Swift.String? = nil,
+                location: Swift.String? = nil,
+                notes: Swift.String? = nil,
+                photoUploadId: Swift.String? = nil,
+                photoPlacement: Components.Schemas.EventPhotoPlacement? = nil
+            ) {
+                self.title = title
+                self.allDay = allDay
+                self.startAt = startAt
+                self.endAt = endAt
+                self.startDate = startDate
+                self.endDate = endDate
+                self.location = location
+                self.notes = notes
+                self.photoUploadId = photoUploadId
+                self.photoPlacement = photoPlacement
+            }
+            public enum CodingKeys: String, CodingKey {
+                case title
+                case allDay = "all_day"
+                case startAt = "start_at"
+                case endAt = "end_at"
+                case startDate = "start_date"
+                case endDate = "end_date"
+                case location
+                case notes
+                case photoUploadId = "photo_upload_id"
+                case photoPlacement = "photo_placement"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EventInvitation`.
+        public struct EventInvitation: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/frame_id`.
+            public var frameId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/sender_id`.
+            public var senderId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/sender_name`.
+            public var senderName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/status`.
+            @frozen public enum StatusPayload: String, Codable, Hashable, Sendable, CaseIterable {
+                case pending = "pending"
+                case accepted = "accepted"
+                case declined = "declined"
+                case withdrawn = "withdrawn"
+            }
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/status`.
+            public var status: Components.Schemas.EventInvitation.StatusPayload
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/all_day`.
+            public var allDay: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/start_at`.
+            public var startAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/end_at`.
+            public var endAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/start_date`.
+            public var startDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/end_date`.
+            public var endDate: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/location`.
+            public var location: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/notes`.
+            public var notes: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/has_photo`.
+            public var hasPhoto: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/photo_placement`.
+            public var photoPlacement: Components.Schemas.EventPhotoPlacement?
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/created_at`.
+            public var createdAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EventInvitation/decided_at`.
+            public var decidedAt: Foundation.Date?
+            /// Creates a new `EventInvitation`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - frameId:
+            ///   - senderId:
+            ///   - senderName:
+            ///   - status:
+            ///   - title:
+            ///   - allDay:
+            ///   - startAt:
+            ///   - endAt:
+            ///   - startDate:
+            ///   - endDate:
+            ///   - location:
+            ///   - notes:
+            ///   - hasPhoto:
+            ///   - photoPlacement:
+            ///   - createdAt:
+            ///   - decidedAt:
+            public init(
+                id: Components.Schemas.Id,
+                frameId: Components.Schemas.Id,
+                senderId: Components.Schemas.Id,
+                senderName: Swift.String,
+                status: Components.Schemas.EventInvitation.StatusPayload,
+                title: Swift.String,
+                allDay: Swift.Bool,
+                startAt: Foundation.Date? = nil,
+                endAt: Foundation.Date? = nil,
+                startDate: Swift.String? = nil,
+                endDate: Swift.String? = nil,
+                location: Swift.String? = nil,
+                notes: Swift.String? = nil,
+                hasPhoto: Swift.Bool,
+                photoPlacement: Components.Schemas.EventPhotoPlacement? = nil,
+                createdAt: Foundation.Date,
+                decidedAt: Foundation.Date? = nil
+            ) {
+                self.id = id
+                self.frameId = frameId
+                self.senderId = senderId
+                self.senderName = senderName
+                self.status = status
+                self.title = title
+                self.allDay = allDay
+                self.startAt = startAt
+                self.endAt = endAt
+                self.startDate = startDate
+                self.endDate = endDate
+                self.location = location
+                self.notes = notes
+                self.hasPhoto = hasPhoto
+                self.photoPlacement = photoPlacement
+                self.createdAt = createdAt
+                self.decidedAt = decidedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case frameId = "frame_id"
+                case senderId = "sender_id"
+                case senderName = "sender_name"
+                case status
+                case title
+                case allDay = "all_day"
+                case startAt = "start_at"
+                case endAt = "end_at"
+                case startDate = "start_date"
+                case endDate = "end_date"
+                case location
+                case notes
+                case hasPhoto = "has_photo"
+                case photoPlacement = "photo_placement"
+                case createdAt = "created_at"
+                case decidedAt = "decided_at"
             }
         }
     }

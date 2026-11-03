@@ -14,6 +14,12 @@ extension Components {
         public typealias ItemId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/PlacementId`.
         public typealias PlacementId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/CalendarId`.
+        public typealias CalendarId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/InvitationId`.
+        public typealias InvitationId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/EventId`.
+        public typealias EventId = Components.Schemas.CalendarEventId
         /// - Remark: Generated from `#/components/parameters/EndpointId`.
         public typealias EndpointId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/InviteToken`.

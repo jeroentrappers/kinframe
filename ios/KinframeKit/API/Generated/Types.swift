@@ -129,7 +129,9 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/invites/{token}/accept/post(acceptInvite)`.
     func acceptInvite(_ input: Operations.AcceptInvite.Input) async throws -> Operations.AcceptInvite.Output
     /// tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
-    /// Upload-Metadata keys: filename, filetype, sha256 (optional).
+    /// Upload-Metadata keys: filename, filetype, sha256 (optional), prepared (optional: `photo-master-v1` or
+    /// `video-master-v1` when the client already produced a master; the server verifies it, see README §5.3
+    /// "Prepared uploads").
     ///
     ///
     /// - Remark: HTTP `POST /v1/uploads`.
@@ -151,7 +153,9 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /v1/sends/{sendId}`.
     /// - Remark: Generated from `#/paths//v1/sends/{sendId}/delete(unsend)`.
     func unsend(_ input: Operations.Unsend.Input) async throws -> Operations.Unsend.Output
-    /// Place the same items on additional frames.
+    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
     /// - Remark: Generated from `#/paths//v1/sends/{sendId}/forward/post(forwardSend)`.
@@ -184,6 +188,28 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/frames/{frameId}/placements:bulk`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:bulk/post(bulkUpdatePlacements)`.
     func bulkUpdatePlacements(_ input: Operations.BulkUpdatePlacements.Input) async throws -> Operations.BulkUpdatePlacements.Output
+    /// Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+    /// "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+    /// a frame rendition is only made when the target's screen size has none yet.
+    ///
+    /// - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+    ///   `see_library` there or be the item's sender (or the member who shared it there).
+    /// - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+    ///   (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+    ///   placements may be shared per request.
+    /// - A target that already holds the item is skipped and reported in `skipped`.
+    /// - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+    ///   and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+    /// - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+    ///   other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+    /// - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+    ///   already have the selection.
+    /// - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/placements:share`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)`.
+    func sharePlacements(_ input: Operations.SharePlacements.Input) async throws -> Operations.SharePlacements.Output
     /// - Remark: HTTP `GET /v1/frames/{frameId}/albums`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/get(listAlbums)`.
     func listAlbums(_ input: Operations.ListAlbums.Input) async throws -> Operations.ListAlbums.Output
@@ -198,6 +224,42 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /v1/frames/{frameId}/albums/{albumId}`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/{albumId}/delete(deleteAlbum)`.
     func deleteAlbum(_ input: Operations.DeleteAlbum.Input) async throws -> Operations.DeleteAlbum.Output
+    /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/get(listTvLinks)`.
+    func listTvLinks(_ input: Operations.ListTvLinks.Input) async throws -> Operations.ListTvLinks.Output
+    /// Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+    /// (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+    /// one of the caller's own placements (e.g. "Show on TV" from History).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/post(createTvLink)`.
+    func createTvLink(_ input: Operations.CreateTvLink.Input) async throws -> Operations.CreateTvLink.Output
+    /// Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/tv-links/{linkId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)`.
+    func revokeTvLink(_ input: Operations.RevokeTvLink.Input) async throws -> Operations.RevokeTvLink.Output
+    /// No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+    /// rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+    /// expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+    /// `410 link_expired` once the link has expired.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/get(getTvSlideshow)`.
+    func getTvSlideshow(_ input: Operations.GetTvSlideshow.Input) async throws -> Operations.GetTvSlideshow.Output
+    /// WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+    /// `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+    /// revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+    /// `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}/mirror`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)`.
+    func tvMirror(_ input: Operations.TvMirror.Input) async throws -> Operations.TvMirror.Output
     /// - Remark: HTTP `GET /v1/frames/{frameId}/settings`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/settings/get(getFrameSettings)`.
     func getFrameSettings(_ input: Operations.GetFrameSettings.Input) async throws -> Operations.GetFrameSettings.Output
@@ -206,6 +268,42 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/frames/{frameId}/settings`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/settings/patch(updateFrameSettings)`.
     func updateFrameSettings(_ input: Operations.UpdateFrameSettings.Input) async throws -> Operations.UpdateFrameSettings.Output
+    /// The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+    /// frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+    /// key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+    /// pair or nothing arrived in the last 48 hours. Rate-limited per address.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/latest`.
+    /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)`.
+    func getStationLatest(_ input: Operations.GetStationLatest.Input) async throws -> Operations.GetStationLatest.Output
+    /// The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+    /// latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+    /// on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+    /// seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/public/get(listPublicStations)`.
+    func listPublicStations(_ input: Operations.ListPublicStations.Input) async throws -> Operations.ListPublicStations.Output
+    /// A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+    /// last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+    /// the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+    /// place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+    /// cacheable for 30 seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/{stationId}/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)`.
+    func getStationPublic(_ input: Operations.GetStationPublic.Input) async throws -> Operations.GetStationPublic.Output
+    /// The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+    /// plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+    /// The instances themselves are in the settings (`plugins.instances`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/plugins`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/plugins/get(getFramePlugins)`.
+    func getFramePlugins(_ input: Operations.GetFramePlugins.Input) async throws -> Operations.GetFramePlugins.Output
     /// Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
     /// server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
     /// no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
@@ -215,6 +313,90 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/geocode`.
     /// - Remark: Generated from `#/paths//v1/geocode/get(geocode)`.
     func geocode(_ input: Operations.Geocode.Input) async throws -> Operations.Geocode.Output
+    /// The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/get(listCalendars)`.
+    func listCalendars(_ input: Operations.ListCalendars.Input) async throws -> Operations.ListCalendars.Output
+    /// Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+    /// result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+    /// `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+    /// several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)`.
+    func createCalendar(_ input: Operations.CreateCalendar.Input) async throws -> Operations.CreateCalendar.Output
+    /// Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+    /// `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+    /// `ok: false` with `status` and `error` when the calendar cannot be read.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars:test`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)`.
+    func testCalendar(_ input: Operations.TestCalendar.Input) async throws -> Operations.TestCalendar.Output
+    /// Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+    /// are kept. Changing the URL or credentials syncs right away.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/patch(updateCalendar)`.
+    func updateCalendar(_ input: Operations.UpdateCalendar.Input) async throws -> Operations.UpdateCalendar.Output
+    /// Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+    /// calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)`.
+    func deleteCalendar(_ input: Operations.DeleteCalendar.Input) async throws -> Operations.DeleteCalendar.Output
+    /// Sync now (needs change_settings). Returns at once with `status: syncing`.
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars/{calendarId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/sync/post(syncCalendar)`.
+    func syncCalendar(_ input: Operations.SyncCalendar.Input) async throws -> Operations.SyncCalendar.Output
+    /// Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+    /// `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+    /// day.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendar`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendar/get(getFrameCalendar)`.
+    func getFrameCalendar(_ input: Operations.GetFrameCalendar.Input) async throws -> Operations.GetFrameCalendar.Output
+    /// Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+    /// Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+    /// frame's calendar.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)`.
+    func setCountdown(_ input: Operations.SetCountdown.Input) async throws -> Operations.SetCountdown.Output
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)`.
+    func clearCountdown(_ input: Operations.ClearCountdown.Input) async throws -> Operations.ClearCountdown.Output
+    /// Events sent to this frame, newest first. Senders see their own; owner and admin see all.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/get(listEventInvitations)`.
+    func listEventInvitations(_ input: Operations.ListEventInvitations.Input) async throws -> Operations.ListEventInvitations.Output
+    /// Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+    /// accepted events go to the frame's local received-events calendar. The sender gets an
+    /// `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+    /// new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)`.
+    func sendEventToFrame(_ input: Operations.SendEventToFrame.Input) async throws -> Operations.SendEventToFrame.Output
+    /// The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/events/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)`.
+    func withdrawEventInvitation(_ input: Operations.WithdrawEventInvitation.Input) async throws -> Operations.WithdrawEventInvitation.Output
+    /// The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/photo/get(getEventInvitationPhoto)`.
+    func getEventInvitationPhoto(_ input: Operations.GetEventInvitationPhoto.Input) async throws -> Operations.GetEventInvitationPhoto.Output
     /// Called once by a fresh frame. Rate-limited per IP.
     ///
     /// - Remark: HTTP `POST /v1/devices/enroll`.
@@ -236,7 +418,9 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/device/changes`.
     /// - Remark: Generated from `#/paths//v1/device/changes/get(deviceGetChanges)`.
     func deviceGetChanges(_ input: Operations.DeviceGetChanges.Input) async throws -> Operations.DeviceGetChanges.Output
-    /// The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match.
+    /// The frame-sized rendition (or poster with ?variant=poster). For a Live/Motion Photo (`item.kind: live`),
+    /// `display` is the still and `?variant=motion` the short frame-sized clip. Supports Range, ETag, If-None-Match.
+    ///
     ///
     /// - Remark: HTTP `GET /v1/device/media/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/media/{placementId}/get(deviceGetMedia)`.
@@ -252,6 +436,28 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/device/settings`.
     /// - Remark: Generated from `#/paths//v1/device/settings/patch(devicePatchSettings)`.
     func devicePatchSettings(_ input: Operations.DevicePatchSettings.Input) async throws -> Operations.DevicePatchSettings.Output
+    /// The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/catalog`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)`.
+    func devicePutPluginCatalog(_ input: Operations.DevicePutPluginCatalog.Input) async throws -> Operations.DevicePutPluginCatalog.Output
+    /// The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+    /// verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/registry`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)`.
+    func deviceGetPluginRegistry(_ input: Operations.DeviceGetPluginRegistry.Input) async throws -> Operations.DeviceGetPluginRegistry.Output
+    /// A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`.
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/bundles/{file}`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/bundles/{file}/get(deviceGetPluginBundle)`.
+    func deviceGetPluginBundle(_ input: Operations.DeviceGetPluginBundle.Input) async throws -> Operations.DeviceGetPluginBundle.Output
+    /// Errors, discovered entities and services (at most every 10 s). Replaces the previous report.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/status`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)`.
+    func devicePutPluginStatus(_ input: Operations.DevicePutPluginStatus.Input) async throws -> Operations.DevicePutPluginStatus.Output
     /// Actions taken at the frame (hide/unhide, trash/restore, local fit/focal override).
     ///
     /// - Remark: HTTP `PATCH /v1/device/placements/{placementId}`.
@@ -263,6 +469,14 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/device/placements/{placementId}/replies`.
     /// - Remark: Generated from `#/paths//v1/device/placements/{placementId}/replies/post(deviceSendReply)`.
     func deviceSendReply(_ input: Operations.DeviceSendReply.Input) async throws -> Operations.DeviceSendReply.Output
+    /// Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+    /// The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+    /// connect and after syncing, so requests announced while it was offline are not lost.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/device/join-requests/get(deviceListJoinRequests)`.
+    func deviceListJoinRequests(_ input: Operations.DeviceListJoinRequests.Input) async throws -> Operations.DeviceListJoinRequests.Output
     /// - Remark: HTTP `POST /v1/device/join-requests/{requestId}`.
     /// - Remark: Generated from `#/paths//v1/device/join-requests/{requestId}/post(deviceDecideJoin)`.
     func deviceDecideJoin(_ input: Operations.DeviceDecideJoin.Input) async throws -> Operations.DeviceDecideJoin.Output
@@ -272,12 +486,60 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/device/members/{userId}/delete(deviceRemoveMember)`.
     func deviceRemoveMember(_ input: Operations.DeviceRemoveMember.Input) async throws -> Operations.DeviceRemoveMember.Output
     /// Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
-    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB). The file
+    /// takes the same processing as any upload (renditions, location metadata stripped).
+    /// The server hashes the body: if this frame already has a live placement of the same file (source, master or
+    /// rendition sha256), nothing is created and the existing placement is returned with `200`.
+    ///
+    /// **Imports from another app's leftover data** (`source`, docs/spec/frameo-import.md): `source_key` makes the
+    /// import idempotent per frame. If this frame imported that key before, the placement of that item is returned
+    /// with `200`, even when it was removed since (`status: removed`), so a re-run never brings back what the family
+    /// deleted. The item keeps `sender_name`, `received_at`, fit, focal point and hidden state from the old app, and
+    /// the frame's owner owns the media.
     ///
     ///
     /// - Remark: HTTP `POST /v1/device/imports`.
     /// - Remark: Generated from `#/paths//v1/device/imports/post(deviceImport)`.
     func deviceImport(_ input: Operations.DeviceImport.Input) async throws -> Operations.DeviceImport.Output
+    /// Which of these file hashes this frame already has (a live placement whose source, master or frame
+    /// rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading. With `source` and
+    /// `source_keys`, also which of those keys this frame has imported before (removed items included, see
+    /// `deviceImport`), so a resumed import only uploads what is missing.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/device/imports/check`.
+    /// - Remark: Generated from `#/paths//v1/device/imports/check/post(deviceImportCheck)`.
+    func deviceImportCheck(_ input: Operations.DeviceImportCheck.Input) async throws -> Operations.DeviceImportCheck.Output
+    /// "Sync now" on the frame: the server re-syncs all of the frame's calendar sources. A `calendar` change follows when something changed.
+    ///
+    /// - Remark: HTTP `POST /v1/device/calendar/sync`.
+    /// - Remark: Generated from `#/paths//v1/device/calendar/sync/post(deviceSyncCalendars)`.
+    func deviceSyncCalendars(_ input: Operations.DeviceSyncCalendars.Input) async throws -> Operations.DeviceSyncCalendars.Output
+    /// The countdown toggle in the frame's event details. A `calendar` change follows.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)`.
+    func deviceSetCountdown(_ input: Operations.DeviceSetCountdown.Input) async throws -> Operations.DeviceSetCountdown.Output
+    /// - Remark: HTTP `DELETE /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/delete(deviceClearCountdown)`.
+    func deviceClearCountdown(_ input: Operations.DeviceClearCountdown.Input) async throws -> Operations.DeviceClearCountdown.Output
+    /// Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+    /// after syncing and after an `event_invitation` websocket message, like join requests.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/get(deviceListInvitations)`.
+    func deviceListInvitations(_ input: Operations.DeviceListInvitations.Input) async throws -> Operations.DeviceListInvitations.Output
+    /// Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before.
+    ///
+    /// - Remark: HTTP `POST /v1/device/invitations/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)`.
+    func deviceDecideInvitation(_ input: Operations.DeviceDecideInvitation.Input) async throws -> Operations.DeviceDecideInvitation.Output
+    /// The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)`.
+    func deviceGetInvitationPhoto(_ input: Operations.DeviceGetInvitationPhoto.Input) async throws -> Operations.DeviceGetInvitationPhoto.Output
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -292,6 +554,41 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/device/update/apk/{versionCode}`.
     /// - Remark: Generated from `#/paths//v1/device/update/apk/{versionCode}/get(deviceGetUpdateApk)`.
     func deviceGetUpdateApk(_ input: Operations.DeviceGetUpdateApk.Input) async throws -> Operations.DeviceGetUpdateApk.Output
+    /// No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+    /// the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+    /// `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+    /// the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+    /// APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/latest`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)`.
+    func getFrameAppLatest(_ input: Operations.GetFrameAppLatest.Input) async throws -> Operations.GetFrameAppLatest.Output
+    /// No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/apk/{versionCode}`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)`.
+    func getFrameAppApk(_ input: Operations.GetFrameAppApk.Input) async throws -> Operations.GetFrameAppApk.Output
+    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+    /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+    /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+    /// and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+    /// `items.<i>.quantity`/`maximum`, `consent`/`required`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)`.
+    func createShopReservation(_ input: Operations.CreateShopReservation.Input) async throws -> Operations.CreateShopReservation.Output
+    /// Cancels a reservation with the signed token from the link in the confirmation email (the web page
+    /// `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+    /// invalid token or a deleted reservation.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations/cancel`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/cancel/post(cancelShopReservation)`.
+    func cancelShopReservation(_ input: Operations.CancelShopReservation.Input) async throws -> Operations.CancelShopReservation.Output
     /// - Remark: HTTP `GET /v1/operator/stats`.
     /// - Remark: Generated from `#/paths//v1/operator/stats/get(operatorStats)`.
     func operatorStats(_ input: Operations.OperatorStats.Input) async throws -> Operations.OperatorStats.Output
@@ -301,6 +598,19 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PUT /v1/operator/limits`.
     /// - Remark: Generated from `#/paths//v1/operator/limits/put(operatorSetLimits)`.
     func operatorSetLimits(_ input: Operations.OperatorSetLimits.Input) async throws -> Operations.OperatorSetLimits.Output
+    /// Shop reservations, newest first. `404 not_found` when the server has no shop.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)`.
+    func operatorListReservations(_ input: Operations.OperatorListReservations.Input) async throws -> Operations.OperatorListReservations.Output
+    /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations.csv`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations.csv/get(operatorExportReservations)`.
+    func operatorExportReservations(_ input: Operations.OperatorExportReservations.Input) async throws -> Operations.OperatorExportReservations.Output
+    /// - Remark: HTTP `PATCH /v1/operator/reservations/{reservationId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)`.
+    func operatorUpdateReservation(_ input: Operations.OperatorUpdateReservation.Input) async throws -> Operations.OperatorUpdateReservation.Output
 }
 
 /// Convenience overloads for operation inputs.
@@ -643,7 +953,9 @@ extension APIProtocol {
         ))
     }
     /// tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
-    /// Upload-Metadata keys: filename, filetype, sha256 (optional).
+    /// Upload-Metadata keys: filename, filetype, sha256 (optional), prepared (optional: `photo-master-v1` or
+    /// `video-master-v1` when the client already produced a master; the server verifies it, see README §5.3
+    /// "Prepared uploads").
     ///
     ///
     /// - Remark: HTTP `POST /v1/uploads`.
@@ -693,7 +1005,9 @@ extension APIProtocol {
     public func unsend(path: Operations.Unsend.Input.Path) async throws -> Operations.Unsend.Output {
         try await unsend(Operations.Unsend.Input(path: path))
     }
-    /// Place the same items on additional frames.
+    /// Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+    /// renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+    ///
     ///
     /// - Remark: HTTP `POST /v1/sends/{sendId}/forward`.
     /// - Remark: Generated from `#/paths//v1/sends/{sendId}/forward/post(forwardSend)`.
@@ -786,6 +1100,38 @@ extension APIProtocol {
             body: body
         ))
     }
+    /// Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+    /// "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+    /// a frame rendition is only made when the target's screen size has none yet.
+    ///
+    /// - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+    ///   `see_library` there or be the item's sender (or the member who shared it there).
+    /// - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+    ///   (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+    ///   placements may be shared per request.
+    /// - A target that already holds the item is skipped and reported in `skipped`.
+    /// - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+    ///   and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+    /// - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+    ///   other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+    /// - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+    ///   already have the selection.
+    /// - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/placements:share`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/placements:share/post(sharePlacements)`.
+    public func sharePlacements(
+        path: Operations.SharePlacements.Input.Path,
+        headers: Operations.SharePlacements.Input.Headers = .init(),
+        body: Operations.SharePlacements.Input.Body
+    ) async throws -> Operations.SharePlacements.Output {
+        try await sharePlacements(Operations.SharePlacements.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
     /// - Remark: HTTP `GET /v1/frames/{frameId}/albums`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/albums/get(listAlbums)`.
     public func listAlbums(
@@ -830,6 +1176,84 @@ extension APIProtocol {
     public func deleteAlbum(path: Operations.DeleteAlbum.Input.Path) async throws -> Operations.DeleteAlbum.Output {
         try await deleteAlbum(Operations.DeleteAlbum.Input(path: path))
     }
+    /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/get(listTvLinks)`.
+    public func listTvLinks(
+        path: Operations.ListTvLinks.Input.Path,
+        headers: Operations.ListTvLinks.Input.Headers = .init()
+    ) async throws -> Operations.ListTvLinks.Output {
+        try await listTvLinks(Operations.ListTvLinks.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+    /// (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+    /// one of the caller's own placements (e.g. "Show on TV" from History).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/tv-links`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/post(createTvLink)`.
+    public func createTvLink(
+        path: Operations.CreateTvLink.Input.Path,
+        headers: Operations.CreateTvLink.Input.Headers = .init(),
+        body: Operations.CreateTvLink.Input.Body
+    ) async throws -> Operations.CreateTvLink.Output {
+        try await createTvLink(Operations.CreateTvLink.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/tv-links/{linkId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/tv-links/{linkId}/delete(revokeTvLink)`.
+    public func revokeTvLink(
+        path: Operations.RevokeTvLink.Input.Path,
+        headers: Operations.RevokeTvLink.Input.Headers = .init()
+    ) async throws -> Operations.RevokeTvLink.Output {
+        try await revokeTvLink(Operations.RevokeTvLink.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+    /// rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+    /// expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+    /// `410 link_expired` once the link has expired.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/get(getTvSlideshow)`.
+    public func getTvSlideshow(
+        path: Operations.GetTvSlideshow.Input.Path,
+        headers: Operations.GetTvSlideshow.Input.Headers = .init()
+    ) async throws -> Operations.GetTvSlideshow.Output {
+        try await getTvSlideshow(Operations.GetTvSlideshow.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+    /// `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+    /// revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+    /// `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/tv/{token}/mirror`.
+    /// - Remark: Generated from `#/paths//v1/tv/{token}/mirror/get(tvMirror)`.
+    public func tvMirror(
+        path: Operations.TvMirror.Input.Path,
+        headers: Operations.TvMirror.Input.Headers = .init()
+    ) async throws -> Operations.TvMirror.Output {
+        try await tvMirror(Operations.TvMirror.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// - Remark: HTTP `GET /v1/frames/{frameId}/settings`.
     /// - Remark: Generated from `#/paths//v1/frames/{frameId}/settings/get(getFrameSettings)`.
     public func getFrameSettings(
@@ -856,6 +1280,62 @@ extension APIProtocol {
             body: body
         ))
     }
+    /// The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+    /// frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+    /// key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+    /// pair or nothing arrived in the last 48 hours. Rate-limited per address.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/latest`.
+    /// - Remark: Generated from `#/paths//v1/stations/latest/get(getStationLatest)`.
+    public func getStationLatest(headers: Operations.GetStationLatest.Input.Headers) async throws -> Operations.GetStationLatest.Output {
+        try await getStationLatest(Operations.GetStationLatest.Input(headers: headers))
+    }
+    /// The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+    /// latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+    /// on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+    /// seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/public/get(listPublicStations)`.
+    public func listPublicStations(headers: Operations.ListPublicStations.Input.Headers = .init()) async throws -> Operations.ListPublicStations.Output {
+        try await listPublicStations(Operations.ListPublicStations.Input(headers: headers))
+    }
+    /// A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+    /// last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+    /// the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+    /// place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+    /// cacheable for 30 seconds.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/stations/{stationId}/public`.
+    /// - Remark: Generated from `#/paths//v1/stations/{stationId}/public/get(getStationPublic)`.
+    public func getStationPublic(
+        path: Operations.GetStationPublic.Input.Path,
+        headers: Operations.GetStationPublic.Input.Headers = .init()
+    ) async throws -> Operations.GetStationPublic.Output {
+        try await getStationPublic(Operations.GetStationPublic.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+    /// plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+    /// The instances themselves are in the settings (`plugins.instances`).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/plugins`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/plugins/get(getFramePlugins)`.
+    public func getFramePlugins(
+        path: Operations.GetFramePlugins.Input.Path,
+        headers: Operations.GetFramePlugins.Input.Headers = .init()
+    ) async throws -> Operations.GetFramePlugins.Output {
+        try await getFramePlugins(Operations.GetFramePlugins.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// Place search for a frame's `settings.location`, proxied to the Open-Meteo geocoding API and cached by the
     /// server (clients never call third parties). Rate-limited per user (`429 rate_limited`). An empty list means
     /// no match. `502 upstream_unavailable` when the geocoding service cannot be reached, `503` when the server
@@ -870,6 +1350,202 @@ extension APIProtocol {
     ) async throws -> Operations.Geocode.Output {
         try await geocode(Operations.Geocode.Input(
             query: query,
+            headers: headers
+        ))
+    }
+    /// The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/get(listCalendars)`.
+    public func listCalendars(
+        path: Operations.ListCalendars.Input.Path,
+        headers: Operations.ListCalendars.Input.Headers = .init()
+    ) async throws -> Operations.ListCalendars.Output {
+        try await listCalendars(Operations.ListCalendars.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+    /// result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+    /// `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+    /// several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/post(createCalendar)`.
+    public func createCalendar(
+        path: Operations.CreateCalendar.Input.Path,
+        headers: Operations.CreateCalendar.Input.Headers = .init(),
+        body: Operations.CreateCalendar.Input.Body
+    ) async throws -> Operations.CreateCalendar.Output {
+        try await createCalendar(Operations.CreateCalendar.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+    /// `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+    /// `ok: false` with `status` and `error` when the calendar cannot be read.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars:test`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars:test/post(testCalendar)`.
+    public func testCalendar(
+        path: Operations.TestCalendar.Input.Path,
+        headers: Operations.TestCalendar.Input.Headers = .init(),
+        body: Operations.TestCalendar.Input.Body
+    ) async throws -> Operations.TestCalendar.Output {
+        try await testCalendar(Operations.TestCalendar.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+    /// are kept. Changing the URL or credentials syncs right away.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/patch(updateCalendar)`.
+    public func updateCalendar(
+        path: Operations.UpdateCalendar.Input.Path,
+        headers: Operations.UpdateCalendar.Input.Headers = .init(),
+        body: Operations.UpdateCalendar.Input.Body
+    ) async throws -> Operations.UpdateCalendar.Output {
+        try await updateCalendar(Operations.UpdateCalendar.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+    /// calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/calendars/{calendarId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/delete(deleteCalendar)`.
+    public func deleteCalendar(
+        path: Operations.DeleteCalendar.Input.Path,
+        headers: Operations.DeleteCalendar.Input.Headers = .init()
+    ) async throws -> Operations.DeleteCalendar.Output {
+        try await deleteCalendar(Operations.DeleteCalendar.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Sync now (needs change_settings). Returns at once with `status: syncing`.
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/calendars/{calendarId}/sync`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendars/{calendarId}/sync/post(syncCalendar)`.
+    public func syncCalendar(
+        path: Operations.SyncCalendar.Input.Path,
+        headers: Operations.SyncCalendar.Input.Headers = .init()
+    ) async throws -> Operations.SyncCalendar.Output {
+        try await syncCalendar(Operations.SyncCalendar.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+    /// `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+    /// day.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/calendar`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/calendar/get(getFrameCalendar)`.
+    public func getFrameCalendar(
+        path: Operations.GetFrameCalendar.Input.Path,
+        headers: Operations.GetFrameCalendar.Input.Headers = .init()
+    ) async throws -> Operations.GetFrameCalendar.Output {
+        try await getFrameCalendar(Operations.GetFrameCalendar.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+    /// Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+    /// frame's calendar.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/put(setCountdown)`.
+    public func setCountdown(
+        path: Operations.SetCountdown.Input.Path,
+        headers: Operations.SetCountdown.Input.Headers = .init()
+    ) async throws -> Operations.SetCountdown.Output {
+        try await setCountdown(Operations.SetCountdown.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/countdowns/{eventId}/delete(clearCountdown)`.
+    public func clearCountdown(
+        path: Operations.ClearCountdown.Input.Path,
+        headers: Operations.ClearCountdown.Input.Headers = .init()
+    ) async throws -> Operations.ClearCountdown.Output {
+        try await clearCountdown(Operations.ClearCountdown.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Events sent to this frame, newest first. Senders see their own; owner and admin see all.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/get(listEventInvitations)`.
+    public func listEventInvitations(
+        path: Operations.ListEventInvitations.Input.Path,
+        headers: Operations.ListEventInvitations.Input.Headers = .init()
+    ) async throws -> Operations.ListEventInvitations.Output {
+        try await listEventInvitations(Operations.ListEventInvitations.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+    /// accepted events go to the frame's local received-events calendar. The sender gets an
+    /// `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+    /// new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/events`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/post(sendEventToFrame)`.
+    public func sendEventToFrame(
+        path: Operations.SendEventToFrame.Input.Path,
+        headers: Operations.SendEventToFrame.Input.Headers = .init(),
+        body: Operations.SendEventToFrame.Input.Body
+    ) async throws -> Operations.SendEventToFrame.Output {
+        try await sendEventToFrame(Operations.SendEventToFrame.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise.
+    ///
+    /// - Remark: HTTP `DELETE /v1/frames/{frameId}/events/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/delete(withdrawEventInvitation)`.
+    public func withdrawEventInvitation(
+        path: Operations.WithdrawEventInvitation.Input.Path,
+        headers: Operations.WithdrawEventInvitation.Input.Headers = .init()
+    ) async throws -> Operations.WithdrawEventInvitation.Output {
+        try await withdrawEventInvitation(Operations.WithdrawEventInvitation.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/events/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/events/{invitationId}/photo/get(getEventInvitationPhoto)`.
+    public func getEventInvitationPhoto(
+        path: Operations.GetEventInvitationPhoto.Input.Path,
+        headers: Operations.GetEventInvitationPhoto.Input.Headers = .init()
+    ) async throws -> Operations.GetEventInvitationPhoto.Output {
+        try await getEventInvitationPhoto(Operations.GetEventInvitationPhoto.Input(
+            path: path,
             headers: headers
         ))
     }
@@ -922,7 +1598,9 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match.
+    /// The frame-sized rendition (or poster with ?variant=poster). For a Live/Motion Photo (`item.kind: live`),
+    /// `display` is the still and `?variant=motion` the short frame-sized clip. Supports Range, ETag, If-None-Match.
+    ///
     ///
     /// - Remark: HTTP `GET /v1/device/media/{placementId}`.
     /// - Remark: Generated from `#/paths//v1/device/media/{placementId}/get(deviceGetMedia)`.
@@ -954,6 +1632,54 @@ extension APIProtocol {
         body: Operations.DevicePatchSettings.Input.Body
     ) async throws -> Operations.DevicePatchSettings.Output {
         try await devicePatchSettings(Operations.DevicePatchSettings.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/catalog`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/catalog/put(devicePutPluginCatalog)`.
+    public func devicePutPluginCatalog(
+        headers: Operations.DevicePutPluginCatalog.Input.Headers = .init(),
+        body: Operations.DevicePutPluginCatalog.Input.Body
+    ) async throws -> Operations.DevicePutPluginCatalog.Output {
+        try await devicePutPluginCatalog(Operations.DevicePutPluginCatalog.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+    /// verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/registry`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/registry/get(deviceGetPluginRegistry)`.
+    public func deviceGetPluginRegistry(headers: Operations.DeviceGetPluginRegistry.Input.Headers = .init()) async throws -> Operations.DeviceGetPluginRegistry.Output {
+        try await deviceGetPluginRegistry(Operations.DeviceGetPluginRegistry.Input(headers: headers))
+    }
+    /// A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`.
+    ///
+    /// - Remark: HTTP `GET /v1/device/plugins/bundles/{file}`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/bundles/{file}/get(deviceGetPluginBundle)`.
+    public func deviceGetPluginBundle(
+        path: Operations.DeviceGetPluginBundle.Input.Path,
+        headers: Operations.DeviceGetPluginBundle.Input.Headers = .init()
+    ) async throws -> Operations.DeviceGetPluginBundle.Output {
+        try await deviceGetPluginBundle(Operations.DeviceGetPluginBundle.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Errors, discovered entities and services (at most every 10 s). Replaces the previous report.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/plugins/status`.
+    /// - Remark: Generated from `#/paths//v1/device/plugins/status/put(devicePutPluginStatus)`.
+    public func devicePutPluginStatus(
+        headers: Operations.DevicePutPluginStatus.Input.Headers = .init(),
+        body: Operations.DevicePutPluginStatus.Input.Body
+    ) async throws -> Operations.DevicePutPluginStatus.Output {
+        try await devicePutPluginStatus(Operations.DevicePutPluginStatus.Input(
             headers: headers,
             body: body
         ))
@@ -995,6 +1721,16 @@ extension APIProtocol {
             body: body
         ))
     }
+    /// Pending join requests that wait for a decision on the frame ("ask on the frame before someone new joins").
+    /// The frame shows them until they are decided here or by an owner/admin in the app; it re-reads this list on
+    /// connect and after syncing, so requests announced while it was offline are not lost.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/join-requests`.
+    /// - Remark: Generated from `#/paths//v1/device/join-requests/get(deviceListJoinRequests)`.
+    public func deviceListJoinRequests(headers: Operations.DeviceListJoinRequests.Input.Headers = .init()) async throws -> Operations.DeviceListJoinRequests.Output {
+        try await deviceListJoinRequests(Operations.DeviceListJoinRequests.Input(headers: headers))
+    }
     /// - Remark: HTTP `POST /v1/device/join-requests/{requestId}`.
     /// - Remark: Generated from `#/paths//v1/device/join-requests/{requestId}/post(deviceDecideJoin)`.
     public func deviceDecideJoin(
@@ -1022,18 +1758,108 @@ extension APIProtocol {
         ))
     }
     /// Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
-    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+    /// Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB). The file
+    /// takes the same processing as any upload (renditions, location metadata stripped).
+    /// The server hashes the body: if this frame already has a live placement of the same file (source, master or
+    /// rendition sha256), nothing is created and the existing placement is returned with `200`.
+    ///
+    /// **Imports from another app's leftover data** (`source`, docs/spec/frameo-import.md): `source_key` makes the
+    /// import idempotent per frame. If this frame imported that key before, the placement of that item is returned
+    /// with `200`, even when it was removed since (`status: removed`), so a re-run never brings back what the family
+    /// deleted. The item keeps `sender_name`, `received_at`, fit, focal point and hidden state from the old app, and
+    /// the frame's owner owns the media.
     ///
     ///
     /// - Remark: HTTP `POST /v1/device/imports`.
     /// - Remark: Generated from `#/paths//v1/device/imports/post(deviceImport)`.
     public func deviceImport(
+        query: Operations.DeviceImport.Input.Query = .init(),
         headers: Operations.DeviceImport.Input.Headers,
         body: Operations.DeviceImport.Input.Body
     ) async throws -> Operations.DeviceImport.Output {
         try await deviceImport(Operations.DeviceImport.Input(
+            query: query,
             headers: headers,
             body: body
+        ))
+    }
+    /// Which of these file hashes this frame already has (a live placement whose source, master or frame
+    /// rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading. With `source` and
+    /// `source_keys`, also which of those keys this frame has imported before (removed items included, see
+    /// `deviceImport`), so a resumed import only uploads what is missing.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/device/imports/check`.
+    /// - Remark: Generated from `#/paths//v1/device/imports/check/post(deviceImportCheck)`.
+    public func deviceImportCheck(
+        headers: Operations.DeviceImportCheck.Input.Headers = .init(),
+        body: Operations.DeviceImportCheck.Input.Body
+    ) async throws -> Operations.DeviceImportCheck.Output {
+        try await deviceImportCheck(Operations.DeviceImportCheck.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// "Sync now" on the frame: the server re-syncs all of the frame's calendar sources. A `calendar` change follows when something changed.
+    ///
+    /// - Remark: HTTP `POST /v1/device/calendar/sync`.
+    /// - Remark: Generated from `#/paths//v1/device/calendar/sync/post(deviceSyncCalendars)`.
+    public func deviceSyncCalendars() async throws -> Operations.DeviceSyncCalendars.Output {
+        try await deviceSyncCalendars(Operations.DeviceSyncCalendars.Input())
+    }
+    /// The countdown toggle in the frame's event details. A `calendar` change follows.
+    ///
+    /// - Remark: HTTP `PUT /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/put(deviceSetCountdown)`.
+    public func deviceSetCountdown(
+        path: Operations.DeviceSetCountdown.Input.Path,
+        headers: Operations.DeviceSetCountdown.Input.Headers = .init()
+    ) async throws -> Operations.DeviceSetCountdown.Output {
+        try await deviceSetCountdown(Operations.DeviceSetCountdown.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `DELETE /v1/device/countdowns/{eventId}`.
+    /// - Remark: Generated from `#/paths//v1/device/countdowns/{eventId}/delete(deviceClearCountdown)`.
+    public func deviceClearCountdown(path: Operations.DeviceClearCountdown.Input.Path) async throws -> Operations.DeviceClearCountdown.Output {
+        try await deviceClearCountdown(Operations.DeviceClearCountdown.Input(path: path))
+    }
+    /// Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+    /// after syncing and after an `event_invitation` websocket message, like join requests.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/get(deviceListInvitations)`.
+    public func deviceListInvitations(headers: Operations.DeviceListInvitations.Input.Headers = .init()) async throws -> Operations.DeviceListInvitations.Output {
+        try await deviceListInvitations(Operations.DeviceListInvitations.Input(headers: headers))
+    }
+    /// Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before.
+    ///
+    /// - Remark: HTTP `POST /v1/device/invitations/{invitationId}`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/post(deviceDecideInvitation)`.
+    public func deviceDecideInvitation(
+        path: Operations.DeviceDecideInvitation.Input.Path,
+        headers: Operations.DeviceDecideInvitation.Input.Headers = .init(),
+        body: Operations.DeviceDecideInvitation.Input.Body
+    ) async throws -> Operations.DeviceDecideInvitation.Output {
+        try await deviceDecideInvitation(Operations.DeviceDecideInvitation.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/device/invitations/{invitationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/device/invitations/{invitationId}/photo/get(deviceGetInvitationPhoto)`.
+    public func deviceGetInvitationPhoto(
+        path: Operations.DeviceGetInvitationPhoto.Input.Path,
+        headers: Operations.DeviceGetInvitationPhoto.Input.Headers = .init()
+    ) async throws -> Operations.DeviceGetInvitationPhoto.Output {
+        try await deviceGetInvitationPhoto(Operations.DeviceGetInvitationPhoto.Input(
+            path: path,
+            headers: headers
         ))
     }
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
@@ -1066,6 +1892,73 @@ extension APIProtocol {
             headers: headers
         ))
     }
+    /// No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+    /// the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+    /// `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+    /// the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+    /// APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/latest`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/latest/get(getFrameAppLatest)`.
+    public func getFrameAppLatest(
+        query: Operations.GetFrameAppLatest.Input.Query = .init(),
+        headers: Operations.GetFrameAppLatest.Input.Headers = .init()
+    ) async throws -> Operations.GetFrameAppLatest.Output {
+        try await getFrameAppLatest(Operations.GetFrameAppLatest.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match.
+    ///
+    /// - Remark: HTTP `GET /v1/frame-app/apk/{versionCode}`.
+    /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)`.
+    public func getFrameAppApk(
+        path: Operations.GetFrameAppApk.Input.Path,
+        headers: Operations.GetFrameAppApk.Input.Headers = .init()
+    ) async throws -> Operations.GetFrameAppApk.Output {
+        try await getFrameAppApk(Operations.GetFrameAppApk.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+    /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+    /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+    /// and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+    /// `items.<i>.quantity`/`maximum`, `consent`/`required`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)`.
+    public func createShopReservation(
+        headers: Operations.CreateShopReservation.Input.Headers = .init(),
+        body: Operations.CreateShopReservation.Input.Body
+    ) async throws -> Operations.CreateShopReservation.Output {
+        try await createShopReservation(Operations.CreateShopReservation.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Cancels a reservation with the signed token from the link in the confirmation email (the web page
+    /// `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+    /// invalid token or a deleted reservation.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/reservations/cancel`.
+    /// - Remark: Generated from `#/paths//v1/shop/reservations/cancel/post(cancelShopReservation)`.
+    public func cancelShopReservation(
+        headers: Operations.CancelShopReservation.Input.Headers = .init(),
+        body: Operations.CancelShopReservation.Input.Body
+    ) async throws -> Operations.CancelShopReservation.Output {
+        try await cancelShopReservation(Operations.CancelShopReservation.Input(
+            headers: headers,
+            body: body
+        ))
+    }
     /// - Remark: HTTP `GET /v1/operator/stats`.
     /// - Remark: Generated from `#/paths//v1/operator/stats/get(operatorStats)`.
     public func operatorStats(headers: Operations.OperatorStats.Input.Headers = .init()) async throws -> Operations.OperatorStats.Output {
@@ -1083,6 +1976,45 @@ extension APIProtocol {
         body: Operations.OperatorSetLimits.Input.Body
     ) async throws -> Operations.OperatorSetLimits.Output {
         try await operatorSetLimits(Operations.OperatorSetLimits.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Shop reservations, newest first. `404 not_found` when the server has no shop.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)`.
+    public func operatorListReservations(
+        query: Operations.OperatorListReservations.Input.Query = .init(),
+        headers: Operations.OperatorListReservations.Input.Headers = .init()
+    ) async throws -> Operations.OperatorListReservations.Output {
+        try await operatorListReservations(Operations.OperatorListReservations.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reservations.csv`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations.csv/get(operatorExportReservations)`.
+    public func operatorExportReservations(
+        query: Operations.OperatorExportReservations.Input.Query = .init(),
+        headers: Operations.OperatorExportReservations.Input.Headers = .init()
+    ) async throws -> Operations.OperatorExportReservations.Output {
+        try await operatorExportReservations(Operations.OperatorExportReservations.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `PATCH /v1/operator/reservations/{reservationId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/reservations/{reservationId}/patch(operatorUpdateReservation)`.
+    public func operatorUpdateReservation(
+        path: Operations.OperatorUpdateReservation.Input.Path,
+        headers: Operations.OperatorUpdateReservation.Input.Headers = .init(),
+        body: Operations.OperatorUpdateReservation.Input.Body
+    ) async throws -> Operations.OperatorUpdateReservation.Output {
+        try await operatorUpdateReservation(Operations.OperatorUpdateReservation.Input(
+            path: path,
             headers: headers,
             body: body
         ))
