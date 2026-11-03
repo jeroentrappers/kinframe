@@ -142,6 +142,7 @@ struct FrameDetailView: View {
                         case .overview: FrameOverviewSection(model: model)
                         case .photos: FrameLibrarySection(api: model.api, frame: frame)
                         case .people: FramePeopleSection(api: model.api, frame: model.frame!)
+                        case .calendar: FrameCalendarSection(api: model.api, frame: frame)
                         case .settings: FrameSettingsSection(api: model.api, frame: frame)
                         }
                     }
@@ -208,7 +209,11 @@ struct FrameDetailView: View {
     }
 
     private func sections(_ frame: FrameSummary) -> [FrameSection] {
-        frame.can(\.changeSettings) ? [.overview, .photos, .people, .settings] : [.overview, .photos, .people]
+        var list: [FrameSection] = [.overview, .photos, .people]
+        // Calendars, sent events and countdowns (web: the Calendar tab), when the server has them.
+        if app.discovery?.calendar == true, frame.can(\.changeSettings) || frame.can(\.send) { list.append(.calendar) }
+        if frame.can(\.changeSettings) { list.append(.settings) }
+        return list
     }
 
     private func title(_ s: FrameSection) -> String {
@@ -216,6 +221,7 @@ struct FrameDetailView: View {
         case .overview: L("frame.tabOverview")
         case .photos: L("frame.tabLibrary")
         case .people: L("frame.tabPeople")
+        case .calendar: L("frame.tabCalendar")
         case .settings: L("frame.tabSettings")
         }
     }

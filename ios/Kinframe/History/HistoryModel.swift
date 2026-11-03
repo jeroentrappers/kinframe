@@ -101,7 +101,7 @@ final class HistoryModel {
                 // A new send (from this or another device): reload the first page.
                 Task { await load() }
             }
-        case .joinRequest, .membershipUpdated:
+        case .joinRequest, .membershipUpdated, .invitationDecided:
             break
         }
     }

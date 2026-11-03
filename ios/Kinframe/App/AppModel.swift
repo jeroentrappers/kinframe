@@ -259,6 +259,12 @@ final class AppModel {
             if let reaction, let by {
                 toasts.show("\(reaction.emoji) \(by)")
             }
+        case .invitationDecided(let frameId, let inv):
+            // Tell the sender when a frame accepted or declined their event, wherever they are in the app.
+            if inv.senderId == me?.id, inv.status == .accepted || inv.status == .declined {
+                let frameName = frame(frameId)?.name ?? ""
+                toasts.show(L(inv.status == .accepted ? "cal.decidedAccepted" : "cal.decidedDeclined", ["frame": frameName, "title": inv.title]))
+            }
         case .sendUpdated, .reply:
             break
         }

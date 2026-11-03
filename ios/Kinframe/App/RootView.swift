@@ -80,7 +80,7 @@ struct FrameRoute: Hashable {
 }
 
 enum FrameSection: String, Hashable, CaseIterable {
-    case overview, photos, people, settings
+    case overview, photos, people, calendar, settings
 }
 
 struct MainTabs: View {
