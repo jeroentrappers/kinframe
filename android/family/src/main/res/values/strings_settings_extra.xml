@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="legal_privacy">Privacy</string>
+    <string name="legal_terms">Terms</string>
+    <string name="settings_form_background">Around photos that don’t fill the screen</string>
+    <string name="settings_form_bg_blur">Soft blur</string>
+    <string name="settings_form_bg_black">Black</string>
+    <string name="settings_form_bg_palette">Matching colour</string>
+    <string name="settings_form_frame_language">Frame language</string>
+    <string name="settings_form_frame_language_hint">The language of the menus and messages on the frame itself.</string>
+    <string name="settings_change_photo">Change photo</string>
+    <string name="settings_remove_photo">Remove</string>
+    <string name="settings_avatar_saved">Photo updated</string>
+    <string name="settings_preferences">Preferences</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_hint">Used on this website and for notifications.</string>
+    <string name="frames_browser_badge">Browser</string>
+    <string name="settings_form_browser_note">This frame runs in a browser: brightness is set on the screen itself.</string>
+    <string name="settings_form_play_album">Show on the frame</string>
+    <string name="settings_form_all_photos">All photos</string>
+    <string name="settings_form_play_album_hint">Scheduled albums still take over on their days.</string>
+    <string name="settings_form_on_this_day">On this day</string>
+    <string name="settings_form_on_this_day_hint">Now and then, show photos taken on today’s date in earlier years.</string>
+    <!-- Android only: the app instead of the website. -->
+    <string name="settings_language_hint_app">Used in this app and for notifications.</string>
+</resources>

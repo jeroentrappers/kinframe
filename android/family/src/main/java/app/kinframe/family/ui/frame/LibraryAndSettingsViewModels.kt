@@ -344,6 +344,8 @@ data class SettingsFormState(
     val places: List<Place> = emptyList(),
     val searching: Boolean = false,
     @StringRes val placeError: Int? = null,
+    /** The frame's albums, for "Show on the frame". */
+    val albums: List<Album> = emptyList(),
 ) {
     val settings: FrameSettings get() = FrameSettings.parse(draft)
     val dirty: Boolean get() = base != null && draft != null && SettingsMerge.diff(base.raw, draft).isNotEmpty()
@@ -366,6 +368,7 @@ class FrameSettingsViewModel(private val api: KinApi, private val frameId: Strin
     init { load() }
 
     fun load() = viewModelScope.launch {
+        launch { runCatching { api.albums(frameId) }.onSuccess { l -> _state.update { it.copy(albums = l) } } }
         try {
             val doc = api.settings(frameId)
             _state.update { it.copy(base = doc, draft = doc.raw, load = Load.Ready(Unit), conflict = false) }

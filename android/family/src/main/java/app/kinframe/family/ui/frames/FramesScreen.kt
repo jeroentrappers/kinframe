@@ -49,6 +49,7 @@ import app.kinframe.family.ui.Load
 import app.kinframe.family.ui.OnlineStatus
 import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.RoleBadge
+import app.kinframe.family.ui.Pill
 import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.Skeleton
 import app.kinframe.family.ui.frameTint
@@ -138,6 +139,7 @@ fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(frame.name, style = Kin.type.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                 RoleBadge(frame.role)
+                if (frame.deviceKind == "browser") Pill(stringResource(R.string.frames_browser_badge), Kin.colors.paperDeep, Kin.colors.inkSoft, icon = KinIcons.Tv)
             }
             frame.location?.takeIf { it.isNotBlank() }?.let {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -88,6 +88,8 @@ data class Frame(
     val memberCount: Int? = null,
     val placementCount: Int? = null,
     val createdAt: String? = null,
+    /** `frame` (a device on the wall) or `browser` (a TV or computer browser that became a frame). */
+    val deviceKind: String? = null,
 ) {
     val isManager: Boolean get() = role == Role.OWNER || role == Role.ADMIN
 

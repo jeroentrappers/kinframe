@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="legal_privacy">Privacy</string>
+    <string name="legal_terms">Voorwaarden</string>
+    <string name="settings_form_background">Rond foto’s die het scherm niet vullen</string>
+    <string name="settings_form_bg_blur">Zachte vervaging</string>
+    <string name="settings_form_bg_black">Zwart</string>
+    <string name="settings_form_bg_palette">Passende kleur</string>
+    <string name="settings_form_frame_language">Taal van het kader</string>
+    <string name="settings_form_frame_language_hint">De taal van de menu’s en berichten op het kader zelf.</string>
+    <string name="settings_change_photo">Foto wijzigen</string>
+    <string name="settings_remove_photo">Verwijderen</string>
+    <string name="settings_avatar_saved">Foto aangepast</string>
+    <string name="settings_preferences">Voorkeuren</string>
+    <string name="settings_language">Taal</string>
+    <string name="settings_language_hint">Voor deze website en voor meldingen.</string>
+    <string name="frames_browser_badge">Browser</string>
+    <string name="settings_form_browser_note">Dit kader draait in een browser: de helderheid stel je op het scherm zelf in.</string>
+    <string name="settings_form_play_album">Tonen op de fotolijst</string>
+    <string name="settings_form_all_photos">Alle foto’s</string>
+    <string name="settings_form_play_album_hint">Geplande albums nemen op hun dagen nog steeds over.</string>
+    <string name="settings_form_on_this_day">Op deze dag</string>
+    <string name="settings_form_on_this_day_hint">Af en toe foto’s tonen die op de datum van vandaag in vorige jaren genomen zijn.</string>
+    <!-- Android only: the app instead of the website. -->
+    <string name="settings_language_hint_app">Gebruikt in deze app en voor meldingen.</string>
+</resources>

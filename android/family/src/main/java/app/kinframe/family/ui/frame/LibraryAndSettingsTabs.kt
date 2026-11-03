@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -342,7 +343,7 @@ fun SettingsTab(
                 Surface(Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.fs_interval), style = Kin.type.label, color = c.ink)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val presets = listOf(5, 10, 15, 30, 60, 120, 300, 900, 3600, 86_400)
+                        val presets = listOf(5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 21_600, 43_200, 86_400)
                         (if (s.slideshow.intervalS in presets) presets else (presets + s.slideshow.intervalS).sorted()).forEach { sec ->
                             ToggleChip(Format.duration(context, sec.toLong()), s.slideshow.intervalS == sec, { vm.set("slideshow.interval_s", sec) })
                         }
@@ -361,6 +362,23 @@ fun SettingsTab(
                         }
                     }
                     SwitchRow(stringResource(R.string.fs_fill), s.slideshow.fill, { vm.set("slideshow.fill", it) }, hint = stringResource(R.string.fs_fill_hint))
+                    if (!s.slideshow.fill) {
+                        Text(stringResource(R.string.settings_form_background), style = Kin.type.label, color = c.ink)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            listOf("blur" to R.string.settings_form_bg_blur, "black" to R.string.settings_form_bg_black, "palette" to R.string.settings_form_bg_palette).forEach { (v, l) ->
+                                ToggleChip(stringResource(l), s.slideshow.background == v, { vm.set("slideshow.background", v) })
+                            }
+                        }
+                    }
+                    if (state.albums.isNotEmpty()) {
+                        Text(stringResource(R.string.settings_form_play_album), style = Kin.type.label, color = c.ink)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            ToggleChip(stringResource(R.string.settings_form_all_photos), s.slideshow.albumId == null, { vm.set("slideshow.album_id", null as kotlinx.serialization.json.JsonElement?) })
+                            state.albums.forEach { a -> ToggleChip(a.name, s.slideshow.albumId == a.id, { vm.set("slideshow.album_id", a.id) }) }
+                        }
+                        Text(stringResource(R.string.settings_form_play_album_hint), style = Kin.type.caption, color = c.inkSoft)
+                    }
+                    SwitchRow(stringResource(R.string.settings_form_on_this_day), s.slideshow.onThisDay, { vm.set("slideshow.on_this_day", it) }, hint = stringResource(R.string.settings_form_on_this_day_hint))
                     Text(stringResource(R.string.fs_live_photos), style = Kin.type.label, color = c.ink)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(LivePhotos.ON to R.string.fs_live_on, LivePhotos.TAP to R.string.fs_live_tap, LivePhotos.OFF to R.string.fs_live_off).forEach { (v, l) ->
@@ -372,7 +390,8 @@ fun SettingsTab(
                 }
 
                 SectionTitle(stringResource(R.string.fs_display))
-                Surface(Modifier.fillMaxWidth()) {
+                if (frame.deviceKind == "browser") Note(stringResource(R.string.settings_form_browser_note))
+                else Surface(Modifier.fillMaxWidth()) {
                     val pct = ((s.display.brightness - 15) * 100f / 240).roundToInt()
                     Row { Text(stringResource(R.string.fs_brightness), style = Kin.type.label, color = c.ink, modifier = Modifier.weight(1f)); Text("$pct%", style = Kin.type.label, color = c.inkSoft) }
                     val label = stringResource(R.string.fs_brightness)
@@ -381,6 +400,12 @@ fun SettingsTab(
                         colors = SliderDefaults.colors(thumbColor = c.accent, activeTrackColor = c.accent, inactiveTrackColor = c.line),
                         modifier = Modifier.semantics { contentDescription = label },
                     )
+                }
+
+                SectionTitle(stringResource(R.string.settings_form_frame_language))
+                Surface(Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.settings_form_frame_language_hint), style = Kin.type.caption, color = c.inkSoft)
+                    LanguagePicker(s.locale.language) { vm.set("locale.language", it) }
                 }
 
                 SectionTitle(stringResource(R.string.fs_sleep)) {
@@ -503,6 +528,30 @@ private fun TimeChip(label: String, value: String, modifier: Modifier, onClick: 
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(KinIcons.Clock, null, Modifier.size(18.dp), tint = c.inkSoft)
             Text(value, style = Kin.type.title, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+/** One of the 36 supported languages, by its own name. */
+@Composable
+fun LanguagePicker(value: String?, onPick: (String) -> Unit) {
+    val c = Kin.colors
+    var open by remember { mutableStateOf(false) }
+    val current = app.kinframe.family.util.Locales.match(value)
+    Box {
+        Row(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(c.paperDeep).clickable(role = Role.DropdownList) { open = true }.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Icon(KinIcons.Globe, null, Modifier.size(18.dp), tint = c.inkSoft)
+            Text(current?.let { app.kinframe.family.util.Locales.NATIVE[it] } ?: value.orEmpty(), style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
+            Icon(KinIcons.ChevronRight, null, Modifier.size(18.dp), tint = c.inkFaint)
+        }
+        androidx.compose.material3.DropdownMenu(open, { open = false }, Modifier.heightIn(max = 360.dp)) {
+            app.kinframe.family.util.Locales.NATIVE.forEach { (tag, name) ->
+                androidx.compose.material3.DropdownMenuItem({ Text(name) }, { open = false; onPick(tag) },
+                    trailingIcon = if (tag == current) ({ Icon(KinIcons.Check, null, tint = c.accent) }) else null)
+            }
         }
     }
 }

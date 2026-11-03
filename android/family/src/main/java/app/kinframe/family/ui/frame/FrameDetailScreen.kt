@@ -206,7 +206,7 @@ private fun OverviewTab(frame: Frame, state: FrameDetailState, a: FrameActions) 
             frame.screen?.let { Detail(stringResource(R.string.overview_screen), "${it.width} × ${it.height}") }
             frame.createdAt?.let { Detail(stringResource(R.string.overview_since), Format.date(it)) }
         }
-        state.health?.let { HealthCard(it) }
+        state.health?.let { HealthCard(it, browser = frame.deviceKind == "browser") }
         if (frame.needsUpdate) Note(stringResource(R.string.frames_needs_update), tone = NoteTone.Warn)
         if (frame.role == FrameRole.OWNER) {
             SectionTitle(stringResource(R.string.overview_ownership))
@@ -293,16 +293,17 @@ private fun Detail(label: String, value: String) {
 }
 
 @Composable
-private fun HealthCard(h: FrameHealth) {
+private fun HealthCard(h: FrameHealth, browser: Boolean = false) {
     val context = LocalContext.current
     val hb = h.lastHeartbeat ?: return
     SectionTitle(stringResource(R.string.overview_health))
     Surface(Modifier.fillMaxWidth()) {
-        hb.wifiRssiDbm?.let { Detail(stringResource(R.string.health_wifi), listOfNotNull(hb.wifiSsid, "$it dBm").joinToString(" · ")) }
-        if (hb.storageFreeBytes != null && hb.storageTotalBytes != null) {
+        // A browser frame has no Wi-Fi, storage or cache of its own to report.
+        if (!browser) hb.wifiRssiDbm?.let { Detail(stringResource(R.string.health_wifi), listOfNotNull(hb.wifiSsid, "$it dBm").joinToString(" · ")) }
+        if (!browser && hb.storageFreeBytes != null && hb.storageTotalBytes != null) {
             Detail(stringResource(R.string.health_storage), stringResource(R.string.health_free, Format.bytes(context, hb.storageFreeBytes!!), Format.bytes(context, hb.storageTotalBytes!!)))
         }
-        hb.placementsCached?.let { Detail(stringResource(R.string.health_cached), it.toString()) }
+        if (!browser) hb.placementsCached?.let { Detail(stringResource(R.string.health_cached), it.toString()) }
         hb.placementsMissing?.takeIf { it > 0 }?.let { Text(pluralStringResource(R.plurals.health_missing, it, it), style = Kin.type.caption, color = Kin.colors.inkSoft) }
         Detail(stringResource(R.string.health_uptime), Format.duration(context, roundUptime(hb.uptimeS)))
         Detail(stringResource(R.string.health_version), hb.appVersion)
