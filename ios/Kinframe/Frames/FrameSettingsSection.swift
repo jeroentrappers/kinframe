@@ -7,6 +7,7 @@ struct FrameSettingsSection: View {
     let frame: FrameSummary
     @State private var model: FrameSettingsModel
     @State private var pickingPlace = false
+    @State private var albums: [Album] = []
 
     init(api: API, frame: FrameSummary) {
         self.frame = frame
@@ -27,7 +28,7 @@ struct FrameSettingsSection: View {
                 if !frame.online { Callout(L("settingsForm.offlineNote")) }
                 if model.conflict { Callout(L("settingsForm.conflict"), kind: .warn) }
                 slideshow
-                display
+                display.id("display")
                 sleep
                 weather
                 PluginsSection(api: model.api, frame: frame).id("plugins")
@@ -36,7 +37,11 @@ struct FrameSettingsSection: View {
         .safeAreaInset(edge: .bottom) {
             if model.dirty { saveBar }
         }
-        .task { await model.load() }
+        .task {
+            await model.load()
+            let id = frame.id
+            albums = (try? await model.api.call { try await $0.listAlbums(path: .init(frameId: id)).ok.body.json }) ?? []
+        }
         .sheet(isPresented: $pickingPlace) {
             LocationPicker(api: model.api) { place in
                 model.setLocation(place)
@@ -106,14 +111,55 @@ struct FrameSettingsSection: View {
                     .labelsHidden()
                 }
             }
+            if !albums.isEmpty || model.value("slideshow.album_id")?.stringValue != nil {
+                row {
+                    VStack(alignment: .leading, spacing: 4) {
+                        LabeledContent(L("settingsForm.playAlbum")) {
+                            Picker(L("settingsForm.playAlbum"), selection: albumBinding) {
+                                Text(L("settingsForm.allPhotos")).tag("")
+                                ForEach(albums) { Text($0.name).tag($0.id) }
+                                let current = albumBinding.wrappedValue
+                                if !current.isEmpty, !albums.contains(where: { $0.id == current }) { Text(L("ios.albums.unknown")).tag(current) }
+                            }
+                            .labelsHidden()
+                        }
+                        Text(L("settingsForm.playAlbumHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
+            row {
+                Toggle(isOn: model.bool("slideshow.on_this_day", false)) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L("settingsForm.onThisDay"))
+                        Text(L("settingsForm.onThisDayHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                }
+                .tint(Palette.accent)
+            }
             row { Toggle(L("settingsForm.showCaption"), isOn: model.bool("widgets.caption", true)).tint(Palette.accent) }
             row(last: true) { Toggle(L("settingsForm.showClock"), isOn: model.bool("widgets.clock", true)).tint(Palette.accent) }
         }
     }
 
+    /// `slideshow.album_id`: "" stands for all photos (null).
+    private var albumBinding: Binding<String> {
+        Binding(get: { model.value("slideshow.album_id")?.stringValue ?? "" },
+                set: { model.set("slideshow.album_id", $0.isEmpty ? .null : .string($0)) })
+    }
+
+    private var hasLocale: Bool { model.value("locale")?.object != nil }
+
     private var display: some View {
         group(L("settingsForm.display")) {
-            row(last: true) {
+            if frame.deviceKind == .browser {
+                row(last: !hasLocale) {
+                    Text(L("settingsForm.browserNote")).font(.footnote).foregroundStyle(Palette.textMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 8)
+                }
+            } else {
+            row(last: !hasLocale) {
                 VStack(alignment: .leading, spacing: 6) {
                     let b = model.int("display.brightness", 204)
                     HStack {
@@ -130,6 +176,21 @@ struct FrameSettingsSection: View {
                     }
                 }
                 .padding(.vertical, 8)
+            }
+            }
+            if hasLocale {
+                row(last: true) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        LabeledContent(L("settingsForm.frameLanguage")) {
+                            Picker(L("settingsForm.frameLanguage"), selection: model.string("locale.language", "en")) {
+                                ForEach(AlbumLogic.frameLanguages, id: \.id) { Text($0.name).tag($0.id) }
+                            }
+                            .labelsHidden()
+                        }
+                        Text(L("settingsForm.frameLanguageHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                    }
+                    .padding(.vertical, 8)
+                }
             }
         }
     }

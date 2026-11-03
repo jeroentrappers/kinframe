@@ -54,6 +54,7 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfOpen <url>` | Open a link, e.g. `http://localhost:8110/f/12345678` |
 | `-kfCompose /a.heic,/b.mov [-kfCaption …] [-kfComposeFrames <ids>] [-kfAutoSend YES] [-kfEditFirst YES]` | Stage files in the composer; `/still.heic+/clip.mov` stages a Live Photo |
 | `-kfScrollTo plugins`, `-kfSheet share\|photo\|pluginAdd\|pluginEdit` | On a frame page: scroll to the plugins, open the share picker, a photo, the plugin catalog or the first plugin |
+| `-kfScrollTo display`, `-kfAlbum <id or name>`, `-kfSheet albumNew\|albumSelect\|albumPick\|albumSchedule\|albumArrange\|albumRename\|albumPlay` | On a frame page: scroll to the screen settings; open an album in the library; open the new-album sheet, select two photos, the add-to-album picker, an album's schedule, arrange or rename sheet, or play it on the frame |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
 | `-kfLanguage en\|nl\|system` | Language |
 
