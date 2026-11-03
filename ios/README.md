@@ -56,6 +56,7 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfScrollTo plugins`, `-kfSheet share\|photo\|pluginAdd\|pluginEdit` | On a frame page: scroll to the plugins, open the share picker, a photo, the plugin catalog or the first plugin |
 | `-kfSection calendar` with `-kfScrollTo calendars\|sentEvents\|calendarSettings`, `-kfSheet calendarAdd\|calendarEvent\|calendarMonth\|calendarDetail` | The Calendar section: scroll to a part, open "Add a calendar", "Send an event", the month view or an event |
 | `-kfSharePreview … -kfComposeFrames <ids> -kfAutoSend YES` | Pick those frames in the share preview and send (the extension's path, with preparation) |
+| `-kfScrollTo display`, `-kfAlbum <id or name>`, `-kfSheet albumNew\|albumSelect\|albumPick\|albumSchedule\|albumArrange\|albumRename\|albumPlay` | On a frame page: scroll to the screen settings; open an album in the library; open the new-album sheet, select two photos, the add-to-album picker, an album's schedule, arrange or rename sheet, or play it on the frame |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
 | `-kfSheet tv [-kfTvMode show\|mirror\|frame] [-kfTvLink YES] [-kfTvStart YES] [-kfTvStage YES]` | On a frame's Photos: open "Show on TV" in that mode, make a TV link, start the AirPlay slideshow (also without a TV), and show the TV's picture inside the sheet |
 | `-kfLanguage en\|nl\|system` | Language |
