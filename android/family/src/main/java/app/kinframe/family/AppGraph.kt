@@ -11,6 +11,9 @@ import app.kinframe.core.api.DiscoveryClient
 import app.kinframe.core.api.HttpKinApi
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.api.TusUploader
+import app.kinframe.core.api.TusResult
+import app.kinframe.core.api.PreparedProfile
+import app.kinframe.family.send.OutboxItem
 import app.kinframe.core.api.User
 import app.kinframe.family.auth.AuthRepository
 import app.kinframe.family.auth.AuthState
@@ -137,6 +140,33 @@ class AppGraph(
         return SendRunner(outbox, a, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
             runCatching { MediaFiles.sha256(ItemSource(app, item).open(0)) }.getOrNull()
         }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) })
+    }
+
+    /**
+     * Uploads the photo of an event sent to a frame: prepared on the phone like any photo (never the full original), then
+     * a tus upload. Returns the upload id for `photo_upload_id`.
+     */
+    suspend fun uploadEventPhoto(uri: Uri, onProgress: (Float) -> Unit): String = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val s = servers.current.value ?: throw java.io.IOException("no server")
+        val info = MediaFiles.inspect(app, uri) ?: throw java.io.IOException("cannot read $uri")
+        val dir = java.io.File(app.cacheDir, "event-photo/${java.util.UUID.randomUUID()}")
+        try {
+            val item = OutboxItem(
+                id = "event", uri = uri.toString(), mime = info.mime, name = info.name, size = info.size,
+            )
+            val prepared = MediaPreparer(app).prepare(item, dir) { onProgress(it * 0.3f) }
+            val tus = TusUploader(http, s.apiBase.newBuilder().addPathSegment("uploads").build(), auth)
+            val meta = buildMap {
+                put("filename", prepared.uploadName); put("filetype", prepared.uploadMime)
+                if (prepared.isPrepared) prepared.prepared?.let { put(PreparedProfile.KEY, it) }
+            }
+            when (val r = tus.upload(ItemSource(app, prepared), meta, onProgress = { sent, total -> if (total > 0) onProgress(0.3f + 0.7f * sent / total) })) {
+                is TusResult.Uploaded -> r.uploadId
+                is TusResult.Existing -> r.itemId
+            }
+        } finally {
+            dir.deleteRecursively()
+        }
     }
 
     fun onSent(sendId: String) {

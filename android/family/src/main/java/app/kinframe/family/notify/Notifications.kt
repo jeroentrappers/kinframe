@@ -29,6 +29,7 @@ object Notifications {
     const val TARGET_HISTORY = "history"
     const val TARGET_PEOPLE = "people"
     const val TARGET_FRAME = "frame"
+    const val TARGET_CALENDAR = "calendar"
 
     fun createChannels(context: Context) {
         val nm = context.getSystemService(NotificationManager::class.java) ?: return
@@ -101,6 +102,7 @@ object Notifications {
             when (msg.type) {
                 "join_request" -> putExtra(EXTRA_TARGET, TARGET_PEOPLE)
                 "membership" , "membership.updated" -> putExtra(EXTRA_TARGET, TARGET_FRAME)
+                "event_invitation.decided" -> putExtra(EXTRA_TARGET, TARGET_CALENDAR)
                 else -> putExtra(EXTRA_TARGET, TARGET_HISTORY)
             }
             msg.ids["send_id"]?.let { putExtra(EXTRA_SEND_ID, it) }

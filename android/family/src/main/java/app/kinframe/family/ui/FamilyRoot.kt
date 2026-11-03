@@ -74,6 +74,10 @@ import app.kinframe.family.send.MediaFiles
 import app.kinframe.family.send.OutboxState
 import app.kinframe.family.send.SendRunner
 import app.kinframe.family.send.SendWorker
+import app.kinframe.family.ui.calendar.CalendarActions
+import app.kinframe.family.ui.calendar.CalendarNotice
+import app.kinframe.family.ui.calendar.CalendarTab
+import app.kinframe.family.ui.calendar.CalendarViewModel
 import app.kinframe.family.ui.frame.FrameActions
 import app.kinframe.family.ui.frame.FrameDetailScreen
 import app.kinframe.family.ui.frame.FrameDetailViewModel
@@ -264,6 +268,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         when (t.target) {
             Notifications.TARGET_PEOPLE -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.People)) }
             Notifications.TARGET_FRAME -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it)) }
+            Notifications.TARGET_CALENDAR -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.Calendar)) }
             else -> {
                 nav.selectTab(Route.History)
                 val sendId = t.sendId ?: t.placementId?.let { history.sendWithPlacement(it) }
@@ -546,7 +551,52 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
             }
             (s.frame as? Load.Ready)?.value?.let { f -> SettingsTab(f, ss, ready.server.discovery.weather, fs, plugins = { PluginsSection(ps, pv) }) }
         },
+        calendar = if (!ready.server.discovery.calendar) null else ({
+            (s.frame as? Load.Ready)?.value?.let { f -> CalendarRoute(graph, api, f, me) }
+        }),
     )
+}
+
+@Composable
+private fun CalendarRoute(graph: AppGraph, api: KinApi, f: app.kinframe.core.api.Frame, me: app.kinframe.core.api.User?) {
+    val res = LocalResources.current
+    val toaster = LocalToaster.current
+    val k = System.identityHashCode(api)
+    val manage = f.can { it.changeSettings }
+    val cal: CalendarViewModel = viewModel(key = "cal-${f.id}-$k") {
+        CalendarViewModel(api, f.id, manage, f.can { it.send }, graph.live.events) { uri, p -> graph.uploadEventPhoto(uri, p) }
+    }
+    val st by cal.state.collectAsStateWithLifecycle()
+    val form by cal.form.collectAsStateWithLifecycle()
+    LaunchedEffect(cal) {
+        cal.events.collect { e ->
+            when (e) {
+                is CalendarNotice.Message -> toaster.show(res.getString(e.message, *e.args.toTypedArray()))
+                is CalendarNotice.Added -> toaster.show(res.getQuantityString(R.plurals.cal_added, e.count, e.count))
+                is CalendarNotice.Error -> toaster.show(res.getString(e.message))
+            }
+        }
+    }
+    LaunchedEffect(cal) {
+        graph.live.events.collect { e ->
+            if (e is app.kinframe.family.data.LiveEvent.InvitationDecided && e.frameId == f.id && e.invitation.status in setOf("accepted", "declined")) {
+                toaster.show(res.getString(if (e.invitation.status == "accepted") R.string.cal_decided_accepted else R.string.cal_decided_declined, f.name, e.invitation.title))
+            }
+        }
+    }
+    val settingsVm: FrameSettingsViewModel? = if (!manage) null else viewModel(key = "cal-fs-${f.id}-$k") {
+        FrameSettingsViewModel(api, f.id) { Locale.getDefault().language }
+    }
+    val ss = settingsVm?.state?.collectAsStateWithLifecycle()?.value
+    if (settingsVm != null) LaunchedEffect(settingsVm) {
+        settingsVm.events.collect { e ->
+            when (e) {
+                SettingsEvent.Saved, SettingsEvent.MergedSaved -> { toaster.show(res.getString(R.string.cal_settings_saved)); cal.refresh() }
+                is SettingsEvent.Error -> toaster.show(res.getString(e.message))
+            }
+        }
+    }
+    CalendarTab(f, true, st, form, ss, CalendarActions(cal, settingsVm, me?.id, me?.displayName.orEmpty()))
 }
 
 private fun shareInvite(context: Context, res: android.content.res.Resources, invite: Invite, frameName: String) {

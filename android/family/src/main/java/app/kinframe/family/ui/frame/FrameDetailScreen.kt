@@ -82,6 +82,8 @@ fun FrameDetailScreen(
     overview: FrameActions,
     library: @Composable () -> Unit,
     settings: @Composable () -> Unit,
+    /** The Calendar tab; null when the server has calendars off. */
+    calendar: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val frame = (state.frame as? Load.Ready)?.value
@@ -95,6 +97,7 @@ fun FrameDetailScreen(
             is Load.Ready -> {
                 val tabs = buildList {
                     add(FrameTab.Overview); add(FrameTab.Library); add(FrameTab.People)
+                    if (calendar != null && (f.value.can { it.changeSettings } || f.value.can { it.send })) add(FrameTab.Calendar)
                     if (f.value.can { it.changeSettings }) add(FrameTab.Settings)
                 }
                 val current = if (tab in tabs) tab else FrameTab.Overview
@@ -111,6 +114,7 @@ fun FrameDetailScreen(
                                     FrameTab.Overview -> R.string.frame_tab_overview
                                     FrameTab.Library -> R.string.frame_tab_library
                                     FrameTab.People -> R.string.frame_tab_people
+                                    FrameTab.Calendar -> R.string.frame_tab_calendar
                                     FrameTab.Settings -> R.string.frame_tab_settings
                                 }), style = Kin.type.label)
                             },
@@ -123,6 +127,7 @@ fun FrameDetailScreen(
                         FrameTab.Overview -> OverviewTab(f.value, state, overview)
                         FrameTab.Library -> library()
                         FrameTab.People -> PeopleTab(f.value, state, overview)
+                        FrameTab.Calendar -> calendar?.invoke()
                         FrameTab.Settings -> settings()
                     }
                 }

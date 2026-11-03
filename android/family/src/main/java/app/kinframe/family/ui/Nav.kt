@@ -22,7 +22,7 @@ sealed interface Route {
     val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Settings
 }
 
-enum class FrameTab { Overview, Library, People, Settings }
+enum class FrameTab { Overview, Library, People, Calendar, Settings }
 
 /** A tiny back stack: enough for four tabs with detail screens, no navigation library needed. */
 class Navigator(start: Route = Route.Frames) {

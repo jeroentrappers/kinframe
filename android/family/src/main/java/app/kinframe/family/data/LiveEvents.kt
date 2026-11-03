@@ -1,6 +1,7 @@
 package app.kinframe.family.data
 
 import app.kinframe.core.api.AccessTokenSource
+import app.kinframe.core.api.EventInvitation
 import app.kinframe.core.api.JoinRequest
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.api.KinJson
@@ -27,6 +28,8 @@ sealed interface LiveEvent {
     data class FrameStatus(val frameId: String, val online: Boolean, val lastSeenAt: String?) : LiveEvent
     data class JoinRequested(val frameId: String, val request: JoinRequest?) : LiveEvent
     data class MembershipUpdated(val frameId: String) : LiveEvent
+    /** A frame accepted or declined an event someone sent it. */
+    data class InvitationDecided(val frameId: String, val invitation: EventInvitation) : LiveEvent
 
     companion object {
         fun parse(text: String): LiveEvent? = runCatching {
@@ -42,6 +45,7 @@ sealed interface LiveEvent {
                     (o["request"] as? JsonObject)?.let { KinJson.decodeFromJsonElement(JoinRequest.serializer(), it) },
                 )
                 "membership.updated" -> MembershipUpdated(s("frame_id")!!)
+                "event_invitation.decided" -> InvitationDecided(s("frame_id")!!, KinJson.decodeFromJsonElement(EventInvitation.serializer(), o["invitation"]!!))
                 else -> null
             }
         }.getOrNull()
