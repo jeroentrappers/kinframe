@@ -51,6 +51,14 @@ fun SettingsScreen(
     onAllowNotifications: () -> Unit,
     onSignOut: () -> Unit,
     onChangeServer: () -> Unit,
+    /** Pick a new profile photo; null hides the profile photo buttons. */
+    onChangePhoto: (() -> Unit)? = null,
+    onRemovePhoto: (() -> Unit)? = null,
+    savingAvatar: Boolean = false,
+    /** The person's language; null hides Preferences. */
+    onLanguage: ((String) -> Unit)? = null,
+    /** Opens a page of the server's website (`/privacy`, `/terms`). */
+    onOpenWeb: ((String) -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -67,10 +75,25 @@ fun SettingsScreen(
                     me.email?.let { Text(it, style = Kin.type.caption, color = c.inkSoft) }
                 }
             }
+            if (onChangePhoto != null) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    SecondaryButton(stringResource(R.string.settings_change_photo), onChangePhoto, enabled = !savingAvatar, icon = KinIcons.Image)
+                    if (me.avatarUrl != null && onRemovePhoto != null) QuietButton(stringResource(R.string.settings_remove_photo), onRemovePhoto, enabled = !savingAvatar)
+                }
+            }
             KinTextField(name, { name = it.take(40) }, stringResource(R.string.settings_display_name),
                 supporting = stringResource(R.string.settings_display_name_hint),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words))
             if (name.trim() != me.displayName && name.isNotBlank()) PrimaryButton(stringResource(R.string.common_save), { onSaveName(name.trim()) }, busy = savingName)
+        }
+
+        if (onLanguage != null) {
+            SectionTitle(stringResource(R.string.settings_preferences))
+            Surface(Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.settings_language), style = Kin.type.label, color = c.ink)
+                app.kinframe.family.ui.frame.LanguagePicker(me.locale ?: java.util.Locale.getDefault().toLanguageTag(), onLanguage)
+                Text(stringResource(R.string.settings_language_hint_app), style = Kin.type.caption, color = c.inkSoft)
+            }
         }
 
         SectionTitle(stringResource(R.string.settings_notifications))
@@ -106,6 +129,12 @@ fun SettingsScreen(
         Text(stringResource(R.string.settings_signed_in_as, me.displayName), style = Kin.type.caption, color = c.inkSoft)
         SecondaryButton(stringResource(R.string.settings_sign_out), onSignOut, Modifier.fillMaxWidth(), icon = KinIcons.SignOut)
         Text(stringResource(R.string.settings_about, BuildConfig.VERSION_NAME), style = Kin.type.caption, color = c.inkFaint)
+        if (onOpenWeb != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                QuietButton(stringResource(R.string.legal_privacy), { onOpenWeb("/privacy") })
+                QuietButton(stringResource(R.string.legal_terms), { onOpenWeb("/terms") })
+            }
+        }
     }
 }
 

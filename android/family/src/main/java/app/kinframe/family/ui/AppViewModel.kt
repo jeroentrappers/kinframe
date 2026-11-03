@@ -35,6 +35,7 @@ data class ProfileState(
     @StringRes val error: Int? = null,
     val nameDraft: String = "",
     val savingName: Boolean = false,
+    val savingAvatar: Boolean = false,
     @StringRes val nameError: Int? = null,
 )
 
@@ -94,6 +95,53 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
                 profile.update { it.copy(savingName = false) }
             } catch (e: Exception) {
                 profile.update { it.copy(savingName = false, nameError = Problems.message(e)) }
+            }
+        }
+    }
+
+    /** A new profile photo: cropped to a square JPEG on the phone (the server makes it 256 × 256). */
+    fun setAvatar(uri: android.net.Uri, onDone: (Int?) -> Unit) {
+        val api = graph.api.value ?: return
+        profile.update { it.copy(savingAvatar = true) }
+        viewModelScope.launch {
+            try {
+                val bytes = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { Avatars.squareJpeg(graph.app, uri) }
+                graph.me.value = api.putAvatar(bytes, "image/jpeg")
+                onDone(null)
+            } catch (e: Exception) {
+                onDone(Problems.message(e))
+            } finally {
+                profile.update { it.copy(savingAvatar = false) }
+            }
+        }
+    }
+
+    fun removeAvatar(onDone: (Int?) -> Unit) {
+        val api = graph.api.value ?: return
+        viewModelScope.launch {
+            try {
+                api.deleteAvatar()
+                graph.me.value = graph.me.value?.copy(avatarUrl = null)
+                onDone(null)
+            } catch (e: Exception) {
+                onDone(Problems.message(e))
+            }
+        }
+    }
+
+    /** The person's language (`PATCH /me {locale}`): notifications and the app follow it. */
+    fun setLanguage(tag: String, onDone: (Int?) -> Unit) {
+        val api = graph.api.value ?: return
+        viewModelScope.launch {
+            try {
+                graph.me.value = api.updateMe(locale = tag)
+                if (android.os.Build.VERSION.SDK_INT >= 33) {
+                    graph.app.getSystemService(android.app.LocaleManager::class.java)?.applicationLocales = android.os.LocaleList.forLanguageTags(tag)
+                }
+                graph.push.ensureRegistered()
+                onDone(null)
+            } catch (e: Exception) {
+                onDone(Problems.message(e))
             }
         }
     }

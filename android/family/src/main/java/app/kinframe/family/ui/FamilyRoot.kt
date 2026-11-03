@@ -424,6 +424,9 @@ private fun Screen(
             val ps by app.profileState.collectAsStateWithLifecycle()
             var allowed by remember { mutableStateOf(Notifications.canPost(context)) }
             val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed = it }
+            val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+                if (uri != null) app.setAvatar(uri) { err -> toaster.show(res.getString(err ?: R.string.settings_avatar_saved)) }
+            }
             SettingsScreen(
                 ready.me, ready.server, graph.auth.mode() == AuthMode.Dev, push, allowed, ps.savingName,
                 onSaveName = { app.onNameDraft(it); app.saveName(); toaster.show(res.getString(R.string.settings_name_saved)) },
@@ -434,6 +437,14 @@ private fun Screen(
                 },
                 onSignOut = { app.signOut(context.findActivity()) },
                 onChangeServer = { app.changeServer() },
+                onChangePhoto = { avatarPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                onRemovePhoto = { app.removeAvatar { err -> toaster.show(res.getString(err ?: R.string.common_saved)) } },
+                savingAvatar = ps.savingAvatar,
+                onLanguage = { tag -> app.setLanguage(tag) { err -> toaster.show(res.getString(err ?: R.string.common_saved)) } },
+                onOpenWeb = { path ->
+                    val web = ready.server.discovery.web ?: ready.server.url.toString()
+                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(web.trimEnd('/') + path)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                },
             )
         }
         is Route.AddFrame -> {
