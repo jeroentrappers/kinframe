@@ -96,6 +96,7 @@ struct AddFrameView: View {
                 Button(L("add.later")) { onFinish?(false) }
                     .buttonStyle(.kf(.ghost, fill: true))
             }
+
         }
     }
 
@@ -233,8 +234,23 @@ private struct ResultPanel: View {
 }
 
 /// Eight digit boxes in two groups over a hidden text field: tap to type, long-press or use Paste.
-struct CodeField: View {
-    @Bindable var model: AddFrameModel
+/// What the 8-digit code field edits: adding a frame, or moving one to a new device.
+@MainActor
+protocol CodeEntryModel: AnyObject, Observable {
+    var digits: String { get }
+    var formatted: String { get }
+    var isComplete: Bool { get }
+    var error: String? { get }
+    var isBusy: Bool { get }
+    func setCode(_ input: String)
+}
+
+extension AddFrameModel: CodeEntryModel {
+    var isBusy: Bool { state == .checking }
+}
+
+struct CodeField<Model: CodeEntryModel>: View {
+    let model: Model
     var onComplete: () -> Void
     @FocusState private var focused: Bool
 
@@ -252,7 +268,7 @@ struct CodeField: View {
                 .opacity(0.02)
                 .accessibilityLabel(L("add.codeLabel"))
                 .accessibilityValue(model.formatted)
-                .disabled(model.state == .checking)
+                .disabled(model.isBusy)
 
                 HStack(spacing: 6) {
                     ForEach(0..<8, id: \.self) { i in
