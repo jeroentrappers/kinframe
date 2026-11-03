@@ -89,7 +89,7 @@ class ShareTest {
                 assertEquals(listOf("c"), frameIds)
                 return ShareResult(placements = placementIds.map { Placement("n-$it", "c", Item("i-$it", "photo"), sharedByName = "Me") })
             }
-            override suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String): BulkResult {
+            override suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String, albumId: String?): BulkResult {
                 purged += frameId to placementIds
                 assertEquals("purge", action)
                 return BulkResult(ok = placementIds)

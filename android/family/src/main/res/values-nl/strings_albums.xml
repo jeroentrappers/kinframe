@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="library_photo">Foto</string>
+    <string name="albums_label">Albums</string>
+    <string name="albums_all">Alle foto’s</string>
+    <string name="albums_new">Nieuw album</string>
+    <string name="albums_new_title">Nieuw album</string>
+    <string name="albums_new_hint">Albums horen bij de fotolijst. Voeg er foto’s aan toe vanuit de bibliotheek.</string>
+    <string name="albums_create">Album maken</string>
+    <string name="albums_created">Album “%1$s” gemaakt</string>
+    <string name="albums_name">Naam van het album</string>
+    <string name="albums_name_placeholder">Zomervakantie, Kerstmis, …</string>
+    <plurals name="albums_count">
+        <item quantity="one">%1$d foto</item>
+        <item quantity="other">%1$d foto’s</item>
+    </plurals>
+    <string name="albums_scheduled">Speelt volgens planning</string>
+    <string name="albums_playing_badge">Speelt op de fotolijst</string>
+    <string name="albums_play">Afspelen op de fotolijst</string>
+    <string name="albums_stop_playing">Alle foto’s tonen</string>
+    <string name="albums_now_playing">%1$s speelt nu “%2$s”</string>
+    <string name="albums_playing_all">%1$s toont weer alle foto’s</string>
+    <string name="albums_arrange">Volgorde aanpassen</string>
+    <string name="albums_arrange_hint">Sleep de handvatten om de volgorde te wijzigen, of selecteer er een en gebruik de pijltjestoetsen.</string>
+    <string name="albums_save_order">Volgorde bewaren</string>
+    <string name="albums_order_saved">Volgorde bewaard</string>
+    <string name="albums_move_item">Foto %1$s van %2$s verplaatsen</string>
+    <string name="albums_schedule">Planning</string>
+    <string name="albums_rename">Naam wijzigen</string>
+    <string name="albums_rename_title">Album hernoemen</string>
+    <string name="albums_delete">Album verwijderen</string>
+    <string name="albums_delete_confirm">“%1$s” verwijderen?</string>
+    <string name="albums_delete_body">Het album verdwijnt. De foto’s blijven op de fotolijst.</string>
+    <string name="albums_delete_body_playing">Het album verdwijnt en de fotolijst toont weer alle foto’s. De foto’s zelf blijven op de fotolijst.</string>
+    <string name="albums_deleted">Album “%1$s” verwijderd</string>
+    <string name="albums_conflict">Iemand anders heeft dit album net gewijzigd. We hebben de nieuwste versie geladen; probeer het opnieuw.</string>
+    <string name="albums_cover">Omslag</string>
+    <string name="albums_make_cover">Als omslag gebruiken</string>
+    <string name="albums_cover_set">Omslag aangepast</string>
+    <string name="albums_remove">Uit album halen</string>
+    <plurals name="albums_removed">
+        <item quantity="one">%1$d foto uit “%2$s” gehaald</item>
+        <item quantity="other">%1$d foto’s uit “%2$s” gehaald</item>
+    </plurals>
+    <string name="albums_add_to_album">Aan album toevoegen</string>
+    <string name="albums_add_short">Album</string>
+    <plurals name="albums_add_title">
+        <item quantity="one">%1$d foto aan een album toevoegen</item>
+        <item quantity="other">%1$d foto’s aan een album toevoegen</item>
+    </plurals>
+    <string name="albums_pick">Kies een album</string>
+    <string name="albums_add">Toevoegen</string>
+    <plurals name="albums_added">
+        <item quantity="one">%1$d foto toegevoegd aan “%2$s”</item>
+        <item quantity="other">%1$d foto’s toegevoegd aan “%2$s”</item>
+    </plurals>
+    <string name="albums_empty_title">Dit album is leeg</string>
+    <string name="albums_empty_body">Selecteer foto’s bij “Alle foto’s” en kies “Aan album toevoegen”.</string>
+    <string name="albums_pick_photos">Foto’s kiezen</string>
+    <string name="albums_schedule_title">“%1$s” plannen</string>
+    <string name="albums_schedule_body">De fotolijst speelt dit album elk jaar vanzelf op deze dagen en gaat daarna terug naar de gewone foto’s.</string>
+    <string name="albums_schedule_on">Elk jaar automatisch afspelen</string>
+    <string name="albums_from">Van</string>
+    <string name="albums_to">Tot en met</string>
+    <string name="albums_from_day">Vanaf dag</string>
+    <string name="albums_from_month">Vanaf maand</string>
+    <string name="albums_to_day">Tot en met dag</string>
+    <string name="albums_to_month">Tot en met maand</string>
+    <string name="albums_schedule_summary">Speelt van %1$s tot en met %2$s, elk jaar.</string>
+    <string name="albums_schedule_wraps">Dat loopt over Nieuwjaar heen.</string>
+    <string name="albums_schedule_short">%1$s – %2$s</string>
+    <string name="albums_schedule_saved">Speelt elk jaar van %1$s tot en met %2$s</string>
+    <string name="albums_schedule_cleared">Planning verwijderd</string>
+    <string name="memories_title">Op deze dag</string>
+    <plurals name="memories_subtitle">
+        <item quantity="one">%1$d foto genomen op %2$s in vorige jaren</item>
+        <item quantity="other">%1$d foto’s genomen op %2$s in vorige jaren</item>
+    </plurals>
+    <plurals name="memories_years_ago">
+        <item quantity="one">%1$d jaar geleden</item>
+        <item quantity="other">%1$d jaar geleden</item>
+    </plurals>
+    <string name="library_taken">Genomen %1$s</string>
+    <!-- Android only: arrows instead of dragging. -->
+    <string name="albums_arrange_hint_android">Gebruik de pijlen op een foto om ze te verplaatsen.</string>
+</resources>

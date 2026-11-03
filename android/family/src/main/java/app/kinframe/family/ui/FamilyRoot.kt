@@ -538,12 +538,17 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         onSend = { composer.preselectFrame(r.frameId); nav.selectTab(Route.Send) },
         overview = actions,
         library = {
-            val lib: LibraryViewModel = viewModel(key = "lib-${r.frameId}-${System.identityHashCode(api)}") { LibraryViewModel(api, r.frameId) }
+            val canSettings = (s.frame as? Load.Ready)?.value?.can { it.changeSettings } == true
+            val lib: LibraryViewModel = viewModel(key = "lib-${r.frameId}-${System.identityHashCode(api)}") { LibraryViewModel(api, r.frameId, canSettings) }
             val ls by lib.state.collectAsStateWithLifecycle()
             LaunchedEffect(lib) {
                 lib.events.collect { e ->
                     when (e) {
                         is LibraryEvent.Error -> toaster.show(res.getString(e.message))
+                        is LibraryEvent.Message -> {
+                            val msg = if (e.plural && e.count != null) res.getQuantityString(e.message, e.count, *e.args.toTypedArray()) else res.getString(e.message, *e.args.toTypedArray())
+                            toaster.show(msg, if (e.undo != null) res.getString(R.string.common_undo) else null, e.undo)
+                        }
                         is LibraryEvent.Done -> {
                             val plural = when (e.action) {
                                 "hide" -> R.plurals.library_done_hide; "unhide" -> R.plurals.library_done_unhide
@@ -563,7 +568,15 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
             (s.frame as? Load.Ready)?.value?.let { f ->
                 app.kinframe.family.ui.frame.LibraryTab(f, ls, ready.server.limits.trashRetentionDays, lib::setTab, lib::toggle, lib::selectAll, lib::clearSelection,
                     { lib.act(it) }, lib::loadMore, lib::load,
-                    onShare = if (canShare) ({ share.open(ShareSource(r.frameId, ls.selected.toList())) }) else null)
+                    onShare = if (canShare) ({ share.open(ShareSource(r.frameId, ls.selected.toList())) }) else null,
+                    albums = app.kinframe.family.ui.frame.LibraryAlbumActions(
+                        select = lib::selectAlbum, create = { lib.createAlbum(it) }, rename = lib::renameAlbum, schedule = lib::scheduleAlbum,
+                        delete = lib::deleteAlbum, play = { id -> lib.play(id, f.name) }, addTo = lib::addToAlbum,
+                        removeFromAlbum = { lib.removeFromAlbum(it) }, makeCover = lib::makeCover,
+                        startArranging = lib::startArranging, move = lib::move, saveOrder = lib::saveOrder, cancelArranging = lib::cancelArranging,
+                        act = { action, ids -> lib.act(action, ids) },
+                        shareOne = if (canShare) ({ id -> share.open(ShareSource(r.frameId, listOf(id))) }) else null,
+                    ))
             }
         },
         settings = {

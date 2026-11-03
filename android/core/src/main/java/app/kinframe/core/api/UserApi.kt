@@ -77,9 +77,14 @@ interface KinApi {
     /** `PATCH /items/{id}`; a JSON null caption clears it. */
     suspend fun updateItem(itemId: String, patch: JsonObject): Item
 
-    suspend fun placements(frameId: String, visibility: String = "visible", cursor: String? = null, limit: Int = 60): PlacementsPage
+    /** [albumId] limits to one album; [onThisDay] (`MM-DD`) gives "On this day" memories; [sort] e.g. `taken_desc`. */
+    suspend fun placements(
+        frameId: String, visibility: String = "visible", cursor: String? = null, limit: Int = 60,
+        albumId: String? = null, onThisDay: String? = null, sort: String? = null,
+    ): PlacementsPage
     suspend fun updatePlacement(frameId: String, placementId: String, patch: JsonObject): Placement
-    suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String): BulkResult
+    /** [albumId] for `add_to_album` and `remove_from_album`. */
+    suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String, albumId: String? = null): BulkResult
     /**
      * Share placements of [frameId] to other frames without uploading again (README §5.3). With [dryRun] nothing is
      * created and `skipped` tells which frames already have the items.
@@ -309,18 +314,21 @@ class HttpKinApi(
 
     // ------------------------------------------------------------------ library
 
-    override suspend fun placements(frameId: String, visibility: String, cursor: String?, limit: Int): PlacementsPage = call {
-        url(ep("frames/$frameId/placements", mapOf("visibility" to visibility, "cursor" to cursor, "limit" to limit.toString()))).get()
+    override suspend fun placements(frameId: String, visibility: String, cursor: String?, limit: Int, albumId: String?, onThisDay: String?, sort: String?): PlacementsPage = call {
+        url(ep("frames/$frameId/placements", mapOf(
+            "visibility" to visibility, "cursor" to cursor, "limit" to limit.toString(), "album_id" to albumId, "on_this_day" to onThisDay, "sort" to sort,
+        ))).get()
     }.decode(PlacementsPage.serializer())
 
     override suspend fun updatePlacement(frameId: String, placementId: String, patch: JsonObject): Placement =
         call { url(ep("frames/$frameId/placements/$placementId")).patch(json(patch)) }.decode(Placement.serializer())
 
-    override suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String): BulkResult = call {
+    override suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String, albumId: String?): BulkResult = call {
         // The path segment contains a colon (`placements:bulk`), which addPathSegments would keep as is.
         url(ep("frames/$frameId/placements:bulk")).post(json(buildJsonObject {
             put("placement_ids", kotlinx.serialization.json.JsonArray(placementIds.map { JsonPrimitive(it) }))
             put("action", JsonPrimitive(action))
+            albumId?.let { put("album_id", JsonPrimitive(it)) }
         }))
     }.decode(BulkResult.serializer())
 

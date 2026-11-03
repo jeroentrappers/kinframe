@@ -53,6 +53,7 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.kinframe.core.api.Album
 import app.kinframe.core.api.BulkAction
 import app.kinframe.core.api.Frame
 import app.kinframe.core.api.LivePhotos
@@ -82,6 +83,26 @@ import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
 import kotlin.math.roundToInt
 
+/** The album and viewer parts of the library (null in previews without albums). */
+class LibraryAlbumActions(
+    val select: (String?) -> Unit,
+    val create: (String) -> Unit,
+    val rename: (Album, String) -> Unit,
+    val schedule: (Album, String?, String?) -> Unit,
+    val delete: (Album) -> Unit,
+    val play: (String?) -> Unit,
+    val addTo: (List<String>, String?, String?) -> Unit,
+    val removeFromAlbum: (List<String>) -> Unit,
+    val makeCover: (Album, String) -> Unit,
+    val startArranging: () -> Unit,
+    val move: (String, Int) -> Unit,
+    val saveOrder: () -> Unit,
+    val cancelArranging: () -> Unit,
+    /** Bulk action on specific placements (from the viewer). */
+    val act: (String, List<String>) -> Unit,
+    val shareOne: ((String) -> Unit)?,
+)
+
 @OptIn(ExperimentalLayoutApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 fun LibraryTab(
@@ -97,6 +118,7 @@ fun LibraryTab(
     onRetry: () -> Unit,
     /** "Share to another frame" for the selection; null when there is no other frame you can send to. */
     onShare: (() -> Unit)? = null,
+    albums: LibraryAlbumActions? = null,
 ) {
     val c = Kin.colors
     val grid = rememberLazyGridState()
@@ -104,7 +126,18 @@ fun LibraryTab(
     LaunchedEffect(grid, list?.size) {
         snapshotFlow { grid.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0 }.collect { if (it >= grid.layoutInfo.totalItemsCount - 6) onLoadMore() }
     }
+    val (canManage, canSettings, canSee) = frame.libraryPerms()
+    val showOnTv = app.kinframe.family.ui.LocalShowOnTv.current
+    val album = state.album
+    val arranging = state.arranging
+    var naming by remember { mutableStateOf<Album?>(null) }
+    var creating by remember { mutableStateOf(false) }
+    var picking by remember { mutableStateOf<List<String>?>(null) }
+    var scheduling by remember { mutableStateOf<Album?>(null) }
+    var deleting by remember { mutableStateOf<Album?>(null) }
+    var viewing by remember { mutableStateOf<app.kinframe.core.api.Placement?>(null) }
     val selecting = state.selected.isNotEmpty()
+    val shown = if (arranging != null) arranging.mapNotNull { id -> list?.firstOrNull { it.id == id } } else list
     Column(Modifier.fillMaxSize()) {
         LazyVerticalGrid(
             columns = GridCells.Adaptive(104.dp), state = grid, modifier = Modifier.weight(1f),
@@ -112,21 +145,40 @@ fun LibraryTab(
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(bottom = 6.dp)) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        LibraryTab.entries.forEach { t ->
-                            val n = when (t) { LibraryTab.Visible -> state.counts.photos + state.counts.videos; LibraryTab.Hidden -> state.counts.hidden; LibraryTab.Trash -> state.counts.trashed }
-                            val label = stringResource(when (t) { LibraryTab.Visible -> R.string.library_visible; LibraryTab.Hidden -> R.string.library_hidden; LibraryTab.Trash -> R.string.library_trash_tab })
-                            ToggleChip(if (n > 0) "$label · $n" else label, state.tab == t, { onTab(t) })
+                    if (albums != null) AlbumChips(state, canManage, albums.select) { creating = true }
+                    if (album != null && albums != null) {
+                        AlbumHeader(
+                            album, list?.firstOrNull { it.id == album.coverPlacementId } ?: list?.firstOrNull(), state.playingAlbumId == album.id, canSettings, canManage,
+                            AlbumHeaderActions(
+                                onPlay = { on -> albums.play(if (on) album.id else null) },
+                                onTv = if (canSee && album.placementCount > 0) ({ showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Album(album.id, album.name))) }) else null,
+                                onArrange = albums.startArranging, onSchedule = { scheduling = album }, onRename = { naming = album }, onDelete = { deleting = album },
+                            ),
+                        )
+                        if (arranging != null) {
+                            Note(stringResource(R.string.albums_arrange_hint_android))
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                PrimaryButton(stringResource(R.string.albums_save_order), albums.saveOrder)
+                                QuietButton(stringResource(R.string.common_cancel), albums.cancelArranging)
+                            }
                         }
+                    } else {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            LibraryTab.entries.forEach { t ->
+                                val n = when (t) { LibraryTab.Visible -> state.counts.photos + state.counts.videos; LibraryTab.Hidden -> state.counts.hidden; LibraryTab.Trash -> state.counts.trashed }
+                                val label = stringResource(when (t) { LibraryTab.Visible -> R.string.library_visible; LibraryTab.Hidden -> R.string.library_hidden; LibraryTab.Trash -> R.string.library_trash_tab })
+                                ToggleChip(if (n > 0) "$label · $n" else label, state.tab == t, { onTab(t) })
+                            }
+                        }
+                        if (state.tab == LibraryTab.Visible && canSee && (list?.isNotEmpty() == true)) {
+                            app.kinframe.family.ui.SecondaryButton(stringResource(R.string.tv_show), {
+                                showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.All))
+                            }, icon = KinIcons.Tv)
+                        }
+                        if (!canSee) Note(stringResource(R.string.library_own_only))
+                        if (state.tab == LibraryTab.Trash) Note(stringResource(R.string.library_trash_note, trashDays))
+                        if (state.tab == LibraryTab.Visible && albums != null) MemoriesStrip(state.memories, java.time.LocalDate.now()) { viewing = it }
                     }
-                    val showOnTv = app.kinframe.family.ui.LocalShowOnTv.current
-                    if (state.tab == LibraryTab.Visible && frame.can { it.seeLibrary } && (list?.isNotEmpty() == true)) {
-                        app.kinframe.family.ui.SecondaryButton(stringResource(R.string.tv_show), {
-                            showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.All))
-                        }, icon = KinIcons.Tv)
-                    }
-                    if (!frame.can { it.seeLibrary }) Note(stringResource(R.string.library_own_only))
-                    if (state.tab == LibraryTab.Trash) Note(stringResource(R.string.library_trash_note, trashDays))
                 }
             }
             when (val p = state.placements) {
@@ -134,13 +186,15 @@ fun LibraryTab(
                 is Load.Error -> item(span = { GridItemSpan(maxLineSpan) }) { ErrorPanel(p.message, onRetry) }
                 is Load.Ready -> if (p.value.isEmpty()) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        when (state.tab) {
-                            LibraryTab.Visible -> EmptyState(stringResource(R.string.library_empty_title), stringResource(R.string.library_empty_body), art = { FrameArt(width = 140.dp) })
-                            LibraryTab.Hidden -> EmptyState(stringResource(R.string.library_empty_hidden), "", art = {})
-                            LibraryTab.Trash -> EmptyState(stringResource(R.string.library_empty_trash), "", art = {})
+                        when {
+                            album != null -> EmptyState(stringResource(R.string.albums_empty_title), stringResource(R.string.albums_empty_body), art = {},
+                                action = albums?.let { a -> { app.kinframe.family.ui.SecondaryButton(stringResource(R.string.albums_pick_photos), { a.select(null) }) } })
+                            state.tab == LibraryTab.Visible -> EmptyState(stringResource(R.string.library_empty_title), stringResource(R.string.library_empty_body), art = { FrameArt(width = 140.dp) })
+                            state.tab == LibraryTab.Hidden -> EmptyState(stringResource(R.string.library_empty_hidden), "", art = {})
+                            else -> EmptyState(stringResource(R.string.library_empty_trash), "", art = {})
                         }
                     }
-                } else items(p.value, key = { it.id }) { pl ->
+                } else items(shown.orEmpty(), key = { it.id }) { pl ->
                     val sel = pl.id in state.selected
                     val desc = stringResource(if (pl.item.kind == MediaKind.VIDEO) R.string.library_video_by else R.string.library_item_by, pl.item.senderName.orEmpty()) +
                         (pl.item.caption?.let { ". $it" } ?: "") + ". " + stringResource(R.string.library_received, Format.relative(pl.receivedAt)) +
@@ -148,16 +202,32 @@ fun LibraryTab(
                     Box(
                         Modifier.aspectRatio(1f).clip(RoundedCornerShape(10.dp))
                             .border(if (sel) 3.dp else 0.dp, if (sel) c.accent else Color.Transparent, RoundedCornerShape(10.dp))
-                            .combinedClickable(role = Role.Checkbox, onLongClick = { onToggle(pl.id) }, onClick = { onToggle(pl.id) })
+                            .combinedClickable(
+                                role = Role.Checkbox, enabled = arranging == null,
+                                onLongClick = { onToggle(pl.id) },
+                                // Tap opens the photo; while selecting it adds to the selection.
+                                onClick = { if (selecting || albums == null) onToggle(pl.id) else viewing = pl },
+                            )
                             .semantics { contentDescription = desc; selected = sel },
                     ) {
                         Thumb(pl.item.thumbUrl, null, Modifier.fillMaxSize(), corner = 10.dp)
                         if (pl.item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(22.dp), tint = Color.White)
                         if (pl.item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(4.dp))
+                        if (album != null && album.coverPlacementId == pl.id) Text(stringResource(R.string.albums_cover), style = Kin.type.caption, color = Color.White,
+                            modifier = Modifier.align(Alignment.TopStart).padding(4.dp).clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = 0.6f)).padding(horizontal = 4.dp))
                         if (pl.sharedByName != null) Icon(KinIcons.Share, null, Modifier.align(Alignment.BottomEnd).padding(5.dp).size(20.dp)
                             .clip(CircleShape).background(Color.Black.copy(alpha = 0.45f)).padding(3.dp), tint = Color.White)
                         if (pl.pendingModeration) Text(stringResource(R.string.library_pending), style = Kin.type.caption, color = Color.White,
                             modifier = Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha = 0.6f)).padding(4.dp))
+                        if (arranging != null && albums != null) {
+                            val i = arranging.indexOf(pl.id)
+                            val n = arranging.size
+                            Row(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color.Black.copy(alpha = 0.5f)), horizontalArrangement = Arrangement.SpaceBetween) {
+                                val moveLabel = stringResource(R.string.albums_move_item, (i + 1).toString(), n.toString())
+                                IconButton({ albums.move(pl.id, -1) }, enabled = i > 0) { Icon(KinIcons.ArrowLeft, moveLabel, tint = Color.White) }
+                                IconButton({ albums.move(pl.id, 1) }, enabled = i < n - 1) { Icon(KinIcons.ArrowRight, moveLabel, tint = Color.White) }
+                            }
+                        }
                         if (selecting) {
                             Box(
                                 Modifier.align(Alignment.TopEnd).padding(6.dp).size(22.dp).clip(CircleShape)
@@ -178,25 +248,67 @@ fun LibraryTab(
                 IconButton(onClear) { Icon(KinIcons.Close, stringResource(R.string.library_clear_selection), tint = c.ink) }
                 Text(pluralStringResource(R.plurals.library_selected, state.selected.size, state.selected.size), style = Kin.type.label, color = c.ink, modifier = Modifier.weight(1f))
                 TextButton(onSelectAll) { Text(stringResource(R.string.library_select_all), color = c.accent) }
+                if (state.tab == LibraryTab.Visible && canSee) {
+                    IconButton({ showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Selection(state.selected.toList()))) }, enabled = !state.busy) {
+                        Icon(KinIcons.Tv, stringResource(R.string.tv_show), tint = c.ink)
+                    }
+                }
                 if (onShare != null && state.tab != LibraryTab.Trash) {
                     IconButton(onShare, enabled = !state.busy) { Icon(KinIcons.Share, stringResource(R.string.share_action), tint = c.ink) }
                 }
-                val showOnTv = app.kinframe.family.ui.LocalShowOnTv.current
-                when (state.tab) {
-                    LibraryTab.Visible -> {
-                        IconButton({ showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Selection(state.selected.toList()))) }, enabled = !state.busy) {
-                            Icon(KinIcons.Tv, stringResource(R.string.tv_show), tint = c.ink)
+                if (album != null && albums != null) {
+                    if (canManage && state.selected.size == 1) IconButton({ albums.makeCover(album, state.selected.first()) }) { Icon(KinIcons.Star, stringResource(R.string.albums_make_cover), tint = c.ink) }
+                    if (canManage) IconButton({ albums.removeFromAlbum(state.selected.toList()) }) { Icon(KinIcons.Minus, stringResource(R.string.albums_remove), tint = c.danger) }
+                } else {
+                    if (albums != null && canManage && state.tab == LibraryTab.Visible) {
+                        IconButton({ picking = state.selected.toList() }, enabled = !state.busy) { Icon(KinIcons.Album, stringResource(R.string.albums_add_to_album), tint = c.ink) }
+                    }
+                    when (state.tab) {
+                        LibraryTab.Visible -> {
+                            IconButton({ onAction(BulkAction.HIDE) }, enabled = !state.busy) { Icon(KinIcons.EyeOff, stringResource(R.string.library_hide), tint = c.ink) }
+                            IconButton({ onAction(BulkAction.TRASH) }, enabled = !state.busy) { Icon(KinIcons.Trash, stringResource(R.string.library_trash), tint = c.danger) }
                         }
-                        IconButton({ onAction(BulkAction.HIDE) }, enabled = !state.busy) { Icon(KinIcons.EyeOff, stringResource(R.string.library_hide), tint = c.ink) }
-                        IconButton({ onAction(BulkAction.TRASH) }, enabled = !state.busy) { Icon(KinIcons.Trash, stringResource(R.string.library_trash), tint = c.danger) }
+                        LibraryTab.Hidden -> {
+                            IconButton({ onAction(BulkAction.UNHIDE) }, enabled = !state.busy) { Icon(KinIcons.Eye, stringResource(R.string.library_unhide), tint = c.ink) }
+                            IconButton({ onAction(BulkAction.TRASH) }, enabled = !state.busy) { Icon(KinIcons.Trash, stringResource(R.string.library_trash), tint = c.danger) }
+                        }
+                        LibraryTab.Trash -> IconButton({ onAction(BulkAction.RESTORE) }, enabled = !state.busy) { Icon(KinIcons.Undo, stringResource(R.string.library_restore), tint = c.ink) }
                     }
-                    LibraryTab.Hidden -> {
-                        IconButton({ onAction(BulkAction.UNHIDE) }, enabled = !state.busy) { Icon(KinIcons.Eye, stringResource(R.string.library_unhide), tint = c.ink) }
-                        IconButton({ onAction(BulkAction.TRASH) }, enabled = !state.busy) { Icon(KinIcons.Trash, stringResource(R.string.library_trash), tint = c.danger) }
-                    }
-                    LibraryTab.Trash -> IconButton({ onAction(BulkAction.RESTORE) }, enabled = !state.busy) { Icon(KinIcons.Undo, stringResource(R.string.library_restore), tint = c.ink) }
                 }
             }
+        }
+    }
+    if (albums != null) {
+        if (creating) AlbumNameDialog(null, { creating = false }) { creating = false; albums.create(it) }
+        naming?.let { a -> AlbumNameDialog(a.name, { naming = null }) { naming = null; albums.rename(a, it) } }
+        picking?.let { ids -> AlbumPickerDialog(ids.size, state.albums, { picking = null }) { id, name -> picking = null; albums.addTo(ids, id, name) } }
+        scheduling?.let { a -> AlbumScheduleDialog(a, { scheduling = null }) { f, t -> scheduling = null; albums.schedule(a, f, t) } }
+        deleting?.let { a ->
+            AlertDialog(
+                onDismissRequest = { deleting = null },
+                title = { Text(stringResource(R.string.albums_delete_confirm, a.name)) },
+                text = { Text(stringResource(if (state.playingAlbumId == a.id) R.string.albums_delete_body_playing else R.string.albums_delete_body)) },
+                confirmButton = { TextButton({ deleting = null; albums.delete(a) }) { Text(stringResource(R.string.albums_delete), color = c.danger) } },
+                dismissButton = { TextButton({ deleting = null }) { Text(stringResource(R.string.common_cancel)) } },
+            )
+        }
+        viewing?.let { pl ->
+            val inAlbum = album != null && list?.any { it.id == pl.id } == true
+            val bulk = when {
+                album != null -> emptyList()
+                pl.trashed || state.tab == LibraryTab.Trash -> listOf(BulkAction.RESTORE)
+                pl.hidden || state.tab == LibraryTab.Hidden -> listOf(BulkAction.UNHIDE, BulkAction.TRASH)
+                else -> listOf(BulkAction.HIDE, BulkAction.TRASH)
+            }.takeIf { canManage || pl.item.senderId != null }.orEmpty()
+            PlacementViewer(pl, ViewerActions(
+                onTv = if (canSee && !pl.trashed && !pl.hidden) ({ viewing = null; showOnTv(app.kinframe.family.ui.tvTarget(frame, app.kinframe.family.ui.tv.TvScope.Selection(listOf(pl.id)))) }) else null,
+                onShare = albums.shareOne?.let { f -> { viewing = null; f(pl.id) } }.takeIf { !pl.trashed },
+                onCover = if (inAlbum && canManage && album != null) ({ viewing = null; albums.makeCover(album, pl.id) }) else null,
+                onRemoveFromAlbum = if (inAlbum && canManage) ({ viewing = null; albums.removeFromAlbum(listOf(pl.id)) }) else null,
+                onAddToAlbum = if (album == null && canManage && !pl.trashed && !pl.hidden) ({ viewing = null; picking = listOf(pl.id) }) else null,
+                bulk = bulk,
+                onBulk = { action -> viewing = null; albums.act(action, listOf(pl.id)) },
+            )) { viewing = null }
         }
     }
 }

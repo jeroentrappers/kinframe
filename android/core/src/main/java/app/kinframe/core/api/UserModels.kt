@@ -279,6 +279,8 @@ object BulkAction {
     const val TRASH = "trash"
     const val RESTORE = "restore"
     const val PURGE = "purge"
+    const val ADD_TO_ALBUM = "add_to_album"
+    const val REMOVE_FROM_ALBUM = "remove_from_album"
 }
 
 @Serializable

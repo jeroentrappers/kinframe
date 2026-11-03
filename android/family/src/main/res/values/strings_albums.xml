@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same wording as the web app (web/src/lib/i18n), generated from its catalog keys. -->
+<resources>
+    <string name="library_photo">Photo</string>
+    <string name="albums_label">Albums</string>
+    <string name="albums_all">All photos</string>
+    <string name="albums_new">New album</string>
+    <string name="albums_new_title">New album</string>
+    <string name="albums_new_hint">Albums live on the frame. Add photos to it from the library.</string>
+    <string name="albums_create">Create album</string>
+    <string name="albums_created">Album “%1$s” created</string>
+    <string name="albums_name">Album name</string>
+    <string name="albums_name_placeholder">Summer holiday, Christmas, …</string>
+    <plurals name="albums_count">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <string name="albums_scheduled">Plays on a schedule</string>
+    <string name="albums_playing_badge">Playing on the frame</string>
+    <string name="albums_play">Play on frame</string>
+    <string name="albums_stop_playing">Show all photos</string>
+    <string name="albums_now_playing">%1$s now plays “%2$s”</string>
+    <string name="albums_playing_all">%1$s shows all photos again</string>
+    <string name="albums_arrange">Change the order</string>
+    <string name="albums_arrange_hint">Drag the handles to change the order, or focus one and use the arrow keys.</string>
+    <string name="albums_save_order">Save order</string>
+    <string name="albums_order_saved">Order saved</string>
+    <string name="albums_move_item">Move photo %1$s of %2$s</string>
+    <string name="albums_schedule">Schedule</string>
+    <string name="albums_rename">Rename</string>
+    <string name="albums_rename_title">Rename album</string>
+    <string name="albums_delete">Delete album</string>
+    <string name="albums_delete_confirm">Delete “%1$s”?</string>
+    <string name="albums_delete_body">The album goes away. Its photos stay on the frame.</string>
+    <string name="albums_delete_body_playing">The album goes away and the frame goes back to showing all photos. The photos themselves stay on the frame.</string>
+    <string name="albums_deleted">Album “%1$s” deleted</string>
+    <string name="albums_conflict">Someone else changed this album just now. We loaded the latest version; please try again.</string>
+    <string name="albums_cover">Cover</string>
+    <string name="albums_make_cover">Use as cover</string>
+    <string name="albums_cover_set">Cover updated</string>
+    <string name="albums_remove">Remove from album</string>
+    <plurals name="albums_removed">
+        <item quantity="one">%1$d photo removed from “%2$s”</item>
+        <item quantity="other">%1$d photos removed from “%2$s”</item>
+    </plurals>
+    <string name="albums_add_to_album">Add to album</string>
+    <string name="albums_add_short">Album</string>
+    <plurals name="albums_add_title">
+        <item quantity="one">Add %1$d photo to an album</item>
+        <item quantity="other">Add %1$d photos to an album</item>
+    </plurals>
+    <string name="albums_pick">Choose an album</string>
+    <string name="albums_add">Add</string>
+    <plurals name="albums_added">
+        <item quantity="one">%1$d photo added to “%2$s”</item>
+        <item quantity="other">%1$d photos added to “%2$s”</item>
+    </plurals>
+    <string name="albums_empty_title">This album is empty</string>
+    <string name="albums_empty_body">Select photos under “All photos” and choose “Add to album”.</string>
+    <string name="albums_pick_photos">Choose photos</string>
+    <string name="albums_schedule_title">Schedule “%1$s”</string>
+    <string name="albums_schedule_body">The frame plays this album by itself on these days every year, then goes back to its usual photos.</string>
+    <string name="albums_schedule_on">Play automatically every year</string>
+    <string name="albums_from">From</string>
+    <string name="albums_to">Until</string>
+    <string name="albums_from_day">From day</string>
+    <string name="albums_from_month">From month</string>
+    <string name="albums_to_day">Until day</string>
+    <string name="albums_to_month">Until month</string>
+    <string name="albums_schedule_summary">Plays from %1$s until %2$s, every year.</string>
+    <string name="albums_schedule_wraps">That runs over New Year.</string>
+    <string name="albums_schedule_short">%1$s – %2$s</string>
+    <string name="albums_schedule_saved">Plays every year from %1$s until %2$s</string>
+    <string name="albums_schedule_cleared">Schedule removed</string>
+    <string name="memories_title">On this day</string>
+    <plurals name="memories_subtitle">
+        <item quantity="one">%1$d photo taken on %2$s in earlier years</item>
+        <item quantity="other">%1$d photos taken on %2$s in earlier years</item>
+    </plurals>
+    <plurals name="memories_years_ago">
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
+    <string name="library_taken">Taken %1$s</string>
+    <!-- Android only: arrows instead of dragging. -->
+    <string name="albums_arrange_hint_android">Use the arrows on each photo to move it.</string>
+</resources>
