@@ -35,9 +35,61 @@
     "en": "Video",
     "nl": "Video"
   },
+  "ios.live.a11y": {
+    "en": "Live photo",
+    "nl": "Livefoto"
+  },
+  "ios.live.badge": {
+    "en": "Live",
+    "nl": "Live"
+  },
+  "ios.live.play": {
+    "en": "Play the Live Photo",
+    "nl": "Livefoto afspelen"
+  },
   "ios.name.placeholder": {
     "en": "e.g. Lisa",
     "nl": "bv. Lisa"
+  },
+  "ios.plugins.enabledHint": {
+    "en": "Shows on the frame once everything it needs is filled in.",
+    "nl": "Verschijnt op het kader zodra alles wat nodig is, ingevuld is."
+  },
+  "ios.plugins.errDuplicate": {
+    "en": "Two plugins have the same ID.",
+    "nl": "Twee plug-ins hebben dezelfde ID."
+  },
+  "ios.plugins.errNotOnFrame": {
+    "en": "The frame doesn’t have this plugin.",
+    "nl": "Het kader heeft deze plug-in niet."
+  },
+  "ios.plugins.errOther": {
+    "en": "Not accepted ({code}).",
+    "nl": "Niet aanvaard ({code})."
+  },
+  "ios.plugins.errSecret": {
+    "en": "A token can’t be saved as a plain setting.",
+    "nl": "Een token kan niet als gewone instelling bewaard worden."
+  },
+  "ios.plugins.errSlot": {
+    "en": "This plugin can’t go in that corner.",
+    "nl": "Deze plug-in kan niet in die hoek."
+  },
+  "ios.plugins.fixFields": {
+    "en": "Check the fields marked in red.",
+    "nl": "Kijk de rood gemarkeerde velden na."
+  },
+  "ios.plugins.newHint": {
+    "en": "It switches on when you save a complete form.",
+    "nl": "Hij gaat aan wanneer je een volledig formulier bewaart."
+  },
+  "ios.plugins.placement": {
+    "en": "Placement",
+    "nl": "Plaats"
+  },
+  "ios.plugins.timezoneClear": {
+    "en": "Clear {name}",
+    "nl": "{name} wissen"
   },
   "ios.send.background": {
     "en": "This keeps going if you close the app.",
@@ -51,6 +103,22 @@
     "en": "Caption for all",
     "nl": "Onderschrift voor alle"
   },
+  "ios.send.liveHint": {
+    "en": "The frame plays the short clip when the photo appears.",
+    "nl": "De fotolijst speelt het korte filmpje af wanneer de foto verschijnt."
+  },
+  "ios.send.liveStillHint": {
+    "en": "Only the photo is sent, without its clip.",
+    "nl": "Alleen de foto wordt verstuurd, zonder filmpje."
+  },
+  "ios.send.liveStillOnly": {
+    "en": "Send as a still photo only",
+    "nl": "Alleen als gewone foto versturen"
+  },
+  "ios.send.liveTitle": {
+    "en": "Live Photo",
+    "nl": "Livefoto"
+  },
   "ios.send.pickBody": {
     "en": "Up to {max} at a time, photos and videos mixed. You can also share them from Photos or any other app.",
     "nl": "Tot {max} tegelijk, foto’s en video’s door elkaar. Je kunt ze ook delen vanuit Foto’s of een andere app."
@@ -58,6 +126,10 @@
   "ios.send.pickTitle": {
     "en": "Pick photos and videos",
     "nl": "Kies foto’s en video’s"
+  },
+  "ios.send.preparing": {
+    "en": "Preparing {n} of {total} · {pct}%",
+    "nl": "{n} van {total} voorbereiden · {pct}%"
   },
   "ios.server.addressLabel": {
     "en": "Server address",
@@ -122,6 +194,22 @@
   "ios.settings.languageSystem": {
     "en": "Same as the phone",
     "nl": "Zoals de telefoon"
+  },
+  "ios.settings.liveOff": {
+    "en": "Photo only",
+    "nl": "Alleen foto"
+  },
+  "ios.settings.liveOn": {
+    "en": "Play when shown",
+    "nl": "Afspelen bij tonen"
+  },
+  "ios.settings.livePhotos": {
+    "en": "Live photos",
+    "nl": "Livefoto’s"
+  },
+  "ios.settings.liveTap": {
+    "en": "Play on tap",
+    "nl": "Afspelen bij tikken"
   },
   "ios.share.signedOut": {
     "en": "Open the kinframe app and sign in first. Then you can share photos straight to your frames.",

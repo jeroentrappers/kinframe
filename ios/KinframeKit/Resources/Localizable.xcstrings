@@ -8620,6 +8620,57 @@
         }
       }
     },
+    "ios.live.a11y": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Livefoto"
+          }
+        }
+      }
+    },
+    "ios.live.badge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        }
+      }
+    },
+    "ios.live.play": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play the Live Photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Livefoto afspelen"
+          }
+        }
+      }
+    },
     "ios.name.placeholder": {
       "extractionState": "manual",
       "localizations": {
@@ -8633,6 +8684,176 @@
           "stringUnit": {
             "state": "translated",
             "value": "bv. Lisa"
+          }
+        }
+      }
+    },
+    "ios.plugins.enabledHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows on the frame once everything it needs is filled in."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verschijnt op het kader zodra alles wat nodig is, ingevuld is."
+          }
+        }
+      }
+    },
+    "ios.plugins.errDuplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two plugins have the same ID."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Twee plug-ins hebben dezelfde ID."
+          }
+        }
+      }
+    },
+    "ios.plugins.errNotOnFrame": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame doesn’t have this plugin."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het kader heeft deze plug-in niet."
+          }
+        }
+      }
+    },
+    "ios.plugins.errOther": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not accepted ({code})."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet aanvaard ({code})."
+          }
+        }
+      }
+    },
+    "ios.plugins.errSecret": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A token can’t be saved as a plain setting."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een token kan niet als gewone instelling bewaard worden."
+          }
+        }
+      }
+    },
+    "ios.plugins.errSlot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This plugin can’t go in that corner."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze plug-in kan niet in die hoek."
+          }
+        }
+      }
+    },
+    "ios.plugins.fixFields": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the fields marked in red."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kijk de rood gemarkeerde velden na."
+          }
+        }
+      }
+    },
+    "ios.plugins.newHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It switches on when you save a complete form."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hij gaat aan wanneer je een volledig formulier bewaart."
+          }
+        }
+      }
+    },
+    "ios.plugins.placement": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Placement"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plaats"
+          }
+        }
+      }
+    },
+    "ios.plugins.timezoneClear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} wissen"
           }
         }
       }
@@ -8688,6 +8909,74 @@
         }
       }
     },
+    "ios.send.liveHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The frame plays the short clip when the photo appears."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De fotolijst speelt het korte filmpje af wanneer de foto verschijnt."
+          }
+        }
+      }
+    },
+    "ios.send.liveStillHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only the photo is sent, without its clip."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen de foto wordt verstuurd, zonder filmpje."
+          }
+        }
+      }
+    },
+    "ios.send.liveStillOnly": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send as a still photo only"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen als gewone foto versturen"
+          }
+        }
+      }
+    },
+    "ios.send.liveTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Livefoto"
+          }
+        }
+      }
+    },
     "ios.send.pickBody": {
       "extractionState": "manual",
       "localizations": {
@@ -8718,6 +9007,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kies foto’s en video’s"
+          }
+        }
+      }
+    },
+    "ios.send.preparing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preparing {n} of {total} · {pct}%"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{n} van {total} voorbereiden · {pct}%"
           }
         }
       }
@@ -8990,6 +9296,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zoals de telefoon"
+          }
+        }
+      }
+    },
+    "ios.settings.liveOff": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo only"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen foto"
+          }
+        }
+      }
+    },
+    "ios.settings.liveOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play when shown"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspelen bij tonen"
+          }
+        }
+      }
+    },
+    "ios.settings.livePhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Livefoto’s"
+          }
+        }
+      }
+    },
+    "ios.settings.liveTap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play on tap"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspelen bij tikken"
           }
         }
       }
