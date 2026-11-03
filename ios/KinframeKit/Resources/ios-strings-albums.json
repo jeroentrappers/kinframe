@@ -1,0 +1,14 @@
+{
+  "ios.albums.arrangeHint": {
+    "en": "Drag the handles to change the order.",
+    "nl": "Sleep de handvatten om de volgorde te wijzigen."
+  },
+  "ios.albums.more": {
+    "en": "Album actions",
+    "nl": "Albumacties"
+  },
+  "ios.albums.unknown": {
+    "en": "An album that’s gone",
+    "nl": "Een album dat er niet meer is"
+  }
+}

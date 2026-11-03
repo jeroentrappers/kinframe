@@ -8467,6 +8467,57 @@
         }
       }
     },
+    "ios.albums.arrangeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drag the handles to change the order."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sleep de handvatten om de volgorde te wijzigen."
+          }
+        }
+      }
+    },
+    "ios.albums.more": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Album actions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albumacties"
+          }
+        }
+      }
+    },
+    "ios.albums.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An album that’s gone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een album dat er niet meer is"
+          }
+        }
+      }
+    },
     "ios.back": {
       "extractionState": "manual",
       "localizations": {
