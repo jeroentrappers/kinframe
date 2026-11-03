@@ -295,6 +295,17 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
     AskForNotifications()
+    // Someone asks to join a frame you manage while the app is open (web: a toast with Review).
+    LaunchedEffect(graph) {
+        graph.live.events.collect { e ->
+            if (e !is app.kinframe.family.data.LiveEvent.JoinRequested) return@collect
+            val f = (frames.state.value.frames as? Load.Ready)?.value?.firstOrNull { it.id == e.frameId } ?: return@collect
+            if (!f.isManager) return@collect
+            toaster.show(res.getString(R.string.live_join_request, e.request?.user?.displayName.orEmpty(), f.name), res.getString(R.string.common_review)) {
+                nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(f.id, FrameTab.People))
+            }
+        }
+    }
 
     LaunchedEffect(composer) {
         composer.events.collect { e ->

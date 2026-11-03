@@ -22,6 +22,7 @@
     <string name="settings_form_play_album_hint">Scheduled albums still take over on their days.</string>
     <string name="settings_form_on_this_day">On this day</string>
     <string name="settings_form_on_this_day_hint">Now and then, show photos taken on today’s date in earlier years.</string>
+    <string name="common_review">Review</string>
     <!-- Android only: the app instead of the website. -->
     <string name="settings_language_hint_app">Used in this app and for notifications.</string>
 </resources>

@@ -22,6 +22,7 @@
     <string name="settings_form_play_album_hint">Geplande albums nemen op hun dagen nog steeds over.</string>
     <string name="settings_form_on_this_day">Op deze dag</string>
     <string name="settings_form_on_this_day_hint">Af en toe foto’s tonen die op de datum van vandaag in vorige jaren genomen zijn.</string>
+    <string name="common_review">Bekijken</string>
     <!-- Android only: the app instead of the website. -->
     <string name="settings_language_hint_app">Gebruikt in deze app en voor meldingen.</string>
 </resources>
