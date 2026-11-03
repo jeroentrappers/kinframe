@@ -54,6 +54,9 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfOpen <url>` | Open a link, e.g. `http://localhost:8110/f/12345678` |
 | `-kfCompose /a.heic,/b.mov [-kfCaption …] [-kfComposeFrames <ids>] [-kfAutoSend YES] [-kfEditFirst YES]` | Stage files in the composer; `/still.heic+/clip.mov` stages a Live Photo |
 | `-kfScrollTo plugins`, `-kfSheet share\|photo\|pluginAdd\|pluginEdit` | On a frame page: scroll to the plugins, open the share picker, a photo, the plugin catalog or the first plugin |
+| `-kfScrollTo details\|ownership`, `-kfSheet transfer\|leave\|replace\|member [-kfTransferConfirm YES]` | On a frame page: scroll to the details or ownership, open the transfer (at its confirm step), the owner's leave, moving to a new frame, or the first member you can edit (with `-kfSection people`) |
+| `-kfSheet reservations`, `-kfScrollTo signOut` | In Settings: the operator's shop reservations (sample data on a server without a shop), the end of the page |
+| `-kfDevOperator YES` | The dev token carries the operator scope (together with `-kfReset YES` to sign in again) |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
 | `-kfLanguage en\|nl\|system` | Language |
 
