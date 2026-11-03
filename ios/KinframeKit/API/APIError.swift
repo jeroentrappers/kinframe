@@ -10,6 +10,13 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
     public var detail: String?
     /// Seconds from `Retry-After`, when the server sent one.
     public var retryAfter: Int?
+    /// A 422's problems per field (`errors[]`: `plugins.instances.0.settings.grid` → `required`).
+    public var fieldErrors: [FieldError] = []
+
+    public struct FieldError: Equatable, Sendable {
+        public var field: String
+        public var code: String
+    }
 
     public init(status: Int, code: String, title: String? = nil, detail: String? = nil, retryAfter: Int? = nil) {
         self.status = status
@@ -26,9 +33,14 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
     /// Build from a problem+json body; falls back to a status-based code.
     public static func from(status: Int, body: Data?, retryAfter: Int? = nil) -> APIError {
         struct Problem: Decodable {
+            struct Field: Decodable {
+                var field: String?
+                var code: String?
+            }
             var code: String?
             var title: String?
             var detail: String?
+            var errors: [Field]?
         }
         let p = body.flatMap { try? JSONDecoder().decode(Problem.self, from: $0) }
         let fallback: String = switch status {
@@ -41,7 +53,9 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
         case 429: "rate_limited"
         default: "server_error"
         }
-        return APIError(status: status, code: p?.code ?? fallback, title: p?.title, detail: p?.detail, retryAfter: retryAfter)
+        var e = APIError(status: status, code: p?.code ?? fallback, title: p?.title, detail: p?.detail, retryAfter: retryAfter)
+        e.fieldErrors = (p?.errors ?? []).compactMap { f in f.field.map { FieldError(field: $0, code: f.code ?? "invalid") } }
+        return e
     }
 
     /// Map anything thrown by the generated client, URLSession or our middleware to an APIError.

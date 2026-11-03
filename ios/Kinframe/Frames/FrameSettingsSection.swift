@@ -1,7 +1,7 @@
 import KinframeKit
 import SwiftUI
 
-/// Slideshow, screen, sleep times and location & weather for a frame (web: FrameSettingsForm).
+/// Slideshow, screen, sleep times, location & weather and plugins for a frame (web: FrameSettingsForm).
 struct FrameSettingsSection: View {
     @Environment(AppModel.self) private var app
     let frame: FrameSummary
@@ -30,6 +30,7 @@ struct FrameSettingsSection: View {
                 display
                 sleep
                 weather
+                PluginsSection(api: model.api, frame: frame).id("plugins")
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -84,6 +85,16 @@ struct FrameSettingsSection: View {
                     }
                 }
                 .tint(Palette.accent)
+            }
+            row {
+                LabeledContent(L("ios.settings.livePhotos")) {
+                    Picker(L("ios.settings.livePhotos"), selection: model.string("slideshow.live_photos", "on")) {
+                        Text(L("ios.settings.liveOn")).tag("on")
+                        Text(L("ios.settings.liveTap")).tag("tap")
+                        Text(L("ios.settings.liveOff")).tag("off")
+                    }
+                    .labelsHidden()
+                }
             }
             row {
                 LabeledContent(L("settingsForm.background")) {

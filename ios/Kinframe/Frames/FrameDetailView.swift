@@ -128,6 +128,7 @@ struct FrameDetailView: View {
     var body: some View {
         Group {
             if let model, let frame = model.summary {
+                ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         header(frame)
@@ -149,6 +150,15 @@ struct FrameDetailView: View {
                     .frame(maxWidth: .infinity)
                 }
                 .refreshable { await model.load() }
+                #if DEBUG
+                .task {
+                    if let target = UserDefaults.standard.string(forKey: "kfScrollTo"), !target.isEmpty {
+                        try? await Task.sleep(for: .seconds(2.5))
+                        withAnimation { proxy.scrollTo(target, anchor: .top) }
+                    }
+                }
+                #endif
+                }
             } else if let error = model?.error {
                 ErrorRetryView(message: error) { Task { await model?.load() } }.padding(16)
             } else {

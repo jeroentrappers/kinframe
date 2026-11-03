@@ -9,6 +9,7 @@ import SwiftUI
 /// - `-kfServer <url>` with `-kfDevEmail <email>` [`-kfDevName <name>`]: sign in with a dev token (dev servers only).
 /// - `-kfStep welcome|server|signIn`: onboarding step.  `-kfTab frames|send|history|settings`: tab.
 /// - `-kfLanguage en|nl|system`.  `-kfOpen <url>`: open a link as if tapped.  `-kfFrame <id>`: open a frame.
+/// - `-kfScrollTo plugins`: scroll the frame page there.  `-kfSheet share|pluginAdd|pluginEdit`: open that sheet.
 @MainActor
 enum DebugLaunch {
     static var args: UserDefaults { .standard }
@@ -40,6 +41,13 @@ enum DebugLaunch {
                 Onboarding.step = .done
             }
         }
+    }
+
+    /// A sheet to open once (`-kfSheet`), for screenshots.
+    static func takeSheet(_ name: String) -> Bool {
+        guard args.string(forKey: "kfSheet") == name else { return false }
+        args.set("", forKey: "kfSheet")
+        return true
     }
 
     static func afterLaunch(_ app: AppModel) {
