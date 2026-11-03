@@ -1,0 +1,26 @@
+{
+  "ios.tv.airplay": {
+    "en": "AirPlay to a TV",
+    "nl": "Via AirPlay op een tv"
+  },
+  "ios.tv.airplayHint": {
+    "en": "An Apple TV or AirPlay TV on the same Wi‑Fi. This phone is the remote.",
+    "nl": "Een Apple TV of AirPlay-tv op hetzelfde wifi. Deze telefoon is de afstandsbediening."
+  },
+  "ios.tv.mirrorAirplayHint": {
+    "en": "An Apple TV or AirPlay TV on the same Wi‑Fi follows {frame} live.",
+    "nl": "Een Apple TV of AirPlay-tv op hetzelfde wifi volgt {frame} live."
+  },
+  "ios.tv.noScreen": {
+    "en": "Open Control Center, tap Screen Mirroring and choose your TV. The TV then shows the photos full screen, not your phone’s screen.",
+    "nl": "Open het bedieningspaneel, tik op Synchrone weergave en kies je tv. De tv toont dan de foto’s schermvullend, niet het scherm van je telefoon."
+  },
+  "ios.tv.share": {
+    "en": "Share link",
+    "nl": "Link delen"
+  },
+  "ios.tv.waiting": {
+    "en": "Waiting for a TV…",
+    "nl": "Wachten op een tv…"
+  }
+}

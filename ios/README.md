@@ -57,6 +57,7 @@ Debug builds understand a few launch arguments, handy for screenshots and manual
 | `-kfSection calendar` with `-kfScrollTo calendars\|sentEvents\|calendarSettings`, `-kfSheet calendarAdd\|calendarEvent\|calendarMonth\|calendarDetail` | The Calendar section: scroll to a part, open "Add a calendar", "Send an event", the month view or an event |
 | `-kfSharePreview … -kfComposeFrames <ids> -kfAutoSend YES` | Pick those frames in the share preview and send (the extension's path, with preparation) |
 | `-kfSharePreview /a.jpg,/b.mov` | Show the share extension's composer inside the app |
+| `-kfSheet tv [-kfTvMode show\|mirror\|frame] [-kfTvLink YES] [-kfTvStart YES] [-kfTvStage YES]` | On a frame's Photos: open "Show on TV" in that mode, make a TV link, start the AirPlay slideshow (also without a TV), and show the TV's picture inside the sheet |
 | `-kfLanguage en\|nl\|system` | Language |
 
 ```sh
@@ -143,6 +144,15 @@ Fraunces). Text uses Dynamic Type styles and controls carry VoiceOver labels.
 **Strings** come from the web catalogs, with the same keys, `{placeholder}` syntax and `.one`/`.other` plurals, plus
 iOS-only strings in `ios-strings.json` (English and Dutch for now). `L("key", ["name": …])` and `Lp(…)` look them up;
 the language can be changed in Settings.
+
+**Show on TV.** `TvSheet` mirrors the web's dialog: a private TV link (`purpose: tv` or `mirror`) to open in the TV's
+browser, with share, copy and the active links to turn off, and "Use another screen", which claims the code a TV
+browser shows at `/tv/frame`. Casting goes over AirPlay: with the phone mirrored to an Apple TV, the app's
+`TvSceneDelegate` gets the external display (`UIWindowSceneSessionRoleExternalDisplayNonInteractive`) and, only while
+a session runs, puts a window there. `TvCast` creates a `cast` link, fetches `GET /v1/tv/{token}` and plays the
+slideshow natively (fit, focal point, caption and byline, videos to the end, a refetch after `refresh_after`); the
+phone is the remote, and Stop revokes the link. A mirror loads the frame's TV page in a web view on the TV. Without
+a session there's no window on the external display, so iOS mirrors the phone as usual.
 
 **Push.** APNs is behind the `KINFRAME_APNS_ENABLED` build setting (off). When on, the app asks for notification
 permission after the first send and registers the device token with `POST /v1/me/push-endpoints {kind: "apns"}`.

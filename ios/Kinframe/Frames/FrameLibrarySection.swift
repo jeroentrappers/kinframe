@@ -91,6 +91,8 @@ struct FrameLibrarySection: View {
     @State private var sharing: ShareRequest?
     /// Opened once the photo sheet is gone (one sheet at a time).
     @State private var shareNext: ShareRequest?
+    @State private var tv: TvRequest?
+    @State private var tvNext: TvRequest?
 
     init(api: API, frame: FrameSummary) {
         self.frame = frame
@@ -110,6 +112,11 @@ struct FrameLibrarySection: View {
                     Text(L("library.trashTab")).tag(LibraryModel.View.trashed)
                 }
                 .pickerStyle(.segmented)
+                if model.view == .visible, frame.can(\.seeLibrary), !model.placements.isEmpty, !model.selecting {
+                    Button { tv = TvRequest(frameId: frame.id, frameName: frame.name, scope: .all) } label: { Image(systemName: "tv") }
+                        .frame(minWidth: 44, minHeight: 44)
+                        .accessibilityLabel(L("tv.show"))
+                }
                 if !model.placements.isEmpty {
                     Button(model.selecting ? L("common.done") : L("library.select")) {
                         withAnimation { model.selecting.toggle(); model.selection = [] }
@@ -168,6 +175,7 @@ struct FrameLibrarySection: View {
                 sharing = ShareRequest(source: .init(frameId: frame.id, placementIds: model.placements.prefix(3).map(\.id)))
             }
             if DebugLaunch.takeSheet("photo") { open = model.placements.first }
+            if DebugLaunch.takeSheet("tv") { tv = TvRequest(frameId: frame.id, frameName: frame.name, scope: .all) }
             #endif
         }
         .sheet(item: $open, onDismiss: {
@@ -175,9 +183,15 @@ struct FrameLibrarySection: View {
                 shareNext = nil
                 sharing = next
             }
+            if let next = tvNext {
+                tvNext = nil
+                tv = next
+            }
         }) { p in
             PlacementSheet(api: model.api, placement: p, manage: manage || p.item.senderId == app.me?.id,
-                           share: canShare && !p.trashed ? { shareNext = ShareRequest(source: .init(frameId: frame.id, placementIds: [p.id])); open = nil } : nil) { action in
+                           share: canShare && !p.trashed ? { shareNext = ShareRequest(source: .init(frameId: frame.id, placementIds: [p.id])); open = nil } : nil,
+                           tv: !p.trashed && !p.hidden && p.pendingModeration != true
+                               ? { tvNext = TvRequest(frameId: frame.id, frameName: frame.name, scope: .selection([p.id])); open = nil } : nil) { action in
                 await run(action, ids: [p.id])
             }
         }
@@ -185,6 +199,9 @@ struct FrameLibrarySection: View {
             ShareToFrameSheet(api: model.api, source: request.source) {
                 withAnimation { model.selecting = false; model.selection = [] }
             }
+        }
+        .sheet(item: $tv) { r in
+            TvSheet(api: model.api, frameId: r.frameId, frameName: r.frameName, scope: r.scope)
         }
     }
 
@@ -249,6 +266,13 @@ struct FrameLibrarySection: View {
             }
             switch model.view {
             case .visible:
+                Button {
+                    tv = TvRequest(frameId: frame.id, frameName: frame.name, scope: .selection(model.placements.map(\.id).filter { model.selection.contains($0) }))
+                } label: {
+                    Image(systemName: "tv")
+                }
+                .buttonStyle(.kf(.secondary))
+                .accessibilityLabel(L("tv.show"))
                 Button(L("library.hide")) { Task { await run(.hide, ids: Array(model.selection)) } }.buttonStyle(.kf(.secondary))
                 Button(L("library.trash")) { Task { await run(.trash, ids: Array(model.selection)) } }.buttonStyle(.kf(.danger))
             case .hidden:
@@ -293,6 +317,8 @@ private struct PlacementSheet: View {
     let manage: Bool
     /// "Share to another frame", when there is a frame to share to.
     let share: (() -> Void)?
+    /// "Show on TV" for this photo.
+    let tv: (() -> Void)?
     let act: (LibraryModel.Action) async -> Void
 
     var body: some View {
@@ -326,6 +352,12 @@ private struct PlacementSheet: View {
                     if let share {
                         Button(action: share) {
                             Label(L("share.action"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.secondary))
+                    }
+                    if let tv {
+                        Button(action: tv) {
+                            Label(L("tv.show"), systemImage: "tv")
                         }
                         .buttonStyle(.kf(.secondary))
                     }
