@@ -88,6 +88,9 @@ struct FrameLibrarySection: View {
     let frame: FrameSummary
     @State private var model: LibraryModel
     @State private var open: Placement?
+    @State private var sharing: ShareRequest?
+    /// Opened once the photo sheet is gone (one sheet at a time).
+    @State private var shareNext: ShareRequest?
 
     init(api: API, frame: FrameSummary) {
         self.frame = frame
@@ -95,6 +98,8 @@ struct FrameLibrarySection: View {
     }
 
     private var manage: Bool { frame.can(\.manageLibrary) }
+    /// "Share to another frame" needs another frame you can send to.
+    private var canShare: Bool { !Sharing.targets(app.frames, excluding: frame.id).isEmpty }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -154,10 +159,31 @@ struct FrameLibrarySection: View {
         .safeAreaInset(edge: .bottom) {
             if model.selecting, !model.selection.isEmpty { bulkBar }
         }
-        .task(id: model.view) { await model.load() }
-        .sheet(item: $open) { p in
-            PlacementSheet(placement: p, manage: manage || p.item.senderId == app.me?.id) { action in
+        .task(id: model.view) {
+            await model.load()
+            #if DEBUG
+            if DebugLaunch.takeSheet("share"), canShare {
+                model.selecting = true
+                model.selection = Set(model.placements.prefix(3).map(\.id))
+                sharing = ShareRequest(source: .init(frameId: frame.id, placementIds: model.placements.prefix(3).map(\.id)))
+            }
+            if DebugLaunch.takeSheet("photo") { open = model.placements.first }
+            #endif
+        }
+        .sheet(item: $open, onDismiss: {
+            if let next = shareNext {
+                shareNext = nil
+                sharing = next
+            }
+        }) { p in
+            PlacementSheet(api: model.api, placement: p, manage: manage || p.item.senderId == app.me?.id,
+                           share: canShare && !p.trashed ? { shareNext = ShareRequest(source: .init(frameId: frame.id, placementIds: [p.id])); open = nil } : nil) { action in
                 await run(action, ids: [p.id])
+            }
+        }
+        .sheet(item: $sharing) { request in
+            ShareToFrameSheet(api: model.api, source: request.source) {
+                withAnimation { model.selecting = false; model.selection = [] }
             }
         }
     }
@@ -173,7 +199,7 @@ struct FrameLibrarySection: View {
         } label: {
             Palette.surface2
                 .aspectRatio(1, contentMode: .fit)
-                .overlay { RemoteThumb(url: p.item.thumbUrl, kind: p.item.kind == .video ? .video : .photo) }
+                .overlay { RemoteThumb(url: p.item.thumbUrl, kind: p.item.kind) }
                 .overlay(alignment: .topTrailing) {
                     if model.selecting {
                         Image(systemName: selected ? "checkmark.circle.fill" : "circle")
@@ -188,11 +214,23 @@ struct FrameLibrarySection: View {
                         Pill(L("library.pending"), foreground: Palette.warn, background: Palette.warnSoft).padding(4)
                     }
                 }
+                .overlay(alignment: .bottomTrailing) {
+                    if p.sharedByName != nil {
+                        Image(systemName: "arrowshape.turn.up.right.fill")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(5)
+                            .background(Circle().fill(.black.opacity(0.45)))
+                            .padding(5)
+                    }
+                }
                 .clipped()
                 .opacity(model.selecting && !selected ? 0.75 : 1)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(L("library.itemBy", ["name": p.item.senderName ?? "?"]))
+        .accessibilityLabel(L("library.itemBy", ["name": p.item.senderName ?? "?"])
+            + (p.item.kind == .live ? ". " + L("ios.live.a11y") : "")
+            + (p.sharedByName.map { ". " + L("share.sharedBy", ["name": $0]) } ?? ""))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
@@ -200,6 +238,15 @@ struct FrameLibrarySection: View {
         HStack(spacing: 8) {
             Text(Lp("library.selected", count: model.selection.count)).font(.subheadline.weight(.semibold))
             Spacer()
+            if canShare, model.view != .trashed {
+                Button {
+                    sharing = ShareRequest(source: .init(frameId: frame.id, placementIds: model.placements.map(\.id).filter { model.selection.contains($0) }))
+                } label: {
+                    Image(systemName: "arrowshape.turn.up.right")
+                }
+                .buttonStyle(.kf(.secondary))
+                .accessibilityLabel(L("share.action"))
+            }
             switch model.view {
             case .visible:
                 Button(L("library.hide")) { Task { await run(.hide, ids: Array(model.selection)) } }.buttonStyle(.kf(.secondary))
@@ -241,8 +288,11 @@ struct FrameLibrarySection: View {
 /// One item on the frame, large, with its details and actions.
 private struct PlacementSheet: View {
     @Environment(\.dismiss) private var dismiss
+    let api: API
     let placement: Placement
     let manage: Bool
+    /// "Share to another frame", when there is a frame to share to.
+    let share: (() -> Void)?
     let act: (LibraryModel.Action) async -> Void
 
     var body: some View {
@@ -253,11 +303,16 @@ private struct PlacementSheet: View {
                         if let image = phase.image { image.resizable().scaledToFit() } else { Palette.surface2.aspectRatio(1, contentMode: .fit) }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
+                    .overlay(alignment: .topLeading) { if placement.item.kind == .live { LiveBadge().padding(8) } }
+                    .livePlayback(api: api, item: placement.item)
                     if let caption = placement.item.caption, !caption.isEmpty {
                         Text(caption).font(.title3).foregroundStyle(Palette.text)
                     }
                     VStack(alignment: .leading, spacing: 4) {
                         Text(L("library.from", ["name": placement.item.senderName ?? "?"]))
+                        if let sharer = placement.sharedByName {
+                            Label(L("share.sharedBy", ["name": sharer]), systemImage: "arrowshape.turn.up.right")
+                        }
                         Text(L("library.received", ["when": Format.dateTime(placement.receivedAt, locale: L10n.locale)]))
                         if let taken = placement.item.capturedAt {
                             Text(L("library.taken", ["when": Format.dateTime(taken, locale: L10n.locale)]))
@@ -267,6 +322,12 @@ private struct PlacementSheet: View {
                     .foregroundStyle(Palette.textMuted)
                     if let r = placement.reaction {
                         Text("\(r.emoji) \(L("reaction.\(r.rawValue)"))").chip()
+                    }
+                    if let share {
+                        Button(action: share) {
+                            Label(L("share.action"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.secondary))
                     }
                     if manage {
                         HStack {

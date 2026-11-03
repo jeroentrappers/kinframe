@@ -10,6 +10,7 @@ struct SendDetailView: View {
     @State private var editing: Item?
     @State private var removed = false
     @State private var commitUnsend: Task<Void, Never>?
+    @State private var sharing: ShareRequest?
 
     var body: some View {
         ScrollView {
@@ -21,6 +22,14 @@ struct SendDetailView: View {
                 } else if let send = model.send {
                     header(send)
                     delivery(send)
+                    if let source = shareSource(send) {
+                        Button {
+                            sharing = ShareRequest(source: source)
+                        } label: {
+                            Label(L("share.action"), systemImage: "arrowshape.turn.up.right")
+                        }
+                        .buttonStyle(.kf(.secondary))
+                    }
                     ForEach(Array(send.items.enumerated()), id: \.element.id) { n, item in
                         itemRow(item, n: n + 1, send: send)
                     }
@@ -50,6 +59,11 @@ struct SendDetailView: View {
         .task { await model.load() }
         .refreshable { await model.load() }
         .onLiveEvent(app.events) { model.apply($0) }
+        .sheet(item: $sharing) { request in
+            if let api = app.api {
+                ShareToFrameSheet(api: api, source: request.source) { Task { await model.load() } }
+            }
+        }
         .sheet(item: $editing) { item in
             CaptionEditor(item: item, number: (model.send?.items.firstIndex { $0.id == item.id } ?? 0) + 1) { text in
                 do {
@@ -86,6 +100,11 @@ struct SendDetailView: View {
                         .font(.footnote.monospacedDigit())
                         .foregroundStyle(Palette.textMuted)
                     ProgressView(value: d.progress).tint(Palette.accent).accessibilityHidden(true)
+                    if let f = send.frames.first(where: { $0.frameId == d.frameId }), case let names = Sharing.sharedBy(f), !names.isEmpty {
+                        Label(L("share.sharedBy", ["name": names.joined(separator: ", ")]), systemImage: "arrowshape.turn.up.right")
+                            .font(.footnote)
+                            .foregroundStyle(Palette.textMuted)
+                    }
                     ReactionChips(reactions: d.reactions, replies: d.replies)
                 }
                 .accessibilityElement(children: .combine)
@@ -107,7 +126,8 @@ struct SendDetailView: View {
                             .background(Capsule().fill(.black.opacity(0.5))).padding(5)
                     }
                 }
-                .accessibilityLabel(item.caption ?? L("detail.itemAlt", ["n": n]))
+                .livePlayback(api: app.api, item: item)
+                .accessibilityLabel((item.caption ?? L("detail.itemAlt", ["n": n])) + (item.kind == .live ? ". " + L("ios.live.a11y") : ""))
             VStack(alignment: .leading, spacing: 8) {
                 if item.status == .failed {
                     Text(failureMessage(item.failureCode))
@@ -142,6 +162,13 @@ struct SendDetailView: View {
             }
         }
         .card(padding: 12)
+    }
+
+    /// "Share to another frame": the first frame that still holds every item, when there's another frame to send to.
+    private func shareSource(_ send: Send) -> Sharing.Source? {
+        guard let source = Sharing.source(of: send, itemIds: Sharing.shareableItems(of: send)),
+              !Sharing.targets(app.frames, excluding: source.frameId).isEmpty else { return nil }
+        return source
     }
 
     private var removedCard: some View {
