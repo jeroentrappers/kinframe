@@ -28,7 +28,16 @@ struct RootView: View {
         .task { await app.launch() }
         #if DEBUG
         // -kfSharePreview /a.jpg,/b.mp4: show the share extension's composer in the app (screenshots).
-        .sheet(item: $sharePreview) { model in ShareRootView(model: model).task { await model.start() } }
+        // With -kfComposeFrames <ids> and -kfAutoSend YES it also picks those frames and sends.
+        .sheet(item: $sharePreview) { model in
+            ShareRootView(model: model).task {
+                await model.start()
+                if let ids = UserDefaults.standard.string(forKey: "kfComposeFrames") {
+                    model.compose.frameIds = Set(ids.split(separator: ",").map(String.init))
+                }
+                if UserDefaults.standard.bool(forKey: "kfAutoSend") { await model.send() }
+            }
+        }
         .task {
             try? await Task.sleep(for: .seconds(2))
             if let list = UserDefaults.standard.string(forKey: "kfSharePreview") {

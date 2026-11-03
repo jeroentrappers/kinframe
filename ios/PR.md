@@ -30,16 +30,26 @@ yet (only API calls in `android/core`), so they're left for when the family apps
   `AVMutableComposition` with the trim and, when muted, without audio; a video composition that bakes the rotation in
   and renders at most 1920×1080 and 30 fps; `AVAssetExportPreset1920x1080` to MP4 with network optimization,
   `metadata = []` and `.forSharing()`. The send gets `captured_at`, `width`, `height`, `duration_ms` and no `trim`
-  for a prepared video. Anything ImageIO or the export can't handle is uploaded as it was. "Preparing 2 of 5 · 40%"
-  shows in the sending card. The master replaces the original in the queue; both are gone once the send is accepted.
+  for a prepared video. "Preparing 2 of 5 · 40%" shows in the sending card. The master replaces the original in the
+  queue; both are gone once the send is accepted.
+- **Originals are never uploaded.** Every file of a send is prepared, one at a time, before any upload starts. When
+  preparing a file fails, it goes as it is only if it's already within the master's limits (long edge ≤ 2560 px;
+  ≤ 1920×1080 and ≤ 30 fps); otherwise the send stops with "A photo or video couldn't be made ready to send, and it's
+  too large to send as it is." (`media_unprepared`) and Try again / Cancel. The same goes for Live Photo clips. GIF and
+  BMP are prepared too (a GIF becomes its first frame, which is all the server keeps of it).
 - **Live Photos:** the picker matches `.livePhotos`; for a Live Photo the app loads `PHLivePhoto` and writes its
   `.pairedVideo` resource with `PHAssetResourceManager` (iCloud allowed), without asking for library access. The
   clip is prepared like a video, muted and cut to 10 s, uploaded on its own, and sent as `live_video_upload_id`.
   "Live" badge on the composer tile, a "Send as a still photo only" switch in the item editor, "Live" badges in
   History and the library, and a long press there plays `GET /v1/items/{id}/media/motion`, muted (the redirect to the
   signed URL is followed without our token; a streamed clip gets the token).
-- **The share extension** still hands originals over and starts uploading them right away, so a share keeps going
-  after the sheet closes. Items whose upload hasn't started when the app takes the job over are prepared by the app.
+- **The share extension prepares too.** After Send it runs the same queue with the same preparer, one file at a time
+  (ImageIO's decode-and-downscale keeps a 48 MP photo well under the extension's memory limit, and the video export
+  runs out of process), shows "Preparing 2 of 3 · 40%", and closes once every file is prepared and the uploads have
+  started on the background session. A file that can't be prepared and is too large shows the error in the sheet and
+  the job is taken out of the queue. If the sheet goes away before preparing is done, the job stays queued and the
+  app prepares what's left the next time it runs (after the 90 s lease). An upload of an unprepared original queued by
+  an older version starts over with the master.
 - **Share to another frame:** `POST /v1/frames/{id}/placements:share` with an `Idempotency-Key`; a dry run over all
   candidate frames (where you can send, not the source) marks "Already there" (not selectable) and "Has some". The
   toast "Shared to …" has Undo, which purges the created placements per frame. Entry points: the library's selection
@@ -63,8 +73,7 @@ yet (only API calls in `android/core`), so they're left for when the family apps
   a real ImageIO run on a 4000×3000 Display P3 JPEG with GPS and orientation 6 (comes out 1920×2560, sRGB, without
   EXIF date, GPS or orientation), the runner with a fake preparer (prepared still and muted clip uploaded with
   `prepared`, the send body with `live_video_upload_id`, `width`, `height`, `captured_at`; a prepared video without
-  `trim` and with `duration_ms`; no preparer uploads originals; an upload the extension started isn't prepared
-  again), sharing (coverage from a dry run, targets, the source frame, "Shared by"), and the plugin settings logic
+  `trim` and with `duration_ms`), sharing (coverage from a dry run, targets, the source frame, "Shared by"), and the plugin settings logic
   (manifest reading, the server's checks, presets, instance JSON keeping unknown fields and sending only changed
   secrets, 422 field mapping, status, registry update diffs, the frame's report, entity filters, time zones).
 - Against a local dev server built from this branch (Docker, own database) with three scripted frames: a Live Photo
@@ -72,6 +81,12 @@ yet (only API calls in `android/core`), so they're left for when the family apps
   photo and the motion clip), a share between frames with the dry-run marks, "Shared by" in History and the library,
   and the Plugins section with a reported catalog (built-in and a community plugin), saving layout changes.
 - Screenshots above (iPhone 17 simulator, light; the plugins section also in Dutch).
+- Always preparing (6 more tests, 94 in all): the limits for going as-is, read from real files too; a file that
+  can't be prepared but is within the limits goes as it is; one that is too large fails the send with
+  `media_unprepared` before anything is uploaded, also when it's a Live Photo's clip; every file is prepared before
+  the first upload; an unfinished upload of an original starts over with the master; the share sheet waits until
+  every file (and clip) is prepared. On the dev server, the share sheet (in-app preview) sent a 4800×3600 JPEG and a
+  video: the queue uploaded a 2560×1920 master and a 1440×1080 MP4, and the server logged `pipeline=prepared` for both.
 
 ### Left after the update
 
@@ -85,8 +100,9 @@ yet (only API calls in `android/core`), so they're left for when the family apps
 
 ### Questions about the update
 
-4. The share extension uploads originals so a share doesn't wait for the app. Should it rather leave the job for
-   the app to prepare (smaller uploads, but only once the app runs)?
+4. ~~Should the share extension upload originals, or leave the job for the app to prepare?~~ Decided: photos and
+   videos are always prepared on the device and originals are never uploaded. The extension now prepares in the
+   sheet before closing (see above), so a share still doesn't wait for the app to be opened.
 5. Should Live Photos get a "Live sound" switch? The handoff mentions it; the Android app has none, so the clip is
    always sent muted for now.
 
