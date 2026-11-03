@@ -1,0 +1,20 @@
+{
+  "id": "kinframe.homewizard-p1",
+  "name": "HomeWizard P1 meter",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "Live power from a HomeWizard P1 meter on the home network: using, returning, per phase and today's totals.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 1, "default_seconds": 1 },
+  "permissions": { "http": ["settings.host"] },
+  "settings": [
+    { "key": "host", "type": "url", "label": "Meter address", "placeholder": "192.168.1.50", "required": true,
+      "local_only": true, "discover": "_hwenergy._tcp",
+      "help": "Switch on Local API for the meter in the HomeWizard Energy app." },
+    { "key": "style", "type": "choice", "label": "Show as", "options": ["value", "gauge", "flow"], "default": "value" },
+    { "key": "max_w", "type": "number", "label": "Full scale (W)", "default": 4000 },
+    { "key": "warn_w", "type": "number", "label": "Highlight above (W, 0 = off)", "default": 0 }
+  ]
+}

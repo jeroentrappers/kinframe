@@ -1,0 +1,24 @@
+[
+  {
+    "entity_id": "media_player.woonkamer",
+    "state": "playing",
+    "attributes": {
+      "friendly_name": "Woonkamer",
+      "supported_features": 448439,
+      "volume_level": 0.35,
+      "is_volume_muted": false,
+      "media_content_type": "music",
+      "media_duration": 245,
+      "media_position": 61,
+      "media_position_updated_at": "2026-10-25T20:00:00+00:00",
+      "media_title": "Les Cactus",
+      "media_artist": "Jacques Dutronc",
+      "media_album_name": "Jacques Dutronc",
+      "app_name": "Spotify",
+      "entity_picture": "/api/media_player_proxy/media_player.woonkamer?token=FIXTURE-NOT-A-TOKEN&cache=3f2a",
+      "source": "Woonkamer"
+    },
+    "last_updated": "2026-10-25T20:00:00+00:00",
+    "last_changed": "2026-10-25T19:58:00+00:00"
+  }
+]

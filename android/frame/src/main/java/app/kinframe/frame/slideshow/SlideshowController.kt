@@ -34,12 +34,16 @@ data class Slide(
     val placement: PlacementEntity,
     val image: ImageBitmap?,
     val key: String,
-    /** Videos only: the caption as a bottom strip, drawn above the playing video. */
+    /** Videos, live photos and [captionSeparate] slides: the caption as a bottom strip, drawn above the slide. */
     val captionStrip: ImageBitmap? = null,
     /** Collages and smart pairs: every photo and its cell ([placement] is the first one). Empty for one photo. */
     val tiles: List<Tile> = emptyList(),
     /** Ken Burns motion while this slide is on screen, or null. */
     val kenBurns: KenBurns.Params? = null,
+    /** The caption is not in [image] but only in [captionStrip], so Ken Burns zooms the photo and not the text. */
+    val captionSeparate: Boolean = false,
+    /** The split layout's two photos: [image] leaves the dashboard's quarter of the screen empty. */
+    val split: Boolean = false,
 ) {
     val ids: List<String> get() = if (tiles.isEmpty()) listOf(placement.id) else tiles.map { it.placement.id }
 }
@@ -59,7 +63,15 @@ data class Stage(
     val direction: Int = 1,
     /** How long the incoming slide is expected to stay (drives the Ken Burns motion). */
     val holdMs: Long = 30_000,
+    /** Where a slide transition starts (0..1): a released swipe continues from the finger instead of from the edge. */
+    val startProgress: Float = 0f,
 )
+
+/**
+ * Immediate feedback for rotate / fill on the frame: the slide on screen turns or rescales right away while the
+ * sharp version renders (seconds on the RK3126), then cross-fades into it.
+ */
+data class AdjustPreview(val slideKey: String, val rotation: Float, val scale: Float)
 
 sealed interface EmptyState {
     data object NoPhotos : EmptyState
@@ -67,7 +79,12 @@ sealed interface EmptyState {
     data class Downloading(val total: Int) : EmptyState
 }
 
-data class VideoState(val placementId: String, val file: File, val visible: Boolean = false)
+/** What the player shows: a video slide, or ([live]) the clip of a Live/Motion Photo over its still. */
+data class VideoState(
+    val placementId: String, val file: File, val visible: Boolean = false, val live: Boolean = false,
+    /** Paused and hidden while a swipe drags the slide: its still moves with the finger, not a playing texture. */
+    val held: Boolean = false,
+)
 
 /**
  * Drives the slideshow: playlist, timing, pre-decoding the next slide at screen size, video playback (Media3),
@@ -94,6 +111,12 @@ class SlideshowController(private val c: FrameController) {
     private val _current = MutableStateFlow<PlacementEntity?>(null)
     val current: StateFlow<PlacementEntity?> = _current
 
+    /** The small "Live" mark on the current live photo: null (hidden), false ("Live") or true ("Tap to play"). */
+    private val _liveMark = MutableStateFlow<Boolean?>(null)
+    val liveMark: StateFlow<Boolean?> = _liveMark
+    /** The live photo whose clip is loaded (paused at its start) in the player, ready to play without a delay. */
+    private var prebufferedId: String? = null
+
     /** Set by the UI: true while the quick menu, settings or a dialog is open (auto-advance pauses). */
     val paused = MutableStateFlow(false)
 
@@ -103,6 +126,8 @@ class SlideshowController(private val c: FrameController) {
     private var settings = FrameSettings.DEFAULT
     private var screenW = 0
     private var screenH = 0
+    /** The split layout's side while it is on (docs/plugins.md §2.2), else null. */
+    private var splitSide: app.kinframe.frame.plugins.BandSide? = null
     private var shownAt = 0L
     private var transitionRunning = false
     private var videoEnded = false
@@ -126,10 +151,43 @@ class SlideshowController(private val c: FrameController) {
         timerJob = c.scope.launch { timerLoop() }
         c.scope.launch {
             c.display.mode.map { it == ScreenMode.Asleep }.distinctUntilChanged().collect { asleep ->
-                if (asleep) player?.pause() else if (_video.value != null && !videoEnded) player?.play()
+                if (asleep) player?.pause() else if (_video.value?.held == false && !videoEnded) player?.play()
             }
         }
     }
+
+    /** The clock/weather corner as last measured by the UI (null until then: estimated from the settings). */
+    @Volatile private var measuredCorner: CornerReserve? = null
+
+    private fun corner(): CornerReserve = measuredCorner
+        ?: CornerReserve.estimate(settings.widgets.clock || settings.widgets.date, settings.widgets.weather && settings.location != null)
+
+    /**
+     * Called by the UI with the size of the clock and weather block in the bottom-right corner (dp, margins included;
+     * 0 × 0 when it isn't shown), so captions and pair/collage labels end before it. Re-renders the current slide when
+     * that changes what it needs.
+     */
+    fun setCornerBlock(widthDp: Float, heightDp: Float) {
+        val r = CornerReserve.quantized(widthDp, heightDp)
+        if (r == measuredCorner) return
+        val before = corner()
+        measuredCorner = r
+        if (r != before && screenW > 0 && settings.widgets.caption) c.scope.launch { rerenderCurrent(onlyIfChanged = true) }
+    }
+
+    /**
+     * Called by the UI with the split layout's side, or null when it is off: two photos per slide around the
+     * dashboard. Re-renders what is on screen.
+     */
+    fun setSplit(side: app.kinframe.frame.plugins.BandSide?) {
+        if (side == splitSide) return
+        splitSide = side
+        cache.clear()
+        if (screenW > 0) c.scope.launch { rerenderCurrent() }
+    }
+
+    private fun splitCells(): app.kinframe.frame.plugins.SplitGeometry.Cells? =
+        splitSide?.let { app.kinframe.frame.plugins.SplitGeometry.cells(screenW >= screenH, it) }
 
     /** Called by the UI with the real drawing size; re-renders on rotation. */
     fun setScreenSize(w: Int, h: Int) {
@@ -195,7 +253,7 @@ class SlideshowController(private val c: FrameController) {
     private suspend fun timerLoop() {
         while (true) {
             delay(250)
-            player?.let { pl -> videoVolume().let { v -> if (pl.volume != v) pl.volume = v } }
+            player?.let { pl -> playerVolume().let { v -> if (pl.volume != v) pl.volume = v } }
             val cur = _stage.value.incoming ?: continue
             if (paused.value || transitionRunning || c.display.mode.value == ScreenMode.Asleep ||
                 c.display.mode.value == ScreenMode.FadingOut || c.settingsOpen.value
@@ -207,13 +265,35 @@ class SlideshowController(private val c: FrameController) {
             if (playable.size <= 1 && playlist.pendingNew().isEmpty()) continue
             val elapsed = SystemClock.elapsedRealtime() - shownAt
             val interval = if (cur.image == null) 6_000L else settings.slideshow.intervalS.coerceIn(2, 86_400) * 1000L
-            val due = if (_video.value != null) VideoPolicy.due(settings.video.playback, videoEnded, elapsed, interval) else elapsed >= interval
+            val v = _video.value
+            val due = when {
+                // Live clip playing or fading back to the still: the interval starts once it is done.
+                v != null && v.live -> LivePolicy.due(playing = true, elapsed, interval)
+                v != null -> VideoPolicy.due(settings.video.playback, videoEnded, elapsed, interval)
+                else -> elapsed >= interval
+            }
             if (due) next(manual = false)
         }
     }
 
     fun next(manual: Boolean, fade: Boolean = false) = c.scope.launch { navigate(+1, manual, fade) }
     fun previous(fade: Boolean = false) = c.scope.launch { navigate(-1, true, fade) }
+
+    /**
+     * Finishes a swipe the finger has already moved [fromProgress] of the way. [previewKey] is the key of the slide that was
+     * shown beside the current one while dragging; if the slide that actually comes next differs (e.g. it became a pair),
+     * the transition starts from the edge instead of jumping.
+     */
+    fun swipe(direction: Int, fromProgress: Float, previewKey: String) =
+        c.scope.launch { navigate(direction, manual = true, startProgress = fromProgress.coerceIn(0f, 0.95f), previewKey = previewKey) }
+
+    /** The already-rendered single slide a swipe in [direction] would bring in, or null (not ready, collage, mid-transition). */
+    fun neighbor(direction: Int): Slide? {
+        val st = _stage.value
+        if (st.outgoing != null || st.incoming == null || st.incoming.tiles.isNotEmpty()) return null
+        val (slide, id) = if (direction > 0) _prepared.value to playlist.peekNext() else _preparedPrevious.value to playlist.peekPrevious()
+        return slide?.takeIf { id != null && it.placement.id == id && it.tiles.isEmpty() && id in playable }
+    }
 
     /** Shows [id] as soon as it is playable again (e.g. right after "Undo"). */
     suspend fun showWhenAvailable(id: String, timeoutMs: Long = 3_000) {
@@ -234,7 +314,7 @@ class SlideshowController(private val c: FrameController) {
 
     fun showNew() = c.scope.launch { playlist.pendingNew().firstOrNull()?.let { show(it) } }
 
-    private suspend fun navigate(direction: Int, manual: Boolean, fade: Boolean = false) {
+    private suspend fun navigate(direction: Int, manual: Boolean, fade: Boolean = false, startProgress: Float = 0f, previewKey: String? = null) {
         if (screenW == 0 || stopped) return
         if (navLock.isLocked && !manual) return
         navLock.withLock {
@@ -252,11 +332,11 @@ class SlideshowController(private val c: FrameController) {
                 settings.slideshow.transition == "slide" -> TransitionKind.Slide
                 else -> TransitionKind.Crossfade
             }
-            present(id, direction, kind)
+            present(id, direction, kind, startProgress, previewKey)
         }
     }
 
-    private suspend fun present(id: String, direction: Int, kind: TransitionKind) {
+    private suspend fun present(id: String, direction: Int, kind: TransitionKind, startProgress: Float = 0f, previewKey: String? = null) {
         val p = playable[id] ?: return
         g.crashGuard.currentItem = id
         val group = groupFor(p)
@@ -267,22 +347,25 @@ class SlideshowController(private val c: FrameController) {
         val slide = if (kb != null) base.copy(kenBurns = kb) else base
         stopVideo()
         val prev = _stage.value
+        // Continue a released swipe from where the finger left it, but only if the slide shown while dragging is the one
+        // that actually comes in.
+        val start = if (kind == TransitionKind.Slide && previewKey != null && previewKey == slide.key) startProgress else 0f
         val duration = when (kind) {
-            TransitionKind.Slide -> 450
+            TransitionKind.Slide -> (450 * (1f - start)).toInt().coerceAtLeast(140)
             TransitionKind.Cut -> 0
             TransitionKind.Crossfade -> settings.slideshow.transitionMs.coerceIn(200, 3000)
         }
         transitionRunning = duration > 0
         val hold = settings.slideshow.intervalS.coerceIn(2, 86_400) * 1000L + duration
-        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null) TransitionKind.Crossfade else kind, duration, direction, hold)
+        _stage.value = Stage(prev.incoming, slide, prev.seq + 1, if (prev.incoming == null) TransitionKind.Crossfade else kind, duration, direction, hold, start)
         _current.value = p
         shownAt = SystemClock.elapsedRealtime()
         g.prefs.playlistCurrent = id
         if (playlist.seed != g.prefs.playlistSeed) g.prefs.playlistSeed = playlist.seed
         _newCount.value = playlist.pendingNew().size
         group.forEach { markShown(it) }
+        // Neighbours are pre-rendered when the transition ends (onTransitionDone), not while it animates.
         if (duration == 0) onTransitionDone(_stage.value.seq)
-        prefetch()
     }
 
     /** The UI reports the end of a transition; videos start only then. */
@@ -292,8 +375,34 @@ class SlideshowController(private val c: FrameController) {
         shownAt = SystemClock.elapsedRealtime()
         val st = _stage.value
         if (st.outgoing != null) _stage.value = st.copy(outgoing = null)
+        if (_preview.value != null && _preview.value?.slideKey != st.incoming?.key) _preview.value = null
+        prefetch()
         val p = st.incoming?.placement ?: return
         if (p.isVideo && settings.video.autoplay && st.incoming.image != null) startVideo(p)
+        if (p.isLive && st.incoming.image != null) {
+            val alone = st.incoming.tiles.isEmpty()
+            if (LivePolicy.autoPlay(settings.slideshow.livePhotos, liveClip(p) != null, alone)) startLive(p) else updateLiveMark()
+        }
+    }
+
+    /** The downloaded clip of a live photo, or null. */
+    private fun liveClip(p: PlacementEntity): File? =
+        p.motionLocalFile?.takeIf { p.isLive }?.let { g.media.file(it) }?.takeIf { it.exists() }
+
+    private fun updateLiveMark() {
+        val inc = _stage.value.incoming
+        val p = inc?.placement?.let { playable[it.id] ?: it }
+        val ls = settings.slideshow.livePhotos
+        _liveMark.value = if (p != null && LivePolicy.showMark(ls, liveClip(p) != null, inc.tiles.isEmpty(), _video.value?.live == true)) LivePolicy.tapHint(ls) else null
+    }
+
+    /** A tap on the photo: replays the clip of a live photo. Returns true when it started. */
+    fun replayLive(): Boolean {
+        val inc = _stage.value.incoming ?: return false
+        val p = playable[inc.placement.id] ?: return false
+        if (transitionRunning || !LivePolicy.playOnTap(settings.slideshow.livePhotos, liveClip(p) != null, inc.tiles.isEmpty(), _video.value != null)) return false
+        startLive(p)
+        return true
     }
 
     /** Aspect ratio as displayed (rotation applied), or null when unknown. */
@@ -311,8 +420,15 @@ class SlideshowController(private val c: FrameController) {
      */
     private fun groupFor(p: PlacementEntity): List<PlacementEntity> {
         if (p.isVideo || screenW == 0) return listOf(p)
+        // A live photo whose clip will play stays alone, like a video.
+        if (p.isLive && p.motionLocalFile != null && settings.slideshow.livePhotos != app.kinframe.core.api.LivePhotos.OFF) return listOf(p)
         val ss = settings.slideshow
         val photos = playlist.upcoming(12).mapNotNull { playable[it] }.filter { !it.isVideo }
+        splitCells()?.let { cells ->
+            // Split layout: always two photos, each in the cell its shape fits (a portrait in the tall one).
+            val partner = Collage.splitPartner(aspect(p) ?: 1f, listOf(cells.big, cells.small), photos.map { it.id to aspect(it) }, screenW, screenH)
+            return photos.firstOrNull { it.id == partner }?.let { listOf(p, it) } ?: listOf(p)
+        }
         if (ss.collage) {
             val n = Collage.count(ss.collageMax, photos.size + 1)
             if (n >= 2) return listOf(p) + photos.take(n - 1)
@@ -329,17 +445,18 @@ class SlideshowController(private val c: FrameController) {
 
     private suspend fun obtainGroup(group: List<PlacementEntity>): Slide {
         val aspects = group.map { aspect(it) ?: 1f }
-        val placed = Collage.place(aspects, screenW, screenH)
+        val split = splitCells()?.takeIf { group.size == 2 }
+        val placed = if (split != null) Collage.placeInto(listOf(split.big, split.small), aspects, screenW, screenH) else Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
-        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}" } +
-            "|$withLabels|${screenW}x$screenH"
+        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}" } +
+            "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}|split=${split != null}:$splitSide"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }
         val requests = tiles.map { t ->
             val q = t.placement
             val dateMs = when (settings.slideshow.captionDate) { "taken" -> q.capturedAt ?: q.receivedAt; "none" -> null; else -> q.receivedAt }
-            val meta = listOfNotNull(q.senderName, dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
+            val meta = listOfNotNull(Credit.of(ctx, q), dateMs?.let { app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone) })
                 .joinToString(" · ").ifEmpty { null }
             SlideRenderer.TileRequest(
                 g.media.file(q.localFile ?: ""), q.rotation, q.focalX, q.focalY, t.cell,
@@ -348,14 +465,15 @@ class SlideshowController(private val c: FrameController) {
         }
         val slide = withContext(renderDispatcher) {
             val bmp = try {
-                renderer.renderTiles(requests, screenW, screenH, g.app.resources.displayMetrics.density)
+                renderer.renderTiles(requests, screenW, screenH, g.app.resources.displayMetrics.density, corner())
             } catch (e: OutOfMemoryError) {
                 Log.e(TAG, "OOM rendering collage"); cache.clear(); System.gc(); null
             }
-            Slide(group.first(), bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, tiles = tiles)
+            Slide(group.first(), bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, tiles = tiles, split = split != null)
         }
         cache[key] = slide
-        while (cache.size > 3) cache.remove(cache.keys.first())
+        // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.
+        while (cache.size > 4) cache.remove(cache.keys.first())
         return slide
     }
 
@@ -383,12 +501,12 @@ class SlideshowController(private val c: FrameController) {
         val memory = if (settings.slideshow.onThisDay) OnThisDay.yearsAgo(p.capturedAt, today, g.clock.zone) else null
         val meta = buildList {
             memory?.let { add(ctx.resources.getQuantityString(app.kinframe.frame.R.plurals.on_this_day_years, it, it)) }
-            name?.let { add(it) }
+            Credit.of(ctx, p)?.let { add(it) }
             dateMs?.let { add(app.kinframe.frame.ui.Format.relativeDate(ctx, it, g.clock.nowMs(), g.clock.zone)) }
             if (p.captionEdited) add(ctx.getString(app.kinframe.frame.R.string.caption_edited))
         }.joinToString(" · ") + (p.reaction?.let { "   " + reactionEmoji(it) } ?: "")
         if (name == null && p.caption.isNullOrBlank()) return null
-        val avatar = if (w.avatar && p.senderId != null) runCatching { Avatars.load(g, p.senderId, p.id) }.getOrNull() else null
+        val avatar = if (w.avatar && p.senderId != null && p.importedFrom == null) runCatching { Avatars.load(g, p.senderId, p.id) }.getOrNull() else null
         return SlideRenderer.CaptionSpec(
             text = p.caption?.takeIf { it.isNotBlank() },
             meta = meta,
@@ -396,13 +514,14 @@ class SlideshowController(private val c: FrameController) {
             initials = if (w.avatar && name != null) Avatars.initials(name) else null,
             avatarColor = Avatars.color(p.senderId ?: name ?: ""),
             textScale = settings.display.textScale.toFloat().coerceIn(1f, 1.3f),
-            rightInsetDp = if (w.clock || w.date) 340f else 36f,
+            corner = corner(),
         )
     }
 
     private suspend fun obtain(p: PlacementEntity): Slide {
         val caption = captionSpec(p)
-        val key = renderKey(p) + "|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.rightInsetDp}" }
+        val separate = caption != null && !p.isVideo && settings.slideshow.transition == "kenburns"
+        val key = renderKey(p) + "|$separate|" + caption?.let { "${it.text}|${it.meta}|${it.avatar != null}|${it.initials}|${it.textScale}|${it.corner}" }
         cache[key]?.let { return it }
         val slide = withContext(renderDispatcher) {
             val file = g.media.file(p.localFile ?: "")
@@ -413,10 +532,12 @@ class SlideshowController(private val c: FrameController) {
                 blurBars = settings.slideshow.background == "blur",
                 caption = caption,
                 density = g.app.resources.displayMetrics.density,
+                fillChosen = p.fit == "fill",
             )
-            val strip = if (p.isVideo) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
+            // Videos and live photos: the caption stays readable above the playing clip. Ken Burns: it stays still.
+            val strip = if (p.isVideo || p.isLive || separate) runCatching { renderer.renderCaptionStrip(request) }.getOrNull() else null
             val bmp: Bitmap? = try {
-                renderer.render(request)
+                renderer.render(if (separate) request.copy(caption = null) else request)
             } catch (e: OutOfMemoryError) {
                 Log.e(TAG, "OOM rendering ${p.id}")
                 cache.clear(); System.gc(); null
@@ -424,10 +545,11 @@ class SlideshowController(private val c: FrameController) {
                 Log.w(TAG, "cannot render ${p.id}: ${e.message}")
                 null
             }
-            Slide(p, bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, strip?.asImageBitmap())
+            Slide(p, bmp?.asImageBitmap()?.also { it.prepareToDraw() }, key, strip?.asImageBitmap(), captionSeparate = separate && strip != null)
         }
         cache[key] = slide
-        while (cache.size > 3) cache.remove(cache.keys.first())
+        // Previous, current and next (for swiping) plus the slide fading out: ~4 MB each at 1280×800.
+        while (cache.size > 4) cache.remove(cache.keys.first())
         return slide
     }
 
@@ -449,26 +571,73 @@ class SlideshowController(private val c: FrameController) {
     private val _prepared = MutableStateFlow<Slide?>(null)
     val prepared: StateFlow<Slide?> = _prepared
 
+    /** The pre-rendered previous slide, shown beside the current one while swiping back. */
+    private val _preparedPrevious = MutableStateFlow<Slide?>(null)
+    val preparedPrevious: StateFlow<Slide?> = _preparedPrevious
+
+    /**
+     * Renders both swipe neighbours as soon as a transition has ended. The previous one is usually the photo that was
+     * just on screen (still in the cache), and after going back the next one is too, so repeated swipes find them ready.
+     */
     private fun prefetch() {
-        val nextId = playlist.peekNext() ?: return
-        if (nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
-        val p = playable[nextId] ?: return
+        val nextId = playlist.peekNext()
+        if (nextId != null && nextId in onDemand) c.scope.launch { c.storage.requestOnDemand(nextId) }
+        val next = nextId?.let { playable[it] }
+        val prev = playlist.peekPrevious()?.let { playable[it] }
         c.scope.launch {
-            delay(1_200) // after the running transition
-            runCatching { obtain(p) }.getOrNull()?.let { _prepared.value = it }
+            prev?.let { pp -> runCatching { obtain(pp) }.getOrNull()?.let { _preparedPrevious.value = it } }
+            next?.let { np -> runCatching { obtain(np) }.getOrNull()?.let { _prepared.value = it } }
+            next?.let { prebufferLive(it) }
         }
     }
 
-    private suspend fun rerenderCurrent() {
-        val inc = _stage.value.incoming ?: return
-        val p = playable[inc.placement.id] ?: return
-        val group = inc.tiles.mapNotNull { playable[it.placement.id] }
+    private suspend fun rerenderCurrent(onlyIfChanged: Boolean = false) {
+        // What is on screen is read under the lock: a slide being put together meanwhile (the first one after a start,
+        // while the layout changes) is waited for, and re-rendered, instead of missed.
         navLock.withLock {
+            val inc = _stage.value.incoming ?: return
+            val p = playable[inc.placement.id] ?: return
+            val group = inc.tiles.mapNotNull { playable[it.placement.id] }
             val slide = if (group.size > 1 && group.size == inc.tiles.size) obtainGroup(group) else obtain(p)
             val st = _stage.value
-            _stage.value = Stage(null, slide, st.seq + 1, TransitionKind.Cut, 0, 1)
-            transitionRunning = false
+            if (onlyIfChanged && slide.key == st.incoming?.key) return@withLock
+            if (_preview.value?.slideKey == st.incoming?.key && slide.key != st.incoming?.key) {
+                // The previewed slide fades into the sharp one (the preview is cleared when that is done).
+                transitionRunning = true
+                _stage.value = Stage(st.incoming, slide, st.seq + 1, TransitionKind.Crossfade, ADJUST_FADE_MS, 1, st.holdMs)
+            } else {
+                _stage.value = Stage(null, slide, st.seq + 1, TransitionKind.Cut, 0, 1)
+                transitionRunning = false
+            }
         }
+    }
+
+    private val _preview = MutableStateFlow<AdjustPreview?>(null)
+    val preview: StateFlow<AdjustPreview?> = _preview
+
+    /** A quarter turn clockwise, shown at once: the turned screen fits inside the screen until the render lands. */
+    fun previewRotate() {
+        val inc = _stage.value.incoming?.takeIf { it.tiles.isEmpty() } ?: return
+        val prev = _preview.value?.takeIf { it.slideKey == inc.key }
+        val rotation = (prev?.rotation ?: 0f) + 90f
+        val quarter = ((rotation / 90f).toInt() % 2) != 0
+        val turnFit = if (screenW > 0 && screenH > 0) minOf(screenW.toFloat() / screenH, screenH.toFloat() / screenW) else 1f
+        val fitScale = (prev?.scale ?: 1f) / (if (((prev?.rotation ?: 0f) / 90f).toInt() % 2 != 0) turnFit else 1f)
+        _preview.value = AdjustPreview(inc.key, rotation, fitScale * (if (quarter) turnFit else 1f))
+    }
+
+    /**
+     * Fill / whole photo, shown at once: the slide scales to the size the photo will have, so filling pushes the
+     * bands out and the whole photo shrinks the crop to its final size, before the sharp render fades in.
+     */
+    fun previewFit(fill: Boolean) {
+        val inc = _stage.value.incoming?.takeIf { it.tiles.isEmpty() } ?: return
+        val a = aspect(inc.placement) ?: return
+        if (screenW <= 0 || screenH <= 0) return
+        val big = maxOf(screenW / a, screenH.toFloat())
+        val small = minOf(screenW / a, screenH.toFloat())
+        val prev = _preview.value?.takeIf { it.slideKey == inc.key }
+        _preview.value = AdjustPreview(inc.key, prev?.rotation ?: 0f, (prev?.scale ?: 1f) * if (fill) big / small else small / big)
     }
 
     // ------------------------------------------------------------------ video
@@ -477,7 +646,10 @@ class SlideshowController(private val c: FrameController) {
         player = p
         p.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
-                if (state == Player.STATE_ENDED) videoEnded = true
+                if (state == Player.STATE_ENDED) {
+                    videoEnded = true
+                    if (_video.value?.live == true) finishLive()
+                }
             }
 
             override fun onRenderedFirstFrame() {
@@ -487,7 +659,9 @@ class SlideshowController(private val c: FrameController) {
             override fun onPlayerError(error: PlaybackException) {
                 Log.w(TAG, "video error: ${error.errorCodeName}")
                 videoEnded = true
+                prebufferedId = null
                 _video.value = _video.value?.copy(visible = false)
+                if (_video.value?.live == true) finishLive()
             }
         })
     }
@@ -512,14 +686,86 @@ class SlideshowController(private val c: FrameController) {
         }
     }
 
+    /**
+     * A swipe starts ([hold]) or springs back. Dragging a playing TextureView costs the RK3126 a frame each time, so
+     * the clip pauses and the slide's still (its first frame) follows the finger instead; it resumes on spring-back.
+     */
+    fun holdVideo(hold: Boolean) {
+        val v = _video.value ?: return
+        if (hold == v.held) return
+        _video.value = v.copy(held = hold)
+        if (hold) player?.pause() else if (!videoEnded && c.display.mode.value != ScreenMode.Asleep) player?.play()
+    }
+
     private fun stopVideo() {
+        _liveMark.value = null
         if (_video.value == null) return
         _video.value = null
         videoEnded = false
+        prebufferedId = null
         player?.run { stop(); clearMediaItems() }
     }
 
-    fun setVolume(percent: Int) { player?.volume = percent.coerceIn(0, 100) / 100f }
+    // ------------------------------------------------------------------ live photos
+
+    /**
+     * Loads the next slide's clip into the (single, reused) player while the current slide shows, so it starts
+     * without a decode hiccup on the RK3126. Nothing is drawn: the video layer exists only while a clip plays.
+     */
+    private fun prebufferLive(p: PlacementEntity) {
+        val file = liveClip(p) ?: return
+        if (_video.value != null || !LivePolicy.prebuffer(settings.slideshow.livePhotos, true, _current.value?.isVideo == true)) return
+        if (prebufferedId == p.id) return
+        val pl = ensurePlayer()
+        pl.repeatMode = Player.REPEAT_MODE_OFF
+        pl.volume = 0f
+        pl.playWhenReady = false
+        pl.setMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+        pl.prepare()
+        prebufferedId = p.id
+    }
+
+    private fun startLive(p: PlacementEntity) {
+        val file = liveClip(p) ?: return
+        val pl = ensurePlayer()
+        videoEnded = false
+        _liveMark.value = null
+        _video.value = VideoState(p.id, file, live = true)
+        pl.repeatMode = Player.REPEAT_MODE_OFF
+        if (prebufferedId == p.id && pl.mediaItemCount > 0) {
+            pl.seekTo(0)
+        } else {
+            pl.setMediaItem(MediaItem.fromUri(Uri.fromFile(file)))
+            pl.prepare()
+        }
+        prebufferedId = p.id
+        pl.volume = playerVolume()
+        pl.playWhenReady = c.display.mode.value != ScreenMode.Asleep
+    }
+
+    /** The clip ended: fade the video layer out over the still, then drop it; the interval starts now. */
+    private fun finishLive() {
+        val v = _video.value ?: return
+        _video.value = v.copy(visible = false)
+        c.scope.launch {
+            delay(LIVE_FADE_MS + 50)
+            if (_video.value?.placementId == v.placementId && _video.value?.live == true && videoEnded) {
+                _video.value = null
+                shownAt = SystemClock.elapsedRealtime()
+                updateLiveMark()
+            }
+        }
+    }
+
+    /** Video volume; live clips are silent unless the sender kept their sound. */
+    private fun playerVolume(): Float {
+        val v = _video.value
+        if (v != null && v.live && playable[v.placementId]?.motionHasAudio != true) return 0f
+        if (v == null) return 0f
+        return videoVolume()
+    }
+
+    fun setVolume(percent: Int) { if (_video.value?.live != true) player?.volume = percent.coerceIn(0, 100) / 100f }
 
     /**
      * The video volume now: the setting, or silence once nobody touched the frame for `auto_mute_min` minutes
@@ -541,7 +787,7 @@ class SlideshowController(private val c: FrameController) {
         val target = (settings.video.volume + delta).coerceIn(0, 100)
         c.display.onUserActivity()
         settings = settings.copy(video = settings.video.copy(volume = target))
-        player?.volume = videoVolume()
+        player?.volume = playerVolume()
         _volumeHint.value = target
         hintJob?.cancel()
         hintJob = c.scope.launch { delay(1_800); _volumeHint.value = null }
@@ -566,5 +812,10 @@ class SlideshowController(private val c: FrameController) {
         playlist.update(emptyList(), PlayOrder.RECEIVED, false)
     }
 
-    companion object { private const val TAG = "KinSlideshow" }
+    companion object {
+        const val ADJUST_FADE_MS = 350
+        private const val TAG = "KinSlideshow"
+        /** Crossfade between a live photo's clip and its still. */
+        const val LIVE_FADE_MS = 400L
+    }
 }

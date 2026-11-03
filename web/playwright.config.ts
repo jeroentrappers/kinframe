@@ -4,6 +4,8 @@ import { defineConfig, devices } from '@playwright/test';
 // tests/mock-api.ts, so no Go server is needed. Uses the system Chrome when present
 // (set PW_CHANNEL= to use Playwright's bundled Chromium instead).
 const channel = process.env.PW_CHANNEL ?? 'chrome';
+// PW_PORT lets several checkouts run their suites side by side.
+const port = Number(process.env.PW_PORT ?? 4173);
 
 export default defineConfig({
 	testDir: 'tests',
@@ -11,7 +13,7 @@ export default defineConfig({
 	fullyParallel: true,
 	reporter: [['list']],
 	use: {
-		baseURL: 'http://localhost:4173',
+		baseURL: `http://localhost:${port}`,
 		trace: 'retain-on-failure',
 		...(channel ? { channel } : {})
 	},
@@ -21,8 +23,8 @@ export default defineConfig({
 		{ name: 'screenshots', testMatch: /screenshots\.spec\.ts/, use: { ...(channel ? { channel } : {}) } }
 	],
 	webServer: {
-		command: 'npm run build && npx vite preview --port 4173 --strictPort',
-		url: 'http://localhost:4173',
+		command: `npm run build && npx vite preview --port ${port} --strictPort`,
+		url: `http://localhost:${port}`,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000
 	}

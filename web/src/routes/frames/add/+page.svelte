@@ -129,6 +129,10 @@
 				</button>
 			</form>
 		</section>
+		<p class="convert-hint">
+			<Icon name="usb" size={18} />
+			<span>{t('add.convertHint')} <a href="/convert">{t('add.convertLink')}</a></span>
+		</p>
 	{:else}
 		<section class="card card-pad panel result" in:softFly role="status">
 			{#if result.status === 'claimed'}
@@ -244,5 +248,17 @@
 	.center {
 		justify-content: center;
 		margin-top: var(--s-2);
+	}
+	.convert-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--s-2);
+		margin-top: var(--s-4);
+		color: var(--text-muted);
+		font-size: 0.92rem;
+	}
+	.convert-hint :global(svg) {
+		flex: none;
+		margin-top: 2px;
 	}
 </style>

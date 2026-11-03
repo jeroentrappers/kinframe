@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Fotografiile de pe ramă rulează în continuare. Cele noi sosesc imediat ce conexiunea revine.</string>
     <string name="status_card_server_title">Serverul de fotografii nu poate fi accesat</string>
     <string name="status_card_server_body">Wi-Fi-ul funcționează, dar serverul nu răspunde. Fotografiile noi sosesc când revine.</string>
+    <string name="status_card_clock_title">Se potrivește ceasul</string>
+    <string name="status_card_clock_body">Rama a repornit și ceasul ei e greșit. Se va potrivi de pe internet în câteva momente.</string>
     <string name="status_card_portal_title">Această rețea Wi-Fi cere autentificare</string>
     <string name="status_card_portal_body">Deschideți pagina de autentificare a rețelei pentru a conecta rama.</string>
     <string name="status_card_portal_action">Conectați-vă</string>

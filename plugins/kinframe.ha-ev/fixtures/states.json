@@ -1,0 +1,92 @@
+[
+  {
+    "entity_id": "sensor.ev3_ev_battery_level",
+    "state": "100",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "%",
+      "device_class": "battery",
+      "friendly_name": "EV3 EV-accuniveau"
+    },
+    "last_updated": "2026-10-25T12:04:41.898817+00:00",
+    "last_changed": "2026-10-25T12:04:41.898817+00:00"
+  },
+  {
+    "entity_id": "sensor.ev3_ev_range",
+    "state": "375.0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "km",
+      "device_class": "distance",
+      "friendly_name": "EV3 EV-bereik"
+    },
+    "last_updated": "2026-10-25T12:04:41.899282+00:00",
+    "last_changed": "2026-10-25T12:04:41.899282+00:00"
+  },
+  {
+    "entity_id": "binary_sensor.ev3_ev_battery_charge",
+    "state": "off",
+    "attributes": {
+      "device_class": "battery_charging",
+      "friendly_name": "EV3 EV-accu laden"
+    },
+    "last_updated": "2026-10-25T11:34:39.470080+00:00",
+    "last_changed": "2026-10-25T11:34:39.470080+00:00"
+  },
+  {
+    "entity_id": "binary_sensor.ev3_ev_battery_plug",
+    "state": "on",
+    "attributes": {
+      "device_class": "plug",
+      "friendly_name": "EV3 EV-laadkabel aangesloten"
+    },
+    "last_updated": "2026-10-25T10:04:34.698299+00:00",
+    "last_changed": "2026-10-25T10:04:34.698299+00:00"
+  },
+  {
+    "entity_id": "sensor.ev3_estimated_charge_duration",
+    "state": "0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "min",
+      "device_class": "duration",
+      "friendly_name": "EV3 Geschatte laadtijd"
+    },
+    "last_updated": "2026-10-25T11:34:39.471333+00:00",
+    "last_changed": "2026-10-25T11:34:39.471333+00:00"
+  },
+  {
+    "entity_id": "sensor.ev3_last_updated_at",
+    "state": "2026-10-25T11:55:32+00:00",
+    "attributes": {
+      "device_class": "timestamp",
+      "friendly_name": "EV3 Laatst bijgewerkt"
+    },
+    "last_updated": "2026-10-25T12:04:41.898767+00:00",
+    "last_changed": "2026-10-25T12:04:41.898767+00:00"
+  },
+  {
+    "entity_id": "sensor.de_buzz_accu",
+    "state": "43",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "%",
+      "device_class": "battery",
+      "friendly_name": "De Buzz Accu"
+    },
+    "last_updated": "2026-10-23T06:01:46.704316+00:00",
+    "last_changed": "2026-10-23T06:01:46.704316+00:00"
+  },
+  {
+    "entity_id": "sensor.de_buzz_elektrisch_bereik",
+    "state": "181",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "km",
+      "device_class": "distance",
+      "friendly_name": "De Buzz Elektrisch bereik"
+    },
+    "last_updated": "2026-10-23T06:01:46.706788+00:00",
+    "last_changed": "2026-10-23T06:01:46.706788+00:00"
+  }
+]

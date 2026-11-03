@@ -34,7 +34,7 @@
 		const f = frames.list.find((x) => compose.frameIds.includes(x.id) && x.screen);
 		return f?.screen ? f.screen.width / f.screen.height : 16 / 10;
 	});
-	const totalBytes = $derived(compose.items.reduce((s, i) => s + i.file.size, 0));
+	const totalBytes = $derived(compose.items.reduce((s, i) => s + i.bytes, 0));
 
 	// Preselect: ?frame=<id>, or the only frame you can send to.
 	$effect(() => {

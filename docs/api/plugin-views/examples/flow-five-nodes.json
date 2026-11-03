@@ -1,0 +1,58 @@
+{
+  "type": "flow",
+  "nodes": [
+    {
+      "id": "solar",
+      "icon": "solar",
+      "value": "1,8 kW",
+      "label": "Solar"
+    },
+    {
+      "id": "home",
+      "icon": "home",
+      "value": "2,9 kW",
+      "label": "Home"
+    },
+    {
+      "id": "grid",
+      "icon": "grid",
+      "value": "0,6 kW",
+      "label": "Grid"
+    },
+    {
+      "id": "battery",
+      "icon": "battery",
+      "value": "0,5 kW",
+      "label": "Battery"
+    },
+    {
+      "id": "car",
+      "icon": "car",
+      "value": "7,4 kW",
+      "label": "Car",
+      "tone": "accent"
+    }
+  ],
+  "edges": [
+    {
+      "from": "solar",
+      "to": "home",
+      "power": 1800
+    },
+    {
+      "from": "grid",
+      "to": "home",
+      "power": 600
+    },
+    {
+      "from": "battery",
+      "to": "home",
+      "power": 500
+    },
+    {
+      "from": "home",
+      "to": "car",
+      "power": 7400
+    }
+  ]
+}

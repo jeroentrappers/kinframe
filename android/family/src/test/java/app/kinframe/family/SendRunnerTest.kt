@@ -99,6 +99,40 @@ class SendRunnerTest {
     }
 
     @Test
+    fun preparesOnceThenUploadsStillAndClipAsALiveItem() = runBlocking {
+        var prepared = 0
+        val clip = OutboxItem("i1-motion", "file:///m.mp4", localPath = "/m.mp4", mime = "video/mp4", name = "a.mp4", size = 10, kind = "video", includeAudio = false)
+        val live = SendRunner(store, HttpKinApi(OkHttpClient(), server.url("/v1"), tokens),
+            TusUploader(OkHttpClient(), server.url("/v1/uploads"), tokens, retryDelaysMs = emptyList()),
+            sourceFor = { ByteArraySource(bytes) },
+            prepare = { _, item, progress ->
+                prepared++
+                progress(1f)
+                item.copy(motionPhoto = true, motion = clip.withPrep(app.kinframe.family.send.prep.PrepResult.Prepared("/p.mp4", 10, "video-master-v1", "video/mp4", 640, 480, 3000, trimmed = true)))
+                    .withPrep(app.kinframe.family.send.prep.PrepResult.Prepared("/p.webp", 10, "photo-master-v1", "image/webp", 800, 600))
+            },
+        )
+        server.enqueue(MockResponse.Builder().code(201).addHeader("Location", "/v1/uploads/still").build())
+        server.enqueue(patched(10))
+        server.enqueue(MockResponse.Builder().code(503).build()) // the clip's creation fails once
+        assertEquals(SendRunner.Outcome.Retry, live.run("idem-1"))
+        server.enqueue(MockResponse.Builder().code(201).addHeader("Location", "/v1/uploads/clip").build())
+        server.enqueue(patched(10))
+        server.enqueue(MockResponse.Builder().code(202).body(sendJson).build())
+        assertTrue(live.run("idem-1") is SendRunner.Outcome.Sent)
+        assertEquals(1, prepared)
+        val reqs = List(server.requestCount) { server.takeRequest() }
+        val meta = reqs[0].headers["Upload-Metadata"]!!
+        assertTrue(meta.contains("prepared " + java.util.Base64.getEncoder().encodeToString("photo-master-v1".toByteArray())))
+        assertTrue(meta.contains("filename " + java.util.Base64.getEncoder().encodeToString("a.webp".toByteArray())))
+        assertTrue(reqs[3].headers["Upload-Metadata"]!!.contains("prepared " + java.util.Base64.getEncoder().encodeToString("video-master-v1".toByteArray())))
+        assertEquals(
+            """{"frame_ids":["f1"],"items":[{"upload_id":"still","caption":"Hi","focal_point":{"x":0.3,"y":0.4},"fit":"fill","width":800,"height":600,"live_video_upload_id":"clip"}]}""",
+            reqs.last().body!!.utf8(),
+        )
+    }
+
+    @Test
     fun refusedSendNeedsThePerson() = runBlocking {
         server.enqueue(MockResponse.Builder().code(201).addHeader("Location", "/v1/uploads/x").addHeader("Kinframe-Existing-Item", "item9").build())
         server.enqueue(MockResponse.Builder().code(403).addHeader("Content-Type", "application/problem+json")

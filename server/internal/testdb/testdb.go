@@ -16,6 +16,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/jackc/pgx/v5"
@@ -30,12 +31,27 @@ var (
 	initErr error
 	counter atomic.Int64
 	pg      *embeddedpostgres.EmbeddedPostgres
+	pgRoot  string // per-run directory with the server's runtime and data (~420 MB); removed by Stop
 )
 
-// Stop shuts down the embedded server; call from TestMain after m.Run.
+// Stop shuts down the embedded server and deletes its directory; call from TestMain after m.Run.
 func Stop() {
 	if pg != nil {
 		_ = pg.Stop()
+	}
+	if pgRoot != "" {
+		_ = os.RemoveAll(pgRoot)
+	}
+}
+
+// removeStaleRoots deletes directories left by test binaries that were killed before Stop ran.
+// /tmp is often a RAM-backed tmpfs, so leftovers add up quickly.
+func removeStaleRoots() {
+	old, _ := filepath.Glob(filepath.Join(os.TempDir(), "kinframe-pg-*"))
+	for _, dir := range old {
+		if fi, err := os.Stat(dir); err == nil && time.Since(fi.ModTime()) > 6*time.Hour {
+			_ = os.RemoveAll(dir)
+		}
 	}
 }
 
@@ -50,11 +66,13 @@ func start() {
 		return
 	}
 	cache, _ := os.UserCacheDir()
+	removeStaleRoots()
 	root, err := os.MkdirTemp("", "kinframe-pg-*")
 	if err != nil {
 		initErr = err
 		return
 	}
+	pgRoot = root
 	cfg := embeddedpostgres.DefaultConfig().
 		Version(embeddedpostgres.V17).
 		Port(uint32(port)).
@@ -66,6 +84,8 @@ func start() {
 	pg = embeddedpostgres.NewDatabase(cfg)
 	if err := pg.Start(); err != nil {
 		initErr = fmt.Errorf("start embedded postgres: %w", err)
+		_ = os.RemoveAll(root)
+		pgRoot = ""
 		return
 	}
 	baseURL = fmt.Sprintf("postgres://kinframe:kinframe@127.0.0.1:%d/kinframe?sslmode=disable", port)

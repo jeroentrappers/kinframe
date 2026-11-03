@@ -1,0 +1,20 @@
+{
+  "id": "kinframe.homewizard-water",
+  "name": "HomeWizard water meter",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "Water from a HomeWizard water meter on the home network: how much flows now and how many litres were used today, against a typical day.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 1, "default_seconds": 2 },
+  "permissions": { "http": ["settings.host"] },
+  "settings": [
+    { "key": "host", "type": "url", "label": "Meter address", "placeholder": "192.168.1.60", "required": true,
+      "local_only": true, "discover": "_hwenergy._tcp",
+      "help": "Switch on Local API for the meter in the HomeWizard Energy app. The meter needs USB power for it; on batteries it only reports to the cloud." },
+    { "key": "style", "type": "choice", "label": "Show as", "options": ["value", "gauge"], "default": "value" },
+    { "key": "typical_l", "type": "number", "label": "A typical day (litres)", "default": 250,
+      "help": "The ring is full at this many litres; above it, it turns orange." }
+  ]
+}

@@ -165,6 +165,10 @@ func (e *env) do(r req) *resp {
 		hr.Header.Set("Authorization", "Bearer "+r.token)
 	}
 	for k, v := range r.header {
+		if k == "Host" {
+			hr.Host = v // net/http ignores a Host header; this is how a proxied vhost arrives
+			continue
+		}
 		hr.Header.Set(k, v)
 	}
 	client := &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}

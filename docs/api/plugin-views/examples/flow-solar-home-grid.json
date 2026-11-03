@@ -1,0 +1,33 @@
+{
+  "type": "flow",
+  "nodes": [
+    {
+      "id": "solar",
+      "icon": "solar",
+      "value": "3,4 kW",
+      "tone": "good"
+    },
+    {
+      "id": "home",
+      "icon": "home",
+      "value": "1,2 kW"
+    },
+    {
+      "id": "grid",
+      "icon": "grid",
+      "value": "2,2 kW"
+    }
+  ],
+  "edges": [
+    {
+      "from": "solar",
+      "to": "home",
+      "power": 1200
+    },
+    {
+      "from": "solar",
+      "to": "grid",
+      "power": 2200
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "type": "gauge",
+  "value": 31,
+  "label": "1.240 W",
+  "style": "dial",
+  "tone": "info",
+  "negative_tone": "good"
+}

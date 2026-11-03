@@ -1,0 +1,27 @@
+{
+  "id": "kinframe.ha-energy",
+  "name": "Home Assistant energy flow",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "Solar, grid, battery, home and car charging power from Home Assistant, as a live flow.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 2, "default_seconds": 10 },
+  "permissions": { "http": ["settings.base_url"], "websocket": ["settings.base_url"] },
+  "settings": [
+    { "key": "base_url", "type": "url", "label": "Home Assistant address", "placeholder": "http://homeassistant.local:8123",
+      "required": true, "local_only": true, "discover": "_home-assistant._tcp" },
+    { "key": "token", "type": "secret", "label": "Long-lived access token", "required": true,
+      "help": "Profile → Security → Long-lived access tokens in Home Assistant." },
+    { "key": "solar", "type": "entity", "label": "Solar power", "domain": "sensor", "unit": "W", "multiple": true },
+    { "key": "grid", "type": "entity", "label": "Grid power (positive = taking from the grid)", "domain": "sensor", "unit": "W", "required": true },
+    { "key": "grid_sign", "type": "choice", "label": "Grid sensor is positive when", "options": ["import", "export"], "default": "import" },
+    { "key": "battery", "type": "entity", "label": "Battery power", "domain": "sensor", "unit": "W" },
+    { "key": "battery_sign", "type": "choice", "label": "Battery sensor is positive when", "options": ["discharging", "charging"], "default": "discharging" },
+    { "key": "battery_soc", "type": "entity", "label": "Battery charge", "domain": "sensor", "unit": "%" },
+    { "key": "home", "type": "entity", "label": "Home power (all use, car included; empty = worked out)", "domain": "sensor" },
+    { "key": "ev", "type": "entity", "label": "Car charger power", "domain": "sensor", "unit": "W" },
+    { "key": "style", "type": "choice", "label": "Show as", "options": ["flow", "rows"], "default": "flow" }
+  ]
+}

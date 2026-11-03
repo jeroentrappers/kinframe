@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Nuotraukos iš Frameo</string>
+    <string name="frameo_found">Nuotraukos ir vaizdo įrašai iš Frameo šiame rėmelyje: %d. Importuokite juos, kad išliktų su aprašais ir siuntėjais.</string>
+    <string name="frameo_import">Importuoti</string>
+    <string name="frameo_importing">Importuojamos nuotraukos iš Frameo</string>
+    <string name="frameo_preparing">Ruošiama…</string>
+    <string name="frameo_waiting">Tęsis, kai rėmelis prisijungs prie interneto.</string>
+    <string name="frameo_stop">Sustabdyti</string>
+    <string name="frameo_done_title">Nuotraukos iš Frameo importuotos</string>
+    <string name="frameo_count">%1$d iš %2$d</string>
+    <string name="frameo_done_imported">Importuota: %d</string>
+    <string name="frameo_done_already">Jau rėmelyje: %d</string>
+    <string name="frameo_done_failed">Neimportuota: %d</string>
+    <string name="frameo_no_permission">Norint perskaityti nuotraukas iš Frameo, reikia prieigos prie saugyklos.</string>
+    <string name="credit_via_frameo">%1$s · per Frameo</string>
+    <string name="credit_frameo">per Frameo</string>
+</resources>

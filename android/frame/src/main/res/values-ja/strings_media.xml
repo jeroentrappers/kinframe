@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">ライブ</string>
+    <string name="live_tap_hint">タップして再生</string>
+    <string name="settings_live_photos">Live Photos</string>
+    <string name="live_photos_on">表示時に再生</string>
+    <string name="live_photos_tap">タップで再生</string>
+    <string name="live_photos_off">写真のみ</string>
+</resources>

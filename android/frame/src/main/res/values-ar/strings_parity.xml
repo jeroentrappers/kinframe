@@ -64,6 +64,8 @@
     <string name="status_card_offline_body">تستمر الصور الموجودة على الإطار في العرض. وتصل الصور الجديدة فور عودة الاتصال.</string>
     <string name="status_card_server_title">تعذّر الوصول إلى خادم الصور</string>
     <string name="status_card_server_body">شبكة Wi-Fi تعمل، لكن الخادم لا يستجيب. ستصل الصور الجديدة عند عودته.</string>
+    <string name="status_card_clock_title">جارٍ ضبط الساعة</string>
+    <string name="status_card_clock_body">أُعيد تشغيل الإطار وساعته غير صحيحة. سيضبطها من الإنترنت بعد لحظات.</string>
     <string name="status_card_portal_title">تطلب شبكة Wi-Fi هذه تسجيل الدخول</string>
     <string name="status_card_portal_body">افتح صفحة تسجيل الدخول للشبكة لتوصيل الإطار بالإنترنت.</string>
     <string name="status_card_portal_action">تسجيل الدخول</string>

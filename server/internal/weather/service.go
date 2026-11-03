@@ -27,7 +27,7 @@ type Location struct {
 }
 
 // Wanted returns the frame's location when its settings ask for weather
-// (location with numeric lat/lon and widgets.weather on).
+// (location with numeric lat/lon and the weather widget or the calendar sidebar on).
 func Wanted(settings json.RawMessage) (Location, bool) {
 	var s struct {
 		Location *struct {
@@ -36,10 +36,11 @@ func Wanted(settings json.RawMessage) (Location, bool) {
 			Lon  *float64 `json:"lon"`
 		} `json:"location"`
 		Widgets struct {
-			Weather bool `json:"weather"`
+			Weather         bool `json:"weather"`
+			CalendarSidebar bool `json:"calendar_sidebar"`
 		} `json:"widgets"`
 	}
-	if json.Unmarshal(settings, &s) != nil || s.Location == nil || s.Location.Lat == nil || s.Location.Lon == nil || !s.Widgets.Weather {
+	if json.Unmarshal(settings, &s) != nil || s.Location == nil || s.Location.Lat == nil || s.Location.Lon == nil || (!s.Widgets.Weather && !s.Widgets.CalendarSidebar) {
 		return Location{}, false
 	}
 	return Location{Name: s.Location.Name, Lat: *s.Location.Lat, Lon: *s.Location.Lon}, true

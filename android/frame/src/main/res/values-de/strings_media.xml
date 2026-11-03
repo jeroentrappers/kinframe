@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Zum Abspielen tippen</string>
+    <string name="settings_live_photos">Live-Fotos</string>
+    <string name="live_photos_on">Beim Anzeigen abspielen</string>
+    <string name="live_photos_tap">Beim Tippen abspielen</string>
+    <string name="live_photos_off">Nur Foto</string>
+</resources>

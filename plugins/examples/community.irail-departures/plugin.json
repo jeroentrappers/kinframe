@@ -1,0 +1,16 @@
+{
+  "id": "community.irail-departures",
+  "name": "Train departures (Belgium)",
+  "version": "0.1.0",
+  "api": 1,
+  "author": { "name": "kinframe example" },
+  "license": "Apache-2.0",
+  "description": "The next trains from a Belgian station, with delays, from the iRail API. An example plugin.",
+  "refresh": { "min_seconds": 30, "default_seconds": 60 },
+  "permissions": { "http": ["https://api.irail.be"] },
+  "settings": [
+    { "key": "station", "type": "text", "label": "Station", "required": true, "placeholder": "Denderleeuw" },
+    { "key": "towards", "type": "text", "label": "Only trains towards (optional)", "placeholder": "Brussel" },
+    { "key": "count", "type": "number", "label": "How many", "default": 3 }
+  ]
+}

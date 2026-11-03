@@ -1,0 +1,83 @@
+[
+  {
+    "entity_id": "sensor.p1_meter_vermogen",
+    "state": "17.0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "W",
+      "device_class": "power",
+      "friendly_name": "P1 Meter Vermogen"
+    },
+    "last_updated": "2026-10-25T21:08:33.428319+00:00",
+    "last_changed": "2026-10-25T21:08:33.428319+00:00"
+  },
+  {
+    "entity_id": "sensor.solis_s6_eh1p_total_pv_power_2",
+    "state": "0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "W",
+      "device_class": "power",
+      "friendly_name": "Solis S6-EH1P Total PV Power"
+    },
+    "last_updated": "2026-10-25T16:19:22.864180+00:00",
+    "last_changed": "2026-10-25T16:19:22.864180+00:00"
+  },
+  {
+    "entity_id": "sensor.omnik_hoofddak_inverter_omnik_hoofddak_current_power_production",
+    "state": "0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "W",
+      "device_class": "power",
+      "friendly_name": "Omnik hoofddak Inverter Huidige productie"
+    },
+    "last_updated": "2026-10-25T16:36:29.080546+00:00",
+    "last_changed": "2026-10-25T16:36:29.080546+00:00"
+  },
+  {
+    "entity_id": "sensor.solis_s6_eh1p_battery_power_2",
+    "state": "607",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "W",
+      "device_class": "power",
+      "friendly_name": "Solis S6-EH1P Battery Power"
+    },
+    "last_updated": "2026-10-25T21:08:25.227942+00:00",
+    "last_changed": "2026-10-25T21:08:25.227942+00:00"
+  },
+  {
+    "entity_id": "sensor.solis_s6_eh1p_battery_soc_2",
+    "state": "63",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "%",
+      "device_class": "battery",
+      "friendly_name": "Solis S6-EH1P Battery SOC"
+    },
+    "last_updated": "2026-10-25T21:04:10.228596+00:00",
+    "last_changed": "2026-10-25T21:04:10.228596+00:00"
+  },
+  {
+    "entity_id": "sensor.huisverbruik_vermogen",
+    "state": "624",
+    "attributes": {
+      "friendly_name": "Huisverbruik vermogen"
+    },
+    "last_updated": "2026-10-25T21:08:33.428792+00:00",
+    "last_changed": "2026-10-25T21:08:33.428792+00:00"
+  },
+  {
+    "entity_id": "sensor.ev_laadvermogen_smartevse_w",
+    "state": "0",
+    "attributes": {
+      "state_class": "measurement",
+      "unit_of_measurement": "W",
+      "device_class": "power",
+      "friendly_name": "EV laadvermogen smartevse (W)"
+    },
+    "last_updated": "2026-10-25T20:40:36.851039+00:00",
+    "last_changed": "2026-10-25T20:40:36.851039+00:00"
+  }
+]

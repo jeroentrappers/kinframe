@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share_action">Delen met een andere fotolijst</string>
+    <string name="share_action_short">Delen</string>
+    <string name="share_hint">Zet dezelfde foto’s op andere fotolijsten waar je naar kunt sturen. Er wordt niets opnieuw geüpload.</string>
+    <string name="share_already_there">Staat er al</string>
+    <string name="share_partly">Deels</string>
+    <string name="share_no_frames">Er zijn geen andere fotolijsten waar je naar kunt sturen.</string>
+    <string name="share_submit">Delen</string>
+    <string name="share_done">Gedeeld met %1$s</string>
+    <string name="share_nothing_new">Die fotolijsten hebben deze foto’s al.</string>
+    <string name="share_undone">Delen ongedaan gemaakt</string>
+    <string name="shared_by">Gedeeld door %1$s</string>
+</resources>

@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">A képkereten lévő fotók továbbra is mennek. Az újak megérkeznek, amint újra van kapcsolat.</string>
     <string name="status_card_server_title">A fotószerver nem érhető el</string>
     <string name="status_card_server_body">A Wi-Fi működik, de a szerver nem válaszol. Az új fotók megérkeznek, amint újra elérhető.</string>
+    <string name="status_card_clock_title">Óra beállítása</string>
+    <string name="status_card_clock_body">A képkeret újraindult, és rosszul jár az órája. Egy pillanat, és beállítja az internetről.</string>
     <string name="status_card_portal_title">Ez a Wi-Fi bejelentkezést kér</string>
     <string name="status_card_portal_body">Nyisd meg a hálózat bejelentkezési oldalát, hogy a képkeret csatlakozzon az internethez.</string>
     <string name="status_card_portal_action">Bejelentkezés</string>

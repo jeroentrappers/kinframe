@@ -54,6 +54,33 @@ object Collage {
         return Placed(cells, order.toList())
     }
 
+    /**
+     * Puts photos into given [cells] (the split layout's two photo cells): the same matching by aspect as [place].
+     */
+    fun placeInto(cells: List<Cell>, photoAspects: List<Float>, screenW: Int, screenH: Int): Placed {
+        require(cells.size == photoAspects.size)
+        val cellOrder = cells.indices.sortedBy { cells[it].aspect(screenW, screenH) }
+        val photoOrder = photoAspects.indices.sortedBy { photoAspects[it] }
+        val order = IntArray(cells.size)
+        cellOrder.forEachIndexed { rank, cellIdx -> order[cellIdx] = photoOrder[rank] }
+        return Placed(cells, order.toList())
+    }
+
+    /**
+     * The split layout's second photo: [p] (aspect [aspect]) takes the cell its shape fits best, and the partner is the
+     * first of the [upcoming] photos (ids and aspects, in play order) that fits the other cell: a landscape photo for a
+     * wide cell, a portrait one for a tall cell. When none of them does, the first upcoming photo (cropped more).
+     */
+    fun splitPartner(aspect: Float, cells: List<Cell>, upcoming: List<Pair<String, Float?>>, screenW: Int, screenH: Int): String? {
+        if (upcoming.isEmpty() || cells.size != 2) return null
+        val a = cells[0].aspect(screenW, screenH)
+        val b = cells[1].aspect(screenW, screenH)
+        fun fit(x: Float, cell: Float) = abs(ln((x / cell).toDouble()))
+        val other = if (fit(aspect, a) <= fit(aspect, b)) b else a
+        val wide = other >= 1f
+        return upcoming.firstOrNull { (_, x) -> x != null && (x >= 1f) == wide }?.first ?: upcoming.first().first
+    }
+
     /** Sum of |ln(photo aspect / cell aspect)|: 0 is a perfect fit, used by tests and to compare layouts. */
     fun mismatch(p: Placed, aspects: List<Float>, screenW: Int, screenH: Int): Double =
         p.cells.indices.sumOf { i -> abs(ln((aspects[p.order[i]] / p.cells[i].aspect(screenW, screenH)).toDouble())) }

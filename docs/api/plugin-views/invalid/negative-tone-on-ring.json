@@ -1,0 +1,8 @@
+{
+  "$error_path": "/negative_tone",
+  "view": {
+    "type": "gauge",
+    "value": 20,
+    "negative_tone": "good"
+  }
+}

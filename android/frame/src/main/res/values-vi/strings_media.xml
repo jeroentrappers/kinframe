@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Chạm để phát</string>
+    <string name="settings_live_photos">Ảnh Live</string>
+    <string name="live_photos_on">Phát khi hiển thị</string>
+    <string name="live_photos_tap">Phát khi chạm</string>
+    <string name="live_photos_off">Chỉ ảnh</string>
+</resources>

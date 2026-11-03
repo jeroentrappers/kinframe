@@ -34,10 +34,17 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.Auth.ApiResource = s.cfg.OIDCAudience
 	d.Auth.MobileClientId = s.cfg.MobileClientID
 	d.Auth.WebClientId = s.cfg.WebClientID
+	if s.cfg.DesktopClientID != "" {
+		d.Auth.DesktopClientId = ptr(s.cfg.DesktopClientID)
+	}
 	d.DevAuth = ptr(s.dev != nil)
 	d.Weather = ptr(s.weather != nil)
+	d.Calendar = ptr(s.calendar != nil)
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
+	}
+	if s.cfg.Shop != nil {
+		d.Shop = shopJSON(s.cfg.Shop)
 	}
 	return ok(d), nil
 }
@@ -141,7 +148,7 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 			}
 		}
 		if req.Params.RemoveItems {
-			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1)`, u.ID); err != nil {
+			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1) OR p.shared_by_user_id = $1`, u.ID); err != nil {
 				return err
 			}
 		}
@@ -335,9 +342,13 @@ func (s *Server) OperatorStats(ctx context.Context, _ gen.OperatorStatsRequestOb
 	if err != nil {
 		return nil, err
 	}
+	pipeline, err := s.st.PipelineStats(ctx)
+	if err != nil {
+		return nil, err
+	}
 	return ok(map[string]any{
 		"users": users, "frames": frames, "frames_online": s.hub.OnlineFrames(), "items": items,
-		"storage_bytes": storage, "processing_queue": queue,
+		"storage_bytes": storage, "processing_queue": queue, "media_pipeline": pipeline,
 	}), nil
 }
 

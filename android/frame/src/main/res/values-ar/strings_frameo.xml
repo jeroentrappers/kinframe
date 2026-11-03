@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">صور من Frameo</string>
+    <string name="frameo_found">صور وفيديوهات من Frameo على هذا الإطار: %d. استوردها للاحتفاظ بها مع أوصافها ومرسليها.</string>
+    <string name="frameo_import">استيراد</string>
+    <string name="frameo_importing">جارٍ استيراد الصور من Frameo</string>
+    <string name="frameo_preparing">جارٍ التحضير…</string>
+    <string name="frameo_waiting">يستمر عندما يتصل الإطار بالإنترنت.</string>
+    <string name="frameo_stop">إيقاف</string>
+    <string name="frameo_done_title">تم استيراد الصور من Frameo</string>
+    <string name="frameo_count">%1$d من %2$d</string>
+    <string name="frameo_done_imported">تم الاستيراد: %d</string>
+    <string name="frameo_done_already">موجودة على الإطار مسبقًا: %d</string>
+    <string name="frameo_done_failed">تعذّر استيرادها: %d</string>
+    <string name="frameo_no_permission">يلزم الوصول إلى مساحة التخزين لقراءة الصور من Frameo.</string>
+    <string name="credit_via_frameo">%1$s · عبر Frameo</string>
+    <string name="credit_frameo">عبر Frameo</string>
+</resources>

@@ -54,6 +54,8 @@
     <string name="status_card_offline_body">相框上的照片會繼續播放。恢復連線後，新照片就會馬上送達。</string>
     <string name="status_card_server_title">無法連上照片伺服器</string>
     <string name="status_card_server_body">Wi-Fi 正常，但伺服器沒有回應。伺服器恢復後，新照片就會送達。</string>
+    <string name="status_card_clock_title">正在校正時鐘</string>
+    <string name="status_card_clock_body">相框剛重新啟動，時鐘不準。稍後會透過網路自動校正。</string>
     <string name="status_card_portal_title">這個 Wi-Fi 需要登入</string>
     <string name="status_card_portal_body">開啟網路的登入頁面，讓相框連上網路。</string>
     <string name="status_card_portal_action">登入</string>

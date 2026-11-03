@@ -1,0 +1,9 @@
+{
+  "$error_path": "/lines/0",
+  "view": {
+    "type": "text",
+    "lines": [
+      "two\nlines"
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Bugün</string>
+    <string name="calendar_tomorrow">Yarın</string>
+    <string name="calendar_view_month">Ay</string>
+    <string name="calendar_view_week">Hafta</string>
+    <string name="calendar_view_four_day">4 gün</string>
+    <string name="calendar_week_number">%1$d. hafta</string>
+    <string name="calendar_previous">Önceki</string>
+    <string name="calendar_next">Sonraki</string>
+    <string name="calendar_sync_now">Şimdi eşitle</string>
+    <string name="calendar_syncing">Eşitleniyor…</string>
+    <string name="calendar_close">Takvimi kapat</string>
+    <string name="calendar_all_day">Tüm gün</string>
+    <string name="calendar_received">Alınan etkinlikler</string>
+    <string name="calendar_nothing">Planlanmış bir şey yok</string>
+    <string name="calendar_nothing_today">Bugün başka plan yok</string>
+    <string name="calendar_empty_title">Henüz takvim yok</string>
+    <string name="calendar_empty_body">kinframe uygulamasından veya web sitesinden, çerçevenin Takvimler bölümünde bir aile takvimi ekleyin. Burada istediğiniz kadar takvim birlikte gösterilebilir.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">bitiş: %1$s</string>
+    <string name="calendar_from">başlangıç: %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d tane daha</item>
+        <item quantity="other">+%d tane daha</item>
+    </plurals>
+    <string name="calendar_rain">%%%1$d</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Bugün</string>
+    <string name="countdown_tomorrow">Yarın</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d gün</item>
+        <item quantity="other">%d gün</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">%d gün sonra</item>
+        <item quantity="other">%d gün sonra</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Gönderen: %1$s</string>
+    <string name="event_repeats">Tekrarlanır</string>
+    <string name="event_countdown">Geri sayım yap</string>
+    <string name="event_countdown_hint">Slayt gösterisinde ve takvimin üst kısmında</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s size bir etkinlik gönderdi</string>
+    <string name="invitation_body">Bu çerçevenin takvimine eklensin mi?</string>
+    <string name="invitation_accept">Takvime ekle</string>
+    <string name="invitation_decline">Reddet</string>
+    <string name="invitation_later">Şimdi değil</string>
+    <string name="invitation_pill_one">Etkinlik: %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d etkinlik daveti</item>
+        <item quantity="other">%d etkinlik daveti</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Takvim</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Takvim</string>
+    <string name="settings_calendar_open">Takvimi aç</string>
+    <string name="settings_calendar_view">Takvim görünümü</string>
+    <string name="settings_calendar_start_today">Bugünden başla</string>
+    <string name="settings_calendar_fade_past">Geçmiş etkinlikleri soluklaştır</string>
+    <string name="settings_calendar_week_numbers">Hafta numaraları</string>
+    <string name="settings_calendar_sidebar">Fotoğrafların yanında takvim</string>
+    <string name="settings_calendar_countdowns">Slayt gösterisinde geri sayımlar</string>
+    <string name="settings_calendar_timed">Takvimi belirli saatlerde göster</string>
+    <string name="settings_calendar_timed_from">Başlangıç</string>
+    <string name="settings_calendar_timed_to">Bitiş</string>
+    <string name="settings_calendar_timed_add">Saat ekle</string>
+    <string name="settings_calendar_timed_remove">Kaldır</string>
+    <string name="settings_calendar_sources">Bu çerçevedeki takvimler</string>
+    <string name="settings_calendar_sources_hint">Takvimler kinframe uygulamasından veya web sitesinden eklenir ve yönetilir.</string>
+    <string name="calendar_status_ok">Güncel</string>
+    <string name="calendar_status_syncing">Eşitleniyor…</string>
+    <string name="calendar_status_failed">Eşitlenemedi</string>
+    <string name="calendar_status_auth_failed">Oturum açılması gerekiyor</string>
+    <string name="calendar_status_disabled">Kapalı</string>
+</resources>

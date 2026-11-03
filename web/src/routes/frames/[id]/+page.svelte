@@ -3,7 +3,9 @@
 	import { page } from '$app/state';
 	import { api, call, type Frame } from '$lib/api/client';
 	import { can, canManage, frames } from '$lib/frames.svelte';
+	import { FrameDrop } from '$lib/framedrop.svelte';
 	import { live } from '$lib/live.svelte';
+	import { softFade } from '$lib/motion';
 	import { problemMessage } from '$lib/problem';
 	import { i18n, t, type MessageKey } from '$lib/i18n/index.svelte';
 	import Icon, { type IconName } from '$components/Icon.svelte';
@@ -13,8 +15,10 @@
 	import FrameLibrary from '$components/frame/FrameLibrary.svelte';
 	import FramePeople from '$components/frame/FramePeople.svelte';
 	import FrameSettingsForm from '$components/frame/FrameSettingsForm.svelte';
+	import FrameCalendar from '$components/frame/calendar/FrameCalendar.svelte';
+	import { discovery } from '$lib/discovery.svelte';
 
-	type Tab = 'overview' | 'library' | 'people' | 'settings';
+	type Tab = 'overview' | 'library' | 'people' | 'calendar' | 'settings';
 
 	let frame = $state<Frame | null>(null);
 	let error = $state<unknown>(null);
@@ -51,6 +55,8 @@
 			{ id: 'library', label: 'frame.tabLibrary', icon: 'image' },
 			{ id: 'people', label: 'frame.tabPeople', icon: 'users' }
 		];
+		if (discovery.doc?.calendar && (can(frame, 'change_settings') || can(frame, 'send')))
+			list.push({ id: 'calendar', label: 'frame.tabCalendar', icon: 'calendar' });
 		if (can(frame, 'change_settings')) list.push({ id: 'settings', label: 'frame.tabSettings', icon: 'settings' });
 		return list;
 	});
@@ -79,6 +85,9 @@
 		document.getElementById(`tab-${next.id}`)?.focus();
 	}
 
+	// Photos dragged in from the computer and dropped anywhere on the page are sent to this frame.
+	const drop = new FrameDrop(() => (frame && can(frame, 'send') ? frame.id : null));
+
 	function onUpdated(f: Frame) {
 		frame = f;
 		frames.upsert(f);
@@ -86,6 +95,10 @@
 </script>
 
 <svelte:head><title>{frame?.name ?? t('frames.title')} · kinframe</title></svelte:head>
+
+<svelte:window ondragenter={drop.enter} ondragleave={drop.leave} ondragover={drop.over} ondrop={drop.drop} />
+
+<p class="visually-hidden" role="status" aria-live="polite">{drop.active && drop.target && frame ? t('frames.dropTo', { name: frame.name }) : ''}</p>
 
 <div class="container page">
 	<a href="/frames" class="back"><Icon name="chevronLeft" size={18} />{t('frames.title')}</a>
@@ -143,6 +156,8 @@
 				<FrameLibrary {frame} />
 			{:else if tab === 'people'}
 				<FramePeople {frame} manage={canManage(frame)} onchanged={() => void load(frame!.id)} />
+			{:else if tab === 'calendar'}
+				<FrameCalendar {frame} />
 			{:else if tab === 'settings'}
 				<FrameSettingsForm {frame} />
 			{/if}
@@ -150,7 +165,40 @@
 	{/if}
 </div>
 
+{#if drop.active && drop.target && frame}
+	<div class="drop-veil" transition:softFade aria-hidden="true">
+		<div class="veil-card"><Icon name="upload" size={32} />{t('frames.dropTo', { name: frame.name })}</div>
+	</div>
+{/if}
+
 <style>
+	.drop-veil {
+		position: fixed;
+		inset: 0;
+		z-index: 50;
+		display: grid;
+		place-items: center;
+		background: color-mix(in srgb, var(--primary) 18%, transparent);
+		backdrop-filter: blur(3px);
+		pointer-events: none;
+	}
+	.veil-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+		max-width: min(90vw, 480px);
+		padding: var(--s-6) var(--s-7);
+		border-radius: var(--r-xl);
+		background: var(--surface);
+		box-shadow: var(--shadow-lg);
+		font-weight: 650;
+		font-size: 1.1rem;
+		text-align: center;
+		overflow-wrap: anywhere;
+		color: var(--primary);
+		border: 2px dashed var(--primary);
+	}
 	.back {
 		display: inline-flex;
 		align-items: center;
@@ -195,7 +243,8 @@
 			display: none;
 		}
 		.tabs button {
-			padding: 0 10px; /* long labels (German, Russian) still fit on a phone */
+			padding: 0 9px; /* six tabs: long labels (German, Russian) still fit on a phone */
+			font-size: 0.88rem;
 		}
 	}
 	.panel {

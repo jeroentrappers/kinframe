@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">라이브</string>
+    <string name="live_tap_hint">탭하여 재생</string>
+    <string name="settings_live_photos">Live Photo</string>
+    <string name="live_photos_on">표시될 때 재생</string>
+    <string name="live_photos_tap">탭하면 재생</string>
+    <string name="live_photos_off">사진만</string>
+</resources>

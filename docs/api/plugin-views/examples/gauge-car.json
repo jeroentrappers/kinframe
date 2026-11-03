@@ -1,0 +1,8 @@
+{
+  "type": "gauge",
+  "value": 68,
+  "label": "68%",
+  "icon": "car",
+  "caption": "Charging · full at 23:10",
+  "tone": "good"
+}

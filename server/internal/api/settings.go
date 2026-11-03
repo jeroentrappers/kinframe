@@ -26,13 +26,13 @@ func init() {
 }
 
 // settingsDoc renders the stored settings with their version, as people see them
-// (without the owner PIN hash).
-func settingsDoc(f *store.Frame) json.RawMessage { return renderSettings(f, false) }
+// (without the owner PIN hash, plugin secrets only by name).
+func (s *Server) settingsDoc(f *store.Frame) json.RawMessage { return s.renderSettings(f, false) }
 
-// deviceSettingsDoc renders the settings for the frame itself, including the owner PIN hash.
-func deviceSettingsDoc(f *store.Frame) json.RawMessage { return renderSettings(f, true) }
+// deviceSettingsDoc renders the settings for the frame itself, including the owner PIN hash and plugin secrets.
+func (s *Server) deviceSettingsDoc(f *store.Frame) json.RawMessage { return s.renderSettings(f, true) }
 
-func renderSettings(f *store.Frame, forDevice bool) json.RawMessage {
+func (s *Server) renderSettings(f *store.Frame, forDevice bool) json.RawMessage {
 	var m map[string]any
 	_ = json.Unmarshal(f.Settings, &m)
 	if m == nil {
@@ -42,6 +42,7 @@ func renderSettings(f *store.Frame, forDevice bool) json.RawMessage {
 	if !forDevice {
 		settings.StripPinHash(m)
 	}
+	settings.RenderPluginSecrets(m, s.pluginSealer, forDevice)
 	m["version"] = f.SettingsVersion
 	b, _ := json.Marshal(m)
 	return b
@@ -69,9 +70,9 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 		}
 		return nil, problem.Validation("kiosk.owner_pin", "pattern", err.Error())
 	}
-	render := settingsDoc
+	render := s.settingsDoc
 	if actor == settings.ActorDevice {
-		render = deviceSettingsDoc
+		render = s.deviceSettingsDoc
 	}
 	settings.Sanitize(patch)
 	paths := settings.LeafPaths(patch)
@@ -93,9 +94,16 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 		if err := json.Unmarshal(f.Settings, &doc); err != nil {
 			return err
 		}
+		s.preparePlugins(patch, doc)
 		doc = settings.MergePatch(doc, patch)
 		settings.DerivePinSet(doc)
 		if err := validateSettings(doc); err != nil {
+			return err
+		}
+		if err := s.checkPlugins(ctx, tx, f, doc); err != nil {
+			return err
+		}
+		if err := s.syncStations(ctx, tx, frameID, doc); err != nil {
 			return err
 		}
 		version := f.SettingsVersion + 1
@@ -123,13 +131,26 @@ func (s *Server) patchSettings(ctx context.Context, frameID uuid.UUID, ifMatch s
 	if err == nil && s.weather != nil && touchesWeather(paths) {
 		s.weather.Kick(frameID)
 	}
+	if err == nil && s.calendar != nil && touchesCalendar(paths) {
+		s.calendar.RebuildLater(frameID)
+	}
 	return out, err
 }
 
 // touchesWeather reports whether a settings patch may change what weather a frame needs.
 func touchesWeather(paths []string) bool {
 	for _, p := range paths {
-		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" {
+		if p == "location" || strings.HasPrefix(p, "location.") || p == "widgets" || p == "widgets.weather" || p == "widgets.calendar_sidebar" {
+			return true
+		}
+	}
+	return false
+}
+
+// touchesCalendar reports whether a settings patch may move a frame's calendar window or zone.
+func touchesCalendar(paths []string) bool {
+	for _, p := range paths {
+		if p == "calendar" || p == "calendar.past_days" || p == "calendar.future_days" || p == "locale" || p == "locale.timezone" {
 			return true
 		}
 	}
@@ -176,7 +197,7 @@ func (s *Server) GetFrameSettings(ctx context.Context, req gen.GetFrameSettingsR
 	if err != nil {
 		return nil, notFound(err, "frame")
 	}
-	return Response{Status: 200, Body: settingsDoc(f), Header: etag(f.SettingsVersion)}, nil
+	return Response{Status: 200, Body: s.settingsDoc(f), Header: etag(f.SettingsVersion)}, nil
 }
 
 func etag(version int) map[string][]string {

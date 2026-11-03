@@ -1,0 +1,284 @@
+/*
+ * kinframe theme for Logto's sign-in pages (Logto 1.43 custom CSS).
+ * Applied by `kinframe-server bootstrap-logto`; {{ORIGIN}} is kinframe's origin.
+ * Mirrors web/src/app.css: warm paper background, terracotta accent, Fraunces headings, pill buttons.
+ *
+ * Logto's class names are CSS-module hashes ("M1ReP_button"), so components are matched on the stable
+ * suffix ([class*="_button"]) or on Logto's documented hooks (.logto_main-content, .logto_page-container).
+ * The theme class on <body> is "<hash>_light" / "<hash>_dark"; Logto picks it from prefers-color-scheme.
+ */
+
+@font-face {
+	font-family: 'Fraunces Variable';
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url({{ORIGIN}}/fonts/fraunces-latin-wght-normal.woff2) format('woff2-variations');
+}
+
+/* ------------------------------------------------------------------ tokens */
+
+body[class] {
+	--kf-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+	--kf-display: 'Fraunces Variable', ui-serif, Georgia, 'Times New Roman', serif;
+
+	--font-body-1: 400 16px/24px var(--kf-sans);
+	--font-body-2: 400 14px/20px var(--kf-sans);
+	--font-body-3: 400 12px/16px var(--kf-sans);
+	--font-label-1: 600 16px/24px var(--kf-sans);
+	--font-label-2: 600 15px/20px var(--kf-sans);
+	--font-label-3: 600 12px/16px var(--kf-sans);
+	--font-title-1: 560 28px/34px var(--kf-display);
+	--font-title-2: 560 24px/30px var(--kf-display);
+	--font-title-3: 600 16px/24px var(--kf-sans);
+	--font-headline-1: 560 28px/34px var(--kf-display);
+	--font-headline-2: 560 24px/30px var(--kf-display);
+	--radius: 12px;
+}
+
+body[class*='_light'] {
+	--kf-bg: #f8f3ec;
+	--kf-surface: #fffdf9;
+	--kf-surface-2: #f4ede4;
+	--kf-border: #e4d8ca;
+	--kf-border-strong: #cdbdab;
+	--kf-text: #2a221d;
+	--kf-muted: #675a50;
+	--kf-faint: #8b7d71;
+	--kf-primary: #a7471e;
+	--kf-primary-hover: #8d3b18;
+	--kf-on-primary: #ffffff;
+	--kf-danger: #b3261e;
+	--kf-focus: #1f5fbf;
+	--kf-shadow: 0 1px 2px rgb(60 40 20 / 0.05), 0 6px 18px -6px rgb(60 40 20 / 0.14);
+}
+
+body[class*='_dark'] {
+	--kf-bg: #191512;
+	--kf-surface: #231e1a;
+	--kf-surface-2: #2c2621;
+	--kf-border: #3a322b;
+	--kf-border-strong: #54493f;
+	--kf-text: #f3ebe3;
+	--kf-muted: #bdaea1;
+	--kf-faint: #94867a;
+	--kf-primary: #f09a6d;
+	--kf-primary-hover: #f6b08b;
+	--kf-on-primary: #2a1206;
+	--kf-danger: #f28b82;
+	--kf-focus: #8ab4ff;
+	--kf-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -8px rgb(0 0 0 / 0.6);
+}
+
+/* Logto's own palette, mapped onto kinframe's. Brand colours are set inline on <body>, hence !important. */
+body[class*='_light'],
+body[class*='_dark'] {
+	--color-bg-body-base: var(--kf-bg);
+	--color-bg-body: var(--kf-surface);
+	--color-bg-float-base: var(--kf-bg);
+	--color-bg-float: var(--kf-surface);
+	--color-bg-body-overlay: var(--kf-surface);
+	--color-bg-float-overlay: var(--kf-surface);
+	--color-bg-layer-1: var(--kf-surface);
+	--color-bg-layer-2: var(--kf-surface-2);
+	--color-bg-light: var(--kf-surface-2);
+	--color-type-primary: var(--kf-text);
+	--color-type-secondary: var(--kf-muted);
+	--color-type-link: var(--kf-primary);
+	--color-line-divider: var(--kf-border);
+	--color-line-border: var(--kf-border-strong);
+	--color-danger-default: var(--kf-danger);
+	--color-brand-default: var(--kf-primary) !important;
+	--color-brand-hover: var(--kf-primary-hover) !important;
+	--color-brand-pressed: var(--kf-primary-hover) !important;
+	--color-brand-loading: var(--kf-primary) !important;
+	--color-overlay-brand-focused: color-mix(in srgb, var(--kf-primary) 22%, transparent) !important;
+	--color-overlay-brand-hover: color-mix(in srgb, var(--kf-primary) 8%, transparent) !important;
+	--color-overlay-brand-pressed: color-mix(in srgb, var(--kf-primary) 12%, transparent) !important;
+	--color-overlay-neutral-hover: var(--kf-surface-2);
+	--color-overlay-neutral-pressed: color-mix(in srgb, var(--kf-surface-2) 70%, var(--kf-border-strong));
+	--color-overlay-neutral-focused: color-mix(in srgb, var(--kf-focus) 30%, transparent);
+	background: var(--kf-bg);
+	color: var(--kf-text);
+	font-family: var(--kf-sans);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ------------------------------------------------------------------ page and card */
+
+body[class] .logto_page-container {
+	background: var(--kf-bg);
+}
+
+body.desktop .logto_main-content {
+	background: var(--kf-surface);
+	border: 1px solid var(--kf-border);
+	border-radius: 26px;
+	box-shadow: var(--kf-shadow);
+	width: 480px;
+	min-height: 0;
+	padding: 32px 40px 36px;
+}
+
+body.mobile .logto_main-content {
+	background: var(--kf-bg);
+}
+
+/* The code and name steps have no logo of their own: show the kinframe mark above the title. */
+.logto_main-content:not(:has(.logto_branding-header)) [class*='_header']:has([class*='_title'])::before {
+	content: '';
+	display: block;
+	width: 140px;
+	height: 32px;
+	margin-bottom: 20px;
+	background: url({{ORIGIN}}/logo-light.svg) left center / contain no-repeat;
+}
+body[class*='_dark'] .logto_main-content:not(:has(.logto_branding-header)) [class*='_header']:has([class*='_title'])::before {
+	background-image: url({{ORIGIN}}/logo-dark.svg);
+}
+
+.logto_branding-header img {
+	height: 44px;
+}
+
+/* ------------------------------------------------------------------ type */
+
+[class*='_headline'],
+[class*='_header'] [class*='_title'] {
+	font-family: var(--kf-display);
+	font-weight: 560;
+	letter-spacing: -0.01em;
+	font-variation-settings: 'SOFT' 50;
+	color: var(--kf-text);
+}
+
+[class*='_header'] [class*='_title'] {
+	font-size: 26px;
+	line-height: 32px;
+}
+
+[class*='_description'],
+[class*='_message'] {
+	color: var(--kf-muted);
+}
+
+a,
+[class*='_link'][class*='_primary'],
+[class*='_createAccount'] a {
+	color: var(--kf-primary);
+	font-weight: 600;
+	text-underline-offset: 2px;
+}
+
+[class*='_divider'] {
+	color: var(--kf-faint);
+}
+
+/* ------------------------------------------------------------------ buttons */
+
+button[class*='_button'] {
+	min-height: 48px;
+	height: 48px;
+	border-radius: 999px;
+	font-weight: 600;
+	font-size: 15.5px;
+	transition:
+		background 180ms cubic-bezier(0.2, 0.7, 0.2, 1),
+		border-color 180ms cubic-bezier(0.2, 0.7, 0.2, 1),
+		transform 90ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+button[class*='_button']:active:not(:disabled) {
+	transform: translateY(1px) scale(0.99);
+}
+
+button[class*='_button'][class*='_primary'] {
+	background: var(--kf-primary);
+	color: var(--kf-on-primary);
+	box-shadow:
+		0 1px 0 rgb(255 255 255 / 0.15) inset,
+		0 1px 2px rgb(60 40 20 / 0.08);
+}
+
+button[class*='_button'][class*='_primary']:not(:disabled):hover {
+	background: var(--kf-primary-hover);
+}
+
+button[class*='_button'][class*='_secondary'] {
+	background: var(--kf-surface);
+	border: 1px solid var(--kf-border-strong);
+	color: var(--kf-text);
+}
+
+button[class*='_button'][class*='_secondary']:not(:disabled):hover {
+	background: var(--kf-surface-2);
+}
+
+/* Social buttons: icon on the left, label centred, a little tighter than the main action. */
+[class*='_socialLinkList'] {
+	gap: 10px;
+}
+
+[class*='_socialLinkList'] button[class*='_button'] {
+	min-height: 46px;
+	height: 46px;
+	margin: 0;
+}
+
+/* ------------------------------------------------------------------ inputs */
+
+[class*='_inputField']:has(> input) {
+	border-radius: 12px;
+	background: var(--kf-surface);
+}
+
+[class*='_inputField'] input {
+	border-radius: 12px;
+}
+
+fieldset[class*='_border'] {
+	border-radius: 12px;
+	border-color: var(--kf-border-strong);
+}
+
+fieldset[class*='_outline'] {
+	border-radius: 14px;
+}
+
+[class*='_passcode'] input {
+	width: 46px;
+	height: 52px;
+	border-radius: 12px;
+	border-color: var(--kf-border-strong);
+	background: var(--kf-surface);
+	font: 600 20px/24px var(--kf-sans);
+}
+
+[class*='_passcode'] input:focus {
+	outline: 3px solid color-mix(in srgb, var(--kf-primary) 22%, transparent);
+}
+
+/* ------------------------------------------------------------------ focus */
+
+a:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible {
+	outline: 3px solid var(--kf-focus) !important;
+	outline-offset: 2px;
+}
+
+a:focus-visible,
+[role='button']:focus-visible {
+	border-radius: 8px;
+}
+
+::selection {
+	background: color-mix(in srgb, var(--kf-primary) 22%, transparent);
+}
+
+/* ------------------------------------------------------------------ footer */
+
+.logto_signature {
+	opacity: 0.7;
+}

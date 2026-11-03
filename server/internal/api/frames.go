@@ -157,7 +157,7 @@ func (s *Server) LeaveFrame(ctx context.Context, req gen.LeaveFrameRequestObject
 
 func (s *Server) removeMember(ctx context.Context, tx *store.Tx, frameID, userID uuid.UUID, removeItems bool) error {
 	if removeItems {
-		if _, err := tx.RemovePlacements(ctx, `p.frame_id = $1 AND p.item_id IN (SELECT id FROM items WHERE sender_user_id = $2)`, frameID, userID); err != nil {
+		if _, err := tx.RemovePlacements(ctx, `p.frame_id = $1 AND (p.item_id IN (SELECT id FROM items WHERE sender_user_id = $2) OR p.shared_by_user_id = $2)`, frameID, userID); err != nil {
 			return err
 		}
 	}
@@ -511,8 +511,10 @@ func (s *Server) ReplaceDevice(ctx context.Context, req gen.ReplaceDeviceRequest
 			return err
 		}
 		// The new device may have another screen size: render what it needs.
-		rows, err := tx.Query(ctx, `SELECT DISTINCT i.media_id FROM placements p JOIN items i ON i.id = p.item_id
-			WHERE p.frame_id = $1 AND p.removed_at IS NULL`, f.ID)
+		rows, err := tx.Query(ctx, `SELECT i.media_id FROM placements p JOIN items i ON i.id = p.item_id
+			WHERE p.frame_id = $1 AND p.removed_at IS NULL
+			UNION SELECT i.motion_media_id FROM placements p JOIN items i ON i.id = p.item_id
+			WHERE p.frame_id = $1 AND p.removed_at IS NULL AND i.motion_media_id IS NOT NULL`, f.ID)
 		if err != nil {
 			return err
 		}

@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.video)
+    implementation(libs.media3.transformer)
+    implementation(libs.media3.effect)
     if (fcmEnabled) implementation(libs.firebase.messaging)
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.compose.ui.tooling.preview)

@@ -57,6 +57,8 @@
     <string name="status_card_offline_body">התמונות שבמסגרת ממשיכות להתחלף. תמונות חדשות יגיעו ברגע שהחיבור יחזור.</string>
     <string name="status_card_server_title">אין גישה לשרת התמונות</string>
     <string name="status_card_server_body">ה-Wi-Fi עובד, אבל השרת לא עונה. תמונות חדשות יגיעו כשהוא יחזור.</string>
+    <string name="status_card_clock_title">מכוון את השעון</string>
+    <string name="status_card_clock_body">המסגרת הופעלה מחדש והשעון שלה שגוי. היא תכוון אותו מהאינטרנט בעוד רגע.</string>
     <string name="status_card_portal_title">רשת ה-Wi-Fi הזו דורשת התחברות</string>
     <string name="status_card_portal_body">יש לפתוח את דף ההתחברות של הרשת כדי לחבר את המסגרת.</string>
     <string name="status_card_portal_action">התחברות</string>

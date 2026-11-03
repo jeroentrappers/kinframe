@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Днес</string>
+    <string name="calendar_tomorrow">Утре</string>
+    <string name="calendar_view_month">Месец</string>
+    <string name="calendar_view_week">Седмица</string>
+    <string name="calendar_view_four_day">4 дни</string>
+    <string name="calendar_week_number">Седмица %1$d</string>
+    <string name="calendar_previous">Назад</string>
+    <string name="calendar_next">Напред</string>
+    <string name="calendar_sync_now">Синхронизиране сега</string>
+    <string name="calendar_syncing">Синхронизиране…</string>
+    <string name="calendar_close">Затваряне на календара</string>
+    <string name="calendar_all_day">Цял ден</string>
+    <string name="calendar_received">Получени събития</string>
+    <string name="calendar_nothing">Нищо не е планирано</string>
+    <string name="calendar_nothing_today">Днес няма нищо друго планирано</string>
+    <string name="calendar_empty_title">Все още няма календари</string>
+    <string name="calendar_empty_body">Добавете семеен календар от приложението или уебсайта на kinframe, в „Календари“ на рамката. Тук могат да се показват заедно колкото искате календари.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">до %1$s</string>
+    <string name="calendar_from">от %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d още</item>
+        <item quantity="other">+%d още</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Днес</string>
+    <string name="countdown_tomorrow">Утре</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d ден</item>
+        <item quantity="other">%d дни</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">след %d ден</item>
+        <item quantity="other">след %d дни</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Изпратено от %1$s</string>
+    <string name="event_repeats">Повтаря се</string>
+    <string name="event_countdown">Обратно броене до това</string>
+    <string name="event_countdown_hint">В слайдшоуто и в горната част на календара</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s ви изпрати събитие</string>
+    <string name="invitation_body">Да се добави ли в календара на тази рамка?</string>
+    <string name="invitation_accept">Добавяне в календара</string>
+    <string name="invitation_decline">Отказване</string>
+    <string name="invitation_later">Не сега</string>
+    <string name="invitation_pill_one">Събитие от %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d покана за събитие</item>
+        <item quantity="other">%d покани за събития</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Календар</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Календар</string>
+    <string name="settings_calendar_open">Отваряне на календара</string>
+    <string name="settings_calendar_view">Изглед на календара</string>
+    <string name="settings_calendar_start_today">Започване от днес</string>
+    <string name="settings_calendar_fade_past">Избледняване на минали събития</string>
+    <string name="settings_calendar_week_numbers">Номера на седмиците</string>
+    <string name="settings_calendar_sidebar">Календар до снимките</string>
+    <string name="settings_calendar_countdowns">Обратно броене в слайдшоуто</string>
+    <string name="settings_calendar_timed">Показване на календара в определени часове</string>
+    <string name="settings_calendar_timed_from">От</string>
+    <string name="settings_calendar_timed_to">До</string>
+    <string name="settings_calendar_timed_add">Добавяне на час</string>
+    <string name="settings_calendar_timed_remove">Премахване</string>
+    <string name="settings_calendar_sources">Календари на тази рамка</string>
+    <string name="settings_calendar_sources_hint">Календарите се добавят и управляват от приложението или уебсайта на kinframe.</string>
+    <string name="calendar_status_ok">Актуален</string>
+    <string name="calendar_status_syncing">Синхронизиране…</string>
+    <string name="calendar_status_failed">Неуспешно синхронизиране</string>
+    <string name="calendar_status_auth_failed">Нужно е влизане</string>
+    <string name="calendar_status_disabled">Изключен</string>
+</resources>

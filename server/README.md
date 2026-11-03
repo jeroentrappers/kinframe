@@ -56,8 +56,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OIDC_ISSUER` | — | Logto issuer, e.g. `https://auth.example.org/oidc` (required unless dev auth) |
 | `KINFRAME_OIDC_AUDIENCE` | `<public url>/v1` | Logto API resource indicator (`aud`) |
 | `KINFRAME_OIDC_JWKS_URL` | from OIDC discovery | Override the JWKS location |
-| `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` | — | Published in discovery |
-| `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `api_resource`). Read at start; fills in the four OIDC settings above when their env vars are unset (env vars win) |
+| `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` / `KINFRAME_OIDC_DESKTOP_CLIENT_ID` | — | Published in discovery |
+| `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `desktop_client_id`, `api_resource`). Read at start; fills in the OIDC settings above when their env vars are unset (env vars win) |
 | `KINFRAME_DEV_AUTH` | off | Enable `POST /dev/token` (never in production) |
 | `KINFRAME_TRUST_PROXY` | off | Use `X-Forwarded-For`/`X-Real-IP` for client IPs (rate limits) |
 | `KINFRAME_WORKERS` | CPUs/2 | Media worker goroutines |
@@ -99,6 +99,23 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |
 | `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
+| `KINFRAME_CALENDAR` | `on` | `off` disables calendar sync, sent events and countdowns (discovery `calendar: false`) |
+| `KINFRAME_SHOP_FILE` | — | Optional pre-order shop config (YAML or JSON, see `docs/deploy.md` → *Pre-order shop*). Unset = no shop. Validated at startup |
+| `KINFRAME_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` | port `587` | The server's own mail (shop confirmations); the same variables configure Logto's sign-in mails. 465 = implicit TLS, 587 = STARTTLS required, other ports STARTTLS if offered. `_FROM` is required with `_HOST` |
+| `KINFRAME_CALENDAR_SYNC_MINUTES` | `15` | Interval between syncs of each ICS/CalDAV source (minimum 5); up to 3 min jitter, back-off to 2 h on errors |
+| `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords (AES-256-GCM). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
+
+### Calendars
+
+`internal/calendar` syncs each frame's calendar sources on the server (README §5.8 of the API docs): ICS/webcal links
+with `If-None-Match`/`If-Modified-Since`, and CalDAV (`/.well-known/caldav` → principal → calendar home → a
+`calendar-query` REPORT limited to the frame's window). Documents are parsed with go-ical and recurrences expanded
+with rrule-go in the event's own wall clock (RRULE, RDATE, EXDATE, RECURRENCE-ID overrides, IANA/Windows/VTIMEZONE
+zones), so DST changes never shift a series. The last fetched document is kept gzipped, so a moving window (every
+midnight, or a settings change) re-expands without a refetch. Each frame's sources are merged into one `calendar`
+change, emitted only when what the frame shows changed. Frames never contact calendar servers. The server fetches
+whatever URL a member with `change_settings` enters, including LAN addresses (a Nextcloud next to the server is a
+normal setup), so only give that permission to people you trust.
 
 ## Media storage
 
@@ -178,8 +195,22 @@ writes `KINFRAME_LOGTO_CONFIG_FILE`. It is idempotent: every step compares with 
 What it ensures: API resource `<KINFRAME_PUBLIC_URL>/v1` (1 h tokens, scope `kinframe:operate`); user role
 `kinframe-operator` with that scope (assigned to `KINFRAME_OPERATOR_EMAILS` that have an account); SPA `kinframe web`;
 native app `kinframe app`; the SMTP connector with English code emails; sign-in experience (passwordless email codes
-for sign-up and sign-in, passkeys, required `name` at sign-up, language from the browser); and a custom access-token
-script that adds `name` and `email` to tokens for the kinframe API only.
+for sign-up and sign-in, passkeys, required `name` at sign-up, language from the browser); social sign-in connectors
+for the providers configured below, shown on the sign-in page in the order Apple, Google, Microsoft, Facebook, GitHub;
+the kinframe look on Logto's pages (logo, colours, dark mode, `internal/logtoboot/signin.css`); and a custom
+access-token script that adds `name` and `email` to tokens for the kinframe API only.
+
+Social connectors get fixed IDs, so their callback URLs are known before the first run:
+`<KINFRAME_LOGTO_ENDPOINT>/callback/{apple,google,microsoft,facebook,github}`. A provider is on when its client ID is
+set; changing a value updates the connector; removing it leaves the connector and its button alone unless
+`KINFRAME_SOCIAL_REMOVE_UNCONFIGURED=true`, which deletes the connectors kinframe created for unset providers. Only
+identity scopes are requested (Google `openid profile email`, Apple `name email`, Microsoft Graph `User.Read`, Facebook
+`email,public_profile`, GitHub `read:user user:email`). Secrets are never logged. Provider registration is described
+in `docs/deploy.md` ("Social sign-in").
+
+The branding loads `/logo-light.svg`, `/logo-dark.svg`, `/favicon.svg` and `/fonts/fraunces-latin-wght-normal.woff2`
+from `KINFRAME_PUBLIC_URL` (files in `web/static`; the server sends `Access-Control-Allow-Origin: *` for `/fonts/`).
+The wordmark SVGs are generated by `tools/brand/mklogo.py`.
 
 Management API access, in order of preference:
 - `KINFRAME_LOGTO_M2M_ID`/`_SECRET`: client-credentials token. Used when set.
@@ -199,6 +230,15 @@ Management API access, in order of preference:
 | `KINFRAME_LOGTO_M2M_ID` / `_SECRET` | — | Management API app, printed by the first run |
 | `KINFRAME_OPERATOR_EMAILS` | — | Comma-separated; existing users get `kinframe-operator` |
 | `KINFRAME_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` | port `587` | Logto's email connector. 465 = implicit TLS, 587 = STARTTLS required, other ports STARTTLS if offered. Required unless Logto already has an email connector. The password is never logged |
+| `KINFRAME_SOCIAL_APPLE_CLIENT_ID` | — | Sign in with Apple **Services ID**. Logto's Apple connector needs nothing else (`_TEAM_ID`, `_KEY_ID`, `_PRIVATE_KEY`, `_CLIENT_SECRET` are ignored with a warning) |
+| `KINFRAME_SOCIAL_GOOGLE_CLIENT_ID` / `_SECRET` | — | Google OAuth web client |
+| `KINFRAME_SOCIAL_MICROSOFT_CLIENT_ID` / `_SECRET` / `_TENANT` | tenant `common` | Microsoft Entra app (connector `azuread-universal`). `common` = personal and work/school accounts; also `consumers`, `organizations`, a tenant ID or domain |
+| `KINFRAME_SOCIAL_FACEBOOK_CLIENT_ID` / `_SECRET` | — | Meta app with Facebook Login |
+| `KINFRAME_SOCIAL_GITHUB_CLIENT_ID` / `_SECRET` | — | GitHub OAuth app |
+| `KINFRAME_SOCIAL_REMOVE_UNCONFIGURED` | `false` | Delete kinframe's connectors for providers whose env vars are gone |
+| `KINFRAME_SOCIAL_LINK_BY_EMAIL` | `true` | Link a first social sign-in to the existing account with the same verified email (Logto `automaticAccountLinking`); `false` makes Logto ask the user |
+| `KINFRAME_LOGTO_BRANDING` | `true` | Apply the kinframe logo, colours and CSS to Logto's sign-in pages |
+| `KINFRAME_TERMS_URL` / `KINFRAME_PRIVACY_URL` | — | Legal links on the sign-up page; none when unset |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `$KINFRAME_DATA_DIR/logto.json` | Output file |
 
 ## Layout

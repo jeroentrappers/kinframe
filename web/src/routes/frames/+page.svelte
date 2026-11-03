@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { frames } from '$lib/frames.svelte';
+	import { can, frames } from '$lib/frames.svelte';
+	import { FrameDrop } from '$lib/framedrop.svelte';
 	import { problemMessage } from '$lib/problem';
 	import { t, tn } from '$lib/i18n/index.svelte';
 	import EmptyState from '$components/EmptyState.svelte';
@@ -7,9 +8,24 @@
 	import Icon from '$components/Icon.svelte';
 
 	const online = $derived(frames.list.filter((f) => f.online).length);
+
+	// Drag photos from the computer straight onto a frame's card to start a send to it.
+	const drop = new FrameDrop((id) => {
+		const f = id ? frames.get(id) : undefined;
+		return f && can(f, 'send') ? f.id : null;
+	});
+	const dropStatus = $derived.by(() => {
+		if (!drop.active || !frames.list.some((f) => can(f, 'send'))) return '';
+		const f = drop.target ? frames.get(drop.target) : undefined;
+		return f ? t('frames.dropTo', { name: f.name }) : t('frames.dropHint');
+	});
 </script>
 
 <svelte:head><title>{t('frames.title')} · kinframe</title></svelte:head>
+
+<svelte:window ondragenter={drop.enter} ondragleave={drop.leave} ondragover={drop.over} ondrop={drop.drop} />
+
+<p class="visually-hidden" role="status" aria-live="polite">{dropStatus}</p>
 
 <div class="container page">
 	<div class="page-header">
@@ -55,7 +71,7 @@
 	{:else}
 		<ul class="grid" role="list">
 			{#each frames.list as frame (frame.id)}
-				<li><FrameCard {frame} /></li>
+				<li><FrameCard {frame} dragging={drop.active} dropOver={drop.target === frame.id} /></li>
 			{/each}
 			<li>
 				<a href="/frames/add" class="add-tile">

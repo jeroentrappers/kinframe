@@ -149,6 +149,24 @@ type VideoInfo struct {
 	FPS        float64
 	HasAudio   bool
 	CapturedAt *time.Time
+
+	// Stream details used to verify prepared masters and to decide whether a
+	// master can double as a frame rendition.
+	Format       string // ffprobe format_name, e.g. "mov,mp4,m4a,3gp,3g2,mj2"
+	MajorBrand   string // ISO-BMFF major brand: "isom", "mp42", "qt" (QuickTime), ...
+	VideoCodec   string // "h264", "hevc", ...
+	Profile      string // "High", "Main", "Constrained Baseline", ...
+	Level        int    // 41 = 4.1
+	PixFmt       string
+	Rotation     int
+	VideoBitrate int // bits per second; 0 when unknown
+	TotalBitrate int
+	VideoStreams int
+	AudioStreams int
+	AudioCodec   string
+	AudioBitrate int
+	AudioChans   int
+	OtherStreams int // subtitles, data, attachments
 }
 
 // ProbeVideo runs ffprobe.
@@ -163,6 +181,12 @@ func (t Tools) ProbeVideo(ctx context.Context, path string) (VideoInfo, error) {
 type probeJSON struct {
 	Streams []struct {
 		CodecType    string            `json:"codec_type"`
+		CodecName    string            `json:"codec_name"`
+		Profile      string            `json:"profile"`
+		Level        int               `json:"level"`
+		PixFmt       string            `json:"pix_fmt"`
+		BitRate      string            `json:"bit_rate"`
+		Channels     int               `json:"channels"`
 		Width        int               `json:"width"`
 		Height       int               `json:"height"`
 		AvgFrameRate string            `json:"avg_frame_rate"`
@@ -175,8 +199,10 @@ type probeJSON struct {
 		} `json:"side_data_list"`
 	} `json:"streams"`
 	Format struct {
-		Duration string            `json:"duration"`
-		Tags     map[string]string `json:"tags"`
+		FormatName string            `json:"format_name"`
+		BitRate    string            `json:"bit_rate"`
+		Duration   string            `json:"duration"`
+		Tags       map[string]string `json:"tags"`
 	} `json:"format"`
 }
 
@@ -190,10 +216,17 @@ func parseProbe(b []byte) (VideoInfo, error) {
 	for _, s := range p.Streams {
 		switch s.CodecType {
 		case "video":
-			if found || s.Disposition["attached_pic"] == 1 || s.Width == 0 {
+			if s.Disposition["attached_pic"] == 1 || s.Width == 0 {
+				info.OtherStreams++
+				continue
+			}
+			info.VideoStreams++
+			if found {
 				continue
 			}
 			found = true
+			info.VideoCodec, info.Profile, info.Level, info.PixFmt = s.CodecName, s.Profile, s.Level, s.PixFmt
+			info.VideoBitrate, _ = strconv.Atoi(s.BitRate)
 			info.Size = Size{s.Width, s.Height}
 			rot := 0.0
 			for _, sd := range s.SideData {
@@ -202,6 +235,7 @@ func parseProbe(b []byte) (VideoInfo, error) {
 			if r, err := strconv.ParseFloat(s.Tags["rotate"], 64); err == nil {
 				rot = r
 			}
+			info.Rotation = int(math.Round(rot))
 			if int(math.Abs(rot))%180 == 90 {
 				info.Size.W, info.Size.H = info.Size.H, info.Size.W
 			}
@@ -213,12 +247,22 @@ func parseProbe(b []byte) (VideoInfo, error) {
 				info.DurationMS = int(d * 1000)
 			}
 		case "audio":
+			info.AudioStreams++
+			if !info.HasAudio {
+				info.AudioCodec, info.AudioChans = s.CodecName, s.Channels
+				info.AudioBitrate, _ = strconv.Atoi(s.BitRate)
+			}
 			info.HasAudio = true
+		default:
+			info.OtherStreams++
 		}
 	}
 	if !found {
 		return VideoInfo{}, ErrUnsupported
 	}
+	info.Format = p.Format.FormatName
+	info.MajorBrand = strings.TrimSpace(p.Format.Tags["major_brand"])
+	info.TotalBitrate, _ = strconv.Atoi(p.Format.BitRate)
 	if d, err := strconv.ParseFloat(p.Format.Duration, 64); err == nil && d > 0 {
 		info.DurationMS = int(d * 1000)
 	}

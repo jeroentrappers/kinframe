@@ -32,7 +32,7 @@ func (s *Store) WeatherFrames(ctx context.Context, only *uuid.UUID) ([]WeatherFr
 		FROM frames f LEFT JOIN frame_weather fw ON fw.frame_id = f.id
 		WHERE f.deleted_at IS NULL AND ($1::uuid IS NULL OR f.id = $1)
 		  AND (fw.frame_id IS NOT NULL OR (
-		       jsonb_typeof(f.settings->'location') = 'object' AND f.settings->'widgets'->'weather' = 'true'::jsonb))
+		       jsonb_typeof(f.settings->'location') = 'object' AND (f.settings->'widgets'->'weather' = 'true'::jsonb OR f.settings->'widgets'->'calendar_sidebar' = 'true'::jsonb)))
 		ORDER BY f.id`, only))
 }
 

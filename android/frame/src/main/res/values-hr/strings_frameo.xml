@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotografije iz Frameo</string>
+    <string name="frameo_found">Fotografije i videozapisi iz Frameo na ovom okviru: %d. Uvezite ih da ostanu s opisima i pošiljateljima.</string>
+    <string name="frameo_import">Uvezi</string>
+    <string name="frameo_importing">Uvoz fotografija iz Frameo</string>
+    <string name="frameo_preparing">Priprema…</string>
+    <string name="frameo_waiting">Nastavlja se kad okvir bude na mreži.</string>
+    <string name="frameo_stop">Zaustavi</string>
+    <string name="frameo_done_title">Fotografije iz Frameo uvezene</string>
+    <string name="frameo_count">%1$d od %2$d</string>
+    <string name="frameo_done_imported">Uvezeno: %d</string>
+    <string name="frameo_done_already">Već na okviru: %d</string>
+    <string name="frameo_done_failed">Nije uvezeno: %d</string>
+    <string name="frameo_no_permission">Za čitanje fotografija iz Frameo potreban je pristup pohrani.</string>
+    <string name="credit_via_frameo">%1$s · putem Frameo</string>
+    <string name="credit_frameo">putem Frameo</string>
+</resources>

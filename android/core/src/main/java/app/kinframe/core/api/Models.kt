@@ -149,11 +149,31 @@ data class Item(
     val placeName: String? = null,
     val createdAt: String? = null,
     val thumbUrl: String? = null,
+    /** Live items only: the motion clip (README §5.3 "Live Photos"). */
+    val motion: ItemMotion? = null,
+    /** Imported on the frame from another app's leftover data ([ItemOrigin]); the sender is then the frame. */
+    val importedFrom: String? = null,
+    /** The original sender's name in that app, shown instead of the frame ("Anna · via Frameo"). */
+    val importedSenderName: String? = null,
+) {
+    /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
+    val isLive: Boolean get() = kind == MediaKind.LIVE
+}
+
+@Serializable
+data class ItemMotion(
+    val status: String = "processing",
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean? = null,
 )
 
+/** Media kinds. Unknown kinds from a newer server are shown as photos. */
 object MediaKind {
     const val PHOTO = "photo"
     const val VIDEO = "video"
+    const val LIVE = "live"
 }
 
 object Reaction {
@@ -176,6 +196,19 @@ data class PlacementMedia(
     val posterUrl: String? = null,
 )
 
+/** The frame-sized motion clip of a live placement (`placement.motion`), once ready. */
+@Serializable
+data class PlacementMotion(
+    val url: String,
+    val sha256: String,
+    val bytes: Long = 0,
+    val mime: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
+    val durationMs: Long? = null,
+    val hasAudio: Boolean = false,
+)
+
 @Serializable
 data class Placement(
     val id: String,
@@ -196,6 +229,10 @@ data class Placement(
     val albumIds: List<String> = emptyList(),
     val replies: List<PlacementReply> = emptyList(),
     val media: PlacementMedia? = null,
+    val motion: PlacementMotion? = null,
+    /** Set when a member shared this placement from another frame's library (README §5.3); the item keeps its sender. */
+    val sharedByUserId: String? = null,
+    val sharedByName: String? = null,
 )
 
 @Serializable
@@ -226,6 +263,7 @@ object ChangeType {
     const val MEMBER_REMOVE = "member.remove"
     const val FRAME = "frame"
     const val WEATHER = "weather"
+    const val CALENDAR = "calendar"
     const val RESET = "reset"
 }
 
@@ -240,6 +278,8 @@ data class Change(
     val member: ChangeMember? = null,
     val frame: ChangeFrame? = null,
     val weather: JsonObject? = null,
+    /** The merged calendar ([FrameCalendar]); null means "drop your calendar". */
+    val calendar: JsonObject? = null,
 )
 
 @Serializable
@@ -314,7 +354,12 @@ data class Problem(
     val status: Int? = null,
     val code: String? = null,
     val detail: String? = null,
+    /** Field-level validation errors (422): `{"field": "plugins.instances.0.settings.grid", "code": "required"}`. */
+    val errors: List<FieldError> = emptyList(),
 )
+
+@Serializable
+data class FieldError(val field: String = "", val code: String = "")
 
 /** Stable machine codes from `ProblemCode` that clients branch on. */
 object ProblemCode {
@@ -354,3 +399,36 @@ object ReplyPreset {
     const val MISS_YOU = "miss_you"
     const val THANKS = "thanks"
 }
+
+/** Result of `POST /device/imports`: the placement, and whether the frame already had this file (`200`, not `202`). */
+data class ImportResult(val placement: Placement, val duplicate: Boolean)
+
+@Serializable
+data class ImportCheckRequest(
+    val sha256: List<String> = emptyList(),
+    val source: String? = null,
+    val sourceKeys: List<String>? = null,
+)
+
+@Serializable
+data class ImportCheckResponse(val known: List<String> = emptyList(), val knownSourceKeys: List<String> = emptyList())
+
+/** Apps a frame can import leftover photos from (`ItemOrigin`, docs/spec/frameo-import.md). */
+object ItemOrigin {
+    const val FRAMEO = "frameo"
+}
+
+/**
+ * The other-app part of `POST /device/imports`: [key] makes the import idempotent per frame; the rest is kept on the
+ * item and placement. Times are RFC 3339.
+ */
+data class ImportOrigin(
+    val source: String,
+    val key: String,
+    val senderName: String? = null,
+    val receivedAt: String? = null,
+    val fit: String? = null,
+    val focal: FocalPoint? = null,
+    val hidden: Boolean = false,
+    val rotation: Int = 0,
+)

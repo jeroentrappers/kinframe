@@ -1,0 +1,19 @@
+{
+  "type": "stack",
+  "items": [
+    {
+      "type": "value",
+      "value": "21,1°",
+      "label": "Living",
+      "icon": "thermometer"
+    },
+    {
+      "type": "progress",
+      "value": 21.1,
+      "min": 17,
+      "max": 23.5,
+      "style": "marker",
+      "tone": "accent"
+    }
+  ]
+}

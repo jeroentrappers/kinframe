@@ -1,0 +1,20 @@
+{
+  "@name": "Elektroměr HomeWizard P1",
+  "@description": "Živý výkon z elektroměru HomeWizard P1 v domě: odběr, dodávka, po fázích a dnešní součty.",
+  "@setting.host": "Adresa elektroměru",
+  "@setting.host.help": "V aplikaci HomeWizard Energy zapněte pro elektroměr Local API.",
+  "@setting.style": "Zobrazit jako",
+  "@option.style.value": "Číslo",
+  "@option.style.gauge": "Ručička",
+  "@option.style.flow": "Tok",
+  "@setting.max_w": "Plný rozsah (W)",
+  "@setting.warn_w": "Zvýraznit nad (W, 0 = vypnuto)",
+  "grid": "Síť",
+  "home": "Domov",
+  "last_hour": "Poslední hodina",
+  "returning": "Dodávka",
+  "today_export": "Dnes dodáno",
+  "today_gas": "Plyn dnes",
+  "today_import": "Dnes odebráno",
+  "using": "Odběr"
+}

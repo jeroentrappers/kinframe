@@ -19,6 +19,174 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
+// Defines values for CalendarColor.
+const (
+	Amber     CalendarColor = "amber"
+	Coral     CalendarColor = "coral"
+	Lavender  CalendarColor = "lavender"
+	Mint      CalendarColor = "mint"
+	Ocean     CalendarColor = "ocean"
+	Olive     CalendarColor = "olive"
+	Plum      CalendarColor = "plum"
+	Rose      CalendarColor = "rose"
+	Sage      CalendarColor = "sage"
+	Sky       CalendarColor = "sky"
+	Tangerine CalendarColor = "tangerine"
+	Teal      CalendarColor = "teal"
+)
+
+// Valid indicates whether the value is a known member of the CalendarColor enum.
+func (e CalendarColor) Valid() bool {
+	switch e {
+	case Amber:
+		return true
+	case Coral:
+		return true
+	case Lavender:
+		return true
+	case Mint:
+		return true
+	case Ocean:
+		return true
+	case Olive:
+		return true
+	case Plum:
+		return true
+	case Rose:
+		return true
+	case Sage:
+		return true
+	case Sky:
+		return true
+	case Tangerine:
+		return true
+	case Teal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarScheduleDays.
+const (
+	CalendarScheduleDaysFri CalendarScheduleDays = "fri"
+	CalendarScheduleDaysMon CalendarScheduleDays = "mon"
+	CalendarScheduleDaysSat CalendarScheduleDays = "sat"
+	CalendarScheduleDaysSun CalendarScheduleDays = "sun"
+	CalendarScheduleDaysThu CalendarScheduleDays = "thu"
+	CalendarScheduleDaysTue CalendarScheduleDays = "tue"
+	CalendarScheduleDaysWed CalendarScheduleDays = "wed"
+)
+
+// Valid indicates whether the value is a known member of the CalendarScheduleDays enum.
+func (e CalendarScheduleDays) Valid() bool {
+	switch e {
+	case CalendarScheduleDaysFri:
+		return true
+	case CalendarScheduleDaysMon:
+		return true
+	case CalendarScheduleDaysSat:
+		return true
+	case CalendarScheduleDaysSun:
+		return true
+	case CalendarScheduleDaysThu:
+		return true
+	case CalendarScheduleDaysTue:
+		return true
+	case CalendarScheduleDaysWed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSourceCreateKind.
+const (
+	CalendarSourceCreateKindCaldav CalendarSourceCreateKind = "caldav"
+	CalendarSourceCreateKindIcs    CalendarSourceCreateKind = "ics"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSourceCreateKind enum.
+func (e CalendarSourceCreateKind) Valid() bool {
+	switch e {
+	case CalendarSourceCreateKindCaldav:
+		return true
+	case CalendarSourceCreateKindIcs:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSourceKind.
+const (
+	CalendarSourceKindCaldav CalendarSourceKind = "caldav"
+	CalendarSourceKindIcs    CalendarSourceKind = "ics"
+	CalendarSourceKindLocal  CalendarSourceKind = "local"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSourceKind enum.
+func (e CalendarSourceKind) Valid() bool {
+	switch e {
+	case CalendarSourceKindCaldav:
+		return true
+	case CalendarSourceKindIcs:
+		return true
+	case CalendarSourceKindLocal:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarSyncStatus.
+const (
+	CalendarSyncStatusAuthFailed CalendarSyncStatus = "auth_failed"
+	CalendarSyncStatusDisabled   CalendarSyncStatus = "disabled"
+	CalendarSyncStatusFailed     CalendarSyncStatus = "failed"
+	CalendarSyncStatusOk         CalendarSyncStatus = "ok"
+	CalendarSyncStatusSyncing    CalendarSyncStatus = "syncing"
+)
+
+// Valid indicates whether the value is a known member of the CalendarSyncStatus enum.
+func (e CalendarSyncStatus) Valid() bool {
+	switch e {
+	case CalendarSyncStatusAuthFailed:
+		return true
+	case CalendarSyncStatusDisabled:
+		return true
+	case CalendarSyncStatusFailed:
+		return true
+	case CalendarSyncStatusOk:
+		return true
+	case CalendarSyncStatusSyncing:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CalendarTestResultStatus.
+const (
+	CalendarTestResultStatusAuthFailed CalendarTestResultStatus = "auth_failed"
+	CalendarTestResultStatusFailed     CalendarTestResultStatus = "failed"
+	CalendarTestResultStatusOk         CalendarTestResultStatus = "ok"
+)
+
+// Valid indicates whether the value is a known member of the CalendarTestResultStatus enum.
+func (e CalendarTestResultStatus) Valid() bool {
+	switch e {
+	case CalendarTestResultStatusAuthFailed:
+		return true
+	case CalendarTestResultStatusFailed:
+		return true
+	case CalendarTestResultStatusOk:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ChangePlacementRotation.
 const (
 	ChangePlacementRotationN0   ChangePlacementRotation = 0
@@ -47,6 +215,7 @@ func (e ChangePlacementRotation) Valid() bool {
 const (
 	ChangeTypeAlbumRemove     ChangeType = "album.remove"
 	ChangeTypeAlbumUpsert     ChangeType = "album.upsert"
+	ChangeTypeCalendar        ChangeType = "calendar"
 	ChangeTypeFrame           ChangeType = "frame"
 	ChangeTypeMemberRemove    ChangeType = "member.remove"
 	ChangeTypeMemberUpsert    ChangeType = "member.upsert"
@@ -63,6 +232,8 @@ func (e ChangeType) Valid() bool {
 	case ChangeTypeAlbumRemove:
 		return true
 	case ChangeTypeAlbumUpsert:
+		return true
+	case ChangeTypeCalendar:
 		return true
 	case ChangeTypeFrame:
 		return true
@@ -97,6 +268,66 @@ func (e DeviceEnrollAppChannel) Valid() bool {
 	case DeviceEnrollAppChannelBeta:
 		return true
 	case DeviceEnrollAppChannelStable:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeviceKind.
+const (
+	Android DeviceKind = "android"
+	Browser DeviceKind = "browser"
+)
+
+// Valid indicates whether the value is a known member of the DeviceKind enum.
+func (e DeviceKind) Valid() bool {
+	switch e {
+	case Android:
+		return true
+	case Browser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EventInvitationStatus.
+const (
+	EventInvitationStatusAccepted  EventInvitationStatus = "accepted"
+	EventInvitationStatusDeclined  EventInvitationStatus = "declined"
+	EventInvitationStatusPending   EventInvitationStatus = "pending"
+	EventInvitationStatusWithdrawn EventInvitationStatus = "withdrawn"
+)
+
+// Valid indicates whether the value is a known member of the EventInvitationStatus enum.
+func (e EventInvitationStatus) Valid() bool {
+	switch e {
+	case EventInvitationStatusAccepted:
+		return true
+	case EventInvitationStatusDeclined:
+		return true
+	case EventInvitationStatusPending:
+		return true
+	case EventInvitationStatusWithdrawn:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EventPhotoPlacement.
+const (
+	Background EventPhotoPlacement = "background"
+	Top        EventPhotoPlacement = "top"
+)
+
+// Valid indicates whether the value is a known member of the EventPhotoPlacement enum.
+func (e EventPhotoPlacement) Valid() bool {
+	switch e {
+	case Background:
+		return true
+	case Top:
 		return true
 	default:
 		return false
@@ -157,6 +388,27 @@ func (e FrameCommandType) Valid() bool {
 	}
 }
 
+// Defines values for FrameSettingsCalendarView.
+const (
+	FourDay FrameSettingsCalendarView = "four_day"
+	Month   FrameSettingsCalendarView = "month"
+	Week    FrameSettingsCalendarView = "week"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsCalendarView enum.
+func (e FrameSettingsCalendarView) Valid() bool {
+	switch e {
+	case FourDay:
+		return true
+	case Month:
+		return true
+	case Week:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsDisplayBrightnessMode.
 const (
 	FrameSettingsDisplayBrightnessModeManual   FrameSettingsDisplayBrightnessMode = "manual"
@@ -183,19 +435,19 @@ func (e FrameSettingsDisplayBrightnessMode) Valid() bool {
 
 // Defines values for FrameSettingsDisplayTextScale.
 const (
-	N1   FrameSettingsDisplayTextScale = 1
-	N115 FrameSettingsDisplayTextScale = 1.15
-	N13  FrameSettingsDisplayTextScale = 1.3
+	FrameSettingsDisplayTextScaleN1   FrameSettingsDisplayTextScale = 1
+	FrameSettingsDisplayTextScaleN115 FrameSettingsDisplayTextScale = 1.15
+	FrameSettingsDisplayTextScaleN13  FrameSettingsDisplayTextScale = 1.3
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsDisplayTextScale enum.
 func (e FrameSettingsDisplayTextScale) Valid() bool {
 	switch e {
-	case N1:
+	case FrameSettingsDisplayTextScaleN1:
 		return true
-	case N115:
+	case FrameSettingsDisplayTextScaleN115:
 		return true
-	case N13:
+	case FrameSettingsDisplayTextScaleN13:
 		return true
 	default:
 		return false
@@ -241,21 +493,81 @@ func (e FrameSettingsLocaleTemperatureUnit) Valid() bool {
 	}
 }
 
+// Defines values for FrameSettingsPluginsLayoutBackground.
+const (
+	FrameSettingsPluginsLayoutBackgroundPaper FrameSettingsPluginsLayoutBackground = "paper"
+	FrameSettingsPluginsLayoutBackgroundPhoto FrameSettingsPluginsLayoutBackground = "photo"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutBackground enum.
+func (e FrameSettingsPluginsLayoutBackground) Valid() bool {
+	switch e {
+	case FrameSettingsPluginsLayoutBackgroundPaper:
+		return true
+	case FrameSettingsPluginsLayoutBackgroundPhoto:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsPluginsLayoutMode.
+const (
+	FrameSettingsPluginsLayoutModeBand    FrameSettingsPluginsLayoutMode = "band"
+	FrameSettingsPluginsLayoutModeOff     FrameSettingsPluginsLayoutMode = "off"
+	FrameSettingsPluginsLayoutModeOverlay FrameSettingsPluginsLayoutMode = "overlay"
+	FrameSettingsPluginsLayoutModeSplit   FrameSettingsPluginsLayoutMode = "split"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutMode enum.
+func (e FrameSettingsPluginsLayoutMode) Valid() bool {
+	switch e {
+	case FrameSettingsPluginsLayoutModeBand:
+		return true
+	case FrameSettingsPluginsLayoutModeOff:
+		return true
+	case FrameSettingsPluginsLayoutModeOverlay:
+		return true
+	case FrameSettingsPluginsLayoutModeSplit:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsPluginsLayoutSide.
+const (
+	Left  FrameSettingsPluginsLayoutSide = "left"
+	Right FrameSettingsPluginsLayoutSide = "right"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsPluginsLayoutSide enum.
+func (e FrameSettingsPluginsLayoutSide) Valid() bool {
+	switch e {
+	case Left:
+		return true
+	case Right:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for FrameSettingsSlideshowBackground.
 const (
-	Black   FrameSettingsSlideshowBackground = "black"
-	Blur    FrameSettingsSlideshowBackground = "blur"
-	Palette FrameSettingsSlideshowBackground = "palette"
+	FrameSettingsSlideshowBackgroundBlack   FrameSettingsSlideshowBackground = "black"
+	FrameSettingsSlideshowBackgroundBlur    FrameSettingsSlideshowBackground = "blur"
+	FrameSettingsSlideshowBackgroundPalette FrameSettingsSlideshowBackground = "palette"
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsSlideshowBackground enum.
 func (e FrameSettingsSlideshowBackground) Valid() bool {
 	switch e {
-	case Black:
+	case FrameSettingsSlideshowBackgroundBlack:
 		return true
-	case Blur:
+	case FrameSettingsSlideshowBackgroundBlur:
 		return true
-	case Palette:
+	case FrameSettingsSlideshowBackgroundPalette:
 		return true
 	default:
 		return false
@@ -277,6 +589,27 @@ func (e FrameSettingsSlideshowCaptionDate) Valid() bool {
 	case FrameSettingsSlideshowCaptionDateReceived:
 		return true
 	case FrameSettingsSlideshowCaptionDateTaken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for FrameSettingsSlideshowLivePhotos.
+const (
+	FrameSettingsSlideshowLivePhotosOff FrameSettingsSlideshowLivePhotos = "off"
+	FrameSettingsSlideshowLivePhotosOn  FrameSettingsSlideshowLivePhotos = "on"
+	FrameSettingsSlideshowLivePhotosTap FrameSettingsSlideshowLivePhotos = "tap"
+)
+
+// Valid indicates whether the value is a known member of the FrameSettingsSlideshowLivePhotos enum.
+func (e FrameSettingsSlideshowLivePhotos) Valid() bool {
+	switch e {
+	case FrameSettingsSlideshowLivePhotosOff:
+		return true
+	case FrameSettingsSlideshowLivePhotosOn:
+		return true
+	case FrameSettingsSlideshowLivePhotosTap:
 		return true
 	default:
 		return false
@@ -306,19 +639,19 @@ func (e FrameSettingsSlideshowOrder) Valid() bool {
 
 // Defines values for FrameSettingsSlideshowTransition.
 const (
-	Crossfade FrameSettingsSlideshowTransition = "crossfade"
-	Kenburns  FrameSettingsSlideshowTransition = "kenburns"
-	Slide     FrameSettingsSlideshowTransition = "slide"
+	FrameSettingsSlideshowTransitionCrossfade FrameSettingsSlideshowTransition = "crossfade"
+	FrameSettingsSlideshowTransitionKenburns  FrameSettingsSlideshowTransition = "kenburns"
+	FrameSettingsSlideshowTransitionSlide     FrameSettingsSlideshowTransition = "slide"
 )
 
 // Valid indicates whether the value is a known member of the FrameSettingsSlideshowTransition enum.
 func (e FrameSettingsSlideshowTransition) Valid() bool {
 	switch e {
-	case Crossfade:
+	case FrameSettingsSlideshowTransitionCrossfade:
 		return true
-	case Kenburns:
+	case FrameSettingsSlideshowTransitionKenburns:
 		return true
-	case Slide:
+	case FrameSettingsSlideshowTransitionSlide:
 		return true
 	default:
 		return false
@@ -390,19 +723,19 @@ func (e HeartbeatScreenState) Valid() bool {
 
 // Defines values for HeartbeatStorageState.
 const (
-	Critical HeartbeatStorageState = "critical"
-	Low      HeartbeatStorageState = "low"
-	Ok       HeartbeatStorageState = "ok"
+	HeartbeatStorageStateCritical HeartbeatStorageState = "critical"
+	HeartbeatStorageStateLow      HeartbeatStorageState = "low"
+	HeartbeatStorageStateOk       HeartbeatStorageState = "ok"
 )
 
 // Valid indicates whether the value is a known member of the HeartbeatStorageState enum.
 func (e HeartbeatStorageState) Valid() bool {
 	switch e {
-	case Critical:
+	case HeartbeatStorageStateCritical:
 		return true
-	case Low:
+	case HeartbeatStorageStateLow:
 		return true
-	case Ok:
+	case HeartbeatStorageStateOk:
 		return true
 	default:
 		return false
@@ -466,6 +799,39 @@ func (e ItemStatus) Valid() bool {
 	}
 }
 
+// Defines values for ItemMotionStatus.
+const (
+	ItemMotionStatusProcessing ItemMotionStatus = "processing"
+	ItemMotionStatusReady      ItemMotionStatus = "ready"
+)
+
+// Valid indicates whether the value is a known member of the ItemMotionStatus enum.
+func (e ItemMotionStatus) Valid() bool {
+	switch e {
+	case ItemMotionStatusProcessing:
+		return true
+	case ItemMotionStatusReady:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ItemOrigin.
+const (
+	Frameo ItemOrigin = "frameo"
+)
+
+// Valid indicates whether the value is a known member of the ItemOrigin enum.
+func (e ItemOrigin) Valid() bool {
+	switch e {
+	case Frameo:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for JoinRequestVia.
 const (
 	JoinRequestViaFrameCode JoinRequestVia = "frame_code"
@@ -486,16 +852,223 @@ func (e JoinRequestVia) Valid() bool {
 
 // Defines values for MediaKind.
 const (
-	Photo MediaKind = "photo"
-	Video MediaKind = "video"
+	MediaKindLive  MediaKind = "live"
+	MediaKindPhoto MediaKind = "photo"
+	MediaKindVideo MediaKind = "video"
 )
 
 // Valid indicates whether the value is a known member of the MediaKind enum.
 func (e MediaKind) Valid() bool {
 	switch e {
-	case Photo:
+	case MediaKindLive:
 		return true
-	case Video:
+	case MediaKindPhoto:
+		return true
+	case MediaKindVideo:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsBackground.
+const (
+	MirrorSettingsBackgroundBlack   MirrorSettingsBackground = "black"
+	MirrorSettingsBackgroundBlur    MirrorSettingsBackground = "blur"
+	MirrorSettingsBackgroundPalette MirrorSettingsBackground = "palette"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsBackground enum.
+func (e MirrorSettingsBackground) Valid() bool {
+	switch e {
+	case MirrorSettingsBackgroundBlack:
+		return true
+	case MirrorSettingsBackgroundBlur:
+		return true
+	case MirrorSettingsBackgroundPalette:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsCaptionDate.
+const (
+	MirrorSettingsCaptionDateNone     MirrorSettingsCaptionDate = "none"
+	MirrorSettingsCaptionDateReceived MirrorSettingsCaptionDate = "received"
+	MirrorSettingsCaptionDateTaken    MirrorSettingsCaptionDate = "taken"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsCaptionDate enum.
+func (e MirrorSettingsCaptionDate) Valid() bool {
+	switch e {
+	case MirrorSettingsCaptionDateNone:
+		return true
+	case MirrorSettingsCaptionDateReceived:
+		return true
+	case MirrorSettingsCaptionDateTaken:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorSettingsTransition.
+const (
+	MirrorSettingsTransitionCrossfade MirrorSettingsTransition = "crossfade"
+	MirrorSettingsTransitionKenburns  MirrorSettingsTransition = "kenburns"
+	MirrorSettingsTransitionSlide     MirrorSettingsTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the MirrorSettingsTransition enum.
+func (e MirrorSettingsTransition) Valid() bool {
+	switch e {
+	case MirrorSettingsTransitionCrossfade:
+		return true
+	case MirrorSettingsTransitionKenburns:
+		return true
+	case MirrorSettingsTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorShowingTransition.
+const (
+	MirrorShowingTransitionCrossfade MirrorShowingTransition = "crossfade"
+	MirrorShowingTransitionCut       MirrorShowingTransition = "cut"
+	MirrorShowingTransitionSlide     MirrorShowingTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the MirrorShowingTransition enum.
+func (e MirrorShowingTransition) Valid() bool {
+	switch e {
+	case MirrorShowingTransitionCrossfade:
+		return true
+	case MirrorShowingTransitionCut:
+		return true
+	case MirrorShowingTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorStateScreen.
+const (
+	MirrorStateScreenDimmed   MirrorStateScreen = "dimmed"
+	MirrorStateScreenOff      MirrorStateScreen = "off"
+	MirrorStateScreenOn       MirrorStateScreen = "on"
+	MirrorStateScreenSleeping MirrorStateScreen = "sleeping"
+	MirrorStateScreenUnknown  MirrorStateScreen = "unknown"
+)
+
+// Valid indicates whether the value is a known member of the MirrorStateScreen enum.
+func (e MirrorStateScreen) Valid() bool {
+	switch e {
+	case MirrorStateScreenDimmed:
+		return true
+	case MirrorStateScreenOff:
+		return true
+	case MirrorStateScreenOn:
+		return true
+	case MirrorStateScreenSleeping:
+		return true
+	case MirrorStateScreenUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for MirrorStateType.
+const (
+	MirrorStateTypeMirror MirrorStateType = "mirror"
+)
+
+// Valid indicates whether the value is a known member of the MirrorStateType enum.
+func (e MirrorStateType) Valid() bool {
+	switch e {
+	case MirrorStateTypeMirror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingDirection.
+const (
+	NowShowingDirectionMinus1 NowShowingDirection = -1
+	NowShowingDirectionN1     NowShowingDirection = 1
+)
+
+// Valid indicates whether the value is a known member of the NowShowingDirection enum.
+func (e NowShowingDirection) Valid() bool {
+	switch e {
+	case NowShowingDirectionMinus1:
+		return true
+	case NowShowingDirectionN1:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingScreen.
+const (
+	NowShowingScreenDimmed   NowShowingScreen = "dimmed"
+	NowShowingScreenOff      NowShowingScreen = "off"
+	NowShowingScreenOn       NowShowingScreen = "on"
+	NowShowingScreenSleeping NowShowingScreen = "sleeping"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingScreen enum.
+func (e NowShowingScreen) Valid() bool {
+	switch e {
+	case NowShowingScreenDimmed:
+		return true
+	case NowShowingScreenOff:
+		return true
+	case NowShowingScreenOn:
+		return true
+	case NowShowingScreenSleeping:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingTransition.
+const (
+	NowShowingTransitionCrossfade NowShowingTransition = "crossfade"
+	NowShowingTransitionCut       NowShowingTransition = "cut"
+	NowShowingTransitionSlide     NowShowingTransition = "slide"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingTransition enum.
+func (e NowShowingTransition) Valid() bool {
+	switch e {
+	case NowShowingTransitionCrossfade:
+		return true
+	case NowShowingTransitionCut:
+		return true
+	case NowShowingTransitionSlide:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for NowShowingType.
+const (
+	NowShowingTypeNowShowing NowShowingType = "now_showing"
+)
+
+// Valid indicates whether the value is a known member of the NowShowingType enum.
+func (e NowShowingType) Valid() bool {
+	switch e {
+	case NowShowingTypeNowShowing:
 		return true
 	default:
 		return false
@@ -571,8 +1144,48 @@ func (e PlacementStatus) Valid() bool {
 	}
 }
 
+// Defines values for PluginInstanceSlot.
+const (
+	TopLeft  PluginInstanceSlot = "top-left"
+	TopRight PluginInstanceSlot = "top-right"
+)
+
+// Valid indicates whether the value is a known member of the PluginInstanceSlot enum.
+func (e PluginInstanceSlot) Valid() bool {
+	switch e {
+	case TopLeft:
+		return true
+	case TopRight:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PluginInstanceVisibility.
+const (
+	Always   PluginInstanceVisibility = "always"
+	OnChange PluginInstanceVisibility = "on_change"
+	OnTap    PluginInstanceVisibility = "on_tap"
+)
+
+// Valid indicates whether the value is a known member of the PluginInstanceVisibility enum.
+func (e PluginInstanceVisibility) Valid() bool {
+	switch e {
+	case Always:
+		return true
+	case OnChange:
+		return true
+	case OnTap:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ProblemCode.
 const (
+	ProblemCodeAlreadyDecided      ProblemCode = "already_decided"
 	ProblemCodeAlreadyMember       ProblemCode = "already_member"
 	ProblemCodeAppUpdateRequired   ProblemCode = "app_update_required"
 	ProblemCodeCodeExpired         ProblemCode = "code_expired"
@@ -585,6 +1198,7 @@ const (
 	ProblemCodeFrameOffline        ProblemCode = "frame_offline"
 	ProblemCodeInviteExpired       ProblemCode = "invite_expired"
 	ProblemCodeInviteInvalid       ProblemCode = "invite_invalid"
+	ProblemCodeLinkExpired         ProblemCode = "link_expired"
 	ProblemCodeMissingPermission   ProblemCode = "missing_permission"
 	ProblemCodeNotFound            ProblemCode = "not_found"
 	ProblemCodeOwnerCannotLeave    ProblemCode = "owner_cannot_leave"
@@ -605,6 +1219,8 @@ const (
 // Valid indicates whether the value is a known member of the ProblemCode enum.
 func (e ProblemCode) Valid() bool {
 	switch e {
+	case ProblemCodeAlreadyDecided:
+		return true
 	case ProblemCodeAlreadyMember:
 		return true
 	case ProblemCodeAppUpdateRequired:
@@ -628,6 +1244,8 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeInviteExpired:
 		return true
 	case ProblemCodeInviteInvalid:
+		return true
+	case ProblemCodeLinkExpired:
 		return true
 	case ProblemCodeMissingPermission:
 		return true
@@ -823,6 +1441,45 @@ func (e ScreenOrientation) Valid() bool {
 	}
 }
 
+// Defines values for ShareResultSkippedReason.
+const (
+	AlreadyOnFrame ShareResultSkippedReason = "already_on_frame"
+)
+
+// Valid indicates whether the value is a known member of the ShareResultSkippedReason enum.
+func (e ShareResultSkippedReason) Valid() bool {
+	switch e {
+	case AlreadyOnFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ShopReservationStatus.
+const (
+	Cancelled ShopReservationStatus = "cancelled"
+	Confirmed ShopReservationStatus = "confirmed"
+	Contacted ShopReservationStatus = "contacted"
+	New       ShopReservationStatus = "new"
+)
+
+// Valid indicates whether the value is a known member of the ShopReservationStatus enum.
+func (e ShopReservationStatus) Valid() bool {
+	switch e {
+	case Cancelled:
+		return true
+	case Confirmed:
+		return true
+	case Contacted:
+		return true
+	case New:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SleepScheduleDays.
 const (
 	SleepScheduleDaysFri SleepScheduleDays = "fri"
@@ -874,6 +1531,72 @@ func (e SleepScheduleMode) Valid() bool {
 	}
 }
 
+// Defines values for TvLinkPurpose.
+const (
+	TvLinkPurposeCast   TvLinkPurpose = "cast"
+	TvLinkPurposeMirror TvLinkPurpose = "mirror"
+	TvLinkPurposeTv     TvLinkPurpose = "tv"
+)
+
+// Valid indicates whether the value is a known member of the TvLinkPurpose enum.
+func (e TvLinkPurpose) Valid() bool {
+	switch e {
+	case TvLinkPurposeCast:
+		return true
+	case TvLinkPurposeMirror:
+		return true
+	case TvLinkPurposeTv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TvLinkCreatePurpose.
+const (
+	TvLinkCreatePurposeCast   TvLinkCreatePurpose = "cast"
+	TvLinkCreatePurposeMirror TvLinkCreatePurpose = "mirror"
+	TvLinkCreatePurposeTv     TvLinkCreatePurpose = "tv"
+)
+
+// Valid indicates whether the value is a known member of the TvLinkCreatePurpose enum.
+func (e TvLinkCreatePurpose) Valid() bool {
+	switch e {
+	case TvLinkCreatePurposeCast:
+		return true
+	case TvLinkCreatePurposeMirror:
+		return true
+	case TvLinkCreatePurposeTv:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TvSlideRotation.
+const (
+	TvSlideRotationN0   TvSlideRotation = 0
+	TvSlideRotationN180 TvSlideRotation = 180
+	TvSlideRotationN270 TvSlideRotation = 270
+	TvSlideRotationN90  TvSlideRotation = 90
+)
+
+// Valid indicates whether the value is a known member of the TvSlideRotation enum.
+func (e TvSlideRotation) Valid() bool {
+	switch e {
+	case TvSlideRotationN0:
+		return true
+	case TvSlideRotationN180:
+		return true
+	case TvSlideRotationN270:
+		return true
+	case TvSlideRotationN90:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for WeatherUnitsPrecipitation.
 const (
 	Mm WeatherUnitsPrecipitation = "mm"
@@ -913,6 +1636,48 @@ const (
 func (e WeatherUnitsWindSpeed) Valid() bool {
 	switch e {
 	case Kmh:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeviceImportParamsRotation.
+const (
+	DeviceImportParamsRotationN0   DeviceImportParamsRotation = 0
+	DeviceImportParamsRotationN180 DeviceImportParamsRotation = 180
+	DeviceImportParamsRotationN270 DeviceImportParamsRotation = 270
+	DeviceImportParamsRotationN90  DeviceImportParamsRotation = 90
+)
+
+// Valid indicates whether the value is a known member of the DeviceImportParamsRotation enum.
+func (e DeviceImportParamsRotation) Valid() bool {
+	switch e {
+	case DeviceImportParamsRotationN0:
+		return true
+	case DeviceImportParamsRotationN180:
+		return true
+	case DeviceImportParamsRotationN270:
+		return true
+	case DeviceImportParamsRotationN90:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for DeviceDecideInvitationJSONBodyDecision.
+const (
+	Accept  DeviceDecideInvitationJSONBodyDecision = "accept"
+	Decline DeviceDecideInvitationJSONBodyDecision = "decline"
+)
+
+// Valid indicates whether the value is a known member of the DeviceDecideInvitationJSONBodyDecision enum.
+func (e DeviceDecideInvitationJSONBodyDecision) Valid() bool {
+	switch e {
+	case Accept:
+		return true
+	case Decline:
 		return true
 	default:
 		return false
@@ -1137,10 +1902,256 @@ type AlbumWrite struct {
 	} `json:"schedule,omitempty"`
 }
 
+// Calendar Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+// list, deduplicated across sources by UID and start, sorted by start.
+type Calendar struct {
+	// Countdowns Marked events that have not passed yet, nearest first.
+	Countdowns  []Countdown          `json:"countdowns"`
+	Events      []CalendarEvent      `json:"events"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	Sources     []CalendarSourceInfo `json:"sources"`
+
+	// Timezone The frame's time zone (`locale.timezone`), used for the window and all-day events.
+	//
+	// Example: Europe/Brussels
+	Timezone string `json:"timezone"`
+	Window   struct {
+		From openapi_types.Date `json:"from"`
+
+		// To Inclusive.
+		To openapi_types.Date `json:"to"`
+	} `json:"window"`
+}
+
+// CalendarColor Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+// everywhere).
+type CalendarColor string
+
+// CalendarEvent One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+// all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+type CalendarEvent struct {
+	AllDay    bool                `json:"all_day"`
+	Countdown *bool               `json:"countdown,omitempty"`
+	EndAt     *time.Time          `json:"end_at,omitempty"`
+	EndDate   *openapi_types.Date `json:"end_date,omitempty"`
+	HasPhoto  *bool               `json:"has_photo,omitempty"`
+
+	// Id Stable id of one event occurrence (a hash of source, UID and occurrence start).
+	Id CalendarEventId `json:"id"`
+
+	// InvitationId Received events only; the photo is at `/v1/device/invitations/{id}/photo`.
+	InvitationId   *Id                  `json:"invitation_id,omitempty"`
+	Location       *string              `json:"location,omitempty"`
+	Notes          *string              `json:"notes,omitempty"`
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+	Recurring      *bool                `json:"recurring,omitempty"`
+
+	// SenderName Received events only.
+	SenderName *string `json:"sender_name,omitempty"`
+
+	// SourceId UUIDv7
+	SourceId  Id                  `json:"source_id"`
+	StartAt   *time.Time          `json:"start_at,omitempty"`
+	StartDate *openapi_types.Date `json:"start_date,omitempty"`
+	Title     string              `json:"title"`
+}
+
+// CalendarEventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+type CalendarEventId = string
+
+// CalendarSchedule Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight.
+type CalendarSchedule struct {
+	Days    []CalendarScheduleDays `json:"days"`
+	Enabled bool                   `json:"enabled"`
+
+	// From Example: 07:00
+	From string `json:"from"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// To Example: 09:00
+	To string `json:"to"`
+}
+
+// CalendarScheduleDays defines model for CalendarSchedule.Days.
+type CalendarScheduleDays string
+
+// CalendarSource defines model for CalendarSource.
+type CalendarSource struct {
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color     CalendarColor `json:"color"`
+	CreatedAt *time.Time    `json:"created_at,omitempty"`
+	Enabled   bool          `json:"enabled"`
+
+	// EventCount Events of this source in the frame's window.
+	EventCount  *int  `json:"event_count,omitempty"`
+	HasPassword *bool `json:"has_password,omitempty"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+	Kind          CalendarSourceKind `json:"kind"`
+	LastAttemptAt *time.Time         `json:"last_attempt_at,omitempty"`
+
+	// LastError Short reason of the last failed sync (English).
+	LastError *string `json:"last_error,omitempty"`
+
+	// LastSyncedAt Last successful sync.
+	LastSyncedAt *time.Time `json:"last_synced_at,omitempty"`
+
+	// Name Display name. Empty for the local calendar until renamed: clients show "Received events".
+	Name       string     `json:"name"`
+	NextSyncAt *time.Time `json:"next_sync_at,omitempty"`
+
+	// Status `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+	Status CalendarSyncStatus `json:"status"`
+
+	// UrlHint Redacted URL for display. Null for `local`.
+	//
+	// Example: https://calendar.google.com/…/basic.ics
+	UrlHint *string `json:"url_hint,omitempty"`
+
+	// Username CalDAV only.
+	Username *string `json:"username,omitempty"`
+}
+
+// CalendarSourceCreate defines model for CalendarSourceCreate.
+type CalendarSourceCreate struct {
+	// CalendarUrl CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`.
+	CalendarUrl *string `json:"calendar_url,omitempty"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color   *CalendarColor           `json:"color,omitempty"`
+	Enabled *bool                    `json:"enabled,omitempty"`
+	Kind    CalendarSourceCreateKind `json:"kind"`
+
+	// Name Defaults to the calendar's own name
+	Name *string `json:"name,omitempty"`
+
+	// Password CalDAV only; use an app-specific password.
+	Password *string `json:"password,omitempty"`
+
+	// Url `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL.
+	Url string `json:"url"`
+
+	// Username CalDAV only.
+	Username *string `json:"username,omitempty"`
+}
+
+// CalendarSourceCreateKind defines model for CalendarSourceCreate.Kind.
+type CalendarSourceCreateKind string
+
+// CalendarSourceInfo defines model for CalendarSourceInfo.
+type CalendarSourceInfo struct {
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color CalendarColor `json:"color"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Kind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+	Kind         CalendarSourceKind `json:"kind"`
+	LastSyncedAt *time.Time         `json:"last_synced_at,omitempty"`
+	Name         string             `json:"name"`
+
+	// Status `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+	Status CalendarSyncStatus `json:"status"`
+}
+
+// CalendarSourceKind `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+type CalendarSourceKind string
+
+// CalendarSourceUpdate defines model for CalendarSourceUpdate.
+type CalendarSourceUpdate struct {
+	CalendarUrl *string `json:"calendar_url,omitempty"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color    *CalendarColor `json:"color,omitempty"`
+	Enabled  *bool          `json:"enabled,omitempty"`
+	Name     *string        `json:"name,omitempty"`
+	Password *string        `json:"password,omitempty"`
+	Url      *string        `json:"url,omitempty"`
+	Username *string        `json:"username,omitempty"`
+}
+
+// CalendarSyncStatus `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+type CalendarSyncStatus string
+
+// CalendarTestResult defines model for CalendarTestResult.
+type CalendarTestResult struct {
+	// CalendarName The calendar's own name
+	CalendarName *string `json:"calendar_name,omitempty"`
+
+	// Calendars CalDAV only. Calendars on the account that hold events.
+	Calendars *[]struct {
+		// Color The server's colour (hex)
+		Color *string `json:"color,omitempty"`
+		Name  string  `json:"name"`
+		Url   string  `json:"url"`
+	} `json:"calendars,omitempty"`
+	Error *string `json:"error,omitempty"`
+
+	// EventCount Events in the next 30 days.
+	EventCount *int                     `json:"event_count,omitempty"`
+	Ok         bool                     `json:"ok"`
+	Status     CalendarTestResultStatus `json:"status"`
+}
+
+// CalendarTestResultStatus defines model for CalendarTestResult.Status.
+type CalendarTestResultStatus string
+
+// CalendarView defines model for CalendarView.
+type CalendarView struct {
+	// Countdowns Marked events that have not passed yet, nearest first.
+	Countdowns  []Countdown          `json:"countdowns"`
+	Events      []CalendarEvent      `json:"events"`
+	GeneratedAt time.Time            `json:"generated_at"`
+	Sources     []CalendarSourceInfo `json:"sources"`
+
+	// Timezone The frame's time zone (`locale.timezone`), used for the window and all-day events.
+	//
+	// Example: Europe/Brussels
+	Timezone string `json:"timezone"`
+
+	// Weather Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
+	// removed, the weather widget was turned off, or the server has weather disabled; the frame drops what it has.
+	// Values are always metric (°C, km/h, mm); clients convert for `locale.temperature_unit`. Local times carry the
+	// location's UTC offset. Data by Open-Meteo.com (CC BY 4.0); clients showing it must credit "Weather data by
+	// Open-Meteo.com".
+	Weather *Weather `json:"weather,omitempty"`
+	Window  struct {
+		From openapi_types.Date `json:"from"`
+
+		// To Inclusive.
+		To openapi_types.Date `json:"to"`
+	} `json:"window"`
+}
+
+// CatalogPlugin A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`).
+type CatalogPlugin struct {
+	// Builtin Part of the frame app; false for a plugin from the community registry (its newest version).
+	Builtin *bool `json:"builtin,omitempty"`
+
+	// Locales Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+	// `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+	// the manifest itself, with `en` for option labels.
+	Locales *map[string]map[string]string `json:"locales,omitempty"`
+
+	// Manifest The plugin's `plugin.json` as-is (docs/plugins.md §3.1).
+	Manifest map[string]interface{} `json:"manifest"`
+}
+
 // Change defines model for Change.
 type Change struct {
-	Album *Album `json:"album,omitempty"`
-	Frame *struct {
+	Album    *Album    `json:"album,omitempty"`
+	Calendar *Calendar `json:"calendar,omitempty"`
+	Frame    *struct {
 		Location  *string `json:"location,omitempty"`
 		Name      *string `json:"name,omitempty"`
 		OwnerName *string `json:"owner_name,omitempty"`
@@ -1182,6 +2193,22 @@ type Change struct {
 			Url       *string `json:"url,omitempty"`
 			Width     *int    `json:"width,omitempty"`
 		} `json:"media,omitempty"`
+
+		// Motion Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+		// clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+		// ignore it and show `media` as a photo.
+		Motion *struct {
+			Bytes      *int  `json:"bytes,omitempty"`
+			DurationMs *int  `json:"duration_ms,omitempty"`
+			HasAudio   *bool `json:"has_audio,omitempty"`
+			Height     *int  `json:"height,omitempty"`
+
+			// Mime Example: video/mp4
+			Mime   *string `json:"mime,omitempty"`
+			Sha256 *string `json:"sha256,omitempty"`
+			Url    *string `json:"url,omitempty"`
+			Width  *int    `json:"width,omitempty"`
+		} `json:"motion,omitempty"`
 		PendingModeration *bool      `json:"pending_moderation,omitempty"`
 		Reaction          *Reaction  `json:"reaction,omitempty"`
 		ReceivedAt        *time.Time `json:"received_at,omitempty"`
@@ -1189,11 +2216,17 @@ type Change struct {
 			At     *time.Time   `json:"at,omitempty"`
 			Preset *ReplyPreset `json:"preset,omitempty"`
 		} `json:"replies,omitempty"`
-		Rotation  *ChangePlacementRotation `json:"rotation,omitempty"`
-		SeenAt    *time.Time               `json:"seen_at,omitempty"`
-		Status    PlacementStatus          `json:"status"`
-		Trashed   bool                     `json:"trashed"`
-		TrashedAt *time.Time               `json:"trashed_at,omitempty"`
+		Rotation *ChangePlacementRotation `json:"rotation,omitempty"`
+		SeenAt   *time.Time               `json:"seen_at,omitempty"`
+
+		// SharedByName Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+		SharedByName *string `json:"shared_by_name,omitempty"`
+
+		// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+		SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
+		Status         PlacementStatus `json:"status"`
+		Trashed        bool            `json:"trashed"`
+		TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
 	} `json:"placement,omitempty"`
 	Seq int `json:"seq"`
 
@@ -1219,6 +2252,22 @@ type ChangeType string
 type CommandResult struct {
 	ErrorCode *string `json:"error_code,omitempty"`
 	Ok        bool    `json:"ok"`
+}
+
+// Countdown A marked event, even when it lies outside the window.
+type Countdown struct {
+	AllDay bool `json:"all_day"`
+
+	// Color Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+	// everywhere).
+	Color CalendarColor `json:"color"`
+
+	// EventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+	EventId   CalendarEventId     `json:"event_id"`
+	SourceId  *Id                 `json:"source_id,omitempty"`
+	StartAt   *time.Time          `json:"start_at,omitempty"`
+	StartDate *openapi_types.Date `json:"start_date,omitempty"`
+	Title     string              `json:"title"`
 }
 
 // DeviceEnroll defines model for DeviceEnroll.
@@ -1256,13 +2305,23 @@ type DeviceEnroll struct {
 		RamMb             *int   `json:"ram_mb,omitempty"`
 		StorageTotalBytes *int   `json:"storage_total_bytes,omitempty"`
 	} `json:"hardware"`
-	Locale   *string `json:"locale,omitempty"`
-	Screen   Screen  `json:"screen"`
-	Timezone *string `json:"timezone,omitempty"`
+
+	// Kind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	Kind     *DeviceKind `json:"kind,omitempty"`
+	Locale   *string     `json:"locale,omitempty"`
+	Screen   Screen      `json:"screen"`
+	Timezone *string     `json:"timezone,omitempty"`
 }
 
 // DeviceEnrollAppChannel defines model for DeviceEnroll.App.Channel.
 type DeviceEnrollAppChannel string
+
+// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+type DeviceKind string
 
 // DeviceState defines model for DeviceState.
 type DeviceState struct {
@@ -1277,20 +2336,48 @@ type DeviceState struct {
 	ServerTime *time.Time `json:"server_time,omitempty"`
 }
 
+// DiscoveredEntity defines model for DiscoveredEntity.
+type DiscoveredEntity struct {
+	DeviceClass *string `json:"device_class,omitempty"`
+	EntityId    string  `json:"entity_id"`
+	Name        *string `json:"name,omitempty"`
+	Unit        *string `json:"unit,omitempty"`
+}
+
+// DiscoveredService defines model for DiscoveredService.
+type DiscoveredService struct {
+	Name string `json:"name"`
+
+	// Url Example: http://192.168.1.20
+	Url string `json:"url"`
+}
+
 // Discovery defines model for Discovery.
 type Discovery struct {
 	Api  string `json:"api"`
 	Auth struct {
-		ApiResource    string `json:"api_resource"`
-		Issuer         string `json:"issuer"`
-		MobileClientId string `json:"mobile_client_id"`
-		WebClientId    string `json:"web_client_id"`
+		ApiResource string `json:"api_resource"`
+
+		// DesktopClientId Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+		// (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+		DesktopClientId *string `json:"desktop_client_id,omitempty"`
+		Issuer          string  `json:"issuer"`
+		MobileClientId  string  `json:"mobile_client_id"`
+		WebClientId     string  `json:"web_client_id"`
 	} `json:"auth"`
+
+	// Calendar True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+	Calendar *bool `json:"calendar,omitempty"`
 
 	// DevAuth True only on development servers running dev auth mode (POST /dev/token). Never true in production.
 	DevAuth *bool  `json:"dev_auth,omitempty"`
 	Limits  Limits `json:"limits"`
 	Name    string `json:"name"`
+
+	// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+	// to text; `en` is always present and is the fallback.
+	Shop    *Shop  `json:"shop,omitempty"`
 	Version string `json:"version"`
 
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
@@ -1301,6 +2388,59 @@ type Discovery struct {
 	// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
 	WebpushPublicKey *string `json:"webpush_public_key,omitempty"`
 }
+
+// EventInvitation defines model for EventInvitation.
+type EventInvitation struct {
+	AllDay    bool                `json:"all_day"`
+	CreatedAt time.Time           `json:"created_at"`
+	DecidedAt *time.Time          `json:"decided_at,omitempty"`
+	EndAt     *time.Time          `json:"end_at,omitempty"`
+	EndDate   *openapi_types.Date `json:"end_date,omitempty"`
+
+	// FrameId UUIDv7
+	FrameId  Id   `json:"frame_id"`
+	HasPhoto bool `json:"has_photo"`
+
+	// Id UUIDv7
+	Id       Id      `json:"id"`
+	Location *string `json:"location,omitempty"`
+	Notes    *string `json:"notes,omitempty"`
+
+	// PhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+
+	// SenderId UUIDv7
+	SenderId   Id                    `json:"sender_id"`
+	SenderName string                `json:"sender_name"`
+	StartAt    *time.Time            `json:"start_at,omitempty"`
+	StartDate  *openapi_types.Date   `json:"start_date,omitempty"`
+	Status     EventInvitationStatus `json:"status"`
+	Title      string                `json:"title"`
+}
+
+// EventInvitationStatus defines model for EventInvitation.Status.
+type EventInvitationStatus string
+
+// EventInvitationCreate Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`).
+type EventInvitationCreate struct {
+	AllDay   *bool               `json:"all_day,omitempty"`
+	EndAt    *time.Time          `json:"end_at,omitempty"`
+	EndDate  *openapi_types.Date `json:"end_date,omitempty"`
+	Location *string             `json:"location,omitempty"`
+	Notes    *string             `json:"notes,omitempty"`
+
+	// PhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+	PhotoPlacement *EventPhotoPlacement `json:"photo_placement,omitempty"`
+
+	// PhotoUploadId A finished tus upload holding an image.
+	PhotoUploadId *string             `json:"photo_upload_id,omitempty"`
+	StartAt       *time.Time          `json:"start_at,omitempty"`
+	StartDate     *openapi_types.Date `json:"start_date,omitempty"`
+	Title         string              `json:"title"`
+}
+
+// EventPhotoPlacement `top`: the photo above the event details. `background`: the photo fills the card behind them.
+type EventPhotoPlacement string
 
 // Fit defines model for Fit.
 type Fit string
@@ -1317,6 +2457,11 @@ type Frame struct {
 	ApproveJoinsOnFrame *bool        `json:"approve_joins_on_frame,omitempty"`
 	CreatedAt           *time.Time   `json:"created_at,omitempty"`
 	DefaultPermissions  *Permissions `json:"default_permissions,omitempty"`
+
+	// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
 	// Id UUIDv7
 	Id                     Id          `json:"id"`
@@ -1362,8 +2507,37 @@ type FrameHealth struct {
 	Online                *bool      `json:"online,omitempty"`
 }
 
+// FramePlugins The frame's plugin catalog and their status, for the apps' Plugins section.
+type FramePlugins struct {
+	Catalog []CatalogPlugin `json:"catalog"`
+
+	// CatalogAt When the frame last reported its catalog; null for an app that doesn't.
+	CatalogAt *time.Time                      `json:"catalog_at,omitempty"`
+	Instances *[]PluginInstanceStatus         `json:"instances,omitempty"`
+	Services  *map[string][]DiscoveredService `json:"services,omitempty"`
+	StatusAt  *time.Time                      `json:"status_at,omitempty"`
+}
+
 // FrameSettings Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients.
 type FrameSettings struct {
+	// Calendar Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`.
+	Calendar *struct {
+		FadePast *bool `json:"fade_past,omitempty"`
+
+		// FutureDays Sync window after today.
+		FutureDays *int `json:"future_days,omitempty"`
+
+		// PastDays Sync window before today.
+		PastDays *int `json:"past_days,omitempty"`
+
+		// StartOnToday Week and 4-day views start on today rather than the first day of the week.
+		StartOnToday *bool `json:"start_on_today,omitempty"`
+
+		// TimedViews Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day.
+		TimedViews  *[]CalendarSchedule        `json:"timed_views,omitempty"`
+		View        *FrameSettingsCalendarView `json:"view,omitempty"`
+		WeekNumbers *bool                      `json:"week_numbers,omitempty"`
+	} `json:"calendar,omitempty"`
 	Display *struct {
 		Brightness         *int                                `json:"brightness,omitempty"`
 		BrightnessMode     *FrameSettingsDisplayBrightnessMode `json:"brightness_mode,omitempty"`
@@ -1407,21 +2581,42 @@ type FrameSettings struct {
 		Sound  *bool `json:"sound,omitempty"`
 		Volume *int  `json:"volume,omitempty"`
 	} `json:"notifications,omitempty"`
+
+	// Plugins Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+	// its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+	Plugins *struct {
+		// Instances Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+		// without `secrets` keeps the ones it has.
+		Instances *[]PluginInstance `json:"instances,omitempty"`
+		Layout    *struct {
+			Background *FrameSettingsPluginsLayoutBackground `json:"background,omitempty"`
+
+			// Mode Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+			Mode *FrameSettingsPluginsLayoutMode `json:"mode,omitempty"`
+
+			// Side Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+			Side *FrameSettingsPluginsLayoutSide `json:"side,omitempty"`
+		} `json:"layout,omitempty"`
+	} `json:"plugins,omitempty"`
 	Slideshow *struct {
 		// AlbumId null = all photos
-		AlbumId       *string                            `json:"album_id,omitempty"`
-		Background    *FrameSettingsSlideshowBackground  `json:"background,omitempty"`
-		CaptionDate   *FrameSettingsSlideshowCaptionDate `json:"caption_date,omitempty"`
-		Collage       *bool                              `json:"collage,omitempty"`
-		CollageMax    *int                               `json:"collage_max,omitempty"`
-		Fill          *bool                              `json:"fill,omitempty"`
-		IntervalS     *int                               `json:"interval_s,omitempty"`
-		OnThisDay     *bool                              `json:"on_this_day,omitempty"`
-		Order         *FrameSettingsSlideshowOrder       `json:"order,omitempty"`
-		PairPortraits *bool                              `json:"pair_portraits,omitempty"`
-		Reverse       *bool                              `json:"reverse,omitempty"`
-		Transition    *FrameSettingsSlideshowTransition  `json:"transition,omitempty"`
-		TransitionMs  *int                               `json:"transition_ms,omitempty"`
+		AlbumId     *string                            `json:"album_id,omitempty"`
+		Background  *FrameSettingsSlideshowBackground  `json:"background,omitempty"`
+		CaptionDate *FrameSettingsSlideshowCaptionDate `json:"caption_date,omitempty"`
+		Collage     *bool                              `json:"collage,omitempty"`
+		CollageMax  *int                               `json:"collage_max,omitempty"`
+		Fill        *bool                              `json:"fill,omitempty"`
+		IntervalS   *int                               `json:"interval_s,omitempty"`
+
+		// LivePhotos Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+		// tap, `off` shows the still only.
+		LivePhotos    *FrameSettingsSlideshowLivePhotos `json:"live_photos,omitempty"`
+		OnThisDay     *bool                             `json:"on_this_day,omitempty"`
+		Order         *FrameSettingsSlideshowOrder      `json:"order,omitempty"`
+		PairPortraits *bool                             `json:"pair_portraits,omitempty"`
+		Reverse       *bool                             `json:"reverse,omitempty"`
+		Transition    *FrameSettingsSlideshowTransition `json:"transition,omitempty"`
+		TransitionMs  *int                              `json:"transition_ms,omitempty"`
 	} `json:"slideshow,omitempty"`
 	Updates *struct {
 		// Channel Frame app release channel (beta program). Beta frames get the newest of beta and stable.
@@ -1435,16 +2630,25 @@ type FrameSettings struct {
 		Volume      *int                        `json:"volume,omitempty"`
 	} `json:"video,omitempty"`
 	Widgets *struct {
-		Avatar   *bool `json:"avatar,omitempty"`
-		Caption  *bool `json:"caption,omitempty"`
-		Clock    *bool `json:"clock,omitempty"`
-		Clock24h *bool `json:"clock_24h,omitempty"`
-		Date     *bool `json:"date,omitempty"`
+		Avatar *bool `json:"avatar,omitempty"`
+
+		// CalendarSidebar Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+		CalendarSidebar *bool `json:"calendar_sidebar,omitempty"`
+		Caption         *bool `json:"caption,omitempty"`
+		Clock           *bool `json:"clock,omitempty"`
+		Clock24h        *bool `json:"clock_24h,omitempty"`
+
+		// Countdowns Countdown widgets on the slideshow (the nearest three).
+		Countdowns *bool `json:"countdowns,omitempty"`
+		Date       *bool `json:"date,omitempty"`
 
 		// Weather Current weather widget; needs `location`.
 		Weather *bool `json:"weather,omitempty"`
 	} `json:"widgets,omitempty"`
 }
+
+// FrameSettingsCalendarView defines model for FrameSettings.Calendar.View.
+type FrameSettingsCalendarView string
 
 // FrameSettingsDisplayBrightnessMode defines model for FrameSettings.Display.BrightnessMode.
 type FrameSettingsDisplayBrightnessMode string
@@ -1458,11 +2662,24 @@ type FrameSettingsLocaleFirstDayOfWeek string
 // FrameSettingsLocaleTemperatureUnit defines model for FrameSettings.Locale.TemperatureUnit.
 type FrameSettingsLocaleTemperatureUnit string
 
+// FrameSettingsPluginsLayoutBackground defines model for FrameSettings.Plugins.Layout.Background.
+type FrameSettingsPluginsLayoutBackground string
+
+// FrameSettingsPluginsLayoutMode Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+type FrameSettingsPluginsLayoutMode string
+
+// FrameSettingsPluginsLayoutSide Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+type FrameSettingsPluginsLayoutSide string
+
 // FrameSettingsSlideshowBackground defines model for FrameSettings.Slideshow.Background.
 type FrameSettingsSlideshowBackground string
 
 // FrameSettingsSlideshowCaptionDate defines model for FrameSettings.Slideshow.CaptionDate.
 type FrameSettingsSlideshowCaptionDate string
+
+// FrameSettingsSlideshowLivePhotos Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+// tap, `off` shows the still only.
+type FrameSettingsSlideshowLivePhotos string
 
 // FrameSettingsSlideshowOrder defines model for FrameSettings.Slideshow.Order.
 type FrameSettingsSlideshowOrder string
@@ -1482,6 +2699,11 @@ type FrameSettingsPatch = map[string]interface{}
 // FrameSummary defines model for FrameSummary.
 type FrameSummary struct {
 	AppVersion *string `json:"app_version,omitempty"`
+
+	// DeviceKind What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+	// page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+	// `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+	DeviceKind *DeviceKind `json:"device_kind,omitempty"`
 
 	// Id UUIDv7
 	Id          Id          `json:"id"`
@@ -1510,7 +2732,7 @@ type FrameUpdate struct {
 	// Size bytes
 	Size int `json:"size"`
 
-	// Url Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+	// Url Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
 	Url string `json:"url"`
 
 	// VersionCode Example: 20099
@@ -1613,9 +2835,24 @@ type Item struct {
 	Height     *int        `json:"height,omitempty"`
 
 	// Id UUIDv7
-	Id        Id        `json:"id"`
-	Kind      MediaKind `json:"kind"`
-	PlaceName *string   `json:"place_name,omitempty"`
+	Id Id `json:"id"`
+
+	// ImportedFrom Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+	// then the frame; clients show `imported_sender_name` instead, e.g. "Anna · via Frameo".
+	ImportedFrom *ItemOrigin `json:"imported_from,omitempty"`
+
+	// ImportedSenderName The original sender's display name in that app, when known.
+	ImportedSenderName *string `json:"imported_sender_name,omitempty"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind MediaKind `json:"kind"`
+
+	// Motion Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
+	// `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
+	Motion    *ItemMotion `json:"motion,omitempty"`
+	PlaceName *string     `json:"place_name,omitempty"`
 
 	// SenderId UUIDv7
 	SenderId   Id         `json:"sender_id"`
@@ -1629,6 +2866,21 @@ type Item struct {
 
 // ItemStatus defines model for Item.Status.
 type ItemStatus string
+
+// ItemMotion defines model for ItemMotion.
+type ItemMotion struct {
+	DurationMs *int             `json:"duration_ms,omitempty"`
+	HasAudio   *bool            `json:"has_audio,omitempty"`
+	Height     *int             `json:"height,omitempty"`
+	Status     ItemMotionStatus `json:"status"`
+	Width      *int             `json:"width,omitempty"`
+}
+
+// ItemMotionStatus defines model for ItemMotion.Status.
+type ItemMotionStatus string
+
+// ItemOrigin An app a frame can import leftover photos from.
+type ItemOrigin string
 
 // JoinRequest defines model for JoinRequest.
 type JoinRequest struct {
@@ -1659,7 +2911,12 @@ type Limits struct {
 	TrashRetentionDays *int `json:"trash_retention_days,omitempty"`
 }
 
-// MediaKind defines model for MediaKind.
+// LocalizedText Language code → text; `en` is the fallback.
+type LocalizedText map[string]string
+
+// MediaKind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
 type MediaKind string
 
 // Member defines model for Member.
@@ -1674,6 +2931,144 @@ type Member struct {
 	// UserId UUIDv7
 	UserId Id `json:"user_id"`
 }
+
+// MirrorSettings The frame settings a mirroring TV needs to look like the frame.
+type MirrorSettings struct {
+	Background   MirrorSettingsBackground   `json:"background"`
+	Caption      *bool                      `json:"caption,omitempty"`
+	CaptionDate  *MirrorSettingsCaptionDate `json:"caption_date,omitempty"`
+	Clock        *bool                      `json:"clock,omitempty"`
+	Clock24h     *bool                      `json:"clock_24h,omitempty"`
+	Date         *bool                      `json:"date,omitempty"`
+	Fill         bool                       `json:"fill"`
+	IntervalS    int                        `json:"interval_s"`
+	Timezone     *string                    `json:"timezone,omitempty"`
+	Transition   MirrorSettingsTransition   `json:"transition"`
+	TransitionMs int                        `json:"transition_ms"`
+}
+
+// MirrorSettingsBackground defines model for MirrorSettings.Background.
+type MirrorSettingsBackground string
+
+// MirrorSettingsCaptionDate defines model for MirrorSettings.CaptionDate.
+type MirrorSettingsCaptionDate string
+
+// MirrorSettingsTransition defines model for MirrorSettings.Transition.
+type MirrorSettingsTransition string
+
+// MirrorShowing defines model for MirrorShowing.
+type MirrorShowing struct {
+	Direction *int  `json:"direction,omitempty"`
+	HoldMs    *int  `json:"hold_ms,omitempty"`
+	KenBurns  *bool `json:"ken_burns,omitempty"`
+
+	// PlacementId UUIDv7
+	PlacementId Id `json:"placement_id"`
+
+	// Slides One per photo on screen; a collage or pair has several.
+	Slides []TvSlide `json:"slides"`
+
+	// StartedAt Server clock. Compare with `server_time` of the same message.
+	StartedAt    time.Time               `json:"started_at"`
+	Transition   MirrorShowingTransition `json:"transition"`
+	TransitionMs int                     `json:"transition_ms"`
+	Video        *struct {
+		// At Server clock at which `position_ms` was the position.
+		At         time.Time `json:"at"`
+		Live       *bool     `json:"live,omitempty"`
+		Playing    bool      `json:"playing"`
+		PositionMs int       `json:"position_ms"`
+	} `json:"video,omitempty"`
+}
+
+// MirrorShowingTransition defines model for MirrorShowing.Transition.
+type MirrorShowingTransition string
+
+// MirrorState Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+// connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+type MirrorState struct {
+	// ExpiresAt When the link stops working.
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId   Id       `json:"frame_id"`
+	FrameName string   `json:"frame_name"`
+	Next      *TvSlide `json:"next,omitempty"`
+
+	// Online The frame is connected.
+	Online bool `json:"online"`
+
+	// Screen `off`/`sleeping`: show a calm "the frame is asleep" screen.
+	Screen     MirrorStateScreen `json:"screen"`
+	ServerTime time.Time         `json:"server_time"`
+
+	// Settings The frame settings a mirroring TV needs to look like the frame.
+	Settings *MirrorSettings `json:"settings,omitempty"`
+
+	// Showing Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show).
+	Showing *MirrorShowing  `json:"showing,omitempty"`
+	Type    MirrorStateType `json:"type"`
+}
+
+// MirrorStateScreen `off`/`sleeping`: show a calm "the frame is asleep" screen.
+type MirrorStateScreen string
+
+// MirrorStateType defines model for MirrorState.Type.
+type MirrorStateType string
+
+// NowShowing Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+// now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+// video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+// the frame's clock; the server only uses differences between them.
+type NowShowing struct {
+	// Direction 1: the slide came in as "next", -1: as "previous".
+	Direction *NowShowingDirection `json:"direction,omitempty"`
+
+	// HoldMs How long the slide is expected to stay.
+	HoldMs *int `json:"hold_ms,omitempty"`
+
+	// KenBurns The slide moves (Ken Burns): deterministic per placement and focal point.
+	KenBurns *bool `json:"ken_burns,omitempty"`
+
+	// NextPlacementId What the frame expects to show next (for preloading).
+	NextPlacementId *Id `json:"next_placement_id,omitempty"`
+
+	// PlacementId The slide on screen (the first tile of a collage or pair); null while nothing shows.
+	PlacementId *Id `json:"placement_id,omitempty"`
+
+	// PlacementIds Every photo on screen (collage or pair), first = `placement_id`.
+	PlacementIds *[]Id            `json:"placement_ids,omitempty"`
+	Screen       NowShowingScreen `json:"screen"`
+	SentAt       time.Time        `json:"sent_at"`
+
+	// StartedAt When the transition to this slide started.
+	StartedAt    *time.Time            `json:"started_at,omitempty"`
+	Transition   *NowShowingTransition `json:"transition,omitempty"`
+	TransitionMs *int                  `json:"transition_ms,omitempty"`
+	Type         NowShowingType        `json:"type"`
+
+	// Video The playing video, or a live photo's clip, while it is on screen.
+	Video *struct {
+		// Live The clip of a live photo (played over its still).
+		Live    *bool `json:"live,omitempty"`
+		Playing bool  `json:"playing"`
+
+		// PositionMs Playback position at `sent_at`.
+		PositionMs int `json:"position_ms"`
+	} `json:"video,omitempty"`
+}
+
+// NowShowingDirection 1: the slide came in as "next", -1: as "previous".
+type NowShowingDirection int
+
+// NowShowingScreen defines model for NowShowing.Screen.
+type NowShowingScreen string
+
+// NowShowingTransition defines model for NowShowing.Transition.
+type NowShowingTransition string
+
+// NowShowingType defines model for NowShowing.Type.
+type NowShowingType string
 
 // Permissions defines model for Permissions.
 type Permissions struct {
@@ -1746,11 +3141,17 @@ type Placement struct {
 		At     *time.Time   `json:"at,omitempty"`
 		Preset *ReplyPreset `json:"preset,omitempty"`
 	} `json:"replies,omitempty"`
-	Rotation  *PlacementRotation `json:"rotation,omitempty"`
-	SeenAt    *time.Time         `json:"seen_at,omitempty"`
-	Status    PlacementStatus    `json:"status"`
-	Trashed   bool               `json:"trashed"`
-	TrashedAt *time.Time         `json:"trashed_at,omitempty"`
+	Rotation *PlacementRotation `json:"rotation,omitempty"`
+	SeenAt   *time.Time         `json:"seen_at,omitempty"`
+
+	// SharedByName Display name of `shared_by_user_id`. Frames show "Sender · shared by Name".
+	SharedByName *string `json:"shared_by_name,omitempty"`
+
+	// SharedByUserId The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards.
+	SharedByUserId *Id             `json:"shared_by_user_id,omitempty"`
+	Status         PlacementStatus `json:"status"`
+	Trashed        bool            `json:"trashed"`
+	TrashedAt      *time.Time      `json:"trashed_at,omitempty"`
 }
 
 // PlacementRotation defines model for Placement.Rotation.
@@ -1758,6 +3159,90 @@ type PlacementRotation int
 
 // PlacementStatus defines model for PlacementStatus.
 type PlacementStatus string
+
+// PluginCatalog defines model for PluginCatalog.
+type PluginCatalog struct {
+	Plugins []CatalogPlugin `json:"plugins"`
+}
+
+// PluginInstance One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+// values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+type PluginInstance struct {
+	// Enabled An enabled instance needs every required setting and secret.
+	Enabled    *bool  `json:"enabled,omitempty"`
+	InstanceId string `json:"instance_id"`
+	Order      *int   `json:"order,omitempty"`
+
+	// PluginId Example: kinframe.ha-energy
+	PluginId string `json:"plugin_id"`
+
+	// Secrets Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+	// frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+	Secrets *map[string]*string `json:"secrets,omitempty"`
+
+	// SecretsSet The secret settings that have a value.
+	SecretsSet *[]string `json:"secrets_set,omitempty"`
+
+	// Settings The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids).
+	Settings *map[string]interface{} `json:"settings,omitempty"`
+	Slot     *PluginInstanceSlot     `json:"slot,omitempty"`
+
+	// Version The plugin version the settings were made with (informational).
+	Version    *string                   `json:"version,omitempty"`
+	Visibility *PluginInstanceVisibility `json:"visibility,omitempty"`
+}
+
+// PluginInstanceSlot defines model for PluginInstance.Slot.
+type PluginInstanceSlot string
+
+// PluginInstanceVisibility defines model for PluginInstance.Visibility.
+type PluginInstanceVisibility string
+
+// PluginInstanceStatus defines model for PluginInstanceStatus.
+type PluginInstanceStatus struct {
+	// Entities Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+	// picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
+	Entities *[]DiscoveredEntity `json:"entities,omitempty"`
+
+	// Error The last error
+	Error      *string    `json:"error,omitempty"`
+	ErrorAt    *time.Time `json:"error_at,omitempty"`
+	InstanceId string     `json:"instance_id"`
+
+	// Running The instance started on the frame.
+	Running *bool `json:"running,omitempty"`
+
+	// Update A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it.
+	Update *struct {
+		// Permissions The newer version's `permissions`.
+		Permissions *map[string]interface{} `json:"permissions,omitempty"`
+		Version     *string                 `json:"version,omitempty"`
+	} `json:"update,omitempty"`
+
+	// UpdatedAt When the last update succeeded.
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+
+	// Version The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions).
+	Version *string `json:"version,omitempty"`
+}
+
+// PluginRegistry defines model for PluginRegistry.
+type PluginRegistry struct {
+	// Index base64 of index.json, byte for byte as signed
+	Index    string `json:"index"`
+	Sequence int    `json:"sequence"`
+
+	// Signature base64 DER ECDSA P-256 SHA-256 signature over those bytes
+	Signature string `json:"signature"`
+}
+
+// PluginStatusReport What the frame knows about its plugins right now (`PUT /device/plugins/status`).
+type PluginStatusReport struct {
+	Instances *[]PluginInstanceStatus `json:"instances,omitempty"`
+
+	// Services mDNS service type (a `discover` value in a manifest) → what the frame found on its network.
+	Services *map[string][]DiscoveredService `json:"services,omitempty"`
+}
 
 // Problem defines model for Problem.
 type Problem struct {
@@ -1776,6 +3261,25 @@ type Problem struct {
 
 // ProblemCode defines model for ProblemCode.
 type ProblemCode string
+
+// PublicStationList defines model for PublicStationList.
+type PublicStationList struct {
+	Stations []PublicStationSummary `json:"stations"`
+}
+
+// PublicStationSummary defines model for PublicStationSummary.
+type PublicStationSummary struct {
+	// Name The title the owner chose; empty: none.
+	Name string `json:"name"`
+
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+	StationId  string         `json:"station_id"`
+
+	// Temp24h The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived.
+	Temp24h []*float32 `json:"temp_24h"`
+}
 
 // PushEndpoint defines model for PushEndpoint.
 type PushEndpoint struct {
@@ -1866,10 +3370,13 @@ type Send struct {
 			ItemId Id `json:"item_id"`
 
 			// PlacementId UUIDv7
-			PlacementId Id              `json:"placement_id"`
-			Reaction    *Reaction       `json:"reaction,omitempty"`
-			Replies     *[]ReplyPreset  `json:"replies,omitempty"`
-			Status      PlacementStatus `json:"status"`
+			PlacementId Id             `json:"placement_id"`
+			Reaction    *Reaction      `json:"reaction,omitempty"`
+			Replies     *[]ReplyPreset `json:"replies,omitempty"`
+
+			// SharedByName Set when another member shared this item to the frame.
+			SharedByName *string         `json:"shared_by_name,omitempty"`
+			Status       PlacementStatus `json:"status"`
 		} `json:"placements"`
 	} `json:"frames"`
 
@@ -1891,13 +3398,31 @@ type SendCreate struct {
 	Items    []struct {
 		Caption *string `json:"caption,omitempty"`
 
-		// CapturedAt Client hint used when the file has no metadata.
+		// CapturedAt Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+		// QuickTime) and send it here. Used when the stored file has no capture time.
 		CapturedAt *time.Time `json:"captured_at,omitempty"`
-		Fit        *Fit       `json:"fit,omitempty"`
+
+		// DurationMs Prepared videos only. Duration the client produced (±500 ms).
+		DurationMs *int `json:"duration_ms,omitempty"`
+		Fit        *Fit `json:"fit,omitempty"`
 
 		// FocalPoint Relative to the master rendition, 0..1 from top-left.
-		FocalPoint   *FocalPoint `json:"focal_point,omitempty"`
-		IncludeAudio *bool       `json:"include_audio,omitempty"`
+		FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+
+		// Height Prepared uploads only. Pixel height the client produced.
+		Height *int `json:"height,omitempty"`
+
+		// IncludeAudio For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+		IncludeAudio *bool `json:"include_audio,omitempty"`
+
+		// Live `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
+		// still only. Without `live_video_upload_id`, the server splits such files itself.
+		Live *bool `json:"live,omitempty"`
+
+		// LiveVideoUploadId Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+		// are cut). `upload_id` must be a photo and `trim` is not allowed. The clip may be a prepared
+		// `video-master-v1`.
+		LiveVideoUploadId *string `json:"live_video_upload_id,omitempty"`
 
 		// Trim Videos only. The selected part must be at least 3 seconds long (unless the whole video is shorter).
 		Trim *struct {
@@ -1907,7 +3432,193 @@ type SendCreate struct {
 
 		// UploadId tus upload id
 		UploadId string `json:"upload_id"`
+
+		// Width Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline.
+		Width *int `json:"width,omitempty"`
 	} `json:"items"`
+}
+
+// ShareResult defines model for ShareResult.
+type ShareResult struct {
+	// Placements The placements created on the target frames (empty for a dry run).
+	Placements []Placement `json:"placements"`
+
+	// Skipped Source placement × target frame pairs that were not shared.
+	Skipped []struct {
+		// ExistingPlacementId UUIDv7
+		ExistingPlacementId *Id `json:"existing_placement_id,omitempty"`
+
+		// FrameId UUIDv7
+		FrameId Id `json:"frame_id"`
+
+		// PlacementId UUIDv7
+		PlacementId Id                       `json:"placement_id"`
+		Reason      ShareResultSkippedReason `json:"reason"`
+	} `json:"skipped"`
+}
+
+// ShareResultSkippedReason defines model for ShareResult.Skipped.Reason.
+type ShareResultSkippedReason string
+
+// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+// to text; `en` is always present and is the fallback.
+type Shop struct {
+	// Brand Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+	//
+	// Example: kinframe
+	Brand string `json:"brand"`
+
+	// Currency ISO 4217
+	//
+	// Example: EUR
+	Currency string `json:"currency"`
+
+	// DefaultLocale Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+	// the shop emails in). Defaults to `en`.
+	//
+	//
+	// Example: nl
+	DefaultLocale *string `json:"default_locale,omitempty"`
+
+	// Domains Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+	// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+	// sign-in and the family app live. Absent when the operator configured none.
+	//
+	//
+	// Example: ["shop.example.org"]
+	Domains *[]string `json:"domains,omitempty"`
+
+	// EstimatedDelivery Language code → text; `en` is the fallback.
+	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
+	Products          []ShopProduct  `json:"products"`
+	Seller            struct {
+		Email openapi_types.Email `json:"email"`
+
+		// Legal Legal line for the footer, e.g. company, address and VAT number.
+		Legal      *string `json:"legal,omitempty"`
+		Name       string  `json:"name"`
+		PrivacyUrl *string `json:"privacy_url,omitempty"`
+	} `json:"seller"`
+	Shipping ShopShipping `json:"shipping"`
+
+	// VatPercent VAT included in all prices
+	//
+	// Example: 21
+	VatPercent float32 `json:"vat_percent"`
+}
+
+// ShopLine defines model for ShopLine.
+type ShopLine struct {
+	LineCents int    `json:"line_cents"`
+	Name      string `json:"name"`
+	ProductId string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+	UnitCents int    `json:"unit_cents"`
+}
+
+// ShopProduct defines model for ShopProduct.
+type ShopProduct struct {
+	// Id Example: frame-10
+	Id string `json:"id"`
+
+	// Image Illustration key: frame-10 or frame-15
+	//
+	// Example: frame-10
+	Image  *string `json:"image,omitempty"`
+	MaxQty int     `json:"max_qty"`
+
+	// Name Example: kinframe 10.1"
+	Name string `json:"name"`
+
+	// PriceCents Unit price incl. VAT
+	PriceCents int `json:"price_cents"`
+
+	// Size Screen size label
+	//
+	// Example: 10.1"
+	Size *string `json:"size,omitempty"`
+
+	// Specs Language code → short spec bullets; `en` is the fallback.
+	Specs *map[string][]string `json:"specs,omitempty"`
+}
+
+// ShopReservation defines model for ShopReservation.
+type ShopReservation struct {
+	CancelledAt *time.Time `json:"cancelled_at,omitempty"`
+	Country     string     `json:"country"`
+	CreatedAt   time.Time  `json:"created_at"`
+	Currency    string     `json:"currency"`
+	Email       string     `json:"email"`
+
+	// Id UUIDv7
+	Id            Id                    `json:"id"`
+	InternalNote  *string               `json:"internal_note,omitempty"`
+	Items         []ShopLine            `json:"items"`
+	Locale        string                `json:"locale"`
+	Name          string                `json:"name"`
+	Note          *string               `json:"note,omitempty"`
+	PostalCode    *string               `json:"postal_code,omitempty"`
+	Reference     string                `json:"reference"`
+	ShippingCents int                   `json:"shipping_cents"`
+	Status        ShopReservationStatus `json:"status"`
+	SubtotalCents int                   `json:"subtotal_cents"`
+	TotalCents    int                   `json:"total_cents"`
+	UpdatedAt     time.Time             `json:"updated_at"`
+}
+
+// ShopReservationCreate defines model for ShopReservationCreate.
+type ShopReservationCreate struct {
+	// Consent Must be true. The customer agrees to be contacted about this reservation.
+	Consent bool `json:"consent"`
+
+	// Country Example: BE
+	Country string `json:"country"`
+	Email   string `json:"email"`
+	Items   []struct {
+		ProductId string `json:"product_id"`
+		Quantity  int    `json:"quantity"`
+	} `json:"items"`
+
+	// Locale Language for the emails (falls back to English)
+	//
+	// Example: nl
+	Locale     *string `json:"locale,omitempty"`
+	Name       string  `json:"name"`
+	Note       *string `json:"note,omitempty"`
+	PostalCode *string `json:"postal_code,omitempty"`
+
+	// Website Honeypot; leave empty.
+	Website *string `json:"website,omitempty"`
+}
+
+// ShopReservationReceipt defines model for ShopReservationReceipt.
+type ShopReservationReceipt struct {
+	Currency string     `json:"currency"`
+	Email    string     `json:"email"`
+	Items    []ShopLine `json:"items"`
+
+	// Reference Example: KF-7Q3M
+	Reference     string                `json:"reference"`
+	ShippingCents int                   `json:"shipping_cents"`
+	Status        ShopReservationStatus `json:"status"`
+	SubtotalCents int                   `json:"subtotal_cents"`
+	TotalCents    int                   `json:"total_cents"`
+}
+
+// ShopReservationStatus defines model for ShopReservationStatus.
+type ShopReservationStatus string
+
+// ShopShipping defines model for ShopShipping.
+type ShopShipping struct {
+	// Countries Example: ["BE","NL"]
+	Countries []string `json:"countries"`
+
+	// FlatCents Shipping cost per order incl. VAT
+	FlatCents int `json:"flat_cents"`
+
+	// FreeFromCents Item subtotal from which shipping is free; null = never
+	FreeFromCents *int `json:"free_from_cents,omitempty"`
 }
 
 // SleepSchedule defines model for SleepSchedule.
@@ -1931,6 +3642,204 @@ type SleepScheduleDays string
 
 // SleepScheduleMode defines model for SleepSchedule.Mode.
 type SleepScheduleMode string
+
+// StationLatest defines model for StationLatest.
+type StationLatest struct {
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+
+	// Today Since midnight in the station's frame's time zone (the first registering frame).
+	Today *struct {
+		GustMaxMs *float32 `json:"gust_max_ms,omitempty"`
+		TempMaxC  *float32 `json:"temp_max_c,omitempty"`
+		TempMinC  *float32 `json:"temp_min_c,omitempty"`
+	} `json:"today,omitempty"`
+}
+
+// StationPublic defines model for StationPublic.
+type StationPublic struct {
+	// Name The title the owner chose; empty: none.
+	Name string `json:"name"`
+
+	// Reading One upload in metric units; a value the station didn't send is absent.
+	Reading    StationReading `json:"reading"`
+	ReceivedAt time.Time      `json:"received_at"`
+
+	// Series The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+	// arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+	// direction (the speed-weighted mean direction).
+	Series StationSeries `json:"series"`
+
+	// StationId The station ID as its owner wrote it.
+	StationId string `json:"station_id"`
+
+	// Timezone IANA zone of the owner's frame: what "today" means.
+	Timezone string `json:"timezone"`
+
+	// Today Since midnight in `timezone`.
+	Today struct {
+		GustMaxAt *time.Time `json:"gust_max_at,omitempty"`
+		GustMaxMs *float32   `json:"gust_max_ms,omitempty"`
+		RainMm    *float32   `json:"rain_mm,omitempty"`
+		TempMaxAt *time.Time `json:"temp_max_at,omitempty"`
+		TempMaxC  *float32   `json:"temp_max_c,omitempty"`
+		TempMinAt *time.Time `json:"temp_min_at,omitempty"`
+		TempMinC  *float32   `json:"temp_min_c,omitempty"`
+		UvMax     *float32   `json:"uv_max,omitempty"`
+	} `json:"today"`
+}
+
+// StationReading One upload in metric units; a value the station didn't send is absent.
+type StationReading struct {
+	DewPointC         *float32   `json:"dew_point_c,omitempty"`
+	FeelsLikeC        *float32   `json:"feels_like_c,omitempty"`
+	GustMs            *float32   `json:"gust_ms,omitempty"`
+	HumidityPct       *float32   `json:"humidity_pct,omitempty"`
+	IndoorHumidityPct *float32   `json:"indoor_humidity_pct,omitempty"`
+	IndoorTempC       *float32   `json:"indoor_temp_c,omitempty"`
+	PressureHpa       *float32   `json:"pressure_hpa,omitempty"`
+	RainRateMmH       *float32   `json:"rain_rate_mm_h,omitempty"`
+	RainTodayMm       *float32   `json:"rain_today_mm,omitempty"`
+	SolarWm2          *float32   `json:"solar_wm2,omitempty"`
+	StationTime       *time.Time `json:"station_time,omitempty"`
+	TempC             *float32   `json:"temp_c,omitempty"`
+	UvIndex           *float32   `json:"uv_index,omitempty"`
+	WindDirDeg        *float32   `json:"wind_dir_deg,omitempty"`
+	WindMs            *float32   `json:"wind_ms,omitempty"`
+}
+
+// StationSeries The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+// arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+// direction (the speed-weighted mean direction).
+type StationSeries struct {
+	DewPointC   StationValues `json:"dew_point_c"`
+	FeelsLikeC  StationValues `json:"feels_like_c"`
+	GustMs      StationValues `json:"gust_ms"`
+	HumidityPct StationValues `json:"humidity_pct"`
+	PressureHpa StationValues `json:"pressure_hpa"`
+	RainRateMmH StationValues `json:"rain_rate_mm_h"`
+	RainTodayMm StationValues `json:"rain_today_mm"`
+	SolarWm2    StationValues `json:"solar_wm2"`
+	Start       time.Time     `json:"start"`
+	StepS       int           `json:"step_s"`
+	TempC       StationValues `json:"temp_c"`
+	UvIndex     StationValues `json:"uv_index"`
+	WindDirDeg  StationValues `json:"wind_dir_deg"`
+	WindMs      StationValues `json:"wind_ms"`
+}
+
+// StationValues defines model for StationValues.
+type StationValues = []*float32
+
+// TvLink defines model for TvLink.
+type TvLink struct {
+	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
+	CreatedAt     time.Time           `json:"created_at"`
+	CreatedByName *string             `json:"created_by_name,omitempty"`
+	ExpiresAt     time.Time           `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId Id `json:"frame_id"`
+
+	// Id UUIDv7
+	Id              Id         `json:"id"`
+	IntervalSeconds int        `json:"interval_seconds"`
+	Kind            *MediaKind `json:"kind,omitempty"`
+
+	// PlacementCount Size of a fixed selection; null for album/library links.
+	PlacementCount *int          `json:"placement_count,omitempty"`
+	Purpose        TvLinkPurpose `json:"purpose"`
+	Token          string        `json:"token"`
+
+	// Url The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
+	Url string `json:"url"`
+}
+
+// TvLinkPurpose defines model for TvLink.Purpose.
+type TvLinkPurpose string
+
+// TvLinkCreate defines model for TvLinkCreate.
+type TvLinkCreate struct {
+	// AlbumId Only this album.
+	AlbumId         *openapi_types.UUID `json:"album_id,omitempty"`
+	ExpiresInHours  *int                `json:"expires_in_hours,omitempty"`
+	IntervalSeconds *int                `json:"interval_seconds,omitempty"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind *MediaKind `json:"kind,omitempty"`
+
+	// PlacementIds Only these placements, in this order (a selection). Empty or absent = the whole visible library.
+	PlacementIds *[]Id `json:"placement_ids,omitempty"`
+
+	// Purpose `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+	// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+	// `placement_ids` or `kind`, because it shows whatever the frame shows.
+	Purpose *TvLinkCreatePurpose `json:"purpose,omitempty"`
+}
+
+// TvLinkCreatePurpose `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+// physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+// `placement_ids` or `kind`, because it shows whatever the frame shows.
+type TvLinkCreatePurpose string
+
+// TvSlide defines model for TvSlide.
+type TvSlide struct {
+	Caption    *string    `json:"caption,omitempty"`
+	CapturedAt *time.Time `json:"captured_at,omitempty"`
+	DurationMs *int       `json:"duration_ms,omitempty"`
+
+	// Fit The placement's fit override, else the item's; null = the frame setting.
+	Fit *Fit `json:"fit,omitempty"`
+
+	// FocalPoint The placement's focal point (its override, else the item's), for filling the screen and Ken Burns.
+	FocalPoint *FocalPoint `json:"focal_point,omitempty"`
+	Height     int         `json:"height"`
+
+	// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+	// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+	// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+	Kind MediaKind `json:"kind"`
+
+	// Mime e.g. image/webp or video/mp4
+	Mime string `json:"mime"`
+
+	// PlacementId UUIDv7
+	PlacementId Id        `json:"placement_id"`
+	PosterUrl   *string   `json:"poster_url,omitempty"`
+	ReceivedAt  time.Time `json:"received_at"`
+
+	// Rotation Clockwise rotation set on the frame for this placement.
+	Rotation   *TvSlideRotation `json:"rotation,omitempty"`
+	SenderName string           `json:"sender_name"`
+	ThumbUrl   *string          `json:"thumb_url,omitempty"`
+
+	// Url Absolute signed URL of the master rendition (Range supported).
+	Url   string `json:"url"`
+	Width int    `json:"width"`
+}
+
+// TvSlideRotation Clockwise rotation set on the frame for this placement.
+type TvSlideRotation int
+
+// TvSlideshow defines model for TvSlideshow.
+type TvSlideshow struct {
+	AlbumName *string `json:"album_name,omitempty"`
+
+	// ExpiresAt When the link itself stops working.
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// FrameId UUIDv7
+	FrameId         Id     `json:"frame_id"`
+	FrameName       string `json:"frame_name"`
+	IntervalSeconds int    `json:"interval_seconds"`
+
+	// RefreshAfter Refetch before the media URLs expire.
+	RefreshAfter time.Time `json:"refresh_after"`
+	Slides       []TvSlide `json:"slides"`
+}
 
 // User defines model for User.
 type User struct {
@@ -2021,11 +3930,17 @@ type WeatherUnitsTemperature string
 // WeatherUnitsWindSpeed defines model for Weather.Units.WindSpeed.
 type WeatherUnitsWindSpeed string
 
+// CalendarId UUIDv7
+type CalendarId = Id
+
 // Cursor defines model for Cursor.
 type Cursor = string
 
 // EndpointId UUIDv7
 type EndpointId = Id
+
+// EventId Stable id of one event occurrence (a hash of source, UID and occurrence start).
+type EventId = CalendarEventId
 
 // FrameId UUIDv7
 type FrameId = Id
@@ -2035,6 +3950,9 @@ type IdempotencyKey = string
 
 // IfMatch defines model for IfMatch.
 type IfMatch = string
+
+// InvitationId UUIDv7
+type InvitationId = Id
 
 // InviteToken defines model for InviteToken.
 type InviteToken = string
@@ -2070,9 +3988,54 @@ type DeviceGetChangesParams struct {
 
 // DeviceImportParams defines parameters for DeviceImport.
 type DeviceImportParams struct {
-	XFilename   string     `json:"X-Filename"`
-	XCapturedAt *time.Time `json:"X-Captured-At,omitempty"`
+	// Caption Caption to restore (e.g. from a kinframe export manifest).
+	Caption *string `form:"caption,omitempty" json:"caption,omitempty"`
+
+	// Source The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it.
+	Source *ItemOrigin `form:"source,omitempty" json:"source,omitempty"`
+
+	// SourceKey Stable id of the file in that app (for Frameo, its file name). Unique per frame and source.
+	SourceKey *string `form:"source_key,omitempty" json:"source_key,omitempty"`
+
+	// SenderName The original sender's display name in that app.
+	SenderName *string `form:"sender_name,omitempty" json:"sender_name,omitempty"`
+
+	// ReceivedAt When the old app received the file; becomes the placement's `received_at` (not in the future).
+	ReceivedAt *time.Time `form:"received_at,omitempty" json:"received_at,omitempty"`
+	Fit        *Fit       `form:"fit,omitempty" json:"fit,omitempty"`
+
+	// FocalX Focal point, as a fraction of the width (with `focal_y`).
+	FocalX *float32 `form:"focal_x,omitempty" json:"focal_x,omitempty"`
+	FocalY *float32 `form:"focal_y,omitempty" json:"focal_y,omitempty"`
+
+	// Hidden Import the placement hidden (it was hidden from the slideshow in the old app).
+	Hidden *bool `form:"hidden,omitempty" json:"hidden,omitempty"`
+
+	// Rotation Extra clockwise rotation chosen on the frame in the old app.
+	Rotation    *DeviceImportParamsRotation `form:"rotation,omitempty" json:"rotation,omitempty"`
+	XFilename   string                      `json:"X-Filename"`
+	XCapturedAt *time.Time                  `json:"X-Captured-At,omitempty"`
 }
+
+// DeviceImportParamsRotation defines parameters for DeviceImport.
+type DeviceImportParamsRotation int
+
+// DeviceImportCheckJSONBody defines parameters for DeviceImportCheck.
+type DeviceImportCheckJSONBody struct {
+	Sha256 *[]string `json:"sha256,omitempty"`
+
+	// Source An app a frame can import leftover photos from.
+	Source     *ItemOrigin `json:"source,omitempty"`
+	SourceKeys *[]string   `json:"source_keys,omitempty"`
+}
+
+// DeviceDecideInvitationJSONBody defines parameters for DeviceDecideInvitation.
+type DeviceDecideInvitationJSONBody struct {
+	Decision DeviceDecideInvitationJSONBodyDecision `json:"decision"`
+}
+
+// DeviceDecideInvitationJSONBodyDecision defines parameters for DeviceDecideInvitation.
+type DeviceDecideInvitationJSONBodyDecision string
 
 // DeviceDecideJoinJSONBody defines parameters for DeviceDecideJoin.
 type DeviceDecideJoinJSONBody struct {
@@ -2150,6 +4113,16 @@ type UpdateFrameJSONBody struct {
 type UpdateAlbumParams struct {
 	// IfMatch Quoted version, e.g. "7"
 	IfMatch IfMatch `json:"If-Match"`
+}
+
+// CreateCalendarParams defines parameters for CreateCalendar.
+type CreateCalendarParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// SendEventToFrameParams defines parameters for SendEventToFrame.
+type SendEventToFrameParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
 // CreateInviteJSONBody defines parameters for CreateInvite.
@@ -2233,6 +4206,18 @@ type BulkUpdatePlacementsJSONBody struct {
 // BulkUpdatePlacementsJSONBodyAction defines parameters for BulkUpdatePlacements.
 type BulkUpdatePlacementsJSONBodyAction string
 
+// SharePlacementsJSONBody defines parameters for SharePlacements.
+type SharePlacementsJSONBody struct {
+	DryRun       *bool `json:"dry_run,omitempty"`
+	FrameIds     []Id  `json:"frame_ids"`
+	PlacementIds []Id  `json:"placement_ids"`
+}
+
+// SharePlacementsParams defines parameters for SharePlacements.
+type SharePlacementsParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
 // ReplaceDeviceJSONBody defines parameters for ReplaceDevice.
 type ReplaceDeviceJSONBody struct {
 	Code string `json:"code"`
@@ -2283,6 +4268,18 @@ type UpdateMeJSONBody struct {
 	ShareLocationNames *bool   `json:"share_location_names,omitempty"`
 }
 
+// OperatorListReservationsParams defines parameters for OperatorListReservations.
+type OperatorListReservationsParams struct {
+	Status *ShopReservationStatus `form:"status,omitempty" json:"status,omitempty"`
+}
+
+// OperatorUpdateReservationJSONBody defines parameters for OperatorUpdateReservation.
+type OperatorUpdateReservationJSONBody struct {
+	// InternalNote Only for the operator; never emailed.
+	InternalNote *string                `json:"internal_note,omitempty"`
+	Status       *ShopReservationStatus `json:"status,omitempty"`
+}
+
 // ListMySendsParams defines parameters for ListMySends.
 type ListMySendsParams struct {
 	Cursor *Cursor                 `form:"cursor,omitempty" json:"cursor,omitempty"`
@@ -2303,11 +4300,28 @@ type ForwardSendJSONBody struct {
 	FrameIds []Id `json:"frame_ids"`
 }
 
+// CancelShopReservationJSONBody defines parameters for CancelShopReservation.
+type CancelShopReservationJSONBody struct {
+	Token string `json:"token"`
+}
+
+// GetStationLatestParams defines parameters for GetStationLatest.
+type GetStationLatestParams struct {
+	XStationId  string `json:"X-Station-Id"`
+	XStationKey string `json:"X-Station-Key"`
+}
+
 // DeviceAckJSONRequestBody defines body for DeviceAck for application/json ContentType.
 type DeviceAckJSONRequestBody DeviceAckJSONBody
 
 // DeviceHeartbeatJSONRequestBody defines body for DeviceHeartbeat for application/json ContentType.
 type DeviceHeartbeatJSONRequestBody = Heartbeat
+
+// DeviceImportCheckJSONRequestBody defines body for DeviceImportCheck for application/json ContentType.
+type DeviceImportCheckJSONRequestBody DeviceImportCheckJSONBody
+
+// DeviceDecideInvitationJSONRequestBody defines body for DeviceDecideInvitation for application/json ContentType.
+type DeviceDecideInvitationJSONRequestBody DeviceDecideInvitationJSONBody
 
 // DeviceDecideJoinJSONRequestBody defines body for DeviceDecideJoin for application/json ContentType.
 type DeviceDecideJoinJSONRequestBody DeviceDecideJoinJSONBody
@@ -2320,6 +4334,12 @@ type DeviceSetReactionJSONRequestBody DeviceSetReactionJSONBody
 
 // DeviceSendReplyJSONRequestBody defines body for DeviceSendReply for application/json ContentType.
 type DeviceSendReplyJSONRequestBody DeviceSendReplyJSONBody
+
+// DevicePutPluginCatalogJSONRequestBody defines body for DevicePutPluginCatalog for application/json ContentType.
+type DevicePutPluginCatalogJSONRequestBody = PluginCatalog
+
+// DevicePutPluginStatusJSONRequestBody defines body for DevicePutPluginStatus for application/json ContentType.
+type DevicePutPluginStatusJSONRequestBody = PluginStatusReport
 
 // DevicePatchSettingsApplicationMergePatchPlusJSONRequestBody defines body for DevicePatchSettings for application/merge-patch+json ContentType.
 type DevicePatchSettingsApplicationMergePatchPlusJSONRequestBody = FrameSettingsPatch
@@ -2342,8 +4362,20 @@ type CreateAlbumJSONRequestBody = AlbumWrite
 // UpdateAlbumJSONRequestBody defines body for UpdateAlbum for application/json ContentType.
 type UpdateAlbumJSONRequestBody = AlbumWrite
 
+// CreateCalendarJSONRequestBody defines body for CreateCalendar for application/json ContentType.
+type CreateCalendarJSONRequestBody = CalendarSourceCreate
+
+// UpdateCalendarJSONRequestBody defines body for UpdateCalendar for application/json ContentType.
+type UpdateCalendarJSONRequestBody = CalendarSourceUpdate
+
+// TestCalendarJSONRequestBody defines body for TestCalendar for application/json ContentType.
+type TestCalendarJSONRequestBody = CalendarSourceCreate
+
 // SendFrameCommandJSONRequestBody defines body for SendFrameCommand for application/json ContentType.
 type SendFrameCommandJSONRequestBody = FrameCommand
+
+// SendEventToFrameJSONRequestBody defines body for SendEventToFrame for application/json ContentType.
+type SendEventToFrameJSONRequestBody = EventInvitationCreate
 
 // CreateInviteJSONRequestBody defines body for CreateInvite for application/json ContentType.
 type CreateInviteJSONRequestBody CreateInviteJSONBody
@@ -2360,6 +4392,9 @@ type UpdatePlacementJSONRequestBody UpdatePlacementJSONBody
 // BulkUpdatePlacementsJSONRequestBody defines body for BulkUpdatePlacements for application/json ContentType.
 type BulkUpdatePlacementsJSONRequestBody BulkUpdatePlacementsJSONBody
 
+// SharePlacementsJSONRequestBody defines body for SharePlacements for application/json ContentType.
+type SharePlacementsJSONRequestBody SharePlacementsJSONBody
+
 // ReplaceDeviceJSONRequestBody defines body for ReplaceDevice for application/json ContentType.
 type ReplaceDeviceJSONRequestBody ReplaceDeviceJSONBody
 
@@ -2368,6 +4403,9 @@ type UpdateFrameSettingsApplicationMergePatchPlusJSONRequestBody = FrameSettings
 
 // TransferOwnershipJSONRequestBody defines body for TransferOwnership for application/json ContentType.
 type TransferOwnershipJSONRequestBody TransferOwnershipJSONBody
+
+// CreateTvLinkJSONRequestBody defines body for CreateTvLink for application/json ContentType.
+type CreateTvLinkJSONRequestBody = TvLinkCreate
 
 // UpdateItemJSONRequestBody defines body for UpdateItem for application/json ContentType.
 type UpdateItemJSONRequestBody UpdateItemJSONBody
@@ -2381,11 +4419,20 @@ type RegisterPushEndpointJSONRequestBody = PushEndpointCreate
 // OperatorSetLimitsJSONRequestBody defines body for OperatorSetLimits for application/json ContentType.
 type OperatorSetLimitsJSONRequestBody = Limits
 
+// OperatorUpdateReservationJSONRequestBody defines body for OperatorUpdateReservation for application/json ContentType.
+type OperatorUpdateReservationJSONRequestBody OperatorUpdateReservationJSONBody
+
 // CreateSendJSONRequestBody defines body for CreateSend for application/json ContentType.
 type CreateSendJSONRequestBody = SendCreate
 
 // ForwardSendJSONRequestBody defines body for ForwardSend for application/json ContentType.
 type ForwardSendJSONRequestBody ForwardSendJSONBody
+
+// CreateShopReservationJSONRequestBody defines body for CreateShopReservation for application/json ContentType.
+type CreateShopReservationJSONRequestBody = ShopReservationCreate
+
+// CancelShopReservationJSONRequestBody defines body for CancelShopReservation for application/json ContentType.
+type CancelShopReservationJSONRequestBody CancelShopReservationJSONBody
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -2396,17 +4443,35 @@ type ServerInterface interface {
 	// (POST /v1/device/acks)
 	DeviceAck(w http.ResponseWriter, r *http.Request)
 
+	// (POST /v1/device/calendar/sync)
+	DeviceSyncCalendars(w http.ResponseWriter, r *http.Request)
+
 	// (GET /v1/device/changes)
 	DeviceGetChanges(w http.ResponseWriter, r *http.Request, params DeviceGetChangesParams)
 
 	// (POST /v1/device/code)
 	DeviceGetCode(w http.ResponseWriter, r *http.Request)
 
+	// (DELETE /v1/device/countdowns/{eventId})
+	DeviceClearCountdown(w http.ResponseWriter, r *http.Request, eventId EventId)
+
+	// (PUT /v1/device/countdowns/{eventId})
+	DeviceSetCountdown(w http.ResponseWriter, r *http.Request, eventId EventId)
+
 	// (POST /v1/device/heartbeat)
 	DeviceHeartbeat(w http.ResponseWriter, r *http.Request)
 
 	// (POST /v1/device/imports)
 	DeviceImport(w http.ResponseWriter, r *http.Request, params DeviceImportParams)
+
+	// (POST /v1/device/imports/check)
+	DeviceImportCheck(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/device/invitations)
+	DeviceListInvitations(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/device/invitations/{invitationId})
+	DeviceDecideInvitation(w http.ResponseWriter, r *http.Request, invitationId InvitationId)
 
 	// (GET /v1/device/join-requests)
 	DeviceListJoinRequests(w http.ResponseWriter, r *http.Request)
@@ -2425,6 +4490,15 @@ type ServerInterface interface {
 
 	// (POST /v1/device/placements/{placementId}/replies)
 	DeviceSendReply(w http.ResponseWriter, r *http.Request, placementId PlacementId)
+
+	// (PUT /v1/device/plugins/catalog)
+	DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/device/plugins/registry)
+	DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/device/plugins/status)
+	DevicePutPluginStatus(w http.ResponseWriter, r *http.Request)
 
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(w http.ResponseWriter, r *http.Request, params DevicePatchSettingsParams)
@@ -2465,8 +4539,44 @@ type ServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(w http.ResponseWriter, r *http.Request, frameId FrameId, albumId Id, params UpdateAlbumParams)
 
+	// (GET /v1/frames/{frameId}/calendar)
+	GetFrameCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (GET /v1/frames/{frameId}/calendars)
+	ListCalendars(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/calendars)
+	CreateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateCalendarParams)
+
+	// (DELETE /v1/frames/{frameId}/calendars/{calendarId})
+	DeleteCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (PATCH /v1/frames/{frameId}/calendars/{calendarId})
+	UpdateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (POST /v1/frames/{frameId}/calendars/{calendarId}/sync)
+	SyncCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId)
+
+	// (POST /v1/frames/{frameId}/calendars:test)
+	TestCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (POST /v1/frames/{frameId}/commands)
 	SendFrameCommand(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (DELETE /v1/frames/{frameId}/countdowns/{eventId})
+	ClearCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId)
+
+	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
+	SetCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId)
+
+	// (GET /v1/frames/{frameId}/events)
+	ListEventInvitations(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/events)
+	SendEventToFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params SendEventToFrameParams)
+
+	// (DELETE /v1/frames/{frameId}/events/{invitationId})
+	WithdrawEventInvitation(w http.ResponseWriter, r *http.Request, frameId FrameId, invitationId InvitationId)
 
 	// (GET /v1/frames/{frameId}/health)
 	GetFrameHealth(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -2510,6 +4620,12 @@ type ServerInterface interface {
 	// (POST /v1/frames/{frameId}/placements:bulk)
 	BulkUpdatePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
+	// (POST /v1/frames/{frameId}/placements:share)
+	SharePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params SharePlacementsParams)
+
+	// (GET /v1/frames/{frameId}/plugins)
+	GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -2521,6 +4637,15 @@ type ServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (GET /v1/frames/{frameId}/tv-links)
+	ListTvLinks(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/tv-links)
+	CreateTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (DELETE /v1/frames/{frameId}/tv-links/{linkId})
+	RevokeTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId, linkId Id)
 
 	// (GET /v1/geocode)
 	Geocode(w http.ResponseWriter, r *http.Request, params GeocodeParams)
@@ -2561,6 +4686,12 @@ type ServerInterface interface {
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(w http.ResponseWriter, r *http.Request)
 
+	// (GET /v1/operator/reservations)
+	OperatorListReservations(w http.ResponseWriter, r *http.Request, params OperatorListReservationsParams)
+
+	// (PATCH /v1/operator/reservations/{reservationId})
+	OperatorUpdateReservation(w http.ResponseWriter, r *http.Request, reservationId Id)
+
 	// (GET /v1/operator/stats)
 	OperatorStats(w http.ResponseWriter, r *http.Request)
 
@@ -2578,6 +4709,24 @@ type ServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(w http.ResponseWriter, r *http.Request, sendId Id)
+
+	// (POST /v1/shop/reservations)
+	CreateShopReservation(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/shop/reservations/cancel)
+	CancelShopReservation(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/stations/latest)
+	GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams)
+
+	// (GET /v1/stations/public)
+	ListPublicStations(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/stations/{stationId}/public)
+	GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string)
+
+	// (GET /v1/tv/{token})
+	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -2608,6 +4757,20 @@ func (siw *ServerInterfaceWrapper) DeviceAck(w http.ResponseWriter, r *http.Requ
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceAck(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceSyncCalendars operation middleware
+func (siw *ServerInterfaceWrapper) DeviceSyncCalendars(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceSyncCalendars(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2677,6 +4840,58 @@ func (siw *ServerInterfaceWrapper) DeviceGetCode(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(w, r)
 }
 
+// DeviceClearCountdown operation middleware
+func (siw *ServerInterfaceWrapper) DeviceClearCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceClearCountdown(w, r, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceSetCountdown operation middleware
+func (siw *ServerInterfaceWrapper) DeviceSetCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceSetCountdown(w, r, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // DeviceHeartbeat operation middleware
 func (siw *ServerInterfaceWrapper) DeviceHeartbeat(w http.ResponseWriter, r *http.Request) {
 
@@ -2699,6 +4914,136 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params DeviceImportParams
+
+	// ------------- Optional query parameter "caption" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "caption", r.URL.Query(), &params.Caption, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "caption"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "caption", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "source" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "source", r.URL.Query(), &params.Source, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "source"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "source", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "source_key" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "source_key", r.URL.Query(), &params.SourceKey, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "source_key"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "source_key", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "sender_name" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "sender_name", r.URL.Query(), &params.SenderName, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "sender_name"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sender_name", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "received_at" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "received_at", r.URL.Query(), &params.ReceivedAt, runtime.BindQueryParameterOptions{Type: "string", Format: "date-time"})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "received_at"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "received_at", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "fit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "fit", r.URL.Query(), &params.Fit, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "fit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "fit", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "focal_x" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "focal_x", r.URL.Query(), &params.FocalX, runtime.BindQueryParameterOptions{Type: "number", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "focal_x"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "focal_x", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "focal_y" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "focal_y", r.URL.Query(), &params.FocalY, runtime.BindQueryParameterOptions{Type: "number", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "focal_y"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "focal_y", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "hidden" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "hidden", r.URL.Query(), &params.Hidden, runtime.BindQueryParameterOptions{Type: "boolean", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "hidden"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "hidden", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "rotation" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "rotation", r.URL.Query(), &params.Rotation, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "rotation"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "rotation", Err: err})
+		}
+		return
+	}
 
 	headers := r.Header
 
@@ -2746,6 +5091,60 @@ func (siw *ServerInterfaceWrapper) DeviceImport(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceImport(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceImportCheck operation middleware
+func (siw *ServerInterfaceWrapper) DeviceImportCheck(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceImportCheck(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceListInvitations operation middleware
+func (siw *ServerInterfaceWrapper) DeviceListInvitations(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceListInvitations(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceDecideInvitation operation middleware
+func (siw *ServerInterfaceWrapper) DeviceDecideInvitation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "invitationId" -------------
+	var invitationId InvitationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "invitationId", r.PathValue("invitationId"), &invitationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "invitationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceDecideInvitation(w, r, invitationId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -2906,6 +5305,48 @@ func (siw *ServerInterfaceWrapper) DeviceSendReply(w http.ResponseWriter, r *htt
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeviceSendReply(w, r, placementId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DevicePutPluginCatalog operation middleware
+func (siw *ServerInterfaceWrapper) DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DevicePutPluginCatalog(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeviceGetPluginRegistry operation middleware
+func (siw *ServerInterfaceWrapper) DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeviceGetPluginRegistry(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DevicePutPluginStatus operation middleware
+func (siw *ServerInterfaceWrapper) DevicePutPluginStatus(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DevicePutPluginStatus(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3285,6 +5726,239 @@ func (siw *ServerInterfaceWrapper) UpdateAlbum(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// GetFrameCalendar operation middleware
+func (siw *ServerInterfaceWrapper) GetFrameCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFrameCalendar(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListCalendars operation middleware
+func (siw *ServerInterfaceWrapper) ListCalendars(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListCalendars(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateCalendar operation middleware
+func (siw *ServerInterfaceWrapper) CreateCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateCalendarParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateCalendar(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteCalendar operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateCalendar operation middleware
+func (siw *ServerInterfaceWrapper) UpdateCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SyncCalendar operation middleware
+func (siw *ServerInterfaceWrapper) SyncCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "calendarId" -------------
+	var calendarId CalendarId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "calendarId", r.PathValue("calendarId"), &calendarId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "calendarId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SyncCalendar(w, r, frameId, calendarId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// TestCalendar operation middleware
+func (siw *ServerInterfaceWrapper) TestCalendar(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.TestCalendar(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // SendFrameCommand operation middleware
 func (siw *ServerInterfaceWrapper) SendFrameCommand(w http.ResponseWriter, r *http.Request) {
 
@@ -3302,6 +5976,187 @@ func (siw *ServerInterfaceWrapper) SendFrameCommand(w http.ResponseWriter, r *ht
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.SendFrameCommand(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ClearCountdown operation middleware
+func (siw *ServerInterfaceWrapper) ClearCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ClearCountdown(w, r, frameId, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SetCountdown operation middleware
+func (siw *ServerInterfaceWrapper) SetCountdown(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "eventId" -------------
+	var eventId EventId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "eventId", r.PathValue("eventId"), &eventId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "eventId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SetCountdown(w, r, frameId, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListEventInvitations operation middleware
+func (siw *ServerInterfaceWrapper) ListEventInvitations(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListEventInvitations(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// SendEventToFrame operation middleware
+func (siw *ServerInterfaceWrapper) SendEventToFrame(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SendEventToFrameParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SendEventToFrame(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// WithdrawEventInvitation operation middleware
+func (siw *ServerInterfaceWrapper) WithdrawEventInvitation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "invitationId" -------------
+	var invitationId InvitationId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "invitationId", r.PathValue("invitationId"), &invitationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "invitationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.WithdrawEventInvitation(w, r, frameId, invitationId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -3885,6 +6740,82 @@ func (siw *ServerInterfaceWrapper) BulkUpdatePlacements(w http.ResponseWriter, r
 	handler.ServeHTTP(w, r)
 }
 
+// SharePlacements operation middleware
+func (siw *ServerInterfaceWrapper) SharePlacements(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params SharePlacementsParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.SharePlacements(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetFramePlugins operation middleware
+func (siw *ServerInterfaceWrapper) GetFramePlugins(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetFramePlugins(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // ReplaceDevice operation middleware
 func (siw *ServerInterfaceWrapper) ReplaceDevice(w http.ResponseWriter, r *http.Request) {
 
@@ -4008,6 +6939,93 @@ func (siw *ServerInterfaceWrapper) TransferOwnership(w http.ResponseWriter, r *h
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.TransferOwnership(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListTvLinks operation middleware
+func (siw *ServerInterfaceWrapper) ListTvLinks(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListTvLinks(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateTvLink operation middleware
+func (siw *ServerInterfaceWrapper) CreateTvLink(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateTvLink(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RevokeTvLink operation middleware
+func (siw *ServerInterfaceWrapper) RevokeTvLink(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "linkId" -------------
+	var linkId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "linkId", r.PathValue("linkId"), &linkId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "linkId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RevokeTvLink(w, r, frameId, linkId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -4311,6 +7329,65 @@ func (siw *ServerInterfaceWrapper) OperatorSetLimits(w http.ResponseWriter, r *h
 	handler.ServeHTTP(w, r)
 }
 
+// OperatorListReservations operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListReservations(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params OperatorListReservationsParams
+
+	// ------------- Optional query parameter "status" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "status", r.URL.Query(), &params.Status, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "status"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "status", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListReservations(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorUpdateReservation operation middleware
+func (siw *ServerInterfaceWrapper) OperatorUpdateReservation(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "reservationId" -------------
+	var reservationId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "reservationId", r.PathValue("reservationId"), &reservationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "reservationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorUpdateReservation(w, r, reservationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorStats operation middleware
 func (siw *ServerInterfaceWrapper) OperatorStats(w http.ResponseWriter, r *http.Request) {
 
@@ -4503,6 +7580,168 @@ func (siw *ServerInterfaceWrapper) ForwardSend(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// CreateShopReservation operation middleware
+func (siw *ServerInterfaceWrapper) CreateShopReservation(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateShopReservation(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CancelShopReservation operation middleware
+func (siw *ServerInterfaceWrapper) CancelShopReservation(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CancelShopReservation(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetStationLatest operation middleware
+func (siw *ServerInterfaceWrapper) GetStationLatest(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetStationLatestParams
+
+	headers := r.Header
+
+	// ------------- Required header parameter "X-Station-Id" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Station-Id")]; found {
+		var XStationId string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Station-Id", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Station-Id", valueList[0], &XStationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Station-Id", Err: err})
+			return
+		}
+
+		params.XStationId = XStationId
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Station-Id is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Station-Id", Err: err})
+		return
+	}
+
+	// ------------- Required header parameter "X-Station-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("X-Station-Key")]; found {
+		var XStationKey string
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "X-Station-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "X-Station-Key", valueList[0], &XStationKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: true, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "X-Station-Key", Err: err})
+			return
+		}
+
+		params.XStationKey = XStationKey
+
+	} else {
+		err := fmt.Errorf("Header parameter X-Station-Key is required, but not found")
+		siw.ErrorHandlerFunc(w, r, &RequiredHeaderError{ParamName: "X-Station-Key", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStationLatest(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListPublicStations operation middleware
+func (siw *ServerInterfaceWrapper) ListPublicStations(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListPublicStations(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetStationPublic operation middleware
+func (siw *ServerInterfaceWrapper) GetStationPublic(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "stationId" -------------
+	var stationId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "stationId", r.PathValue("stationId"), &stationId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "stationId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetStationPublic(w, r, stationId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetTvSlideshow operation middleware
+func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "token" -------------
+	var token string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "token", r.PathValue("token"), &token, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "token", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTvSlideshow(w, r, token)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -4625,16 +7864,25 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/.well-known/kinframe", wrapper.GetDiscovery)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/acks", wrapper.DeviceAck)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/calendar/sync", wrapper.DeviceSyncCalendars)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/changes", wrapper.DeviceGetChanges)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/code", wrapper.DeviceGetCode)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/countdowns/{eventId}", wrapper.DeviceClearCountdown)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/countdowns/{eventId}", wrapper.DeviceSetCountdown)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/heartbeat", wrapper.DeviceHeartbeat)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports", wrapper.DeviceImport)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/imports/check", wrapper.DeviceImportCheck)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/invitations", wrapper.DeviceListInvitations)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/invitations/{invitationId}", wrapper.DeviceDecideInvitation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/join-requests", wrapper.DeviceListJoinRequests)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/join-requests/{requestId}", wrapper.DeviceDecideJoin)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/device/members/{userId}", wrapper.DeviceRemoveMember)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/placements/{placementId}", wrapper.DevicePatchPlacement)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/placements/{placementId}/reaction", wrapper.DeviceSetReaction)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/device/placements/{placementId}/replies", wrapper.DeviceSendReply)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/catalog", wrapper.DevicePutPluginCatalog)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/plugins/registry", wrapper.DeviceGetPluginRegistry)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/device/plugins/status", wrapper.DevicePutPluginStatus)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/device/settings", wrapper.DevicePatchSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/enroll", wrapper.EnrollDevice)
@@ -4647,7 +7895,19 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/albums", wrapper.CreateAlbum)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.DeleteAlbum)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/albums/{albumId}", wrapper.UpdateAlbum)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendar", wrapper.GetFrameCalendar)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.ListCalendars)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars", wrapper.CreateCalendar)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}", wrapper.DeleteCalendar)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}", wrapper.UpdateCalendar)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars/{calendarId}/sync", wrapper.SyncCalendar)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/calendars:test", wrapper.TestCalendar)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/commands", wrapper.SendFrameCommand)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.ClearCountdown)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.SetCountdown)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.ListEventInvitations)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.SendEventToFrame)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/events/{invitationId}", wrapper.WithdrawEventInvitation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/health", wrapper.GetFrameHealth)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/invites", wrapper.ListInvites)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/invites", wrapper.CreateInvite)
@@ -4662,10 +7922,15 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.PurgePlacement)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/placements/{placementId}", wrapper.UpdatePlacement)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:bulk", wrapper.BulkUpdatePlacements)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/placements:share", wrapper.SharePlacements)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/plugins", wrapper.GetFramePlugins)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/replace-device", wrapper.ReplaceDevice)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/transfer", wrapper.TransferOwnership)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.ListTvLinks)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.CreateTvLink)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links/{linkId}", wrapper.RevokeTvLink)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/redeem", wrapper.RedeemFrameCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/geocode", wrapper.Geocode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/invites/{token}", wrapper.PreviewInvite)
@@ -4680,12 +7945,20 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/push-endpoints/{endpointId}", wrapper.DeletePushEndpoint)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/stats", wrapper.OperatorStats)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends", wrapper.CreateSend)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.GetSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations", wrapper.CreateShopReservation)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/{stationId}/public", wrapper.GetStationPublic)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/latest", wrapper.GetStationLatest)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/public", wrapper.ListPublicStations)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
 }
@@ -4726,6 +7999,21 @@ type DeviceAck204Response struct {
 
 func (response DeviceAck204Response) VisitDeviceAckResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceSyncCalendarsRequestObject struct {
+}
+
+type DeviceSyncCalendarsResponseObject interface {
+	VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error
+}
+
+type DeviceSyncCalendars202Response struct {
+}
+
+func (response DeviceSyncCalendars202Response) VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error {
+	w.WriteHeader(202)
 	return nil
 }
 
@@ -4776,6 +8064,54 @@ func (response DeviceGetCode200JSONResponse) VisitDeviceGetCodeResponse(w http.R
 	return err
 }
 
+type DeviceClearCountdownRequestObject struct {
+	EventId EventId `json:"eventId"`
+}
+
+type DeviceClearCountdownResponseObject interface {
+	VisitDeviceClearCountdownResponse(w http.ResponseWriter) error
+}
+
+type DeviceClearCountdown204Response struct {
+}
+
+func (response DeviceClearCountdown204Response) VisitDeviceClearCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceSetCountdownRequestObject struct {
+	EventId EventId `json:"eventId"`
+}
+
+type DeviceSetCountdownResponseObject interface {
+	VisitDeviceSetCountdownResponse(w http.ResponseWriter) error
+}
+
+type DeviceSetCountdown204Response struct {
+}
+
+func (response DeviceSetCountdown204Response) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceSetCountdown404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DeviceSetCountdown404ApplicationProblemPlusJSONResponse) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type DeviceHeartbeatRequestObject struct {
 	Body *DeviceHeartbeatJSONRequestBody
 }
@@ -4801,6 +8137,20 @@ type DeviceImportResponseObject interface {
 	VisitDeviceImportResponse(w http.ResponseWriter) error
 }
 
+type DeviceImport200JSONResponse Placement
+
+func (response DeviceImport200JSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type DeviceImport202JSONResponse Placement
 
 func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
@@ -4811,6 +8161,119 @@ func (response DeviceImport202JSONResponse) VisitDeviceImportResponse(w http.Res
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceImportdefaultApplicationProblemPlusJSONResponse) VisitDeviceImportResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportCheckRequestObject struct {
+	Body *DeviceImportCheckJSONRequestBody
+}
+
+type DeviceImportCheckResponseObject interface {
+	VisitDeviceImportCheckResponse(w http.ResponseWriter) error
+}
+
+type DeviceImportCheck200JSONResponse struct {
+	Known           []string  `json:"known"`
+	KnownSourceKeys *[]string `json:"known_source_keys,omitempty"`
+}
+
+func (response DeviceImportCheck200JSONResponse) VisitDeviceImportCheckResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceImportCheckdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceImportCheckdefaultApplicationProblemPlusJSONResponse) VisitDeviceImportCheckResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceListInvitationsRequestObject struct {
+}
+
+type DeviceListInvitationsResponseObject interface {
+	VisitDeviceListInvitationsResponse(w http.ResponseWriter) error
+}
+
+type DeviceListInvitations200JSONResponse []EventInvitation
+
+func (response DeviceListInvitations200JSONResponse) VisitDeviceListInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceDecideInvitationRequestObject struct {
+	InvitationId InvitationId `json:"invitationId"`
+	Body         *DeviceDecideInvitationJSONRequestBody
+}
+
+type DeviceDecideInvitationResponseObject interface {
+	VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error
+}
+
+type DeviceDecideInvitation204Response struct {
+}
+
+func (response DeviceDecideInvitation204Response) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceDecideInvitation409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response DeviceDecideInvitation409ApplicationProblemPlusJSONResponse) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -4941,6 +8404,118 @@ type DeviceSendReply204Response struct {
 func (response DeviceSendReply204Response) VisitDeviceSendReplyResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type DevicePutPluginCatalogRequestObject struct {
+	Body *DevicePutPluginCatalogJSONRequestBody
+}
+
+type DevicePutPluginCatalogResponseObject interface {
+	VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error
+}
+
+type DevicePutPluginCatalog204Response struct {
+}
+
+func (response DevicePutPluginCatalog204Response) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DevicePutPluginCatalogdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGetPluginRegistryRequestObject struct {
+}
+
+type DeviceGetPluginRegistryResponseObject interface {
+	VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error
+}
+
+type DeviceGetPluginRegistry200JSONResponse PluginRegistry
+
+func (response DeviceGetPluginRegistry200JSONResponse) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeviceGetPluginRegistry204Response struct {
+}
+
+func (response DeviceGetPluginRegistry204Response) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeviceGetPluginRegistrydefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeviceGetPluginRegistrydefaultApplicationProblemPlusJSONResponse) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DevicePutPluginStatusRequestObject struct {
+	Body *DevicePutPluginStatusJSONRequestBody
+}
+
+type DevicePutPluginStatusResponseObject interface {
+	VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error
+}
+
+type DevicePutPluginStatus204Response struct {
+}
+
+func (response DevicePutPluginStatus204Response) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DevicePutPluginStatusdefaultApplicationProblemPlusJSONResponse) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type DevicePatchSettingsRequestObject struct {
@@ -5393,6 +8968,312 @@ func (response UpdateAlbum412ApplicationProblemPlusJSONResponse) VisitUpdateAlbu
 	return err
 }
 
+type GetFrameCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type GetFrameCalendarResponseObject interface {
+	VisitGetFrameCalendarResponse(w http.ResponseWriter) error
+}
+
+type GetFrameCalendar200JSONResponse CalendarView
+
+func (response GetFrameCalendar200JSONResponse) VisitGetFrameCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFrameCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFrameCalendardefaultApplicationProblemPlusJSONResponse) VisitGetFrameCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCalendarsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListCalendarsResponseObject interface {
+	VisitListCalendarsResponse(w http.ResponseWriter) error
+}
+
+type ListCalendars200JSONResponse []CalendarSource
+
+func (response ListCalendars200JSONResponse) VisitListCalendarsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListCalendarsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListCalendarsdefaultApplicationProblemPlusJSONResponse) VisitListCalendarsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  CreateCalendarParams
+	Body    *CreateCalendarJSONRequestBody
+}
+
+type CreateCalendarResponseObject interface {
+	VisitCreateCalendarResponse(w http.ResponseWriter) error
+}
+
+type CreateCalendar201JSONResponse CalendarSource
+
+func (response CreateCalendar201JSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendar422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateCalendar422ApplicationProblemPlusJSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateCalendardefaultApplicationProblemPlusJSONResponse) VisitCreateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+}
+
+type DeleteCalendarResponseObject interface {
+	VisitDeleteCalendarResponse(w http.ResponseWriter) error
+}
+
+type DeleteCalendar204Response struct {
+}
+
+func (response DeleteCalendar204Response) VisitDeleteCalendarResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteCalendardefaultApplicationProblemPlusJSONResponse) VisitDeleteCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+	Body       *UpdateCalendarJSONRequestBody
+}
+
+type UpdateCalendarResponseObject interface {
+	VisitUpdateCalendarResponse(w http.ResponseWriter) error
+}
+
+type UpdateCalendar200JSONResponse CalendarSource
+
+func (response UpdateCalendar200JSONResponse) VisitUpdateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateCalendardefaultApplicationProblemPlusJSONResponse) VisitUpdateCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncCalendarRequestObject struct {
+	FrameId    FrameId    `json:"frameId"`
+	CalendarId CalendarId `json:"calendarId"`
+}
+
+type SyncCalendarResponseObject interface {
+	VisitSyncCalendarResponse(w http.ResponseWriter) error
+}
+
+type SyncCalendar202JSONResponse CalendarSource
+
+func (response SyncCalendar202JSONResponse) VisitSyncCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(202)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SyncCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SyncCalendardefaultApplicationProblemPlusJSONResponse) VisitSyncCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendarRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *TestCalendarJSONRequestBody
+}
+
+type TestCalendarResponseObject interface {
+	VisitTestCalendarResponse(w http.ResponseWriter) error
+}
+
+type TestCalendar200JSONResponse CalendarTestResult
+
+func (response TestCalendar200JSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendar429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response TestCalendar429ApplicationProblemPlusJSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type TestCalendardefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response TestCalendardefaultApplicationProblemPlusJSONResponse) VisitTestCalendarResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type SendFrameCommandRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *SendFrameCommandJSONRequestBody
@@ -5452,6 +9333,220 @@ type SendFrameCommanddefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response SendFrameCommanddefaultApplicationProblemPlusJSONResponse) VisitSendFrameCommandResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ClearCountdownRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	EventId EventId `json:"eventId"`
+}
+
+type ClearCountdownResponseObject interface {
+	VisitClearCountdownResponse(w http.ResponseWriter) error
+}
+
+type ClearCountdown204Response struct {
+}
+
+func (response ClearCountdown204Response) VisitClearCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type ClearCountdowndefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ClearCountdowndefaultApplicationProblemPlusJSONResponse) VisitClearCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SetCountdownRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	EventId EventId `json:"eventId"`
+}
+
+type SetCountdownResponseObject interface {
+	VisitSetCountdownResponse(w http.ResponseWriter) error
+}
+
+type SetCountdown204Response struct {
+}
+
+func (response SetCountdown204Response) VisitSetCountdownResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type SetCountdowndefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SetCountdowndefaultApplicationProblemPlusJSONResponse) VisitSetCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEventInvitationsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListEventInvitationsResponseObject interface {
+	VisitListEventInvitationsResponse(w http.ResponseWriter) error
+}
+
+type ListEventInvitations200JSONResponse []EventInvitation
+
+func (response ListEventInvitations200JSONResponse) VisitListEventInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEventInvitationsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListEventInvitationsdefaultApplicationProblemPlusJSONResponse) VisitListEventInvitationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFrameRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  SendEventToFrameParams
+	Body    *SendEventToFrameJSONRequestBody
+}
+
+type SendEventToFrameResponseObject interface {
+	VisitSendEventToFrameResponse(w http.ResponseWriter) error
+}
+
+type SendEventToFrame201JSONResponse EventInvitation
+
+func (response SendEventToFrame201JSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFrame422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SendEventToFrame422ApplicationProblemPlusJSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SendEventToFramedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response SendEventToFramedefaultApplicationProblemPlusJSONResponse) VisitSendEventToFrameResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type WithdrawEventInvitationRequestObject struct {
+	FrameId      FrameId      `json:"frameId"`
+	InvitationId InvitationId `json:"invitationId"`
+}
+
+type WithdrawEventInvitationResponseObject interface {
+	VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error
+}
+
+type WithdrawEventInvitation204Response struct {
+}
+
+func (response WithdrawEventInvitation204Response) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type WithdrawEventInvitation409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response WithdrawEventInvitation409ApplicationProblemPlusJSONResponse) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type WithdrawEventInvitationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response WithdrawEventInvitationdefaultApplicationProblemPlusJSONResponse) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -5892,6 +9987,113 @@ func (response BulkUpdatePlacements200JSONResponse) VisitBulkUpdatePlacementsRes
 	return err
 }
 
+type SharePlacementsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  SharePlacementsParams
+	Body    *SharePlacementsJSONRequestBody
+}
+
+type SharePlacementsResponseObject interface {
+	VisitSharePlacementsResponse(w http.ResponseWriter) error
+}
+
+type SharePlacements200JSONResponse ShareResult
+
+func (response SharePlacements200JSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements403ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response SharePlacements403ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(403)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements404ApplicationProblemPlusJSONResponse Problem
+
+func (response SharePlacements404ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type SharePlacements422ApplicationProblemPlusJSONResponse Problem
+
+func (response SharePlacements422ApplicationProblemPlusJSONResponse) VisitSharePlacementsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFramePluginsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type GetFramePluginsResponseObject interface {
+	VisitGetFramePluginsResponse(w http.ResponseWriter) error
+}
+
+type GetFramePlugins200JSONResponse FramePlugins
+
+func (response GetFramePlugins200JSONResponse) VisitGetFramePluginsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetFramePluginsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetFramePluginsdefaultApplicationProblemPlusJSONResponse) VisitGetFramePluginsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ReplaceDeviceRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *ReplaceDeviceJSONRequestBody
@@ -6034,6 +10236,119 @@ type TransferOwnershipdefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response TransferOwnershipdefaultApplicationProblemPlusJSONResponse) VisitTransferOwnershipResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListTvLinksRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListTvLinksResponseObject interface {
+	VisitListTvLinksResponse(w http.ResponseWriter) error
+}
+
+type ListTvLinks200JSONResponse []TvLink
+
+func (response ListTvLinks200JSONResponse) VisitListTvLinksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListTvLinksdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListTvLinksdefaultApplicationProblemPlusJSONResponse) VisitListTvLinksResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTvLinkRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Body    *CreateTvLinkJSONRequestBody
+}
+
+type CreateTvLinkResponseObject interface {
+	VisitCreateTvLinkResponse(w http.ResponseWriter) error
+}
+
+type CreateTvLink201JSONResponse TvLink
+
+func (response CreateTvLink201JSONResponse) VisitCreateTvLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTvLinkdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateTvLinkdefaultApplicationProblemPlusJSONResponse) VisitCreateTvLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RevokeTvLinkRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	LinkId  Id      `json:"linkId"`
+}
+
+type RevokeTvLinkResponseObject interface {
+	VisitRevokeTvLinkResponse(w http.ResponseWriter) error
+}
+
+type RevokeTvLink204Response struct {
+}
+
+func (response RevokeTvLink204Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RevokeTvLinkdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RevokeTvLinkdefaultApplicationProblemPlusJSONResponse) VisitRevokeTvLinkResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -6491,6 +10806,87 @@ func (response OperatorSetLimits200JSONResponse) VisitOperatorSetLimitsResponse(
 	return err
 }
 
+type OperatorListReservationsRequestObject struct {
+	Params OperatorListReservationsParams
+}
+
+type OperatorListReservationsResponseObject interface {
+	VisitOperatorListReservationsResponse(w http.ResponseWriter) error
+}
+
+type OperatorListReservations200JSONResponse struct {
+	Reservations []ShopReservation `json:"reservations"`
+}
+
+func (response OperatorListReservations200JSONResponse) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListReservationsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListReservationsdefaultApplicationProblemPlusJSONResponse) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorUpdateReservationRequestObject struct {
+	ReservationId Id `json:"reservationId"`
+	Body          *OperatorUpdateReservationJSONRequestBody
+}
+
+type OperatorUpdateReservationResponseObject interface {
+	VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error
+}
+
+type OperatorUpdateReservation200JSONResponse ShopReservation
+
+func (response OperatorUpdateReservation200JSONResponse) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorUpdateReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorUpdateReservationdefaultApplicationProblemPlusJSONResponse) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorStatsRequestObject struct {
 }
 
@@ -6499,9 +10895,20 @@ type OperatorStatsResponseObject interface {
 }
 
 type OperatorStats200JSONResponse struct {
-	Frames          *int `json:"frames,omitempty"`
-	FramesOnline    *int `json:"frames_online,omitempty"`
-	Items           *int `json:"items,omitempty"`
+	Frames       *int `json:"frames,omitempty"`
+	FramesOnline *int `json:"frames_online,omitempty"`
+	Items        *int `json:"items,omitempty"`
+
+	// MediaPipeline How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+	// `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+	// upload that did not conform and was transcoded). `reused_renditions` counts frame video
+	// renditions served from the master's bytes instead of a transcode.
+	MediaPipeline *struct {
+		Fallback         *int `json:"fallback,omitempty"`
+		Prepared         *int `json:"prepared,omitempty"`
+		ReusedRenditions *int `json:"reused_renditions,omitempty"`
+		Transcoded       *int `json:"transcoded,omitempty"`
+	} `json:"media_pipeline,omitempty"`
 	ProcessingQueue *int `json:"processing_queue,omitempty"`
 	StorageBytes    *int `json:"storage_bytes,omitempty"`
 	Users           *int `json:"users,omitempty"`
@@ -6689,6 +11096,268 @@ func (response ForwardSend202JSONResponse) VisitForwardSendResponse(w http.Respo
 	return err
 }
 
+type CreateShopReservationRequestObject struct {
+	Body *CreateShopReservationJSONRequestBody
+}
+
+type CreateShopReservationResponseObject interface {
+	VisitCreateShopReservationResponse(w http.ResponseWriter) error
+}
+
+type CreateShopReservation201JSONResponse ShopReservationReceipt
+
+func (response CreateShopReservation201JSONResponse) VisitCreateShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateShopReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateShopReservationdefaultApplicationProblemPlusJSONResponse) VisitCreateShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelShopReservationRequestObject struct {
+	Body *CancelShopReservationJSONRequestBody
+}
+
+type CancelShopReservationResponseObject interface {
+	VisitCancelShopReservationResponse(w http.ResponseWriter) error
+}
+
+type CancelShopReservation200JSONResponse struct {
+	// Reference Example: KF-7Q3M
+	Reference string                `json:"reference"`
+	Status    ShopReservationStatus `json:"status"`
+}
+
+func (response CancelShopReservation200JSONResponse) VisitCancelShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CancelShopReservationdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CancelShopReservationdefaultApplicationProblemPlusJSONResponse) VisitCancelShopReservationResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationLatestRequestObject struct {
+	Params GetStationLatestParams
+}
+
+type GetStationLatestResponseObject interface {
+	VisitGetStationLatestResponse(w http.ResponseWriter) error
+}
+
+type GetStationLatest200JSONResponse StationLatest
+
+func (response GetStationLatest200JSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationLatest404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetStationLatest404ApplicationProblemPlusJSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationLatest429ApplicationProblemPlusJSONResponse Problem
+
+func (response GetStationLatest429ApplicationProblemPlusJSONResponse) VisitGetStationLatestResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListPublicStationsRequestObject struct {
+}
+
+type ListPublicStationsResponseObject interface {
+	VisitListPublicStationsResponse(w http.ResponseWriter) error
+}
+
+type ListPublicStations200JSONResponse PublicStationList
+
+func (response ListPublicStations200JSONResponse) VisitListPublicStationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListPublicStations429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ListPublicStations429ApplicationProblemPlusJSONResponse) VisitListPublicStationsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationPublicRequestObject struct {
+	StationId string `json:"stationId"`
+}
+
+type GetStationPublicResponseObject interface {
+	VisitGetStationPublicResponse(w http.ResponseWriter) error
+}
+
+type GetStationPublic200JSONResponse StationPublic
+
+func (response GetStationPublic200JSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationPublic404ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response GetStationPublic404ApplicationProblemPlusJSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(404)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetStationPublic429ApplicationProblemPlusJSONResponse Problem
+
+func (response GetStationPublic429ApplicationProblemPlusJSONResponse) VisitGetStationPublicResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTvSlideshowRequestObject struct {
+	Token string `json:"token"`
+}
+
+type GetTvSlideshowResponseObject interface {
+	VisitGetTvSlideshowResponse(w http.ResponseWriter) error
+}
+
+type GetTvSlideshow200JSONResponse TvSlideshow
+
+func (response GetTvSlideshow200JSONResponse) VisitGetTvSlideshowResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTvSlideshowdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTvSlideshowdefaultApplicationProblemPlusJSONResponse) VisitGetTvSlideshowResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 
@@ -6698,17 +11367,35 @@ type StrictServerInterface interface {
 	// (POST /v1/device/acks)
 	DeviceAck(ctx context.Context, request DeviceAckRequestObject) (DeviceAckResponseObject, error)
 
+	// (POST /v1/device/calendar/sync)
+	DeviceSyncCalendars(ctx context.Context, request DeviceSyncCalendarsRequestObject) (DeviceSyncCalendarsResponseObject, error)
+
 	// (GET /v1/device/changes)
 	DeviceGetChanges(ctx context.Context, request DeviceGetChangesRequestObject) (DeviceGetChangesResponseObject, error)
 
 	// (POST /v1/device/code)
 	DeviceGetCode(ctx context.Context, request DeviceGetCodeRequestObject) (DeviceGetCodeResponseObject, error)
 
+	// (DELETE /v1/device/countdowns/{eventId})
+	DeviceClearCountdown(ctx context.Context, request DeviceClearCountdownRequestObject) (DeviceClearCountdownResponseObject, error)
+
+	// (PUT /v1/device/countdowns/{eventId})
+	DeviceSetCountdown(ctx context.Context, request DeviceSetCountdownRequestObject) (DeviceSetCountdownResponseObject, error)
+
 	// (POST /v1/device/heartbeat)
 	DeviceHeartbeat(ctx context.Context, request DeviceHeartbeatRequestObject) (DeviceHeartbeatResponseObject, error)
 
 	// (POST /v1/device/imports)
 	DeviceImport(ctx context.Context, request DeviceImportRequestObject) (DeviceImportResponseObject, error)
+
+	// (POST /v1/device/imports/check)
+	DeviceImportCheck(ctx context.Context, request DeviceImportCheckRequestObject) (DeviceImportCheckResponseObject, error)
+
+	// (GET /v1/device/invitations)
+	DeviceListInvitations(ctx context.Context, request DeviceListInvitationsRequestObject) (DeviceListInvitationsResponseObject, error)
+
+	// (POST /v1/device/invitations/{invitationId})
+	DeviceDecideInvitation(ctx context.Context, request DeviceDecideInvitationRequestObject) (DeviceDecideInvitationResponseObject, error)
 
 	// (GET /v1/device/join-requests)
 	DeviceListJoinRequests(ctx context.Context, request DeviceListJoinRequestsRequestObject) (DeviceListJoinRequestsResponseObject, error)
@@ -6727,6 +11414,15 @@ type StrictServerInterface interface {
 
 	// (POST /v1/device/placements/{placementId}/replies)
 	DeviceSendReply(ctx context.Context, request DeviceSendReplyRequestObject) (DeviceSendReplyResponseObject, error)
+
+	// (PUT /v1/device/plugins/catalog)
+	DevicePutPluginCatalog(ctx context.Context, request DevicePutPluginCatalogRequestObject) (DevicePutPluginCatalogResponseObject, error)
+
+	// (GET /v1/device/plugins/registry)
+	DeviceGetPluginRegistry(ctx context.Context, request DeviceGetPluginRegistryRequestObject) (DeviceGetPluginRegistryResponseObject, error)
+
+	// (PUT /v1/device/plugins/status)
+	DevicePutPluginStatus(ctx context.Context, request DevicePutPluginStatusRequestObject) (DevicePutPluginStatusResponseObject, error)
 
 	// (PATCH /v1/device/settings)
 	DevicePatchSettings(ctx context.Context, request DevicePatchSettingsRequestObject) (DevicePatchSettingsResponseObject, error)
@@ -6767,8 +11463,44 @@ type StrictServerInterface interface {
 	// (PATCH /v1/frames/{frameId}/albums/{albumId})
 	UpdateAlbum(ctx context.Context, request UpdateAlbumRequestObject) (UpdateAlbumResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/calendar)
+	GetFrameCalendar(ctx context.Context, request GetFrameCalendarRequestObject) (GetFrameCalendarResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/calendars)
+	ListCalendars(ctx context.Context, request ListCalendarsRequestObject) (ListCalendarsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars)
+	CreateCalendar(ctx context.Context, request CreateCalendarRequestObject) (CreateCalendarResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/calendars/{calendarId})
+	DeleteCalendar(ctx context.Context, request DeleteCalendarRequestObject) (DeleteCalendarResponseObject, error)
+
+	// (PATCH /v1/frames/{frameId}/calendars/{calendarId})
+	UpdateCalendar(ctx context.Context, request UpdateCalendarRequestObject) (UpdateCalendarResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars/{calendarId}/sync)
+	SyncCalendar(ctx context.Context, request SyncCalendarRequestObject) (SyncCalendarResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/calendars:test)
+	TestCalendar(ctx context.Context, request TestCalendarRequestObject) (TestCalendarResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/commands)
 	SendFrameCommand(ctx context.Context, request SendFrameCommandRequestObject) (SendFrameCommandResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/countdowns/{eventId})
+	ClearCountdown(ctx context.Context, request ClearCountdownRequestObject) (ClearCountdownResponseObject, error)
+
+	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
+	SetCountdown(ctx context.Context, request SetCountdownRequestObject) (SetCountdownResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/events)
+	ListEventInvitations(ctx context.Context, request ListEventInvitationsRequestObject) (ListEventInvitationsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/events)
+	SendEventToFrame(ctx context.Context, request SendEventToFrameRequestObject) (SendEventToFrameResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/events/{invitationId})
+	WithdrawEventInvitation(ctx context.Context, request WithdrawEventInvitationRequestObject) (WithdrawEventInvitationResponseObject, error)
 
 	// (GET /v1/frames/{frameId}/health)
 	GetFrameHealth(ctx context.Context, request GetFrameHealthRequestObject) (GetFrameHealthResponseObject, error)
@@ -6812,6 +11544,12 @@ type StrictServerInterface interface {
 	// (POST /v1/frames/{frameId}/placements:bulk)
 	BulkUpdatePlacements(ctx context.Context, request BulkUpdatePlacementsRequestObject) (BulkUpdatePlacementsResponseObject, error)
 
+	// (POST /v1/frames/{frameId}/placements:share)
+	SharePlacements(ctx context.Context, request SharePlacementsRequestObject) (SharePlacementsResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/plugins)
+	GetFramePlugins(ctx context.Context, request GetFramePluginsRequestObject) (GetFramePluginsResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/replace-device)
 	ReplaceDevice(ctx context.Context, request ReplaceDeviceRequestObject) (ReplaceDeviceResponseObject, error)
 
@@ -6823,6 +11561,15 @@ type StrictServerInterface interface {
 
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(ctx context.Context, request TransferOwnershipRequestObject) (TransferOwnershipResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/tv-links)
+	ListTvLinks(ctx context.Context, request ListTvLinksRequestObject) (ListTvLinksResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/tv-links)
+	CreateTvLink(ctx context.Context, request CreateTvLinkRequestObject) (CreateTvLinkResponseObject, error)
+
+	// (DELETE /v1/frames/{frameId}/tv-links/{linkId})
+	RevokeTvLink(ctx context.Context, request RevokeTvLinkRequestObject) (RevokeTvLinkResponseObject, error)
 
 	// (GET /v1/geocode)
 	Geocode(ctx context.Context, request GeocodeRequestObject) (GeocodeResponseObject, error)
@@ -6863,6 +11610,12 @@ type StrictServerInterface interface {
 	// (PUT /v1/operator/limits)
 	OperatorSetLimits(ctx context.Context, request OperatorSetLimitsRequestObject) (OperatorSetLimitsResponseObject, error)
 
+	// (GET /v1/operator/reservations)
+	OperatorListReservations(ctx context.Context, request OperatorListReservationsRequestObject) (OperatorListReservationsResponseObject, error)
+
+	// (PATCH /v1/operator/reservations/{reservationId})
+	OperatorUpdateReservation(ctx context.Context, request OperatorUpdateReservationRequestObject) (OperatorUpdateReservationResponseObject, error)
+
 	// (GET /v1/operator/stats)
 	OperatorStats(ctx context.Context, request OperatorStatsRequestObject) (OperatorStatsResponseObject, error)
 
@@ -6880,6 +11633,24 @@ type StrictServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(ctx context.Context, request ForwardSendRequestObject) (ForwardSendResponseObject, error)
+
+	// (POST /v1/shop/reservations)
+	CreateShopReservation(ctx context.Context, request CreateShopReservationRequestObject) (CreateShopReservationResponseObject, error)
+
+	// (POST /v1/shop/reservations/cancel)
+	CancelShopReservation(ctx context.Context, request CancelShopReservationRequestObject) (CancelShopReservationResponseObject, error)
+
+	// (GET /v1/stations/latest)
+	GetStationLatest(ctx context.Context, request GetStationLatestRequestObject) (GetStationLatestResponseObject, error)
+
+	// (GET /v1/stations/public)
+	ListPublicStations(ctx context.Context, request ListPublicStationsRequestObject) (ListPublicStationsResponseObject, error)
+
+	// (GET /v1/stations/{stationId}/public)
+	GetStationPublic(ctx context.Context, request GetStationPublicRequestObject) (GetStationPublicResponseObject, error)
+
+	// (GET /v1/tv/{token})
+	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
 }
 
 type StrictHandlerFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, request any) (any, error)
@@ -6976,6 +11747,30 @@ func (sh *strictHandler) DeviceAck(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeviceSyncCalendars operation middleware
+func (sh *strictHandler) DeviceSyncCalendars(w http.ResponseWriter, r *http.Request) {
+	var request DeviceSyncCalendarsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceSyncCalendars(ctx, request.(DeviceSyncCalendarsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceSyncCalendars")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceSyncCalendarsResponseObject); ok {
+		if err := validResponse.VisitDeviceSyncCalendarsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // DeviceGetChanges operation middleware
 func (sh *strictHandler) DeviceGetChanges(w http.ResponseWriter, r *http.Request, params DeviceGetChangesParams) {
 	var request DeviceGetChangesRequestObject
@@ -7019,6 +11814,58 @@ func (sh *strictHandler) DeviceGetCode(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceGetCodeResponseObject); ok {
 		if err := validResponse.VisitDeviceGetCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceClearCountdown operation middleware
+func (sh *strictHandler) DeviceClearCountdown(w http.ResponseWriter, r *http.Request, eventId EventId) {
+	var request DeviceClearCountdownRequestObject
+
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceClearCountdown(ctx, request.(DeviceClearCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceClearCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceClearCountdownResponseObject); ok {
+		if err := validResponse.VisitDeviceClearCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceSetCountdown operation middleware
+func (sh *strictHandler) DeviceSetCountdown(w http.ResponseWriter, r *http.Request, eventId EventId) {
+	var request DeviceSetCountdownRequestObject
+
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceSetCountdown(ctx, request.(DeviceSetCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceSetCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceSetCountdownResponseObject); ok {
+		if err := validResponse.VisitDeviceSetCountdownResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7078,6 +11925,94 @@ func (sh *strictHandler) DeviceImport(w http.ResponseWriter, r *http.Request, pa
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceImportResponseObject); ok {
 		if err := validResponse.VisitDeviceImportResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceImportCheck operation middleware
+func (sh *strictHandler) DeviceImportCheck(w http.ResponseWriter, r *http.Request) {
+	var request DeviceImportCheckRequestObject
+
+	var body DeviceImportCheckJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceImportCheck(ctx, request.(DeviceImportCheckRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceImportCheck")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceImportCheckResponseObject); ok {
+		if err := validResponse.VisitDeviceImportCheckResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceListInvitations operation middleware
+func (sh *strictHandler) DeviceListInvitations(w http.ResponseWriter, r *http.Request) {
+	var request DeviceListInvitationsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceListInvitations(ctx, request.(DeviceListInvitationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceListInvitations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceListInvitationsResponseObject); ok {
+		if err := validResponse.VisitDeviceListInvitationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceDecideInvitation operation middleware
+func (sh *strictHandler) DeviceDecideInvitation(w http.ResponseWriter, r *http.Request, invitationId InvitationId) {
+	var request DeviceDecideInvitationRequestObject
+
+	request.InvitationId = invitationId
+
+	var body DeviceDecideInvitationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceDecideInvitation(ctx, request.(DeviceDecideInvitationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceDecideInvitation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceDecideInvitationResponseObject); ok {
+		if err := validResponse.VisitDeviceDecideInvitationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7261,6 +12196,92 @@ func (sh *strictHandler) DeviceSendReply(w http.ResponseWriter, r *http.Request,
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeviceSendReplyResponseObject); ok {
 		if err := validResponse.VisitDeviceSendReplyResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DevicePutPluginCatalog operation middleware
+func (sh *strictHandler) DevicePutPluginCatalog(w http.ResponseWriter, r *http.Request) {
+	var request DevicePutPluginCatalogRequestObject
+
+	var body DevicePutPluginCatalogJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DevicePutPluginCatalog(ctx, request.(DevicePutPluginCatalogRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DevicePutPluginCatalog")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DevicePutPluginCatalogResponseObject); ok {
+		if err := validResponse.VisitDevicePutPluginCatalogResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeviceGetPluginRegistry operation middleware
+func (sh *strictHandler) DeviceGetPluginRegistry(w http.ResponseWriter, r *http.Request) {
+	var request DeviceGetPluginRegistryRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeviceGetPluginRegistry(ctx, request.(DeviceGetPluginRegistryRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeviceGetPluginRegistry")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeviceGetPluginRegistryResponseObject); ok {
+		if err := validResponse.VisitDeviceGetPluginRegistryResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DevicePutPluginStatus operation middleware
+func (sh *strictHandler) DevicePutPluginStatus(w http.ResponseWriter, r *http.Request) {
+	var request DevicePutPluginStatusRequestObject
+
+	var body DevicePutPluginStatusJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DevicePutPluginStatus(ctx, request.(DevicePutPluginStatusRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DevicePutPluginStatus")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DevicePutPluginStatusResponseObject); ok {
+		if err := validResponse.VisitDevicePutPluginStatusResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -7650,6 +12671,213 @@ func (sh *strictHandler) UpdateAlbum(w http.ResponseWriter, r *http.Request, fra
 	}
 }
 
+// GetFrameCalendar operation middleware
+func (sh *strictHandler) GetFrameCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request GetFrameCalendarRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFrameCalendar(ctx, request.(GetFrameCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFrameCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFrameCalendarResponseObject); ok {
+		if err := validResponse.VisitGetFrameCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListCalendars operation middleware
+func (sh *strictHandler) ListCalendars(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListCalendarsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListCalendars(ctx, request.(ListCalendarsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListCalendars")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListCalendarsResponseObject); ok {
+		if err := validResponse.VisitListCalendarsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateCalendar operation middleware
+func (sh *strictHandler) CreateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateCalendarParams) {
+	var request CreateCalendarRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body CreateCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateCalendar(ctx, request.(CreateCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateCalendarResponseObject); ok {
+		if err := validResponse.VisitCreateCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteCalendar operation middleware
+func (sh *strictHandler) DeleteCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request DeleteCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteCalendar(ctx, request.(DeleteCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteCalendarResponseObject); ok {
+		if err := validResponse.VisitDeleteCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateCalendar operation middleware
+func (sh *strictHandler) UpdateCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request UpdateCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	var body UpdateCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateCalendar(ctx, request.(UpdateCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateCalendarResponseObject); ok {
+		if err := validResponse.VisitUpdateCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SyncCalendar operation middleware
+func (sh *strictHandler) SyncCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId, calendarId CalendarId) {
+	var request SyncCalendarRequestObject
+
+	request.FrameId = frameId
+	request.CalendarId = calendarId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SyncCalendar(ctx, request.(SyncCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SyncCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SyncCalendarResponseObject); ok {
+		if err := validResponse.VisitSyncCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// TestCalendar operation middleware
+func (sh *strictHandler) TestCalendar(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request TestCalendarRequestObject
+
+	request.FrameId = frameId
+
+	var body TestCalendarJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.TestCalendar(ctx, request.(TestCalendarRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "TestCalendar")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(TestCalendarResponseObject); ok {
+		if err := validResponse.VisitTestCalendarResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // SendFrameCommand operation middleware
 func (sh *strictHandler) SendFrameCommand(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request SendFrameCommandRequestObject
@@ -7676,6 +12904,147 @@ func (sh *strictHandler) SendFrameCommand(w http.ResponseWriter, r *http.Request
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(SendFrameCommandResponseObject); ok {
 		if err := validResponse.VisitSendFrameCommandResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ClearCountdown operation middleware
+func (sh *strictHandler) ClearCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId) {
+	var request ClearCountdownRequestObject
+
+	request.FrameId = frameId
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ClearCountdown(ctx, request.(ClearCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ClearCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ClearCountdownResponseObject); ok {
+		if err := validResponse.VisitClearCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SetCountdown operation middleware
+func (sh *strictHandler) SetCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId) {
+	var request SetCountdownRequestObject
+
+	request.FrameId = frameId
+	request.EventId = eventId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SetCountdown(ctx, request.(SetCountdownRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SetCountdown")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SetCountdownResponseObject); ok {
+		if err := validResponse.VisitSetCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListEventInvitations operation middleware
+func (sh *strictHandler) ListEventInvitations(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListEventInvitationsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListEventInvitations(ctx, request.(ListEventInvitationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListEventInvitations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListEventInvitationsResponseObject); ok {
+		if err := validResponse.VisitListEventInvitationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// SendEventToFrame operation middleware
+func (sh *strictHandler) SendEventToFrame(w http.ResponseWriter, r *http.Request, frameId FrameId, params SendEventToFrameParams) {
+	var request SendEventToFrameRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body SendEventToFrameJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SendEventToFrame(ctx, request.(SendEventToFrameRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SendEventToFrame")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SendEventToFrameResponseObject); ok {
+		if err := validResponse.VisitSendEventToFrameResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// WithdrawEventInvitation operation middleware
+func (sh *strictHandler) WithdrawEventInvitation(w http.ResponseWriter, r *http.Request, frameId FrameId, invitationId InvitationId) {
+	var request WithdrawEventInvitationRequestObject
+
+	request.FrameId = frameId
+	request.InvitationId = invitationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.WithdrawEventInvitation(ctx, request.(WithdrawEventInvitationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "WithdrawEventInvitation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(WithdrawEventInvitationResponseObject); ok {
+		if err := validResponse.VisitWithdrawEventInvitationResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -8095,6 +13464,66 @@ func (sh *strictHandler) BulkUpdatePlacements(w http.ResponseWriter, r *http.Req
 	}
 }
 
+// SharePlacements operation middleware
+func (sh *strictHandler) SharePlacements(w http.ResponseWriter, r *http.Request, frameId FrameId, params SharePlacementsParams) {
+	var request SharePlacementsRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body SharePlacementsJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.SharePlacements(ctx, request.(SharePlacementsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "SharePlacements")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(SharePlacementsResponseObject); ok {
+		if err := validResponse.VisitSharePlacementsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetFramePlugins operation middleware
+func (sh *strictHandler) GetFramePlugins(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request GetFramePluginsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetFramePlugins(ctx, request.(GetFramePluginsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetFramePlugins")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetFramePluginsResponseObject); ok {
+		if err := validResponse.VisitGetFramePluginsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // ReplaceDevice operation middleware
 func (sh *strictHandler) ReplaceDevice(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request ReplaceDeviceRequestObject
@@ -8214,6 +13643,92 @@ func (sh *strictHandler) TransferOwnership(w http.ResponseWriter, r *http.Reques
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(TransferOwnershipResponseObject); ok {
 		if err := validResponse.VisitTransferOwnershipResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListTvLinks operation middleware
+func (sh *strictHandler) ListTvLinks(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListTvLinksRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListTvLinks(ctx, request.(ListTvLinksRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListTvLinks")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListTvLinksResponseObject); ok {
+		if err := validResponse.VisitListTvLinksResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateTvLink operation middleware
+func (sh *strictHandler) CreateTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request CreateTvLinkRequestObject
+
+	request.FrameId = frameId
+
+	var body CreateTvLinkJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateTvLink(ctx, request.(CreateTvLinkRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateTvLink")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateTvLinkResponseObject); ok {
+		if err := validResponse.VisitCreateTvLinkResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RevokeTvLink operation middleware
+func (sh *strictHandler) RevokeTvLink(w http.ResponseWriter, r *http.Request, frameId FrameId, linkId Id) {
+	var request RevokeTvLinkRequestObject
+
+	request.FrameId = frameId
+	request.LinkId = linkId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RevokeTvLink(ctx, request.(RevokeTvLinkRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RevokeTvLink")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RevokeTvLinkResponseObject); ok {
+		if err := validResponse.VisitRevokeTvLinkResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -8573,6 +14088,65 @@ func (sh *strictHandler) OperatorSetLimits(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// OperatorListReservations operation middleware
+func (sh *strictHandler) OperatorListReservations(w http.ResponseWriter, r *http.Request, params OperatorListReservationsParams) {
+	var request OperatorListReservationsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListReservations(ctx, request.(OperatorListReservationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListReservations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListReservationsResponseObject); ok {
+		if err := validResponse.VisitOperatorListReservationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorUpdateReservation operation middleware
+func (sh *strictHandler) OperatorUpdateReservation(w http.ResponseWriter, r *http.Request, reservationId Id) {
+	var request OperatorUpdateReservationRequestObject
+
+	request.ReservationId = reservationId
+
+	var body OperatorUpdateReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorUpdateReservation(ctx, request.(OperatorUpdateReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorUpdateReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorUpdateReservationResponseObject); ok {
+		if err := validResponse.VisitOperatorUpdateReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // OperatorStats operation middleware
 func (sh *strictHandler) OperatorStats(w http.ResponseWriter, r *http.Request) {
 	var request OperatorStatsRequestObject
@@ -8734,6 +14308,170 @@ func (sh *strictHandler) ForwardSend(w http.ResponseWriter, r *http.Request, sen
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ForwardSendResponseObject); ok {
 		if err := validResponse.VisitForwardSendResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateShopReservation operation middleware
+func (sh *strictHandler) CreateShopReservation(w http.ResponseWriter, r *http.Request) {
+	var request CreateShopReservationRequestObject
+
+	var body CreateShopReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateShopReservation(ctx, request.(CreateShopReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateShopReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateShopReservationResponseObject); ok {
+		if err := validResponse.VisitCreateShopReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CancelShopReservation operation middleware
+func (sh *strictHandler) CancelShopReservation(w http.ResponseWriter, r *http.Request) {
+	var request CancelShopReservationRequestObject
+
+	var body CancelShopReservationJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CancelShopReservation(ctx, request.(CancelShopReservationRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CancelShopReservation")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CancelShopReservationResponseObject); ok {
+		if err := validResponse.VisitCancelShopReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetStationLatest operation middleware
+func (sh *strictHandler) GetStationLatest(w http.ResponseWriter, r *http.Request, params GetStationLatestParams) {
+	var request GetStationLatestRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStationLatest(ctx, request.(GetStationLatestRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStationLatest")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStationLatestResponseObject); ok {
+		if err := validResponse.VisitGetStationLatestResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListPublicStations operation middleware
+func (sh *strictHandler) ListPublicStations(w http.ResponseWriter, r *http.Request) {
+	var request ListPublicStationsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListPublicStations(ctx, request.(ListPublicStationsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListPublicStations")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListPublicStationsResponseObject); ok {
+		if err := validResponse.VisitListPublicStationsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetStationPublic operation middleware
+func (sh *strictHandler) GetStationPublic(w http.ResponseWriter, r *http.Request, stationId string) {
+	var request GetStationPublicRequestObject
+
+	request.StationId = stationId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetStationPublic(ctx, request.(GetStationPublicRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetStationPublic")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetStationPublicResponseObject); ok {
+		if err := validResponse.VisitGetStationPublicResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTvSlideshow operation middleware
+func (sh *strictHandler) GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string) {
+	var request GetTvSlideshowRequestObject
+
+	request.Token = token
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTvSlideshow(ctx, request.(GetTvSlideshowRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTvSlideshow")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTvSlideshowResponseObject); ok {
+		if err := validResponse.VisitGetTvSlideshowResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

@@ -1,0 +1,20 @@
+{
+  "@name": "Счётчик HomeWizard P1",
+  "@description": "Мощность в реальном времени со счётчика HomeWizard P1 дома: потребление, отдача в сеть, по фазам и итоги за сегодня.",
+  "@setting.host": "Адрес счётчика",
+  "@setting.host.help": "Включите Local API для счётчика в приложении HomeWizard Energy.",
+  "@setting.style": "Показывать как",
+  "@option.style.value": "Число",
+  "@option.style.gauge": "Стрелку",
+  "@option.style.flow": "Поток",
+  "@setting.max_w": "Полная шкала (Вт)",
+  "@setting.warn_w": "Выделять выше (Вт, 0 = выкл.)",
+  "grid": "Сеть",
+  "home": "Дом",
+  "last_hour": "Последний час",
+  "returning": "Отдача в сеть",
+  "today_export": "Отдано сегодня",
+  "today_gas": "Газ сегодня",
+  "today_import": "Потреблено сегодня",
+  "using": "Потребление"
+}

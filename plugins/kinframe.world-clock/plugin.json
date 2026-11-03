@@ -1,0 +1,22 @@
+{
+  "id": "kinframe.world-clock",
+  "name": "World clock",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "The time where family and friends live: up to four places, with the day when it differs and how far ahead or behind they are.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 5, "default_seconds": 10 },
+  "settings": [
+    { "key": "city_1", "type": "timezone", "label": "Place", "required": true, "placeholder": "America/New_York" },
+    { "key": "name_1", "type": "text", "label": "Name (empty = the city)", "placeholder": "Anna" },
+    { "key": "city_2", "type": "timezone", "label": "Second place" },
+    { "key": "name_2", "type": "text", "label": "Name" },
+    { "key": "city_3", "type": "timezone", "label": "Third place" },
+    { "key": "name_3", "type": "text", "label": "Name" },
+    { "key": "city_4", "type": "timezone", "label": "Fourth place" },
+    { "key": "name_4", "type": "text", "label": "Name" },
+    { "key": "show_difference", "type": "boolean", "label": "Show how far ahead or behind", "default": true }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "@name": "Rain radar",
+  "@option.source.auto": "Automatic",
+  "@option.source.buienradar": "Buienradar",
+  "@option.source.open_meteo": "Open-Meteo",
+  "rain_from": "Rain from {time}",
+  "dry_from": "Dry from {time}",
+  "rain_2h": "Rain for the next 2 h",
+  "dry_2h": "Dry for the next 2 h",
+  "dry": "Dry",
+  "next_2h": "Next 2 hours",
+  "source": "Source: {name}",
+  "no_location": "The frame has no place yet: set it in the frame’s weather settings",
+  "rain_from_label": "Rain from",
+  "dry_from_label": "Dry from",
+  "peak": "At most"
+}

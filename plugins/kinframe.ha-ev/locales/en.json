@@ -1,0 +1,1 @@
+{"@name": "Car battery", "charging": "Charging", "charging_until": "Charging · full at {time}", "plugged": "Plugged in", "range": "Range", "power": "Charging power", "full_at": "Full at", "token_refused": "Home Assistant refused the token"}

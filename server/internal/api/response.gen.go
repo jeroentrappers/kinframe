@@ -6,64 +6,106 @@ import "net/http"
 
 func (r Response) VisitAcceptInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitBulkUpdatePlacementsResponse(w http.ResponseWriter) error   { return r.write(w) }
+func (r Response) VisitCancelShopReservationResponse(w http.ResponseWriter) error  { return r.write(w) }
+func (r Response) VisitClearCountdownResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitCreateAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
+func (r Response) VisitCreateCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitCreateInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitCreateSendResponse(w http.ResponseWriter) error             { return r.write(w) }
+func (r Response) VisitCreateShopReservationResponse(w http.ResponseWriter) error  { return r.write(w) }
+func (r Response) VisitCreateTvLinkResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitDecideJoinRequestResponse(w http.ResponseWriter) error      { return r.write(w) }
 func (r Response) VisitDeleteAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitDeleteAvatarResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitDeleteCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitDeleteMeResponse(w http.ResponseWriter) error               { return r.write(w) }
 func (r Response) VisitDeletePushEndpointResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeviceAckResponse(w http.ResponseWriter) error              { return r.write(w) }
+func (r Response) VisitDeviceClearCountdownResponse(w http.ResponseWriter) error   { return r.write(w) }
+func (r Response) VisitDeviceDecideInvitationResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitDeviceDecideJoinResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitDeviceGetChangesResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitDeviceGetCodeResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitDeviceGetPluginRegistryResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
 func (r Response) VisitDeviceGetStateResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitDeviceHeartbeatResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitDeviceImportResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitDeviceImportCheckResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitDeviceListInvitationsResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitDeviceListJoinRequestsResponse(w http.ResponseWriter) error { return r.write(w) }
 func (r Response) VisitDevicePatchPlacementResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitDevicePatchSettingsResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitDevicePutPluginCatalogResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitDevicePutPluginStatusResponse(w http.ResponseWriter) error  { return r.write(w) }
 func (r Response) VisitDeviceRemoveMemberResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeviceSendReplyResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitDeviceSetCountdownResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitDeviceSetReactionResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitDeviceSyncCalendarsResponse(w http.ResponseWriter) error    { return r.write(w) }
 func (r Response) VisitDeviceTokenResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitEnrollDeviceResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitForwardSendResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitGeocodeResponse(w http.ResponseWriter) error                { return r.write(w) }
 func (r Response) VisitGetDiscoveryResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitGetFrameResponse(w http.ResponseWriter) error               { return r.write(w) }
+func (r Response) VisitGetFrameCalendarResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetFrameHealthResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitGetFramePluginsResponse(w http.ResponseWriter) error        { return r.write(w) }
 func (r Response) VisitGetFrameSettingsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetMeResponse(w http.ResponseWriter) error                  { return r.write(w) }
 func (r Response) VisitGetSendResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitGetStationLatestResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitGetStationPublicResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitGetTvSlideshowResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitLeaveFrameResponse(w http.ResponseWriter) error             { return r.write(w) }
 func (r Response) VisitListAlbumsResponse(w http.ResponseWriter) error             { return r.write(w) }
+func (r Response) VisitListCalendarsResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitListEventInvitationsResponse(w http.ResponseWriter) error   { return r.write(w) }
 func (r Response) VisitListInvitesResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListJoinRequestsResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitListMembersResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListMyFramesResponse(w http.ResponseWriter) error           { return r.write(w) }
 func (r Response) VisitListMySendsResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitListPlacementsResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitListPublicStationsResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitListPushEndpointsResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitListTvLinksResponse(w http.ResponseWriter) error            { return r.write(w) }
 func (r Response) VisitOperatorGetLimitsResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitOperatorSetLimitsResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error          { return r.write(w) }
-func (r Response) VisitPreviewInviteResponse(w http.ResponseWriter) error          { return r.write(w) }
-func (r Response) VisitPurgePlacementResponse(w http.ResponseWriter) error         { return r.write(w) }
-func (r Response) VisitRedeemFrameCodeResponse(w http.ResponseWriter) error        { return r.write(w) }
-func (r Response) VisitRegisterPushEndpointResponse(w http.ResponseWriter) error   { return r.write(w) }
-func (r Response) VisitRemoveFrameResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitRemoveMemberResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitReplaceDeviceResponse(w http.ResponseWriter) error          { return r.write(w) }
-func (r Response) VisitRevokeInviteResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error       { return r.write(w) }
-func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error      { return r.write(w) }
-func (r Response) VisitUnsendResponse(w http.ResponseWriter) error                 { return r.write(w) }
-func (r Response) VisitUpdateAlbumResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitUpdateFrameResponse(w http.ResponseWriter) error            { return r.write(w) }
-func (r Response) VisitUpdateFrameSettingsResponse(w http.ResponseWriter) error    { return r.write(w) }
-func (r Response) VisitUpdateItemResponse(w http.ResponseWriter) error             { return r.write(w) }
-func (r Response) VisitUpdateMeResponse(w http.ResponseWriter) error               { return r.write(w) }
-func (r Response) VisitUpdateMemberResponse(w http.ResponseWriter) error           { return r.write(w) }
-func (r Response) VisitUpdatePlacementResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitOperatorSetLimitsResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}
+func (r Response) VisitPreviewInviteResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitPurgePlacementResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitRedeemFrameCodeResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitRegisterPushEndpointResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitRemoveFrameResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitRemoveMemberResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitReplaceDeviceResponse(w http.ResponseWriter) error        { return r.write(w) }
+func (r Response) VisitRevokeInviteResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitRevokeTvLinkResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitSendEventToFrameResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitSendFrameCommandResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitSetCountdownResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitSharePlacementsResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitSyncCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitTestCalendarResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitTransferOwnershipResponse(w http.ResponseWriter) error    { return r.write(w) }
+func (r Response) VisitUnsendResponse(w http.ResponseWriter) error               { return r.write(w) }
+func (r Response) VisitUpdateAlbumResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitUpdateCalendarResponse(w http.ResponseWriter) error       { return r.write(w) }
+func (r Response) VisitUpdateFrameResponse(w http.ResponseWriter) error          { return r.write(w) }
+func (r Response) VisitUpdateFrameSettingsResponse(w http.ResponseWriter) error  { return r.write(w) }
+func (r Response) VisitUpdateItemResponse(w http.ResponseWriter) error           { return r.write(w) }
+func (r Response) VisitUpdateMeResponse(w http.ResponseWriter) error             { return r.write(w) }
+func (r Response) VisitUpdateMemberResponse(w http.ResponseWriter) error         { return r.write(w) }
+func (r Response) VisitUpdatePlacementResponse(w http.ResponseWriter) error      { return r.write(w) }
+func (r Response) VisitWithdrawEventInvitationResponse(w http.ResponseWriter) error {
+	return r.write(w)
+}

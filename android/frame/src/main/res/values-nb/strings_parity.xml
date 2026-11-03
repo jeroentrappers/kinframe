@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Bildene på fotorammen fortsetter å vises. Nye kommer så snart den er på nett igjen.</string>
     <string name="status_card_server_title">Får ikke kontakt med bildeserveren</string>
     <string name="status_card_server_body">Wi-Fi virker, men serveren svarer ikke. Nye bilder kommer når den er tilbake.</string>
+    <string name="status_card_clock_title">Stiller klokken</string>
+    <string name="status_card_clock_body">Rammen startet på nytt, og klokken går feil. Den stiller seg selv fra internett om et øyeblikk.</string>
     <string name="status_card_portal_title">Dette Wi-Fi-nettet krever pålogging</string>
     <string name="status_card_portal_body">Åpne påloggingssiden til nettverket for å få fotorammen på nett.</string>
     <string name="status_card_portal_action">Logg på</string>

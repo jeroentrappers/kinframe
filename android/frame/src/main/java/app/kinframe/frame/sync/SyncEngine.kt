@@ -16,6 +16,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
@@ -103,6 +104,8 @@ class SyncEngine(
                 }
                 // `weather: null` means no weather any more (widget off, location removed): drop what we have.
                 ChangeType.WEATHER -> state = state.copy(weatherJson = c.weather?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // `calendar: null` means the frame has no calendars any more.
+                ChangeType.CALENDAR -> state = state.copy(calendarJson = c.calendar?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 ChangeType.RESET -> {
                     Log.i(TAG, "reset at seq ${c.seq}: re-syncing from 0")
                     placements.deleteAll()
@@ -126,6 +129,8 @@ class SyncEngine(
         val item = p.item
         val m = p.media
         val sameMedia = existing != null && existing.mediaSha256 != null && existing.mediaSha256.equals(m?.sha256, ignoreCase = true)
+        val mo = p.motion
+        val sameMotion = existing != null && existing.motionSha256 != null && existing.motionSha256.equals(mo?.sha256, ignoreCase = true)
         val focal = p.focalOverride ?: item.focalPoint
         return PlacementEntity(
             id = p.id,
@@ -134,6 +139,9 @@ class SyncEngine(
             status = p.status,
             senderId = item.senderId,
             senderName = item.senderName,
+            sharedByName = p.sharedByName,
+            importedFrom = item.importedFrom,
+            importedSenderName = item.importedSenderName,
             caption = item.caption,
             captionEdited = item.captionEdited,
             capturedAt = parseTime(item.capturedAt),
@@ -161,9 +169,19 @@ class SyncEngine(
             lastError = if (sameMedia) existing?.lastError else null,
             firstShownAt = existing?.firstShownAt,
             lastShownAt = existing?.lastShownAt,
-            isNew = existing?.isNew ?: (!initial && p.seenAt == null && p.status != "seen"),
+            // Photos imported from the frame's old app were seen there already: they don't jump the queue as new.
+            isNew = existing?.isNew ?: (!initial && item.importedFrom == null && p.seenAt == null && p.status != "seen"),
             evictedAt = if (sameMedia) existing?.evictedAt else null,
             albumIds = p.albumIds.joinToString(",").ifEmpty { null },
+            motionUrl = mo?.url,
+            motionSha256 = mo?.sha256?.lowercase(),
+            motionBytes = mo?.bytes ?: 0,
+            motionMime = mo?.mime,
+            motionDurationMs = mo?.durationMs,
+            motionHasAudio = mo?.hasAudio ?: false,
+            motionLocalFile = if (sameMotion) existing?.motionLocalFile else null,
+            motionAttempts = if (sameMotion) existing?.motionAttempts ?: 0 else 0,
+            motionNextAttemptAt = if (sameMotion) existing?.motionNextAttemptAt ?: 0 else 0,
         )
     }
 
@@ -176,6 +194,8 @@ class SyncEngine(
                 OutboxEntity.PLACEMENT_PATCH -> {
                     payload["hidden"]?.jsonPrimitive?.booleanOrNull?.let { r = r.copy(hidden = it) }
                     payload["trashed"]?.jsonPrimitive?.booleanOrNull?.let { r = r.copy(trashed = it) }
+                    payload["rotation"]?.jsonPrimitive?.intOrNull?.let { r = r.copy(rotation = it) }
+                    payload["fit"]?.jsonPrimitive?.let { if (it.isString) r = r.copy(fit = it.content) }
                 }
                 OutboxEntity.REACTION -> r = r.copy(reaction = payload["reaction"]?.jsonPrimitive?.let { if (it.isString) it.content else null })
             }
@@ -191,7 +211,9 @@ class SyncEngine(
 
     /** Deletes media files no placement refers to (after resets, or leftovers from a power cut). */
     suspend fun garbageCollect() {
-        val keep = db.placements().all().mapNotNull { p -> p.mediaSha256?.let { media.fileName(it, p.mediaMime) } }.toSet()
+        val keep = db.placements().all().flatMap { p ->
+            listOfNotNull(p.mediaSha256?.let { media.fileName(it, p.mediaMime) }, p.motionSha256?.let { media.fileName(it, p.motionMime) })
+        }.toSet()
         media.dir.listFiles()?.filter { it.isFile && it.name !in keep }?.forEach { it.delete() }
         val shas = keep.map { it.substringBefore('.') }.toSet()
         media.partialDir.listFiles()?.filter { it.name.substringBefore('.') !in shas }?.forEach { it.delete() }

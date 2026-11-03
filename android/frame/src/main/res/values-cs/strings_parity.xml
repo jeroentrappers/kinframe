@@ -60,6 +60,8 @@
     <string name="status_card_offline_body">Fotky v rámečku se dál přehrávají. Nové dorazí, jakmile bude rámeček zase online.</string>
     <string name="status_card_server_title">Server s fotkami je nedostupný</string>
     <string name="status_card_server_body">Wi-Fi funguje, ale server neodpovídá. Nové fotky dorazí, až bude zpět.</string>
+    <string name="status_card_clock_title">Nastavuji hodiny</string>
+    <string name="status_card_clock_body">Rámeček se restartoval a jeho hodiny nejdou správně. Za chvíli se nastaví podle internetu.</string>
     <string name="status_card_portal_title">Tato Wi-Fi vyžaduje přihlášení</string>
     <string name="status_card_portal_body">Otevřete přihlašovací stránku sítě, aby se rámeček připojil k internetu.</string>
     <string name="status_card_portal_action">Přihlásit se</string>

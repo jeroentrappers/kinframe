@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">लाइव</string>
+    <string name="live_tap_hint">चलाने के लिए टैप करें</string>
+    <string name="settings_live_photos">लाइव फ़ोटो</string>
+    <string name="live_photos_on">दिखने पर चलाएँ</string>
+    <string name="live_photos_tap">टैप करने पर चलाएँ</string>
+    <string name="live_photos_off">सिर्फ़ फ़ोटो</string>
+</resources>

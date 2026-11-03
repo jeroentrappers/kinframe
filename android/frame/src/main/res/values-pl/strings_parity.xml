@@ -60,6 +60,8 @@
     <string name="status_card_offline_body">Zdjęcia w ramce są nadal wyświetlane. Nowe pojawią się, gdy tylko ramka znów będzie online.</string>
     <string name="status_card_server_title">Brak połączenia z serwerem zdjęć</string>
     <string name="status_card_server_body">Wi-Fi działa, ale serwer nie odpowiada. Nowe zdjęcia pojawią się, gdy wróci.</string>
+    <string name="status_card_clock_title">Ustawianie zegara</string>
+    <string name="status_card_clock_body">Ramka została uruchomiona ponownie i jej zegar jest nieprawidłowy. Za chwilę ustawi go z internetu.</string>
     <string name="status_card_portal_title">Ta sieć Wi-Fi wymaga logowania</string>
     <string name="status_card_portal_body">Otwórz stronę logowania sieci, aby połączyć ramkę z internetem.</string>
     <string name="status_card_portal_action">Zaloguj się</string>

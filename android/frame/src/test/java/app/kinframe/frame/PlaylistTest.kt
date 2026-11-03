@@ -26,6 +26,21 @@ class PlaylistTest {
     }
 
     @Test
+    fun peekPreviousNamesWhatPreviousReturnsWithoutMoving() {
+        val p = Playlist(1) { now }
+        p.update(items(4), PlayOrder.RECEIVED, reverse = false)
+        // No history yet: steps back in the order.
+        p.next()
+        assertEquals("p4", p.peekPrevious())
+        p.take(2) // p2, p3
+        val peeked = p.peekPrevious()
+        assertEquals("p2", peeked)
+        assertEquals("peek must not move", "p2", p.peekPrevious())
+        assertEquals(peeked, p.previous())
+        assertEquals(p.peekPrevious(), p.previous())
+    }
+
+    @Test
     fun takenOrderUsesCaptureTime() {
         val p = Playlist(1) { now }
         p.update(items(3), PlayOrder.TAKEN, reverse = false)
@@ -109,5 +124,39 @@ class PlaylistTest {
         assertEquals(null, p.next())
         p.update(items(1), PlayOrder.SHUFFLE, false)
         assertEquals(listOf("p1", "p1"), p.take(2))
+    }
+
+    @Test
+    fun backThenForwardReplaysTheSamePhotosAndTheOrderContinues() {
+        val reference = Playlist(7) { now }
+        reference.update(items(12), PlayOrder.SHUFFLE, reverse = false)
+        val expected = reference.take(9)
+
+        val p = Playlist(7) { now }
+        p.update(items(12), PlayOrder.SHUFFLE, reverse = false)
+        val seen = p.take(5)
+        assertEquals(expected.take(5), seen)
+        // Left, right, left, right... always the same neighbours.
+        repeat(3) {
+            assertEquals(seen[3], p.previous())
+            assertEquals(seen[4], p.peekNext())
+            assertEquals(seen[4], p.next())
+        }
+        assertEquals(seen[3], p.previous())
+        assertEquals(seen[2], p.previous())
+        assertEquals(seen[3], p.next())
+        assertEquals(seen[4], p.next())
+        // Past the replayed items the order continues as if we had never gone back.
+        assertEquals(expected.drop(5), p.take(4))
+    }
+
+    @Test
+    fun jumpingClearsTheForwardHistory() {
+        val p = Playlist(3) { now }
+        p.update(items(5), PlayOrder.RECEIVED, reverse = false)
+        p.take(3) // p1 p2 p3
+        p.previous() // p2
+        p.jumpTo("p5")
+        assertNotEquals("p3", p.peekNext())
     }
 }

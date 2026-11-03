@@ -10,7 +10,7 @@
 | `android/` | One Gradle project with modules `:core` (API client, models, Logto, design system), `:frame` (frame app: kiosk launcher on the photo frame) and `:family` (Android family app) | Kotlin, Jetpack Compose, Media3 | frames, family members |
 | `ios/` | iOS family app, with a share extension | Swift, SwiftUI (built on macOS/Xcode) | family members |
 | `web/` | Website: family web app + frame owner admin | SvelteKit (static SPA, served by the backend) | family members, owners |
-| `provisioning/` | Turn a stock Frameo device into a kinframe device | adb + shell | whoever sets up a frame |
+| `tools/convert/`, `web/` `/convert` | Turn a stock Frameo device into a kinframe device, and back (one shared step list) | adb + POSIX shell; WebUSB ADB in the browser | whoever sets up a frame |
 | `deploy/` | docker compose: backend, Postgres, Logto, reverse proxy | Docker | self-hosters |
 
 ```
@@ -24,7 +24,8 @@
 
 - **People** sign in with **Logto** (self-hosted, in the same compose stack). Logto handles sign-up, email/passkey/social
   sign-in, MFA and account management.
-  - `web/` is a Logto *SPA* application; `mobile/` is a Logto *Native* application (PKCE, system browser).
+  - `web/` is a Logto *SPA* application; `mobile/` and `desktop/` are Logto *Native* applications (PKCE, system
+    browser).
   - The backend is a Logto *API resource*. Clients request access tokens for that resource; the backend validates the
     JWT locally (Logto JWKS, issuer, audience, expiry) and maps `sub` to a kinframe user row created on first use.
 - **Frames** do not have a person behind them, so they don't use Logto. They get a **device credential** from the
@@ -48,6 +49,7 @@ GET /.well-known/kinframe
   "auth": {
     "issuer": "https://auth.frames.example.org/oidc",
     "mobile_client_id": "…",            // Logto native app
+    "desktop_client_id": "…",           // Logto native app, loopback redirect
     "web_client_id": "…",               // Logto SPA
     "api_resource": "https://frames.example.org/v1"
   },
@@ -56,6 +58,9 @@ GET /.well-known/kinframe
 ```
 
 - The app stores the chosen server and its discovery document, then runs OIDC (PKCE) against that server's Logto.
+- The desktop app (Windows, macOS, Linux) is a separate Logto *Native* application. It follows RFC 8252: a loopback
+  redirect `http://127.0.0.1:<random port>/callback` in the system browser. Logto ignores the port of loopback
+  redirects for Native apps, so the bootstrap registers just `http://127.0.0.1/callback`.
 - The mobile redirect URI is fixed for all servers (`app.kinframe:/callback`, plus a universal/app link where
   possible). The compose bootstrap registers it in Logto automatically, so self-hosters configure nothing by hand.
 - Frames use only `api`, since they don't sign in with Logto.

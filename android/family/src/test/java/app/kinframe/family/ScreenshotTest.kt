@@ -71,8 +71,32 @@ import app.kinframe.family.ui.send.ComposerState
 import app.kinframe.family.ui.send.DraftItem
 import app.kinframe.family.ui.send.ItemEditor
 import app.kinframe.family.ui.settings.SettingsScreen
+import app.kinframe.family.ui.share.Coverage
+import app.kinframe.family.ui.share.ShareSheetContent
+import app.kinframe.family.ui.share.ShareSource
+import app.kinframe.family.ui.share.ShareState
+import app.kinframe.family.ui.share.ShareTarget
 import app.kinframe.core.api.Discovery
 import app.kinframe.core.api.DiscoveryAuth
+import app.kinframe.core.api.CatalogPlugin
+import app.kinframe.core.api.DiscoveredEntity
+import app.kinframe.core.api.DiscoveredService
+import app.kinframe.core.api.FramePlugins
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.PluginInstanceStatus
+import app.kinframe.core.api.SettingsDocument
+import app.kinframe.core.plugin.settings.FormPlugin
+import app.kinframe.core.plugin.settings.InstanceFieldError
+import app.kinframe.core.plugin.settings.PluginInstanceDraft
+import app.kinframe.family.ui.PageColumn
+import app.kinframe.family.ui.frame.ConfirmAddContent
+import app.kinframe.family.ui.frame.PluginCatalogContent
+import app.kinframe.family.ui.frame.PluginEditor
+import app.kinframe.family.ui.frame.PluginEditorActions
+import app.kinframe.family.ui.frame.PluginEditorContent
+import app.kinframe.family.ui.frame.PluginsSectionContent
+import app.kinframe.family.ui.frame.PluginsState
+import kotlinx.serialization.json.jsonObject
 import coil3.asImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
@@ -122,7 +146,7 @@ class ScreenshotTest {
         Send("s1", ago(8), items = listOf(item("a", "Sunday at the beach ☀️"), item("b"), item("c", kind = "video"), item("d"), item("e")),
             frames = listOf(
                 SendFrame("f-oma", "Oma’s frame", true, listOf(SendPlacement("p1", "a", "seen", "love"), SendPlacement("p2", "b", "seen", "love", listOf("beautiful")), SendPlacement("p3", "c", "delivered"))),
-                SendFrame("f-opa", "Opa Jos", false, listOf(SendPlacement("p4", "a", "ready"), SendPlacement("p5", "b", "ready"), SendPlacement("p6", "c", "pending"))),
+                SendFrame("f-opa", "Opa Jos", false, listOf(SendPlacement("p4", "a", "ready"), SendPlacement("p5", "b", "ready"), SendPlacement("p6", "c", "pending", sharedByName = "Lies"))),
             )),
         Send("s2", ago(60 * 26), items = listOf(item("f", "First steps!")),
             frames = listOf(SendFrame("f-oma", "Oma’s frame", true, listOf(SendPlacement("p7", "f", "seen", "wow", listOf("call_me")))))),
@@ -191,7 +215,19 @@ class ScreenshotTest {
     }
 
     @Test fun historyDetail() = both("history_detail") {
-        SendDetailScreen(SendDetailState(send = Load.Ready(sends[0])), {}, {}, {}, {}, {}, {}, {})
+        SendDetailScreen(SendDetailState(send = Load.Ready(sends[0])), {}, {}, {}, {}, {}, {}, {}, onShare = {})
+    }
+
+    @Test fun shareSheet() = both("share_sheet") {
+        ShareSheetContent(
+            ShareState(
+                source = ShareSource("f-oma", listOf("pl2", "pl3")),
+                targets = Load.Ready(listOf(ShareTarget(frames[2], Coverage.None), ShareTarget(frames[1], Coverage.Some),
+                    ShareTarget(frames[1].copy(id = "f-tom", name = "Tom’s frame"), Coverage.All))),
+                chosen = setOf("f-cabin"),
+            ),
+            {}, {}, {}, {},
+        )
     }
 
     private val detail = FrameDetailState(
@@ -216,15 +252,107 @@ class ScreenshotTest {
     }
 
     @Test fun frameLibrary() = both("frame_library") {
-        val placements = (1..14).map { i -> Placement("pl$i", "f-oma", item("x$i", kind = if (i % 5 == 0) "video" else "photo"), receivedAt = ago(i * 60L)) }
+        val placements = (1..14).map { i ->
+            Placement("pl$i", "f-oma", item("x$i", kind = if (i % 5 == 0) "video" else "photo"), receivedAt = ago(i * 60L), sharedByName = if (i == 4) "Lies" else null)
+        }
         FrameDetailScreen(detail, FrameTab.Library, {}, {}, {}, {}, noop, {
             LibraryTab(frames[0], LibraryState(placements = Load.Ready(placements), counts = PlacementCounts(photos = 290, videos = 22, hidden = 3, trashed = 1),
-                selected = setOf("pl2", "pl3")), 30, {}, {}, {}, {}, {}, {}, {})
+                selected = setOf("pl2", "pl3")), 30, {}, {}, {}, {}, {}, {}, {}, onShare = {})
         }, {})
     }
 
     @Test fun appSettings() = both("settings") {
         SettingsScreen(User("u1", "Jeroen", "jeroen@example.org"), server, false, PushStatus.Active("ntfy"), true, false, {}, {}, {}, {}, {})
+    }
+
+    // ---------------------------------------------------------------- plugins
+
+    /** The repository's real manifests (`plugins/`), as the frame reports them in its catalog. */
+    private fun catalogPlugin(id: String): CatalogPlugin {
+        val dir = listOf(File("../../plugins/$id"), File("../plugins/$id")).first { it.isDirectory }
+        val locales = File(dir, "locales").listFiles { f -> f.name.endsWith(".json") }.orEmpty().associate { f ->
+            f.name.removeSuffix(".json") to KinJson.parseToJsonElement(f.readText()).jsonObject.mapValues { (_, v) -> (v as kotlinx.serialization.json.JsonPrimitive).content }
+        }
+        return CatalogPlugin(KinJson.parseToJsonElement(File(dir, "plugin.json").readText()).jsonObject, locales, builtin = true)
+    }
+
+    private val pluginReport by lazy {
+        FramePlugins(
+            catalog = listOf(catalogPlugin("kinframe.ha-energy"), catalogPlugin("kinframe.ha-ev"), catalogPlugin("kinframe.homewizard-p1")),
+            catalogAt = ago(5),
+            instances = listOf(
+                PluginInstanceStatus("p-energy", running = true, entities = listOf(
+                    DiscoveredEntity("sensor.solaredge_ac_power", "Solar power", "W", "power"),
+                    DiscoveredEntity("sensor.p1_meter_active_power", "Grid power", "W", "power"),
+                    DiscoveredEntity("sensor.home_battery_power", "Home battery power", "W", "power"),
+                    DiscoveredEntity("sensor.home_battery_soc", "Home battery", "%", "battery"),
+                )),
+                PluginInstanceStatus("p-car", running = true, error = "Home Assistant refused the token"),
+            ),
+            services = mapOf("_home-assistant._tcp" to listOf(DiscoveredService("Home", "http://192.168.1.157:8123"))),
+        )
+    }
+
+    private val pluginDoc = SettingsDocument(KinJson.parseToJsonElement("""{"version":4,"plugins":{"layout":{"mode":"band","side":"right"},"instances":[
+        {"instance_id":"p-energy","plugin_id":"kinframe.ha-energy","slot":"top-left","enabled":true,"settings":{"base_url":"http://192.168.1.157:8123","solar":["sensor.solaredge_ac_power"]},"secrets_set":["token"]},
+        {"instance_id":"p-car","plugin_id":"kinframe.ha-ev","slot":"top-right","enabled":true,"settings":{},"secrets_set":["token"]},
+        {"instance_id":"p-p1","plugin_id":"kinframe.homewizard-p1","slot":"top-right","enabled":false,"settings":{}}]}}""").jsonObject)
+
+    @Test fun framePlugins() = both("frame_plugins") {
+        PageColumn { PluginsSectionContent(PluginsState(pluginDoc, Load.Ready(pluginReport)), { _, _ -> }, { _, _ -> }, {}, {}, {}) }
+    }
+
+    @Test fun pluginEditor() = both("plugin_editor") {
+        val draft = PluginInstanceDraft("p-energy", "kinframe.ha-energy", slot = "top-left",
+            settings = KinJson.parseToJsonElement("""{"base_url":"http://192.168.1.157:8123","solar":["sensor.solaredge_ac_power"]}""").jsonObject,
+            secretsSet = setOf("token"))
+        val plugin = FormPlugin.read(pluginReport.catalog[0])
+        PluginEditorContent(plugin, PluginEditor(draft, isNew = false, errors = listOf(InstanceFieldError("grid", "settings", "required"))), pluginReport, false,
+            PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun pluginEditorDutch() = shot("plugin_editor_nl_light", dark = false) {
+        val plugin = FormPlugin.read(pluginReport.catalog[1])
+        PluginEditorContent(plugin, PluginEditor(PluginInstanceDraft("p-car", "kinframe.ha-ev", secretsSet = setOf("token")), isNew = false), pluginReport, false,
+            PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    /** A community plugin (registry, docs/plugins.md §7) whose newer version asks for more and waits for approval. */
+    private val binDay by lazy {
+        CatalogPlugin(KinJson.parseToJsonElement("""{"id":"community.bin-day","name":"Bin day","version":"1.0.0","api":1,
+            "author":{"name":"Jane Doe","url":"https://github.com/janedoe"},"license":"MIT",
+            "description":"Which bin goes out tomorrow, from your council’s calendar.",
+            "permissions":{"http":["settings.calendar_url"],"actions":true},
+            "settings":[{"key":"calendar_url","type":"url","label":"Calendar address","required":true}]}""").jsonObject,
+            mapOf("nl" to mapOf("@name" to "Afvaldag", "@setting.calendar_url" to "Adres van de kalender")), builtin = false)
+    }
+
+    private val binDayReport by lazy {
+        pluginReport.copy(catalog = pluginReport.catalog + binDay, instances = listOf(
+            PluginInstanceStatus("p-bins", running = true, version = "1.0.0", update = app.kinframe.core.api.PluginUpdate("1.2.0",
+                KinJson.parseToJsonElement("""{"http":["settings.calendar_url","https://holidays.example.org"],"location":true,"actions":true}""").jsonObject)),
+        ))
+    }
+
+    @Test fun pluginUpdateApproval() = both("plugin_update_approval") {
+        val draft = PluginInstanceDraft("p-bins", "community.bin-day", version = "1.0.0",
+            settings = KinJson.parseToJsonElement("""{"calendar_url":"https://cal.example.org/bins.ics"}""").jsonObject)
+        PluginEditorContent(FormPlugin.read(binDay), PluginEditor(draft, isNew = false), binDayReport, false, PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    @Test @Config(qualifiers = "nl-w411dp-h891dp-xxhdpi")
+    fun pluginUpdateApprovalDutch() = shot("plugin_update_approval_nl_light", dark = false) {
+        val draft = PluginInstanceDraft("p-bins", "community.bin-day", version = "1.0.0")
+        PluginEditorContent(FormPlugin.read(binDay), PluginEditor(draft, isNew = false), binDayReport, false, PluginEditorActions({}, {}, {}, {}, {}))
+    }
+
+    @Test fun pluginCatalogCommunity() = both("plugin_catalog_community") {
+        PageColumn { PluginCatalogContent(listOf(pluginReport.catalog[2], binDay).mapNotNull(FormPlugin::read)) {} }
+    }
+
+    @Test fun pluginConfirmAdd() = both("plugin_confirm_add") {
+        PageColumn { ConfirmAddContent(FormPlugin.read(binDay)!!) }
     }
 
     // ---------------------------------------------------------------- rendering

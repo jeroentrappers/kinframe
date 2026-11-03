@@ -89,12 +89,24 @@ class FrameController(val g: FrameGraph) {
 
     /** What the slideshow's status card should say, if anything. */
     val frameStatus: StateFlow<FrameStatus?> by lazy {
-        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status) { conn, login, st, net ->
-            FrameStatuses.of(conn, net.connected, login != null, st.level)
+        kotlinx.coroutines.flow.combine(connection, portal.loginUrl, storage.state, g.network.status, g.time.clockWrong) { conn, login, st, net, clockWrong ->
+            FrameStatuses.of(conn, net.connected, login != null, st.level, clockWrong)
         }.stateIn(scope, SharingStarted.Eagerly, null)
     }
 
+    /** SD card and USB stick: export, import, automatic backup, restore (product spec 4.10). */
+    val removable by lazy { app.kinframe.frame.removable.RemovableStorage(this) }
+
+    /** The photos a converted Frameo frame received, brought into kinframe (docs/spec/frameo-import.md). */
+    val frameo by lazy { app.kinframe.frame.frameo.FrameoImport(this) }
+
     val joins = JoinRequests(this) { Locales.wrap(g.app).getString(R.string.join_someone) }
+
+    /** Calendars, event invitations, countdowns and the timed calendar view (product spec 4.9). */
+    val calendar by lazy { app.kinframe.frame.calendar.CalendarController(this) }
+
+    /** Live widgets from devices on the home network (docs/plugins.md, step 1: built-in widgets). */
+    val plugins by lazy { app.kinframe.frame.plugins.FramePlugins(this) }
 
     /** Frame name shown by the `identify` command (null = hidden). */
     val identify = MutableStateFlow<String?>(null)
@@ -118,6 +130,7 @@ class FrameController(val g: FrameGraph) {
         scope.launch {
             g.sessionMarker.onStart()
             g.network.start()
+            g.time.start(scope) { g.network.onAvailable(it) }
             launch(Dispatchers.IO) { g.root.isAvailable() }
             if (g.sessionMarker.needsIntegrityCheck) withContext(Dispatchers.IO) { integrityCheck() }
             applyTimezone()
@@ -145,10 +158,16 @@ class FrameController(val g: FrameGraph) {
                 g.settings.raw.map { serverLanguageOf(it) }.distinctUntilChanged().collect { onServerLanguage(it) }
             }
             scope.launch {
-                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online -> if (online) joins.refresh() }
+                connection.map { it == FrameSession.Connection.Online }.distinctUntilChanged().collect { online ->
+                    if (online) { joins.refresh(); calendar.refreshInvitations() }
+                }
             }
+            calendar.start()
             reportStateChanges()
+            app.kinframe.frame.sync.NowShowingReporter(this@FrameController).start()
             update.start()
+            removable.start()
+            frameo.start()
             scope.launch {
                 delay(30_000)
                 while (true) {
@@ -271,10 +290,16 @@ class FrameController(val g: FrameGraph) {
             if (result.newItems > 0) scope.launch { display.onNewPhotos() }
             // A decision made in the app shows up as a membership change: drop the card here too.
             if (joins.pending.value.isNotEmpty()) joins.refresh()
+            // Withdrawn or decided elsewhere: drop the invitation card too.
+            if (calendar.invitations.value.isNotEmpty()) calendar.refreshInvitations()
         }
 
         override fun onJoinRequest(request: JsonObject) {
             scope.launch { joins.onEvent(request) }
+        }
+
+        override fun onEventInvitation(invitation: JsonObject) {
+            scope.launch { calendar.onInvitationEvent(invitation) }
         }
     }
 
@@ -284,6 +309,8 @@ class FrameController(val g: FrameGraph) {
         stopSession()
         slideshow.reset()
         joins.clear()
+        calendar.clear()
+        frameo.reset()
         withContext(Dispatchers.IO) {
             g.credentials.clear()
             g.api.forgetToken()
@@ -299,6 +326,8 @@ class FrameController(val g: FrameGraph) {
         g.prefs.claimed = true
         startSession()
         _screen.value = AppScreen.Slideshow
+        // A freshly set-up frame may have a kinframe export on a stick waiting to be restored.
+        scope.launch { removable.refreshRestoreOffer() }
     }
 
     /** Remote commands (README §5.6). Returns null on success or an error code. */
@@ -317,6 +346,7 @@ class FrameController(val g: FrameGraph) {
             }
             "sync_now" -> {
                 _session.value?.requestPull(); _session.value?.sendHeartbeatNow()
+                calendar.syncNow()
                 update.requestCheck(UpdateManager.Trigger.Remote)
                 null
             }
@@ -390,6 +420,7 @@ class FrameController(val g: FrameGraph) {
     fun openAndroidSettings(activity: android.app.Activity) {
         gate.authorize(OwnerGate.Reason.ExitKiosk) {
             activity.startActivity(Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            app.kinframe.frame.system.ReturnButton.show(activity)
         }
     }
 

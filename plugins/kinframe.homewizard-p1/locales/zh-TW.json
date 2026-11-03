@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1 電錶",
+  "@description": "家中 HomeWizard P1 電錶的即時功率：用電、回送電網、各相數值和今日合計。",
+  "@setting.host": "電錶位址",
+  "@setting.host.help": "在 HomeWizard Energy 應用程式中為電錶開啟本機 API。",
+  "@setting.style": "顯示為",
+  "@option.style.value": "數值",
+  "@option.style.gauge": "錶盤",
+  "@option.style.flow": "流向",
+  "@setting.max_w": "滿刻度 (W)",
+  "@setting.warn_w": "高於此值時醒目顯示 (W，0 = 關閉)",
+  "grid": "電網",
+  "home": "家",
+  "last_hour": "過去一小時",
+  "returning": "回送中",
+  "today_export": "今日回送",
+  "today_gas": "今日瓦斯",
+  "today_import": "今日用電",
+  "using": "用電中"
+}

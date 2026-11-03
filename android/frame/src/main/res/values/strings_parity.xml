@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">The photos on the frame keep playing. New ones arrive as soon as it is back online.</string>
     <string name="status_card_server_title">Can\'t reach the photo server</string>
     <string name="status_card_server_body">The Wi-Fi works, but the server doesn\'t answer. New photos arrive when it\'s back.</string>
+    <string name="status_card_clock_title">Setting the clock</string>
+    <string name="status_card_clock_body">The frame restarted and its clock is wrong. It sets itself from the internet in a moment.</string>
     <string name="status_card_portal_title">This Wi-Fi asks you to sign in</string>
     <string name="status_card_portal_body">Open the network\'s sign-in page to get the frame online.</string>
     <string name="status_card_portal_action">Sign in</string>

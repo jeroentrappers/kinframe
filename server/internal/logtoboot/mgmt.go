@@ -78,6 +78,7 @@ type application struct {
 type connector struct {
 	ID          string         `json:"id"`
 	ConnectorID string         `json:"connectorId"`
+	Target      string         `json:"target"`
 	Type        string         `json:"type"`
 	Config      map[string]any `json:"config"`
 }
@@ -149,7 +150,7 @@ func subset(want, have any) bool {
 	for k, wv := range wm {
 		hv, ok := hm[k]
 		if !ok {
-			if a, isArr := wv.([]any); wv == nil || (isArr && len(a) == 0) {
+			if isEmpty(wv) {
 				continue // absent and empty are the same to Logto
 			}
 			return false
@@ -159,4 +160,17 @@ func subset(want, have any) bool {
 		}
 	}
 	return true
+}
+
+// isEmpty: nil, [] and {} all mean "nothing" to Logto, which may drop them.
+func isEmpty(v any) bool {
+	switch x := v.(type) {
+	case nil:
+		return true
+	case []any:
+		return len(x) == 0
+	case map[string]any:
+		return len(x) == 0
+	}
+	return false
 }

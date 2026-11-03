@@ -1,0 +1,80 @@
+{
+  "type": "stack",
+  "items": [
+    {
+      "type": "value",
+      "icon": "bolt",
+      "value": "1,2 kW",
+      "label": "Using"
+    },
+    {
+      "type": "sparkline",
+      "label": "Last hour",
+      "show_range": true,
+      "points": [
+        820,
+        900,
+        1150,
+        1400,
+        1320,
+        980,
+        760,
+        700,
+        1250,
+        2900,
+        3100,
+        2400,
+        1200,
+        1180,
+        1220
+      ]
+    },
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "bolt",
+          "value": "410 W",
+          "label": "L1"
+        },
+        {
+          "type": "value",
+          "icon": "bolt",
+          "value": "530 W",
+          "label": "L2"
+        },
+        {
+          "type": "value",
+          "icon": "bolt",
+          "value": "260 W",
+          "label": "L3"
+        }
+      ]
+    },
+    {
+      "type": "rows",
+      "items": [
+        {
+          "type": "value",
+          "icon": "grid",
+          "value": "6,82 kWh",
+          "label": "Used today"
+        },
+        {
+          "type": "value",
+          "icon": "sun",
+          "value": "3,15 kWh",
+          "label": "Returned today",
+          "tone": "good"
+        },
+        {
+          "type": "value",
+          "icon": "flame",
+          "value": "1,24 m³",
+          "label": "Gas today"
+        }
+      ]
+    }
+  ]
+}

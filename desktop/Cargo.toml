@@ -1,0 +1,81 @@
+[package]
+name = "kinframe-desktop"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "kinframe for Windows, macOS and Linux: send photos and whole folders to your family's photo frames"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/jeroentrappers/kinframe"
+homepage = "https://kinframe.appmire.be"
+authors = ["Jeroen Trappers <jeroen.trappers@gmail.com>"]
+default-run = "kinframe"
+
+[[bin]]
+name = "kinframe"
+path = "src/main.rs"
+
+[lib]
+name = "kinframe_desktop"
+path = "src/lib.rs"
+
+[dependencies]
+eframe = "0.37"
+egui = "0.37"
+egui_extras = { version = "0.37", default-features = false }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "io-util", "net", "sync", "time"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "json", "query", "form", "http2", "charset", "system-proxy"] }
+tokio-tungstenite = { version = "0.30", features = ["rustls-tls-native-roots"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"
+sha2 = "0.11"
+hex = "0.4"
+base64 = "0.23"
+getrandom = "0.3"
+uuid = { version = "1", features = ["v4", "v7", "serde"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde", "std"] }
+walkdir = "2"
+kamadak-exif = "0.6"
+keyring = "4"
+rfd = "0.17"
+directories = "6"
+webbrowser = "1"
+sys-locale = "0.3"
+thiserror = "2"
+anyhow = "1"
+log = "0.4"
+env_logger = { version = "0.11", default-features = false, features = ["auto-color", "humantime"] }
+
+[dev-dependencies]
+wiremock = "0.6"
+tempfile = "3"
+egui_kittest = { version = "0.37", features = ["wgpu", "snapshot"] }
+egui_system_font_provider = "0.37"
+
+[profile.release]
+lto = "thin"
+codegen-units = 4
+strip = true
+
+# cargo-packager: `cargo packager --release` (see README.md, "Packaging").
+[package.metadata.packager]
+product-name = "kinframe"
+identifier = "app.kinframe.desktop"
+category = "Photography"
+copyright = "Copyright © 2026 Jeroen Trappers and kinframe contributors"
+out-dir = "target/packages"
+icons = ["assets/icons/icon-32.png", "assets/icons/icon-128.png", "assets/icons/icon-256.png", "assets/icons/icon-512.png"]
+license-file = "../LICENSE"
+
+[package.metadata.packager.deb]
+depends = ["xdg-desktop-portal", "libxkbcommon0", "libvulkan1 | libgl1"]
+section = "graphics"
+desktop-template = "packaging/kinframe.desktop"
+
+[package.metadata.packager.macos]
+minimum-system-version = "11.0"
+
+[package.metadata.packager.nsis]
+installer-mode = "currentUser"

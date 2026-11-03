@@ -222,6 +222,7 @@
 					<div class="stack-sm"><div class="skeleton" style="height:16px"></div><div class="skeleton" style="height:16px;width:70%"></div><div class="skeleton" style="height:16px;width:80%"></div></div>
 				{:else}
 					<ul class="health" role="list">
+						{#if frame.device_kind !== 'browser'}
 						<li>
 							<Icon name="wifi" size={18} />
 							<span class="h-label">{t('health.wifi')}</span>
@@ -253,6 +254,7 @@
 								{[String(hb?.placements_cached ?? '–'), hb?.placements_missing ? tn('health.missing', hb.placements_missing) : null].filter(Boolean).join(' · ')}
 							</span>
 						</li>
+						{/if}
 						<li>
 							<Icon name="clock" size={18} />
 							<span class="h-label">{t('health.uptime')}</span>

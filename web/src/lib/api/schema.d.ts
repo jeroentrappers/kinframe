@@ -395,7 +395,9 @@ export interface paths {
         put?: never;
         /**
          * @description tus 1.0 creation endpoint (also HEAD/PATCH/DELETE on /v1/uploads/{uploadId}). See README §5.3.
-         *     Upload-Metadata keys: filename, filetype, sha256 (optional).
+         *     Upload-Metadata keys: filename, filetype, sha256 (optional), prepared (optional: `photo-master-v1` or
+         *     `video-master-v1` when the client already produced a master; the server verifies it, see README §5.3
+         *     "Prepared uploads").
          */
         post: operations["tusCreateUpload"];
         delete?: never;
@@ -449,7 +451,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Place the same items on additional frames. */
+        /**
+         * @description Place the same items on additional frames. Uses the same path as `sharePlacements`: no new upload or master,
+         *     renditions only for screen sizes that have none yet, and frames that already hold an item are skipped.
+         */
         post: operations["forwardSend"];
         delete?: never;
         options?: never;
@@ -547,6 +552,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/frames/{frameId}/placements:share": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Share photos and videos from this frame's library to other frames without uploading them again (README §5.3,
+         *     "Sharing between frames"). Each new placement references the **same item**: no new upload, master or blob copy;
+         *     a frame rendition is only made when the target's screen size has none yet.
+         *
+         *     - Source: every placement must be live on `{frameId}` (not trashed or awaiting moderation), and the caller needs
+         *       `see_library` there or be the item's sender (or the member who shared it there).
+         *     - Targets: the caller needs `send` on every frame in `frame_ids`. The target's moderation applies
+         *       (`pending_moderation` unless the caller manages that frame), and at most `limits.max_items_per_send`
+         *       placements may be shared per request.
+         *     - A target that already holds the item is skipped and reported in `skipped`.
+         *     - New placements keep the item's original sender (who hears about reactions, and sees them in their history)
+         *       and record `shared_by_user_id` / `shared_by_name` (the sharer, who gets the "delivered" push).
+         *     - The original sender's unsend removes shared placements too. Owners and admins of a target manage them like any
+         *       other placement; the sharer may hide, trash or purge the placements they created (that is how clients undo).
+         *     - `dry_run: true` validates and reports `skipped` without creating anything, so pickers can show which frames
+         *       already have the selection.
+         *     - All-or-nothing validation; repeat-safe with `Idempotency-Key`.
+         */
+        post: operations["sharePlacements"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/albums": {
         parameters: {
             query?: never;
@@ -585,6 +625,91 @@ export interface paths {
         patch: operations["updateAlbum"];
         trace?: never;
     };
+    "/v1/frames/{frameId}/tv-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created. */
+        get: operations["listTvLinks"];
+        put?: never;
+        /**
+         * @description Creates a short-lived, revocable share token for a slideshow of this frame's library, used by the TV page
+         *     (`/tv/{frameId}?t=<token>`) and by Cast senders. Needs `see_library`, unless every `placement_ids` entry is
+         *     one of the caller's own placements (e.g. "Show on TV" from History).
+         */
+        post: operations["createTvLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/tv-links/{linkId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Revoke a TV link (its creator, or owner/admin). TV pages using it stop at their next refresh. */
+        delete: operations["revokeTvLink"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tv/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description No sign-in: the token is the credential. Returns the slides with absolute, signed media URLs (master
+         *     rendition: WebP photos, H.264/AAC MP4 videos) that a TV or Chromecast can fetch without headers. The URLs
+         *     expire after 1-2 h; refetch after `refresh_after`. `404 not_found` for unknown or revoked tokens,
+         *     `410 link_expired` once the link has expired.
+         */
+        get: operations["getTvSlideshow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/tv/{token}/mirror": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description WebSocket (README §6.4) for a `mirror` TV link: the TV follows the physical frame live. The server sends a
+         *     `MirrorState` right away and on every change, and `{type: "ended", reason}` before closing when the link is
+         *     revoked, expires or its creator loses `see_library`. At most 8 viewers per frame (`429 rate_limited`).
+         *     `404 not_found` for unknown, revoked or non-mirror tokens, `410 link_expired` for expired ones.
+         */
+        get: operations["tvMirror"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/frames/{frameId}/settings": {
         parameters: {
             query?: never;
@@ -604,6 +729,96 @@ export interface paths {
         patch: operations["updateFrameSettings"];
         trace?: never;
     };
+    "/v1/stations/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The latest reading of a personal weather station that uploads to kinframe (docs/plugins.md §9.4), for the
+         *     frame's weather-station widget and the Home Assistant integration. The station is named by its upload ID and
+         *     key, the same pair it uploads with, in headers so they stay out of logs. `404` when no frame registered that
+         *     pair or nothing arrived in the last 48 hours. Rate-limited per address.
+         */
+        get: operations["getStationLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/stations/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The weather stations with a public page (docs/plugins.md §9.4), for the overview at /stations: each one's
+         *     latest reading and its temperature per hour over the last 24 hours. Only stations whose owner turned the page
+         *     on and that sent a reading in the last 48 hours; sorted by title. Rate-limited per address; cacheable for 60
+         *     seconds.
+         */
+        get: operations["listPublicStations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/stations/{stationId}/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description A personal weather station's public page (docs/plugins.md §9.4): its latest reading, today's extremes and the
+         *     last 48 hours in 5-minute steps, for anyone with the link. Only for stations whose owner turned the page on in
+         *     the frame's weather-station plugin (`public_page`), under the title they chose; nothing about the frame or its
+         *     place. `404` for every other station ID, so it doesn't tell which stations exist. Rate-limited per address;
+         *     cacheable for 30 seconds.
+         */
+        get: operations["getStationPublic"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/plugins": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description The plugins the frame can run and how its instances are doing (needs change_settings): the form for each
+         *     plugin comes from its manifest, the entity picker and "find on network" from what the frame discovered.
+         *     The instances themselves are in the settings (`plugins.instances`).
+         */
+        get: operations["getFramePlugins"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/geocode": {
         parameters: {
             query?: never;
@@ -618,6 +833,200 @@ export interface paths {
          *     has weather disabled.
          */
         get: operations["geocode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description The frame's calendar sources with their sync status (needs change_settings). There is no limit on the number. */
+        get: operations["listCalendars"];
+        put?: never;
+        /**
+         * @description Add an ICS/webcal link or a CalDAV calendar (needs change_settings). The server syncs it right away; the
+         *     result has `status: syncing`. The URL and credentials are encrypted at rest and never returned (only
+         *     `url_hint`). `503 feature_disabled` when the server has calendars turned off. For a CalDAV account with
+         *     several calendars, `calendar_url` picks one (from `testCalendar`); create one source per calendar.
+         */
+        post: operations["createCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars:test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Try a link or CalDAV account without saving it (needs change_settings; rate-limited). For CalDAV,
+         *     `calendars` lists the calendars found on the account so the client can let the user pick one or more.
+         *     `ok: false` with `status` and `error` when the calendar cannot be read.
+         */
+        post: operations["testCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars/{calendarId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Remove a source and its events from the frame (needs change_settings). Removing the local received-events
+         *     calendar deletes every accepted event; the calendar comes back with the next accepted invitation.
+         */
+        delete: operations["deleteCalendar"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Rename, recolour, enable/disable, or change the link or credentials (needs change_settings). Omitted fields
+         *     are kept. Changing the URL or credentials syncs right away.
+         */
+        patch: operations["updateCalendar"];
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendars/{calendarId}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Sync now (needs change_settings). Returns at once with `status: syncing`. */
+        post: operations["syncCalendar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Read-only merged view of what the frame shows (needs change_settings): the payload of the frame's
+         *     `calendar` change, plus the frame's weather (`null` when it has none) so clients can show the forecast per
+         *     day.
+         */
+        get: operations["getFrameCalendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/countdowns/{eventId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description Show a countdown to this event (an `id` from the merged calendar) on the frame (needs change_settings).
+         *     Idempotent. Any number can be marked; the frame shows the nearest three. `404` when the event is not in the
+         *     frame's calendar.
+         */
+        put: operations["setCountdown"];
+        post?: never;
+        delete: operations["clearCountdown"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description Events sent to this frame, newest first. Senders see their own; owner and admin see all. */
+        get: operations["listEventInvitations"];
+        put?: never;
+        /**
+         * @description Send an event to the frame (needs `send`). It arrives as an invitation that the frame accepts or declines;
+         *     accepted events go to the frame's local received-events calendar. The sender gets an
+         *     `event_invitation.decided` websocket event (or a push). Accepted events cannot be changed remotely: send a
+         *     new one instead. The optional photo is a finished tus upload (`photo_upload_id`, JPEG/PNG/WebP/HEIC).
+         */
+        post: operations["sendEventToFrame"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description The sender (or owner/admin) withdraws an invitation that is still pending; `409 already_decided` otherwise. */
+        delete: operations["withdrawEventInvitation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/events/{invitationId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The invitation's photo (WebP), for its sender and owner/admin. `404` when it has none. */
+        get: operations["getEventInvitationPhoto"];
         put?: never;
         post?: never;
         delete?: never;
@@ -716,7 +1125,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The frame-sized rendition (or poster with ?variant=poster). Supports Range, ETag, If-None-Match. */
+        /**
+         * @description The frame-sized rendition (or poster with ?variant=poster). For a Live/Motion Photo (`item.kind: live`),
+         *     `display` is the still and `?variant=motion` the short frame-sized clip. Supports Range, ETag, If-None-Match.
+         */
         get: operations["deviceGetMedia"];
         put?: never;
         post?: never;
@@ -773,6 +1185,77 @@ export interface paths {
         head?: never;
         /** @description Settings changed locally on the frame. Same semantics as updateFrameSettings. */
         patch: operations["devicePatchSettings"];
+        trace?: never;
+    };
+    "/v1/device/plugins/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description The plugins this frame can run, sent when the app starts and its catalog changed. Replaces the previous one. */
+        put: operations["devicePutPluginCatalog"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/plugins/registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description The community plugin registry's index exactly as signed, with its signature (docs/plugins.md §7.1); the frame
+         *     verifies it with the key built into the app. `204` while the server has none (registry off or not fetched yet).
+         */
+        get: operations["deviceGetPluginRegistry"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/plugins/bundles/{file}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A plugin bundle the current index lists and doesn't revoke (`<id>-<version>.zip`). ETag `"<sha256>"`. */
+        get: operations["deviceGetPluginBundle"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/plugins/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Errors, discovered entities and services (at most every 10 s). Replaces the previous report. */
+        put: operations["devicePutPluginStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/device/placements/{placementId}": {
@@ -889,9 +1372,130 @@ export interface paths {
         put?: never;
         /**
          * @description Upload a photo/video imported from SD/USB on the frame so it joins the library (sender = the frame).
-         *     Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB).
+         *     Body is the file; tus is not required for imports (frames upload one file at a time, ≤ 512 MiB). The file
+         *     takes the same processing as any upload (renditions, location metadata stripped).
+         *     The server hashes the body: if this frame already has a live placement of the same file (source, master or
+         *     rendition sha256), nothing is created and the existing placement is returned with `200`.
+         *
+         *     **Imports from another app's leftover data** (`source`, docs/spec/frameo-import.md): `source_key` makes the
+         *     import idempotent per frame. If this frame imported that key before, the placement of that item is returned
+         *     with `200`, even when it was removed since (`status: removed`), so a re-run never brings back what the family
+         *     deleted. The item keeps `sender_name`, `received_at`, fit, focal point and hidden state from the old app, and
+         *     the frame's owner owns the media.
          */
         post: operations["deviceImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/imports/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Which of these file hashes this frame already has (a live placement whose source, master or frame
+         *     rendition sha256 matches), so an import from SD/USB can skip duplicates before uploading. With `source` and
+         *     `source_keys`, also which of those keys this frame has imported before (removed items included, see
+         *     `deviceImport`), so a resumed import only uploads what is missing.
+         */
+        post: operations["deviceImportCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/calendar/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description "Sync now" on the frame: the server re-syncs all of the frame's calendar sources. A `calendar` change follows when something changed. */
+        post: operations["deviceSyncCalendars"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/countdowns/{eventId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** @description The countdown toggle in the frame's event details. A `calendar` change follows. */
+        put: operations["deviceSetCountdown"];
+        post?: never;
+        delete: operations["deviceClearCountdown"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Event invitations waiting for a decision on the frame, oldest first. The frame re-reads this list on connect,
+         *     after syncing and after an `event_invitation` websocket message, like join requests.
+         */
+        get: operations["deviceListInvitations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations/{invitationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Accept or decline. Final; `409 already_decided` when it was decided or withdrawn before. */
+        post: operations["deviceDecideInvitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/device/invitations/{invitationId}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The invitation's photo (WebP, long edge at most 1280 px). Supports ETag and If-None-Match. */
+        get: operations["deviceGetInvitationPhoto"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -937,6 +1541,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/frame-app/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description No sign-in. The newest stable frame app release this server mirrors (README §5.7), for the convert tool on
+         *     the website (`/convert`), which installs kinframe on a frame over USB. `url` points at
+         *     `/v1/frame-app/apk/{version_code}` on this server, so the browser needs no cross-origin download. `204` when
+         *     the server mirrors no release (self-update disabled) or none suits `sdk`. Clients must still check the
+         *     APK's signing certificate: this endpoint is a convenience, not a trust anchor.
+         */
+        get: operations["getFrameAppLatest"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frame-app/apk/{versionCode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description No sign-in. The mirrored APK, as `/v1/device/update/apk/{versionCode}`. Supports Range, If-Range, ETag (`"<sha256>"`) and If-None-Match. */
+        get: operations["getFrameAppApk"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shop/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
+         *     emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+         *     Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
+         *     Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
+         *     not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
+         *     and codes: `email`/`format`, `country`/`enum`, `items`/`minItems`, `items.<i>.product_id`/`enum`,
+         *     `items.<i>.quantity`/`maximum`, `consent`/`required`.
+         */
+        post: operations["createShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shop/reservations/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Cancels a reservation with the signed token from the link in the confirmation email (the web page
+         *     `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
+         *     invalid token or a deleted reservation.
+         */
+        post: operations["cancelShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/operator/stats": {
         parameters: {
             query?: never;
@@ -969,6 +1659,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/operator/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Shop reservations, newest first. `404 not_found` when the server has no shop. */
+        get: operations["operatorListReservations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reservations.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters. */
+        get: operations["operatorExportReservations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/reservations/{reservationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["operatorUpdateReservation"];
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -992,7 +1732,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "server_error";
         Discovery: {
             name: string;
             version: string;
@@ -1004,6 +1744,11 @@ export interface components {
                 /** Format: uri */
                 issuer: string;
                 mobile_client_id: string;
+                /**
+                 * @description Logto Native app of the Windows, macOS and Linux client. It signs in with a loopback redirect
+                 *     (`http://127.0.0.1:<port>/callback`, RFC 8252). Absent on servers bootstrapped before it existed.
+                 */
+                desktop_client_id?: string;
                 web_client_id: string;
                 api_resource: string;
             };
@@ -1019,10 +1764,169 @@ export interface components {
              */
             weather?: boolean;
             /**
+             * @description True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+             * @default false
+             */
+            calendar?: boolean;
+            /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
              */
             webpush_public_key?: string | null;
+            shop?: components["schemas"]["Shop"];
+        };
+        /**
+         * @description Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
+         *     (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
+         *     to text; `en` is always present and is the fallback.
+         */
+        Shop: {
+            /**
+             * @description Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
+             * @example kinframe
+             */
+            brand: string;
+            /**
+             * @description ISO 4217
+             * @example EUR
+             */
+            currency: string;
+            /**
+             * @description VAT included in all prices
+             * @example 21
+             */
+            vat_percent: number;
+            products: components["schemas"]["ShopProduct"][];
+            shipping: components["schemas"]["ShopShipping"];
+            estimated_delivery?: components["schemas"]["LocalizedText"];
+            /**
+             * @description Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
+             *     `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+             *     sign-in and the family app live. Absent when the operator configured none.
+             * @example [
+             *       "shop.example.org"
+             *     ]
+             */
+            domains?: string[];
+            /**
+             * @description Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+             *     the shop emails in). Defaults to `en`.
+             * @example nl
+             */
+            default_locale?: string;
+            seller: {
+                name: string;
+                /** Format: email */
+                email: string;
+                /** @description Legal line for the footer, e.g. company, address and VAT number. */
+                legal?: string;
+                /** Format: uri */
+                privacy_url?: string;
+            };
+        };
+        /** @description Language code → text; `en` is the fallback. */
+        LocalizedText: {
+            [key: string]: string;
+        };
+        ShopProduct: {
+            /** @example frame-10 */
+            id: string;
+            /** @example kinframe 10.1" */
+            name: string;
+            /**
+             * @description Screen size label
+             * @example 10.1"
+             */
+            size?: string;
+            /** @description Unit price incl. VAT */
+            price_cents: number;
+            max_qty: number;
+            /**
+             * @description Illustration key: frame-10 or frame-15
+             * @example frame-10
+             */
+            image?: string;
+            /** @description Language code → short spec bullets; `en` is the fallback. */
+            specs?: {
+                [key: string]: string[];
+            };
+        };
+        ShopShipping: {
+            /**
+             * @example [
+             *       "BE",
+             *       "NL"
+             *     ]
+             */
+            countries: string[];
+            /** @description Shipping cost per order incl. VAT */
+            flat_cents: number;
+            /** @description Item subtotal from which shipping is free; null = never */
+            free_from_cents?: number | null;
+        };
+        /** @enum {string} */
+        ShopReservationStatus: "new" | "contacted" | "confirmed" | "cancelled";
+        ShopReservationCreate: {
+            name: string;
+            email: string;
+            /** @example BE */
+            country: string;
+            postal_code?: string;
+            items: {
+                product_id: string;
+                quantity: number;
+            }[];
+            note?: string;
+            /**
+             * @description Language for the emails (falls back to English)
+             * @example nl
+             */
+            locale?: string;
+            /** @description Must be true. The customer agrees to be contacted about this reservation. */
+            consent: boolean;
+            /** @description Honeypot; leave empty. */
+            website?: string;
+        };
+        ShopLine: {
+            product_id: string;
+            name: string;
+            quantity: number;
+            unit_cents: number;
+            line_cents: number;
+        };
+        ShopReservationReceipt: {
+            /** @example KF-7Q3M */
+            reference: string;
+            status: components["schemas"]["ShopReservationStatus"];
+            email: string;
+            items: components["schemas"]["ShopLine"][];
+            subtotal_cents: number;
+            shipping_cents: number;
+            total_cents: number;
+            currency: string;
+        };
+        ShopReservation: {
+            id: components["schemas"]["Id"];
+            reference: string;
+            status: components["schemas"]["ShopReservationStatus"];
+            name: string;
+            email: string;
+            country: string;
+            postal_code?: string | null;
+            note?: string | null;
+            locale: string;
+            items: components["schemas"]["ShopLine"][];
+            subtotal_cents: number;
+            shipping_cents: number;
+            total_cents: number;
+            currency: string;
+            internal_note?: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: date-time */
+            cancelled_at?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -1106,6 +2010,7 @@ export interface components {
             screen?: components["schemas"]["Screen"];
             app_version?: string | null;
             needs_update?: boolean;
+            device_kind?: components["schemas"]["DeviceKind"];
         };
         Frame: components["schemas"]["FrameSummary"] & {
             default_permissions?: components["schemas"]["Permissions"];
@@ -1243,8 +2148,13 @@ export interface components {
             /** @description false while the frame has no owner */
             claimed?: boolean;
         };
-        /** @enum {string} */
-        MediaKind: "photo" | "video";
+        /**
+         * @description `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+         *     Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+         *     `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+         * @enum {string}
+         */
+        MediaKind: "photo" | "video" | "live";
         /** @enum {string} */
         Fit: "fill" | "fit";
         /** @description Relative to the master rendition, 0..1 from top-left. */
@@ -1269,13 +2179,35 @@ export interface components {
                     start_ms?: number;
                     end_ms?: number;
                 };
-                /** @default true */
+                /**
+                 * @description For a live item it applies to the motion clip, which is muted unless this is `true` explicitly.
+                 * @default true
+                 */
                 include_audio?: boolean;
                 /**
                  * Format: date-time
-                 * @description Client hint used when the file has no metadata.
+                 * @description Capture time. Prepared uploads carry no metadata, so clients read it from the original (EXIF,
+                 *     QuickTime) and send it here. Used when the stored file has no capture time.
                  */
                 captured_at?: string | null;
+                /** @description Prepared uploads only. Pixel width the client produced; a mismatch makes the server take the normal pipeline. */
+                width?: number;
+                /** @description Prepared uploads only. Pixel height the client produced. */
+                height?: number;
+                /** @description Prepared videos only. Duration the client produced (±500 ms). */
+                duration_ms?: number;
+                /**
+                 * @description Makes this a Live Photo: the tus upload of its motion clip (MOV/MP4, at most 10 s; longer clips
+                 *     are cut). `upload_id` must be a photo and `trim` is not allowed. The clip may be a prepared
+                 *     `video-master-v1`.
+                 */
+                live_video_upload_id?: string;
+                /**
+                 * @description `false` sends a Motion Photo (a JPEG/HEIC with an embedded video, detected by the server) as a
+                 *     still only. Without `live_video_upload_id`, the server splits such files itself.
+                 * @default true
+                 */
+                live?: boolean;
             }[];
         };
         Item: {
@@ -1300,10 +2232,35 @@ export interface components {
             /** Format: date-time */
             created_at: string;
             /**
+             * @description Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
+             *     then the frame; clients show `imported_sender_name` instead, e.g. "Anna · via Frameo".
+             */
+            imported_from?: components["schemas"]["ItemOrigin"] | null;
+            /** @description The original sender's display name in that app, when known. */
+            imported_sender_name?: string | null;
+            /**
+             * @description Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
+             *     `ready`. If the clip fails, the item stays a plain photo (`kind: photo`, no `motion`).
+             */
+            motion?: components["schemas"]["ItemMotion"] | null;
+            /**
              * Format: uri
              * @description Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
              */
             thumb_url?: string | null;
+        };
+        /**
+         * @description An app a frame can import leftover photos from.
+         * @enum {string}
+         */
+        ItemOrigin: "frameo";
+        ItemMotion: {
+            /** @enum {string} */
+            status: "processing" | "ready";
+            width?: number | null;
+            height?: number | null;
+            duration_ms?: number | null;
+            has_audio?: boolean | null;
         };
         /** @enum {string} */
         PlacementStatus: "pending" | "ready" | "delivered" | "seen" | "failed" | "removed";
@@ -1334,6 +2291,22 @@ export interface components {
             /** Format: date-time */
             received_at?: string;
             album_ids?: components["schemas"]["Id"][];
+            /** @description The member who shared this placement from another frame (`sharePlacements`); null for sends and forwards. */
+            shared_by_user_id?: components["schemas"]["Id"] | null;
+            /** @description Display name of `shared_by_user_id`. Frames show "Sender · shared by Name". */
+            shared_by_name?: string | null;
+        };
+        ShareResult: {
+            /** @description The placements created on the target frames (empty for a dry run). */
+            placements: components["schemas"]["Placement"][];
+            /** @description Source placement × target frame pairs that were not shared. */
+            skipped: {
+                placement_id: components["schemas"]["Id"];
+                frame_id: components["schemas"]["Id"];
+                /** @enum {string} */
+                reason: "already_on_frame";
+                existing_placement_id?: components["schemas"]["Id"];
+            }[];
         };
         Send: {
             id: components["schemas"]["Id"];
@@ -1351,6 +2324,8 @@ export interface components {
                     status: components["schemas"]["PlacementStatus"];
                     reaction?: components["schemas"]["Reaction"] | null;
                     replies?: components["schemas"]["ReplyPreset"][];
+                    /** @description Set when another member shared this item to the frame. */
+                    shared_by_name?: string | null;
                 }[];
             }[];
             summary?: {
@@ -1381,6 +2356,217 @@ export interface components {
             cover_placement_id?: components["schemas"]["Id"];
             schedule?: components["schemas"]["Album"]["schedule"];
         };
+        TvLinkCreate: {
+            /**
+             * Format: uuid
+             * @description Only this album.
+             */
+            album_id?: string | null;
+            /** @description Only these placements, in this order (a selection). Empty or absent = the whole visible library. */
+            placement_ids?: components["schemas"]["Id"][];
+            kind?: components["schemas"]["MediaKind"];
+            /**
+             * @description `tv` and `cast` show the library at the TV's own pace (cast links are short-lived). `mirror` follows the
+             *     physical frame live (`GET /v1/tv/{token}/mirror`): it needs `see_library` and takes no `album_id`,
+             *     `placement_ids` or `kind`, because it shows whatever the frame shows.
+             * @default tv
+             * @enum {string}
+             */
+            purpose?: "tv" | "cast" | "mirror";
+            /** @default 10 */
+            interval_seconds?: number;
+            /** @default 12 */
+            expires_in_hours?: number;
+        };
+        TvLink: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            token: string;
+            /**
+             * Format: uri
+             * @description The TV page: <public URL>/tv/<frameId>?t=<token> (mirror links add &mode=mirror)
+             */
+            url: string;
+            /** @enum {string} */
+            purpose: "tv" | "cast" | "mirror";
+            /** Format: uuid */
+            album_id?: string | null;
+            /** @description Size of a fixed selection; null for album/library links. */
+            placement_count?: number | null;
+            kind?: components["schemas"]["MediaKind"] | null;
+            interval_seconds: number;
+            created_by_name?: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        TvSlide: {
+            placement_id: components["schemas"]["Id"];
+            kind: components["schemas"]["MediaKind"];
+            /**
+             * Format: uri
+             * @description Absolute signed URL of the master rendition (Range supported).
+             */
+            url: string;
+            /** @description e.g. image/webp or video/mp4 */
+            mime: string;
+            /** Format: uri */
+            poster_url?: string | null;
+            /** Format: uri */
+            thumb_url?: string | null;
+            caption?: string | null;
+            sender_name: string;
+            /** Format: date-time */
+            captured_at?: string | null;
+            /** Format: date-time */
+            received_at: string;
+            width: number;
+            height: number;
+            duration_ms?: number | null;
+            /** @description The placement's focal point (its override, else the item's), for filling the screen and Ken Burns. */
+            focal_point?: components["schemas"]["FocalPoint"] | null;
+            /** @description The placement's fit override, else the item's; null = the frame setting. */
+            fit?: components["schemas"]["Fit"] | null;
+            /**
+             * @description Clockwise rotation set on the frame for this placement.
+             * @enum {integer}
+             */
+            rotation?: 0 | 90 | 180 | 270;
+        };
+        TvSlideshow: {
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            album_name?: string | null;
+            interval_seconds: number;
+            /**
+             * Format: date-time
+             * @description When the link itself stops working.
+             */
+            expires_at: string;
+            /**
+             * Format: date-time
+             * @description Refetch before the media URLs expire.
+             */
+            refresh_after: string;
+            slides: components["schemas"]["TvSlide"][];
+        };
+        /**
+         * @description Device websocket message `now_showing` (frame → server, README §6.1): what the frame's screen shows right
+         *     now. Sent on every slide change (timer, swipe, `next`/`previous`/`show_placement`, the "N new" card), when a
+         *     video starts, pauses or ends, every 15 s while a video plays, and when the screen sleeps or wakes. Times are
+         *     the frame's clock; the server only uses differences between them.
+         */
+        NowShowing: {
+            /** @enum {string} */
+            type: "now_showing";
+            /** @description The slide on screen (the first tile of a collage or pair); null while nothing shows. */
+            placement_id?: components["schemas"]["Id"] | null;
+            /** @description Every photo on screen (collage or pair), first = `placement_id`. */
+            placement_ids?: components["schemas"]["Id"][];
+            /**
+             * Format: date-time
+             * @description When the transition to this slide started.
+             */
+            started_at?: string;
+            /** @enum {string} */
+            transition?: "crossfade" | "slide" | "cut";
+            transition_ms?: number;
+            /**
+             * @description 1: the slide came in as "next", -1: as "previous".
+             * @enum {integer}
+             */
+            direction?: -1 | 1;
+            /** @description The slide moves (Ken Burns): deterministic per placement and focal point. */
+            ken_burns?: boolean;
+            /** @description How long the slide is expected to stay. */
+            hold_ms?: number;
+            /** @description The playing video, or a live photo's clip, while it is on screen. */
+            video?: {
+                /** @description Playback position at `sent_at`. */
+                position_ms: number;
+                playing: boolean;
+                /** @description The clip of a live photo (played over its still). */
+                live?: boolean;
+            } | null;
+            /** @description What the frame expects to show next (for preloading). */
+            next_placement_id?: components["schemas"]["Id"] | null;
+            /** @enum {string} */
+            screen: "on" | "off" | "dimmed" | "sleeping";
+            /** Format: date-time */
+            sent_at: string;
+        };
+        /** @description The frame settings a mirroring TV needs to look like the frame. */
+        MirrorSettings: {
+            interval_s: number;
+            /** @enum {string} */
+            transition: "crossfade" | "slide" | "kenburns";
+            transition_ms: number;
+            fill: boolean;
+            /** @enum {string} */
+            background: "blur" | "black" | "palette";
+            caption?: boolean;
+            /** @enum {string} */
+            caption_date?: "taken" | "received" | "none";
+            clock?: boolean;
+            date?: boolean;
+            clock_24h?: boolean;
+            timezone?: string;
+        };
+        MirrorShowing: {
+            placement_id: components["schemas"]["Id"];
+            /** @description One per photo on screen; a collage or pair has several. */
+            slides: components["schemas"]["TvSlide"][];
+            /**
+             * Format: date-time
+             * @description Server clock. Compare with `server_time` of the same message.
+             */
+            started_at: string;
+            /** @enum {string} */
+            transition: "crossfade" | "slide" | "cut";
+            transition_ms: number;
+            direction?: number;
+            ken_burns?: boolean;
+            hold_ms?: number;
+            video?: {
+                position_ms: number;
+                playing: boolean;
+                live?: boolean;
+                /**
+                 * Format: date-time
+                 * @description Server clock at which `position_ms` was the position.
+                 */
+                at: string;
+            } | null;
+        };
+        /**
+         * @description Message `mirror` on the TV mirror websocket (`GET /v1/tv/{token}/mirror`): the frame's state, sent right after
+         *     connecting and on every change. Media URLs are signed like `TvSlide` URLs and are refreshed with each message.
+         */
+        MirrorState: {
+            /** @enum {string} */
+            type: "mirror";
+            /** Format: date-time */
+            server_time: string;
+            frame_id: components["schemas"]["Id"];
+            frame_name: string;
+            /** @description The frame is connected. */
+            online: boolean;
+            /**
+             * @description `off`/`sleeping`: show a calm "the frame is asleep" screen.
+             * @enum {string}
+             */
+            screen: "on" | "off" | "dimmed" | "sleeping" | "unknown";
+            settings?: components["schemas"]["MirrorSettings"];
+            /** @description Null while the frame shows nothing (empty, offline before it reported anything, or an item the link may not show). */
+            showing?: components["schemas"]["MirrorShowing"] | null;
+            next?: components["schemas"]["TvSlide"] | null;
+            /**
+             * Format: date-time
+             * @description When the link stops working.
+             */
+            expires_at: string;
+        };
         SleepSchedule: {
             id: components["schemas"]["Id"];
             /** @example 23:00 */
@@ -1394,6 +2580,16 @@ export interface components {
              * @enum {string}
              */
             mode?: "off" | "dim";
+        };
+        /** @description Same shape as `SleepSchedule`, with `from`/`to` instead of `sleep_at`/`wake_at`. `to` before `from` runs past midnight. */
+        CalendarSchedule: {
+            id: components["schemas"]["Id"];
+            /** @example 07:00 */
+            from: string;
+            /** @example 09:00 */
+            to: string;
+            days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+            enabled: boolean;
         };
         /** @description Defaults per docs/spec/product-spec.md §6. Unknown fields must be preserved by clients. */
         FrameSettings: {
@@ -1437,6 +2633,13 @@ export interface components {
                 album_id?: string | null;
                 /** @default false */
                 on_this_day?: boolean;
+                /**
+                 * @description Live/Motion Photos: `on` plays the motion once when the slide appears (and on tap), `tap` only on
+                 *     tap, `off` shows the still only.
+                 * @default on
+                 * @enum {string}
+                 */
+                live_photos?: "on" | "tap" | "off";
             };
             widgets?: {
                 /** @default true */
@@ -1454,6 +2657,16 @@ export interface components {
                 weather?: boolean;
                 /** @default true */
                 clock_24h?: boolean;
+                /**
+                 * @description Hybrid view: today and upcoming events beside the slideshow (side panel in landscape, bottom panel in portrait).
+                 * @default false
+                 */
+                calendar_sidebar?: boolean;
+                /**
+                 * @description Countdown widgets on the slideshow (the nearest three).
+                 * @default true
+                 */
+                countdowns?: boolean;
             };
             video?: {
                 /** @default true */
@@ -1505,6 +2718,35 @@ export interface components {
                  */
                 first_day_of_week?: "mon" | "sun" | "sat";
             };
+            /** @description Full-screen calendar options (product spec §4.9). The first day of the week is `locale.first_day_of_week`. */
+            calendar?: {
+                /**
+                 * @default week
+                 * @enum {string}
+                 */
+                view?: "four_day" | "week" | "month";
+                /**
+                 * @description Week and 4-day views start on today rather than the first day of the week.
+                 * @default true
+                 */
+                start_on_today?: boolean;
+                /** @default true */
+                fade_past?: boolean;
+                /** @default false */
+                week_numbers?: boolean;
+                /**
+                 * @description Sync window before today.
+                 * @default 30
+                 */
+                past_days?: number;
+                /**
+                 * @description Sync window after today.
+                 * @default 30
+                 */
+                future_days?: number;
+                /** @description Calendar timed view: while a schedule is active the frame shows the full-screen calendar instead of photos. New schedules default to 07:00–09:00 on every day. */
+                timed_views?: components["schemas"]["CalendarSchedule"][];
+            };
             /**
              * @description Used for weather and sun-based brightness. Set by owner/admin, usually from a `/v1/geocode` result.
              *     Changing it (or turning `widgets.weather` on) makes the server fetch weather right away.
@@ -1545,6 +2787,261 @@ export interface components {
                  */
                 channel?: "stable" | "beta";
             };
+            /**
+             * @description Widgets from plugins (docs/plugins.md): the layout and the plugin instances. What a frame can run is in
+             *     its catalog (`GET /frames/{frameId}/plugins`); instances are checked against it.
+             */
+            plugins?: {
+                layout?: {
+                    /**
+                     * @description Off, the photo's top corners, a band beside or above a 3:2 photo, or split: a photo on half the screen and the other half shared by a dashboard (widgets, clock, the next 48 hours) and a second photo.
+                     * @default off
+                     * @enum {string}
+                     */
+                    mode?: "off" | "overlay" | "band" | "split";
+                    /**
+                     * @description Where the band goes in landscape; for split, the side of the dashboard's half (landscape) or of the dashboard itself (portrait).
+                     * @default right
+                     * @enum {string}
+                     */
+                    side?: "left" | "right";
+                    /**
+                     * @default paper
+                     * @enum {string}
+                     */
+                    background?: "paper" | "photo";
+                };
+                /**
+                 * @description Replaced whole by a patch (it is an array). Secrets are matched by `instance_id`: an instance sent
+                 *     without `secrets` keeps the ones it has.
+                 */
+                instances?: components["schemas"]["PluginInstance"][];
+            };
+        };
+        /**
+         * @description One widget: a plugin with the owner's settings (docs/plugins.md §10). Settings follow the plugin's manifest;
+         *     values of `secret` settings never go in `settings` but in `secrets`, which people can only write.
+         */
+        PluginInstance: {
+            instance_id: string;
+            /** @example kinframe.ha-energy */
+            plugin_id: string;
+            /** @description The plugin version the settings were made with (informational). */
+            version?: string;
+            /**
+             * @default top-right
+             * @enum {string}
+             */
+            slot?: "top-left" | "top-right";
+            /** @default 0 */
+            order?: number;
+            /**
+             * @default always
+             * @enum {string}
+             */
+            visibility?: "always" | "on_change" | "on_tap";
+            /**
+             * @description An enabled instance needs every required setting and secret.
+             * @default true
+             */
+            enabled?: boolean;
+            /** @description The manifest's non-secret settings by key (strings, numbers, booleans, or a list of entity ids). */
+            settings?: {
+                [key: string]: unknown;
+            };
+            /**
+             * @description Write: key → new value, or null to remove it; keys left out keep their value. Stored encrypted. Only the
+             *     frame reads them back (in the change feed and `PATCH /device/settings` responses), in full.
+             */
+            secrets?: {
+                [key: string]: string | null;
+            };
+            /** @description The secret settings that have a value. */
+            readonly secrets_set?: string[];
+        };
+        /** @description A plugin the frame can run, as the frame reports it (`PUT /device/plugins/catalog`). */
+        CatalogPlugin: {
+            /** @description The plugin's `plugin.json` as-is (docs/plugins.md §3.1). */
+            manifest: {
+                [key: string]: unknown;
+            };
+            /**
+             * @description Language tag → the manifest's translations (`@name`, `@description`, `@setting.<key>`,
+             *     `@setting.<key>.help`, `@setting.<key>.placeholder`, `@option.<key>.<value>`, `@preset.<id>`). English is
+             *     the manifest itself, with `en` for option labels.
+             */
+            locales?: {
+                [key: string]: {
+                    [key: string]: string;
+                };
+            };
+            /** @description Part of the frame app; false for a plugin from the community registry (its newest version). */
+            builtin?: boolean;
+        };
+        PluginCatalog: {
+            plugins: components["schemas"]["CatalogPlugin"][];
+        };
+        PluginInstanceStatus: {
+            instance_id: string;
+            /** @description The instance started on the frame. */
+            running?: boolean;
+            /** @description The last error */
+            error?: string | null;
+            /** Format: date-time */
+            error_at?: string | null;
+            /**
+             * Format: date-time
+             * @description When the last update succeeded.
+             */
+            updated_at?: string | null;
+            /** @description The plugin version the frame runs (a registry plugin may run a newer one than the instance names: same permissions). */
+            version?: string | null;
+            /** @description A newer registry version that asks for different permissions; it runs once the owner sets the instance's `version` to it. */
+            update?: {
+                version?: string;
+                /** @description The newer version's `permissions`. */
+                permissions?: {
+                    [key: string]: unknown;
+                };
+            } | null;
+            /**
+             * @description Home Assistant entities the frame can see through this instance's `base_url` and `token` (for the entity
+             *     picker, docs/plugins.md §6.2). Absent when the plugin has no entity settings or the connection failed.
+             */
+            entities?: components["schemas"]["DiscoveredEntity"][];
+        };
+        DiscoveredEntity: {
+            entity_id: string;
+            name?: string;
+            unit?: string;
+            device_class?: string;
+        };
+        DiscoveredService: {
+            name: string;
+            /** @example http://192.168.1.20 */
+            url: string;
+        };
+        StationLatest: {
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description Since midnight in the station's frame's time zone (the first registering frame). */
+            today?: {
+                temp_min_c?: number | null;
+                temp_max_c?: number | null;
+                gust_max_ms?: number | null;
+            };
+        };
+        PublicStationList: {
+            stations: components["schemas"]["PublicStationSummary"][];
+        };
+        PublicStationSummary: {
+            station_id: string;
+            /** @description The title the owner chose; empty: none. */
+            name: string;
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description The mean temperature (°C) of each of the last 24 hours, oldest first, the current hour last; null where nothing arrived. */
+            temp_24h: (number | null)[];
+        };
+        StationPublic: {
+            /** @description The station ID as its owner wrote it. */
+            station_id: string;
+            /** @description The title the owner chose; empty: none. */
+            name: string;
+            /** @description IANA zone of the owner's frame: what "today" means. */
+            timezone: string;
+            /** Format: date-time */
+            received_at: string;
+            reading: components["schemas"]["StationReading"];
+            /** @description Since midnight in `timezone`. */
+            today: {
+                temp_min_c?: number | null;
+                /** Format: date-time */
+                temp_min_at?: string | null;
+                temp_max_c?: number | null;
+                /** Format: date-time */
+                temp_max_at?: string | null;
+                gust_max_ms?: number | null;
+                /** Format: date-time */
+                gust_max_at?: string | null;
+                rain_mm?: number | null;
+                uv_max?: number | null;
+            };
+            series: components["schemas"]["StationSeries"];
+        };
+        /**
+         * @description The last 48 hours in fixed steps (`step_s` seconds from `start`), one value per step and null where nothing
+         *     arrived: means, except gusts, rain rate and UV (the step's maximum), today's rain (its last value) and wind
+         *     direction (the speed-weighted mean direction).
+         */
+        StationSeries: {
+            /** Format: date-time */
+            start: string;
+            step_s: number;
+            temp_c: components["schemas"]["StationValues"];
+            dew_point_c: components["schemas"]["StationValues"];
+            feels_like_c: components["schemas"]["StationValues"];
+            humidity_pct: components["schemas"]["StationValues"];
+            pressure_hpa: components["schemas"]["StationValues"];
+            wind_ms: components["schemas"]["StationValues"];
+            gust_ms: components["schemas"]["StationValues"];
+            wind_dir_deg: components["schemas"]["StationValues"];
+            rain_rate_mm_h: components["schemas"]["StationValues"];
+            rain_today_mm: components["schemas"]["StationValues"];
+            solar_wm2: components["schemas"]["StationValues"];
+            uv_index: components["schemas"]["StationValues"];
+        };
+        StationValues: (number | null)[];
+        /** @description One upload in metric units; a value the station didn't send is absent. */
+        StationReading: {
+            /** Format: date-time */
+            station_time?: string;
+            temp_c?: number;
+            humidity_pct?: number;
+            dew_point_c?: number;
+            feels_like_c?: number;
+            pressure_hpa?: number;
+            wind_ms?: number;
+            wind_dir_deg?: number;
+            gust_ms?: number;
+            rain_rate_mm_h?: number;
+            rain_today_mm?: number;
+            solar_wm2?: number;
+            uv_index?: number;
+            indoor_temp_c?: number;
+            indoor_humidity_pct?: number;
+        };
+        PluginRegistry: {
+            /** @description base64 of index.json, byte for byte as signed */
+            index: string;
+            /** @description base64 DER ECDSA P-256 SHA-256 signature over those bytes */
+            signature: string;
+            sequence: number;
+        };
+        /** @description What the frame knows about its plugins right now (`PUT /device/plugins/status`). */
+        PluginStatusReport: {
+            instances?: components["schemas"]["PluginInstanceStatus"][];
+            /** @description mDNS service type (a `discover` value in a manifest) → what the frame found on its network. */
+            services?: {
+                [key: string]: components["schemas"]["DiscoveredService"][];
+            };
+        };
+        /** @description The frame's plugin catalog and their status, for the apps' Plugins section. */
+        FramePlugins: {
+            catalog: components["schemas"]["CatalogPlugin"][];
+            /**
+             * Format: date-time
+             * @description When the frame last reported its catalog; null for an app that doesn't.
+             */
+            catalog_at?: string | null;
+            instances?: components["schemas"]["PluginInstanceStatus"][];
+            services?: {
+                [key: string]: components["schemas"]["DiscoveredService"][];
+            };
+            /** Format: date-time */
+            status_at?: string | null;
         };
         /** @description PBKDF2-HMAC-SHA256 of the UTF-8 PIN digits (RFC 8018), 32-byte output. `salt` and `hash` are standard base64. */
         PinHash: {
@@ -1567,7 +3064,7 @@ export interface components {
             min_sdk: number;
             /**
              * Format: uri
-             * @description Where to download the APK: `/v1/device/update/apk/{version_code}` on this server.
+             * @description Where to download the APK on this server: `/v1/device/update/apk/{version_code}` (frames) or `/v1/frame-app/apk/{version_code}` (public).
              */
             url: string;
             sha256: string;
@@ -1618,7 +3115,16 @@ export interface components {
             };
             locale?: string;
             timezone?: string;
+            kind?: components["schemas"]["DeviceKind"];
         };
+        /**
+         * @description What runs the frame. `android`: the frame app. `browser`: a web browser enrolled as a virtual frame from the TV
+         *     page (`/tv/frame`). Browser frames speak the same device protocol; they never get app updates, are exempt from
+         *     `426 app_update_required`, and send a smaller heartbeat (no Wi-Fi or storage fields).
+         * @default android
+         * @enum {string}
+         */
+        DeviceKind: "android" | "browser";
         DeviceState: {
             device_id: components["schemas"]["Id"];
             claimed: boolean;
@@ -1632,7 +3138,7 @@ export interface components {
         Change: {
             seq: number;
             /** @enum {string} */
-            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "reset";
+            type: "placement.upsert" | "placement.remove" | "settings" | "album.upsert" | "album.remove" | "member.upsert" | "member.remove" | "frame" | "weather" | "calendar" | "reset";
             placement?: components["schemas"]["Placement"] & {
                 /** @description Frame rendition to download (present on placement.upsert when status is ready). */
                 media?: {
@@ -1650,6 +3156,23 @@ export interface components {
                     /** Format: uri */
                     poster_url?: string | null;
                 };
+                /**
+                 * @description Live items only (`item.kind: live`), once the clip's frame rendition is ready: the short H.264
+                 *     clip to play over the still (`media`), which is also its poster. Frames that don't know `live`
+                 *     ignore it and show `media` as a photo.
+                 */
+                motion?: {
+                    /** Format: uri */
+                    url?: string;
+                    sha256?: string;
+                    bytes?: number;
+                    /** @example video/mp4 */
+                    mime?: string;
+                    width?: number;
+                    height?: number;
+                    duration_ms?: number;
+                    has_audio?: boolean;
+                };
             };
             id?: components["schemas"]["Id"];
             settings?: components["schemas"]["FrameSettings"];
@@ -1666,6 +3189,7 @@ export interface components {
                 owner_name?: string;
             };
             weather?: components["schemas"]["Weather"];
+            calendar?: components["schemas"]["Calendar"] | null;
         };
         /**
          * @description Payload of the `weather` change (docs/api/README.md §5.4). `null` means "no weather": the location was
@@ -1746,6 +3270,227 @@ export interface components {
                 sunset?: string | null;
             }[];
         } | null;
+        /**
+         * @description Palette key. Clients map it to the light/dark colours listed in docs/api/README.md §5.8 (the same 12 colours
+         *     everywhere).
+         * @enum {string}
+         */
+        CalendarColor: "coral" | "tangerine" | "amber" | "olive" | "mint" | "sage" | "teal" | "sky" | "ocean" | "lavender" | "plum" | "rose";
+        /**
+         * @description `ics`: an ICS/iCal/webcal link. `caldav`: a CalDAV calendar. `local`: the frame's received-events calendar.
+         * @enum {string}
+         */
+        CalendarSourceKind: "ics" | "caldav" | "local";
+        /**
+         * @description `syncing` before the first sync and while one runs; `disabled` when the source is turned off.
+         * @enum {string}
+         */
+        CalendarSyncStatus: "ok" | "syncing" | "failed" | "auth_failed" | "disabled";
+        CalendarSource: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["CalendarSourceKind"];
+            /** @description Display name. Empty for the local calendar until renamed: clients show "Received events". */
+            name: string;
+            color: components["schemas"]["CalendarColor"];
+            enabled: boolean;
+            /**
+             * @description Redacted URL for display. Null for `local`.
+             * @example https://calendar.google.com/…/basic.ics
+             */
+            url_hint?: string | null;
+            /** @description CalDAV only. */
+            username?: string | null;
+            has_password?: boolean;
+            status: components["schemas"]["CalendarSyncStatus"];
+            /** @description Short reason of the last failed sync (English). */
+            last_error?: string | null;
+            /**
+             * Format: date-time
+             * @description Last successful sync.
+             */
+            last_synced_at?: string | null;
+            /** Format: date-time */
+            last_attempt_at?: string | null;
+            /** Format: date-time */
+            next_sync_at?: string | null;
+            /** @description Events of this source in the frame's window. */
+            event_count?: number;
+            /** Format: date-time */
+            created_at?: string;
+        };
+        CalendarSourceCreate: {
+            /** @enum {string} */
+            kind: "ics" | "caldav";
+            /** @description `https://`, `http://` or `webcal://` (treated as https). For CalDAV: the server, account or calendar URL. */
+            url: string;
+            /** @description Defaults to the calendar's own name */
+            name?: string;
+            color?: components["schemas"]["CalendarColor"];
+            /** @default true */
+            enabled?: boolean;
+            /** @description CalDAV only. */
+            username?: string;
+            /** @description CalDAV only; use an app-specific password. */
+            password?: string;
+            /** @description CalDAV only: the calendar collection to use, from `CalendarTestResult.calendars`. */
+            calendar_url?: string;
+        };
+        CalendarSourceUpdate: {
+            name?: string;
+            color?: components["schemas"]["CalendarColor"];
+            enabled?: boolean;
+            url?: string;
+            username?: string;
+            password?: string;
+            calendar_url?: string;
+        };
+        CalendarTestResult: {
+            ok: boolean;
+            /** @enum {string} */
+            status: "ok" | "failed" | "auth_failed";
+            error?: string | null;
+            /** @description The calendar's own name */
+            calendar_name?: string | null;
+            /** @description Events in the next 30 days. */
+            event_count?: number | null;
+            /** @description CalDAV only. Calendars on the account that hold events. */
+            calendars?: {
+                url: string;
+                name: string;
+                /** @description The server's colour (hex) */
+                color?: string | null;
+            }[];
+        };
+        /** @description Stable id of one event occurrence (a hash of source, UID and occurrence start). */
+        CalendarEventId: string;
+        /**
+         * @description One occurrence. Timed events have `start_at`/`end_at` (UTC; clients show them in the frame's time zone);
+         *     all-day events have `start_date`/`end_date` (inclusive) and no times. Multi-day events span several days.
+         */
+        CalendarEvent: {
+            id: components["schemas"]["CalendarEventId"];
+            source_id: components["schemas"]["Id"];
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            location?: string | null;
+            notes?: string | null;
+            recurring?: boolean;
+            countdown?: boolean;
+            /** @description Received events only. */
+            sender_name?: string | null;
+            /** @description Received events only; the photo is at `/v1/device/invitations/{id}/photo`. */
+            invitation_id?: components["schemas"]["Id"] | null;
+            has_photo?: boolean;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"] | null;
+        };
+        CalendarSourceInfo: {
+            id: components["schemas"]["Id"];
+            kind: components["schemas"]["CalendarSourceKind"];
+            name: string;
+            color: components["schemas"]["CalendarColor"];
+            status: components["schemas"]["CalendarSyncStatus"];
+            /** Format: date-time */
+            last_synced_at?: string | null;
+        };
+        /** @description A marked event, even when it lies outside the window. */
+        Countdown: {
+            event_id: components["schemas"]["CalendarEventId"];
+            source_id?: components["schemas"]["Id"] | null;
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            color: components["schemas"]["CalendarColor"];
+        };
+        /**
+         * @description Payload of the `calendar` change (docs/api/README.md §5.8): every enabled source of the frame merged into one
+         *     list, deduplicated across sources by UID and start, sorted by start.
+         */
+        Calendar: {
+            /** Format: date-time */
+            generated_at: string;
+            /**
+             * @description The frame's time zone (`locale.timezone`), used for the window and all-day events.
+             * @example Europe/Brussels
+             */
+            timezone: string;
+            window: {
+                /** Format: date */
+                from: string;
+                /**
+                 * Format: date
+                 * @description Inclusive.
+                 */
+                to: string;
+            };
+            sources: components["schemas"]["CalendarSourceInfo"][];
+            events: components["schemas"]["CalendarEvent"][];
+            /** @description Marked events that have not passed yet, nearest first. */
+            countdowns: components["schemas"]["Countdown"][];
+        };
+        CalendarView: components["schemas"]["Calendar"] & {
+            weather?: components["schemas"]["Weather"];
+        };
+        /**
+         * @description `top`: the photo above the event details. `background`: the photo fills the card behind them.
+         * @enum {string}
+         */
+        EventPhotoPlacement: "top" | "background";
+        /** @description Timed events need `start_at` and `end_at`; all-day events need `start_date` (`end_date` is inclusive and defaults to `start_date`). */
+        EventInvitationCreate: {
+            title: string;
+            /** @default false */
+            all_day?: boolean;
+            /** Format: date-time */
+            start_at?: string;
+            /** Format: date-time */
+            end_at?: string;
+            /** Format: date */
+            start_date?: string;
+            /** Format: date */
+            end_date?: string;
+            location?: string;
+            notes?: string;
+            /** @description A finished tus upload holding an image. */
+            photo_upload_id?: string;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"];
+        };
+        EventInvitation: {
+            id: components["schemas"]["Id"];
+            frame_id: components["schemas"]["Id"];
+            sender_id: components["schemas"]["Id"];
+            sender_name: string;
+            /** @enum {string} */
+            status: "pending" | "accepted" | "declined" | "withdrawn";
+            title: string;
+            all_day: boolean;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at?: string | null;
+            /** Format: date */
+            start_date?: string | null;
+            /** Format: date */
+            end_date?: string | null;
+            location?: string | null;
+            notes?: string | null;
+            has_photo: boolean;
+            photo_placement?: components["schemas"]["EventPhotoPlacement"];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            decided_at?: string | null;
+        };
     };
     responses: {
         /** @description Error (RFC 9457) */
@@ -1763,6 +3508,9 @@ export interface components {
         UserId: components["schemas"]["Id"];
         ItemId: components["schemas"]["Id"];
         PlacementId: components["schemas"]["Id"];
+        CalendarId: components["schemas"]["Id"];
+        InvitationId: components["schemas"]["Id"];
+        EventId: components["schemas"]["CalendarEventId"];
         EndpointId: components["schemas"]["Id"];
         InviteToken: string;
         Cursor: string;
@@ -2715,7 +4463,8 @@ export interface operations {
             header?: never;
             path: {
                 itemId: components["parameters"]["ItemId"];
-                variant: "thumb_256" | "thumb_512" | "master" | "poster";
+                /** @description `motion` is the master of a Live/Motion Photo clip (`item.kind: live`). */
+                variant: "thumb_256" | "thumb_512" | "master" | "poster" | "motion";
             };
             cookie?: never;
         };
@@ -2867,6 +4616,42 @@ export interface operations {
             };
         };
     };
+    sharePlacements: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    placement_ids: components["schemas"]["Id"][];
+                    frame_ids: components["schemas"]["Id"][];
+                    /** @default false */
+                    dry_run?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Created placements and skipped targets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShareResult"];
+                };
+            };
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+        };
+    };
     listAlbums: {
         parameters: {
             query?: never;
@@ -2967,6 +4752,122 @@ export interface operations {
             412: components["responses"]["Problem"];
         };
     };
+    listTvLinks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active TV links */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvLink"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createTvLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TvLinkCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvLink"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    revokeTvLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                linkId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTvSlideshow: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Slideshow */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TvSlideshow"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    tvMirror: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Switching to the websocket protocol */
+            101: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     getFrameSettings: {
         parameters: {
             query?: never;
@@ -3020,6 +4921,99 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getStationLatest: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Station-Id": string;
+                "X-Station-Key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Latest reading */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StationLatest"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+        };
+    };
+    listPublicStations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The public stations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicStationList"];
+                };
+            };
+            429: components["responses"]["Problem"];
+        };
+    };
+    getStationPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stationId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The station's page */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StationPublic"];
+                };
+            };
+            404: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+        };
+    };
+    getFramePlugins: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalog and status */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FramePlugins"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     geocode: {
         parameters: {
             query: {
@@ -3044,6 +5038,328 @@ export interface operations {
                 };
             };
             429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listCalendars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sources in display order; the local received-events calendar (if any) comes first. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createCalendar: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    testCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceCreate"];
+            };
+        };
+        responses: {
+            /** @description Outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarTestResult"];
+                };
+            };
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CalendarSourceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    syncCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                calendarId: components["parameters"]["CalendarId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarSource"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getFrameCalendar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Merged calendar */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarView"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    setCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    clearCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unmarked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listEventInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    sendEventToFrame: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInvitationCreate"];
+            };
+        };
+        responses: {
+            /** @description Sent */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    withdrawEventInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Withdrawn */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getEventInvitationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
             default: components["responses"]["Problem"];
         };
     };
@@ -3178,7 +5494,7 @@ export interface operations {
     deviceGetMedia: {
         parameters: {
             query?: {
-                variant?: "display" | "poster" | "avatar";
+                variant?: "display" | "poster" | "avatar" | "motion";
             };
             header?: never;
             path: {
@@ -3288,6 +5604,103 @@ export interface operations {
                 };
             };
             412: components["responses"]["Problem"];
+        };
+    };
+    devicePutPluginCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PluginCatalog"];
+            };
+        };
+        responses: {
+            /** @description Stored */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceGetPluginRegistry: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Signed index */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PluginRegistry"];
+                };
+            };
+            /** @description No registry */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceGetPluginBundle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bundle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": string;
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    devicePutPluginStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PluginStatusReport"];
+            };
+        };
+        responses: {
+            /** @description Stored */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
         };
     };
     devicePatchPlacement: {
@@ -3447,7 +5860,26 @@ export interface operations {
     };
     deviceImport: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Caption to restore (e.g. from a kinframe export manifest). */
+                caption?: string;
+                /** @description The app the file comes from. `source_key`, `sender_name` and `received_at` are ignored without it. */
+                source?: components["schemas"]["ItemOrigin"];
+                /** @description Stable id of the file in that app (for Frameo, its file name). Unique per frame and source. */
+                source_key?: string;
+                /** @description The original sender's display name in that app. */
+                sender_name?: string;
+                /** @description When the old app received the file; becomes the placement's `received_at` (not in the future). */
+                received_at?: string;
+                fit?: components["schemas"]["Fit"];
+                /** @description Focal point, as a fraction of the width (with `focal_y`). */
+                focal_x?: number;
+                focal_y?: number;
+                /** @description Import the placement hidden (it was hidden from the slideshow in the old app). */
+                hidden?: boolean;
+                /** @description Extra clockwise rotation chosen on the frame in the old app. */
+                rotation?: 0 | 90 | 180 | 270;
+            };
             header: {
                 "X-Filename": string;
                 "X-Captured-At"?: string;
@@ -3461,6 +5893,15 @@ export interface operations {
             };
         };
         responses: {
+            /** @description Duplicate; the frame already has this file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Placement"];
+                };
+            };
             /** @description Accepted; a placement.upsert change follows */
             202: {
                 headers: {
@@ -3470,6 +5911,176 @@ export interface operations {
                     "application/json": components["schemas"]["Placement"];
                 };
             };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceImportCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    sha256?: string[];
+                    source?: components["schemas"]["ItemOrigin"];
+                    source_keys?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The known subset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        known: string[];
+                        known_source_keys?: string[];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deviceSyncCalendars: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Sync started */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deviceSetCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Marked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    deviceClearCountdown: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                eventId: components["parameters"]["EventId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unmarked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    deviceListInvitations: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending invitations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventInvitation"][];
+                };
+            };
+        };
+    };
+    deviceDecideInvitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {string} */
+                    decision: "accept" | "decline";
+                };
+            };
+        };
+        responses: {
+            /** @description Decided */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+        };
+    };
+    deviceGetInvitationPhoto: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitationId: components["parameters"]["InvitationId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            /** @description Not modified */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
         };
     };
     deviceCheckUpdate: {
@@ -3544,6 +6155,129 @@ export interface operations {
             404: components["responses"]["Problem"];
         };
     };
+    getFrameAppLatest: {
+        parameters: {
+            query?: {
+                /** @description The frame's Android API level; releases whose `min_sdk` is higher are skipped. */
+                sdk?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The newest stable release */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FrameUpdate"];
+                };
+            };
+            /** @description No release available */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getFrameAppApk: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                versionCode: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description APK bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.android.package-archive": string;
+                };
+            };
+            /** @description Partial bytes */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not modified */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    createShopReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShopReservationCreate"];
+            };
+        };
+        responses: {
+            /** @description Reserved */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservationReceipt"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    cancelShopReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example KF-7Q3M */
+                        reference: string;
+                        status: components["schemas"]["ShopReservationStatus"];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     operatorStats: {
         parameters: {
             query?: never;
@@ -3566,6 +6300,18 @@ export interface operations {
                         items?: number;
                         storage_bytes?: number;
                         processing_queue?: number;
+                        /**
+                         * @description How masters were made (README §5.3 "Prepared uploads"): `transcoded` by the full pipeline,
+                         *     `prepared` (a client master verified and kept without re-encoding), `fallback` (a prepared
+                         *     upload that did not conform and was transcoded). `reused_renditions` counts frame video
+                         *     renditions served from the master's bytes instead of a transcode.
+                         */
+                        media_pipeline?: {
+                            transcoded?: number;
+                            prepared?: number;
+                            fallback?: number;
+                            reused_renditions?: number;
+                        };
                     };
                 };
             };
@@ -3613,6 +6359,85 @@ export interface operations {
                     "application/json": components["schemas"]["Limits"];
                 };
             };
+        };
+    };
+    operatorListReservations: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ShopReservationStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Reservations */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        reservations: components["schemas"]["ShopReservation"][];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorExportReservations: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["ShopReservationStatus"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CSV export */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorUpdateReservation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reservationId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    status?: components["schemas"]["ShopReservationStatus"];
+                    /** @description Only for the operator; never emailed. */
+                    internal_note?: string | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservation"];
+                };
+            };
+            default: components["responses"]["Problem"];
         };
     };
 }

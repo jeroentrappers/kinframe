@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1 मीटर",
+  "@description": "घर के HomeWizard P1 मीटर से लाइव बिजली: खपत, ग्रिड को वापसी, हर फ़ेज़ के हिसाब से और आज का कुल।",
+  "@setting.host": "मीटर का पता",
+  "@setting.host.help": "HomeWizard Energy ऐप में मीटर के लिए Local API चालू करें।",
+  "@setting.style": "इस रूप में दिखाएँ",
+  "@option.style.value": "संख्या",
+  "@option.style.gauge": "डायल",
+  "@option.style.flow": "प्रवाह",
+  "@setting.max_w": "पूरा पैमाना (W)",
+  "@setting.warn_w": "इससे ऊपर हाइलाइट करें (W, 0 = बंद)",
+  "grid": "ग्रिड",
+  "home": "घर",
+  "last_hour": "पिछला घंटा",
+  "returning": "ग्रिड को वापस",
+  "today_export": "आज वापस",
+  "today_gas": "आज गैस",
+  "today_import": "आज खपत",
+  "using": "खपत"
+}

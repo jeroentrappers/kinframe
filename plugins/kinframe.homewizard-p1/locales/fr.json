@@ -1,0 +1,20 @@
+{
+  "@name": "Compteur HomeWizard P1",
+  "@description": "La puissance en direct d'un compteur HomeWizard P1 de la maison : consommation, injection, par phase et les totaux du jour.",
+  "@setting.host": "Adresse du compteur",
+  "@setting.host.help": "Activez l'API locale du compteur dans l'app HomeWizard Energy.",
+  "@setting.style": "Afficher en",
+  "@option.style.value": "Nombre",
+  "@option.style.gauge": "Cadran",
+  "@option.style.flow": "Flux",
+  "@setting.max_w": "Pleine échelle (W)",
+  "@setting.warn_w": "Mettre en évidence au-delà de (W, 0 = non)",
+  "grid": "Réseau",
+  "home": "Maison",
+  "last_hour": "Dernière heure",
+  "returning": "Injection",
+  "today_export": "Injecté aujourd’hui",
+  "today_gas": "Gaz aujourd’hui",
+  "today_import": "Consommé aujourd’hui",
+  "using": "Consommation"
+}

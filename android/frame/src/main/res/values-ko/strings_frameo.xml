@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Frameo 사진</string>
+    <string name="frameo_found">이 액자에 있는 Frameo 사진과 동영상: %d개. 가져오면 설명과 보낸 사람까지 그대로 남아요.</string>
+    <string name="frameo_import">가져오기</string>
+    <string name="frameo_importing">Frameo에서 사진을 가져오는 중</string>
+    <string name="frameo_preparing">준비 중…</string>
+    <string name="frameo_waiting">액자가 온라인이 되면 계속돼요.</string>
+    <string name="frameo_stop">중지</string>
+    <string name="frameo_done_title">Frameo 사진을 가져왔어요</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">가져옴: %d</string>
+    <string name="frameo_done_already">이미 액자에 있음: %d</string>
+    <string name="frameo_done_failed">가져오지 못함: %d</string>
+    <string name="frameo_no_permission">Frameo 사진을 읽으려면 저장공간 접근 권한이 필요해요.</string>
+    <string name="credit_via_frameo">%1$s · Frameo 경유</string>
+    <string name="credit_frameo">Frameo 경유</string>
+</resources>

@@ -1,0 +1,11 @@
+{
+  "$error_path": "/items/0/type",
+  "view": {
+    "type": "stack",
+    "items": [
+      {
+        "type": "none"
+      }
+    ]
+  }
+}

@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Les photos du cadre continuent de défiler. Les nouvelles arrivent dès que la connexion revient.</string>
     <string name="status_card_server_title">Serveur de photos injoignable</string>
     <string name="status_card_server_body">Le Wi-Fi fonctionne, mais le serveur ne répond pas. Les nouvelles photos arriveront à son retour.</string>
+    <string name="status_card_clock_title">Réglage de l’heure</string>
+    <string name="status_card_clock_body">Le cadre a redémarré et son horloge est fausse. Il la règle via Internet dans un instant.</string>
     <string name="status_card_portal_title">Ce Wi-Fi demande une connexion</string>
     <string name="status_card_portal_body">Ouvrez la page de connexion du réseau pour mettre le cadre en ligne.</string>
     <string name="status_card_portal_action">Se connecter</string>

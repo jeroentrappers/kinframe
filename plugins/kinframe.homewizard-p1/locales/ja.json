@@ -1,0 +1,20 @@
+{
+  "@name": "HomeWizard P1 メーター",
+  "@description": "家の HomeWizard P1 メーターのリアルタイム電力：使用、売電、相ごと、今日の合計。",
+  "@setting.host": "メーターのアドレス",
+  "@setting.host.help": "HomeWizard Energy アプリでメーターのローカル API をオンにしてください。",
+  "@setting.style": "表示方法",
+  "@option.style.value": "数値",
+  "@option.style.gauge": "ダイヤル",
+  "@option.style.flow": "フロー",
+  "@setting.max_w": "フルスケール (W)",
+  "@setting.warn_w": "これを超えたら強調 (W、0 = オフ)",
+  "grid": "電力網",
+  "home": "家",
+  "last_hour": "過去 1 時間",
+  "returning": "売電中",
+  "today_export": "今日の売電量",
+  "today_gas": "今日のガス",
+  "today_import": "今日の使用量",
+  "using": "使用中"
+}

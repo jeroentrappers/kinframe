@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Le foto sulla cornice continuano a scorrere. Quelle nuove arrivano appena torna online.</string>
     <string name="status_card_server_title">Server delle foto non raggiungibile</string>
     <string name="status_card_server_body">Il Wi-Fi funziona, ma il server non risponde. Le nuove foto arriveranno quando tornerà disponibile.</string>
+    <string name="status_card_clock_title">Regolazione dell’orologio</string>
+    <string name="status_card_clock_body">La cornice si è riavviata e il suo orologio è sbagliato. Tra un attimo si regola da internet.</string>
     <string name="status_card_portal_title">Questo Wi-Fi richiede l’accesso</string>
     <string name="status_card_portal_body">Apri la pagina di accesso della rete per portare online la cornice.</string>
     <string name="status_card_portal_action">Accedi</string>

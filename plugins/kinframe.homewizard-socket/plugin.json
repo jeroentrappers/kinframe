@@ -1,0 +1,21 @@
+{
+  "id": "kinframe.homewizard-socket",
+  "name": "HomeWizard energy socket",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "What an appliance on a HomeWizard energy socket draws now and used today, with a switch to turn it on or off in the detail card.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 1, "default_seconds": 1 },
+  "permissions": { "http": ["settings.host"], "actions": true },
+  "settings": [
+    { "key": "host", "type": "url", "label": "Socket address", "placeholder": "192.168.1.70", "required": true,
+      "local_only": true, "discover": "_hwenergy._tcp",
+      "help": "Switch on Local API for the socket in the HomeWizard Energy app." },
+    { "key": "label", "type": "text", "label": "What's plugged in", "placeholder": "Washing machine",
+      "help": "Shown under the power; empty shows today's use." },
+    { "key": "icon", "type": "choice", "label": "Icon", "options": ["plug", "washing-machine", "lightbulb", "fan", "car", "bolt"], "default": "plug" },
+    { "key": "switch", "type": "boolean", "label": "Allow switching from the frame", "default": true }
+  ]
+}

@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">फ़्रेम पर मौजूद फ़ोटो चलती रहेंगी। ऑनलाइन होते ही नई फ़ोटो आ जाएंगी।</string>
     <string name="status_card_server_title">फ़ोटो सर्वर तक नहीं पहुंच पा रहे</string>
     <string name="status_card_server_body">वाई-फ़ाई चल रहा है, लेकिन सर्वर जवाब नहीं दे रहा। उसके वापस आने पर नई फ़ोटो आ जाएंगी।</string>
+    <string name="status_card_clock_title">घड़ी सेट हो रही है</string>
+    <string name="status_card_clock_body">फ़्रेम फिर से चालू हुआ और उसकी घड़ी गलत है। यह कुछ ही पल में इंटरनेट से अपने-आप सेट हो जाएगी।</string>
     <string name="status_card_portal_title">यह वाई-फ़ाई साइन इन मांग रहा है</string>
     <string name="status_card_portal_body">फ़्रेम को ऑनलाइन लाने के लिए नेटवर्क का साइन-इन पेज खोलें।</string>
     <string name="status_card_portal_action">साइन इन करें</string>

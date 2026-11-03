@@ -147,6 +147,83 @@ class DeviceApiTest {
     }
 
     @Test
+    fun importFileStreamsBodyWithHeadersAndCaption() = runBlocking {
+        val f = java.io.File.createTempFile("imp", ".jpg").apply { writeBytes(ByteArray(200_000) { it.toByte() }); deleteOnExit() }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"id":"p9","item":{"id":"i9","kind":"photo"},"status":"pending"}""", 202))
+        var progress = 0L
+        val res = api.importFile(f, "Zoë's photo.jpg", "image/jpeg", capturedAt = "2026-01-02T03:04:05Z", caption = "Zee & zon") { progress = it }
+        assertEquals("p9", res.placement.id)
+        assertEquals(false, res.duplicate)
+        assertEquals(200_000L, progress)
+        server.takeRequest()
+        val r = server.takeRequest()
+        assertEquals("/v1/device/imports", r.url.encodedPath)
+        assertEquals("Zee & zon", r.url.queryParameter("caption"))
+        assertEquals("Zo_'s photo.jpg", r.headers["X-Filename"])
+        assertEquals("2026-01-02T03:04:05Z", r.headers["X-Captured-At"])
+        assertEquals("image/jpeg", r.headers["Content-Type"])
+        assertEquals(200_000L, r.body!!.size.toLong())
+    }
+
+    @Test
+    fun importFileReportsDuplicateOn200() = runBlocking {
+        val f = java.io.File.createTempFile("imp", ".jpg").apply { writeText("x"); deleteOnExit() }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"id":"p1","item":{"id":"i1"},"status":"seen"}"""))
+        assertTrue(api.importFile(f, "a.jpg", null).duplicate)
+    }
+
+    @Test
+    fun importFileSendsTheOrigin() = runBlocking {
+        val f = java.io.File.createTempFile("imp", ".webp").apply { writeText("x"); deleteOnExit() }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"id":"p1","item":{"id":"i1","imported_from":"frameo","imported_sender_name":"Anna"},"status":"pending"}""", 202))
+        val origin = app.kinframe.core.api.ImportOrigin(
+            source = "frameo", key = "1700000000000.webp", senderName = "Anna", receivedAt = "2023-11-14T22:13:20Z",
+            fit = "fill", focal = app.kinframe.core.api.FocalPoint(0.25, 1.5), hidden = true, rotation = 90,
+        )
+        val res = api.importFile(f, "1700000000000.webp", "image/webp", origin = origin)
+        assertEquals("frameo", res.placement.item.importedFrom)
+        assertEquals("Anna", res.placement.item.importedSenderName)
+        server.takeRequest()
+        val r = server.takeRequest().url
+        assertEquals("frameo", r.queryParameter("source"))
+        assertEquals("1700000000000.webp", r.queryParameter("source_key"))
+        assertEquals("Anna", r.queryParameter("sender_name"))
+        assertEquals("2023-11-14T22:13:20Z", r.queryParameter("received_at"))
+        assertEquals("fill", r.queryParameter("fit"))
+        assertEquals("0.25", r.queryParameter("focal_x"))
+        assertEquals("1.0", r.queryParameter("focal_y"))
+        assertEquals("true", r.queryParameter("hidden"))
+        assertEquals("90", r.queryParameter("rotation"))
+    }
+
+    @Test
+    fun importedKeysAsksBySource() = runBlocking {
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"known":[],"known_source_keys":["b.webp"]}"""))
+        assertEquals(setOf("b.webp"), api.importedKeys("frameo", listOf("a.webp", "b.webp")))
+        server.takeRequest()
+        val body = server.takeRequest().body!!.utf8()
+        assertTrue(body, body.contains(""""source":"frameo"""") && body.contains(""""source_keys":["a.webp","b.webp"]"""))
+    }
+
+    @Test
+    fun importCheckBatchesAndLowercases() = runBlocking {
+        val hashes = (0 until 600).map { "%064X".format(it) }
+        server.enqueue(token("t1"))
+        server.enqueue(json("""{"known":["${hashes[3].lowercase()}"]}"""))
+        server.enqueue(json("""{"known":["${hashes[550].lowercase()}"]}"""))
+        val known = api.importCheck(hashes)
+        assertEquals(setOf(hashes[3].lowercase(), hashes[550].lowercase()), known)
+        server.takeRequest()
+        val first = server.takeRequest()
+        assertEquals("/v1/device/imports/check", first.url.encodedPath)
+        assertTrue(first.body!!.utf8().startsWith("""{"sha256":["""))
+    }
+
+    @Test
     fun updateRequiredHookFiresOn426() = runBlocking {
         var fired = 0
         api.onUpdateRequired = { fired++ }

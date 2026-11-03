@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotos do Frameo</string>
+    <string name="frameo_found">Fotos e vídeos do Frameo neste porta-retrato: %d. Importe-os para mantê-los, com legendas e remetentes.</string>
+    <string name="frameo_import">Importar</string>
+    <string name="frameo_importing">Importando fotos do Frameo</string>
+    <string name="frameo_preparing">Preparando…</string>
+    <string name="frameo_waiting">Continua quando o porta-retrato estiver on-line.</string>
+    <string name="frameo_stop">Parar</string>
+    <string name="frameo_done_title">Fotos do Frameo importadas</string>
+    <string name="frameo_count">%1$d de %2$d</string>
+    <string name="frameo_done_imported">Importadas: %d</string>
+    <string name="frameo_done_already">Já no porta-retrato: %d</string>
+    <string name="frameo_done_failed">Não importadas: %d</string>
+    <string name="frameo_no_permission">É preciso acesso ao armazenamento para ler as fotos do Frameo.</string>
+    <string name="credit_via_frameo">%1$s · via Frameo</string>
+    <string name="credit_frameo">via Frameo</string>
+</resources>

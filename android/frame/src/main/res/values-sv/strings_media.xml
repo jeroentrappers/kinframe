@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Tryck för att spela upp</string>
+    <string name="settings_live_photos">Live-bilder</string>
+    <string name="live_photos_on">Spela upp när den visas</string>
+    <string name="live_photos_tap">Spela upp vid tryck</string>
+    <string name="live_photos_off">Bara foto</string>
+</resources>

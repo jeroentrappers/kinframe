@@ -1,0 +1,486 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 4,
+    "identityHash": "77bf25a0b3695122fb08f8ea0eda5a08",
+    "entities": [
+      {
+        "tableName": "placements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `itemId` TEXT NOT NULL, `kind` TEXT NOT NULL, `status` TEXT NOT NULL, `senderId` TEXT, `senderName` TEXT, `caption` TEXT, `captionEdited` INTEGER NOT NULL, `capturedAt` INTEGER, `receivedAt` INTEGER NOT NULL, `focalX` REAL, `focalY` REAL, `fit` TEXT, `rotation` INTEGER NOT NULL, `hidden` INTEGER NOT NULL, `trashed` INTEGER NOT NULL, `pendingModeration` INTEGER NOT NULL, `reaction` TEXT, `width` INTEGER, `height` INTEGER, `durationMs` INTEGER, `hasAudio` INTEGER, `mediaUrl` TEXT, `mediaSha256` TEXT, `mediaBytes` INTEGER NOT NULL, `mediaMime` TEXT, `localFile` TEXT, `storedAt` INTEGER, `downloadAttempts` INTEGER NOT NULL, `nextAttemptAt` INTEGER NOT NULL, `lastError` TEXT, `firstShownAt` INTEGER, `lastShownAt` INTEGER, `isNew` INTEGER NOT NULL, `evictedAt` INTEGER, `albumIds` TEXT, `motionUrl` TEXT, `motionSha256` TEXT, `motionBytes` INTEGER NOT NULL DEFAULT 0, `motionMime` TEXT, `motionDurationMs` INTEGER, `motionHasAudio` INTEGER NOT NULL DEFAULT 0, `motionLocalFile` TEXT, `motionAttempts` INTEGER NOT NULL DEFAULT 0, `motionNextAttemptAt` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "itemId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "senderId",
+            "columnName": "senderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "senderName",
+            "columnName": "senderName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "caption",
+            "columnName": "caption",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "captionEdited",
+            "columnName": "captionEdited",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "capturedAt",
+            "columnName": "capturedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "receivedAt",
+            "columnName": "receivedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "focalX",
+            "columnName": "focalX",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "focalY",
+            "columnName": "focalY",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "fit",
+            "columnName": "fit",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rotation",
+            "columnName": "rotation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hidden",
+            "columnName": "hidden",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trashed",
+            "columnName": "trashed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pendingModeration",
+            "columnName": "pendingModeration",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reaction",
+            "columnName": "reaction",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "width",
+            "columnName": "width",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "height",
+            "columnName": "height",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "durationMs",
+            "columnName": "durationMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hasAudio",
+            "columnName": "hasAudio",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "mediaUrl",
+            "columnName": "mediaUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mediaSha256",
+            "columnName": "mediaSha256",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "mediaBytes",
+            "columnName": "mediaBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaMime",
+            "columnName": "mediaMime",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "localFile",
+            "columnName": "localFile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "storedAt",
+            "columnName": "storedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "downloadAttempts",
+            "columnName": "downloadAttempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextAttemptAt",
+            "columnName": "nextAttemptAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastError",
+            "columnName": "lastError",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "firstShownAt",
+            "columnName": "firstShownAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastShownAt",
+            "columnName": "lastShownAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "isNew",
+            "columnName": "isNew",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "evictedAt",
+            "columnName": "evictedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "albumIds",
+            "columnName": "albumIds",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionUrl",
+            "columnName": "motionUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionSha256",
+            "columnName": "motionSha256",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionBytes",
+            "columnName": "motionBytes",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionMime",
+            "columnName": "motionMime",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionDurationMs",
+            "columnName": "motionDurationMs",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "motionHasAudio",
+            "columnName": "motionHasAudio",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionLocalFile",
+            "columnName": "motionLocalFile",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "motionAttempts",
+            "columnName": "motionAttempts",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "motionNextAttemptAt",
+            "columnName": "motionNextAttemptAt",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_placements_mediaSha256",
+            "unique": false,
+            "columnNames": [
+              "mediaSha256"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_placements_mediaSha256` ON `${TABLE_NAME}` (`mediaSha256`)"
+          },
+          {
+            "name": "index_placements_receivedAt",
+            "unique": false,
+            "columnNames": [
+              "receivedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_placements_receivedAt` ON `${TABLE_NAME}` (`receivedAt`)"
+          }
+        ]
+      },
+      {
+        "tableName": "members",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `displayName` TEXT, `avatarUrl` TEXT, `role` TEXT, PRIMARY KEY(`userId`))",
+        "fields": [
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "avatarUrl",
+            "columnName": "avatarUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "role",
+            "columnName": "role",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "userId"
+          ]
+        }
+      },
+      {
+        "tableName": "sync_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `nextSeq` INTEGER NOT NULL, `settingsJson` TEXT, `frameName` TEXT, `frameLocation` TEXT, `ownerName` TEXT, `weatherJson` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nextSeq",
+            "columnName": "nextSeq",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "settingsJson",
+            "columnName": "settingsJson",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "frameName",
+            "columnName": "frameName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "frameLocation",
+            "columnName": "frameLocation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ownerName",
+            "columnName": "ownerName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "weatherJson",
+            "columnName": "weatherJson",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "acks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `placementId` TEXT NOT NULL, `kind` TEXT NOT NULL, `at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "placementId",
+            "columnName": "placementId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_acks_placementId_kind",
+            "unique": true,
+            "columnNames": [
+              "placementId",
+              "kind"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_acks_placementId_kind` ON `${TABLE_NAME}` (`placementId`, `kind`)"
+          }
+        ]
+      },
+      {
+        "tableName": "outbox",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `kind` TEXT NOT NULL, `placementId` TEXT, `payload` TEXT NOT NULL, `notBefore` INTEGER NOT NULL, `attempts` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "placementId",
+            "columnName": "placementId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notBefore",
+            "columnName": "notBefore",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attempts",
+            "columnName": "attempts",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_outbox_placementId",
+            "unique": false,
+            "columnNames": [
+              "placementId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_outbox_placementId` ON `${TABLE_NAME}` (`placementId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '77bf25a0b3695122fb08f8ea0eda5a08')"
+    ]
+  }
+}

@@ -8,6 +8,9 @@
 	import Icon from '$components/Icon.svelte';
 	import Illustration from '$components/Illustration.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
+	import SellerFooter from '$components/SellerFooter.svelte';
+	import ShopSection from '$components/ShopSection.svelte';
+	import Storefront from '$components/Storefront.svelte';
 
 	const next = $derived(safeNext(page.url.searchParams.get('next')));
 	const reason = $derived(next.startsWith('/f/') ? 'frame' : next.startsWith('/i/') ? 'invite' : null);
@@ -50,12 +53,20 @@
 	}
 </script>
 
-<svelte:head><title>kinframe · {discovery.name}</title></svelte:head>
+<svelte:head>
+	{#if !discovery.storefront}<title>kinframe · {discovery.name}</title>{/if}
+</svelte:head>
 
+{#if discovery.storefront && discovery.shop}
+	<Storefront shop={discovery.shop} />
+{:else}
 <div class="landing">
 	<header class="container top">
 		<Logo size={32} />
 		<div class="spacer"></div>
+		{#if discovery.shop}
+			<a class="btn btn-ghost btn-sm shop-link" href="#shop">{t('shop.title', { brand: discovery.brand })}</a>
+		{/if}
 		<LanguagePicker />
 	</header>
 
@@ -138,11 +149,23 @@
 		</article>
 	</section>
 
+	{#if discovery.shop}
+		<ShopSection shop={discovery.shop} />
+	{/if}
+
 	<footer class="container foot">
-		<span>{t('landing.footer')}</span>
-		{#if discovery.doc?.version}<span class="faint">· v{discovery.doc.version}</span>{/if}
+		{#if discovery.shop}<SellerFooter shop={discovery.shop} />{/if}
+		<p class="software">
+			<span>{t('landing.footer')}</span>
+			{#if discovery.doc?.version}<span class="faint">· v{discovery.doc.version}</span>{/if}
+		</p>
+		<nav class="legal-links" aria-label={t('legal.links')}>
+			<a href="/privacy">{t('legal.privacy')}</a>
+			<a href="/terms">{t('legal.terms')}</a>
+		</nav>
 	</footer>
 </div>
+{/if}
 
 <style>
 	.landing {
@@ -276,9 +299,30 @@
 		margin-top: auto;
 		padding-block: var(--s-5);
 		display: flex;
-		gap: 6px;
+		flex-direction: column;
+		gap: var(--s-3);
 		font-size: 0.85rem;
 		color: var(--text-muted);
 		border-top: 1px solid var(--border);
+	}
+	.software {
+		display: flex;
+		gap: 6px;
+	}
+	.legal-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--s-4);
+	}
+	.legal-links a {
+		color: inherit;
+	}
+	.shop-link {
+		margin-inline-end: var(--s-2);
+	}
+	@media (max-width: 520px) {
+		.shop-link {
+			display: none;
+		}
 	}
 </style>

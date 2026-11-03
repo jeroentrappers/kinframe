@@ -132,6 +132,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Gallery | Grid, multi-select, sort, filter by sender/type/source/visibility | Same on the frame. The same library is also browsable in app and web for members with *see library*. | P |
 | Albums | Frame-local only | **Server-side albums**, editable from frame, app and web. An album can be shown on several frames. | P |
 | Storage | Warn below 256 MB, refuse below 128 MB, no auto-delete | The frame cache is managed automatically. Least-recently-shown items are evicted from the frame when space runs low and re-downloaded on demand. The owner sees storage in the app. Nothing is lost because the server keeps everything. | P |
+| Share to another frame | None | From a frame's library (single or multi-select) or the sent history: **"Share to another frame"** puts the same photos on other frames you can send to, without uploading again (the server reuses the stored media). Needs *see library* on the source (or being the sender) and *send* on the target; the target's moderation applies and frames that already have it are skipped. The original sender keeps the credit and hears about reactions; frames show "Anna · shared by Ben". Undo, the target's owner/admins, the sharer and the original sender's unsend can remove it again. | + |
 
 ### 4.7 Frame: power, sleep, brightness, presence
 
@@ -187,7 +188,8 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Email-to-frame inbox | + (3) |
 | "On this day" and scheduled albums | + (4) |
 | Moderation queue: the owner approves items before they show (useful for frames in care homes) | + (5) |
-| Google Cast / DLNA: show a frame's library on a TV | + (6) |
+| Google Cast / DLNA: show a frame's library on a TV, mirror a frame live, or use a TV or browser as a frame of its own (see kinframe-additions, "TV modes") | + (6) |
+| Optional pre-order shop for operators who sell frames: product cards on the landing page, reservations without payment, operator list and CSV export (API README §5.11). Off unless configured; open-source servers have no shop | + (7) |
 
 ## 5. Non-functional requirements
 
@@ -201,6 +203,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Robustness | Crash-safe storage: temp file, fsync, rename, plus a WAL-mode SQLite index. Survives power loss at any moment. Crash-loop protection. |
 | Security | Outbound-only networking, TLS, revocable device credential. No inbound listeners (no adb over TCP in production). Kiosk: the user cannot leave the app without an owner PIN or adb. |
 | Root use | Optional. With root: silent updates, disabling Frameo and the OEM updater, read-only remount on shutdown, system settings. Without root: degrade gracefully on a plain Android tablet. |
+| Clock | Frames without a clock battery (the RK3126 reference) start in the past after a restart, and TLS fails until the clock is right. The app asks NTP servers itself (UDP, no certificates) at start, when the network returns, every 6 hours and every 30 s while the clock is earlier than the last time it was known to be right; it sets the system clock with root when it is more than 2 s off (a jump of more than a minute needs two servers to agree). Without root the slideshow says the clock is being set instead of "server unreachable", and the server's `hello.server_time` corrects the app's own clock once connected. |
 | Hardware capabilities | Per-board capability file (light sensor, motion sensor path, battery, rotation, max video decode). Settings appear only when the capability exists. |
 
 **Server**
@@ -274,5 +277,8 @@ Decided by the project owner on 2026-10-22.
    - **Per-frame-size renditions and thumbnails**, derived from the master and regenerable at any time. Frames up to
      1440p, including ones added later, get full quality.
    - The upload is deleted as soon as the master is written.
+   - Phones and browsers may make the master themselves (smaller uploads, less server CPU). The server verifies it
+     and keeps it without re-encoding, but always strips metadata itself; anything that doesn't conform is processed
+     as usual (API README §5.3, "Prepared uploads").
 3. **One server can host several unrelated families.** Frames and memberships isolate them. There is no extra tenant
    concept, and the operator role can see everything.

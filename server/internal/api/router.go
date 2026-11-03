@@ -63,7 +63,14 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/device/ws", s.deviceAuth(http.HandlerFunc(s.deviceWS)))
 	mux.Handle("GET /v1/device/update", s.deviceAuth(http.HandlerFunc(s.deviceCheckUpdate)))
 	mux.Handle("GET /v1/device/update/apk/{versionCode}", s.deviceAuth(http.HandlerFunc(s.deviceGetUpdateApk)))
+	mux.Handle("GET /v1/device/plugins/bundles/{file}", s.deviceAuth(http.HandlerFunc(s.deviceGetPluginBundle)))
+	mux.Handle("GET /v1/frame-app/latest", validator.middleware(http.HandlerFunc(s.frameAppLatest)))
+	mux.HandleFunc("GET /v1/frame-app/apk/{versionCode}", s.deviceGetUpdateApk)
+	mux.Handle("GET /v1/device/invitations/{invitationId}/photo", s.deviceAuth(http.HandlerFunc(s.deviceGetInvitationPhoto)))
+	mux.Handle("GET /v1/frames/{frameId}/events/{invitationId}/photo", user(http.HandlerFunc(s.getEventInvitationPhoto)))
+	mux.Handle("GET /v1/operator/reservations.csv", user(http.HandlerFunc(s.exportReservations)))
 	mux.HandleFunc("GET /v1/ws", s.userWS)
+	mux.HandleFunc("GET /v1/tv/{token}/mirror", s.tvMirrorWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
 	mux.HandleFunc("GET /avatars/{user}/{file}", s.avatarFile)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -78,6 +85,8 @@ func (s *Server) Handler() (http.Handler, error) {
 	if s.dev != nil {
 		mux.HandleFunc("POST /dev/token", s.devToken)
 	}
+	// Weather stations upload in the Weather Underground format (plain HTTP, the stations' own protocol).
+	mux.HandleFunc("GET /weatherstation/updateweatherstation.php", s.stationUpload)
 	mux.Handle("/", s.spa())
 	return s.recoverer(s.realIP(s.logRequests(mux))), nil
 }
@@ -107,7 +116,7 @@ func (s *Server) authenticate(next http.Handler) http.Handler {
 	user, device := s.userAuth(next), s.deviceAuth(next)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
-		case strings.HasPrefix(r.URL.Path, "/v1/devices/"):
+		case strings.HasPrefix(r.URL.Path, "/v1/devices/"), tvPublicPath(r), shopPublicPath(r), r.URL.Path == "/v1/stations/latest", stationPagePath(r):
 			next.ServeHTTP(w, r)
 		case strings.HasPrefix(r.URL.Path, "/v1/device/"):
 			device.ServeHTTP(w, r)
@@ -171,9 +180,19 @@ func versionExempt(path string) bool {
 	return deviceVersionExempt[path] || strings.HasPrefix(path, "/v1/device/update/apk/")
 }
 
+// deviceQueryTokenPath reports whether a device call may carry its token in the
+// query string (`access_token`): a browser frame cannot set headers on a
+// websocket or on the <img>/<video> elements that load its media.
+func deviceQueryTokenPath(r *http.Request) bool {
+	return r.Method == http.MethodGet && (r.URL.Path == "/v1/device/ws" || strings.HasPrefix(r.URL.Path, "/v1/device/media/"))
+}
+
 func (s *Server) deviceAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := bearer(r)
+		if token == "" && deviceQueryTokenPath(r) {
+			token = r.URL.Query().Get("access_token")
+		}
 		if token == "" {
 			problem.Write(w, r, problem.New(problem.Unauthorized, "missing device token"))
 			return
@@ -192,7 +211,7 @@ func (s *Server) deviceAuth(next http.Handler) http.Handler {
 			s.writeError(w, r, err)
 			return
 		}
-		if s.cfg.MinFrameAppVersion > 0 && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
+		if s.cfg.MinFrameAppVersion > 0 && !d.IsBrowser() && d.AppVersionCode < s.cfg.MinFrameAppVersion && !versionExempt(r.URL.Path) {
 			problem.Write(w, r, problem.New(problem.AppUpdateRequired, ""))
 			return
 		}
@@ -386,7 +405,15 @@ func (s *Server) realIP(next http.Handler) http.Handler {
 				ip = strings.TrimSpace(xr)
 			}
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ipKey, ip)))
+		host := r.Host
+		if s.cfg.TrustProxy {
+			if xh := r.Header.Get("X-Forwarded-Host"); xh != "" {
+				first, _, _ := strings.Cut(xh, ",")
+				host = strings.TrimSpace(first)
+			}
+		}
+		ctx := context.WithValue(r.Context(), ipKey, ip)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(ctx, hostKey, host)))
 	})
 }
 
@@ -421,6 +448,12 @@ func (s *Server) spa() http.Handler {
 					if strings.HasPrefix(p, "/_app/immutable/") {
 						w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 					}
+					if strings.HasPrefix(p, "/fonts/") {
+						// Logto's sign-in page (another origin) loads the
+						// display font from here; browsers need CORS for fonts.
+						w.Header().Set("Access-Control-Allow-Origin", "*")
+						w.Header().Set("Cache-Control", "public, max-age=604800")
+					}
 					files.ServeHTTP(w, r)
 					return
 				}
@@ -431,6 +464,24 @@ func (s *Server) spa() http.Handler {
 			problem.Write(w, r, problem.New(problem.NotFound, "web app not built"))
 			return
 		}
+		if host := requestHost(r.Context()); s.cfg.Shop.IsStorefront(host) {
+			// A storefront domain: the brand's title, description and link preview.
+			b, err := os.ReadFile(index)
+			if err != nil {
+				s.writeError(w, r, err)
+				return
+			}
+			lang := s.cfg.Shop.StorefrontLang(r.Header.Get("Accept-Language"))
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			w.Header().Set("Vary", "Accept-Language")
+			_, _ = w.Write(s.cfg.Shop.StorefrontIndex(b, s.shopOrigin(r.Context()), lang))
+			return
+		}
 		http.ServeFile(w, r, index)
 	})
+}
+
+// stationPagePath: a weather station's public page (GET /v1/stations/{id}/public) needs no session.
+func stationPagePath(r *http.Request) bool {
+	return r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/stations/") && strings.HasSuffix(r.URL.Path, "/public")
 }

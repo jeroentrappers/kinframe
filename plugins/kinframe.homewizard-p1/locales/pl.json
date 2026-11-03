@@ -1,0 +1,20 @@
+{
+  "@name": "Licznik HomeWizard P1",
+  "@description": "Moc na żywo z licznika HomeWizard P1 w domu: pobór, oddawanie do sieci, na fazę i dzisiejsze sumy.",
+  "@setting.host": "Adres licznika",
+  "@setting.host.help": "Włącz Local API licznika w aplikacji HomeWizard Energy.",
+  "@setting.style": "Pokaż jako",
+  "@option.style.value": "Liczbę",
+  "@option.style.gauge": "Wskazówkę",
+  "@option.style.flow": "Przepływ",
+  "@setting.max_w": "Pełna skala (W)",
+  "@setting.warn_w": "Wyróżnij powyżej (W, 0 = wył.)",
+  "grid": "Sieć",
+  "home": "Dom",
+  "last_hour": "Ostatnia godzina",
+  "returning": "Oddawanie",
+  "today_export": "Oddano dziś",
+  "today_gas": "Gaz dziś",
+  "today_import": "Pobrano dziś",
+  "using": "Pobór"
+}

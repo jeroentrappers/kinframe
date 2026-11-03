@@ -1,0 +1,21 @@
+{
+  "type": "list",
+  "rows": [
+    {
+      "time": "Tomorrow",
+      "title": "PMD",
+      "icon": "trash",
+      "tone": "accent"
+    },
+    {
+      "time": "Thu 30",
+      "title": "Paper and cardboard",
+      "icon": "trash"
+    },
+    {
+      "time": "Mon 3",
+      "title": "Residual waste",
+      "icon": "trash"
+    }
+  ]
+}

@@ -60,6 +60,7 @@ import app.kinframe.family.ui.NoteTone
 import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.QuietButton
 import app.kinframe.family.ui.SectionTitle
+import app.kinframe.family.ui.LiveBadge
 import app.kinframe.family.ui.SwitchRow
 import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
@@ -83,6 +84,7 @@ fun ItemEditor(
     onTrim: (String, Long, Long, TrimHandle) -> Unit,
     onAudio: (String, Boolean) -> Unit,
     onRemove: (String) -> Unit,
+    onLive: (String, Boolean) -> Unit = { _, _ -> },
 ) {
     val item = state.items.getOrNull(index) ?: return
     val c = Kin.colors
@@ -132,6 +134,16 @@ fun ItemEditor(
                 }
 
                 if (item.isVideo && item.info.durationMs != null) TrimEditor(item, state.limits.maxVideoSeconds * 1000L, onTrim, onAudio)
+                if (item.info.motionPhoto) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (item.sendLive) LiveBadge()
+                        Text(stringResource(R.string.send_live_title), style = Kin.type.label, color = c.ink)
+                    }
+                    SwitchRow(
+                        stringResource(R.string.send_live_still_only), !item.sendLive, { onLive(item.id, !it) },
+                        hint = stringResource(if (item.sendLive) R.string.send_live_hint else R.string.send_live_still_hint),
+                    )
+                }
 
                 SectionTitle(stringResource(R.string.send_caption))
                 KinTextField(

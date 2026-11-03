@@ -1,0 +1,33 @@
+{
+  "type": "rows",
+  "items": [
+    {
+      "type": "value",
+      "icon": "bolt",
+      "value": "3,8 kWh",
+      "label": "Electricity today",
+      "tone": "info"
+    },
+    {
+      "type": "value",
+      "icon": "water",
+      "value": "142 l",
+      "label": "Water today",
+      "tone": "water"
+    },
+    {
+      "type": "value",
+      "icon": "flame",
+      "value": "1,24 m³",
+      "label": "Gas today",
+      "tone": "gas"
+    },
+    {
+      "type": "value",
+      "icon": "thermometer",
+      "value": "21,4 °C",
+      "label": "Living room",
+      "tone": "heat"
+    }
+  ]
+}

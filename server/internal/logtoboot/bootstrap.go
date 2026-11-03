@@ -28,6 +28,7 @@ const (
 	operatorRoleName  = "kinframe-operator"
 	webAppName        = "kinframe web"
 	nativeAppName     = "kinframe app"
+	desktopAppName    = "kinframe desktop"
 	bootstrapAppName  = "kinframe bootstrap"
 	mobileScheme      = "app.kinframe"
 	nameProfileField  = "name"
@@ -65,6 +66,9 @@ func (b *Bootstrapper) changed(msg string, args ...any) {
 }
 
 func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) error {
+	for _, w := range b.cfg.Warnings {
+		b.log.Warn(w)
+	}
 	endpoint := originOf(b.cfg.Endpoint)
 	if err := b.waitReady(ctx, endpoint+"/api/status"); err != nil {
 		return err
@@ -135,6 +139,10 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 	if err != nil {
 		return fmt.Errorf("mobile app: %w", err)
 	}
+	desktopID, err := b.ensureDesktopApp(ctx)
+	if err != nil {
+		return fmt.Errorf("desktop app: %w", err)
+	}
 	if err := b.ensureEmailConnector(ctx); err != nil {
 		return fmt.Errorf("email connector: %w", err)
 	}
@@ -153,10 +161,11 @@ func (b *Bootstrapper) run(ctx context.Context, transport http.RoundTripper) err
 	}
 
 	if err := b.writeOutput(config.LogtoFile{
-		Issuer:         issuer,
-		WebClientID:    webID,
-		MobileClientID: mobileID,
-		APIResource:    b.cfg.APIResource(),
+		Issuer:          issuer,
+		WebClientID:     webID,
+		MobileClientID:  mobileID,
+		DesktopClientID: desktopID,
+		APIResource:     b.cfg.APIResource(),
 	}); err != nil {
 		return fmt.Errorf("write %s: %w", b.cfg.OutputFile, err)
 	}
@@ -389,6 +398,24 @@ func (b *Bootstrapper) ensureOperatorRole(ctx context.Context, scopeID string) e
 	return nil
 }
 
+// desktopRedirect is the loopback redirect of the desktop client (RFC 8252
+// §7.3). Logto (oidc-provider) ignores the port of loopback redirect URIs for
+// Native applications, so this one entry covers the random port the desktop
+// app listens on: http://127.0.0.1:53127/callback matches. Post-logout
+// redirects get no such port leniency, so the desktop app signs out by
+// revoking its refresh token instead of a browser round trip.
+var desktopClientMetadata = oidcClientMetadata{
+	RedirectURIs:           []string{"http://127.0.0.1/callback"},
+	PostLogoutRedirectURIs: []string{},
+}
+
+// ensureDesktopApp registers the Native app the Windows, macOS and Linux
+// client signs in with. It is separate from the mobile app so operators can
+// see and revoke desktop sessions on their own.
+func (b *Bootstrapper) ensureDesktopApp(ctx context.Context) (string, error) {
+	return b.ensureApp(ctx, desktopAppName, "Native", "kinframe desktop app (Windows, macOS and Linux)", desktopClientMetadata, nil)
+}
+
 // ensureApp returns the client ID of the named application.
 func (b *Bootstrapper) ensureApp(ctx context.Context, name, typ, description string, meta oidcClientMetadata, custom map[string]any) (string, error) {
 	apps, err := list[application](ctx, b.m, "/applications")
@@ -557,9 +584,13 @@ func maps(m map[string]any) map[string]any {
 }
 
 // signInExperience: passwordless email codes for sign-up and sign-in,
-// passkeys offered, the name asked at sign-up, language from the browser.
-func signInExperience() map[string]any {
-	return map[string]any{
+// passkeys offered, the name asked at sign-up, language from the browser,
+// the given social buttons, and (when enabled) kinframe's look.
+func (b *Bootstrapper) signInExperience(socialTargets []string) map[string]any {
+	if socialTargets == nil {
+		socialTargets = []string{}
+	}
+	exp := map[string]any{
 		"signInMode": "SignInAndRegister",
 		"signUp": map[string]any{
 			"identifiers":          []string{"email"},
@@ -575,7 +606,42 @@ func signInExperience() map[string]any {
 		"languageInfo":        map[string]any{"autoDetect": true, "fallbackLanguage": "en"},
 		"passkeySignIn":       map[string]any{"enabled": true, "showPasskeyButton": true, "allowAutofill": true},
 		"signUpProfileFields": []any{map[string]any{"name": nameProfileField}},
+		// Social buttons in this order. A first social sign-in whose provider
+		// reports a verified email that already has an account is linked to
+		// it (automatically, or after asking the user when linking is off).
+		// Providers that give no trusted email make the user confirm one with
+		// a code (skipRequiredIdentifiers stays off).
+		"socialSignInConnectorTargets": socialTargets,
+		"socialSignIn": map[string]any{
+			"automaticAccountLinking": b.cfg.SocialLinkByEmail,
+			"skipRequiredIdentifiers": false,
+		},
 	}
+	if b.cfg.Branding {
+		origin := b.cfg.Origin()
+		exp["color"] = map[string]any{
+			"primaryColor":      brandPrimary,
+			"isDarkModeEnabled": true,
+			"darkPrimaryColor":  brandPrimaryDark,
+		}
+		exp["branding"] = map[string]any{
+			"logoUrl":     origin + "/logo-light.svg",
+			"darkLogoUrl": origin + "/logo-dark.svg",
+			"favicon":     origin + "/favicon.svg",
+			"darkFavicon": origin + "/favicon.svg",
+		}
+		exp["customCss"] = signInCSS(origin)
+		exp["termsOfUseUrl"] = nullable(b.cfg.TermsURL)
+		exp["privacyPolicyUrl"] = nullable(b.cfg.PrivacyURL)
+	}
+	return exp
+}
+
+func nullable(s string) any {
+	if s == "" {
+		return nil
+	}
+	return s
 }
 
 func (b *Bootstrapper) ensureSignInExperience(ctx context.Context) error {
@@ -583,25 +649,38 @@ func (b *Bootstrapper) ensureSignInExperience(ctx context.Context) error {
 	if err := b.m.do(ctx, http.MethodGet, "/sign-in-exp", nil, &have); err != nil {
 		return err
 	}
-	want := signInExperience()
+	var current []string
+	if ts, ok := have["socialSignInConnectorTargets"].([]any); ok {
+		for _, t := range ts {
+			if s, ok := t.(string); ok {
+				current = append(current, s)
+			}
+		}
+	}
+	targets, err := b.ensureSocialConnectors(ctx, current)
+	if err != nil {
+		return fmt.Errorf("social connectors: %w", err)
+	}
+	want := b.signInExperience(targets)
 	if subsetEqual(want, have) {
 		return nil
 	}
-	err := b.m.do(ctx, http.MethodPatch, "/sign-in-exp", want, nil)
+	err = b.m.do(ctx, http.MethodPatch, "/sign-in-exp", want, nil)
 	var ae *apiError
 	if errors.As(err, &ae) && ae.Status < 500 {
 		// Passkey sign-in is newer than the rest; don't fail the whole
 		// setup if this Logto build refuses it.
 		delete(want, "passkeySignIn")
 		if err2 := b.m.do(ctx, http.MethodPatch, "/sign-in-exp", want, nil); err2 == nil {
-			b.log.Warn("Logto refused passkey sign-in; configured email codes only", "err", err)
+			b.log.Warn("Logto refused passkey sign-in; configured the rest", "err", err)
 			err = nil
 		}
 	}
 	if err != nil {
 		return err
 	}
-	b.changed("updated sign-in experience (email one-time codes, passkeys, name at sign-up)")
+	b.changed("updated sign-in experience (email one-time codes, passkeys, name at sign-up, social sign-in, branding)",
+		"social", strings.Join(targets, ","))
 	return nil
 }
 

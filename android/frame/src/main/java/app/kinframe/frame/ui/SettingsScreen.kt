@@ -5,6 +5,7 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.api.FrameSettings
+import app.kinframe.core.api.LivePhotos
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.SleepScheduleDto
 import app.kinframe.core.design.ChoiceChips
@@ -56,6 +58,7 @@ import app.kinframe.core.design.KinButtonStyle
 import app.kinframe.core.design.KinCard
 import app.kinframe.core.design.KinIcon
 import app.kinframe.core.design.KinIcons
+import app.kinframe.core.design.KinShapeM
 import app.kinframe.frame.BuildConfig
 import app.kinframe.frame.FrameController
 import app.kinframe.frame.kiosk.OwnerGate
@@ -81,6 +84,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
     val scope = rememberCoroutineScope()
     var lastTouch by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var choosingPin by remember { mutableStateOf(false) }
+    val dismissKeyboard = app.kinframe.frame.plugins.rememberKeyboardDismiss()
     LaunchedEffect(lastTouch) { delay(5 * 60_000); onClose() }
 
     fun patch(p: JsonObject) {
@@ -94,7 +98,9 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
         Modifier.fillMaxSize().background(Kin.colors.paper)
             .pointerInput(Unit) {
                 awaitPointerEventScope { while (true) { awaitPointerEvent(PointerEventPass.Initial); lastTouch = System.currentTimeMillis(); c.gate.touch() } }
-            },
+            }
+            // A tap beside a text field puts the keyboard away (the frame has no back button on screen).
+            .pointerInput(Unit) { detectTapGestures(onTap = { dismissKeyboard() }) },
     ) {
         Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(start = 24.dp, end = 40.dp, top = 20.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -110,10 +116,15 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 SlideshowSection(c, s, ::section)
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
+                app.kinframe.frame.weather.WeatherSettingsSection(c, s) { patch(it) }
                 SleepSection(s) { patch(it) }
+                app.kinframe.frame.plugins.PluginSettingsSection(c)
+                app.kinframe.frame.calendar.CalendarSettingsSection(c, s, onOpen = { onClose(); c.calendar.openCalendar() }) { patch(it) }
                 LanguageSection(c)
                 OwnerPinSection(c, s) { choosingPin = true }
                 UpdatesSection(c, s, ::section)
+                app.kinframe.frame.frameo.FrameoSettingsSection(c) { title, content -> SectionCard(title, content) }
+                RemovableSection(c)
                 AboutSection(c)
                 Spacer(Modifier.height(40.dp))
             }
@@ -125,7 +136,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
 }
 
 @Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
+internal fun SectionCard(title: String, content: @Composable () -> Unit) {
     KinCard(Modifier.fillMaxWidth().widthIn(max = 1000.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
             Text(title, style = Kin.type.title)
@@ -135,7 +146,7 @@ private fun SectionCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun Labeled(label: String, content: @Composable () -> Unit) {
+internal fun Labeled(label: String, content: @Composable () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(label, style = Kin.type.label, color = Kin.colors.inkSoft)
         content()
@@ -184,6 +195,16 @@ private fun SlideshowSection(c: FrameController, s: FrameSettings, section: (Str
             SwitchRow(stringResource(R.string.settings_pair_portraits), ss.pairPortraits) { section("slideshow", arrayOf("pair_portraits" to it)) }
         }
         SwitchRow(stringResource(R.string.settings_on_this_day), ss.onThisDay) { section("slideshow", arrayOf("on_this_day" to it)) }
+        Labeled(stringResource(R.string.settings_live_photos)) {
+            ChoiceChips(
+                listOf(
+                    LivePhotos.ON to stringResource(R.string.live_photos_on),
+                    LivePhotos.TAP to stringResource(R.string.live_photos_tap),
+                    LivePhotos.OFF to stringResource(R.string.live_photos_off),
+                ),
+                ss.livePhotos.takeIf { it in LivePhotos.all } ?: LivePhotos.ON, { section("slideshow", arrayOf("live_photos" to it)) },
+            )
+        }
         Labeled(stringResource(R.string.settings_fill)) {
             ChoiceChips(
                 listOf(true to stringResource(R.string.fill_fill), false to stringResource(R.string.fill_fit)),
@@ -294,7 +315,7 @@ private fun SleepSection(s: FrameSettings, patch: (JsonObject) -> Unit) {
 }
 
 @Composable
-private fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
+internal fun TimeStepper(label: String, value: String, onMinus: () -> Unit, onPlus: () -> Unit) {
     Labeled(label) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             StepButton(KinIcons.Minus, onMinus)
@@ -312,13 +333,37 @@ private fun StepButton(icon: androidx.compose.ui.graphics.vector.ImageVector, on
 }
 
 @Composable
-private fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(Modifier.fillMaxWidth().clip(CircleShape).clickable { onChange(!checked) }.padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = Kin.type.body, modifier = Modifier.weight(1f))
+internal fun SwitchRow(label: String, checked: Boolean, subtitle: String? = null, enabled: Boolean = true, onChange: (Boolean) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clip(if (subtitle == null) CircleShape else KinShapeM).clickable(enabled = enabled) { onChange(!checked) }.padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = 16.dp)) {
+            Text(label, style = Kin.type.body, color = if (enabled) Kin.colors.ink else Kin.colors.inkFaint)
+            subtitle?.let { Text(it, style = Kin.type.caption, color = Kin.colors.inkSoft) }
+        }
         Switch(
-            checked, onChange,
+            checked, onChange, enabled = enabled,
             colors = SwitchDefaults.colors(checkedTrackColor = Kin.colors.accent, checkedThumbColor = Kin.colors.onAccent, uncheckedTrackColor = Kin.colors.paperDeep, uncheckedBorderColor = Kin.colors.line, uncheckedThumbColor = Kin.colors.inkFaint),
         )
+    }
+}
+
+/** SD card and USB stick (product spec 4.10): opens the storage panel when one is in the frame. */
+@Composable
+private fun RemovableSection(c: FrameController) {
+    val volumes by c.removable.volumes.collectAsState()
+    val v = volumes.firstOrNull()
+    SectionCard(stringResource(R.string.settings_removable)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Storage, null, tint = if (v != null) Kin.colors.sage else Kin.colors.inkFaint)
+            Text(
+                if (v == null) stringResource(R.string.settings_removable_none)
+                else v.label ?: stringResource(if (v.kind == app.kinframe.frame.removable.Volume.Kind.Usb) R.string.removable_card_usb_title else R.string.removable_card_sd_title),
+                style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.weight(1f).padding(horizontal = 14.dp),
+            )
+            if (v != null) KinButton(stringResource(R.string.removable_card_open), { c.removable.open() }, style = KinButtonStyle.Secondary)
+        }
     }
 }
 

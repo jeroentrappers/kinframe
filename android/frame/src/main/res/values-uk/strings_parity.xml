@@ -60,6 +60,8 @@
     <string name="status_card_offline_body">Фото на рамці й далі показуються. Нові надійдуть, щойно зв’язок відновиться.</string>
     <string name="status_card_server_title">Сервер фото недоступний</string>
     <string name="status_card_server_body">Wi-Fi працює, але сервер не відповідає. Нові фото надійдуть, коли він знову запрацює.</string>
+    <string name="status_card_clock_title">Налаштування годинника</string>
+    <string name="status_card_clock_body">Рамка перезапустилася, і її годинник показує неправильно. Зараз вона звірить його через інтернет.</string>
     <string name="status_card_portal_title">Ця мережа Wi-Fi вимагає входу</string>
     <string name="status_card_portal_body">Відкрийте сторінку входу в мережу, щоб підключити рамку до інтернету.</string>
     <string name="status_card_portal_action">Увійти</string>

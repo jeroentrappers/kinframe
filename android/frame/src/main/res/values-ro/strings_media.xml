@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Atingeți pentru redare</string>
+    <string name="settings_live_photos">Fotografii Live</string>
+    <string name="live_photos_on">Redă la afișare</string>
+    <string name="live_photos_tap">Redă la atingere</string>
+    <string name="live_photos_off">Doar fotografia</string>
+</resources>

@@ -56,6 +56,8 @@ class FrameSession(
         /** Runs a remote command; returns null on success or an error code. */
         suspend fun onCommand(type: String, args: JsonObject): String?
         fun onJoinRequest(request: JsonObject) {}
+        /** An event was sent to the frame (README §5.8). */
+        fun onEventInvitation(invitation: JsonObject) {}
         suspend fun heartbeat(): Heartbeat
         fun onPulled(result: SyncEngine.PullResult) {}
     }
@@ -76,12 +78,14 @@ class FrameSession(
 
     @Volatile private var revoked = false
     private var lastStateJson: String? = null
+    @Volatile private var lastNowShowing: NowShowing? = null
     private var stateJob: Job? = null
 
     private val ws: ReconnectingWebSocket = ReconnectingWebSocket(http, scope, { api.webSocketRequest() }, object : ReconnectingWebSocket.Listener {
         override fun onOpen() {
             _connection.value = Connection.Online
             lastStateJson?.let { send(it) }
+            lastNowShowing?.let { send(it.toJson(clock.nowMs())) }
         }
 
         override fun onMessage(text: String) = handleMessage(text)
@@ -218,6 +222,7 @@ class FrameSession(
             }
             "claimed" -> events.onClaimed(msg.str("owner_name"))
             "join_request" -> (msg["request"] as? JsonObject)?.let(events::onJoinRequest)
+            "event_invitation" -> (msg["invitation"] as? JsonObject)?.let(events::onEventInvitation)
             "revoked" -> revoke()
             else -> Unit // unknown types are ignored (README §7)
         }
@@ -243,6 +248,15 @@ class FrameSession(
             // Send the latest value if it changed during the quiet period.
             lastStateJson?.let { if (it != json) send(it) }
         }
+    }
+
+    /**
+     * `now_showing` message (README §6.1, see [NowShowing]): sent right away, since a mirroring TV should change slides
+     * together with the frame, and again after a reconnect.
+     */
+    fun reportNowShowing(now: NowShowing) {
+        lastNowShowing = now
+        send(now.toJson(clock.nowMs()))
     }
 
     private fun revoke() {

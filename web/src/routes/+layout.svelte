@@ -10,27 +10,61 @@
 	import { live } from '$lib/live.svelte';
 	import { push } from '$lib/push.svelte';
 	import { toasts } from '$lib/toast.svelte';
-	import { applyDocumentLocale, i18n, t } from '$lib/i18n/index.svelte';
+	import { applyDocumentLocale, hasSavedLocale, i18n, t } from '$lib/i18n/index.svelte';
+	import { isStorefrontPath, storefrontLocale } from '$lib/storefront';
 	import AppShell from '$components/AppShell.svelte';
 	import Toaster from '$components/Toaster.svelte';
 	import Logo from '$components/Logo.svelte';
 	import Icon from '$components/Icon.svelte';
+	import TvMiniBar from '$components/TvMiniBar.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
 	/** Routes that render without a session. Everything else (including /f/{code} and /i/{token})
 	 *  bounces to the landing page with ?next= and comes back after sign-in. */
-	const PUBLIC = [/^\/$/, /^\/callback$/];
+	const PUBLIC = [/^\/$/, /^\/callback$/, /^\/tv\//, /^\/shop(\/|$)/, /^\/(privacy|terms)$/, /^\/convert$/, /^\/station\/[^/]+$/, /^\/stations$/];
 	const isPublic = $derived(PUBLIC.some((r) => r.test(page.url.pathname)));
+	/** The TV page (/tv/{frameId}?t=…) is full screen and needs no session: the link's token is the credential. */
+	const isTv = $derived(page.url.pathname.startsWith('/tv/'));
+	/** The shop pages (/shop, /shop/cancel) have their own header, signed in or not. */
+	const isShop = $derived(/^\/shop(\/|$)/.test(page.url.pathname));
+	/** The privacy policy and terms of use, likewise readable signed in or not, with their own header. */
+	const isLegal = $derived(/^\/(privacy|terms)$/.test(page.url.pathname));
+	/** So does the convert tool (/convert): it's for people who don't have a frame on kinframe yet. */
+	const isConvert = $derived(page.url.pathname === '/convert');
+	/** The public weather stations (/stations) and each one's page (/station/{id}): signed in or not, their own header. */
+	const isStation = $derived(/^\/(station\/[^/]+|stations)$/.test(page.url.pathname));
 
 	let booting = $state(true);
+
+	/** On a storefront, app pages live on the main origin: same path there (sign-in only happens there). */
+	function leaveStorefront(): boolean {
+		if (isStorefrontPath(location.pathname)) return false;
+		const target = discovery.appUrl(location.pathname + location.search + location.hash);
+		if (!target) return false;
+		location.replace(target);
+		return true;
+	}
 
 	async function boot() {
 		booting = true;
 		const [doc] = await Promise.all([discovery.load(), i18n.ready]);
-		if (doc) await auth.init();
+		if (doc && discovery.storefront) {
+			if (leaveStorefront()) return; // keep the splash while the browser leaves
+			if (!hasSavedLocale()) {
+				const langs = navigator.languages?.length ? navigator.languages : [navigator.language];
+				await i18n.use(storefrontLocale(langs, doc.shop?.default_locale));
+			}
+		} else if (doc) {
+			await auth.init();
+		}
 		booting = false;
 	}
+
+	// Client-side navigation on a storefront to an app page (an old bookmark in history, a typed link).
+	$effect(() => {
+		if (!booting && discovery.storefront && !isStorefrontPath(page.url.pathname)) leaveStorefront();
+	});
 
 	onMount(() => {
 		applyDocumentLocale(i18n.locale);
@@ -88,8 +122,13 @@
 			<button class="btn btn-primary" onclick={boot}><Icon name="refresh" size={18} />{t('common.tryAgain')}</button>
 		</div>
 	</div>
+{:else if discovery.storefront}
+	{#if isStorefrontPath(page.url.pathname)}{@render children()}{/if}
+{:else if isTv || isShop || isLegal || isConvert || isStation}
+	{@render children()}
 {:else if auth.status === 'signed_in' && page.url.pathname !== '/' && page.url.pathname !== '/callback'}
 	<AppShell>{@render children()}</AppShell>
+	<TvMiniBar />
 {:else if isPublic}
 	{@render children()}
 {/if}

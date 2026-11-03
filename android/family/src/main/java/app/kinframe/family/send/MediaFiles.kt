@@ -25,6 +25,8 @@ data class MediaInfo(
     val durationMs: Long? = null,
     val width: Int? = null,
     val height: Int? = null,
+    /** An Android Motion Photo (still with an embedded clip, detected from its XMP). */
+    val motionPhoto: Boolean = false,
 )
 
 object MediaFiles {
@@ -95,8 +97,16 @@ object MediaFiles {
                 }
             }
         }
+        val motion = kind == MediaKind.PHOTO && runCatching {
+            cr.openInputStream(uri)?.use { s ->
+                val head = ByteArray(app.kinframe.family.send.prep.MotionPhotos.XMP_SCAN)
+                var n = 0
+                while (n < head.size) { val r = s.read(head, n, head.size - n); if (r < 0) break; n += r }
+                app.kinframe.family.send.prep.MediaPreparer.isMotionPhoto(head.copyOf(n))
+            } ?: false
+        }.getOrDefault(false)
         val fallbackMime = if (kind == MediaKind.VIDEO) "video/mp4" else "image/jpeg"
-        return MediaInfo(uri, name ?: "file", mime ?: fallbackMime, size.coerceAtLeast(0), kind, duration, w, h)
+        return MediaInfo(uri, name ?: "file", mime ?: fallbackMime, size.coerceAtLeast(0), kind, duration, w, h, motion)
     }
 
     /**
@@ -135,10 +145,10 @@ object MediaFiles {
 
 /** Upload source over a private copy or a content URI. */
 class ItemSource(private val context: Context, private val item: OutboxItem) : UploadSource {
-    override val length: Long get() = item.size
+    override val length: Long get() = item.uploadSize
 
     override fun open(offset: Long): InputStream {
-        val s: InputStream = item.localPath?.let { FileInputStream(File(it)) }
+        val s: InputStream = (item.preparedPath ?: item.localPath)?.let { FileInputStream(File(it)) }
             ?: context.contentResolver.openInputStream(Uri.parse(item.uri))
             ?: throw IOException("cannot open ${item.uri}")
         var left = offset

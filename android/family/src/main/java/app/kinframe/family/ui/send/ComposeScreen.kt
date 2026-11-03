@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinIcons
 import app.kinframe.family.R
+import app.kinframe.family.ui.LiveBadge
 import app.kinframe.family.ui.ContentMaxWidth
 import app.kinframe.family.ui.EmptyState
 import app.kinframe.family.ui.ErrorPanel
@@ -182,6 +183,7 @@ private fun DraftThumb(index: Int, item: DraftItem, issue: ItemIssue?, onEdit: (
                     Text(Format.clock(item.sendDurationMs ?: 0), style = Kin.type.caption, color = Color.White)
                 }
             }
+            if (item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
             if (item.caption.isNotBlank()) {
                 Icon(KinIcons.Message, null, Modifier.align(Alignment.BottomEnd).padding(6.dp).size(18.dp).clip(CircleShape)
                     .background(Color.Black.copy(alpha = 0.55f)).padding(3.dp), tint = Color.White)

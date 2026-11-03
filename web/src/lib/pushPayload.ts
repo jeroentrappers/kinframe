@@ -16,6 +16,7 @@ export function pushUrl(p: PushPayload): string {
 	const send = id(p.ids?.send_id);
 	const frame = id(p.ids?.frame_id);
 	if (p.key === 'join_request' && frame) return `/frames/${frame}?tab=people`;
+	if ((p.type === 'event_invitation.decided' || p.key?.startsWith('event_invitation')) && frame) return `/frames/${frame}?tab=calendar`;
 	if (send) return `/history/${send}`;
 	if (frame) return `/frames/${frame}`;
 	return '/history';

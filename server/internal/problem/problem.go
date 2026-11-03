@@ -27,6 +27,7 @@ const (
 	CodeExpired         Code = "code_expired"
 	InviteInvalid       Code = "invite_invalid"
 	InviteExpired       Code = "invite_expired"
+	LinkExpired         Code = "link_expired"
 	AlreadyMember       Code = "already_member"
 	ValidationFailed    Code = "validation_failed"
 	TooManyItems        Code = "too_many_items"
@@ -43,6 +44,7 @@ const (
 	AppUpdateRequired   Code = "app_update_required"
 	UpstreamUnavailable Code = "upstream_unavailable"
 	FeatureDisabled     Code = "feature_disabled"
+	AlreadyDecided      Code = "already_decided"
 	ServerError         Code = "server_error"
 )
 
@@ -61,6 +63,7 @@ var defaults = map[Code]struct {
 	CodeExpired:         {410, "This code has expired"},
 	InviteInvalid:       {404, "This invite link is not valid"},
 	InviteExpired:       {410, "This invite link has expired"},
+	LinkExpired:         {410, "This link has expired"},
 	AlreadyMember:       {409, "You are already a member of this frame"},
 	ValidationFailed:    {422, "Some fields are not valid"},
 	TooManyItems:        {422, "Too many items in one send"},
@@ -77,6 +80,7 @@ var defaults = map[Code]struct {
 	AppUpdateRequired:   {426, "The frame app must be updated"},
 	UpstreamUnavailable: {502, "An external service is not reachable right now"},
 	FeatureDisabled:     {503, "This feature is turned off on this server"},
+	AlreadyDecided:      {409, "This was already answered"},
 	ServerError:         {500, "Something went wrong on the server"},
 }
 

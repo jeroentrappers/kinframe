@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Dodirnite za reprodukciju</string>
+    <string name="settings_live_photos">Žive fotografije</string>
+    <string name="live_photos_on">Reproduciraj pri prikazu</string>
+    <string name="live_photos_tap">Reproduciraj na dodir</string>
+    <string name="live_photos_off">Samo fotografija</string>
+</resources>

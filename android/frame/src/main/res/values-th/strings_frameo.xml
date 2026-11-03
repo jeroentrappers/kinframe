@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">รูปภาพจาก Frameo</string>
+    <string name="frameo_found">รูปภาพและวิดีโอจาก Frameo ในกรอบรูปนี้: %d นำเข้าเพื่อเก็บไว้พร้อมคำบรรยายและผู้ส่ง</string>
+    <string name="frameo_import">นำเข้า</string>
+    <string name="frameo_importing">กำลังนำเข้ารูปภาพจาก Frameo</string>
+    <string name="frameo_preparing">กำลังเตรียม…</string>
+    <string name="frameo_waiting">จะทำต่อเมื่อกรอบรูปออนไลน์</string>
+    <string name="frameo_stop">หยุด</string>
+    <string name="frameo_done_title">นำเข้ารูปภาพจาก Frameo แล้ว</string>
+    <string name="frameo_count">%1$d จาก %2$d</string>
+    <string name="frameo_done_imported">นำเข้าแล้ว: %d</string>
+    <string name="frameo_done_already">มีในกรอบรูปอยู่แล้ว: %d</string>
+    <string name="frameo_done_failed">นำเข้าไม่ได้: %d</string>
+    <string name="frameo_no_permission">ต้องให้สิทธิ์เข้าถึงพื้นที่จัดเก็บเพื่ออ่านรูปภาพจาก Frameo</string>
+    <string name="credit_via_frameo">%1$s · ผ่าน Frameo</string>
+    <string name="credit_frameo">ผ่าน Frameo</string>
+</resources>

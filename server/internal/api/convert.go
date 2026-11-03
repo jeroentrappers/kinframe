@@ -77,6 +77,12 @@ func (s *Server) frameSummary(v *store.FrameView) gen.FrameSummary {
 		AppVersion:  v.AppVersion,
 		NeedsUpdate: ptr(v.AppVersionCode != nil && s.cfg.MinFrameAppVersion > 0 && *v.AppVersionCode < s.cfg.MinFrameAppVersion),
 	}
+	if v.DeviceKind != nil {
+		fs.DeviceKind = ptr(gen.DeviceKind(*v.DeviceKind))
+		if *v.DeviceKind == "browser" {
+			fs.NeedsUpdate = ptr(false) // the web app updates itself
+		}
+	}
 	if fs.Online {
 		fs.LastSeenAt = ptr(time.Now().UTC().Truncate(time.Second))
 	}
@@ -95,7 +101,7 @@ func (s *Server) frameJSON(v *store.FrameView) gen.Frame {
 	return gen.Frame{
 		Id: fs.Id, Name: fs.Name, Location: fs.Location, OwnerName: fs.OwnerName, Role: fs.Role,
 		Permissions: fs.Permissions, Online: fs.Online, LastSeenAt: fs.LastSeenAt, Screen: fs.Screen,
-		AppVersion: fs.AppVersion, NeedsUpdate: fs.NeedsUpdate,
+		AppVersion: fs.AppVersion, NeedsUpdate: fs.NeedsUpdate, DeviceKind: fs.DeviceKind,
 		DefaultPermissions:     ptr(permsJSON(v.DefaultPermissions)),
 		ApproveJoinsOnFrame:    ptr(v.ApproveJoinsOnFrame),
 		InviteRequiresApproval: ptr(v.InviteRequiresApproval),
@@ -165,6 +171,19 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if out.CapturedAt == nil {
 		out.CapturedAt = it.CapturedHint
 	}
+	if it.Origin != nil {
+		out.ImportedFrom = ptr(gen.ItemOrigin(*it.Origin))
+		out.ImportedSenderName = it.OriginSenderName
+	}
+	if it.IsLive() {
+		out.Kind = gen.MediaKindLive
+		mo := gen.ItemMotion{Status: gen.ItemMotionStatusProcessing}
+		if *it.MotionStatus == "ready" {
+			mo = gen.ItemMotion{Status: gen.ItemMotionStatusReady, Width: it.MotionWidth, Height: it.MotionHeight,
+				DurationMs: it.MotionDurationMS, HasAudio: it.MotionHasAudio}
+		}
+		out.Motion = &mo
+	}
 	if it.FocalX != nil && it.FocalY != nil {
 		out.FocalPoint = &gen.FocalPoint{X: float32(*it.FocalX), Y: float32(*it.FocalY)}
 	}
@@ -192,6 +211,8 @@ func (s *Server) placementJSON(p *store.PlacementRow) gen.Placement {
 		SeenAt:            p.SeenAt,
 		ReceivedAt:        ptr(p.ReceivedAt),
 		AlbumIds:          ptr(p.AlbumIDs),
+		SharedByUserId:    p.SharedByUserID,
+		SharedByName:      p.SharedByName,
 	}
 	if p.RemovedAt != nil {
 		out.Status = "removed"

@@ -6,9 +6,13 @@ import android.content.Intent
 import app.kinframe.frame.FrameApp
 import app.kinframe.frame.MainActivity
 
-/** Starts the frame after boot (it is also the HOME app, this covers plain tablets) and after an app update. */
+/**
+ * Starts the frame after boot (it is also the HOME app, this covers firmwares that start it late) and after an app
+ * update. On a tablet ([DeviceMode]) it stays out of the way: no start at boot, no reopening after an update.
+ */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (!DeviceMode.isFrame(context)) return
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED, "android.intent.action.QUICKBOOT_POWERON" -> {
                 FrameApp.graph(context) // ensures the app graph (and session) is up

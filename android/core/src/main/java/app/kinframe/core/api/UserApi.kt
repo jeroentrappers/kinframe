@@ -70,11 +70,18 @@ interface KinApi {
     suspend fun placements(frameId: String, visibility: String = "visible", cursor: String? = null, limit: Int = 60): PlacementsPage
     suspend fun updatePlacement(frameId: String, placementId: String, patch: JsonObject): Placement
     suspend fun bulkPlacements(frameId: String, placementIds: List<String>, action: String): BulkResult
+    /**
+     * Share placements of [frameId] to other frames without uploading again (README §5.3). With [dryRun] nothing is
+     * created and `skipped` tells which frames already have the items.
+     */
+    suspend fun sharePlacements(frameId: String, placementIds: List<String>, frameIds: List<String>, dryRun: Boolean = false, idempotencyKey: String? = null): ShareResult
 
     suspend fun settings(frameId: String): SettingsDocument
     /** Merge patch with `If-Match: "<version>"`; a stale version answers `412 version_conflict`. */
     suspend fun patchSettings(frameId: String, version: Int, patch: JsonObject): SettingsDocument
     suspend fun geocode(query: String, lang: String): List<Place>
+    /** `GET /frames/{id}/plugins`: the frame's plugin catalog and the status of its instances (docs/plugins.md §6). */
+    suspend fun framePlugins(frameId: String): FramePlugins
 
     /** The user websocket, `GET /v1/ws?access_token=…` (README §6.2). */
     suspend fun webSocketRequest(): Request
@@ -259,6 +266,14 @@ class HttpKinApi(
         }))
     }.decode(BulkResult.serializer())
 
+    override suspend fun sharePlacements(frameId: String, placementIds: List<String>, frameIds: List<String>, dryRun: Boolean, idempotencyKey: String?): ShareResult = call {
+        url(ep("frames/$frameId/placements:share")).apply { idempotencyKey?.let { header("Idempotency-Key", it) } }.post(json(buildJsonObject {
+            put("placement_ids", kotlinx.serialization.json.JsonArray(placementIds.map { JsonPrimitive(it) }))
+            put("frame_ids", kotlinx.serialization.json.JsonArray(frameIds.map { JsonPrimitive(it) }))
+            if (dryRun) put("dry_run", JsonPrimitive(true))
+        }))
+    }.decode(ShareResult.serializer())
+
     // ------------------------------------------------------------------ settings and weather
 
     override suspend fun settings(frameId: String): SettingsDocument = call { url(ep("frames/$frameId/settings")).get() }.settingsDoc()
@@ -269,6 +284,9 @@ class HttpKinApi(
 
     override suspend fun geocode(query: String, lang: String): List<Place> =
         call { url(ep("geocode", mapOf("q" to query, "lang" to lang))).get() }.decode(ListSerializer(Place.serializer()))
+
+    override suspend fun framePlugins(frameId: String): FramePlugins =
+        call { url(ep("frames/$frameId/plugins")).get() }.decode(FramePlugins.serializer())
 
     override suspend fun webSocketRequest(): Request {
         val token = tokens.accessToken()

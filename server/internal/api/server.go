@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -17,12 +18,17 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/api/gen"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
 	"github.com/jeroentrappers/kinframe/server/internal/blob"
+	"github.com/jeroentrappers/kinframe/server/internal/calendar"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/ratelimit"
+	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
+	"github.com/jeroentrappers/kinframe/server/internal/secrets"
+	"github.com/jeroentrappers/kinframe/server/internal/shop"
+	"github.com/jeroentrappers/kinframe/server/internal/stations"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
 	"github.com/jeroentrappers/kinframe/server/internal/ws"
@@ -46,19 +52,40 @@ type Server struct {
 	tus       *handler.UnroutedHandler
 	uploadDir string
 
-	redeemUser  *ratelimit.Limiter
-	redeemIP    *ratelimit.Limiter
-	enrollIP    *ratelimit.Limiter
-	tokenIP     *ratelimit.Limiter
-	devTokenIP  *ratelimit.Limiter
-	inviteUser  *ratelimit.Limiter
-	geocodeUser *ratelimit.Limiter
+	redeemUser       *ratelimit.Limiter
+	redeemIP         *ratelimit.Limiter
+	enrollIP         *ratelimit.Limiter
+	tokenIP          *ratelimit.Limiter
+	devTokenIP       *ratelimit.Limiter
+	inviteUser       *ratelimit.Limiter
+	geocodeUser      *ratelimit.Limiter
+	calendarTestUser *ratelimit.Limiter
+	tvUser           *ratelimit.Limiter
+	tvIP             *ratelimit.Limiter
+	shopIP           *ratelimit.Limiter
+	shopCancelIP     *ratelimit.Limiter
+
+	shopTokens *shop.Tokens
+	mailer     shop.Mailer // nil: SMTP not configured
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
 
-	releases *releases.Mirror // nil: self-update disabled (always 204)
-	weather  *weather.Service // nil: weather disabled
+	releases *releases.Mirror  // nil: self-update disabled (always 204)
+	weather  *weather.Service  // nil: weather disabled
+	calendar *calendar.Service // nil: calendars disabled
+	sealer   *calendar.Sealer
+	registry *registry.Mirror // nil: no community plugin registry
+
+	// Weather stations that upload to kinframe (docs/plugins.md §9.4).
+	stationKey     []byte
+	stationIP      *ratelimit.Limiter
+	stationPage    *ratelimit.Limiter
+	stationForward *stations.Forwarder
+	// pluginSealer keeps plugin secrets (settings plugins.instances[].secrets) encrypted at rest.
+	pluginSealer *secrets.Sealer
+
+	mirror mirrorHub // TV mirror: the latest now_showing per frame and its viewers
 }
 
 // Deps are the collaborators a Server needs.
@@ -72,35 +99,64 @@ type Deps struct {
 	Tools    media.Tools
 	Log      *slog.Logger
 	Users    auth.UserVerifier
-	Dev      *auth.DevTokens  // nil unless dev auth is enabled
-	Releases *releases.Mirror // frame app releases; nil disables self-update
-	Weather  *weather.Service // nil disables weather and /v1/geocode
+	Dev      *auth.DevTokens   // nil unless dev auth is enabled
+	Releases *releases.Mirror  // frame app releases; nil disables self-update
+	Weather  *weather.Service  // nil disables weather and /v1/geocode
+	Calendar *calendar.Service // nil disables calendars
+	Registry *registry.Mirror  // community plugin registry; nil disables it
+	// Mailer sends the server's own email (shop); defaults to SMTP from the
+	// config, nil when SMTP is not configured.
+	Mailer shop.Mailer
 }
 
 func New(d Deps) (*Server, error) {
 	s := &Server{
-		cfg:         d.Config,
-		st:          d.Store,
-		hub:         d.Hub,
-		notify:      d.Notifier,
-		blob:        d.Blob,
-		scratch:     d.Scratch,
-		tools:       d.Tools,
-		log:         d.Log,
-		users:       d.Users,
-		dev:         d.Dev,
-		releases:    d.Releases,
-		weather:     d.Weather,
-		devices:     auth.NewDeviceTokens(d.Config.SigningKey, d.Config.PublicURL),
-		signer:      auth.NewURLSigner(d.Config.SigningKey),
-		redeemUser:  ratelimit.New(10, time.Hour),
-		redeemIP:    ratelimit.New(30, time.Hour),
-		enrollIP:    ratelimit.New(20, time.Hour),
-		tokenIP:     ratelimit.New(120, time.Hour),
-		devTokenIP:  ratelimit.New(120, time.Hour),
-		inviteUser:  ratelimit.New(60, time.Hour),
-		geocodeUser: ratelimit.New(60, time.Minute),
+		cfg:              d.Config,
+		st:               d.Store,
+		hub:              d.Hub,
+		notify:           d.Notifier,
+		blob:             d.Blob,
+		scratch:          d.Scratch,
+		tools:            d.Tools,
+		log:              d.Log,
+		users:            d.Users,
+		dev:              d.Dev,
+		releases:         d.Releases,
+		weather:          d.Weather,
+		calendar:         d.Calendar,
+		devices:          auth.NewDeviceTokens(d.Config.SigningKey, d.Config.PublicURL),
+		signer:           auth.NewURLSigner(d.Config.SigningKey),
+		redeemUser:       ratelimit.New(10, time.Hour),
+		redeemIP:         ratelimit.New(30, time.Hour),
+		enrollIP:         ratelimit.New(20, time.Hour),
+		tokenIP:          ratelimit.New(120, time.Hour),
+		devTokenIP:       ratelimit.New(120, time.Hour),
+		inviteUser:       ratelimit.New(60, time.Hour),
+		geocodeUser:      ratelimit.New(60, time.Minute),
+		calendarTestUser: ratelimit.New(30, time.Minute),
+		tvUser:           ratelimit.New(60, time.Hour),
+		tvIP:             ratelimit.New(600, time.Hour),
+		shopIP:           ratelimit.New(10, time.Hour),
+		shopCancelIP:     ratelimit.New(30, time.Hour),
+		shopTokens:       shop.NewTokens(auth.DeriveKey(d.Config.SigningKey, "shop-cancel")),
+		mailer:           d.Mailer,
 	}
+	if s.mailer == nil && d.Config.SMTP != nil {
+		s.mailer = &shop.SMTPMailer{Cfg: *d.Config.SMTP}
+	}
+	if d.Calendar != nil {
+		s.sealer = d.Calendar.Sealer
+	}
+	s.registry = d.Registry
+	s.stationKey = auth.DeriveKey(d.Config.SigningKey, "weather-station")
+	s.stationIP = ratelimit.New(600, time.Hour)
+	s.stationPage = ratelimit.New(1200, time.Hour)
+	s.stationForward = &stations.Forwarder{URL: d.Config.StationForwardURL, HTTP: &http.Client{Timeout: 10 * time.Second}, Log: d.Log.With("component", "stations")}
+	ps, err := secrets.New(d.Config.SecretsKey, d.Config.SigningKey, "kinframe plugin secrets v1", "kinframe plugin secrets from signing key v1")
+	if err != nil {
+		return nil, fmt.Errorf("plugin secrets: %w", err)
+	}
+	s.pluginSealer = ps
 	if err := s.setupTus(); err != nil {
 		return nil, err
 	}
@@ -180,6 +236,7 @@ const (
 	deviceKey
 	rawBodyKey
 	ipKey
+	hostKey
 )
 
 type principal struct {
@@ -207,6 +264,13 @@ func isOperator(ctx context.Context) bool {
 func deviceFrom(ctx context.Context) *store.Device {
 	d, _ := ctx.Value(deviceKey).(*store.Device)
 	return d
+}
+
+// requestHost is the Host the client asked for (X-Forwarded-Host behind a
+// trusted proxy), port included.
+func requestHost(ctx context.Context) string {
+	h, _ := ctx.Value(hostKey).(string)
+	return h
 }
 
 func clientIP(ctx context.Context) string {

@@ -48,6 +48,12 @@ data class KinColors(
     val warnSoft: Color = Color(0xFFFBEFD3),
     val dangerSoft: Color = Color(0xFFFBE4E1),
     val sun: Color = Color(0xFFE7A23A),
+    /** Plugin views' `info` tone: grid consumption on the P1 dial. */
+    val violet: Color = Color(0xFF6E46A8),
+    /** Plugin views' quantity tones (docs/plugins.md §4.3): ≥ 3:1 on paper, told apart from the others with an icon. */
+    val water: Color = Color(0xFF1B7FD1),
+    val gas: Color = Color(0xFFA8306E),
+    val heat: Color = Color(0xFFD2691E),
     val isDark: Boolean = false,
 )
 
@@ -99,6 +105,10 @@ object KinPalettes {
         love = Color(0xFFFF6B6F),
         night = Color(0xFF0F0C0A),
         sun = Color(0xFFE7A23A),
+        violet = Color(0xFFC3A6F0),
+        water = Color(0xFF88DDF7),
+        gas = Color(0xFFE36FA9),
+        heat = Color(0xFFE8752A),
         isDark = true,
     )
 }

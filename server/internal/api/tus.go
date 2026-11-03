@@ -15,6 +15,7 @@ import (
 	"github.com/tus/tusd/v2/pkg/handler"
 	expslog "golang.org/x/exp/slog"
 
+	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 )
@@ -57,6 +58,14 @@ func (s *Server) RemoveUpload(path string) {
 	_ = os.Remove(path + ".lock")
 }
 
+// RemoveExpiredUpload removes an upload no send consumed, including a Motion
+// Photo clip split out of it by a send that then failed validation. (A consumed
+// split clip belongs to its own media and is removed by the worker.)
+func (s *Server) RemoveExpiredUpload(path string) {
+	s.RemoveUpload(path)
+	_ = os.Remove(path + ".motion.mp4")
+}
+
 func tusProblem(code problem.Code, status int, detail string) handler.Error {
 	p := problem.New(code, "%s", detail).WithStatus(status)
 	body, _ := json.Marshal(p)
@@ -84,7 +93,7 @@ func (s *Server) tusPreCreate(hook handler.HookEvent) (handler.HTTPResponse, han
 		return handler.HTTPResponse{}, handler.FileInfoChanges{}, tusProblem(problem.UploadTooLarge, 413, "the file exceeds the server's upload limit")
 	}
 	md := handler.MetaData{}
-	for _, k := range []string{"filename", "filetype", "sha256"} {
+	for _, k := range []string{"filename", "filetype", "sha256", "prepared"} {
 		if v, ok := info.MetaData[k]; ok && len(v) <= 512 {
 			md[k] = v
 		}
@@ -94,8 +103,15 @@ func (s *Server) tusPreCreate(hook handler.HookEvent) (handler.HTTPResponse, han
 		sha = ""
 		delete(md, "sha256")
 	}
+	if v, ok := md["prepared"]; ok && !media.ValidPrepared(v) {
+		// Unknown profiles (a newer client) are ignored: the upload takes the normal pipeline.
+		delete(md, "prepared")
+	}
 	id := store.NewID().String()
 	up := store.Upload{ID: id, UserID: p.user.ID, Size: info.Size}
+	if v := md["prepared"]; v != "" {
+		up.Prepared = &v
+	}
 	if v := md["filename"]; v != "" {
 		up.Filename = &v
 	}

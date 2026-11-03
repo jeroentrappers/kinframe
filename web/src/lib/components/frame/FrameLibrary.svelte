@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { flip } from 'svelte/animate';
 	import { api, call, ApiError, type Album, type AlbumSchedule, type Frame, type Placement } from '$lib/api/client';
-	import { can } from '$lib/frames.svelte';
+	import { can, frames } from '$lib/frames.svelte';
 	import { formatDateTime } from '$lib/format';
 	import { getFrameSettings, patchFrameSettings } from '$lib/frameSettings';
 	import { formatMonthDay, moveItem, orderBy, scheduleCovers } from '$lib/parity';
@@ -12,11 +12,15 @@
 	import Dialog from '../Dialog.svelte';
 	import EmptyState from '../EmptyState.svelte';
 	import Icon, { type IconName } from '../Icon.svelte';
+	import ShareDialog from '../ShareDialog.svelte';
 	import Thumb from '../Thumb.svelte';
+	import TvDialog from '../TvDialog.svelte';
+	import type { TvScope } from '$lib/tv';
 	import AlbumNameDialog from './AlbumNameDialog.svelte';
 	import AlbumPickerDialog from './AlbumPickerDialog.svelte';
 	import AlbumScheduleDialog from './AlbumScheduleDialog.svelte';
 	import Memories from './Memories.svelte';
+	import { senderLabel } from '$lib/sender';
 
 	type View = 'visible' | 'hidden' | 'trashed';
 	type Action = 'hide' | 'unhide' | 'trash' | 'restore';
@@ -37,6 +41,17 @@
 	const seeAll = $derived(can(frame, 'see_library'));
 	const manage = $derived(can(frame, 'manage_library'));
 	const control = $derived(can(frame, 'change_settings'));
+	// Sharing needs another frame you can send to (README §5.3, "Sharing between frames").
+	const canShare = $derived(frames.list.some((f) => f.id !== frame.id && can(f, 'send')));
+	let shareOpen = $state(false);
+	let shareIds = $state<string[]>([]);
+
+	function share(ids: string[] = [...selected]) {
+		if (ids.length === 0) return;
+		shareIds = ids;
+		viewerOpen = false;
+		shareOpen = true;
+	}
 
 	// ---------------------------------------------------------------- albums
 	let albums = $state<Album[]>([]);
@@ -120,6 +135,7 @@
 		void frame.id;
 		void loadAlbums();
 		void loadPlaying();
+		void frames.load();
 	});
 
 	$effect(() => {
@@ -423,6 +439,18 @@
 		requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-index="${to}"] .grip`)?.focus());
 	}
 
+	// ---------------------------------------------------------------- show on TV
+	let tvOpen = $state(false);
+	let tvScope = $state<TvScope>({ kind: 'all' });
+	let tvSingleVideo = $state(false);
+
+	function showOnTv(scope: TvScope, singleVideo = false) {
+		tvScope = scope;
+		tvSingleVideo = singleVideo;
+		viewerOpen = false;
+		tvOpen = true;
+	}
+
 	const playing = (a: Album) => playingId === a.id;
 	const scheduledNow = (a: Album) => scheduleCovers(a.schedule);
 	const coverItem = $derived(album?.cover_placement_id ? items.find((p) => p.id === album.cover_placement_id) : items[0]);
@@ -496,6 +524,11 @@
 						{playing(album) ? t('albums.stopPlaying') : t('albums.play')}
 					</button>
 				{/if}
+				{#if seeAll && items.length > 0}
+					<button class="btn btn-sm" onclick={() => album && showOnTv({ kind: 'album', albumId: album.id, name: album.name })}>
+						<Icon name="tv" size={16} />{t('tv.show')}
+					</button>
+				{/if}
 				{#if manage}
 					<span class="icon-tools">
 					<button class="btn btn-ghost btn-icon btn-sm" onclick={startArranging} disabled={items.length < 2} aria-label={t('albums.arrange')} title={t('albums.arrange')}><Icon name="grip" size={18} /></button>
@@ -528,6 +561,9 @@
 			<p class="muted small num">
 				{tn('history.photos', counts.photos ?? 0)}{#if counts.videos}, {tn('history.videos', counts.videos)}{/if}
 			</p>
+		{/if}
+		{#if view === 'visible' && seeAll && items.length > 0}
+			<button class="btn btn-sm tv-btn" onclick={() => showOnTv({ kind: 'all' })}><Icon name="tv" size={16} />{t('tv.show')}</button>
 		{/if}
 	</div>
 {/if}
@@ -583,7 +619,7 @@
 				data-index={i}
 				animate:flip={{ duration: reducedMotion() ? 0 : 180 }}
 			>
-				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: p.item.sender_name ?? '' })}>
+				<button class="tile-btn" onclick={() => open(p)} tabindex={arranging ? -1 : 0} aria-label={p.item.caption ?? t('library.itemBy', { name: senderLabel(p.item) })}>
 					<Thumb itemId={p.item.id} variant="thumb_256" kind={p.item.kind} radius="0" />
 				</button>
 				{#if arranging}
@@ -620,16 +656,40 @@
 		<span class="sel num">{tn('library.selected', selected.size)}</span>
 		<span class="spacer"></span>
 		<button class="btn btn-ghost btn-sm select-all" onclick={() => (selected = new Set(items.map((p) => p.id)))}>{t('library.selectAll')}</button>
+		{#if view === 'visible'}
+			<button
+				class="btn btn-sm"
+				onclick={() => {
+					const ids = items.filter((p) => selected.has(p.id)).map((p) => p.id);
+					const one = ids.length === 1 ? items.find((p) => p.id === ids[0]) : undefined;
+					showOnTv({ kind: 'selection', ids }, one?.item.kind === 'video');
+				}}
+				aria-label={t('tv.show')}
+				title={t('tv.show')}
+			>
+				<Icon name="tv" size={16} /><span class="label-long">{t('tv.show')}</span>
+			</button>
+		{/if}
 		{#if album}
 			{#if manage && selected.size === 1}
 				<button class="btn btn-sm" onclick={() => { const p = items.find((x) => selected.has(x.id)); if (p) void setCover(p); }}>
 					<Icon name="star" size={16} />{t('albums.makeCover')}
 				</button>
 			{/if}
+			{#if canShare}
+				<button class="btn btn-sm btn-soft" onclick={() => share()}>
+					<Icon name="share" size={16} /><span class="label-long">{t('share.action')}</span><span class="label-short">{t('share.actionShort')}</span>
+				</button>
+			{/if}
 			{#if manage}
 				<button class="btn btn-sm btn-danger" onclick={() => removeFromAlbum()}><Icon name="x" size={16} />{t('albums.remove')}</button>
 			{/if}
 		{:else}
+			{#if canShare && view !== 'trashed'}
+				<button class="btn btn-sm btn-soft" onclick={() => share()}>
+					<Icon name="share" size={16} /><span class="label-long">{t('share.action')}</span><span class="label-short">{t('share.actionShort')}</span>
+				</button>
+			{/if}
 			{#if manage && view === 'visible'}
 				<button class="btn btn-sm btn-soft" onclick={() => { pickerIds = [...selected]; pickerOpen = true; }}>
 					<Icon name="album" size={16} /><span class="label-long">{t('albums.addToAlbum')}</span><span class="label-short">{t('albums.addShort')}</span>
@@ -644,20 +704,31 @@
 	</div>
 {/if}
 
-<Dialog bind:open={viewerOpen} title={viewing?.item.sender_name ? t('library.from', { name: viewing.item.sender_name }) : t('library.photo')} size="md">
+<Dialog bind:open={viewerOpen} title={viewing && senderLabel(viewing.item) ? t('library.from', { name: senderLabel(viewing.item) }) : t('library.photo')} size="md">
 	{#if viewing}
 		<div class="viewer stack">
 			<div class="big">
 				<Thumb itemId={viewing.item.id} variant={viewing.item.kind === 'video' ? 'poster' : 'master'} kind={viewing.item.kind} alt={viewing.item.caption ?? ''} />
 			</div>
 			{#if viewing.item.caption}<p>{viewing.item.caption}</p>{/if}
+			{#if viewing.shared_by_name}
+				<p class="shared-by small"><Icon name="share" size={14} />{t('share.sharedBy', { name: viewing.shared_by_name })}</p>
+			{/if}
 			<p class="muted small">
 				{#if viewing.item.captured_at}{t('library.taken', { when: formatDateTime(viewing.item.captured_at, i18n.tag) })} · {/if}{t('library.received', { when: formatDateTime(viewing.received_at, i18n.tag) })}
 			</p>
 		</div>
 	{/if}
 	{#snippet footer()}
+		{#if viewing && view === 'visible' && !viewing.pending_moderation}
+			<button class="btn" onclick={() => viewing && showOnTv({ kind: 'selection', ids: [viewing.id] }, viewing.item.kind === 'video')}>
+				<Icon name="tv" size={16} />{t('tv.show')}
+			</button>
+		{/if}
 		{#if viewing}
+			{#if canShare && !viewing.trashed && !viewing.pending_moderation}
+				<button class="btn" onclick={() => viewing && share([viewing.id])}><Icon name="share" size={16} />{t('share.actionShort')}</button>
+			{/if}
 			{#if viewingInAlbum && manage}
 				{#if album?.cover_placement_id !== viewing.id}
 					<button class="btn" onclick={() => viewing && setCover(viewing)}><Icon name="star" size={16} />{t('albums.makeCover')}</button>
@@ -693,6 +764,8 @@
 <AlbumNameDialog bind:open={renameOpen} title={t('albums.renameTitle')} submitLabel={t('common.save')} initial={album?.name ?? ''} onsave={rename} />
 <AlbumScheduleDialog bind:open={scheduleOpen} albumName={album?.name ?? ''} schedule={album?.schedule} onsave={saveSchedule} />
 <AlbumPickerDialog bind:open={pickerOpen} {albums} count={pickerIds.length} onpick={addToAlbum} />
+<ShareDialog bind:open={shareOpen} frameId={frame.id} placementIds={shareIds} onshared={() => (selected = new Set())} />
+<TvDialog bind:open={tvOpen} frameId={frame.id} frameName={frame.name} scope={tvScope} singleVideo={tvSingleVideo} />
 
 <Dialog bind:open={deleteOpen} title={t('albums.deleteConfirm', { name: album?.name ?? '' })}>
 	<p class="muted">{album && playing(album) ? t('albums.deleteBodyPlaying') : t('albums.deleteBody')}</p>
@@ -1100,5 +1173,12 @@
 	}
 	.big :global(img) {
 		object-fit: contain !important;
+	}
+	.shared-by {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: var(--text-muted);
+		font-weight: 600;
 	}
 </style>

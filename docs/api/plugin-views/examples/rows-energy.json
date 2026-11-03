@@ -1,0 +1,27 @@
+{
+  "type": "rows",
+  "items": [
+    {
+      "type": "value",
+      "icon": "solar",
+      "value": "3,4",
+      "unit": "kW",
+      "label": "Solar",
+      "tone": "good"
+    },
+    {
+      "type": "value",
+      "icon": "grid",
+      "value": "0,8",
+      "unit": "kW",
+      "label": "Grid"
+    },
+    {
+      "type": "value",
+      "icon": "home",
+      "value": "2,6",
+      "unit": "kW",
+      "label": "Home"
+    }
+  ]
+}

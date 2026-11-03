@@ -27,6 +27,9 @@ interface PlacementDao {
     @Query("SELECT * FROM placements")
     fun observeAll(): Flow<List<PlacementEntity>>
 
+    @Query("SELECT COUNT(*) FROM placements")
+    fun observeCount(): Flow<Int>
+
     @Query("SELECT COUNT(*) FROM placements WHERE mediaSha256 = :sha AND localFile IS NOT NULL")
     suspend fun countUsingSha(sha: String): Int
 
@@ -80,14 +83,42 @@ interface PlacementDao {
     @Query("UPDATE placements SET hidden = :hidden WHERE id = :id")
     suspend fun setHidden(id: String, hidden: Boolean)
 
+    @Query("UPDATE placements SET rotation = :rotation WHERE id = :id")
+    suspend fun setRotation(id: String, rotation: Int)
+
+    /** [fit] "fill" or "fit"; null follows the frame's setting. */
+    @Query("UPDATE placements SET fit = :fit WHERE id = :id")
+    suspend fun setFit(id: String, fit: String?)
+
     @Query("UPDATE placements SET trashed = :trashed WHERE id = :id")
     suspend fun setTrashed(id: String, trashed: Boolean)
 
     @Query("UPDATE placements SET reaction = :reaction WHERE id = :id")
     suspend fun setReaction(id: String, reaction: String?)
 
-    @Query("SELECT localFile FROM placements WHERE localFile IS NOT NULL")
+    @Query("SELECT localFile FROM placements WHERE localFile IS NOT NULL UNION SELECT motionLocalFile FROM placements WHERE motionLocalFile IS NOT NULL")
     suspend fun allLocalFiles(): List<String>
+
+    /** Live photos whose still is stored but whose clip is not (yet): the clip never blocks the still. */
+    @Query(
+        """SELECT * FROM placements
+           WHERE kind = 'live' AND localFile IS NOT NULL AND motionUrl IS NOT NULL AND motionLocalFile IS NULL
+             AND trashed = 0 AND motionNextAttemptAt <= :now
+           ORDER BY receivedAt DESC LIMIT :limit""",
+    )
+    suspend fun pendingMotion(now: Long, limit: Int): List<PlacementEntity>
+
+    @Query(
+        """SELECT MIN(motionNextAttemptAt) FROM placements
+           WHERE kind = 'live' AND localFile IS NOT NULL AND motionUrl IS NOT NULL AND motionLocalFile IS NULL AND trashed = 0""",
+    )
+    suspend fun earliestMotionRetry(): Long?
+
+    @Query("UPDATE placements SET motionLocalFile = :file, motionAttempts = 0 WHERE motionSha256 = :sha")
+    suspend fun markMotionStored(sha: String, file: String): Int
+
+    @Query("UPDATE placements SET motionAttempts = :attempts, motionNextAttemptAt = :next WHERE id = :id")
+    suspend fun markMotionFailed(id: String, attempts: Int, next: Long)
 
     @Query("SELECT COUNT(*) FROM placements WHERE localFile IS NOT NULL")
     suspend fun countCached(): Int

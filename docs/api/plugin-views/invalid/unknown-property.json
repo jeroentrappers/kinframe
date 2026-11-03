@@ -1,0 +1,8 @@
+{
+  "$error_path": "/colour",
+  "view": {
+    "type": "value",
+    "value": "1",
+    "colour": "red"
+  }
+}

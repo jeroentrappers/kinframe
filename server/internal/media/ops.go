@@ -43,10 +43,11 @@ func (t Tools) PhotoMaster(ctx context.Context, src, dst string) (Size, *time.Ti
 }
 
 // PhotoRendition writes the frame-sized WebP for a screen long edge. If the
-// master is already small enough it is copied rather than re-encoded.
+// master is already a small enough WebP it is copied rather than re-encoded
+// (prepared JPEG masters are always re-encoded to WebP).
 func (t Tools) PhotoRendition(ctx context.Context, master string, masterSize Size, screenLong int, dst string) (Size, error) {
 	target := PhotoRenditionSize(masterSize, screenLong)
-	if target == masterSize {
+	if _, mime, _ := Sniff(master); target == masterSize && mime == "image/webp" {
 		return masterSize, copyFile(master, dst)
 	}
 	if _, err := run(ctx, t.bin(t.Vips, "vips"), "thumbnail", master, webp(dst, RenditionPhotoQ),

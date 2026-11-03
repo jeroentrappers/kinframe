@@ -1,0 +1,13 @@
+{
+  "@name": "Wereldklok",
+  "@description": "Hoe laat het is waar familie en vrienden wonen: tot vier plaatsen, met de dag als die anders is en hoeveel ze voor of achter lopen.",
+  "@setting.city_1": "Plaats",
+  "@setting.name_1": "Naam (leeg = de stad)",
+  "@setting.city_2": "Tweede plaats",
+  "@setting.name_2": "Naam",
+  "@setting.city_3": "Derde plaats",
+  "@setting.name_3": "Naam",
+  "@setting.city_4": "Vierde plaats",
+  "@setting.name_4": "Naam",
+  "@setting.show_difference": "Tonen hoeveel ze voor of achter lopen"
+}

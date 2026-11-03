@@ -36,8 +36,11 @@ data class DraftItem(
     /** Null = the whole video. */
     val trim: Pair<Long, Long>? = null,
     val includeAudio: Boolean = true,
+    /** A Motion Photo goes out live unless the person turns that off ("send as still only"). */
+    val sendLive: Boolean = true,
 ) {
     val isVideo: Boolean get() = info.kind == MediaKind.VIDEO
+    val isLive: Boolean get() = info.motionPhoto && sendLive
     val aspect: Float? get() = info.width?.let { w -> info.height?.takeIf { it > 0 }?.let { h -> w.toFloat() / h } }
     val sendDurationMs: Long? get() = trim?.let { it.second - it.first } ?: info.durationMs
 }
@@ -181,6 +184,8 @@ class ComposerViewModel(
 
     fun setIncludeAudio(id: String, on: Boolean) = change(id) { it.copy(includeAudio = on) }
 
+    fun setSendLive(id: String, live: Boolean) = change(id) { it.copy(sendLive = live) }
+
     fun toggleFrame(frameId: String) = _state.update { s ->
         s.copy(selected = if (frameId in s.selected) s.selected - frameId else s.selected + frameId, error = null)
     }
@@ -210,6 +215,8 @@ class ComposerViewModel(
                     trimStartMs = d.trim?.first,
                     trimEndMs = d.trim?.second,
                     includeAudio = d.includeAudio,
+                    motionPhoto = d.info.motionPhoto,
+                    live = d.sendLive,
                 )
             },
         )

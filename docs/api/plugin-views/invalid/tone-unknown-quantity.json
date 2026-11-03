@@ -1,0 +1,8 @@
+{
+  "$error_path": "/tone",
+  "view": {
+    "type": "value",
+    "value": "3,8 kWh",
+    "tone": "electricity"
+  }
+}

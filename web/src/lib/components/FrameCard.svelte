@@ -1,12 +1,23 @@
 <script lang="ts">
 	import type { FrameSummary } from '$lib/api/client';
+	import { DROP_FRAME_ATTR } from '$lib/dropfiles';
 	import { can } from '$lib/frames.svelte';
 	import { t } from '$lib/i18n/index.svelte';
 	import Icon from './Icon.svelte';
 	import OnlineStatus from './OnlineStatus.svelte';
 	import RoleBadge from './RoleBadge.svelte';
 
-	let { frame }: { frame: FrameSummary } = $props();
+	let {
+		frame,
+		dragging = false,
+		dropOver = false
+	}: {
+		frame: FrameSummary;
+		/** Files are being dragged over the page: show whether this card takes them. */
+		dragging?: boolean;
+		/** The dragged files are right over this card. */
+		dropOver?: boolean;
+	} = $props();
 
 	// A calm, per-frame tint so frames are recognisable at a glance.
 	const TINTS = [
@@ -19,9 +30,16 @@
 	];
 	const tint = $derived(TINTS[[...frame.id].reduce((a, c) => a + c.charCodeAt(0), 0) % TINTS.length]!);
 	const portrait = $derived(frame.screen?.orientation === 'portrait');
+	const sendable = $derived(can(frame, 'send'));
 </script>
 
-<article class="card frame-card">
+<article
+	class="card frame-card"
+	class:drop-ready={dragging && sendable}
+	class:drop-over={dragging && sendable && dropOver}
+	class:drop-off={dragging && !sendable}
+	{...sendable ? { [DROP_FRAME_ATTR]: frame.id } : {}}
+>
 	<a href="/frames/{frame.id}" class="cover" style="--a:{tint[0]}; --b:{tint[1]}" aria-label={t('frames.open', { name: frame.name })}>
 		<span class="mini-frame" class:portrait>
 			<span class="mini-screen">
@@ -34,6 +52,7 @@
 	<div class="body">
 		<div class="title-row">
 			<h2><a href="/frames/{frame.id}">{frame.name}</a></h2>
+			{#if frame.device_kind === 'browser'}<span class="badge browser" title={t('frames.browserBadge')}><Icon name="globe" size={13} />{t('frames.browserBadge')}</span>{/if}
 			<RoleBadge role={frame.role} />
 		</div>
 		{#if frame.location}
@@ -51,12 +70,34 @@
 			<p class="update"><Icon name="info" size={15} />{t('frames.needsUpdate')}</p>
 		{/if}
 	</div>
+	{#if dragging && sendable && dropOver}
+		<!-- The page announces drop targets in one live region; this is the visual twin. -->
+		<div class="drop-label" aria-hidden="true">
+			<Icon name="upload" size={28} />
+			<span>{t('frames.dropTo', { name: frame.name })}</span>
+		</div>
+	{/if}
 </article>
 
 <style>
+	.badge.browser {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		border-radius: var(--r-full, 999px);
+		background: var(--surface-2);
+		color: var(--text-muted);
+		font-size: 0.75rem;
+		font-weight: 650;
+		white-space: nowrap;
+	}
 	.frame-card {
+		position: relative;
 		overflow: hidden;
 		height: 100%;
+		outline: 2px dashed transparent;
+		outline-offset: 3px;
 		display: flex;
 		flex-direction: column;
 		transition:
@@ -66,6 +107,34 @@
 	.frame-card:hover {
 		box-shadow: var(--shadow);
 		transform: translateY(-2px);
+	}
+	.frame-card.drop-ready {
+		outline-color: color-mix(in srgb, var(--primary) 55%, transparent);
+	}
+	.frame-card.drop-over {
+		outline: 3px solid var(--primary);
+		box-shadow: var(--shadow-lg);
+		transform: translateY(-3px) scale(1.01);
+	}
+	.frame-card.drop-off {
+		opacity: 0.55;
+	}
+	.drop-label {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		padding: var(--s-4);
+		text-align: center;
+		font-weight: 650;
+		font-size: 1.05rem;
+		color: var(--primary);
+		background: color-mix(in srgb, var(--surface) 86%, transparent);
+		backdrop-filter: blur(2px);
+		pointer-events: none;
 	}
 	.cover {
 		position: relative;

@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Fotona på fotoramen fortsätter att visas. Nya kommer så fort den är online igen.</string>
     <string name="status_card_server_title">Når inte fotoservern</string>
     <string name="status_card_server_body">Wifi fungerar, men servern svarar inte. Nya foton kommer när den är tillbaka.</string>
+    <string name="status_card_clock_title">Ställer klockan</string>
+    <string name="status_card_clock_body">Ramen har startats om och klockan går fel. Den ställer sig själv via internet om en stund.</string>
     <string name="status_card_portal_title">Det här wifi-nätverket kräver inloggning</string>
     <string name="status_card_portal_body">Öppna nätverkets inloggningssida för att få fotoramen online.</string>
     <string name="status_card_portal_action">Logga in</string>

@@ -1,0 +1,28 @@
+{
+  "$error_path": "/items",
+  "view": {
+    "type": "rows",
+    "items": [
+      {
+        "type": "value",
+        "value": "0"
+      },
+      {
+        "type": "value",
+        "value": "1"
+      },
+      {
+        "type": "value",
+        "value": "2"
+      },
+      {
+        "type": "value",
+        "value": "3"
+      },
+      {
+        "type": "value",
+        "value": "4"
+      }
+    ]
+  }
+}

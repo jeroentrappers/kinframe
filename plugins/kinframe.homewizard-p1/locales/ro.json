@@ -1,0 +1,20 @@
+{
+  "@name": "Contor HomeWizard P1",
+  "@description": "Puterea în timp real de la un contor HomeWizard P1 din casă: consum, injecție în rețea, pe fază și totalurile de azi.",
+  "@setting.host": "Adresa contorului",
+  "@setting.host.help": "Activați Local API pentru contor în aplicația HomeWizard Energy.",
+  "@setting.style": "Afișare ca",
+  "@option.style.value": "Număr",
+  "@option.style.gauge": "Cadran",
+  "@option.style.flow": "Flux",
+  "@setting.max_w": "Scală completă (W)",
+  "@setting.warn_w": "Evidențiază peste (W, 0 = oprit)",
+  "grid": "Rețea",
+  "home": "Casă",
+  "last_hour": "Ultima oră",
+  "returning": "Injectare",
+  "today_export": "Injectat azi",
+  "today_gas": "Gaz azi",
+  "today_import": "Consumat azi",
+  "using": "Consum"
+}

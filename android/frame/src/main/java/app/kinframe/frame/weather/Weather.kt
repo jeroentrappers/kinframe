@@ -21,6 +21,12 @@ data class Weather(
     val current: Current,
     val hourly: List<Hour> = emptyList(),
     val daily: List<Day> = emptyList(),
+    /**
+     * The owner's own weather station's temperature, when "use my weather station for the current temperature" is on
+     * (docs/plugins.md §9.4): it replaces the current temperature; the condition and today's range stay the forecast's.
+     * Never stored or sent.
+     */
+    @kotlinx.serialization.Transient val stationTempC: Double? = null,
 ) {
     @Serializable
     data class WeatherLocation(val name: String? = null, val lat: Double? = null, val lon: Double? = null)
@@ -85,6 +91,11 @@ data class Weather(
      * offline) the forecast for the current hour is closer to the truth.
      */
     fun nowConditions(nowMs: Long): Current {
+        val c = forecastNow(nowMs)
+        return stationTempC?.let { c.copy(tempC = it, apparentC = null) } ?: c
+    }
+
+    private fun forecastNow(nowMs: Long): Current {
         val age = nowMs - (fetchedAtMs ?: return current)
         if (age < HOURLY_AFTER_MS) return current
         val h = hourAt(nowMs) ?: return current
@@ -136,4 +147,13 @@ object Units {
 
     /** Compass sector (0 = N, 1 = NE … 7 = NW) for a direction in degrees. */
     fun compassSector(deg: Int): Int = (((deg % 360 + 360) % 360 + 22.5) / 45.0).toInt() % 8
+}
+
+/**
+ * The forecast with the weather station's temperature as the current one, while that reading is fresh (the station
+ * widget greys after 30 minutes, the corner falls back to the forecast at the same moment).
+ */
+fun Weather.withStation(station: app.kinframe.frame.plugins.StationNow?, nowMs: Long): Weather {
+    val s = station?.takeIf { nowMs - it.atMs <= app.kinframe.frame.plugins.station.WeatherStation.STALE_S * 1000L } ?: return this
+    return copy(stationTempC = s.tempC)
 }

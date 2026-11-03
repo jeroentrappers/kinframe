@@ -1,0 +1,21 @@
+{
+  "$error_path": "/sub",
+  "view": {
+    "type": "gauge",
+    "value": 5,
+    "sub": [
+      {
+        "value": "1"
+      },
+      {
+        "value": "2"
+      },
+      {
+        "value": "3"
+      },
+      {
+        "value": "4"
+      }
+    ]
+  }
+}

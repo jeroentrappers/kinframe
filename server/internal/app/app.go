@@ -19,10 +19,12 @@ import (
 
 	"github.com/jeroentrappers/kinframe/server/internal/api"
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
+	"github.com/jeroentrappers/kinframe/server/internal/calendar"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/notify"
+	"github.com/jeroentrappers/kinframe/server/internal/registry"
 	"github.com/jeroentrappers/kinframe/server/internal/releases"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
 	"github.com/jeroentrappers/kinframe/server/internal/weather"
@@ -41,8 +43,11 @@ type App struct {
 	Handler http.Handler
 	// Releases mirrors frame app releases; nil when neither GitHub nor a directory is configured.
 	Releases *releases.Mirror
+	Registry *registry.Mirror
 	// Weather fetches Open-Meteo weather for frames; nil when disabled.
 	Weather *weather.Service
+	// Calendar syncs frames' calendars; nil when disabled.
+	Calendar *calendar.Service
 }
 
 // New connects to the database, applies migrations and builds the app.
@@ -116,6 +121,20 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			return nil, fmt.Errorf("frame releases: %w", err)
 		}
 	}
+	var reg *registry.Mirror
+	if cfg.PluginRegistryURL != "" {
+		key, err := registry.ParsePublicKey(cfg.PluginRegistryKey)
+		if err != nil {
+			return nil, fmt.Errorf("plugin registry key: %w", err)
+		}
+		reg = &registry.Mirror{
+			BaseURL: cfg.PluginRegistryURL, Key: key, Dir: filepath.Join(cfg.DataDir, "plugin-registry"),
+			HTTP: &http.Client{Timeout: 60 * time.Second}, Interval: cfg.PluginRegistryInterval, Log: log.With("component", "plugin-registry"),
+		}
+		if err := reg.Load(); err != nil {
+			log.Warn("plugin registry cache unreadable; it is fetched again", "err", err)
+		}
+	}
 	var wx *weather.Service
 	if cfg.WeatherURL != "" {
 		wx = &weather.Service{
@@ -127,7 +146,22 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx})
+	var cal *calendar.Service
+	if cfg.CalendarEnabled {
+		sealer, err := calendar.NewSealer(cfg.SecretsKey, cfg.SigningKey)
+		if err != nil {
+			return nil, fmt.Errorf("calendar secrets: %w", err)
+		}
+		cal = &calendar.Service{
+			Store: st, Sealer: sealer, Log: log.With("component", "calendar"),
+			Interval: cfg.CalendarSync, Jitter: 3 * time.Minute,
+			Fetcher: &calendar.Fetcher{
+				UserAgent: "kinframe/" + cfg.Version + " (+https://github.com/jeroentrappers/kinframe)",
+				HTTP:      &http.Client{Timeout: 30 * time.Second},
+			},
+		}
+	}
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg})
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +177,8 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 	st.OnFeed = srv.FeedChanged
 	st.OnJob = w.Wake
 	hub.OnDevice = srv.DeviceConnection
-	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx}, nil
+	hub.OnNowShowing = srv.NowShowing
+	return &App{Cfg: cfg, Log: log, Pool: pool, Store: st, Hub: hub, API: srv, Worker: w, Handler: h, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg}, nil
 }
 
 // RunBackground starts the media workers and the maintenance loop.
@@ -156,9 +191,17 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
 	}
+	if a.Registry != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Registry.Run(ctx) }()
+	}
 	if a.Weather != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Weather.Run(ctx) }()
+	}
+	if a.Calendar != nil {
+		wg.Add(1)
+		go func() { defer wg.Done(); a.Calendar.Run(ctx) }()
 	}
 	return &wg
 }
@@ -212,10 +255,17 @@ func (a *App) Maintain(ctx context.Context) {
 		log.Error("expired uploads", "err", err)
 	} else {
 		for _, id := range ids {
-			a.API.RemoveUpload(filepath.Join(a.Cfg.DataDir, "uploads", id))
+			a.API.RemoveExpiredUpload(filepath.Join(a.Cfg.DataDir, "uploads", id))
 			if err := a.Store.DeleteUpload(ctx, id); err != nil {
 				log.Error("delete upload", "err", err)
 			}
+		}
+	}
+	if a.Cfg.Shop != nil {
+		if n, err := a.Store.PurgeReservations(ctx, a.Cfg.Shop.RetentionDays); err != nil {
+			log.Error("purge shop reservations", "err", err)
+		} else if n > 0 {
+			log.Info("deleted old shop reservations", "count", n)
 		}
 	}
 	if err := a.Store.PruneIdempotency(ctx); err != nil {

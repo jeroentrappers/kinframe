@@ -16,6 +16,21 @@
     fail_msg: Set the domains and the secrets (see defaults/main.yml).
     quiet: true
 
+- name: Social sign-in providers are complete (client ID and secret together)
+  ansible.builtin.assert:
+    that:
+      - (kinframe_social_google_client_id | length > 0) == (kinframe_social_google_client_secret | length > 0)
+      - (kinframe_social_microsoft_client_id | length > 0) == (kinframe_social_microsoft_client_secret | length > 0)
+      - (kinframe_social_facebook_client_id | length > 0) == (kinframe_social_facebook_client_secret | length > 0)
+      - (kinframe_social_github_client_id | length > 0) == (kinframe_social_github_client_secret | length > 0)
+      - kinframe_social_microsoft_tenant | length > 0
+      - kinframe_terms_url == '' or kinframe_terms_url is match('^https?://')
+      - kinframe_privacy_url == '' or kinframe_privacy_url is match('^https?://')
+    fail_msg: >-
+      Each social provider needs both kinframe_social_<provider>_client_id and _client_secret (Apple: only the
+      client ID, its Services ID). Terms/privacy URLs must be absolute. See defaults/main.yml and docs/deploy.md.
+    quiet: true
+
 - name: Media storage settings are complete
   ansible.builtin.assert:
     that:
@@ -86,6 +101,35 @@
   when: item.when | default(true) | bool
   no_log: true
   register: rendered
+
+- name: Shop settings are complete
+  ansible.builtin.assert:
+    that:
+      - kinframe_shop is mapping
+      - kinframe_shop.seller is defined and kinframe_shop.seller.name is defined and kinframe_shop.seller.email is defined
+      - kinframe_shop.notify_email is defined
+      - kinframe_shop.products is defined and kinframe_shop.products | length > 0
+      - kinframe_shop.shipping is defined and kinframe_shop.shipping.countries | length > 0
+    fail_msg: kinframe_shop needs seller.name/email, notify_email, products and shipping.countries (see docs/deploy.md).
+    quiet: true
+  when: kinframe_shop | length > 0
+
+- name: Shop file
+  ansible.builtin.copy:
+    content: "{{ ({'enabled': true} | combine(kinframe_shop)) | to_nice_json }}\n"
+    dest: "{{ kinframe_dir }}/shop.json"
+    owner: root
+    group: root
+    mode: "0644"
+  register: shop_file
+  when: kinframe_shop | length > 0
+
+- name: No shop file without kinframe_shop
+  ansible.builtin.file:
+    path: "{{ kinframe_dir }}/shop.json"
+    state: absent
+  register: shop_file_removed
+  when: kinframe_shop | length == 0
 
 - name: Object store bootstrap script
   ansible.builtin.copy:
@@ -169,12 +213,12 @@
   register: server_up
   changed_when: "'Started' in server_up.stderr or 'Created' in server_up.stderr or 'Recreate' in server_up.stderr"
 
-# The server reads the Logto client IDs (/data/logto.json) at start.
-- name: Restart the server after a Logto change
+# The server reads the Logto client IDs (/data/logto.json) and the shop file at start.
+- name: Restart the server after a Logto or shop change
   ansible.builtin.command:
     cmd: docker compose restart server
     chdir: "{{ kinframe_dir }}"
-  when: bootstrap is changed and server_up is not changed
+  when: (bootstrap is changed or shop_file is changed) and server_up is not changed
   changed_when: true
 
 - name: Wait for the kinframe server

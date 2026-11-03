@@ -14,7 +14,7 @@ export interface UploadHandle {
 /** Resumable tus 1.0 upload to /v1/uploads (README §5.3). */
 export function uploadFile(
 	file: File,
-	opts: { sha256?: string; onProgress?: (sent: number, total: number) => void }
+	opts: { sha256?: string; prepared?: string; onProgress?: (sent: number, total: number) => void }
 ): UploadHandle {
 	let upload: Upload;
 	let settled = false;
@@ -26,6 +26,8 @@ export function uploadFile(
 			filetype: file.type || 'application/octet-stream'
 		};
 		if (opts.sha256) metadata.sha256 = opts.sha256;
+		// A client-made master (README §5.3 "Prepared uploads"); the server verifies it.
+		if (opts.prepared) metadata.prepared = opts.prepared;
 
 		upload = new Upload(file, {
 			endpoint: new URL(apiUrl('/v1/uploads'), location.href).href,

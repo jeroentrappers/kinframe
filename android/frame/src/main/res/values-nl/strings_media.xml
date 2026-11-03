@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Tik om af te spelen</string>
+    <string name="settings_live_photos">Livefoto’s</string>
+    <string name="live_photos_on">Afspelen bij tonen</string>
+    <string name="live_photos_tap">Afspelen bij tikken</string>
+    <string name="live_photos_off">Alleen foto</string>
+</resources>

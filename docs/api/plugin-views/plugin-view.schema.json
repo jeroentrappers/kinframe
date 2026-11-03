@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kinframe.app/schemas/plugin-view-1.json",
+  "title": "kinframe plugin view, API 1",
+  "description": "What a plugin's render() and detail() return (docs/plugins.md §4). The frame draws it natively; anything that does not validate is not drawn and the previous view stays. Limits beyond what JSON Schema can express: the tree is at most 3 components deep (stack › stack › leaf), a view has at most 24 components in total (rows' values included, flow nodes not), edge ids must name nodes of the same flow, node ids are unique, sparkline min < max, strings have no line breaks or control characters, and the serialized view is at most 16 KB. The Kotlin validator (android/core/.../PluginViewParser.kt) enforces all of them.",
+  "oneOf": [{ "$ref": "#/$defs/component" }, { "$ref": "#/$defs/none" }],
+  "$defs": {
+    "component": {
+      "oneOf": [
+        { "$ref": "#/$defs/value" },
+        { "$ref": "#/$defs/rows" },
+        { "$ref": "#/$defs/gauge" },
+        { "$ref": "#/$defs/flow" },
+        { "$ref": "#/$defs/sparkline" },
+        { "$ref": "#/$defs/text" },
+        { "$ref": "#/$defs/stack" },
+        { "$ref": "#/$defs/image" },
+        { "$ref": "#/$defs/actions" },
+        { "$ref": "#/$defs/progress" },
+        { "$ref": "#/$defs/list" }
+      ]
+    },
+    "none": {
+      "description": "Nothing to show right now (the music stopped): the widget is hidden and its place in the band freed. Only as the whole view. Returning null instead keeps the last view.",
+      "type": "object", "additionalProperties": false, "required": ["type"],
+      "properties": { "type": { "const": "none" } }
+    },
+    "image": {
+      "description": "A picture (album art, a snapshot) from an http(s) URL the plugin's own network permissions allow. The frame fetches it (at most 768 KB), decodes it small and caches it; a quiet placeholder until then. Square (rounded corners) or round; the size comes from the form.",
+      "type": "object", "additionalProperties": false, "required": ["type", "src"],
+      "properties": {
+        "type": { "const": "image" },
+        "src": { "type": "string", "pattern": "^https?://", "maxLength": 2048 },
+        "shape": { "enum": ["square", "round"] },
+        "description": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 60 }] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "actions": {
+      "description": "Round icon buttons that call the plugin's action(ctx, id) handler. Tappable in the detail card only (the corner and the band don't draw them). Needs permissions.actions in the manifest.",
+      "type": "object", "additionalProperties": false, "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "actions" },
+        "items": {
+          "type": "array", "minItems": 1, "maxItems": 5,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["id", "icon"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "icon": { "$ref": "#/$defs/icon" },
+              "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "tone": { "$ref": "#/$defs/tone" },
+              "primary": { "type": "boolean" }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "progress": {
+      "description": "A thin bar from min (default 0) to max, or a marker dot on the track. While running, the frame moves the value on by one per second from `at` (epoch ms), so a track's position moves smoothly between refreshes; `time` shows seconds as 1:23 / 3:45.",
+      "type": "object", "additionalProperties": false, "required": ["type", "value", "max"],
+      "properties": {
+        "type": { "const": "progress" },
+        "value": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "at": { "type": "number" },
+        "running": { "type": "boolean" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "time": { "type": "boolean" },
+        "style": { "enum": ["bar", "marker"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "tone": {
+      "description": "Maps to the frame's palette (lightened on photos). Default neutral; a container's tone is the default for its children. The first six say how good something is; water, gas and heat name a quantity (pair them with their icon: colour is never the only cue).",
+      "enum": ["neutral", "good", "warn", "bad", "accent", "info", "water", "gas", "heat"]
+    },
+    "list": {
+      "description": "Up to 5 rows of time, title, detail and badge: departures, bin days, appointments. Corner: a label and the first 3 rows; detail card: all rows; band column (too narrow for titles): the first row's icon and the times with their badges (the first title when no row has a time); band strip: the first 2 rows, one line each. A row's tone colours its badge and icon.",
+      "type": "object", "additionalProperties": false, "required": ["type", "rows"],
+      "properties": {
+        "type": { "const": "list" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "rows": {
+          "type": "array", "minItems": 1, "maxItems": 5,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["title"],
+            "properties": {
+              "title": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 40 }] },
+              "time": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 10 }] },
+              "detail": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "badge": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 10 }] },
+              "icon": { "$ref": "#/$defs/icon" },
+              "tone": { "$ref": "#/$defs/tone" }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "icon": {
+      "description": "The fixed icon set of API 1, drawn by the frame in its line style. `direction` is a needle pointing up (north), meant to be turned with a value's `icon_rotation`.",
+      "enum": [
+        "bolt", "grid", "solar", "sun", "home", "battery", "battery-charging", "plug", "car", "flame", "gas", "meter",
+        "water", "thermometer", "wind", "leaf", "euro", "fan", "lightbulb",
+        "moon", "cloud", "clock", "calendar", "rain", "direction",
+        "washing-machine", "trash", "door", "lock", "bike", "bus", "train", "user", "wifi", "bell",
+        "info", "warning", "check", "arrow-up", "arrow-down", "arrow-left", "arrow-right",
+        "music", "play", "pause", "skip-next", "skip-previous", "volume-up", "volume-down", "volume-off", "power"
+      ]
+    },
+    "short": { "type": "string", "minLength": 1, "pattern": "^[^\\u0000-\\u001f\\u007f\\u2028\\u2029]*$" },
+    "value": {
+      "description": "Icon, big number, unit, optional label and trend arrow: ⚡ 1,2 kW ↑. Format numbers with ctx.format; a unit after a (no-break) space in `value` is drawn smaller unless `unit` is given. One or two decimals are drawn small and raised (21,4 → 21 with a raised ,4); the text itself is unchanged.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "properties": {
+        "type": { "const": "value" },
+        "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+        "unit": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 8 }] },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "icon": { "$ref": "#/$defs/icon" },
+        "icon_rotation": {
+          "type": "number", "minimum": 0, "maximum": 360,
+          "description": "Turns the icon clockwise by this many degrees, e.g. the `direction` needle for a wind direction (pointing where the wind blows to). Absent: upright."
+        },
+        "trend": { "enum": ["up", "down", "flat"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "rows": {
+      "description": "Up to 4 values stacked: grid / solar / home.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "rows" },
+        "items": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/value" } },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "gauge": {
+      "description": "A ring (default) or bar from 0–100 % with a short label inside: car battery 68 %. A dial is two-sided: zero at the top, -100–100 %, positive clockwise in `tone`, negative anticlockwise in `negative_tone` (grid use vs return); a trailing unit in its label is drawn small below the number.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value"],
+      "if": { "properties": { "style": { "const": "dial" } }, "required": ["style"] },
+      "then": { "properties": { "value": { "minimum": -100 } } },
+      "else": { "properties": { "value": { "minimum": 0 }, "negative_tone": false } },
+      "properties": {
+        "type": { "const": "gauge" },
+        "value": { "type": "number", "minimum": -100, "maximum": 100 },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 12 }] },
+        "caption": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "icon": { "$ref": "#/$defs/icon" },
+        "style": { "enum": ["ring", "bar", "dial"] },
+        "tone": { "$ref": "#/$defs/tone" },
+        "negative_tone": { "$ref": "#/$defs/tone" },
+        "sub": {
+          "description": "Up to three small values under a ring or dial: today's ↑ 11,8 / ↓ 14,5 kWh beside the live power.",
+          "type": "array", "minItems": 1, "maxItems": 3,
+          "items": {
+            "type": "object", "additionalProperties": false, "required": ["value"],
+            "properties": {
+              "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 12 }] },
+              "icon": { "$ref": "#/$defs/icon" },
+              "tone": { "$ref": "#/$defs/tone" }
+            }
+          }
+        }
+      }
+    },
+    "flow": {
+      "description": "Up to 5 nodes with animated arrows between them; arrow speed follows power (relative to the largest edge). The node with the most edges is drawn in the middle.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "nodes"],
+      "properties": {
+        "type": { "const": "flow" },
+        "nodes": {
+          "type": "array", "minItems": 2, "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "icon"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "icon": { "$ref": "#/$defs/icon" },
+              "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+              "tone": { "$ref": "#/$defs/tone" },
+              "percent": { "description": "A ring around the node (0–100), e.g. a home battery's charge.", "type": "number", "minimum": 0, "maximum": 100 }
+            }
+          }
+        },
+        "edges": {
+          "type": "array", "maxItems": 8,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "to": { "type": "string", "pattern": "^[a-z0-9_-]{1,24}$" },
+              "power": { "type": "number", "minimum": 0, "description": "A magnitude; 0 draws an idle line. Swap from/to for the other direction." }
+            }
+          }
+        },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "sparkline": {
+      "description": "A small chart of 2–100 points (a day of quarter hours, 100 on the day the clocks go back); null is a gap. `bars` draws a bar per point from zero (or the range's nearest edge). `highlight` picks out one point in `highlight_tone` (default the chart's tone), `marker` another as \"now\" (a thin line across the chart); both are indexes of numbers, not gaps.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "points"],
+      "properties": {
+        "type": { "const": "sparkline" },
+        "points": { "type": "array", "minItems": 2, "maxItems": 100, "items": { "type": ["number", "null"] } },
+        "style": { "enum": ["line", "bars"] },
+        "highlight": { "type": "integer", "minimum": 0, "maximum": 99 },
+        "highlight_tone": { "$ref": "#/$defs/tone" },
+        "marker": { "type": "integer", "minimum": 0, "maximum": 99 },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "label": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 32 }] },
+        "value": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 16 }] },
+        "show_range": { "type": "boolean" },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "text": {
+      "description": "One or two short lines: Charging · full at 23:10.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "lines"],
+      "properties": {
+        "type": { "const": "text" },
+        "lines": { "type": "array", "minItems": 1, "maxItems": 2, "items": { "allOf": [{ "$ref": "#/$defs/short" }, { "maxLength": 60 }] } },
+        "icon": { "$ref": "#/$defs/icon" },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    },
+    "stack": {
+      "description": "A vertical (default) or horizontal group. In the band the frame picks the axis: a column stacks vertically, a strip horizontally.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "items"],
+      "properties": {
+        "type": { "const": "stack" },
+        "items": { "type": "array", "minItems": 1, "maxItems": 4, "items": { "$ref": "#/$defs/component" } },
+        "direction": { "enum": ["vertical", "horizontal"] },
+        "tone": { "$ref": "#/$defs/tone" }
+      }
+    }
+  }
+}

@@ -58,9 +58,12 @@ class Downloader(
     suspend fun run() = coroutineScope {
         val gate = Semaphore(parallelism)
         while (isActive) {
-            val due = db.placements().pendingDownloads(now(), 20).filter { it.id !in inFlight }
+            val stills = db.placements().pendingDownloads(now(), 20)
+            // Live photo clips come after every still that is due (a clip never delays a photo).
+            val clips = if (stills.isEmpty()) db.placements().pendingMotion(now(), 20) else emptyList()
+            val due = (stills + clips).filter { it.id !in inFlight }
             if (due.isEmpty() || inFlight.size >= parallelism) {
-                val earliest = db.placements().earliestRetry()
+                val earliest = listOfNotNull(db.placements().earliestRetry(), db.placements().earliestMotionRetry()).minOrNull()
                 val wait = when {
                     inFlight.isNotEmpty() -> 60_000L
                     earliest == null -> Long.MAX_VALUE
@@ -74,7 +77,7 @@ class Downloader(
                 inFlight += p.id
                 launch {
                     try {
-                        gate.withPermit { downloadOne(p) }
+                        gate.withPermit { if (p.localFile == null) downloadOne(p) else downloadMotion(p) }
                     } finally {
                         inFlight -= p.id
                         kick()
@@ -104,6 +107,7 @@ class Downloader(
             if (!part.renameTo(target)) throw IOException("rename failed")
             AtomicFile.syncDir(media.dir)
             link(sha, name, p)
+            if (p.isLive && p.motionUrl != null) downloadMotion(p)
             return true
         } catch (e: CancellationException) {
             throw e
@@ -117,6 +121,40 @@ class Downloader(
             val next = now() + if (e.message == "storage_full") 3_600_000L else jittered
             Log.w(TAG, "download ${p.id} failed (attempt $attempts): ${e.message}")
             db.placements().markFailed(p.id, attempts, next, e.message?.take(120))
+            return false
+        }
+    }
+
+    /**
+     * Downloads the clip of a live photo (same resumable, verified, atomic path as stills). Failures back off on their
+     * own counter and never touch the still. Returns true when the clip is stored.
+     */
+    suspend fun downloadMotion(p: PlacementEntity): Boolean {
+        val sha = p.motionSha256 ?: return false
+        val url = p.motionUrl?.let { api.resolve(it) } ?: return false
+        val name = media.fileName(sha, p.motionMime ?: "video/mp4")
+        val target = media.file(name)
+        try {
+            if (!(target.exists() && (p.motionBytes <= 0 || target.length() == p.motionBytes))) {
+                if (freeBytes() - p.motionBytes < minFreeBytes && !makeRoom(p.motionBytes)) throw IOException("storage_full")
+                val part = media.partial(sha)
+                fetchInto(url, part, sha, p.motionBytes)
+                if (!part.renameTo(target)) throw IOException("rename failed")
+                AtomicFile.syncDir(media.dir)
+            }
+            db.placements().markMotionStored(sha, name)
+            db.placements().get(p.id)?.let(onStored)
+            return true
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: DeviceRevokedException) {
+            onRevoked()
+            return false
+        } catch (e: Exception) {
+            val attempts = p.motionAttempts + 1
+            val base = min(3_600_000.0, 30_000.0 * Math.pow(2.0, (attempts - 1).toDouble()))
+            Log.w(TAG, "motion ${p.id} failed (attempt $attempts): ${e.message}")
+            db.placements().markMotionFailed(p.id, attempts, now() + (base * (0.8 + Random.nextDouble() * 0.4)).toLong())
             return false
         }
     }

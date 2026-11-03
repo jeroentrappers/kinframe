@@ -76,6 +76,11 @@ func (s *Server) updateChannel(r *http.Request, d *store.Device) string {
 // deviceCheckUpdate implements GET /v1/device/update (README §5.7).
 func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 	d := deviceFrom(r.Context())
+	if d.IsBrowser() {
+		// A browser frame is the web app: it never installs APKs.
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	q := r.URL.Query()
 	channel := q.Get("channel")
 	switch channel {
@@ -124,7 +129,34 @@ func (s *Server) deviceCheckUpdate(w http.ResponseWriter, r *http.Request) {
 	_ = Response{Status: http.StatusOK, Body: body}.write(w)
 }
 
-// deviceGetUpdateApk serves a mirrored APK with Range/ETag support.
+// frameAppLatest implements GET /v1/frame-app/latest: the newest stable release, without sign-in, for the
+// website's convert tool (it installs kinframe on a frame over USB, so it needs the APK same-origin).
+// The tool pins the release signing certificate itself; this is only the transport.
+func (s *Server) frameAppLatest(w http.ResponseWriter, r *http.Request) {
+	sdk, _ := strconv.Atoi(r.URL.Query().Get("sdk")) // validated against the spec by the router
+	if s.releases == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	rel := s.releases.Latest("stable", 0, sdk, nil)
+	if rel == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	body := frameUpdate{
+		VersionName: rel.VersionName, VersionCode: rel.VersionCode, MinSDK: rel.MinSDK,
+		URL:    s.cfg.APIURL() + "/frame-app/apk/" + strconv.Itoa(rel.VersionCode),
+		SHA256: rel.SHA256, Size: rel.Size, PublishedAt: rel.PublishedAt.UTC(), Prerelease: rel.Prerelease,
+	}
+	if rel.Notes != "" {
+		body.ReleaseNotes = &rel.Notes
+	}
+	w.Header().Set("Cache-Control", "no-cache")
+	_ = Response{Status: http.StatusOK, Body: body}.write(w)
+}
+
+// deviceGetUpdateApk serves a mirrored APK with Range/ETag support. It is also mounted without sign-in as
+// GET /v1/frame-app/apk/{versionCode} (releases are public on GitHub anyway).
 func (s *Server) deviceGetUpdateApk(w http.ResponseWriter, r *http.Request) {
 	code, err := strconv.Atoi(r.PathValue("versionCode"))
 	if err != nil || s.releases == nil {

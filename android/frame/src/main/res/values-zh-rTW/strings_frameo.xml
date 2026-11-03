@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">來自 Frameo 的相片</string>
+    <string name="frameo_found">此相框上來自 Frameo 的相片和影片：%d 個。匯入後可連同說明文字和傳送者一起保留。</string>
+    <string name="frameo_import">匯入</string>
+    <string name="frameo_importing">正在匯入來自 Frameo 的相片</string>
+    <string name="frameo_preparing">正在準備…</string>
+    <string name="frameo_waiting">相框連線後繼續。</string>
+    <string name="frameo_stop">停止</string>
+    <string name="frameo_done_title">已匯入來自 Frameo 的相片</string>
+    <string name="frameo_count">%1$d / %2$d</string>
+    <string name="frameo_done_imported">已匯入：%d</string>
+    <string name="frameo_done_already">相框上已有：%d</string>
+    <string name="frameo_done_failed">無法匯入：%d</string>
+    <string name="frameo_no_permission">需要儲存空間權限才能讀取來自 Frameo 的相片。</string>
+    <string name="credit_via_frameo">%1$s · 透過 Frameo</string>
+    <string name="credit_frameo">透過 Frameo</string>
+</resources>

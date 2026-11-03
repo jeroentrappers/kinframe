@@ -153,20 +153,25 @@ type Device struct {
 	LastHeartbeat         json.RawMessage `db:"last_heartbeat"`
 	LastHeartbeatAt       *time.Time      `db:"last_heartbeat_at"`
 	LastUncleanShutdownAt *time.Time      `db:"last_unclean_shutdown_at"`
+	// Kind is "android" (the frame app) or "browser" (a virtual frame in a web browser).
+	Kind string `db:"kind"`
 }
+
+// IsBrowser reports whether the device is a web browser enrolled as a virtual frame.
+func (d *Device) IsBrowser() bool { return d.Kind == "browser" }
 
 const deviceCols = `id, secret_hash, frame_id, hardware, screen_w, screen_h, density_dpi, orientation, decode_w, decode_h,
 	app_version, app_version_code, app_channel, locale, timezone, created_at, revoked_at, last_seen_at,
-	last_heartbeat, last_heartbeat_at, last_unclean_shutdown_at`
+	last_heartbeat, last_heartbeat_at, last_unclean_shutdown_at, kind`
 
 func (s *Store) CreateDevice(ctx context.Context, d Device) (*Device, error) {
 	return one[Device](s.Pool.Query(ctx, `
 		INSERT INTO devices (id, secret_hash, hardware, screen_w, screen_h, density_dpi, orientation, decode_w, decode_h,
-			app_version, app_version_code, app_channel, locale, timezone)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+			app_version, app_version_code, app_channel, locale, timezone, kind)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, COALESCE(NULLIF($15, ''), 'android'))
 		RETURNING `+deviceCols,
 		d.ID, d.SecretHash, d.Hardware, d.ScreenW, d.ScreenH, d.DensityDPI, d.Orientation, d.DecodeW, d.DecodeH,
-		d.AppVersion, d.AppVersionCode, d.AppChannel, d.Locale, d.Timezone))
+		d.AppVersion, d.AppVersionCode, d.AppChannel, d.Locale, d.Timezone, d.Kind))
 }
 
 func (s *Store) GetDevice(ctx context.Context, q db.DBTX, id uuid.UUID) (*Device, error) {

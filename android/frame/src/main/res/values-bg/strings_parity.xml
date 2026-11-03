@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Снимките на рамката продължават да се показват. Новите пристигат веднага щом връзката се върне.</string>
     <string name="status_card_server_title">Няма връзка със сървъра за снимки</string>
     <string name="status_card_server_body">Wi-Fi работи, но сървърът не отговаря. Новите снимки ще пристигнат, когато се върне.</string>
+    <string name="status_card_clock_title">Часовникът се сверява</string>
+    <string name="status_card_clock_body">Рамката се рестартира и часовникът ѝ е грешен. След малко ще се свери от интернет.</string>
     <string name="status_card_portal_title">Тази Wi-Fi мрежа иска вход</string>
     <string name="status_card_portal_body">Отворете страницата за вход в мрежата, за да свържете рамката с интернет.</string>
     <string name="status_card_portal_action">Вход</string>

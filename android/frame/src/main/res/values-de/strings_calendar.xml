@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Heute</string>
+    <string name="calendar_tomorrow">Morgen</string>
+    <string name="calendar_view_month">Monat</string>
+    <string name="calendar_view_week">Woche</string>
+    <string name="calendar_view_four_day">4 Tage</string>
+    <string name="calendar_week_number">KW %1$d</string>
+    <string name="calendar_previous">Zurück</string>
+    <string name="calendar_next">Weiter</string>
+    <string name="calendar_sync_now">Jetzt synchronisieren</string>
+    <string name="calendar_syncing">Wird synchronisiert …</string>
+    <string name="calendar_close">Kalender schließen</string>
+    <string name="calendar_all_day">Ganztägig</string>
+    <string name="calendar_received">Empfangene Termine</string>
+    <string name="calendar_nothing">Nichts geplant</string>
+    <string name="calendar_nothing_today">Heute ist nichts weiter geplant</string>
+    <string name="calendar_empty_title">Noch keine Kalender</string>
+    <string name="calendar_empty_body">Füge in der kinframe-App oder auf der Website unter den Kalendern des Rahmens einen Familienkalender hinzu. Hier können beliebig viele Kalender gemeinsam angezeigt werden.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">bis %1$s</string>
+    <string name="calendar_from">ab %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d weiterer</item>
+        <item quantity="other">+%d weitere</item>
+    </plurals>
+    <string name="calendar_rain">%1$d %%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Heute</string>
+    <string name="countdown_tomorrow">Morgen</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">in %d Tag</item>
+        <item quantity="other">in %d Tagen</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Gesendet von %1$s</string>
+    <string name="event_repeats">Wiederholt sich</string>
+    <string name="event_countdown">Countdown anzeigen</string>
+    <string name="event_countdown_hint">In der Diashow und oben im Kalender</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s hat dir einen Termin gesendet</string>
+    <string name="invitation_body">Zum Kalender dieses Rahmens hinzufügen?</string>
+    <string name="invitation_accept">Zum Kalender hinzufügen</string>
+    <string name="invitation_decline">Ablehnen</string>
+    <string name="invitation_later">Nicht jetzt</string>
+    <string name="invitation_pill_one">Termin von %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d Termineinladung</item>
+        <item quantity="other">%d Termineinladungen</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Kalender</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Kalender</string>
+    <string name="settings_calendar_open">Kalender öffnen</string>
+    <string name="settings_calendar_view">Kalenderansicht</string>
+    <string name="settings_calendar_start_today">Mit heute beginnen</string>
+    <string name="settings_calendar_fade_past">Vergangene Termine abblenden</string>
+    <string name="settings_calendar_week_numbers">Kalenderwochen</string>
+    <string name="settings_calendar_sidebar">Kalender neben den Fotos</string>
+    <string name="settings_calendar_countdowns">Countdowns in der Diashow</string>
+    <string name="settings_calendar_timed">Kalender zu festen Zeiten anzeigen</string>
+    <string name="settings_calendar_timed_from">Von</string>
+    <string name="settings_calendar_timed_to">Bis</string>
+    <string name="settings_calendar_timed_add">Zeit hinzufügen</string>
+    <string name="settings_calendar_timed_remove">Entfernen</string>
+    <string name="settings_calendar_sources">Kalender auf diesem Rahmen</string>
+    <string name="settings_calendar_sources_hint">Kalender werden in der kinframe-App oder auf der Website hinzugefügt und verwaltet.</string>
+    <string name="calendar_status_ok">Aktuell</string>
+    <string name="calendar_status_syncing">Wird synchronisiert …</string>
+    <string name="calendar_status_failed">Synchronisierung fehlgeschlagen</string>
+    <string name="calendar_status_auth_failed">Anmeldung erforderlich</string>
+    <string name="calendar_status_disabled">Ausgeschaltet</string>
+</resources>

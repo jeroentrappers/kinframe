@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Фотографије из Frameo</string>
+    <string name="frameo_found">Фотографије и видео снимци из Frameo на овом раму: %d. Увезите их да остану са описима и пошиљаоцима.</string>
+    <string name="frameo_import">Увези</string>
+    <string name="frameo_importing">Увоз фотографија из Frameo</string>
+    <string name="frameo_preparing">Припрема…</string>
+    <string name="frameo_waiting">Наставља се када рам буде на мрежи.</string>
+    <string name="frameo_stop">Заустави</string>
+    <string name="frameo_done_title">Фотографије из Frameo увезене</string>
+    <string name="frameo_count">%1$d од %2$d</string>
+    <string name="frameo_done_imported">Увезено: %d</string>
+    <string name="frameo_done_already">Већ на раму: %d</string>
+    <string name="frameo_done_failed">Није увезено: %d</string>
+    <string name="frameo_no_permission">За читање фотографија из Frameo потребан је приступ меморији.</string>
+    <string name="credit_via_frameo">%1$s · преко Frameo</string>
+    <string name="credit_frameo">преко Frameo</string>
+</resources>

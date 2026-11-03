@@ -85,7 +85,7 @@ describe('message catalogs', () => {
 	});
 
 	it('has a message for every ProblemCode', () => {
-		const codes = ['unauthorized', 'token_expired', 'device_revoked', 'forbidden', 'missing_permission', 'not_found', 'code_invalid', 'code_expired', 'invite_invalid', 'invite_expired', 'already_member', 'validation_failed', 'too_many_items', 'video_too_long', 'upload_too_large', 'upload_not_found', 'unsupported_media', 'corrupt_media', 'version_conflict', 'frame_offline', 'command_timeout', 'owner_cannot_leave', 'rate_limited', 'app_update_required', 'server_error'];
+		const codes = ['unauthorized', 'token_expired', 'device_revoked', 'forbidden', 'missing_permission', 'not_found', 'code_invalid', 'code_expired', 'invite_invalid', 'invite_expired', 'link_expired', 'already_member', 'validation_failed', 'too_many_items', 'video_too_long', 'upload_too_large', 'upload_not_found', 'unsupported_media', 'corrupt_media', 'version_conflict', 'frame_offline', 'command_timeout', 'owner_cannot_leave', 'rate_limited', 'app_update_required', 'server_error'];
 		for (const c of codes) expect(en).toHaveProperty([`problem.${c}`]);
 	});
 

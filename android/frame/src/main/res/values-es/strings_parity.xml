@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Las fotos del marco se siguen mostrando. Las nuevas llegarán en cuanto vuelva la conexión.</string>
     <string name="status_card_server_title">No se puede conectar con el servidor de fotos</string>
     <string name="status_card_server_body">El Wi-Fi funciona, pero el servidor no responde. Las fotos nuevas llegarán cuando vuelva.</string>
+    <string name="status_card_clock_title">Ajustando el reloj</string>
+    <string name="status_card_clock_body">El marco se ha reiniciado y su reloj no es correcto. Se ajustará desde internet en un momento.</string>
     <string name="status_card_portal_title">Este Wi-Fi pide iniciar sesión</string>
     <string name="status_card_portal_body">Abre la página de inicio de sesión de la red para conectar el marco.</string>
     <string name="status_card_portal_action">Iniciar sesión</string>

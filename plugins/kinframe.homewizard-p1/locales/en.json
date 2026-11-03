@@ -1,0 +1,14 @@
+{
+  "@name": "HomeWizard P1 meter",
+  "@option.style.value": "Number",
+  "@option.style.gauge": "Dial",
+  "@option.style.flow": "Flow",
+  "grid": "Grid",
+  "home": "Home",
+  "last_hour": "Last hour",
+  "returning": "Returning",
+  "today_export": "Returned today",
+  "today_gas": "Gas today",
+  "today_import": "Used today",
+  "using": "Using"
+}

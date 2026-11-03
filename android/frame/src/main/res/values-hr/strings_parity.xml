@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Fotografije na okviru i dalje se prikazuju. Nove stižu čim se veza vrati.</string>
     <string name="status_card_server_title">Poslužitelj fotografija nije dostupan</string>
     <string name="status_card_server_body">Wi-Fi radi, ali poslužitelj ne odgovara. Nove fotografije stižu kad se vrati.</string>
+    <string name="status_card_clock_title">Postavljanje sata</string>
+    <string name="status_card_clock_body">Okvir se ponovno pokrenuo i sat mu ne pokazuje točno vrijeme. Za trenutak će se postaviti s interneta.</string>
     <string name="status_card_portal_title">Ovaj Wi-Fi traži prijavu</string>
     <string name="status_card_portal_body">Otvorite stranicu za prijavu na mrežu kako bi okvir bio povezan.</string>
     <string name="status_card_portal_action">Prijava</string>

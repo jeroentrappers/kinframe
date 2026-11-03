@@ -56,6 +56,8 @@
     <string name="status_card_offline_body">Die Fotos auf dem Rahmen laufen weiter. Neue kommen an, sobald er wieder online ist.</string>
     <string name="status_card_server_title">Fotoserver nicht erreichbar</string>
     <string name="status_card_server_body">Das WLAN funktioniert, aber der Server antwortet nicht. Neue Fotos kommen an, sobald er wieder da ist.</string>
+    <string name="status_card_clock_title">Uhr wird gestellt</string>
+    <string name="status_card_clock_body">Der Bilderrahmen wurde neu gestartet und seine Uhr geht falsch. Sie stellt sich gleich über das Internet.</string>
     <string name="status_card_portal_title">Dieses WLAN verlangt eine Anmeldung</string>
     <string name="status_card_portal_body">Öffne die Anmeldeseite des Netzwerks, um den Rahmen online zu bringen.</string>
     <string name="status_card_portal_action">Anmelden</string>

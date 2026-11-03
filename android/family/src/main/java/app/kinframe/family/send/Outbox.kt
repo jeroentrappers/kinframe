@@ -38,20 +38,77 @@ data class OutboxItem(
     val uploadedBytes: Long = 0,
     /** tus upload id, or an existing item id when the server already had the file. Set once uploaded. */
     val uploadId: String? = null,
+    /** Capture time read from the original before preparing (prepared files carry no metadata). */
+    val capturedAt: String? = null,
+    /** Set once preparation ran: [PREP_PREPARED] or [PREP_ORIGINAL] (upload the file as is). */
+    val prepState: String? = null,
+    /** The prepared master (README §5.3 "Prepared uploads") and what it is. */
+    val preparedPath: String? = null,
+    val preparedSize: Long? = null,
+    val prepared: String? = null,
+    val preparedMime: String? = null,
+    val preparedWidth: Int? = null,
+    val preparedHeight: Int? = null,
+    val preparedDurationMs: Long? = null,
+    /** Trim and mute are baked into the prepared video, so the send doesn't repeat them. */
+    val preparedTrimmed: Boolean = false,
+    /** An Android Motion Photo (a still with an embedded clip). */
+    val motionPhoto: Boolean = false,
+    /** Send a Motion Photo as live (default) or, when false, as a still only. */
+    val live: Boolean = true,
+    /** The clip of a live item, split out of the Motion Photo and uploaded on its own. */
+    val motion: OutboxItem? = null,
 ) {
     val tusState: TusState? get() = uploadUrl?.let { TusState(it, uploadedBytes) }
 
-    /** Duplicates can't be trimmed or muted server-side (server NOTES), so only plain files offer a hash. */
-    val dedupable: Boolean get() = trimStartMs == null && trimEndMs == null && includeAudio
+    /** What goes over the wire: the prepared master when there is one. */
+    val uploadSize: Long get() = preparedSize ?: size
+    val uploadMime: String get() = preparedMime ?: mime
+    val uploadName: String get() = if (preparedPath != null) name.substringBeforeLast('.') + "." + preparedPath.substringAfterLast('.') else name
+    val isPrepared: Boolean get() = prepState == PREP_PREPARED
 
-    fun toSendItem(): SendItemCreate = SendItemCreate(
-        uploadId = requireNotNull(uploadId),
-        caption = caption?.takeIf { it.isNotBlank() },
-        focalPoint = if (focalX != null && focalY != null) FocalPoint(focalX, focalY) else null,
-        fit = fit,
-        trim = if (kind == MediaKind.VIDEO && (trimStartMs != null || trimEndMs != null) && trimEndMs != null) Trim(trimStartMs ?: 0, trimEndMs) else null,
-        includeAudio = if (kind == MediaKind.VIDEO && !includeAudio) false else null,
-    )
+    /** Bytes of this item and its clip, for progress. */
+    val totalUploadSize: Long get() = uploadSize + (motion?.uploadSize ?: 0)
+
+    /**
+     * Duplicates can't be trimmed or muted server-side (server NOTES), so only plain files offer a hash. A prepared
+     * video has its trim and mute baked in, so its bytes are what the item is.
+     */
+    val dedupable: Boolean get() = (isPrepared && preparedTrimmed) || (trimStartMs == null && trimEndMs == null && includeAudio)
+
+    /** Records the outcome of preparing this item. */
+    fun withPrep(r: app.kinframe.family.send.prep.PrepResult): OutboxItem = when (r) {
+        is app.kinframe.family.send.prep.PrepResult.Prepared -> copy(
+            prepState = PREP_PREPARED, preparedPath = r.path, preparedSize = r.size, prepared = r.profile, preparedMime = r.mime,
+            preparedWidth = r.width, preparedHeight = r.height, preparedDurationMs = r.durationMs, preparedTrimmed = r.trimmed,
+            sha256 = null,
+        )
+        is app.kinframe.family.send.prep.PrepResult.Original -> copy(prepState = PREP_ORIGINAL)
+    }
+
+    fun toSendItem(): SendItemCreate {
+        val video = kind == MediaKind.VIDEO
+        val baked = isPrepared && preparedTrimmed
+        return SendItemCreate(
+            uploadId = requireNotNull(uploadId),
+            caption = caption?.takeIf { it.isNotBlank() },
+            focalPoint = if (focalX != null && focalY != null) FocalPoint(focalX, focalY) else null,
+            fit = fit,
+            trim = if (video && !baked && (trimStartMs != null || trimEndMs != null) && trimEndMs != null) Trim(trimStartMs ?: 0, trimEndMs) else null,
+            includeAudio = if (video && !includeAudio) false else null,
+            capturedAt = capturedAt,
+            width = if (isPrepared) preparedWidth else null,
+            height = if (isPrepared) preparedHeight else null,
+            durationMs = if (isPrepared && video) preparedDurationMs else null,
+            liveVideoUploadId = motion?.uploadId,
+            live = if (motionPhoto && !live) false else null,
+        )
+    }
+
+    companion object {
+        const val PREP_PREPARED = "prepared"
+        const val PREP_ORIGINAL = "original"
+    }
 }
 
 object OutboxState {
@@ -73,13 +130,26 @@ data class OutboxSend(
     /** ProblemCode (or "network", "unauthorized") of the last failure. */
     val error: String? = null,
 ) {
-    val totalBytes: Long get() = items.sumOf { it.size }
-    val uploadedBytes: Long get() = items.sumOf { if (it.uploadId != null) it.size else it.uploadedBytes.coerceAtMost(it.size) }
+    val totalBytes: Long get() = items.sumOf { it.totalUploadSize }
+    val uploadedBytes: Long get() = items.sumOf { it.sentBytes() + (it.motion?.sentBytes() ?: 0) }
 }
 
-/** Live progress of the upload in flight (not persisted on every byte). */
-data class OutboxProgress(val sendId: String, val itemIndex: Int, val itemCount: Int, val sent: Long, val total: Long) {
-    val fraction: Float get() = if (total <= 0) 0f else (sent.toFloat() / total).coerceIn(0f, 1f)
+private fun OutboxItem.sentBytes(): Long = if (uploadId != null) uploadSize else uploadedBytes.coerceAtMost(uploadSize)
+
+/**
+ * Live progress of the send in flight (not persisted on every byte). While [preparing] is set, [fraction] is the
+ * preparation progress of item [itemIndex] (resizing a photo, transcoding a video).
+ */
+data class OutboxProgress(
+    val sendId: String,
+    val itemIndex: Int,
+    val itemCount: Int,
+    val sent: Long,
+    val total: Long,
+    val preparing: Boolean = false,
+    val prepFraction: Float = 0f,
+) {
+    val fraction: Float get() = if (preparing) prepFraction.coerceIn(0f, 1f) else if (total <= 0) 0f else (sent.toFloat() / total).coerceIn(0f, 1f)
 }
 
 /** Queued sends in a crash-safe JSON file. */

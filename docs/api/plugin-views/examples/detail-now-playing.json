@@ -1,0 +1,61 @@
+{
+  "type": "stack",
+  "items": [
+    {
+      "type": "stack",
+      "direction": "horizontal",
+      "items": [
+        {
+          "type": "image",
+          "src": "http://192.168.1.157:8123/api/media_player_proxy/media_player.living?token=EXAMPLE&cache=1"
+        },
+        {
+          "type": "text",
+          "lines": [
+            "Les Cactus",
+            "Jacques Dutronc · Jacques Dutronc"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "progress",
+      "value": 61,
+      "max": 245,
+      "at": 1792958400000,
+      "running": true,
+      "time": true
+    },
+    {
+      "type": "actions",
+      "items": [
+        {
+          "id": "previous",
+          "icon": "skip-previous",
+          "label": "Previous"
+        },
+        {
+          "id": "play_pause",
+          "icon": "pause",
+          "label": "Pause",
+          "primary": true
+        },
+        {
+          "id": "next",
+          "icon": "skip-next",
+          "label": "Next"
+        },
+        {
+          "id": "volume_down",
+          "icon": "volume-down",
+          "label": "Quieter"
+        },
+        {
+          "id": "volume_up",
+          "icon": "volume-up",
+          "label": "Volume 35"
+        }
+      ]
+    }
+  ]
+}

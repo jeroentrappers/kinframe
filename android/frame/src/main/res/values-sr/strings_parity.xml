@@ -58,6 +58,8 @@
     <string name="status_card_offline_body">Фотографије на раму се и даље приказују. Нове стижу чим веза поново проради.</string>
     <string name="status_card_server_title">Сервер за фотографије није доступан</string>
     <string name="status_card_server_body">Wi-Fi ради, али сервер не одговара. Нове фотографије стижу када се врати.</string>
+    <string name="status_card_clock_title">Подешавање сата</string>
+    <string name="status_card_clock_body">Рам се поново покренуо и сат му не показује тачно време. За тренутак ће се подесити преко интернета.</string>
     <string name="status_card_portal_title">Овај Wi-Fi тражи пријаву</string>
     <string name="status_card_portal_body">Отворите страницу за пријаву на мрежу да би рам био на мрежи.</string>
     <string name="status_card_portal_action">Пријави се</string>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="frameo_title">Fotografii din Frameo</string>
+    <string name="frameo_found">Fotografii și videoclipuri din Frameo pe această ramă: %d. Importați-le pentru a le păstra, cu descrierile și expeditorii lor.</string>
+    <string name="frameo_import">Importați</string>
+    <string name="frameo_importing">Se importă fotografiile din Frameo</string>
+    <string name="frameo_preparing">Se pregătește…</string>
+    <string name="frameo_waiting">Continuă când rama este online.</string>
+    <string name="frameo_stop">Opriți</string>
+    <string name="frameo_done_title">Fotografiile din Frameo au fost importate</string>
+    <string name="frameo_count">%1$d din %2$d</string>
+    <string name="frameo_done_imported">Importate: %d</string>
+    <string name="frameo_done_already">Deja pe ramă: %d</string>
+    <string name="frameo_done_failed">Neimportate: %d</string>
+    <string name="frameo_no_permission">Este nevoie de acces la stocare pentru a citi fotografiile din Frameo.</string>
+    <string name="credit_via_frameo">%1$s · prin Frameo</string>
+    <string name="credit_frameo">prin Frameo</string>
+</resources>

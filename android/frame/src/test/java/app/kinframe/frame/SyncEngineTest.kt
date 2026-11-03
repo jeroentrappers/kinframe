@@ -47,6 +47,17 @@ class SyncEngineTest : SyncTestBase() {
     }
 
     @Test
+    fun sharedPlacementKeepsWhoSharedIt() = runBlocking {
+        fake.pages[0] = page(2, false,
+            up(1, placement("p1", byteArrayOf(1), extra = ""","shared_by_user_id":"u2","shared_by_name":"Ben"""")),
+            up(2, placement("p2", byteArrayOf(2))))
+        engine.pull()
+        assertEquals("Ann", db.placements().get("p1")!!.senderName)
+        assertEquals("Ben", db.placements().get("p1")!!.sharedByName)
+        assertNull(db.placements().get("p2")!!.sharedByName)
+    }
+
+    @Test
     fun weatherIsPersistedAndClearedByNull() = runBlocking {
         val weather = """{"fetched_at":"2026-10-22T12:05:00Z","location":{"name":"Gent"},"current":{"temp_c":14.6,"code":2,"is_day":true},"daily":[]}"""
         fake.pages[0] = page(1, false, """{"seq":1,"type":"weather","weather":$weather}""")
@@ -59,6 +70,23 @@ class SyncEngineTest : SyncTestBase() {
         engine.pull()
         assertNull(db.syncState().get()!!.weatherJson)
         assertEquals(2L, db.syncState().get()!!.nextSeq)
+    }
+
+    @Test
+    fun calendarIsPersistedAndClearedByNull() = runBlocking {
+        val cal = """{"generated_at":"2026-10-22T12:00:00Z","timezone":"Europe/Brussels","window":{"from":"2026-09-22","to":"2026-11-21"},
+            "sources":[{"id":"s1","kind":"ics","name":"Family","color":"coral","status":"ok"}],
+            "events":[{"id":"ev-00000001","source_id":"s1","title":"Swimming","all_day":false,"start_at":"2026-10-22T14:30:00Z","end_at":"2026-10-22T15:30:00Z"}],
+            "countdowns":[]}"""
+        fake.pages[0] = page(1, false, """{"seq":1,"type":"calendar","calendar":$cal}""")
+        engine.pull()
+        val stored = app.kinframe.core.api.FrameCalendar.parse(db.syncState().get()!!.calendarJson)
+        assertEquals("Swimming", stored!!.events.single().title)
+        assertEquals("coral", stored.sources.single().color)
+        // The last calendar was removed on the server: `calendar: null` drops it.
+        fake.pages[1] = page(2, false, """{"seq":2,"type":"calendar","calendar":null}""")
+        engine.pull()
+        assertNull(db.syncState().get()!!.calendarJson)
     }
 
     @Test

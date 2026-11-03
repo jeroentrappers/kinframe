@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">Pieskarieties, lai atskaņotu</string>
+    <string name="settings_live_photos">Dzīvie foto</string>
+    <string name="live_photos_on">Atskaņot, kad parādās</string>
+    <string name="live_photos_tap">Atskaņot pēc pieskāriena</string>
+    <string name="live_photos_off">Tikai foto</string>
+</resources>

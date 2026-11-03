@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kalendář na celou obrazovku -->
+    <string name="calendar_today">Dnes</string>
+    <string name="calendar_tomorrow">Zítra</string>
+    <string name="calendar_view_month">Měsíc</string>
+    <string name="calendar_view_week">Týden</string>
+    <string name="calendar_view_four_day">4 dny</string>
+    <string name="calendar_week_number">Týden %1$d</string>
+    <string name="calendar_previous">Předchozí</string>
+    <string name="calendar_next">Další</string>
+    <string name="calendar_sync_now">Synchronizovat</string>
+    <string name="calendar_syncing">Synchronizace…</string>
+    <string name="calendar_close">Zavřít kalendář</string>
+    <string name="calendar_all_day">Celý den</string>
+    <string name="calendar_received">Přijaté události</string>
+    <string name="calendar_nothing">Nic naplánováno</string>
+    <string name="calendar_nothing_today">Dnes už nic dalšího naplánováno</string>
+    <string name="calendar_empty_title">Zatím žádné kalendáře</string>
+    <string name="calendar_empty_body">Přidejte rodinný kalendář v aplikaci nebo na webu kinframe, v části Kalendáře u tohoto rámečku. Zobrazit tu můžete libovolný počet kalendářů najednou.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">do %1$s</string>
+    <string name="calendar_from">od %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d další</item>
+        <item quantity="few">+%d další</item>
+        <item quantity="many">+%d dalších</item>
+        <item quantity="other">+%d dalších</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Odpočty -->
+    <string name="countdown_today">Dnes</string>
+    <string name="countdown_tomorrow">Zítra</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d den</item>
+        <item quantity="few">%d dny</item>
+        <item quantity="many">%d dne</item>
+        <item quantity="other">%d dní</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">za %d den</item>
+        <item quantity="few">za %d dny</item>
+        <item quantity="many">za %d dne</item>
+        <item quantity="other">za %d dní</item>
+    </plurals>
+
+    <!-- Podrobnosti události -->
+    <string name="event_sent_by">Odesílatel: %1$s</string>
+    <string name="event_repeats">Opakuje se</string>
+    <string name="event_countdown">Odpočítávat do této události</string>
+    <string name="event_countdown_hint">V prezentaci a nahoře v kalendáři</string>
+
+    <!-- Pozvánky -->
+    <string name="invitation_title">%1$s vám posílá událost</string>
+    <string name="invitation_body">Přidat ji do kalendáře tohoto rámečku?</string>
+    <string name="invitation_accept">Přidat do kalendáře</string>
+    <string name="invitation_decline">Odmítnout</string>
+    <string name="invitation_later">Teď ne</string>
+    <string name="invitation_pill_one">Událost od: %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d pozvánka</item>
+        <item quantity="few">%d pozvánky</item>
+        <item quantity="many">%d pozvánky</item>
+        <item quantity="other">%d pozvánek</item>
+    </plurals>
+
+    <!-- Rychlá nabídka -->
+    <string name="menu_calendar">Kalendář</string>
+
+    <!-- Nastavení -->
+    <string name="settings_calendar">Kalendář</string>
+    <string name="settings_calendar_open">Otevřít kalendář</string>
+    <string name="settings_calendar_view">Zobrazení kalendáře</string>
+    <string name="settings_calendar_start_today">Začínat dneškem</string>
+    <string name="settings_calendar_fade_past">Ztlumit minulé události</string>
+    <string name="settings_calendar_week_numbers">Čísla týdnů</string>
+    <string name="settings_calendar_sidebar">Kalendář vedle fotek</string>
+    <string name="settings_calendar_countdowns">Odpočty v prezentaci</string>
+    <string name="settings_calendar_timed">Zobrazovat kalendář v nastavených časech</string>
+    <string name="settings_calendar_timed_from">Od</string>
+    <string name="settings_calendar_timed_to">Do</string>
+    <string name="settings_calendar_timed_add">Přidat čas</string>
+    <string name="settings_calendar_timed_remove">Odebrat</string>
+    <string name="settings_calendar_sources">Kalendáře na tomto rámečku</string>
+    <string name="settings_calendar_sources_hint">Kalendáře se přidávají a spravují v aplikaci nebo na webu kinframe.</string>
+    <string name="calendar_status_ok">Aktuální</string>
+    <string name="calendar_status_syncing">Synchronizace…</string>
+    <string name="calendar_status_failed">Synchronizace se nezdařila</string>
+    <string name="calendar_status_auth_failed">Je třeba se přihlásit</string>
+    <string name="calendar_status_disabled">Vypnuto</string>
+</resources>

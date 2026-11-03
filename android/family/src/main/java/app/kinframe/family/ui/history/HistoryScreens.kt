@@ -59,6 +59,7 @@ import app.kinframe.family.history.Delivery
 import app.kinframe.family.history.FrameDelivery
 import app.kinframe.family.history.Stage
 import app.kinframe.family.send.OutboxProgress
+import app.kinframe.family.ui.LiveBadge
 import app.kinframe.family.send.OutboxSend
 import app.kinframe.family.send.OutboxState
 import app.kinframe.family.ui.ContentMaxWidth
@@ -73,6 +74,7 @@ import app.kinframe.family.ui.NoteTone
 import app.kinframe.family.ui.PageColumn
 import app.kinframe.family.ui.PrimaryButton
 import app.kinframe.family.ui.QuietButton
+import app.kinframe.family.ui.SecondaryButton
 import app.kinframe.family.ui.SectionTitle
 import app.kinframe.family.ui.SkeletonList
 import app.kinframe.family.ui.StagePill
@@ -170,6 +172,7 @@ fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard
                 Text(stringResource(R.string.notif_sending_title, o.frameNames.joinToString(", ")), style = Kin.type.bodyStrong, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val text = when {
                     o.state == OutboxState.FAILED -> stringResource(Problems.byCode(o.error) ?: R.string.outbox_failed)
+                    p != null && p.preparing -> stringResource(R.string.outbox_preparing, p.itemIndex + 1, p.itemCount, (p.fraction * 100).toInt())
                     p != null -> stringResource(R.string.outbox_uploading, p.itemIndex + 1, p.itemCount, (p.fraction * 100).toInt())
                     o.error == "network" -> stringResource(R.string.outbox_waiting_network)
                     else -> pluralStringResource(R.plurals.notif_sending_items, o.items.size, o.items.size)
@@ -205,6 +208,7 @@ fun SendCard(send: Send, onOpen: () -> Unit) {
                 Box(Modifier.weight(1f).aspectRatio(1f)) {
                     Thumb(item.thumbUrl, null, Modifier.fillMaxSize())
                     if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(22.dp), tint = Color.White)
+                    if (item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(4.dp))
                     if (i == 3 && send.items.size > 4) {
                         Box(Modifier.fillMaxSize().clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).background(Color.Black.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
                             Text("+${send.items.size - 3}", style = Kin.type.title, color = Color.White)
@@ -250,6 +254,12 @@ fun DeliveryRow(d: FrameDelivery, compact: Boolean) {
         if (!d.online && d.stage.rank < Stage.Delivered.rank && d.stage != Stage.Failed && !compact) {
             Text(stringResource(R.string.detail_offline_waiting), style = Kin.type.caption, color = c.inkFaint)
         }
+        if (d.sharedBy.isNotEmpty() && !compact) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(KinIcons.Share, null, Modifier.size(14.dp), tint = c.inkSoft)
+                Text(stringResource(R.string.shared_by, d.sharedBy.joinToString(", ")), style = Kin.type.caption, color = c.inkSoft)
+            }
+        }
         Reactions(d.reactions, d.replies, d.frameName)
     }
 }
@@ -293,6 +303,8 @@ fun SendDetailScreen(
     onSaveCaption: () -> Unit,
     onCancelEdit: () -> Unit,
     onUnsend: () -> Unit,
+    /** "Share to another frame" for the whole send, or one item (by id); null when there is nowhere to share to. */
+    onShare: ((List<String>) -> Unit)? = null,
 ) {
     val c = Kin.colors
     var confirm by rememberSaveable { mutableStateOf(false) }
@@ -316,6 +328,10 @@ fun SendDetailScreen(
                         }
                     }
                     state.error?.let { Note(stringResource(it), tone = NoteTone.Danger) }
+                    val shareable = send.items.filter { it.status != "failed" }.map { it.id }
+                    if (!state.unsent && onShare != null && shareable.isNotEmpty()) {
+                        SecondaryButton(stringResource(R.string.share_action), { onShare(shareable) }, icon = KinIcons.Share)
+                    }
                     if (!state.unsent) QuietButton(stringResource(R.string.detail_unsend), { confirm = true }, danger = true)
                 }
             }
@@ -345,8 +361,13 @@ private fun ItemRow(
     val c = Kin.colors
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(Modifier.size(84.dp)) {
-            Thumb(item.thumbUrl, stringResource(if (item.kind == MediaKind.VIDEO) R.string.a11y_video else R.string.a11y_photo), Modifier.fillMaxSize())
+            Thumb(item.thumbUrl, stringResource(when {
+                item.kind == MediaKind.VIDEO -> R.string.a11y_video
+                item.isLive -> R.string.a11y_live_photo
+                else -> R.string.a11y_photo
+            }), Modifier.fillMaxSize())
             if (item.kind == MediaKind.VIDEO) Icon(KinIcons.Play, null, Modifier.align(Alignment.Center).size(24.dp), tint = Color.White)
+            if (item.isLive) LiveBadge(Modifier.align(Alignment.TopStart).padding(6.dp))
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (state.editingItem == item.id) {

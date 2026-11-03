@@ -27,6 +27,12 @@ export type ReplyPreset = Schemas['ReplyPreset'];
 export type FrameCommandType = Schemas['FrameCommand']['type'];
 export type Album = Schemas['Album'];
 export type AlbumSchedule = NonNullable<Album['schedule']>;
+export type CalendarSource = Schemas['CalendarSource'];
+export type CalendarSourceCreate = Schemas['CalendarSourceCreate'];
+export type CalendarTestResult = Schemas['CalendarTestResult'];
+export type CalendarView = Schemas['CalendarView'];
+export type CalendarSchedule = Schemas['CalendarSchedule'];
+export type EventInvitation = Schemas['EventInvitation'];
 
 /** An RFC 9457 problem (or a network failure, code `network`). */
 export class ApiError extends Error {
@@ -35,8 +41,17 @@ export class ApiError extends Error {
 	readonly title: string;
 	readonly detail?: string;
 	readonly retryAfter?: number;
+	/** Field-level validation errors (422). */
+	readonly errors?: Problem['errors'];
 
-	constructor(status: number, code: ProblemCode | 'network', title: string, detail?: string, retryAfter?: number) {
+	constructor(
+		status: number,
+		code: ProblemCode | 'network',
+		title: string,
+		detail?: string,
+		retryAfter?: number,
+		errors?: Problem['errors']
+	) {
 		super(detail ?? title);
 		this.name = 'ApiError';
 		this.status = status;
@@ -44,6 +59,7 @@ export class ApiError extends Error {
 		this.title = title;
 		this.detail = detail;
 		this.retryAfter = retryAfter;
+		this.errors = errors;
 	}
 
 	static fromResponse(response: Response, body: unknown): ApiError {
@@ -66,7 +82,8 @@ export class ApiError extends Error {
 			p.code ?? fallback,
 			p.title ?? response.statusText,
 			p.detail,
-			Number.isFinite(retry) && retry > 0 ? retry : undefined
+			Number.isFinite(retry) && retry > 0 ? retry : undefined,
+			Array.isArray(p.errors) ? p.errors : undefined
 		);
 	}
 }

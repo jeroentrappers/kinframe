@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">原況</string>
+    <string name="live_tap_hint">點一下播放</string>
+    <string name="settings_live_photos">原況照片</string>
+    <string name="live_photos_on">顯示時播放</string>
+    <string name="live_photos_tap">點一下時播放</string>
+    <string name="live_photos_off">僅照片</string>
+</resources>

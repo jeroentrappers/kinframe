@@ -55,6 +55,8 @@
     <string name="status_card_offline_body">Çerçevedeki fotoğraflar gösterilmeye devam eder. Yenileri, bağlantı gelir gelmez ulaşır.</string>
     <string name="status_card_server_title">Fotoğraf sunucusuna ulaşılamıyor</string>
     <string name="status_card_server_body">Wi-Fi çalışıyor ama sunucu yanıt vermiyor. Yeni fotoğraflar, sunucu geri geldiğinde ulaşır.</string>
+    <string name="status_card_clock_title">Saat ayarlanıyor</string>
+    <string name="status_card_clock_body">Çerçeve yeniden başladı ve saati yanlış. Birazdan internetten kendini ayarlayacak.</string>
     <string name="status_card_portal_title">Bu Wi-Fi oturum açmanızı istiyor</string>
     <string name="status_card_portal_body">Çerçeveyi internete bağlamak için ağın oturum açma sayfasını açın.</string>
     <string name="status_card_portal_action">Oturum aç</string>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">Hoje</string>
+    <string name="calendar_tomorrow">Amanhã</string>
+    <string name="calendar_view_month">Mês</string>
+    <string name="calendar_view_week">Semana</string>
+    <string name="calendar_view_four_day">4 dias</string>
+    <string name="calendar_week_number">Semana %1$d</string>
+    <string name="calendar_previous">Anterior</string>
+    <string name="calendar_next">Próximo</string>
+    <string name="calendar_sync_now">Sincronizar agora</string>
+    <string name="calendar_syncing">Sincronizando…</string>
+    <string name="calendar_close">Fechar agenda</string>
+    <string name="calendar_all_day">Dia inteiro</string>
+    <string name="calendar_received">Eventos recebidos</string>
+    <string name="calendar_nothing">Nada planejado</string>
+    <string name="calendar_nothing_today">Nada mais planejado para hoje</string>
+    <string name="calendar_empty_title">Nenhuma agenda ainda</string>
+    <string name="calendar_empty_body">Adicione uma agenda da família pelo app ou site do kinframe, nas agendas do porta-retrato. Aqui dá para mostrar quantas agendas você quiser juntas.</string>
+    <string name="calendar_time_range">%1$s – %2$s</string>
+    <string name="calendar_until">até %1$s</string>
+    <string name="calendar_from">a partir de %1$s</string>
+    <plurals name="calendar_more">
+        <item quantity="one">+%d outro</item>
+        <item quantity="many">+%d de outros</item>
+        <item quantity="other">+%d outros</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">Hoje</string>
+    <string name="countdown_tomorrow">Amanhã</string>
+    <plurals name="countdown_days">
+        <item quantity="one">%d dia</item>
+        <item quantity="many">%d dias</item>
+        <item quantity="other">%d dias</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="one">em %d dia</item>
+        <item quantity="many">em %d de dias</item>
+        <item quantity="other">em %d dias</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">Enviado por %1$s</string>
+    <string name="event_repeats">Repete</string>
+    <string name="event_countdown">Mostrar contagem regressiva</string>
+    <string name="event_countdown_hint">Na apresentação e no topo da agenda</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s enviou um evento para você</string>
+    <string name="invitation_body">Adicionar à agenda deste porta-retrato?</string>
+    <string name="invitation_accept">Adicionar à agenda</string>
+    <string name="invitation_decline">Recusar</string>
+    <string name="invitation_later">Agora não</string>
+    <string name="invitation_pill_one">Evento de %1$s</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="one">%d convite para evento</item>
+        <item quantity="many">%d de convites para eventos</item>
+        <item quantity="other">%d convites para eventos</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">Agenda</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">Agenda</string>
+    <string name="settings_calendar_open">Abrir agenda</string>
+    <string name="settings_calendar_view">Visualização da agenda</string>
+    <string name="settings_calendar_start_today">Começar por hoje</string>
+    <string name="settings_calendar_fade_past">Esmaecer eventos passados</string>
+    <string name="settings_calendar_week_numbers">Números das semanas</string>
+    <string name="settings_calendar_sidebar">Agenda ao lado das fotos</string>
+    <string name="settings_calendar_countdowns">Contagens regressivas na apresentação</string>
+    <string name="settings_calendar_timed">Mostrar a agenda em horários definidos</string>
+    <string name="settings_calendar_timed_from">De</string>
+    <string name="settings_calendar_timed_to">Até</string>
+    <string name="settings_calendar_timed_add">Adicionar horário</string>
+    <string name="settings_calendar_timed_remove">Remover</string>
+    <string name="settings_calendar_sources">Agendas neste porta-retrato</string>
+    <string name="settings_calendar_sources_hint">As agendas são adicionadas e gerenciadas pelo app ou site do kinframe.</string>
+    <string name="calendar_status_ok">Atualizada</string>
+    <string name="calendar_status_syncing">Sincronizando…</string>
+    <string name="calendar_status_failed">Não foi possível sincronizar</string>
+    <string name="calendar_status_auth_failed">É preciso entrar</string>
+    <string name="calendar_status_disabled">Desativada</string>
+</resources>

@@ -1,0 +1,611 @@
+package app.kinframe.frame.plugins
+
+import android.app.Application
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.dp
+import app.kinframe.core.design.Kin
+import app.kinframe.core.plugin.PluginView
+import app.kinframe.core.plugin.imageSources
+import app.kinframe.core.plugin.PluginViewParser
+import app.kinframe.core.plugin.ViewResult
+import app.kinframe.core.plugin.ui.PluginPalette
+import app.kinframe.core.plugin.ui.PluginViewContent
+import app.kinframe.core.plugin.ui.ViewForm
+import app.kinframe.frame.FakePhoto
+import app.kinframe.frame.Screenshots
+import app.kinframe.frame.weather.WeatherFixtures
+import app.kinframe.frame.weather.withStation
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.File
+
+/**
+ * Plugin views and the overlay / band layouts at the Denver's size (1280×800 mdpi, landscape and portrait), rendered to
+ * `frame/build/screenshots/plugins_*.png` for design review. Neutral drawn backgrounds only, no photos. Representative
+ * ones are copied to docs/plugins/.
+ */
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [34], application = Application::class, qualifiers = "w1280dp-h800dp-land-mdpi")
+class PluginScreenshotTest {
+    private val examples = File("../../docs/api/plugin-views/examples")
+
+    private fun view(name: String): PluginView = when (val r = PluginViewParser.parse(examples.resolve("$name.json").readText())) {
+        is ViewResult.Valid -> r.view
+        is ViewResult.Invalid -> error("$name: $r")
+    }
+
+    private val now = WeatherFixtures.nowMs
+    private val weather = WeatherFixtures.gent()
+
+    private fun stage(
+        name: String, layout: PluginLayoutConfig, vararg instances: InstanceState, detail: InstanceState? = null, detailView: PluginView? = null,
+        seed: Int = 0, pair: Boolean = false, weatherNow: app.kinframe.frame.weather.Weather? = weather,
+    ) =
+        Screenshots.shot("plugins_$name") {
+            androidx.compose.foundation.layout.BoxWithConstraints {
+                val w = constraints.maxWidth
+                val h = constraints.maxHeight
+                val img = androidx.compose.runtime.remember {
+                    if (!pair) placeholderPhoto(w, h, seed) else {
+                        // Two photos side by side as the slideshow renders them, at the photo area's size.
+                        val area = (BandGeometry.compute(w, h, 1f, layout.side) as? BandGeometry.Band)?.photo ?: PxRect(0, 0, w, h)
+                        pairPhoto(area.width, area.height, seed)
+                    }
+                }
+                PluginStage(
+                    layout, instances.toList(), "14:20", "Sunday 25 October", weatherNow, now, shortDate = "Sun\n25 Oct",
+                    photoImage = img, detail = detail, detailView = detailView,
+                ) {
+                    androidx.compose.foundation.Image(img, null, Modifier.fillMaxSize(), contentScale = androidx.compose.ui.layout.ContentScale.Crop)
+                }
+            }
+        }
+
+    /** A pair (two portrait photos on a landscape area, two landscape ones on a portrait area) with sender lines. */
+    private fun pairPhoto(w: Int, h: Int, seed: Int): androidx.compose.ui.graphics.ImageBitmap {
+        val landscape = w >= h
+        val dir = kotlin.io.path.createTempDirectory("pair").toFile()
+        fun file(i: Int): File {
+            val pw = if (landscape) 600 else 1200
+            val ph = if (landscape) 900 else 800
+            val f = File(dir, "p$i.png")
+            f.outputStream().use { placeholderPhoto(pw, ph, seed + i).asAndroidBitmap().compress(android.graphics.Bitmap.CompressFormat.PNG, 100, it) }
+            return f
+        }
+        val tiles = app.kinframe.frame.slideshow.Collage.cells(2, landscape).mapIndexed { i, cell ->
+            app.kinframe.frame.slideshow.SlideRenderer.TileRequest(
+                file(i), 0, null, null, cell,
+                label = listOf("Anna · Yesterday", "Line Van Gavere · via Frameo · 5 days ago")[i],
+                caption = "Autumn walk in the woods".takeIf { i == 1 },
+            )
+        }
+        return app.kinframe.frame.slideshow.SlideRenderer().renderTiles(tiles, w, h, 1f, app.kinframe.frame.slideshow.CornerReserve.None).asImageBitmap()
+    }
+
+    private val band = PluginLayoutConfig(PluginLayoutMode.Band, BandSide.Right)
+    private val overlay = PluginLayoutConfig(PluginLayoutMode.Overlay)
+
+    /** The rain radar in the band column and an overlay corner. */
+    @Test fun bandLandscapeRain() = stage(
+        "band_landscape_rain", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("sparkline-rain"), Slot.TopLeft), previewInstance("b", view("gauge-dial-using"), Slot.TopRight), seed = 3,
+    )
+
+    @Test fun overlayRain() = stage("overlay_rain", overlay, previewInstance("a", view("sparkline-rain"), Slot.TopRight), seed = 3)
+
+    @Test fun bandLandscapePaper() = stage(
+        "band_landscape_paper", band,
+        previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),
+    )
+
+    /** The Denver as used: a portrait pair, the band on the left over the photo's colours, the P1 dial in it. */
+    @Test fun bandLandscapePairLeft() = stage(
+        "band_landscape_pair_left", band.copy(side = BandSide.Left, background = BandBackground.Photo),
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), seed = 1, pair = true,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun bandPortraitPair() = stage(
+        "band_portrait_pair", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("value-returning"), Slot.TopRight),
+        seed = 2, pair = true,
+    )
+
+    @Test fun bandLandscapePhotoLeft() = stage(
+        "band_landscape_photo_left", band.copy(side = BandSide.Left, background = BandBackground.Photo),
+        previewInstance("a", view("value-returning"), Slot.TopLeft), previewInstance("b", view("gauge-car"), Slot.TopRight), seed = 1,
+    )
+
+    @Test fun bandLandscapeFiveNodes() = stage(
+        "band_landscape_flow5", band,
+        previewInstance("a", view("flow-five-nodes"), Slot.TopLeft), seed = 3,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun bandPortraitPaper() = stage(
+        "band_portrait_paper", band,
+        previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),
+        seed = 2,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun bandPortraitPhoto() = stage(
+        "band_portrait_photo", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("stack-car"), Slot.TopLeft), previewInstance("b", view("value-returning"), Slot.TopRight),
+        seed = 1,
+    )
+
+    @Test fun overlayLandscape() = stage(
+        "overlay_landscape", overlay,
+        previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("value-using"), Slot.TopRight),
+        previewInstance("c", view("text-charging"), Slot.TopRight),
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun overlayPortrait() = stage(
+        "overlay_portrait", overlay,
+        previewInstance("a", view("gauge-car"), Slot.TopLeft), previewInstance("b", view("value-returning"), Slot.TopRight),
+        seed = 3,
+    )
+
+    @Test fun overlayStaleAndUnavailable() = stage(
+        "overlay_stale_unavailable", overlay,
+        previewInstance("a", view("value-using"), Slot.TopLeft, InstanceStatus.Stale),
+        previewInstance("b", null, Slot.TopRight, InstanceStatus.Unavailable),
+        seed = 1,
+    )
+
+    @Test fun fourByThreeFallsBackToCorners() = Unit // geometry: BandGeometryTest.fourByThreeHasNoRoomAndUsesTheCorners
+
+    @Test fun detailCard() {
+        val p1 = previewInstance("p1", view("value-using"), Slot.TopRight, name = "HomeWizard P1 meter")
+        stage("detail_landscape", band, p1, detail = p1, detailView = view("detail-p1"))
+    }
+
+    @Test @Config(qualifiers = "w960dp-h540dp-land-xhdpi")
+    fun bandFullHd() = stage(
+        "band_1920x1080", band,
+        previewInstance("a", view("flow-solar-home-grid"), Slot.TopLeft), previewInstance("b", view("gauge-car"), Slot.TopRight),
+    )
+
+    // ------------------------------------------------------------------ weather station (§9.4)
+
+    private val station = "Weather station"
+
+    @Test fun p1DialBand() = stage(
+        "p1_dial_band", band,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+    )
+
+    @Test fun p1DialOverlay() = stage(
+        "p1_dial_overlay", overlay,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+        seed = 2,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun p1DialStrip() = stage(
+        "p1_dial_strip", band,
+        previewInstance("a", view("gauge-dial-using"), Slot.TopLeft), previewInstance("b", view("gauge-dial-returning"), Slot.TopRight),
+        seed = 1,
+    )
+
+
+    /** A gusty, wet afternoon at the owner's station, with a day of history: what the redesigned views show (§9.4). */
+    private fun stationReal(kind: String, withTemp: Boolean = true, rain: Boolean = true): PluginView {
+        val r = app.kinframe.frame.plugins.station.StationReading(
+            now, tempC = 12.8, humidityPct = 81.0, dewPointC = 9.6, feelsLikeC = 10.9, windMs = 4.2, windDirDeg = 239.0, gustMs = 8.9,
+            pressureHpa = 996.0, rainTodayMm = if (rain) 6.4 else 0.0, rainRateMmH = if (rain) 1.8 else 0.0, solarWm2 = 144.0, uvIndex = 1.0,
+            todayMinC = 7.9, todayMaxC = 14.1,
+        )
+        val h = app.kinframe.frame.plugins.station.StationHistory()
+        for (i in 0 until 24 * 12) {
+            val at = now - (24 * 12 - i) * 300_000L
+            val x = i / (24.0 * 12)
+            h.add(app.kinframe.frame.plugins.station.StationReading(at, tempC = 10.5 + 3.5 * kotlin.math.sin((x - 0.25) * 2 * Math.PI), pressureHpa = 1004.0 - 8.0 * x))
+        }
+        val f = app.kinframe.core.plugin.PluginFormat(java.util.Locale.forLanguageTag("nl"), java.time.ZoneId.of("Europe/Brussels"))
+        val words = mapOf(
+            "temperature" to "Temperatuur", "humidity" to "Luchtvochtigheid", "wind" to "Wind", "gusts" to "rukwinden", "rain_today" to "Regen vandaag",
+            "pressure" to "Luchtdruk", "sunlight" to "Zonlicht", "dew_point" to "dauwpunt", "uv_index" to "UV-index", "feels_like" to "voelt als %1\$s",
+            "updated_now" to "Net bijgewerkt", "updated_ago" to "%1\$s geleden bijgewerkt", "compass_5" to "ZW",
+        )
+        val t: (String) -> String = { k -> words[k] ?: k }
+        val unit = app.kinframe.frame.plugins.station.WindUnit.Kmh
+        val v = app.kinframe.frame.plugins.station.StationViews
+        val j = when (kind) {
+            "rows" -> v.rows(r, h.tempTrend(), h.pressureTrend(), unit, f, t, withTemp)
+            "detail" -> v.detail(r, null, h, unit, f, t, now + 120_000L)
+            else -> v.compact(r, h.tempTrend(), unit, f, t, withTemp)
+        }
+        return when (val res = PluginViewParser.parse(j)) {
+            is ViewResult.Valid -> res.view
+            is ViewResult.Invalid -> error("$kind: $res")
+        }
+    }
+
+    @Test fun stationRedesignCorners() = stage(
+        "station_redesign_corners", overlay,
+        previewInstance("a", stationReal("compact"), Slot.TopLeft, name = station),
+        previewInstance("b", stationReal("rows"), Slot.TopRight, name = station),
+        seed = 3,
+    )
+
+    @Test fun stationRedesignBand() = stage(
+        "station_redesign_band", band,
+        previewInstance("a", stationReal("compact"), Slot.TopLeft, name = station),
+        previewInstance("b", stationReal("rows", rain = false), Slot.TopRight, name = station),
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationRedesignStrip() = stage(
+        "station_redesign_strip", band.copy(background = BandBackground.Photo),
+        previewInstance("a", stationReal("rows", withTemp = false), Slot.TopLeft, name = station),
+        seed = 1,
+    )
+
+    @Test fun stationRedesignDetail() {
+        val s = previewInstance("ws", stationReal("compact"), Slot.TopLeft, name = station)
+        stage("station_redesign_detail", overlay, s, detail = s, detailView = stationReal("detail"), seed = 3)
+    }
+
+    @Test fun stationCorners() = stage(
+        "station_overlay_landscape", overlay,
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+        seed = 3,
+    )
+
+    /** A station reading as the widget renders it, with or without its temperature (§9.4: the forecast shows it). */
+    private fun stationView(rows: Boolean, withTemp: Boolean): PluginView {
+        val r = app.kinframe.frame.plugins.station.StationReading(
+            now, tempC = 10.3, humidityPct = 68.0, windMs = 0.9, windDirDeg = 239.0, pressureHpa = 995.6, rainTodayMm = 15.1, solarWm2 = 0.0, uvIndex = 0.0,
+        )
+        val f = app.kinframe.core.plugin.PluginFormat(java.util.Locale.forLanguageTag("nl"), java.time.ZoneId.of("Europe/Brussels"))
+        val t: (String) -> String = { k -> mapOf("temperature" to "Temperatuur", "humidity" to "Luchtvochtigheid", "wind" to "Wind", "rain_today" to "Regen vandaag", "pressure" to "Luchtdruk", "sunlight" to "Zonlicht", "dew_point" to "Dauwpunt", "compass_5" to "ZW")[k] ?: k }
+        val j = if (rows) app.kinframe.frame.plugins.station.StationViews.rows(r, null, null, app.kinframe.frame.plugins.station.WindUnit.Kmh, f, t, withTemp)
+        else app.kinframe.frame.plugins.station.StationViews.compact(r, null, app.kinframe.frame.plugins.station.WindUnit.Kmh, f, t, withTemp)
+        return (PluginViewParser.parse(j) as ViewResult.Valid).view
+    }
+
+    /** Forecast and station both on: the clock block shows the station's 10,3° with the forecast's sky; the widget has no temperature. */
+    @Test fun weatherBothOn() = stage(
+        "weather_both_on", band.copy(side = BandSide.Right, background = BandBackground.Photo),
+        previewInstance("a", stationView(rows = true, withTemp = false), Slot.TopLeft, name = station),
+        weatherNow = weather.withStationNow(10.3), pair = true, seed = 2,
+    )
+
+    /** Only the station: no forecast weather in the clock block; the widget carries the temperature. */
+    @Test fun weatherStationOnly() = stage(
+        "weather_station_only", band.copy(side = BandSide.Right, background = BandBackground.Photo),
+        previewInstance("a", stationView(rows = true, withTemp = true), Slot.TopLeft, name = station),
+        weatherNow = null, pair = true, seed = 2,
+    )
+
+    /** Both on, compact style: humidity leads, the wind is its label. */
+    @Test fun weatherBothOnCompact() = stage(
+        "weather_both_on_compact", band,
+        previewInstance("a", stationView(rows = false, withTemp = false), Slot.TopLeft, name = station),
+        weatherNow = weather.withStationNow(10.3),
+    )
+
+    private fun app.kinframe.frame.weather.Weather.withStationNow(c: Double) = withStation(StationNow(c, now), now)
+
+    @Test fun stationBandColumn() = stage(
+        "station_band_column", band,
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationBandStrip() = stage(
+        "station_band_strip", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("weather-station-compact"), Slot.TopLeft, name = station),
+        previewInstance("b", view("weather-station-rows"), Slot.TopRight, name = station),
+        seed = 1,
+    )
+
+    @Test fun stationDetail() {
+        val s = previewInstance("ws", view("weather-station-compact"), Slot.TopLeft, name = station)
+        stage("station_detail", overlay, s, detail = s, detailView = view("detail-weather-station"), seed = 3)
+    }
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun stationDetailPortrait() {
+        val s = previewInstance("ws", view("weather-station-compact"), Slot.TopLeft, name = station)
+        stage("station_detail_portrait", band, s, detail = s, detailView = view("detail-weather-station"), seed = 2)
+    }
+
+    /** Every example in every form: corner and detail (on photo and on paper) and the two compact band forms. */
+    @Test @Config(qualifiers = "w1280dp-h2500dp-port-mdpi")
+    fun gallery() = Screenshots.shot("plugins_gallery") {
+        val names = examples.list()!!.filter { it.endsWith(".json") && !it.startsWith("detail-") }.sorted().map { it.removeSuffix(".json") }
+        Row(Modifier.fillMaxSize()) {
+            Box(Modifier.width(560.dp).fillMaxHeight()) {
+                FakePhoto(1)
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
+                    names.forEach { PluginViewContent(view(it), ViewForm.Corner, PluginPalette.OnPhoto) }
+                }
+            }
+            Column(Modifier.width(96.dp).fillMaxHeight().background(Kin.colors.paper).padding(vertical = 20.dp, horizontal = 6.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
+                Label("column")
+                names.forEach { PluginViewContent(view(it), ViewForm.Column, PluginPalette.onPaper(Kin.colors)) }
+            }
+            Column(Modifier.fillMaxSize().background(Color(0xFF2B2A33)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Label("strip", Color.White)
+                names.forEach { Box(Modifier.height(64.dp), contentAlignment = Alignment.CenterStart) { PluginViewContent(view(it), ViewForm.Strip, PluginPalette.OnPhoto) } }
+            }
+        }
+    }
+
+    @Test fun detailForms() = Screenshots.shot("plugins_detail_forms") {
+        Row(Modifier.fillMaxSize().background(Kin.colors.surface).padding(28.dp), horizontalArrangement = Arrangement.spacedBy(40.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(26.dp)) {
+                listOf("detail-p1").forEach { PluginViewContent(view(it), ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(26.dp)) {
+                listOf("flow-five-nodes", "rows-energy", "sparkline-day").forEach { PluginViewContent(view(it), ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+            }
+        }
+    }
+
+    @Composable
+    private fun Label(t: String, c: Color = Kin.colors.inkSoft) = Text(t, style = Kin.type.caption, color = c)
+
+    // ---------------------------------------------------------------------------- JavaScript plugins (step 2)
+
+    /** Views straight from the bundled plugins, run in QuickJS against the fake Home Assistant and fixtures. */
+    private fun jsViews(plugin: String, fixture: String, vararg settings: Pair<String, Any>, prepare: (app.kinframe.frame.plugins.js.FakeHomeAssistant) -> Unit = {}): Pair<PluginView, PluginView> =
+        kotlinx.coroutines.runBlocking {
+            val ha = app.kinframe.frame.plugins.js.FakeHomeAssistant(java.io.File("../../plugins/$plugin/fixtures/$fixture"))
+            prepare(ha)
+            val map = mapOf("base_url" to kotlinx.serialization.json.JsonPrimitive(ha.baseUrl), "token" to kotlinx.serialization.json.JsonPrimitive(ha.token)) +
+                settings.associate { (k, v) ->
+                    k to if (v is List<*>) kotlinx.serialization.json.JsonArray(v.map { kotlinx.serialization.json.JsonPrimitive(it as String) }) else kotlinx.serialization.json.JsonPrimitive(v.toString())
+                }
+            val kit = app.kinframe.frame.plugins.js.JsPluginKit(app.kinframe.frame.plugins.js.JsPluginKit.plugin(plugin), kotlinx.serialization.json.JsonObject(map), language = "en")
+            kit.now = java.time.Instant.parse("2026-10-25T20:00:00Z").toEpochMilli()
+            try { kit.view() to kit.detail() } finally { kit.close(); ha.close() }
+        }
+
+    private val energyKeys = arrayOf<Pair<String, Any>>(
+        "solar" to listOf("sensor.solis_s6_eh1p_total_pv_power_2", "sensor.omnik_hoofddak_inverter_omnik_hoofddak_current_power_production"),
+        "grid" to "sensor.p1_meter_vermogen", "battery" to "sensor.solis_s6_eh1p_battery_power_2",
+        "battery_soc" to "sensor.solis_s6_eh1p_battery_soc_2", "home" to "sensor.huisverbruik_vermogen", "ev" to "sensor.ev_laadvermogen_smartevse_w",
+    )
+
+    private fun energy(fixture: String) = jsViews("kinframe.ha-energy", fixture, *energyKeys)
+    private fun media() = jsViews("kinframe.ha-media", "states-playing.json", "entity" to "media_player.woonkamer")
+    private fun car(charging: Boolean) = jsViews("kinframe.ha-ev", "states.json", "prefix" to "ev3", "name" to "EV3") { ha ->
+        if (charging) { ha.set("binary_sensor.ev3_ev_battery_charge", "on"); ha.set("sensor.ev3_estimated_charge_duration", "95"); ha.set("sensor.ev3_ev_battery_level", "64") }
+    }
+
+    /** A stand-in album cover drawn here (no real artwork): soft bands and a circle. */
+    private fun albumArt(): androidx.compose.ui.graphics.ImageBitmap {
+        val b = android.graphics.Bitmap.createBitmap(300, 300, android.graphics.Bitmap.Config.ARGB_8888)
+        val c = android.graphics.Canvas(b)
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+        paint.shader = android.graphics.LinearGradient(0f, 0f, 300f, 300f, 0xFFE07A5F.toInt(), 0xFF3D405B.toInt(), android.graphics.Shader.TileMode.CLAMP)
+        c.drawRect(0f, 0f, 300f, 300f, paint)
+        paint.shader = null; paint.color = 0xCCF2CC8F.toInt()
+        c.drawCircle(200f, 110f, 60f, paint)
+        paint.color = 0x9981B29A.toInt()
+        c.drawRect(0f, 210f, 300f, 300f, paint)
+        return b.asImageBitmap()
+    }
+
+    private fun withArt(s: InstanceState, v: PluginView): InstanceState =
+        s.copy(images = v.imageSourcesDeep().associateWith { albumArt() })
+
+    private fun PluginView.imageSourcesDeep(): List<String> = imageSources()
+
+    @Test fun jsBandColumn() {
+        val (flow, _) = energy("states-sunny.json")
+        val (playing, _) = media()
+        stage(
+            "js_band_column", band.copy(side = BandSide.Left, background = BandBackground.Photo),
+            previewInstance("e", flow, Slot.TopLeft, name = "Energy flow"),
+            withArt(previewInstance("m", playing, Slot.TopRight, name = "Now playing"), playing), seed = 1, pair = true,
+        )
+    }
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun jsStrip() {
+        val (ev, _) = car(charging = true)
+        stage("js_strip", band, previewInstance("c", ev, Slot.TopLeft, name = "Car battery"), previewInstance("d", view("gauge-dial-today"), Slot.TopRight), seed = 2)
+    }
+
+    @Test fun jsCorners() {
+        val (flow, _) = energy("states-evening.json")
+        val (ev, _) = car(charging = false)
+        stage("js_corners", overlay, previewInstance("e", flow, Slot.TopLeft, name = "Energy flow"), previewInstance("c", ev, Slot.TopRight, name = "Car battery"), seed = 3)
+    }
+
+    @Test fun jsDetailMedia() {
+        val (playing, detail) = media()
+        val s = withArt(previewInstance("m", playing, Slot.TopRight, name = "Now playing"), detail)
+        stage("js_detail_media", band, s, detail = s, detailView = detail, seed = 2)
+    }
+
+    @Test fun jsDetailEnergy() {
+        val (flow, detail) = energy("states-sunny.json")
+        val s = previewInstance("e", flow, Slot.TopLeft, name = "Energy flow")
+        stage("js_detail_energy", overlay, s, detail = s, detailView = detail, seed = 0)
+    }
+
+    @Test fun jsDetailCar() {
+        val (ev, detail) = car(charging = true)
+        val s = previewInstance("c", ev, Slot.TopLeft, name = "Car battery")
+        stage("js_detail_car", overlay, s, detail = s, detailView = detail, seed = 1)
+    }
+
+    /**
+     * The HomeWizard device plugins (water meter, energy socket) against a fake device: [readings] of `GET /api/v1/data`
+     * 5 s apart (so the detail has a last hour), the widget and the detail of the last one.
+     */
+    private fun hwViews(plugin: String, readings: List<String>, state: String? = null, vararg settings: Pair<String, Any>): Pair<PluginView, PluginView> =
+        kotlinx.coroutines.runBlocking {
+            val dir = File("../../plugins/$plugin/fixtures")
+            val d = app.kinframe.frame.plugins.js.FakeHomeWizard(dir, dir.list()!!.first { it.startsWith("data") }, state)
+            val map = mapOf("host" to kotlinx.serialization.json.JsonPrimitive(d.host)) + settings.associate { (k, v) ->
+                k to if (v is Boolean) kotlinx.serialization.json.JsonPrimitive(v) else if (v is Number) kotlinx.serialization.json.JsonPrimitive(v) else kotlinx.serialization.json.JsonPrimitive(v.toString())
+            }
+            val kit = app.kinframe.frame.plugins.js.JsPluginKit(app.kinframe.frame.plugins.js.JsPluginKit.plugin(plugin), kotlinx.serialization.json.JsonObject(map), language = "en")
+            kit.now = java.time.Instant.parse("2026-10-25T19:00:00Z").toEpochMilli()
+            try {
+                var v: PluginView? = null
+                readings.forEach { r -> d.data = r; v = kit.view(); kit.now += 5_000 }
+                v!! to kit.detail()
+            } finally { kit.close(); d.close() }
+        }
+
+    /** A shower: the meter climbs by its flow, 5 s per reading. */
+    private fun shower(): List<String> {
+        var m3 = 512.30
+        return (0 until 60).map { i ->
+            val lpm = if (i < 20) 0.0 else 7.0 + (i % 5) * 0.3
+            m3 += lpm / 12 / 1000
+            """{"wifi_ssid":"Home","wifi_strength":78,"total_liter_m3":$m3,"active_liter_lpm":$lpm,"total_liter_offset_m3":0}"""
+        }
+    }
+
+    /** A washing machine heating, then turning: the socket's power and counter, 5 s per reading. */
+    private fun wash(): List<String> {
+        var kwh = 214.20
+        return (0 until 60).map { i ->
+            val w = if (i < 15) 3.0 else if (i < 40) 2050.0 + (i % 3) * 20 else 180.0 + (i % 4) * 40
+            kwh += w / 720 / 1000
+            """{"total_power_import_kwh":$kwh,"total_power_import_t1_kwh":$kwh,"active_power_w":$w,"active_power_l1_w":$w,"active_voltage_v":231.9,"active_current_a":${"%.2f".format(java.util.Locale.ROOT, w / 231.9)}}"""
+        }
+    }
+
+    @Test fun jsWaterInEveryForm() = everyForm("plugins_js_homewizard_water", listOf(
+        "water value" to hwViews("kinframe.homewizard-water", shower()),
+        "water gauge" to hwViews("kinframe.homewizard-water", shower(), null, "style" to "gauge", "typical_l" to 150),
+    ))
+
+    @Test fun jsSocketInEveryForm() = everyForm("plugins_js_homewizard_socket", listOf(
+        "socket" to hwViews("kinframe.homewizard-socket", wash(), "state-on.json", "label" to "Washing machine", "icon" to "washing-machine"),
+        "socket locked" to hwViews("kinframe.homewizard-socket", wash().take(1), "state-locked.json"),
+    ))
+
+    /** Each widget in the column, strip and corner forms, and its detail card. */
+    private fun everyForm(name: String, rows: List<Pair<String, Pair<PluginView, PluginView>>>) {
+        Screenshots.shot(name) {
+            Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                rows.forEach { (n, views) ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+                        Text(n, color = Color.White, modifier = Modifier.width(110.dp))
+                        Box(Modifier.width(80.dp).background(Kin.colors.paper).padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
+                            PluginViewContent(views.first, ViewForm.Column, PluginPalette.onPaper(Kin.colors))
+                        }
+                        Box(Modifier.width(240.dp).background(Kin.colors.paper).padding(8.dp)) { PluginViewContent(views.first, ViewForm.Strip, PluginPalette.onPaper(Kin.colors)) }
+                        Box(Modifier.width(240.dp).background(Color(0xFF5B6B5E)).padding(8.dp)) { PluginViewContent(views.first, ViewForm.Corner, PluginPalette.OnPhoto) }
+                        Box(Modifier.width(420.dp).background(Kin.colors.surface).padding(8.dp)) { PluginViewContent(views.second, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test fun jsDetailSocket() {
+        val (v, detail) = hwViews("kinframe.homewizard-socket", wash(), "state-on.json", "label" to "Washing machine", "icon" to "washing-machine")
+        val s = previewInstance("s", v, Slot.TopRight, name = "Energy socket")
+        stage("js_detail_socket", band, s, detail = s, detailView = detail, seed = 3)
+    }
+
+    @Test fun newComponentsInEveryForm() = Screenshots.shot("plugins_new_components") {
+        val names = listOf("gauge-dial-today", "progress-temperature-range", "flow-battery-ring", "image-album-art")
+        Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            names.forEach { n ->
+                val v = view(n)
+                val images = v.imageSourcesDeep().associateWith { albumArt() }
+                androidx.compose.runtime.CompositionLocalProvider(app.kinframe.core.plugin.ui.LocalPluginImages provides { src -> images[src] }) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.Top) {
+                        Text(n, color = Color.White, modifier = Modifier.width(150.dp))
+                        Box(Modifier.width(80.dp).background(Kin.colors.paper).padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
+                            PluginViewContent(v, ViewForm.Column, PluginPalette.onPaper(Kin.colors))
+                        }
+                        Box(Modifier.width(300.dp).background(Kin.colors.paper).padding(8.dp)) { PluginViewContent(v, ViewForm.Strip, PluginPalette.onPaper(Kin.colors)) }
+                        Box(Modifier.width(300.dp).background(Color(0xFF5B6B5E)).padding(8.dp)) { PluginViewContent(v, ViewForm.Corner, PluginPalette.OnPhoto) }
+                        Box(Modifier.width(380.dp).background(Kin.colors.surface).padding(8.dp)) { PluginViewContent(v, ViewForm.Detail, PluginPalette.onPaper(Kin.colors)) }
+                    }
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------- list, bars, quantity tones, decimals
+
+    private val additions = listOf("list-departures", "list-bin-days", "sparkline-prices-bars", "rows-utilities", "gauge-water-day", "value-temperature-decimals")
+
+    /** The §11.1 additions in every form: band column and strip on paper, the corner on a photo, the detail card. */
+    @Test @Config(qualifiers = "w1280dp-h1100dp-land-mdpi")
+    fun viewApiAdditions() = additionsSheet("plugins_view_api_additions", dark = false)
+
+    /** The same on the dark palette (the family app's dark mode, the frame's night look). */
+    @Test @Config(qualifiers = "w1280dp-h1100dp-land-mdpi")
+    fun viewApiAdditionsDark() = additionsSheet("plugins_view_api_additions_dark", dark = true)
+
+    private fun additionsSheet(name: String, dark: Boolean) = Screenshots.shot(name) {
+        val c = if (dark) app.kinframe.core.design.KinPalettes.dark else Kin.colors
+        val palette = PluginPalette.onPaper(c)
+        Column(Modifier.fillMaxSize().background(Color(0xFF1C1714)).padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            additions.forEach { n ->
+                val v = view(n)
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                    Text(n, color = Color.White, modifier = Modifier.width(120.dp))
+                    Box(Modifier.width(80.dp).background(c.paper).padding(vertical = 6.dp), contentAlignment = Alignment.TopCenter) {
+                        PluginViewContent(v, ViewForm.Column, palette)
+                    }
+                    Box(Modifier.width(300.dp).height(64.dp).background(c.paper).padding(8.dp), contentAlignment = Alignment.CenterStart) {
+                        PluginViewContent(v, ViewForm.Strip, palette)
+                    }
+                    Box(Modifier.width(320.dp).background(Color(0xFF5B6B5E)).padding(8.dp)) { PluginViewContent(v, ViewForm.Corner, PluginPalette.OnPhoto) }
+                    Box(Modifier.width(400.dp).background(c.surface).padding(8.dp)) { PluginViewContent(v, ViewForm.Detail, palette) }
+                }
+            }
+        }
+    }
+
+    @Test fun listAndPricesBand() = stage(
+        "list_prices_band", band,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight),
+    )
+
+    @Test fun listAndPricesOverlay() = stage(
+        "list_prices_overlay", overlay,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight), seed = 2,
+    )
+
+    @Test @Config(qualifiers = "w800dp-h1280dp-port-mdpi")
+    fun listAndPricesStrip() = stage(
+        "list_prices_strip", band,
+        previewInstance("a", view("list-departures"), Slot.TopLeft), previewInstance("b", view("sparkline-prices-bars"), Slot.TopRight), seed = 1,
+    )
+
+    @Test fun utilitiesBand() = stage(
+        "utilities_band", band.copy(background = BandBackground.Photo),
+        previewInstance("a", view("rows-utilities"), Slot.TopLeft), previewInstance("b", view("gauge-water-day"), Slot.TopRight), seed = 3,
+    )
+}

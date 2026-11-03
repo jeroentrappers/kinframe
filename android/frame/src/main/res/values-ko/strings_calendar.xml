@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Full-screen calendar -->
+    <string name="calendar_today">오늘</string>
+    <string name="calendar_tomorrow">내일</string>
+    <string name="calendar_view_month">월</string>
+    <string name="calendar_view_week">주</string>
+    <string name="calendar_view_four_day">4일</string>
+    <string name="calendar_week_number">%1$d주차</string>
+    <string name="calendar_previous">이전</string>
+    <string name="calendar_next">다음</string>
+    <string name="calendar_sync_now">지금 동기화</string>
+    <string name="calendar_syncing">동기화하는 중…</string>
+    <string name="calendar_close">캘린더 닫기</string>
+    <string name="calendar_all_day">종일</string>
+    <string name="calendar_received">받은 일정</string>
+    <string name="calendar_nothing">예정된 일정이 없어요</string>
+    <string name="calendar_nothing_today">오늘은 더 이상 일정이 없어요</string>
+    <string name="calendar_empty_title">아직 캘린더가 없어요</string>
+    <string name="calendar_empty_body">kinframe 앱이나 웹사이트의 액자 캘린더 메뉴에서 가족 캘린더를 추가하세요. 여러 캘린더를 여기에 함께 표시할 수 있어요.</string>
+    <string name="calendar_time_range">%1$s~%2$s</string>
+    <string name="calendar_until">%1$s까지</string>
+    <string name="calendar_from">%1$s부터</string>
+    <plurals name="calendar_more">
+        <item quantity="other">+%d개 더 보기</item>
+    </plurals>
+    <string name="calendar_rain">%1$d%%</string>
+
+    <!-- Countdowns -->
+    <string name="countdown_today">오늘</string>
+    <string name="countdown_tomorrow">내일</string>
+    <plurals name="countdown_days">
+        <item quantity="other">%d일</item>
+    </plurals>
+    <plurals name="countdown_in_days">
+        <item quantity="other">%d일 후</item>
+    </plurals>
+
+    <!-- Event details -->
+    <string name="event_sent_by">보낸 사람: %1$s</string>
+    <string name="event_repeats">반복</string>
+    <string name="event_countdown">카운트다운하기</string>
+    <string name="event_countdown_hint">슬라이드쇼와 캘린더 상단에 표시돼요</string>
+
+    <!-- Event invitations -->
+    <string name="invitation_title">%1$s님이 일정을 보냈어요</string>
+    <string name="invitation_body">이 액자의 캘린더에 추가할까요?</string>
+    <string name="invitation_accept">캘린더에 추가</string>
+    <string name="invitation_decline">거절</string>
+    <string name="invitation_later">나중에</string>
+    <string name="invitation_pill_one">%1$s님의 일정</string>
+    <plurals name="invitation_pill_many">
+        <item quantity="other">일정 초대 %d개</item>
+    </plurals>
+
+    <!-- Quick menu -->
+    <string name="menu_calendar">캘린더</string>
+
+    <!-- Settings -->
+    <string name="settings_calendar">캘린더</string>
+    <string name="settings_calendar_open">캘린더 열기</string>
+    <string name="settings_calendar_view">캘린더 보기</string>
+    <string name="settings_calendar_start_today">오늘부터 시작</string>
+    <string name="settings_calendar_fade_past">지난 일정 흐리게 표시</string>
+    <string name="settings_calendar_week_numbers">주 번호</string>
+    <string name="settings_calendar_sidebar">사진 옆에 캘린더 표시</string>
+    <string name="settings_calendar_countdowns">슬라이드쇼에 카운트다운 표시</string>
+    <string name="settings_calendar_timed">정해진 시간에 캘린더 표시</string>
+    <string name="settings_calendar_timed_from">시작</string>
+    <string name="settings_calendar_timed_to">종료</string>
+    <string name="settings_calendar_timed_add">시간 추가</string>
+    <string name="settings_calendar_timed_remove">삭제</string>
+    <string name="settings_calendar_sources">이 액자의 캘린더</string>
+    <string name="settings_calendar_sources_hint">캘린더는 kinframe 앱이나 웹사이트에서 추가하고 관리해요.</string>
+    <string name="calendar_status_ok">최신 상태</string>
+    <string name="calendar_status_syncing">동기화하는 중…</string>
+    <string name="calendar_status_failed">동기화할 수 없어요</string>
+    <string name="calendar_status_auth_failed">로그인이 필요해요</string>
+    <string name="calendar_status_disabled">꺼짐</string>
+</resources>

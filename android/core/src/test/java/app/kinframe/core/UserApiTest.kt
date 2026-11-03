@@ -126,6 +126,23 @@ class UserApiTest {
     }
 
     @Test
+    fun shareSendsTargetsAndParsesSkips() = runBlocking {
+        server.enqueue(json("""{"placements":[{"id":"n1","frame_id":"f2","item":{"id":"i1","kind":"photo","status":"ready","sender_id":"u1","sender_name":"Anna","created_at":"2026-10-22T10:00:00Z"},"status":"pending","hidden":false,"trashed":false,"shared_by_user_id":"u2","shared_by_name":"Ben"}],"skipped":[{"placement_id":"p1","frame_id":"f3","reason":"already_on_frame","existing_placement_id":"x"}]}"""))
+        val r = api.sharePlacements("f1", listOf("p1"), listOf("f2", "f3"), idempotencyKey = "k1")
+        assertEquals("Ben", r.placements.single().sharedByName)
+        assertEquals("Anna", r.placements.single().item.senderName)
+        assertEquals("f3", r.skipped.single().frameId)
+        val req = server.takeRequest()
+        assertEquals("/v1/frames/f1/placements:share", req.url.encodedPath)
+        assertEquals("k1", req.headers["Idempotency-Key"])
+        assertEquals("""{"placement_ids":["p1"],"frame_ids":["f2","f3"]}""", req.body!!.utf8())
+
+        server.enqueue(json("""{"placements":[],"skipped":[]}"""))
+        api.sharePlacements("f1", listOf("p1"), listOf("f2"), dryRun = true)
+        assertEquals("""{"placement_ids":["p1"],"frame_ids":["f2"],"dry_run":true}""", server.takeRequest().body!!.utf8())
+    }
+
+    @Test
     fun unlimitedInviteSendsNullMaxUses() = runBlocking {
         server.enqueue(json("""{"id":"i","token":"tok","url":"https://x/i/tok","expires_at":"2026-10-29T10:00:00Z"}"""))
         api.createInvite("f1", InviteCreate(maxUses = null, expiresInHours = 24), "k")

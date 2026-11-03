@@ -1,0 +1,18 @@
+{
+  "id": "kinframe.rain-radar",
+  "name": "Rain radar",
+  "version": "1.0.0",
+  "api": 1,
+  "author": { "name": "kinframe", "url": "https://github.com/jeroentrappers/kinframe" },
+  "license": "Apache-2.0",
+  "description": "Rain in the next two hours where the frame is, from the weather radar: when it starts, when it stops and how hard. Hides itself while it stays dry.",
+  "slots": ["top-left", "top-right"],
+  "refresh": { "min_seconds": 120, "default_seconds": 300, "stale_seconds": 1200 },
+  "permissions": { "http": ["https://gpsgadget.buienradar.nl", "https://api.open-meteo.com"], "location": true },
+  "default_visibility": "always",
+  "settings": [
+    { "key": "source", "type": "choice", "label": "Source", "options": ["auto", "buienradar", "open_meteo"], "default": "auto",
+      "help": "Buienradar's radar covers Belgium, the Netherlands and the borders; elsewhere Open-Meteo's 15-minute forecast is used." },
+    { "key": "show_dry", "type": "boolean", "label": "Also show when it stays dry", "default": false }
+  ]
+}

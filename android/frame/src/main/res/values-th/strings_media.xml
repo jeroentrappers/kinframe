@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="live_badge">Live</string>
+    <string name="live_tap_hint">แตะเพื่อเล่น</string>
+    <string name="settings_live_photos">ภาพถ่ายแบบ Live</string>
+    <string name="live_photos_on">เล่นเมื่อแสดง</string>
+    <string name="live_photos_tap">เล่นเมื่อแตะ</string>
+    <string name="live_photos_off">ภาพนิ่งเท่านั้น</string>
+</resources>

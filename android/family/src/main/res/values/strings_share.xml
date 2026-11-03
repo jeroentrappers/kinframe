@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "Share to another frame" (README §5.3): photos from a frame's library or the sent history on more frames, no re-upload. -->
+<resources>
+    <string name="share_action">Share to another frame</string>
+    <string name="share_action_short">Share</string>
+    <string name="share_hint">Puts the same photos on other frames you can send to. Nothing is uploaded again.</string>
+    <string name="share_already_there">Already there</string>
+    <string name="share_partly">Has some</string>
+    <string name="share_no_frames">There are no other frames you can send to.</string>
+    <string name="share_submit">Share</string>
+    <string name="share_done">Shared to %1$s</string>
+    <string name="share_nothing_new">Those frames already have these photos.</string>
+    <string name="share_undone">Sharing undone</string>
+    <string name="shared_by">Shared by %1$s</string>
+</resources>

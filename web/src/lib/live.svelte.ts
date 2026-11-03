@@ -1,4 +1,4 @@
-import { apiUrl, type JoinRequest, type ReplyPreset, type Send } from './api/client';
+import { apiUrl, type EventInvitation, type JoinRequest, type ReplyPreset, type Send } from './api/client';
 import { backoffDelay, type Reaction } from './logic';
 
 /** User websocket events (README §6.2). Unknown types are ignored. */
@@ -8,7 +8,8 @@ export type LiveEvent =
 	| { type: 'reply'; placement_id: string; frame_id: string; preset: ReplyPreset }
 	| { type: 'frame.status'; frame_id: string; online: boolean; last_seen_at: string | null }
 	| { type: 'join_request'; frame_id: string; request: JoinRequest }
-	| { type: 'membership.updated'; frame_id: string };
+	| { type: 'membership.updated'; frame_id: string }
+	| { type: 'event_invitation.decided'; frame_id: string; invitation: EventInvitation };
 
 type Handler = (e: LiveEvent) => void;
 

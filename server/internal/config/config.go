@@ -11,12 +11,16 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"net/mail"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jeroentrappers/kinframe/server/internal/shop"
 )
 
 type Config struct {
@@ -37,8 +41,11 @@ type Config struct {
 	OIDCAudience   string
 	OIDCJWKSURL    string
 	MobileClientID string
-	WebClientID    string
-	DevAuth        bool
+	// DesktopClientID is the Logto Native app of the desktop client; empty on
+	// servers bootstrapped before it existed.
+	DesktopClientID string
+	WebClientID     string
+	DevAuth         bool
 	// LogtoConfigFile is where `bootstrap-logto` writes the Logto client
 	// settings; values from it fill in OIDC settings not set in the env.
 	LogtoConfigFile string
@@ -79,10 +86,32 @@ type Config struct {
 	AppleTeamID   string
 	AppleBundleID string
 
+	// Community plugin registry mirror (docs/plugins.md §7). Empty URL disables it.
+	PluginRegistryURL      string // where index.json, its .sig and the bundles are
+	PluginRegistryKey      string // base64 SubjectPublicKeyInfo of the registry's ECDSA P-256 key
+	PluginRegistryInterval time.Duration
+
+	// Where weather-station uploads are passed on (Weather Underground's own receiver); empty: not passed on.
+	StationForwardURL string
+
 	// Weather (Open-Meteo). Empty WeatherURL disables weather and /v1/geocode.
 	WeatherURL     string
 	GeocodingURL   string
 	WeatherRefresh time.Duration
+
+	// Calendars (README §5.8). CalendarSync is the interval between syncs of
+	// a source; SecretsKey (optional) encrypts stored calendar credentials,
+	// else a key derived from SigningKey is used.
+	CalendarEnabled bool
+	CalendarSync    time.Duration
+	SecretsKey      []byte
+
+	// SMTP for the server's own mail (shop reservations); nil when
+	// KINFRAME_SMTP_HOST is unset. The same settings configure Logto's
+	// sign-in mails (bootstrap-logto).
+	SMTP *shop.SMTP
+	// Shop is the optional pre-order shop (KINFRAME_SHOP_FILE); nil = no shop.
+	Shop *shop.Config
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -141,6 +170,7 @@ func load(get func(string) string) (*Config, error) {
 		OIDCIssuer:         strings.TrimRight(env("KINFRAME_OIDC_ISSUER", ""), "/"),
 		OIDCJWKSURL:        env("KINFRAME_OIDC_JWKS_URL", ""),
 		MobileClientID:     env("KINFRAME_OIDC_MOBILE_CLIENT_ID", ""),
+		DesktopClientID:    env("KINFRAME_OIDC_DESKTOP_CLIENT_ID", ""),
 		WebClientID:        env("KINFRAME_OIDC_WEB_CLIENT_ID", ""),
 		DevAuth:            boolv("KINFRAME_DEV_AUTH"),
 		TrustProxy:         boolv("KINFRAME_TRUST_PROXY"),
@@ -168,6 +198,12 @@ func load(get func(string) string) (*Config, error) {
 		FrameReleasesToken:    env("KINFRAME_FRAME_RELEASES_GITHUB_TOKEN", ""),
 		FrameReleasesDir:      env("KINFRAME_FRAME_RELEASES_DIR", ""),
 		FrameReleasesInterval: time.Duration(intv("KINFRAME_FRAME_RELEASES_POLL_MINUTES", 30)) * time.Minute,
+
+		PluginRegistryURL:      env("KINFRAME_PLUGIN_REGISTRY_URL", DefaultPluginRegistryURL),
+		PluginRegistryKey:      env("KINFRAME_PLUGIN_REGISTRY_KEY", DefaultPluginRegistryKey),
+		PluginRegistryInterval: time.Duration(intv("KINFRAME_PLUGIN_REGISTRY_POLL_MINUTES", 60)) * time.Minute,
+
+		StationForwardURL: env("KINFRAME_STATION_FORWARD_URL", "http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php"),
 	}
 	c.AppleTeamID = env("KINFRAME_APPLE_TEAM_ID", "")
 	c.AppleBundleID = env("KINFRAME_APPLE_BUNDLE_ID", "app.kinframe.family")
@@ -177,6 +213,20 @@ func load(get func(string) string) (*Config, error) {
 	switch strings.ToLower(env("KINFRAME_WEATHER", "on")) {
 	case "0", "off", "false", "no":
 		c.WeatherURL, c.GeocodingURL = "", ""
+	}
+	c.CalendarSync = time.Duration(intv("KINFRAME_CALENDAR_SYNC_MINUTES", 15)) * time.Minute
+	c.CalendarEnabled = true
+	switch strings.ToLower(env("KINFRAME_CALENDAR", "on")) {
+	case "0", "off", "false", "no":
+		c.CalendarEnabled = false
+	}
+	if c.CalendarSync < 5*time.Minute {
+		errs = append(errs, errors.New("KINFRAME_CALENDAR_SYNC_MINUTES must be at least 5"))
+	}
+	if sk, err := parseKey(env("KINFRAME_SECRETS_KEY", "")); err != nil {
+		errs = append(errs, fmt.Errorf("KINFRAME_SECRETS_KEY: %w", err))
+	} else {
+		c.SecretsKey = sk
 	}
 	if c.WeatherRefresh < 15*time.Minute {
 		errs = append(errs, errors.New("KINFRAME_WEATHER_REFRESH_MINUTES must be at least 15"))
@@ -191,6 +241,25 @@ func load(get func(string) string) (*Config, error) {
 	if c.FrameReleasesInterval < time.Minute {
 		errs = append(errs, errors.New("KINFRAME_FRAME_RELEASES_POLL_MINUTES must be at least 1"))
 	}
+	if host := env("KINFRAME_SMTP_HOST", ""); host != "" {
+		c.SMTP = &shop.SMTP{Host: host, Port: intv("KINFRAME_SMTP_PORT", 587), User: env("KINFRAME_SMTP_USER", ""),
+			Password: get("KINFRAME_SMTP_PASSWORD"), From: env("KINFRAME_SMTP_FROM", "")}
+		if a, err := mail.ParseAddress(c.SMTP.From); err != nil || a.Address == "" {
+			errs = append(errs, errors.New("KINFRAME_SMTP_FROM must be an email address when KINFRAME_SMTP_HOST is set"))
+		}
+		if c.SMTP.Port <= 0 || c.SMTP.Port > 65535 {
+			errs = append(errs, fmt.Errorf("KINFRAME_SMTP_PORT: invalid port %d", c.SMTP.Port))
+		}
+	}
+	if f := env("KINFRAME_SHOP_FILE", ""); f != "" {
+		if c.Shop, err = shop.Load(f, c.ServerName); err != nil {
+			errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: %w", err))
+		} else if c.Shop != nil {
+			if u, err := url.Parse(c.PublicURL); err == nil && c.Shop.IsStorefront(u.Hostname()) {
+				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: domains must not include the app's own host %q (KINFRAME_PUBLIC_URL)", u.Hostname()))
+			}
+		}
+	}
 	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
 		errs = append(errs, err)
 	}
@@ -202,6 +271,7 @@ func load(get func(string) string) (*Config, error) {
 		c.OIDCIssuer = cmp.Or(c.OIDCIssuer, strings.TrimRight(lf.Issuer, "/"))
 		c.WebClientID = cmp.Or(c.WebClientID, lf.WebClientID)
 		c.MobileClientID = cmp.Or(c.MobileClientID, lf.MobileClientID)
+		c.DesktopClientID = cmp.Or(c.DesktopClientID, lf.DesktopClientID)
 		c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", lf.APIResource)
 	}
 	c.OIDCAudience = cmp.Or(c.OIDCAudience, env("KINFRAME_OIDC_AUDIENCE", c.APIURL()))
@@ -286,10 +356,11 @@ func (c *Config) AppleAppIDs() []string {
 // LogtoFile is the Logto client configuration written by `bootstrap-logto`
 // and served in discovery (/.well-known/kinframe).
 type LogtoFile struct {
-	Issuer         string `json:"issuer"`
-	WebClientID    string `json:"web_client_id"`
-	MobileClientID string `json:"mobile_client_id"`
-	APIResource    string `json:"api_resource"`
+	Issuer          string `json:"issuer"`
+	WebClientID     string `json:"web_client_id"`
+	MobileClientID  string `json:"mobile_client_id"`
+	DesktopClientID string `json:"desktop_client_id,omitempty"`
+	APIResource     string `json:"api_resource"`
 }
 
 // DefaultLogtoConfigFile is the bootstrap output location inside the data dir.
@@ -349,3 +420,10 @@ func devKey(dataDir string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+// The public community plugin registry and its signing key (public; the private key is only in the registry's CI
+// and the operator's vault). Self-hosters can point at their own registry with their own key.
+const (
+	DefaultPluginRegistryURL = "https://github.com/jeroentrappers/kinframe-plugins/releases/download/registry"
+	DefaultPluginRegistryKey = "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEt0Z/3gbK9h78oVewOrMVTasFYG4af/w1D3eXmNJk2gCHgw8rEsrammSJXnMu6VXjp0rkz87UXXVOzaAep6fB+Q=="
+)
