@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Builds KinframeKit/Resources/Localizable.xcstrings from the web catalogs (web/src/lib/i18n/en.ts, catalogs/nl.ts) plus the
-iOS-only strings in KinframeKit/Resources/ios-strings.json, so the apps share the web app's wording.
+iOS-only strings in KinframeKit/Resources/ios-strings*.json, so the apps share the web app's wording.
 
 Keys, {placeholders} and .one/.other plural keys are kept exactly as on the web. Run after changing either source:
     ios/tools/strings.py
@@ -28,7 +28,14 @@ def parse_ts(path: Path) -> dict:
 
 def main() -> int:
     web = {lang: parse_ts(WEB / f"{lang}.ts" if lang == "en" else WEB / "catalogs" / f"{lang}.ts") for lang in LANGS}
-    ios = json.loads((RES / "ios-strings.json").read_text(encoding="utf-8"))
+    # ios-strings.json, plus one ios-strings-<area>.json per feature area (fewer merge conflicts).
+    ios = {}
+    for path in [RES / "ios-strings.json", *sorted(RES.glob("ios-strings-*.json"))]:
+        for key, value in json.loads(path.read_text(encoding="utf-8")).items():
+            if key in ios:
+                print(f"{key} is in more than one ios-strings file", file=sys.stderr)
+                return 1
+            ios[key] = value
     strings = {}
     for key in sorted(set(web["en"]) | set(ios)):
         locs = {}
