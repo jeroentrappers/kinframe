@@ -97,6 +97,17 @@ struct AddFrameView: View {
                     .buttonStyle(.kf(.ghost, fill: true))
             }
 
+            // Converting an old frame needs a computer with a USB cable, so the phone points to the web page.
+            if let url = WebLinks.page("/convert", web: app.discovery?.web) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Image(systemName: "cable.connector").foregroundStyle(Palette.textMuted).accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L("add.convertHint")).font(.footnote).foregroundStyle(Palette.textMuted)
+                        Link(L("add.convertLink"), destination: url).font(.footnote.weight(.semibold))
+                    }
+                }
+                .padding(.top, 8)
+            }
         }
     }
 
