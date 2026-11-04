@@ -2,7 +2,8 @@ import { photoTarget, preparedName, type Size } from './plan';
 
 /**
  * Photo master preparation (photo-master-v1): decode with EXIF orientation applied, scale to ≤ 2560 px, encode
- * WebP q90 (JPEG q90 where the browser can't encode WebP). A canvas encode carries no metadata at all.
+ * WebP q90 (JPEG q90 where the browser can't encode WebP). A canvas encode carries no metadata at all. When the
+ * browser can't decode the file (HEIC outside Safari, TIFF…), the worker falls back to WebAssembly (wasmPhoto.ts).
  *
  * The platform pieces are injected so this runs in a Web Worker (OffscreenCanvas) and in unit tests (fakes).
  */

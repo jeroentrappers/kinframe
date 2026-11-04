@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { compose, type DraftItem } from '$lib/compose.svelte';
 	import { tm } from '$lib/i18n/media';
-	import { discovery } from '$lib/discovery.svelte';
-	import { CAPTION_MAX, captionRemaining, formatBytes, formatDuration } from '$lib/format';
+	import { CAPTION_MAX, captionRemaining, formatDuration } from '$lib/format';
 	import { coverPosition } from '$lib/logic';
 	import { isTrimmed, keptSeconds } from '$lib/parity';
+	import { issueText } from '$lib/issueText';
 	import { problemMessage } from '$lib/problem';
-	import { i18n, t } from '$lib/i18n/index.svelte';
+	import { t } from '$lib/i18n/index.svelte';
 	import Icon from './Icon.svelte';
 
 	let {
@@ -24,13 +24,7 @@
 	const pos = $derived(coverPosition(item.focal, aspect, 1));
 	const pct = $derived(item.bytes ? Math.min(100, Math.round((item.uploaded / item.bytes) * 100)) : 0);
 	const prepPct = $derived(Math.round(item.prepProgress * 100));
-	const issueText = $derived(
-		item.issue === 'too_large'
-			? t('send.issueTooLarge', { max: formatBytes(discovery.limits.max_upload_bytes, i18n.tag) })
-			: item.issue === 'video_too_long'
-				? t('send.issueTooLong', { max: formatDuration(discovery.limits.max_video_seconds) })
-				: null
-	);
+	const issue = $derived(item.issue ? issueText(item.issue) : null);
 </script>
 
 <article class="draft" class:has-issue={item.issue} class:uploading={item.state === 'uploading'}>
@@ -83,10 +77,12 @@
 			</div>
 		{/if}
 	</div>
-	{#if issueText}
-		<p class="issue" role="alert"><Icon name="alert" size={15} />{issueText}</p>
+	{#if issue}
+		<p class="issue" role="alert"><Icon name="alert" size={15} />{issue}</p>
 	{:else if item.state === 'error'}
 		<p class="issue" role="alert"><Icon name="alert" size={15} />{problemMessage(item.error)}</p>
+	{:else if item.kind === 'video' && item.includeAudio && item.noSound}
+		<p class="note" role="status"><Icon name="volumeOff" size={15} />{t('send.noSoundNote')}</p>
 	{/if}
 	<div class="caption">
 		<label class="visually-hidden" for="cap-{item.key}">{t('send.captionFor', { n: index + 1 })}</label>
@@ -327,6 +323,14 @@
 		font-size: 0.8rem;
 		color: var(--danger);
 		font-weight: 600;
+		padding: 0 4px;
+	}
+	.note {
+		display: flex;
+		align-items: flex-start;
+		gap: 6px;
+		font-size: 0.8rem;
+		color: var(--text-muted);
 		padding: 0 4px;
 	}
 	.caption {

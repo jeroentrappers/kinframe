@@ -13,10 +13,11 @@ import {
 } from './logic';
 import { probeImage, probeVideo, sha256Hex } from './media';
 import { defaultTrim, isTrimmed, keptSeconds, trimForApi, type Trim } from './parity';
-import { canPrepareVideo, preparePhotoFile, prepareVideoFile, type PreparedFile, type VideoJob } from './prep/client';
+import { issueText } from './issueText';
+import { preparePhotoFile, prepareVideoFile, probeVideoFile, type PreparedFile, type PreparedVideo, type VideoInfo, type VideoJob } from './prep/client';
 import { pairLive } from './prep/live';
 import { splitMotionPhotoFile } from './prep/motionPhoto';
-import { MAX_MOTION_PHOTO_BYTES, MAX_MOTION_S } from './prep/plan';
+import { MAX_MOTION_PHOTO_BYTES, MAX_MOTION_S, chooseVideoUpload, videoWithinLimits } from './prep/plan';
 import { sendItemBody } from './prep/sendItem';
 import { PARALLEL_UPLOADS, uploadFile, type UploadHandle } from './upload';
 
@@ -27,6 +28,10 @@ export interface LiveClip {
 	split: boolean;
 	prepared: PreparedFile | null;
 	uploadId: string | null;
+	/** What this browser can do with the clip (probe); null until known or when it can't be read. */
+	info: VideoInfo | null;
+	/** The clip can't be converted here and is over the limits: send the still only, or nothing. */
+	unpreparable: boolean;
 }
 
 export interface DraftItem {
@@ -62,6 +67,12 @@ export interface DraftItem {
 	/** Settings the prepared video was made with; a change re-prepares it. */
 	preparedFor: string | null;
 	capturedAt: string | null;
+	/** Videos: size, frame rate and what this browser can do with it (probe); null until known or unreadable. */
+	video: VideoInfo | null;
+	/** Preparation can't make the master and the original is over the limits (never uploaded as it is). */
+	prepIssue: ItemIssue | null;
+	/** Videos: the sound can't be encoded in this browser, so the master will be muted. */
+	noSound: boolean;
 }
 
 let seq = 0;
@@ -77,6 +88,8 @@ class Compose {
 	#handles = new Map<string, UploadHandle>();
 	#videoJobs = new Map<string, VideoJob>();
 	#photoPrep = new Map<string, Promise<void>>();
+	/** Each item's probe (size, Live clip, what this browser can do with it); sending waits for it. */
+	#probes = new Map<string, Promise<void>>();
 	#sendKey: string | null = null;
 	#lastBody = '';
 
@@ -141,15 +154,18 @@ class Compose {
 				prepProgress: 0,
 				uploadId: null,
 				error: null,
-				live: clip ? { file: clip, split: false, prepared: null, uploadId: null } : null,
+				live: clip ? { file: clip, split: false, prepared: null, uploadId: null, info: null, unpreparable: false } : null,
 				sendLive: true,
 				prepared: null,
 				preparedFor: null,
-				capturedAt: null
+				capturedAt: null,
+				video: null,
+				prepIssue: null,
+				noSound: false
 			};
 		});
 		this.items = [...this.items, ...fresh];
-		for (const item of fresh) void this.#probe(item.key);
+		for (const item of fresh) this.#probes.set(item.key, this.#probe(item.key));
 		return { unsupported: unsupported.length, overLimit: overLimit.length };
 	}
 
@@ -168,6 +184,14 @@ class Compose {
 					i.trim = defaultTrim(i.durationS, discovery.limits.max_video_seconds);
 				this.recheck(key);
 			});
+			// What this browser can do with it: no conversion is only fine when the original is within the limits.
+			const info = await probeVideoFile(item.file);
+			this.#patch(key, (i) => {
+				i.video = info;
+				i.prepIssue = chooseVideoUpload(info?.canPrepare ?? false, videoWithinLimits(info)) === 'error' ? 'video_unpreparable' : null;
+				i.noSound = !!info?.canPrepare && info.hasAudio && !info.canKeepAudio;
+				this.recheck(key);
+			});
 			return;
 		}
 		const size = await probeImage(item.previewUrl);
@@ -182,7 +206,7 @@ class Compose {
 			if (parts)
 				this.#patch(key, (i) => {
 					i.file = parts.still;
-					i.live = { file: parts.clip, split: true, prepared: null, uploadId: null };
+					i.live = { file: parts.clip, split: true, prepared: null, uploadId: null, info: null, unpreparable: false };
 					i.bytes = parts.still.size + parts.clip.size;
 				});
 		} else {
@@ -197,7 +221,22 @@ class Compose {
 				this.add([clip]);
 			}
 		}
-		this.#preparePhoto(key);
+		const clip = this.#probeClip(key);
+		void this.#preparePhoto(key);
+		await clip;
+	}
+
+	/** Live/Motion clips follow the video rule: converted here, or as they are only when within the limits. */
+	async #probeClip(key: string) {
+		const clip = this.items.find((i) => i.key === key)?.live?.file;
+		if (!clip) return;
+		const info = await probeVideoFile(clip);
+		this.#patch(key, (i) => {
+			if (i.live?.file !== clip) return;
+			i.live.info = info;
+			i.live.unpreparable = chooseVideoUpload(info?.canPrepare ?? false, videoWithinLimits(info)) === 'error';
+			this.recheck(key);
+		});
 	}
 
 	/** Photos are prepared in the background right away (in a worker), so sending is quick. */
@@ -206,11 +245,21 @@ class Compose {
 		if (!p) {
 			const item = this.items.find((i) => i.key === key);
 			if (!item) return Promise.resolve();
-			p = preparePhotoFile(item.file).then(({ prepared, capturedAt }) =>
+			p = preparePhotoFile(item.file).then(({ prepared, capturedAt, failed }) =>
 				this.#patch(key, (i) => {
 					i.prepared = prepared;
 					i.capturedAt = capturedAt;
+					i.prepIssue = failed ? 'photo_unpreparable' : null;
 					i.bytes = (prepared?.file.size ?? i.file.size) + (i.live && i.sendLive ? (i.live.prepared?.file.size ?? i.live.file.size) : 0);
+					// The browser can't show the original (HEIC on Chrome): show the master instead.
+					if (prepared && !i.previewable) {
+						URL.revokeObjectURL(i.previewUrl);
+						i.previewUrl = URL.createObjectURL(prepared.file);
+						i.previewable = true;
+						i.width = prepared.width;
+						i.height = prepared.height;
+					}
+					this.recheck(key);
 				})
 			);
 			this.#photoPrep.set(key, p);
@@ -218,10 +267,13 @@ class Compose {
 		return p;
 	}
 
-	/** Re-evaluate an item's issue after its trim changed. */
+	/** Re-evaluate an item's issue after its trim, its Live toggle or its preparation outcome changed. */
 	recheck(key: string) {
 		this.#patch(key, (i) => {
-			i.issue = itemIssue({ kind: i.kind, bytes: i.file.size, durationS: keptSeconds(i.trim, i.durationS) }, discovery.limits);
+			i.issue =
+				itemIssue({ kind: i.kind, bytes: i.file.size, durationS: keptSeconds(i.trim, i.durationS) }, discovery.limits) ??
+				i.prepIssue ??
+				(i.live?.unpreparable && i.sendLive ? 'clip_unpreparable' : null);
 		});
 	}
 
@@ -232,6 +284,7 @@ class Compose {
 			const clip = i.live.prepared?.file.size ?? i.live.file.size;
 			i.bytes = (i.prepared?.file.size ?? i.file.size) + (on ? clip : 0);
 		});
+		this.recheck(key);
 	}
 
 	#patch(key: string, fn: (i: DraftItem) => void) {
@@ -244,6 +297,7 @@ class Compose {
 		this.#handles.delete(key);
 		this.#videoJobs.get(key)?.cancel();
 		this.#photoPrep.delete(key);
+		this.#probes.delete(key);
 		const item = this.items.find((i) => i.key === key);
 		if (item) URL.revokeObjectURL(item.previewUrl);
 		this.items = this.items.filter((i) => i.key !== key);
@@ -257,48 +311,72 @@ class Compose {
 		this.frameIds = this.frameIds.includes(id) ? this.frameIds.filter((f) => f !== id) : [...this.frameIds, id];
 	}
 
-	/** Makes the item's video master in a worker (WebCodecs), or leaves `prepared` null to upload the original. */
+	/**
+	 * Makes the item's video master in a worker (WebCodecs). Without one, the original goes up only when it is
+	 * within the limits; otherwise this throws and the item shows why.
+	 */
 	async #prepareVideo(key: string) {
 		const item = this.items.find((i) => i.key === key);
-		if (!item || !canPrepareVideo()) return;
+		if (!item) return;
 		const trim = item.trim && item.durationS != null && isTrimmed(item.trim, item.durationS) ? { start: item.trim.start, end: item.trim.end } : null;
 		const settings = JSON.stringify({ trim, audio: item.includeAudio });
 		if (item.preparedFor === settings) return;
-		this.#patch(key, (i) => {
-			i.state = 'preparing';
-			i.prepProgress = 0;
-		});
-		const job = prepareVideoFile(item.file, {
-			trim,
-			includeAudio: item.includeAudio,
-			onProgress: (p) => this.#patch(key, (i) => (i.prepProgress = p))
-		});
-		this.#videoJobs.set(key, job);
-		const prepared = await job.promise;
-		this.#videoJobs.delete(key);
+		let prepared: PreparedVideo | null = null;
+		if (item.video?.canPrepare) {
+			this.#patch(key, (i) => {
+				i.state = 'preparing';
+				i.prepProgress = 0;
+			});
+			const job = prepareVideoFile(item.file, {
+				trim,
+				includeAudio: item.includeAudio,
+				onProgress: (p) => this.#patch(key, (i) => (i.prepProgress = p))
+			});
+			this.#videoJobs.set(key, job);
+			prepared = await job.promise;
+			this.#videoJobs.delete(key);
+			if (this.phase !== 'uploading' || !this.items.some((i) => i.key === key)) return; // cancelled or removed
+		}
+		const choice = chooseVideoUpload(prepared !== null, videoWithinLimits(item.video));
 		this.#patch(key, (i) => {
 			i.prepared = prepared;
 			i.preparedFor = prepared ? settings : null;
 			if (prepared?.capturedAt) i.capturedAt = prepared.capturedAt;
+			if (prepared?.audioDropped) i.noSound = true;
 			i.bytes = prepared?.file.size ?? i.file.size;
+			if (choice === 'error') i.prepIssue = 'video_unpreparable';
 		});
+		if (choice === 'error') this.#failPrep(key, 'video_unpreparable');
 	}
 
-	/** Prepares the motion clip of a Live Photo (muted, ≤ 10 s). */
+	/** Prepares the motion clip of a Live Photo (muted, ≤ 10 s), with the same strict rule as videos. */
 	async #prepareClip(key: string) {
 		const item = this.items.find((i) => i.key === key);
-		if (!item?.live || item.live.prepared || !canPrepareVideo()) return;
-		const meta = await probeVideo(item.live.file);
-		const trim = meta && meta.duration > MAX_MOTION_S ? { start: 0, end: MAX_MOTION_S } : null;
-		const job = prepareVideoFile(item.live.file, { trim, includeAudio: false });
-		this.#videoJobs.set(key, job);
-		const prepared = await job.promise;
-		this.#videoJobs.delete(key);
+		if (!item?.live || item.live.prepared) return;
+		let prepared: PreparedVideo | null = null;
+		if (item.live.info?.canPrepare) {
+			const meta = await probeVideo(item.live.file);
+			const trim = meta && meta.duration > MAX_MOTION_S ? { start: 0, end: MAX_MOTION_S } : null;
+			const job = prepareVideoFile(item.live.file, { trim, includeAudio: false });
+			this.#videoJobs.set(key, job);
+			prepared = await job.promise;
+			this.#videoJobs.delete(key);
+			if (this.phase !== 'uploading' || !this.items.some((i) => i.key === key)) return; // cancelled or removed
+		}
+		const choice = chooseVideoUpload(prepared !== null, videoWithinLimits(item.live.info));
 		this.#patch(key, (i) => {
 			if (!i.live) return;
 			i.live.prepared = prepared;
+			if (choice === 'error') i.live.unpreparable = true;
 			i.bytes = (i.prepared?.file.size ?? i.file.size) + (prepared?.file.size ?? i.live.file.size);
 		});
+		if (choice === 'error') this.#failPrep(key, 'clip_unpreparable');
+	}
+
+	/** Marks an item that can't be prepared and stops its upload with the same (localized) message. */
+	#failPrep(key: string, issue: ItemIssue): never {
+		this.recheck(key);
+		throw new Error(issueText(issue));
 	}
 
 	async #upload(key: string, file: File, opts: { sha256: boolean; prepared?: string; offset: number }): Promise<string> {
@@ -329,10 +407,20 @@ class Compose {
 				i.state = 'preparing';
 				i.error = null;
 			});
-			if (item.kind === 'video') await this.#prepareVideo(item.key);
-			else await this.#preparePhoto(item.key);
-			if (item.live && item.sendLive) await this.#prepareClip(item.key);
-			if (!alive()) return;
+			try {
+				await this.#probes.get(item.key);
+				if (item.kind === 'video') await this.#prepareVideo(item.key);
+				else await this.#preparePhoto(item.key);
+				if (item.live && item.sendLive) await this.#prepareClip(item.key);
+				if (!alive()) return;
+				// Preparation may have finished only now (a photo picked just before Send): never send what failed it.
+				const issue = this.items.find((i) => i.key === item.key)?.issue;
+				if (issue) throw new Error(issueText(issue));
+			} catch (e) {
+				// The card shows the issue itself; nothing of this item was uploaded.
+				this.#patch(item.key, (i) => (i.state = 'idle'));
+				throw e;
+			}
 			this.#patch(item.key, (i) => (i.state = 'uploading'));
 			try {
 				const cur = this.items.find((i) => i.key === item.key)!;
@@ -421,6 +509,7 @@ class Compose {
 		for (const j of this.#videoJobs.values()) j.cancel();
 		this.#videoJobs.clear();
 		this.#photoPrep.clear();
+		this.#probes.clear();
 		for (const i of this.items) URL.revokeObjectURL(i.previewUrl);
 		this.items = [];
 		this.phase = 'compose';

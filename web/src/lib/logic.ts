@@ -220,7 +220,11 @@ export interface Limits {
 	max_upload_bytes: number;
 }
 
-export type ItemIssue = 'too_large' | 'video_too_long' | 'unsupported';
+/**
+ * Why an item can't be sent. The `*_unpreparable` ones come from preparation: this browser can't make the master
+ * and the original is over the limits, so it may not go up as it is (prep/plan.ts).
+ */
+export type ItemIssue = 'too_large' | 'video_too_long' | 'unsupported' | 'photo_unpreparable' | 'video_unpreparable' | 'clip_unpreparable';
 
 const PHOTO_EXT = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif', 'avif', 'gif'];
 const VIDEO_EXT = ['mp4', 'mov', 'm4v', '3gp', 'mkv', 'webm'];

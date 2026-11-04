@@ -1,6 +1,9 @@
 /**
  * Client-side preparation rules (docs/api/README.md §5.3 "Prepared uploads"). The server verifies whatever we
  * send and falls back to its own pipeline, so these only need to aim at the profile, not be perfect.
+ *
+ * The web app never uploads a full original: a file goes up as it is only when it is already within the master
+ * limits (photoWithinLimits, videoWithinLimits). Anything else is prepared in the browser, or not sent at all.
  */
 
 export const PHOTO_PROFILE = 'photo-master-v1';
@@ -51,10 +54,39 @@ export function videoFrameRate(sourceFps: number | null): number | undefined {
 
 /**
  * Whether a prepared photo is worth uploading instead of the original: it must be smaller (a small JPEG can grow
- * when re-encoded; the server then does the work itself).
+ * when re-encoded; the server then does the work itself). Only asked for originals within the limits.
  */
 export function usePrepared(originalBytes: number, preparedBytes: number): boolean {
 	return preparedBytes > 0 && preparedBytes < originalBytes;
+}
+
+/** Formats the server accepts as a photo master (by magic bytes, §5.3). */
+export const MASTER_PHOTO_FORMATS: readonly string[] = ['jpeg', 'webp'];
+
+/** An original photo may go up as it is: a JPEG or WebP whose long edge is at most 2560 px. */
+export function photoWithinLimits(info: { format: string | null; width: number | null; height: number | null } | null): boolean {
+	if (!info?.format || !MASTER_PHOTO_FORMATS.includes(info.format) || !info.width || !info.height) return false;
+	return Math.max(info.width, info.height) <= MASTER_PHOTO_EDGE;
+}
+
+/** An original video may go up as it is: at most 1080p (either orientation) and 30 fps. */
+export function videoWithinLimits(info: { width: number; height: number; fps: number | null } | null): boolean {
+	if (!info || !info.width || !info.height || info.fps === null) return false;
+	const long = Math.max(info.width, info.height);
+	const short = Math.min(info.width, info.height);
+	return long <= MASTER_VIDEO_BOX.long && short <= MASTER_VIDEO_BOX.short && info.fps <= MAX_VIDEO_FPS + 0.5;
+}
+
+/** What to upload for a photo: the prepared master, the original (only within the limits), or nothing (an error). */
+export function choosePhotoUpload(originalBytes: number, preparedBytes: number | null, originalWithinLimits: boolean): 'prepared' | 'original' | 'error' {
+	if (preparedBytes === null) return originalWithinLimits ? 'original' : 'error';
+	return originalWithinLimits && !usePrepared(originalBytes, preparedBytes) ? 'original' : 'prepared';
+}
+
+/** What to upload for a video (or a Live/Motion clip): the same rule without the size comparison. */
+export function chooseVideoUpload(prepared: boolean, originalWithinLimits: boolean): 'prepared' | 'original' | 'error' {
+	if (prepared) return 'prepared';
+	return originalWithinLimits ? 'original' : 'error';
 }
 
 /** File name for a prepared file: same base name, new extension. */
