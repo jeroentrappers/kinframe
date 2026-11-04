@@ -80,6 +80,12 @@ type Config struct {
 	FrameReleasesDir      string // optional drop-in directory of APKs
 	FrameReleasesInterval time.Duration
 
+	// Apple Developer Team ID and bundle id of the iOS family app, for
+	// /.well-known/apple-app-site-association (Universal Links for join and
+	// invite links). An empty team ID disables the file.
+	AppleTeamID   string
+	AppleBundleID string
+
 	// Community plugin registry mirror (docs/plugins.md §7). Empty URL disables it.
 	PluginRegistryURL      string // where index.json, its .sig and the bundles are
 	PluginRegistryKey      string // base64 SubjectPublicKeyInfo of the registry's ECDSA P-256 key
@@ -199,6 +205,8 @@ func load(get func(string) string) (*Config, error) {
 
 		StationForwardURL: env("KINFRAME_STATION_FORWARD_URL", "http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php"),
 	}
+	c.AppleTeamID = env("KINFRAME_APPLE_TEAM_ID", "")
+	c.AppleBundleID = env("KINFRAME_APPLE_BUNDLE_ID", "app.kinframe.family")
 	c.WeatherURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_URL", "https://api.open-meteo.com"), "/")
 	c.GeocodingURL = strings.TrimRight(env("KINFRAME_OPEN_METEO_GEOCODING_URL", "https://geocoding-api.open-meteo.com"), "/")
 	c.WeatherRefresh = time.Duration(intv("KINFRAME_WEATHER_REFRESH_MINUTES", 30)) * time.Minute
@@ -334,6 +342,15 @@ func load(get func(string) string) (*Config, error) {
 		return nil, errors.Join(errs...)
 	}
 	return c, nil
+}
+
+// AppleAppIDs lists the iOS apps allowed to open this server's links, or nil
+// when no team is configured.
+func (c *Config) AppleAppIDs() []string {
+	if c.AppleTeamID == "" || c.AppleBundleID == "" {
+		return nil
+	}
+	return []string{c.AppleTeamID + "." + c.AppleBundleID}
 }
 
 // LogtoFile is the Logto client configuration written by `bootstrap-logto`

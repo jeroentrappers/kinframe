@@ -116,3 +116,29 @@ func TestWeatherConfig(t *testing.T) {
 		t.Fatal("5 minute refresh accepted")
 	}
 }
+
+func TestAppleAppIDs(t *testing.T) {
+	base := map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1", "KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32), "KINFRAME_DATA_DIR": t.TempDir()}
+	load1 := func(extra map[string]string) []string {
+		t.Helper()
+		c, err := load(func(k string) string {
+			if x, ok := extra[k]; ok {
+				return x
+			}
+			return base[k]
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return c.AppleAppIDs()
+	}
+	if got := load1(nil); got != nil {
+		t.Fatalf("no team = %v", got)
+	}
+	if got := load1(map[string]string{"KINFRAME_APPLE_TEAM_ID": "ABCDE12345"}); len(got) != 1 || got[0] != "ABCDE12345.app.kinframe.family" {
+		t.Fatalf("team = %v", got)
+	}
+	if got := load1(map[string]string{"KINFRAME_APPLE_TEAM_ID": "ABCDE12345", "KINFRAME_APPLE_BUNDLE_ID": "org.example.frames"}); got[0] != "ABCDE12345.org.example.frames" {
+		t.Fatalf("bundle = %v", got)
+	}
+}

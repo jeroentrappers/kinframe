@@ -93,6 +93,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_S3_CREATE_BUCKET` | `true` | Create the bucket at start when missing (needs the permission) |
 | `KINFRAME_MEDIA_REDIRECT` | `off` | `presigned`: signed media URLs and avatars 302 to 15-minute presigned bucket URLs (s3 only) |
 | `KINFRAME_S3_PUBLIC_ENDPOINT` | the endpoint | Endpoint presigned URLs point at, when clients reach the bucket under another name |
+| `KINFRAME_APPLE_TEAM_ID` | — | Apple Developer Team ID the iOS family app is signed with. When set, `/.well-known/apple-app-site-association` lists `<team id>.<bundle id>` so `/f/<code>` and `/i/<token>` links open the iOS app. Unset: the file is not served |
+| `KINFRAME_APPLE_BUNDLE_ID` | `app.kinframe.family` | Bundle id of the iOS app, for the same file (change it for your own build) |
 | `KINFRAME_WEATHER` | `on` | `off` disables weather for all frames and `/v1/geocode` (discovery `weather: false`) |
 | `KINFRAME_OPEN_METEO_URL` | `https://api.open-meteo.com` | Open-Meteo forecast API base (e.g. a self-hosted Open-Meteo) |
 | `KINFRAME_OPEN_METEO_GEOCODING_URL` | `https://geocoding-api.open-meteo.com` | Open-Meteo geocoding API base (place search) |

@@ -1,0 +1,266 @@
+{
+  "ios.back": {
+    "en": "Back",
+    "nl": "Terug"
+  },
+  "ios.cmd.doneSync": {
+    "en": "{name} is checking for new photos",
+    "nl": "{name} zoekt naar nieuwe foto’s"
+  },
+  "ios.cmd.sync": {
+    "en": "Sync now",
+    "nl": "Nu bijwerken"
+  },
+  "ios.continue": {
+    "en": "Continue",
+    "nl": "Verder"
+  },
+  "ios.focal.down": {
+    "en": "Move down",
+    "nl": "Omlaag"
+  },
+  "ios.focal.left": {
+    "en": "Move left",
+    "nl": "Naar links"
+  },
+  "ios.focal.right": {
+    "en": "Move right",
+    "nl": "Naar rechts"
+  },
+  "ios.focal.up": {
+    "en": "Move up",
+    "nl": "Omhoog"
+  },
+  "ios.library.video": {
+    "en": "Video",
+    "nl": "Video"
+  },
+  "ios.live.a11y": {
+    "en": "Live photo",
+    "nl": "Livefoto"
+  },
+  "ios.live.badge": {
+    "en": "Live",
+    "nl": "Live"
+  },
+  "ios.live.play": {
+    "en": "Play the Live Photo",
+    "nl": "Livefoto afspelen"
+  },
+  "ios.name.placeholder": {
+    "en": "e.g. Lisa",
+    "nl": "bv. Lisa"
+  },
+  "ios.plugins.enabledHint": {
+    "en": "Shows on the frame once everything it needs is filled in.",
+    "nl": "Verschijnt op het kader zodra alles wat nodig is, ingevuld is."
+  },
+  "ios.plugins.errDuplicate": {
+    "en": "Two plugins have the same ID.",
+    "nl": "Twee plug-ins hebben dezelfde ID."
+  },
+  "ios.plugins.errNotOnFrame": {
+    "en": "The frame doesn’t have this plugin.",
+    "nl": "Het kader heeft deze plug-in niet."
+  },
+  "ios.plugins.errOther": {
+    "en": "Not accepted ({code}).",
+    "nl": "Niet aanvaard ({code})."
+  },
+  "ios.plugins.errSecret": {
+    "en": "A token can’t be saved as a plain setting.",
+    "nl": "Een token kan niet als gewone instelling bewaard worden."
+  },
+  "ios.plugins.errSlot": {
+    "en": "This plugin can’t go in that corner.",
+    "nl": "Deze plug-in kan niet in die hoek."
+  },
+  "ios.plugins.fixFields": {
+    "en": "Check the fields marked in red.",
+    "nl": "Kijk de rood gemarkeerde velden na."
+  },
+  "ios.plugins.newHint": {
+    "en": "It switches on when you save a complete form.",
+    "nl": "Hij gaat aan wanneer je een volledig formulier bewaart."
+  },
+  "ios.plugins.placement": {
+    "en": "Placement",
+    "nl": "Plaats"
+  },
+  "ios.plugins.timezoneClear": {
+    "en": "Clear {name}",
+    "nl": "{name} wissen"
+  },
+  "ios.send.background": {
+    "en": "This keeps going if you close the app.",
+    "nl": "Dit gaat gewoon verder als je de app sluit."
+  },
+  "ios.send.camera": {
+    "en": "Take a photo or video",
+    "nl": "Foto of video maken"
+  },
+  "ios.send.captionAll": {
+    "en": "Caption for all",
+    "nl": "Onderschrift voor alle"
+  },
+  "ios.send.liveHint": {
+    "en": "The frame plays the short clip when the photo appears.",
+    "nl": "De fotolijst speelt het korte filmpje af wanneer de foto verschijnt."
+  },
+  "ios.send.liveStillHint": {
+    "en": "Only the photo is sent, without its clip.",
+    "nl": "Alleen de foto wordt verstuurd, zonder filmpje."
+  },
+  "ios.send.liveStillOnly": {
+    "en": "Send as a still photo only",
+    "nl": "Alleen als gewone foto versturen"
+  },
+  "ios.send.liveTitle": {
+    "en": "Live Photo",
+    "nl": "Livefoto"
+  },
+  "ios.send.pickBody": {
+    "en": "Up to {max} at a time, photos and videos mixed. You can also share them from Photos or any other app.",
+    "nl": "Tot {max} tegelijk, foto’s en video’s door elkaar. Je kunt ze ook delen vanuit Foto’s of een andere app."
+  },
+  "ios.send.pickTitle": {
+    "en": "Pick photos and videos",
+    "nl": "Kies foto’s en video’s"
+  },
+  "ios.send.preparing": {
+    "en": "Preparing {n} of {total} · {pct}%",
+    "nl": "{n} van {total} voorbereiden · {pct}%"
+  },
+  "ios.server.addressLabel": {
+    "en": "Server address",
+    "nl": "Adres van de server"
+  },
+  "ios.server.body": {
+    "en": "kinframe runs on a server your family trusts. Most families use the default one. If someone in the family runs their own, pick that.",
+    "nl": "kinframe draait op een server die je familie vertrouwt. De meeste families gebruiken de standaardserver. Heeft iemand in de familie een eigen server, kies die dan."
+  },
+  "ios.server.change": {
+    "en": "Use another server",
+    "nl": "Een andere server gebruiken"
+  },
+  "ios.server.changeBody": {
+    "en": "You’ll be signed out here. Sends still on their way stay in the queue until you’re back on this server.",
+    "nl": "Je wordt hier afgemeld. Zendingen die nog onderweg zijn, blijven in de wachtrij tot je terug op deze server bent."
+  },
+  "ios.server.changeTitle": {
+    "en": "Use another server?",
+    "nl": "Een andere server gebruiken?"
+  },
+  "ios.server.check": {
+    "en": "Check",
+    "nl": "Controleren"
+  },
+  "ios.server.custom": {
+    "en": "Use your own server",
+    "nl": "Je eigen server gebruiken"
+  },
+  "ios.server.customHint": {
+    "en": "Enter the address you got from whoever runs it.",
+    "nl": "Vul het adres in dat je kreeg van wie de server beheert."
+  },
+  "ios.server.defaultHint": {
+    "en": "The default kinframe server",
+    "nl": "De standaardserver van kinframe"
+  },
+  "ios.server.invalid": {
+    "en": "That doesn’t look like a web address. Check it and try again.",
+    "nl": "Dat lijkt geen webadres. Kijk het na en probeer opnieuw."
+  },
+  "ios.server.notKinframe": {
+    "en": "That address works, but it isn’t a kinframe server.",
+    "nl": "Dat adres werkt, maar het is geen kinframe-server."
+  },
+  "ios.server.placeholder": {
+    "en": "frames.example.org",
+    "nl": "kaders.voorbeeld.be"
+  },
+  "ios.server.title": {
+    "en": "Choose your server",
+    "nl": "Kies je server"
+  },
+  "ios.server.unreachable": {
+    "en": "Can’t reach that server. Check the address and your connection.",
+    "nl": "Die server is niet bereikbaar. Kijk het adres en je verbinding na."
+  },
+  "ios.settings.languageHint": {
+    "en": "Used in the app and for notifications.",
+    "nl": "Voor de app en voor meldingen."
+  },
+  "ios.settings.languageSystem": {
+    "en": "Same as the phone",
+    "nl": "Zoals de telefoon"
+  },
+  "ios.settings.liveOff": {
+    "en": "Photo only",
+    "nl": "Alleen foto"
+  },
+  "ios.settings.liveOn": {
+    "en": "Play when shown",
+    "nl": "Afspelen bij tonen"
+  },
+  "ios.settings.livePhotos": {
+    "en": "Live photos",
+    "nl": "Livefoto’s"
+  },
+  "ios.settings.liveTap": {
+    "en": "Play on tap",
+    "nl": "Afspelen bij tikken"
+  },
+  "ios.share.signedOut": {
+    "en": "Open the kinframe app and sign in first. Then you can share photos straight to your frames.",
+    "nl": "Open eerst de kinframe-app en meld je aan. Daarna kun je foto’s rechtstreeks naar je kaders delen."
+  },
+  "ios.switch.body": {
+    "en": "This link is for {server}. You’ll be signed out here and can sign in there.",
+    "nl": "Deze link hoort bij {server}. Je wordt hier afgemeld en kunt je daar aanmelden."
+  },
+  "ios.switch.confirm": {
+    "en": "Switch",
+    "nl": "Wisselen"
+  },
+  "ios.switch.title": {
+    "en": "Switch server?",
+    "nl": "Van server wisselen?"
+  },
+  "ios.trim.audio": {
+    "en": "Include sound",
+    "nl": "Met geluid"
+  },
+  "ios.trim.hint": {
+    "en": "Drag the edges to choose the part to send: at least {min} seconds, at most {max}.",
+    "nl": "Sleep de randen om het stuk te kiezen dat je stuurt: minstens {min} seconden, hoogstens {max}."
+  },
+  "ios.trim.noAudio": {
+    "en": "This video has no sound.",
+    "nl": "Deze video heeft geen geluid."
+  },
+  "ios.trim.play": {
+    "en": "Play",
+    "nl": "Afspelen"
+  },
+  "ios.trim.stop": {
+    "en": "Stop",
+    "nl": "Stoppen"
+  },
+  "ios.trim.title": {
+    "en": "Trim",
+    "nl": "Inkorten"
+  },
+  "ios.welcome.f1Body": {
+    "en": "Pick photos and videos or share them from any app. They show up on the frame a few seconds later.",
+    "nl": "Kies foto’s en video’s of deel ze vanuit elke app. Enkele seconden later staan ze op het kader."
+  },
+  "ios.welcome.start": {
+    "en": "Get started",
+    "nl": "Aan de slag"
+  },
+  "problem.media_unprepared": {
+    "en": "A photo or video couldn’t be made ready to send, and it’s too large to send as it is.",
+    "nl": "Een foto of video kon niet klaargemaakt worden om te versturen, en is te groot om zo te versturen."
+  }
+}

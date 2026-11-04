@@ -1,0 +1,4 @@
+// Signing for the app and the share extension (automatic signing; profiles are never committed).
+// DEVELOPMENT_TEAM is the Appmire Apple Developer team. It stays empty until that team is added to Xcode:
+// simulator builds and tests need no team. Set it here, and only here.
+DEVELOPMENT_TEAM =
