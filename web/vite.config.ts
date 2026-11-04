@@ -14,6 +14,8 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	// Media preparation workers (src/lib/prep) are ES modules.
 	worker: { format: 'es' },
+	// Only imported lazily from the photo worker: pre-bundle it so `vite dev` doesn't reload when a HEIC is picked.
+	optimizeDeps: { include: ['libheif-js/libheif-wasm/libheif.js'] },
 	server: { proxy },
 	preview: { proxy },
 	test: {
