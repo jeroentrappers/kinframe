@@ -1,0 +1,34 @@
+[package]
+name = "kinframe-prep"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-or-later"
+description = "Photo master preparation (photo-master-v1) for the kinframe web app, as WebAssembly"
+publish = false
+
+# The fallback the web app's photo worker loads when the browser can't decode or encode a photo itself
+# (src/lib/prep/photo.worker.ts). Built with `npm run build:wasm` (build.mjs); the output is committed in
+# src/lib/prep/wasm/. The crates that end up in the module are listed with their licences in
+# static/third-party-notices.txt: keep that list in step when dependencies change.
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Pure-Rust decoders only (zune-jpeg, png, image-webp, gif, tiff); every format but AVIF/HEIC, which libheif handles.
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp", "tiff"] }
+# Only the RGBA8 pixel type: a much smaller module, and we always resize RGBA8.
+fast_image_resize = { version = "6.1.0", default-features = false, features = ["std", "only_u8x4"] }
+# 4:2:0 baseline JPEG; writes no metadata at all.
+jpeg-encoder = { version = "0.7.1", default-features = false, features = ["std"] }
+wasm-bindgen = "0.2.130"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "debuginfo"
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-Os", "--strip-debug", "--strip-producers", "--enable-bulk-memory", "--enable-nontrapping-float-to-int", "--enable-sign-ext", "--enable-mutable-globals"]

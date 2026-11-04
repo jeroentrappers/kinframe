@@ -1,0 +1,6 @@
+# Pinned so `npm run build:wasm` gives the same bytes everywhere (CI rebuilds and compares with the committed module).
+[toolchain]
+channel = "1.99.0"
+targets = ["wasm32-unknown-unknown"]
+profile = "minimal"
+components = ["rustfmt", "clippy"]
