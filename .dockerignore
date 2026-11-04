@@ -3,6 +3,7 @@
 !web/
 !server/
 web/node_modules
+web/prep-wasm/target
 web/build
 web/.svelte-kit
 web/test-results

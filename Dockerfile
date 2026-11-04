@@ -4,6 +4,9 @@
 # (server/Dockerfile is the server-only image used to run the test suite in the runtime toolchain.)
 
 # ---- web SPA ----------------------------------------------------------------
+# No Rust needed: the photo preparation WebAssembly module (web/prep-wasm) is committed, built, in
+# web/src/lib/prep/wasm, and the HEIC decoder comes prebuilt from the pinned libheif-js npm package. CI checks that
+# the committed module matches its source (ci.yml, "Web prep WebAssembly").
 FROM node:22-trixie-slim AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./

@@ -90,6 +90,39 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --project=desktop --project=phone
 
+  prep-wasm:
+    name: Web prep WebAssembly (Rust tests + committed module up to date)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/prep-wasm
+    steps:
+      - uses: actions/checkout@v4
+      # rust-toolchain.toml pins the compiler (and the wasm32 target); the module must rebuild byte for byte.
+      - name: Install the pinned toolchain
+        run: |
+          channel=$(sed -n 's/^channel = "\(.*\)"$/\1/p' rust-toolchain.toml)
+          rustup toolchain install "$channel" --profile minimal --target wasm32-unknown-unknown --component rustfmt,clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: web/prep-wasm
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack@0.15.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+      - name: Rebuild the module and compare with the committed one
+        run: |
+          node build.mjs
+          git diff --exit-code -- ../src/lib/prep/wasm || {
+            echo "::error::web/src/lib/prep/wasm is out of date: run 'npm run build:wasm' in web/ and commit the result"
+            exit 1
+          }
+
   ios:
     name: iOS (build + unit tests)
     runs-on: macos-latest
@@ -120,7 +153,7 @@ jobs:
   publish:
     name: Publish server image
     if: github.event_name == 'push'
-    needs: [secrets, server, web]
+    needs: [secrets, server, web, prep-wasm]
     runs-on: ubuntu-latest
     permissions:
       contents: read
