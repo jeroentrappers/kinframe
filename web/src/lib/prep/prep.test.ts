@@ -1,10 +1,24 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { captureTimeFromBytes, exifTimeToIso } from './exif';
+import { heifColour } from './heifColour';
 import { pairLive } from './live';
 import { findMotionVideo, mp4At, splitMotionPhoto } from './motionPhoto';
 import { preparePhoto, preparedPhotoName, type PhotoPrepDeps } from './photo';
-import { photoTarget, preparedName, usePrepared, videoBitrate, videoFrameRate, videoTarget } from './plan';
+import {
+	choosePhotoUpload,
+	chooseVideoUpload,
+	photoTarget,
+	photoWithinLimits,
+	preparedName,
+	usePrepared,
+	videoBitrate,
+	videoFrameRate,
+	videoTarget,
+	videoWithinLimits
+} from './plan';
 import { sendItemBody, type SendItemInput } from './sendItem';
+import { sniffImage } from './sniff';
 
 // ---------------------------------------------------------------- fixtures
 
@@ -205,7 +219,7 @@ describe('photo preparation (injected platform)', () => {
 		expect(p.mime).toBe('image/jpeg');
 		expect(calls.encodes).toEqual(['image/webp', 'image/jpeg']);
 	});
-	it('rejects (upload the original) when decoding fails', async () => {
+	it('rejects when the browser cannot decode (the worker then tries WebAssembly)', async () => {
 		const { deps } = fakes(true);
 		await expect(preparePhoto(new Blob([]), { ...deps, decode: () => Promise.reject(new Error('HEIC')) })).rejects.toThrow('HEIC');
 	});
@@ -249,5 +263,109 @@ describe('send item body', () => {
 		expect(still).toMatchObject({ live: false });
 		expect(still).not.toHaveProperty('live_video_upload_id');
 		expect(sendItemBody(base)).not.toHaveProperty('live');
+	});
+});
+
+// ---------------------------------------------------------------- strict mode: never upload full originals
+
+/** A baseline JPEG header with an SOF0 for w×h, behind an APP1 of `pad` bytes. */
+function jpegHeader(w: number, h: number, pad = 0): Uint8Array {
+	const app1 = concat([0xff, 0xe1], [(pad + 2) >> 8, (pad + 2) & 0xff], new Uint8Array(pad));
+	const sof = [0xff, 0xc0, 0, 17, 8, h >> 8, h & 0xff, w >> 8, w & 0xff, 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1];
+	return concat([0xff, 0xd8], app1, sof, [0xff, 0xda, 0, 2]);
+}
+
+function riff(chunk: string, body: number[]): Uint8Array {
+	return concat(enc.encode('RIFF'), u32le(4 + 8 + body.length), enc.encode('WEBP'), enc.encode(chunk), u32le(body.length), body);
+}
+
+const fixture = (name: string) => new Uint8Array(readFileSync(new URL(`../../../tests/fixtures/${name}`, import.meta.url)));
+
+describe('sniffing', () => {
+	it('reads JPEG sizes behind large segments', () => {
+		expect(sniffImage(jpegHeader(4032, 3024, 60_000))).toEqual({ format: 'jpeg', width: 4032, height: 3024 });
+		expect(sniffImage(Uint8Array.from([0xff, 0xd8, 0xff, 0xd9]))).toEqual({ format: 'jpeg', width: null, height: null });
+	});
+	it('reads PNG, GIF and the three WebP flavours', () => {
+		const png = concat([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], u32be(13), enc.encode('IHDR'), u32be(3000), u32be(2000));
+		expect(sniffImage(png)).toEqual({ format: 'png', width: 3000, height: 2000 });
+		expect(sniffImage(concat(enc.encode('GIF89a'), u16le(640), u16le(480)))).toEqual({ format: 'gif', width: 640, height: 480 });
+		const vp8 = riff('VP8 ', [0, 0, 0, 0x9d, 0x01, 0x2a, ...u16le(2560), ...u16le(1440)]);
+		expect(sniffImage(vp8)).toEqual({ format: 'webp', width: 2560, height: 1440 });
+		const bits = (3999 & 0x3fff) | ((2999 & 0x3fff) << 14);
+		expect(sniffImage(riff('VP8L', [0x2f, ...u32le(bits)]))).toEqual({ format: 'webp', width: 4000, height: 3000 });
+		const vp8x = riff('VP8X', [0, 0, 0, 0, 2559 & 0xff, 2559 >> 8, 0, 1919 & 0xff, 1919 >> 8, 0]);
+		expect(sniffImage(vp8x)).toEqual({ format: 'webp', width: 2560, height: 1920 });
+	});
+	it('tells HEIF from AVIF by brand', () => {
+		expect(sniffImage(fixture('heic-rotated.heic')).format).toBe('heif');
+		const ftyp = (major: string, ...compat: string[]) => box('ftyp', concat(enc.encode(major), u32be(0), ...compat.map((c) => enc.encode(c))));
+		expect(sniffImage(ftyp('mif1', 'mif1', 'heic')).format).toBe('heif');
+		expect(sniffImage(ftyp('avif', 'mif1', 'miaf')).format).toBe('avif');
+		expect(sniffImage(ftyp('mif1', 'avif')).format).toBe('avif');
+		expect(sniffImage(ftyp('isom', 'mp41')).format).toBeNull();
+		expect(sniffImage(enc.encode('hello')).format).toBeNull();
+	});
+});
+
+describe('strict upload rule', () => {
+	it('lets only master-sized JPEG and WebP originals go up as they are', () => {
+		expect(photoWithinLimits({ format: 'jpeg', width: 2560, height: 1920 })).toBe(true);
+		expect(photoWithinLimits({ format: 'webp', width: 1080, height: 2400 })).toBe(true);
+		expect(photoWithinLimits({ format: 'jpeg', width: 2561, height: 100 })).toBe(false);
+		expect(photoWithinLimits({ format: 'png', width: 800, height: 600 })).toBe(false);
+		expect(photoWithinLimits({ format: 'heif', width: null, height: null })).toBe(false);
+		expect(photoWithinLimits({ format: 'jpeg', width: null, height: null })).toBe(false);
+		expect(photoWithinLimits(null)).toBe(false);
+	});
+	it('lets only ≤ 1080p, ≤ 30 fps videos go up as they are', () => {
+		expect(videoWithinLimits({ width: 1920, height: 1080, fps: 30 })).toBe(true);
+		expect(videoWithinLimits({ width: 1080, height: 1920, fps: 29.97 })).toBe(true);
+		expect(videoWithinLimits({ width: 1920, height: 1080, fps: 59.94 })).toBe(false);
+		expect(videoWithinLimits({ width: 3840, height: 2160, fps: 30 })).toBe(false);
+		expect(videoWithinLimits({ width: 1440, height: 1440, fps: 30 })).toBe(false);
+		expect(videoWithinLimits({ width: 1280, height: 720, fps: null })).toBe(false);
+		expect(videoWithinLimits(null)).toBe(false);
+	});
+	it('uploads a prepared photo, or a smaller original only when it is within the limits', () => {
+		expect(choosePhotoUpload(5_000_000, 900_000, false)).toBe('prepared');
+		expect(choosePhotoUpload(5_000_000, 900_000, true)).toBe('prepared');
+		// The master grew (a small, already compressed JPEG): the original is fine to send instead…
+		expect(choosePhotoUpload(90_000, 120_000, true)).toBe('original');
+		// …but never an original over the limits, even if it is smaller.
+		expect(choosePhotoUpload(90_000, 120_000, false)).toBe('prepared');
+	});
+	it('without a master, sends the original only within the limits, else refuses', () => {
+		expect(choosePhotoUpload(400_000, null, true)).toBe('original');
+		expect(choosePhotoUpload(40_000_000, null, false)).toBe('error');
+		expect(chooseVideoUpload(true, false)).toBe('prepared');
+		expect(chooseVideoUpload(false, true)).toBe('original');
+		expect(chooseVideoUpload(false, false)).toBe('error');
+	});
+});
+
+describe('HEIF colour', () => {
+	/** A HEIF header whose primary item 7 has the given properties (ipco order), plus unassociated `loose` ones. */
+	function heif(props: Uint8Array[], loose: Uint8Array[] = []): Uint8Array {
+		const assoc = props.map((_, i) => 0x80 | (i + 1));
+		const ipma = box('ipma', [0, 0, 0, 0, ...u32be(1), 0, 7, assoc.length, ...assoc]);
+		const iprp = box('iprp', concat(box('ipco', concat(...props, ...loose)), ipma));
+		return concat(box('ftyp', enc.encode('heic')), box('meta', concat([0, 0, 0, 0], box('pitm', [0, 0, 0, 0, 0, 7]), iprp)));
+	}
+	const ispe = box('ispe', new Uint8Array(12));
+	const nclx = (primaries: number) => box('colr', concat(enc.encode('nclx'), [0, primaries, 0, 13, 0, 6, 0x80]));
+
+	it('reads the primary image’s nclx primaries (12 is Display P3)', () => {
+		expect(heifColour(heif([ispe, nclx(12)]))).toEqual({ icc: null, p3: true });
+		expect(heifColour(heif([ispe, nclx(1)]))).toEqual({ icc: null, p3: false });
+	});
+	it('prefers an ICC profile', () => {
+		const icc = Uint8Array.from([1, 2, 3, 4, 5]);
+		expect(heifColour(heif([ispe, nclx(1), box('colr', concat(enc.encode('prof'), icc))]))).toEqual({ icc, p3: false });
+	});
+	it('falls back to the tiles’ colour (grids), and to sRGB', () => {
+		expect(heifColour(heif([ispe], [nclx(12)]))).toEqual({ icc: null, p3: true });
+		expect(heifColour(fixture('heic-rotated.heic'))).toEqual({ icc: null, p3: false });
+		expect(heifColour(enc.encode('junk'))).toEqual({ icc: null, p3: false });
 	});
 });

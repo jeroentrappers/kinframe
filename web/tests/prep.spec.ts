@@ -30,7 +30,10 @@ async function sent(page: Page, st: MockState): Promise<S['SendCreate']> {
 	return st.calls.find((c) => c.path === '/v1/sends' && c.method === 'POST')!.body as S['SendCreate'];
 }
 
-/** A tiny MP4 (ftyp, moov, mdat): structurally valid, not playable, so preparing it fails and it goes up as is. */
+/** A real 1 s, 192×108, 30 fps H.264 clip: within the master limits, and convertible where WebCodecs exists. */
+const motionMp4 = () => readFileSync('tests/fixtures/motion.mp4');
+
+/** A tiny MP4 (ftyp, moov, mdat): structurally valid but unreadable, so it can't be prepared nor checked. */
 function fakeMp4(): Buffer {
 	const box = (type: string, body: Buffer) => {
 		const h = Buffer.alloc(8);
@@ -63,9 +66,9 @@ test('Live Photo pair: still + same-name clip become one item; toggle sends the 
 	await openSend(page, st);
 	await page.getByTestId('file-input').setInputFiles([
 		{ name: 'IMG_0042.png', mimeType: 'image/png', buffer: await gradientPng(400, 300, 50) },
-		{ name: 'IMG_0042.MOV', mimeType: 'video/quicktime', buffer: fakeMp4() },
+		{ name: 'IMG_0042.MOV', mimeType: 'video/quicktime', buffer: motionMp4() },
 		{ name: 'IMG_0043.png', mimeType: 'image/png', buffer: await gradientPng(300, 400, 90) },
-		{ name: 'IMG_0043.MOV', mimeType: 'video/quicktime', buffer: fakeMp4() }
+		{ name: 'IMG_0043.MOV', mimeType: 'video/quicktime', buffer: motionMp4() }
 	]);
 	await expect(page.getByLabel('Caption for item 2')).toBeVisible();
 	await expect(page.getByLabel('Caption for item 3')).toHaveCount(0);
@@ -99,7 +102,7 @@ test('Android Motion Photo: the embedded clip is split off and sent as Live', as
 		}),
 		'base64'
 	);
-	const mp4 = fakeMp4();
+	const mp4 = motionMp4();
 	const xmp = Buffer.from(
 		'http://ns.adobe.com/xap/1.0/\0<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF><rdf:Description GCamera:MotionPhoto="1"><Container:Directory><rdf:Seq>' +
 			'<rdf:li><Container:Item Item:Mime="image/jpeg" Item:Semantic="Primary"/></rdf:li>' +
@@ -119,7 +122,8 @@ test('Android Motion Photo: the embedded clip is split off and sent as Live', as
 	expect(item.live_video_upload_id).toBeTruthy();
 	const clip = st.uploads[item.live_video_upload_id!]!;
 	expect(clip.filename).toBe('PXL_20261020.MP.mp4');
-	expect(clip.length).toBe(mp4.length);
+	// Converted (muted) where WebCodecs can, else the split-off clip as is: it is within the limits.
+	if (!clip.prepared) expect(clip.length).toBe(mp4.length);
 	// The still never carries the video bytes.
 	expect(st.uploads[item.upload_id]!.length).toBeLessThan(motion.length - mp4.length + 1);
 });
@@ -151,4 +155,137 @@ test('videos are converted with WebCodecs where the browser can encode H.264', a
 	writeFileSync(info.outputPath('prepared.mp4'), bytes);
 	expect(bytes.subarray(4, 8).toString('latin1')).toBe('ftyp');
 	expect(bytes.indexOf('moov')).toBeLessThan(bytes.indexOf('mdat'));
+});
+
+// ---------------------------------------------------------------- WebAssembly fallback, HEIC, strict mode
+
+/** Decodes an uploaded JPEG in the page and samples pixels (x, y as fractions of the size). */
+async function samplePixels(page: Page, bytes: Buffer, points: [number, number][]): Promise<number[][]> {
+	return page.evaluate(
+		async ({ b64, points }) => {
+			const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+			const bmp = await createImageBitmap(new Blob([bin], { type: 'image/jpeg' }));
+			const c = new OffscreenCanvas(bmp.width, bmp.height);
+			const ctx = c.getContext('2d')!;
+			ctx.drawImage(bmp, 0, 0);
+			return points.map(([x, y]) => [...ctx.getImageData(Math.floor(x * bmp.width), Math.floor(y * bmp.height), 1, 1).data.slice(0, 3)]);
+		},
+		{ b64: bytes.toString('base64'), points }
+	);
+}
+
+const near = (px: number[], want: number[]) => px.every((v, i) => Math.abs(v - want[i]!) < 40);
+
+function expectPlainJpeg(bytes: Buffer) {
+	expect([bytes[0], bytes[1], bytes[2]]).toEqual([0xff, 0xd8, 0xff]);
+	expect(bytes.includes('Exif')).toBe(false);
+	expect(bytes.includes('ICC_PROFILE')).toBe(false);
+}
+
+test('HEIC is decoded with libheif (rotation applied) where the browser can’t', async ({ page, browserName }) => {
+	const st = state();
+	await openSend(page, st);
+	await page.getByTestId('file-input').setInputFiles({ name: 'IMG_0001.HEIC', mimeType: 'image/heic', buffer: readFileSync('tests/fixtures/heic-rotated.heic') });
+	// The browser can't show HEIC, but the prepared master becomes the preview.
+	await expect(page.locator('.draft img')).toBeVisible({ timeout: 20_000 });
+	const item = (await sent(page, st)).items[0]!;
+	const up = st.uploads[item.upload_id]!;
+	expect(up.prepared).toBe('photo-master-v1');
+	// 4000×3000 stored, rotated 90° by `irot`: 3000×4000 shown, so 1920×2560.
+	expect(item).toMatchObject({ width: 1920, height: 2560 });
+	const bytes = Buffer.concat(up.data!);
+	// Safari decodes HEIC itself (WebP or JPEG out); Chromium and Firefox go through libheif (JPEG).
+	if (browserName !== 'webkit') {
+		expect(up.filename).toBe('IMG_0001.jpg');
+		expectPlainJpeg(bytes);
+		const [top, bottom] = await samplePixels(page, bytes, [[0.5, 0.1], [0.5, 0.9]]);
+		expect(near(top!, [32, 32, 208]), `top ${top}`).toBe(true);
+		expect(near(bottom!, [208, 32, 32]), `bottom ${bottom}`).toBe(true);
+	}
+});
+
+test('multi-image HEIC: the primary image is sent', async ({ page, browserName }) => {
+	const st = state();
+	await openSend(page, st);
+	await page.getByTestId('file-input').setInputFiles({ name: 'burst.heic', mimeType: 'image/heic', buffer: readFileSync('tests/fixtures/heic-multi.heic') });
+	const item = (await sent(page, st)).items[0]!;
+	expect(item).toMatchObject({ width: 400, height: 600 });
+	const up = st.uploads[item.upload_id]!;
+	if (browserName !== 'webkit') {
+		expect(up.filename).toBe('burst.jpg');
+		const [px] = await samplePixels(page, Buffer.concat(up.data!), [[0.5, 0.5]]);
+		expect(near(px!, [32, 32, 208]), `${px}`).toBe(true);
+	}
+});
+
+test('the WebAssembly fallback prepares large PNG and WebP photos', async ({ page }) => {
+	const st = state();
+	await openSend(page, st);
+	await page.evaluate(() => localStorage.setItem('kinframe.prep', 'wasm'));
+	const webp = Buffer.from(
+		await page.evaluate(async () => {
+			const c = new OffscreenCanvas(4000, 3000);
+			const ctx = c.getContext('2d')!;
+			const g = ctx.createLinearGradient(0, 0, 4000, 0);
+			g.addColorStop(0, '#d02020');
+			g.addColorStop(1, '#2020d0');
+			ctx.fillStyle = g;
+			ctx.fillRect(0, 0, 4000, 3000);
+			const blob = await c.convertToBlob({ type: 'image/webp', quality: 0.8 });
+			return btoa(String.fromCharCode(...new Uint8Array(await blob.arrayBuffer())));
+		}),
+		'base64'
+	);
+	await page.getByTestId('file-input').setInputFiles([
+		{ name: 'wide.webp', mimeType: 'image/webp', buffer: webp },
+		{ name: 'big.png', mimeType: 'image/png', buffer: await gradientPng(3000, 2000, 30) }
+	]);
+	const [w, p] = (await sent(page, st)).items;
+	expect(w).toMatchObject({ width: 2560, height: 1920 });
+	expect(p).toMatchObject({ width: 2560, height: 1707 });
+	for (const item of [w!, p!]) {
+		const up = st.uploads[item.upload_id]!;
+		expect(up.prepared).toBe('photo-master-v1');
+		expect(up.filename).toMatch(/\.jpg$/);
+		expectPlainJpeg(Buffer.concat(up.data!));
+	}
+	const [left, right] = await samplePixels(page, Buffer.concat(st.uploads[w!.upload_id]!.data!), [[0.02, 0.5], [0.98, 0.5]]);
+	expect(near(left!, [208, 32, 32]) && near(right!, [32, 32, 208]), `${left} ${right}`).toBe(true);
+});
+
+/** A JPEG whose header says w×h but whose data is garbage: no decoder can prepare it. */
+function brokenJpeg(w: number, h: number): Buffer {
+	const sof = Buffer.from([0xff, 0xc0, 0, 17, 8, h >> 8, h & 0xff, w >> 8, w & 0xff, 3, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1]);
+	return Buffer.concat([Buffer.from([0xff, 0xd8]), sof, Buffer.from([0xff, 0xda, 0, 2]), Buffer.alloc(4096, 0x5a), Buffer.from([0xff, 0xd9])]);
+}
+
+test('strict: a photo that can’t be prepared goes up as is only within the limits', async ({ page }) => {
+	const st = state();
+	await openSend(page, st);
+	await page.getByTestId('file-input').setInputFiles([
+		{ name: 'small.jpg', mimeType: 'image/jpeg', buffer: brokenJpeg(800, 600) },
+		{ name: 'huge.jpg', mimeType: 'image/jpeg', buffer: brokenJpeg(4000, 3000) }
+	]);
+	await expect(page.getByRole('alert').filter({ hasText: 'This browser can’t prepare this photo' })).toHaveCount(1, { timeout: 20_000 });
+	await expect(page.getByRole('button', { name: /^Send (all|it)/ }).first()).toBeDisabled();
+	await page.getByRole('button', { name: 'Remove item 2' }).click();
+	const item = (await sent(page, st)).items[0]!;
+	const up = st.uploads[item.upload_id]!;
+	expect(up.prepared).toBeUndefined();
+	expect(up.filename).toBe('small.jpg');
+});
+
+test('strict: a Live Photo clip that can’t be converted blocks the item until Live is off', async ({ page }) => {
+	const st = state();
+	await openSend(page, st);
+	await page.getByTestId('file-input').setInputFiles([
+		{ name: 'IMG_0050.png', mimeType: 'image/png', buffer: await gradientPng(400, 300, 50) },
+		{ name: 'IMG_0050.MOV', mimeType: 'video/quicktime', buffer: fakeMp4() }
+	]);
+	await expect(page.getByRole('alert').filter({ hasText: 'Turn Live off' })).toBeVisible({ timeout: 20_000 });
+	await page.getByRole('button', { name: /Live Photo/ }).click();
+	await expect(page.getByRole('alert')).toHaveCount(0);
+	const item = (await sent(page, st)).items[0]!;
+	expect(item.live).toBe(false);
+	expect(Object.keys(st.uploads)).toHaveLength(1);
 });
