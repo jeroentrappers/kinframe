@@ -147,7 +147,7 @@ in `ios-strings*.json`.
 | Fill or fit, focal point, landscape and portrait previews | yes | yes | yes | |
 | Trim videos, keep or drop the sound | yes | yes | yes | |
 | Live and Motion Photos | yes | yes | yes | |
-| Prepare on the device (photo-master-v1, video-master-v1) | yes | differs | differs | Android and iOS never upload full originals: a file that can't be prepared goes as it is only when it is already within 2560 px or 1080p/30 fps, otherwise the send stops with an error. The web app still falls back to the original. iOS prepares in the share extension too. |
+| Prepare on the device (photo-master-v1, video-master-v1) | yes | yes | yes | No client uploads full originals: a file that can't be prepared goes as it is only when it is already within 2560 px (web: a JPEG or WebP) or 1080p/30 fps, otherwise the item shows an error and isn't sent. The web app falls back to WebAssembly for photos (HEIC through libheif); a browser without an AAC encoder sends videos muted, with a note on the item. iOS prepares in the share extension too. |
 | Resumable uploads, background sending, retry | yes | yes | yes | Android: WorkManager with a progress notification. iOS: a background `URLSession`. |
 | Recipients, offline note | yes | yes | yes | |
 | Turn on notifications after the first send (PushOffer) | yes | differs | differs | Android asks for the notification permission once and explains it in Settings. iOS asks once after the first send, only in builds with APNs turned on (off by default). |

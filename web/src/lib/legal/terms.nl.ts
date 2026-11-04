@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Gebruiksvoorwaarden',
-	updated: '2026-10-27',
+	updated: '2026-11-04',
 	intro: [
 		'Deze voorwaarden gelden voor de gehoste kinframe-dienst op https://kinframe.appmire.be: de website, de aanmeldpagina’s en de kinframe-apps en kaders wanneer ze deze server gebruiken. Door een account aan te maken of de dienst te gebruiken, ga je ermee akkoord. Lees ook ons privacybeleid op https://kinframe.appmire.be/privacy.'
 	],
@@ -19,7 +19,7 @@ const doc: LegalDoc = {
 			title: 'De dienst',
 			body: [
 				'Met kinframe stuur je foto’s, video’s, onderschriften en afspraken naar de fotokaders van je familie, en zie je wanneer ze aankomen en hoe mensen reageren. De dienst is momenteel gratis. We kunnen functies toevoegen, wijzigen of weghalen naarmate de software zich ontwikkelt.',
-				'De kinframe-software is vrije, opensourcesoftware onder de GNU Affero General Public License (AGPL-3.0); de broncode staat op https://github.com/jeroentrappers/kinframe. Deze voorwaarden gaan over onze gehoste dienst, niet over de software: ze beperken de rechten die de AGPL je geeft niet, en je mag ook je eigen kinframe-server draaien.'
+				'De kinframe-software is vrije, opensourcesoftware onder de GNU Affero General Public License (AGPL-3.0); de broncode staat op https://github.com/jeroentrappers/kinframe. Deze voorwaarden gaan over onze gehoste dienst, niet over de software: ze beperken de rechten die de AGPL je geeft niet, en je mag ook je eigen kinframe-server draaien. De webapp bevat ook opensourcecomponenten onder hun eigen licenties, zoals de HEIC-decoder (libheif en libde265, LGPL-3.0); ze staan op https://kinframe.appmire.be/third-party-notices.txt.'
 			]
 		},
 		{

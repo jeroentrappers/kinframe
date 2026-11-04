@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Terms of use',
-	updated: '2026-10-27',
+	updated: '2026-11-04',
 	intro: [
 		'These terms apply to the hosted kinframe service at https://kinframe.appmire.be: the website, the sign-in pages, and the kinframe apps and frames when they use this server. By creating an account or using the service, you agree to them. Please also read our privacy policy at https://kinframe.appmire.be/privacy.'
 	],
@@ -19,7 +19,7 @@ const doc: LegalDoc = {
 			title: 'The service',
 			body: [
 				'kinframe lets you send photos, videos, captions and calendar events to photo frames of your family, and see when they arrive and how people react. The service is currently free of charge. We may add, change or remove features as the software develops.',
-				'The kinframe software is free and open-source software under the GNU Affero General Public License (AGPL-3.0); its source code is at https://github.com/jeroentrappers/kinframe. These terms are about our hosted service, not the software: they do not limit the rights the AGPL gives you, and you are free to run your own kinframe server instead.'
+				'The kinframe software is free and open-source software under the GNU Affero General Public License (AGPL-3.0); its source code is at https://github.com/jeroentrappers/kinframe. These terms are about our hosted service, not the software: they do not limit the rights the AGPL gives you, and you are free to run your own kinframe server instead. The web app also contains open-source components under their own licences, such as the HEIC decoder (libheif and libde265, LGPL-3.0); they are listed at https://kinframe.appmire.be/third-party-notices.txt.'
 			]
 		},
 		{

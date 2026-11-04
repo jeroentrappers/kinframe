@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Conditions d’utilisation',
-	updated: '2026-10-27',
+	updated: '2026-11-04',
 	intro: [
 		'Ces conditions s’appliquent au service kinframe hébergé sur https://kinframe.appmire.be : le site web, les pages de connexion, et les applications et cadres kinframe lorsqu’ils utilisent ce serveur. En créant un compte ou en utilisant le service, vous les acceptez. Lisez aussi notre politique de confidentialité sur https://kinframe.appmire.be/privacy.'
 	],
@@ -19,7 +19,7 @@ const doc: LegalDoc = {
 			title: 'Le service',
 			body: [
 				'kinframe vous permet d’envoyer des photos, des vidéos, des légendes et des événements vers les cadres photo de votre famille, et de voir quand ils arrivent et comment vos proches réagissent. Le service est actuellement gratuit. Nous pouvons ajouter, modifier ou retirer des fonctions au fil de l’évolution du logiciel.',
-				'Le logiciel kinframe est un logiciel libre sous licence GNU Affero General Public License (AGPL-3.0) ; son code source se trouve sur https://github.com/jeroentrappers/kinframe. Ces conditions concernent notre service hébergé, pas le logiciel : elles ne limitent pas les droits que vous confère l’AGPL, et vous êtes libre de faire tourner votre propre serveur kinframe.'
+				'Le logiciel kinframe est un logiciel libre sous licence GNU Affero General Public License (AGPL-3.0) ; son code source se trouve sur https://github.com/jeroentrappers/kinframe. Ces conditions concernent notre service hébergé, pas le logiciel : elles ne limitent pas les droits que vous confère l’AGPL, et vous êtes libre de faire tourner votre propre serveur kinframe. L’application web contient aussi des composants libres sous leurs propres licences, comme le décodeur HEIC (libheif et libde265, LGPL-3.0) ; ils sont listés sur https://kinframe.appmire.be/third-party-notices.txt.'
 			]
 		},
 		{

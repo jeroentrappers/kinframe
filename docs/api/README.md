@@ -187,10 +187,21 @@ not conform silently takes the normal pipeline, so preparing is always safe.
   device's `max_video_decode`, ≤ 30 fps, bitrate within the rendition budget (w·h·4, max 8 Mbps, +10 %), AAC or no
   audio, faststart. The frame then downloads the master's bytes and the server transcodes nothing. This applies to
   any master, prepared or not. Photos always get their cheap per-frame-size WebP and thumbnails.
-- Clients may fall back to uploading the original whenever preparation fails or is unsupported (HEIC without a
-  decoder, no WebCodecs, an encoder error). Mixed sends are fine. The Android family app never uploads full originals:
-  a file it can't prepare goes as it is only when it is already within the limits (long edge ≤ 2560 px; video
-  ≤ 1080p and ≤ 30 fps), otherwise the send stops with an error.
+- **Clients never upload full originals.** The Android and iOS family apps and the web app prepare every photo and
+  video. A file a client can't prepare goes as it is only when it is already within the limits (photo: long edge
+  ≤ 2560 px, and for the web app a JPEG or WebP; video: ≤ 1080p and ≤ 30 fps); otherwise the item shows an error and
+  isn't sent. A prepared photo that comes out bigger than its original may be replaced by the original, again only
+  when the original is within the limits. Mixed sends are fine. The server keeps accepting originals and processing
+  them itself (older clients, other tools); nothing about that changed.
+- **Web app.** Photos are prepared in a worker with the browser's own decoder (`createImageBitmap` +
+  `OffscreenCanvas`, WebP or JPEG). When that fails or is missing, a WebAssembly module (Rust, `web/prep-wasm`) decodes
+  JPEG, PNG, WebP, GIF (first frame), BMP and TIFF, scales with Lanczos3, applies the EXIF orientation, converts
+  matrix/TRC ICC profiles (Display P3, Adobe RGB…) to sRGB and writes a metadata-free JPEG q90. HEIC/HEIF (and AVIF)
+  that the browser can't decode (everything but Safari) is decoded by libheif + libde265 compiled to WebAssembly
+  (LGPL-3.0, `libheif-js`); its primary image is used, with the HEIF rotation and mirroring applied. HEVC decoding is
+  patent-encumbered in some countries, so that module is loaded only on demand, for such files. Videos need WebCodecs
+  (H.264 encoding); a browser without an AAC encoder sends the video muted and says so on the item.
+  `localStorage['kinframe.prep'] = 'wasm'` forces the WebAssembly path for testing.
 - The operator sees how masters were made in `GET /v1/operator/stats` → `media_pipeline` (`transcoded`,
   `prepared`, `fallback`, `reused_renditions`); each master is also logged with its path and the rejection reason.
 

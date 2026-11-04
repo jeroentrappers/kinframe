@@ -1,0 +1,107 @@
+kinframe web app: third-party notices
+=====================================
+
+kinframe is free software under the GNU Affero General Public License, version 3 or later (AGPL-3.0-or-later).
+Source code: https://github.com/jeroentrappers/kinframe
+
+This file lists the components that the web app ships as WebAssembly to prepare photos in your browser. They run
+only on your own device, and only when needed (see "When they are loaded" below). Each is distributed under its own
+licence, as listed here.
+
+
+When they are loaded
+--------------------
+
+- The photo preparation module (kinframe_prep_bg.wasm) is loaded only when the browser can't decode or encode a
+  photo itself.
+- The HEIF module (libheif.wasm) is loaded only for HEIC/HEIF (and AVIF) photos that the browser can't decode
+  itself. Safari decodes HEIC natively and never loads it.
+
+HEVC, the image format inside HEIC files, is covered by patents in some countries. kinframe only decodes it, on the
+user's own device, and only when the user picks such a photo. Operators who distribute kinframe are responsible for
+checking whether a patent licence applies to them.
+
+
+1. HEIF decoding: libheif.wasm (from the npm package libheif-js 1.23.5)
+-----------------------------------------------------------------------
+
+libheif-js 1.23.5, an Emscripten build of libheif by Kiril Vatev
+  https://github.com/catdad-experiments/libheif-js
+  Licence: LGPL-3.0
+
+libheif 1.23.5, copyright struktur AG and contributors
+  https://github.com/strukturag/libheif
+  Licence: LGPL-3.0 (GNU Lesser General Public License, version 3)
+
+libde265 1.0.15 (HEVC decoder), copyright struktur AG and contributors
+  https://github.com/strukturag/libde265
+  Licence: LGPL-3.0
+
+dav1d (AV1 decoder), copyright VideoLAN and dav1d authors
+  https://code.videolan.org/videolan/dav1d
+  Licence: BSD-2-Clause
+
+OpenH264 (H.264 decoder), copyright Cisco Systems
+  https://github.com/cisco/openh264
+  Licence: BSD-2-Clause
+
+libheif.wasm is an unmodified copy of the file in the libheif-js package. It is a separate file that the web app
+loads at run time, so you can replace it with your own build of libheif: build libheif's Emscripten target (or the
+libheif-js package) from source and put the resulting libheif.wasm in its place (the web app loads it from
+_app/immutable/workers/assets/libheif-*.wasm). The complete source code of these libraries is available at the
+addresses above. The texts of the GNU LGPL version 3 and the GNU GPL version 3 it builds on are at
+https://www.gnu.org/licenses/lgpl-3.0.txt and https://www.gnu.org/licenses/gpl-3.0.txt.
+
+
+2. Photo preparation: kinframe_prep_bg.wasm (web/prep-wasm in the kinframe source)
+---------------------------------------------------------------------------------
+
+The module itself is part of kinframe (AGPL-3.0-or-later). It is built from Rust with these crates:
+
+  adler2 2.0.1               0BSD OR MIT OR Apache-2.0       https://github.com/oyvindln/adler2
+  bitflags 2.13.2            MIT OR Apache-2.0               https://github.com/bitflags/bitflags
+  bytemuck 1.25.2            Zlib OR Apache-2.0 OR MIT       https://github.com/Lokathor/bytemuck
+  byteorder-lite 0.1.0       Unlicense OR MIT                https://github.com/image-rs/byteorder-lite
+  cfg-if 1.0.5               MIT OR Apache-2.0               https://github.com/rust-lang/cfg-if
+  color_quant 1.1.0          MIT                             https://github.com/image-rs/color_quant
+  crc32fast 1.5.4            MIT OR Apache-2.0               https://github.com/srijs/rust-crc32fast
+  fast_image_resize 6.1.0    MIT OR Apache-2.0               https://github.com/cykooz/fast_image_resize
+  fax 0.2.7                  MIT                             https://github.com/pdf-rs/fax
+  fdeflate 0.3.7             MIT OR Apache-2.0               https://github.com/image-rs/fdeflate
+  flate2 1.1.10              MIT OR Apache-2.0               https://github.com/rust-lang/flate2-rs
+  gif 0.14.2                 MIT OR Apache-2.0               https://github.com/image-rs/image-gif
+  half 2.7.1                 MIT OR Apache-2.0               https://github.com/VoidStarKat/half-rs
+  image 0.25.10              MIT OR Apache-2.0               https://github.com/image-rs/image
+  image-webp 0.2.4           MIT OR Apache-2.0               https://github.com/image-rs/image-webp
+  jpeg-encoder 0.7.1         (MIT OR Apache-2.0) AND IJG     https://github.com/vstroebel/jpeg-encoder
+  miniz_oxide 0.8.9, 0.9.1   MIT OR Zlib OR Apache-2.0       https://github.com/Frommi/miniz_oxide
+  moxcms 0.8.1               BSD-3-Clause OR Apache-2.0      https://github.com/awxkee/moxcms
+  num-traits 0.2.19          MIT OR Apache-2.0               https://github.com/rust-num/num-traits
+  png 0.18.1                 MIT OR Apache-2.0               https://github.com/image-rs/image-png
+  pxfm 0.1.30                BSD-3-Clause OR Apache-2.0      https://github.com/awxkee/pxfm
+  quick-error 2.0.1          MIT OR Apache-2.0               https://github.com/tailhook/quick-error
+  simd-adler32 0.3.10        MIT                             https://github.com/mcountryman/simd-adler32
+  thiserror 2.0.21           MIT OR Apache-2.0               https://github.com/dtolnay/thiserror
+  tiff 0.11.3                MIT                             https://github.com/image-rs/image-tiff
+  unicode-ident 1.0.27       (MIT OR Apache-2.0) AND Unicode-3.0  https://github.com/dtolnay/unicode-ident
+  wasm-bindgen 0.2.130       MIT OR Apache-2.0               https://github.com/wasm-bindgen/wasm-bindgen
+  wasm-bindgen-shared 0.2.130  MIT OR Apache-2.0             https://github.com/wasm-bindgen/wasm-bindgen
+  weezl 0.1.12               MIT OR Apache-2.0               https://github.com/image-rs/weezl
+  zerocopy 0.8.63            BSD-2-Clause OR Apache-2.0 OR MIT  https://github.com/google/zerocopy
+  zlib-rs 0.6.8              Zlib                            https://github.com/trifectatechfoundation/zlib-rs
+  zune-core 0.5.3            MIT OR Apache-2.0 OR Zlib       https://github.com/etemesi254/zune-image
+  zune-jpeg 0.5.15           MIT OR Apache-2.0 OR Zlib       https://github.com/etemesi254/zune-image
+  Rust standard library      MIT OR Apache-2.0               https://github.com/rust-lang/rust
+
+jpeg-encoder: this software is based in part on the work of the Independent JPEG Group.
+
+The licence texts are at https://spdx.org/licenses/ (for example https://spdx.org/licenses/MIT.html and
+https://spdx.org/licenses/Apache-2.0.html), and each crate ships its own in its source package.
+
+
+3. Video preparation
+--------------------
+
+mediabunny and @mediabunny/aac-encoder 1.61.3 (the AAC encoder is loaded only when the browser has none)
+  https://github.com/Vanilagy/mediabunny
+  Licence: MPL-2.0
