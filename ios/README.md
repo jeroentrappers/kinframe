@@ -22,7 +22,7 @@ against a dev server (see below). CI runs the unit tests on `macos-latest` witho
 
 ### Signing
 
-The app is published under the **Appmire** Apple Developer team. The team is set in exactly one place,
+`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM = QB4NQU492U`, Appmire GCV); device builds need that team signed in to Xcode, automatic
 `ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM`), and is empty until that team is added to Xcode; automatic
 signing does the rest. Never commit certificates or provisioning profiles.
 
