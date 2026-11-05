@@ -22,8 +22,8 @@ against a dev server (see below). CI runs the unit tests on `macos-latest` witho
 
 ### Signing
 
-`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM = QB4NQU492U`, Appmire GCV); device builds need that team signed in to Xcode, automatic
-`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM`), and is empty until that team is added to Xcode; automatic
+The app is published under the **Appmire** Apple Developer team. The team is set in exactly one place,
+`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM = QB4NQU492U`, Appmire GCV). Device builds need that team signed in to Xcode; automatic
 signing does the rest. Never commit certificates or provisioning profiles.
 
 The app and the share extension share data through the App Group `group.app.kinframe.family` and the keychain group
