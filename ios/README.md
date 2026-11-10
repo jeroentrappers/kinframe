@@ -41,8 +41,8 @@ override with `MARKETING_VERSION=…` and `BUILD_NUMBER=…`.
 
 The app, the share extension and KinframeKit each carry a `PrivacyInfo.xcprivacy`: no tracking, UserDefaults
 (`CA92.1`, `1C8F.1` for the App Group) and file timestamps (`C617.1`, the outbox) as required-reason APIs, and the
-collected data (email, name, user ID, photos and videos, all for app functionality). Keep them in step with the
-App Privacy answers in App Store Connect.
+collected data (email, name, user ID, photos and videos, other user content, all for app functionality). Keep them
+in step with the App Privacy answers in App Store Connect (drafted in `ios/AppStore.md`).
 
 ### Against a dev server
 
