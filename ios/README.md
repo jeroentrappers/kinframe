@@ -31,6 +31,19 @@ The app and the share extension share data through the App Group `group.app.kinf
 `applinks:kinframe.appmire.be`; the server serves the matching `apple-app-site-association` when
 `KINFRAME_APPLE_TEAM_ID` is set (see `server/README.md`).
 
+### Releasing
+
+`ios/tools/release.sh` archives a Release build and exports it with `ios/ExportOptions.plist` to `ios/build/export`;
+`ios/tools/release.sh --upload` also uploads it to App Store Connect for TestFlight. It signs headless with an App
+Store Connect API key, read from `~/.appstoreconnect/env` (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH`). The
+version is the latest `vX.Y.Z` tag without its pre-release suffix and the build number is the commit count;
+override with `MARKETING_VERSION=…` and `BUILD_NUMBER=…`.
+
+The app, the share extension and KinframeKit each carry a `PrivacyInfo.xcprivacy`: no tracking, UserDefaults
+(`CA92.1`, `1C8F.1` for the App Group) and file timestamps (`C617.1`, the outbox) as required-reason APIs, and the
+collected data (email, name, user ID, photos and videos, all for app functionality). Keep them in step with the
+App Privacy answers in App Store Connect.
+
 ### Against a dev server
 
 A dev server runs in dev-auth mode, so you sign in with any email instead of Logto:
