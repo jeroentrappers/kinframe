@@ -52,6 +52,125 @@
         }
       }
     },
+    "account.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account verwijderen"
+          }
+        }
+      }
+    },
+    "account.deleteBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account, profile photo and sign-in are deleted for good, and you leave all your frames. This can’t be undone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account, je profielfoto en je aanmelding worden voorgoed verwijderd, en je verlaat al je kaders. Dit kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
+    "account.deleteItems": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also remove the photos and videos I sent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook de foto’s en video’s verwijderen die ik stuurde"
+          }
+        }
+      }
+    },
+    "account.deleteItemsHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otherwise they stay on the frames, with your name."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anders blijven ze op de kaders staan, met je naam."
+          }
+        }
+      }
+    },
+    "account.deleteOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You own {frames}. Hand each frame over to another member, or remove it, before you delete your account."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jij bent eigenaar van {frames}. Geef elk kader aan een ander lid of verwijder het voor je je account verwijdert."
+          }
+        }
+      }
+    },
+    "account.deleteTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete your account?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account verwijderen?"
+          }
+        }
+      }
+    },
+    "account.deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account has been deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account is verwijderd."
+          }
+        }
+      }
+    },
     "add.alreadyBody": {
       "extractionState": "manual",
       "localizations": {
@@ -16491,6 +16610,40 @@
         }
       }
     },
+    "send.issueClipPrep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser can’t convert the motion of this Live Photo. Turn Live off to send the photo only."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze browser kan de beweging van deze Live Photo niet omzetten. Zet Live uit om alleen de foto te sturen."
+          }
+        }
+      }
+    },
+    "send.issuePhotoPrep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser can’t prepare this photo, and it’s too large to send as it is. Try another browser, or save it as a JPEG first."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze browser kan deze foto niet voorbereiden, en hij is te groot om zo te versturen. Probeer een andere browser, of bewaar hem eerst als JPEG."
+          }
+        }
+      }
+    },
     "send.issueTooLarge": {
       "extractionState": "manual",
       "localizations": {
@@ -16521,6 +16674,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Te lang. Video’s mogen tot {max} duren."
+          }
+        }
+      }
+    },
+    "send.issueVideoPrep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser can’t convert this video, and it’s larger than 1080p or 30 fps. Try a recent Chrome, Edge or Safari."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze browser kan deze video niet omzetten, en hij is groter dan 1080p of 30 fps. Probeer een recente versie van Chrome, Edge of Safari."
           }
         }
       }
@@ -16650,13 +16820,30 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your browser can’t preview this file, but it will be sent as is and the frame will show it."
+            "value": "Your browser can’t preview this file, but it will still be converted and sent, and the frame will show it."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je browser kan dit bestand niet tonen, maar het wordt gewoon verstuurd en het kader toont het wel."
+            "value": "Je browser kan dit bestand niet tonen, maar het wordt toch omgezet en verstuurd, en het kader toont het wel."
+          }
+        }
+      }
+    },
+    "send.noSoundNote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This browser can’t encode sound, so this video will be sent without sound."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze browser kan geen geluid coderen, dus deze video wordt zonder geluid verstuurd."
           }
         }
       }

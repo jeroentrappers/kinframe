@@ -4,7 +4,7 @@ import PhotosUI
 import SwiftUI
 import UserNotifications
 
-/// Profile (name, photo), language, server and sign-out.
+/// Profile (name, photo), language, server, sign-out and account deletion.
 struct SettingsTab: View {
     @Environment(AppModel.self) private var app
     @State private var name = ""
@@ -18,6 +18,7 @@ struct SettingsTab: View {
     @State private var pushStatus: UNAuthorizationStatus = .notDetermined
     @State private var pushBusy = false
     @State private var debugReservations = false
+    @State private var deletingAccount = false
     @Environment(\.openURL) private var openURL
     @FocusState private var nameFocused: Bool
 
@@ -49,6 +50,7 @@ struct SettingsTab: View {
                         }
                         Button(L("settings.signOut"), role: .destructive) { confirmSignOut = true }
                             .id("signOut")
+                        Button(L("account.delete"), role: .destructive) { deletingAccount = true }
                     } footer: {
                         Text(L("settings.about")).frame(maxWidth: .infinity).padding(.top, 12)
                     }
@@ -70,6 +72,7 @@ struct SettingsTab: View {
             .confirmationDialog(L("settings.signOut"), isPresented: $confirmSignOut, titleVisibility: .hidden) {
                 Button(L("settings.signOut"), role: .destructive) { Task { await app.signOut() } }
             }
+            .sheet(isPresented: $deletingAccount) { DeleteAccountSheet() }
             .alert(L("ios.server.changeTitle"), isPresented: $confirmChangeServer) {
                 Button(L("ios.server.change"), role: .destructive) {
                     Task {
@@ -91,6 +94,7 @@ struct SettingsTab: View {
             .task {
                 try? await Task.sleep(for: .seconds(1.5))
                 if DebugLaunch.takeSheet("reservations") { debugReservations = true }
+                if DebugLaunch.takeSheet("deleteAccount") { deletingAccount = true }
             }
             #endif
             .onAppear { name = app.me?.displayName ?? "" }
