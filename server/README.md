@@ -58,6 +58,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OIDC_JWKS_URL` | from OIDC discovery | Override the JWKS location |
 | `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` / `KINFRAME_OIDC_DESKTOP_CLIENT_ID` | — | Published in discovery |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `desktop_client_id`, `api_resource`). Read at start; fills in the OIDC settings above when their env vars are unset (env vars win) |
+| `KINFRAME_LOGTO_M2M_ID` / `KINFRAME_LOGTO_M2M_SECRET` | — | The `kinframe bootstrap` M2M app (printed once by `bootstrap-logto`). When set, `DELETE /v1/me` also deletes the user's Logto account, with its social sign-in links; without them only the kinframe account is deleted |
+| `KINFRAME_LOGTO_URL` | the issuer without `/oidc` | Where the server reaches Logto for that (e.g. `http://logto:3001`); requests carry the issuer's host in `Host`/`X-Forwarded-*` |
 | `KINFRAME_DEV_AUTH` | off | Enable `POST /dev/token` (never in production) |
 | `KINFRAME_TRUST_PROXY` | off | Use `X-Forwarded-For`/`X-Real-IP` for client IPs (rate limits) |
 | `KINFRAME_WORKERS` | CPUs/2 | Media worker goroutines |

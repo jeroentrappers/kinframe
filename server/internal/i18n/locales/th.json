@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "เจ้าของปิดการนำสมาชิกออกบนกรอบรูป",
   "this frame has not been claimed yet": "กรอบรูปนี้ยังไม่มีเจ้าของ",
   "transfer or remove your frames before deleting your account": "โอนหรือนำกรอบรูปของคุณออกก่อนลบบัญชี",
+  "the sign-in account could not be deleted; try again later": "ไม่สามารถลบบัญชีสำหรับลงชื่อเข้าใช้ได้ โปรดลองอีกครั้งในภายหลัง",
   "unknown device or wrong secret": "ไม่รู้จักอุปกรณ์หรือรหัสลับไม่ถูกต้อง",
   "unknown variant": "ไม่รู้จักรูปแบบนี้",
   "upload already used": "ไฟล์ที่อัปโหลดถูกใช้ไปแล้ว",

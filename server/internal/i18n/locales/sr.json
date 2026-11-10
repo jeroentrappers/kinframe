@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "власник је онемогућио уклањање чланова на раму",
   "this frame has not been claimed yet": "овај рам још нема власника",
   "transfer or remove your frames before deleting your account": "пренесите или уклоните своје рамове пре брисања налога",
+  "the sign-in account could not be deleted; try again later": "налог за пријаву није могао да се избрише; покушајте поново касније",
   "unknown device or wrong secret": "непознат уређај или погрешна тајна",
   "unknown variant": "непозната варијанта",
   "upload already used": "отпремање је већ искоришћено",

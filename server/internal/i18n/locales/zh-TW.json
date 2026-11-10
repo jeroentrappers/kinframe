@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "擁有者已停用在相框上移除成員的功能",
   "this frame has not been claimed yet": "這台相框尚未被認領",
   "transfer or remove your frames before deleting your account": "刪除帳戶前，請先轉移或移除你的相框",
+  "the sign-in account could not be deleted; try again later": "無法刪除登入帳號，請稍後再試",
   "unknown device or wrong secret": "未知的裝置或密鑰錯誤",
   "unknown variant": "未知的變體",
   "upload already used": "這個上傳已被使用",

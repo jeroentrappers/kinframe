@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "владелец запретил удалять участников на рамке",
   "this frame has not been claimed yet": "у этой рамки ещё нет владельца",
   "transfer or remove your frames before deleting your account": "перед удалением аккаунта передайте или удалите свои рамки",
+  "the sign-in account could not be deleted; try again later": "не удалось удалить учётную запись для входа; попробуйте позже",
   "unknown device or wrong secret": "неизвестное устройство или неверный секрет",
   "unknown variant": "неизвестный вариант",
   "upload already used": "загрузка уже использована",

@@ -161,7 +161,11 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			},
 		}
 	}
-	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg})
+	var accounts api.AccountDeleter
+	if cfg.LogtoM2MID != "" {
+		accounts = &auth.LogtoAccounts{Endpoint: cfg.LogtoEndpoint, URL: cfg.LogtoURL, ID: cfg.LogtoM2MID, Secret: cfg.LogtoM2MSecret, HTTP: &http.Client{Timeout: 15 * time.Second}}
+	}
+	srv, err := api.New(api.Deps{Config: cfg, Store: st, Hub: hub, Notifier: n, Blob: store, Scratch: scratch, Tools: tools, Log: log, Users: verifiers, Dev: dev, Releases: mirror, Weather: wx, Calendar: cal, Registry: reg, Accounts: accounts})
 	if err != nil {
 		return nil, err
 	}

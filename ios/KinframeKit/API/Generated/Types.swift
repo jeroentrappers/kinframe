@@ -22,7 +22,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/patch(updateMe)`.
     func updateMe(_ input: Operations.UpdateMe.Input) async throws -> Operations.UpdateMe.Output
-    /// Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+    /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.
@@ -652,7 +652,7 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+    /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.

@@ -78,7 +78,9 @@ Procedure:
    `docker compose logs logto-bootstrap | grep KINFRAME_LOGTO_M2M`.
 3. Store `KINFRAME_LOGTO_M2M_ID` and `KINFRAME_LOGTO_M2M_SECRET` in the vault and set them for the job. Later runs use
    them instead of the admin password, which can then be removed from the job's environment (keep it in the vault: it
-   is the console login).
+   is the console login). Set them for the **server** too, with `KINFRAME_LOGTO_URL: http://logto:3001`: then
+   deleting an account in the apps also deletes the Logto account (App Store and Play require in-app deletion).
+   Without them, only the kinframe account is deleted and the Logto user stays behind.
 4. Operators: list their emails in `KINFRAME_OPERATOR_EMAILS`. Users must have signed up before the role can be
    assigned; re-run the job after they did (`docker compose run --rm logto-bootstrap`). Their clients must request the
    `kinframe:operate` scope to get it in the token.
