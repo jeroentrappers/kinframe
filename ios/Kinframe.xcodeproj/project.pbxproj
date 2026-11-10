@@ -834,7 +834,7 @@
 				TargetAttributes = {
 					21754D8BB1D4D7E463768693 = {
 						DevelopmentTeam = QB4NQU492U;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					417FFB547958DE84AB047F18 = {
 						DevelopmentTeam = QB4NQU492U;
@@ -851,7 +851,7 @@
 					};
 					C04FB9D14F4D79DC93E5135A = {
 						DevelopmentTeam = QB4NQU492U;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -1117,6 +1117,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = Kinframe/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1124,6 +1127,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family;
 				PRODUCT_NAME = Kinframe;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development app.kinframe.family";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1133,6 +1137,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = KinframeShare/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1141,6 +1148,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.share;
 				PRODUCT_NAME = KinframeShare;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore app.kinframe.family.share";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1306,6 +1314,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = KinframeShare/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1314,6 +1325,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.share;
 				PRODUCT_NAME = KinframeShare;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development app.kinframe.family.share";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1384,6 +1396,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = Kinframe/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1391,6 +1406,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family;
 				PRODUCT_NAME = Kinframe;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore app.kinframe.family";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

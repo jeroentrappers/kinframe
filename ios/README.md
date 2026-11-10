@@ -23,8 +23,24 @@ against a dev server (see below). CI runs the unit tests on `macos-latest` witho
 ### Signing
 
 The app is published under the **Appmire** Apple Developer team. The team is set in exactly one place,
-`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM = QB4NQU492U`, Appmire GCV). Device builds need that team signed in to Xcode; automatic
-signing does the rest. Never commit certificates or provisioning profiles.
+`ios/Config/Signing.xcconfig` (`DEVELOPMENT_TEAM = QB4NQU492U`, Appmire GCV). Simulator builds sign ad hoc and need
+no account. On a device the app and the share extension sign **manually** with profiles from
+[fastlane match](https://docs.fastlane.tools/actions/match/): `match Development <bundle id>` for Debug,
+`match AppStore <bundle id>` for Release (`project.yml`). The certificates and profiles live encrypted in the private
+repo `jeroentrappers/apple-certificates` (branch `appmire`). Never commit certificates or profiles here.
+
+fastlane is pinned in `ios/Gemfile` (`bundle install` once, then `bundle exec fastlane <lane>` from `ios/`). It needs
+an App Store Connect API key (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH`) and `MATCH_PASSWORD`, read from
+`~/.appstoreconnect/env` and `~/.appstoreconnect/signing.env` when not set. Signing identities go into a dedicated
+keychain (`~/Library/Keychains/kinframe-signing.keychain-db`, password `KINFRAME_KEYCHAIN_PASSWORD`); on CI
+(`CI=true`) into a temporary one.
+
+| Lane | What |
+|---|---|
+| `certificates` | Fetch the development and App Store certificates and profiles, read-only |
+| `register_device name:"…" udid:…` | Register a device and regenerate the development profiles with it |
+| `renew_certificates` | Create missing certificates and profiles (changes the Apple account) |
+| `release [upload:true]` | Archive Release and export the .ipa to `ios/build`; `upload:true` sends it to TestFlight |
 
 The app and the share extension share data through the App Group `group.app.kinframe.family` and the keychain group
 `$(AppIdentifierPrefix)app.kinframe.family.shared`. Universal Links use the associated domain
@@ -33,11 +49,10 @@ The app and the share extension share data through the App Group `group.app.kinf
 
 ### Releasing
 
-`ios/tools/release.sh` archives a Release build and exports it with `ios/ExportOptions.plist` to `ios/build/export`;
-`ios/tools/release.sh --upload` also uploads it to App Store Connect for TestFlight. It signs headless with an App
-Store Connect API key, read from `~/.appstoreconnect/env` (`ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_PATH`). The
-version is the latest `vX.Y.Z` tag without its pre-release suffix and the build number is the commit count;
-override with `MARKETING_VERSION=…` and `BUILD_NUMBER=…`.
+`bundle exec fastlane release` archives a Release build signed with the App Store profiles and exports it with
+`ios/ExportOptions.plist`; `release upload:true` also uploads it to App Store Connect for TestFlight. The version is
+the latest `vX.Y.Z` tag without its pre-release suffix and the build number is the commit count; override with
+`MARKETING_VERSION=…` and `BUILD_NUMBER=…`.
 
 The app, the share extension and KinframeKit each carry a `PrivacyInfo.xcprivacy`: no tracking, UserDefaults
 (`CA92.1`, `1C8F.1` for the App Group) and file timestamps (`C617.1`, the outbox) as required-reason APIs, and the

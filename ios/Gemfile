@@ -1,0 +1,4 @@
+# fastlane manages signing (match) and App Store uploads; run it with `bundle exec fastlane <lane>` from ios/.
+source "https://rubygems.org"
+
+gem "fastlane", "2.241.2"

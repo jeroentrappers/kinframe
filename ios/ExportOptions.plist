@@ -7,9 +7,16 @@
 	<key>teamID</key>
 	<string>QB4NQU492U</string>
 	<key>signingStyle</key>
-	<string>automatic</string>
-	<key>destination</key>
-	<string>export</string>
+	<string>manual</string>
+	<key>signingCertificate</key>
+	<string>Apple Distribution</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>app.kinframe.family</key>
+		<string>match AppStore app.kinframe.family</string>
+		<key>app.kinframe.family.share</key>
+		<string>match AppStore app.kinframe.family.share</string>
+	</dict>
 	<key>uploadSymbols</key>
 	<true/>
 	<key>manageAppVersionAndBuildNumber</key>

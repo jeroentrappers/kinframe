@@ -1,0 +1,9 @@
+# Certificates and provisioning profiles live encrypted in a private repo (one branch per team); MATCH_PASSWORD
+# decrypts them. `bundle exec fastlane certificates` fetches them read-only; see ios/README.md.
+git_url("git@github.com:jeroentrappers/apple-certificates.git")
+storage_mode("git")
+git_branch("appmire")
+team_id("QB4NQU492U")
+app_identifier(["app.kinframe.family", "app.kinframe.family.share"])
+platform("ios")
+readonly(true)
