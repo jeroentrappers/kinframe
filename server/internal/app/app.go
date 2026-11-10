@@ -275,6 +275,9 @@ func (a *App) Maintain(ctx context.Context) {
 	if err := a.Store.PruneIdempotency(ctx); err != nil {
 		log.Error("prune idempotency keys", "err", err)
 	}
+	if err := a.Store.PruneDeletedSubjects(ctx); err != nil {
+		log.Error("prune deleted subjects", "err", err)
+	}
 	// Scratch directories left behind by a crash (normal runs remove their own).
 	if n := pruneScratch(filepath.Join(a.Cfg.DataDir, "tmp"), 6*time.Hour); n > 0 {
 		log.Info("removed stale scratch files", "count", n)

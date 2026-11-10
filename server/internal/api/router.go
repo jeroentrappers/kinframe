@@ -153,7 +153,10 @@ func (s *Server) resolveUser(ctx context.Context, token string) (*principal, *pr
 		}
 		return nil, authProblem(err)
 	}
-	u, err := s.st.UpsertUserBySub(ctx, claims.Subject, claims.Email, claims.Name)
+	u, err := s.st.UpsertUserBySub(ctx, claims.Subject, claims.Email, claims.Name, claims.IssuedAt)
+	if errors.Is(err, store.ErrAccountDeleted) {
+		return nil, problem.New(problem.Unauthorized, "invalid access token")
+	}
 	if err != nil {
 		p := problem.Internal(err)
 		return nil, p
