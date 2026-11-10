@@ -149,6 +149,18 @@ class PushState {
 		}
 	}
 
+	/** After the account was deleted: the server already dropped its endpoints, so only unsubscribe this browser. */
+	async forget() {
+		store.set(ENDPOINT_KEY, null);
+		try {
+			const reg = await navigator.serviceWorker.getRegistration('/');
+			await (await reg?.pushManager.getSubscription())?.unsubscribe();
+		} catch {
+			/* no service worker or no subscription */
+		}
+		this.subscribed = false;
+	}
+
 	/** Push texts are localized by the server; tell it when the language changes. */
 	async syncLocale() {
 		if (!this.subscribed) return;

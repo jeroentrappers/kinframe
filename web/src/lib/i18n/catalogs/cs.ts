@@ -521,6 +521,13 @@ const cs: Catalog = {
 	'settings.signedInAs': 'Přihlášeno jako {name}',
 	'settings.signOut': 'Odhlásit se',
 	'settings.about': 'kinframe · svobodný software pod licencí AGPL-3.0 · bez sledování',
+	'account.delete': 'Smazat účet',
+	'account.deleteTitle': 'Smazat váš účet?',
+	'account.deleteBody': 'Váš účet, profilová fotka a přihlášení budou nadobro smazány a opustíte všechny své rámečky. Tuto akci nelze vrátit.',
+	'account.deleteItems': 'Odebrat i fotky a videa, které jsem poslal(a)',
+	'account.deleteItemsHint': 'Jinak na rámečcích zůstanou, s vaším jménem.',
+	'account.deleteOwner': 'Vlastníte {frames}. Než smažete účet, předejte každý rámeček jinému členovi, nebo ho odeberte.',
+	'account.deleted': 'Váš účet byl smazán.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Přihlaste se prosím znovu.',

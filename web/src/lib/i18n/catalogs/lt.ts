@@ -522,6 +522,13 @@ const lt: Catalog = {
 	'settings.signedInAs': 'Prisijungta kaip {name}',
 	'settings.signOut': 'Atsijungti',
 	'settings.about': 'kinframe · laisvoji programinė įranga pagal AGPL-3.0 · jokio sekimo',
+	'account.delete': 'Ištrinti paskyrą',
+	'account.deleteTitle': 'Ištrinti jūsų paskyrą?',
+	'account.deleteBody': 'Jūsų paskyra, profilio nuotrauka ir prisijungimas ištrinami visam laikui, o jūs paliekate visus savo rėmelius. To atšaukti negalima.',
+	'account.deleteItems': 'Taip pat pašalinti mano išsiųstas nuotraukas ir vaizdo įrašus',
+	'account.deleteItemsHint': 'Kitaip jie liks rėmeliuose su jūsų vardu.',
+	'account.deleteOwner': 'Jums priklauso: {frames}. Prieš ištrindami paskyrą perduokite kiekvieną rėmelį kitam nariui arba jį pašalinkite.',
+	'account.deleted': 'Jūsų paskyra ištrinta.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Prisijunkite dar kartą.',

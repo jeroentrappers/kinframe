@@ -506,6 +506,13 @@ const vi: Catalog = {
 	'settings.signedInAs': 'Đã đăng nhập là {name}',
 	'settings.signOut': 'Đăng xuất',
 	'settings.about': 'kinframe · phần mềm tự do theo giấy phép AGPL-3.0 · không theo dõi',
+	'account.delete': 'Xóa tài khoản',
+	'account.deleteTitle': 'Xóa tài khoản của bạn?',
+	'account.deleteBody': 'Tài khoản, ảnh hồ sơ và thông tin đăng nhập của bạn sẽ bị xóa vĩnh viễn, và bạn sẽ rời khỏi tất cả khung ảnh. Không thể hoàn tác.',
+	'account.deleteItems': 'Gỡ cả ảnh và video tôi đã gửi',
+	'account.deleteItemsHint': 'Nếu không, chúng vẫn ở trên khung ảnh kèm tên của bạn.',
+	'account.deleteOwner': 'Bạn là chủ sở hữu của {frames}. Hãy chuyển từng khung ảnh cho thành viên khác hoặc xóa nó trước khi xóa tài khoản.',
+	'account.deleted': 'Tài khoản của bạn đã bị xóa.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Vui lòng đăng nhập lại.',

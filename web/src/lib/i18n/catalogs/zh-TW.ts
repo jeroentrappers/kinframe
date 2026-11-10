@@ -504,6 +504,13 @@ const zhTW: Catalog = {
 	'settings.signedInAs': '目前登入身分：{name}',
 	'settings.signOut': '登出',
 	'settings.about': 'kinframe · 採用 AGPL-3.0 授權的自由軟體 · 不追蹤',
+	'account.delete': '刪除帳號',
+	'account.deleteTitle': '要刪除你的帳號嗎？',
+	'account.deleteBody': '你的帳號、大頭貼和登入資訊將永久刪除，你也會退出所有相框。此操作無法復原。',
+	'account.deleteItems': '同時移除我傳送的照片和影片',
+	'account.deleteItemsHint': '否則它們會以你的名字留在相框上。',
+	'account.deleteOwner': '你是 {frames} 的擁有者。刪除帳號前，請將每個相框轉移給其他成員或將其移除。',
+	'account.deleted': '你的帳號已刪除。',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': '請重新登入。',

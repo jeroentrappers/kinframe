@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacybeleid',
-	updated: '2026-10-28',
+	updated: '2026-11-10',
 	intro: [
 		'Met kinframe sturen families foto’s, video’s en berichten naar een fotokader thuis. Dit beleid legt uit welke persoonsgegevens de gehoste kinframe-dienst op https://kinframe.appmire.be verzamelt, waarom, wie er nog bij betrokken is, hoelang we ze bewaren en hoe je ze kunt laten wissen. Het geldt voor de website, de kinframe-apps en kaders wanneer ze deze server gebruiken, de aanmeldpagina’s op auth.kinframe.appmire.be en de webshop voor reservaties.',
 		'Kort gezegd: we gebruiken je gegevens alleen om de dienst te laten werken. Geen advertenties, geen analytics en geen tracking, en we verkopen of delen niets voor marketing. De servers staan in Duitsland.'
@@ -116,7 +116,7 @@ const doc: LegalDoc = {
 						'Meldingen: zet ze uit bij Instellingen; het pushabonnement wordt gewist.'
 					]
 				},
-				'Je account verwijderen: daar is in de apps nog geen knop voor. Stuur een e-mail naar jeroen@appmire.be vanaf het adres waarmee je je aanmeldt, met als onderwerp “Verwijder mijn kinframe-account”, en zeg of de foto’s die je stuurde op de kaders mogen blijven of verwijderd moeten worden. We verwijderen je account, je aanmeldidentiteit (ook een koppeling met Apple, Google, Microsoft, Facebook of GitHub), je profielfoto en je pushabonnementen, en op vraag je foto’s. Ben je eigenaar van een kader, laat dan weten of we het moeten verwijderen of aan een ander lid overdragen. We doen dit binnen een maand en bevestigen het per e-mail. Items die je op een kader laat staan, tonen nog steeds je naam.',
+				'Je account verwijderen: ga in de app of op de website naar Instellingen → Account verwijderen. Je kiest of de foto’s en video’s die je stuurde op de kaders blijven of verwijderd worden. Je account, je aanmeldidentiteit (ook een koppeling met Apple, Google, Microsoft, Facebook of GitHub), je profielfoto en je pushabonnementen worden meteen verwijderd, en je verlaat al je kaders. Ben je eigenaar van een kader, geef het dan eerst aan een ander lid of verwijder het. Items die je op een kader laat staan, tonen nog steeds je naam. Je kunt ook een e-mail sturen naar jeroen@appmire.be vanaf het adres waarmee je je aanmeldt, met als onderwerp “Verwijder mijn kinframe-account”: dan doen we het binnen een maand en bevestigen we het per e-mail.',
 				'Bestanden volledig wissen: wil je dat de bewaarde bestanden van foto’s die je stuurde, of alle gegevens van een verwijderd kader, van onze servers gewist worden (en niet alleen uit beeld verdwijnen), vraag het ons op hetzelfde adres en we doen het binnen een maand.',
 				'Meldde je je aan met Facebook, dan kun je kinframe ook uit je Facebook-account verwijderen via Instellingen en privacy → Instellingen → Apps en websites. Dan deelt Facebook geen gegevens meer met ons; om de gegevens te wissen die we al hebben, stuur je ons de e-mail hierboven. Hetzelfde geldt voor Apple, Google, Microsoft en GitHub in hun accountinstellingen.',
 				'Onze back-ups worden in de normale back-upcyclus overschreven, zodat gewiste gegevens er na verloop van tijd ook uit verdwijnen.'

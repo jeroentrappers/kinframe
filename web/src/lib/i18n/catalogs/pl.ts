@@ -537,6 +537,13 @@ const pl: Catalog = {
 	'settings.signedInAs': 'Zalogowano jako {name}',
 	'settings.signOut': 'Wyloguj się',
 	'settings.about': 'kinframe · wolne oprogramowanie na licencji AGPL-3.0 · bez śledzenia',
+	'account.delete': 'Usuń konto',
+	'account.deleteTitle': 'Usunąć Twoje konto?',
+	'account.deleteBody': 'Twoje konto, zdjęcie profilowe i dane logowania zostaną trwale usunięte, a Ty opuścisz wszystkie swoje ramki. Tego nie można cofnąć.',
+	'account.deleteItems': 'Usuń też zdjęcia i filmy, które wysłałem/am',
+	'account.deleteItemsHint': 'W przeciwnym razie zostaną na ramkach, z Twoim imieniem.',
+	'account.deleteOwner': 'Jesteś właścicielem: {frames}. Zanim usuniesz konto, przekaż każdą ramkę innemu członkowi albo ją usuń.',
+	'account.deleted': 'Twoje konto zostało usunięte.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Zaloguj się ponownie.',

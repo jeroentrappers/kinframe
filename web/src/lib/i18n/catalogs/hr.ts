@@ -521,6 +521,13 @@ const hr: Catalog = {
 	'settings.signedInAs': 'Prijavljeni ste kao {name}',
 	'settings.signOut': 'Odjava',
 	'settings.about': 'kinframe · slobodan softver pod licencom AGPL-3.0 · bez praćenja',
+	'account.delete': 'Izbriši račun',
+	'account.deleteTitle': 'Izbrisati vaš račun?',
+	'account.deleteBody': 'Vaš račun, profilna fotografija i prijava trajno se brišu i napuštate sve svoje okvire. To se ne može poništiti.',
+	'account.deleteItems': 'Ukloni i fotografije i videozapise koje sam poslao/la',
+	'account.deleteItemsHint': 'Inače ostaju na okvirima, s vašim imenom.',
+	'account.deleteOwner': 'Vlasnik ste okvira {frames}. Prije brisanja računa predajte svaki okvir drugom članu ili ga uklonite.',
+	'account.deleted': 'Vaš je račun izbrisan.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Ponovno se prijavite.',

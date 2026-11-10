@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacy policy',
-	updated: '2026-10-28',
+	updated: '2026-11-10',
 	intro: [
 		'kinframe lets families send photos, videos and messages to a photo frame at home. This policy explains which personal data the hosted kinframe service at https://kinframe.appmire.be collects, why, who else is involved, how long it is kept and how you can have it deleted. It covers the website, the kinframe apps and frames when they use this server, the sign-in pages at auth.kinframe.appmire.be and the pre-order shop.',
 		'In short: we only use your data to run the service. There are no ads, no analytics and no tracking, and nothing is sold or shared for marketing. The servers are in Germany.'
@@ -116,7 +116,7 @@ const doc: LegalDoc = {
 						'Notifications: turn them off in Settings; the push subscription is deleted.'
 					]
 				},
-				'Deleting your account: the apps do not have a button for this yet. Send an e-mail to jeroen@appmire.be from the address you sign in with, with the subject “Delete my kinframe account”, and say whether the photos you sent should stay on the frames or be removed. We will delete your account, your sign-in identity (including any link to Apple, Google, Microsoft, Facebook or GitHub), your profile photo and your push subscriptions, and remove your photos if you ask. If you own a frame, tell us whether to remove it or to hand it over to another member. We do this within one month and confirm by e-mail. Items you choose to leave on a frame keep showing your name.',
+				'Deleting your account: in the app or on the website, go to Settings → Delete account. You choose whether the photos and videos you sent stay on the frames or are removed. Your account, your sign-in identity (including any link to Apple, Google, Microsoft, Facebook or GitHub), your profile photo and your push subscriptions are deleted right away, and you leave all your frames. If you own a frame, first hand it over to another member or remove it. Items you leave on a frame keep showing your name. You can also send an e-mail to jeroen@appmire.be from the address you sign in with, with the subject “Delete my kinframe account”: we then do it within one month and confirm by e-mail.',
 				'Erasing files completely: if you want the stored files of photos you sent, or all data of a removed frame, erased from our servers (and not only removed from view), ask us at the same address and we will do it within one month.',
 				'If you signed in with Facebook, you can also remove kinframe from your Facebook account under Settings & privacy → Settings → Apps and websites. That stops Facebook from sharing data with us; to delete the data we already have, send us the e-mail above. The same applies to Apple, Google, Microsoft and GitHub in their account settings.',
 				'Our backups are overwritten in the normal backup cycle, so deleted data disappears from them over time.'

@@ -521,6 +521,13 @@ const fr: Catalog = {
 	'settings.signedInAs': 'Connecté en tant que {name}',
 	'settings.signOut': 'Se déconnecter',
 	'settings.about': 'kinframe · logiciel libre sous AGPL-3.0 · sans pistage',
+	'account.delete': 'Supprimer le compte',
+	'account.deleteTitle': 'Supprimer votre compte ?',
+	'account.deleteBody': 'Votre compte, votre photo de profil et votre connexion sont supprimés définitivement, et vous quittez tous vos cadres. Cette action est irréversible.',
+	'account.deleteItems': 'Retirer aussi les photos et vidéos que j’ai envoyées',
+	'account.deleteItemsHint': 'Sinon, elles restent sur les cadres, avec votre nom.',
+	'account.deleteOwner': 'Vous êtes propriétaire de {frames}. Cédez chaque cadre à un autre membre ou supprimez-le avant de supprimer votre compte.',
+	'account.deleted': 'Votre compte a été supprimé.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Veuillez vous reconnecter.',

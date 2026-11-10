@@ -510,6 +510,13 @@ const he: Catalog = {
 	'settings.signedInAs': 'מחובר בתור {name}',
 	'settings.signOut': 'יציאה',
 	'settings.about': 'kinframe · תוכנה חופשית ברישיון AGPL-3.0 · בלי מעקב',
+	'account.delete': 'מחיקת החשבון',
+	'account.deleteTitle': 'למחוק את החשבון?',
+	'account.deleteBody': 'החשבון, תמונת הפרופיל והכניסה שלך יימחקו לצמיתות, ויוצאים מכל המסגרות. אי אפשר לבטל את זה.',
+	'account.deleteItems': 'להסיר גם את התמונות והסרטונים ששלחתי',
+	'account.deleteItemsHint': 'אחרת הם נשארים במסגרות, עם השם שלך.',
+	'account.deleteOwner': 'בבעלותך: {frames}. יש להעביר כל מסגרת לחבר אחר או להסיר אותה לפני מחיקת החשבון.',
+	'account.deleted': 'החשבון נמחק.',
 
 	'problem.unauthorized': 'יש להיכנס שוב.',
 	'problem.token_expired': 'פג תוקף ההתחברות. יש להיכנס שוב.',

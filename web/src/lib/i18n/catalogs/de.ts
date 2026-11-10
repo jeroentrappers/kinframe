@@ -505,6 +505,13 @@ const de: Catalog = {
 	'settings.signedInAs': 'Angemeldet als {name}',
 	'settings.signOut': 'Abmelden',
 	'settings.about': 'kinframe · freie Software unter der AGPL-3.0 · kein Tracking',
+	'account.delete': 'Konto löschen',
+	'account.deleteTitle': 'Dein Konto löschen?',
+	'account.deleteBody': 'Dein Konto, dein Profilbild und deine Anmeldung werden endgültig gelöscht, und du verlässt alle deine Rahmen. Das lässt sich nicht rückgängig machen.',
+	'account.deleteItems': 'Auch die Fotos und Videos entfernen, die ich gesendet habe',
+	'account.deleteItemsHint': 'Sonst bleiben sie mit deinem Namen auf den Rahmen.',
+	'account.deleteOwner': 'Dir gehört {frames}. Übergib jeden Rahmen an ein anderes Mitglied oder entferne ihn, bevor du dein Konto löschst.',
+	'account.deleted': 'Dein Konto wurde gelöscht.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Bitte melde dich erneut an.',

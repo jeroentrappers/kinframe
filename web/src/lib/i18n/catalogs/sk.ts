@@ -521,6 +521,13 @@ const sk: Catalog = {
 	'settings.signedInAs': 'Prihlásené ako {name}',
 	'settings.signOut': 'Odhlásiť sa',
 	'settings.about': 'kinframe · slobodný softvér pod licenciou AGPL-3.0 · bez sledovania',
+	'account.delete': 'Odstrániť účet',
+	'account.deleteTitle': 'Odstrániť váš účet?',
+	'account.deleteBody': 'Váš účet, profilová fotka a prihlásenie budú natrvalo odstránené a opustíte všetky svoje rámiky. Túto akciu nemožno vrátiť.',
+	'account.deleteItems': 'Odobrať aj fotky a videá, ktoré som poslal(a)',
+	'account.deleteItemsHint': 'Inak na rámikoch zostanú, s vaším menom.',
+	'account.deleteOwner': 'Vlastníte {frames}. Pred odstránením účtu odovzdajte každý rámik inému členovi alebo ho odstráňte.',
+	'account.deleted': 'Váš účet bol odstránený.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Prihláste sa znova.',

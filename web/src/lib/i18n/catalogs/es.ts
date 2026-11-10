@@ -510,6 +510,13 @@ const es: Catalog = {
 	'settings.signedInAs': 'Sesión iniciada como {name}',
 	'settings.signOut': 'Cerrar sesión',
 	'settings.about': 'kinframe · software libre bajo la AGPL-3.0 · sin rastreo',
+	'account.delete': 'Eliminar cuenta',
+	'account.deleteTitle': '¿Eliminar tu cuenta?',
+	'account.deleteBody': 'Tu cuenta, tu foto de perfil y tu inicio de sesión se eliminan para siempre, y sales de todos tus marcos. No se puede deshacer.',
+	'account.deleteItems': 'Retirar también las fotos y vídeos que envié',
+	'account.deleteItemsHint': 'Si no, se quedan en los marcos, con tu nombre.',
+	'account.deleteOwner': 'Eres propietario de {frames}. Cede cada marco a otro miembro o elimínalo antes de eliminar tu cuenta.',
+	'account.deleted': 'Tu cuenta se ha eliminado.',
 
 	'problem.unauthorized': 'Vuelve a iniciar sesión.',
 	'problem.token_expired': 'Tu sesión ha caducado. Vuelve a iniciar sesión.',

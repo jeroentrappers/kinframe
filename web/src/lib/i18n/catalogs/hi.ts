@@ -506,6 +506,13 @@ const hi: Catalog = {
 	'settings.signedInAs': '{name} के रूप में साइन इन है',
 	'settings.signOut': 'साइन आउट करें',
 	'settings.about': 'kinframe · AGPL-3.0 के तहत फ़्री सॉफ़्टवेयर · कोई ट्रैकिंग नहीं',
+	'account.delete': 'खाता हटाएं',
+	'account.deleteTitle': 'अपना खाता हटाएं?',
+	'account.deleteBody': 'आपका खाता, प्रोफ़ाइल फ़ोटो और साइन-इन हमेशा के लिए हटा दिए जाते हैं, और आप अपने सभी फ़्रेम छोड़ देते हैं। इसे पूर्ववत नहीं किया जा सकता।',
+	'account.deleteItems': 'मेरी भेजी फ़ोटो और वीडियो भी हटाएं',
+	'account.deleteItemsHint': 'वरना वे आपके नाम के साथ फ़्रेम पर रहेंगे।',
+	'account.deleteOwner': 'आप {frames} के मालिक हैं। अपना खाता हटाने से पहले हर फ़्रेम किसी दूसरे सदस्य को सौंपें या उसे हटाएं।',
+	'account.deleted': 'आपका खाता हटा दिया गया है।',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'कृपया फिर से साइन इन करें।',

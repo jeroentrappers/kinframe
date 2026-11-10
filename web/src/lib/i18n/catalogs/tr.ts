@@ -494,6 +494,13 @@ const tr: Catalog = {
 	'settings.signedInAs': 'Giriş yapan: {name}',
 	'settings.signOut': 'Çıkış yap',
 	'settings.about': 'kinframe · AGPL-3.0 lisanslı özgür yazılım · takip yok',
+	'account.delete': 'Hesabı sil',
+	'account.deleteTitle': 'Hesabınız silinsin mi?',
+	'account.deleteBody': 'Hesabınız, profil fotoğrafınız ve oturum açma bilgileriniz kalıcı olarak silinir ve tüm çerçevelerinizden ayrılırsınız. Bu işlem geri alınamaz.',
+	'account.deleteItems': 'Gönderdiğim fotoğrafları ve videoları da kaldır',
+	'account.deleteItemsHint': 'Aksi halde adınızla birlikte çerçevelerde kalır.',
+	'account.deleteOwner': 'Sahibi olduğunuz çerçeveler: {frames}. Hesabınızı silmeden önce her çerçeveyi başka bir üyeye devredin veya kaldırın.',
+	'account.deleted': 'Hesabınız silindi.',
 
 	'problem.unauthorized': 'Lütfen tekrar giriş yapın.',
 	'problem.token_expired': 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.',
