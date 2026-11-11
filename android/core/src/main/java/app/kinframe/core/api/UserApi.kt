@@ -1,5 +1,7 @@
 package app.kinframe.core.api
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonElement
@@ -177,16 +179,22 @@ class HttpKinApi(
         }
     }
 
-    private fun <T> Response.decode(ser: KSerializer<T>): T = use {
-        if (!isSuccessful) throwForStatus()
-        KinJson.decodeFromString(ser, body.string())
+    // Bodies are read off the caller's thread: callers run on the main thread, and a body larger than what came in
+    // with the headers would read from the socket there (NetworkOnMainThreadException).
+    private suspend fun <T> Response.decode(ser: KSerializer<T>): T = withContext(Dispatchers.IO) {
+        use {
+            if (!isSuccessful) throwForStatus()
+            KinJson.decodeFromString(ser, body.string())
+        }
     }
 
-    private fun Response.expectOk() = use { if (!isSuccessful) throwForStatus() }
+    private suspend fun Response.expectOk() = withContext(Dispatchers.IO) { use { if (!isSuccessful) throwForStatus() } }
 
-    private fun Response.settingsDoc(): SettingsDocument = use {
-        if (!isSuccessful) throwForStatus()
-        SettingsDocument(KinJson.parseToJsonElement(body.string()).jsonObject)
+    private suspend fun Response.settingsDoc(): SettingsDocument = withContext(Dispatchers.IO) {
+        use {
+            if (!isSuccessful) throwForStatus()
+            SettingsDocument(KinJson.parseToJsonElement(body.string()).jsonObject)
+        }
     }
 
     // ------------------------------------------------------------------ me
