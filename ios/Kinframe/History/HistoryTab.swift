@@ -45,17 +45,21 @@ private struct HistoryList: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                Text(L("history.lede")).foregroundStyle(Palette.textMuted)
-                Picker(L("history.filter"), selection: $model.filter) {
-                    ForEach(HistoryModel.Filter.allCases) { f in
-                        Text(L("history.filter_\(f.rawValue)")).tag(f)
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(L("history.lede")).foregroundStyle(Palette.textMuted)
+                    Picker(L("history.filter"), selection: $model.filter) {
+                        ForEach(HistoryModel.Filter.allCases) { f in
+                            Text(L("history.filter_\(f.rawValue)")).tag(f)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .onChange(of: model.filter) { Task { await model.load() } }
                 }
-                .pickerStyle(.segmented)
-                .onChange(of: model.filter) { Task { await model.load() } }
+                .frame(maxWidth: PageWidth.text, alignment: .leading)
 
                 ForEach(app.outbox.active) { job in
                     SendingCard(job: job, onRetry: { app.outbox.retry(job.id) }, onCancel: { app.outbox.cancel(job.id) })
+                        .frame(maxWidth: PageWidth.text)
                 }
 
                 if model.loading {
@@ -65,14 +69,17 @@ private struct HistoryList: View {
                     .accessibilityLabel(L("common.loading"))
                 } else if let error = model.error, model.sends.isEmpty {
                     ErrorRetryView(message: error) { Task { await model.load() } }
+                        .frame(maxWidth: PageWidth.text)
                 } else if model.sends.isEmpty, app.outbox.active.isEmpty {
                     if model.filter == .all {
                         EmptyStateView(systemImage: "paperplane", title: L("history.emptyTitle"), message: L("history.emptyBody")) {
                             Button(L("nav.sendPhotos")) { app.tab = .send }.buttonStyle(.kf(.primary, large: true))
                         }
                         .card(padding: 8)
+                        .frame(maxWidth: PageWidth.text)
                     } else {
                         EmptyStateView(systemImage: "tray", title: L("history.emptyFiltered"), message: "")
+                            .frame(maxWidth: PageWidth.text)
                     }
                 } else {
                     ForEach(model.groups) { group in
@@ -82,12 +89,15 @@ private struct HistoryList: View {
                             .foregroundStyle(Palette.textFaint)
                             .padding(.top, 6)
                             .accessibilityAddTraits(.isHeader)
-                        ForEach(group.sends) { send in
-                            NavigationLink(value: HistoryRoute(sendId: send.id)) {
-                                SendCard(send: send)
+                        // One column on phones; a grid on iPad and iPhone Duo unfolded.
+                        LazyVGrid(columns: cardColumns(spacing: 14), spacing: 14) {
+                            ForEach(group.sends) { send in
+                                NavigationLink(value: HistoryRoute(sendId: send.id)) {
+                                    SendCard(send: send)
+                                }
+                                .buttonStyle(CardButtonStyle())
+                                .accessibilityHint(L("history.openSend", ["when": Format.dateTime(send.createdAt, locale: L10n.locale)]))
                             }
-                            .buttonStyle(CardButtonStyle())
-                            .accessibilityHint(L("history.openSend", ["when": Format.dateTime(send.createdAt, locale: L10n.locale)]))
                         }
                     }
                     if model.cursor != nil {
@@ -97,13 +107,13 @@ private struct HistoryList: View {
                             if model.loadingMore { ProgressView() } else { Text(L("common.loadMore")) }
                         }
                         .buttonStyle(.kf(.secondary, fill: true))
+                        .frame(maxWidth: PageWidth.text)
+                        .frame(maxWidth: .infinity)
                         .onAppear { Task { await model.loadMore() } }
                     }
                 }
             }
-            .padding(16)
-            .frame(maxWidth: 720)
-            .frame(maxWidth: .infinity)
+            .pageColumn(PageWidth.wide)
         }
         .refreshable { await model.load() }
     }

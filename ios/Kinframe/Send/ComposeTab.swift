@@ -51,6 +51,10 @@ struct ComposeTab: View {
     @State private var sendingJob: UUID?
     @State private var showCamera = false
     @FocusState private var captionFocused: Bool
+    @State private var width: CGFloat = 0
+
+    /// Photos and caption beside the frame list once both fit comfortably (iPad; not the iPhone Duo's inner screen).
+    private var twoColumns: Bool { width >= 760 }
 
     private var sendable: [FrameSummary] { app.frames.filter { $0.can(\.send) } }
 
@@ -68,20 +72,20 @@ struct ComposeTab: View {
                             app.outbox.cancel(id)
                             sendingJob = nil
                         })
-                    } else {
-                        if model.drafts.isEmpty && importing == 0 {
-                            pickerHero
-                        } else {
-                            items
-                            captionField
+                    } else if twoColumns {
+                        // iPad and other wide screens: what you send on the left, where it goes on the right.
+                        HStack(alignment: .top, spacing: 24) {
+                            composer.frame(maxWidth: .infinity)
+                            frameList.frame(width: 340)
                         }
+                    } else {
+                        composer
                         frameList
                     }
                 }
-                .padding(16)
-                .frame(maxWidth: 720)
-                .frame(maxWidth: .infinity)
+                .pageColumn(twoColumns ? 1100 : PageWidth.text)
             }
+            .onWidthChange { width = $0 }
             .scrollDismissesKeyboard(.interactively)
             .pageBackground()
             .navigationTitle(L("send.title"))
@@ -139,6 +143,18 @@ struct ComposeTab: View {
     private struct EditingID: Identifiable { let id: UUID }
 
     // MARK: Sections
+
+    @ViewBuilder
+    private var composer: some View {
+        if model.drafts.isEmpty && importing == 0 {
+            pickerHero
+        } else {
+            VStack(alignment: .leading, spacing: 20) {
+                items
+                captionField
+            }
+        }
+    }
 
     private var noFrames: some View {
         EmptyStateView(systemImage: "photo.on.rectangle", title: L("send.noFramesTitle"), message: L("send.noFramesBody")) {
@@ -305,10 +321,13 @@ struct ComposeTab: View {
             .buttonStyle(.kf(.primary, large: true, fill: true))
             .disabled(!model.canSend || importing > 0)
         }
+        // Two columns: under the frame list rather than a button across the whole page.
+        .frame(maxWidth: twoColumns ? 340 : .infinity)
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .padding(.horizontal, 16)
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .frame(maxWidth: 720)
+        .frame(maxWidth: twoColumns ? 1100 : PageWidth.text)
         .frame(maxWidth: .infinity)
         .background(.bar)
     }

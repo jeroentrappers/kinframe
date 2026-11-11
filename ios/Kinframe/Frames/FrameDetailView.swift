@@ -142,9 +142,8 @@ struct FrameDetailView: View {
                         case .settings: FrameSettingsSection(api: model.api, frame: frame)
                         }
                     }
-                    .padding(16)
-                    .frame(maxWidth: 720)
-                    .frame(maxWidth: .infinity)
+                    // Photos and the calendar use the extra room on iPad; the other sections stay at reading width.
+                    .pageColumn(section == .photos || section == .calendar ? PageWidth.wide : PageWidth.text)
                 }
                 .refreshable { await model.load() }
                 #if DEBUG

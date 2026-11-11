@@ -71,9 +71,9 @@ enum DebugLaunch {
 
     static func afterLaunch(_ app: AppModel) {
         switch args.string(forKey: "kfTab") {
-        case "frames": app.tab = .frames
+        case "frames": app.tab = .frames; app.framesPath = NavigationPath()
         case "send": app.tab = .send
-        case "history": app.tab = .history
+        case "history": app.tab = .history; app.historyPath = NavigationPath()
         case "settings": app.tab = .settings
         default: break
         }

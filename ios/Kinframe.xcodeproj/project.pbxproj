@@ -121,6 +121,7 @@
 		F9093C7282F5D25E5BEDB757 /* Types+Components+Schemas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6053E8207E3B4E2EC68B0182 /* Types+Components+Schemas.swift */; };
 		FAFA0173AD0F117C86B1028B /* OutboxMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AECE5C594CA00352DAFDC995 /* OutboxMonitor.swift */; };
 		FC0238ED3A22462718987E94 /* Outbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C014E862C884180FF6184437 /* Outbox.swift */; };
+		FD1DA70012B313EE1FAEB489 /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F14654379EEAAC57752B57A /* AdaptiveLayout.swift */; };
 		FDD21DF54C4B0B02FB54C1FE /* TusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D70A0F7B376DACEFC002F725 /* TusTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -221,6 +222,7 @@
 		242B69A812E4EFA73EA15BFB /* PhotoUpload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoUpload.swift; sourceTree = "<group>"; };
 		2E11C71AEC875688FFC8AC9B /* TvLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvLogic.swift; sourceTree = "<group>"; };
 		2E8AB52696E6E7E34E98704A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		2F14654379EEAAC57752B57A /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
 		30E692E828C86CCB18064467 /* ios-strings-account.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-account.json"; sourceTree = "<group>"; };
 		3803BAFF209C97A1DDA0769A /* SendDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendDetailView.swift; sourceTree = "<group>"; };
 		391A0551D41EECEB970D8CC3 /* ios-strings-albums.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-albums.json"; sourceTree = "<group>"; };
@@ -536,6 +538,7 @@
 		68C9C0F8EC4D4CBC1DF6DC7A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				2F14654379EEAAC57752B57A /* AdaptiveLayout.swift */,
 				C9FFDDEAA3375A7AE2728A33 /* AppModel.swift */,
 				7E11AABD7A7899CB67AD92C9 /* DebugLaunch.swift */,
 				638C0CC006FCA0217AB3B9E6 /* KinframeApp.swift */,
@@ -977,6 +980,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD1DA70012B313EE1FAEB489 /* AdaptiveLayout.swift in Sources */,
 				39FA7495F1680355C89C78CF /* AddFrameModel.swift in Sources */,
 				01C5801CD6EBB5929BF18290 /* AddFrameView.swift in Sources */,
 				51297A7ED5DFF75DB774B064 /* AlbumViews.swift in Sources */,

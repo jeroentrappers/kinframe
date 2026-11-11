@@ -56,6 +56,7 @@ struct SettingsTab: View {
                 .listRowBackground(Palette.surface)
             }
             .scrollContentBackground(.hidden)
+            .readableFormWidth()
             #if DEBUG
             .task {
                 if UserDefaults.standard.string(forKey: "kfScrollTo") == "signOut" {
