@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"strings"
 	"time"
 
@@ -46,11 +48,23 @@ func truncate(s string, n int) string {
 	return s
 }
 
-// UpsertUserBySub returns the user for an identity subject, creating it on first use.
-func (s *Store) UpsertUserBySub(ctx context.Context, sub, email, name string) (*User, error) {
+// ErrAccountDeleted: the token was issued before its account was deleted.
+var ErrAccountDeleted = errors.New("account deleted")
+
+// UpsertUserBySub returns the user for an identity subject, creating it on
+// first use, except for a token issued before that subject's account was deleted.
+func (s *Store) UpsertUserBySub(ctx context.Context, sub, email, name string, issuedAt time.Time) (*User, error) {
 	u, err := one[User](s.Pool.Query(ctx, `SELECT `+userCols+` FROM users WHERE sub = $1`, sub))
 	if err != ErrNotFound {
 		return u, err
+	}
+	var deleted bool
+	if err := s.Pool.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM deleted_subjects WHERE sub_hash = $1 AND deleted_at > $2)`,
+		subjectHash(sub), issuedAt).Scan(&deleted); err != nil {
+		return nil, err
+	}
+	if deleted {
+		return nil, ErrAccountDeleted
 	}
 	var emailp *string
 	if email != "" {
@@ -86,8 +100,30 @@ func (s *Store) SetAvatar(ctx context.Context, id uuid.UUID, key *string) (*User
 
 // SoftDeleteUser detaches the identity so a new sign-in creates a fresh user.
 func (s *Store) SoftDeleteUser(ctx context.Context, q db.DBTX, id uuid.UUID) error {
+	var sub *string
+	if err := q.QueryRow(ctx, `SELECT sub FROM users WHERE id = $1`, id).Scan(&sub); err != nil {
+		return err
+	}
+	if sub != nil {
+		if _, err := q.Exec(ctx, `INSERT INTO deleted_subjects (sub_hash) VALUES ($1)
+			ON CONFLICT (sub_hash) DO UPDATE SET deleted_at = now()`, subjectHash(*sub)); err != nil {
+			return err
+		}
+	}
 	_, err := q.Exec(ctx, `UPDATE users SET sub = NULL, email = NULL, avatar_key = NULL, deleted_at = now() WHERE id = $1`, id)
 	return err
+}
+
+// PruneDeletedSubjects forgets deleted accounts' subjects once no token issued
+// before the deletion can still be valid.
+func (s *Store) PruneDeletedSubjects(ctx context.Context) error {
+	_, err := s.Pool.Exec(ctx, `DELETE FROM deleted_subjects WHERE deleted_at < now() - interval '24 hours'`)
+	return err
+}
+
+func subjectHash(sub string) []byte {
+	h := sha256.Sum256([]byte(sub))
+	return h[:]
 }
 
 // ---------------------------------------------------------------- push endpoints

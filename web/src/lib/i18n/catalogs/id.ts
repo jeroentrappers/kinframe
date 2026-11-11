@@ -506,6 +506,13 @@ const id: Catalog = {
 	'settings.signedInAs': 'Login sebagai {name}',
 	'settings.signOut': 'Logout',
 	'settings.about': 'kinframe · perangkat lunak bebas di bawah AGPL-3.0 · tanpa pelacakan',
+	'account.delete': 'Hapus akun',
+	'account.deleteTitle': 'Hapus akun Anda?',
+	'account.deleteBody': 'Akun, foto profil, dan data masuk Anda dihapus selamanya, dan Anda keluar dari semua bingkai. Tindakan ini tidak dapat dibatalkan.',
+	'account.deleteItems': 'Hapus juga foto dan video yang saya kirim',
+	'account.deleteItemsHint': 'Jika tidak, foto dan video tetap ada di bingkai dengan nama Anda.',
+	'account.deleteOwner': 'Anda pemilik {frames}. Alihkan setiap bingkai ke anggota lain atau hapus bingkai itu sebelum menghapus akun.',
+	'account.deleted': 'Akun Anda telah dihapus.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Silakan login lagi.',

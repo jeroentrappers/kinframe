@@ -521,6 +521,13 @@ const sr: Catalog = {
 	'settings.signedInAs': 'Пријављени сте као {name}',
 	'settings.signOut': 'Одјави се',
 	'settings.about': 'kinframe · слободан софтвер под AGPL-3.0 · без праћења',
+	'account.delete': 'Избриши налог',
+	'account.deleteTitle': 'Избрисати ваш налог?',
+	'account.deleteBody': 'Ваш налог, профилна фотографија и пријава биће трајно избрисани, а ви ћете напустити све своје рамове. Ово не може да се опозове.',
+	'account.deleteItems': 'Уклони и фотографије и видео-снимке које сам послао/ла',
+	'account.deleteItemsHint': 'У супротном остају на рамовима, са вашим именом.',
+	'account.deleteOwner': 'Власник сте: {frames}. Пре брисања налога пренесите сваки рам на другог члана или га уклоните.',
+	'account.deleted': 'Ваш налог је избрисан.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Пријавите се поново.',

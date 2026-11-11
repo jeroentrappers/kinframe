@@ -522,6 +522,13 @@ const lv: Catalog = {
 	'settings.signedInAs': 'Pierakstījies kā {name}',
 	'settings.signOut': 'Izrakstīties',
 	'settings.about': 'kinframe · brīvā programmatūra ar AGPL-3.0 licenci · bez izsekošanas',
+	'account.delete': 'Dzēst kontu',
+	'account.deleteTitle': 'Vai dzēst jūsu kontu?',
+	'account.deleteBody': 'Jūsu konts, profila fotoattēls un pierakstīšanās tiek neatgriezeniski dzēsti, un jūs pametat visus savus rāmjus. To nevar atsaukt.',
+	'account.deleteItems': 'Noņemt arī manis sūtītos fotoattēlus un video',
+	'account.deleteItemsHint': 'Pretējā gadījumā tie paliek rāmjos ar jūsu vārdu.',
+	'account.deleteOwner': 'Jums pieder: {frames}. Pirms konta dzēšanas nododiet katru rāmi citam dalībniekam vai noņemiet to.',
+	'account.deleted': 'Jūsu konts ir dzēsts.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Lūdzu, pierakstieties vēlreiz.',

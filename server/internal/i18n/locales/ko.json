@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "소유자가 액자에서 멤버 내보내기를 막아 두었어요",
   "this frame has not been claimed yet": "아직 등록되지 않은 액자예요",
   "transfer or remove your frames before deleting your account": "계정을 삭제하기 전에 액자를 넘기거나 삭제하세요",
+  "the sign-in account could not be deleted; try again later": "로그인 계정을 삭제할 수 없습니다. 나중에 다시 시도하세요",
   "unknown device or wrong secret": "알 수 없는 기기이거나 시크릿이 틀렸어요",
   "unknown variant": "알 수 없는 변형이에요",
   "upload already used": "이미 사용된 업로드예요",

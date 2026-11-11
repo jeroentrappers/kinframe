@@ -506,6 +506,13 @@ const th: Catalog = {
 	'settings.signedInAs': 'ลงชื่อเข้าใช้เป็น {name}',
 	'settings.signOut': 'ออกจากระบบ',
 	'settings.about': 'kinframe · ซอฟต์แวร์เสรีภายใต้ AGPL-3.0 · ไม่มีการติดตาม',
+	'account.delete': 'ลบบัญชี',
+	'account.deleteTitle': 'ลบบัญชีของคุณหรือไม่',
+	'account.deleteBody': 'บัญชี รูปโปรไฟล์ และข้อมูลการลงชื่อเข้าใช้ของคุณจะถูกลบถาวร และคุณจะออกจากกรอบรูปทั้งหมด การดำเนินการนี้ย้อนกลับไม่ได้',
+	'account.deleteItems': 'นำรูปและวิดีโอที่ฉันส่งออกด้วย',
+	'account.deleteItemsHint': 'มิฉะนั้นจะยังอยู่ในกรอบรูปพร้อมชื่อของคุณ',
+	'account.deleteOwner': 'คุณเป็นเจ้าของ {frames} ก่อนลบบัญชี ให้โอนกรอบรูปแต่ละอันให้สมาชิกคนอื่นหรือลบออก',
+	'account.deleted': 'ลบบัญชีของคุณแล้ว',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'โปรดลงชื่อเข้าใช้อีกครั้ง',

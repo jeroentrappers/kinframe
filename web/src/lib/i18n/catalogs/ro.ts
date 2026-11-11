@@ -510,6 +510,13 @@ const ro: Catalog = {
 	'settings.signedInAs': 'Conectat ca {name}',
 	'settings.signOut': 'Deconectați-vă',
 	'settings.about': 'kinframe · software liber sub AGPL-3.0 · fără urmărire',
+	'account.delete': 'Ștergeți contul',
+	'account.deleteTitle': 'Ștergeți contul?',
+	'account.deleteBody': 'Contul, fotografia de profil și datele de conectare sunt șterse definitiv și părăsiți toate ramele. Acțiunea nu poate fi anulată.',
+	'account.deleteItems': 'Eliminați și fotografiile și videoclipurile pe care le-am trimis',
+	'account.deleteItemsHint': 'Altfel rămân pe rame, cu numele dumneavoastră.',
+	'account.deleteOwner': 'Sunteți proprietarul: {frames}. Înainte de a șterge contul, cedați fiecare ramă altui membru sau eliminați-o.',
+	'account.deleted': 'Contul a fost șters.',
 
 	'problem.unauthorized': 'Conectați-vă din nou.',
 	'problem.token_expired': 'Sesiunea a expirat. Conectați-vă din nou.',

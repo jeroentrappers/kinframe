@@ -48,6 +48,9 @@ type Server struct {
 	dev     *auth.DevTokens
 	devices *auth.DeviceTokens
 	signer  *auth.URLSigner
+	// accounts deletes the sign-in account with the kinframe account; nil
+	// leaves sign-in accounts alone (dev auth, or no Logto M2M credentials).
+	accounts AccountDeleter
 
 	tus       *handler.UnroutedHandler
 	uploadDir string
@@ -107,6 +110,13 @@ type Deps struct {
 	// Mailer sends the server's own email (shop); defaults to SMTP from the
 	// config, nil when SMTP is not configured.
 	Mailer shop.Mailer
+	// Accounts deletes sign-in accounts (Logto); nil leaves them alone.
+	Accounts AccountDeleter
+}
+
+// AccountDeleter deletes the sign-in account behind a token subject.
+type AccountDeleter interface {
+	Delete(ctx context.Context, subject string) error
 }
 
 func New(d Deps) (*Server, error) {
@@ -140,6 +150,7 @@ func New(d Deps) (*Server, error) {
 		shopCancelIP:     ratelimit.New(30, time.Hour),
 		shopTokens:       shop.NewTokens(auth.DeriveKey(d.Config.SigningKey, "shop-cancel")),
 		mailer:           d.Mailer,
+		accounts:         d.Accounts,
 	}
 	if s.mailer == nil && d.Config.SMTP != nil {
 		s.mailer = &shop.SMTPMailer{Cfg: *d.Config.SMTP}

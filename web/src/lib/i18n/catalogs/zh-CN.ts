@@ -504,6 +504,13 @@ const zhCN: Catalog = {
 	'settings.signedInAs': '当前登录：{name}',
 	'settings.signOut': '退出登录',
 	'settings.about': 'kinframe · 基于 AGPL-3.0 的自由软件 · 无跟踪',
+	'account.delete': '删除账号',
+	'account.deleteTitle': '要删除你的账号吗？',
+	'account.deleteBody': '你的账号、头像和登录信息将被永久删除，你也会退出所有相框。此操作无法撤销。',
+	'account.deleteItems': '同时移除我发送的照片和视频',
+	'account.deleteItemsHint': '否则它们会以你的名字留在相框上。',
+	'account.deleteOwner': '你是 {frames} 的所有者。删除账号前，请将每个相框转让给其他成员或将其移除。',
+	'account.deleted': '你的账号已删除。',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': '请重新登录。',

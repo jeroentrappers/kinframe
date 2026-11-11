@@ -526,6 +526,13 @@ const ru: Catalog = {
 	'settings.signedInAs': 'Вы вошли как {name}',
 	'settings.signOut': 'Выйти',
 	'settings.about': 'kinframe · свободное ПО под лицензией AGPL-3.0 · без слежки',
+	'account.delete': 'Удалить аккаунт',
+	'account.deleteTitle': 'Удалить аккаунт?',
+	'account.deleteBody': 'Ваш аккаунт, фото профиля и данные для входа будут удалены навсегда, а вы покинете все свои рамки. Это действие нельзя отменить.',
+	'account.deleteItems': 'Также удалить отправленные мной фото и видео',
+	'account.deleteItemsHint': 'Иначе они останутся на рамках с вашим именем.',
+	'account.deleteOwner': 'Вы владелец: {frames}. Прежде чем удалить аккаунт, передайте каждую рамку другому участнику или удалите её.',
+	'account.deleted': 'Ваш аккаунт удалён.',
 
 	'problem.unauthorized': 'Войдите снова.',
 	'problem.token_expired': 'Сеанс истёк. Войдите снова.',

@@ -506,6 +506,13 @@ export const en = {
 	'settings.signedInAs': 'Signed in as {name}',
 	'settings.signOut': 'Sign out',
 	'settings.about': 'kinframe · free software under the AGPL-3.0 · no tracking',
+	'account.delete': 'Delete account',
+	'account.deleteTitle': 'Delete your account?',
+	'account.deleteBody': 'Your account, profile photo and sign-in are deleted for good, and you leave all your frames. This can’t be undone.',
+	'account.deleteItems': 'Also remove the photos and videos I sent',
+	'account.deleteItemsHint': 'Otherwise they stay on the frames, with your name.',
+	'account.deleteOwner': 'You own {frames}. Hand each frame over to another member, or remove it, before you delete your account.',
+	'account.deleted': 'Your account has been deleted.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Please sign in again.',

@@ -23,6 +23,7 @@ type UserClaims struct {
 	Email     string
 	Name      string
 	Scopes    []string
+	IssuedAt  time.Time
 	ExpiresAt time.Time
 }
 
@@ -49,6 +50,9 @@ type tokenClaims struct {
 
 func (c tokenClaims) user() UserClaims {
 	u := UserClaims{Subject: c.Subject, Email: c.Email, Name: c.Name, Scopes: strings.Fields(c.Scope)}
+	if c.IssuedAt != nil {
+		u.IssuedAt = c.IssuedAt.Time
+	}
 	if c.ExpiresAt != nil {
 		u.ExpiresAt = c.ExpiresAt.Time
 	}

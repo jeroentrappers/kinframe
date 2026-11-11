@@ -494,6 +494,13 @@ const sv: Catalog = {
 	'settings.signedInAs': 'Inloggad som {name}',
 	'settings.signOut': 'Logga ut',
 	'settings.about': 'kinframe · fri programvara under AGPL-3.0 · ingen spårning',
+	'account.delete': 'Radera konto',
+	'account.deleteTitle': 'Vill du radera ditt konto?',
+	'account.deleteBody': 'Ditt konto, din profilbild och din inloggning raderas för gott, och du lämnar alla dina fotoramar. Det går inte att ångra.',
+	'account.deleteItems': 'Ta även bort foton och videor som jag har skickat',
+	'account.deleteItemsHint': 'Annars ligger de kvar på fotoramarna med ditt namn.',
+	'account.deleteOwner': 'Du äger {frames}. Överlåt varje fotoram till en annan medlem, eller ta bort den, innan du raderar ditt konto.',
+	'account.deleted': 'Ditt konto har raderats.',
 
 	'problem.unauthorized': 'Logga in igen.',
 	'problem.token_expired': 'Sessionen har gått ut. Logga in igen.',

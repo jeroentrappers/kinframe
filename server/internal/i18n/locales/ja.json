@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "オーナーがフレームでのメンバーの削除を無効にしています",
   "this frame has not been claimed yet": "このフレームはまだ登録されていません",
   "transfer or remove your frames before deleting your account": "アカウントを削除する前に、フレームを引き継ぐか削除してください",
+  "the sign-in account could not be deleted; try again later": "サインインアカウントを削除できませんでした。後でもう一度お試しください",
   "unknown device or wrong secret": "不明なデバイスか、シークレットが間違っています",
   "unknown variant": "不明なバリアントです",
   "upload already used": "このアップロードはすでに使用されています",

@@ -510,6 +510,13 @@ const pt: Catalog = {
 	'settings.signedInAs': 'Conectado como {name}',
 	'settings.signOut': 'Sair',
 	'settings.about': 'kinframe · software livre sob a AGPL-3.0 · sem rastreamento',
+	'account.delete': 'Eliminar conta',
+	'account.deleteTitle': 'Eliminar a sua conta?',
+	'account.deleteBody': 'A sua conta, foto de perfil e início de sessão são eliminados para sempre, e sai de todos os seus porta-retratos. Isto não pode ser anulado.',
+	'account.deleteItems': 'Remover também as fotos e vídeos que enviei',
+	'account.deleteItemsHint': 'Caso contrário, ficam nos porta-retratos, com o seu nome.',
+	'account.deleteOwner': 'É proprietário de {frames}. Transfira cada porta-retrato para outro membro, ou remova-o, antes de eliminar a sua conta.',
+	'account.deleted': 'A sua conta foi eliminada.',
 
 	'problem.unauthorized': 'Entre de novo.',
 	'problem.token_expired': 'Sua sessão expirou. Entre de novo.',

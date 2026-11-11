@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "omistaja on estänyt jäsenten poistamisen kuvakehyksestä",
   "this frame has not been claimed yet": "tätä kuvakehystä ei ole vielä otettu käyttöön",
   "transfer or remove your frames before deleting your account": "siirrä tai poista kuvakehyksesi ennen tilin poistamista",
+  "the sign-in account could not be deleted; try again later": "kirjautumistiliä ei voitu poistaa; yritä myöhemmin uudelleen",
   "unknown device or wrong secret": "tuntematon laite tai väärä salaisuus",
   "unknown variant": "tuntematon muunnelma",
   "upload already used": "lähetetty tiedosto on jo käytetty",

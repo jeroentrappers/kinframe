@@ -496,6 +496,13 @@ const nl: Catalog = {
 	'settings.signedInAs': 'Aangemeld als {name}',
 	'settings.signOut': 'Afmelden',
 	'settings.about': 'kinframe · vrije software onder de AGPL-3.0 · geen tracking',
+	'account.delete': 'Account verwijderen',
+	'account.deleteTitle': 'Je account verwijderen?',
+	'account.deleteBody': 'Je account, je profielfoto en je aanmelding worden voorgoed verwijderd, en je verlaat al je kaders. Dit kan niet ongedaan worden gemaakt.',
+	'account.deleteItems': 'Ook de foto’s en video’s verwijderen die ik stuurde',
+	'account.deleteItemsHint': 'Anders blijven ze op de kaders staan, met je naam.',
+	'account.deleteOwner': 'Jij bent eigenaar van {frames}. Geef elk kader aan een ander lid of verwijder het voor je je account verwijdert.',
+	'account.deleted': 'Je account is verwijderd.',
 
 	'problem.unauthorized': 'Meld je opnieuw aan.',
 	'problem.token_expired': 'Je sessie is verlopen. Meld je opnieuw aan.',

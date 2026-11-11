@@ -117,6 +117,7 @@
   "the owner disabled removing members on the frame": "chủ sở hữu đã tắt việc xóa thành viên trên khung ảnh",
   "this frame has not been claimed yet": "khung ảnh này chưa có chủ",
   "transfer or remove your frames before deleting your account": "hãy chuyển hoặc gỡ bỏ khung ảnh của bạn trước khi xóa tài khoản",
+  "the sign-in account could not be deleted; try again later": "không thể xóa tài khoản đăng nhập; vui lòng thử lại sau",
   "unknown device or wrong secret": "thiết bị không xác định hoặc mã bí mật sai",
   "unknown variant": "biến thể không xác định",
   "upload already used": "tệp tải lên đã được dùng",

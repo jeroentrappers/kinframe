@@ -49,6 +49,14 @@ type Config struct {
 	// LogtoConfigFile is where `bootstrap-logto` writes the Logto client
 	// settings; values from it fill in OIDC settings not set in the env.
 	LogtoConfigFile string
+	// LogtoEndpoint is Logto's public endpoint (the issuer without /oidc) and
+	// LogtoURL where the server reaches it (KINFRAME_LOGTO_URL, default the
+	// endpoint). With the bootstrap M2M app's credentials, deleting a kinframe
+	// account also deletes its Logto account.
+	LogtoEndpoint  string
+	LogtoURL       string
+	LogtoM2MID     string
+	LogtoM2MSecret string
 
 	TrustProxy bool
 
@@ -277,6 +285,12 @@ func load(get func(string) string) (*Config, error) {
 		c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", lf.APIResource)
 	}
 	c.OIDCAudience = cmp.Or(c.OIDCAudience, env("KINFRAME_OIDC_AUDIENCE", c.APIURL()))
+	c.LogtoEndpoint = strings.TrimSuffix(c.OIDCIssuer, "/oidc")
+	c.LogtoURL = strings.TrimRight(env("KINFRAME_LOGTO_URL", c.LogtoEndpoint), "/")
+	c.LogtoM2MID, c.LogtoM2MSecret = env("KINFRAME_LOGTO_M2M_ID", ""), get("KINFRAME_LOGTO_M2M_SECRET")
+	if (c.LogtoM2MID == "") != (c.LogtoM2MSecret == "") {
+		errs = append(errs, errors.New("set both KINFRAME_LOGTO_M2M_ID and KINFRAME_LOGTO_M2M_SECRET, or neither"))
+	}
 	if err := c.LogLevel.UnmarshalText([]byte(env("KINFRAME_LOG_LEVEL", "info"))); err != nil {
 		errs = append(errs, fmt.Errorf("KINFRAME_LOG_LEVEL: %w", err))
 	}

@@ -51,7 +51,7 @@ export interface paths {
         get: operations["getMe"];
         put?: never;
         post?: never;
-        /** @description Deletes the kinframe user. The Logto account is deleted separately via Logto's account API. */
+        /** @description Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too. */
         delete: operations["deleteMe"];
         options?: never;
         head?: never;

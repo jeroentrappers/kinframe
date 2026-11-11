@@ -505,6 +505,13 @@ const bg: Catalog = {
 	'settings.signedInAs': 'Влезли сте като {name}',
 	'settings.signOut': 'Изход',
 	'settings.about': 'kinframe · свободен софтуер под AGPL-3.0 · без проследяване',
+	'account.delete': 'Изтриване на акаунта',
+	'account.deleteTitle': 'Да се изтрие ли акаунтът ви?',
+	'account.deleteBody': 'Акаунтът, профилната снимка и данните за вход се изтриват завинаги и напускате всичките си рамки. Това не може да бъде отменено.',
+	'account.deleteItems': 'Премахване и на изпратените от мен снимки и видеоклипове',
+	'account.deleteItemsHint': 'Иначе те остават на рамките, с вашето име.',
+	'account.deleteOwner': 'Вие сте собственик на {frames}. Преди да изтриете акаунта си, прехвърлете всяка рамка на друг член или я премахнете.',
+	'account.deleted': 'Акаунтът ви беше изтрит.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Моля, влезте отново.',

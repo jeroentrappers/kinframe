@@ -494,6 +494,13 @@ const fi: Catalog = {
 	'settings.signedInAs': 'Kirjautunut: {name}',
 	'settings.signOut': 'Kirjaudu ulos',
 	'settings.about': 'kinframe · vapaa ohjelmisto, AGPL-3.0 · ei seurantaa',
+	'account.delete': 'Poista tili',
+	'account.deleteTitle': 'Poistetaanko tilisi?',
+	'account.deleteBody': 'Tilisi, profiilikuvasi ja kirjautumisesi poistetaan pysyvästi, ja poistut kaikista kuvakehyksistäsi. Tätä ei voi perua.',
+	'account.deleteItems': 'Poista myös lähettämäni kuvat ja videot',
+	'account.deleteItemsHint': 'Muuten ne jäävät kuvakehyksiin nimelläsi.',
+	'account.deleteOwner': 'Omistat kuvakehykset: {frames}. Siirrä jokainen kuvakehys toiselle jäsenelle tai poista se ennen kuin poistat tilisi.',
+	'account.deleted': 'Tilisi on poistettu.',
 
 	'problem.unauthorized': 'Kirjaudu uudelleen sisään.',
 	'problem.token_expired': 'Istunto vanheni. Kirjaudu uudelleen sisään.',

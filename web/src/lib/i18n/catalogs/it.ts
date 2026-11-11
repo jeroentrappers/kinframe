@@ -521,6 +521,13 @@ const it: Catalog = {
 	'settings.signedInAs': 'Accesso effettuato come {name}',
 	'settings.signOut': 'Esci',
 	'settings.about': 'kinframe · software libero con licenza AGPL-3.0 · nessun tracciamento',
+	'account.delete': 'Elimina account',
+	'account.deleteTitle': 'Eliminare il tuo account?',
+	'account.deleteBody': 'Il tuo account, la foto del profilo e l’accesso vengono eliminati per sempre e lasci tutte le tue cornici. L’operazione non può essere annullata.',
+	'account.deleteItems': 'Rimuovi anche le foto e i video che ho inviato',
+	'account.deleteItemsHint': 'Altrimenti restano sulle cornici, con il tuo nome.',
+	'account.deleteOwner': 'Sei proprietario di {frames}. Cedi ogni cornice a un altro membro o rimuovila prima di eliminare l’account.',
+	'account.deleted': 'Il tuo account è stato eliminato.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Accedi di nuovo.',

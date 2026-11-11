@@ -505,6 +505,13 @@ const da: Catalog = {
 	'settings.signedInAs': 'Logget ind som {name}',
 	'settings.signOut': 'Log ud',
 	'settings.about': 'kinframe · fri software under AGPL-3.0 · ingen sporing',
+	'account.delete': 'Slet konto',
+	'account.deleteTitle': 'Vil du slette din konto?',
+	'account.deleteBody': 'Din konto, dit profilbillede og dit login slettes for altid, og du forlader alle dine rammer. Det kan ikke fortrydes.',
+	'account.deleteItems': 'Fjern også de billeder og videoer, jeg har sendt',
+	'account.deleteItemsHint': 'Ellers bliver de på rammerne med dit navn.',
+	'account.deleteOwner': 'Du ejer {frames}. Overdrag hver ramme til et andet medlem, eller fjern den, før du sletter din konto.',
+	'account.deleted': 'Din konto er slettet.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Log ind igen.',

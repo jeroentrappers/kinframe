@@ -505,6 +505,13 @@ const ko: Catalog = {
 	'settings.signedInAs': '{name}(으)로 로그인됨',
 	'settings.signOut': '로그아웃',
 	'settings.about': 'kinframe · AGPL-3.0 자유 소프트웨어 · 추적 없음',
+	'account.delete': '계정 삭제',
+	'account.deleteTitle': '계정을 삭제할까요?',
+	'account.deleteBody': '계정, 프로필 사진, 로그인 정보가 영구히 삭제되고 모든 액자에서 나가게 돼요. 되돌릴 수 없어요.',
+	'account.deleteItems': '내가 보낸 사진과 동영상도 삭제',
+	'account.deleteItemsHint': '삭제하지 않으면 내 이름과 함께 액자에 남아요.',
+	'account.deleteOwner': '{frames}의 소유자예요. 계정을 삭제하기 전에 각 액자를 다른 멤버에게 넘기거나 삭제하세요.',
+	'account.deleted': '계정이 삭제되었어요.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': '다시 로그인하세요.',

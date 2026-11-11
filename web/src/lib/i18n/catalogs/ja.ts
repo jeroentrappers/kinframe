@@ -505,6 +505,13 @@ const ja: Catalog = {
 	'settings.signedInAs': '{name} としてログイン中',
 	'settings.signOut': 'ログアウト',
 	'settings.about': 'kinframe · AGPL-3.0 のフリーソフトウェア · 追跡なし',
+	'account.delete': 'アカウントを削除',
+	'account.deleteTitle': 'アカウントを削除しますか？',
+	'account.deleteBody': 'アカウント、プロフィール写真、サインイン情報は完全に削除され、すべてのフレームから退出します。この操作は元に戻せません。',
+	'account.deleteItems': '送った写真と動画も削除する',
+	'account.deleteItemsHint': '削除しない場合、あなたの名前のままフレームに残ります。',
+	'account.deleteOwner': '{frames} のオーナーです。アカウントを削除する前に、各フレームを他のメンバーに引き継ぐか削除してください。',
+	'account.deleted': 'アカウントを削除しました。',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'もう一度ログインしてください。',

@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { auth, PLACEHOLDER_NAME, safeNext } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
+	import { frames } from '$lib/frames.svelte';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { squareAvatar } from '$lib/media';
 	import { push } from '$lib/push.svelte';
@@ -11,6 +12,7 @@
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import Avatar from '$components/Avatar.svelte';
+	import Dialog from '$components/Dialog.svelte';
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 
@@ -93,6 +95,34 @@
 
 	async function signOut() {
 		await push.signOut();
+		await auth.signOut();
+	}
+
+	// Account deletion (App Store and Play require it in the apps): owners hand over or remove their frames first.
+	let deleteOpen = $state(false);
+	let deleteItems = $state(false);
+	let deleting = $state(false);
+	const ownedFrames = $derived(frames.list.filter((f) => f.role === 'owner'));
+	const ownedNames = $derived(new Intl.ListFormat(i18n.tag, { type: 'conjunction' }).format(ownedFrames.map((f) => f.name)));
+
+	function openDelete() {
+		deleteItems = false;
+		deleteOpen = true;
+		void frames.load(true);
+	}
+
+	async function deleteAccount() {
+		deleting = true;
+		try {
+			await call(api.DELETE('/v1/me', { params: { query: { remove_items: deleteItems } } }));
+		} catch (err) {
+			deleting = false;
+			toasts.error(problemMessage(err));
+			return;
+		}
+		deleteOpen = false;
+		toasts.success(t('account.deleted'));
+		await push.forget();
 		await auth.signOut();
 	}
 </script>
@@ -202,6 +232,10 @@
 			<button class="btn" onclick={signOut}><Icon name="logout" size={18} />{t('settings.signOut')}</button>
 		</section>
 
+		<div class="row delete-row">
+			<button class="btn btn-danger-ghost btn-sm" onclick={openDelete}><Icon name="trash" size={16} />{t('account.delete')}</button>
+		</div>
+
 		<p class="faint tiny about">
 			{t('settings.about')}
 			<span aria-hidden="true">·</span> <a href="/privacy">{t('legal.privacy')}</a>
@@ -210,7 +244,28 @@
 	</div>
 </div>
 
+<Dialog bind:open={deleteOpen} title={t('account.deleteTitle')}>
+	<div class="stack">
+		{#if ownedFrames.length > 0}
+			<p>{t('account.deleteOwner', { frames: ownedNames })}</p>
+		{:else}
+			<p class="muted">{t('account.deleteBody')}</p>
+			<label class="switch"><input type="checkbox" bind:checked={deleteItems} /><span>{t('account.deleteItems')}</span></label>
+			{#if !deleteItems}<p class="hint">{t('account.deleteItemsHint')}</p>{/if}
+		{/if}
+	</div>
+	{#snippet footer()}
+		<button class="btn btn-ghost" onclick={() => (deleteOpen = false)}>{t('common.cancel')}</button>
+		{#if ownedFrames.length === 0}
+			<button class="btn btn-danger" onclick={deleteAccount} disabled={deleting}>{t('account.delete')}</button>
+		{/if}
+	{/snippet}
+</Dialog>
+
 <style>
+	.delete-row {
+		justify-content: center;
+	}
 	.welcome {
 		display: grid;
 		gap: 4px;

@@ -570,6 +570,13 @@ const ar: Catalog = {
 	'settings.signedInAs': 'تم تسجيل الدخول باسم {name}',
 	'settings.signOut': 'تسجيل الخروج',
 	'settings.about': 'kinframe · برنامج حر بترخيص AGPL-3.0 · بلا تتبّع',
+	'account.delete': 'حذف الحساب',
+	'account.deleteTitle': 'هل تريد حذف حسابك؟',
+	'account.deleteBody': 'سيُحذف حسابك وصورة ملفك الشخصي وتسجيل دخولك نهائيًا، وستغادر كل إطاراتك. لا يمكن التراجع عن ذلك.',
+	'account.deleteItems': 'إزالة الصور ومقاطع الفيديو التي أرسلتها أيضًا',
+	'account.deleteItemsHint': 'وإلا فستبقى على الإطارات باسمك.',
+	'account.deleteOwner': 'أنت تملك {frames}. انقل كل إطار إلى عضو آخر أو أزِله قبل حذف حسابك.',
+	'account.deleted': 'تم حذف حسابك.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'يُرجى تسجيل الدخول مرة أخرى.',

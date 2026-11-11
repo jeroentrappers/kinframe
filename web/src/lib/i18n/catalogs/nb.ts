@@ -494,6 +494,13 @@ const nb: Catalog = {
 	'settings.signedInAs': 'Logget på som {name}',
 	'settings.signOut': 'Logg av',
 	'settings.about': 'kinframe · fri programvare under AGPL-3.0 · ingen sporing',
+	'account.delete': 'Slett konto',
+	'account.deleteTitle': 'Vil du slette kontoen din?',
+	'account.deleteBody': 'Kontoen, profilbildet og påloggingen din slettes for godt, og du forlater alle fotorammene dine. Dette kan ikke angres.',
+	'account.deleteItems': 'Fjern også bildene og videoene jeg har sendt',
+	'account.deleteItemsHint': 'Ellers blir de liggende på fotorammene med navnet ditt.',
+	'account.deleteOwner': 'Du eier {frames}. Overfør hver fotoramme til et annet medlem, eller fjern den, før du sletter kontoen.',
+	'account.deleted': 'Kontoen din er slettet.',
 
 	'problem.unauthorized': 'Logg på igjen.',
 	'problem.token_expired': 'Økten er utløpt. Logg på igjen.',

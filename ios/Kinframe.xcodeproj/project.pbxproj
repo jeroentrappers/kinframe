@@ -58,6 +58,7 @@
 		7968A52D8B9F2EEBC6184058 /* ShareToFrameSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3EC5104F5EA270D8F2443BE /* ShareToFrameSheet.swift */; };
 		7B3990EF2CEBAC0C6556D1E0 /* PluginSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBF6923BF9E8DE46ACD4A06 /* PluginSettings.swift */; };
 		7CC64E6B62CA80021AA2E2B6 /* FrameSettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A9535A041673E5D7017784 /* FrameSettingsModel.swift */; };
+		825553A8DE0B782A82E275EB /* DeleteAccountSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89EB2549B84E2BE8126BD426 /* DeleteAccountSheet.swift */; };
 		82C98563682235A48ACC15C3 /* CalendarSourceSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8136B7FE12B1F61F82B2306F /* CalendarSourceSheet.swift */; };
 		83435CA7BE18912FD2CC8D07 /* OutboxRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F273118D6B0D2D3AF7223EFB /* OutboxRunner.swift */; };
 		8499EF1780505AE2EC5AB980 /* HistoryTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC597DAD1E7520764C2787C4 /* HistoryTab.swift */; };
@@ -265,6 +266,7 @@
 		83C213A483FF05045B58A478 /* ServerSignIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerSignIn.swift; sourceTree = "<group>"; };
 		8420C512CD5E11E9785C7181 /* KinframeShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = KinframeShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		8825D1B10EBFEACE1DDCBF19 /* MediaPrep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPrep.swift; sourceTree = "<group>"; };
+		89EB2549B84E2BE8126BD426 /* DeleteAccountSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteAccountSheet.swift; sourceTree = "<group>"; };
 		8B1C9C678F32A644068D20FB /* Tus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tus.swift; sourceTree = "<group>"; };
 		8F267B5F96C70904A64F27F7 /* HistoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryModel.swift; sourceTree = "<group>"; };
 		9269194C06CBB80AC1BE86E0 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistrar.swift; sourceTree = "<group>"; };
@@ -418,6 +420,7 @@
 		3CDC54626FABB83F2349ADEF /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				89EB2549B84E2BE8126BD426 /* DeleteAccountSheet.swift */,
 				6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */,
 				7A2D51B6582B4DD276994E81 /* SettingsTab.swift */,
 			);
@@ -992,6 +995,7 @@
 				9C8FC947075798F223AD5CC0 /* Common.swift in Sources */,
 				663F3AE52103E378AB8241FB /* ComposeTab.swift in Sources */,
 				97848E2821FF067839B727D4 /* DebugLaunch.swift in Sources */,
+				825553A8DE0B782A82E275EB /* DeleteAccountSheet.swift in Sources */,
 				0CF29835FB3B4013A415D87C /* FrameCalendarModel.swift in Sources */,
 				F72191111BDE903F9E8956B8 /* FrameCalendarSection.swift in Sources */,
 				A915ED1DB0E01CB71324EDB6 /* FrameDetailView.swift in Sources */,

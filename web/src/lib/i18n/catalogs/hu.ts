@@ -505,6 +505,13 @@ const hu: Catalog = {
 	'settings.signedInAs': 'Bejelentkezve: {name}',
 	'settings.signOut': 'Kijelentkezés',
 	'settings.about': 'kinframe · szabad szoftver, AGPL-3.0 · nincs követés',
+	'account.delete': 'Fiók törlése',
+	'account.deleteTitle': 'Törlöd a fiókodat?',
+	'account.deleteBody': 'A fiókod, a profilképed és a bejelentkezésed végleg törlődik, és kilépsz az összes képkeretedből. Ez nem vonható vissza.',
+	'account.deleteItems': 'Az általam küldött fotók és videók eltávolítása is',
+	'account.deleteItemsHint': 'Különben a nevedet viselve a képkereteken maradnak.',
+	'account.deleteOwner': 'A tiéd: {frames}. A fiók törlése előtt add át mindegyik képkeretet egy másik tagnak, vagy távolítsd el.',
+	'account.deleted': 'A fiókodat töröltük.',
 
 	// problems (ProblemCode)
 	'problem.unauthorized': 'Jelentkezz be újra.',
