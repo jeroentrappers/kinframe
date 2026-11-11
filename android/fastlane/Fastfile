@@ -1,0 +1,58 @@
+# Google Play for the family app (app.kinframe.family). The frame app is not on Play: it ships as GitHub releases.
+#
+#   bundle exec fastlane android build              signed AAB in family/build/outputs/bundle/release/
+#   bundle exec fastlane android internal           build + upload to the internal testing track
+#   bundle exec fastlane android metadata           store listing only (fastlane/metadata/android/)
+#   bundle exec fastlane android promote track:production rollout:0.1
+#
+# Signing and Firebase come from ~/.config/play/kinframe-signing.env (KINFRAME_UPLOAD_*, KINFRAME_GOOGLE_SERVICES).
+# Version: VERSION_NAME (default: latest v* tag), VERSION_CODE (default: git commit count, like iOS).
+
+default_platform(:android)
+
+platform :android do
+  before_all do
+    env = File.expand_path("~/.config/play/kinframe-signing.env")
+    if File.exist?(env)
+      File.readlines(env).each do |l|
+        k, v = l.strip.split("=", 2)
+        ENV[k] ||= v if k && v && !k.start_with?("#")
+      end
+    end
+  end
+
+  lane :build do
+    UI.user_error!("KINFRAME_UPLOAD_KEYSTORE is not set") if ENV["KINFRAME_UPLOAD_KEYSTORE"].to_s.empty?
+    name = ENV["VERSION_NAME"] || sh("git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo v0.1.0").strip.delete_prefix("v")
+    code = ENV["VERSION_CODE"] || sh("git rev-list --count HEAD").strip
+    UI.message("kinframe family #{name} (#{code})")
+    # Play builds use Firebase Cloud Messaging when the Firebase options are available (KINFRAME_GOOGLE_SERVICES).
+    fcm = !ENV["KINFRAME_GOOGLE_SERVICES"].to_s.empty?
+    UI.important("No KINFRAME_GOOGLE_SERVICES: building without FCM") unless fcm
+    gradle(task: ":family:bundle", build_type: "Release", print_command: false,
+           properties: { "versionName" => name, "versionCode" => code, "kinframe.fcm" => fcm.to_s })
+  end
+
+  lane :internal do
+    build
+    upload_to_play_store(track: "internal", release_status: options_status, skip_upload_apk: true,
+                         skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true,
+                         skip_upload_changelogs: true)
+  end
+
+  lane :metadata do
+    upload_to_play_store(skip_upload_apk: true, skip_upload_aab: true, skip_upload_changelogs: true)
+  end
+
+  lane :promote do |options|
+    upload_to_play_store(track: "internal", track_promote_to: options.fetch(:track, "production"),
+                         rollout: options.fetch(:rollout, "0.1").to_s, skip_upload_apk: true, skip_upload_aab: true,
+                         skip_upload_metadata: true, skip_upload_changelogs: true, skip_upload_images: true,
+                         skip_upload_screenshots: true)
+  end
+end
+
+# A new app stays in draft on every track until Google has reviewed the first release and the listing is complete.
+def options_status
+  ENV["PLAY_RELEASE_STATUS"] || "draft"
+end

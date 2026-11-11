@@ -7,3 +7,5 @@
 # Signing material never goes in the repo.
 *.jks
 *.keystore
+.bundle/
+vendor/bundle/

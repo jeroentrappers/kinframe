@@ -11,6 +11,26 @@ val familyVersionCode: Int = providers.gradleProperty("versionCode").map { it.to
 // Store builds pass -Pkinframe.fcm=true and supply their own Firebase options as string resources
 // (google_app_id, gcm_defaultSenderId, google_api_key, project_id); no google-services.json lives in this repo.
 val fcmEnabled: Boolean = providers.gradleProperty("kinframe.fcm").map { it.toBoolean() }.getOrElse(false)
+// The Firebase options can also come from a google-services.json outside the repo: KINFRAME_GOOGLE_SERVICES=<path>.
+@Suppress("UNCHECKED_CAST")
+val firebaseOptions: Map<String, String> = System.getenv("KINFRAME_GOOGLE_SERVICES")?.takeIf { fcmEnabled }?.let { path ->
+    val json = groovy.json.JsonSlurper().parse(file(path)) as Map<String, Any?>
+    val project = json["project_info"] as Map<String, Any?>
+    val client = (json["client"] as List<Map<String, Any?>>).first {
+        ((it["client_info"] as Map<String, Any?>)["android_client_info"] as Map<String, Any?>)["package_name"] == "app.kinframe.family"
+    }
+    mapOf(
+        "google_app_id" to (client["client_info"] as Map<String, Any?>)["mobilesdk_app_id"] as String,
+        "gcm_defaultSenderId" to project["project_number"] as String,
+        "project_id" to project["project_id"] as String,
+        "google_api_key" to ((client["api_key"] as List<Map<String, Any?>>).first()["current_key"] as String),
+        "google_storage_bucket" to (project["storage_bucket"] as String? ?: ""),
+    )
+}.orEmpty()
+
+// Release signing for Play (upload key): from the environment, e.g. ~/.config/play/kinframe-signing.env sourced by
+// fastlane. Without it, release builds fall back to the debug key (local testing only; Play rejects those).
+val uploadKeystore: String? = System.getenv("KINFRAME_UPLOAD_KEYSTORE")
 
 android {
     namespace = "app.kinframe.family"
@@ -27,6 +47,7 @@ android {
         // Logto's redirect receiver: we replace its filter with our own (app.kinframe:/callback, see the manifest).
         manifestPlaceholders["logtoRedirectScheme"] = "app.kinframe"
         manifestPlaceholders["fcmEnabled"] = fcmEnabled.toString()
+        firebaseOptions.forEach { (k, v) -> resValue("string", k, v) }
     }
 
     sourceSets {
@@ -35,12 +56,21 @@ android {
         }
     }
 
+    signingConfigs {
+        if (uploadKeystore != null) create("upload") {
+            storeFile = file(uploadKeystore)
+            storePassword = System.getenv("KINFRAME_UPLOAD_KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KINFRAME_UPLOAD_KEY_ALIAS")
+            keyPassword = System.getenv("KINFRAME_UPLOAD_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("upload") ?: signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -51,6 +81,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
