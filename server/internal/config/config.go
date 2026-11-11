@@ -80,6 +80,11 @@ type Config struct {
 	VAPIDSubject    string // mailto: or https: contact for push services
 	// FCM for the family app's store builds: a Firebase service account JSON key (KINFRAME_FCM_CREDENTIALS_FILE).
 	FCMCredentials []byte
+	// APNs for the iOS app: a .p8 key (KINFRAME_APNS_KEY_FILE) with its key ID, the team ID and the bundle ID.
+	APNsKey    []byte
+	APNsKeyID  string
+	APNsTeamID string
+	APNsTopic  string
 	UploadExpiry    time.Duration
 	JanitorInterval time.Duration
 
@@ -341,6 +346,16 @@ func load(get func(string) string) (*Config, error) {
 			}
 		}
 		c.VAPIDPublicKey, c.VAPIDPrivateKey = pub, priv
+		if f := env("KINFRAME_APNS_KEY_FILE", ""); f != "" {
+			if c.APNsKey, err = os.ReadFile(f); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_APNS_KEY_FILE: %w", err))
+			}
+			c.APNsKeyID, c.APNsTeamID = env("KINFRAME_APNS_KEY_ID", ""), env("KINFRAME_APNS_TEAM_ID", "")
+			c.APNsTopic = env("KINFRAME_APNS_TOPIC", "app.kinframe.family")
+			if c.APNsKeyID == "" || c.APNsTeamID == "" {
+				errs = append(errs, errors.New("KINFRAME_APNS_KEY_FILE needs KINFRAME_APNS_KEY_ID and KINFRAME_APNS_TEAM_ID"))
+			}
+		}
 		if f := env("KINFRAME_FCM_CREDENTIALS_FILE", ""); f != "" {
 			if c.FCMCredentials, err = os.ReadFile(f); err != nil {
 				errs = append(errs, fmt.Errorf("KINFRAME_FCM_CREDENTIALS_FILE: %w", err))

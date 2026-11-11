@@ -115,6 +115,13 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 			}
 			senders["fcm"] = fcm
 		}
+		if len(cfg.APNsKey) > 0 {
+			apns, err := notify.NewAPNsSender(cfg.APNsKey, cfg.APNsKeyID, cfg.APNsTeamID, cfg.APNsTopic)
+			if err != nil {
+				return nil, err
+			}
+			senders["apns"] = apns
+		}
 		n.Sender = senders
 	}
 	var mirror *releases.Mirror

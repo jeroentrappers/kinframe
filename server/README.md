@@ -75,6 +75,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |
 | `KINFRAME_VAPID_PUBLIC_KEY` / `KINFRAME_VAPID_PRIVATE_KEY` | generated | WebPush VAPID key pair (base64url P-256 public point and private scalar). Set both or neither; when unset the server generates a pair once and keeps it in `<data dir>/vapid.json` (mode 0600). Keep it stable: browser subscriptions are bound to the public key |
 | `KINFRAME_FCM_CREDENTIALS_FILE` | — | Firebase service account JSON key; enables FCM push to the family app’s store builds (needs push enabled) |
+| `KINFRAME_APNS_KEY_FILE` | — | APNs auth key (.p8) for push to the iOS app (needs push enabled); with `KINFRAME_APNS_KEY_ID`, `KINFRAME_APNS_TEAM_ID` and `KINFRAME_APNS_TOPIC` (default `app.kinframe.family`) |
 | `KINFRAME_VAPID_SUBJECT` | public URL if https, else `mailto:kinframe@localhost` | Contact push services see in the VAPID token (`mailto:` or `https://`) |
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |

@@ -105,6 +105,9 @@ services:
 {% if kinframe_fcm_credentials | length > 0 %}
       - ./fcm.json:/etc/kinframe/fcm.json:ro
 {% endif %}
+{% if kinframe_apns_key | length > 0 %}
+      - ./apns.p8:/etc/kinframe/apns.p8:ro
+{% endif %}
     ports:
       - "127.0.0.1:{{ kinframe_port }}:8110"
 

@@ -102,6 +102,11 @@ kinframe_privacy_url: ""
 kinframe_shop: {}
 # Firebase service account JSON key (vault) for FCM push to the family app's Play builds; empty = no FCM.
 kinframe_fcm_credentials: ""
+# APNs auth key (.p8 contents, vault) for push to the iOS app; empty = no APNs.
+kinframe_apns_key: ""
+kinframe_apns_key_id: ""
+kinframe_apns_team_id: QB4NQU492U
+kinframe_apns_topic: app.kinframe.family
 
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}
