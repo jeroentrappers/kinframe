@@ -1,1 +1,5 @@
-kinframe sends photos to Wi-Fi photo frames. The review account is a member of "Demo frame", a frame that is always online for App Review: it confirms what you send as delivered and seen and reacts with a heart, so you can try the whole flow without hardware. Sign in with "Use password" on the sign-in page (e-mail codes are the default). Account deletion: Settings > Delete account; this demo account is recreated after review.
+kinframe sends photos to Wi-Fi photo frames. The review account is a member of "Demo frame", a frame that is always online for App Review: it confirms what you send as delivered and seen and reacts with a heart, so you can try the whole flow without hardware. Sign in with "Use password" on the sign-in page (e-mail codes are the default).
+
+Prefer to watch photos arrive on a screen? Open https://kinframe.appmire.be/tv/frame in any web browser: it becomes a frame and shows a code. In the app, choose Frames > Add frame, enter that code, and send photos to it; they appear in the browser within seconds.
+
+Account deletion: Settings > Delete account; this demo account is recreated after review.
