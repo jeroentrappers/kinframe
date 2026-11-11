@@ -9,3 +9,5 @@
 *.keystore
 .bundle/
 vendor/bundle/
+fastlane/report.xml
+fastlane/README.md

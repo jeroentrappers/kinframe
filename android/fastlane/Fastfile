@@ -2,7 +2,7 @@
 #
 #   bundle exec fastlane android build              signed AAB in family/build/outputs/bundle/release/
 #   bundle exec fastlane android internal           build + upload to the internal testing track
-#   bundle exec fastlane android metadata           store listing only (fastlane/metadata/android/)
+#   bundle exec fastlane android metadata version_code:305   store listing only (fastlane/metadata/android/)
 #   bundle exec fastlane android promote track:production rollout:0.1
 #
 # Signing and Firebase come from ~/.config/play/kinframe-signing.env (KINFRAME_UPLOAD_*, KINFRAME_GOOGLE_SERVICES).
@@ -40,8 +40,10 @@ platform :android do
                          skip_upload_changelogs: true)
   end
 
-  lane :metadata do
-    upload_to_play_store(skip_upload_apk: true, skip_upload_aab: true, skip_upload_changelogs: true)
+  # supply attaches the listing to a release: pass the version code that is on the track (default: internal).
+  lane :metadata do |options|
+    upload_to_play_store(track: options.fetch(:track, "internal"), version_code: options.fetch(:version_code).to_i,
+                         skip_upload_apk: true, skip_upload_aab: true, skip_upload_changelogs: true)
   end
 
   lane :promote do |options|

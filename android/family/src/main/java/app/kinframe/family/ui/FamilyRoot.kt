@@ -68,6 +68,8 @@ import app.kinframe.core.api.Limits
 import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinIcons
 import app.kinframe.family.AppGraph
+import app.kinframe.family.BuildConfig
+import app.kinframe.family.DebugLaunch
 import app.kinframe.family.R
 import app.kinframe.family.auth.AuthMode
 import app.kinframe.family.notify.Notifications
@@ -296,6 +298,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
     AskForNotifications()
+    if (BuildConfig.DEBUG) DebugLaunch.Effect(nav, composer)
     // Someone asks to join a frame you manage while the app is open (web: a toast with Review).
     LaunchedEffect(graph) {
         graph.live.events.collect { e ->
