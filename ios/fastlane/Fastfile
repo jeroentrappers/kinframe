@@ -25,6 +25,12 @@ platform :ios do
     sync(type: "appstore", readonly: false)
   end
 
+  desc "Regenerate the profiles after a capability change on the App ID (changes the Apple account; ask first)"
+  lane :refresh_profiles do
+    sync(type: "development", readonly: false, force: true)
+    sync(type: "appstore", readonly: false, force: true)
+  end
+
   desc "Register a development device and add it to the development profiles: name:… udid:…"
   lane :register_device do |options|
     register_devices(devices: { options.fetch(:name) => options.fetch(:udid) }, api_key: asc_key)
@@ -76,6 +82,7 @@ platform :ios do
       type: options[:type],
       readonly: options.fetch(:readonly, true),
       force_for_new_devices: options.fetch(:force_for_new_devices, false),
+      force: options.fetch(:force, false),
       api_key: asc_key,
       keychain_name: ENV["CI"] ? nil : keychain_path,
       keychain_password: ENV["CI"] ? nil : ENV.fetch("KINFRAME_KEYCHAIN_PASSWORD")

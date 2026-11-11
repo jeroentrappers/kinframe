@@ -23,10 +23,16 @@ settings:
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: NO
-    # Feature flag: APNs registration. Off until the server can send APNs pushes (see ios/README.md).
-    KINFRAME_APNS_ENABLED: NO
+    # Feature flag: APNs registration (the server sends through APNs when KINFRAME_APNS_KEY_FILE is set).
+    KINFRAME_APNS_ENABLED: YES
     # Shared between the app, the share extension and the keychain.
     KINFRAME_APP_GROUP: group.app.kinframe.family
+  configs:
+    # aps-environment in Kinframe.entitlements: debug builds get sandbox device tokens, store builds production ones.
+    Debug:
+      KINFRAME_APS_ENVIRONMENT: development
+    Release:
+      KINFRAME_APS_ENVIRONMENT: production
 
 packages:
   OpenAPIRuntime:
