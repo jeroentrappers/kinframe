@@ -292,7 +292,7 @@ func TestCalendar(t *testing.T) {
 	party := findEvent(cal, "Pancake party")
 	local := cal["sources"].([]any)[0].(map[string]any)
 	if local["kind"] != "local" || local["name"] != "" || party["source_id"] != local["id"] || party["sender_name"] != "Bob" ||
-		party["invitation_id"] != invID || party["has_photo"] != photo || party["notes"] != "Bring syrup" {
+		party["invitation_id"] != invID || (party["has_photo"] == true) != photo || party["notes"] != "Bring syrup" {
 		t.Fatalf("received event: %v / %v", party, local)
 	}
 	var sent []map[string]any
