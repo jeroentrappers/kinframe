@@ -48,6 +48,29 @@ platform :ios do
     upload_to_testflight(api_key: asc_key, skip_waiting_for_build_processing: true) if options[:upload]
   end
 
+  desc "Upload the store listing (metadata/, screenshots/) to App Store Connect. Never submits for review."
+  lane :store_listing do |options|
+    deliver(
+      api_key: asc_key,
+      skip_metadata: options[:skip_metadata] || false,
+      skip_screenshots: options[:skip_screenshots] || false,
+      app_review_information: review_information,
+    )
+  end
+
+  desc "Submit build_number (waits for processing) for App Review with the current listing. Manual release after approval."
+  lane :submit do |options|
+    deliver(
+      api_key: asc_key,
+      build_number: options.fetch(:build_number).to_s,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      submission_information: { add_id_info_uses_idfa: false, export_compliance_uses_encryption: false },
+      app_review_information: review_information,
+    )
+  end
+
   private_lane :sync do |options|
     match(
       type: options[:type],
@@ -58,6 +81,15 @@ platform :ios do
       keychain_password: ENV["CI"] ? nil : ENV.fetch("KINFRAME_KEYCHAIN_PASSWORD")
     )
   end
+end
+
+# App Review contact and demo account: fastlane/review_information/*.txt plus REVIEW_PASSWORD and REVIEW_PHONE
+# (+32 …) from ~/.appstoreconnect/review.env. Without a phone number Apple rejects it, so it is left out.
+def review_information
+  return {} if ENV["REVIEW_PHONE"].to_s.empty?
+  dir = File.expand_path("review_information", __dir__)
+  info = Dir[File.join(dir, "*.txt")].to_h { |f| [File.basename(f, ".txt").to_sym, File.read(f).strip] }
+  info.merge(phone_number: ENV["REVIEW_PHONE"], demo_password: ENV.fetch("REVIEW_PASSWORD"), demo_required: true)
 end
 
 def asc_key
@@ -75,7 +107,7 @@ end
 # ~/.appstoreconnect/env (API key) and ~/.appstoreconnect/signing.env (MATCH_PASSWORD, KINFRAME_KEYCHAIN_PASSWORD):
 # KEY=value lines; variables already set win.
 def load_local_env
-  %w[env signing.env].each do |name|
+  %w[env signing.env review.env].each do |name|
     path = File.expand_path("~/.appstoreconnect/#{name}")
     next unless File.exist?(path)
     File.readlines(path).each do |line|

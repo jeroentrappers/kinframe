@@ -23,7 +23,7 @@ Draft texts and answers for the App Store Connect app record. English and Dutch,
 
 ## English (U.S.)
 
-**Name** [30]: `kinframe`
+**Name** [30]: `kinframe: Family Photo Frame` (28; "kinframe" alone is taken. The home screen still shows "kinframe")
 
 **Subtitle** [30]: `Your photos, on their frame` (27)
 

@@ -1,0 +1,13 @@
+Jouw foto's, op hun kader, in een paar seconden.
+
+kinframe stuurt foto's en video's naar de fotokaders van de familie. Geen abonnement, geen tracking, en de server is van jullie.
+
+VAN OVERAL STUREN Kies foto's en video's in de app, of deel ze rechtstreeks vanuit Foto's. Enkele seconden later staan ze op het kader. Voeg een bijschrift toe, stuur naar meerdere kaders tegelijk, en Live Photos gaan gewoon mee.
+
+ZIE DE GLIMLACH Je ziet wanneer een foto aankomt en wanneer hij bekeken is. Hartjes en snelle antwoorden van het kader komen meteen bij jou terug.
+
+BEHEER JE KADERS Voeg een kader toe, nodig de familie uit en kies wie mag sturen. Orden albums, stel in wanneer het scherm aan en uit gaat, voeg agenda's en widgets toe, of toon een diavoorstelling op je tv met AirPlay.
+
+VAN JULLIE ZELF kinframe is open source en vrije software (AGPL-3.0), zonder advertenties, analyse of telemetrie. Gebruik de dienst op kinframe.appmire.be, met servers in Duitsland, of draai je eigen server: de app werkt met allebei.
+
+Voor kinframe heb je een kinframe-fotokader nodig: een wifi-fotokader waarop de kinframe-app draait.
