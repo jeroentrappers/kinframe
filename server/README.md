@@ -72,6 +72,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_JANITOR_INTERVAL_SECONDS` | `600` | Trash purge, feed pruning, upload expiry |
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |
 | `KINFRAME_VAPID_PUBLIC_KEY` / `KINFRAME_VAPID_PRIVATE_KEY` | generated | WebPush VAPID key pair (base64url P-256 public point and private scalar). Set both or neither; when unset the server generates a pair once and keeps it in `<data dir>/vapid.json` (mode 0600). Keep it stable: browser subscriptions are bound to the public key |
+| `KINFRAME_FCM_CREDENTIALS_FILE` | — | Firebase service account JSON key; enables FCM push to the family app’s store builds (needs push enabled) |
 | `KINFRAME_VAPID_SUBJECT` | public URL if https, else `mailto:kinframe@localhost` | Contact push services see in the VAPID token (`mailto:` or `https://`) |
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
@@ -238,6 +239,7 @@ Management API access, in order of preference:
 | `KINFRAME_SOCIAL_REMOVE_UNCONFIGURED` | `false` | Delete kinframe's connectors for providers whose env vars are gone |
 | `KINFRAME_SOCIAL_LINK_BY_EMAIL` | `true` | Link a first social sign-in to the existing account with the same verified email (Logto `automaticAccountLinking`); `false` makes Logto ask the user |
 | `KINFRAME_LOGTO_BRANDING` | `true` | Apply the kinframe logo, colours and CSS to Logto's sign-in pages |
+| `KINFRAME_LOGTO_PASSWORD_SIGNIN` | `false` | Let accounts that have a password (set by an admin, e.g. an App Review account) sign in with it next to email codes; sign-up stays passwordless |
 | `KINFRAME_TERMS_URL` / `KINFRAME_PRIVACY_URL` | — | Legal links on the sign-up page; none when unset |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `$KINFRAME_DATA_DIR/logto.json` | Output file |
 

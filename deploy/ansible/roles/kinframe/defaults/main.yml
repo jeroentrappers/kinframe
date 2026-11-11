@@ -90,6 +90,8 @@ kinframe_social_remove_unconfigured: false
 kinframe_social_link_by_email: true
 # Logto sign-in page: kinframe look (logo, colours, CSS) and optional legal links (empty = no link).
 kinframe_logto_branding: true
+# Accounts with a password (e.g. App Review) may sign in with it; codes stay the default.
+kinframe_logto_password_signin: false
 kinframe_terms_url: ""
 kinframe_privacy_url: ""
 
@@ -98,6 +100,8 @@ kinframe_privacy_url: ""
 # default_locale, …); the role
 # writes it to <kinframe_dir>/shop.json and sets KINFRAME_SHOP_FILE. Mails go out over kinframe_smtp_*.
 kinframe_shop: {}
+# Firebase service account JSON key (vault) for FCM push to the family app's Play builds; empty = no FCM.
+kinframe_fcm_credentials: ""
 
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}

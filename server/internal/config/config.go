@@ -70,6 +70,8 @@ type Config struct {
 	VAPIDPublicKey  string // base64url uncompressed P-256 point
 	VAPIDPrivateKey string // base64url scalar
 	VAPIDSubject    string // mailto: or https: contact for push services
+	// FCM for the family app's store builds: a Firebase service account JSON key (KINFRAME_FCM_CREDENTIALS_FILE).
+	FCMCredentials []byte
 	UploadExpiry    time.Duration
 	JanitorInterval time.Duration
 
@@ -325,6 +327,11 @@ func load(get func(string) string) (*Config, error) {
 			}
 		}
 		c.VAPIDPublicKey, c.VAPIDPrivateKey = pub, priv
+		if f := env("KINFRAME_FCM_CREDENTIALS_FILE", ""); f != "" {
+			if c.FCMCredentials, err = os.ReadFile(f); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_FCM_CREDENTIALS_FILE: %w", err))
+			}
+		}
 		c.VAPIDSubject = env("KINFRAME_VAPID_SUBJECT", "")
 		if c.VAPIDSubject == "" {
 			if strings.HasPrefix(c.PublicURL, "https://") {

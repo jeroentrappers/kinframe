@@ -108,6 +108,13 @@ func NewWithPool(cfg *config.Config, log *slog.Logger, pool *pgxpool.Pool) (*App
 		if cfg.VAPIDPublicKey != "" {
 			senders["webpush"] = notify.WebPushSender{PublicKey: cfg.VAPIDPublicKey, PrivateKey: cfg.VAPIDPrivateKey, Subject: cfg.VAPIDSubject}
 		}
+		if len(cfg.FCMCredentials) > 0 {
+			fcm, err := notify.NewFCMSender(cfg.FCMCredentials)
+			if err != nil {
+				return nil, err
+			}
+			senders["fcm"] = fcm
+		}
 		n.Sender = senders
 	}
 	var mirror *releases.Mirror

@@ -102,6 +102,9 @@ services:
 {% if kinframe_shop %}
       - ./shop.json:/etc/kinframe/shop.json:ro
 {% endif %}
+{% if kinframe_fcm_credentials | length > 0 %}
+      - ./fcm.json:/etc/kinframe/fcm.json:ro
+{% endif %}
     ports:
       - "127.0.0.1:{{ kinframe_port }}:8110"
 

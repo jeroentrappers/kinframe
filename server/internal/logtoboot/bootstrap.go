@@ -583,7 +583,8 @@ func maps(m map[string]any) map[string]any {
 	return out
 }
 
-// signInExperience: passwordless email codes for sign-up and sign-in,
+// signInExperience: passwordless email codes for sign-up and sign-in (plus
+// an optional password for accounts that have one, see PasswordSignIn),
 // passkeys offered, the name asked at sign-up, language from the browser,
 // the given social buttons, and (when enabled) kinframe's look.
 func (b *Bootstrapper) signInExperience(socialTargets []string) map[string]any {
@@ -600,7 +601,7 @@ func (b *Bootstrapper) signInExperience(socialTargets []string) map[string]any {
 		},
 		"signIn": map[string]any{
 			"methods": []any{map[string]any{
-				"identifier": "email", "password": false, "verificationCode": true, "isPasswordPrimary": false,
+				"identifier": "email", "password": b.cfg.PasswordSignIn, "verificationCode": true, "isPasswordPrimary": false,
 			}},
 		},
 		"languageInfo":        map[string]any{"autoDetect": true, "fallbackLanguage": "en"},
