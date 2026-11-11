@@ -1,5 +1,6 @@
 package app.kinframe.family.ui
 
+import app.kinframe.core.api.Role as ApiRole
 import android.Manifest
 import android.app.Activity
 import android.content.ClipData
@@ -433,6 +434,8 @@ private fun Screen(
         Route.Settings -> {
             val push by graph.push.status.collectAsStateWithLifecycle()
             val ps by app.profileState.collectAsStateWithLifecycle()
+            val fs by frames.state.collectAsStateWithLifecycle()
+            var deletingAccount by remember { mutableStateOf(false) }
             var allowed by remember { mutableStateOf(Notifications.canPost(context)) }
             val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed = it }
             val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -456,6 +459,12 @@ private fun Screen(
                     val web = ready.server.discovery.web ?: ready.server.url.toString()
                     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(web.trimEnd('/') + path)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 },
+                ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
+                onDeleteAccount = { removeItems ->
+                    deletingAccount = true
+                    app.deleteAccount(removeItems) { err -> deletingAccount = false; toaster.show(res.getString(err)) }
+                },
+                deletingAccount = deletingAccount,
             )
         }
         is Route.AddFrame -> {

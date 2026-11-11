@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -59,6 +65,11 @@ fun SettingsScreen(
     onLanguage: ((String) -> Unit)? = null,
     /** Opens a page of the server's website (`/privacy`, `/terms`). */
     onOpenWeb: ((String) -> Unit)? = null,
+    /** Names of the frames the person owns; they hand those over or remove them before deleting the account. */
+    ownedFrames: List<String> = emptyList(),
+    /** Deletes the account (removeItems: also what they sent); null hides the button. */
+    onDeleteAccount: ((Boolean) -> Unit)? = null,
+    deletingAccount: Boolean = false,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -128,6 +139,11 @@ fun SettingsScreen(
 
         Text(stringResource(R.string.settings_signed_in_as, me.displayName), style = Kin.type.caption, color = c.inkSoft)
         SecondaryButton(stringResource(R.string.settings_sign_out), onSignOut, Modifier.fillMaxWidth(), icon = KinIcons.SignOut)
+        if (onDeleteAccount != null) {
+            var asking by rememberSaveable { mutableStateOf(false) }
+            QuietButton(stringResource(R.string.account_delete), { asking = true }, enabled = !deletingAccount)
+            if (asking) DeleteAccountDialog(ownedFrames, deletingAccount, onDismiss = { asking = false }, onDelete = onDeleteAccount)
+        }
         Text(stringResource(R.string.settings_about, BuildConfig.VERSION_NAME), style = Kin.type.caption, color = c.inkFaint)
         if (onOpenWeb != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -136,6 +152,37 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismiss: () -> Unit, onDelete: (Boolean) -> Unit) {
+    val c = Kin.colors
+    var removeItems by rememberSaveable { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = { if (!deleting) onDismiss() },
+        title = { Text(stringResource(R.string.account_delete_title)) },
+        text = {
+            if (owned.isNotEmpty()) {
+                Text(stringResource(R.string.account_delete_owner, owned.joinToString(", ")))
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.account_delete_body))
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()
+                        .toggleable(removeItems, enabled = !deleting, role = Role.Checkbox) { removeItems = it }) {
+                        Checkbox(removeItems, onCheckedChange = null)
+                        Text(stringResource(R.string.account_delete_items), Modifier.padding(start = 8.dp))
+                    }
+                    if (!removeItems) Text(stringResource(R.string.account_delete_items_hint), style = Kin.type.caption, color = c.inkSoft)
+                }
+            }
+        },
+        confirmButton = {
+            if (owned.isEmpty()) TextButton({ onDelete(removeItems) }, enabled = !deleting) {
+                Text(stringResource(if (deleting) R.string.common_loading else R.string.account_delete), color = c.danger)
+            }
+        },
+        dismissButton = { TextButton(onDismiss, enabled = !deleting) { Text(stringResource(if (owned.isEmpty()) R.string.common_cancel else R.string.common_done)) } },
+    )
 }
 
 @Composable

@@ -607,4 +607,10 @@
     <string name="fs_live_on">Play when shown</string>
     <string name="fs_live_tap">Play on tap</string>
     <string name="fs_live_off">Photo only</string>
+    <string name="account_delete">Delete account</string>
+    <string name="account_delete_title">Delete your account?</string>
+    <string name="account_delete_body">Your account, profile photo and sign-in are deleted for good, and you leave all your frames. This can’t be undone.</string>
+    <string name="account_delete_items">Also remove the photos and videos I sent</string>
+    <string name="account_delete_items_hint">Otherwise they stay on the frames, with your name.</string>
+    <string name="account_delete_owner">You own %1$s. Hand each frame over to another member, or remove it, before you delete your account.</string>
 </resources>
