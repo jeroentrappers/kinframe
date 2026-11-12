@@ -1,5 +1,29 @@
-kinframe sends photos to Wi-Fi photo frames. The review account is a member of "Demo frame", a frame that is always online for App Review: it confirms what you send as delivered and seen and reacts with a heart, so you can try the whole flow without hardware. Sign in with "Use password" on the sign-in page (e-mail codes are the default).
+PURPOSE AND AUDIENCE
+kinframe sends photos and short videos from your phone to Wi-Fi photo frames in the homes of people you love, typically grandparents and other relatives who don't use smartphones. Families use it to share everyday moments: you pick photos, choose a frame and press Send; the frame shows them within seconds and you see when they were delivered and seen, and any reaction. Audience: adults sharing within their own family. There is no public feed, no strangers and no discovery: every frame is private and only people invited by its owner can send to it.
 
-Prefer to watch photos arrive on a screen? Open https://kinframe.appmire.be/tv/frame in any web browser: it becomes a frame and shows a code. In the app, choose Frames > Add frame, enter that code, and send photos to it; they appear in the browser within seconds.
+HOW TO REVIEW (no hardware needed)
+1. Sign in with the demo account below. On the sign-in page choose "Use password" (e-mail codes are the default).
+2. The account is a member of "Demo frame", a frame that is always online for App Review. It confirms what you send as delivered and seen and reacts with a heart.
+3. Tap Send, pick photos, choose Demo frame and send. Follow the delivery in History.
+4. To watch photos arrive on a screen, open https://kinframe.appmire.be/tv/frame in any web browser: it becomes a frame and shows a code. In the app choose Frames > Add frame, enter that code and send photos to it; they appear in the browser within seconds.
+5. New accounts: enter any new e-mail address on the sign-in page and confirm the code sent to it, or use Sign in with Apple / Google.
 
-Account deletion: Settings > Delete account; this demo account is recreated after review.
+ACCOUNT DELETION
+Settings > Delete account. The account, profile photo and sign-in are deleted for good; optionally the photos sent too. The demo account is recreated after review.
+
+USER CONTENT AND MODERATION
+Content is only shared inside private, invite-only family frames. A sender can take back photos at any time (History > send > Remove now); they disappear from every frame. The frame owner and admins can remove any member (Frames > frame > People > member > Remove from frame, optionally "Also remove the photos they sent"); that person can no longer send to the frame unless invited again. Any member can leave a frame (Leave frame). Problems can be reported to jeroen@appmire.be; we respond within 24 hours.
+
+EXTERNAL SERVICES
+- Sign-in: Logto (self-hosted at auth.kinframe.appmire.be), Sign in with Apple, Google Sign-In.
+- Push notifications: Apple Push Notification service.
+- Hosting and photo storage: our own servers at Hetzner (Germany, EU).
+- Sign-in e-mails: our own mail server (mail.appmire.be).
+- Optional frame widgets: Open-Meteo (weather), calendars the user connects (Google, Microsoft, iCloud).
+No in-app purchases or payments, no ads, no analytics, no AI services.
+
+REGIONS
+The app works the same in all regions. Its interface is available in English and Dutch.
+
+REGULATION
+kinframe does not operate in a regulated industry and contains no third-party protected content; users only share their own photos.
