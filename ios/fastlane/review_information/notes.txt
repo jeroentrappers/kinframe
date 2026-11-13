@@ -6,7 +6,7 @@ HOW TO REVIEW (no hardware needed)
 2. The account is a member of "Demo frame", a frame that is always online for App Review. It confirms what you send as delivered and seen and reacts with a heart.
 3. Tap Send, pick photos, choose Demo frame and send. Follow the delivery in History.
 4. To watch photos arrive on a screen, open https://kinframe.appmire.be/tv/frame in any web browser: it becomes a frame and shows a code. In the app choose Frames > Add frame, enter that code and send photos to it; they appear in the browser within seconds.
-5. New accounts: enter any new e-mail address on the sign-in page and confirm the code sent to it, or use Sign in with Apple / Google.
+5. You are welcome to create your own account to see sign-up and account deletion in action; kinframe is free. Enter any new e-mail address on the sign-in page and confirm the code sent to it, or use Sign in with Apple / Google.
 
 ACCOUNT DELETION
 Settings > Delete account. The account, profile photo and sign-in are deleted for good; optionally the photos sent too. The demo account is recreated after review.
