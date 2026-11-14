@@ -89,6 +89,34 @@ enum DebugLaunch {
         if let link = args.string(forKey: "kfOpen").flatMap(URL.init(string:)) {
             app.open(link)
         }
+        if let out = args.string(forKey: "kfSnapshot") {
+            snapshot(to: out, after: args.double(forKey: "kfSnapshotDelay"))
+        }
+    }
+
+    /// `-kfSnapshot <file.png>` [`-kfSnapshotDelay <s>`]: render the window into a PNG and quit. On the Mac the
+    /// window is fixed at 1440×900 points, which renders at 2880×1800, the Mac App Store screenshot size. Needs no
+    /// screen recording permission.
+    private static func snapshot(to path: String, after delay: Double) {
+        Task { @MainActor in
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            #if targetEnvironment(macCatalyst)
+            for scene in scenes {
+                scene.sizeRestrictions?.minimumSize = CGSize(width: 1440, height: 900)
+                scene.sizeRestrictions?.maximumSize = CGSize(width: 1440, height: 900)
+            }
+            #endif
+            try? await Task.sleep(for: .seconds(delay > 0 ? delay : 8))
+            let windows = scenes.flatMap(\.windows)
+            guard let window = windows.first(where: \.isKeyWindow) ?? windows.first else { exit(1) }
+            let format = UIGraphicsImageRendererFormat()
+            format.scale = 2
+            let image = UIGraphicsImageRenderer(bounds: window.bounds, format: format).image { _ in
+                _ = window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+            }
+            try? image.pngData()?.write(to: URL(fileURLWithPath: path))
+            exit(0)
+        }
     }
 }
 #endif
