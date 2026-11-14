@@ -3615,6 +3615,10 @@ type ShopProduct struct {
 	// Name Example: kinframe 10.1"
 	Name string `json:"name"`
 
+	// Photos Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+	// for a day). Absent = show the `image` illustration.
+	Photos *[]string `json:"photos,omitempty"`
+
 	// PriceCents Unit price incl. VAT
 	PriceCents int `json:"price_cents"`
 

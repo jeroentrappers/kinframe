@@ -289,6 +289,38 @@ test.describe('shop', () => {
 		await expect(page.getByText('Stock updated')).toBeVisible();
 	});
 
+	test('product photos: gallery, thumbnails and full-screen view', async ({ page }) => {
+		const state = emptyState();
+		const base = shopFixture();
+		const photos = ['/v1/shop/media/a.png', '/v1/shop/media/b.png', '/v1/shop/media/c.png'];
+		state.discovery.shop = { ...base, products: base.products.map((p, i) => (i === 0 ? { ...p, photos } : p)) };
+		await mockApi(page, state);
+		// A 1×1 PNG for every photo.
+		const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64');
+		await page.route('**/v1/shop/media/*', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: png }));
+		await page.goto('/');
+		const section = page.getByRole('region', { name: 'Get a kinframe' });
+		const gallery = section.getByTestId('product-photos');
+		await expect(gallery).toHaveCount(1); // the second frame keeps its drawing
+		const name = base.products[0]!.name;
+		await expect(gallery.getByRole('img', { name: `${name}, photo 1 of 3` })).toHaveAttribute('src', photos[0]!);
+		await gallery.getByRole('button', { name: `${name}, photo 3 of 3` }).click();
+		await expect(gallery.getByRole('img', { name: `${name}, photo 3 of 3` })).toBeVisible();
+
+		await gallery.getByRole('button', { name: `Enlarge the photo of ${name}` }).click();
+		const viewer = page.getByRole('dialog', { name });
+		await expect(viewer).toBeVisible();
+		await viewer.getByRole('button', { name: 'Next photo' }).click();
+		await expect(viewer.getByRole('img')).toHaveAttribute('src', photos[0]!);
+		await page.keyboard.press('ArrowLeft');
+		await expect(viewer.getByRole('img')).toHaveAttribute('src', photos[2]!);
+		await page.keyboard.press('Escape');
+		await expect(viewer).toBeHidden();
+
+		await section.getByRole('link', { name: `Reserve the ${name}` }).click();
+		await expect(page.getByRole('img', { name: `${name}, photo 1 of 3` })).toBeVisible();
+	});
+
 	test('checkout: buy, delivery address, pay, paid order page', async ({ page }) => {
 		const state = emptyState();
 		state.discovery.shop = { ...shopFixture(), checkout: true };

@@ -124,6 +124,17 @@
   register: shop_file
   when: kinframe_shop | length > 0
 
+- name: Shop photos
+  ansible.builtin.copy:
+    src: "{{ kinframe_shop_media_src | regex_replace('/*$', '') }}/"
+    dest: "{{ kinframe_dir }}/shop-media/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+  register: shop_media
+  when: kinframe_shop | length > 0 and kinframe_shop_media_src | length > 0
+
 - name: No shop file without kinframe_shop
   ansible.builtin.file:
     path: "{{ kinframe_dir }}/shop.json"
@@ -254,7 +265,7 @@
   ansible.builtin.command:
     cmd: docker compose restart server
     chdir: "{{ kinframe_dir }}"
-  when: (bootstrap is changed or shop_file is changed or fcm_file is changed or apns_file is changed) and server_up is not changed
+  when: (bootstrap is changed or shop_file is changed or shop_media is changed or fcm_file is changed or apns_file is changed) and server_up is not changed
   changed_when: true
 
 - name: Wait for the kinframe server

@@ -29,7 +29,7 @@
 	import Logo from '$components/Logo.svelte';
 	import SellerFooter from '$components/SellerFooter.svelte';
 	import ShopAvailability from '$components/ShopAvailability.svelte';
-	import ShopFrameArt from '$components/ShopFrameArt.svelte';
+	import ShopPhotos from '$components/ShopPhotos.svelte';
 
 	const shop = $derived(discovery.shop);
 	const checkout = $derived(!!discovery.shop?.checkout);
@@ -255,7 +255,7 @@
 								{@const n = form.qty[p.id] ?? 0}
 								{@const specs = localized(p.specs, i18n.locale) ?? []}
 								<div class="product" class:chosen={n > 0}>
-									<div class="p-art"><ShopFrameArt image={p.image ?? (i === 0 ? 'frame-10' : 'frame-15')} /></div>
+									<div class="p-art"><ShopPhotos product={p} fallback={i === 0 ? 'frame-10' : 'frame-15'} compact /></div>
 									<div class="p-info">
 										<h3 id="pname-{p.id}">{p.name}</h3>
 										<p class="p-price"><span class="num">{money(p.price_cents)}</span> <span class="hint">{t('shop.inclVat', { vat })}</span></p>

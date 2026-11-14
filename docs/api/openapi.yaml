@@ -2136,6 +2136,12 @@ components:
           minimum: 0
           description: 'Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).'
         image: { type: string, description: 'Illustration key: frame-10 or frame-15', examples: [frame-10] }
+        photos:
+          type: array
+          items: { type: string }
+          description: |
+            Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+            for a day). Absent = show the `image` illustration.
         specs:
           type: object
           description: Language code → short spec bullets; `en` is the fallback.

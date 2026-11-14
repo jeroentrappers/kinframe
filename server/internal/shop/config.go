@@ -11,6 +11,7 @@ import (
 	"net/mail"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -95,6 +96,10 @@ type Product struct {
 	Image string `yaml:"image"`
 	// Specs are short bullets per language; "en" is required and the fallback.
 	Specs map[string][]string `yaml:"specs"`
+	// Photos are product photo file names in the shop's media directory
+	// (KINFRAME_SHOP_MEDIA_DIR), the first one leading; served at
+	// /v1/shop/media/{name}. Empty = the web illustration (Image).
+	Photos []string `yaml:"photos"`
 }
 
 // ElsewhereLink is a retailer selling a compatible frame in some countries.
@@ -152,6 +157,7 @@ var Images = []string{"frame-10", "frame-15"}
 
 var (
 	idRe       = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`)
+	photoRe    = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]{0,99}\.(jpg|jpeg|png|webp)$`)
 	countryRe  = regexp.MustCompile(`^[A-Z]{2}$`)
 	currencyRe = regexp.MustCompile(`^[A-Z]{3}$`)
 	prefixRe   = regexp.MustCompile(`^[A-Z]{1,4}$`)
@@ -267,6 +273,14 @@ func (c *Config) validate() error {
 		where := fmt.Sprintf("products[%d]", i)
 		if !idRe.MatchString(p.ID) {
 			bad("%s.id must be lowercase letters, digits and dashes, got %q", where, p.ID)
+		}
+		if len(p.Photos) > 12 {
+			bad("%s.photos: at most 12", where)
+		}
+		for _, f := range p.Photos {
+			if !photoRe.MatchString(f) || strings.Contains(f, "..") {
+				bad("%s.photos: %q must be a lowercase file name ending in .jpg, .png or .webp", where, f)
+			}
 		}
 		if seen[p.ID] {
 			bad("%s.id %q is used twice", where, p.ID)
@@ -416,4 +430,31 @@ func (c *Config) ShippingFor(subtotal int) int {
 		return 0
 	}
 	return c.Shipping.FlatCents
+}
+
+// Photo reports whether name is one of the products' photos (only those are
+// served from the media directory).
+func (c *Config) Photo(name string) bool {
+	for _, p := range c.Products {
+		if slices.Contains(p.Photos, name) {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckMedia checks that every product photo is a readable file in dir.
+func (c *Config) CheckMedia(dir string) error {
+	var errs []error
+	for _, p := range c.Products {
+		for _, f := range p.Photos {
+			if dir == "" {
+				return errors.New("products have photos but KINFRAME_SHOP_MEDIA_DIR is not set")
+			}
+			if st, err := os.Stat(filepath.Join(dir, f)); err != nil || !st.Mode().IsRegular() {
+				errs = append(errs, fmt.Errorf("photo %s of %s is not a file in %s", f, p.ID, dir))
+			}
+		}
+	}
+	return errors.Join(errs...)
 }

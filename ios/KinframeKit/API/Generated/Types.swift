@@ -615,6 +615,18 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/operator/reservations`.
     /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)`.
     func operatorListReservations(_ input: Operations.OperatorListReservations.Input) async throws -> Operations.OperatorListReservations.Output
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    func operatorListShopStock(_ input: Operations.OperatorListShopStock.Input) async throws -> Operations.OperatorListShopStock.Output
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    func operatorSetShopStock(_ input: Operations.OperatorSetShopStock.Input) async throws -> Operations.OperatorSetShopStock.Output
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
     ///
     /// - Remark: HTTP `GET /v1/operator/reservations.csv`.
@@ -2023,6 +2035,30 @@ extension APIProtocol {
         try await operatorListReservations(Operations.OperatorListReservations.Input(
             query: query,
             headers: headers
+        ))
+    }
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    public func operatorListShopStock(headers: Operations.OperatorListShopStock.Input.Headers = .init()) async throws -> Operations.OperatorListShopStock.Output {
+        try await operatorListShopStock(Operations.OperatorListShopStock.Input(headers: headers))
+    }
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    public func operatorSetShopStock(
+        path: Operations.OperatorSetShopStock.Input.Path,
+        headers: Operations.OperatorSetShopStock.Input.Headers = .init(),
+        body: Operations.OperatorSetShopStock.Input.Body
+    ) async throws -> Operations.OperatorSetShopStock.Output {
+        try await operatorSetShopStock(Operations.OperatorSetShopStock.Input(
+            path: path,
+            headers: headers,
+            body: body
         ))
     }
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.

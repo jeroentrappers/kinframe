@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/mail"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -54,6 +56,13 @@ func shopJSON(c *shop.Config) *gen.Shop {
 		if len(p.Specs) > 0 {
 			specs := map[string][]string(p.Specs)
 			gp.Specs = &specs
+		}
+		if len(p.Photos) > 0 {
+			photos := make([]string, len(p.Photos))
+			for j, f := range p.Photos {
+				photos[j] = "/v1/shop/media/" + f
+			}
+			gp.Photos = &photos
 		}
 		out.Products[i] = gp
 	}
@@ -607,4 +616,30 @@ func csvSafe(v string) string {
 		return "'" + v
 	}
 	return v
+}
+
+// shopMedia is GET /v1/shop/media/{name} (hand-written: a file): a product
+// photo from KINFRAME_SHOP_MEDIA_DIR. Only photos named in the shop config are
+// served.
+func (s *Server) shopMedia(w http.ResponseWriter, r *http.Request) {
+	c := s.cfg.Shop
+	name := r.PathValue("name")
+	if c == nil || s.cfg.ShopMediaDir == "" || !c.Photo(name) {
+		s.writeError(w, r, problem.New(problem.NotFound, ""))
+		return
+	}
+	f, err := os.Open(filepath.Join(s.cfg.ShopMediaDir, name))
+	if err != nil {
+		s.writeError(w, r, problem.New(problem.NotFound, ""))
+		return
+	}
+	defer f.Close()
+	st, err := f.Stat()
+	if err != nil {
+		s.writeError(w, r, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	http.ServeContent(w, r, name, st.ModTime(), f)
 }

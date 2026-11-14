@@ -2997,6 +2997,13 @@ components:
                 name:
                     example: kinframe 10.1"
                     type: string
+                photos:
+                    description: |
+                        Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+                        for a day). Absent = show the `image` illustration.
+                    items:
+                        type: string
+                    type: array
                 price_cents:
                     description: Unit price incl. VAT
                     in cents: null

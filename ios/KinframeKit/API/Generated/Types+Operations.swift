@@ -16973,6 +16973,335 @@ public enum Operations {
             }
         }
     }
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    public enum OperatorListShopStock {
+        public static let id: Swift.String = "operatorListShopStock"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/shop/stock/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListShopStock.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorListShopStock.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorListShopStock.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.OperatorListShopStock.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/shop/stock/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/shop/stock/GET/responses/200/content/json`.
+                    public struct JsonPayload: Codable, Hashable, Sendable {
+                        /// - Remark: Generated from `#/paths/v1/operator/shop/stock/GET/responses/200/content/json/stock`.
+                        public var stock: [Components.Schemas.ShopStockItem]
+                        /// Creates a new `JsonPayload`.
+                        ///
+                        /// - Parameters:
+                        ///   - stock:
+                        public init(stock: [Components.Schemas.ShopStockItem]) {
+                            self.stock = stock
+                        }
+                        public enum CodingKeys: String, CodingKey {
+                            case stock
+                        }
+                    }
+                    /// - Remark: Generated from `#/paths/v1/operator/shop/stock/GET/responses/200/content/application\/json`.
+                    case json(Operations.OperatorListShopStock.Output.Ok.Body.JsonPayload)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Operations.OperatorListShopStock.Output.Ok.Body.JsonPayload {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorListShopStock.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorListShopStock.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Stock
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorListShopStock.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorListShopStock.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    public enum OperatorSetShopStock {
+        public static let id: Swift.String = "operatorSetShopStock"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/path/productId`.
+                public var productId: Swift.String
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - productId:
+                public init(productId: Swift.String) {
+                    self.productId = productId
+                }
+            }
+            public var path: Operations.OperatorSetShopStock.Input.Path
+            /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorSetShopStock.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.OperatorSetShopStock.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.OperatorSetShopStock.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/requestBody/json/quantity`.
+                    public var quantity: Swift.Int
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - quantity:
+                    public init(quantity: Swift.Int) {
+                        self.quantity = quantity
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case quantity
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/requestBody/content/application\/json`.
+                case json(Operations.OperatorSetShopStock.Input.Body.JsonPayload)
+            }
+            public var body: Operations.OperatorSetShopStock.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.OperatorSetShopStock.Input.Path,
+                headers: Operations.OperatorSetShopStock.Input.Headers = .init(),
+                body: Operations.OperatorSetShopStock.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/operator/shop/stock/{productId}/PUT/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShopStockItem)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShopStockItem {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.OperatorSetShopStock.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.OperatorSetShopStock.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.OperatorSetShopStock.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.OperatorSetShopStock.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
     ///
     /// - Remark: HTTP `GET /v1/operator/reservations.csv`.

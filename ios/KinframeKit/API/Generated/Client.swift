@@ -8627,6 +8627,173 @@ public struct Client: APIProtocol {
             }
         )
     }
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    public func operatorListShopStock(_ input: Operations.OperatorListShopStock.Input) async throws -> Operations.OperatorListShopStock.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.OperatorListShopStock.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/operator/shop/stock",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .get
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                return (request, nil)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.OperatorListShopStock.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Operations.OperatorListShopStock.Output.Ok.Body.JsonPayload.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    public func operatorSetShopStock(_ input: Operations.OperatorSetShopStock.Input) async throws -> Operations.OperatorSetShopStock.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.OperatorSetShopStock.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/operator/shop/stock/{}",
+                    parameters: [
+                        input.path.productId
+                    ]
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .put
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.OperatorSetShopStock.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ShopStockItem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
     ///
     /// - Remark: HTTP `GET /v1/operator/reservations.csv`.

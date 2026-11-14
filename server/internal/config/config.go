@@ -127,6 +127,8 @@ type Config struct {
 	SMTP *shop.SMTP
 	// Shop is the optional pre-order shop (KINFRAME_SHOP_FILE); nil = no shop.
 	Shop *shop.Config
+	// ShopMediaDir holds the shop's product photos (KINFRAME_SHOP_MEDIA_DIR).
+	ShopMediaDir string
 	// MollieAPIKey pays shop orders (KINFRAME_MOLLIE_API_KEY; test_… or live_…),
 	// required when the shop file has payments.
 	MollieAPIKey string
@@ -277,6 +279,10 @@ func load(get func(string) string) (*Config, error) {
 		} else if c.Shop != nil {
 			if u, err := url.Parse(c.PublicURL); err == nil && c.Shop.IsStorefront(u.Hostname()) {
 				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: domains must not include the app's own host %q (KINFRAME_PUBLIC_URL)", u.Hostname()))
+			}
+			c.ShopMediaDir = env("KINFRAME_SHOP_MEDIA_DIR", "")
+			if err := c.Shop.CheckMedia(c.ShopMediaDir); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: %w", err))
 			}
 			c.MollieAPIKey = get("KINFRAME_MOLLIE_API_KEY")
 			if c.Shop.Checkout() && !strings.HasPrefix(c.MollieAPIKey, "test_") && !strings.HasPrefix(c.MollieAPIKey, "live_") {

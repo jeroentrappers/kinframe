@@ -6,7 +6,7 @@
 	import Icon from './Icon.svelte';
 	import ShopAvailability from './ShopAvailability.svelte';
 	import ShopElsewhere from './ShopElsewhere.svelte';
-	import ShopFrameArt from './ShopFrameArt.svelte';
+	import ShopPhotos from './ShopPhotos.svelte';
 
 	let { shop }: { shop: Shop } = $props();
 	// Shops with checkout sell (pay online); the others take reservations.
@@ -34,7 +34,7 @@
 		{#each shop.products as p, i (p.id)}
 			{@const specs = localized(p.specs, i18n.locale) ?? []}
 			<article class="product" aria-labelledby="product-{p.id}">
-				<div class="art"><ShopFrameArt image={p.image ?? (i === 0 ? 'frame-10' : 'frame-15')} /></div>
+				<div class="art" class:has-photos={!!p.photos?.length}><ShopPhotos product={p} fallback={i === 0 ? 'frame-10' : 'frame-15'} /></div>
 				<div class="body">
 					<div class="name-row">
 						<h3 id="product-{p.id}">{p.name}</h3>
@@ -153,6 +153,10 @@
 		border: 1px solid var(--border);
 		box-shadow: var(--shadow);
 		overflow: hidden;
+	}
+	.art.has-photos {
+		padding: var(--s-3);
+		background: var(--surface);
 	}
 	.art {
 		padding: var(--s-5) var(--s-5) var(--s-2);

@@ -1964,6 +1964,11 @@ export interface components {
              * @example frame-10
              */
             image?: string;
+            /**
+             * @description Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+             *     for a day). Absent = show the `image` illustration.
+             */
+            photos?: string[];
             /** @description Language code → short spec bullets; `en` is the fallback. */
             specs?: {
                 [key: string]: string[];
