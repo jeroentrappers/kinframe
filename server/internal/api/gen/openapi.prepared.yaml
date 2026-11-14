@@ -2842,6 +2842,13 @@ components:
                     items:
                         type: string
                     type: array
+                elsewhere:
+                    description: |
+                        Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+                        affiliate links (shown with a disclosure). Absent when the operator configured none.
+                    items:
+                        $ref: '#/components/schemas/ShopElsewhereLink'
+                    type: array
                 estimated_delivery:
                     $ref: '#/components/schemas/LocalizedText'
                 products:
@@ -2878,6 +2885,36 @@ components:
                 - products
                 - shipping
                 - seller
+            type: object
+        ShopElsewhereLink:
+            description: A retailer selling a compatible frame in some countries the shop doesn't ship to.
+            properties:
+                affiliate:
+                    default: false
+                    description: True for an affiliate link; the web app then shows a disclosure.
+                    type: boolean
+                countries:
+                    description: ISO 3166-1 alpha-2 codes; `*` means every other country.
+                    example:
+                        - NL
+                    items:
+                        type: string
+                    type: array
+                product:
+                    description: The frame model.
+                    example: Denver PFF-1024
+                    type: string
+                retailer:
+                    example: bol.com
+                    type: string
+                url:
+                    format: uri
+                    type: string
+            required:
+                - countries
+                - retailer
+                - product
+                - url
             type: object
         ShopLine:
             properties:

@@ -316,6 +316,11 @@ kinframe_shop:
     countries: [BE, NL]              # ISO codes; the form only offers these
     flat_cents: 695
     free_from_cents: 10000           # item subtotal for free shipping; null = never free
+  elsewhere:                         # optional: where visitors outside shipping.countries can buy a frame the
+                                     # convert tool supports (docs/hardware/supported-devices.md)
+    - { countries: [NL], retailer: bol.com, product: Denver PFF-1024, url: "https://www.bol.com/nl/nl/p/…" }
+    - { countries: ["*"], retailer: Amazon.de, product: Denver PFF-1024, url: "https://www.amazon.de/dp/…?tag=…", affiliate: true }
+                                     # "*" = every other country; affiliate: true adds rel="sponsored" and a disclosure
   domains: [shop.example.org]        # optional storefront host names, see "Storefront domain" below
   default_locale: en                 # storefront language when the browser asks for none of en/nl/fr/de
 ```

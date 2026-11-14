@@ -3489,6 +3489,10 @@ type Shop struct {
 	// Example: ["shop.example.org"]
 	Domains *[]string `json:"domains,omitempty"`
 
+	// Elsewhere Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+	// affiliate links (shown with a disclosure). Absent when the operator configured none.
+	Elsewhere *[]ShopElsewhereLink `json:"elsewhere,omitempty"`
+
 	// EstimatedDelivery Language code → text; `en` is the fallback.
 	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
 	Products          []ShopProduct  `json:"products"`
@@ -3506,6 +3510,26 @@ type Shop struct {
 	//
 	// Example: 21
 	VatPercent float32 `json:"vat_percent"`
+}
+
+// ShopElsewhereLink A retailer selling a compatible frame in some countries the shop doesn't ship to.
+type ShopElsewhereLink struct {
+	// Affiliate True for an affiliate link; the web app then shows a disclosure.
+	Affiliate *bool `json:"affiliate,omitempty"`
+
+	// Countries ISO 3166-1 alpha-2 codes; `*` means every other country.
+	//
+	// Example: ["NL"]
+	Countries []string `json:"countries"`
+
+	// Product The frame model.
+	//
+	// Example: Denver PFF-1024
+	Product string `json:"product"`
+
+	// Retailer Example: bol.com
+	Retailer string `json:"retailer"`
+	Url      string `json:"url"`
 }
 
 // ShopLine defines model for ShopLine.

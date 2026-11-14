@@ -1800,6 +1800,11 @@ export interface components {
             shipping: components["schemas"]["ShopShipping"];
             estimated_delivery?: components["schemas"]["LocalizedText"];
             /**
+             * @description Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+             *     affiliate links (shown with a disclosure). Absent when the operator configured none.
+             */
+            elsewhere?: components["schemas"]["ShopElsewhereLink"][];
+            /**
              * @description Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
              *     `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
              *     sign-in and the family app live. Absent when the operator configured none.
@@ -1823,6 +1828,30 @@ export interface components {
                 /** Format: uri */
                 privacy_url?: string;
             };
+        };
+        /** @description A retailer selling a compatible frame in some countries the shop doesn't ship to. */
+        ShopElsewhereLink: {
+            /**
+             * @description ISO 3166-1 alpha-2 codes; `*` means every other country.
+             * @example [
+             *       "NL"
+             *     ]
+             */
+            countries: string[];
+            /** @example bol.com */
+            retailer: string;
+            /**
+             * @description The frame model.
+             * @example Denver PFF-1024
+             */
+            product: string;
+            /** Format: uri */
+            url: string;
+            /**
+             * @description True for an affiliate link; the web app then shows a disclosure.
+             * @default false
+             */
+            affiliate?: boolean;
         };
         /** @description Language code → text; `en` is the fallback. */
         LocalizedText: {

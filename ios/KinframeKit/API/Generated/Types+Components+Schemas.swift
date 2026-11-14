@@ -275,6 +275,12 @@ extension Components {
             public var shipping: Components.Schemas.ShopShipping
             /// - Remark: Generated from `#/components/schemas/Shop/estimated_delivery`.
             public var estimatedDelivery: Components.Schemas.LocalizedText?
+            /// Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+            /// affiliate links (shown with a disclosure). Absent when the operator configured none.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/elsewhere`.
+            public var elsewhere: [Components.Schemas.ShopElsewhereLink]?
             /// Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
             /// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
             /// sign-in and the family app live. Absent when the operator configured none.
@@ -336,6 +342,7 @@ extension Components {
             ///   - products:
             ///   - shipping:
             ///   - estimatedDelivery:
+            ///   - elsewhere: Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
             ///   - domains: Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
             ///   - defaultLocale: Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
             ///   - seller:
@@ -346,6 +353,7 @@ extension Components {
                 products: [Components.Schemas.ShopProduct],
                 shipping: Components.Schemas.ShopShipping,
                 estimatedDelivery: Components.Schemas.LocalizedText? = nil,
+                elsewhere: [Components.Schemas.ShopElsewhereLink]? = nil,
                 domains: [Swift.String]? = nil,
                 defaultLocale: Swift.String? = nil,
                 seller: Components.Schemas.Shop.SellerPayload
@@ -356,6 +364,7 @@ extension Components {
                 self.products = products
                 self.shipping = shipping
                 self.estimatedDelivery = estimatedDelivery
+                self.elsewhere = elsewhere
                 self.domains = domains
                 self.defaultLocale = defaultLocale
                 self.seller = seller
@@ -367,9 +376,59 @@ extension Components {
                 case products
                 case shipping
                 case estimatedDelivery = "estimated_delivery"
+                case elsewhere
                 case domains
                 case defaultLocale = "default_locale"
                 case seller
+            }
+        }
+        /// A retailer selling a compatible frame in some countries the shop doesn't ship to.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink`.
+        public struct ShopElsewhereLink: Codable, Hashable, Sendable {
+            /// ISO 3166-1 alpha-2 codes; `*` means every other country.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/countries`.
+            public var countries: [Swift.String]
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/retailer`.
+            public var retailer: Swift.String
+            /// The frame model.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/product`.
+            public var product: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/url`.
+            public var url: Swift.String
+            /// True for an affiliate link; the web app then shows a disclosure.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopElsewhereLink/affiliate`.
+            public var affiliate: Swift.Bool?
+            /// Creates a new `ShopElsewhereLink`.
+            ///
+            /// - Parameters:
+            ///   - countries: ISO 3166-1 alpha-2 codes; `*` means every other country.
+            ///   - retailer:
+            ///   - product: The frame model.
+            ///   - url:
+            ///   - affiliate: True for an affiliate link; the web app then shows a disclosure.
+            public init(
+                countries: [Swift.String],
+                retailer: Swift.String,
+                product: Swift.String,
+                url: Swift.String,
+                affiliate: Swift.Bool? = nil
+            ) {
+                self.countries = countries
+                self.retailer = retailer
+                self.product = product
+                self.url = url
+                self.affiliate = affiliate
+            }
+            public enum CodingKeys: String, CodingKey {
+                case countries
+                case retailer
+                case product
+                case url
+                case affiliate
             }
         }
         /// Language code → text; `en` is the fallback.

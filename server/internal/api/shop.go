@@ -58,6 +58,13 @@ func shopJSON(c *shop.Config) *gen.Shop {
 		d := gen.LocalizedText(c.EstimatedDelivery)
 		out.EstimatedDelivery = &d
 	}
+	if len(c.Elsewhere) > 0 {
+		links := make([]gen.ShopElsewhereLink, len(c.Elsewhere))
+		for i, l := range c.Elsewhere {
+			links[i] = gen.ShopElsewhereLink{Countries: l.Countries, Retailer: l.Retailer, Product: l.Product, Url: l.URL, Affiliate: ptr(l.Affiliate)}
+		}
+		out.Elsewhere = &links
+	}
 	if len(c.Domains) > 0 {
 		out.Domains = &c.Domains
 	}

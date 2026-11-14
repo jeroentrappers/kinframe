@@ -4,6 +4,7 @@
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { countryName, formatMoney, localized, type Shop } from '$lib/shop';
 	import Icon from './Icon.svelte';
+	import ShopElsewhere from './ShopElsewhere.svelte';
 	import ShopFrameArt from './ShopFrameArt.svelte';
 
 	let { shop }: { shop: Shop } = $props();
@@ -84,6 +85,8 @@
 			</div>
 		</li>
 	</ul>
+
+	<ShopElsewhere {shop} />
 </section>
 
 <style>

@@ -34,6 +34,9 @@ type Config struct {
 	Shipping   Shipping  `yaml:"shipping"`
 	// EstimatedDelivery is free text per language, e.g. {en: "early 2027", nl: "begin 2027"}.
 	EstimatedDelivery Localized `yaml:"estimated_delivery"`
+	// Elsewhere links visitors outside Shipping.Countries to retailers selling a
+	// frame the convert tool supports (affiliate links allowed).
+	Elsewhere []ElsewhereLink `yaml:"elsewhere"`
 	// NotifyEmail receives a message for every new reservation and cancellation.
 	NotifyEmail string `yaml:"notify_email"`
 	// RetentionDays: reservations are deleted this many days after their last
@@ -65,6 +68,17 @@ type Product struct {
 	Image string `yaml:"image"`
 	// Specs are short bullets per language; "en" is required and the fallback.
 	Specs map[string][]string `yaml:"specs"`
+}
+
+// ElsewhereLink is a retailer selling a compatible frame in some countries.
+type ElsewhereLink struct {
+	// Countries are ISO 3166-1 alpha-2 codes; "*" means every other country.
+	Countries []string `yaml:"countries"`
+	Retailer  string   `yaml:"retailer"`
+	Product   string   `yaml:"product"`
+	URL       string   `yaml:"url"`
+	// Affiliate marks an affiliate link: the web app shows a disclosure.
+	Affiliate bool `yaml:"affiliate"`
 }
 
 type Shipping struct {
@@ -242,6 +256,23 @@ func (c *Config) validate() error {
 	}
 	if len(c.EstimatedDelivery) > 0 && c.EstimatedDelivery["en"] == "" {
 		bad("estimated_delivery needs an en text (the fallback)")
+	}
+	for i, l := range c.Elsewhere {
+		where := fmt.Sprintf("elsewhere[%d]", i)
+		if len(l.Countries) == 0 {
+			bad("%s.countries is required", where)
+		}
+		for _, cc := range l.Countries {
+			if cc != "*" && !countryRe.MatchString(cc) {
+				bad("%s.countries: %q is not an ISO 3166-1 alpha-2 code or *", where, cc)
+			}
+		}
+		if strings.TrimSpace(l.Retailer) == "" || strings.TrimSpace(l.Product) == "" {
+			bad("%s.retailer and product are required", where)
+		}
+		if u, err := url.Parse(l.URL); err != nil || u.Scheme != "https" || u.Host == "" {
+			bad("%s.url must be an absolute https URL", where)
+		}
 	}
 	for i, d := range c.Domains {
 		if len(d) > 253 || !domainRe.MatchString(d) {

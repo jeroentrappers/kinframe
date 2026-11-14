@@ -1981,6 +1981,12 @@ components:
         products: { type: array, items: { $ref: '#/components/schemas/ShopProduct' } }
         shipping: { $ref: '#/components/schemas/ShopShipping' }
         estimated_delivery: { $ref: '#/components/schemas/LocalizedText' }
+        elsewhere:
+          type: array
+          items: { $ref: '#/components/schemas/ShopElsewhereLink' }
+          description: |
+            Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+            affiliate links (shown with a disclosure). Absent when the operator configured none.
         domains:
           type: array
           items: { type: string }
@@ -2003,6 +2009,21 @@ components:
             email: { type: string, format: email }
             legal: { type: string, description: 'Legal line for the footer, e.g. company, address and VAT number.' }
             privacy_url: { type: string, format: uri }
+
+    ShopElsewhereLink:
+      type: object
+      description: A retailer selling a compatible frame in some countries the shop doesn't ship to.
+      required: [countries, retailer, product, url]
+      properties:
+        countries:
+          type: array
+          items: { type: string }
+          description: ISO 3166-1 alpha-2 codes; `*` means every other country.
+          examples: [[NL]]
+        retailer: { type: string, examples: [bol.com] }
+        product: { type: string, description: The frame model., examples: [Denver PFF-1024] }
+        url: { type: string, format: uri }
+        affiliate: { type: boolean, default: false, description: True for an affiliate link; the web app then shows a disclosure. }
 
     LocalizedText:
       type: object
