@@ -2891,6 +2891,21 @@ components:
                     type: object
                 shipping:
                     $ref: '#/components/schemas/ShopShipping'
+                stock:
+                    description: |
+                        Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+                        (the next business day) and when one is not. Business days are Belgian working days.
+                    properties:
+                        ships_in_stock:
+                            format: date
+                            type: string
+                        ships_out_of_stock:
+                            format: date
+                            type: string
+                    required:
+                        - ships_in_stock
+                        - ships_out_of_stock
+                    type: object
                 vat_percent:
                     description: VAT included in all prices
                     example: 21
@@ -2972,6 +2987,10 @@ components:
                     description: 'Illustration key: frame-10 or frame-15'
                     example: frame-10
                     type: string
+                in_stock:
+                    description: 'Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).'
+                    minimum: 0
+                    type: integer
                 max_qty:
                     minimum: 1
                     type: integer
@@ -3053,6 +3072,10 @@ components:
                     type: string
                 shipping_cents:
                     type: integer
+                ships_on:
+                    format: date
+                    nullable: true
+                    type: string
                 status:
                     $ref: '#/components/schemas/ShopReservationStatus'
                 street:
@@ -3178,6 +3201,11 @@ components:
                     type: string
                 shipping_cents:
                     type: integer
+                ships_on:
+                    description: 'Shops with `stock`: the promised dispatch day.'
+                    format: date
+                    nullable: true
+                    type: string
                 status:
                     $ref: '#/components/schemas/ShopReservationStatus'
                 subtotal_cents:
@@ -3222,6 +3250,17 @@ components:
             required:
                 - countries
                 - flat_cents
+            type: object
+        ShopStockItem:
+            properties:
+                product_id:
+                    type: string
+                quantity:
+                    minimum: 0
+                    type: integer
+            required:
+                - product_id
+                - quantity
             type: object
         SleepSchedule:
             properties:
@@ -6262,6 +6301,70 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ShopReservation'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/shop/stock:
+        get:
+            description: |
+                Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+                counted have 0. `404 not_found` when the server has no shop or no stock management.
+            operationId: operatorListShopStock
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    stock:
+                                        items:
+                                            $ref: '#/components/schemas/ShopStockItem'
+                                        type: array
+                                required:
+                                    - stock
+                                type: object
+                    description: Stock
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/shop/stock/{productId}:
+        put:
+            description: Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+            operationId: operatorSetShopStock
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                quantity:
+                                    maximum: 100000
+                                    minimum: 0
+                                    type: integer
+                            required:
+                                - quantity
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShopStockItem'
                     description: Updated
                 default:
                     $ref: '#/components/responses/Problem'

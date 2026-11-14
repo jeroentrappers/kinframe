@@ -3553,6 +3553,13 @@ type Shop struct {
 	} `json:"seller"`
 	Shipping ShopShipping `json:"shipping"`
 
+	// Stock Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+	// (the next business day) and when one is not. Business days are Belgian working days.
+	Stock *struct {
+		ShipsInStock    openapi_types.Date `json:"ships_in_stock"`
+		ShipsOutOfStock openapi_types.Date `json:"ships_out_of_stock"`
+	} `json:"stock,omitempty"`
+
 	// VatPercent VAT included in all prices
 	//
 	// Example: 21
@@ -3599,8 +3606,11 @@ type ShopProduct struct {
 	// Image Illustration key: frame-10 or frame-15
 	//
 	// Example: frame-10
-	Image  *string `json:"image,omitempty"`
-	MaxQty int     `json:"max_qty"`
+	Image *string `json:"image,omitempty"`
+
+	// InStock Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).
+	InStock *int `json:"in_stock,omitempty"`
+	MaxQty  int  `json:"max_qty"`
 
 	// Name Example: kinframe 10.1"
 	Name string `json:"name"`
@@ -3642,6 +3652,7 @@ type ShopReservation struct {
 	Reference     string                `json:"reference"`
 	ShippedAt     *time.Time            `json:"shipped_at,omitempty"`
 	ShippingCents int                   `json:"shipping_cents"`
+	ShipsOn       *openapi_types.Date   `json:"ships_on,omitempty"`
 	Status        ShopReservationStatus `json:"status"`
 	Street        *string               `json:"street,omitempty"`
 	SubtotalCents int                   `json:"subtotal_cents"`
@@ -3698,8 +3709,11 @@ type ShopReservationReceipt struct {
 	PaymentStatus *ShopPaymentStatus `json:"payment_status,omitempty"`
 
 	// Reference Example: KF-7Q3M
-	Reference     string                `json:"reference"`
-	ShippingCents int                   `json:"shipping_cents"`
+	Reference     string `json:"reference"`
+	ShippingCents int    `json:"shipping_cents"`
+
+	// ShipsOn Shops with `stock`: the promised dispatch day.
+	ShipsOn       *openapi_types.Date   `json:"ships_on,omitempty"`
 	Status        ShopReservationStatus `json:"status"`
 	SubtotalCents int                   `json:"subtotal_cents"`
 	TotalCents    int                   `json:"total_cents"`
@@ -3718,6 +3732,12 @@ type ShopShipping struct {
 
 	// FreeFromCents Item subtotal from which shipping is free; null = never
 	FreeFromCents *int `json:"free_from_cents,omitempty"`
+}
+
+// ShopStockItem defines model for ShopStockItem.
+type ShopStockItem struct {
+	ProductId string `json:"product_id"`
+	Quantity  int    `json:"quantity"`
 }
 
 // SleepSchedule defines model for SleepSchedule.
@@ -4382,6 +4402,11 @@ type OperatorUpdateReservationJSONBody struct {
 	TrackingUrl *string `json:"tracking_url,omitempty"`
 }
 
+// OperatorSetShopStockJSONBody defines parameters for OperatorSetShopStock.
+type OperatorSetShopStockJSONBody struct {
+	Quantity int `json:"quantity"`
+}
+
 // ListMySendsParams defines parameters for ListMySends.
 type ListMySendsParams struct {
 	Cursor *Cursor                 `form:"cursor,omitempty" json:"cursor,omitempty"`
@@ -4528,6 +4553,9 @@ type OperatorSetLimitsJSONRequestBody = Limits
 
 // OperatorUpdateReservationJSONRequestBody defines body for OperatorUpdateReservation for application/json ContentType.
 type OperatorUpdateReservationJSONRequestBody OperatorUpdateReservationJSONBody
+
+// OperatorSetShopStockJSONRequestBody defines body for OperatorSetShopStock for application/json ContentType.
+type OperatorSetShopStockJSONRequestBody OperatorSetShopStockJSONBody
 
 // CreateSendJSONRequestBody defines body for CreateSend for application/json ContentType.
 type CreateSendJSONRequestBody = SendCreate
@@ -4801,6 +4829,12 @@ type ServerInterface interface {
 
 	// (PATCH /v1/operator/reservations/{reservationId})
 	OperatorUpdateReservation(w http.ResponseWriter, r *http.Request, reservationId Id)
+
+	// (GET /v1/operator/shop/stock)
+	OperatorListShopStock(w http.ResponseWriter, r *http.Request)
+
+	// (PUT /v1/operator/shop/stock/{productId})
+	OperatorSetShopStock(w http.ResponseWriter, r *http.Request, productId string)
 
 	// (GET /v1/operator/stats)
 	OperatorStats(w http.ResponseWriter, r *http.Request)
@@ -7501,6 +7535,46 @@ func (siw *ServerInterfaceWrapper) OperatorUpdateReservation(w http.ResponseWrit
 	handler.ServeHTTP(w, r)
 }
 
+// OperatorListShopStock operation middleware
+func (siw *ServerInterfaceWrapper) OperatorListShopStock(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorListShopStock(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// OperatorSetShopStock operation middleware
+func (siw *ServerInterfaceWrapper) OperatorSetShopStock(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "productId" -------------
+	var productId string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "productId", r.PathValue("productId"), &productId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.OperatorSetShopStock(w, r, productId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // OperatorStats operation middleware
 func (siw *ServerInterfaceWrapper) OperatorStats(w http.ResponseWriter, r *http.Request) {
 
@@ -8074,6 +8148,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/operator/reservations/{reservationId}", wrapper.OperatorUpdateReservation)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/shop/stock", wrapper.OperatorListShopStock)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/shop/stock/{productId}", wrapper.OperatorSetShopStock)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/stats", wrapper.OperatorStats)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends", wrapper.ListMySends)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends", wrapper.CreateSend)
@@ -11015,6 +11091,86 @@ func (response OperatorUpdateReservationdefaultApplicationProblemPlusJSONRespons
 	return err
 }
 
+type OperatorListShopStockRequestObject struct {
+}
+
+type OperatorListShopStockResponseObject interface {
+	VisitOperatorListShopStockResponse(w http.ResponseWriter) error
+}
+
+type OperatorListShopStock200JSONResponse struct {
+	Stock []ShopStockItem `json:"stock"`
+}
+
+func (response OperatorListShopStock200JSONResponse) VisitOperatorListShopStockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorListShopStockdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorListShopStockdefaultApplicationProblemPlusJSONResponse) VisitOperatorListShopStockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorSetShopStockRequestObject struct {
+	ProductId string `json:"productId"`
+	Body      *OperatorSetShopStockJSONRequestBody
+}
+
+type OperatorSetShopStockResponseObject interface {
+	VisitOperatorSetShopStockResponse(w http.ResponseWriter) error
+}
+
+type OperatorSetShopStock200JSONResponse ShopStockItem
+
+func (response OperatorSetShopStock200JSONResponse) VisitOperatorSetShopStockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type OperatorSetShopStockdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response OperatorSetShopStockdefaultApplicationProblemPlusJSONResponse) VisitOperatorSetShopStockResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type OperatorStatsRequestObject struct {
 }
 
@@ -11782,6 +11938,12 @@ type StrictServerInterface interface {
 
 	// (PATCH /v1/operator/reservations/{reservationId})
 	OperatorUpdateReservation(ctx context.Context, request OperatorUpdateReservationRequestObject) (OperatorUpdateReservationResponseObject, error)
+
+	// (GET /v1/operator/shop/stock)
+	OperatorListShopStock(ctx context.Context, request OperatorListShopStockRequestObject) (OperatorListShopStockResponseObject, error)
+
+	// (PUT /v1/operator/shop/stock/{productId})
+	OperatorSetShopStock(ctx context.Context, request OperatorSetShopStockRequestObject) (OperatorSetShopStockResponseObject, error)
 
 	// (GET /v1/operator/stats)
 	OperatorStats(ctx context.Context, request OperatorStatsRequestObject) (OperatorStatsResponseObject, error)
@@ -14310,6 +14472,63 @@ func (sh *strictHandler) OperatorUpdateReservation(w http.ResponseWriter, r *htt
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(OperatorUpdateReservationResponseObject); ok {
 		if err := validResponse.VisitOperatorUpdateReservationResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorListShopStock operation middleware
+func (sh *strictHandler) OperatorListShopStock(w http.ResponseWriter, r *http.Request) {
+	var request OperatorListShopStockRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorListShopStock(ctx, request.(OperatorListShopStockRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorListShopStock")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorListShopStockResponseObject); ok {
+		if err := validResponse.VisitOperatorListShopStockResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// OperatorSetShopStock operation middleware
+func (sh *strictHandler) OperatorSetShopStock(w http.ResponseWriter, r *http.Request, productId string) {
+	var request OperatorSetShopStockRequestObject
+
+	request.ProductId = productId
+
+	var body OperatorSetShopStockJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.OperatorSetShopStock(ctx, request.(OperatorSetShopStockRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "OperatorSetShopStock")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(OperatorSetShopStockResponseObject); ok {
+		if err := validResponse.VisitOperatorSetShopStockResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

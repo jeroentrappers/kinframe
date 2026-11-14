@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/jeroentrappers/kinframe/server/internal/config"
 	"github.com/jeroentrappers/kinframe/server/internal/shop"
@@ -36,10 +38,10 @@ func (f *fakeMollie) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_, _ = io.WriteString(w, `{"title":"Unauthorized","detail":"bad key"}`)
 		return
 	}
-	payment := func() map[string]any {
-		p := map[string]any{"id": "tr_test1", "status": f.status, "metadata": map[string]string{"reference": "x"}, "_links": map[string]any{}}
+	payment := func(id string) map[string]any {
+		p := map[string]any{"id": id, "status": f.status, "metadata": map[string]string{"reference": "x"}, "_links": map[string]any{}}
 		if f.status == "open" {
-			p["_links"] = map[string]any{"checkout": map[string]string{"href": "https://pay.example/tr_test1"}}
+			p["_links"] = map[string]any{"checkout": map[string]string{"href": "https://pay.example/" + id}}
 		}
 		return p
 	}
@@ -49,9 +51,9 @@ func (f *fakeMollie) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewDecoder(r.Body).Decode(&b)
 		f.created = append(f.created, b)
 		f.status = "open"
-		_ = json.NewEncoder(w).Encode(payment())
-	case r.Method == "GET" && r.URL.Path == "/payments/tr_test1":
-		_ = json.NewEncoder(w).Encode(payment())
+		_ = json.NewEncoder(w).Encode(payment(fmt.Sprintf("tr_test%d", len(f.created))))
+	case r.Method == "GET" && strings.HasPrefix(r.URL.Path, "/payments/tr_test"):
+		_ = json.NewEncoder(w).Encode(payment(strings.TrimPrefix(r.URL.Path, "/payments/")))
 	default:
 		w.WriteHeader(http.StatusNotFound)
 	}
@@ -59,8 +61,8 @@ func (f *fakeMollie) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (f *fakeMollie) set(status string) { f.mu.Lock(); f.status = status; f.mu.Unlock() }
 
-func withCheckoutShop(t *testing.T, mail *smtptest.Server, mollie *httptest.Server) option {
-	c, err := shop.Parse([]byte(strings.Replace(testCheckoutShop,
+func withCheckoutShop(t *testing.T, mail *smtptest.Server, mollie *httptest.Server, extra ...string) option {
+	c, err := shop.Parse([]byte(strings.Replace(testCheckoutShop+strings.Join(extra, "\n"),
 		`seller: { name: Example BV, email: shop@example.org, legal: "Example BV · VAT BE0123.456.789" }`,
 		`seller: { name: Example BV, email: shop@example.org, legal: "Example BV · VAT BE0123.456.789", address: "Kerkstraat 1, 9000 Gent", vat_number: BE0123456789 }`, 1)),
 		"kinframe test")
@@ -218,4 +220,74 @@ func toStrings(v any) []string {
 		out = append(out, x.(string))
 	}
 	return out
+}
+
+func TestShopStock(t *testing.T) {
+	mail := smtptest.Start(t)
+	fm := &fakeMollie{}
+	ms := httptest.NewServer(fm)
+	defer ms.Close()
+	e := newEnv(t, withCheckoutShop(t, mail, ms, "stock: { restock_days: 3 }"))
+	c := &shop.Config{Stock: &shop.Stock{RestockDays: 3}}
+	inStock := c.ShipsOn(time.Now(), true).Format(time.DateOnly)
+	later := c.ShipsOn(time.Now(), false).Format(time.DateOnly)
+
+	product := func() map[string]any {
+		d := e.get("/.well-known/kinframe", "").m(t)
+		if dig(d, "shop", "stock", "ships_in_stock") != inStock || dig(d, "shop", "stock", "ships_out_of_stock") != later {
+			t.Fatalf("stock days: %v", dig(d, "shop", "stock"))
+		}
+		return dig(d, "shop", "products").([]any)[0].(map[string]any)
+	}
+	if p := product(); p["in_stock"] != float64(0) {
+		t.Fatalf("no stock yet: %v", p)
+	}
+
+	op := e.expect(req{method: "POST", path: "/dev/token", body: map[string]any{"email": "op@x.org", "name": "Op", "operator": true}}, 200).m(t)["access_token"].(string)
+	user := e.expect(req{method: "POST", path: "/dev/token", body: map[string]any{"email": "u@x.org", "name": "U"}}, 200).m(t)["access_token"].(string)
+	if r := e.do(req{method: "PUT", path: "/v1/operator/shop/stock/frame-10", token: user, body: map[string]any{"quantity": 2}}); r.StatusCode != 403 {
+		t.Fatalf("non-operator: %d", r.StatusCode)
+	}
+	if r := e.do(req{method: "PUT", path: "/v1/operator/shop/stock/nope", token: op, body: map[string]any{"quantity": 2}}); r.StatusCode != 404 {
+		t.Fatalf("unknown product: %d", r.StatusCode)
+	}
+	if r := e.do(req{method: "PUT", path: "/v1/operator/shop/stock/frame-10", token: op, body: map[string]any{"quantity": -1}}); r.StatusCode != 422 && r.StatusCode != 400 {
+		t.Fatalf("negative: %d", r.StatusCode)
+	}
+	e.expect(req{method: "PUT", path: "/v1/operator/shop/stock/frame-10", token: op, body: map[string]any{"quantity": 2}}, 200)
+	if p := product(); p["in_stock"] != float64(2) {
+		t.Fatalf("stock 2: %v", p)
+	}
+
+	// In stock: ships the next business day; paying takes the frame from the stock.
+	order := reservation(map[string]any{"street": "Veldstraat 10", "city": "Gent"})
+	rc := e.expect(req{method: "POST", path: "/v1/shop/reservations", body: order}, 201).m(t)
+	if rc["ships_on"] != inStock {
+		t.Fatalf("receipt in stock: %v", rc["ships_on"])
+	}
+	fm.set("paid")
+	resp, err := http.PostForm(e.url+"/v1/shop/payments/webhook", url.Values{"id": {"tr_test1"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp.Body.Close()
+	var customer smtptest.Mail
+	for _, m := range mail.Wait(t, 2) {
+		if m.To == "an@example.org" {
+			customer = m
+		}
+	}
+	if !strings.Contains(customer.Text, "Verwachte verzending: ") {
+		t.Fatalf("customer mail: %s", customer.Text)
+	}
+	list := e.expect(req{method: "GET", path: "/v1/operator/shop/stock", token: op}, 200).m(t)["stock"].([]any)
+	if s0 := list[0].(map[string]any); s0["product_id"] != "frame-10" || s0["quantity"] != float64(1) {
+		t.Fatalf("stock after order: %v", list)
+	}
+
+	// Two frames with one left: the later day.
+	order["items"] = []map[string]any{{"product_id": "frame-10", "quantity": 2}}
+	if rc := e.expect(req{method: "POST", path: "/v1/shop/reservations", body: order}, 201).m(t); rc["ships_on"] != later {
+		t.Fatalf("receipt out of stock: %v", rc["ships_on"])
+	}
 }

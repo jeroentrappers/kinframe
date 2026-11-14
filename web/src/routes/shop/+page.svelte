@@ -11,7 +11,9 @@
 	import {
 		clampQty,
 		countryName,
+		dispatchDay,
 		errorsFromProblem,
+		formatDay,
 		formatMoney,
 		localized,
 		quote,
@@ -26,6 +28,7 @@
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 	import Logo from '$components/Logo.svelte';
 	import SellerFooter from '$components/SellerFooter.svelte';
+	import ShopAvailability from '$components/ShopAvailability.svelte';
 	import ShopFrameArt from '$components/ShopFrameArt.svelte';
 
 	const shop = $derived(discovery.shop);
@@ -81,7 +84,9 @@
 	const q = $derived(shop ? quote(shop, form.qty) : null);
 	const money = (cents: number) => (shop ? formatMoney(cents, shop.currency, i18n.tag) : '');
 	const vat = $derived(shop ? new Intl.NumberFormat(i18n.tag).format(shop.vat_percent) : '');
-	const when = $derived(localized(shop?.estimated_delivery, i18n.locale));
+	const when = $derived(shop?.stock ? undefined : localized(shop?.estimated_delivery, i18n.locale));
+	/** Shops with stock: the dispatch day of the frames chosen now. */
+	const dispatch = $derived(shop ? dispatchDay(shop, form.qty) : null);
 	const countryOptions = $derived(
 		(shop?.shipping.countries ?? [])
 			.map((c) => ({ code: c, name: countryName(c, i18n.tag) }))
@@ -205,7 +210,7 @@
 				</ul>
 				<p class="muted small">{t('shop.vatNote', { vat })}</p>
 				<p>{t('shop.thanksEmail', { email: receipt.email })}</p>
-				<p class="callout callout-ok"><Icon name="info" size={18} />{t('shop.thanksNext')}{#if when}&nbsp;{t('shop.delivery', { when })}.{/if}</p>
+				<p class="callout callout-ok"><Icon name="info" size={18} />{t('shop.thanksNext')}{#if receipt.ships_on}&nbsp;{t('shop.dispatch', { date: formatDay(receipt.ships_on, i18n.tag) })}.{:else if when}&nbsp;{t('shop.delivery', { when })}.{/if}</p>
 				<div class="row-wrap">
 					<a class="btn btn-primary" href="/">{t('shop.backHome')}</a>
 					<button class="btn btn-ghost" type="button" onclick={again}>{t('shop.thanksAgain')}</button>
@@ -255,6 +260,7 @@
 										<h3 id="pname-{p.id}">{p.name}</h3>
 										<p class="p-price"><span class="num">{money(p.price_cents)}</span> <span class="hint">{t('shop.inclVat', { vat })}</span></p>
 										{#if specs.length}<p class="hint p-specs">{specs.join(' · ')}</p>{/if}
+										<ShopAvailability {shop} product={p} />
 									</div>
 									<div class="stepper" role="group" aria-labelledby="pname-{p.id}">
 										<button
@@ -452,6 +458,9 @@
 									</li>
 									<li class="total"><span>{t('shop.total')}</span><span class="num" data-testid="shop-total">{money(q.totalCents)}</span></li>
 								</ul>
+								{#if dispatch}
+									<p class="free-hint reached" data-testid="dispatch"><Icon name="calendar" size={16} />{t('shop.dispatch', { date: formatDay(dispatch, i18n.tag) })}</p>
+								{/if}
 								{#if q.missingForFreeCents != null}
 									<p class="free-hint" data-testid="free-hint"><Icon name="send" size={16} />{t('shop.freeShippingHint', { amount: money(q.missingForFreeCents) })}</p>
 								{:else if q.freeFromCents != null}

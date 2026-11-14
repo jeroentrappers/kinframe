@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -46,6 +47,13 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	}
 	if s.cfg.Shop != nil {
 		d.Shop = shopJSON(s.cfg.Shop)
+		if s.cfg.Shop.Stock != nil {
+			stock, err := s.stockCached(ctx)
+			if err != nil {
+				return nil, err
+			}
+			withStock(d.Shop, s.cfg.Shop, stock, time.Now())
+		}
 	}
 	return ok(d), nil
 }

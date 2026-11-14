@@ -109,7 +109,7 @@ func reservationJSON(r *store.Reservation) gen.ShopReservation {
 		SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents, Currency: r.Currency,
 		InternalNote: r.InternalNote, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, CancelledAt: r.CancelledAt,
 		Street: r.Street, City: r.City, Phone: r.Phone, PaymentStatus: paymentStatusJSON(r.PaymentStatus), PaidAt: r.PaidAt, ShippedAt: r.ShippedAt,
-		TrackingUrl: r.TrackingURL,
+		TrackingUrl: r.TrackingURL, ShipsOn: dateJSON(r.ShipsOn),
 	}
 }
 
@@ -124,7 +124,7 @@ func receiptJSON(r *store.Reservation, checkoutURL string) gen.ShopReservationRe
 	out := gen.ShopReservationReceipt{
 		Reference: r.Reference, Status: gen.ShopReservationStatus(r.Status), Email: r.Email, Items: linesJSON(r.Items),
 		SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents, Currency: r.Currency,
-		PaymentStatus: paymentStatusJSON(r.PaymentStatus),
+		PaymentStatus: paymentStatusJSON(r.PaymentStatus), ShipsOn: dateJSON(r.ShipsOn),
 	}
 	if checkoutURL != "" {
 		out.CheckoutUrl = ptr(checkoutURL)
@@ -227,6 +227,13 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 		r.Street, r.City, r.Phone = trimmedOrNil(b.Street), trimmedOrNil(b.City), trimmedOrNil(b.Phone)
 		r.PaymentStatus = ptr("open")
 	}
+	if c.Stock != nil {
+		stock, err := s.stockNow(ctx)
+		if err != nil {
+			return nil, err
+		}
+		r.ShipsOn = ptr(c.ShipsOn(time.Now(), shop.InStock(q.Lines, stock)))
+	}
 	var saved *store.Reservation
 	for range 8 {
 		r.Reference = shop.NewReference(c.ReferencePrefix)
@@ -246,10 +253,7 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	mr := s.mailReservation(saved, s.shopOrigin(ctx))
 	s.sendMail("reservation "+saved.Reference, c.CustomerEmail(mr), c.OperatorEmail(mr, false, s.cfg.PublicURL+"/settings/reservations"))
 
-	return created(gen.ShopReservationReceipt{
-		Reference: saved.Reference, Status: gen.ShopReservationStatus(saved.Status), Email: saved.Email, Items: linesJSON(saved.Items),
-		SubtotalCents: saved.SubtotalCents, ShippingCents: saved.ShippingCents, TotalCents: saved.TotalCents, Currency: saved.Currency,
-	}), nil
+	return created(receiptJSON(saved, "")), nil
 }
 
 // shopOrigin is where customer links point: the storefront domain the request
@@ -280,7 +284,7 @@ func (s *Server) mailReservation(r *store.Reservation, origin string) shop.Reser
 		Quote:     shop.Quote{Lines: r.Items, SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents},
 		CancelURL: origin + "/shop/cancel?token=" + s.shopTokens.Sign(r.ID),
 		Order:     r.PaymentStatus != nil, Street: deref(r.Street), City: deref(r.City), Phone: deref(r.Phone),
-		TrackingURL: deref(r.TrackingURL),
+		TrackingURL: deref(r.TrackingURL), ShipsOn: r.ShipsOn,
 	}
 }
 
@@ -335,6 +339,12 @@ func (s *Server) syncPayment(ctx context.Context, r *store.Reservation, origin s
 	}
 	if nowPaid {
 		s.log.Info("shop order paid", "reference", updated.Reference, "payment", pay.ID, "total_cents", updated.TotalCents)
+		if s.cfg.Shop.Stock != nil {
+			if err := s.st.TakeShopStock(ctx, updated.Items); err != nil {
+				s.log.Error("shop stock", "reference", updated.Reference, "err", err)
+			}
+			s.shopStock.forget()
+		}
 		mr := s.mailReservation(updated, origin)
 		s.sendMail("order "+updated.Reference, s.cfg.Shop.CustomerEmail(mr), s.cfg.Shop.OperatorEmail(mr, false, s.cfg.PublicURL+"/settings/reservations"))
 	}

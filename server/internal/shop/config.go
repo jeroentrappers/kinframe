@@ -53,6 +53,9 @@ type Config struct {
 	// (KINFRAME_MOLLIE_API_KEY) and the order is confirmed once paid. Nil =
 	// reservations without payment.
 	Payments *Payments `yaml:"payments"`
+	// Stock turns on stock management (dispatch.go); nil = no stock, and the
+	// shop shows EstimatedDelivery only.
+	Stock *Stock `yaml:"stock"`
 }
 
 // Payments configures online payment of orders.
@@ -192,6 +195,9 @@ func Parse(b []byte, serverName string) (*Config, error) {
 	if c.DefaultLocale == "" {
 		c.DefaultLocale = "en"
 	}
+	if c.Stock != nil && c.Stock.RestockDays == 0 {
+		c.Stock.RestockDays = 3
+	}
 	for i, d := range c.Domains {
 		c.Domains[i] = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(d)), ".")
 	}
@@ -295,6 +301,9 @@ func (c *Config) validate() error {
 	}
 	if f := c.Shipping.FreeFromCents; f != nil && *f < 0 {
 		bad("shipping.free_from_cents must not be negative")
+	}
+	if c.Stock != nil && (c.Stock.RestockDays < 0 || c.Stock.RestockDays > 60) {
+		bad("stock.restock_days must be between 1 and 60")
 	}
 	if len(c.EstimatedDelivery) > 0 && c.EstimatedDelivery["en"] == "" {
 		bad("estimated_delivery needs an en text (the fallback)")

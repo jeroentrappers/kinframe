@@ -71,6 +71,8 @@ type Server struct {
 	shopTokens *shop.Tokens
 	// orderTokens sign the order page link the payment provider returns to.
 	orderTokens *shop.Tokens
+	// shopStock caches the stock counts for discovery (stock.go).
+	shopStock stockCache
 	shopOrderIP *ratelimit.Limiter
 	mailer      shop.Mailer          // nil: SMTP not configured
 	payments    shop.PaymentProvider // nil: the shop has no payments

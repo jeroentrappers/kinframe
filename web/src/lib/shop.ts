@@ -70,6 +70,29 @@ export function quote(shop: Pick<Shop, 'products' | 'shipping'>, qty: Quantities
 	};
 }
 
+/**
+ * Shops with stock: the dispatch day (YYYY-MM-DD) of these quantities, the next business day when every frame is in
+ * stock, else the later day. Null without stock management or for an empty order.
+ */
+export function dispatchDay(shop: Pick<Shop, 'products' | 'stock'>, qty: Quantities): string | null {
+	if (!shop.stock) return null;
+	const chosen = shop.products.filter((p) => (qty[p.id] ?? 0) > 0);
+	if (chosen.length === 0) return null;
+	const inStock = chosen.every((p) => clampQty(qty[p.id] ?? 0, p) <= (p.in_stock ?? 0));
+	return inStock ? shop.stock.ships_in_stock : shop.stock.ships_out_of_stock;
+}
+
+/** A calendar day (YYYY-MM-DD) as "Tuesday 17 November" in the UI language. */
+export function formatDay(day: string, tag: string): string {
+	const [y, m, d] = day.split('-').map(Number);
+	const date = new Date(y!, (m ?? 1) - 1, d ?? 1);
+	try {
+		return new Intl.DateTimeFormat(tag, { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
+	} catch {
+		return day;
+	}
+}
+
 /** "€79.00", "€ 79,00", "79,00 €" by the UI language. Whole amounts keep their cents for clarity in totals. */
 export function formatMoney(cents: number, currency: string, tag: string, opts: { compact?: boolean } = {}): string {
 	const whole = opts.compact && cents % 100 === 0;

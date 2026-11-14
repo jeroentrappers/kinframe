@@ -65,6 +65,8 @@ export interface MockState {
 	eventInvitations: Record<string, S['EventInvitation'][]>;
 	/** Shop reservations (README §5.11); only reachable when discovery has a shop. */
 	reservations: S['ShopReservation'][];
+	/** Shop stock per product id (shops with `stock`). */
+	stock: Record<string, number>;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -103,6 +105,7 @@ export function emptyState(): MockState {
 		calendarViews: {},
 		eventInvitations: {},
 		reservations: [],
+		stock: {},
 		calls: [],
 		ws: null
 	};
@@ -410,6 +413,17 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
 			const st = url.searchParams.get('status');
 			return json(route, 200, { reservations: state.reservations.filter((r) => !st || r.status === st) });
+		}
+		if (path === '/v1/operator/shop/stock' && method === 'GET') {
+			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
+			const products = state.discovery.shop?.products ?? [];
+			return json(route, 200, { stock: products.map((p) => ({ product_id: p.id, quantity: state.stock[p.id] ?? 0 })) });
+		}
+		if ((m = path.match(/^\/v1\/operator\/shop\/stock\/([^/]+)$/)) && method === 'PUT') {
+			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
+			const quantity = (body as { quantity: number }).quantity;
+			state.stock[m[1]!] = quantity;
+			return json(route, 200, { product_id: m[1], quantity });
 		}
 		if (path === '/v1/operator/reservations.csv' && method === 'GET') {
 			const rows = state.reservations.map((r) => `${r.reference},${r.status},${r.email}`);

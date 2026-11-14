@@ -373,6 +373,24 @@ missed webhook only delays the emails until the customer looks.
 operators set `seller.terms_url` to their own. Paid orders are kept seven years (accounting law); unpaid ones are
 deleted after 30 days.
 
+Shipped orders can carry the carrier's **tracking link** (Settings → Orders): the shipped email links to it, and
+adding or changing it on an order that is already shipped emails the customer the new link.
+
+#### Stock
+
+With a `stock` section the operator keeps the number of frames ready to ship per product (Settings → Orders →
+Stock). Paid orders lower the count; cancelled ones don't raise it again (correct it by hand when a frame comes
+back). The shop then shows per frame "In stock · shipped Tuesday 17 November" (the next business day) or, when it
+is out of stock, the day `restock_days` business days later, and the order emails state the promised dispatch day.
+Business days are Belgian working days (weekends and public holidays skipped). `estimated_delivery` is then only
+shown in the storefront FAQ.
+
+```yaml
+kinframe_shop:
+  stock:
+    restock_days: 3   # extra business days when out of stock (default 3)
+```
+
 #### Storefront domain
 
 The shop can also live on its own domain under the consumer brand, while the server, the API, sign-in and the

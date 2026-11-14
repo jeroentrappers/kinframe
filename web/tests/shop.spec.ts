@@ -251,6 +251,44 @@ test.describe('shop', () => {
 		await expect(save).toBeDisabled();
 	});
 
+	test('stock: availability per frame, dispatch day in the summary, operator count', async ({ page }) => {
+		const state = emptyState();
+		const base = shopFixture();
+		state.discovery.shop = {
+			...base,
+			checkout: true,
+			products: base.products.map((p, i) => ({ ...p, in_stock: i === 0 ? 2 : 0 })),
+			stock: { ships_in_stock: '2026-11-17', ships_out_of_stock: '2026-11-20' }
+		};
+		await mockApi(page, state);
+		await page.goto('/');
+		const section = page.getByRole('region', { name: 'Get a kinframe' });
+		const avail = section.getByTestId('availability');
+		await expect(avail.first()).toHaveText(/In stock · shipped Tuesday,? (17 November|November 17)/);
+		await expect(avail.nth(1)).toHaveText(/Shipped Friday,? (20 November|November 20)/);
+
+		await section.getByRole('link', { name: /^Buy the / }).first().click();
+		await expect(page.getByTestId('dispatch')).toHaveText(/Expected dispatch: Tuesday,? (17 November|November 17)/);
+		await page.getByRole('button', { name: /^One .* more$/ }).first().click();
+		await page.getByRole('button', { name: /^One .* more$/ }).first().click();
+		await expect(page.getByTestId('dispatch')).toHaveText(/Expected dispatch: Friday,? (20 November|November 20)/);
+
+		await page.goto('/');
+		await page.getByLabel('Email', { exact: true }).fill('op@example.org');
+		await page.getByLabel('Name', { exact: true }).fill('Op');
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await expect(page).toHaveURL(/\/frames$/);
+		state.me!.is_operator = true;
+		await page.goto('/settings/reservations');
+		const stock = page.getByTestId('stock');
+		const input = stock.getByLabel(`${base.products[0]!.name} in stock`);
+		await expect(input).toHaveValue('0');
+		await input.fill('4');
+		await stock.getByRole('button', { name: 'Save' }).first().click();
+		await expect.poll(() => state.stock[base.products[0]!.id]).toBe(4);
+		await expect(page.getByText('Stock updated')).toBeVisible();
+	});
+
 	test('checkout: buy, delivery address, pay, paid order page', async ({ page }) => {
 		const state = emptyState();
 		state.discovery.shop = { ...shopFixture(), checkout: true };

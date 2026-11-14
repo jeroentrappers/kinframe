@@ -1701,6 +1701,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/operator/shop/stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+         *     counted have 0. `404 not_found` when the server has no shop or no stock management.
+         */
+        get: operations["operatorListShopStock"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/shop/stock/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again. */
+        put: operations["operatorSetShopStock"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/operator/reservations.csv": {
         parameters: {
             query?: never;
@@ -1825,6 +1862,16 @@ export interface components {
             shipping: components["schemas"]["ShopShipping"];
             estimated_delivery?: components["schemas"]["LocalizedText"];
             /**
+             * @description Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+             *     (the next business day) and when one is not. Business days are Belgian working days.
+             */
+            stock?: {
+                /** Format: date */
+                ships_in_stock: string;
+                /** Format: date */
+                ships_out_of_stock: string;
+            };
+            /**
              * @description Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
              *     affiliate links (shown with a disclosure). Absent when the operator configured none.
              */
@@ -1910,6 +1957,8 @@ export interface components {
             /** @description Unit price incl. VAT */
             price_cents: number;
             max_qty: number;
+            /** @description Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown). */
+            in_stock?: number;
             /**
              * @description Illustration key: frame-10 or frame-15
              * @example frame-10
@@ -1994,6 +2043,11 @@ export interface components {
              *     final.
              */
             checkout_url?: string | null;
+            /**
+             * Format: date
+             * @description Shops with `stock`: the promised dispatch day.
+             */
+            ships_on?: string | null;
         };
         ShopReservation: {
             id: components["schemas"]["Id"];
@@ -2026,6 +2080,12 @@ export interface components {
             /** Format: date-time */
             shipped_at?: string | null;
             tracking_url?: string | null;
+            /** Format: date */
+            ships_on?: string | null;
+        };
+        ShopStockItem: {
+            product_id: string;
+            quantity: number;
         };
         Limits: {
             /** @default 200 */
@@ -6507,6 +6567,58 @@ export interface operations {
                     "application/json": {
                         reservations: components["schemas"]["ShopReservation"][];
                     };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorListShopStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stock */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        stock: components["schemas"]["ShopStockItem"][];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorSetShopStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    quantity: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopStockItem"];
                 };
             };
             default: components["responses"]["Problem"];

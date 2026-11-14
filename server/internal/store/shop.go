@@ -39,13 +39,14 @@ type Reservation struct {
 	PaidAt        *time.Time  `db:"paid_at"`
 	ShippedAt     *time.Time  `db:"shipped_at"`
 	TrackingURL   *string     `db:"tracking_url"`
+	ShipsOn       *time.Time  `db:"ships_on"`
 	CreatedAt     time.Time   `db:"created_at"`
 	UpdatedAt     time.Time   `db:"updated_at"`
 }
 
 const reservationSelect = `SELECT id, reference, status, name, email, country, postal_code, note, locale, items, currency,
 	subtotal_cents, shipping_cents, total_cents, consent_at, internal_note, cancelled_at, created_at, updated_at,
-	street, city, phone, payment_id, payment_status, paid_at, shipped_at, tracking_url
+	street, city, phone, payment_id, payment_status, paid_at, shipped_at, tracking_url, ships_on
 	FROM shop_reservations`
 
 // ErrReferenceTaken means the generated reference already exists; pick another.
@@ -53,10 +54,10 @@ var ErrReferenceTaken = errors.New("reservation reference taken")
 
 func (s *Store) CreateReservation(ctx context.Context, r Reservation) (*Reservation, error) {
 	_, err := s.Pool.Exec(ctx, `INSERT INTO shop_reservations (id, reference, name, email, country, postal_code, note, locale,
-		items, currency, subtotal_cents, shipping_cents, total_cents, consent_at, street, city, phone, payment_status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now(), $14, $15, $16, $17)`,
+		items, currency, subtotal_cents, shipping_cents, total_cents, consent_at, street, city, phone, payment_status, ships_on)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now(), $14, $15, $16, $17, $18)`,
 		r.ID, r.Reference, r.Name, r.Email, r.Country, r.PostalCode, r.Note, r.Locale, r.Items, r.Currency,
-		r.SubtotalCents, r.ShippingCents, r.TotalCents, r.Street, r.City, r.Phone, r.PaymentStatus)
+		r.SubtotalCents, r.ShippingCents, r.TotalCents, r.Street, r.City, r.Phone, r.PaymentStatus, r.ShipsOn)
 	if db.IsUniqueViolation(err, "shop_reservations_reference_key") {
 		return nil, ErrReferenceTaken
 	}
@@ -158,4 +159,42 @@ func (s *Store) PurgeReservations(ctx context.Context, retentionDays int) (int64
 			OR (payment_status IN ('open', 'failed', 'canceled', 'expired') AND updated_at < now() - interval '30 days')))
 		OR paid_at < now() - interval '7 years'`, retentionDays)
 	return tag.RowsAffected(), err
+}
+
+// ShopStock is the count of frames ready to ship per product id; products
+// without a row have none.
+func (s *Store) ShopStock(ctx context.Context) (map[string]int, error) {
+	rows, err := s.Pool.Query(ctx, `SELECT product_id, quantity FROM shop_stock`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := map[string]int{}
+	for rows.Next() {
+		var id string
+		var n int
+		if err := rows.Scan(&id, &n); err != nil {
+			return nil, err
+		}
+		out[id] = n
+	}
+	return out, rows.Err()
+}
+
+// SetShopStock sets a product's stock count.
+func (s *Store) SetShopStock(ctx context.Context, productID string, quantity int) error {
+	_, err := s.Pool.Exec(ctx, `INSERT INTO shop_stock (product_id, quantity) VALUES ($1, $2)
+		ON CONFLICT (product_id) DO UPDATE SET quantity = $2, updated_at = now()`, productID, quantity)
+	return err
+}
+
+// TakeShopStock lowers the stock by a paid order's lines (never below 0).
+func (s *Store) TakeShopStock(ctx context.Context, lines []shop.Line) error {
+	for _, l := range lines {
+		if _, err := s.Pool.Exec(ctx, `UPDATE shop_stock SET quantity = greatest(quantity - $2, 0), updated_at = now()
+			WHERE product_id = $1`, l.ProductID, l.Quantity); err != nil {
+			return err
+		}
+	}
+	return nil
 }

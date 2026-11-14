@@ -2,6 +2,7 @@
 	// Operator view of the shop's reservations, or its orders when the shop takes payment (checkout): filter, status,
 	// internal notes and a CSV export. Orders show the delivery address and payment; unpaid ones are hidden by default.
 	// Paid orders take the carrier's tracking link, which the server emails to the customer once the order is shipped.
+	// Shops with stock management: the count of frames ready to ship per product.
 	import { api, authFetch, call } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
@@ -32,6 +33,37 @@
 	/** The status choices for one entry: its own status stays selectable (older reservations can be "contacted"). */
 	const choices = (r: ShopReservation) => (statuses.includes(r.status) ? statuses : [...statuses, r.status]);
 	let showUnpaid = $state(false);
+	const stocked = $derived(!!discovery.shop?.stock);
+	let stock = $state<Record<string, number> | null>(null);
+	let stockEdit = $state<Record<string, number | null>>({});
+
+	async function loadStock() {
+		try {
+			const res = await call(api.GET('/v1/operator/shop/stock'));
+			stock = Object.fromEntries(res.stock.map((x) => [x.product_id, x.quantity]));
+			stockEdit = { ...stock };
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		}
+	}
+
+	$effect(() => {
+		if (allowed && stocked) void loadStock();
+	});
+
+	const stockValid = (n: number | null | undefined): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 100000;
+
+	async function saveStock(productId: string) {
+		const n = stockEdit[productId];
+		if (!stockValid(n)) return;
+		try {
+			const saved = await call(api.PUT('/v1/operator/shop/stock/{productId}', { params: { path: { productId } }, body: { quantity: n } }));
+			stock = { ...stock, [productId]: saved.quantity };
+			toasts.success(t('reservations.stockSaved'));
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		}
+	}
 	const unpaid = (r: ShopReservation) => r.payment_status != null && r.payment_status !== 'paid';
 	const shown = $derived(list?.filter((r) => showUnpaid || !unpaid(r)) ?? null);
 	const hiddenCount = $derived((list?.length ?? 0) - (shown?.length ?? 0));
@@ -101,6 +133,27 @@
 		<p class="callout callout-warn"><Icon name="shield" size={18} />{t('reservations.forbidden')}</p>
 	{:else}
 		<p class="muted lede">{t('reservations.lede')}</p>
+		{#if stocked && discovery.shop}
+			<section class="card card-pad stock" aria-labelledby="stock-title" data-testid="stock">
+				<h2 id="stock-title">{t('reservations.stockTitle')}</h2>
+				{#if stock === null}
+					<div class="skeleton" style="height: 40px"></div>
+				{:else}
+					<div class="stock-rows">
+						{#each discovery.shop.products as p (p.id)}
+							<div class="stock-row">
+								<label for="stock-{p.id}">{t('reservations.stockLabel', { name: p.name })}</label>
+								<input id="stock-{p.id}" class="input num" type="number" min="0" max="100000" step="1" inputmode="numeric" bind:value={stockEdit[p.id]} />
+								<button class="btn" disabled={!stockValid(stockEdit[p.id]) || stockEdit[p.id] === stock[p.id]} onclick={() => saveStock(p.id)}
+									>{t('common.save')}</button
+								>
+							</div>
+						{/each}
+					</div>
+				{/if}
+				<p class="hint">{t('reservations.stockHint')}</p>
+			</section>
+		{/if}
 		<div class="toolbar">
 			<label class="filter">
 				<span class="label">{t('reservations.filterLabel')}</span>
@@ -226,6 +279,25 @@
 </div>
 
 <style>
+	.stock {
+		display: grid;
+		gap: var(--s-3);
+		margin-bottom: var(--s-4);
+	}
+	.stock h2 {
+		font-size: 1.1rem;
+		margin: 0;
+	}
+	.stock-rows {
+		display: grid;
+		gap: var(--s-2);
+	}
+	.stock-row {
+		display: grid;
+		grid-template-columns: 1fr 7rem auto;
+		align-items: center;
+		gap: var(--s-2);
+	}
 	.unpaid-toggle {
 		display: inline-flex;
 		align-items: center;

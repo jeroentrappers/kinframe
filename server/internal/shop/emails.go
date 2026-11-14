@@ -6,6 +6,7 @@ import (
 	"net/mail"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/language/display"
@@ -29,6 +30,8 @@ type Reservation struct {
 	Phone  string
 	// TrackingURL is the carrier's tracking link of a shipped order.
 	TrackingURL string
+	// ShipsOn is the promised dispatch day (shops with stock).
+	ShipsOn *time.Time
 }
 
 // address is the delivery address on one line per part.
@@ -56,6 +59,7 @@ var emailTexts = map[string]map[string]string{
 		"total":       "Total (incl. {vat}% VAT)",
 		"nopay":       "You don’t pay anything now and there is no obligation. As soon as the frames are in stock, we’ll email you the final price, the delivery date and a payment link. Only then do you decide.",
 		"delivery":    "Estimated delivery: {delivery}.",
+		"dispatch":    "Expected dispatch: {date}.",
 		"note":        "Your note",
 		"cancel":      "Changed your mind? You can cancel your reservation with this link:",
 		"cancelBtn":   "Cancel my reservation",
@@ -86,6 +90,7 @@ var emailTexts = map[string]map[string]string{
 		"total":       "Totaal (incl. {vat}% btw)",
 		"nopay":       "Je betaalt nu niets en zit nergens aan vast. Zodra de fotokaders op voorraad zijn, mailen we je de definitieve prijs, de leverdatum en een betaallink. Pas dan beslis je.",
 		"delivery":    "Verwachte levering: {delivery}.",
+		"dispatch":    "Verwachte verzending: {date}.",
 		"note":        "Je opmerking",
 		"cancel":      "Toch van gedachten veranderd? Met deze link annuleer je je reservatie:",
 		"cancelBtn":   "Mijn reservatie annuleren",
@@ -116,6 +121,7 @@ var emailTexts = map[string]map[string]string{
 		"total":       "Total (TVA {vat} % comprise)",
 		"nopay":       "Vous ne payez rien maintenant et vous n’êtes engagé à rien. Dès que les cadres seront en stock, nous vous enverrons par e-mail le prix définitif, la date de livraison et un lien de paiement. C’est seulement à ce moment-là que vous décidez.",
 		"delivery":    "Livraison estimée : {delivery}.",
+		"dispatch":    "Expédition prévue : {date}.",
 		"note":        "Votre remarque",
 		"cancel":      "Vous avez changé d’avis ? Ce lien annule votre réservation :",
 		"cancelBtn":   "Annuler ma réservation",
@@ -146,6 +152,7 @@ var emailTexts = map[string]map[string]string{
 		"total":       "Gesamt (inkl. {vat} % MwSt.)",
 		"nopay":       "Du zahlst jetzt nichts und gehst keine Verpflichtung ein. Sobald die Rahmen auf Lager sind, schicken wir dir per E-Mail den endgültigen Preis, das Lieferdatum und einen Zahlungslink. Erst dann entscheidest du.",
 		"delivery":    "Voraussichtliche Lieferung: {delivery}.",
+		"dispatch":    "Voraussichtlicher Versand: {date}.",
 		"note":        "Deine Anmerkung",
 		"cancel":      "Doch anders entschieden? Mit diesem Link stornierst du deine Reservierung:",
 		"cancelBtn":   "Meine Reservierung stornieren",
@@ -225,7 +232,9 @@ func (c *Config) CustomerEmail(r Reservation) Message {
 	shipLabel := T("shipping", map[string]string{"country": CountryName(r.Country, lang)})
 	totalLabel := T("total", map[string]string{"vat": c.vat()})
 	delivery := ""
-	if d := c.EstimatedDelivery.Get(lang); d != "" {
+	if r.ShipsOn != nil {
+		delivery = T("dispatch", map[string]string{"date": LongDate(*r.ShipsOn, lang)})
+	} else if d := c.EstimatedDelivery.Get(lang); d != "" {
 		delivery = T("delivery", map[string]string{"delivery": d})
 	}
 
@@ -395,6 +404,9 @@ func (c *Config) OperatorEmail(r Reservation, cancelled bool, adminURL string) M
 	} else if r.PostalCode != "" {
 		fmt.Fprintf(&t, "Postal code: %s\n", r.PostalCode)
 	}
+	if r.ShipsOn != nil {
+		fmt.Fprintf(&t, "Promised dispatch: %s\n", LongDate(*r.ShipsOn, "en"))
+	}
 	fmt.Fprintf(&t, "Language: %s\n\n", r.Lang)
 	for _, l := range r.Quote.Lines {
 		fmt.Fprintf(&t, "  %d × %s  %s\n", l.Quantity, l.Name, money(l.LineCents))
@@ -416,4 +428,30 @@ func (c *Config) OperatorEmail(r Reservation, cancelled bool, adminURL string) M
 		Text:    t.String(),
 		HTML:    htm,
 	}
+}
+
+var (
+	weekdays = map[string][7]string{
+		"en": {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
+		"nl": {"zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"},
+		"fr": {"dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"},
+		"de": {"Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"},
+	}
+	months = map[string][12]string{
+		"en": {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"},
+		"nl": {"januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"},
+		"fr": {"janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"},
+		"de": {"Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"},
+	}
+)
+
+// LongDate is a day as people write it in an email language: "Tuesday 17
+// November 2026", "dinsdag 17 november 2026", "Dienstag, 17. November 2026".
+func LongDate(d time.Time, lang string) string {
+	lang = emailLang(lang)
+	w, m := weekdays[lang][d.Weekday()], months[lang][d.Month()-1]
+	if lang == "de" {
+		return fmt.Sprintf("%s, %d. %s %d", w, d.Day(), m, d.Year())
+	}
+	return fmt.Sprintf("%s %d %s %d", w, d.Day(), m, d.Year())
 }

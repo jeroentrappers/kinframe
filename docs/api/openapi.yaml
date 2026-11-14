@@ -1823,6 +1823,47 @@ paths:
                   reservations: { type: array, items: { $ref: '#/components/schemas/ShopReservation' } }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/operator/shop/stock:
+    get:
+      tags: [operator]
+      operationId: operatorListShopStock
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: |
+        Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+        counted have 0. `404 not_found` when the server has no shop or no stock management.
+      responses:
+        '200':
+          description: Stock
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [stock]
+                properties:
+                  stock: { type: array, items: { $ref: '#/components/schemas/ShopStockItem' } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/shop/stock/{productId}:
+    put:
+      tags: [operator]
+      operationId: operatorSetShopStock
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 0, maximum: 100000 }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ShopStockItem' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
   /v1/operator/reservations.csv:
     get:
       tags: [operator]
@@ -2013,6 +2054,15 @@ components:
         products: { type: array, items: { $ref: '#/components/schemas/ShopProduct' } }
         shipping: { $ref: '#/components/schemas/ShopShipping' }
         estimated_delivery: { $ref: '#/components/schemas/LocalizedText' }
+        stock:
+          type: object
+          description: |
+            Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+            (the next business day) and when one is not. Business days are Belgian working days.
+          required: [ships_in_stock, ships_out_of_stock]
+          properties:
+            ships_in_stock: { type: string, format: date }
+            ships_out_of_stock: { type: string, format: date }
         elsewhere:
           type: array
           items: { $ref: '#/components/schemas/ShopElsewhereLink' }
@@ -2081,6 +2131,10 @@ components:
         size: { type: string, description: Screen size label, examples: ['10.1"'] }
         price_cents: { type: integer, description: Unit price incl. VAT, in cents }
         max_qty: { type: integer, minimum: 1 }
+        in_stock:
+          type: integer
+          minimum: 0
+          description: 'Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).'
         image: { type: string, description: 'Illustration key: frame-10 or frame-15', examples: [frame-10] }
         specs:
           type: object
@@ -2162,6 +2216,7 @@ components:
           description: |
             Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
             final.
+        ships_on: { type: [string, 'null'], format: date, description: 'Shops with `stock`: the promised dispatch day.' }
 
     ShopReservation:
       type: object
@@ -2192,6 +2247,14 @@ components:
         paid_at: { type: [string, 'null'], format: date-time }
         shipped_at: { type: [string, 'null'], format: date-time }
         tracking_url: { type: [string, 'null'] }
+        ships_on: { type: [string, 'null'], format: date }
+
+    ShopStockItem:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id: { type: string }
+        quantity: { type: integer, minimum: 0 }
 
     Limits:
       type: object

@@ -4,6 +4,7 @@
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { countryName, formatMoney, localized, type Shop } from '$lib/shop';
 	import Icon from './Icon.svelte';
+	import ShopAvailability from './ShopAvailability.svelte';
 	import ShopElsewhere from './ShopElsewhere.svelte';
 	import ShopFrameArt from './ShopFrameArt.svelte';
 
@@ -26,7 +27,7 @@
 		<p class="eyebrow">{t('shop.eyebrow')}</p>
 		<h2 id="shop-title">{t('shop.title', { brand })}</h2>
 		<p class="lede">{t('shop.lede', { brand })}</p>
-		{#if when}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
+		{#if when && !shop.stock}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
 	</div>
 
 	<div class="products">
@@ -43,6 +44,7 @@
 						<span class="amount num">{money(p.price_cents)}</span>
 						<span class="vat">{t('shop.inclVat', { vat })}</span>
 					</p>
+					<ShopAvailability {shop} product={p} />
 					{#if specs.length}
 						<ul class="specs">
 							{#each specs as s (s)}

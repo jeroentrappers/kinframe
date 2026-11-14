@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
 	clampQty,
 	countryName,
+	dispatchDay,
 	errorsFromProblem,
+	formatDay,
 	formatMoney,
 	isEmail,
 	localized,
@@ -57,6 +59,25 @@ describe('quote', () => {
 		expect(clampQty(-2, { max_qty: 5 })).toBe(0);
 		expect(clampQty(Number.NaN, { max_qty: 5 })).toBe(0);
 		expect(quote(shop, { 'frame-10': 7, toaster: 3 })).toMatchObject({ count: 5, subtotalCents: 39500 });
+	});
+});
+
+describe('stock', () => {
+	const stocked: Shop = {
+		...shop,
+		products: [{ ...shop.products[0]!, in_stock: 2 }, { ...shop.products[1]!, in_stock: 0 }],
+		stock: { ships_in_stock: '2026-11-17', ships_out_of_stock: '2026-11-20' }
+	};
+	it('ships the next business day only when every frame is in stock', () => {
+		expect(dispatchDay(shop, { 'frame-10': 1 })).toBeNull();
+		expect(dispatchDay(stocked, {})).toBeNull();
+		expect(dispatchDay(stocked, { 'frame-10': 2 })).toBe('2026-11-17');
+		expect(dispatchDay(stocked, { 'frame-10': 3 })).toBe('2026-11-20');
+		expect(dispatchDay(stocked, { 'frame-10': 1, 'frame-15': 1 })).toBe('2026-11-20');
+	});
+	it('formats a day without shifting it by time zone', () => {
+		expect(formatDay('2026-11-17', 'en-GB')).toBe('Tuesday 17 November');
+		expect(formatDay('2026-11-17', 'nl-BE')).toBe('dinsdag 17 november');
 	});
 });
 
