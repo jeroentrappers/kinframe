@@ -997,7 +997,7 @@ const sr: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Купите фото-рам',
-	'shop.eyebrow': 'Наручите унапред',
+	'shop.eyebrow': 'Доступно одмах',
 	'shop.title': 'Набавите свој {brand}',
 	'shop.lede': 'Фото-рам спреман за употребу, са већ инсталираним системом {brand}. Укључите га, повежите на Wi-Fi и породица може одмах да шаље фотографије.',
 	'shop.reserve': 'Резервиши',

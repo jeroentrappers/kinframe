@@ -967,7 +967,7 @@ const zhCN: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': '购买相框',
-	'shop.eyebrow': '现已开放预订',
+	'shop.eyebrow': '现已发售',
 	'shop.title': '拥有一台 {brand}',
 	'shop.lede': '开箱即用的相框，已预装 {brand}。插上电源、连上 Wi-Fi，家人马上就能发送照片。',
 	'shop.reserve': '预订',

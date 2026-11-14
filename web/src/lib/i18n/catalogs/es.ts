@@ -985,7 +985,7 @@ const es: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Comprar un marco de fotos',
-	'shop.eyebrow': 'Reserva ya',
+	'shop.eyebrow': 'Ya disponible',
 	'shop.title': 'Consigue tu {brand}',
 	'shop.lede': 'Un marco de fotos listo para usar, con {brand} ya instalado. Enchúfalo, conéctalo al wifi y la familia podrá enviar fotos al instante.',
 	'shop.reserve': 'Reservar',

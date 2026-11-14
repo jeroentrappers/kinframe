@@ -956,7 +956,7 @@ const el: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Αγορά κορνίζας',
-	'shop.eyebrow': 'Προπαραγγελίες ανοιχτές',
+	'shop.eyebrow': 'Διαθέσιμο τώρα',
 	'shop.title': 'Αποκτήστε μια κορνίζα {brand}',
 	'shop.lede': 'Μια κορνίζα έτοιμη για χρήση, με προεγκατεστημένο το {brand}. Συνδέστε τη στην πρίζα και στο Wi-Fi, και η οικογένεια μπορεί να στέλνει φωτογραφίες αμέσως.',
 	'shop.reserve': 'Κράτηση',

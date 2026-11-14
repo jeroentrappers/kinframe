@@ -967,7 +967,7 @@ const hu: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Képkeret vásárlása',
-	'shop.eyebrow': 'Rendeld elő most',
+	'shop.eyebrow': 'Most kapható',
 	'shop.title': 'Legyen saját {brand} képkereted',
 	'shop.lede': 'Használatra kész képkeret, előtelepített {brand} szoftverrel. Dugd be, csatlakoztasd a Wi-Fi-hez, és a család máris küldheti a fotókat.',
 	'shop.reserve': 'Lefoglalom',

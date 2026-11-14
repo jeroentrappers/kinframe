@@ -968,7 +968,7 @@ const id: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Beli bingkai foto',
-	'shop.eyebrow': 'Pesan sekarang',
+	'shop.eyebrow': 'Tersedia sekarang',
 	'shop.title': 'Dapatkan {brand}',
 	'shop.lede': 'Bingkai foto siap pakai dengan {brand} yang sudah terpasang. Colokkan, sambungkan ke Wi-Fi, dan keluarga bisa langsung mengirim foto.',
 	'shop.reserve': 'Pesan',

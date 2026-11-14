@@ -997,7 +997,7 @@ const sk: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Kúpiť fotorámik',
-	'shop.eyebrow': 'Predobjednávky spustené',
+	'shop.eyebrow': 'Teraz skladom',
 	'shop.title': 'Fotorámik {brand}',
 	'shop.lede': 'Fotorámik pripravený na použitie s už nainštalovanou aplikáciou {brand}. Zapojte ho, pripojte k Wi-Fi a rodina môže hneď posielať fotky.',
 	'shop.reserve': 'Rezervovať',

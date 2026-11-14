@@ -968,7 +968,7 @@ const bg: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Купете фоторамка',
-	'shop.eyebrow': 'Предварителни поръчки',
+	'shop.eyebrow': 'Вече в наличност',
 	'shop.title': 'Вземете {brand}',
 	'shop.lede': 'Готова за употреба фоторамка с вече инсталиран {brand}. Включете я в контакта, свържете я с Wi-Fi и семейството веднага може да изпраща снимки.',
 	'shop.reserve': 'Резервиране',

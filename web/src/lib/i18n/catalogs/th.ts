@@ -969,7 +969,7 @@ const th: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'ซื้อกรอบรูป',
-	'shop.eyebrow': 'เปิดจองล่วงหน้าแล้ว',
+	'shop.eyebrow': 'พร้อมจำหน่ายแล้ว',
 	'shop.title': 'เป็นเจ้าของ {brand}',
 	'shop.lede': 'กรอบรูปพร้อมใช้งานที่ติดตั้ง {brand} ไว้แล้ว เสียบปลั๊ก เชื่อมต่อ Wi-Fi แล้วครอบครัวก็ส่งรูปได้ทันที',
 	'shop.reserve': 'จอง',

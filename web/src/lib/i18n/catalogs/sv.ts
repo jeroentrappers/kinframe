@@ -951,7 +951,7 @@ const sv: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Köp en fotoram',
-	'shop.eyebrow': 'Förbeställ nu',
+	'shop.eyebrow': 'Finns nu',
 	'shop.title': 'Skaffa en {brand}',
 	'shop.lede': 'En färdig fotoram med {brand} redan installerat. Koppla in den, anslut till wifi så kan familjen skicka foton direkt.',
 	'shop.reserve': 'Reservera',

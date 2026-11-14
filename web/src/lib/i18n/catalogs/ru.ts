@@ -1014,7 +1014,7 @@ const ru: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Купить фоторамку',
-	'shop.eyebrow': 'Предзаказ открыт',
+	'shop.eyebrow': 'Уже в продаже',
 	'shop.title': 'Фоторамка {brand}',
 	'shop.lede': 'Готовая к работе фоторамка с уже установленным приложением {brand}. Включите её в розетку, подключите к Wi-Fi — и семья сразу сможет присылать фото.',
 	'shop.reserve': 'Забронировать',

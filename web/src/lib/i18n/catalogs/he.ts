@@ -984,7 +984,7 @@ const he: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'קניית מסגרת תמונות',
-	'shop.eyebrow': 'פתוח לשריון מוקדם',
+	'shop.eyebrow': 'זמין עכשיו',
 	'shop.title': 'רוצים {brand} משלכם?',
 	'shop.lede': 'מסגרת תמונות מוכנה לשימוש, עם {brand} מותקן מראש. מחברים לחשמל, מתחברים ל-Wi-Fi, והמשפחה יכולה לשלוח תמונות מיד.',
 	'shop.reserve': 'שריון',

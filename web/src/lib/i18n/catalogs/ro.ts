@@ -985,7 +985,7 @@ const ro: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Cumpărați o ramă foto',
-	'shop.eyebrow': 'Precomandați acum',
+	'shop.eyebrow': 'Disponibil acum',
 	'shop.title': 'Rama foto {brand}',
 	'shop.lede': 'O ramă foto gata de folosit, cu {brand} deja instalat. O conectați la priză și la Wi-Fi, iar familia poate trimite fotografii imediat.',
 	'shop.reserve': 'Rezervați',

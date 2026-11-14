@@ -958,7 +958,7 @@ const nl: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Een fotokader kopen',
-	'shop.eyebrow': 'Nu reserveren',
+	'shop.eyebrow': 'Nu verkrijgbaar',
 	'shop.title': 'Bestel je eigen {brand}',
 	'shop.lede': 'Een kant-en-klaar fotokader waarop {brand} al geïnstalleerd is. Stekker erin, verbinden met de wifi en de familie kan meteen foto’s sturen.',
 	'shop.reserve': 'Reserveren',

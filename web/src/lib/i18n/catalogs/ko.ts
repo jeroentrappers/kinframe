@@ -967,7 +967,7 @@ const ko: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': '디지털 액자 구매',
-	'shop.eyebrow': '지금 사전 예약',
+	'shop.eyebrow': '지금 구매 가능',
 	'shop.title': '{brand} 액자를 만나 보세요',
 	'shop.lede': '{brand} 앱이 설치되어 바로 쓸 수 있는 디지털 액자예요. 전원을 꽂고 Wi-Fi에 연결하면 가족이 바로 사진을 보낼 수 있어요.',
 	'shop.reserve': '예약하기',

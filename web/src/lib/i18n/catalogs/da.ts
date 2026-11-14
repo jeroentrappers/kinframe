@@ -963,7 +963,7 @@ const da: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Køb en fotoramme',
-	'shop.eyebrow': 'Forudbestil nu',
+	'shop.eyebrow': 'På lager nu',
 	'shop.title': 'Få en {brand}',
 	'shop.lede': 'En fotoramme, der er klar til brug, med {brand} installeret. Sæt den i stikkontakten, forbind den til wi-fi, og familien kan sende billeder med det samme.',
 	'shop.reserve': 'Reservér',

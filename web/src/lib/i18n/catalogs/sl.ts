@@ -1026,7 +1026,7 @@ const sl: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Kupite fotookvir',
-	'shop.eyebrow': 'Prednaročila so odprta',
+	'shop.eyebrow': 'Na voljo zdaj',
 	'shop.title': 'Fotookvir {brand}',
 	'shop.lede': 'Fotookvir, pripravljen za uporabo, z že nameščeno aplikacijo {brand}. Priključite ga, povežite z Wi-Fi in družina lahko takoj pošilja fotografije.',
 	'shop.reserve': 'Rezerviraj',

@@ -1026,7 +1026,7 @@ const pl: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Kup ramkę na zdjęcia',
-	'shop.eyebrow': 'Zamów w przedsprzedaży',
+	'shop.eyebrow': 'Dostępne od ręki',
 	'shop.title': 'Ramka {brand} dla twojej rodziny',
 	'shop.lede': 'Gotowa do użycia ramka na zdjęcia z zainstalowaną aplikacją {brand}. Podłącz ją, połącz z Wi-Fi, a rodzina od razu może wysyłać zdjęcia.',
 	'shop.reserve': 'Zarezerwuj',

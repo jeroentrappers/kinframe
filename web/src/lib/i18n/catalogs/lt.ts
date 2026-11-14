@@ -997,7 +997,7 @@ const lt: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Įsigykite nuotraukų rėmelį',
-	'shop.eyebrow': 'Užsisakykite iš anksto',
+	'shop.eyebrow': 'Jau parduodama',
 	'shop.title': 'Įsigykite „{brand}“ rėmelį',
 	'shop.lede': 'Paruoštas naudoti nuotraukų rėmelis su iš anksto įdiegta programa „{brand}“. Įjunkite jį, prijunkite prie Wi-Fi, ir šeima iškart galės siųsti nuotraukas.',
 	'shop.reserve': 'Rezervuoti',

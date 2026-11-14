@@ -996,7 +996,7 @@ const it: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Acquista una cornice digitale',
-	'shop.eyebrow': 'Preordina ora',
+	'shop.eyebrow': 'Disponibile ora',
 	'shop.title': 'Porta a casa {brand}',
 	'shop.lede': 'Una cornice digitale pronta all’uso con {brand} già installato. Collegala alla corrente e al Wi-Fi e la famiglia può subito inviare foto.',
 	'shop.reserve': 'Prenota',

@@ -997,7 +997,7 @@ const fr: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Acheter un cadre photo',
-	'shop.eyebrow': 'Précommande ouverte',
+	'shop.eyebrow': 'Disponible maintenant',
 	'shop.title': 'Offrez-vous un {brand}',
 	'shop.lede': 'Un cadre photo prêt à l’emploi, avec {brand} déjà installé. Branchez-le, connectez-le au Wi-Fi et la famille peut tout de suite envoyer des photos.',
 	'shop.reserve': 'Réserver',

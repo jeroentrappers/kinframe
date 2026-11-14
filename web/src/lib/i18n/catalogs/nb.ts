@@ -951,7 +951,7 @@ const nb: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Kjøp en fotoramme',
-	'shop.eyebrow': 'Forhåndsbestill nå',
+	'shop.eyebrow': 'Tilgjengelig nå',
 	'shop.title': 'Skaff deg {brand}',
 	'shop.lede': 'En fotoramme som er klar til bruk, med {brand} ferdig installert. Plugg den inn, koble den til Wi-Fi, så kan familien sende bilder med en gang.',
 	'shop.reserve': 'Reserver',

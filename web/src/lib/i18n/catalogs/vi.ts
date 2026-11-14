@@ -969,7 +969,7 @@ const vi: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Mua khung ảnh',
-	'shop.eyebrow': 'Đặt trước ngay',
+	'shop.eyebrow': 'Đã có hàng',
 	'shop.title': 'Sở hữu {brand}',
 	'shop.lede': 'Khung ảnh dùng được ngay, đã cài sẵn {brand}. Cắm điện, kết nối Wi-Fi là cả nhà có thể gửi ảnh ngay.',
 	'shop.reserve': 'Đặt trước',

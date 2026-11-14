@@ -998,7 +998,7 @@ const lv: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Iegādāties fotorāmi',
-	'shop.eyebrow': 'Priekšpasūtījums atvērts',
+	'shop.eyebrow': 'Pieejams tagad',
 	'shop.title': 'Fotorāmis {brand}',
 	'shop.lede': 'Lietošanai gatavs fotorāmis ar jau instalētu lietotni {brand}. Pievienojiet to elektrībai un Wi-Fi, un ģimene uzreiz var sūtīt fotoattēlus.',
 	'shop.reserve': 'Rezervēt',

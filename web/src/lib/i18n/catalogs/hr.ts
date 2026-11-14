@@ -996,7 +996,7 @@ const hr: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Kupite foto okvir',
-	'shop.eyebrow': 'Prednaručite sada',
+	'shop.eyebrow': 'Dostupno odmah',
 	'shop.title': 'Nabavite okvir {brand}',
 	'shop.lede': 'Foto okvir spreman za upotrebu, s već instaliranom aplikacijom {brand}. Uključite ga, spojite na Wi-Fi i obitelj vam odmah može slati fotografije.',
 	'shop.reserve': 'Rezervirajte',

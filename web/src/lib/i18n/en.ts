@@ -970,7 +970,7 @@ export const en = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Buy a photo frame',
-	'shop.eyebrow': 'Pre-order now',
+	'shop.eyebrow': 'Available now',
 	'shop.title': 'Get a {brand}',
 	'shop.lede': 'A ready-to-use photo frame with {brand} already installed. Plug it in, connect it to Wi-Fi and the family can send photos right away.',
 	'shop.reserve': 'Reserve',

@@ -968,7 +968,7 @@ const hi: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'फ़ोटो फ़्रेम खरीदें',
-	'shop.eyebrow': 'अभी प्री-ऑर्डर करें',
+	'shop.eyebrow': 'अब उपलब्ध',
 	'shop.title': 'अपना {brand} पाएं',
 	'shop.lede': 'इस्तेमाल के लिए तैयार फ़ोटो फ़्रेम, जिसमें {brand} पहले से इंस्टॉल है। बस प्लग इन करें, Wi-Fi से जोड़ें और परिवार तुरंत फ़ोटो भेज सकता है।',
 	'shop.reserve': 'रिज़र्व करें',

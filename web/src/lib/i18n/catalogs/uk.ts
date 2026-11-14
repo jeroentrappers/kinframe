@@ -1014,7 +1014,7 @@ const uk: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Купити фоторамку',
-	'shop.eyebrow': 'Попереднє замовлення',
+	'shop.eyebrow': 'Вже в продажу',
 	'shop.title': 'Придбайте {brand}',
 	'shop.lede': 'Готова до роботи фоторамка з уже встановленою системою {brand}. Увімкніть її, підключіть до Wi-Fi — і родина одразу зможе надсилати фото.',
 	'shop.reserve': 'Забронювати',

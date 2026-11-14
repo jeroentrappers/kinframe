@@ -956,7 +956,7 @@ const tr: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Fotoğraf çerçevesi satın alın',
-	'shop.eyebrow': 'Şimdi ön sipariş verin',
+	'shop.eyebrow': 'Şimdi satışta',
 	'shop.title': '{brand} sahibi olun',
 	'shop.lede': '{brand} yüklü, kullanıma hazır bir fotoğraf çerçevesi. Fişe takın, Wi-Fi’ye bağlayın; aileniz hemen fotoğraf göndermeye başlayabilir.',
 	'shop.reserve': 'Rezervasyon yap',

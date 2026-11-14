@@ -951,7 +951,7 @@ const fi: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Osta kuvakehys',
-	'shop.eyebrow': 'Ennakkotilaa nyt',
+	'shop.eyebrow': 'Nyt saatavilla',
 	'shop.title': 'Hanki oma {brand}',
 	'shop.lede': 'Käyttövalmis kuvakehys, jossa {brand} on valmiiksi asennettuna. Kytke se virtaan ja Wi-Fi-verkkoon, niin perhe voi lähettää kuvia heti.',
 	'shop.reserve': 'Varaa',

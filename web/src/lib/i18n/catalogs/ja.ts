@@ -967,7 +967,7 @@ const ja: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'フォトフレームを購入',
-	'shop.eyebrow': '予約受付中',
+	'shop.eyebrow': '好評発売中',
 	'shop.title': '{brand}を、ご家族に',
 	'shop.lede': '{brand}があらかじめ入った、すぐに使えるフォトフレームです。電源につないでWi-Fiに接続すれば、家族がすぐに写真を送れます。',
 	'shop.reserve': '予約する',

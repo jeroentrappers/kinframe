@@ -1085,7 +1085,7 @@ const ar: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'شراء إطار صور',
-	'shop.eyebrow': 'الطلب المسبق متاح الآن',
+	'shop.eyebrow': 'متوفر الآن',
 	'shop.title': 'احصل على {brand}',
 	'shop.lede': 'إطار صور جاهز للاستخدام ومثبّت عليه {brand} مسبقًا. وصّله بالكهرباء واربطه بشبكة Wi-Fi، وستتمكن العائلة من إرسال الصور فورًا.',
 	'shop.reserve': 'احجز',

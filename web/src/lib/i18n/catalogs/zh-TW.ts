@@ -967,7 +967,7 @@ const zhTW: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': '購買相框',
-	'shop.eyebrow': '現正開放預購',
+	'shop.eyebrow': '現已開賣',
 	'shop.title': '擁有一台 {brand}',
 	'shop.lede': '開箱即用的相框，已預先安裝 {brand}。插上電源、連上 Wi-Fi，家人馬上就能傳送照片。',
 	'shop.reserve': '預購',

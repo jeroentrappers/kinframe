@@ -985,7 +985,7 @@ const pt: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Compre um porta-retrato',
-	'shop.eyebrow': 'Pré-venda aberta',
+	'shop.eyebrow': 'Disponível agora',
 	'shop.title': 'Garanta seu {brand}',
 	'shop.lede': 'Um porta-retrato digital pronto para usar, com o {brand} já instalado. É só ligar na tomada, conectar ao Wi-Fi e a família já pode enviar fotos.',
 	'shop.reserve': 'Reservar',

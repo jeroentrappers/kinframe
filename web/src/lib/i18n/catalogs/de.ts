@@ -963,7 +963,7 @@ const de: Catalog = {
 	// ---- calendar (end) ----
 	// ---- shop (only on servers with a shop; {brand} is the operator's consumer brand) ----
 	'shop.sectionLabel': 'Einen Bilderrahmen kaufen',
-	'shop.eyebrow': 'Jetzt vorbestellen',
+	'shop.eyebrow': 'Jetzt erhältlich',
 	'shop.title': 'Hol dir {brand}',
 	'shop.lede': 'Ein fertig eingerichteter Bilderrahmen mit {brand}. Einstecken, mit dem WLAN verbinden und die Familie kann sofort Fotos senden.',
 	'shop.reserve': 'Reservieren',
