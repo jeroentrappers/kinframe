@@ -77,9 +77,42 @@ platform :ios do
     )
   end
 
+  desc "Fetch the Mac Catalyst App Store certificates and profiles (read-only)"
+  lane :mac_certificates do
+    sync(type: "appstore", platform: "catalyst")
+  end
+
+  desc "Create the Mac Catalyst App Store profiles and the Mac installer certificate (changes the Apple account; ask first)"
+  lane :mac_renew_certificates do
+    sync(type: "appstore", platform: "catalyst", readonly: false)
+  end
+
+  desc "Archive the Mac Catalyst build for the Mac App Store into build/mac; upload: true also sends it to App Store Connect"
+  lane :mac_release do |options|
+    sync(type: "appstore", platform: "catalyst")
+    version = ENV["MARKETING_VERSION"] || last_tag_version
+    build = ENV["BUILD_NUMBER"] || sh("git rev-list --count HEAD").strip
+    UI.message("Kinframe for Mac #{version} (#{build})")
+    build_app(
+      project: "Kinframe.xcodeproj",
+      scheme: "Kinframe",
+      configuration: "Release",
+      catalyst_platform: "macos",
+      destination: "generic/platform=macOS,variant=Mac Catalyst",
+      output_directory: "build/mac",
+      installer_cert_name: installer_identity,
+      export_options: "ExportOptions-Mac.plist",
+      xcargs: "MARKETING_VERSION=#{version} CURRENT_PROJECT_VERSION=#{build}"
+    )
+    upload_to_testflight(api_key: asc_key, app_platform: "osx", pkg: Dir["build/mac/*.pkg"].first,
+                         skip_waiting_for_build_processing: true) if options[:upload]
+  end
+
   private_lane :sync do |options|
     match(
       type: options[:type],
+      platform: options.fetch(:platform, "ios"),
+      additional_cert_types: options[:platform] == "catalyst" ? ["mac_installer_distribution"] : nil,
       readonly: options.fetch(:readonly, true),
       force_for_new_devices: options.fetch(:force_for_new_devices, false),
       force: options.fetch(:force, false),
@@ -129,4 +162,11 @@ end
 def last_tag_version
   tag = sh("git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || echo v0.1.0").strip
   tag.delete_prefix("v").split("-").first
+end
+
+# The "3rd Party Mac Developer Installer" identity match put in the signing keychain (signs the Mac .pkg).
+def installer_identity
+  out = `security find-identity -v #{ENV["CI"] ? "" : keychain_path.shellescape} 2>/dev/null`
+  out[/"(3rd Party Mac Developer Installer: [^"]+)"/, 1] || out[/"(Mac Installer Distribution: [^"]+)"/, 1] ||
+    UI.user_error!("No Mac installer certificate; run mac_certificates")
 end

@@ -216,6 +216,7 @@
 		167B694AC1ADC1EBE4343C2A /* Types+Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Components.swift"; sourceTree = "<group>"; };
 		183560BB3B0B92AE4F451AE6 /* PluginEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginEditorSheet.swift; sourceTree = "<group>"; };
 		19FFC500B71512BBE9F896A0 /* CalendarTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarTests.swift; sourceTree = "<group>"; };
+		1B672E51486739C731251496 /* KinframeShare-Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "KinframeShare-Mac.entitlements"; sourceTree = "<group>"; };
 		1B68A605A5C83A17BE9C7211 /* PrepTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepTests.swift; sourceTree = "<group>"; };
 		1B82F92CA964A85CF53F3C9E /* Types+Operations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Types+Operations.swift"; sourceTree = "<group>"; };
 		1CBAEF8E65793E4A8FDC572F /* KinframeUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KinframeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -272,6 +273,7 @@
 		9269194C06CBB80AC1BE86E0 /* PushRegistrar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistrar.swift; sourceTree = "<group>"; };
 		92716D11006FEFDA7298A9A8 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		93993AAB7D50559BF46380E5 /* ItemEditorSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemEditorSheet.swift; sourceTree = "<group>"; };
+		942A81E07757E3A7E107EB9D /* Kinframe-Mac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Kinframe-Mac.entitlements"; sourceTree = "<group>"; };
 		95307A70F7BF8FCDDF979816 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		955351EE7ED4A72AC2EA17E3 /* AlbumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumTests.swift; sourceTree = "<group>"; };
 		98AECF0467EE188565C39A4D /* TvStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvStage.swift; sourceTree = "<group>"; };
@@ -464,6 +466,7 @@
 				3CDC54626FABB83F2349ADEF /* Settings */,
 				346ACF5F0A18D46954F6BAFE /* TV */,
 				E8D237386B8585BE08CD47D3 /* Info.plist */,
+				942A81E07757E3A7E107EB9D /* Kinframe-Mac.entitlements */,
 				98ED649A616D0EDBFD9246ED /* Kinframe.entitlements */,
 			);
 			path = Kinframe;
@@ -481,6 +484,7 @@
 			isa = PBXGroup;
 			children = (
 				0C58DA7A258760622EC6D2A1 /* Info.plist */,
+				1B672E51486739C731251496 /* KinframeShare-Mac.entitlements */,
 				75A57290E2DCC144619A1A20 /* KinframeShare.entitlements */,
 				5484BA393137203416877B8C /* PrivacyInfo.xcprivacy */,
 				CC296D5E58C89E0E3EF39E75 /* ShareViewController.swift */,
@@ -1113,6 +1117,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.kit;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1124,10 +1129,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Kinframe/Kinframe-Mac.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
 				CODE_SIGN_STYLE = Manual;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				INFOPLIST_FILE = Kinframe/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1137,6 +1144,7 @@
 				PRODUCT_NAME = Kinframe;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development app.kinframe.family";
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1145,9 +1153,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "KinframeShare/KinframeShare-Mac.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				INFOPLIST_FILE = KinframeShare/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1157,7 +1168,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.share;
 				PRODUCT_NAME = KinframeShare;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore app.kinframe.family.share";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "match AppStore app.kinframe.family.share catalyst";
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1213,8 +1226,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				KINFRAME_APNS_ENABLED = YES;
-				KINFRAME_APS_ENVIRONMENT = production;
 				KINFRAME_APP_GROUP = group.app.kinframe.family;
+				KINFRAME_APS_ENVIRONMENT = production;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -1303,8 +1316,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				KINFRAME_APNS_ENABLED = YES;
-				KINFRAME_APS_ENVIRONMENT = development;
 				KINFRAME_APP_GROUP = group.app.kinframe.family;
+				KINFRAME_APS_ENVIRONMENT = development;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 0.1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -1324,9 +1337,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = KinframeShare/KinframeShare.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "KinframeShare/KinframeShare-Mac.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
 				CODE_SIGN_STYLE = Manual;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				INFOPLIST_FILE = KinframeShare/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1337,6 +1352,7 @@
 				PRODUCT_NAME = KinframeShare;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development app.kinframe.family.share";
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1360,6 +1376,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family.kit;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -1405,10 +1422,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Kinframe/Kinframe.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Kinframe/Kinframe-Mac.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "-";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				INFOPLIST_FILE = Kinframe/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1417,7 +1437,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = app.kinframe.family;
 				PRODUCT_NAME = Kinframe;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore app.kinframe.family";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "match AppStore app.kinframe.family catalyst";
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
