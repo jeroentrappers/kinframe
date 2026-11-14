@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Politique de confidentialité',
-	updated: '2026-10-28',
+	updated: '2026-11-10',
 	intro: [
 		'kinframe permet aux familles d’envoyer des photos, des vidéos et des messages vers un cadre photo à la maison. Cette politique explique quelles données personnelles le service kinframe hébergé sur https://kinframe.appmire.be collecte, pourquoi, qui d’autre intervient, combien de temps elles sont conservées et comment les faire supprimer. Elle couvre le site web, les applications et cadres kinframe lorsqu’ils utilisent ce serveur, les pages de connexion sur auth.kinframe.appmire.be et la boutique de précommande.',
 		'En bref : nous utilisons vos données uniquement pour faire fonctionner le service. Pas de publicité, pas de mesure d’audience, pas de pistage, et rien n’est vendu ni partagé à des fins de marketing. Les serveurs se trouvent en Allemagne.'
@@ -116,7 +116,7 @@ const doc: LegalDoc = {
 						'Notifications : désactivez-les dans les paramètres ; l’abonnement push est supprimé.'
 					]
 				},
-				'Supprimer votre compte : les applications n’ont pas encore de bouton pour cela. Envoyez un e-mail à jeroen@appmire.be depuis l’adresse avec laquelle vous vous connectez, avec l’objet « Supprimer mon compte kinframe », en précisant si les photos que vous avez envoyées doivent rester sur les cadres ou être retirées. Nous supprimons votre compte, votre identité de connexion (y compris un lien avec Apple, Google, Microsoft, Facebook ou GitHub), votre photo de profil et vos abonnements push, et vos photos si vous le demandez. Si vous êtes propriétaire d’un cadre, dites-nous s’il faut le supprimer ou le confier à un autre membre. Nous le faisons dans un délai d’un mois et le confirmons par e-mail. Les éléments que vous laissez sur un cadre continuent d’afficher votre nom.',
+				'Supprimer votre compte : dans l’application ou sur le site, allez dans Paramètres → Supprimer le compte. Vous choisissez si les photos et vidéos que vous avez envoyées restent sur les cadres ou sont retirées. Votre compte, votre identité de connexion (y compris un lien avec Apple, Google, Microsoft, Facebook ou GitHub), votre photo de profil et vos abonnements push sont supprimés immédiatement, et vous quittez tous vos cadres. Si vous êtes propriétaire d’un cadre, confiez-le d’abord à un autre membre ou supprimez-le. Les éléments que vous laissez sur un cadre continuent d’afficher votre nom. Vous pouvez aussi envoyer un e-mail à jeroen@appmire.be depuis l’adresse avec laquelle vous vous connectez, avec l’objet « Supprimer mon compte kinframe » : nous le faisons alors dans un délai d’un mois et le confirmons par e-mail.',
 				'Effacer complètement les fichiers : si vous voulez que les fichiers stockés des photos que vous avez envoyées, ou toutes les données d’un cadre supprimé, soient effacés de nos serveurs (et pas seulement retirés de l’affichage), demandez-le-nous à la même adresse et nous le ferons dans un délai d’un mois.',
 				'Si vous vous êtes connecté avec Facebook, vous pouvez aussi retirer kinframe de votre compte Facebook via Paramètres et confidentialité → Paramètres → Apps et sites web. Facebook cesse alors de partager des données avec nous ; pour supprimer les données que nous avons déjà, envoyez-nous l’e-mail ci-dessus. Il en va de même pour Apple, Google, Microsoft et GitHub dans leurs paramètres de compte.',
 				'Nos sauvegardes sont écrasées au fil du cycle normal de sauvegarde, de sorte que les données supprimées en disparaissent aussi avec le temps.'
