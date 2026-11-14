@@ -41,6 +41,7 @@ const lt: Catalog = {
 	'landing.signIn': 'Prisijungti',
 	'landing.signInHint': 'Esate čia pirmą kartą? Prisijungus sukuriama paskyra. Atsiųsime kodą el. paštu, slaptažodžio nereikia.',
 	'landing.appStore': 'Atsisiųskite iš App Store',
+	'landing.googlePlay': 'Gaukite „Google Play“',
 	'landing.expired': 'Buvote atjungti. Norėdami tęsti, prisijunkite dar kartą.',
 	'landing.reasonFrame': 'Prisijunkite, kad pridėtumėte rėmelį. Iškart grąžinsime jus atgal.',
 	'landing.reasonInvite': 'Prisijunkite, kad priimtumėte pakvietimą. Iškart grąžinsime jus atgal.',

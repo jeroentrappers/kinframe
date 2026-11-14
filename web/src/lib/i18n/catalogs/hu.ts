@@ -40,6 +40,7 @@ const hu: Catalog = {
 	'landing.signIn': 'Bejelentkezés',
 	'landing.signInHint': 'Új vagy itt? A bejelentkezéssel létrejön a fiókod. E-mailben küldünk egy kódot, jelszó nem kell.',
 	'landing.appStore': 'Letöltés az App Store-ból',
+	'landing.googlePlay': 'Szerezd meg a Google Playen',
 	'landing.expired': 'Kijelentkeztettünk. A folytatáshoz jelentkezz be újra.',
 	'landing.reasonFrame': 'Jelentkezz be a képkeret hozzáadásához. Utána rögtön visszahozunk ide.',
 	'landing.reasonInvite': 'Jelentkezz be a meghívás elfogadásához. Utána rögtön visszahozunk ide.',

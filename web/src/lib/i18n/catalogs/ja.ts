@@ -40,6 +40,7 @@ const ja: Catalog = {
 	'landing.signIn': 'ログイン',
 	'landing.signInHint': '初めての方も、ログインするとアカウントが作成されます。メールでコードをお送りするので、パスワードは不要です。',
 	'landing.appStore': 'App Storeからダウンロード',
+	'landing.googlePlay': 'Google Play で手に入れよう',
 	'landing.expired': 'ログアウトされました。続けるには、もう一度ログインしてください。',
 	'landing.reasonFrame': 'フレームを追加するにはログインしてください。すぐに元の画面に戻ります。',
 	'landing.reasonInvite': '招待を受けるにはログインしてください。すぐに元の画面に戻ります。',

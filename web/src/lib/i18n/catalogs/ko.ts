@@ -40,6 +40,7 @@ const ko: Catalog = {
 	'landing.signIn': '로그인',
 	'landing.signInHint': '처음이신가요? 로그인하면 계정이 만들어져요. 이메일로 코드를 보내 드리니 비밀번호는 필요 없어요.',
 	'landing.appStore': 'App Store에서 다운로드',
+	'landing.googlePlay': 'Google Play에서 받기',
 	'landing.expired': '로그아웃되었어요. 계속하려면 다시 로그인하세요.',
 	'landing.reasonFrame': '액자를 추가하려면 로그인하세요. 바로 돌아올게요.',
 	'landing.reasonInvite': '초대를 수락하려면 로그인하세요. 바로 돌아올게요.',

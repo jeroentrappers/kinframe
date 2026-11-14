@@ -39,6 +39,7 @@ const tr: Catalog = {
 	'landing.signIn': 'Giriş yap',
 	'landing.signInHint': 'Yeni misiniz? Giriş yaptığınızda hesabınız oluşturulur. Size e-postayla bir kod göndeririz, şifre gerekmez.',
 	'landing.appStore': 'App Store’dan indirin',
+	'landing.googlePlay': 'Google Play’den alın',
 	'landing.expired': 'Oturumunuz kapatıldı. Devam etmek için lütfen tekrar giriş yapın.',
 	'landing.reasonFrame': 'Çerçeveyi eklemek için giriş yapın. Hemen geri döneceksiniz.',
 	'landing.reasonInvite': 'Davetinizi kabul etmek için giriş yapın. Hemen geri döneceksiniz.',

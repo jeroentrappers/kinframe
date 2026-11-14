@@ -41,6 +41,7 @@ const id: Catalog = {
 	'landing.signIn': 'Login',
 	'landing.signInHint': 'Baru di sini? Login akan membuat akun Anda. Kami akan mengirim kode lewat email, tanpa sandi.',
 	'landing.appStore': 'Download di App Store',
+	'landing.googlePlay': 'Temukan di Google Play',
 	'landing.expired': 'Anda telah logout. Silakan login lagi untuk melanjutkan.',
 	'landing.reasonFrame': 'Login untuk menambahkan bingkai. Kami akan langsung membawa Anda kembali.',
 	'landing.reasonInvite': 'Login untuk menerima undangan Anda. Kami akan langsung membawa Anda kembali.',

@@ -39,6 +39,7 @@ const sv: Catalog = {
 	'landing.signIn': 'Logga in',
 	'landing.signInHint': 'Ny här? När du loggar in skapas ditt konto. Vi mejlar dig en kod, inget lösenord behövs.',
 	'landing.appStore': 'Hämta i App Store',
+	'landing.googlePlay': 'Ladda ned på Google Play',
 	'landing.expired': 'Du har loggats ut. Logga in igen för att fortsätta.',
 	'landing.reasonFrame': 'Logga in för att lägga till fotoramen. Sedan kommer du direkt tillbaka.',
 	'landing.reasonInvite': 'Logga in för att tacka ja till inbjudan. Sedan kommer du direkt tillbaka.',

@@ -39,6 +39,7 @@ const he: Catalog = {
 	'landing.signIn': 'כניסה',
 	'landing.signInHint': 'חדשים כאן? הכניסה יוצרת את החשבון. נשלח קוד באימייל, בלי צורך בסיסמה.',
 	'landing.appStore': 'הורידו מ-App Store',
+	'landing.googlePlay': 'קבלו את זה ב-Google Play',
 	'landing.expired': 'בוצעה יציאה מהחשבון. יש להיכנס שוב כדי להמשיך.',
 	'landing.reasonFrame': 'יש להיכנס כדי להוסיף את המסגרת. מיד אחר כך נחזור לכאן.',
 	'landing.reasonInvite': 'יש להיכנס כדי לקבל את ההזמנה. מיד אחר כך נחזור לכאן.',

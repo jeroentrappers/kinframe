@@ -41,6 +41,7 @@ const zhCN: Catalog = {
 	'landing.signIn': '登录',
 	'landing.signInHint': '第一次使用？登录时会自动创建账号。我们会通过邮件发送验证码，无需密码。',
 	'landing.appStore': '在 App Store 下载',
+	'landing.googlePlay': '在 Google Play 上获取',
 	'landing.expired': '你已退出登录。请重新登录以继续。',
 	'landing.reasonFrame': '登录后即可添加相框，完成后会自动返回这里。',
 	'landing.reasonInvite': '登录后即可接受邀请，完成后会自动返回这里。',

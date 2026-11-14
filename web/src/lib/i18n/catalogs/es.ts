@@ -39,6 +39,7 @@ const es: Catalog = {
 	'landing.signIn': 'Iniciar sesión',
 	'landing.signInHint': '¿Eres nuevo? Al iniciar sesión se crea tu cuenta. Te enviaremos un código por correo, sin contraseña.',
 	'landing.appStore': 'Descargar en el App Store',
+	'landing.googlePlay': 'Disponible en Google Play',
 	'landing.expired': 'Se ha cerrado tu sesión. Vuelve a iniciar sesión para continuar.',
 	'landing.reasonFrame': 'Inicia sesión para añadir el marco. Te traeremos de vuelta enseguida.',
 	'landing.reasonInvite': 'Inicia sesión para aceptar la invitación. Te traeremos de vuelta enseguida.',

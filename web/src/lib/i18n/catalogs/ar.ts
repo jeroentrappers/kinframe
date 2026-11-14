@@ -41,6 +41,7 @@ const ar: Catalog = {
 	'landing.signIn': 'تسجيل الدخول',
 	'landing.signInHint': 'جديد هنا؟ تسجيل الدخول يُنشئ حسابك. سنرسل لك رمزًا بالبريد الإلكتروني، دون حاجة إلى كلمة مرور.',
 	'landing.appStore': 'حمّله من App Store',
+	'landing.googlePlay': 'احصل عليه من Google Play',
 	'landing.expired': 'تم تسجيل خروجك. سجّل الدخول مرة أخرى للمتابعة.',
 	'landing.reasonFrame': 'سجّل الدخول لإضافة الإطار. سنعيدك إلى هنا مباشرة.',
 	'landing.reasonInvite': 'سجّل الدخول لقبول دعوتك. سنعيدك إلى هنا مباشرة.',

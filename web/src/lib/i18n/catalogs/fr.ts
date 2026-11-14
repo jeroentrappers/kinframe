@@ -40,6 +40,7 @@ const fr: Catalog = {
 	'landing.signIn': 'Se connecter',
 	'landing.signInHint': 'Nouveau ici ? La connexion crée votre compte. Nous vous envoyons un code par e-mail, sans mot de passe.',
 	'landing.appStore': 'Télécharger dans l’App Store',
+	'landing.googlePlay': 'Disponible sur Google Play',
 	'landing.expired': 'Vous avez été déconnecté. Reconnectez-vous pour continuer.',
 	'landing.reasonFrame': 'Connectez-vous pour ajouter le cadre. Vous reviendrez ici aussitôt.',
 	'landing.reasonInvite': 'Connectez-vous pour accepter votre invitation. Vous reviendrez ici aussitôt.',

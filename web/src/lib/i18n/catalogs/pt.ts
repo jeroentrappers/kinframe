@@ -39,6 +39,7 @@ const pt: Catalog = {
 	'landing.signIn': 'Entrar',
 	'landing.signInHint': 'É novo por aqui? Ao entrar, sua conta é criada. Enviaremos um código por e-mail, sem precisar de senha.',
 	'landing.appStore': 'Baixar na App Store',
+	'landing.googlePlay': 'Disponível no Google Play',
 	'landing.expired': 'Você saiu da sua conta. Entre de novo para continuar.',
 	'landing.reasonFrame': 'Entre para adicionar o porta-retrato. Você volta para cá logo em seguida.',
 	'landing.reasonInvite': 'Entre para aceitar o convite. Você volta para cá logo em seguida.',

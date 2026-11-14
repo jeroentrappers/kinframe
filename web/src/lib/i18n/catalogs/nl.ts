@@ -40,6 +40,7 @@ const nl: Catalog = {
 	'landing.signIn': 'Aanmelden',
 	'landing.signInHint': 'Nieuw? Door aan te melden maak je een account. Je krijgt een code per e-mail, geen wachtwoord nodig.',
 	'landing.appStore': 'Download in de App Store',
+	'landing.googlePlay': 'Ontdek het op Google Play',
 	'landing.expired': 'Je bent afgemeld. Meld je opnieuw aan om verder te gaan.',
 	'landing.reasonFrame': 'Meld je aan om het kader toe te voegen. Daarna gaan we meteen verder.',
 	'landing.reasonInvite': 'Meld je aan om de uitnodiging te aanvaarden. Daarna gaan we meteen verder.',

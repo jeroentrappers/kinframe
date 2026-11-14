@@ -40,6 +40,7 @@ const cs: Catalog = {
 	'landing.signIn': 'Přihlásit se',
 	'landing.signInHint': 'Jste tu poprvé? Přihlášením si vytvoříte účet. Pošleme vám kód e-mailem, heslo nepotřebujete.',
 	'landing.appStore': 'Stáhnout v App Store',
+	'landing.googlePlay': 'Nyní na Google Play',
 	'landing.expired': 'Byli jste odhlášeni. Pro pokračování se znovu přihlaste.',
 	'landing.reasonFrame': 'Přihlaste se a přidejte rámeček. Hned vás vrátíme zpět.',
 	'landing.reasonInvite': 'Přihlaste se a přijměte pozvánku. Hned vás vrátíme zpět.',

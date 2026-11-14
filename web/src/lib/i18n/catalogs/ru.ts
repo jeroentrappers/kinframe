@@ -39,6 +39,7 @@ const ru: Catalog = {
 	'landing.signIn': 'Войти',
 	'landing.signInHint': 'Впервые здесь? При входе создаётся аккаунт. Мы пришлём код на почту, пароль не нужен.',
 	'landing.appStore': 'Загрузите в App Store',
+	'landing.googlePlay': 'Доступно в Google Play',
 	'landing.expired': 'Вы вышли из аккаунта. Войдите снова, чтобы продолжить.',
 	'landing.reasonFrame': 'Войдите, чтобы добавить рамку. Потом мы сразу вернём вас сюда.',
 	'landing.reasonInvite': 'Войдите, чтобы принять приглашение. Потом мы сразу вернём вас сюда.',

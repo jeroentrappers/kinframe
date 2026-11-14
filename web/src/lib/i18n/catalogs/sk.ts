@@ -40,6 +40,7 @@ const sk: Catalog = {
 	'landing.signIn': 'Prihlásiť sa',
 	'landing.signInHint': 'Ste tu prvýkrát? Prihlásením si vytvoríte účet. Pošleme vám kód e-mailom, heslo nepotrebujete.',
 	'landing.appStore': 'Stiahnuť v App Store',
+	'landing.googlePlay': 'Získajte na Google Play',
 	'landing.expired': 'Boli ste odhlásení. Ak chcete pokračovať, znova sa prihláste.',
 	'landing.reasonFrame': 'Prihláste sa a pridajte rámik. Hneď vás vrátime späť.',
 	'landing.reasonInvite': 'Prihláste sa a prijmite pozvánku. Hneď vás vrátime späť.',

@@ -40,6 +40,7 @@ const pl: Catalog = {
 	'landing.signIn': 'Zaloguj się',
 	'landing.signInHint': 'Pierwszy raz tutaj? Logowanie od razu tworzy konto. Wyślemy ci kod e-mailem, hasło nie jest potrzebne.',
 	'landing.appStore': 'Pobierz w App Store',
+	'landing.googlePlay': 'Pobierz z Google Play',
 	'landing.expired': 'Wylogowano cię. Zaloguj się ponownie, aby kontynuować.',
 	'landing.reasonFrame': 'Zaloguj się, aby dodać ramkę. Zaraz cię tu przywrócimy.',
 	'landing.reasonInvite': 'Zaloguj się, aby przyjąć zaproszenie. Zaraz cię tu przywrócimy.',

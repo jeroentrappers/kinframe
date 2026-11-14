@@ -41,6 +41,7 @@ const vi: Catalog = {
 	'landing.signIn': 'Đăng nhập',
 	'landing.signInHint': 'Lần đầu đến đây? Đăng nhập sẽ tạo tài khoản cho bạn. Chúng tôi sẽ gửi mã qua email, không cần mật khẩu.',
 	'landing.appStore': 'Tải về trên App Store',
+	'landing.googlePlay': 'Tải về trên Google Play',
 	'landing.expired': 'Bạn đã bị đăng xuất. Vui lòng đăng nhập lại để tiếp tục.',
 	'landing.reasonFrame': 'Đăng nhập để thêm khung ảnh. Chúng tôi sẽ đưa bạn quay lại ngay.',
 	'landing.reasonInvite': 'Đăng nhập để chấp nhận lời mời. Chúng tôi sẽ đưa bạn quay lại ngay.',

@@ -40,6 +40,7 @@ const it: Catalog = {
 	'landing.signIn': 'Accedi',
 	'landing.signInHint': 'Sei nuovo? Accedendo crei il tuo account. Ti mandiamo un codice via email, senza password.',
 	'landing.appStore': 'Scarica su App Store',
+	'landing.googlePlay': 'Disponibile su Google Play',
 	'landing.expired': 'Sei stato disconnesso. Accedi di nuovo per continuare.',
 	'landing.reasonFrame': 'Accedi per aggiungere la cornice. Poi ti riportiamo subito qui.',
 	'landing.reasonInvite': 'Accedi per accettare l’invito. Poi ti riportiamo subito qui.',

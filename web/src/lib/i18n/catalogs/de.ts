@@ -40,6 +40,7 @@ const de: Catalog = {
 	'landing.signIn': 'Anmelden',
 	'landing.signInHint': 'Neu hier? Beim Anmelden wird dein Konto erstellt. Wir schicken dir einen Code per E-Mail, kein Passwort nötig.',
 	'landing.appStore': 'Laden im App Store',
+	'landing.googlePlay': 'Jetzt bei Google Play',
 	'landing.expired': 'Du wurdest abgemeldet. Bitte melde dich erneut an, um fortzufahren.',
 	'landing.reasonFrame': 'Melde dich an, um den Rahmen hinzuzufügen. Danach geht es direkt weiter.',
 	'landing.reasonInvite': 'Melde dich an, um die Einladung anzunehmen. Danach geht es direkt weiter.',

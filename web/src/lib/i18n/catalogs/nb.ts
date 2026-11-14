@@ -39,6 +39,7 @@ const nb: Catalog = {
 	'landing.signIn': 'Logg på',
 	'landing.signInHint': 'Ny her? Når du logger på, opprettes kontoen din. Vi sender deg en kode på e-post, du trenger ikke passord.',
 	'landing.appStore': 'Last ned fra App Store',
+	'landing.googlePlay': 'Last ned fra Google Play',
 	'landing.expired': 'Du ble logget av. Logg på igjen for å fortsette.',
 	'landing.reasonFrame': 'Logg på for å legge til fotorammen. Så sender vi deg rett tilbake.',
 	'landing.reasonInvite': 'Logg på for å godta invitasjonen. Så sender vi deg rett tilbake.',

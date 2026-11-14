@@ -41,6 +41,7 @@ export const en = {
 	'landing.signIn': 'Sign in',
 	'landing.signInHint': 'New here? Signing in creates your account. We’ll email you a code, no password needed.',
 	'landing.appStore': 'Download on the App Store',
+	'landing.googlePlay': 'Get it on Google Play',
 	'landing.expired': 'You were signed out. Please sign in again to continue.',
 	'landing.reasonFrame': 'Sign in to add the frame. We’ll take you right back.',
 	'landing.reasonInvite': 'Sign in to accept your invitation. We’ll take you right back.',

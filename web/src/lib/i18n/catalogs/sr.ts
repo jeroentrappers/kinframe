@@ -40,6 +40,7 @@ const sr: Catalog = {
 	'landing.signIn': 'Пријави се',
 	'landing.signInHint': 'Нови сте овде? Пријављивањем се отвара налог. Послаћемо вам код имејлом, лозинка није потребна.',
 	'landing.appStore': 'Преузмите са App Store-а',
+	'landing.googlePlay': 'Набавите на Google Play-у',
 	'landing.expired': 'Одјављени сте. Пријавите се поново да бисте наставили.',
 	'landing.reasonFrame': 'Пријавите се да бисте додали рам. Одмах ћемо вас вратити.',
 	'landing.reasonInvite': 'Пријавите се да бисте прихватили позивницу. Одмах ћемо вас вратити.',

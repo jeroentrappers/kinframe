@@ -39,6 +39,7 @@ const ro: Catalog = {
 	'landing.signIn': 'Conectați-vă',
 	'landing.signInHint': 'Sunteți nou? Conectarea vă creează contul. Vă trimitem un cod prin e-mail, fără parolă.',
 	'landing.appStore': 'Descarcă din App Store',
+	'landing.googlePlay': 'Descarcă de pe Google Play',
 	'landing.expired': 'Ați fost deconectat. Conectați-vă din nou pentru a continua.',
 	'landing.reasonFrame': 'Conectați-vă pentru a adăuga rama. Vă aducem imediat înapoi.',
 	'landing.reasonInvite': 'Conectați-vă pentru a accepta invitația. Vă aducem imediat înapoi.',

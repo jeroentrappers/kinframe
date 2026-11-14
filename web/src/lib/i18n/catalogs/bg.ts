@@ -40,6 +40,7 @@ const bg: Catalog = {
 	'landing.signIn': 'Вход',
 	'landing.signInHint': 'За първи път сте тук? С влизането се създава профил. Ще ви изпратим код по имейл, без парола.',
 	'landing.appStore': 'Изтеглете от App Store',
+	'landing.googlePlay': 'Изтеглете от Google Play',
 	'landing.expired': 'Излязохте от профила си. Влезте отново, за да продължите.',
 	'landing.reasonFrame': 'Влезте, за да добавите рамката. Веднага ще ви върнем тук.',
 	'landing.reasonInvite': 'Влезте, за да приемете поканата. Веднага ще ви върнем тук.',

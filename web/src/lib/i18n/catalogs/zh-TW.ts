@@ -41,6 +41,7 @@ const zhTW: Catalog = {
 	'landing.signIn': '登入',
 	'landing.signInHint': '第一次使用嗎？登入時就會建立帳戶。我們會用電子郵件寄驗證碼給你，不需要密碼。',
 	'landing.appStore': '在 App Store 下載',
+	'landing.googlePlay': '立即前往 Google Play 下載',
 	'landing.expired': '你已登出。請重新登入以繼續。',
 	'landing.reasonFrame': '登入後即可新增相框，完成後會立刻帶你回到這裡。',
 	'landing.reasonInvite': '登入後即可接受邀請，完成後會立刻帶你回到這裡。',
