@@ -1172,6 +1172,8 @@ const fr: Catalog = {
 	'reservations.emptyFilter': 'Aucune réservation avec ce statut.',
 	'reservations.internalNote': 'Note interne',
 	'reservations.internalNoteHint': 'Pour vous seulement, jamais envoyée par e-mail.',
+	'reservations.tracking': 'Lien de suivi',
+	'reservations.trackingHint': 'Le client reçoit ce lien par e-mail à l’expédition de la commande, ou tout de suite si elle est déjà expédiée.',
 	'reservations.customerNote': 'Remarque du client',
 	'reservations.saved': 'Réservation mise à jour',
 	'reservations.framesCount': 'Cadres : {count}',

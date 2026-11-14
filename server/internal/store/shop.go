@@ -38,13 +38,14 @@ type Reservation struct {
 	PaymentStatus *string     `db:"payment_status"`
 	PaidAt        *time.Time  `db:"paid_at"`
 	ShippedAt     *time.Time  `db:"shipped_at"`
+	TrackingURL   *string     `db:"tracking_url"`
 	CreatedAt     time.Time   `db:"created_at"`
 	UpdatedAt     time.Time   `db:"updated_at"`
 }
 
 const reservationSelect = `SELECT id, reference, status, name, email, country, postal_code, note, locale, items, currency,
 	subtotal_cents, shipping_cents, total_cents, consent_at, internal_note, cancelled_at, created_at, updated_at,
-	street, city, phone, payment_id, payment_status, paid_at, shipped_at
+	street, city, phone, payment_id, payment_status, paid_at, shipped_at, tracking_url
 	FROM shop_reservations`
 
 // ErrReferenceTaken means the generated reference already exists; pick another.
@@ -107,12 +108,14 @@ func (s *Store) ListReservations(ctx context.Context, status string) ([]Reservat
 		WHERE ($1 = '' OR status = $1) ORDER BY created_at DESC, id DESC LIMIT 5000`, status))
 }
 
-// ReservationPatch changes the status and/or the internal note. ClearNote
-// sets the note to NULL.
+// ReservationPatch changes the status, the internal note and/or the tracking
+// link. ClearNote and ClearTracking set those to NULL.
 type ReservationPatch struct {
-	Status       *string
-	InternalNote *string
-	ClearNote    bool
+	Status        *string
+	InternalNote  *string
+	ClearNote     bool
+	TrackingURL   *string
+	ClearTracking bool
 }
 
 func (s *Store) UpdateReservation(ctx context.Context, id uuid.UUID, p ReservationPatch) (*Reservation, error) {
@@ -121,8 +124,9 @@ func (s *Store) UpdateReservation(ctx context.Context, id uuid.UUID, p Reservati
 		cancelled_at = CASE WHEN $2::text IS NULL OR $2 = status THEN cancelled_at WHEN $2 = 'cancelled' THEN now() ELSE NULL END,
 		shipped_at = CASE WHEN $2::text IS NULL OR $2 = status THEN shipped_at WHEN $2 = 'shipped' THEN now() ELSE shipped_at END,
 		internal_note = CASE WHEN $4 THEN NULL ELSE coalesce($3, internal_note) END,
+		tracking_url = CASE WHEN $6 THEN NULL ELSE coalesce($5, tracking_url) END,
 		updated_at = now()
-		WHERE id = $1`, id, p.Status, p.InternalNote, p.ClearNote)
+		WHERE id = $1`, id, p.Status, p.InternalNote, p.ClearNote, p.TrackingURL, p.ClearTracking)
 	if err != nil {
 		return nil, err
 	}

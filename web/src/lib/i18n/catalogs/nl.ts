@@ -1133,6 +1133,8 @@ const nl: Catalog = {
 	'reservations.emptyFilter': 'Geen reservaties met deze status.',
 	'reservations.internalNote': 'Interne notitie',
 	'reservations.internalNoteHint': 'Alleen voor jou, wordt nooit gemaild.',
+	'reservations.tracking': 'Track-and-tracelink',
+	'reservations.trackingHint': 'De klant krijgt deze link per e-mail zodra de bestelling verzonden is, of meteen als ze al verzonden is.',
 	'reservations.customerNote': 'Opmerking van de klant',
 	'reservations.saved': 'Reservatie bijgewerkt',
 	'reservations.framesCount': 'Fotokaders: {count}',

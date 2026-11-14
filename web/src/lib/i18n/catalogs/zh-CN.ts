@@ -1142,6 +1142,8 @@ const zhCN: Catalog = {
 	'reservations.emptyFilter': '没有此状态的预订。',
 	'reservations.internalNote': '内部备注',
 	'reservations.internalNoteHint': '仅自己可见，绝不会通过邮件发送。',
+	'reservations.tracking': '物流跟踪链接',
+	'reservations.trackingHint': '订单发货时，客户会通过电子邮件收到此链接；如果已经发货，则会立即收到。',
 	'reservations.customerNote': '客户备注',
 	'reservations.saved': '预订已更新',
 	'reservations.framesCount': '相框：{count} 台',

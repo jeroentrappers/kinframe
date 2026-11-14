@@ -1142,6 +1142,8 @@ const zhTW: Catalog = {
 	'reservations.emptyFilter': '沒有這個狀態的預購。',
 	'reservations.internalNote': '內部備註',
 	'reservations.internalNoteHint': '只有你看得到，絕不會以電子郵件寄出。',
+	'reservations.tracking': '物流追蹤連結',
+	'reservations.trackingHint': '訂單出貨時，客戶會透過電子郵件收到此連結；若已出貨，則會立即收到。',
 	'reservations.customerNote': '客戶備註',
 	'reservations.saved': '預購已更新',
 	'reservations.framesCount': '相框：{count} 台',

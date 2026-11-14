@@ -1131,6 +1131,8 @@ const tr: Catalog = {
 	'reservations.emptyFilter': 'Bu durumda rezervasyon yok.',
 	'reservations.internalNote': 'Dahili not',
 	'reservations.internalNoteHint': 'Yalnızca sizin için, asla e-postayla gönderilmez.',
+	'reservations.tracking': 'Kargo takip bağlantısı',
+	'reservations.trackingHint': 'Müşteri, sipariş kargoya verildiğinde bu bağlantıyı e-postayla alır; zaten kargoya verildiyse hemen alır.',
 	'reservations.customerNote': 'Müşterinin notu',
 	'reservations.saved': 'Rezervasyon güncellendi',
 	'reservations.framesCount': 'Çerçeve: {count}',

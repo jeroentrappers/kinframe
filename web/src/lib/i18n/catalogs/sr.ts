@@ -1172,6 +1172,8 @@ const sr: Catalog = {
 	'reservations.emptyFilter': 'Нема резервација са овим статусом.',
 	'reservations.internalNote': 'Интерна напомена',
 	'reservations.internalNoteHint': 'Само за вас, никад се не шаље имејлом.',
+	'reservations.tracking': 'Линк за праћење',
+	'reservations.trackingHint': 'Купац добија овај линк имејлом када се поруџбина пошаље, или одмах ако је већ послата.',
 	'reservations.customerNote': 'Напомена купца',
 	'reservations.saved': 'Резервација је ажурирана',
 	'reservations.framesCount': 'Рамови: {count}',

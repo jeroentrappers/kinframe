@@ -1,6 +1,7 @@
 <script lang="ts">
 	// Operator view of the shop's reservations, or its orders when the shop takes payment (checkout): filter, status,
 	// internal notes and a CSV export. Orders show the delivery address and payment; unpaid ones are hidden by default.
+	// Paid orders take the carrier's tracking link, which the server emails to the customer once the order is shipped.
 	import { api, authFetch, call } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
@@ -15,6 +16,16 @@
 	let list = $state<ShopReservation[] | null>(null);
 	let error = $state<string | null>(null);
 	let notes = $state<Record<string, string>>({});
+	let tracking = $state<Record<string, string>>({});
+	/** An absolute http(s) link, as the server accepts it. */
+	const validLink = (v: string) => {
+		try {
+			const u = new URL(v);
+			return (u.protocol === 'https:' || u.protocol === 'http:') && !/\s/.test(v);
+		} catch {
+			return false;
+		}
+	};
 	let downloading = $state(false);
 	const checkout = $derived(!!discovery.shop?.checkout);
 	const statuses = $derived(checkout ? ORDER_STATUSES : RESERVATION_STATUSES);
@@ -31,6 +42,7 @@
 			const res = await call(api.GET('/v1/operator/reservations', { params: { query: filter ? { status: filter } : {} } }));
 			list = res.reservations;
 			notes = Object.fromEntries(res.reservations.map((r) => [r.id, r.internal_note ?? '']));
+			tracking = Object.fromEntries(res.reservations.map((r) => [r.id, r.tracking_url ?? '']));
 		} catch (e) {
 			error = problemMessage(e);
 		}
@@ -41,11 +53,12 @@
 		if (allowed) void load();
 	});
 
-	async function update(r: ShopReservation, body: { status?: ShopReservationStatus; internal_note?: string | null }) {
+	async function update(r: ShopReservation, body: { status?: ShopReservationStatus; internal_note?: string | null; tracking_url?: string | null }) {
 		try {
 			const next = await call(api.PATCH('/v1/operator/reservations/{reservationId}', { params: { path: { reservationId: r.id } }, body }));
 			if (list) list = list.map((x) => (x.id === r.id ? next : x)).filter((x) => !filter || x.status === filter);
 			notes[r.id] = next.internal_note ?? '';
+			tracking[r.id] = next.tracking_url ?? '';
 			toasts.success(t('reservations.saved'));
 		} catch (e) {
 			toasts.error(problemMessage(e));
@@ -173,6 +186,37 @@
 								</div>
 								<span id="note-hint-{r.id}" class="hint">{t('reservations.internalNoteHint')}</span>
 							</div>
+							{#if r.paid_at || r.tracking_url}
+								{@const link = (tracking[r.id] ?? '').trim()}
+								<div class="field grow">
+									<label for="track-{r.id}">{t('reservations.tracking')}</label>
+									<div class="note-row">
+										<input
+											id="track-{r.id}"
+											class="input"
+											type="url"
+											inputmode="url"
+											maxlength="2000"
+											placeholder="https://"
+											bind:value={tracking[r.id]}
+											aria-invalid={link !== '' && !validLink(link)}
+											aria-describedby="track-hint-{r.id}"
+											data-testid="tracking-input"
+										/>
+										{#if r.tracking_url}
+											<a class="btn btn-icon" href={r.tracking_url} target="_blank" rel="noopener noreferrer" aria-label={t('reservations.tracking')}
+												><Icon name="link" size={16} /></a
+											>
+										{/if}
+										<button
+											class="btn"
+											disabled={link === (r.tracking_url ?? '') || (link !== '' && !validLink(link))}
+											onclick={() => update(r, { tracking_url: link || null })}>{t('common.save')}</button
+										>
+									</div>
+									<span id="track-hint-{r.id}" class="hint">{t('reservations.trackingHint')}</span>
+								</div>
+							{/if}
 						</div>
 					</li>
 				{/each}

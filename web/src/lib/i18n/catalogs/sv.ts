@@ -1126,6 +1126,8 @@ const sv: Catalog = {
 	'reservations.emptyFilter': 'Inga reservationer med den här statusen.',
 	'reservations.internalNote': 'Intern anteckning',
 	'reservations.internalNoteHint': 'Bara för dig, mejlas aldrig.',
+	'reservations.tracking': 'Spårningslänk',
+	'reservations.trackingHint': 'Kunden får länken via e-post när beställningen skickas, eller direkt om den redan har skickats.',
 	'reservations.customerNote': 'Meddelande från kunden',
 	'reservations.saved': 'Reservationen har uppdaterats',
 	'reservations.framesCount': 'Fotoramar: {count}',

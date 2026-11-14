@@ -1142,6 +1142,8 @@ const ko: Catalog = {
 	'reservations.emptyFilter': '이 상태의 예약이 없어요.',
 	'reservations.internalNote': '내부 메모',
 	'reservations.internalNoteHint': '나만 볼 수 있으며 이메일로 보내지 않아요.',
+	'reservations.tracking': '배송 추적 링크',
+	'reservations.trackingHint': '주문이 발송되면 고객에게 이 링크가 이메일로 전송되며, 이미 발송된 경우 바로 전송됩니다.',
 	'reservations.customerNote': '고객 메모',
 	'reservations.saved': '예약이 업데이트되었어요',
 	'reservations.framesCount': '액자: {count}개',

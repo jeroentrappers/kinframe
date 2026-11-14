@@ -3522,7 +3522,7 @@ type Shop struct {
 	DefaultLocale *string `json:"default_locale,omitempty"`
 
 	// Domains Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-	// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+	// `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
 	// sign-in and the family app live. Absent when the operator configured none.
 	//
 	//
@@ -3646,6 +3646,7 @@ type ShopReservation struct {
 	Street        *string               `json:"street,omitempty"`
 	SubtotalCents int                   `json:"subtotal_cents"`
 	TotalCents    int                   `json:"total_cents"`
+	TrackingUrl   *string               `json:"tracking_url,omitempty"`
 	UpdatedAt     time.Time             `json:"updated_at"`
 }
 
@@ -4376,6 +4377,9 @@ type OperatorUpdateReservationJSONBody struct {
 	// InternalNote Only for the operator; never emailed.
 	InternalNote *string                `json:"internal_note,omitempty"`
 	Status       *ShopReservationStatus `json:"status,omitempty"`
+
+	// TrackingUrl The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link.
+	TrackingUrl *string `json:"tracking_url,omitempty"`
 }
 
 // ListMySendsParams defines parameters for ListMySends.

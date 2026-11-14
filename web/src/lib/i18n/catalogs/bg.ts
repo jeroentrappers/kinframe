@@ -1143,6 +1143,8 @@ const bg: Catalog = {
 	'reservations.emptyFilter': 'Няма резервации с този статус.',
 	'reservations.internalNote': 'Вътрешна бележка',
 	'reservations.internalNoteHint': 'Само за вас, никога не се изпраща по имейл.',
+	'reservations.tracking': 'Линк за проследяване',
+	'reservations.trackingHint': 'Клиентът получава този линк по имейл, когато поръчката бъде изпратена, или веднага, ако вече е изпратена.',
 	'reservations.customerNote': 'Бележка от клиента',
 	'reservations.saved': 'Резервацията е актуализирана',
 	'reservations.framesCount': 'Рамки: {count}',

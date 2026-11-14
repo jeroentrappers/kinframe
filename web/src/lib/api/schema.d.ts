@@ -1831,7 +1831,7 @@ export interface components {
             elsewhere?: components["schemas"]["ShopElsewhereLink"][];
             /**
              * @description Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-             *     `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+             *     `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
              *     sign-in and the family app live. Absent when the operator configured none.
              * @example [
              *       "shop.example.org"
@@ -2025,6 +2025,7 @@ export interface components {
             paid_at?: string | null;
             /** Format: date-time */
             shipped_at?: string | null;
+            tracking_url?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -6549,6 +6550,8 @@ export interface operations {
                     status?: components["schemas"]["ShopReservationStatus"];
                     /** @description Only for the operator; never emailed. */
                     internal_note?: string | null;
+                    /** @description The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link. */
+                    tracking_url?: string | null;
                 };
             };
         };

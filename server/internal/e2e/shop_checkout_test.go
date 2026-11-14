@@ -173,13 +173,34 @@ func TestShopCheckout(t *testing.T) {
 	if o["street"] != "Veldstraat 10" || o["payment_status"] != "paid" || o["paid_at"] == nil {
 		t.Fatalf("operator view: %v", o)
 	}
-	e.expect(req{method: "PATCH", path: "/v1/operator/reservations/" + o["id"].(string), token: op, body: map[string]any{"status": "shipped"}}, 200)
-	mails = mail.Wait(t, 3)
-	if !strings.Contains(mails[2].Subject, "onderweg") || mails[2].To != "an@example.org" {
-		t.Fatalf("shipped mail: %s to %s", mails[2].Subject, mails[2].To)
+	path := "/v1/operator/reservations/" + o["id"].(string)
+	if r := e.do(req{method: "PATCH", path: path, token: op, body: map[string]any{"tracking_url": "javascript:alert(1)"}}); r.StatusCode != 422 ||
+		!slices.Equal(fields(r), []string{"tracking_url/format"}) {
+		t.Fatalf("bad tracking link: %d %v", r.StatusCode, fields(r))
 	}
-	if len(mail.Mails()) != 3 {
+	track := "https://track.bpost.cloud/btr/web/#/search?itemCode=323212345678901234&lang=nl"
+	sh := e.expect(req{method: "PATCH", path: path, token: op, body: map[string]any{"status": "shipped", "tracking_url": track}}, 200).m(t)
+	if sh["tracking_url"] != track || sh["shipped_at"] == nil {
+		t.Fatalf("shipped: %v", sh)
+	}
+	mails = mail.Wait(t, 3)
+	if !strings.Contains(mails[2].Subject, "onderweg") || mails[2].To != "an@example.org" ||
+		!strings.Contains(mails[2].Text, "Volg je pakje:\n"+track) || !strings.Contains(mails[2].HTML, "Volg mijn pakje") {
+		t.Fatalf("shipped mail: %s to %s\n%s", mails[2].Subject, mails[2].To, mails[2].Text)
+	}
+	// The same link again sends nothing; a new link on a shipped order mails the customer once more.
+	e.expect(req{method: "PATCH", path: path, token: op, body: map[string]any{"tracking_url": track, "internal_note": "bpost"}}, 200)
+	track2 := "https://www.dhl.com/be-nl/home/tracking.html?tracking-id=JVGL0123456789"
+	e.expect(req{method: "PATCH", path: path, token: op, body: map[string]any{"tracking_url": track2}}, 200)
+	mails = mail.Wait(t, 4)
+	if !strings.Contains(mails[3].Text, track2) || mails[3].To != "an@example.org" {
+		t.Fatalf("tracking mail: %s\n%s", mails[3].Subject, mails[3].Text)
+	}
+	if len(mail.Mails()) != 4 {
 		t.Fatalf("mails: %d", len(mail.Mails()))
+	}
+	if c := e.expect(req{method: "PATCH", path: path, token: op, body: map[string]any{"tracking_url": nil}}, 200).m(t); c["tracking_url"] != nil {
+		t.Fatalf("cleared: %v", c["tracking_url"])
 	}
 
 	// A provider failure is reported, not hidden.

@@ -200,6 +200,57 @@ test.describe('shop', () => {
 		expect((await download).suggestedFilename()).toMatch(/^reservations-\d{4}-\d{2}-\d{2}\.csv$/);
 	});
 
+	test('operator: tracking link on a paid order', async ({ page }) => {
+		const state = emptyState();
+		state.discovery.shop = { ...shopFixture(), checkout: true };
+		const now = new Date().toISOString();
+		state.reservations = [
+			{
+				id: '0192f0a0-0000-7000-8000-00000000r002',
+				reference: 'FL-ND7K',
+				status: 'shipped',
+				name: 'An Peeters',
+				email: 'an@example.org',
+				country: 'BE',
+				postal_code: '9000',
+				street: 'Veldstraat 10',
+				city: 'Gent',
+				note: null,
+				locale: 'nl',
+				items: [{ product_id: 'frame-10', name: 'kinframe 10.1"', quantity: 1, unit_cents: 9900, line_cents: 9900 }],
+				subtotal_cents: 9900,
+				shipping_cents: 695,
+				total_cents: 10595,
+				currency: 'EUR',
+				internal_note: null,
+				payment_status: 'paid',
+				paid_at: now,
+				shipped_at: now,
+				created_at: now,
+				updated_at: now,
+				cancelled_at: null
+			}
+		];
+		await mockApi(page, state);
+		await page.goto('/');
+		await page.getByLabel('Email', { exact: true }).fill('op@example.org');
+		await page.getByLabel('Name', { exact: true }).fill('Op');
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await expect(page).toHaveURL(/\/frames$/);
+		state.me!.is_operator = true;
+		await page.goto('/settings/reservations');
+		const card = page.getByTestId('reservation');
+		const input = card.getByLabel('Tracking link');
+		const save = card.getByRole('button', { name: 'Save' }).last();
+		await input.fill('not a link');
+		await expect(save).toBeDisabled();
+		await input.fill('https://track.bpost.cloud/btr/web/#/search?itemCode=323212345678901234');
+		await save.click();
+		await expect.poll(() => state.reservations[0]!.tracking_url).toBe('https://track.bpost.cloud/btr/web/#/search?itemCode=323212345678901234');
+		await expect(card.getByRole('link', { name: 'Tracking link' })).toHaveAttribute('href', /itemCode=323212345678901234/);
+		await expect(save).toBeDisabled();
+	});
+
 	test('checkout: buy, delivery address, pay, paid order page', async ({ page }) => {
 		const state = emptyState();
 		state.discovery.shop = { ...shopFixture(), checkout: true };

@@ -1144,6 +1144,8 @@ const vi: Catalog = {
 	'reservations.emptyFilter': 'Không có lượt đặt trước nào ở trạng thái này.',
 	'reservations.internalNote': 'Ghi chú nội bộ',
 	'reservations.internalNoteHint': 'Chỉ dành cho bạn, không bao giờ được gửi qua email.',
+	'reservations.tracking': 'Liên kết theo dõi',
+	'reservations.trackingHint': 'Khách hàng nhận liên kết này qua email khi đơn hàng được gửi đi, hoặc ngay lập tức nếu đơn đã được gửi.',
 	'reservations.customerNote': 'Ghi chú của khách hàng',
 	'reservations.saved': 'Đã cập nhật lượt đặt trước',
 	'reservations.framesCount': 'Khung ảnh: {count}',

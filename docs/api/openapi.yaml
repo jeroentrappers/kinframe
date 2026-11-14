@@ -1851,6 +1851,12 @@ paths:
               properties:
                 status: { $ref: '#/components/schemas/ShopReservationStatus' }
                 internal_note: { type: [string, 'null'], maxLength: 2000, description: Only for the operator; never emailed. }
+                tracking_url:
+                  type: [string, 'null']
+                  maxLength: 2000
+                  description: >-
+                    The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or
+                    changing it on an order that is already shipped emails the customer the new link.
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservation' } } } }
         default: { $ref: '#/components/responses/Problem' }
@@ -2185,6 +2191,7 @@ components:
         payment_status: { $ref: '#/components/schemas/ShopPaymentStatus' }
         paid_at: { type: [string, 'null'], format: date-time }
         shipped_at: { type: [string, 'null'], format: date-time }
+        tracking_url: { type: [string, 'null'] }
 
     Limits:
       type: object

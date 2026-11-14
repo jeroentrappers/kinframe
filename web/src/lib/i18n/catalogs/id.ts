@@ -1143,6 +1143,8 @@ const id: Catalog = {
 	'reservations.emptyFilter': 'Tidak ada pemesanan dengan status ini.',
 	'reservations.internalNote': 'Catatan internal',
 	'reservations.internalNoteHint': 'Hanya untuk Anda, tidak pernah dikirim lewat email.',
+	'reservations.tracking': 'Tautan pelacakan',
+	'reservations.trackingHint': 'Pelanggan menerima tautan ini lewat email saat pesanan dikirim, atau langsung jika sudah dikirim.',
 	'reservations.customerNote': 'Catatan dari pelanggan',
 	'reservations.saved': 'Pemesanan diperbarui',
 	'reservations.framesCount': 'Bingkai: {count}',

@@ -1142,6 +1142,8 @@ const hu: Catalog = {
 	'reservations.emptyFilter': 'Nincs ilyen állapotú foglalás.',
 	'reservations.internalNote': 'Belső megjegyzés',
 	'reservations.internalNoteHint': 'Csak neked, e-mailben soha nem küldjük el.',
+	'reservations.tracking': 'Csomagkövetési link',
+	'reservations.trackingHint': 'A vásárló e-mailben kapja meg ezt a linket, amikor a rendelést feladják, vagy azonnal, ha már feladták.',
 	'reservations.customerNote': 'Az ügyfél megjegyzése',
 	'reservations.saved': 'Foglalás frissítve',
 	'reservations.framesCount': 'Képkeretek: {count}',

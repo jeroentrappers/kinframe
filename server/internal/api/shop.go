@@ -109,6 +109,7 @@ func reservationJSON(r *store.Reservation) gen.ShopReservation {
 		SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents, Currency: r.Currency,
 		InternalNote: r.InternalNote, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, CancelledAt: r.CancelledAt,
 		Street: r.Street, City: r.City, Phone: r.Phone, PaymentStatus: paymentStatusJSON(r.PaymentStatus), PaidAt: r.PaidAt, ShippedAt: r.ShippedAt,
+		TrackingUrl: r.TrackingURL,
 	}
 }
 
@@ -129,6 +130,12 @@ func receiptJSON(r *store.Reservation, checkoutURL string) gen.ShopReservationRe
 		out.CheckoutUrl = ptr(checkoutURL)
 	}
 	return out
+}
+
+// validTrackingURL accepts an absolute http(s) link, as carriers give them.
+func validTrackingURL(s string) bool {
+	u, err := url.Parse(s)
+	return err == nil && (u.Scheme == "https" || u.Scheme == "http") && u.Host != "" && !strings.ContainsAny(s, " \t\r\n")
 }
 
 func validCustomerEmail(s string) bool {
@@ -273,6 +280,7 @@ func (s *Server) mailReservation(r *store.Reservation, origin string) shop.Reser
 		Quote:     shop.Quote{Lines: r.Items, SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents},
 		CancelURL: origin + "/shop/cancel?token=" + s.shopTokens.Sign(r.ID),
 		Order:     r.PaymentStatus != nil, Street: deref(r.Street), City: deref(r.City), Phone: deref(r.Phone),
+		TrackingURL: deref(r.TrackingURL),
 	}
 }
 
@@ -492,6 +500,15 @@ func (s *Server) OperatorUpdateReservation(ctx context.Context, req gen.Operator
 			p.InternalNote = v
 		}
 	}
+	if present, null := rawField(ctx, "tracking_url"); present {
+		if v := trimmedOrNil(b.TrackingUrl); v == nil || null {
+			p.ClearTracking = true
+		} else if !validTrackingURL(*v) {
+			return nil, problem.New(problem.ValidationFailed, "some reservation details are not valid").WithField("tracking_url", "format")
+		} else {
+			p.TrackingURL = v
+		}
+	}
 	before, err := s.st.GetReservation(ctx, req.ReservationId)
 	if err == store.ErrNotFound {
 		return nil, problem.New(problem.NotFound, "")
@@ -506,7 +523,10 @@ func (s *Server) OperatorUpdateReservation(ctx context.Context, req gen.Operator
 	if err != nil {
 		return nil, err
 	}
-	if r.Status == "shipped" && before.Status != "shipped" && r.PaidAt != nil {
+	// The customer hears when a paid order ships, and again when its tracking link is added or changed afterwards.
+	shipped := r.Status == "shipped" && before.Status != "shipped"
+	tracking := r.Status == "shipped" && before.Status == "shipped" && deref(r.TrackingURL) != "" && deref(r.TrackingURL) != deref(before.TrackingURL)
+	if (shipped || tracking) && r.PaidAt != nil {
 		s.sendMail("shipped "+r.Reference, s.cfg.Shop.ShippedEmail(s.mailReservation(r, s.storefrontOrigin())))
 	}
 	return ok(reservationJSON(r)), nil
@@ -542,7 +562,7 @@ func (s *Server) exportReservations(w http.ResponseWriter, r *http.Request) {
 	for _, p := range c.Products {
 		head = append(head, "qty "+p.ID)
 	}
-	head = append(head, "items", "subtotal", "shipping", "total", "currency", "note", "internal_note", "cancelled_at")
+	head = append(head, "items", "subtotal", "shipping", "total", "currency", "note", "internal_note", "cancelled_at", "tracking_url")
 	_ = cw.Write(head)
 	money := func(cents int) string { return fmt.Sprintf("%d.%02d", cents/100, cents%100) }
 	for _, res := range rs {
@@ -562,7 +582,7 @@ func (s *Server) exportReservations(w http.ResponseWriter, r *http.Request) {
 			cancelled = res.CancelledAt.UTC().Format(time.RFC3339)
 		}
 		row = append(row, strings.Join(items, "; "), money(res.SubtotalCents), money(res.ShippingCents), money(res.TotalCents),
-			res.Currency, deref(res.Note), deref(res.InternalNote), cancelled)
+			res.Currency, deref(res.Note), deref(res.InternalNote), cancelled, deref(res.TrackingURL))
 		for i := range row {
 			row[i] = csvSafe(row[i])
 		}

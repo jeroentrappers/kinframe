@@ -1189,6 +1189,8 @@ const uk: Catalog = {
 	'reservations.emptyFilter': 'Немає бронювань із цим статусом.',
 	'reservations.internalNote': 'Внутрішня нотатка',
 	'reservations.internalNoteHint': 'Лише для вас, ніколи не надсилається клієнту.',
+	'reservations.tracking': 'Посилання для відстеження',
+	'reservations.trackingHint': 'Покупець отримає це посилання електронною поштою, коли замовлення буде відправлено, або одразу, якщо його вже відправлено.',
 	'reservations.customerNote': 'Примітка від клієнта',
 	'reservations.saved': 'Бронювання оновлено',
 	'reservations.framesCount': 'Рамок: {count}',

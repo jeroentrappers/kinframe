@@ -1126,6 +1126,8 @@ const fi: Catalog = {
 	'reservations.emptyFilter': 'Ei varauksia tällä tilalla.',
 	'reservations.internalNote': 'Sisäinen muistiinpano',
 	'reservations.internalNoteHint': 'Vain sinulle, ei koskaan lähetetä sähköpostitse.',
+	'reservations.tracking': 'Seurantalinkki',
+	'reservations.trackingHint': 'Asiakas saa tämän linkin sähköpostilla, kun tilaus lähetetään, tai heti, jos se on jo lähetetty.',
 	'reservations.customerNote': 'Asiakkaan viesti',
 	'reservations.saved': 'Varaus päivitetty',
 	'reservations.framesCount': 'Kuvakehyksiä: {count}',

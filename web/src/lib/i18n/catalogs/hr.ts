@@ -1171,6 +1171,8 @@ const hr: Catalog = {
 	'reservations.emptyFilter': 'Nema rezervacija s ovim statusom.',
 	'reservations.internalNote': 'Interna napomena',
 	'reservations.internalNoteHint': 'Samo za vas, nikad se ne šalje e-poštom.',
+	'reservations.tracking': 'Poveznica za praćenje',
+	'reservations.trackingHint': 'Kupac dobiva ovu poveznicu e-poštom kad se narudžba pošalje ili odmah ako je već poslana.',
 	'reservations.customerNote': 'Napomena kupca',
 	'reservations.saved': 'Rezervacija je ažurirana',
 	'reservations.framesCount': 'Okviri: {count}',

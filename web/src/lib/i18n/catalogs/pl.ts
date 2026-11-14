@@ -1201,6 +1201,8 @@ const pl: Catalog = {
 	'reservations.emptyFilter': 'Brak rezerwacji z tym statusem.',
 	'reservations.internalNote': 'Notatka wewnętrzna',
 	'reservations.internalNoteHint': 'Tylko dla ciebie, nigdy nie jest wysyłana e-mailem.',
+	'reservations.tracking': 'Link do śledzenia przesyłki',
+	'reservations.trackingHint': 'Klient dostanie ten link e-mailem, gdy zamówienie zostanie wysłane, lub od razu, jeśli już zostało wysłane.',
 	'reservations.customerNote': 'Uwagi od klienta',
 	'reservations.saved': 'Rezerwacja zaktualizowana',
 	'reservations.framesCount': 'Ramki: {count}',

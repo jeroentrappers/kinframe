@@ -1143,6 +1143,8 @@ const hi: Catalog = {
 	'reservations.emptyFilter': 'इस स्टेटस वाला कोई रिज़र्वेशन नहीं।',
 	'reservations.internalNote': 'इंटरनल नोट',
 	'reservations.internalNoteHint': 'सिर्फ़ आपके लिए, कभी ईमेल नहीं किया जाता।',
+	'reservations.tracking': 'ट्रैकिंग लिंक',
+	'reservations.trackingHint': 'ऑर्डर भेजे जाने पर ग्राहक को यह लिंक ईमेल से मिलता है, या तुरंत, अगर वह पहले ही भेजा जा चुका है।',
 	'reservations.customerNote': 'ग्राहक का नोट',
 	'reservations.saved': 'रिज़र्वेशन अपडेट हो गया',
 	'reservations.framesCount': 'फ़्रेम: {count}',

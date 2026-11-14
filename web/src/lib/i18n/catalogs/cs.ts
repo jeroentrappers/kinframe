@@ -1172,6 +1172,8 @@ const cs: Catalog = {
 	'reservations.emptyFilter': 'Žádné rezervace s tímto stavem.',
 	'reservations.internalNote': 'Interní poznámka',
 	'reservations.internalNoteHint': 'Jen pro vás, nikdy se neposílá e-mailem.',
+	'reservations.tracking': 'Odkaz pro sledování zásilky',
+	'reservations.trackingHint': 'Zákazník dostane tento odkaz e-mailem při odeslání objednávky, nebo hned, pokud už byla odeslána.',
 	'reservations.customerNote': 'Poznámka od zákazníka',
 	'reservations.saved': 'Rezervace aktualizována',
 	'reservations.framesCount': 'Rámečky: {count}',

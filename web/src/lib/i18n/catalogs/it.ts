@@ -1171,6 +1171,8 @@ const it: Catalog = {
 	'reservations.emptyFilter': 'Nessuna prenotazione con questo stato.',
 	'reservations.internalNote': 'Nota interna',
 	'reservations.internalNoteHint': 'Solo per te, mai inviata via email.',
+	'reservations.tracking': 'Link di tracciamento',
+	'reservations.trackingHint': 'Il cliente riceve questo link via e-mail quando l’ordine viene spedito, o subito se è già stato spedito.',
 	'reservations.customerNote': 'Nota del cliente',
 	'reservations.saved': 'Prenotazione aggiornata',
 	'reservations.framesCount': 'Cornici: {count}',

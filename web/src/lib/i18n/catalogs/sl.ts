@@ -1201,6 +1201,8 @@ const sl: Catalog = {
 	'reservations.emptyFilter': 'Ni rezervacij s tem stanjem.',
 	'reservations.internalNote': 'Interna opomba',
 	'reservations.internalNoteHint': 'Samo za vas, nikoli se ne pošlje po e-pošti.',
+	'reservations.tracking': 'Povezava za sledenje',
+	'reservations.trackingHint': 'Kupec prejme to povezavo po e-pošti, ko je naročilo odposlano, ali takoj, če je že odposlano.',
 	'reservations.customerNote': 'Opomba stranke',
 	'reservations.saved': 'Rezervacija je posodobljena',
 	'reservations.framesCount': 'Okvirji: {count}',

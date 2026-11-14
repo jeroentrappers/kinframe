@@ -911,6 +911,8 @@ extension Components {
             public var paidAt: Foundation.Date?
             /// - Remark: Generated from `#/components/schemas/ShopReservation/shipped_at`.
             public var shippedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/tracking_url`.
+            public var trackingUrl: Swift.String?
             /// Creates a new `ShopReservation`.
             ///
             /// - Parameters:
@@ -938,6 +940,7 @@ extension Components {
             ///   - paymentStatus:
             ///   - paidAt:
             ///   - shippedAt:
+            ///   - trackingUrl:
             public init(
                 id: Components.Schemas.Id,
                 reference: Swift.String,
@@ -962,7 +965,8 @@ extension Components {
                 phone: Swift.String? = nil,
                 paymentStatus: Components.Schemas.ShopPaymentStatus? = nil,
                 paidAt: Foundation.Date? = nil,
-                shippedAt: Foundation.Date? = nil
+                shippedAt: Foundation.Date? = nil,
+                trackingUrl: Swift.String? = nil
             ) {
                 self.id = id
                 self.reference = reference
@@ -988,6 +992,7 @@ extension Components {
                 self.paymentStatus = paymentStatus
                 self.paidAt = paidAt
                 self.shippedAt = shippedAt
+                self.trackingUrl = trackingUrl
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -1014,6 +1019,7 @@ extension Components {
                 case paymentStatus = "payment_status"
                 case paidAt = "paid_at"
                 case shippedAt = "shipped_at"
+                case trackingUrl = "tracking_url"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Limits`.

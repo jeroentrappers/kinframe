@@ -1131,6 +1131,8 @@ const el: Catalog = {
 	'reservations.emptyFilter': 'Δεν υπάρχουν κρατήσεις με αυτή την κατάσταση.',
 	'reservations.internalNote': 'Εσωτερική σημείωση',
 	'reservations.internalNoteHint': 'Μόνο για εσάς, δεν αποστέλλεται ποτέ με email.',
+	'reservations.tracking': 'Σύνδεσμος παρακολούθησης',
+	'reservations.trackingHint': 'Ο πελάτης λαμβάνει αυτόν τον σύνδεσμο με email όταν αποσταλεί η παραγγελία ή αμέσως αν έχει ήδη αποσταλεί.',
 	'reservations.customerNote': 'Σημείωση από τον πελάτη',
 	'reservations.saved': 'Η κράτηση ενημερώθηκε',
 	'reservations.framesCount': 'Κορνίζες: {count}',

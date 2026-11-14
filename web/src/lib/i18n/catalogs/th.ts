@@ -1144,6 +1144,8 @@ const th: Catalog = {
 	'reservations.emptyFilter': 'ไม่มีการจองที่มีสถานะนี้',
 	'reservations.internalNote': 'หมายเหตุภายใน',
 	'reservations.internalNoteHint': 'สำหรับคุณเท่านั้น ไม่ส่งทางอีเมล',
+	'reservations.tracking': 'ลิงก์ติดตามพัสดุ',
+	'reservations.trackingHint': 'ลูกค้าจะได้รับลิงก์นี้ทางอีเมลเมื่อจัดส่งคำสั่งซื้อ หรือทันทีหากจัดส่งไปแล้ว',
 	'reservations.customerNote': 'หมายเหตุจากลูกค้า',
 	'reservations.saved': 'อัปเดตการจองแล้ว',
 	'reservations.framesCount': 'กรอบรูป: {count}',

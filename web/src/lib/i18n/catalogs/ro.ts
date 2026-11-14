@@ -1160,6 +1160,8 @@ const ro: Catalog = {
 	'reservations.emptyFilter': 'Nicio rezervare cu această stare.',
 	'reservations.internalNote': 'Notiță internă',
 	'reservations.internalNoteHint': 'Doar pentru dvs., nu se trimite niciodată prin e-mail.',
+	'reservations.tracking': 'Link de urmărire',
+	'reservations.trackingHint': 'Clientul primește acest link pe e-mail când comanda este expediată sau imediat, dacă a fost deja expediată.',
 	'reservations.customerNote': 'Mențiuni de la client',
 	'reservations.saved': 'Rezervarea a fost actualizată',
 	'reservations.framesCount': 'Rame: {count}',

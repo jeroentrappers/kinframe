@@ -27,6 +27,8 @@ type Reservation struct {
 	Street string
 	City   string
 	Phone  string
+	// TrackingURL is the carrier's tracking link of a shipped order.
+	TrackingURL string
 }
 
 // address is the delivery address on one line per part.
@@ -70,6 +72,8 @@ var emailTexts = map[string]map[string]string{
 		"o.privacy":   "We only use your details to deliver and handle this order.",
 		"s.subject":   "Your {brand} order {reference} is on its way",
 		"s.intro":     "Good news: your order is on its way to you.",
+		"s.track":     "Track your parcel:",
+		"s.trackBtn":  "Track my parcel",
 		"s.withdraw":  "You may withdraw from your purchase within 14 days after delivery, without giving a reason. Use this link or reply to this email:",
 	},
 	"nl": {
@@ -98,6 +102,8 @@ var emailTexts = map[string]map[string]string{
 		"o.privacy":   "We gebruiken je gegevens alleen om deze bestelling te leveren en af te handelen.",
 		"s.subject":   "Je bestelling {reference} is onderweg",
 		"s.intro":     "Goed nieuws: je bestelling is onderweg naar je.",
+		"s.track":     "Volg je pakje:",
+		"s.trackBtn":  "Volg mijn pakje",
 		"s.withdraw":  "Je kunt je aankoop binnen 14 dagen na de levering herroepen, zonder opgave van reden. Gebruik deze link of antwoord op deze e-mail:",
 	},
 	"fr": {
@@ -126,6 +132,8 @@ var emailTexts = map[string]map[string]string{
 		"o.privacy":   "Nous utilisons vos données uniquement pour livrer et traiter cette commande.",
 		"s.subject":   "Votre commande {reference} est en route",
 		"s.intro":     "Bonne nouvelle : votre commande est en route.",
+		"s.track":     "Suivez votre colis :",
+		"s.trackBtn":  "Suivre mon colis",
 		"s.withdraw":  "Vous pouvez vous rétracter dans les 14 jours suivant la livraison, sans donner de motif. Utilisez ce lien ou répondez à cet e-mail :",
 	},
 	"de": {
@@ -154,6 +162,8 @@ var emailTexts = map[string]map[string]string{
 		"o.privacy":   "Wir verwenden deine Daten nur, um diese Bestellung zu liefern und abzuwickeln.",
 		"s.subject":   "Deine Bestellung {reference} ist unterwegs",
 		"s.intro":     "Gute Nachricht: Deine Bestellung ist auf dem Weg zu dir.",
+		"s.track":     "Verfolge deine Sendung:",
+		"s.trackBtn":  "Sendung verfolgen",
 		"s.withdraw":  "Du kannst deinen Kauf innerhalb von 14 Tagen nach der Lieferung ohne Angabe von Gründen widerrufen. Nutze diesen Link oder antworte auf diese E-Mail:",
 	},
 }
@@ -312,6 +322,9 @@ func (c *Config) ShippedEmail(r Reservation) Message {
 	var t strings.Builder
 	t.WriteString(fill(tx["greeting"], args) + "\n\n" + tx["s.intro"] + "\n\n")
 	t.WriteString(tx["o.reference"] + ": " + r.Reference + "\n\n")
+	if r.TrackingURL != "" {
+		t.WriteString(tx["s.track"] + "\n" + r.TrackingURL + "\n\n")
+	}
 	t.WriteString(tx["o.address"] + ":\n  " + strings.Join(addr, "\n  ") + "\n\n")
 	t.WriteString(tx["s.withdraw"] + "\n" + r.CancelURL + "\n\n")
 	t.WriteString(tx["questions"] + "\n\n" + tx["signoff"] + "\n" + c.Seller.Name + "\n")
@@ -330,6 +343,10 @@ func (c *Config) ShippedEmail(r Reservation) Message {
 		`<div style="max-width:560px;margin:0 auto;background:#fffdf9;border-radius:16px;padding:28px;border:1px solid #eadfd2">`)
 	fmt.Fprintf(&h, `<p style="margin:0 0 12px">%s</p><p style="margin:0 0 16px">%s</p>`, e(fill(tx["greeting"], args)), e(tx["s.intro"]))
 	fmt.Fprintf(&h, `<p style="margin:0 0 16px">%s: <strong>%s</strong></p>`, e(tx["o.reference"]), e(r.Reference))
+	if r.TrackingURL != "" {
+		fmt.Fprintf(&h, `<p style="margin:0 0 20px"><a href="%s" style="display:inline-block;background:#b4532a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:10px;font-weight:600">%s</a></p>`,
+			e(r.TrackingURL), e(tx["s.trackBtn"]))
+	}
 	fmt.Fprintf(&h, `<p style="margin:0 0 16px"><strong>%s</strong><br>%s</p>`, e(tx["o.address"]), strings.Join(esc, "<br>"))
 	fmt.Fprintf(&h, `<p style="margin:0 0 6px">%s</p><p style="margin:0 0 16px"><a href="%s" style="color:#b4532a">%s</a></p>`,
 		e(tx["s.withdraw"]), e(r.CancelURL), e(tx["o.cancelBtn"]))

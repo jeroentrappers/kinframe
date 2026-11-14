@@ -1173,6 +1173,8 @@ const lv: Catalog = {
 	'reservations.emptyFilter': 'Nav rezervāciju ar šo statusu.',
 	'reservations.internalNote': 'Iekšēja piezīme',
 	'reservations.internalNoteHint': 'Tikai jums, nekad netiek sūtīta pa e-pastu.',
+	'reservations.tracking': 'Sūtījuma izsekošanas saite',
+	'reservations.trackingHint': 'Klients saņem šo saiti e-pastā, kad pasūtījums tiek nosūtīts, vai uzreiz, ja tas jau ir nosūtīts.',
 	'reservations.customerNote': 'Klienta piezīme',
 	'reservations.saved': 'Rezervācija atjaunināta',
 	'reservations.framesCount': 'Rāmji: {count}',

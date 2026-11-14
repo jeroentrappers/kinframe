@@ -1159,6 +1159,8 @@ const he: Catalog = {
 	'reservations.emptyFilter': 'אין שריונים בסטטוס הזה.',
 	'reservations.internalNote': 'הערה פנימית',
 	'reservations.internalNoteHint': 'רק בשבילכם, אף פעם לא נשלחת באימייל.',
+	'reservations.tracking': 'קישור למעקב',
+	'reservations.trackingHint': 'הלקוח מקבל את הקישור הזה באימייל כשההזמנה נשלחת, או מיד אם היא כבר נשלחה.',
 	'reservations.customerNote': 'הערה מהלקוח',
 	'reservations.saved': 'השריון עודכן',
 	'reservations.framesCount': 'מסגרות: {count}',

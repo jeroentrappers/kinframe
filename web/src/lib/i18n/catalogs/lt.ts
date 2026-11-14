@@ -1172,6 +1172,8 @@ const lt: Catalog = {
 	'reservations.emptyFilter': 'Rezervacijų su šia būsena nėra.',
 	'reservations.internalNote': 'Vidinė pastaba',
 	'reservations.internalNoteHint': 'Tik jums, niekada nesiunčiama el. paštu.',
+	'reservations.tracking': 'Siuntos sekimo nuoroda',
+	'reservations.trackingHint': 'Klientas gauna šią nuorodą el. paštu, kai užsakymas išsiunčiamas, arba iš karto, jei jis jau išsiųstas.',
 	'reservations.customerNote': 'Kliento pastaba',
 	'reservations.saved': 'Rezervacija atnaujinta',
 	'reservations.framesCount': 'Rėmeliai: {count}',

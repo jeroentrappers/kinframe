@@ -1142,6 +1142,8 @@ const ja: Catalog = {
 	'reservations.emptyFilter': 'このステータスの予約はありません。',
 	'reservations.internalNote': '内部メモ',
 	'reservations.internalNoteHint': '自分用のメモです。メールで送信されることはありません。',
+	'reservations.tracking': '追跡リンク',
+	'reservations.trackingHint': '注文の発送時に、このリンクがお客様にメールで届きます。すでに発送済みの場合はすぐに届きます。',
 	'reservations.customerNote': 'お客様からのメモ',
 	'reservations.saved': '予約を更新しました',
 	'reservations.framesCount': 'フレーム：{count}台',

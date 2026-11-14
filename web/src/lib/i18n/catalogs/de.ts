@@ -1138,6 +1138,8 @@ const de: Catalog = {
 	'reservations.emptyFilter': 'Keine Reservierungen mit diesem Status.',
 	'reservations.internalNote': 'Interne Notiz',
 	'reservations.internalNoteHint': 'Nur für dich, wird nie gemailt.',
+	'reservations.tracking': 'Sendungsverfolgung',
+	'reservations.trackingHint': 'Der Kunde erhält diesen Link per E-Mail, sobald die Bestellung versandt ist, oder sofort, wenn sie schon versandt wurde.',
 	'reservations.customerNote': 'Anmerkung des Kunden',
 	'reservations.saved': 'Reservierung aktualisiert',
 	'reservations.framesCount': 'Rahmen: {count}',

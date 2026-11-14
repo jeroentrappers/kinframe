@@ -1147,6 +1147,8 @@ export const en = {
 	'reservations.emptyFilter': 'No reservations with this status.',
 	'reservations.internalNote': 'Internal note',
 	'reservations.internalNoteHint': 'Only for you, never emailed.',
+	'reservations.tracking': 'Tracking link',
+	'reservations.trackingHint': 'The customer gets this link by e-mail when the order ships, or right away if it has already shipped.',
 	'reservations.customerNote': 'Note from the customer',
 	'reservations.saved': 'Reservation updated',
 	'reservations.framesCount': 'Frames: {count}',

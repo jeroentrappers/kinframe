@@ -1138,6 +1138,8 @@ const da: Catalog = {
 	'reservations.emptyFilter': 'Ingen reservationer med denne status.',
 	'reservations.internalNote': 'Intern note',
 	'reservations.internalNoteHint': 'Kun til dig, sendes aldrig på mail.',
+	'reservations.tracking': 'Sporingslink',
+	'reservations.trackingHint': 'Kunden får dette link på e-mail, når ordren sendes, eller med det samme, hvis den allerede er sendt.',
 	'reservations.customerNote': 'Bemærkning fra kunden',
 	'reservations.saved': 'Reservationen er opdateret',
 	'reservations.framesCount': 'Rammer: {count}',

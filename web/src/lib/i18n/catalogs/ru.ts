@@ -1189,6 +1189,8 @@ const ru: Catalog = {
 	'reservations.emptyFilter': 'Нет броней с этим статусом.',
 	'reservations.internalNote': 'Внутренняя заметка',
 	'reservations.internalNoteHint': 'Только для вас, никогда не отправляется по почте.',
+	'reservations.tracking': 'Ссылка для отслеживания',
+	'reservations.trackingHint': 'Покупатель получит эту ссылку по электронной почте при отправке заказа или сразу, если заказ уже отправлен.',
 	'reservations.customerNote': 'Комментарий покупателя',
 	'reservations.saved': 'Бронь обновлена',
 	'reservations.framesCount': 'Рамок: {count}',

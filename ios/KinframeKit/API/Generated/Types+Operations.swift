@@ -17166,21 +17166,29 @@ public enum Operations {
                     ///
                     /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/json/internal_note`.
                     public var internalNote: Swift.String?
+                    /// The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link.
+                    ///
+                    /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/json/tracking_url`.
+                    public var trackingUrl: Swift.String?
                     /// Creates a new `JsonPayload`.
                     ///
                     /// - Parameters:
                     ///   - status:
                     ///   - internalNote: Only for the operator; never emailed.
+                    ///   - trackingUrl: The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link.
                     public init(
                         status: Components.Schemas.ShopReservationStatus? = nil,
-                        internalNote: Swift.String? = nil
+                        internalNote: Swift.String? = nil,
+                        trackingUrl: Swift.String? = nil
                     ) {
                         self.status = status
                         self.internalNote = internalNote
+                        self.trackingUrl = trackingUrl
                     }
                     public enum CodingKeys: String, CodingKey {
                         case status
                         case internalNote = "internal_note"
+                        case trackingUrl = "tracking_url"
                     }
                 }
                 /// - Remark: Generated from `#/paths/v1/operator/reservations/{reservationId}/PATCH/requestBody/content/application\/json`.

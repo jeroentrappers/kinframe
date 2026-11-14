@@ -1160,6 +1160,8 @@ const pt: Catalog = {
 	'reservations.emptyFilter': 'Nenhuma reserva com este status.',
 	'reservations.internalNote': 'Nota interna',
 	'reservations.internalNoteHint': 'Só para você, nunca enviada por e-mail.',
+	'reservations.tracking': 'Link de rastreio',
+	'reservations.trackingHint': 'O cliente recebe este link por e-mail quando a encomenda é enviada, ou logo, se já tiver sido enviada.',
 	'reservations.customerNote': 'Observação do cliente',
 	'reservations.saved': 'Reserva atualizada',
 	'reservations.framesCount': 'Porta-retratos: {count}',

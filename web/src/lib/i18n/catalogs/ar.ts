@@ -1260,6 +1260,8 @@ const ar: Catalog = {
 	'reservations.emptyFilter': 'لا توجد حجوزات بهذه الحالة.',
 	'reservations.internalNote': 'ملاحظة داخلية',
 	'reservations.internalNoteHint': 'لك فقط، ولا تُرسل بالبريد الإلكتروني أبدًا.',
+	'reservations.tracking': 'رابط التتبع',
+	'reservations.trackingHint': 'يتلقى العميل هذا الرابط بالبريد الإلكتروني عند شحن الطلب، أو فورًا إذا كان قد شُحن بالفعل.',
 	'reservations.customerNote': 'ملاحظة من العميل',
 	'reservations.saved': 'تم تحديث الحجز',
 	'reservations.framesCount': 'الإطارات: {count}',

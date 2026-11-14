@@ -1126,6 +1126,8 @@ const nb: Catalog = {
 	'reservations.emptyFilter': 'Ingen reservasjoner med denne statusen.',
 	'reservations.internalNote': 'Internt notat',
 	'reservations.internalNoteHint': 'Bare for deg, sendes aldri på e-post.',
+	'reservations.tracking': 'Sporingslenke',
+	'reservations.trackingHint': 'Kunden får denne lenken på e-post når bestillingen sendes, eller med en gang hvis den allerede er sendt.',
 	'reservations.customerNote': 'Merknad fra kunden',
 	'reservations.saved': 'Reservasjonen er oppdatert',
 	'reservations.framesCount': 'Fotorammer: {count}',

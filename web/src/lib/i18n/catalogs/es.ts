@@ -1160,6 +1160,8 @@ const es: Catalog = {
 	'reservations.emptyFilter': 'No hay reservas con este estado.',
 	'reservations.internalNote': 'Nota interna',
 	'reservations.internalNoteHint': 'Solo para ti, nunca se envía por correo.',
+	'reservations.tracking': 'Enlace de seguimiento',
+	'reservations.trackingHint': 'El cliente recibe este enlace por correo cuando se envía el pedido, o enseguida si ya se ha enviado.',
 	'reservations.customerNote': 'Nota del cliente',
 	'reservations.saved': 'Reserva actualizada',
 	'reservations.framesCount': 'Marcos: {count}',
