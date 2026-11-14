@@ -39,6 +39,7 @@ const pl: Catalog = {
 		'kinframe wysyła zdjęcia i filmy do rodzinnych ramek na zdjęcia. Bez abonamentu, bez śledzenia, a serwer należy do twojej rodziny.',
 	'landing.signIn': 'Zaloguj się',
 	'landing.signInHint': 'Pierwszy raz tutaj? Logowanie od razu tworzy konto. Wyślemy ci kod e-mailem, hasło nie jest potrzebne.',
+	'landing.appStore': 'Pobierz w App Store',
 	'landing.expired': 'Wylogowano cię. Zaloguj się ponownie, aby kontynuować.',
 	'landing.reasonFrame': 'Zaloguj się, aby dodać ramkę. Zaraz cię tu przywrócimy.',
 	'landing.reasonInvite': 'Zaloguj się, aby przyjąć zaproszenie. Zaraz cię tu przywrócimy.',

@@ -40,6 +40,7 @@ const lv: Catalog = {
 		'kinframe sūta fotoattēlus un video uz ģimenes fotorāmjiem. Bez abonementiem, bez izsekošanas, un serveris pieder jūsu ģimenei.',
 	'landing.signIn': 'Pierakstīties',
 	'landing.signInHint': 'Pirmo reizi šeit? Pierakstoties tiek izveidots konts. Mēs nosūtīsim kodu uz e-pastu, parole nav vajadzīga.',
+	'landing.appStore': 'Lejupielādēt no App Store',
 	'landing.expired': 'Jūs tikāt izrakstīts. Lai turpinātu, pierakstieties vēlreiz.',
 	'landing.reasonFrame': 'Pierakstieties, lai pievienotu rāmi. Mēs jūs uzreiz atgriezīsim.',
 	'landing.reasonInvite': 'Pierakstieties, lai pieņemtu uzaicinājumu. Mēs jūs uzreiz atgriezīsim.',

@@ -39,6 +39,7 @@ const sk: Catalog = {
 		'kinframe posiela fotky a videá do rodinných fotorámikov. Žiadne predplatné, žiadne sledovanie a server patrí vašej rodine.',
 	'landing.signIn': 'Prihlásiť sa',
 	'landing.signInHint': 'Ste tu prvýkrát? Prihlásením si vytvoríte účet. Pošleme vám kód e-mailom, heslo nepotrebujete.',
+	'landing.appStore': 'Stiahnuť v App Store',
 	'landing.expired': 'Boli ste odhlásení. Ak chcete pokračovať, znova sa prihláste.',
 	'landing.reasonFrame': 'Prihláste sa a pridajte rámik. Hneď vás vrátime späť.',
 	'landing.reasonInvite': 'Prihláste sa a prijmite pozvánku. Hneď vás vrátime späť.',

@@ -40,6 +40,7 @@ const lt: Catalog = {
 		'kinframe siunčia nuotraukas ir vaizdo įrašus į šeimos nuotraukų rėmelius. Jokių prenumeratų, jokio sekimo, o serveris priklauso jūsų šeimai.',
 	'landing.signIn': 'Prisijungti',
 	'landing.signInHint': 'Esate čia pirmą kartą? Prisijungus sukuriama paskyra. Atsiųsime kodą el. paštu, slaptažodžio nereikia.',
+	'landing.appStore': 'Atsisiųskite iš App Store',
 	'landing.expired': 'Buvote atjungti. Norėdami tęsti, prisijunkite dar kartą.',
 	'landing.reasonFrame': 'Prisijunkite, kad pridėtumėte rėmelį. Iškart grąžinsime jus atgal.',
 	'landing.reasonInvite': 'Prisijunkite, kad priimtumėte pakvietimą. Iškart grąžinsime jus atgal.',

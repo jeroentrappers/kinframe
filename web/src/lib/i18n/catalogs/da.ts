@@ -39,6 +39,7 @@ const da: Catalog = {
 		'kinframe sender billeder og videoer til familiens fotorammer. Ingen abonnementer, ingen sporing, og serveren tilhører din familie.',
 	'landing.signIn': 'Log ind',
 	'landing.signInHint': 'Ny her? Når du logger ind, oprettes din konto. Vi sender dig en kode på mail, ingen adgangskode nødvendig.',
+	'landing.appStore': 'Hent i App Store',
 	'landing.expired': 'Du er blevet logget ud. Log ind igen for at fortsætte.',
 	'landing.reasonFrame': 'Log ind for at tilføje rammen. Vi sender dig straks tilbage.',
 	'landing.reasonInvite': 'Log ind for at acceptere invitationen. Vi sender dig straks tilbage.',

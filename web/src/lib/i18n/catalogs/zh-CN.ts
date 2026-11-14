@@ -40,6 +40,7 @@ const zhCN: Catalog = {
 		'kinframe 把照片和视频发送到家人的数码相框。无需订阅，没有跟踪，服务器归你的家庭所有。',
 	'landing.signIn': '登录',
 	'landing.signInHint': '第一次使用？登录时会自动创建账号。我们会通过邮件发送验证码，无需密码。',
+	'landing.appStore': '在 App Store 下载',
 	'landing.expired': '你已退出登录。请重新登录以继续。',
 	'landing.reasonFrame': '登录后即可添加相框，完成后会自动返回这里。',
 	'landing.reasonInvite': '登录后即可接受邀请，完成后会自动返回这里。',

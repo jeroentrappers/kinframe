@@ -38,6 +38,7 @@ const fi: Catalog = {
 		'kinframe lähettää kuvia ja videoita perheen kuvakehyksiin. Ei tilausmaksuja, ei seurantaa, ja palvelin kuuluu perheellesi.',
 	'landing.signIn': 'Kirjaudu sisään',
 	'landing.signInHint': 'Uusi täällä? Tili luodaan, kun kirjaudut sisään. Lähetämme sinulle koodin sähköpostitse, salasanaa ei tarvita.',
+	'landing.appStore': 'Lataa App Storesta',
 	'landing.expired': 'Sinut kirjattiin ulos. Jatka kirjautumalla uudelleen sisään.',
 	'landing.reasonFrame': 'Kirjaudu sisään lisätäksesi kuvakehyksen. Palaat heti takaisin.',
 	'landing.reasonInvite': 'Kirjaudu sisään hyväksyäksesi kutsun. Palaat heti takaisin.',

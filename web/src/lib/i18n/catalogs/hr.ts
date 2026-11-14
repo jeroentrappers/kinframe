@@ -39,6 +39,7 @@ const hr: Catalog = {
 		'kinframe šalje fotografije i videozapise na obiteljske foto okvire. Bez pretplata, bez praćenja, a poslužitelj pripada vašoj obitelji.',
 	'landing.signIn': 'Prijava',
 	'landing.signInHint': 'Novi ste ovdje? Prijavom se stvara vaš račun. E-poštom ćemo vam poslati kôd, zaporka nije potrebna.',
+	'landing.appStore': 'Preuzmite na App Storeu',
 	'landing.expired': 'Odjavljeni ste. Za nastavak se ponovno prijavite.',
 	'landing.reasonFrame': 'Prijavite se kako biste dodali okvir. Odmah ćemo vas vratiti ovamo.',
 	'landing.reasonInvite': 'Prijavite se kako biste prihvatili pozivnicu. Odmah ćemo vas vratiti ovamo.',

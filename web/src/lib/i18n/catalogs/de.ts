@@ -39,6 +39,7 @@ const de: Catalog = {
 		'kinframe sendet Fotos und Videos an die Bilderrahmen der Familie. Kein Abo, kein Tracking, und der Server gehört deiner Familie.',
 	'landing.signIn': 'Anmelden',
 	'landing.signInHint': 'Neu hier? Beim Anmelden wird dein Konto erstellt. Wir schicken dir einen Code per E-Mail, kein Passwort nötig.',
+	'landing.appStore': 'Laden im App Store',
 	'landing.expired': 'Du wurdest abgemeldet. Bitte melde dich erneut an, um fortzufahren.',
 	'landing.reasonFrame': 'Melde dich an, um den Rahmen hinzuzufügen. Danach geht es direkt weiter.',
 	'landing.reasonInvite': 'Melde dich an, um die Einladung anzunehmen. Danach geht es direkt weiter.',

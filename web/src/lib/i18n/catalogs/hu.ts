@@ -39,6 +39,7 @@ const hu: Catalog = {
 		'A kinframe fotókat és videókat küld a család képkereteire. Nincs előfizetés, nincs követés, és a szerver a családodé.',
 	'landing.signIn': 'Bejelentkezés',
 	'landing.signInHint': 'Új vagy itt? A bejelentkezéssel létrejön a fiókod. E-mailben küldünk egy kódot, jelszó nem kell.',
+	'landing.appStore': 'Letöltés az App Store-ból',
 	'landing.expired': 'Kijelentkeztettünk. A folytatáshoz jelentkezz be újra.',
 	'landing.reasonFrame': 'Jelentkezz be a képkeret hozzáadásához. Utána rögtön visszahozunk ide.',
 	'landing.reasonInvite': 'Jelentkezz be a meghívás elfogadásához. Utána rögtön visszahozunk ide.',

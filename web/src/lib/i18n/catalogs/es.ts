@@ -38,6 +38,7 @@ const es: Catalog = {
 		'kinframe envía fotos y vídeos a los marcos de fotos de la familia. Sin suscripciones, sin rastreo, y el servidor es de tu familia.',
 	'landing.signIn': 'Iniciar sesión',
 	'landing.signInHint': '¿Eres nuevo? Al iniciar sesión se crea tu cuenta. Te enviaremos un código por correo, sin contraseña.',
+	'landing.appStore': 'Descargar en el App Store',
 	'landing.expired': 'Se ha cerrado tu sesión. Vuelve a iniciar sesión para continuar.',
 	'landing.reasonFrame': 'Inicia sesión para añadir el marco. Te traeremos de vuelta enseguida.',
 	'landing.reasonInvite': 'Inicia sesión para aceptar la invitación. Te traeremos de vuelta enseguida.',
