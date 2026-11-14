@@ -28,11 +28,11 @@ describe('linkify', () => {
 	});
 });
 
-describe.each(['privacy', 'terms'] as LegalKind[])('%s texts', (kind) => {
+describe.each(['privacy', 'terms', 'sales'] as LegalKind[])('%s texts', (kind) => {
 	it('exist in every language with the same sections, anchors and date', async () => {
 		const docs = await Promise.all(LEGAL_LANGUAGES.map((l) => loadLegal(kind, l)));
 		const [en, ...others] = docs.map((d) => d.doc);
-		expect(en!.updated).toBe(kind === 'privacy' ? '2026-11-10' : '2026-11-04');
+		expect(en!.updated).toBe({ privacy: '2026-11-14', terms: '2026-11-04', sales: '2026-11-14' }[kind]);
 		for (const d of others) {
 			expect(d.updated).toBe(en!.updated);
 			expect(d.sections.map((s) => s.id)).toEqual(en!.sections.map((s) => s.id));

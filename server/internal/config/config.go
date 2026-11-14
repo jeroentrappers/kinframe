@@ -81,10 +81,10 @@ type Config struct {
 	// FCM for the family app's store builds: a Firebase service account JSON key (KINFRAME_FCM_CREDENTIALS_FILE).
 	FCMCredentials []byte
 	// APNs for the iOS app: a .p8 key (KINFRAME_APNS_KEY_FILE) with its key ID, the team ID and the bundle ID.
-	APNsKey    []byte
-	APNsKeyID  string
-	APNsTeamID string
-	APNsTopic  string
+	APNsKey         []byte
+	APNsKeyID       string
+	APNsTeamID      string
+	APNsTopic       string
 	UploadExpiry    time.Duration
 	JanitorInterval time.Duration
 
@@ -127,6 +127,11 @@ type Config struct {
 	SMTP *shop.SMTP
 	// Shop is the optional pre-order shop (KINFRAME_SHOP_FILE); nil = no shop.
 	Shop *shop.Config
+	// MollieAPIKey pays shop orders (KINFRAME_MOLLIE_API_KEY; test_… or live_…),
+	// required when the shop file has payments.
+	MollieAPIKey string
+	// MollieBaseURL overrides the Mollie API endpoint (tests).
+	MollieBaseURL string
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -272,6 +277,10 @@ func load(get func(string) string) (*Config, error) {
 		} else if c.Shop != nil {
 			if u, err := url.Parse(c.PublicURL); err == nil && c.Shop.IsStorefront(u.Hostname()) {
 				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: domains must not include the app's own host %q (KINFRAME_PUBLIC_URL)", u.Hostname()))
+			}
+			c.MollieAPIKey = get("KINFRAME_MOLLIE_API_KEY")
+			if c.Shop.Checkout() && !strings.HasPrefix(c.MollieAPIKey, "test_") && !strings.HasPrefix(c.MollieAPIKey, "live_") {
+				errs = append(errs, errors.New("KINFRAME_MOLLIE_API_KEY must be a Mollie API key (test_… or live_…) when the shop has payments"))
 			}
 		}
 	}

@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "само създателят или собственик/администратор може да анулира тази покана",
   "only the creator or an owner/admin can revoke this link": "само създателят или собственик/администратор може да отмени тази връзка",
   "some reservation details are not valid": "някои данни в резервацията не са валидни",
+  "the payment provider is not available; please try again": "услугата за плащане не е достъпна; опитайте отново",
   "this TV link is not valid": "тази връзка за телевизор не е валидна",
   "operator access required": "необходим е достъп на оператор",
   "owner only": "само за собственика",

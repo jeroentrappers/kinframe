@@ -1456,12 +1456,46 @@ func (e ShareResultSkippedReason) Valid() bool {
 	}
 }
 
+// Defines values for ShopPaymentStatus.
+const (
+	ShopPaymentStatusAuthorized ShopPaymentStatus = "authorized"
+	ShopPaymentStatusCanceled   ShopPaymentStatus = "canceled"
+	ShopPaymentStatusExpired    ShopPaymentStatus = "expired"
+	ShopPaymentStatusFailed     ShopPaymentStatus = "failed"
+	ShopPaymentStatusOpen       ShopPaymentStatus = "open"
+	ShopPaymentStatusPaid       ShopPaymentStatus = "paid"
+	ShopPaymentStatusPending    ShopPaymentStatus = "pending"
+)
+
+// Valid indicates whether the value is a known member of the ShopPaymentStatus enum.
+func (e ShopPaymentStatus) Valid() bool {
+	switch e {
+	case ShopPaymentStatusAuthorized:
+		return true
+	case ShopPaymentStatusCanceled:
+		return true
+	case ShopPaymentStatusExpired:
+		return true
+	case ShopPaymentStatusFailed:
+		return true
+	case ShopPaymentStatusOpen:
+		return true
+	case ShopPaymentStatusPaid:
+		return true
+	case ShopPaymentStatusPending:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ShopReservationStatus.
 const (
 	Cancelled ShopReservationStatus = "cancelled"
 	Confirmed ShopReservationStatus = "confirmed"
 	Contacted ShopReservationStatus = "contacted"
 	New       ShopReservationStatus = "new"
+	Shipped   ShopReservationStatus = "shipped"
 )
 
 // Valid indicates whether the value is a known member of the ShopReservationStatus enum.
@@ -1474,6 +1508,8 @@ func (e ShopReservationStatus) Valid() bool {
 	case Contacted:
 		return true
 	case New:
+		return true
+	case Shipped:
 		return true
 	default:
 		return false
@@ -3469,6 +3505,10 @@ type Shop struct {
 	// Example: kinframe
 	Brand string `json:"brand"`
 
+	// Checkout True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+	// with a `checkout_url` to send the customer to. False: reservations without payment.
+	Checkout *bool `json:"checkout,omitempty"`
+
 	// Currency ISO 4217
 	//
 	// Example: EUR
@@ -3497,12 +3537,19 @@ type Shop struct {
 	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
 	Products          []ShopProduct  `json:"products"`
 	Seller            struct {
-		Email openapi_types.Email `json:"email"`
+		// Address Seller's address (terms of sale).
+		Address *string             `json:"address,omitempty"`
+		Email   openapi_types.Email `json:"email"`
 
 		// Legal Legal line for the footer, e.g. company, address and VAT number.
 		Legal      *string `json:"legal,omitempty"`
 		Name       string  `json:"name"`
+		Phone      *string `json:"phone,omitempty"`
 		PrivacyUrl *string `json:"privacy_url,omitempty"`
+
+		// TermsUrl Terms of sale; absent = the web app's own page `/shop/terms`.
+		TermsUrl  *string `json:"terms_url,omitempty"`
+		VatNumber *string `json:"vat_number,omitempty"`
 	} `json:"seller"`
 	Shipping ShopShipping `json:"shipping"`
 
@@ -3541,6 +3588,9 @@ type ShopLine struct {
 	UnitCents int    `json:"unit_cents"`
 }
 
+// ShopPaymentStatus The payment at the provider (shops with `checkout`); `paid` confirms the order.
+type ShopPaymentStatus string
+
 // ShopProduct defines model for ShopProduct.
 type ShopProduct struct {
 	// Id Example: frame-10
@@ -3570,22 +3620,30 @@ type ShopProduct struct {
 // ShopReservation defines model for ShopReservation.
 type ShopReservation struct {
 	CancelledAt *time.Time `json:"cancelled_at,omitempty"`
+	City        *string    `json:"city,omitempty"`
 	Country     string     `json:"country"`
 	CreatedAt   time.Time  `json:"created_at"`
 	Currency    string     `json:"currency"`
 	Email       string     `json:"email"`
 
 	// Id UUIDv7
-	Id            Id                    `json:"id"`
-	InternalNote  *string               `json:"internal_note,omitempty"`
-	Items         []ShopLine            `json:"items"`
-	Locale        string                `json:"locale"`
-	Name          string                `json:"name"`
-	Note          *string               `json:"note,omitempty"`
+	Id           Id         `json:"id"`
+	InternalNote *string    `json:"internal_note,omitempty"`
+	Items        []ShopLine `json:"items"`
+	Locale       string     `json:"locale"`
+	Name         string     `json:"name"`
+	Note         *string    `json:"note,omitempty"`
+	PaidAt       *time.Time `json:"paid_at,omitempty"`
+
+	// PaymentStatus The payment at the provider (shops with `checkout`); `paid` confirms the order.
+	PaymentStatus *ShopPaymentStatus    `json:"payment_status,omitempty"`
+	Phone         *string               `json:"phone,omitempty"`
 	PostalCode    *string               `json:"postal_code,omitempty"`
 	Reference     string                `json:"reference"`
+	ShippedAt     *time.Time            `json:"shipped_at,omitempty"`
 	ShippingCents int                   `json:"shipping_cents"`
 	Status        ShopReservationStatus `json:"status"`
+	Street        *string               `json:"street,omitempty"`
 	SubtotalCents int                   `json:"subtotal_cents"`
 	TotalCents    int                   `json:"total_cents"`
 	UpdatedAt     time.Time             `json:"updated_at"`
@@ -3593,7 +3651,11 @@ type ShopReservation struct {
 
 // ShopReservationCreate defines model for ShopReservationCreate.
 type ShopReservationCreate struct {
-	// Consent Must be true. The customer agrees to be contacted about this reservation.
+	// City Required when the shop has `checkout`.
+	City *string `json:"city,omitempty"`
+
+	// Consent Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+	// `checkout`: the customer accepts the terms of sale.
 	Consent bool `json:"consent"`
 
 	// Country Example: BE
@@ -3607,10 +3669,16 @@ type ShopReservationCreate struct {
 	// Locale Language for the emails (falls back to English)
 	//
 	// Example: nl
-	Locale     *string `json:"locale,omitempty"`
-	Name       string  `json:"name"`
-	Note       *string `json:"note,omitempty"`
+	Locale *string `json:"locale,omitempty"`
+	Name   string  `json:"name"`
+	Note   *string `json:"note,omitempty"`
+
+	// Phone Optional
+	Phone      *string `json:"phone,omitempty"`
 	PostalCode *string `json:"postal_code,omitempty"`
+
+	// Street Street and number (required when the shop has `checkout`).
+	Street *string `json:"street,omitempty"`
 
 	// Website Honeypot; leave empty.
 	Website *string `json:"website,omitempty"`
@@ -3618,9 +3686,15 @@ type ShopReservationCreate struct {
 
 // ShopReservationReceipt defines model for ShopReservationReceipt.
 type ShopReservationReceipt struct {
-	Currency string     `json:"currency"`
-	Email    string     `json:"email"`
-	Items    []ShopLine `json:"items"`
+	// CheckoutUrl Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+	// final.
+	CheckoutUrl *string    `json:"checkout_url,omitempty"`
+	Currency    string     `json:"currency"`
+	Email       string     `json:"email"`
+	Items       []ShopLine `json:"items"`
+
+	// PaymentStatus The payment at the provider (shops with `checkout`); `paid` confirms the order.
+	PaymentStatus *ShopPaymentStatus `json:"payment_status,omitempty"`
 
 	// Reference Example: KF-7Q3M
 	Reference     string                `json:"reference"`
@@ -4324,6 +4398,11 @@ type ForwardSendJSONBody struct {
 	FrameIds []Id `json:"frame_ids"`
 }
 
+// GetShopOrderStatusJSONBody defines parameters for GetShopOrderStatus.
+type GetShopOrderStatusJSONBody struct {
+	Token string `json:"token"`
+}
+
 // CancelShopReservationJSONBody defines parameters for CancelShopReservation.
 type CancelShopReservationJSONBody struct {
 	Token string `json:"token"`
@@ -4451,6 +4530,9 @@ type CreateSendJSONRequestBody = SendCreate
 
 // ForwardSendJSONRequestBody defines body for ForwardSend for application/json ContentType.
 type ForwardSendJSONRequestBody ForwardSendJSONBody
+
+// GetShopOrderStatusJSONRequestBody defines body for GetShopOrderStatus for application/json ContentType.
+type GetShopOrderStatusJSONRequestBody GetShopOrderStatusJSONBody
 
 // CreateShopReservationJSONRequestBody defines body for CreateShopReservation for application/json ContentType.
 type CreateShopReservationJSONRequestBody = ShopReservationCreate
@@ -4733,6 +4815,9 @@ type ServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(w http.ResponseWriter, r *http.Request, sendId Id)
+
+	// (POST /v1/shop/orders/status)
+	GetShopOrderStatus(w http.ResponseWriter, r *http.Request)
 
 	// (POST /v1/shop/reservations)
 	CreateShopReservation(w http.ResponseWriter, r *http.Request)
@@ -7604,6 +7689,20 @@ func (siw *ServerInterfaceWrapper) ForwardSend(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// GetShopOrderStatus operation middleware
+func (siw *ServerInterfaceWrapper) GetShopOrderStatus(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetShopOrderStatus(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // CreateShopReservation operation middleware
 func (siw *ServerInterfaceWrapper) CreateShopReservation(w http.ResponseWriter, r *http.Request) {
 
@@ -7977,6 +8076,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.Unsend)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/sends/{sendId}", wrapper.GetSend)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/sends/{sendId}/forward", wrapper.ForwardSend)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/orders/status", wrapper.GetShopOrderStatus)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations", wrapper.CreateShopReservation)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/shop/reservations/cancel", wrapper.CancelShopReservation)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/stations/{stationId}/public", wrapper.GetStationPublic)
@@ -11120,6 +11220,45 @@ func (response ForwardSend202JSONResponse) VisitForwardSendResponse(w http.Respo
 	return err
 }
 
+type GetShopOrderStatusRequestObject struct {
+	Body *GetShopOrderStatusJSONRequestBody
+}
+
+type GetShopOrderStatusResponseObject interface {
+	VisitGetShopOrderStatusResponse(w http.ResponseWriter) error
+}
+
+type GetShopOrderStatus200JSONResponse ShopReservationReceipt
+
+func (response GetShopOrderStatus200JSONResponse) VisitGetShopOrderStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetShopOrderStatusdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetShopOrderStatusdefaultApplicationProblemPlusJSONResponse) VisitGetShopOrderStatusResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type CreateShopReservationRequestObject struct {
 	Body *CreateShopReservationJSONRequestBody
 }
@@ -11657,6 +11796,9 @@ type StrictServerInterface interface {
 
 	// (POST /v1/sends/{sendId}/forward)
 	ForwardSend(ctx context.Context, request ForwardSendRequestObject) (ForwardSendResponseObject, error)
+
+	// (POST /v1/shop/orders/status)
+	GetShopOrderStatus(ctx context.Context, request GetShopOrderStatusRequestObject) (GetShopOrderStatusResponseObject, error)
 
 	// (POST /v1/shop/reservations)
 	CreateShopReservation(ctx context.Context, request CreateShopReservationRequestObject) (CreateShopReservationResponseObject, error)
@@ -14332,6 +14474,37 @@ func (sh *strictHandler) ForwardSend(w http.ResponseWriter, r *http.Request, sen
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ForwardSendResponseObject); ok {
 		if err := validResponse.VisitForwardSendResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetShopOrderStatus operation middleware
+func (sh *strictHandler) GetShopOrderStatus(w http.ResponseWriter, r *http.Request) {
+	var request GetShopOrderStatusRequestObject
+
+	var body GetShopOrderStatusJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetShopOrderStatus(ctx, request.(GetShopOrderStatusRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetShopOrderStatus")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetShopOrderStatusResponseObject); ok {
+		if err := validResponse.VisitGetShopOrderStatusResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

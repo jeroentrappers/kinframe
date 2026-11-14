@@ -282,7 +282,7 @@ extension Components {
             /// - Remark: Generated from `#/components/schemas/Shop/elsewhere`.
             public var elsewhere: [Components.Schemas.ShopElsewhereLink]?
             /// Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-            /// `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+            /// `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
             /// sign-in and the family app live. Absent when the operator configured none.
             ///
             ///
@@ -294,6 +294,12 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Shop/default_locale`.
             public var defaultLocale: Swift.String?
+            /// True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+            /// with a `checkout_url` to send the customer to. False: reservations without payment.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Shop/checkout`.
+            public var checkout: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/Shop/seller`.
             public struct SellerPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/Shop/seller/name`.
@@ -306,6 +312,18 @@ extension Components {
                 public var legal: Swift.String?
                 /// - Remark: Generated from `#/components/schemas/Shop/seller/privacy_url`.
                 public var privacyUrl: Swift.String?
+                /// Terms of sale; absent = the web app's own page `/shop/terms`.
+                ///
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/terms_url`.
+                public var termsUrl: Swift.String?
+                /// Seller's address (terms of sale).
+                ///
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/address`.
+                public var address: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/vat_number`.
+                public var vatNumber: Swift.String?
+                /// - Remark: Generated from `#/components/schemas/Shop/seller/phone`.
+                public var phone: Swift.String?
                 /// Creates a new `SellerPayload`.
                 ///
                 /// - Parameters:
@@ -313,22 +331,38 @@ extension Components {
                 ///   - email:
                 ///   - legal: Legal line for the footer, e.g. company, address and VAT number.
                 ///   - privacyUrl:
+                ///   - termsUrl: Terms of sale; absent = the web app's own page `/shop/terms`.
+                ///   - address: Seller's address (terms of sale).
+                ///   - vatNumber:
+                ///   - phone:
                 public init(
                     name: Swift.String,
                     email: Swift.String,
                     legal: Swift.String? = nil,
-                    privacyUrl: Swift.String? = nil
+                    privacyUrl: Swift.String? = nil,
+                    termsUrl: Swift.String? = nil,
+                    address: Swift.String? = nil,
+                    vatNumber: Swift.String? = nil,
+                    phone: Swift.String? = nil
                 ) {
                     self.name = name
                     self.email = email
                     self.legal = legal
                     self.privacyUrl = privacyUrl
+                    self.termsUrl = termsUrl
+                    self.address = address
+                    self.vatNumber = vatNumber
+                    self.phone = phone
                 }
                 public enum CodingKeys: String, CodingKey {
                     case name
                     case email
                     case legal
                     case privacyUrl = "privacy_url"
+                    case termsUrl = "terms_url"
+                    case address
+                    case vatNumber = "vat_number"
+                    case phone
                 }
             }
             /// - Remark: Generated from `#/components/schemas/Shop/seller`.
@@ -345,6 +379,7 @@ extension Components {
             ///   - elsewhere: Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
             ///   - domains: Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
             ///   - defaultLocale: Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
+            ///   - checkout: True when orders are paid online: `createShopReservation` then needs the delivery address and answers
             ///   - seller:
             public init(
                 brand: Swift.String,
@@ -356,6 +391,7 @@ extension Components {
                 elsewhere: [Components.Schemas.ShopElsewhereLink]? = nil,
                 domains: [Swift.String]? = nil,
                 defaultLocale: Swift.String? = nil,
+                checkout: Swift.Bool? = nil,
                 seller: Components.Schemas.Shop.SellerPayload
             ) {
                 self.brand = brand
@@ -367,6 +403,7 @@ extension Components {
                 self.elsewhere = elsewhere
                 self.domains = domains
                 self.defaultLocale = defaultLocale
+                self.checkout = checkout
                 self.seller = seller
             }
             public enum CodingKeys: String, CodingKey {
@@ -379,6 +416,7 @@ extension Components {
                 case elsewhere
                 case domains
                 case defaultLocale = "default_locale"
+                case checkout
                 case seller
             }
         }
@@ -570,7 +608,20 @@ extension Components {
             case new = "new"
             case contacted = "contacted"
             case confirmed = "confirmed"
+            case shipped = "shipped"
             case cancelled = "cancelled"
+        }
+        /// The payment at the provider (shops with `checkout`); `paid` confirms the order.
+        ///
+        /// - Remark: Generated from `#/components/schemas/ShopPaymentStatus`.
+        @frozen public enum ShopPaymentStatus: String, Codable, Hashable, Sendable, CaseIterable {
+            case open = "open"
+            case pending = "pending"
+            case authorized = "authorized"
+            case paid = "paid"
+            case failed = "failed"
+            case canceled = "canceled"
+            case expired = "expired"
         }
         /// - Remark: Generated from `#/components/schemas/ShopReservationCreate`.
         public struct ShopReservationCreate: Codable, Hashable, Sendable {
@@ -582,6 +633,18 @@ extension Components {
             public var country: Swift.String
             /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/postal_code`.
             public var postalCode: Swift.String?
+            /// Street and number (required when the shop has `checkout`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/street`.
+            public var street: Swift.String?
+            /// Required when the shop has `checkout`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/city`.
+            public var city: Swift.String?
+            /// Optional
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/phone`.
+            public var phone: Swift.String?
             /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/ItemsPayload`.
             public struct ItemsPayloadPayload: Codable, Hashable, Sendable {
                 /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/ItemsPayload/product_id`.
@@ -615,7 +678,9 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/locale`.
             public var locale: Swift.String?
-            /// Must be true. The customer agrees to be contacted about this reservation.
+            /// Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+            /// `checkout`: the customer accepts the terms of sale.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ShopReservationCreate/consent`.
             public var consent: Swift.Bool
@@ -630,16 +695,22 @@ extension Components {
             ///   - email:
             ///   - country:
             ///   - postalCode:
+            ///   - street: Street and number (required when the shop has `checkout`).
+            ///   - city: Required when the shop has `checkout`.
+            ///   - phone: Optional
             ///   - items:
             ///   - note:
             ///   - locale: Language for the emails (falls back to English)
-            ///   - consent: Must be true. The customer agrees to be contacted about this reservation.
+            ///   - consent: Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
             ///   - website: Honeypot; leave empty.
             public init(
                 name: Swift.String,
                 email: Swift.String,
                 country: Swift.String,
                 postalCode: Swift.String? = nil,
+                street: Swift.String? = nil,
+                city: Swift.String? = nil,
+                phone: Swift.String? = nil,
                 items: Components.Schemas.ShopReservationCreate.ItemsPayload,
                 note: Swift.String? = nil,
                 locale: Swift.String? = nil,
@@ -650,6 +721,9 @@ extension Components {
                 self.email = email
                 self.country = country
                 self.postalCode = postalCode
+                self.street = street
+                self.city = city
+                self.phone = phone
                 self.items = items
                 self.note = note
                 self.locale = locale
@@ -661,6 +735,9 @@ extension Components {
                 case email
                 case country
                 case postalCode = "postal_code"
+                case street
+                case city
+                case phone
                 case items
                 case note
                 case locale
@@ -727,6 +804,14 @@ extension Components {
             public var totalCents: Swift.Int
             /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/currency`.
             public var currency: Swift.String
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/payment_status`.
+            public var paymentStatus: Components.Schemas.ShopPaymentStatus?
+            /// Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+            /// final.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/ShopReservationReceipt/checkout_url`.
+            public var checkoutUrl: Swift.String?
             /// Creates a new `ShopReservationReceipt`.
             ///
             /// - Parameters:
@@ -738,6 +823,8 @@ extension Components {
             ///   - shippingCents:
             ///   - totalCents:
             ///   - currency:
+            ///   - paymentStatus:
+            ///   - checkoutUrl: Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
             public init(
                 reference: Swift.String,
                 status: Components.Schemas.ShopReservationStatus,
@@ -746,7 +833,9 @@ extension Components {
                 subtotalCents: Swift.Int,
                 shippingCents: Swift.Int,
                 totalCents: Swift.Int,
-                currency: Swift.String
+                currency: Swift.String,
+                paymentStatus: Components.Schemas.ShopPaymentStatus? = nil,
+                checkoutUrl: Swift.String? = nil
             ) {
                 self.reference = reference
                 self.status = status
@@ -756,6 +845,8 @@ extension Components {
                 self.shippingCents = shippingCents
                 self.totalCents = totalCents
                 self.currency = currency
+                self.paymentStatus = paymentStatus
+                self.checkoutUrl = checkoutUrl
             }
             public enum CodingKeys: String, CodingKey {
                 case reference
@@ -766,6 +857,8 @@ extension Components {
                 case shippingCents = "shipping_cents"
                 case totalCents = "total_cents"
                 case currency
+                case paymentStatus = "payment_status"
+                case checkoutUrl = "checkout_url"
             }
         }
         /// - Remark: Generated from `#/components/schemas/ShopReservation`.
@@ -806,6 +899,18 @@ extension Components {
             public var updatedAt: Foundation.Date
             /// - Remark: Generated from `#/components/schemas/ShopReservation/cancelled_at`.
             public var cancelledAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/street`.
+            public var street: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/city`.
+            public var city: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/phone`.
+            public var phone: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/payment_status`.
+            public var paymentStatus: Components.Schemas.ShopPaymentStatus?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/paid_at`.
+            public var paidAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/ShopReservation/shipped_at`.
+            public var shippedAt: Foundation.Date?
             /// Creates a new `ShopReservation`.
             ///
             /// - Parameters:
@@ -827,6 +932,12 @@ extension Components {
             ///   - createdAt:
             ///   - updatedAt:
             ///   - cancelledAt:
+            ///   - street:
+            ///   - city:
+            ///   - phone:
+            ///   - paymentStatus:
+            ///   - paidAt:
+            ///   - shippedAt:
             public init(
                 id: Components.Schemas.Id,
                 reference: Swift.String,
@@ -845,7 +956,13 @@ extension Components {
                 internalNote: Swift.String? = nil,
                 createdAt: Foundation.Date,
                 updatedAt: Foundation.Date,
-                cancelledAt: Foundation.Date? = nil
+                cancelledAt: Foundation.Date? = nil,
+                street: Swift.String? = nil,
+                city: Swift.String? = nil,
+                phone: Swift.String? = nil,
+                paymentStatus: Components.Schemas.ShopPaymentStatus? = nil,
+                paidAt: Foundation.Date? = nil,
+                shippedAt: Foundation.Date? = nil
             ) {
                 self.id = id
                 self.reference = reference
@@ -865,6 +982,12 @@ extension Components {
                 self.createdAt = createdAt
                 self.updatedAt = updatedAt
                 self.cancelledAt = cancelledAt
+                self.street = street
+                self.city = city
+                self.phone = phone
+                self.paymentStatus = paymentStatus
+                self.paidAt = paidAt
+                self.shippedAt = shippedAt
             }
             public enum CodingKeys: String, CodingKey {
                 case id
@@ -885,6 +1008,12 @@ extension Components {
                 case createdAt = "created_at"
                 case updatedAt = "updated_at"
                 case cancelledAt = "cancelled_at"
+                case street
+                case city
+                case phone
+                case paymentStatus = "payment_status"
+                case paidAt = "paid_at"
+                case shippedAt = "shipped_at"
             }
         }
         /// - Remark: Generated from `#/components/schemas/Limits`.

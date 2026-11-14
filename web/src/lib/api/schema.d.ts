@@ -1591,8 +1591,12 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-         *     emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+         * @description Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+         *     order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+         *     `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+         *     reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+         *     `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+         *     `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
          *     Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
          *     Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
          *     not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -1600,6 +1604,27 @@ export interface paths {
          *     `items.<i>.quantity`/`maximum`, `consent`/`required`.
          */
         post: operations["createShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shop/orders/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+         *     signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+         *     also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+         */
+        post: operations["getShopOrderStatus"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1819,6 +1844,12 @@ export interface components {
              * @example nl
              */
             default_locale?: string;
+            /**
+             * @description True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+             *     with a `checkout_url` to send the customer to. False: reservations without payment.
+             * @default false
+             */
+            checkout?: boolean;
             seller: {
                 name: string;
                 /** Format: email */
@@ -1827,6 +1858,15 @@ export interface components {
                 legal?: string;
                 /** Format: uri */
                 privacy_url?: string;
+                /**
+                 * Format: uri
+                 * @description Terms of sale; absent = the web app's own page `/shop/terms`.
+                 */
+                terms_url?: string;
+                /** @description Seller's address (terms of sale). */
+                address?: string;
+                vat_number?: string;
+                phone?: string;
             };
         };
         /** @description A retailer selling a compatible frame in some countries the shop doesn't ship to. */
@@ -1894,13 +1934,24 @@ export interface components {
             free_from_cents?: number | null;
         };
         /** @enum {string} */
-        ShopReservationStatus: "new" | "contacted" | "confirmed" | "cancelled";
+        ShopReservationStatus: "new" | "contacted" | "confirmed" | "shipped" | "cancelled";
+        /**
+         * @description The payment at the provider (shops with `checkout`); `paid` confirms the order.
+         * @enum {string}
+         */
+        ShopPaymentStatus: "open" | "pending" | "authorized" | "paid" | "failed" | "canceled" | "expired";
         ShopReservationCreate: {
             name: string;
             email: string;
             /** @example BE */
             country: string;
             postal_code?: string;
+            /** @description Street and number (required when the shop has `checkout`). */
+            street?: string;
+            /** @description Required when the shop has `checkout`. */
+            city?: string;
+            /** @description Optional */
+            phone?: string;
             items: {
                 product_id: string;
                 quantity: number;
@@ -1911,7 +1962,10 @@ export interface components {
              * @example nl
              */
             locale?: string;
-            /** @description Must be true. The customer agrees to be contacted about this reservation. */
+            /**
+             * @description Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+             *     `checkout`: the customer accepts the terms of sale.
+             */
             consent: boolean;
             /** @description Honeypot; leave empty. */
             website?: string;
@@ -1933,6 +1987,13 @@ export interface components {
             shipping_cents: number;
             total_cents: number;
             currency: string;
+            payment_status?: components["schemas"]["ShopPaymentStatus"];
+            /**
+             * Format: uri
+             * @description Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+             *     final.
+             */
+            checkout_url?: string | null;
         };
         ShopReservation: {
             id: components["schemas"]["Id"];
@@ -1956,6 +2017,14 @@ export interface components {
             updated_at: string;
             /** Format: date-time */
             cancelled_at?: string | null;
+            street?: string | null;
+            city?: string | null;
+            phone?: string | null;
+            payment_status?: components["schemas"]["ShopPaymentStatus"];
+            /** Format: date-time */
+            paid_at?: string | null;
+            /** Format: date-time */
+            shipped_at?: string | null;
         };
         Limits: {
             /** @default 200 */
@@ -6266,6 +6335,33 @@ export interface operations {
         responses: {
             /** @description Reserved */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservationReceipt"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getShopOrderStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The order */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

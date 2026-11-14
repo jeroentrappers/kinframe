@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "เฉพาะผู้สร้าง เจ้าของ หรือผู้ดูแลเท่านั้นที่เพิกถอนคำเชิญนี้ได้",
   "only the creator or an owner/admin can revoke this link": "เฉพาะผู้สร้างลิงก์หรือเจ้าของ/ผู้ดูแลเท่านั้นที่เพิกถอนลิงก์นี้ได้",
   "some reservation details are not valid": "ข้อมูลการจองบางส่วนไม่ถูกต้อง",
+  "the payment provider is not available; please try again": "บริการชำระเงินไม่พร้อมใช้งาน โปรดลองอีกครั้ง",
   "this TV link is not valid": "ลิงก์ทีวีนี้ไม่ถูกต้อง",
   "operator access required": "ต้องมีสิทธิ์ผู้ดูแลเซิร์ฟเวอร์",
   "owner only": "เฉพาะเจ้าของเท่านั้น",

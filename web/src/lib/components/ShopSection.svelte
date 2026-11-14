@@ -8,6 +8,8 @@
 	import ShopFrameArt from './ShopFrameArt.svelte';
 
 	let { shop }: { shop: Shop } = $props();
+	// Shops with checkout sell (pay online); the others take reservations.
+	const checkout = $derived(!!shop.checkout);
 
 	const brand = $derived(discovery.brand);
 	const money = (cents: number, compact = true) => formatMoney(cents, shop.currency, i18n.tag, { compact });
@@ -48,8 +50,8 @@
 							{/each}
 						</ul>
 					{/if}
-					<a class="btn btn-primary reserve" href="/shop?product={encodeURIComponent(p.id)}" aria-label={t('shop.reserveProduct', { name: p.name })}>
-						{t('shop.reserve')}
+					<a class="btn btn-primary reserve" href="/shop?product={encodeURIComponent(p.id)}" aria-label={checkout ? t('shop.buyProduct', { name: p.name }) : t('shop.reserveProduct', { name: p.name })}>
+						{checkout ? t('shop.buy') : t('shop.reserve')}
 						<Icon name="chevronRight" size={18} />
 					</a>
 				</div>
@@ -68,8 +70,8 @@
 		<li>
 			<span class="p-icon"><Icon name="heart" size={20} /></span>
 			<div>
-				<strong>{t('shop.pointPayLater')}</strong>
-				<p>{t('shop.pointPayLaterBody')}</p>
+				<strong>{checkout ? t('shop.pointPaySecure') : t('shop.pointPayLater')}</strong>
+				<p>{checkout ? t('shop.pointPaySecureBody') : t('shop.pointPayLaterBody')}</p>
 			</div>
 		</li>
 		<li>

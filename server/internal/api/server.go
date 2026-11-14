@@ -69,7 +69,11 @@ type Server struct {
 	shopCancelIP     *ratelimit.Limiter
 
 	shopTokens *shop.Tokens
-	mailer     shop.Mailer // nil: SMTP not configured
+	// orderTokens sign the order page link the payment provider returns to.
+	orderTokens *shop.Tokens
+	shopOrderIP *ratelimit.Limiter
+	mailer      shop.Mailer          // nil: SMTP not configured
+	payments    shop.PaymentProvider // nil: the shop has no payments
 
 	limitsMu sync.Mutex
 	limits   *config.Limits
@@ -110,6 +114,9 @@ type Deps struct {
 	// Mailer sends the server's own email (shop); defaults to SMTP from the
 	// config, nil when SMTP is not configured.
 	Mailer shop.Mailer
+	// Payments pays shop orders; defaults to Mollie with Config.MollieAPIKey
+	// when the shop has payments.
+	Payments shop.PaymentProvider
 	// Accounts deletes sign-in accounts (Logto); nil leaves them alone.
 	Accounts AccountDeleter
 }
@@ -149,11 +156,17 @@ func New(d Deps) (*Server, error) {
 		shopIP:           ratelimit.New(10, time.Hour),
 		shopCancelIP:     ratelimit.New(30, time.Hour),
 		shopTokens:       shop.NewTokens(auth.DeriveKey(d.Config.SigningKey, "shop-cancel")),
+		orderTokens:      shop.NewTokens(auth.DeriveKey(d.Config.SigningKey, "shop-order")),
+		shopOrderIP:      ratelimit.New(600, time.Hour),
 		mailer:           d.Mailer,
 		accounts:         d.Accounts,
 	}
 	if s.mailer == nil && d.Config.SMTP != nil {
 		s.mailer = &shop.SMTPMailer{Cfg: *d.Config.SMTP}
+	}
+	s.payments = d.Payments
+	if s.payments == nil && d.Config.Shop != nil && d.Config.Shop.Checkout() {
+		s.payments = &shop.Mollie{APIKey: d.Config.MollieAPIKey, BaseURL: d.Config.MollieBaseURL}
 	}
 	if d.Calendar != nil {
 		s.sealer = d.Calendar.Sealer

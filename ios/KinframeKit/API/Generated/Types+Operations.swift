@@ -15862,8 +15862,12 @@ public enum Operations {
             }
         }
     }
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -15962,6 +15966,170 @@ public enum Operations {
             /// Error (RFC 9457)
             ///
             /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    public enum GetShopOrderStatus {
+        public static let id: Swift.String = "getShopOrderStatus"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetShopOrderStatus.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetShopOrderStatus.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetShopOrderStatus.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/requestBody/json/token`.
+                    public var token: Swift.String
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - token:
+                    public init(token: Swift.String) {
+                        self.token = token
+                    }
+                    public enum CodingKeys: String, CodingKey {
+                        case token
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/requestBody/content/application\/json`.
+                case json(Operations.GetShopOrderStatus.Input.Body.JsonPayload)
+            }
+            public var body: Operations.GetShopOrderStatus.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.GetShopOrderStatus.Input.Headers = .init(),
+                body: Operations.GetShopOrderStatus.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/shop/orders/status/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.ShopReservationReceipt)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.ShopReservationReceipt {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetShopOrderStatus.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetShopOrderStatus.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// The order
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetShopOrderStatus.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetShopOrderStatus.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)/responses/default`.
             ///
             /// HTTP response code: `default`.
             case `default`(statusCode: Swift.Int, Components.Responses.Problem)

@@ -26,7 +26,7 @@
 
 	// Link previews come from the server's index.html; this keeps the description in step with the language.
 	$effect(() => {
-		const desc = t('storefront.metaDescription');
+		const desc = shop.checkout ? t('storefront.metaDescriptionOrder') : t('storefront.metaDescription');
 		document.querySelector('meta[name="description"]')?.setAttribute('content', desc);
 		document.querySelector('meta[property="og:description"]')?.setAttribute('content', desc);
 		document.querySelector('meta[property="og:title"]')?.setAttribute('content', title);
@@ -45,7 +45,7 @@
 	<header class="container top">
 		<a href="/" class="home"><Logo size={32} /></a>
 		<div class="spacer"></div>
-		<a class="btn btn-primary btn-sm reserve-top" href="#shop">{t('shop.reserve')}</a>
+		<a class="btn btn-primary btn-sm reserve-top" href="#shop">{shop.checkout ? t('shop.buy') : t('shop.reserve')}</a>
 		<LanguagePicker />
 	</header>
 
@@ -56,7 +56,7 @@
 				<h1 id="hero-title">{t('storefront.title')}</h1>
 				<p class="lede">{t('storefront.lede')}</p>
 				<div class="actions">
-					<a class="btn btn-primary btn-lg" href="#shop">{t('shop.pageTitle', { brand })}<Icon name="chevronDown" size={18} /></a>
+					<a class="btn btn-primary btn-lg" href="#shop">{shop.checkout ? t('shop.orderPageTitle', { brand }) : t('shop.pageTitle', { brand })}<Icon name="chevronDown" size={18} /></a>
 					<a class="btn btn-ghost btn-lg" href="#how">{t('storefront.howTitle')}</a>
 				</div>
 				<p class="from">{t('storefront.priceFrom', { price: money(fromPrice) })}</p>

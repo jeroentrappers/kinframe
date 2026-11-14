@@ -84,7 +84,7 @@ describe('formatting', () => {
 });
 
 describe('validation', () => {
-	const ok: ReservationForm = { name: 'An', email: 'an@example.org', country: 'BE', postalCode: '', note: '', consent: true, qty: { 'frame-10': 1 } };
+	const ok: ReservationForm = { name: 'An', email: 'an@example.org', country: 'BE', postalCode: '', note: '', consent: true, qty: { 'frame-10': 1 }, street: '', city: '', phone: '' };
 
 	it('accepts a complete form', () => {
 		expect(validateReservation(ok, shop)).toEqual({});
@@ -129,5 +129,20 @@ describe('validation', () => {
 		});
 		expect(JSON.stringify(body)).not.toContain('cents');
 		expect(reservationBody(ok, shop, 'en', 'spam')).toHaveProperty('website', 'spam');
+	});
+	it('needs the delivery address when the shop takes payment, and sends it', () => {
+		const paid = { ...shop, checkout: true };
+		expect(validateReservation(ok, paid)).toEqual({ street: 'required', postalCode: 'required', city: 'required' });
+		expect(validateReservation(ok, shop)).toEqual({});
+		const full = { ...ok, street: ' Veldstraat 10 ', postalCode: '9000', city: 'Gent', phone: '' };
+		expect(validateReservation(full, paid)).toEqual({});
+		const body = reservationBody(full, paid, 'nl', '');
+		expect(body).toMatchObject({ street: 'Veldstraat 10', city: 'Gent', postal_code: '9000' });
+		expect(body).not.toHaveProperty('phone');
+		expect(reservationBody(full, shop, 'nl', '')).not.toHaveProperty('street');
+		expect(errorsFromProblem([{ field: 'postal_code', code: 'minLength' }, { field: 'street', code: 'minLength' }])).toEqual({
+			postalCode: 'required',
+			street: 'required'
+		});
 	});
 });

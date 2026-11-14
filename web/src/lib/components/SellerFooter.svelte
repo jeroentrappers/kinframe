@@ -14,9 +14,13 @@
 	</p>
 	{#if shop.seller.legal}<p class="legal">{shop.seller.legal}</p>{/if}
 	<p class="privacy">
-		{t('shop.privacyNote')}
+		{shop.checkout ? t('shop.orderPrivacyNote') : t('shop.privacyNote')}
 		{#if shop.seller.privacy_url}
 			<a href={shop.seller.privacy_url} rel="noopener" target="_blank">{t('shop.privacyLink')}</a>
+		{/if}
+		{#if shop.checkout}
+			<span class="sep" aria-hidden="true">·</span>
+			<a href={shop.seller.terms_url ?? '/shop/terms'}>{t('shop.termsTitle')}</a>
 		{/if}
 	</p>
 </div>

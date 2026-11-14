@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "ovu pozivnicu može opozvati samo njezin autor ili vlasnik/administrator",
   "only the creator or an owner/admin can revoke this link": "samo osoba koja je stvorila poveznicu ili vlasnik/administrator može je opozvati",
   "some reservation details are not valid": "neki podaci rezervacije nisu valjani",
+  "the payment provider is not available; please try again": "usluga plaćanja nije dostupna; pokušajte ponovno",
   "this TV link is not valid": "ova TV poveznica nije valjana",
   "operator access required": "potreban je pristup operatera",
   "owner only": "samo vlasnik",

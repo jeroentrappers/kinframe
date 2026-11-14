@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "ezt a meghívót csak a létrehozója vagy egy tulajdonos/adminisztrátor vonhatja vissza",
   "only the creator or an owner/admin can revoke this link": "ezt a linket csak a létrehozója vagy egy tulajdonos/adminisztrátor vonhatja vissza",
   "some reservation details are not valid": "a foglalás néhány adata érvénytelen",
+  "the payment provider is not available; please try again": "a fizetési szolgáltatás nem érhető el; próbáld újra",
   "this TV link is not valid": "ez a tévés link nem érvényes",
   "operator access required": "üzemeltetői hozzáférés szükséges",
   "owner only": "csak a tulajdonos",

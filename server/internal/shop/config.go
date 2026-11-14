@@ -49,13 +49,37 @@ type Config struct {
 	// DefaultLocale is the storefront's language for visitors whose browser
 	// prefers none of the shop languages (EmailLanguages). Default "en".
 	DefaultLocale string `yaml:"default_locale"`
+	// Payments turns reservations into paid orders: the customer pays online
+	// (KINFRAME_MOLLIE_API_KEY) and the order is confirmed once paid. Nil =
+	// reservations without payment.
+	Payments *Payments `yaml:"payments"`
 }
+
+// Payments configures online payment of orders.
+type Payments struct {
+	// Provider is the payment provider; only "mollie".
+	Provider string `yaml:"provider"`
+	// Methods limits the payment methods (Mollie ids: bancontact, creditcard,
+	// applepay, ideal, …); empty = every method enabled in the provider's dashboard.
+	Methods []string `yaml:"methods"`
+}
+
+// Checkout reports whether orders are paid online.
+func (c *Config) Checkout() bool { return c.Payments != nil }
 
 type Seller struct {
 	Name       string `yaml:"name"`
 	Email      string `yaml:"email"`
 	Legal      string `yaml:"legal"`
 	PrivacyURL string `yaml:"privacy_url"`
+	// TermsURL is the terms of sale (required with payments); empty = the
+	// web app's own page /shop/terms, built from the seller details.
+	TermsURL string `yaml:"terms_url"`
+	// Address and VATNumber identify the seller on the terms of sale and in
+	// order emails (required with payments).
+	Address   string `yaml:"address"`
+	VATNumber string `yaml:"vat_number"`
+	Phone     string `yaml:"phone"`
 }
 
 type Product struct {
@@ -203,6 +227,24 @@ func (c *Config) validate() error {
 	if c.Seller.PrivacyURL != "" {
 		if u, err := url.Parse(c.Seller.PrivacyURL); err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
 			bad("seller.privacy_url must be an absolute http(s) URL")
+		}
+	}
+	if c.Seller.TermsURL != "" {
+		if u, err := url.Parse(c.Seller.TermsURL); err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+			bad("seller.terms_url must be an absolute http(s) URL")
+		}
+	}
+	if p := c.Payments; p != nil {
+		if p.Provider != "mollie" {
+			bad("payments.provider must be mollie, got %q", p.Provider)
+		}
+		for _, m := range p.Methods {
+			if !idRe.MatchString(m) {
+				bad("payments.methods: %q is not a payment method id like bancontact", m)
+			}
+		}
+		if strings.TrimSpace(c.Seller.Address) == "" || strings.TrimSpace(c.Seller.VATNumber) == "" {
+			bad("seller.address and seller.vat_number are required with payments (terms of sale, order emails)")
 		}
 	}
 	if !validEmail(c.NotifyEmail) {

@@ -16032,6 +16032,23 @@
         }
       }
     },
+    "reservations.status.shipped": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shipped"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzonden"
+          }
+        }
+      }
+    },
     "reservations.statusLabel": {
       "extractionState": "manual",
       "localizations": {

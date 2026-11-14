@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacy policy',
-	updated: '2026-11-10',
+	updated: '2026-11-14',
 	intro: [
 		'kinframe lets families send photos, videos and messages to a photo frame at home. This policy explains which personal data the hosted kinframe service at https://kinframe.appmire.be collects, why, who else is involved, how long it is kept and how you can have it deleted. It covers the website, the kinframe apps and frames when they use this server, the sign-in pages at auth.kinframe.appmire.be and the pre-order shop.',
 		'In short: we only use your data to run the service. There are no ads, no analytics and no tracking, and nothing is sold or shared for marketing. The servers are in Germany.'
@@ -32,7 +32,7 @@ const doc: LegalDoc = {
 						'Plugins (widgets on the frame): which plugins a frame uses and their settings, such as the address of a device in your home or a Home Assistant access token. Tokens and other secrets are stored encrypted and only sent to the frame. For the plugin settings in the apps, the frame also reports whether each widget works, its last error, the names and addresses of devices it found on your home network and, for Home Assistant, the names and units of your entities. We keep only the latest report. If your weather station uploads to kinframe, we keep its readings for 48 hours with its station ID; its key is only stored encrypted, in the frame’s settings. If you turn on its public page, anyone can see those readings, on its page and in the list of public stations, under the station ID and the title you chose; nothing about you or your frame is shown there.',
 						'Frame device data: the frame’s brand and model, screen size, Android and app version, language, time zone, storage use, the name and signal strength of its Wi-Fi network, uptime and the number of recent crashes. We keep only the latest report. We do not collect serial numbers, MAC addresses, battery levels or the frame’s position.',
 						'Notifications: if you turn them on, the address of your push subscription (provided by your browser or phone), a device label such as “Chrome on Android” and your language.',
-						'Shop reservations: your name, e-mail address, country, an optional postal code and note, your language, the items you reserve and the time you gave consent. No payment data and no IP addresses.',
+						'Shop reservations and orders: your name, e-mail address, country, postal code and note, your language, the items you reserve or buy and the time you gave consent; for orders also your delivery address, an optional phone number and the status of your payment. No card or bank details and no IP addresses: payments go through Mollie, which only tells us whether you paid.',
 						'Technical data: our servers see your IP address when you connect. The kinframe server uses it in memory to limit abuse (rate limits) and does not store it with your data. The web server and the sign-in service keep logs (see “How long we keep data”).'
 					]
 				}
@@ -46,7 +46,7 @@ const doc: LegalDoc = {
 					list: [
 						'To provide the service you signed up for: your account, delivering what you send to the right frames, showing who sent it, reactions, calendars, weather and notifications (performance of a contract, GDPR article 6(1)(b)).',
 						'To keep the service secure and working: sign-in security, preventing abuse, fixing faults and keeping frames up to date (our legitimate interest, article 6(1)(f)).',
-						'To send you sign-in codes and, for the shop, your reservation confirmation and follow-up about it (contract or steps before a contract, and your consent in the reservation form).',
+						'To send you sign-in codes and, for the shop, to handle, deliver and confirm your reservation or order (contract or steps before a contract), and to keep the accounting records the law requires (legal obligation).',
 						'Push notifications only when you turn them on; you can turn them off at any time (consent, article 6(1)(a)).',
 						'To meet legal obligations, for example when the authorities lawfully ask us for information (article 6(1)(c)).'
 					]
@@ -71,7 +71,7 @@ const doc: LegalDoc = {
 						'Google Cast: only if you choose to show a slideshow on a Chromecast, your browser loads Google’s Cast software and the Chromecast loads the photos from our server.',
 						'E-mail: sign-in codes and shop e-mails are sent through Appmire’s own mail server. They contain no tracking pixels.',
 						'GitHub: our server downloads kinframe app updates and the community plugin registry from GitHub Releases. No personal data is sent; frames download updates from our server only.',
-						'Shop: reservations are handled by the seller named on the shop page and in the confirmation e-mail, who uses them only for that reservation.'
+						'Shop: reservations and orders are handled by the seller named on the shop page and in the confirmation e-mail, who uses them only for that reservation or order. Payments are processed by Mollie B.V. (Amsterdam, the Netherlands), under its own privacy policy at https://www.mollie.com/privacy; parcels are delivered by a postal or courier service that gets your name and address.'
 					]
 				},
 				'We do not sell your data and do not share it with anyone else, unless the law requires it.'
@@ -97,7 +97,7 @@ const doc: LegalDoc = {
 						'Push subscriptions: until you turn notifications off, sign out of the app, or the push service reports that the subscription has expired.',
 						'Plugins: their settings until the owner removes the widget or the frame; the frame’s plugin report: only the latest.',
 						'Calendars: until you remove the calendar or the frame.',
-						'Shop reservations: deleted automatically one year after the last change, or 30 days after you cancel.',
+						'Shop reservations: deleted automatically one year after the last change, or 30 days after you cancel. Unpaid orders: 30 days. Paid orders: kept for seven years, as accounting law requires.',
 						'Logs: the kinframe server does not log requests or IP addresses in normal operation. Our web server keeps access logs (IP address, time, address requested, browser) for at most 14 days, for security. The sign-in service keeps a record of sign-ins (time, IP address and browser) to protect your account.'
 					]
 				}

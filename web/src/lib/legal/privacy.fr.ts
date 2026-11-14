@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Politique de confidentialité',
-	updated: '2026-11-10',
+	updated: '2026-11-14',
 	intro: [
 		'kinframe permet aux familles d’envoyer des photos, des vidéos et des messages vers un cadre photo à la maison. Cette politique explique quelles données personnelles le service kinframe hébergé sur https://kinframe.appmire.be collecte, pourquoi, qui d’autre intervient, combien de temps elles sont conservées et comment les faire supprimer. Elle couvre le site web, les applications et cadres kinframe lorsqu’ils utilisent ce serveur, les pages de connexion sur auth.kinframe.appmire.be et la boutique de précommande.',
 		'En bref : nous utilisons vos données uniquement pour faire fonctionner le service. Pas de publicité, pas de mesure d’audience, pas de pistage, et rien n’est vendu ni partagé à des fins de marketing. Les serveurs se trouvent en Allemagne.'
@@ -32,7 +32,7 @@ const doc: LegalDoc = {
 						'Plug-ins (widgets sur le cadre) : les plug-ins qu’un cadre utilise et leurs réglages, comme l’adresse d’un appareil chez vous ou un jeton d’accès Home Assistant. Les jetons et autres secrets sont conservés chiffrés et envoyés uniquement au cadre. Pour les réglages des plug-ins dans les apps, le cadre signale aussi si chaque widget fonctionne, sa dernière erreur, les noms et adresses des appareils trouvés sur votre réseau domestique et, pour Home Assistant, les noms et unités de vos entités. Nous ne gardons que le dernier rapport. Si votre station météo envoie ses données à kinframe, nous gardons ses mesures 48 heures avec son ID de station ; sa clé n’est conservée que chiffrée, dans les réglages du cadre. Si vous activez sa page publique, tout le monde peut voir ces mesures, sur sa page et dans la liste des stations publiques, sous l’ID de la station et le titre que vous avez choisi ; rien sur vous ni sur votre cadre n’y figure.',
 						'Données du cadre : marque et modèle, taille de l’écran, versions d’Android et de l’application, langue, fuseau horaire, utilisation du stockage, nom et force du signal du réseau Wi-Fi, durée de fonctionnement et nombre de plantages récents. Nous ne gardons que le dernier rapport. Nous ne collectons ni numéro de série, ni adresse MAC, ni niveau de batterie, ni la position du cadre.',
 						'Notifications : si vous les activez, l’adresse de votre abonnement push (fournie par votre navigateur ou téléphone), un libellé d’appareil comme « Chrome sur Android » et votre langue.',
-						'Réservations dans la boutique : votre nom, votre adresse e-mail, votre pays, un code postal et une remarque facultatifs, votre langue, les articles réservés et le moment de votre consentement. Aucune donnée de paiement et aucune adresse IP.',
+						'Réservations et commandes dans la boutique : votre nom, votre adresse e-mail, votre pays, votre code postal et votre remarque, votre langue, les articles réservés ou achetés et le moment de votre consentement ; pour les commandes, aussi votre adresse de livraison, un numéro de téléphone facultatif et le statut de votre paiement. Aucune donnée de carte ou bancaire et aucune adresse IP : les paiements passent par Mollie, qui nous indique seulement si vous avez payé.',
 						'Données techniques : nos serveurs voient votre adresse IP lorsque vous vous connectez. Le serveur kinframe l’utilise en mémoire pour limiter les abus (limitation du débit) et ne la conserve pas avec vos données. Le serveur web et le service de connexion tiennent des journaux (voir « Combien de temps nous conservons les données »).'
 					]
 				}
@@ -46,7 +46,7 @@ const doc: LegalDoc = {
 					list: [
 						'Pour fournir le service auquel vous vous êtes inscrit : votre compte, la livraison de vos envois aux bons cadres, l’affichage de l’expéditeur, les réactions, les agendas, la météo et les notifications (exécution d’un contrat, article 6, paragraphe 1, b du RGPD).',
 						'Pour garder le service sûr et opérationnel : sécurité de la connexion, prévention des abus, correction des pannes et mise à jour des cadres (notre intérêt légitime, article 6, paragraphe 1, f).',
-						'Pour vous envoyer des codes de connexion et, pour la boutique, la confirmation de votre réservation et son suivi (contrat ou mesures précontractuelles, et votre consentement dans le formulaire de réservation).',
+						'Pour vous envoyer des codes de connexion et, pour la boutique, pour traiter, livrer et confirmer votre réservation ou commande (contrat ou mesures précontractuelles), et pour tenir la comptabilité exigée par la loi (obligation légale).',
 						'Les notifications push uniquement si vous les activez ; vous pouvez les désactiver à tout moment (consentement, article 6, paragraphe 1, a).',
 						'Pour respecter nos obligations légales, par exemple lorsque les autorités nous demandent légalement des informations (article 6, paragraphe 1, c).'
 					]
@@ -71,7 +71,7 @@ const doc: LegalDoc = {
 						'Google Cast : uniquement si vous choisissez d’afficher un diaporama sur un Chromecast, votre navigateur charge le logiciel Cast de Google et le Chromecast charge les photos depuis notre serveur.',
 						'E-mail : les codes de connexion et les e-mails de la boutique passent par le propre serveur de messagerie d’Appmire. Ils ne contiennent aucun pixel de suivi.',
 						'GitHub : notre serveur télécharge les mises à jour des applications kinframe et le registre des plug-ins de la communauté depuis GitHub Releases. Aucune donnée personnelle n’est envoyée ; les cadres téléchargent les mises à jour uniquement depuis notre serveur.',
-						'Boutique : les réservations sont traitées par le vendeur indiqué sur la page de la boutique et dans l’e-mail de confirmation, qui les utilise uniquement pour cette réservation.'
+						'Boutique : les réservations et commandes sont traitées par le vendeur indiqué sur la page de la boutique et dans l’e-mail de confirmation, qui les utilise uniquement pour cette réservation ou commande. Les paiements sont traités par Mollie B.V. (Amsterdam, Pays-Bas), selon sa propre politique de confidentialité sur https://www.mollie.com/privacy ; les colis sont livrés par un service postal ou de messagerie qui reçoit votre nom et votre adresse.'
 					]
 				},
 				'Nous ne vendons pas vos données et ne les partageons avec personne d’autre, sauf obligation légale.'
@@ -97,7 +97,7 @@ const doc: LegalDoc = {
 						'Abonnements push : jusqu’à ce que vous désactiviez les notifications, vous déconnectiez de l’application ou que le service push signale que l’abonnement a expiré.',
 						'Plug-ins : leurs réglages jusqu’à ce que le propriétaire supprime le widget ou le cadre ; le rapport des plug-ins du cadre : uniquement le dernier.',
 						'Agendas : jusqu’à ce que vous supprimiez l’agenda ou le cadre.',
-						'Réservations dans la boutique : supprimées automatiquement un an après la dernière modification, ou 30 jours après votre annulation.',
+						'Réservations dans la boutique : supprimées automatiquement un an après la dernière modification, ou 30 jours après votre annulation. Commandes non payées : 30 jours. Commandes payées : conservées sept ans, comme l’exige la législation comptable.',
 						'Journaux : en fonctionnement normal, le serveur kinframe n’enregistre ni les requêtes ni les adresses IP. Notre serveur web conserve des journaux d’accès (adresse IP, heure, adresse demandée, navigateur) pendant 14 jours au maximum, pour la sécurité. Le service de connexion garde une trace des connexions (heure, adresse IP et navigateur) pour protéger votre compte.'
 					]
 				}

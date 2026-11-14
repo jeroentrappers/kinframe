@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"net"
 	"net/http"
 	"net/mail"
+	"net/url"
 	"strings"
 	"time"
 
@@ -31,7 +33,8 @@ func (s *Server) shopOrNotFound() (*shop.Config, error) {
 
 // shopPublicPath reports whether a request is one of the public shop calls.
 func shopPublicPath(r *http.Request) bool {
-	return r.Method == http.MethodPost && (r.URL.Path == "/v1/shop/reservations" || r.URL.Path == "/v1/shop/reservations/cancel")
+	return r.Method == http.MethodPost && (r.URL.Path == "/v1/shop/reservations" || r.URL.Path == "/v1/shop/reservations/cancel" ||
+		r.URL.Path == "/v1/shop/orders/status")
 }
 
 func shopJSON(c *shop.Config) *gen.Shop {
@@ -69,6 +72,17 @@ func shopJSON(c *shop.Config) *gen.Shop {
 		out.Domains = &c.Domains
 	}
 	out.DefaultLocale = ptr(c.DefaultLocale)
+	if c.Checkout() {
+		out.Checkout = ptr(true)
+	}
+	for _, f := range []struct {
+		v   string
+		dst **string
+	}{{c.Seller.TermsURL, &out.Seller.TermsUrl}, {c.Seller.Address, &out.Seller.Address}, {c.Seller.VATNumber, &out.Seller.VatNumber}, {c.Seller.Phone, &out.Seller.Phone}} {
+		if f.v != "" {
+			*f.dst = ptr(f.v)
+		}
+	}
 	out.Seller.Name = c.Seller.Name
 	out.Seller.Email = openapi_types.Email(c.Seller.Email)
 	if c.Seller.Legal != "" {
@@ -94,7 +108,27 @@ func reservationJSON(r *store.Reservation) gen.ShopReservation {
 		Country: r.Country, PostalCode: r.PostalCode, Note: r.Note, Locale: r.Locale, Items: linesJSON(r.Items),
 		SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents, Currency: r.Currency,
 		InternalNote: r.InternalNote, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, CancelledAt: r.CancelledAt,
+		Street: r.Street, City: r.City, Phone: r.Phone, PaymentStatus: paymentStatusJSON(r.PaymentStatus), PaidAt: r.PaidAt, ShippedAt: r.ShippedAt,
 	}
+}
+
+func paymentStatusJSON(s *string) *gen.ShopPaymentStatus {
+	if s == nil {
+		return nil
+	}
+	return ptr(gen.ShopPaymentStatus(*s))
+}
+
+func receiptJSON(r *store.Reservation, checkoutURL string) gen.ShopReservationReceipt {
+	out := gen.ShopReservationReceipt{
+		Reference: r.Reference, Status: gen.ShopReservationStatus(r.Status), Email: r.Email, Items: linesJSON(r.Items),
+		SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents, Currency: r.Currency,
+		PaymentStatus: paymentStatusJSON(r.PaymentStatus),
+	}
+	if checkoutURL != "" {
+		out.CheckoutUrl = ptr(checkoutURL)
+	}
+	return out
 }
 
 func validCustomerEmail(s string) bool {
@@ -162,6 +196,16 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	if !b.Consent {
 		p.WithField("consent", "required")
 	}
+	if c.Checkout() {
+		for _, f := range []struct {
+			name string
+			v    *string
+		}{{"street", b.Street}, {"postal_code", b.PostalCode}, {"city", b.City}} {
+			if trimmed(f.v) == "" {
+				p.WithField(f.name, "minLength")
+			}
+		}
+	}
 	if len(p.Errors) > 0 {
 		return nil, p
 	}
@@ -171,6 +215,10 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 		ID: store.NewID(), Name: name, Email: email, Country: country, PostalCode: trimmedOrNil(b.PostalCode), Note: trimmedOrNil(b.Note),
 		Locale: lang, Items: q.Lines, Currency: c.Currency,
 		SubtotalCents: q.SubtotalCents, ShippingCents: q.ShippingCents, TotalCents: q.TotalCents,
+	}
+	if c.Checkout() {
+		r.Street, r.City, r.Phone = trimmedOrNil(b.Street), trimmedOrNil(b.City), trimmedOrNil(b.Phone)
+		r.PaymentStatus = ptr("open")
 	}
 	var saved *store.Reservation
 	for range 8 {
@@ -182,6 +230,9 @@ func (s *Server) CreateShopReservation(ctx context.Context, req gen.CreateShopRe
 	}
 	if err != nil {
 		return nil, err
+	}
+	if c.Checkout() {
+		return s.startCheckout(ctx, c, saved, lang)
 	}
 	s.log.Info("shop reservation", "reference", saved.Reference, "total_cents", saved.TotalCents, "country", saved.Country)
 
@@ -205,13 +256,150 @@ func (s *Server) shopOrigin(ctx context.Context) string {
 	return scheme + "://" + strings.TrimSuffix(strings.ToLower(host), ".")
 }
 
+// storefrontOrigin is where emails sent outside a customer request link to:
+// the first storefront domain, else the app's public URL.
+func (s *Server) storefrontOrigin() string {
+	if d := s.cfg.Shop.Domains; len(d) > 0 {
+		scheme, _, _ := strings.Cut(s.cfg.PublicURL, "://")
+		return scheme + "://" + d[0]
+	}
+	return s.cfg.PublicURL
+}
+
 func (s *Server) mailReservation(r *store.Reservation, origin string) shop.Reservation {
 	return shop.Reservation{
 		Reference: r.Reference, Name: r.Name, Email: r.Email, Country: r.Country, PostalCode: deref(r.PostalCode),
 		Note: deref(r.Note), Lang: r.Locale,
 		Quote:     shop.Quote{Lines: r.Items, SubtotalCents: r.SubtotalCents, ShippingCents: r.ShippingCents, TotalCents: r.TotalCents},
 		CancelURL: origin + "/shop/cancel?token=" + s.shopTokens.Sign(r.ID),
+		Order:     r.PaymentStatus != nil, Street: deref(r.Street), City: deref(r.City), Phone: deref(r.Phone),
 	}
+}
+
+// ---------------------------------------------------------------- payments
+
+// startCheckout creates the payment for a new order and answers with the
+// provider's payment page. The emails go out once the payment is paid.
+func (s *Server) startCheckout(ctx context.Context, c *shop.Config, r *store.Reservation, lang string) (gen.CreateShopReservationResponseObject, error) {
+	origin := s.shopOrigin(ctx)
+	pay, err := s.payments.Create(ctx, shop.PaymentRequest{
+		AmountCents: r.TotalCents, Currency: r.Currency, Description: c.Brand + " " + r.Reference, Reference: r.Reference,
+		RedirectURL: origin + "/shop/order?token=" + s.orderTokens.Sign(r.ID),
+		WebhookURL:  s.paymentWebhookURL(), Locale: lang, Methods: c.Payments.Methods,
+	})
+	if err != nil {
+		s.log.Error("shop payment", "reference", r.Reference, "err", err)
+		_, _, _ = s.st.SetPaymentStatus(ctx, r.ID, "failed")
+		return nil, problem.New(problem.UpstreamUnavailable, "the payment provider is not available; please try again")
+	}
+	if err := s.st.SetPayment(ctx, r.ID, pay.ID, pay.Status); err != nil {
+		return nil, err
+	}
+	r.PaymentStatus = ptr(pay.Status)
+	s.log.Info("shop order", "reference", r.Reference, "payment", pay.ID, "total_cents", r.TotalCents, "country", r.Country)
+	return created(receiptJSON(r, pay.CheckoutURL)), nil
+}
+
+// paymentWebhookURL is where the provider reports payment changes; empty when
+// the public URL can't be reached from the internet (local development).
+func (s *Server) paymentWebhookURL() string {
+	u, err := url.Parse(s.cfg.PublicURL)
+	if err != nil || u.Scheme != "https" {
+		return ""
+	}
+	h := u.Hostname()
+	if h == "localhost" || strings.HasSuffix(h, ".localhost") || strings.HasSuffix(h, ".test") || net.ParseIP(h) != nil {
+		return ""
+	}
+	return strings.TrimSuffix(s.cfg.PublicURL, "/") + "/v1/shop/payments/webhook"
+}
+
+// syncPayment reads the payment from the provider and stores its status; the
+// first time it is paid, the order emails go out.
+func (s *Server) syncPayment(ctx context.Context, r *store.Reservation, origin string) (*store.Reservation, *shop.Payment, error) {
+	pay, err := s.payments.Get(ctx, *r.PaymentID)
+	if err != nil {
+		return r, nil, err
+	}
+	updated, nowPaid, err := s.st.SetPaymentStatus(ctx, r.ID, pay.Status)
+	if err != nil {
+		return r, pay, err
+	}
+	if nowPaid {
+		s.log.Info("shop order paid", "reference", updated.Reference, "payment", pay.ID, "total_cents", updated.TotalCents)
+		mr := s.mailReservation(updated, origin)
+		s.sendMail("order "+updated.Reference, s.cfg.Shop.CustomerEmail(mr), s.cfg.Shop.OperatorEmail(mr, false, s.cfg.PublicURL+"/settings/reservations"))
+	}
+	return updated, pay, nil
+}
+
+// shopPaymentWebhook is POST /v1/shop/payments/webhook (hand-written: the
+// provider posts a form with the payment id). The status itself is always
+// read back from the provider, so a forged call can't mark an order paid.
+func (s *Server) shopPaymentWebhook(w http.ResponseWriter, r *http.Request) {
+	c := s.cfg.Shop
+	if c == nil || !c.Checkout() || s.payments == nil {
+		s.writeError(w, r, problem.New(problem.NotFound, ""))
+		return
+	}
+	id := strings.TrimSpace(r.PostFormValue("id"))
+	if id == "" || len(id) > 64 {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	res, err := s.st.GetReservationByPayment(r.Context(), id)
+	if err == store.ErrNotFound {
+		w.WriteHeader(http.StatusOK) // unknown payment: nothing to do (and nothing to reveal)
+		return
+	}
+	if err != nil {
+		s.writeError(w, r, err)
+		return
+	}
+	if _, _, err := s.syncPayment(r.Context(), res, s.storefrontOrigin()); err != nil {
+		s.log.Error("shop payment webhook", "payment", id, "err", err)
+		http.Error(w, "payment provider unavailable", http.StatusBadGateway) // the provider retries
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) GetShopOrderStatus(ctx context.Context, req gen.GetShopOrderStatusRequestObject) (gen.GetShopOrderStatusResponseObject, error) {
+	c, err := s.shopOrNotFound()
+	if err != nil {
+		return nil, err
+	}
+	if ok, retry := s.shopOrderIP.Allow(clientIP(ctx)); !ok {
+		p := problem.New(problem.RateLimited, "")
+		p.RetryAfter = retry
+		return nil, p
+	}
+	id, err := s.orderTokens.Verify(req.Body.Token)
+	if err != nil {
+		return nil, problem.New(problem.NotFound, "")
+	}
+	r, err := s.st.GetReservation(ctx, id)
+	if err == store.ErrNotFound {
+		return nil, problem.New(problem.NotFound, "")
+	}
+	if err != nil {
+		return nil, err
+	}
+	checkout := ""
+	if c.Checkout() && s.payments != nil && r.PaymentID != nil && r.PaymentStatus != nil {
+		switch *r.PaymentStatus {
+		case "open", "pending", "authorized":
+			updated, pay, err := s.syncPayment(ctx, r, s.shopOrigin(ctx))
+			if err != nil {
+				s.log.Warn("shop payment status", "reference", r.Reference, "err", err)
+			}
+			r = updated
+			if pay != nil && pay.Status == "open" {
+				checkout = pay.CheckoutURL
+			}
+		}
+	}
+	return ok(receiptJSON(r, checkout)), nil
 }
 
 // sendMail sends in the background: the reservation is stored either way,
@@ -253,7 +441,8 @@ func (s *Server) CancelShopReservation(ctx context.Context, req gen.CancelShopRe
 	if err != nil {
 		return nil, err
 	}
-	if changed {
+	// An unpaid checkout that is cancelled needs nothing from the operator.
+	if changed && (r.PaymentStatus == nil || r.PaidAt != nil) {
 		s.log.Info("shop reservation cancelled by the customer", "reference", r.Reference)
 		s.sendMail("cancellation "+r.Reference, c.OperatorEmail(s.mailReservation(r, s.shopOrigin(ctx)), true, s.cfg.PublicURL+"/settings/reservations"))
 	}
@@ -303,12 +492,22 @@ func (s *Server) OperatorUpdateReservation(ctx context.Context, req gen.Operator
 			p.InternalNote = v
 		}
 	}
+	before, err := s.st.GetReservation(ctx, req.ReservationId)
+	if err == store.ErrNotFound {
+		return nil, problem.New(problem.NotFound, "")
+	}
+	if err != nil {
+		return nil, err
+	}
 	r, err := s.st.UpdateReservation(ctx, req.ReservationId, p)
 	if err == store.ErrNotFound {
 		return nil, problem.New(problem.NotFound, "")
 	}
 	if err != nil {
 		return nil, err
+	}
+	if r.Status == "shipped" && before.Status != "shipped" && r.PaidAt != nil {
+		s.sendMail("shipped "+r.Reference, s.cfg.Shop.ShippedEmail(s.mailReservation(r, s.storefrontOrigin())))
 	}
 	return ok(reservationJSON(r)), nil
 }

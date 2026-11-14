@@ -8085,8 +8085,12 @@ public struct Client: APIProtocol {
             }
         )
     }
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -8149,6 +8153,95 @@ public struct Client: APIProtocol {
                         preconditionFailure("bestContentType chose an invalid content type.")
                     }
                     return .created(.init(body: body))
+                default:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Components.Responses.Problem.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/problem+json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/problem+json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.Problem.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .applicationProblemJson(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .`default`(
+                        statusCode: response.status.code,
+                        .init(body: body)
+                    )
+                }
+            }
+        )
+    }
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    public func getShopOrderStatus(_ input: Operations.GetShopOrderStatus.Input) async throws -> Operations.GetShopOrderStatus.Output {
+        try await client.send(
+            input: input,
+            forOperation: Operations.GetShopOrderStatus.id,
+            serializer: { input in
+                let path = try converter.renderedPath(
+                    template: "/v1/shop/orders/status",
+                    parameters: []
+                )
+                var request: HTTPTypes.HTTPRequest = .init(
+                    soar_path: path,
+                    method: .post
+                )
+                suppressMutabilityWarning(&request)
+                converter.setAcceptHeader(
+                    in: &request.headerFields,
+                    contentTypes: input.headers.accept
+                )
+                let body: OpenAPIRuntime.HTTPBody?
+                switch input.body {
+                case let .json(value):
+                    body = try converter.setRequiredRequestBodyAsJSON(
+                        value,
+                        headerFields: &request.headerFields,
+                        contentType: "application/json; charset=utf-8"
+                    )
+                }
+                return (request, body)
+            },
+            deserializer: { response, responseBody in
+                switch response.status.code {
+                case 200:
+                    let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
+                    let body: Operations.GetShopOrderStatus.Output.Ok.Body
+                    let chosenContentType = try converter.bestContentType(
+                        received: contentType,
+                        options: [
+                            "application/json"
+                        ]
+                    )
+                    switch chosenContentType {
+                    case "application/json":
+                        body = try await converter.getResponseBodyAsJSON(
+                            Components.Schemas.ShopReservationReceipt.self,
+                            from: responseBody,
+                            transforming: { value in
+                                .json(value)
+                            }
+                        )
+                    default:
+                        preconditionFailure("bestContentType chose an invalid content type.")
+                    }
+                    return .ok(.init(body: body))
                 default:
                     let contentType = converter.extractContentTypeIfPresent(in: response.headerFields)
                     let body: Components.Responses.Problem.Body

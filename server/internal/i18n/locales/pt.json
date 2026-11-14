@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "só quem criou ou um proprietário/administrador pode revogar este convite",
   "only the creator or an owner/admin can revoke this link": "só quem criou o link ou um proprietário/administrador pode revogá-lo",
   "some reservation details are not valid": "alguns dados da reserva não são válidos",
+  "the payment provider is not available; please try again": "o serviço de pagamento não está disponível; tente novamente",
   "this TV link is not valid": "este link para a TV não é válido",
   "operator access required": "é necessário acesso de operador",
   "owner only": "somente o proprietário",

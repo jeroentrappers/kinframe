@@ -10,7 +10,7 @@ import (
 )
 
 // Storefront domains (Config.Domains) serve the same web app as the main
-// origin, but as the brand's shop: landing page, /shop and /shop/cancel. The
+// origin, but as the brand's shop: landing page and the /shop pages. The
 // API, sign-in and the family app stay on KINFRAME_PUBLIC_URL.
 
 // HostName strips a port from a Host header value and lowercases it.

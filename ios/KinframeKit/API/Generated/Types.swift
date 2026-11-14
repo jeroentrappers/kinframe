@@ -569,8 +569,12 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/frame-app/apk/{versionCode}`.
     /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)`.
     func getFrameAppApk(_ input: Operations.GetFrameAppApk.Input) async throws -> Operations.GetFrameAppApk.Output
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -581,6 +585,14 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/shop/reservations`.
     /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)`.
     func createShopReservation(_ input: Operations.CreateShopReservation.Input) async throws -> Operations.CreateShopReservation.Output
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    func getShopOrderStatus(_ input: Operations.GetShopOrderStatus.Input) async throws -> Operations.GetShopOrderStatus.Output
     /// Cancels a reservation with the signed token from the link in the confirmation email (the web page
     /// `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
     /// invalid token or a deleted reservation.
@@ -1923,8 +1935,12 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -1939,6 +1955,22 @@ extension APIProtocol {
         body: Operations.CreateShopReservation.Input.Body
     ) async throws -> Operations.CreateShopReservation.Output {
         try await createShopReservation(Operations.CreateShopReservation.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    public func getShopOrderStatus(
+        headers: Operations.GetShopOrderStatus.Input.Headers = .init(),
+        body: Operations.GetShopOrderStatus.Input.Body
+    ) async throws -> Operations.GetShopOrderStatus.Output {
+        try await getShopOrderStatus(Operations.GetShopOrderStatus.Input(
             headers: headers,
             body: body
         ))

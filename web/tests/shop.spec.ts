@@ -199,4 +199,45 @@ test.describe('shop', () => {
 		await page.getByRole('button', { name: 'Download CSV' }).click();
 		expect((await download).suggestedFilename()).toMatch(/^reservations-\d{4}-\d{2}-\d{2}\.csv$/);
 	});
+
+	test('checkout: buy, delivery address, pay, paid order page', async ({ page }) => {
+		const state = emptyState();
+		state.discovery.shop = { ...shopFixture(), checkout: true };
+		await mockApi(page, state);
+		await page.goto('/');
+
+		const section = page.getByRole('region', { name: 'Get a kinframe' });
+		await expect(section.getByText('Pay securely online')).toBeVisible();
+		await expect(section.getByRole('link', { name: /Reserve/ })).toHaveCount(0);
+		await expect(page.getByTestId('seller-footer').getByRole('link', { name: 'Terms of sale' })).toHaveAttribute('href', '/shop/terms');
+		await section.getByRole('link', { name: 'Buy the kinframe 10.1"' }).click();
+		await expect(page.getByRole('heading', { name: 'Order your kinframe' })).toBeVisible();
+
+		await page.getByLabel('Name').fill('An Peeters');
+		await page.getByLabel('Email', { exact: true }).fill('an@example.org');
+		await page.getByLabel('Country').selectOption('BE');
+		await page.getByLabel('I accept the terms of sale of Example BV.').check();
+		await page.getByRole('button', { name: /^Order and pay/ }).click();
+		await expect(page.getByRole('alert')).toContainText('Enter your street and number.');
+		await expect(page.getByRole('alert')).toContainText('Enter your postal code.');
+		await expect(page.getByRole('alert')).toContainText('Enter your city.');
+
+		await page.getByLabel('Street and number').fill('Veldstraat 10');
+		await page.getByLabel('Postal code').fill('9000');
+		await page.getByLabel('City').fill('Gent');
+		await page.getByRole('button', { name: /^Order and pay/ }).click();
+
+		await expect(page).toHaveURL(/\/shop\/order\?token=tok-KF-01QM$/);
+		await expect(page.getByTestId('order-title')).toHaveText('Thank you! Your order is paid.');
+		await expect(page.getByTestId('order-reference')).toHaveText('KF-01QM');
+		await expect(page.getByText('We sent a confirmation to an@example.org', { exact: false })).toBeVisible();
+		const created = state.calls.find((c) => c.path === '/v1/shop/reservations')!.body as Record<string, unknown>;
+		expect(created).toMatchObject({ street: 'Veldstraat 10', postal_code: '9000', city: 'Gent' });
+		expect(state.reservations[0]!.payment_status).toBe('paid');
+
+		await page.goto('/shop/terms');
+		await expect(page.getByRole('heading', { name: 'Terms of sale', level: 1 })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Right of withdrawal (14 days)' })).toBeVisible();
+		await expect(page.getByTestId('legal-other-server')).toHaveCount(0);
+	});
 });

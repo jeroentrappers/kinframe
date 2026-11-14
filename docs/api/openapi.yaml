@@ -1682,8 +1682,12 @@ paths:
       operationId: createShopReservation
       security: []
       description: |
-        Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-        emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+        Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+        order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+        `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+        reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+        `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+        `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
         Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
         Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
         not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -1694,6 +1698,28 @@ paths:
         content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationCreate' } } }
       responses:
         '201': { description: Reserved, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationReceipt' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/shop/orders/status:
+    post:
+      tags: [shop]
+      operationId: getShopOrderStatus
+      security: []
+      description: |
+        The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+        signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+        also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, minLength: 10, maxLength: 200 }
+      responses:
+        '200': { description: The order, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationReceipt' } } } }
         default: { $ref: '#/components/responses/Problem' }
 
   /v1/shop/reservations/cancel:
@@ -1992,7 +2018,7 @@ components:
           items: { type: string }
           description: |
             Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-            `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+            `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
             sign-in and the family app live. Absent when the operator configured none.
           examples: [[shop.example.org]]
         default_locale:
@@ -2001,6 +2027,12 @@ components:
             Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
             the shop emails in). Defaults to `en`.
           examples: [nl]
+        checkout:
+          type: boolean
+          default: false
+          description: |
+            True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+            with a `checkout_url` to send the customer to. False: reservations without payment.
         seller:
           type: object
           required: [name, email]
@@ -2009,6 +2041,10 @@ components:
             email: { type: string, format: email }
             legal: { type: string, description: 'Legal line for the footer, e.g. company, address and VAT number.' }
             privacy_url: { type: string, format: uri }
+            terms_url: { type: string, format: uri, description: Terms of sale; absent = the web app's own page `/shop/terms`. }
+            address: { type: string, description: Seller's address (terms of sale). }
+            vat_number: { type: string }
+            phone: { type: string }
 
     ShopElsewhereLink:
       type: object
@@ -2055,7 +2091,12 @@ components:
 
     ShopReservationStatus:
       type: string
-      enum: [new, contacted, confirmed, cancelled]
+      enum: [new, contacted, confirmed, shipped, cancelled]
+
+    ShopPaymentStatus:
+      type: string
+      description: The payment at the provider (shops with `checkout`); `paid` confirms the order.
+      enum: [open, pending, authorized, paid, failed, canceled, expired]
 
     ShopReservationCreate:
       type: object
@@ -2065,6 +2106,9 @@ components:
         email: { type: string, maxLength: 254 }
         country: { type: string, minLength: 2, maxLength: 2, examples: [BE] }
         postal_code: { type: string, maxLength: 12 }
+        street: { type: string, maxLength: 200, description: Street and number (required when the shop has `checkout`). }
+        city: { type: string, maxLength: 100, description: Required when the shop has `checkout`. }
+        phone: { type: string, maxLength: 30, description: Optional, for the delivery. }
         items:
           type: array
           maxItems: 20
@@ -2076,7 +2120,11 @@ components:
               quantity: { type: integer, minimum: 1, maximum: 99 }
         note: { type: string, maxLength: 1000 }
         locale: { type: string, maxLength: 35, description: Language for the emails (falls back to English), examples: [nl] }
-        consent: { type: boolean, description: Must be true. The customer agrees to be contacted about this reservation. }
+        consent:
+          type: boolean
+          description: |
+            Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+            `checkout`: the customer accepts the terms of sale.
         website: { type: string, maxLength: 200, description: Honeypot; leave empty. }
 
     ShopLine:
@@ -2101,6 +2149,13 @@ components:
         shipping_cents: { type: integer }
         total_cents: { type: integer }
         currency: { type: string }
+        payment_status: { $ref: '#/components/schemas/ShopPaymentStatus' }
+        checkout_url:
+          type: [string, 'null']
+          format: uri
+          description: |
+            Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+            final.
 
     ShopReservation:
       type: object
@@ -2124,6 +2179,12 @@ components:
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
         cancelled_at: { type: [string, 'null'], format: date-time }
+        street: { type: [string, 'null'] }
+        city: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        payment_status: { $ref: '#/components/schemas/ShopPaymentStatus' }
+        paid_at: { type: [string, 'null'], format: date-time }
+        shipped_at: { type: [string, 'null'], format: date-time }
 
     Limits:
       type: object

@@ -95,6 +95,7 @@
   "only the creator or an owner/admin can revoke this invite": "bu daveti yalnızca oluşturan kişi veya bir sahip/yönetici iptal edebilir",
   "only the creator or an owner/admin can revoke this link": "bu bağlantıyı yalnızca oluşturan kişi ya da bir sahip/yönetici iptal edebilir",
   "some reservation details are not valid": "rezervasyon bilgilerinin bazıları geçerli değil",
+  "the payment provider is not available; please try again": "ödeme hizmeti kullanılamıyor; lütfen tekrar deneyin",
   "this TV link is not valid": "bu TV bağlantısı geçerli değil",
   "operator access required": "sunucu yöneticisi erişimi gerekli",
   "owner only": "yalnızca sahip",

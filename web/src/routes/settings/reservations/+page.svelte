@@ -1,11 +1,12 @@
 <script lang="ts">
-	// Operator view of the shop's pre-order reservations: filter, status, internal notes and a CSV export.
+	// Operator view of the shop's reservations, or its orders when the shop takes payment (checkout): filter, status,
+	// internal notes and a CSV export. Orders show the delivery address and payment; unpaid ones are hidden by default.
 	import { api, authFetch, call } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { problemMessage } from '$lib/problem';
-	import { countryName, formatMoney, RESERVATION_STATUSES, type ShopReservation, type ShopReservationStatus } from '$lib/shop';
+	import { countryName, formatMoney, ORDER_STATUSES, RESERVATION_STATUSES, type ShopReservation, type ShopReservationStatus } from '$lib/shop';
 	import { toasts } from '$lib/toast.svelte';
 	import Icon from '$components/Icon.svelte';
 
@@ -15,6 +16,14 @@
 	let error = $state<string | null>(null);
 	let notes = $state<Record<string, string>>({});
 	let downloading = $state(false);
+	const checkout = $derived(!!discovery.shop?.checkout);
+	const statuses = $derived(checkout ? ORDER_STATUSES : RESERVATION_STATUSES);
+	/** The status choices for one entry: its own status stays selectable (older reservations can be "contacted"). */
+	const choices = (r: ShopReservation) => (statuses.includes(r.status) ? statuses : [...statuses, r.status]);
+	let showUnpaid = $state(false);
+	const unpaid = (r: ShopReservation) => r.payment_status != null && r.payment_status !== 'paid';
+	const shown = $derived(list?.filter((r) => showUnpaid || !unpaid(r)) ?? null);
+	const hiddenCount = $derived((list?.length ?? 0) - (shown?.length ?? 0));
 
 	async function load() {
 		error = null;
@@ -65,13 +74,13 @@
 	const frames = (r: ShopReservation) => r.items.reduce((a, l) => a + l.quantity, 0);
 </script>
 
-<svelte:head><title>{t('reservations.title')} · kinframe</title></svelte:head>
+<svelte:head><title>{checkout ? t('reservations.titleOrders') : t('reservations.title')} · kinframe</title></svelte:head>
 
 <div class="container page">
 	<div class="page-header">
 		<div>
 			<a class="back" href="/settings"><Icon name="chevronLeft" size={18} />{t('settings.title')}</a>
-			<h1>{t('reservations.title')}</h1>
+			<h1>{checkout ? t('reservations.titleOrders') : t('reservations.title')}</h1>
 		</div>
 	</div>
 
@@ -84,13 +93,16 @@
 				<span class="label">{t('reservations.filterLabel')}</span>
 				<select class="select" bind:value={filter}>
 					<option value="">{t('reservations.filterAll')}</option>
-					{#each RESERVATION_STATUSES as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
+					{#each statuses as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
 				</select>
 			</label>
-			{#if list}
+			{#if shown}
 				<span class="muted small num">
-					{list.length} · {t('reservations.framesCount', { count: list.filter((r) => r.status !== 'cancelled').reduce((a, r) => a + frames(r), 0) })}
+					{shown.length} · {t('reservations.framesCount', { count: shown.filter((r) => r.status !== 'cancelled').reduce((a, r) => a + frames(r), 0) })}
 				</span>
+			{/if}
+			{#if checkout}
+				<label class="unpaid-toggle small"><input type="checkbox" bind:checked={showUnpaid} />{t('reservations.showUnpaid')}</label>
 			{/if}
 			<div class="spacer"></div>
 			<button class="btn" onclick={download} disabled={downloading}>
@@ -103,22 +115,35 @@
 			<p class="callout callout-error" role="alert">{error}</p>
 		{:else if list === null}
 			<div class="skeleton" style="height: 120px"></div>
-		{:else if list.length === 0}
+		{:else if !shown || shown.length === 0}
 			<p class="card card-pad muted">{filter ? t('reservations.emptyFilter') : t('reservations.empty')}</p>
+			{#if hiddenCount > 0}<p class="muted small">{t('reservations.unpaidHidden')}</p>{/if}
 		{:else}
+			{#if hiddenCount > 0}<p class="muted small">{t('reservations.unpaidHidden')}</p>{/if}
 			<ul class="list">
-				{#each list as r (r.id)}
+				{#each shown as r (r.id)}
 					<li class="card card-pad res" data-testid="reservation">
 						<div class="res-head">
 							<strong class="ref">{r.reference}</strong>
 							<span class="badge status-{r.status}">{t(`reservations.status.${r.status}`)}</span>
-							<span class="faint small">{t('reservations.reservedOn', { date: date(r.created_at) })}</span>
+							{#if r.payment_status}
+								<span class="badge pay-{r.payment_status}" data-testid="payment-status">{t(`reservations.payment.${r.payment_status}`)}</span>
+							{/if}
+							<span class="faint small">{r.paid_at ? t('reservations.paidOn', { date: date(r.paid_at) }) : t('reservations.reservedOn', { date: date(r.created_at) })}</span>
 						</div>
 						<div class="res-grid">
 							<div>
 								<p class="who">{r.name}</p>
 								<p><a href="mailto:{r.email}?subject={encodeURIComponent(r.reference)}">{r.email}</a></p>
-								<p class="muted small">{countryName(r.country, i18n.tag)}{r.postal_code ? ` · ${r.postal_code}` : ''} · {r.locale}</p>
+								{#if r.street}
+									<p class="address small" aria-label={t('reservations.address')}>
+										{r.street}<br />{r.postal_code} {r.city}<br />{countryName(r.country, i18n.tag)}
+									</p>
+									{#if r.phone}<p class="small">{t('reservations.phone')}: <a href="tel:{r.phone}">{r.phone}</a></p>{/if}
+									<p class="muted small">{r.locale}</p>
+								{:else}
+									<p class="muted small">{countryName(r.country, i18n.tag)}{r.postal_code ? ` · ${r.postal_code}` : ''} · {r.locale}</p>
+								{/if}
 							</div>
 							<div>
 								{#each r.items as l (l.product_id)}<p>{l.quantity} × {l.name}</p>{/each}
@@ -133,7 +158,7 @@
 							<label class="field">
 								<span class="label">{t('reservations.statusLabel')}</span>
 								<select class="select" value={r.status} onchange={(e) => update(r, { status: e.currentTarget.value as ShopReservationStatus })}>
-									{#each RESERVATION_STATUSES as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
+									{#each choices(r) as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
 								</select>
 							</label>
 							<div class="field grow">
@@ -157,6 +182,24 @@
 </div>
 
 <style>
+	.unpaid-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.address {
+		margin: 4px 0;
+	}
+	.pay-paid {
+		background: var(--accent-soft);
+		color: var(--accent);
+	}
+	.pay-open,
+	.pay-pending,
+	.pay-authorized {
+		background: var(--warn-soft);
+		color: var(--warn);
+	}
 	.back {
 		display: inline-flex;
 		align-items: center;
@@ -213,7 +256,8 @@
 		background: var(--warn-soft);
 		color: var(--warn);
 	}
-	.status-confirmed {
+	.status-confirmed,
+	.status-shipped {
 		background: var(--accent-soft);
 		color: var(--accent-text);
 	}
