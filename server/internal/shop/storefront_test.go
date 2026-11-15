@@ -85,6 +85,33 @@ func TestStorefrontIndex(t *testing.T) {
 	if strings.Contains(out, "kinframe") || strings.Index(out, "og:title") > strings.Index(out, "</head>") {
 		t.Errorf("storefront index:\n%s", out)
 	}
+	// The shop as plain HTML for visitors without JavaScript.
+	nos := out[strings.Index(out, "<noscript>"):]
+	for _, want := range []string{
+		"<noscript><main", "<h1>Kader &amp; Co: het fotokader", "Reserveren", "incl. 21% btw", "/shop/terms", "Verkoper",
+	} {
+		if !strings.Contains(nos, want) {
+			t.Errorf("noscript missing %s in\n%s", want, nos)
+		}
+	}
+	if strings.Index(out, "<noscript>") < strings.Index(out, "<body>") {
+		t.Errorf("noscript outside body:\n%s", out)
+	}
+	// With online payment: order, not reserve, and the payment methods.
+	paid, err := Parse([]byte(strings.Replace(sample, "  legal: Example BV · VAT BE0123.456.789\n",
+		"  legal: Example BV · VAT BE0123.456.789\n  address: Kerkstraat 1, 9000 Gent\n  vat_number: BE0123456789\n", 1)+"domains: [shop.example.org]\npayments: { provider: mollie, methods: [bancontact, creditcard, applepay] }\n"), "kinframe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, desc := paid.StorefrontMeta("nl"); !strings.HasSuffix(desc, "Bestel online en betaal veilig.") {
+		t.Errorf("checkout description %q", desc)
+	}
+	po := string(paid.StorefrontIndex(index, "https://shop.example.org", "nl"))
+	for _, want := range []string{"Bestellen", "Betalen: Bancontact, kredietkaart, Apple Pay."} {
+		if !strings.Contains(po, want) {
+			t.Errorf("checkout noscript missing %s", want)
+		}
+	}
 	// Unknown languages fall back to English texts.
 	if title, _ := c.StorefrontMeta("ja"); title != "Kader & Co: the photo frame for the whole family" {
 		t.Errorf("fallback title %q", title)

@@ -65,16 +65,32 @@ var storefrontTexts = map[string][2]string{
 		"Schick Fotos vom Handy, und Sekunden später sind sie auf dem Rahmen. Einfach für Oma und Opa, ohne Abo. Jetzt reservieren, später bezahlen."},
 }
 
+// storefrontOrderNow replaces the "reserve now, pay later" sentence when
+// orders are paid online.
+var storefrontOrderNow = map[string][2]string{
+	"en": {"Reserve now, pay later.", "Order online and pay securely."},
+	"nl": {"Nu reserveren, later betalen.", "Bestel online en betaal veilig."},
+	"fr": {"Réservez maintenant, payez plus tard.", "Commandez en ligne et payez en toute sécurité."},
+	"de": {"Jetzt reservieren, später bezahlen.", "Online bestellen und sicher bezahlen."},
+}
+
 // StorefrontMeta is the storefront's page title and description in lang.
 func (c *Config) StorefrontMeta(lang string) (title, description string) {
-	tx := storefrontTexts[emailLang(lang)]
-	return strings.ReplaceAll(tx[0], "{brand}", c.Brand), tx[1]
+	l := emailLang(lang)
+	tx := storefrontTexts[l]
+	description = tx[1]
+	if c.Checkout() {
+		r := storefrontOrderNow[l]
+		description = strings.Replace(description, r[0], r[1], 1)
+	}
+	return strings.ReplaceAll(tx[0], "{brand}", c.Brand), description
 }
 
 var (
 	titleRe = regexp.MustCompile(`<title>[^<]*</title>`)
 	descRe  = regexp.MustCompile(`<meta name="description" content="[^"]*"\s*/?>`)
 	langRe  = regexp.MustCompile(`<html lang="[^"]*"`)
+	bodyRe  = regexp.MustCompile(`<body[^>]*>`)
 )
 
 // StorefrontIndex rewrites the web app's index.html for a storefront host:
@@ -97,5 +113,126 @@ func (c *Config) StorefrontIndex(index []byte, origin, lang string) []byte {
 	if i := strings.Index(s, "</head>"); i >= 0 {
 		s = s[:i] + og + s[i:]
 	}
+	if loc := bodyRe.FindStringIndex(s); loc != nil {
+		s = s[:loc[1]] + c.storefrontNoscript(lang, title, desc) + s[loc[1]:]
+	}
 	return []byte(s)
+}
+
+// noscriptTexts label the storefront's plain HTML version.
+var noscriptTexts = map[string]map[string]string{
+	"en": {
+		"products": "Our frames", "vat": "incl. {vat}% VAT", "order": "Order", "reserve": "Reserve",
+		"shipping": "Delivery in {countries}. Shipping {flat}, free from {free}.", "shippingFlat": "Delivery in {countries}. Shipping {flat}.",
+		"pay": "Payment: {methods}.", "seller": "Seller", "terms": "Terms of sale", "privacy": "Privacy",
+		"js": "This shop works best with JavaScript turned on.", "creditcard": "credit card",
+	},
+	"nl": {
+		"products": "Onze fotokaders", "vat": "incl. {vat}% btw", "order": "Bestellen", "reserve": "Reserveren",
+		"shipping": "Levering in {countries}. Verzending {flat}, gratis vanaf {free}.", "shippingFlat": "Levering in {countries}. Verzending {flat}.",
+		"pay": "Betalen: {methods}.", "seller": "Verkoper", "terms": "Verkoopsvoorwaarden", "privacy": "Privacy",
+		"js": "Deze winkel werkt het best met JavaScript ingeschakeld.", "creditcard": "kredietkaart",
+	},
+	"fr": {
+		"products": "Nos cadres", "vat": "TVA {vat} % incl.", "order": "Commander", "reserve": "Réserver",
+		"shipping": "Livraison en {countries}. Frais d’envoi {flat}, gratuits dès {free}.", "shippingFlat": "Livraison en {countries}. Frais d’envoi {flat}.",
+		"pay": "Paiement : {methods}.", "seller": "Vendeur", "terms": "Conditions de vente", "privacy": "Vie privée",
+		"js": "Cette boutique fonctionne mieux avec JavaScript activé.", "creditcard": "carte de crédit",
+	},
+	"de": {
+		"products": "Unsere Fotorahmen", "vat": "inkl. {vat} % MwSt.", "order": "Bestellen", "reserve": "Reservieren",
+		"shipping": "Lieferung nach {countries}. Versand {flat}, kostenlos ab {free}.", "shippingFlat": "Lieferung nach {countries}. Versand {flat}.",
+		"pay": "Zahlung: {methods}.", "seller": "Verkäufer", "terms": "AGB", "privacy": "Datenschutz",
+		"js": "Dieser Shop funktioniert am besten mit aktiviertem JavaScript.", "creditcard": "Kreditkarte",
+	},
+}
+
+// methodNames are the payment methods' display names (creditcard is translated).
+var methodNames = map[string]string{
+	"bancontact": "Bancontact", "applepay": "Apple Pay", "googlepay": "Google Pay", "ideal": "iDEAL",
+	"paypal": "PayPal", "kbc": "KBC/CBC", "belfius": "Belfius", "banktransfer": "SEPA", "klarna": "Klarna",
+}
+
+// storefrontNoscript is the shop as plain HTML for visitors and checkers that
+// don't run the web app: products and prices, shipping, payment and the
+// seller's details with the terms and privacy links.
+func (c *Config) storefrontNoscript(lang, title, desc string) string {
+	l := emailLang(lang)
+	tx := noscriptTexts[l]
+	e := html.EscapeString
+	money := func(cents int) string { return Money(cents, c.Currency, l) }
+	var b strings.Builder
+	b.WriteString(`<noscript><main style="max-width:40rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5">`)
+	b.WriteString("<h1>" + e(title) + "</h1><p>" + e(desc) + "</p>")
+	b.WriteString("<h2>" + e(tx["products"]) + "</h2>")
+	action := tx["reserve"]
+	if c.Checkout() {
+		action = tx["order"]
+	}
+	for _, p := range c.Products {
+		b.WriteString("<section><h3>" + e(p.Name) + "</h3>")
+		if len(p.Photos) > 0 {
+			b.WriteString(`<img src="/v1/shop/media/` + e(p.Photos[0]) + `" alt="` + e(p.Name) + `" width="320" style="max-width:100%;height:auto">`)
+		}
+		b.WriteString("<p><strong>" + e(money(p.PriceCents)) + "</strong> " + e(fill(tx["vat"], map[string]string{"vat": c.vat()})) + "</p><ul>")
+		for _, spec := range p.SpecsFor(l) {
+			b.WriteString("<li>" + e(spec) + "</li>")
+		}
+		b.WriteString(`</ul><p><a href="/shop">` + e(action) + "</a></p></section>")
+	}
+	countries := make([]string, len(c.Shipping.Countries))
+	for i, cc := range c.Shipping.Countries {
+		countries[i] = CountryName(cc, l)
+	}
+	args := map[string]string{"countries": strings.Join(countries, ", "), "flat": money(c.Shipping.FlatCents)}
+	ship := tx["shippingFlat"]
+	if c.Shipping.FreeFromCents != nil {
+		args["free"] = money(*c.Shipping.FreeFromCents)
+		ship = tx["shipping"]
+	}
+	b.WriteString("<p>" + e(fill(ship, args)))
+	if c.Payments != nil && len(c.Payments.Methods) > 0 {
+		names := make([]string, 0, len(c.Payments.Methods))
+		for _, m := range c.Payments.Methods {
+			switch n, ok := methodNames[m]; {
+			case m == "creditcard":
+				names = append(names, tx["creditcard"])
+			case ok:
+				names = append(names, n)
+			default:
+				names = append(names, m)
+			}
+		}
+		b.WriteString(" " + e(fill(tx["pay"], map[string]string{"methods": strings.Join(names, ", ")})))
+	}
+	b.WriteString("</p>")
+	s := c.Seller
+	b.WriteString("<h2>" + e(tx["seller"]) + "</h2><p>" + e(s.Name))
+	if s.Legal != "" {
+		b.WriteString("<br>" + e(s.Legal))
+	} else {
+		if s.Address != "" {
+			b.WriteString("<br>" + e(s.Address))
+		}
+		if s.VATNumber != "" {
+			b.WriteString("<br>" + e(s.VATNumber))
+		}
+	}
+	if s.Email != "" {
+		b.WriteString(`<br><a href="mailto:` + e(s.Email) + `">` + e(s.Email) + "</a>")
+	}
+	if s.Phone != "" {
+		b.WriteString(`<br><a href="tel:` + e(strings.ReplaceAll(s.Phone, " ", "")) + `">` + e(s.Phone) + "</a>")
+	}
+	terms := s.TermsURL
+	if terms == "" {
+		terms = "/shop/terms"
+	}
+	privacy := s.PrivacyURL
+	if privacy == "" {
+		privacy = "/privacy"
+	}
+	b.WriteString(`</p><p><a href="` + e(terms) + `">` + e(tx["terms"]) + `</a> · <a href="` + e(privacy) + `">` + e(tx["privacy"]) + "</a></p>")
+	b.WriteString("<p><small>" + e(tx["js"]) + "</small></p></main></noscript>")
+	return b.String()
 }
