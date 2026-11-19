@@ -16,83 +16,93 @@
         <item quantity="one">%1$d week stil</item>
         <item quantity="other">%1$d weken stil</item>
     </plurals>
-    <string name="engagement_last_shared_by">Laatst gedeeld door %1$s, %2$s</string>
+    <string name="engagement_last_shared_by">Laatst van %1$s, %2$s</string>
     <string name="engagement_send_to">Stuur iets naar %1$s</string>
     <string name="engagement_pick_photos">Foto’s kiezen</string>
+    <!-- Android only: no web key -->
     <string name="engagement_pick_photos_hint">De foto’s die je onlangs nam, staan bovenaan. Er verlaat niets je telefoon tot je het kiest.</string>
     <string name="engagement_open_frame">Het kader openen</string>
 
     <!-- Photo requests -->
     <string name="engagement_frame_would_like">%1$s wil graag nieuwe foto’s 💛</string>
     <string name="engagement_request_open">%1$s vroeg %2$s om nieuwe foto’s.</string>
-    <string name="engagement_request_answered">%1$s antwoordde met nieuwe foto’s.</string>
+    <string name="engagement_request_answered">%1$s heeft al nieuwe foto’s gestuurd.</string>
+    <!-- Android only: no web key -->
     <string name="engagement_request_expired">Niemand antwoordde op de laatste vraag.</string>
 
     <!-- Streak -->
+    <!-- Android only: no web key -->
     <string name="engagement_streak_short">🔥 %1$d wk</string>
     <plurals name="engagement_streak_weeks">
         <item quantity="one">🔥 %1$d week</item>
         <item quantity="other">🔥 %1$d weken</item>
     </plurals>
-    <string name="engagement_streak_new">Nieuwe reeks: deel deze week</string>
+    <string name="engagement_streak_new">Nieuwe reeks</string>
     <plurals name="engagement_streak_week_progress">
         <item quantity="one">%1$d van %2$d foto deze week</item>
         <item quantity="other">%1$d van %2$d foto’s deze week</item>
     </plurals>
     <string name="engagement_streak_met">Het doel van deze week is gehaald</string>
+    <!-- Android only: no web key -->
     <string name="engagement_streak_helpers">Wie deze week deelde</string>
     <string name="engagement_streak_best">Beste: %1$d weken</string>
     <plurals name="engagement_freezes">
-        <item quantity="one">%1$d keer een gemiste week vergeven</item>
-        <item quantity="other">%1$d keer een gemiste week vergeven</item>
+        <item quantity="one">Nog %1$d vrije week voor vakanties</item>
+        <item quantity="other">Nog %1$d vrije weken voor vakanties</item>
     </plurals>
+    <!-- Android only: no web key -->
     <string name="engagement_streak_off">Deze familie houdt geen reeks bij.</string>
     <string name="engagement_streak_and_prompts">Reeks en thema’s</string>
     <string name="engagement_family_title">%1$s: samen delen</string>
 
     <!-- Prompts -->
-    <string name="engagement_prompts">Thema van de week</string>
+    <string name="engagement_prompts">Weekthema</string>
     <string name="engagement_prompt_this_week">Deze week in %1$s</string>
     <string name="engagement_prompt_current">Deze week</string>
-    <string name="engagement_prompt_answer">Antwoord met een foto</string>
+    <string name="engagement_prompt_answer">Antwoorden met een foto</string>
     <plurals name="engagement_prompt_answers">
-        <item quantity="one">%1$d antwoord tot nu toe</item>
-        <item quantity="other">%1$d antwoorden tot nu toe</item>
+        <item quantity="one">%1$d antwoord</item>
+        <item quantity="other">%1$d antwoorden</item>
     </plurals>
     <plurals name="engagement_answers_to">
         <item quantity="one">%1$d antwoord op “%2$s”</item>
         <item quantity="other">%1$d antwoorden op “%2$s”</item>
     </plurals>
-    <string name="engagement_answers_prompt">Antwoord op “%1$s”</string>
+    <string name="engagement_answers_prompt">Antwoordt op “%1$s”</string>
+    <!-- Android only: no web key -->
     <string name="engagement_prompt_change">Thema van deze week wijzigen</string>
     <string name="engagement_prompt_week_of">Week van %1$s</string>
-    <string name="engagement_prompt_skipped_week">Geen thema deze week</string>
+    <string name="engagement_prompt_skipped_week">Geen thema</string>
+    <!-- Android only: no web key -->
     <string name="engagement_prompt_choose">Kies een thema</string>
-    <string name="engagement_prompt_own">Je eigen thema</string>
-    <string name="engagement_prompt_own_placeholder">bv. Je zondagse ontbijt</string>
+    <string name="engagement_prompt_own">Zelf schrijven</string>
+    <string name="engagement_prompt_own_placeholder">Je lievelingsplekje in de tuin</string>
+    <!-- Android only: no web key -->
     <string name="engagement_prompt_use_own">Dit gebruiken</string>
-    <string name="engagement_prompt_skip">Deze week overslaan</string>
-    <string name="engagement_prompt_reset_button">Terug naar het gewone</string>
+    <string name="engagement_prompt_skip">Overslaan</string>
+    <string name="engagement_prompt_reset_button">Terugzetten</string>
+    <!-- Android only: no web key -->
     <string name="engagement_prompt_set">Thema ingesteld</string>
     <string name="engagement_prompt_skipped">Geen thema die week</string>
-    <string name="engagement_prompt_reset">Terug naar het thema van de server</string>
+    <string name="engagement_prompt_reset">Terug naar de keuze van kinframe</string>
 
     <!-- Family settings -->
-    <string name="engagement_family_settings">Instellingen voor de familie</string>
-    <string name="engagement_setting_streak">Reeks van de familie</string>
-    <string name="engagement_setting_streak_hint">Tel de weken op rij dat de familie samen haar doel haalt. Niemand wordt gerangschikt.</string>
+    <string name="engagement_family_settings">Aanmoediging</string>
+    <string name="engagement_setting_streak">Familiereeks</string>
+    <string name="engagement_setting_streak_hint">Tel de weken op rij dat de familie samen foto’s deelt. Niemand wordt vergeleken.</string>
     <plurals name="engagement_setting_goal">
-        <item quantity="one">Doel: %1$d foto per week</item>
-        <item quantity="other">Doel: %1$d foto’s per week</item>
+        <item quantity="one">De familie deelt samen minstens %1$d foto per week.</item>
+        <item quantity="other">De familie deelt samen minstens %1$d foto’s per week.</item>
     </plurals>
-    <string name="engagement_setting_prompts">Thema van de week</string>
-    <string name="engagement_setting_prompts_hint">Op maandag een kort thema, zoals “Iets wat je kookte”.</string>
+    <string name="engagement_setting_prompts">Weekthema</string>
+    <string name="engagement_setting_prompts_hint">Elke maandag een klein thema, zoals “Iets wat je gekookt hebt”.</string>
     <string name="engagement_setting_recap">Maandoverzicht</string>
-    <string name="engagement_setting_recap_hint">Op de 1e een kaart in de familiechat met de maand in foto’s.</string>
+    <string name="engagement_setting_recap_hint">Op de 1e van de maand een kaartje in de familiechat over de vorige maand.</string>
     <plurals name="engagement_setting_quiet">
-        <item quantity="one">Herinner iemand voorzichtig als een kader %1$d dag geen nieuwe foto’s kreeg</item>
-        <item quantity="other">Herinner iemand voorzichtig als een kader %1$d dagen geen nieuwe foto’s kreeg</item>
+        <item quantity="one">Een kader dat %1$d dag geen nieuwe foto’s kreeg, krijgt een zachte herinnering.</item>
+        <item quantity="other">Een kader dat %1$d dagen geen nieuwe foto’s kreeg, krijgt een zachte herinnering.</item>
     </plurals>
+    <!-- Android only: no web key -->
     <string name="engagement_setting_timezone">Weken lopen volgens de tijd van %1$s.</string>
     <string name="engagement_setting_timezone_use">%1$s gebruiken</string>
 
@@ -103,32 +113,34 @@
         <item quantity="other">%1$d jaar geleden in %2$s</item>
     </plurals>
     <string name="engagement_share_again">Opnieuw delen</string>
+    <!-- Android only: no web key -->
     <string name="engagement_share_again_none">Deze foto’s zijn van iemand anders; deel ze in een chat.</string>
     <string name="engagement_milestone_new">Een mijlpaal, alleen voor jou</string>
-    <string name="engagement_auto_reduced">Je deed niets met de laatste herinneringen, dus we sturen er minder. Je kunt dat altijd wijzigen bij Instellingen.</string>
+    <string name="engagement_auto_reduced">We sturen je nu minder herinneringen, omdat de laatste je niet goed uitkwamen. Je kunt dat hier aanpassen.</string>
+    <!-- Android only: no web key -->
     <string name="engagement_reminder_settings">Instellingen voor herinneringen</string>
 
     <!-- Weekly summary and recap -->
-    <string name="engagement_summary_title">Je week in foto’s</string>
+    <string name="engagement_summary_title">Jouw week</string>
     <string name="engagement_summary_week">Week van %1$s</string>
     <plurals name="engagement_summary_seen">
         <item quantity="one">Je foto’s werden %1$d keer bekeken op %2$d kaders.</item>
         <item quantity="other">Je foto’s werden %1$d keer bekeken op %2$d kaders.</item>
     </plurals>
     <plurals name="engagement_summary_loved">
-        <item quantity="one">De kaders vonden er %1$d mooi.</item>
-        <item quantity="other">De kaders vonden er %1$d mooi.</item>
+        <item quantity="one">%1$d hartje van de kaders ❤️</item>
+        <item quantity="other">%1$d hartjes van de kaders ❤️</item>
     </plurals>
     <plurals name="engagement_summary_reactions">
-        <item quantity="one">%1$d reactie</item>
-        <item quantity="other">%1$d reacties</item>
+        <item quantity="one">%1$d reactie van de familie</item>
+        <item quantity="other">%1$d reacties van de familie</item>
     </plurals>
     <plurals name="engagement_summary_comments">
         <item quantity="one">%1$d opmerking</item>
         <item quantity="other">%1$d opmerkingen</item>
     </plurals>
     <string name="engagement_recap">Maandoverzicht</string>
-    <string name="engagement_recap_title">%1$s in foto’s</string>
+    <string name="engagement_recap_title">De familie in %1$s</string>
     <plurals name="engagement_recap_photos">
         <item quantity="one">%1$d foto</item>
         <item quantity="other">%1$d foto’s</item>
@@ -142,7 +154,8 @@
         <item quantity="other">%1$d mensen deelden</item>
     </plurals>
     <string name="engagement_recap_most_loved">Meest geliefd</string>
-    <string name="engagement_recap_freshest">De meest verse kaders</string>
+    <string name="engagement_recap_freshest">Kaders met de nieuwste foto’s</string>
+    <!-- Android only: no web key -->
     <plurals name="engagement_recap_frame_days">
         <item quantity="one">%1$s: nieuwe foto’s op %2$d dag</item>
         <item quantity="other">%1$s: nieuwe foto’s op %2$d dagen</item>
@@ -150,61 +163,67 @@
     <string name="engagement_recap_new_members">Nieuw in de familie</string>
 
     <!-- Milestones -->
-    <string name="engagement_milestones">Mijn mijlpalen</string>
-    <string name="engagement_milestones_lede">Alleen voor jou, tenzij je er een op je profiel toont.</string>
+    <string name="engagement_milestones">Mijlpalen</string>
+    <string name="engagement_milestones_lede">Alleen jij ziet deze, tenzij je er een op je profiel wilt tonen.</string>
+    <!-- Android only: no web key -->
     <string name="engagement_milestones_none">Je eerste mijlpaal komt met je eerste foto.</string>
     <string name="engagement_milestone_show">Op mijn profiel tonen</string>
+    <!-- Android only: no web key -->
     <string name="engagement_milestone_show_hint">Wie een familie of een kader met je deelt, kan die zien.</string>
-    <string name="engagement_milestone_first_photo">Je eerste foto</string>
+    <string name="engagement_milestone_first_photo">Je deelde je eerste foto</string>
     <string name="engagement_milestone_photos_10">10 foto’s gedeeld</string>
     <string name="engagement_milestone_photos_100">100 foto’s gedeeld</string>
-    <string name="engagement_milestone_photos_1000">1000 foto’s gedeeld</string>
+    <string name="engagement_milestone_photos_1000">1.000 foto’s gedeeld</string>
     <string name="engagement_milestone_first_video">Je eerste video</string>
     <string name="engagement_milestone_year">Een jaar lang gedeeld</string>
-    <string name="engagement_milestone_loves_100">100 ❤ van de kaders</string>
+    <string name="engagement_milestone_loves_100">100 hartjes van de kaders</string>
+    <!-- Android only: no web key -->
     <string name="engagement_milestone_other">Een mijlpaal</string>
 
     <!-- Settings: reminders -->
+    <!-- Android only: no web key -->
     <string name="engagement_settings_title">Herinneringen en chats</string>
     <string name="engagement_settings_lede">Zachte herinneringen om te delen, het weekoverzicht, de samenvatting per e-mail, leesbevestigingen en geblokkeerde mensen.</string>
     <string name="engagement_settings_open">Herinneringen en meldingen</string>
     <string name="engagement_reminders">Herinneringen</string>
-    <string name="engagement_reminders_lede">Een paar concrete duwtjes, zoals “Het kader van Opa kreeg al 9 dagen geen nieuwe foto’s”. Hooguit twee per week, nooit ’s nachts.</string>
+    <string name="engagement_reminders_lede">Af en toe laat kinframe je weten dat een kader stil wordt. Nooit meer dan twee keer per week.</string>
     <string name="engagement_level_normal">Normaal</string>
     <string name="engagement_level_fewer">Minder</string>
     <string name="engagement_level_off">Uit</string>
-    <string name="engagement_level_normal_hint">Hooguit twee herinneringen per week.</string>
-    <string name="engagement_level_fewer_hint">Hooguit één per week, en geen herinneringen over de reeks.</string>
-    <string name="engagement_level_off_hint">Geen herinneringen. Kaders die om foto’s vragen, volgen de schakelaar hieronder.</string>
-    <string name="engagement_snooze_month">Een maand uitstellen</string>
-    <string name="engagement_snoozed">Herinneringen een maand uitgesteld</string>
-    <string name="engagement_snoozed_until">Herinneringen zijn uitgesteld tot %1$s.</string>
-    <string name="engagement_snooze_end">Uitstel beëindigen</string>
+    <string name="engagement_level_normal_hint">Hoogstens twee herinneringen per week.</string>
+    <string name="engagement_level_fewer_hint">Hoogstens één per week, en geen herinneringen over de reeks.</string>
+    <string name="engagement_level_off_hint">Geen herinneringen. Vragen van een kader komen nog wel, tenzij je ze hieronder uitzet.</string>
+    <string name="engagement_snooze_month">1 maand pauzeren</string>
+    <string name="engagement_snoozed">Herinneringen een maand gepauzeerd</string>
+    <string name="engagement_snoozed_until">Gepauzeerd tot %1$s</string>
+    <string name="engagement_snooze_end">Pauze beëindigen</string>
+    <!-- Android only: no web key -->
     <string name="engagement_snooze_ended">Herinneringen staan weer aan</string>
     <string name="engagement_frame_requests">Als een kader om foto’s vraagt</string>
-    <string name="engagement_frame_requests_hint">“Oma wil graag nieuwe foto’s 💛”, verstuurd vanop het kader zelf.</string>
-    <string name="engagement_weekly_summary">Weekoverzicht</string>
-    <string name="engagement_weekly_summary_hint">Op zondagavond: hoe vaak je foto’s bekeken en geliefd werden.</string>
+    <string name="engagement_frame_requests_hint">Oma tikt op haar kader op “Vraag om nieuwe foto’s”.</string>
+    <string name="engagement_weekly_summary">Wekelijks overzicht</string>
+    <string name="engagement_weekly_summary_hint">Op zondag: hoe vaak je foto’s bekeken werden en een hartje kregen.</string>
     <string name="engagement_birthday_reminders">Herinneringen voor verjaardagen</string>
-    <string name="engagement_birthday_reminders_hint">Drie dagen voor een verjaardag in de familie: een foto met hen sturen?</string>
+    <string name="engagement_birthday_reminders_hint">Een paar dagen voor een verjaardag in de familie: een foto met de jarige sturen?</string>
     <string name="engagement_quiet_hours">Stille uren</string>
-    <string name="engagement_quiet_hours_hint">In deze uren geen herinneringen; ze wachten tot de ochtend.</string>
-    <string name="engagement_quiet_from">Vanaf %1$s</string>
+    <string name="engagement_quiet_hours_hint">Herinneringen wachten tot de ochtend.</string>
+    <string name="engagement_quiet_from">Van %1$s</string>
     <string name="engagement_quiet_to">Tot %1$s</string>
     <string name="engagement_email_digest">Samenvatting per e-mail</string>
-    <string name="engagement_email_digest_hint">Ongelezen reacties en berichten per e-mail, voor als je de app niet opent.</string>
+    <string name="engagement_email_digest_hint">Nieuwe opmerkingen en berichten per e-mail, voor als je de app niet opent.</string>
     <string name="engagement_digest_off">Uit</string>
     <string name="engagement_digest_daily">Dagelijks</string>
     <string name="engagement_digest_weekly">Wekelijks</string>
 
     <!-- Frame settings -->
-    <string name="engagement_frame_settings">De familie op het kader</string>
-    <string name="engagement_frame_ask">Knop “Vraag om nieuwe foto’s”</string>
-    <string name="engagement_frame_ask_hint">In het snelmenu van het kader: één tik laat het de familie weten, hooguit één keer per dag.</string>
-    <string name="engagement_frame_prompt_cards">Kaarten met het thema van de week</string>
-    <string name="engagement_frame_prompt_cards_hint">Toon “Deze week: …” voor de foto’s die op een thema van de familie antwoorden.</string>
-    <string name="engagement_frame_new_from">“Nieuwe foto’s van …”</string>
-    <string name="engagement_frame_new_from_hint">Als het kader wakker wordt nadat er nieuwe foto’s kwamen, zegt het van wie.</string>
+    <string name="engagement_frame_settings">Familie op het kader</string>
+    <string name="engagement_frame_ask">Vraag om nieuwe foto’s</string>
+    <string name="engagement_frame_ask_hint">Een knop in het menu van het kader die de familie om nieuwe foto’s vraagt.</string>
+    <string name="engagement_frame_prompt_cards">Kaartjes met het weekthema</string>
+    <string name="engagement_frame_prompt_cards_hint">Toon het thema van de week voor de foto’s die erop antwoorden.</string>
+    <string name="engagement_frame_new_from">“Nieuwe foto’s van…”</string>
+    <string name="engagement_frame_new_from_hint">Als er nieuwe foto’s zijn, zegt het kader bij het wakker worden wie ze stuurde.</string>
+    <!-- Android only: no web key -->
     <string name="engagement_frame_settings_note">Het kader heeft hiervoor een recente versie van de kinframe-app nodig.</string>
 
     <!-- Notifications -->
@@ -214,6 +233,6 @@
     <string name="engagement_notif_reminder">Een zachte herinnering</string>
     <string name="engagement_notif_frame_request">Een kader wil graag nieuwe foto’s</string>
     <string name="engagement_notif_summary">Je week in foto’s</string>
-    <string name="engagement_action_snooze">1 maand uitstellen</string>
+    <string name="engagement_action_snooze">1 maand pauzeren</string>
     <string name="engagement_action_fewer">Minder herinneringen</string>
 </resources>

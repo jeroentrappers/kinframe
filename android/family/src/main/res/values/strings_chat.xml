@@ -5,35 +5,39 @@
     <string name="chat_nav">Chats</string>
     <string name="chat_title">Chats</string>
     <string name="chat_new">New chat</string>
+    <!-- Android only: no web key -->
     <string name="chat_new_group">New group</string>
     <string name="chat_empty_title">No chats yet</string>
-    <string name="chat_empty_body">Your family chats appear here. Start a chat with anyone you share a family or a frame with.</string>
+    <string name="chat_empty_body">Talk with the people you share a family or a frame with. Family chats appear here by themselves.</string>
+    <!-- Android only: no web key -->
     <string name="chat_no_messages">No messages yet</string>
     <string name="chat_show_archived">Show archived chats</string>
     <string name="chat_hide_archived">Hide archived chats</string>
-    <string name="chat_archive">Archive</string>
-    <string name="chat_unarchive">Unarchive</string>
+    <string name="chat_archive">Archive chat</string>
+    <string name="chat_unarchive">Move out of the archive</string>
     <string name="chat_archived_done">Chat archived. A new message brings it back.</string>
-    <string name="chat_unarchived_done">Chat back in the list</string>
+    <string name="chat_unarchived_done">Chat moved out of the archive</string>
     <string name="chat_kind_family">Family</string>
     <string name="chat_kind_circle">Circle</string>
     <string name="chat_muted">Muted</string>
-    <string name="chat_operator_note">Chats are private to their members, but they are not end-to-end encrypted: whoever runs this server could read them.</string>
+    <string name="chat_operator_note">Chats are private to the people in them, but not end-to-end encrypted: whoever runs this server could read them.</string>
     <string name="chat_contacts_hint">You can chat with people you share a family or a frame with.</string>
-    <string name="chat_no_contacts">Nobody to chat with yet. Invite family to a frame or a family first.</string>
+    <string name="chat_no_contacts">There’s no one to chat with yet. Invite family to a family or a frame first.</string>
     <string name="chat_group_name">Group name</string>
-    <string name="chat_group_name_placeholder">e.g. Cousins weekend</string>
+    <string name="chat_group_name_placeholder">Cousins weekend</string>
     <string name="chat_create_group">Create group</string>
     <plurals name="chat_members_count">
-        <item quantity="one">%1$d member</item>
-        <item quantity="other">%1$d members</item>
+        <item quantity="one">%1$d person</item>
+        <item quantity="other">%1$d people</item>
     </plurals>
 
     <!-- A conversation -->
+    <!-- Android only: no web key -->
     <string name="chat_placeholder">Message… (@ to mention)</string>
     <string name="chat_send">Send</string>
     <string name="chat_attach">Add photos or videos</string>
-    <string name="chat_sending">Sending…</string>
+    <string name="chat_sending">Sending</string>
+    <!-- Android only: no web key -->
     <plurals name="chat_photos_sending">
         <item quantity="one">Sending a photo…</item>
         <item quantity="other">Sending %1$d photos…</item>
@@ -48,13 +52,14 @@
     <string name="chat_shared_post">Shared a post</string>
     <string name="chat_message_deleted">This message was deleted</string>
     <string name="chat_message_removed">This message was removed</string>
+    <!-- Android only: no web key -->
     <string name="chat_message_too_long">That message is too long.</string>
     <string name="chat_media_unreadable">Those files couldn’t be read.</string>
     <string name="chat_quote_unavailable">Message not available</string>
     <string name="chat_post_unavailable">This post isn’t available</string>
     <string name="chat_replying_to">Replying to %1$s</string>
-    <string name="chat_editing">Editing your message</string>
-    <string name="chat_copy">Copy</string>
+    <string name="chat_editing">Editing message</string>
+    <string name="chat_copy">Copy text</string>
     <string name="chat_copied">Copied</string>
     <string name="chat_remove_message">Remove message</string>
     <string name="chat_no_preview">Send without preview</string>
@@ -63,22 +68,24 @@
     <string name="chat_typing_now">%1$s is typing…</string>
     <string name="chat_recording_now">%1$s is recording…</string>
     <string name="chat_several_typing">Several people are typing…</string>
-    <string name="chat_read_only">You can’t send messages here any more.</string>
+    <string name="chat_read_only">This chat is read-only.</string>
     <string name="chat_invite_card_title">Someone without an account?</string>
-    <string name="chat_invite_card_body">Relatives without the app can still join the family with its invite link.</string>
+    <string name="chat_invite_card_body">Invite them with the family’s link.</string>
+    <!-- Android only: no web key -->
     <string name="chat_invite_card_button">Invite to the family</string>
 
     <!-- Voice messages -->
     <string name="chat_voice_record">Record a voice message</string>
-    <string name="chat_voice_cancel">Cancel recording</string>
+    <string name="chat_voice_cancel">Discard recording</string>
     <string name="chat_voice_send">Send voice message</string>
-    <string name="chat_voice_play">Play</string>
+    <string name="chat_voice_play">Play voice message</string>
     <string name="chat_voice_pause">Pause</string>
-    <string name="chat_voice_processing">Preparing…</string>
-    <string name="chat_voice_failed">This voice message can’t be played.</string>
+    <string name="chat_voice_processing">Processing…</string>
+    <string name="chat_voice_failed">Can’t play</string>
+    <!-- Android only: no web key -->
     <string name="chat_voice_sending">Sending a voice message…</string>
-    <string name="chat_voice_too_short">Hold on a little longer: voice messages are at least a second.</string>
-    <!-- Android only: the microphone permission. -->
+    <string name="chat_voice_too_short">That was too short. Hold on a little longer.</string>
+    <!-- Android only: the microphone permission and recording errors. -->
     <string name="chat_voice_permission">kinframe needs the microphone to record a voice message.</string>
     <string name="chat_voice_cannot_record">The microphone couldn’t be opened.</string>
 
@@ -88,115 +95,127 @@
         <item quantity="other">%1$s put %2$d photos on %3$s</item>
     </plurals>
     <plurals name="chat_system_streak">
-        <item quantity="one">The family shared %1$d week in a row 🎉</item>
-        <item quantity="other">The family shared %1$d weeks in a row 🎉</item>
+        <item quantity="one">The family shared photos %1$d week in a row 🎉</item>
+        <item quantity="other">The family shared photos %1$d weeks in a row 🎉</item>
     </plurals>
-    <string name="chat_system_recap">The family’s %1$s, in a nutshell</string>
-    <string name="chat_system_prompt">This week: %1$s</string>
+    <string name="chat_system_recap">The family’s %1$s</string>
+    <string name="chat_system_prompt">This week’s theme: %1$s</string>
     <string name="chat_system_joined">%1$s joined</string>
     <string name="chat_system_left">%1$s left</string>
 
     <!-- Put on a frame, share in chat -->
     <string name="chat_put_on_frame">Put on a frame</string>
-    <string name="chat_put">Put on frame</string>
+    <string name="chat_put">Send</string>
+    <!-- Android only: no web key -->
     <string name="chat_put_nothing">There’s no frame you can send to yet.</string>
     <string name="chat_put_others_note">Someone else’s photos go to frames only; they stay theirs.</string>
     <string name="chat_put_on_frame_done">On its way to %1$s</string>
     <string name="chat_share_in_chat">Share in chat</string>
     <string name="chat_share">Share</string>
-    <string name="chat_share_line">Add a line</string>
+    <string name="chat_share_line">Message</string>
     <string name="chat_share_line_placeholder">Did you see this?</string>
     <string name="chat_shared_to">Shared in %1$s</string>
 
     <!-- Conversation details -->
     <string name="chat_info_title">Chat details</string>
+    <!-- Android only: no web key -->
     <string name="chat_members">Members</string>
     <string name="chat_add_people">Add people</string>
     <string name="chat_add">Add</string>
+    <!-- Android only: no web key -->
     <string name="chat_members_added">Added to the group</string>
     <string name="chat_member_removed">Removed from the group</string>
     <string name="chat_make_admin">Make admin</string>
     <string name="chat_remove_admin">Remove as admin</string>
-    <string name="chat_remove_member">Remove</string>
+    <string name="chat_remove_member">Remove from group</string>
     <string name="chat_view_profile">View profile</string>
     <string name="chat_group_photo">Change photo</string>
     <string name="chat_group_photo_remove">Remove photo</string>
-    <string name="chat_family_members_note">Everyone in the family is in this chat. Join or leave the family to join or leave the chat.</string>
-    <string name="chat_circle_members_note">Everyone in the circle is in this chat. Members follow the circle.</string>
+    <string name="chat_family_members_note">Everyone in the family is in this chat.</string>
+    <string name="chat_circle_members_note">Everyone in the circle is in this chat.</string>
     <string name="chat_open_family">Open the family</string>
     <string name="chat_leave_group">Leave group</string>
     <string name="chat_leave_title">Leave %1$s?</string>
+    <!-- Android only: no web key -->
     <string name="chat_leave_body">You won’t get its messages any more. Someone in the group can add you again.</string>
     <string name="chat_left">You left the group</string>
     <string name="chat_mute_title">Notifications</string>
-    <string name="chat_mute_off">On</string>
-    <string name="chat_mute_1h">Mute 1 hour</string>
-    <string name="chat_mute_8h">Mute 8 hours</string>
-    <string name="chat_mute_1w">Mute 1 week</string>
-    <string name="chat_mute_always">Mute always</string>
+    <string name="chat_mute_off">Not muted</string>
+    <string name="chat_mute_1h">For 1 hour</string>
+    <string name="chat_mute_8h">For 8 hours</string>
+    <string name="chat_mute_1w">For a week</string>
+    <string name="chat_mute_always">Until I turn it back on</string>
     <string name="chat_muted_until">Muted until %1$s</string>
     <string name="chat_muted_done">Chat muted</string>
-    <string name="chat_unmuted_done">Notifications for this chat are on</string>
+    <string name="chat_unmuted_done">Chat unmuted</string>
 
     <!-- People, blocks -->
+    <!-- Android only: no web key -->
     <string name="chat_person_families">Families you share</string>
     <string name="chat_person_frames">Frames you share</string>
-    <string name="chat_send_message">Send a message</string>
+    <string name="chat_send_message">Message</string>
     <string name="chat_block">Block</string>
     <string name="chat_unblock">Unblock</string>
-    <string name="chat_block_title">Block %1$s?</string>
-    <string name="chat_block_body">You won’t see their comments and messages, they can’t message you or add you to groups. Shared families stay; nobody is told.</string>
+    <string name="chat_block_title">Block %1$s</string>
+    <string name="chat_block_body">Blocking hides someone’s comments and messages for you and stops their messages. You stay in the same families.</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked">Blocked</string>
     <string name="chat_unblocked">Unblocked</string>
-    <string name="chat_unblocked_name">%1$s unblocked</string>
+    <string name="chat_unblocked_name">%1$s is unblocked</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked_note">You blocked this person.</string>
     <string name="chat_blocked_title">Blocked people</string>
-    <string name="chat_blocked_lede">You don’t see what blocked people write, and they can’t message you. They don’t know you blocked them.</string>
+    <string name="chat_blocked_lede">You don’t see their comments, messages or reactions, and they can’t message you. They aren’t told.</string>
     <string name="chat_blocked_none">You haven’t blocked anyone.</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked_since">Blocked since %1$s</string>
-    <string name="chat_problem_cannot_message">You can’t message this person.</string>
+    <string name="chat_problem_cannot_message">You can’t send this person a message.</string>
     <string name="chat_problem_audio_too_long">That voice message is too long.</string>
 
     <!-- Reports -->
     <string name="chat_report">Report</string>
     <string name="chat_report_post">Report this post</string>
+    <!-- Android only: no web key -->
     <string name="chat_report_title">Report this?</string>
-    <string name="chat_report_body">The family’s admins (or the server’s operator) will have a look. They don’t learn who reported it.</string>
-    <string name="chat_report_unkind">Unkind</string>
+    <string name="chat_report_body">The family’s admins, or the people who run this server, will have a look. The person isn’t told who reported it.</string>
+    <string name="chat_report_unkind">Unkind or hurtful</string>
     <string name="chat_report_spam">Spam</string>
-    <string name="chat_report_inappropriate">Inappropriate</string>
+    <string name="chat_report_inappropriate">Not appropriate here</string>
     <string name="chat_report_other">Something else</string>
-    <string name="chat_report_note">A note (optional)</string>
+    <string name="chat_report_note">Anything to add</string>
     <string name="chat_report_send">Report</string>
-    <string name="chat_reported">Thanks, it’s been reported.</string>
+    <string name="chat_reported">Thanks. Someone will have a look.</string>
     <string name="chat_reports_title">Reports</string>
+    <!-- Android only: no web key -->
     <string name="chat_reports_lede">Comments, messages and posts people in this family reported. Remove them, or dismiss the report.</string>
-    <string name="chat_reports_operator_title">Reports for the operator</string>
-    <string name="chat_reports_operator_lede">Reports outside families: frame posts and direct and group chats.</string>
+    <string name="chat_reports_operator_title">Reports</string>
+    <string name="chat_reports_operator_lede">Reports from private chats, groups and direct sends to frames.</string>
+    <!-- Android only: no web key -->
     <plurals name="chat_reports_count">
         <item quantity="one">%1$d report</item>
         <item quantity="other">%1$d reports</item>
     </plurals>
     <string name="chat_reports_open">Open</string>
     <string name="chat_reports_all">All</string>
-    <string name="chat_reports_none">Nothing to look at.</string>
+    <string name="chat_reports_none">No reports</string>
     <string name="chat_report_kind_comment">Comment</string>
     <string name="chat_report_kind_message">Message</string>
     <string name="chat_report_kind_post">Post</string>
+    <!-- Android only: no web key -->
     <string name="chat_report_by">Written by %1$s</string>
     <string name="chat_report_note_shown">Note: %1$s</string>
     <string name="chat_report_remove">Remove it</string>
-    <string name="chat_report_dismiss">Dismiss</string>
+    <string name="chat_report_dismiss">Keep it</string>
     <string name="chat_report_removed">Removed</string>
-    <string name="chat_report_dismissed">Report dismissed</string>
+    <string name="chat_report_dismissed">Kept</string>
     <string name="chat_report_already">Someone else already handled this report.</string>
     <string name="chat_report_status_removed">Removed</string>
-    <string name="chat_report_status_dismissed">Dismissed</string>
+    <string name="chat_report_status_dismissed">Kept</string>
 
     <!-- Settings -->
-    <string name="chat_settings_title">Chats</string>
+    <string name="chat_settings_title">Chats and privacy</string>
     <string name="chat_read_receipts">Read receipts</string>
-    <string name="chat_read_receipts_hint">Show “Seen” in direct chats and small groups. Off: others don’t see when you read, and you don’t see theirs.</string>
+    <string name="chat_read_receipts_hint">Others see “Seen” in private chats and small groups. When off, you don’t see theirs either.</string>
 
     <!-- Notifications -->
     <!-- Android only: notification channel, reply and mark-as-read from the notification. -->

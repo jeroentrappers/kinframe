@@ -4,35 +4,39 @@
     <string name="chat_nav">Chats</string>
     <string name="chat_title">Chats</string>
     <string name="chat_new">Nieuwe chat</string>
+    <!-- Android only: no web key -->
     <string name="chat_new_group">Nieuwe groep</string>
     <string name="chat_empty_title">Nog geen chats</string>
-    <string name="chat_empty_body">Je familiechats verschijnen hier. Begin een chat met iemand met wie je een familie of een kader deelt.</string>
+    <string name="chat_empty_body">Praat met de mensen met wie je een familie of kader deelt. Familiechats verschijnen hier vanzelf.</string>
+    <!-- Android only: no web key -->
     <string name="chat_no_messages">Nog geen berichten</string>
     <string name="chat_show_archived">Gearchiveerde chats tonen</string>
     <string name="chat_hide_archived">Gearchiveerde chats verbergen</string>
-    <string name="chat_archive">Archiveren</string>
-    <string name="chat_unarchive">Uit archief halen</string>
+    <string name="chat_archive">Chat archiveren</string>
+    <string name="chat_unarchive">Uit het archief halen</string>
     <string name="chat_archived_done">Chat gearchiveerd. Een nieuw bericht haalt hem terug.</string>
-    <string name="chat_unarchived_done">Chat staat weer in de lijst</string>
+    <string name="chat_unarchived_done">Chat uit het archief gehaald</string>
     <string name="chat_kind_family">Familie</string>
     <string name="chat_kind_circle">Kring</string>
     <string name="chat_muted">Gedempt</string>
-    <string name="chat_operator_note">Chats zijn privé voor wie erin zit, maar ze zijn niet end-to-end versleuteld: wie deze server beheert, zou ze kunnen lezen.</string>
-    <string name="chat_contacts_hint">Je kunt chatten met mensen met wie je een familie of een kader deelt.</string>
-    <string name="chat_no_contacts">Nog niemand om mee te chatten. Nodig eerst familie uit voor een kader of een familie.</string>
-    <string name="chat_group_name">Naam van de groep</string>
-    <string name="chat_group_name_placeholder">bv. Weekend met de neven</string>
+    <string name="chat_operator_note">Chats zijn privé voor de mensen die erin zitten, maar niet end-to-end versleuteld: wie deze server beheert, zou ze kunnen lezen.</string>
+    <string name="chat_contacts_hint">Je kunt chatten met mensen met wie je een familie of kader deelt.</string>
+    <string name="chat_no_contacts">Er is nog niemand om mee te chatten. Nodig eerst iemand uit in een familie of bij een kader.</string>
+    <string name="chat_group_name">Groepsnaam</string>
+    <string name="chat_group_name_placeholder">Weekendje met de neven</string>
     <string name="chat_create_group">Groep maken</string>
     <plurals name="chat_members_count">
-        <item quantity="one">%1$d lid</item>
-        <item quantity="other">%1$d leden</item>
+        <item quantity="one">%1$d persoon</item>
+        <item quantity="other">%1$d mensen</item>
     </plurals>
 
     <!-- A conversation -->
-    <string name="chat_placeholder">Bericht… (@ om iemand te noemen)</string>
-    <string name="chat_send">Versturen</string>
+    <!-- Android only: no web key -->
+    <string name="chat_placeholder">Bericht… (@ om iemand te vermelden)</string>
+    <string name="chat_send">Sturen</string>
     <string name="chat_attach">Foto’s of video’s toevoegen</string>
-    <string name="chat_sending">Versturen…</string>
+    <string name="chat_sending">Wordt verstuurd</string>
+    <!-- Android only: no web key -->
     <plurals name="chat_photos_sending">
         <item quantity="one">Foto versturen…</item>
         <item quantity="other">%1$d foto’s versturen…</item>
@@ -47,37 +51,40 @@
     <string name="chat_shared_post">Deelde een bericht</string>
     <string name="chat_message_deleted">Dit bericht is verwijderd</string>
     <string name="chat_message_removed">Dit bericht is weggehaald</string>
+    <!-- Android only: no web key -->
     <string name="chat_message_too_long">Dat bericht is te lang.</string>
     <string name="chat_media_unreadable">Die bestanden konden niet gelezen worden.</string>
     <string name="chat_quote_unavailable">Bericht niet beschikbaar</string>
     <string name="chat_post_unavailable">Dit bericht is niet beschikbaar</string>
     <string name="chat_replying_to">Antwoord aan %1$s</string>
-    <string name="chat_editing">Je bericht bewerken</string>
-    <string name="chat_copy">Kopiëren</string>
+    <string name="chat_editing">Bericht bewerken</string>
+    <string name="chat_copy">Tekst kopiëren</string>
     <string name="chat_copied">Gekopieerd</string>
     <string name="chat_remove_message">Bericht weghalen</string>
-    <string name="chat_no_preview">Zonder voorbeeld versturen</string>
+    <string name="chat_no_preview">Zonder voorbeeld sturen</string>
     <string name="chat_seen">Gezien</string>
     <string name="chat_seen_by">Gezien door %1$s</string>
     <string name="chat_typing_now">%1$s typt…</string>
     <string name="chat_recording_now">%1$s neemt op…</string>
     <string name="chat_several_typing">Meerdere mensen typen…</string>
-    <string name="chat_read_only">Je kunt hier geen berichten meer sturen.</string>
+    <string name="chat_read_only">In deze chat kun je alleen lezen.</string>
     <string name="chat_invite_card_title">Iemand zonder account?</string>
-    <string name="chat_invite_card_body">Familie zonder de app kan toch bij de familie komen met de uitnodigingslink.</string>
+    <string name="chat_invite_card_body">Nodig die persoon uit met de link van de familie.</string>
+    <!-- Android only: no web key -->
     <string name="chat_invite_card_button">Uitnodigen voor de familie</string>
 
     <!-- Voice messages -->
     <string name="chat_voice_record">Spraakbericht opnemen</string>
-    <string name="chat_voice_cancel">Opname annuleren</string>
-    <string name="chat_voice_send">Spraakbericht versturen</string>
-    <string name="chat_voice_play">Afspelen</string>
+    <string name="chat_voice_cancel">Opname weggooien</string>
+    <string name="chat_voice_send">Spraakbericht sturen</string>
+    <string name="chat_voice_play">Spraakbericht afspelen</string>
     <string name="chat_voice_pause">Pauzeren</string>
-    <string name="chat_voice_processing">Klaarmaken…</string>
-    <string name="chat_voice_failed">Dit spraakbericht kan niet afgespeeld worden.</string>
+    <string name="chat_voice_processing">Verwerken…</string>
+    <string name="chat_voice_failed">Kan niet afspelen</string>
+    <!-- Android only: no web key -->
     <string name="chat_voice_sending">Spraakbericht versturen…</string>
-    <string name="chat_voice_too_short">Iets langer: een spraakbericht duurt minstens een seconde.</string>
-    <!-- Android only: the microphone permission. -->
+    <string name="chat_voice_too_short">Dat was te kort. Houd iets langer ingedrukt.</string>
+    <!-- Android only: the microphone permission and recording errors. -->
     <string name="chat_voice_permission">kinframe heeft de microfoon nodig om een spraakbericht op te nemen.</string>
     <string name="chat_voice_cannot_record">De microfoon kon niet geopend worden.</string>
 
@@ -87,71 +94,79 @@
         <item quantity="other">%1$s zette %2$d foto’s op %3$s</item>
     </plurals>
     <plurals name="chat_system_streak">
-        <item quantity="one">De familie deelde %1$d week op rij 🎉</item>
-        <item quantity="other">De familie deelde %1$d weken op rij 🎉</item>
+        <item quantity="one">De familie deelde %1$d week op rij foto’s 🎉</item>
+        <item quantity="other">De familie deelde %1$d weken op rij foto’s 🎉</item>
     </plurals>
-    <string name="chat_system_recap">%1$s van de familie, in het kort</string>
-    <string name="chat_system_prompt">Deze week: %1$s</string>
-    <string name="chat_system_joined">%1$s kwam erbij</string>
-    <string name="chat_system_left">%1$s ging weg</string>
+    <string name="chat_system_recap">%1$s van de familie</string>
+    <string name="chat_system_prompt">Thema van deze week: %1$s</string>
+    <string name="chat_system_joined">%1$s is erbij gekomen</string>
+    <string name="chat_system_left">%1$s is weggegaan</string>
 
     <!-- Put on a frame, share in chat -->
     <string name="chat_put_on_frame">Op een kader zetten</string>
-    <string name="chat_put">Op kader zetten</string>
+    <string name="chat_put">Sturen</string>
+    <!-- Android only: no web key -->
     <string name="chat_put_nothing">Er is nog geen kader waar je naar kunt sturen.</string>
     <string name="chat_put_others_note">Foto’s van iemand anders gaan alleen naar kaders; ze blijven van hen.</string>
     <string name="chat_put_on_frame_done">Onderweg naar %1$s</string>
     <string name="chat_share_in_chat">Delen in een chat</string>
     <string name="chat_share">Delen</string>
-    <string name="chat_share_line">Voeg iets toe</string>
-    <string name="chat_share_line_placeholder">Heb je deze gezien?</string>
+    <string name="chat_share_line">Bericht</string>
+    <string name="chat_share_line_placeholder">Heb je dit gezien?</string>
     <string name="chat_shared_to">Gedeeld in %1$s</string>
 
     <!-- Conversation details -->
-    <string name="chat_info_title">Over deze chat</string>
+    <string name="chat_info_title">Chatdetails</string>
+    <!-- Android only: no web key -->
     <string name="chat_members">Leden</string>
     <string name="chat_add_people">Mensen toevoegen</string>
     <string name="chat_add">Toevoegen</string>
+    <!-- Android only: no web key -->
     <string name="chat_members_added">Toegevoegd aan de groep</string>
     <string name="chat_member_removed">Uit de groep gehaald</string>
     <string name="chat_make_admin">Beheerder maken</string>
     <string name="chat_remove_admin">Geen beheerder meer</string>
-    <string name="chat_remove_member">Verwijderen</string>
+    <string name="chat_remove_member">Uit de groep verwijderen</string>
     <string name="chat_view_profile">Profiel bekijken</string>
     <string name="chat_group_photo">Foto wijzigen</string>
     <string name="chat_group_photo_remove">Foto verwijderen</string>
-    <string name="chat_family_members_note">Iedereen in de familie zit in deze chat. Wie bij de familie komt of weggaat, komt of gaat ook hier.</string>
-    <string name="chat_circle_members_note">Iedereen in de kring zit in deze chat. De leden volgen de kring.</string>
-    <string name="chat_open_family">De familie openen</string>
+    <string name="chat_family_members_note">Iedereen in de familie zit in deze chat.</string>
+    <string name="chat_circle_members_note">Iedereen in de kring zit in deze chat.</string>
+    <string name="chat_open_family">Familie openen</string>
     <string name="chat_leave_group">Groep verlaten</string>
     <string name="chat_leave_title">%1$s verlaten?</string>
+    <!-- Android only: no web key -->
     <string name="chat_leave_body">Je krijgt de berichten niet meer. Iemand in de groep kan je opnieuw toevoegen.</string>
     <string name="chat_left">Je verliet de groep</string>
     <string name="chat_mute_title">Meldingen</string>
-    <string name="chat_mute_off">Aan</string>
-    <string name="chat_mute_1h">1 uur dempen</string>
-    <string name="chat_mute_8h">8 uur dempen</string>
-    <string name="chat_mute_1w">1 week dempen</string>
-    <string name="chat_mute_always">Altijd dempen</string>
+    <string name="chat_mute_off">Niet gedempt</string>
+    <string name="chat_mute_1h">1 uur</string>
+    <string name="chat_mute_8h">8 uur</string>
+    <string name="chat_mute_1w">Een week</string>
+    <string name="chat_mute_always">Tot ik het weer aanzet</string>
     <string name="chat_muted_until">Gedempt tot %1$s</string>
     <string name="chat_muted_done">Chat gedempt</string>
-    <string name="chat_unmuted_done">Meldingen voor deze chat staan aan</string>
+    <string name="chat_unmuted_done">Chat niet meer gedempt</string>
 
     <!-- People, blocks -->
+    <!-- Android only: no web key -->
     <string name="chat_person_families">Families die jullie delen</string>
     <string name="chat_person_frames">Kaders die jullie delen</string>
     <string name="chat_send_message">Bericht sturen</string>
     <string name="chat_block">Blokkeren</string>
     <string name="chat_unblock">Deblokkeren</string>
-    <string name="chat_block_title">%1$s blokkeren?</string>
-    <string name="chat_block_body">Je ziet hun reacties en berichten niet meer, ze kunnen jou geen berichten sturen of aan groepen toevoegen. Gedeelde families blijven; niemand krijgt het te horen.</string>
+    <string name="chat_block_title">%1$s blokkeren</string>
+    <string name="chat_block_body">Als je iemand blokkeert, zie je diens opmerkingen en berichten niet meer en kan die persoon je geen berichten meer sturen. Jullie blijven in dezelfde families.</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked">Geblokkeerd</string>
     <string name="chat_unblocked">Gedeblokkeerd</string>
-    <string name="chat_unblocked_name">%1$s gedeblokkeerd</string>
+    <string name="chat_unblocked_name">%1$s is gedeblokkeerd</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked_note">Je hebt deze persoon geblokkeerd.</string>
     <string name="chat_blocked_title">Geblokkeerde mensen</string>
-    <string name="chat_blocked_lede">Je ziet niet wat geblokkeerde mensen schrijven en ze kunnen je geen berichten sturen. Ze weten niet dat je hen blokkeerde.</string>
+    <string name="chat_blocked_lede">Je ziet hun opmerkingen, berichten en reacties niet, en ze kunnen je geen berichten sturen. Ze krijgen dat niet te horen.</string>
     <string name="chat_blocked_none">Je hebt niemand geblokkeerd.</string>
+    <!-- Android only: no web key -->
     <string name="chat_blocked_since">Geblokkeerd sinds %1$s</string>
     <string name="chat_problem_cannot_message">Je kunt deze persoon geen bericht sturen.</string>
     <string name="chat_problem_audio_too_long">Dat spraakbericht is te lang.</string>
@@ -159,43 +174,47 @@
     <!-- Reports -->
     <string name="chat_report">Melden</string>
     <string name="chat_report_post">Dit bericht melden</string>
+    <!-- Android only: no web key -->
     <string name="chat_report_title">Dit melden?</string>
-    <string name="chat_report_body">De beheerders van de familie (of de beheerder van de server) kijken ernaar. Ze weten niet wie het meldde.</string>
-    <string name="chat_report_unkind">Onvriendelijk</string>
+    <string name="chat_report_body">De beheerders van de familie, of de mensen achter deze server, bekijken het. De persoon hoort niet wie het gemeld heeft.</string>
+    <string name="chat_report_unkind">Onvriendelijk of kwetsend</string>
     <string name="chat_report_spam">Spam</string>
-    <string name="chat_report_inappropriate">Ongepast</string>
+    <string name="chat_report_inappropriate">Hoort hier niet</string>
     <string name="chat_report_other">Iets anders</string>
-    <string name="chat_report_note">Een opmerking (niet verplicht)</string>
+    <string name="chat_report_note">Wil je nog iets toevoegen?</string>
     <string name="chat_report_send">Melden</string>
-    <string name="chat_reported">Bedankt, het is gemeld.</string>
-    <string name="chat_reports_title">Meldingen</string>
-    <string name="chat_reports_lede">Reacties, berichten en posts die mensen in deze familie meldden. Verwijder ze, of leg de melding naast je neer.</string>
-    <string name="chat_reports_operator_title">Meldingen voor de beheerder</string>
-    <string name="chat_reports_operator_lede">Meldingen buiten families: posts naar kaders, en rechtstreekse en groepschats.</string>
+    <string name="chat_reported">Bedankt. Iemand bekijkt het.</string>
+    <string name="chat_reports_title">Gemeld</string>
+    <!-- Android only: no web key -->
+    <string name="chat_reports_lede">Opmerkingen, chatberichten en berichten die mensen in deze familie meldden. Haal ze weg, of leg de melding naast je neer.</string>
+    <string name="chat_reports_operator_title">Gemelde inhoud</string>
+    <string name="chat_reports_operator_lede">Wat gemeld werd in privéchats, groepen en verzendingen rechtstreeks naar kaders.</string>
+    <!-- Android only: no web key -->
     <plurals name="chat_reports_count">
         <item quantity="one">%1$d melding</item>
         <item quantity="other">%1$d meldingen</item>
     </plurals>
     <string name="chat_reports_open">Open</string>
     <string name="chat_reports_all">Alle</string>
-    <string name="chat_reports_none">Niets om naar te kijken.</string>
-    <string name="chat_report_kind_comment">Reactie</string>
-    <string name="chat_report_kind_message">Bericht</string>
-    <string name="chat_report_kind_post">Post</string>
+    <string name="chat_reports_none">Niets gemeld</string>
+    <string name="chat_report_kind_comment">Opmerking</string>
+    <string name="chat_report_kind_message">Chatbericht</string>
+    <string name="chat_report_kind_post">Bericht</string>
+    <!-- Android only: no web key -->
     <string name="chat_report_by">Geschreven door %1$s</string>
-    <string name="chat_report_note_shown">Opmerking: %1$s</string>
-    <string name="chat_report_remove">Verwijderen</string>
-    <string name="chat_report_dismiss">Negeren</string>
-    <string name="chat_report_removed">Verwijderd</string>
-    <string name="chat_report_dismissed">Melding genegeerd</string>
-    <string name="chat_report_already">Iemand anders handelde deze melding al af.</string>
-    <string name="chat_report_status_removed">Verwijderd</string>
-    <string name="chat_report_status_dismissed">Genegeerd</string>
+    <string name="chat_report_note_shown">Toelichting: %1$s</string>
+    <string name="chat_report_remove">Weghalen</string>
+    <string name="chat_report_dismiss">Laten staan</string>
+    <string name="chat_report_removed">Weggehaald</string>
+    <string name="chat_report_dismissed">Blijft staan</string>
+    <string name="chat_report_already">Iemand anders heeft deze melding al behandeld.</string>
+    <string name="chat_report_status_removed">Weggehaald</string>
+    <string name="chat_report_status_dismissed">Blijft staan</string>
 
     <!-- Settings -->
-    <string name="chat_settings_title">Chats</string>
+    <string name="chat_settings_title">Chats en privacy</string>
     <string name="chat_read_receipts">Leesbevestigingen</string>
-    <string name="chat_read_receipts_hint">Toon “Gezien” in rechtstreekse chats en kleine groepen. Uit: anderen zien niet wanneer jij las, en jij ziet het van hen niet.</string>
+    <string name="chat_read_receipts_hint">Anderen zien “Gezien” in privéchats en kleine groepen. Staat dit uit, dan zie jij die van hen ook niet.</string>
 
     <!-- Notifications -->
     <!-- Android only: notification channel, reply and mark-as-read from the notification. -->

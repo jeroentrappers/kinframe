@@ -4,18 +4,21 @@
 <resources>
     <string name="social_nav_home">Home</string>
     <string name="social_home_title">Home</string>
+    <!-- Android only: no web key -->
     <string name="social_share_photos">Share photos</string>
     <string name="social_home_empty_title">Nothing shared yet</string>
-    <string name="social_home_empty_body">Photos posted in your families show up here, newest first, with everyone’s comments and the frames’ reactions.</string>
+    <string name="social_home_empty_body">Photos posted in your families appear here, newest first. Share one to get things going.</string>
     <string name="social_post_title">Post</string>
-    <string name="social_post_gone">This post isn’t available any more.</string>
+    <string name="social_post_gone">This post doesn’t exist any more, or you can’t see it.</string>
     <string name="social_to_frame">To %1$s</string>
+    <!-- Android only: no web key -->
     <string name="social_family_circle">%1$s · %2$s</string>
     <string name="social_via">via %1$s</string>
     <string name="social_video">Video</string>
     <string name="social_you">You</string>
     <string name="social_former_member">Former member</string>
     <string name="social_loading">Loading…</string>
+    <!-- Android only: no web key -->
     <string name="social_frame_label">%1$s</string>
     <string name="social_mentioned_you">Mentioned you</string>
     <string name="social_this_photo">This photo</string>
@@ -32,7 +35,7 @@
     <string name="social_react">React</string>
     <string name="social_who_reacted">Reactions</string>
     <string name="social_reaction_love">Love</string>
-    <string name="social_reaction_laugh">Laugh</string>
+    <string name="social_reaction_laugh">Haha</string>
     <string name="social_reaction_wow">Wow</string>
     <string name="social_reaction_sad">Sad</string>
     <string name="social_reaction_thumbs_up">Thumbs up</string>
@@ -48,38 +51,43 @@
 
     <!-- Threads -->
     <string name="social_add_comment">Add a comment…</string>
+    <!-- Android only: no web key -->
     <string name="social_comment_placeholder">Write a comment… (@ to mention)</string>
-    <string name="social_send_comment">Send comment</string>
-    <string name="social_no_comments">No comments yet. Be the first to say something nice.</string>
-    <string name="social_comments_closed">Comments are turned off for this post.</string>
+    <string name="social_send_comment">Send</string>
+    <string name="social_no_comments">No comments yet. Say something nice.</string>
+    <string name="social_comments_closed">Comments are turned off</string>
     <string name="social_reply">Reply</string>
     <string name="social_replying_to">Replying to %1$s</string>
-    <string name="social_editing_comment">Editing your comment</string>
+    <string name="social_editing_comment">Edit comment</string>
     <string name="social_edited">edited</string>
     <string name="social_comment_tombstone">Comment deleted</string>
-    <string name="social_removed_by_admin">Removed by a family admin</string>
+    <string name="social_removed_by_admin">Removed by a family admin. Only you can see it.</string>
     <string name="social_comment_remove">Remove comment</string>
+    <!-- Android only: no web key -->
     <string name="social_comment_delete_title">Delete your comment?</string>
     <string name="social_comment_delete_body">It disappears from the thread for everyone.</string>
     <string name="social_comment_remove_title">Remove this comment?</string>
     <string name="social_comment_remove_body">It and its replies disappear for everyone. The author sees that a family admin removed it.</string>
     <string name="social_comment_deleted">Comment deleted</string>
     <string name="social_comment_removed">Comment removed</string>
+    <!-- Android only: no web key -->
     <string name="social_comment_too_long">That comment is too long.</string>
     <string name="social_frame_reacted">%1$s reacted %2$s</string>
     <string name="social_frame_replied">%1$s: %2$s</string>
-    <string name="social_thread_mute">Mute this post</string>
-    <string name="social_thread_unmute">Unmute this post</string>
-    <string name="social_thread_muted">You won’t get notifications for this post.</string>
-    <string name="social_thread_unmuted">Notifications for this post are back on.</string>
+    <string name="social_thread_mute">Mute notifications for this post</string>
+    <string name="social_thread_unmute">Unmute notifications</string>
+    <string name="social_thread_muted">You won’t get notifications for this post</string>
+    <string name="social_thread_unmuted">Notifications for this post are back on</string>
     <string name="social_thread_close">Turn off comments</string>
     <string name="social_thread_open">Turn on comments</string>
-    <string name="social_thread_closed_done">Comments turned off</string>
+    <string name="social_thread_closed_done">Comments turned off. Existing comments stay.</string>
     <string name="social_thread_opened_done">Comments turned on</string>
     <string name="social_problem_comments_closed">Comments are turned off for this post.</string>
+    <!-- Android only: no web key -->
     <string name="social_problem_not_ready">This server doesn’t have this yet.</string>
 
     <!-- Notifications -->
+    <!-- Android only: no web key -->
     <string name="social_channel">Comments and reactions</string>
     <string name="social_channel_desc">Comments, replies, mentions and reactions on your photos.</string>
     <string name="social_notif_comment">New comment</string>
@@ -88,60 +96,66 @@
     <string name="social_notif_reaction">New reaction</string>
 
     <!-- Roles and family settings -->
-    <string name="social_role_member">Member</string>
-    <string name="social_role_member_hint">Members follow along: they read, comment, react and chat, but don’t post photos.</string>
-    <string name="social_member_cannot_post">You follow this family as a member: you can comment, react and chat, but not post photos.</string>
-    <string name="social_setting_see_reactions_hint">Every member sees how the frames reacted. People’s reactions are always visible.</string>
+    <string name="social_role_member">Reader</string>
+    <string name="social_role_member_hint">Readers see everything, comment, react and chat, but don’t post photos.</string>
+    <!-- Android only: no web key -->
+    <string name="social_member_cannot_post">You follow this family as a reader: you can comment, react and chat, but not post photos.</string>
+    <string name="social_setting_see_reactions_hint">Hearts and quick replies from the frames show on every post, for every member.</string>
     <string name="social_setting_see_receipts">Everyone sees where posts were seen</string>
-    <string name="social_setting_see_receipts_hint">Every member sees on which frames each post arrived and was seen. Otherwise only the poster and admins.</string>
-    <string name="social_setting_new_can_post">New members can post</string>
-    <string name="social_setting_new_can_post_hint">People who join become posters. Off: they join as members who comment and chat. Existing members keep their role.</string>
-    <string name="social_setting_circles">Members can create circles</string>
-    <string name="social_setting_circles_hint">Anyone in the family can start a circle. Off: only the owner and admins.</string>
+    <string name="social_setting_see_receipts_hint">Otherwise only the poster and admins see which frames showed a post.</string>
+    <string name="social_setting_new_can_post">New members can post photos</string>
+    <string name="social_setting_new_can_post_hint">When off, people who join become readers: they follow along, comment and chat.</string>
+    <string name="social_setting_circles">Members can make circles</string>
+    <string name="social_setting_circles_hint">When off, only the owner and admins make circles.</string>
     <string name="social_family_chat">Family chat</string>
-    <string name="social_family_mute">Notifications from this family</string>
+    <string name="social_family_mute">Notifications for this family</string>
+    <!-- Android only: no web key -->
     <string name="social_family_mute_hint">Muted parts still show up in the app; you just don’t get notifications.</string>
-    <string name="social_mute_none">Everything</string>
+    <string name="social_mute_none">All notifications</string>
     <string name="social_mute_posts">Mute posts</string>
-    <string name="social_mute_chat">Mute chat</string>
-    <string name="social_mute_all">Mute all</string>
-    <string name="social_family_muted">Notifications changed</string>
-    <string name="social_family_unmuted">You get all notifications from this family again.</string>
+    <string name="social_mute_chat">Mute the chat</string>
+    <string name="social_mute_all">Mute everything</string>
+    <string name="social_family_muted">Notifications for this family changed</string>
+    <string name="social_family_unmuted">You get all notifications for this family again</string>
 
     <!-- Circles -->
     <string name="social_circles">Circles</string>
+    <!-- Android only: no web key -->
     <plurals name="social_circles_count">
         <item quantity="one">%1$d circle</item>
         <item quantity="other">%1$d circles</item>
     </plurals>
     <string name="social_circles_title">Circles of %1$s</string>
-    <string name="social_circles_lede">Smaller groups inside the family, such as a household or the cousins. A circle has its own chat and you can share photos with just the circle.</string>
+    <string name="social_circles_lede">Circles are smaller groups inside the family, like a household or the cousins. Each has its own chat, and you can share photos with just one circle.</string>
     <string name="social_circles_empty_title">No circles yet</string>
-    <string name="social_circles_empty_body">Start one for a household or for the cousins: its own chat, and photos only they see.</string>
+    <string name="social_circles_empty_body">Make one for a household or a branch of the family.</string>
     <string name="social_circle_new">New circle</string>
-    <string name="social_circle_name">Circle name</string>
-    <string name="social_circle_name_placeholder">e.g. The cousins</string>
-    <string name="social_circle_pick_members">Who’s in it</string>
+    <string name="social_circle_name">Name</string>
+    <string name="social_circle_name_placeholder">The cousins</string>
+    <string name="social_circle_pick_members">People</string>
     <string name="social_circle_create">Create circle</string>
-    <string name="social_circle_created">%1$s created</string>
+    <string name="social_circle_created">%1$s is ready</string>
+    <!-- Android only: no web key -->
     <string name="social_circle_not_in">Not in it</string>
-    <string name="social_circle_chat">Circle chat</string>
+    <string name="social_circle_chat">Chat</string>
+    <!-- Android only: no web key -->
     <string name="social_circle_frames">Frames</string>
-    <string name="social_circle_frames_hint">Photos shared with the circle go to the family’s frames that a circle member manages, plus the extra frames chosen here.</string>
-    <string name="social_circle_no_frames">No frame gets this circle’s photos yet.</string>
-    <string name="social_circle_extra_frames">Extra frames</string>
+    <string name="social_circle_frames_hint">Frames looked after by someone in the circle get its photos anyway.</string>
+    <string name="social_circle_no_frames">No frame shows this circle’s photos yet.</string>
+    <string name="social_circle_extra_frames">Also show on these frames</string>
+    <!-- Android only: no web key -->
     <string name="social_circle_members_added">Added to the circle</string>
     <string name="social_circle_member_removed">Removed from the circle</string>
     <string name="social_circle_leave">Leave circle</string>
     <string name="social_circle_left">You left %1$s</string>
     <string name="social_circle_delete">Delete circle</string>
     <string name="social_circle_delete_title">Delete %1$s?</string>
-    <string name="social_circle_delete_body">Its photos are removed from every frame and its chat closes. This can’t be undone.</string>
-    <string name="social_circle_deleted">%1$s deleted</string>
-    <string name="social_audience_title">Share with in %1$s</string>
-    <string name="social_audience_whole">Whole family</string>
+    <string name="social_circle_delete_body">Its posts are removed from the timeline and from every frame, and its chat is closed. This can’t be undone.</string>
+    <string name="social_circle_deleted">%1$s was deleted</string>
+    <string name="social_audience_title">Share with, in %1$s</string>
+    <string name="social_audience_whole">The whole family</string>
 
     <!-- Frame settings -->
     <string name="social_frame_show_comments">Show comments</string>
-    <string name="social_frame_show_comments_hint">When a photo with comments comes up, the newest comment shows at the bottom for a few seconds.</string>
+    <string name="social_frame_show_comments_hint">When a photo with comments comes up, the newest one fades in for a few seconds.</string>
 </resources>
