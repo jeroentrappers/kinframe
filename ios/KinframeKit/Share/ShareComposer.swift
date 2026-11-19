@@ -19,6 +19,10 @@ public final class ShareModel {
         case loading, signedOut, noFrames, ready, sending, failed(String)
         /// This build is below the server's minimum (README §5.15): the app has to be updated first.
         case updateRequired
+        /// A kinframe link was shared (of any server): it waits in the App Group until the app opens.
+        case linkWaiting
+        /// A link or text without a kinframe link in it.
+        case notALink
     }
 
     private weak var context: NSExtensionContext?
@@ -49,6 +53,17 @@ public final class ShareModel {
         public let server: URL
         public var frames: [FrameSummary]
         public var feeds: [FeedSummary]
+        /// This server's limits (discovery).
+        public var limits: Limits = .defaults
+    }
+
+    /// Check the send against the limits of the servers it goes to (before anything is chosen, of every server).
+    public func refreshLimits() {
+        guard !groups.isEmpty else { return }
+        let limits = ComposeLimits.effective(groups.map { g in
+            (g.limits, g.frames.contains { compose.frameIds.contains($0.id) } || g.feeds.contains { compose.feedIds.contains($0.id) })
+        })
+        if compose.limits != limits { compose.limits = limits }
     }
 
     /// A server label above each group, when there is more than one account.
@@ -70,6 +85,16 @@ public final class ShareModel {
     }
 
     public func start() async {
+        // A shared link rather than photos: links of other servers can't open the app by themselves (README "Links").
+        if preview.isEmpty, let shared = await Self.sharedLink(context) {
+            if let url = shared {
+                PendingLink.store(url)
+                phase = .linkWaiting
+            } else {
+                phase = .notALink
+            }
+            return
+        }
         async let files: Void = loadAttachments()
         guard let primary = sessions.first else {
             await files
@@ -97,7 +122,7 @@ public final class ShareModel {
             // Not the families where you are `member` (family social: you follow along there, you don't post).
             loaded.append(Group(id: s.record.id, serverName: s.record.serverName, server: server.apiBase,
                                 frames: ((try? frameResult.get()) ?? []).filter { $0.can(\.send) },
-                                feeds: ((await allFeeds) ?? []).filter { $0.role != .member }))
+                                feeds: ((await allFeeds) ?? []).filter { $0.role != .member }, limits: server.discovery.limits))
         }
         groups = loaded.filter { !$0.frames.isEmpty || !$0.feeds.isEmpty }
         frames = groups.flatMap(\.frames)
@@ -119,6 +144,7 @@ public final class ShareModel {
             compose.frameIds = Set(frames.map(\.id)).intersection(last)
             compose.feedIds = Set(feeds.map(\.id)).intersection(lastFeeds)
         }
+        refreshLimits()
         phase = .ready
     }
 
@@ -128,6 +154,35 @@ public final class ShareModel {
         } catch {
             return .failure(error)
         }
+    }
+
+    /// Nil when photos or videos were shared (the usual sheet). Otherwise the kinframe link in the shared URL or text,
+    /// or `.some(nil)` when there is none.
+    private static func sharedLink(_ context: NSExtensionContext?) async -> URL?? {
+        let providers = (context?.inputItems as? [NSExtensionItem] ?? []).flatMap { $0.attachments ?? [] }
+        let media = providers.contains { p in [UTType.movie, .image].contains { p.hasItemConformingToTypeIdentifier($0.identifier) } }
+        guard !media, !providers.isEmpty else { return nil }
+        for provider in providers {
+            for type in [UTType.url, .plainText] where provider.hasItemConformingToTypeIdentifier(type.identifier) {
+                let text: String? = await withCheckedContinuation { cont in
+                    provider.loadItem(forTypeIdentifier: type.identifier, options: nil) { item, _ in
+                        switch item {
+                        case let url as URL: cont.resume(returning: url.absoluteString)
+                        case let s as String: cont.resume(returning: s)
+                        case let data as Data: cont.resume(returning: URL(dataRepresentation: data, relativeTo: nil)?.absoluteString ?? String(data: data, encoding: .utf8))
+                        default: cont.resume(returning: nil)
+                        }
+                    }
+                }
+                if let text, let url = DeepLink.find(in: text) { return .some(url) }
+            }
+        }
+        return .some(nil)
+    }
+
+    /// Done after a link was left for the app.
+    public func finishLink() {
+        context?.completeRequest(returningItems: nil)
     }
 
     /// Copy every shared image and movie into the App Group (provider URLs are only valid during the callback).
@@ -288,6 +343,10 @@ public struct ShareRootView: View {
                         Callout(L("ios.appUpdate.share"), kind: .warn)
                     case .noFrames:
                         Callout(L("send.noFramesBody"), kind: .warn)
+                    case .linkWaiting:
+                        Callout(L("servers.share.link"), kind: .ok)
+                    case .notALink:
+                        Callout(L("servers.share.notLink"), kind: .warn)
                     case .failed(let message):
                         Callout(message, kind: .error)
                     case .ready, .sending:
@@ -316,7 +375,9 @@ public struct ShareRootView: View {
                     Button(L("common.cancel")) { model.cancel() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if model.phase == .sending {
+                    if model.phase == .linkWaiting {
+                        Button(L("common.done")) { model.finishLink() }.fontWeight(.semibold)
+                    } else if model.phase == .sending {
                         ProgressView()
                     } else {
                         Button(L("send.sendButton")) { Task { await model.send() } }
@@ -327,6 +388,9 @@ public struct ShareRootView: View {
             }
         }
         .tint(Palette.primary)
+        // The limits follow the servers the send goes to.
+        .onChange(of: model.compose.frameIds) { model.refreshLimits() }
+        .onChange(of: model.compose.feedIds) { model.refreshLimits() }
     }
 
     private var thumbnails: some View {

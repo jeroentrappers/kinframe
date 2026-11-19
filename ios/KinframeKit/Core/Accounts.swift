@@ -164,4 +164,25 @@ public enum AccountMerge {
     public static func safeCutoff(oldest: [Date?], hasMore: [Bool]) -> Date? {
         zip(oldest, hasMore).compactMap { $1 ? $0 : nil }.max()
     }
+
+    /// Paged lists of several accounts merged strictly by time: newest first, and only as far back as every source
+    /// has loaded (`safeCutoff`), so an item of one server never shows below an older one of another server whose
+    /// next page isn't loaded yet. `hasMore[i]` says whether `lists[i]` has more pages.
+    public static func merged<T>(_ lists: [[T]], hasMore: [Bool], by date: (T) -> Date) -> [T] {
+        let all = interleave(lists, by: date)
+        guard let cutoff = safeCutoff(oldest: lists.map { $0.map(date).min() }, hasMore: hasMore) else { return all }
+        return all.filter { date($0) >= cutoff }
+    }
+
+    /// The sources to page next ("Load more"): those whose oldest loaded item is the cutoff, i.e. the ones holding the
+    /// merged list back. Paging them moves the cutoff (or ends them); the others wait their turn.
+    public static func toLoad(oldest: [Date?], hasMore: [Bool]) -> [Int] {
+        guard let cutoff = safeCutoff(oldest: oldest, hasMore: hasMore) else { return [] }
+        return oldest.indices.filter { hasMore[$0] && oldest[$0] == cutoff }
+    }
+
+    /// `toLoad` for lists (their oldest item by `date`).
+    public static func toLoad<T>(_ lists: [[T]], hasMore: [Bool], by date: (T) -> Date) -> [Int] {
+        toLoad(oldest: lists.map { $0.map(date).min() }, hasMore: hasMore)
+    }
 }

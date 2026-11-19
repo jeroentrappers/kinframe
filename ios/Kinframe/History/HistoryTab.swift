@@ -75,10 +75,15 @@ private struct HistoryList: View {
     private var allEmpty: Bool { model.sends.isEmpty && others.allSatisfy { $0.1.sends.isEmpty } }
     private var hasMore: Bool { model.cursor != nil || others.contains { $0.1.cursor != nil } }
 
-    /// Day groups over every account's sends, newest first.
+    /// Every account's history (this account first).
+    private var sources: [(AppModel, HistoryModel)] { [(app, model)] + others }
+
+    /// Day groups over every account's sends, newest first, only as far back as every history has loaded, so the
+    /// merged list stays in time order while "Load more" pages the servers one after another.
     private var groups: [(bucket: Format.DayBucket, rows: [Row])] {
-        let lists = [model.sends.map { Row(owner: app, send: $0) }] + others.map { m, h in h.sends.map { Row(owner: m, send: $0) } }
-        let rows = others.isEmpty ? lists[0] : AccountMerge.interleave(lists) { $0.send.createdAt }
+        let sources = sources
+        let lists = sources.map { m, h in h.sends.map { Row(owner: m, send: $0) } }
+        let rows = AccountMerge.merged(lists, hasMore: sources.map { $0.1.cursor != nil }) { $0.send.createdAt }
         var out: [(bucket: Format.DayBucket, rows: [Row])] = []
         for r in rows {
             let b = Format.dayBucket(r.send.createdAt)
@@ -95,10 +100,17 @@ private struct HistoryList: View {
         }
     }
 
+    /// Page the histories that hold the merged list back (the one whose oldest loaded send is the newest of those).
     private func loadMoreAll() async {
-        await model.loadMore()
-        for (_, h) in others where h.cursor != nil { await h.loadMore() }
+        let histories = sources.map(\.1)
+        let next = AccountMerge.toLoad(histories.map(\.sends), hasMore: histories.map { $0.cursor != nil }) { $0.createdAt }
+        let chosen = next.map { histories[$0] }
+        await withTaskGroup(of: Void.self) { g in
+            for h in chosen { g.addTask { await h.loadMore() } }
+        }
     }
+
+    private var loadingMore: Bool { sources.contains { $0.1.loadingMore } }
 
     var body: some View {
         ScrollView {
@@ -115,7 +127,10 @@ private struct HistoryList: View {
                 }
                 .frame(maxWidth: PageWidth.text, alignment: .leading)
 
-                if app.leavingEnabled, let api = app.api { LeavingHistorySection(api: api) }
+                // Leaving: keep requests to answer and former places, of every account with `leaving`.
+                ForEach(sources.map(\.0).filter(\.leavingEnabled), id: \.accountId) { m in
+                    if let api = m.api { LeavingHistorySection(api: api).environment(m) }
+                }
 
                 ForEach(app.outbox.active) { job in
                     SendingCard(job: job, onRetry: { app.outbox.retry(job.id) }, onCancel: { app.outbox.cancel(job.id) })
@@ -167,7 +182,7 @@ private struct HistoryList: View {
                         Button {
                             Task { await loadMoreAll() }
                         } label: {
-                            if model.loadingMore { ProgressView() } else { Text(L("common.loadMore")) }
+                            if loadingMore { ProgressView() } else { Text(L("common.loadMore")) }
                         }
                         .buttonStyle(.kf(.secondary, fill: true))
                         .frame(maxWidth: PageWidth.text)

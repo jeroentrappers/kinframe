@@ -213,6 +213,8 @@ final class AppModel {
             // A chosen server whose sign-in isn't done yet still decides whether this build may be used.
             if server != nil { await refreshDiscovery() }
         }
+        // A link shared to the share extension while the app wasn't running.
+        accounts?.openPendingLink()
     }
 
     /// Another account (not primary) at launch: connect it in the background, no onboarding.
@@ -737,6 +739,8 @@ final class AppModel {
 
     func open(_ url: URL) {
         // `app.kinframe:/google-import?…`: the end of Google's consent, when it reached the app instead of the session.
+        // With several accounts, the account whose import it is takes it.
+        if let owner = accounts?.models.first(where: { $0.googleImport.owns(url) }), owner.googleImport.handleReturn(url) { return }
         if googleImport.handleReturn(url) { return }
         guard let link = DeepLink.parse(url) else { return }
         // A link of another server: the account signed in there handles it, else that server is added first

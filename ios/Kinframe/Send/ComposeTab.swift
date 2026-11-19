@@ -68,6 +68,17 @@ struct ComposeTab: View {
     private func owner(frame id: String) -> AppModel { accounts.active.first { m in m.frames.contains { $0.id == id } } ?? app }
     private func owner(feed id: String) -> AppModel { accounts.active.first { m in m.feeds.contains { $0.id == id } } ?? app }
 
+    /// The limits the send is checked against: those of every server it goes to (the strictest of each), or before
+    /// anything is chosen, of every server it could go to.
+    private var effectiveLimits: Limits {
+        let servers = accounts.active.filter { m in
+            m.frames.contains { $0.can(\.send) } || (m.feedsEnabled && m.feeds.contains { $0.role != .member })
+        }
+        return ComposeLimits.effective((servers.isEmpty ? [app] : servers).map { m in
+            (m.limits, m.frames.contains { model.frameIds.contains($0.id) } || m.feeds.contains { model.feedIds.contains($0.id) })
+        })
+    }
+
     /// "Janssens" above the first recipient of each server, when there are several accounts.
     @ViewBuilder
     private func serverHeader(_ m: AppModel, first: Bool) -> some View {
@@ -91,7 +102,7 @@ struct ComposeTab: View {
                     Text(L("send.lede"))
                         .foregroundStyle(Palette.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
-                    if app.framesLoaded, sendable.isEmpty, feeds.isEmpty {
+                    if accounts.framesLoaded, sendable.isEmpty, feeds.isEmpty {
                         noFrames
                     } else if let id = sendingJob, let job = app.outbox.job(id) {
                         SendingCard(job: job, onRetry: { app.outbox.retry(id) }, onCancel: {
@@ -120,7 +131,7 @@ struct ComposeTab: View {
                 if sendingJob == nil, !model.drafts.isEmpty || importing > 0 { sendBar }
             }
             .sheet(item: Binding(get: { editing.map(EditingID.init) }, set: { editing = $0?.id })) { item in
-                ItemEditorSheet(model: model, draftId: item.id, frames: app.frames.filter { model.frameIds.contains($0.id) })
+                ItemEditorSheet(model: model, draftId: item.id, frames: sendable.filter { model.frameIds.contains($0.id) })
             }
             .fullScreenCover(isPresented: $showCamera) {
                 CameraPicker { url, name in
@@ -135,7 +146,7 @@ struct ComposeTab: View {
             Task { await load(items) }
         }
         .onAppear {
-            model.limits = app.limits
+            model.limits = effectiveLimits
             preselect()
             #if DEBUG
             // -kfCompose /a.heic,/b.mp4 stages files, -kfAutoSend YES sends them (screenshots, manual tests).
@@ -159,9 +170,13 @@ struct ComposeTab: View {
         }
         .onChange(of: app.composeFrameIds) { preselect() }
         .onChange(of: app.composeFeedIds) { preselect() }
-        .onChange(of: app.feeds) { preselect() }
-        .onChange(of: app.frames) { preselect() }
-        .onChange(of: app.framesLoaded) { preselect() }
+        // Every account's recipients (a request of another account preselects its families).
+        .onChange(of: feeds.map(\.id)) { preselect() }
+        .onChange(of: sendable.map(\.id)) { preselect() }
+        .onChange(of: accounts.framesLoaded) { preselect() }
+        .onChange(of: accounts.feedsLoaded) { preselect() }
+        // The limits follow the servers the send goes to.
+        .onChange(of: effectiveLimits) { _, limits in model.limits = limits }
         .onChange(of: sendingJob.flatMap { app.outbox.job($0)?.state }) { _, state in
             if case .sent(let sendId) = state {
                 finished(sendId)
@@ -426,9 +441,9 @@ struct ComposeTab: View {
     // MARK: Actions
 
     private func preselect() {
-        // Wait for the frame list: until then the wanted frames can't be checked.
-        guard app.framesLoaded else { return }
-        if !app.composeFeedIds.isEmpty, app.feedsLoaded {
+        // Wait for the frame lists: until then the wanted frames can't be checked.
+        guard accounts.framesLoaded else { return }
+        if !app.composeFeedIds.isEmpty, accounts.feedsLoaded {
             // "Post" in a feed: that feed only.
             model.feedIds = app.composeFeedIds.filter { id in feeds.contains { $0.id == id } }
             model.frameIds = []

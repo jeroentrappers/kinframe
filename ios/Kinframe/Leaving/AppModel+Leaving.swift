@@ -32,19 +32,18 @@ extension AppModel {
             if let frameId {
                 leaving.trashFrameId = frameId
                 tab = .frames
-                framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos)])
+                framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos, account: accountId)])
             } else if let feedId {
                 openFeed(feedId, section: .members)
             }
         case .keepRequest(let requestId):
-            tab = .history
-            historyPath = NavigationPath()
-            leaving.openRequestId = requestId
+            // A sheet over whatever is on screen, talking to this account (the presenters in MainTabs).
+            leaving.answering = .init(id: requestId)
         case .ownership(let frameId, let feedId):
             if let frameId {
                 Task { await loadFrames() }
                 tab = .frames
-                framesPath = NavigationPath([FrameRoute(id: frameId)])
+                framesPath = NavigationPath([FrameRoute(id: frameId, account: accountId)])
             } else if let feedId {
                 Task { await loadFeeds() }
                 openFeed(feedId)

@@ -218,5 +218,22 @@ private struct SecondaryPresenter: View {
                         .environment(model)
                     }
             }
+            // "Add from Google Photos" started on a frame or family of this account (or found again after a relaunch).
+            .background {
+                Color.clear
+                    .sheet(isPresented: Binding(get: { model.googleImport.presented }, set: { if !$0 { model.googleImport.close() } })) {
+                        GoogleImportSheet(controller: model.googleImport).environment(model)
+                    }
+            }
+            // Leaving: a keep request of this account to answer.
+            .background {
+                Color.clear
+                    .sheet(item: Binding(get: { model.leaving.answering }, set: { model.leaving.answering = $0 })) { ref in
+                        if let api = model.api {
+                            KeepRequestAnswerSheet(api: api, requestId: ref.id) { model.historyVersion += 1 }
+                                .environment(model)
+                        }
+                    }
+            }
     }
 }

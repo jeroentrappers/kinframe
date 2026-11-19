@@ -143,23 +143,38 @@ The primary model owns navigation; the others forward tabs, paths and preselecti
 its account so a detail screen gets the right model in the environment. Home, Chats (badge = the sum), Frames,
 Families, History and the composer list every account, with a server chip (discovery `server_name`) when there is
 more than one; Settings → Accounts adds a server (the onboarding screens run with the new account's model), signs out
-of one, makes one primary and opens each account's own Settings. A send to recipients on two servers is one outbox
-job per server (`ComposeModel.makeJobs`); the first prepares the media and the others take its masters
-(`OutboxJob.preparedBy`); the runner holds one session per server. The share extension reads the same list and shows
-recipients grouped per server. A tapped notification opens the account named by the payload's `server`. A link of a
-server without an account asks "This family is on kinframe.janssens.be. Sign in there to join." and adds that server
-after sign-in. An install from before keeps its session: its account is `default`, whose Keychain names are the old
-ones. The Logto SDK keeps one session in its own Keychain service, so each account keeps its tokens under its own
-names and lends them to a Logto client right before using it (`LogtoSlot`).
+of one, makes one primary and opens each account's own Settings. A tab shows when any account has it (Home and Chats
+follow `social`/`chats`/`engagement` of every account, Families `feeds`), and inside each post, chat, card and button
+follows its own account's flags, user id and roles. Home shows every account's strip, newest unseen milestone,
+prompts, On this day and weekly summary, each talking to its own server. Merged lists that page (Home, History) show
+only as far back as every server has loaded and page the server holding the list back (`AccountMerge.merged`,
+`toLoad`), so they stay in time order. "Enter a code", "Add frame" and "New family" ask which server first when
+there is more than one (`ServerChoiceSheet`). The composer checks a send against the limits of the servers it goes to
+(the strictest of each, `ComposeLimits`), also in the share extension. Each account's Google Photos import, keep
+request answers and social sheets show over the tabs (`SecondaryAccountPresenters`). A send to recipients on two
+servers is one outbox job per server (`ComposeModel.makeJobs`); the first prepares the media and the others take its
+masters (`OutboxJob.preparedBy`); the runner holds one session per server. The share extension reads the same list
+and shows recipients grouped per server. A tapped notification opens the account named by the payload's `server`. A
+link of a server without an account asks "This family is on kinframe.janssens.be. Sign in there to join." and adds
+that server after sign-in. An install from before keeps its session: its account is `default`, whose Keychain names
+are the old ones.
 
 **Server and sign-in.** Onboarding validates a server by fetching `/.well-known/kinframe` and shows its name and
 version. `ServerConfig` (address plus discovery) lives in the App Group's user defaults. `AuthService` signs in with
 the Logto Swift SDK: Authorization Code with PKCE in `ASWebAuthenticationSession` (ephemeral, so there's no extra
 consent prompt), redirect `app.kinframe:/callback`, the API resource from discovery and scopes
-`openid profile email offline_access kinframe:operate`. Refresh tokens are in the Keychain (Logto SDK); the current
-access token is cached there too, so the share extension uses the same session. Before a refresh the Logto client is
-rebuilt from the Keychain, so a refresh token rotated by the other process is never reused. On dev servers a dev
-token from `/dev/token` replaces Logto. New accounts still called "New member" get the name from the ID token, or
+`openid profile email offline_access kinframe:operate`. The SDK runs only the browser sign-in, with its persistent
+storage off: its single Keychain slot never holds any account's tokens. Each account keeps its refresh token, ID token
+and current access token in the shared Keychain under its own names (`LogtoSlot`), so the share extension uses the
+same sessions. Refreshing is one `refresh_token` grant at the account's own Logto tenant (`LogtoTokenEndpoint`, found
+through its OpenID configuration) with the account's own refresh token. Refreshes of one account are serialized: one at
+a time per account in the process (`RefreshRegistry`), and between the app and the share extension by a file lock in
+the App Group (`FileSessionLock`, `flock`), under which the Keychain is read again, so a token the other process just
+refreshed is used instead of spending the rotated refresh token twice. A 401 passes the refused token: when another
+request already replaced it, that token is used and nothing is refreshed. A token is cached and sent only when its
+`iss` and `aud` are the account's issuer and API resource (`TokenAudience`). A refused refresh token (`invalid_grant`)
+ends only that account's session; network trouble keeps it. Signing in or out while a refresh runs wins. Tested with
+fakes in `KinframeTests/SessionTests.swift`. On dev servers a dev token from `/dev/token` replaces Logto. New accounts still called "New member" get the name from the ID token, or
 are asked once.
 
 **API.** `API` wraps the generated `Client` with a middleware that adds the bearer token and `Accept-Language`,
@@ -276,7 +291,11 @@ aren't end-to-end encrypted. Families gain circles (a section of the family page
 chat), the `member` role (not offered as a recipient), the streak, the family chat, a mute and, for admins, the new
 switches, the encouragement settings, prompts and reports. Settings gains read receipts, blocked people, reminders
 (level, frame requests, summary, birthdays, snooze, quiet hours, email digest), milestones and, for operators, their
-reports; a frame's settings gain *Show comments*, *Ask for new photos*, *Prompt cards* and *New photos from…*.
+reports; a frame's settings gain *Show comments*, *Ask for new photos*, *Prompt cards* and *New photos from…*. A
+frame's request (`frame_request` push, `photo_request.*` events, the Home badge) or a quiet-frame reminder
+(`reminder_quiet`) for a frame you're not on opens "Send something to Oma's frame" with the families whose posts
+reach it preselected (`PhotoRequest.feed_ids`, else the families you post to with an active subscription of the frame;
+`FrameRequestTargets`); requests heard of that way stay on the Home strip until answered or expired.
 `SocialStore` (app) keeps the chat list, badge, typing, reminders, milestones and caches; the websocket's family
 social events arrive as `LiveEvent.social`, pushes route through `PushRoute.social`. Reminder notifications have
 Snooze 1 month and Fewer reminders (category `kinframe.reminder`), chat notifications a reply field (category
@@ -323,10 +342,23 @@ The server can't send APNs yet; until then the websocket covers the app while it
 
 ## Limits and notes
 
-- Universal Links work for `kinframe.appmire.be` only, because associated domains are fixed at build time. Join and
-  invite links of other servers open through `app.kinframe://f/<code>?server=<url>`,
-  `app.kinframe://i/<token>?server=<url>`, `app.kinframe://fi/<token>?server=<url>` or `app.kinframe://open?url=<link>`.
-  Feed invite links (`/fi/<token>`) open the app only when the server's `apple-app-site-association` lists `/fi/*`.
+- Universal Links work for `kinframe.appmire.be` only: associated domains are fixed in the entitlements at build time,
+  and an app can't claim other servers' domains generically (every server serves an `apple-app-site-association`,
+  but iOS only checks the domains the app lists). Feed invite links (`/fi/<token>`) open the app only when that
+  server's `apple-app-site-association` lists `/fi/*`. Links of other servers still reach the app:
+  - **Tapped inside the app** (a chat, a comment, a caption): the root `openURL` handler opens every kinframe link in the
+    app (`Accounts.openInApp`), whatever its server; an unknown host is checked first (`/.well-known/kinframe`), so an
+    ordinary web page with a similar path still opens in the browser. (iOS doesn't open an app's own Universal Links
+    from inside the app either, so this also covers `kinframe.appmire.be`.)
+  - **Pasted**: "Paste" in "Enter a code" takes a whole link: a frame code of that server fills the boxes, an invite
+    or a link of another server goes where links go (`DeepLink.find` finds the link in pasted text).
+  - **Shared**: "Share → kinframe" on a link (Safari, Messages, a chat app) leaves it in the App Group and the app opens
+    it the next time it comes to the front (`PendingLink`; a share extension can't open its app itself).
+  - **Custom scheme**: `app.kinframe://f/<code>?server=<url>`, `app.kinframe://i/<token>?server=<url>`,
+    `app.kinframe://fi/<token>?server=<url>` or `app.kinframe://open?url=<link>`.
+
+  Then the account on that server handles it, or the app asks to sign in there (or, for a family invite, to show the
+  family on a frame you manage here).
 - The simulator doesn't let UI tests look inside a share extension, so its composer is tested through the in-app
   preview; sharing from Photos is covered by an opt-in test that taps by position.
 - Generated string enums reject values they don't know. If the server adds an enum value (a new placement status, for

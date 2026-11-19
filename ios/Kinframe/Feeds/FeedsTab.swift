@@ -40,7 +40,7 @@ enum FeedSection: String, Hashable, CaseIterable {
         case .frames: L("ios.feeds.tabFrames")
         case .birthdays: L("ios.bday.tab")
         case .settings: L("frame.tabSettings")
-        case .circles: L("social.circle.tab")
+        case .circles: L("social.tabCircles")
         }
     }
 }
@@ -59,7 +59,7 @@ struct FeedsTab: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 14) {
                     Text(L("ios.feeds.lede")).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
-                    if !app.feedsLoaded {
+                    if !accounts.feedsLoaded, accounts.feeds.isEmpty {
                         LoadingView()
                     } else if accounts.feeds.isEmpty {
                         EmptyStateView(systemImage: "rectangle.stack.badge.person.crop", title: L("ios.feeds.emptyTitle"), message: L("ios.feeds.emptyBody")) {
@@ -103,17 +103,18 @@ struct FeedsTab: View {
                 FeedDetailView(route: route).account(route.account, in: accounts)
             }
         }
-        .task(id: app.api?.baseURL) { await app.loadFeeds() }
+        .task(id: accounts.active.map(\.accountId)) { await accounts.loadFeeds() }
+        // Several accounts: the server the new family goes on, or the code is from, first.
         .sheet(isPresented: $creating) {
-            if let api = app.api {
+            ServerChoiceSheet(accounts: accounts.familyAccounts, title: L("ios.feeds.new"), message: L("servers.choose.family")) { m, api in
                 FeedCreateSheet(api: api) { feed in
-                    app.updateFeed(feed.summary)
-                    app.feedsPath.append(FeedRoute(id: feed.id, account: app.accountId))
+                    m.updateFeed(feed.summary)
+                    m.feedsPath.append(FeedRoute(id: feed.id, account: m.accountId))
                 }
             }
         }
         .sheet(isPresented: $enteringCode) {
-            if let api = app.api {
+            ServerChoiceSheet(accounts: accounts.frameAccounts, title: L("ios.feeds.enterCode"), message: L("servers.choose.code")) { _, api in
                 NavigationStack { AddFrameView(api: api) }
             }
         }
