@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Families on different servers (docs/spec/multi-server.md, README §5.22). Keys prefixed servers_. -->
+<resources>
+    <string name="servers_accounts_title">Accounts</string>
+    <string name="servers_accounts_as">as %1$s</string>
+    <string name="servers_accounts_primary">Primary</string>
+    <string name="servers_accounts_signed_out">Signed out</string>
+    <string name="servers_accounts_make_primary">Make primary</string>
+    <string name="servers_accounts_sign_out">Sign out</string>
+    <string name="servers_accounts_sign_out_title">Sign out of %1$s?</string>
+    <string name="servers_accounts_sign_out_body">Its families, frames and chats leave the app. Your other servers stay signed in.</string>
+    <string name="servers_accounts_hint">Families on other kinframe servers show up together with yours. The primary account opens first and receives what you share.</string>
+    <string name="servers_add_title">Add a server</string>
+    <string name="servers_add_already">You are already signed in to %1$s.</string>
+    <string name="servers_link_title">This family is on %1$s</string>
+    <string name="servers_link_body">Sign in there to join. Your other servers stay signed in.</string>
+    <string name="servers_link_confirm">Sign in there</string>
+    <string name="servers_link_other_server">This link is for %1$s. Sign in there to continue.</string>
+
+    <string name="servers_follows_title">Families on other servers</string>
+    <string name="servers_family_on">%1$s (on %2$s)</string>
+    <plurals name="servers_follow_items">
+        <item quantity="one">%d photo on this frame</item>
+        <item quantity="other">%d photos on this frame</item>
+    </plurals>
+    <string name="servers_follow_add">Add a family from another server</string>
+    <string name="servers_follow_add_hint">Paste the link a family admin on that server shared with you.</string>
+    <string name="servers_follow_invite_url">Invite link</string>
+    <string name="servers_follow_check">Check the link</string>
+    <plurals name="servers_preview_frames">
+        <item quantity="one">%d frame follows this family</item>
+        <item quantity="other">%d frames follow this family</item>
+    </plurals>
+    <string name="servers_preview_copy">Photos from this family will be copied to this server (%1$s) and shown on %2$s.</string>
+    <string name="servers_preview_operator">The people who run %1$s can see the copies, as with any photo on it.</string>
+    <string name="servers_preview_approval">The family\'s admins approve first.</string>
+    <string name="servers_history_title">Earlier photos</string>
+    <string name="servers_history_none">Only new photos</string>
+    <string name="servers_history_last">The last %1$d</string>
+    <string name="servers_history_all">All of them</string>
+    <string name="servers_on_end_title">If this stops</string>
+    <string name="servers_on_end_remove">Remove the photos from the frame</string>
+    <string name="servers_on_end_keep">Keep the photos already there</string>
+    <string name="servers_follow_confirm">Show on the frame</string>
+    <string name="servers_follow_active">%1$s now shows on the frame.</string>
+    <string name="servers_follow_pending">Asked %1$s\'s admins.</string>
+    <string name="servers_follow_removed">%1$s no longer shows on the frame.</string>
+    <string name="servers_follow_unsubscribe">Stop showing this family</string>
+    <string name="servers_follow_unsubscribe_title">Stop showing %1$s?</string>
+    <string name="servers_follow_unsubscribe_body">New photos stop coming. Keep the photos already on the frame, or remove them?</string>
+    <string name="servers_status_pending">Waiting</string>
+    <string name="servers_status_active">Active</string>
+    <string name="servers_status_rejected">Declined</string>
+    <string name="servers_status_removed">Stopped</string>
+    <string name="servers_status_error">Can\'t reach it</string>
+
+    <string name="servers_feed_title">Frames on other servers</string>
+    <string name="servers_feed_allow">Allow frames on other servers</string>
+    <string name="servers_feed_allow_hint">Frames on other kinframe servers may follow this family with a link you share. They get copies of whole-family posts only, never circles, chats or members.</string>
+    <string name="servers_feed_invite">Share a link for frames on other servers</string>
+    <string name="servers_feed_invite_hint">Frames on other servers may use this link. You can remove them any time.</string>
+    <string name="servers_feed_invite_text">Show our family on your frame: %1$s</string>
+    <string name="servers_blocked_title">Blocked servers</string>
+    <string name="servers_blocked_none">No servers are blocked.</string>
+    <string name="servers_blocked_host">Server address</string>
+    <string name="servers_blocked_block">Block this server</string>
+    <string name="servers_blocked_unblock">Unblock</string>
+    <string name="servers_blocked_done">%1$s is blocked.</string>
+
+    <string name="servers_problem_already">This frame already shows that family.</string>
+    <string name="servers_problem_invite">This link doesn\'t work (any more).</string>
+    <string name="servers_problem_unreachable">That server can\'t be reached right now.</string>
+    <string name="servers_problem_forbidden">That server or family doesn\'t allow this.</string>
+</resources>

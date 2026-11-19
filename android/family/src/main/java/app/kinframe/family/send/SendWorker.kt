@@ -53,7 +53,8 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
     }
 
     override suspend fun doWork(): Result {
-        val runner = graph.sendRunner() ?: return Result.retry()
+        // Each send belongs to one server (multi-server.md §2.2): its own account uploads it.
+        val runner = graph.sendRunner(graph.outbox.get(sendId)?.server) ?: return Result.retry()
         runCatching { setForeground(foreground(null)) }
         val ticker = graph.scope.launch {
             var last = -1

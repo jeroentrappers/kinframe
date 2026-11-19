@@ -241,10 +241,11 @@ private fun CommentItem(cm: Comment, a: PostActions, reply: Boolean, onWho: () -
 private fun FrameEntry(cm: Comment) {
     val c = Kin.colors
     val f = cm.frame ?: return
+    val name = app.kinframe.family.ui.servers.remoteName(f.frameName, f.serverName)
     val text = when {
-        f.reply != null -> stringResource(R.string.social_frame_replied, f.frameName, stringResource(Delivery.replyLabel(f.reply!!)))
-        f.reaction != null -> stringResource(R.string.social_frame_reacted, f.frameName, Delivery.EMOJI[f.reaction!!].orEmpty())
-        else -> f.frameName
+        f.reply != null -> stringResource(R.string.social_frame_replied, name, stringResource(Delivery.replyLabel(f.reply!!)))
+        f.reaction != null -> stringResource(R.string.social_frame_reacted, name, Delivery.EMOJI[f.reaction!!].orEmpty())
+        else -> name
     }
     Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(c.accentSoft).padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

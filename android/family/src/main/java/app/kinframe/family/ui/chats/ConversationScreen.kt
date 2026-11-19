@@ -386,7 +386,8 @@ private fun Composer(s: ConversationState, conv: Conversation, a: ConversationAc
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     if (conv.readOnly) {
-        Note(stringResource(R.string.chat_read_only), Modifier.padding(12.dp))
+        Note(if (conv.readOnlyReason == app.kinframe.core.leaving.ReadOnlyReason.NO_LONGER_CONTACTS)
+            stringResource(R.string.leaving_chat_no_longer, conv.other?.displayName ?: conv.name) else stringResource(R.string.chat_read_only), Modifier.padding(12.dp))
         return
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(ConversationViewModel.MAX_ITEMS)) { uris -> a.vm.sendMedia(uris) }

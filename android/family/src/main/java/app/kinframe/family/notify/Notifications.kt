@@ -171,6 +171,8 @@ object Notifications {
             val open = (context.applicationContext as? app.kinframe.family.FamilyApp)?.graph?.social?.openConversation
             return SocialNotifications.show(context, msg, open)
         }
+        // Leaving (README §6.3): photos taken away, keep requests, ownership.
+        if (LeavingNotifications.handles(msg.kind)) return LeavingNotifications.show(context, msg)
         val channel = when (msg.kind) {
             "join_request", PUSH_SUBSCRIPTION_REQUEST, PUSH_FEED_JOIN_REQUEST, PUSH_FEED_MEMBERSHIP, PUSH_BIRTHDAY_SUGGESTION,
             PUSH_EMAIL_PENDING_SENDER, PUSH_EMAIL_PENDING_EXPIRING -> CHANNEL_PEOPLE

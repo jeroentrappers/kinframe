@@ -206,7 +206,7 @@ fun WhoReactedSheet(load: suspend () -> ReactionList, onDismiss: () -> Unit) {
                     items(l.value.frames, key = { "f" + it.frameId + it.itemId }) { f ->
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             Box(Modifier.size(36.dp).clip(CircleShape).background(c.paperDeep), contentAlignment = Alignment.Center) { Icon(KinIcons.Frame, null, Modifier.size(18.dp), tint = c.inkSoft) }
-                            Text(stringResource(R.string.social_frame_label, f.frameName), style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
+                            Text(stringResource(R.string.social_frame_label, app.kinframe.family.ui.servers.remoteName(f.frameName, f.serverName)), style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
                             Text(PersonReaction.emoji(f.reaction), style = Kin.type.title)
                         }
                     }

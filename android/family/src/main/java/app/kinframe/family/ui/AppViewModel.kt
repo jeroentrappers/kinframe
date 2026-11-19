@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import app.kinframe.core.api.KinApi
 import app.kinframe.core.api.User
 import app.kinframe.family.AppGraph
+import app.kinframe.family.accounts.AddServerRequest
+import app.kinframe.family.accounts.Accounts
 import app.kinframe.family.data.ServerChoice
 import app.kinframe.family.util.DeepLink
 import app.kinframe.family.util.DeepLinks
@@ -48,7 +50,7 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
     private val _switchPrompt = MutableStateFlow<DeepLink?>(null)
     val switchPrompt: StateFlow<DeepLink?> = _switchPrompt.asStateFlow()
 
-    val phase: StateFlow<Phase> = combine(graph.servers.current, graph.api, graph.me, profile) { server, api, me, p ->
+    val phase: StateFlow<Phase> = combine(graph.server, graph.api, graph.me, profile) { server, api, me, p ->
         when {
             server == null -> Phase.NoServer
             api == null -> Phase.SignedOut(server)
@@ -77,7 +79,7 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
             }
             // The device's time zone goes to the server automatically (birthday morning notices at 08:00 local).
             val tz = java.time.ZoneId.systemDefault().id
-            if (graph.servers.current.value?.discovery?.birthdays == true && me.timezone != tz) {
+            if (graph.server.value?.discovery?.birthdays == true && me.timezone != tz) {
                 me = runCatching { api.updateMe(timezone = tz) }.getOrDefault(me)
             }
             graph.me.value = me
@@ -151,27 +153,31 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
         }
     }
 
-    /** A frame-code or invite link arrived. Links for another server ask first (product spec 4.1). */
+    /**
+     * A frame-code or invite link arrived. A link of a server the app is signed in to opens there (its token goes to
+     * that account); a link of another kinframe server asks to sign in there first ("This family is on
+     * kinframe.janssens.be. Sign in there to join.", multi-server.md §2.1) and adds that server as an account.
+     */
     fun onLink(link: DeepLink) {
-        val current = graph.servers.current.value
-        if (current == null || DeepLinks.sameServer(current.url, link.server)) {
-            graph.pendingLink.value = link
-        } else {
-            _switchPrompt.value = link
+        val current = graph.server.value
+        val account = graph.accounts.forServer(link.server.toString())
+        when {
+            current == null || DeepLinks.sameServer(current.url, link.server) -> graph.pendingLink.value = link
+            account != null && account.signedIn -> {
+                graph.accounts.index.put(Accounts.linkKey(link), account.id)
+                graph.pendingLink.value = link
+            }
+            else -> _switchPrompt.value = link
         }
     }
 
     fun dismissSwitch() { _switchPrompt.value = null }
 
+    /** "Sign in there": Settings' add-server flow for the link's server; the link opens once signed in. */
     fun confirmSwitch() {
         val link = _switchPrompt.value ?: return
         _switchPrompt.value = null
-        viewModelScope.launch {
-            val choice = runCatching { graph.servers.check(link.server) }.getOrNull() ?: return@launch
-            graph.forgetServer()
-            graph.servers.choose(choice)
-            graph.pendingLink.value = link
-        }
+        graph.addServer.value = AddServerRequest(link.server.toString(), link)
     }
 
     fun signOut(activity: Activity?) = viewModelScope.launch {
@@ -182,9 +188,14 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
     /** Deletes the account (`DELETE /v1/me`) and signs out locally: the tokens are void once the account is gone. */
     fun deleteAccount(removeItems: Boolean, onError: (Int) -> Unit) {
         val api = graph.api.value ?: return
+        // With leaving (README §5.21): `DELETE /v1/me {photos: take|leave}` on the primary account's server.
+        val leaving = graph.accounts.primary.value.route()?.leaving
         viewModelScope.launch {
             try {
-                api.deleteMe(removeItems)
+                if (leaving != null) leaving.deleteAccount(app.kinframe.core.leaving.AccountDeletion(
+                    if (removeItems) app.kinframe.core.leaving.DeletionPhotos.TAKE else app.kinframe.core.leaving.DeletionPhotos.LEAVE,
+                ))
+                else api.deleteMe(removeItems)
             } catch (e: Exception) {
                 onError(Problems.message(e))
                 return@launch

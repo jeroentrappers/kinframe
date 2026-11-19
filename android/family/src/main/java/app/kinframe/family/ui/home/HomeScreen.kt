@@ -81,6 +81,10 @@ class HomeActions(
     val post: () -> Unit,
     /** Shown in the top bar when the bottom bar has no room for them (History, Settings). */
     val topActions: @Composable () -> Unit = {},
+    /** "Don't show this memory again" (README §5.21); null without discovery `leaving`. */
+    val hideMemory: ((OnThisDayGroup) -> Unit)? = null,
+    /** The server chip of a post when signed in to several servers (multi-server.md §2.2), else null. */
+    val serverChip: (TimelinePost) -> String? = { null },
 )
 
 @Composable
@@ -142,7 +146,7 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                     }
                 }
                 s.onThisDay?.groups?.takeIf { it.isNotEmpty() }?.let { groups ->
-                    item("otd") { OnThisDayCard(groups, a.shareAgain) }
+                    item("otd") { OnThisDayCard(groups, a.shareAgain, a.hideMemory) }
                 }
                 when (val p = s.posts) {
                     Load.Loading -> item("loading") { SkeletonList(2, 320.dp) }
@@ -157,11 +161,16 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                                 pluralStringResource(R.plurals.engagement_answers_to, e.count, e.count, e.title), style = Kin.type.title, color = c.ink,
                                 modifier = Modifier.padding(top = 8.dp),
                             )
-                            is HomeEntry.Post -> TimelineCard(
+                            is HomeEntry.Post -> Column {
+                                a.serverChip(e.post)?.let { chip ->
+                                    app.kinframe.family.ui.Pill(chip, c.paperDeep, c.inkSoft, Modifier.padding(bottom = 4.dp), icon = KinIcons.Server)
+                                }
+                                TimelineCard(
                                 e.post, a.me, onOpen = { a.openPost(e.post) }, onReact = { r -> a.vm.react(e.post, r) }, onWho = { a.who(e.post) },
                                 onPoster = { a.openPerson(e.post.poster.userId) }.takeIf { !e.post.poster.formerMember && e.post.poster.userId != a.me },
                                 onShare = a.share?.let { f -> { f(e.post) } },
                             )
+                            }
                         }
                     }
                 }
@@ -215,7 +224,7 @@ private fun StripItem(name: String, label: String?, level: Double?, badge: Boole
 }
 
 @Composable
-private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup) -> Unit) {
+private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup) -> Unit, onHide: ((OnThisDayGroup) -> Unit)? = null) {
     val c = Kin.colors
     Surface(Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.engagement_on_this_day), style = Kin.type.title, color = c.ink)
@@ -225,6 +234,7 @@ private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup
                 items(g.items, key = { it.id }) { item -> Thumb(item.thumbUrl, item.caption, Modifier.size(96.dp).aspectRatio(1f)) }
             }
             SecondaryButton(stringResource(R.string.engagement_share_again), { onShare(g) }, icon = KinIcons.Send)
+            if (onHide != null) QuietButton(stringResource(R.string.leaving_memory_hide), { onHide(g) })
         }
     }
 }

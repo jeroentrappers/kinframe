@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="leaving_leave">Verlaten</string>
+    <string name="leaving_leave_family_title">%1$s verlaten?</string>
+    <string name="leaving_leave_frame_title">%1$s verlaten?</string>
+    <string name="leaving_owner_first">Je bent de eigenaar. Maak eerst iemand anders eigenaar.</string>
+    <plurals name="leaving_your_photos">
+        <item quantity="one">Je foto\'s (%d)</item>
+        <item quantity="other">Je foto\'s (%d)</item>
+    </plurals>
+    <string name="leaving_photos_keep_family">Laat ze bij de familie</string>
+    <string name="leaving_photos_keep_frame">Laat ze op het kader</string>
+    <string name="leaving_photos_keep_hint">Ze blijven waar ze zijn, nog altijd op jouw naam.</string>
+    <string name="leaving_photos_take">Neem ze mee</string>
+    <string name="leaving_photos_take_hint">Ze worden meteen weggehaald. Kaders houden ze 30 dagen in hun prullenbak en hun eigenaars krijgen een bericht.</string>
+    <plurals name="leaving_your_comments">
+        <item quantity="one">Je reacties (%d)</item>
+        <item quantity="other">Je reacties (%d)</item>
+    </plurals>
+    <string name="leaving_comments_keep">Laat ze staan</string>
+    <string name="leaving_comments_delete">Verwijder ook mijn reacties</string>
+    <string name="leaving_frames_title">Kaders waar je via deze familie lid van bent</string>
+    <string name="leaving_frame_too">Verlaat ook %1$s</string>
+    <string name="leaving_frame_owner">Je bent eigenaar van dit kader: maak eerst iemand anders eigenaar.</string>
+    <string name="leaving_later_hint">Je kunt je foto\'s later nog altijd weghalen via je geschiedenis.</string>
+    <string name="leaving_done_kept">Je bent vertrokken. Je foto\'s blijven waar ze waren.</string>
+    <plurals name="leaving_done_taken">
+        <item quantity="one">%d foto is weggehaald.</item>
+        <item quantity="other">%d foto\'s zijn weggehaald.</item>
+    </plurals>
+    <string name="leaving_done_until">Ze blijven in de prullenbak van de kaders tot %1$s.</string>
+    <plurals name="leaving_done_remote">
+        <item quantity="one">%d kader op een andere server kreeg de vraag ze weg te halen.</item>
+        <item quantity="other">%d kaders op andere servers kregen de vraag ze weg te halen.</item>
+    </plurals>
+
+    <string name="leaving_former_title">Plaatsen die je verliet</string>
+    <string name="leaving_former_lede">Families en kaders die je verliet of waaruit je verwijderd bent, waar je foto\'s nog staan. Je foto\'s zijn van jou: je kunt ze altijd weghalen.</string>
+    <string name="leaving_former_empty">Niets hier</string>
+    <string name="leaving_former_entry_hint">Haal je foto\'s weg bij families en kaders die je verliet</string>
+    <plurals name="leaving_former_photos">
+        <item quantity="one">%d foto van jou staat er nog</item>
+        <item quantity="other">%d foto\'s van jou staan er nog</item>
+    </plurals>
+    <string name="leaving_take_away">Haal ze weg</string>
+    <string name="leaving_take_away_from">Haal mijn foto\'s weg bij %1$s</string>
+    <string name="leaving_take_away_title">Je foto\'s weghalen bij %1$s?</string>
+
+    <string name="leaving_keep_title">Vragen om foto\'s te houden</string>
+    <string name="leaving_keep_entry_hint">Als iemand vraagt foto\'s te houden die je weghaalde</string>
+    <plurals name="leaving_keep_open">
+        <item quantity="one">%d vraag wacht op je antwoord</item>
+        <item quantity="other">%d vragen wachten op je antwoord</item>
+    </plurals>
+    <string name="leaving_keep_empty">Geen vragen</string>
+    <plurals name="leaving_keep_line">
+        <item quantity="one">%1$s vraagt %2$d foto te houden op %3$s.</item>
+        <item quantity="other">%1$s vraagt %2$d foto\'s te houden op %3$s.</item>
+    </plurals>
+    <string name="leaving_keep_until">Antwoord voor %1$s</string>
+    <string name="leaving_keep_answer_hint">Tik op foto\'s om ze weg te laten. Toegestane foto\'s komen terug zoals voorheen en blijven van jou: je kunt ze later opnieuw weghalen.</string>
+    <string name="leaving_keep_toggle">Toestaan of weglaten</string>
+    <string name="leaving_keep_picked">%1$d van %2$d gekozen</string>
+    <string name="leaving_keep_allow_all">Alles toestaan</string>
+    <string name="leaving_keep_allow_some">Deze toestaan</string>
+    <string name="leaving_keep_decline">Weigeren</string>
+    <string name="leaving_keep_allowed">%2$s mag %1$d foto\'s houden.</string>
+    <string name="leaving_keep_declined">Je weigerde de vraag van %2$s.</string>
+    <string name="leaving_keep_status_open">Wacht op een antwoord</string>
+    <string name="leaving_keep_status_allowed">Toegestaan</string>
+    <string name="leaving_keep_status_partly">Deels toegestaan</string>
+    <string name="leaving_keep_status_declined">Geweigerd</string>
+    <string name="leaving_keep_status_expired">Verlopen</string>
+
+    <string name="leaving_taken_title">Weggehaald</string>
+    <string name="leaving_taken_by">Weggehaald door %1$s</string>
+    <plurals name="leaving_taken_line">
+        <item quantity="one">%1$d foto, weggehaald op %2$s. In de prullenbak tot %3$s.</item>
+        <item quantity="other">%1$d foto\'s, weggehaald op %2$s. In de prullenbak tot %3$s.</item>
+    </plurals>
+    <string name="leaving_taken_asked">Je vroeg ze te houden: %1$s</string>
+    <string name="leaving_ask_button">Vraag %1$s ze te houden</string>
+    <string name="leaving_ask_hint">%1$s krijgt één melding en beslist. Je kunt kiezen om welke foto\'s je vraagt.</string>
+    <string name="leaving_ask_note">Een paar woorden (optioneel)</string>
+    <string name="leaving_ask_send">Vragen</string>
+    <string name="leaving_ask_sent">Gevraagd aan %1$s.</string>
+    <string name="leaving_ask_blocked">%1$s aanvaardt geen vragen.</string>
+    <string name="leaving_ask_deleted">Dit account is verwijderd: er is niemand om het te vragen.</string>
+    <string name="leaving_problem_forbidden">Dat kan hier niet voor jou.</string>
+    <string name="leaving_problem_already_asked">Je vroeg al om deze foto\'s.</string>
+    <string name="leaving_problem_expired">De 30 dagen zijn voorbij.</string>
+
+    <string name="leaving_settings_title">Vertrekken en herinneringen</string>
+    <string name="leaving_memories_title">Herinneringen</string>
+    <string name="leaving_memories_entry_hint">Laat mensen weg uit Op deze dag, terugblikken en overzichten</string>
+    <string name="leaving_memories_on">Herinneringen op %1$s</string>
+    <string name="leaving_memories_lede">Op deze dag, de maandelijkse terugblik, suggesties en het weekoverzicht tonen geen berichten meer van de mensen die je weglaat. Kaders veranderen niet.</string>
+    <string name="leaving_memories_people">Mensen weglaten</string>
+    <string name="leaving_memories_people_none">Niemand wordt weggelaten.</string>
+    <string name="leaving_memories_add">Iemand weglaten</string>
+    <string name="leaving_memories_no_people">Geen mensen om uit te kiezen.</string>
+    <string name="leaving_memories_show">Weer tonen</string>
+    <string name="leaving_memories_hidden">Verborgen herinneringen</string>
+    <plurals name="leaving_memories_hidden_count">
+        <item quantity="one">%d herinnering is verborgen.</item>
+        <item quantity="other">%d herinneringen zijn verborgen.</item>
+    </plurals>
+    <string name="leaving_memories_show_all">Toon ze allemaal weer</string>
+    <string name="leaving_memories_private">Privé: niemand krijgt een bericht en voor anderen verandert er niets. Dit blokkeert niemand.</string>
+    <string name="leaving_memories_person_hidden">%1$s staat niet meer in je herinneringen.</string>
+    <string name="leaving_memories_person_shown">%1$s staat weer in je herinneringen.</string>
+    <string name="leaving_memories_all_shown">Verborgen herinneringen kunnen weer verschijnen.</string>
+    <string name="leaving_memory_hide">Toon deze herinnering niet meer</string>
+    <string name="leaving_memory_hidden">Deze herinnering verschijnt niet meer.</string>
+
+    <string name="leaving_chat_no_longer">Je kunt %1$s geen berichten meer sturen.</string>
+
+    <string name="leaving_delete_take">Neem mijn foto\'s mee</string>
+    <string name="leaving_delete_take_hint">Ze verdwijnen van elk kader en uit elke familie. Kaders houden ze 30 dagen in hun prullenbak.</string>
+    <string name="leaving_delete_leave">Laat mijn foto\'s aan de families</string>
+    <string name="leaving_delete_leave_hint">Elke foto gaat naar de eigenaar van de familie of het kader en blijft op jouw naam als voormalig lid.</string>
+
+    <string name="leaving_notif_taken_title">Foto\'s weggehaald</string>
+    <string name="leaving_notif_keep_request_title">Iemand vraagt je foto\'s te houden</string>
+    <string name="leaving_notif_keep_answered_title">Je vraag is beantwoord</string>
+    <string name="leaving_notif_ownership_title">Eigenaar gewijzigd</string>
+</resources>
