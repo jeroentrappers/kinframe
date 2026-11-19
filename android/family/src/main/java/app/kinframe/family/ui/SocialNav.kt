@@ -29,22 +29,26 @@ data class CirclesRoute(val feedId: String) : SocialRoute
 
 data class CircleRoute(val feedId: String, val circleId: String) : SocialRoute
 
-data object BlockedPeopleRoute : SocialRoute
+/**
+ * Per-server settings screens carry the [accountId] they are for (multi-server.md §2.1: reminders, blocked people,
+ * milestones, the operator's reports and the weekly summary are each server's own); null is the primary account.
+ */
+data class BlockedPeopleRoute(val accountId: String? = null) : SocialRoute
 
 /** A family's reports for its admins, or (null) the operator's. */
-data class ReportsRoute(val feedId: String? = null) : SocialRoute
+data class ReportsRoute(val feedId: String? = null, val accountId: String? = null) : SocialRoute
 
 /** Settings → Reminders: level, frame requests, summary, birthdays, snooze, quiet hours, email digest, read receipts. */
-data object RemindersRoute : SocialRoute
+data class RemindersRoute(val accountId: String? = null) : SocialRoute
 
 /** A family's streak and weekly prompts, with the admins' settings. */
 data class FeedEngagementRoute(val feedId: String) : SocialRoute
 
-data class WeeklySummaryRoute(val weekOf: String) : SocialRoute
+data class WeeklySummaryRoute(val weekOf: String, val accountId: String? = null) : SocialRoute
 
 data class RecapRoute(val feedId: String, val month: String) : SocialRoute
 
-data object MilestonesRoute : SocialRoute
+data class MilestonesRoute(val accountId: String? = null) : SocialRoute
 
 /** "Send something to Oma's frame": the frame's freshness, its photo request and suggestions. */
 data class FreshFrameRoute(val frameId: String) : SocialRoute

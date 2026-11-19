@@ -75,7 +75,7 @@ class HomeActions(
     val who: (TimelinePost) -> Unit,
     val share: ((TimelinePost) -> Unit)?,
     val shareAgain: (OnThisDayGroup) -> Unit,
-    val openSummary: (String) -> Unit,
+    val openSummary: (HomeSummary) -> Unit,
     val openMilestones: () -> Unit,
     val openReminders: () -> Unit,
     val post: () -> Unit,
@@ -94,6 +94,8 @@ class HomeActions(
      * §2.2: grouped by server only when the same name appears twice), else null.
      */
     val stripServer: (String) -> String? = { null },
+    /** The server chip of a weekly summary card when there are several accounts, else null. */
+    val summaryServer: (HomeSummary) -> String? = { null },
 )
 
 @Composable
@@ -137,13 +139,15 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                     }
                 }
                 items(s.milestones, key = { "ms" + it.key }) { m -> MilestoneCard(m, { a.vm.dismissMilestone(m.key) }, a.openMilestones) }
-                s.summary?.let { w ->
-                    item("summary") {
-                        Surface(Modifier.fillMaxWidth(), onClick = { a.openSummary(w.weekOf) }) {
-                            Text(stringResource(R.string.engagement_summary_title), style = Kin.type.label, color = c.inkSoft)
-                            Text(summaryLine(w), style = Kin.type.bodyStrong, color = c.ink)
-                            QuietButton(stringResource(R.string.common_close), a.vm::dismissSummary)
+                // One card per server with a summary; each opens its own server's summary.
+                items(s.summaries, key = { "summary" + it.accountId + it.summary.weekOf }) { card ->
+                    Surface(Modifier.fillMaxWidth(), onClick = { a.openSummary(card) }) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(stringResource(R.string.engagement_summary_title), style = Kin.type.label, color = c.inkSoft, modifier = Modifier.weight(1f))
+                            a.summaryServer(card)?.let { app.kinframe.family.ui.Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
                         }
+                        Text(summaryLine(card.summary), style = Kin.type.bodyStrong, color = c.ink)
+                        QuietButton(stringResource(R.string.common_close), { a.vm.dismissSummary(card) })
                     }
                 }
                 items(s.prompts, key = { "prompt" + it.id }) { p ->

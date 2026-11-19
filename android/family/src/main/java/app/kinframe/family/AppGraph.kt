@@ -59,6 +59,8 @@ import app.kinframe.core.leaving.LeavingApi
 import app.kinframe.core.servers.RemoteApi
 import app.kinframe.core.servers.RoutingKinApi
 import app.kinframe.core.servers.RoutingLeavingApi
+import app.kinframe.core.servers.RoutingSocialApi
+import app.kinframe.core.social.SocialApi
 import app.kinframe.family.accounts.AddServerRequest
 import app.kinframe.family.accounts.Account
 import app.kinframe.family.accounts.AccountDeps
@@ -263,6 +265,17 @@ class AppGraph(
             scope.launch { runCatching { kin.me() }.onSuccess { u -> if (a.me.value == null) a.me.value = u } }
         }
     }
+
+    /** [accountId]'s profile as its server just answered it (read receipts…); the primary one's is also [me]. */
+    fun setProfile(accountId: String, user: User) {
+        val a = accounts.byId(accountId) ?: accounts.primary.value
+        a.me.value = user
+        if (a.id == accounts.primary.value.id) me.value = user
+    }
+
+    /** The social client pinned to [accountId] (that server's reminders, blocked people, milestones, reports). */
+    fun socialFor(accountId: String): SocialApi? =
+        (social.api.value as? RoutingSocialApi)?.forAccount(accountId) ?: social.api.value
 
     /** The API client pinned to [accountId] (a new family there, a frame code typed for that server). */
     fun kinFor(accountId: String): KinApi? = (api.value as? RoutingKinApi)?.forAccount(accountId) ?: api.value

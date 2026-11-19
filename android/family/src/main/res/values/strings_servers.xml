@@ -12,6 +12,9 @@
     <string name="servers_accounts_sign_out_title">Sign out of %1$s?</string>
     <string name="servers_accounts_sign_out_body">Its families, frames and chats leave the app. Your other servers stay signed in.</string>
     <string name="servers_accounts_hint">Families on other kinframe servers show up together with yours. The primary account opens first and receives what you share.</string>
+    <!-- Android only: no web key. Settings → Accounts → one server: reminders and chats, Telegram, memories, deleting the account there. -->
+    <string name="servers_account_settings">Settings on this server</string>
+    <string name="servers_account_delete_hint">Deletes your account on %1$s only. Your other servers stay signed in.</string>
     <string name="servers_add_title">Add a server</string>
     <!-- Android only: no web key -->
     <string name="servers_add_already">You are already signed in to %1$s.</string>

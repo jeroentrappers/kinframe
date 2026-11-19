@@ -39,10 +39,10 @@ import app.kinframe.family.util.Format
 
 /** Settings → Blocked people: unblock. */
 @Composable
-fun BlockedPeopleScreen(s: Load<List<Block>>, vm: BlocksViewModel, onBack: () -> Unit) {
+fun BlockedPeopleScreen(s: Load<List<Block>>, vm: BlocksViewModel, onBack: () -> Unit, server: String? = null) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.chat_blocked_title), onBack = onBack)
+        KinTopBar(stringResource(R.string.chat_blocked_title), onBack = onBack, subtitle = server)
         when (s) {
             Load.Loading -> SkeletonList(3, 56.dp)
             is Load.Error -> ErrorPanel(s.message, { vm.load() })
@@ -69,10 +69,10 @@ fun BlockedPeopleScreen(s: Load<List<Block>>, vm: BlocksViewModel, onBack: () ->
 
 /** A family's reports (owner and admins) or the operator's queue: remove or dismiss. */
 @Composable
-fun ReportsScreen(s: ReportsState, vm: ReportsViewModel, operator: Boolean, onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenChat: (String) -> Unit) {
+fun ReportsScreen(s: ReportsState, vm: ReportsViewModel, operator: Boolean, onBack: () -> Unit, onOpenPost: (String) -> Unit, onOpenChat: (String) -> Unit, server: String? = null) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(if (operator) R.string.chat_reports_operator_title else R.string.chat_reports_title), onBack = onBack)
+        KinTopBar(stringResource(if (operator) R.string.chat_reports_operator_title else R.string.chat_reports_title), onBack = onBack, subtitle = server)
         PageColumn(spacing = 10.dp) {
             Text(stringResource(if (operator) R.string.chat_reports_operator_lede else R.string.chat_reports_lede), style = Kin.type.body, color = c.inkSoft)
             ChoiceRow(listOf("open" to stringResource(R.string.chat_reports_open), "all" to stringResource(R.string.chat_reports_all)), if (s.status == "open") "open" else "all") { vm.setStatus(it) }

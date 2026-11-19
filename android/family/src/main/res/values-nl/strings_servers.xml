@@ -11,6 +11,8 @@
     <string name="servers_accounts_sign_out_title">Afmelden bij %1$s?</string>
     <string name="servers_accounts_sign_out_body">Zijn families, kaders en chats verdwijnen uit de app. Je andere servers blijven aangemeld.</string>
     <string name="servers_accounts_hint">Families op andere kinframe-servers verschijnen samen met de jouwe. Het hoofdaccount opent eerst en krijgt wat je deelt.</string>
+    <string name="servers_account_settings">Instellingen op deze server</string>
+    <string name="servers_account_delete_hint">Verwijdert alleen je account op %1$s. Je andere servers blijven aangemeld.</string>
     <string name="servers_add_title">Server toevoegen</string>
     <!-- Android only: no web key -->
     <string name="servers_add_already">Je bent al aangemeld bij %1$s.</string>

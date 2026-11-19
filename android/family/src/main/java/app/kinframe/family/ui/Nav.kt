@@ -33,6 +33,8 @@ sealed interface Route {
     /** A frame's or feed's Telegram chats (docs/spec/telegram.md). */
     data class TelegramChats(val scope: app.kinframe.family.ui.channels.ChannelScope) : Route
     data class TelegramChat(val chatId: String) : Route
+    /** Settings → Accounts → one server: that server's own settings, with several accounts (multi-server.md §2.1). */
+    data class AccountSettings(val accountId: String) : Route
 
     val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings || this is SocialTab
 }

@@ -95,9 +95,15 @@ val <T> Load<T>.valueOrNull: T? get() = (this as? Load.Ready<T>)?.value
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KinTopBar(title: String, onBack: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
+fun KinTopBar(title: String, onBack: (() -> Unit)? = null, subtitle: String? = null, actions: @Composable RowScope.() -> Unit = {}) {
     TopAppBar(
-        title = { Text(title, style = Kin.type.title, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() }) },
+        title = {
+            Column {
+                Text(title, style = Kin.type.title, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.semantics { heading() })
+                // Per-server screens with several accounts: which server (multi-server.md §2.1).
+                subtitle?.let { Text(it, style = Kin.type.caption, color = Kin.colors.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+        },
         navigationIcon = {
             if (onBack != null) {
                 IconButton(onClick = onBack) { Icon(KinIcons.ChevronLeft, stringResource(R.string.common_back), tint = Kin.colors.ink) }

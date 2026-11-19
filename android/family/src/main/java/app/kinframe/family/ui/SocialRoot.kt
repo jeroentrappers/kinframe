@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.kinframe.core.api.Feed
+import app.kinframe.core.servers.RoutingSocialApi
 import app.kinframe.core.api.MediaKind
 import app.kinframe.core.api.SendCreate
 import app.kinframe.core.api.SendItemCreate
@@ -222,8 +223,14 @@ fun SocialRouteScreen(
     val social = graph.social.api.collectAsStateWithLifecycle().value ?: return
     // The account of what this screen shows: its flags, limits and the person's user id there (multi-server.md §2.2).
     val key = socialRouteKey(r)
-    val acct = rememberAccountContext(graph, key, ready)
-    val flags = if (key == null) graph.social.flags else acct.flags
+    // Per-server settings (reminders, blocked people, milestones, operator reports, the weekly summary) name their
+    // account; with none, the primary one. Their calls go to that server only (multi-server.md §2.1).
+    val scoped = isAccountScoped(r)
+    val acct = rememberAccountContext(graph, key, ready, socialRouteAccount(r))
+    val flags = if (key == null && !scoped) graph.social.flags else acct.flags
+    val own: SocialApi = remember(social, acct.accountId) { (social as? RoutingSocialApi)?.forAccount(acct.accountId) ?: social }
+    // The view models of one entity's screen are made again when its account becomes known (multi-server.md §2.2).
+    val ak = acct.accountId
     val limits = acct.limits
     val context = LocalContext.current
     val res = LocalResources.current
@@ -241,7 +248,12 @@ fun SocialRouteScreen(
     when (r) {
         HomeRoute -> {
             val vm: HomeViewModel = viewModel(key = "home-${k(social)}") {
-                HomeViewModel(social, api, { graph.me.value?.id }, graph.live.events, flags.engagement, isMe = graph.accounts::isMe)
+                HomeViewModel(social, api, { graph.me.value?.id }, graph.live.events, flags.engagement, isMe = graph.accounts::isMe,
+                    // One card per server: each opens its own server's summary.
+                    summaries = { week ->
+                        (social as? RoutingSocialApi)?.weeklySummaries(week)?.map { (account, w) -> app.kinframe.family.ui.home.HomeSummary(w, account) }
+                            ?: listOf(app.kinframe.family.ui.home.HomeSummary(social.weeklySummary(week)))
+                    })
             }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is HomeNotice.Message) toaster.show(res.getString(e.message)) } }
@@ -254,9 +266,9 @@ fun SocialRouteScreen(
                 who = { p -> who = Triple(ReactionTarget.POST, p.id, null) },
                 share = if (flags.chats) ({ p -> sharing = p.id }) else null,
                 shareAgain = { g -> again = g },
-                openSummary = { nav.push(WeeklySummaryRoute(it)) },
-                openMilestones = { nav.push(MilestonesRoute) },
-                openReminders = { nav.push(RemindersRoute) },
+                openSummary = { w -> nav.push(WeeklySummaryRoute(w.summary.weekOf, w.accountId)) },
+                openMilestones = { nav.push(MilestonesRoute()) },
+                openReminders = { nav.push(RemindersRoute()) },
                 post = { nav.selectTab(Route.Send) },
                 topActions = topActions,
                 // "Don't show this memory again" (README §5.21), on the memory's own server: hidden memories are per
@@ -274,6 +286,7 @@ fun SocialRouteScreen(
                 serverChip = { p -> graph.accounts.chipFor(p.id) },
                 meFor = { p -> graph.accounts.meIdFor(p.id) ?: primaryMe },
                 stripServer = homeStripServers(graph, s),
+                summaryServer = { w -> w.accountId?.let { graph.accounts.labelIfSeveral(it) } },
             ))
         }
         ChatsRoute -> {
@@ -294,7 +307,7 @@ fun SocialRouteScreen(
             NewChatScreen(s, r.group, { nav.pop() }, vm::start, { vm.loadContacts() })
         }
         is PostRoute -> {
-            val vm: PostViewModel = viewModel(key = "post-${r.postId}-${k(social)}") {
+            val vm: PostViewModel = viewModel(key = "post-${r.postId}-$ak-${k(social)}") {
                 PostViewModel(social, api, r.postId, meOf, graph.live.events, limits.maxCommentChars)
             }
             val s by vm.state.collectAsStateWithLifecycle()
@@ -323,7 +336,7 @@ fun SocialRouteScreen(
         }
         is ConversationRoute -> ConversationRouteScreen(graph, ready, nav, r, social, flags, acct)
         is ConversationInfoRoute -> {
-            val vm: ConversationInfoViewModel = viewModel(key = "conv-info-${r.conversationId}-${k(social)}") {
+            val vm: ConversationInfoViewModel = viewModel(key = "conv-info-${r.conversationId}-$ak-${k(social)}") {
                 ConversationInfoViewModel(social, r.conversationId, meOf, graph.live.events) { uri ->
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { runCatching { Avatars.squareJpeg(graph.app, uri) }.getOrNull() }
                 }
@@ -343,7 +356,7 @@ fun SocialRouteScreen(
                 onOpenFamily = if (acct.discovery?.feeds == true) openFeed else null)
         }
         is PersonRoute -> {
-            val vm: PersonViewModel = viewModel(key = "person-${r.userId}-${k(social)}") { PersonViewModel(social, r.userId) }
+            val vm: PersonViewModel = viewModel(key = "person-${r.userId}-$ak-${k(social)}") { PersonViewModel(social, r.userId) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) {
                 vm.events.collect { e ->
@@ -357,7 +370,7 @@ fun SocialRouteScreen(
         }
         is CirclesRoute, is CircleRoute -> {
             val feedId = (r as? CirclesRoute)?.feedId ?: (r as CircleRoute).feedId
-            val vm: CirclesViewModel = viewModel(key = "circles-$feedId-${k(social)}") { CirclesViewModel(social, api, feedId, meOf, graph.live.events) }
+            val vm: CirclesViewModel = viewModel(key = "circles-$feedId-$ak-${k(social)}") { CirclesViewModel(social, api, feedId, meOf, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) {
                 vm.events.collect { e ->
@@ -371,53 +384,56 @@ fun SocialRouteScreen(
             if (r is CircleRoute) CircleScreen(s, vm, r.circleId, me, { nav.pop() }, onChat = if (flags.chats) ({ nav.push(ConversationRoute(it)) }) else null)
             else CirclesScreen(s, vm, { nav.pop() }) { nav.push(CircleRoute(feedId, it.id)) }
         }
-        BlockedPeopleRoute -> {
-            val vm: BlocksViewModel = viewModel(key = "blocks-${k(social)}") { BlocksViewModel(social) }
+        is BlockedPeopleRoute -> {
+            val vm: BlocksViewModel = viewModel(key = "blocks-$ak-${k(social)}") { BlocksViewModel(own) }
             val s by vm.state.collectAsStateWithLifecycle()
             SafetyNotices(vm.events)
-            BlockedPeopleScreen(s, vm) { nav.pop() }
+            BlockedPeopleScreen(s, vm, { nav.pop() }, server = graph.accounts.labelIfSeveral(acct.accountId))
         }
         is ReportsRoute -> {
-            val vm: ReportsViewModel = viewModel(key = "reports-${r.feedId}-${k(social)}") { ReportsViewModel(social, r.feedId, graph.live.events) }
+            val vm: ReportsViewModel = viewModel(key = "reports-${r.feedId}-$ak-${k(social)}") { ReportsViewModel(own, r.feedId, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             SafetyNotices(vm.events)
-            ReportsScreen(s, vm, operator = r.feedId == null, { nav.pop() }, { nav.push(PostRoute(it)) }, { nav.push(ConversationRoute(it)) })
+            ReportsScreen(s, vm, operator = r.feedId == null, { nav.pop() }, { nav.push(PostRoute(it)) }, { nav.push(ConversationRoute(it)) },
+                server = if (r.feedId == null) graph.accounts.labelIfSeveral(acct.accountId) else null)
         }
-        RemindersRoute -> {
-            val vm: RemindersViewModel = viewModel(key = "reminders-${k(social)}") {
-                RemindersViewModel(social, graph.me.value?.showReadReceipts ?: true, flags.engagement) { u -> graph.me.value = u }
+        is RemindersRoute -> {
+            val vm: RemindersViewModel = viewModel(key = "reminders-$ak-${k(social)}") {
+                // Read receipts are per server too: that account's profile, kept in step with what the server answers.
+                RemindersViewModel(own, acct.me?.showReadReceipts ?: true, flags.engagement) { u -> graph.setProfile(acct.accountId, u) }
             }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is EngagementNotice.Message) toaster.show(res.getString(e.message)) } }
             RemindersScreen(s, vm, flags.chats, flags.engagement, { nav.pop() },
-                onBlocked = if (flags.chats) ({ nav.push(BlockedPeopleRoute) }) else null,
-                onMilestones = if (flags.engagement) ({ nav.push(MilestonesRoute) }) else null,
-                onReports = if (flags.chats && acct.isOperator) ({ nav.push(ReportsRoute(null)) }) else null)
+                onBlocked = if (flags.chats) ({ nav.push(BlockedPeopleRoute(r.accountId)) }) else null,
+                onMilestones = if (flags.engagement) ({ nav.push(MilestonesRoute(r.accountId)) }) else null,
+                onReports = if (flags.chats && acct.isOperator) ({ nav.push(ReportsRoute(null, r.accountId)) }) else null,
+                server = graph.accounts.labelIfSeveral(acct.accountId))
         }
         is FeedEngagementRoute -> {
-            val vm: FeedEngagementViewModel = viewModel(key = "engagement-${r.feedId}-${k(social)}") { FeedEngagementViewModel(social, api, r.feedId, graph.live.events) }
+            val vm: FeedEngagementViewModel = viewModel(key = "engagement-${r.feedId}-$ak-${k(social)}") { FeedEngagementViewModel(social, api, r.feedId, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is EngagementNotice.Message) toaster.show(res.getString(e.message)) } }
             FeedEngagementScreen(s, vm) { nav.pop() }
         }
         is WeeklySummaryRoute -> {
-            val vm: DocumentViewModel<app.kinframe.core.social.WeeklySummary> = viewModel(key = "summary-${r.weekOf}-${k(social)}") { DocumentViewModel { social.weeklySummary(r.weekOf) } }
+            val vm: DocumentViewModel<app.kinframe.core.social.WeeklySummary> = viewModel(key = "summary-${r.weekOf}-$ak-${k(social)}") { DocumentViewModel { own.weeklySummary(r.weekOf) } }
             val s by vm.state.collectAsStateWithLifecycle()
-            WeeklySummaryScreen(s, { vm.load() }) { nav.pop() }
+            WeeklySummaryScreen(s, { vm.load() }, { nav.pop() }, server = graph.accounts.labelIfSeveral(acct.accountId))
         }
         is RecapRoute -> {
-            val vm: DocumentViewModel<app.kinframe.core.social.MonthlyRecap> = viewModel(key = "recap-${r.feedId}-${r.month}-${k(social)}") { DocumentViewModel { social.feedRecap(r.feedId, r.month) } }
+            val vm: DocumentViewModel<app.kinframe.core.social.MonthlyRecap> = viewModel(key = "recap-${r.feedId}-${r.month}-$ak-${k(social)}") { DocumentViewModel { social.feedRecap(r.feedId, r.month) } }
             val s by vm.state.collectAsStateWithLifecycle()
             RecapScreen(s, { vm.load() }, { nav.pop() }) { nav.push(PostRoute(it)) }
         }
-        MilestonesRoute -> {
-            val vm: MilestonesViewModel = viewModel(key = "milestones-${k(social)}") { MilestonesViewModel(social) }
+        is MilestonesRoute -> {
+            val vm: MilestonesViewModel = viewModel(key = "milestones-$ak-${k(social)}") { MilestonesViewModel(own) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) { vm.events.collect { e -> if (e is EngagementNotice.Message) toaster.show(res.getString(e.message)) } }
-            MilestonesScreen(s, vm) { nav.pop() }
+            MilestonesScreen(s, vm, { nav.pop() }, server = graph.accounts.labelIfSeveral(acct.accountId))
         }
         is FreshFrameRoute -> {
-            val vm: FreshFrameViewModel = viewModel(key = "fresh-${r.frameId}-${k(social)}") { FreshFrameViewModel(social, api, r.frameId, graph.live.events) }
+            val vm: FreshFrameViewModel = viewModel(key = "fresh-${r.frameId}-$ak-${k(social)}") { FreshFrameViewModel(social, api, r.frameId, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             FreshFrameScreen(s, { nav.pop() },
                 // Not on the frame (it asked through a family): the send preselects the families that reach it.
@@ -578,16 +594,21 @@ fun FrameSocialSettingsSlot(flags: SocialFlags, fs: app.kinframe.family.ui.frame
 /** Settings: the family social entries (reminders, chats, blocked people, milestones). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun SocialSettingsSection(ready: Phase.Ready, nav: Navigator) {
-    val flags = SocialFlags.of(ready.server.discovery)
+fun SocialSettingsSection(ready: Phase.Ready, nav: Navigator) =
+    SocialSettingsSection(SocialFlags.of(ready.server.discovery), ready.me.isOperator, null, nav)
+
+/** The family social entries of one account ([accountId] null: the primary one), with that server's flags and roles. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun SocialSettingsSection(flags: SocialFlags, operator: Boolean, accountId: String?, nav: Navigator) {
     if (!flags.chats && !flags.engagement) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         SectionTitle(stringResource(R.string.engagement_settings_title))
         Text(stringResource(R.string.engagement_settings_lede), style = Kin.type.caption, color = Kin.colors.inkSoft)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SecondaryButton(stringResource(R.string.engagement_settings_open), { nav.push(RemindersRoute) }, icon = KinIcons.Bell)
-            if (flags.chats) SecondaryButton(stringResource(R.string.chat_blocked_title), { nav.push(BlockedPeopleRoute) }, icon = KinIcons.Shield)
-            if (flags.chats && ready.me.isOperator) SecondaryButton(stringResource(R.string.chat_reports_operator_title), { nav.push(ReportsRoute(null)) }, icon = KinIcons.Warning)
+            SecondaryButton(stringResource(R.string.engagement_settings_open), { nav.push(RemindersRoute(accountId)) }, icon = KinIcons.Bell)
+            if (flags.chats) SecondaryButton(stringResource(R.string.chat_blocked_title), { nav.push(BlockedPeopleRoute(accountId)) }, icon = KinIcons.Shield)
+            if (flags.chats && operator) SecondaryButton(stringResource(R.string.chat_reports_operator_title), { nav.push(ReportsRoute(null, accountId)) }, icon = KinIcons.Warning)
         }
     }
 }
@@ -612,6 +633,20 @@ fun SendAudience(s: ComposerState, composer: ComposerViewModel) {
             }
         }
     }
+}
+
+/** Per-server settings screens: their account is named by the route, not found by an id. */
+fun isAccountScoped(r: SocialRoute): Boolean =
+    r is RemindersRoute || r is BlockedPeopleRoute || r is MilestonesRoute || r is WeeklySummaryRoute || (r is ReportsRoute && r.feedId == null)
+
+/** The account a per-server settings screen is for (null: the primary one, or an entity's screen). */
+fun socialRouteAccount(r: SocialRoute): String? = when (r) {
+    is RemindersRoute -> r.accountId
+    is BlockedPeopleRoute -> r.accountId
+    is MilestonesRoute -> r.accountId
+    is WeeklySummaryRoute -> r.accountId
+    is ReportsRoute -> r.accountId.takeIf { r.feedId == null }
+    else -> null
 }
 
 /** The key of a social screen's entity: the routing index tells its account. Null for the merged screens. */
@@ -647,6 +682,8 @@ class SocialTargets(
     val canSendTo: suspend (String) -> Boolean,
     /** The Send tab with the frame, or (not on it) the families that reach it, preselected (README §5.20). */
     val sendTo: (frameId: String, requestId: String?) -> Unit,
+    /** An account by its local id ([OpenTarget.accountId], the push's account; null: the primary one). */
+    val byAccount: (String?) -> app.kinframe.family.accounts.AccountContext = { account(null) },
 )
 
 /** Where a family social notification tap goes (README §6.3). Returns false when it isn't one. */
@@ -666,15 +703,18 @@ suspend fun openSocialTarget(t: OpenTarget, nav: Navigator, c: SocialTargets): B
         }
         SocialNotifications.TARGET_REPORTS -> {
             val feed = t.feedId ?: ids["feed_id"]
-            val a = c.account(feed)
+            // A family's reports are on the family's server; the operator's on the server that sent the push.
+            val a = if (feed != null) c.account(feed) else c.byAccount(t.accountId)
             if (!a.flags.chats) return true
             if (feed == null && !a.isOperator) return true
-            nav.selectTab(if (c.tabs.social) HomeRoute else Route.Settings); nav.push(ReportsRoute(feed))
+            nav.selectTab(if (c.tabs.social) HomeRoute else Route.Settings); nav.push(ReportsRoute(feed, if (feed == null) a.accountId else null))
         }
         SocialNotifications.TARGET_WEEKLY_SUMMARY -> {
             val week = ids["week_of"] ?: return true
-            if (!c.account(null).flags.engagement) return true
-            nav.selectTab(home); nav.push(WeeklySummaryRoute(week))
+            // The summary of the server that sent the push (each server has its own).
+            val a = c.byAccount(t.accountId)
+            if (!a.flags.engagement) return true
+            nav.selectTab(home); nav.push(WeeklySummaryRoute(week, a.accountId))
         }
         // "Oma's frame would like new photos" or a quiet-frame reminder: the frame, or, for someone who isn't on it
         // (it reached them through a family), the Send tab with the families that reach the frame.

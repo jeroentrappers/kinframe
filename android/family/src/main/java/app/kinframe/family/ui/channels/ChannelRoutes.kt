@@ -95,9 +95,12 @@ fun ChannelRoute(graph: AppGraph, ready: Phase.Ready, r: Route, nav: Navigator) 
 
 /** Settings → Telegram (discovery `telegram`): link or unlink the person's own Telegram account. */
 @Composable
-fun TelegramLinkSettings(graph: AppGraph, ready: Phase.Ready) {
-    val api = ready.api
-    val vm: TelegramLinkViewModel = viewModel(key = "telegram-link-${System.identityHashCode(api)}") { TelegramLinkViewModel(api, graph.live.events) }
+fun TelegramLinkSettings(graph: AppGraph, ready: Phase.Ready, accountId: String? = null) {
+    // The link is per server (multi-server.md §2.1): [accountId]'s client and its own websocket events.
+    val account = graph.accounts.byId(accountId)
+    val api = androidx.compose.runtime.remember(accountId, ready.api) { accountId?.let(graph::kinFor) ?: ready.api }
+    val live = account?.live?.events ?: graph.live.events
+    val vm: TelegramLinkViewModel = viewModel(key = "telegram-link-$accountId-${System.identityHashCode(api)}") { TelegramLinkViewModel(api, live) }
     val st by vm.state.collectAsStateWithLifecycle()
     Notices(vm.events)
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.load() }
