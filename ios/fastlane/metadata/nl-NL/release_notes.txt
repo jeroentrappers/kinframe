@@ -1,9 +1,15 @@
-Feeds: start een privéfeed voor de familie en laat het kader van elke grootouder erop abonneren. Eén keer posten en de foto's staan op alle geabonneerde kaders, met "bekeken op 4 van 5 kaders" en reacties die bij jou terugkomen.
+kinframe wordt de privéplek waar je familie deelt.
 
-Verjaardagen: bewaar de verjaardagen van de familie in een feed. Op de dag zelf tonen de kaders een verjaardagskaart met ballonnen, en met één tik op het kader komt er een felicitatie bij jou terug.
+Home: alles wat je families delen, het nieuwste eerst, met de reacties van mensen en van de kaders.
 
-Fotobronnen: houd een album of feed gelijk met een Immich-album of een gedeeld iCloud-album.
+Opmerkingen: praat over elke foto, antwoord, noem iemand met @, en zie het ❤ van oma's kader gewoon in het gesprek.
 
-Albums kunnen nu alleen in albummodus spelen, zodat een groot archiefalbum de gewone diavoorstelling niet overspoelt.
+Chats: met één persoon, in groepen, een chat voor elke familie en voor kringen daarbinnen. Stuur foto's, video's en spraakberichten, en zet elke foto met één tik op een kader.
 
-De app laat nu weten wanneer een update nodig is, plus veel kleinere verbeteringen op iPad en Mac.
+Families: "feeds" heten nu families. Maak kringen voor de neven en nichten of een gezin, en voeg familieleden toe die alleen willen meelezen.
+
+Zachte herinneringen: zie welke kaders stil worden, antwoord als oma op "Vraag om nieuwe foto's" tikt, houd de familiereeks vol en probeer het weekthema. Weinig herinneringen, nooit 's nachts, makkelijk uit te zetten.
+
+Een familie verlaten: kies of je foto's blijven of met je meegaan. Kaders krijgen een seintje en kunnen vragen om er een paar te houden. Laat mensen privé uit je herinneringen.
+
+Meerdere servers: meld je aan op meer dan één kinframe-server en zie al je families samen. Kaders kunnen een familie op een andere server volgen.

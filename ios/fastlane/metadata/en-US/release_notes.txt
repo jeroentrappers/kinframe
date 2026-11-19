@@ -1,9 +1,15 @@
-Feeds: start a private family feed and let every grandparent's frame subscribe to it. Post once, and the photos reach all subscribed frames, with "seen on 4 of 5 frames" and reactions coming back.
+kinframe becomes your family's private place to share.
 
-Birthdays: keep the family's birthdays in a feed. On the day, the frames show a birthday card with balloons, and a tap on the frame sends a greeting back to you.
+Home: everything your families share, newest first, with the reactions from people and from the frames.
 
-Photo sources: keep an album or feed in step with an Immich album or an iCloud shared album.
+Comments: talk about every photo, reply, mention someone with @, and see Oma's ❤ from her frame right in the conversation.
 
-Albums can now play only in album mode, so a big archive album doesn't fill the everyday slideshow.
+Chats: one-to-one, groups, a chat for every family and for circles inside it. Send photos, videos and voice messages, and put any photo on a frame with one tap.
 
-The app now tells you when an update is needed, and many smaller improvements on iPad and Mac.
+Families: "feeds" are now called families. Make circles for the cousins or a household, and add family members who only want to follow along.
+
+Gentle reminders: see which frames are getting quiet, answer when Oma taps "Ask for new photos", keep the family streak going and try the weekly theme. Few reminders, never at night, easy to turn off.
+
+Leaving a family: decide whether your photos stay or go with you. Frames are told and can ask to keep some. Leave people out of your memories, privately.
+
+Several servers: sign in to more than one kinframe server and see all your families together. Frames can follow a family on another server.

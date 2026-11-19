@@ -1,5 +1,7 @@
-• Feeds: een privéfeed voor de familie waarop elk kader kan abonneren. Eén keer posten, "bekeken op 4 van 5 kaders" en reacties.
-• Verjaardagen: op de dag zelf een verjaardagskaart met ballonnen op het kader; één tik stuurt een felicitatie terug.
-• Fotobronnen: houd een album of feed gelijk met Immich of een gedeeld iCloud-album.
-• Albums kunnen alleen in albummodus spelen.
-• De app laat weten wanneer een update nodig is.
+• Home: alles wat je families delen, met reacties van mensen en kaders.
+• Opmerkingen bij elke foto, antwoorden en @vermeldingen.
+• Chats: één-op-één, groepen, familie- en kringchats, spraakberichten, foto op een kader zetten.
+• Feeds heten nu families, met kringen en meelezers.
+• Zachte herinneringen, Vraag om nieuwe foto's, familiereeks en weekthema.
+• Familie verlaten: je foto's blijven of gaan mee, met een seintje.
+• Meerdere kinframe-servers in één app.

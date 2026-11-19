@@ -1,5 +1,7 @@
-• Feeds: a private family feed that every frame can subscribe to. Post once, see "seen on 4 of 5 frames" and reactions.
-• Birthdays: frames show a birthday card with balloons on the day; a tap sends a greeting back.
-• Photo sources: keep an album or feed in step with Immich or an iCloud shared album.
-• Albums can play only in album mode.
-• The app tells you when an update is needed.
+• Home: everything your families share, with reactions from people and frames.
+• Comments on every photo, replies and @mentions.
+• Chats: one-to-one, groups, family and circle chats, voice messages, put a photo on a frame.
+• Feeds are now families, with circles and readers.
+• Gentle reminders, Ask for new photos, family streak and weekly theme.
+• Leaving a family: your photos stay or go, with notice.
+• Several kinframe servers in one app.
