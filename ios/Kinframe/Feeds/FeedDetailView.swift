@@ -302,7 +302,7 @@ struct FeedDetailView: View {
                             if app.social.features.social {
                                 FamilyTimelineSection(feedId: feed.id)
                             } else {
-                                FeedPostsSection(model: model, openReceipts: { receipts = FeedPostRoute(feedId: feed.id, postId: $0.id) })
+                                FeedPostsSection(model: model, openReceipts: { receipts = FeedPostRoute(feedId: feed.id, postId: $0.id, account: app.accountId) })
                             }
                         case .members: FeedMembersSection(model: model)
                         case .frames: FeedFramesSection(model: model)

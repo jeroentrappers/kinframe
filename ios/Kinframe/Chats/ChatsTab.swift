@@ -5,7 +5,10 @@ import SwiftUI
 /// with people you share a family or a frame with; archive or mute with a swipe.
 struct ChatsTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
     @State private var creating = false
+    /// The account a new chat starts on (contacts are per server); the primary one unless picked.
+    @State private var creatingOn: AppModel?
     @State private var showArchived = false
 
     var body: some View {
@@ -19,24 +22,32 @@ struct ChatsTab: View {
                     } else {
                         LoadingView().listRowBackground(Color.clear)
                     }
-                } else if app.social.conversations.isEmpty {
+                } else if accounts.conversations.isEmpty {
                     EmptyStateView(systemImage: "bubble.left.and.bubble.right", title: L("chat.list.emptyTitle"), message: L("chat.list.emptyBody")) {
                         Button(L("chat.new.title")) { creating = true }.buttonStyle(.kf(.primary, large: true))
                     }
                     .listRowBackground(Color.clear)
                 } else {
-                    ForEach(app.social.conversations) { c in
-                        NavigationLink(value: ChatRoute(id: c.id)) { ChatRow(conversation: c) }
+                    // Every account's chats by last message (docs/spec/multi-server.md §2.2); a chat lives on one server.
+                    ForEach(accounts.conversations, id: \.value.id) { owned in
+                        let c = owned.value, m = owned.model
+                        NavigationLink(value: ChatRoute(id: c.id, account: m.accountId)) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                ChatRow(conversation: c)
+                                ServerChip(model: m).padding(.leading, 60)
+                            }
+                        }
+                            .environment(m)
                             .listRowBackground(Palette.surface)
                             .swipeActions(edge: .trailing) {
-                                Button { Task { await archive(c, true) } } label: { Label(L("chat.archive"), systemImage: "archivebox") }
+                                Button { Task { await archive(c, true, on: m) } } label: { Label(L("chat.archive"), systemImage: "archivebox") }
                                     .tint(Palette.textMuted)
                             }
                             .swipeActions(edge: .leading) {
                                 if c.muted {
-                                    Button { Task { await mute(c, .off) } } label: { Label(L("chat.mute.off"), systemImage: "bell") }
+                                    Button { Task { await mute(c, .off, on: m) } } label: { Label(L("chat.mute.off"), systemImage: "bell") }
                                 } else {
-                                    Button { Task { await mute(c, .always) } } label: { Label(L("chat.mute.action"), systemImage: "bell.slash") }
+                                    Button { Task { await mute(c, .always, on: m) } } label: { Label(L("chat.mute.action"), systemImage: "bell.slash") }
                                         .tint(Palette.accent)
                                 }
                             }
@@ -48,7 +59,9 @@ struct ChatsTab: View {
                 .listRowBackground(Color.clear)
             }
             .scrollContentBackground(.hidden)
-            .refreshable { await app.social.loadConversations() }
+            .refreshable {
+                await withTaskGroup(of: Void.self) { g in for m in accounts.active { g.addTask { await m.social.loadConversations() } } }
+            }
             .pageBackground()
             .navigationTitle(L("chat.title"))
             .toolbar {
@@ -57,37 +70,54 @@ struct ChatsTab: View {
                         .accessibilityLabel(L("chat.archived"))
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { creating = true } label: { Image(systemName: "square.and.pencil").frame(width: 44, height: 44) }
+                    let chatAccounts = accounts.active.filter(\.social.features.chats)
+                    if chatAccounts.count > 1 {
+                        // Contacts are per server: pick where the chat starts.
+                        Menu {
+                            ForEach(chatAccounts, id: \.accountId) { m in
+                                Button(m.serverName) { creatingOn = m; creating = true }
+                            }
+                        } label: {
+                            Image(systemName: "square.and.pencil").frame(width: 44, height: 44)
+                        }
                         .accessibilityLabel(L("chat.new.title"))
+                    } else {
+                        Button { creatingOn = nil; creating = true } label: { Image(systemName: "square.and.pencil").frame(width: 44, height: 44) }
+                            .accessibilityLabel(L("chat.new.title"))
+                    }
                 }
             }
             .socialDestinations()
         }
         .task(id: app.api?.baseURL) { await app.social.loadConversations() }
         .sheet(isPresented: $creating) {
+            let m = creatingOn ?? app
             NewChatSheet { c in
-                app.social.update(c)
-                app.chatsPath.append(ChatRoute(id: c.id))
+                m.social.update(c)
+                app.chatsPath.append(ChatRoute(id: c.id, account: m.accountId))
             }
+            .environment(m)
         }
         .sheet(isPresented: $showArchived) { ArchivedChatsSheet() }
     }
 
-    private func archive(_ c: Conversation, _ on: Bool) async {
-        guard let api = app.api else { return }
+    private func archive(_ c: Conversation, _ on: Bool, on owner: AppModel? = nil) async {
+        let m = owner ?? app
+        guard let api = m.api else { return }
         do {
             let updated = try await api.setConversationArchived(c.id, on)
-            app.social.update(updated)
-            if on { app.social.remove(conversation: c.id) }
+            m.social.update(updated)
+            if on { m.social.remove(conversation: c.id) }
             app.toasts.show(L(on ? "chat.archivedToast" : "chat.unarchivedToast"))
         } catch {
             app.toasts.error(error)
         }
     }
 
-    private func mute(_ c: Conversation, _ m: MuteFor) async {
-        guard let api = app.api else { return }
-        do { app.social.update(try await api.setConversationMute(c.id, m)) } catch { app.toasts.error(error) }
+    private func mute(_ c: Conversation, _ mute: MuteFor, on owner: AppModel? = nil) async {
+        let m = owner ?? app
+        guard let api = m.api else { return }
+        do { m.social.update(try await api.setConversationMute(c.id, mute)) } catch { app.toasts.error(error) }
     }
 }
 

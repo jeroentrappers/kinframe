@@ -9,28 +9,29 @@ struct KinframeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environment(delegate.model)
+            AccountsRoot(accounts: delegate.accounts)
                 .onOpenURL { delegate.model.open($0) }
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
                     if let url = activity.webpageURL { delegate.model.open(url) }
                 }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { delegate.model.didBecomeActive() }
+            if phase == .active { delegate.accounts.didBecomeActive() }
         }
     }
 }
 
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     /// Created at launch, also when the system launches the app in the background to finish uploads.
-    @MainActor lazy var model = AppModel()
+    @MainActor lazy var accounts = Accounts()
+    /// The primary account (navigation, links, the upload queue's background sessions).
+    @MainActor var model: AppModel { accounts.primary }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         Self.styleNavigationBars()
         MainActor.assumeIsolated {
-            _ = model
+            _ = accounts
             PushRegistrar.shared.registerCategories()
         }
         return true
@@ -67,7 +68,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         MainActor.assumeIsolated {
-            PushRegistrar.shared.didRegister(token: deviceToken, api: model.api)
+            PushRegistrar.shared.didRegister(token: deviceToken, accounts: accounts.models)
         }
     }
 
@@ -86,9 +87,32 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         let action = response.actionIdentifier
         // Family social: the reminder buttons and the reply from a chat notification run without opening anything.
         let reply = (response as? UNTextInputNotificationResponse)?.userText
-        if await MainActor.run(body: { PushRegistrar.shared.handleAction(action, payload: payload.value, reply: reply, api: model.api) }) { return }
+        // The payload's `server` says which account it is for (README §6.3); without it, the primary account.
+        let account = await MainActor.run { accounts.model(forPush: payload.value) }
+        if await MainActor.run(body: { PushRegistrar.shared.handleAction(action, payload: payload.value, reply: reply, api: account.api) }) { return }
         guard let route = PushRoute.parse(payload.value) else { return }
-        await MainActor.run { model.open(route) }
+        await MainActor.run { account.open(route) }
+    }
+}
+
+/// The primary account's model for the app's screens, and every account for merged lists; a new primary swaps it.
+private struct AccountsRoot: View {
+    let accounts: Accounts
+
+    var body: some View {
+        RootView()
+            .environment(accounts.primary)
+            .environment(accounts)
+            .id(accounts.primary.accountId)
+    }
+}
+
+extension Accounts {
+    /// The account a push is for: its `server` field, else the primary account (APNs has one token for all).
+    func model(forPush payload: [AnyHashable: Any]) -> AppModel {
+        let records = models.compactMap { m in m.server.map { AccountRecord(id: m.accountId, server: $0) } }
+        let r = AccountServers.account(forPush: payload, in: records, fallback: primary.accountId)
+        return model(for: r?.id)
     }
 }
 

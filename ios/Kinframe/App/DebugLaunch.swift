@@ -24,7 +24,7 @@ enum DebugLaunch {
         }
         if args.bool(forKey: "kfReset") {
             await app.auth.signOut()
-            ServerStore.save(nil)
+            AccountStore.save([])
             UserDefaults.standard.removeObject(forKey: "onboardingStep")
             app.server = nil
             app.auth.configure(nil)
@@ -86,13 +86,13 @@ enum DebugLaunch {
         if let id = args.string(forKey: "kfPost") { app.openSocial(.post(postId: id, commentId: nil)) }
         if let id = args.string(forKey: "kfChat") { app.openSocial(.conversation(conversationId: id, messageId: nil)) }
         if let id = args.string(forKey: "kfSend") {
-            app.historyPath = NavigationPath([HistoryRoute(sendId: id)])
+            app.historyPath = NavigationPath([HistoryRoute(sendId: id, account: app.accountId)])
         }
         if let ids = args.string(forKey: "kfComposeFrames") {
             app.composeFrameIds = Set(ids.split(separator: ",").map(String.init))
         }
         if let id = args.string(forKey: "kfFrame") {
-            app.framesPath = NavigationPath([FrameRoute(id: id, section: args.string(forKey: "kfSection").flatMap(FrameSection.init(rawValue:)) ?? .overview)])
+            app.framesPath = NavigationPath([FrameRoute(id: id, section: args.string(forKey: "kfSection").flatMap(FrameSection.init(rawValue:)) ?? .overview, account: app.accountId)])
         }
         if let id = args.string(forKey: "kfFeed") {
             app.openFeed(id, section: args.string(forKey: "kfFeedSection").flatMap(FeedSection.init(rawValue:)) ?? .posts)

@@ -1,0 +1,86 @@
+{
+  "servers.account.add": {
+    "en": "Add a server",
+    "nl": "Een server toevoegen"
+  },
+  "servers.account.added": {
+    "en": "Signed in to {server}. You see it together with your other accounts.",
+    "nl": "Aangemeld bij {server}. Je ziet het samen met je andere accounts."
+  },
+  "servers.account.chip": {
+    "en": "On {server}",
+    "nl": "Op {server}"
+  },
+  "servers.account.duplicate": {
+    "en": "You’re already signed in to this server ({server}).",
+    "nl": "Je bent al aangemeld bij deze server ({server})."
+  },
+  "servers.account.expired": {
+    "en": "You were signed out of {server}. Sign in again in Settings → Accounts.",
+    "nl": "Je bent afgemeld bij {server}. Meld je opnieuw aan via Instellingen → Accounts."
+  },
+  "servers.account.footer": {
+    "en": "Your family uses kinframe on another server too? Add it: the app shows everything together.",
+    "nl": "Gebruikt je familie kinframe ook op een andere server? Voeg ze toe: de app toont alles samen."
+  },
+  "servers.account.footerSeveral": {
+    "en": "The first account is your primary one: it opens first and gets what you share from other apps by default. Each server only knows its own account.",
+    "nl": "Het eerste account is je hoofdaccount: het opent eerst en krijgt standaard wat je vanuit andere apps deelt. Elke server kent alleen zijn eigen account."
+  },
+  "servers.account.foreignFamily": {
+    "en": "This family is on {server}. Sign in there to join.",
+    "nl": "Deze familie staat op {server}. Meld je daar aan om mee te doen."
+  },
+  "servers.account.foreignFrame": {
+    "en": "This frame is on {server}. Sign in there to join.",
+    "nl": "Dit fotokader staat op {server}. Meld je daar aan om mee te doen."
+  },
+  "servers.account.foreignSignIn": {
+    "en": "Sign in there",
+    "nl": "Daar aanmelden"
+  },
+  "servers.account.foreignTitle": {
+    "en": "Another kinframe server",
+    "nl": "Een andere kinframe-server"
+  },
+  "servers.account.linkFamily": {
+    "en": "This family is on {server}. Sign in there to join; your other accounts stay signed in.",
+    "nl": "Deze familie staat op {server}. Meld je daar aan om mee te doen; je andere accounts blijven aangemeld."
+  },
+  "servers.account.linkFrame": {
+    "en": "This frame is on {server}. Sign in there to join; your other accounts stay signed in.",
+    "nl": "Dit fotokader staat op {server}. Meld je daar aan om mee te doen; je andere accounts blijven aangemeld."
+  },
+  "servers.account.makePrimary": {
+    "en": "Make this my primary account",
+    "nl": "Maak dit mijn hoofdaccount"
+  },
+  "servers.account.primary": {
+    "en": "Primary",
+    "nl": "Hoofdaccount"
+  },
+  "servers.account.remove": {
+    "en": "Remove this account",
+    "nl": "Dit account verwijderen"
+  },
+  "servers.account.sending": {
+    "en": "To {server}",
+    "nl": "Naar {server}"
+  },
+  "servers.account.signInAgain": {
+    "en": "Sign in again",
+    "nl": "Opnieuw aanmelden"
+  },
+  "servers.account.signedOut": {
+    "en": "Signed out",
+    "nl": "Afgemeld"
+  },
+  "servers.account.signedOutBody": {
+    "en": "Your session on {server} ended. Sign in again to see its frames, families and chats here.",
+    "nl": "Je sessie op {server} is verlopen. Meld je opnieuw aan om de fotokaders, families en chats ervan hier te zien."
+  },
+  "servers.account.title": {
+    "en": "Accounts",
+    "nl": "Accounts"
+  }
+}

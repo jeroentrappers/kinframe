@@ -24,6 +24,7 @@
 		0DED0431EE39EF401C282599 /* MediaProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5380C9E2047A52D1360A8DB /* MediaProbe.swift */; };
 		0E319531F8CEAE0EE79F2B08 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC296D5E58C89E0E3EF39E75 /* ShareViewController.swift */; };
 		0F8F30A92A360F3C4323C682 /* SocialSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4009D8EFCDCC1D4DCFAD8492 /* SocialSettings.swift */; };
+		0FCE0BD635F7C3BBA9608B6E /* Accounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C74867D5FB13854FBEFD460 /* Accounts.swift */; };
 		11941DD0D230C42090604A61 /* FeedPostsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6671E7BADFB6F3EABFE08D69 /* FeedPostsSection.swift */; };
 		139CE024F5CCF5D4D86EE947 /* EngagementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB8F4D94C14F8B91DB69C0C /* EngagementAPI.swift */; };
 		15BF360D11927DFB18C529E7 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4D1E0020562F1614A91ADDB /* Toast.swift */; };
@@ -36,6 +37,7 @@
 		1EFFFBD7B390115384173C1D /* Sharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8449FAB6BDDAF87D7A02D9 /* Sharing.swift */; };
 		1F0B14ACF9ADF485A8BC6201 /* FeedDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FD0C9ABA51684D6344D070 /* FeedDetailView.swift */; };
 		2028954E449ABC2A5B8726F2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5484BA393137203416877B8C /* PrivacyInfo.xcprivacy */; };
+		22D6DB5CD1E6FE40FA7495D3 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F451FC2D334E344D628EB0B8 /* AccountsView.swift */; };
 		26600A5C56593CA1D6146FE5 /* ios-strings.json in Resources */ = {isa = PBXBuildFile; fileRef = F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */; };
 		26C38861A582BB6431CF5648 /* PhotoSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 672B254CA978299153A1018A /* PhotoSourceTests.swift */; };
 		274A754353099D953C08B5D3 /* SettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A2D51B6582B4DD276994E81 /* SettingsTab.swift */; };
@@ -180,9 +182,11 @@
 		DDC293BDDE5548BA4DB234BE /* TvLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E11C71AEC875688FFC8AC9B /* TvLogic.swift */; };
 		DE35A20A448D0C309DB5F5F1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6E231649ABA1EA8177F46ECF /* PrivacyInfo.xcprivacy */; };
 		DF144CDA419275D4B86288E5 /* ComposeRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D9DF6CD9D75158079385D0C /* ComposeRules.swift */; };
+		DF90BDE255A79676BECB9626 /* ios-strings-servers.json in Resources */ = {isa = PBXBuildFile; fileRef = F8990436A2EAD9DA87EB72EF /* ios-strings-servers.json */; };
 		E47CFE459FA435EB434745E5 /* DeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21FAFB345F3139690C2D96E5 /* DeepLink.swift */; };
 		E608979D8378A22610DE7978 /* ConversationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4044479D484B980C1BD853D /* ConversationModel.swift */; };
 		E74E74BBC7C31E93BBF226F1 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9FFDDEAA3375A7AE2728A33 /* AppModel.swift */; };
+		E7CE15DCA02176CBFF114169 /* Accounts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02567E0B3015B77DAF06A0DC /* Accounts.swift */; };
 		E7FBBAB099CAA639E1AFD55F /* CalendarSettingsForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4A8E80E025D315AE288B7CD /* CalendarSettingsForm.swift */; };
 		E820CB7C433EF279DBF0E77D /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395E28EFE78058A2D5D4CC79 /* AuthService.swift */; };
 		E8F357D8EC336FA96911843A /* Types+Components+Parameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1B4B58F91BA1271161EEC6 /* Types+Components+Parameters.swift */; };
@@ -286,6 +290,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		02567E0B3015B77DAF06A0DC /* Accounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accounts.swift; sourceTree = "<group>"; };
 		03813535886C2FC7FB009121 /* AppModel+Social.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Social.swift"; sourceTree = "<group>"; };
 		04256317C62749907ECF272C /* SocialNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocialNotifications.swift; sourceTree = "<group>"; };
 		048D0390C6907E2B72A5DDB9 /* FeedBirthdaysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedBirthdaysSection.swift; sourceTree = "<group>"; };
@@ -312,6 +317,7 @@
 		261ACB19625F0A557E96AAF5 /* Chat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chat.swift; sourceTree = "<group>"; };
 		26F667E6B4FEFBB31DDF2B6A /* BirthdayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BirthdayTests.swift; sourceTree = "<group>"; };
 		275F353CF802BC81B5066EA6 /* PhotoSourcesAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoSourcesAPI.swift; sourceTree = "<group>"; };
+		2C74867D5FB13854FBEFD460 /* Accounts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Accounts.swift; sourceTree = "<group>"; };
 		2E11C71AEC875688FFC8AC9B /* TvLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TvLogic.swift; sourceTree = "<group>"; };
 		2E8AB52696E6E7E34E98704A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2F14654379EEAAC57752B57A /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
@@ -476,12 +482,14 @@
 		F273118D6B0D2D3AF7223EFB /* OutboxRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxRunner.swift; sourceTree = "<group>"; };
 		F38B4269ECC77AA69A914EAB /* ios-strings-photo-sources.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-photo-sources.json"; sourceTree = "<group>"; };
 		F4044479D484B980C1BD853D /* ConversationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationModel.swift; sourceTree = "<group>"; };
+		F451FC2D334E344D628EB0B8 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		F4BD5C4897E6D6DC2BC866E5 /* ios-strings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings.json"; sourceTree = "<group>"; };
 		F51DB5A0AE266CFAD67C1DC5 /* MyPhotoSourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPhotoSourcesView.swift; sourceTree = "<group>"; };
 		F5380C9E2047A52D1360A8DB /* MediaProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaProbe.swift; sourceTree = "<group>"; };
 		F72B34B1A15B5737057B18BE /* ComposeTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeTab.swift; sourceTree = "<group>"; };
 		F7681302EF650412C6357C93 /* CalendarLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarLogic.swift; sourceTree = "<group>"; };
 		F89227CF81E0514B02B56D89 /* FrameSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameSettingsSection.swift; sourceTree = "<group>"; };
+		F8990436A2EAD9DA87EB72EF /* ios-strings-servers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-servers.json"; sourceTree = "<group>"; };
 		FC873BE973861F77CE307F38 /* StubURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubURLProtocol.swift; sourceTree = "<group>"; };
 		FD7A3BB7DD790DFE1557B5D8 /* ios-strings-chat.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "ios-strings-chat.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -555,6 +563,7 @@
 				4533A15B04A4983C42D4889A /* ios-strings-engagement.json */,
 				33A5B24DE5030B4656B843FF /* ios-strings-feeds.json */,
 				F38B4269ECC77AA69A914EAB /* ios-strings-photo-sources.json */,
+				F8990436A2EAD9DA87EB72EF /* ios-strings-servers.json */,
 				4D984FAB9F97110BBFE1FE76 /* ios-strings-social.json */,
 				63D305F2CDB0EEB492D34999 /* ios-strings-telegram.json */,
 				CD57603156919C10B84A3CB8 /* ios-strings-tv.json */,
@@ -594,6 +603,7 @@
 		3CDC54626FABB83F2349ADEF /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				F451FC2D334E344D628EB0B8 /* AccountsView.swift */,
 				89EB2549B84E2BE8126BD426 /* DeleteAccountSheet.swift */,
 				6EC1CFE4CFDF03453E4DB04B /* ReservationsView.swift */,
 				7A2D51B6582B4DD276994E81 /* SettingsTab.swift */,
@@ -751,6 +761,7 @@
 		68C9C0F8EC4D4CBC1DF6DC7A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				2C74867D5FB13854FBEFD460 /* Accounts.swift */,
 				2F14654379EEAAC57752B57A /* AdaptiveLayout.swift */,
 				C9FFDDEAA3375A7AE2728A33 /* AppModel.swift */,
 				EE55DB93DC5E383460A2DF8D /* AppUpdateView.swift */,
@@ -970,6 +981,7 @@
 			isa = PBXGroup;
 			children = (
 				CBB9689A2BC24EF795CAECBD /* AccountLogic.swift */,
+				02567E0B3015B77DAF06A0DC /* Accounts.swift */,
 				50DCB1591698D4216C6ABD32 /* AlbumLogic.swift */,
 				7F8FD22B50391273A796A542 /* AppGroup.swift */,
 				B03E23BAE7ECF3808E9D409C /* AppVersion.swift */,
@@ -1193,6 +1205,7 @@
 				D9540BA606DB3B6F14152173 /* ios-strings-engagement.json in Resources */,
 				3EF38EAAEBCB5BD02D82E3DD /* ios-strings-feeds.json in Resources */,
 				A02ABB6264D8D11385444CB3 /* ios-strings-photo-sources.json in Resources */,
+				DF90BDE255A79676BECB9626 /* ios-strings-servers.json in Resources */,
 				AD6DA70C44DA4CC201A22F6B /* ios-strings-social.json in Resources */,
 				3AD1C1CA0BCAE9AECB568B87 /* ios-strings-telegram.json in Resources */,
 				3ABC0B9E9ABCAF2EA9F2E844 /* ios-strings-tv.json in Resources */,
@@ -1228,6 +1241,7 @@
 				9E9167CAAB99B75EBE643466 /* API.swift in Sources */,
 				B12A47CF3243D1DDD9ADE4AC /* APIError.swift in Sources */,
 				484540B616101F8D950FFC9F /* AccountLogic.swift in Sources */,
+				E7CE15DCA02176CBFF114169 /* Accounts.swift in Sources */,
 				9922BC12F41171B6E1ECD1E2 /* AlbumLogic.swift in Sources */,
 				856A329F866D2E780A9A4356 /* AlbumWrite.swift in Sources */,
 				58ED3D7CE9CBD7F20972C5FA /* AppGroup.swift in Sources */,
@@ -1299,6 +1313,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0FCE0BD635F7C3BBA9608B6E /* Accounts.swift in Sources */,
+				22D6DB5CD1E6FE40FA7495D3 /* AccountsView.swift in Sources */,
 				FD1DA70012B313EE1FAEB489 /* AdaptiveLayout.swift in Sources */,
 				39FA7495F1680355C89C78CF /* AddFrameModel.swift in Sources */,
 				01C5801CD6EBB5929BF18290 /* AddFrameView.swift in Sources */,

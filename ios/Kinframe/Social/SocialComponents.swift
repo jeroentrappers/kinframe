@@ -191,7 +191,7 @@ struct MentionText: View {
             .environment(\.openURL, OpenURLAction { url in
                 if url.scheme == "kinframe-person" {
                     let id = url.absoluteString.replacingOccurrences(of: "kinframe-person:", with: "")
-                    app.social.personSheet = PersonRoute(userId: id)
+                    app.social.personSheet = PersonRoute(userId: id, account: app.accountId)
                     return .handled
                 }
                 return .systemAction

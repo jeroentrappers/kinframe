@@ -159,7 +159,7 @@ struct SendDetailView: View {
         VStack(alignment: .leading, spacing: 14) {
             ForEach(feeds) { f in
                 Button {
-                    if f.removed != true { receipts = FeedPostRoute(feedId: f.feedId, postId: f.postId) }
+                    if f.removed != true { receipts = FeedPostRoute(feedId: f.feedId, postId: f.postId, account: app.accountId) }
                 } label: {
                     FeedRecipientRow(feed: f).contentShape(Rectangle())
                 }

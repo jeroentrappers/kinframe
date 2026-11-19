@@ -44,11 +44,13 @@ struct PickedMedia: Transferable {
 
 struct ComposeTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
     @State private var model = ComposeModel(limits: .defaults)
     @State private var picks: [PhotosPickerItem] = []
     @State private var importing = 0
     @State private var editing: Draft.ID?
     @State private var sendingJob: UUID?
+    @State private var sendingAccount: AppModel?
     @State private var showCamera = false
     @FocusState private var captionFocused: Bool
     @State private var width: CGFloat = 0
@@ -56,10 +58,31 @@ struct ComposeTab: View {
     /// Photos and caption beside the frame list once both fit comfortably (iPad; not the iPhone Duo's inner screen).
     private var twoColumns: Bool { width >= 760 }
 
-    private var sendable: [FrameSummary] { app.frames.filter { $0.can(\.send) } }
+    /// Frames of every account (docs/spec/multi-server.md §2.2), grouped per server in account order.
+    private var sendable: [FrameSummary] { accounts.active.flatMap { m in m.frames.filter { $0.can(\.send) } } }
     /// Every feed you're in takes posts (any role), when the server has feeds.
     /// Families you may post to: not those where you are `member` (family social: follow along, no posting).
-    private var feeds: [FeedSummary] { app.feedsEnabled ? app.feeds.filter { $0.role != .member } : [] }
+    private var feeds: [FeedSummary] { accounts.active.flatMap { m in m.feedsEnabled ? m.feeds.filter { $0.role != .member } : [] } }
+
+    /// The account a recipient belongs to.
+    private func owner(frame id: String) -> AppModel { accounts.active.first { m in m.frames.contains { $0.id == id } } ?? app }
+    private func owner(feed id: String) -> AppModel { accounts.active.first { m in m.feeds.contains { $0.id == id } } ?? app }
+
+    /// "Janssens" above the first recipient of each server, when there are several accounts.
+    @ViewBuilder
+    private func serverHeader(_ m: AppModel, first: Bool) -> some View {
+        if accounts.several {
+            if !first { Divider().overlay(Palette.border) }
+            Text(m.serverName)
+                .font(.footnote.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(Palette.textFaint)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .padding(.top, 10)
+                .accessibilityAddTraits(.isHeader)
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -282,8 +305,12 @@ struct ComposeTab: View {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeader(L("send.to"))
                 VStack(spacing: 0) {
-                    ForEach(Array(sendable.enumerated()), id: \.element.id) { n, frame in
-                        if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
+                    let list = sendable
+                    ForEach(Array(list.enumerated()), id: \.element.id) { n, frame in
+                        let o = owner(frame: frame.id)
+                        if n == 0 || owner(frame: list[n - 1].id) !== o {
+                            serverHeader(o, first: n == 0)
+                        } else if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
                         let on = model.frameIds.contains(frame.id)
                         Button {
                             withAnimation(.snappy) { model.toggle(frame: frame.id) }
@@ -323,8 +350,12 @@ struct ComposeTab: View {
         VStack(alignment: .leading, spacing: 10) {
             SectionHeader(sendable.isEmpty ? L("send.to") : L("ios.feeds.sendToFeeds"))
             VStack(spacing: 0) {
-                ForEach(Array(feeds.enumerated()), id: \.element.id) { n, feed in
-                    if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
+                let list = feeds
+                ForEach(Array(list.enumerated()), id: \.element.id) { n, feed in
+                    let o = owner(feed: feed.id)
+                    if n == 0 || owner(feed: list[n - 1].id) !== o {
+                        serverHeader(o, first: n == 0)
+                    } else if n > 0 { Divider().overlay(Palette.border).padding(.leading, 60) }
                     let on = model.feedIds.contains(feed.id)
                     Button {
                         withAnimation(.snappy) { model.toggle(feed: feed.id) }
@@ -350,7 +381,7 @@ struct ComposeTab: View {
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
                     // Family social: "Share with: whole family / The cousins", and this week's prompt.
-                    if on { ComposeAudience(feed: feed, model: model) }
+                    if on { ComposeAudience(feed: feed, model: model).environment(o) }
                 }
             }
             .card(padding: 0)
@@ -456,10 +487,17 @@ struct ComposeTab: View {
     }
 
     private func send() {
-        guard let server = app.server, model.canSend else { return }
+        guard model.canSend else { return }
         do {
-            let job = try model.makeJob(server: server.apiBase, frames: app.frames, feeds: feeds, store: app.outbox.store)
-            try app.outbox.enqueue(job)
+            // One job per server with chosen recipients; the first prepares the media for all (one upload each).
+            let targets = accounts.active.compactMap { m in
+                m.server.map { ComposeModel.ServerTargets(server: $0.apiBase, serverName: m.serverName, frames: m.frames,
+                                                          feeds: m.feedsEnabled ? m.feeds.filter { $0.role != .member } : []) }
+            }
+            let jobs = try model.makeJobs(targets, store: app.outbox.store)
+            guard let job = jobs.first else { return }
+            try app.outbox.enqueue(jobs)
+            sendingAccount = accounts.active.first { $0.server?.apiBase == job.server }
             withAnimation { sendingJob = job.id }
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         } catch {
@@ -471,7 +509,8 @@ struct ComposeTab: View {
         sendingJob = nil
         app.toasts.show(L("send.sent"))
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        app.historyPath = NavigationPath([HistoryRoute(sendId: sendId)])
+        app.historyPath = NavigationPath([HistoryRoute(sendId: sendId, account: (sendingAccount ?? app).accountId)])
+        sendingAccount = nil
         app.tab = .history
     }
 }
@@ -563,7 +602,7 @@ struct SendingCard: View {
                 ThumbStack(job: job)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).font(.headline).foregroundStyle(Palette.text)
-                    Text(job.recipientNames.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.textMuted).lineLimit(1)
+                    Text((job.serverName.map { L("servers.account.sending", ["server": $0]) + " · " } ?? "") + job.recipientNames.joined(separator: ", ")).font(.subheadline).foregroundStyle(Palette.textMuted).lineLimit(1)
                 }
                 Spacer()
             }

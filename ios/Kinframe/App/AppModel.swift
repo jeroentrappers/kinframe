@@ -1,7 +1,10 @@
 import KinframeKit
 import SwiftUI
 
-/// App-wide state: the server, the session, the frame list, live events and the upload queue.
+/// One account's state (docs/spec/multi-server.md §2.1): its server, session, frame and family lists, live events and
+/// caches. The primary account's model also holds the app's navigation; the other accounts' models (`host` set)
+/// forward tabs, paths and preselections to it, so a screen of any account can open things the usual way. Screens
+/// get the model of the account they show through the environment (`Accounts.model(for:)`).
 @MainActor
 @Observable
 final class AppModel {
@@ -22,6 +25,14 @@ final class AppModel {
         var id: String { server.absoluteString }
     }
 
+    /// The account (`AccountRecord.id`) this model belongs to.
+    let accountId: String
+    /// The primary account's model, which owns navigation; nil for the primary itself.
+    weak var host: AppModel?
+    /// All accounts (merged lists, adding a server).
+    weak var accounts: Accounts?
+    var isPrimary: Bool { host == nil }
+
     var phase: Phase = .launching
     var server: ServerConfig?
     var me: User?
@@ -38,31 +49,79 @@ final class AppModel {
     /// The recommended build whose "new version" banner was dismissed.
     var dismissedUpdateBuild: Int? = AppUpdateDismissals().dismissedBuild
 
-    var tab: Tab = .frames
-    var framesPath = NavigationPath()
-    var historyPath = NavigationPath()
-    var feedsPath = NavigationPath()
+    var tab: Tab {
+        get { host?.tab ?? own_tab }
+        set { if let host { host.tab = newValue } else { own_tab = newValue } }
+    }
+    private var own_tab: Tab = .frames
+    var framesPath: NavigationPath {
+        get { host?.framesPath ?? own_framesPath }
+        set { if let host { host.framesPath = newValue } else { own_framesPath = newValue } }
+    }
+    private var own_framesPath: NavigationPath = NavigationPath()
+    var historyPath: NavigationPath {
+        get { host?.historyPath ?? own_historyPath }
+        set { if let host { host.historyPath = newValue } else { own_historyPath = newValue } }
+    }
+    private var own_historyPath: NavigationPath = NavigationPath()
+    var feedsPath: NavigationPath {
+        get { host?.feedsPath ?? own_feedsPath }
+        set { if let host { host.feedsPath = newValue } else { own_feedsPath = newValue } }
+    }
+    private var own_feedsPath: NavigationPath = NavigationPath()
     /// Family social: Home (timeline) and Chats.
-    var homePath = NavigationPath()
-    var chatsPath = NavigationPath()
+    var homePath: NavigationPath {
+        get { host?.homePath ?? own_homePath }
+        set { if let host { host.homePath = newValue } else { own_homePath = newValue } }
+    }
+    private var own_homePath: NavigationPath = NavigationPath()
+    var chatsPath: NavigationPath {
+        get { host?.chatsPath ?? own_chatsPath }
+        set { if let host { host.chatsPath = newValue } else { own_chatsPath = newValue } }
+    }
+    private var own_chatsPath: NavigationPath = NavigationPath()
     /// Frame code or invite being handled (sheet), from a deep link.
     var pendingLink: DeepLink?
     var activeLink: DeepLink?
-    var serverSwitch: ServerSwitch?
+    var serverSwitch: ServerSwitch? {
+        get { host?.serverSwitch ?? own_serverSwitch }
+        set { if let host { host.serverSwitch = newValue } else { own_serverSwitch = newValue } }
+    }
+    private var own_serverSwitch: ServerSwitch? = nil
     /// Frames preselected for the next compose.
-    var composeFrameIds: Set<String> = []
+    var composeFrameIds: Set<String> {
+        get { host?.composeFrameIds ?? own_composeFrameIds }
+        set { if let host { host.composeFrameIds = newValue } else { own_composeFrameIds = newValue } }
+    }
+    private var own_composeFrameIds: Set<String> = []
     /// Feeds preselected for the next compose ("Post" in a feed).
-    var composeFeedIds: Set<String> = []
+    var composeFeedIds: Set<String> {
+        get { host?.composeFeedIds ?? own_composeFeedIds }
+        set { if let host { host.composeFeedIds = newValue } else { own_composeFeedIds = newValue } }
+    }
+    private var own_composeFeedIds: Set<String> = []
     /// The weekly prompt the next compose answers ("Answer" on a prompt card).
-    var composePromptId: String?
+    var composePromptId: String? {
+        get { host?.composePromptId ?? own_composePromptId }
+        set { if let host { host.composePromptId = newValue } else { own_composePromptId = newValue } }
+    }
+    private var own_composePromptId: String? = nil
     /// A feed post to open from a notification (its receipts).
-    var pendingFeedPost: FeedPostRoute?
+    var pendingFeedPost: FeedPostRoute? {
+        get { host?.pendingFeedPost ?? own_pendingFeedPost }
+        set { if let host { host.pendingFeedPost = newValue } else { own_pendingFeedPost = newValue } }
+    }
+    private var own_pendingFeedPost: FeedPostRoute? = nil
     /// Bumped when history should reload (a send was created, live events).
-    var historyVersion = 0
+    var historyVersion: Int {
+        get { host?.historyVersion ?? own_historyVersion }
+        set { if let host { host.historyVersion = newValue } else { own_historyVersion = newValue } }
+    }
+    private var own_historyVersion: Int = 0
     var expired = false
 
-    let auth = AuthService()
-    let toasts = ToastCenter()
+    let auth: AuthService
+    let toasts: ToastCenter
     /// "Add from Google Photos", app-wide (one import at a time; a relaunch or a notification finds it again).
     let googleImport = GoogleImportController()
     /// The last status seen per photo source the caller owns, to say once when one starts needing them.
@@ -78,16 +137,20 @@ final class AppModel {
     /// Family social: chats, badge, reminders, milestones (Social/SocialStore.swift).
     let social = SocialStore()
 
-    init() {
+    init(accountId: String = AccountRecord.legacyId, toasts: ToastCenter = ToastCenter(), outbox: OutboxMonitor? = nil, host: AppModel? = nil) {
         L10n.bootstrap()
-        outbox = OutboxMonitor()
+        self.accountId = accountId
+        self.toasts = toasts
+        self.host = host
+        auth = AuthService(account: accountId)
+        self.outbox = outbox ?? OutboxMonitor()
         social.app = self
         auth.onSignedOut = { [weak self] in self?.sessionEnded() }
         live.onEvent = { [weak self] in self?.handle($0) }
         live.onStatus = { [weak self] in self?.liveStatus = $0 }
         // An import is a send: history shows it.
         googleImport.onFinished = { [weak self] _ in self?.historyVersion += 1 }
-        outbox.onSent = { [weak self] send in
+        self.outbox.onSent = { [weak self] send in
             self?.historyVersion += 1
             self?.events.post(.sendUpdated(sendId: send.id))
         }
@@ -96,7 +159,7 @@ final class AppModel {
             MainActor.assumeIsolated { self?.serverRequiresUpdate() }
         }
         // Set up the session right away: the system may launch the app in the background just to finish uploads.
-        server = ServerStore.load()
+        server = AccountStore.record(accountId)?.server
         auth.configure(server?.discovery)
         if let server, auth.isSignedIn {
             prepare(server)
@@ -130,6 +193,8 @@ final class AppModel {
         defer { DebugLaunch.afterLaunch(self) }
         #endif
         _ = activeRefresh.shouldRefresh(force: true)
+        // The other accounts connect alongside (docs/spec/multi-server.md §2.1).
+        if let accounts { Task { await accounts.launch() } }
         if let server, auth.isSignedIn {
             connect(server)
             phase = .main
@@ -145,6 +210,15 @@ final class AppModel {
         }
     }
 
+    /// Another account (not primary) at launch: connect it in the background, no onboarding.
+    func resumeAsSecondary() async {
+        guard let server, auth.isSignedIn else { return }
+        connect(server)
+        phase = .main
+        await refreshDiscovery()
+        await loadMe()
+    }
+
     /// Re-read discovery so limits, auth settings and the app version policy stay current. True when it was read.
     @discardableResult
     func refreshDiscovery() async -> Bool {
@@ -155,7 +229,7 @@ final class AppModel {
         let updated = ServerConfig(url: current.url, discovery: fresh)
         if updated != current {
             self.server = updated
-            ServerStore.save(updated)
+            saveServer(updated)
             auth.configure(fresh)
         }
         unreachable = false
@@ -206,9 +280,19 @@ final class AppModel {
         }
         let config = ServerConfig(url: url, discovery: discovery)
         server = config
-        ServerStore.save(config)
+        saveServer(config)
         auth.configure(discovery)
     }
+
+    /// Keep this account's record (address and discovery) in the shared account list.
+    private func saveServer(_ config: ServerConfig) {
+        var record = AccountStore.record(accountId) ?? AccountRecord(id: accountId, server: config)
+        record.server = config
+        AccountStore.upsert(record, primary: isPrimary && AccountStore.load().isEmpty)
+    }
+
+    /// The server's label for the chip in merged lists (only shown with several accounts).
+    var serverName: String { server.map(AccountServers.name) ?? "" }
 
     /// After a successful sign-in: connect and decide the next onboarding step.
     func didSignIn(idTokenName: String?) async {
@@ -230,7 +314,7 @@ final class AppModel {
         let api = API(baseURL: server.apiBase, tokens: auth)
         self.api = api
         googleImport.configure(api: api)
-        outbox.configure(server: server.apiBase, tokens: auth)
+        accounts?.syncOutbox()
     }
 
     private func connect(_ server: ServerConfig) {
@@ -248,7 +332,7 @@ final class AppModel {
         live.stop()
         googleImport.configure(api: nil)
         sourceStates = [:]
-        PushRegistrar.shared.unregister(api: api)
+        PushRegistrar.shared.unregister(api: api, account: accountId)
         await auth.signOut()
         api = nil
         me = nil
@@ -263,12 +347,12 @@ final class AppModel {
         chatsPath = NavigationPath()
         social.reset()
         tab = .frames
-        outbox.configure(server: nil, tokens: nil)
-        Onboarding.reset()
+        accounts?.syncOutbox()
         if !keepServer {
             server = nil
-            ServerStore.save(nil)
+            AccountStore.remove(accountId)
         }
+        Onboarding.reset()
         phase = .onboarding
     }
 
@@ -286,6 +370,14 @@ final class AppModel {
     private func sessionEnded() {
         guard phase == .main else { return }
         expired = true
+        // Another account's session: say so; Settings → Accounts offers to sign in again. The others carry on.
+        if !isPrimary {
+            live.stop()
+            api = nil
+            toasts.show(L("servers.account.expired", ["server": serverName]))
+            accounts?.sessionEnded(self)
+            return
+        }
         Task { await signOut() }
     }
 
@@ -383,7 +475,7 @@ final class AppModel {
     func openFeed(_ id: String, section: FeedSection = .posts) {
         guard feedsEnabled else { return }
         tab = .feeds
-        feedsPath = NavigationPath([FeedRoute(id: id, section: section)])
+        feedsPath = NavigationPath([FeedRoute(id: id, section: section, account: accountId)])
     }
 
     /// Where a tapped notification leads.
@@ -393,16 +485,16 @@ final class AppModel {
             openFeed(feedId, section: FeedSection(section))
         case .feedPost(let feedId, let postId):
             openFeed(feedId)
-            pendingFeedPost = FeedPostRoute(feedId: feedId, postId: postId)
+            pendingFeedPost = FeedPostRoute(feedId: feedId, postId: postId, account: accountId)
         case .frameFeeds(let frameId):
             tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings)])
+            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings, account: accountId)])
         case .framePeople(let frameId):
             tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .people)])
+            framesPath = NavigationPath([FrameRoute(id: frameId, section: .people, account: accountId)])
         case .send(let sendId):
             tab = .history
-            historyPath = NavigationPath([HistoryRoute(sendId: sendId)])
+            historyPath = NavigationPath([HistoryRoute(sendId: sendId, account: accountId)])
         case .feeds:
             guard feedsEnabled else { return }
             tab = .feeds
@@ -434,7 +526,7 @@ final class AppModel {
         } else if let frameId {
             channelFocus = focus
             tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings)])
+            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings, account: accountId)])
         } else if let api {
             Task {
                 let target: ChannelTarget?
@@ -458,7 +550,7 @@ final class AppModel {
             openFeed(feedId, section: .settings)
         } else if let frameId {
             tab = .frames
-            framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos, albumId: albumId)])
+            framesPath = NavigationPath([FrameRoute(id: frameId, section: .photos, albumId: albumId, account: accountId)])
         } else {
             tab = .settings
             showMyPhotoSources = true
@@ -501,7 +593,7 @@ final class AppModel {
             toasts.show(L("live.joinRequest", ["name": name ?? "?", "frame": frameName]), action: .init(title: L("common.review")) { [weak self] in
                 guard let self else { return }
                 self.tab = .frames
-                self.framesPath = NavigationPath([FrameRoute(id: frameId, section: .people)])
+                self.framesPath = NavigationPath([FrameRoute(id: frameId, section: .people, account: self.accountId)])
             })
         case .membershipUpdated:
             Task { await loadFrames() }
@@ -634,6 +726,9 @@ final class AppModel {
         // `app.kinframe:/google-import?…`: the end of Google's consent, when it reached the app instead of the session.
         if googleImport.handleReturn(url) { return }
         guard let link = DeepLink.parse(url) else { return }
+        // A link of another server: the account signed in there handles it, else that server is added first
+        // (docs/spec/multi-server.md §2.1).
+        if let accounts, isPrimary, accounts.route(link) { return }
         if link.needsServerSwitch(from: server?.url), let target = link.server {
             serverSwitch = ServerSwitch(link: link, server: target)
             return
@@ -641,7 +736,7 @@ final class AppModel {
         route(link)
     }
 
-    private func route(_ link: DeepLink) {
+    func route(_ link: DeepLink) {
         if phase == .main, api != nil {
             activeLink = link
         } else {
@@ -696,7 +791,7 @@ enum Onboarding {
     }
 
     static func reset() {
-        step = ServerStore.load() == nil ? .welcome : .signIn
+        step = AccountStore.load().isEmpty ? .welcome : .signIn
     }
 }
 

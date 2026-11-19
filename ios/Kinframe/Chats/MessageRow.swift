@@ -57,7 +57,7 @@ struct MessageRow: View {
             if own { Spacer(minLength: 48) }
             if !own {
                 if continues { Color.clear.frame(width: 30, height: 1) } else {
-                    Button { if let a = message.author { app.social.personSheet = PersonRoute(userId: a.userId) } } label: {
+                    Button { if let a = message.author { app.social.personSheet = PersonRoute(userId: a.userId, account: app.accountId) } } label: {
                         PersonChip(person: message.author, size: 30)
                     }
                     .buttonStyle(.plain)
@@ -242,7 +242,7 @@ struct SharedPostCard: View {
     var body: some View {
         Button {
             guard card.available, app.social.features.social else { return }
-            app.chatsPath.append(PostRoute(postId: card.postId))
+            app.chatsPath.append(PostRoute(postId: card.postId, account: app.accountId))
         } label: {
             if card.available {
                 VStack(alignment: .leading, spacing: 6) {

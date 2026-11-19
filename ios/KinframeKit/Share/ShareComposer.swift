@@ -8,6 +8,10 @@ import UniformTypeIdentifiers
 /// the app finishes the send when the system wakes it. Originals are never uploaded: a file that can't be prepared
 /// and is too large to go as it is shows an error. When the sheet is gone before preparing finished, the app
 /// prepares what's left the next time it runs.
+///
+/// Several accounts (docs/spec/multi-server.md §2.2): the account list comes through the App Group, recipients of
+/// every signed-in account are listed grouped per server, and a send to two servers is two jobs whose media is
+/// prepared once.
 @MainActor
 @Observable
 public final class ShareModel {
@@ -25,11 +29,30 @@ public final class ShareModel {
     /// "Preparing 2 of 3 · 40 %" while the queue prepares the files.
     public private(set) var progress: String?
     private var runner: OutboxRunner?
-    private var jobId: UUID?
+    private var jobIds: [UUID] = []
     public let compose: ComposeModel
     private var preview: [URL] = []
-    private let auth = AuthService()
-    private var server: ServerConfig?
+    /// One signed-in session per account, primary first.
+    private var sessions: [Session] = []
+    /// Recipients per server, in account order (the list's sections).
+    public private(set) var groups: [Group] = []
+
+    struct Session {
+        let record: AccountRecord
+        let auth: AuthService
+    }
+
+    /// One server's recipients in the sheet.
+    public struct Group: Identifiable {
+        public let id: String
+        public let serverName: String
+        public let server: URL
+        public var frames: [FrameSummary]
+        public var feeds: [FeedSummary]
+    }
+
+    /// A server label above each group, when there is more than one account.
+    public var several: Bool { groups.count > 1 }
     private static let lastFramesKey = "share.lastFrames"
     private static let lastFeedsKey = "share.lastFeeds"
 
@@ -37,34 +60,50 @@ public final class ShareModel {
     public init(context: NSExtensionContext?, preview: [URL] = []) {
         self.context = context
         self.preview = preview
-        let stored = ServerStore.load()
-        server = stored
-        compose = ComposeModel(limits: stored?.discovery.limits ?? .defaults)
-        auth.configure(stored?.discovery)
+        let records = AccountStore.load()
+        compose = ComposeModel(limits: records.first?.server.discovery.limits ?? .defaults)
+        for r in records {
+            let auth = AuthService(account: r.id)
+            auth.configure(r.server.discovery)
+            if auth.isSignedIn { sessions.append(Session(record: r, auth: auth)) }
+        }
     }
 
     public func start() async {
         async let files: Void = loadAttachments()
-        guard let server, auth.isSignedIn else {
+        guard let primary = sessions.first else {
             await files
             phase = .signedOut
             return
         }
-        if AppUpdatePolicy.prompt(server.discovery.appVersions, build: .current).isBlocking {
+        if AppUpdatePolicy.prompt(primary.record.server.discovery.appVersions, build: .current).isBlocking {
             await files
             phase = .updateRequired
             return
         }
-        let api = API(baseURL: server.apiBase, tokens: auth)
-        let feedsOn = server.discovery.feeds
-        async let allFrames = Self.capture { try await api.call { try await $0.listMyFrames().ok.body.json } }
-        async let allFeeds: [FeedSummary]? = feedsOn ? (try? await api.myFeeds()) : nil
-        let frameResult = await allFrames
-        frames = ((try? frameResult.get()) ?? []).filter { $0.can(\.send) }
-        // Not the families where you are `member` (family social: you follow along there, you don't post).
-        feeds = ((await allFeeds) ?? []).filter { $0.role != .member }
+        var loaded: [Group] = []
+        var updateRequired = false
+        for s in sessions {
+            let server = s.record.server
+            if AppUpdatePolicy.prompt(server.discovery.appVersions, build: .current).isBlocking { continue }
+            let api = API(baseURL: server.apiBase, tokens: s.auth)
+            let feedsOn = server.discovery.feeds
+            async let allFrames = Self.capture { try await api.call { try await $0.listMyFrames().ok.body.json } }
+            async let allFeeds: [FeedSummary]? = feedsOn ? (try? await api.myFeeds()) : nil
+            let frameResult = await allFrames
+            if case .failure(let error) = frameResult, (error as? APIError)?.isAppUpdateRequired == true, s.record.id == primary.record.id {
+                updateRequired = true
+            }
+            // Not the families where you are `member` (family social: you follow along there, you don't post).
+            loaded.append(Group(id: s.record.id, serverName: s.record.serverName, server: server.apiBase,
+                                frames: ((try? frameResult.get()) ?? []).filter { $0.can(\.send) },
+                                feeds: ((await allFeeds) ?? []).filter { $0.role != .member }))
+        }
+        groups = loaded.filter { !$0.frames.isEmpty || !$0.feeds.isEmpty }
+        frames = groups.flatMap(\.frames)
+        feeds = groups.flatMap(\.feeds)
         await files
-        if case .failure(let error) = frameResult, (error as? APIError)?.isAppUpdateRequired == true {
+        if updateRequired {
             phase = .updateRequired
             return
         }
@@ -134,30 +173,40 @@ public final class ShareModel {
 
     /// Queue the send in the App Group and start uploading on a background session the app can pick up.
     public func send() async {
-        guard let server, compose.canSend else { return }
+        guard !sessions.isEmpty, compose.canSend else { return }
         phase = .sending
         do {
             let store = OutboxStore()
-            let job = try compose.makeJob(server: server.apiBase, frames: frames, feeds: feeds, store: store)
-            try store.save(job)
-            AppGroup.defaults.set(job.frameIds, forKey: Self.lastFramesKey)
-            AppGroup.defaults.set(job.feedIds ?? [], forKey: Self.lastFeedsKey)
+            let targets = groups.map { ComposeModel.ServerTargets(server: $0.server, serverName: $0.serverName, frames: $0.frames, feeds: $0.feeds) }
+            let jobs = try compose.makeJobs(targets, store: store)
+            guard let job = jobs.first else {
+                phase = .ready
+                return
+            }
+            for j in jobs { try store.save(j) }
+            AppGroup.defaults.set(jobs.flatMap(\.frameIds), forKey: Self.lastFramesKey)
+            AppGroup.defaults.set(jobs.flatMap { $0.feedIds ?? [] }, forKey: Self.lastFeedsKey)
             let transport = BackgroundUploadTransport(identifier: "app.kinframe.family.share.\(UUID().uuidString)")
             let runner = OutboxRunner(store: store, transport: transport, owner: "share-\(UUID().uuidString)", preparer: MediaPreparer())
             self.runner = runner
-            jobId = job.id
+            jobIds = jobs.map(\.id)
             transport.setOrphanHandler { tag, response, error in
                 Task { await runner.handleOrphan(tag: tag, response: response, error: error) }
             }
-            await runner.configure(server: server.apiBase, tokens: auth)
+            var byServer: [URL: TokenProvider] = [:]
+            for s in sessions { byServer[s.record.server.apiBase] = s.auth }
+            await runner.configure(sessions: byServer)
             progress = Self.progressText(job)
             await runner.kick()
-            if let failed = await waitUntilPrepared(job.id, runner: runner) {
-                // Nothing was uploaded: take the job out of the queue and say why.
-                await runner.cancel(job.id)
-                progress = nil
-                phase = failed == AppUpdateSignal.code ? .updateRequired : .failed(APIError(status: 0, code: failed).message)
-                return
+            // The first job prepares the media; the others take its masters, which needs the first one done.
+            for j in jobs {
+                if let failed = await waitUntilPrepared(j.id, runner: runner) {
+                    // Nothing was uploaded: take the jobs out of the queue and say why.
+                    for id in jobIds { await runner.cancel(id) }
+                    progress = nil
+                    phase = failed == AppUpdateSignal.code ? .updateRequired : .failed(APIError(status: 0, code: failed).message)
+                    return
+                }
             }
             progress = nil
             // Give the first requests a moment to start; the system carries them on after the sheet closes.
@@ -207,10 +256,11 @@ public final class ShareModel {
     }
 
     public func cancel() {
-        if let runner, let jobId {
-            // Stop preparing and take the job out of the queue before the extension goes away.
-            OutboxStore().remove(jobId)
-            Task { await runner.cancel(jobId) }
+        if let runner, !jobIds.isEmpty {
+            // Stop preparing and take the jobs out of the queue before the extension goes away.
+            let ids = jobIds
+            for id in ids { OutboxStore().remove(id) }
+            Task { for id in ids { await runner.cancel(id) } }
         }
         compose.clear()
         context?.cancelRequest(withError: NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError))
@@ -311,6 +361,9 @@ public struct ShareRootView: View {
             Text(L("send.to")).font(.headline)
             VStack(spacing: 0) {
                 ForEach(model.frames) { frame in
+                    if model.several, let g = model.groups.first(where: { $0.frames.first?.id == frame.id }) {
+                        ServerHeader(name: g.serverName)
+                    }
                     let on = model.compose.frameIds.contains(frame.id)
                     Button {
                         model.compose.toggle(frame: frame.id)
@@ -346,6 +399,9 @@ public struct ShareRootView: View {
             Text(model.frames.isEmpty ? L("send.to") : L("ios.feeds.sendToFeeds")).font(.headline)
             VStack(spacing: 0) {
                 ForEach(model.feeds) { feed in
+                    if model.several, let g = model.groups.first(where: { $0.feeds.first?.id == feed.id }) {
+                        ServerHeader(name: g.serverName)
+                    }
                     let on = model.compose.feedIds.contains(feed.id)
                     Button {
                         model.compose.toggle(feed: feed.id)
@@ -385,6 +441,22 @@ public struct ShareRootView: View {
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(left < 0 ? Palette.danger : Palette.textFaint)
         }
+    }
+}
+
+/// The server's name above its recipients when the sheet lists several accounts.
+private struct ServerHeader: View {
+    let name: String
+
+    var body: some View {
+        Text(name)
+            .font(.footnote.weight(.semibold))
+            .textCase(.uppercase)
+            .foregroundStyle(Palette.textFaint)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 

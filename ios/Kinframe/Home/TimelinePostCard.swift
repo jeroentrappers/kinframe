@@ -47,7 +47,7 @@ struct TimelinePostCard: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Button { app.social.personSheet = PersonRoute(userId: post.poster.userId) } label: {
+            Button { app.social.personSheet = PersonRoute(userId: post.poster.userId, account: app.accountId) } label: {
                 PersonChip(person: post.poster, size: 38)
             }
             .buttonStyle(.plain)
@@ -149,7 +149,7 @@ struct TimelinePostCard: View {
                     do { try await model.react(post, emoji) } catch { app.toasts.error(error) }
                 }
             }
-            Button { openThread(PostRoute(postId: post.id)) } label: {
+            Button { openThread(PostRoute(postId: post.id, account: app.accountId)) } label: {
                 Label(post.thread.state == .closed ? L("social.thread.closedShort") : L("social.thread.comment"), systemImage: "bubble.left")
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(Palette.textMuted)
@@ -173,13 +173,13 @@ struct TimelinePostCard: View {
     @ViewBuilder private var comments: some View {
         let t = post.thread
         if let all = ThreadLogic.viewAllText(t) {
-            Button { openThread(PostRoute(postId: post.id)) } label: {
+            Button { openThread(PostRoute(postId: post.id, account: app.accountId)) } label: {
                 Text(all).font(.footnote.weight(.semibold)).foregroundStyle(Palette.textMuted)
             }
             .buttonStyle(.plain)
         }
         ForEach(t.latestComments) { c in
-            Button { openThread(PostRoute(postId: post.id, commentId: c.id)) } label: {
+            Button { openThread(PostRoute(postId: post.id, commentId: c.id, account: app.accountId)) } label: {
                 (Text(PersonName.display(c.author, me: me, you: true) + "  ").bold() + Text(c.body ?? ""))
                     .font(.footnote)
                     .foregroundStyle(Palette.text)

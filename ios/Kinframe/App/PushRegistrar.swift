@@ -36,9 +36,29 @@ final class PushRegistrar {
         }
     }
 
-    func didRegister(token: Data, api: API?) {
+    /// The device token, kept so an account added later registers too.
+    private var token: Data?
+
+    /// Every account registers the device with its own server (docs/spec/multi-server.md §2.1).
+    func didRegister(token: Data, accounts: [AppModel]) {
+        self.token = token
+        for m in accounts where m.api != nil { didRegister(token: token, api: m.api, account: m.accountId) }
+    }
+
+    /// A server was added: register this device there too (when notifications are on).
+    func registerNewAccount(_ m: AppModel) {
+        guard let token, !UserDefaults.standard.bool(forKey: offKey) else { return }
+        didRegister(token: token, api: m.api, account: m.accountId)
+    }
+
+    private func endpointKey(_ account: String) -> String {
+        account == AccountRecord.legacyId ? endpointKey : "\(endpointKey).\(account)"
+    }
+
+    func didRegister(token: Data, api: API?, account: String = AccountRecord.legacyId) {
         guard enabled, let api else { return }
         let hex = token.map { String(format: "%02x", $0) }.joined()
+        let endpointKey = endpointKey(account)
         Task {
             let endpoint = try? await api.call {
                 try await $0.registerPushEndpoint(body: .json(.init(
@@ -101,14 +121,15 @@ final class PushRegistrar {
         return true
     }
 
-    /// Stop pushes to this device: the endpoint is removed from the server.
-    func turnOff(api: API?) {
+    /// Stop pushes to this device: the endpoints are removed from every server.
+    func turnOff(accounts: [AppModel]) {
         UserDefaults.standard.set(true, forKey: offKey)
-        unregister(api: api)
+        for m in accounts { unregister(api: m.api, account: m.accountId) }
     }
 
     /// Forget this device's endpoint on sign-out.
-    func unregister(api: API?) {
+    func unregister(api: API?, account: String = AccountRecord.legacyId) {
+        let endpointKey = endpointKey(account)
         guard let id = UserDefaults.standard.string(forKey: endpointKey) else { return }
         UserDefaults.standard.removeObject(forKey: endpointKey)
         guard let api else { return }

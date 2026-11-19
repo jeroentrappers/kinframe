@@ -3,6 +3,7 @@ import SwiftUI
 
 struct FramesTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
     @State private var adding = false
 
     var body: some View {
@@ -10,7 +11,8 @@ struct FramesTab: View {
         NavigationStack(path: $app.framesPath) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    if !app.framesLoaded, app.frames.isEmpty {
+                    // Every account's frames (docs/spec/multi-server.md §2.2), each opening on its own server.
+                    if !app.framesLoaded, accounts.frames.isEmpty {
                         if let error = app.framesError {
                             ErrorRetryView(message: error) { Task { await app.loadFrames() } }
                         } else {
@@ -18,7 +20,7 @@ struct FramesTab: View {
                                 ForEach(0..<2, id: \.self) { _ in FrameCardSkeleton() }
                             }
                         }
-                    } else if app.frames.isEmpty {
+                    } else if accounts.frames.isEmpty {
                         EmptyStateView(title: L("frames.emptyTitle"), message: L("frames.emptyBody")) {
                             Button(L("frames.emptyCta")) { adding = true }
                                 .buttonStyle(.kf(.primary, large: true))
@@ -33,9 +35,12 @@ struct FramesTab: View {
                             .padding(.top, -8)
                         // One column on phones; two or more on iPad, iPhone Duo unfolded and in landscape.
                         LazyVGrid(columns: cardColumns(), spacing: 16) {
-                            ForEach(app.frames) { frame in
-                                NavigationLink(value: FrameRoute(id: frame.id)) {
+                            ForEach(accounts.frames, id: \.value.id) { owned in
+                                let frame = owned.value
+                                NavigationLink(value: FrameRoute(id: frame.id, account: owned.model.accountId)) {
                                     FrameCard(frame: frame)
+                                        .overlay(alignment: .topLeading) { ServerChip(model: owned.model).padding(10) }
+                                        .environment(owned.model)
                                 }
                                 .buttonStyle(CardButtonStyle())
                                 .accessibilityHint(L("frames.open", ["name": frame.name]))
@@ -45,7 +50,7 @@ struct FramesTab: View {
                 }
                 .pageColumn(PageWidth.wide)
             }
-            .refreshable { await app.loadFrames() }
+            .refreshable { await accounts.loadFrames() }
             .pageBackground()
             .navigationTitle(L("frames.title"))
             .toolbar {
@@ -59,7 +64,7 @@ struct FramesTab: View {
                 }
             }
             .navigationDestination(for: FrameRoute.self) { route in
-                FrameDetailView(route: route)
+                FrameDetailView(route: route).account(route.account, in: accounts)
             }
             .sheet(isPresented: $adding) {
                 if let api = app.api {
@@ -70,7 +75,8 @@ struct FramesTab: View {
     }
 
     private var summary: String {
-        Lp("frames.summary", count: app.frames.count, ["online": app.frames.filter(\.online).count])
+        let all = accounts.frames.map(\.value)
+        return Lp("frames.summary", count: all.count, ["online": all.filter(\.online).count])
     }
 }
 

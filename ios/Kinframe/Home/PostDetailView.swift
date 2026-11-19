@@ -411,7 +411,7 @@ private struct CommentRow: View {
 
     private var person: some View {
         HStack(alignment: .top, spacing: 10) {
-            Button { app.social.personSheet = PersonRoute(userId: comment.author?.userId ?? "") } label: {
+            Button { app.social.personSheet = PersonRoute(userId: comment.author?.userId ?? "", account: app.accountId) } label: {
                 PersonChip(person: comment.author, size: 32)
             }
             .buttonStyle(.plain)

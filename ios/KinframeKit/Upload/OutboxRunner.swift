@@ -25,8 +25,8 @@ public actor OutboxRunner {
     /// Client-side preparation, in the app and in the share extension alike.
     let preparer: MediaPreparing
 
-    private var server: URL?
-    private var tokens: TokenProvider?
+    /// The signed-in sessions, by API base: each job runs with the one of its server (one account per server).
+    private var sessions: [URL: TokenProvider] = [:]
     private var running: [UUID: Task<Void, Never>] = [:]
 
     public nonisolated let events: AsyncStream<OutboxEvent>
@@ -46,8 +46,13 @@ public actor OutboxRunner {
 
     /// The signed-in session jobs run with. Jobs for another server wait until it's current again.
     public func configure(server: URL?, tokens: TokenProvider?) {
-        self.server = server
-        self.tokens = tokens
+        sessions = [:]
+        if let server, let tokens { sessions[server] = tokens }
+    }
+
+    /// Several accounts (docs/spec/multi-server.md §2.2): one session per server. Jobs of a server without one wait.
+    public func configure(sessions: [URL: TokenProvider]) {
+        self.sessions = sessions
     }
 
     /// Start every job that isn't finished, running, waiting on an in-flight background request or driven by the
@@ -144,12 +149,13 @@ public actor OutboxRunner {
     private func run(_ id: UUID) async {
         guard let job = store.update(id, { $0.lease = .init(owner: owner, until: Date().addingTimeInterval(Self.leaseDuration)) }) else { return }
         emit.yield(.updated(job))
-        guard let server, job.server == server, let tokens else {
-            // Signed out, or the job belongs to another server: leave it for later.
+        guard let tokens = sessions[job.server] else {
+            // Signed out, or the job belongs to a server without a session: leave it for later.
             return
         }
         do {
             if case .uploading = job.state {
+                await borrowPrepared(id)
                 try await prepareAll(id)
                 try await uploadAll(job, tokens: tokens)
                 if let j = store.update(id, { $0.state = .sending }) { emit.yield(.updated(j)) }
@@ -221,6 +227,57 @@ public actor OutboxRunner {
     public static let unprepared = APIError(status: 0, code: "media_unprepared")
 
     private var reportedPrep: [String: Double] = [:]
+
+    /// A send to several servers is one job per server; the first one prepares the media and the others take its
+    /// prepared masters instead of preparing again (`OutboxJob.preparedBy`). Waits while that job is still preparing;
+    /// when it's gone or failed, this job prepares on its own.
+    func borrowPrepared(_ id: UUID) async {
+        guard let leader = store.load(id)?.preparedBy else { return }
+        for _ in 0..<1200 {
+            guard let lead = store.load(leader) else { return }
+            if case .failed = lead.state { return }
+            if lead.items.allSatisfy({ $0.prep != nil && ($0.motion == nil || $0.motionPrep != nil) }) { break }
+            try? await sleep(0.5)
+            if Task.isCancelled { return }
+        }
+        guard let lead = store.load(leader), var job = store.load(id), lead.items.count == job.items.count else { return }
+        let from = store.directory(leader), to = store.directory(id)
+        let fm = FileManager.default
+        func copy(_ file: String) -> Bool {
+            let src = from.appending(path: file), dst = to.appending(path: file)
+            if fm.fileExists(atPath: dst.path) { return true }
+            return (try? fm.copyItem(at: src, to: dst)) != nil
+        }
+        var changed = false
+        for i in job.items.indices {
+            let l = lead.items[i]
+            if job.items[i].prep == nil, l.prep == .prepared, copy(l.upload.file) {
+                let original = job.items[i].upload.file
+                var u = l.upload
+                Tus.reset(&u)
+                job.items[i].upload = u
+                job.items[i].prep = .prepared
+                job.items[i].prepared = l.prepared
+                job.items[i].capturedAt = job.items[i].capturedAt ?? l.capturedAt
+                if original != u.file { try? fm.removeItem(at: to.appending(path: original)) }
+                changed = true
+            }
+            if job.items[i].motion != nil, job.items[i].motionPrep == nil, l.motionPrep == .prepared, let lm = l.motion, copy(lm.file) {
+                let original = job.items[i].motion?.file
+                var u = lm
+                Tus.reset(&u)
+                job.items[i].motion = u
+                job.items[i].motionPrep = .prepared
+                if let original, original != u.file { try? fm.removeItem(at: to.appending(path: original)) }
+                changed = true
+            }
+        }
+        guard changed else { return }
+        let updated = job
+        if let j = store.update(id, { current in
+            current.items = updated.items
+        }) { emit.yield(.updated(j)) }
+    }
 
     /// Prepare every file of a job, one at a time (memory stays low, which the share extension needs), before any
     /// upload starts.

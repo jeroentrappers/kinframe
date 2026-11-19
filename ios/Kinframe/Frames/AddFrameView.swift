@@ -147,7 +147,7 @@ struct AddFrameView: View {
             if let frameId { app.composeFrameIds = [frameId] }
             app.tab = .send
         } else if let frameId {
-            app.framesPath.append(FrameRoute(id: frameId))
+            app.framesPath.append(FrameRoute(id: frameId, account: app.accountId))
         }
     }
 }

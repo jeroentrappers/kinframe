@@ -4,9 +4,12 @@ import PhotosUI
 import SwiftUI
 import UserNotifications
 
-/// Profile (name, photo), language, server, sign-out and account deletion.
+/// Profile (name, photo), language, server, sign-out and account deletion. With several accounts, Settings → Accounts
+/// opens the same page for each of them (`embedded`, the account's model in the environment).
 struct SettingsTab: View {
     @Environment(AppModel.self) private var app
+    @Environment(Accounts.self) private var accounts
+    var embedded = false
     @State private var name = ""
     @State private var avatarPick: PhotosPickerItem?
     @State private var savingName = false
@@ -23,10 +26,20 @@ struct SettingsTab: View {
     @FocusState private var nameFocused: Bool
 
     var body: some View {
-        NavigationStack {
+        if embedded {
+            page
+        } else {
+            NavigationStack { page }
+        }
+    }
+
+    private var page: some View {
+        Group {
             ScrollViewReader { proxy in
             Form {
                 Group {
+                    // Several servers (docs/spec/multi-server.md §2.1): the accounts, adding one, the primary one.
+                    if !embedded { AccountsSection() }
                     profile
                     preferences
                     notifications
@@ -86,9 +99,9 @@ struct SettingsTab: View {
             #endif
             }
             .pageBackground()
-            .navigationTitle(L("settings.title"))
+            .navigationTitle(embedded ? app.serverName : L("settings.title"))
             .confirmationDialog(L("settings.signOut"), isPresented: $confirmSignOut, titleVisibility: .hidden) {
-                Button(L("settings.signOut"), role: .destructive) { Task { await app.signOut() } }
+                Button(L("settings.signOut"), role: .destructive) { Task { await accounts.signOut(app) } }
             }
             .sheet(isPresented: $deletingAccount) { DeleteAccountSheet() }
             .alert(L("ios.server.changeTitle"), isPresented: $confirmChangeServer) {
@@ -240,7 +253,7 @@ struct SettingsTab: View {
                 app.toasts.show(L("push.enabled"))
             }
         } else {
-            PushRegistrar.shared.turnOff(api: app.api)
+            PushRegistrar.shared.turnOff(accounts: accounts.models)
             app.toasts.show(L("push.disabled"))
         }
         await refreshPush()
@@ -278,7 +291,8 @@ struct SettingsTab: View {
             if app.auth.mode == .dev {
                 Text(L("settings.devMode")).font(.footnote).foregroundStyle(Palette.warn)
             }
-            Button(L("ios.server.change")) { confirmChangeServer = true }
+            // With several accounts, servers are added and removed in Accounts instead.
+            if !accounts.several { Button(L("ios.server.change")) { confirmChangeServer = true } }
         }
     }
 
