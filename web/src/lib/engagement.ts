@@ -36,6 +36,16 @@ export function requestOpen(r: PhotoRequest | null | undefined, now = Date.now()
 	return !!r && r.state === 'open' && Date.parse(r.expires_at) > now;
 }
 
+/** The families to preselect for a frame you're not on: those reaching it that you can post to, in your order. */
+export function familiesToPreselect(reaching: readonly string[], postable: readonly string[]): string[] {
+	return postable.filter((id) => reaching.includes(id));
+}
+
+/** Where "Send photos" for a frame's request goes: the frame itself, or (not on it) the send page finds its families. */
+export function requestSendUrl(frameId: string, requestId?: string | null): string {
+	return `/send?frame=${frameId}${requestId ? `&request=${requestId}` : ''}`;
+}
+
 /** The Monday (YYYY-MM-DD, local time) of the week `d` is in. */
 export function weekOf(d: Date): string {
 	const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());

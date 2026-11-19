@@ -8656,6 +8656,10 @@ type PhotoRequest struct {
 	CreatedAt  time.Time  `json:"created_at"`
 	ExpiresAt  time.Time  `json:"expires_at"`
 
+	// FeedIds The families with an active subscription to the frame. A family member who is not on the frame answers
+	// the request by posting to one of these (the apps preselect it when sending).
+	FeedIds *[]Id `json:"feed_ids,omitempty"`
+
 	// FrameId UUIDv7
 	FrameId   Id     `json:"frame_id"`
 	FrameName string `json:"frame_name"`

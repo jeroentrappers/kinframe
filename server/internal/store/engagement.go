@@ -107,10 +107,14 @@ type PhotoRequest struct {
 	AnsweredSendID  *uuid.UUID  `db:"answered_send_id"`
 	AnsweredLabel   *string     `db:"answered_label"` // the send's credited name (outside contributions)
 	NotifiedUserIDs []uuid.UUID `db:"notified_user_ids"`
+	// FeedIDs are the families with an active subscription to the frame (where its family members answer it).
+	FeedIDs []uuid.UUID `db:"feed_ids"`
 }
 
 const photoRequestSelect = `SELECT r.id, r.frame_id, f.name AS frame_name, r.state, r.created_at, r.expires_at, r.answered_at,
-	r.answered_by_user_id, r.answered_send_id, s.via_label AS answered_label, r.notified_user_ids
+	r.answered_by_user_id, r.answered_send_id, s.via_label AS answered_label, r.notified_user_ids,
+	ARRAY(SELECT su.feed_id FROM subscriptions su JOIN feeds fd ON fd.id = su.feed_id AND fd.deleted_at IS NULL
+	      WHERE su.frame_id = r.frame_id AND su.status = 'active' ORDER BY su.feed_id) AS feed_ids
 	FROM photo_requests r JOIN frames f ON f.id = r.frame_id LEFT JOIN sends s ON s.id = r.answered_send_id`
 
 // PhotoRequestValidity is how long a request stays open.
@@ -164,6 +168,25 @@ func (s *Store) AddPhotoRequestNotified(ctx context.Context, id uuid.UUID, users
 // OpenPhotoRequests returns every open request (the scheduler holds pushes in quiet hours).
 func (s *Store) OpenPhotoRequests(ctx context.Context) ([]PhotoRequest, error) {
 	return many[PhotoRequest](s.Pool.Query(ctx, photoRequestSelect+` WHERE r.state = 'open' AND f.deleted_at IS NULL ORDER BY r.created_at`))
+}
+
+// PhotoRequestViewers are everyone who sees the frame's requests in the apps (canSeePhotoRequests): the frame's
+// members and the members of families with an active subscription to it.
+func (s *Store) PhotoRequestViewers(ctx context.Context, q db.DBTX, frameID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := many[idRow](q.Query(ctx, `
+		SELECT u.id FROM users u WHERE u.deleted_at IS NULL AND u.id IN (
+			SELECT m.user_id FROM memberships m WHERE m.frame_id = $1
+			UNION
+			SELECT fm.user_id FROM subscriptions su
+			JOIN feeds f ON f.id = su.feed_id AND f.deleted_at IS NULL
+			JOIN feed_members fm ON fm.feed_id = su.feed_id
+			WHERE su.frame_id = $1 AND su.status = 'active')
+		ORDER BY u.id`, frameID))
+	out := make([]uuid.UUID, len(rows))
+	for i, r := range rows {
+		out[i] = r.ID
+	}
+	return out, err
 }
 
 // RequestRecipient is a candidate for a frame's frame_request push.

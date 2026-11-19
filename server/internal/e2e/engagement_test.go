@@ -548,6 +548,55 @@ func TestEngagementPhotoRequests(t *testing.T) {
 	}
 }
 
+// Everyone who sees a frame's request in the apps hears of it live, not only the push recipients: the frame's
+// owner who never sent to it and the family's readers too. The request names the families that reach the frame.
+func TestEngagementPhotoRequestViewers(t *testing.T) {
+	requireMedia(t)
+	e := newEnv(t)
+	anna, ben, carla := e.user("anna@x.org", "Anna"), e.user("ben@x.org", "Ben"), e.user("carla@x.org", "Carla")
+	d, frame := e.claim(anna)
+	feed := e.createFeed(anna, map[string]any{"name": "Peeters"})
+	e.joinFeed(anna, ben, feed)
+	e.joinFeed(anna, carla, feed)
+	e.expect(req{method: "PATCH", path: "/v1/feeds/" + feed + "/members/" + carla.id, token: anna.token, body: map[string]any{"role": "member"}}, 200)
+	e.subscribeSQL(feed, frame)
+	// Ben sent to the frame before (in the daytime, out of everyone's quiet hours), so he alone gets the push.
+	// (Three days ago: placements made now must come after the request.)
+	day := time.Now().In(brussels).AddDate(0, 0, -3)
+	noon := time.Date(day.Year(), day.Month(), day.Day(), 12, 0, 0, 0, brussels)
+	e.sqlPlace(ben, frame, noon.Add(-48*time.Hour))
+	e.setClock(noon)
+	annaWS := e.dialWS("/v1/ws?access_token="+anna.token, "")
+	carlaWS := e.dialWS("/v1/ws?access_token="+carla.token, "")
+	benWS := e.dialWS("/v1/ws?access_token="+ben.token, "")
+	r := e.expect(req{method: "POST", path: "/v1/device/photo-requests", token: d.token}, 201).m(t)
+	for _, w := range []*wsConn{annaWS, carlaWS, benWS} {
+		ev := w.await("photo_request.created", 5*time.Second)
+		if dig(ev, "request", "id") != r["id"] {
+			t.Fatalf("created %v", ev)
+		}
+		if fs, _ := dig(ev, "request", "feed_ids").([]any); len(fs) != 1 || fs[0] != feed {
+			t.Fatalf("feed_ids %v", ev)
+		}
+	}
+	if n := e.count(`SELECT count(*) FROM nudges WHERE kind = 'frame_request'`); n != 1 {
+		t.Fatalf("frame_request nudges: %d", n)
+	}
+	got := e.get("/v1/photo-requests/"+r["id"].(string), carla.token).m(t)
+	if fs, _ := got["feed_ids"].([]any); len(fs) != 1 || fs[0] != feed {
+		t.Fatalf("get %v", got)
+	}
+	// Ben answers through the family: everyone hears it was answered.
+	e.setClock(noon.Add(time.Hour))
+	e.post(ben, []string{}, []string{feed}, e.photo(ben, 1))
+	for _, w := range []*wsConn{annaWS, carlaWS, benWS} {
+		ev := w.await("photo_request.updated", 20*time.Second)
+		if dig(ev, "request", "state") != "answered" || dig(ev, "request", "answered_by", "display_name") != "Ben" {
+			t.Fatalf("updated %v", ev)
+		}
+	}
+}
+
 func jsonNum(v any) string {
 	b, _ := json.Marshal(v)
 	return string(b)

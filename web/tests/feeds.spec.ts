@@ -132,6 +132,19 @@ test('a feed code in "Enter a code" opens the feed invite', async ({ page }) => 
 	expect(st.calls.find((c) => c.path === '/v1/feed-invites:lookup')?.body).toEqual({ code: 'AB12CD34' });
 });
 
+test('joining as a Reader offers the family, not posting', async ({ page }) => {
+	const { st } = feedState();
+	const token = 'fiREADER000000000000000000';
+	st.feedInvitePreviews[token] = { token, purpose: 'join', feed_name: 'Cousins', invited_by_name: 'Lisa', owner_name: 'Lisa', member_count: 4, requires_approval: false, join_role: 'member' } as S['FeedInvitePreview'];
+	await signIn(page, st);
+	await page.goto(`/fi/${token}`);
+	await page.getByRole('button', { name: 'Join family' }).click();
+	await expect(page.getByRole('heading', { name: 'You’re in Cousins' })).toBeVisible();
+	await expect(page.getByText('Readers see everything, comment, react and chat, but don’t post photos.')).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Post photos' })).toHaveCount(0);
+	await expect(page.getByRole('link', { name: 'View family' })).toBeVisible();
+});
+
 test('send to a frame and a feed at once', async ({ page }) => {
 	const { st, oma, feed } = feedState();
 	await signIn(page, st);

@@ -155,7 +155,10 @@ func (s *Server) fillFeedEngagement(ctx context.Context, feeds []feedSummaryJSON
 
 func (s *Server) photoRequestJSON(r *store.PhotoRequest, people map[uuid.UUID]store.Person, fr *gen.Freshness) gen.PhotoRequest {
 	out := gen.PhotoRequest{Id: r.ID, FrameId: r.FrameID, FrameName: r.FrameName, State: gen.PhotoRequestState(r.State),
-		CreatedAt: r.CreatedAt, ExpiresAt: r.ExpiresAt, AnsweredAt: r.AnsweredAt, Freshness: fr}
+		CreatedAt: r.CreatedAt, ExpiresAt: r.ExpiresAt, AnsweredAt: r.AnsweredAt, Freshness: fr, FeedIds: ptr(r.FeedIDs)}
+	if out.FeedIds != nil && *out.FeedIds == nil {
+		out.FeedIds = &[]uuid.UUID{}
+	}
 	if r.AnsweredBy != nil {
 		if p, ok := people[*r.AnsweredBy]; ok {
 			ref := s.engPersonRef(p)
@@ -308,6 +311,29 @@ func (s *Server) announcePhotoRequest(ctx context.Context, r *store.PhotoRequest
 			s.log.Warn("photo request notified", "err", err)
 		}
 	}
+	// Everyone else who sees the request in the apps (the frame's other members, the families' readers) gets the
+	// event without a push, so their frame strip and frame page show it live.
+	s.notify.Users(s.photoRequestOthers(ctx, r.FrameID, to), ev, nil)
+}
+
+// photoRequestOthers are the request's viewers who are not in `except`.
+func (s *Server) photoRequestOthers(ctx context.Context, frameID uuid.UUID, except []uuid.UUID) []uuid.UUID {
+	viewers, err := s.st.PhotoRequestViewers(ctx, s.st.Q(), frameID)
+	if err != nil {
+		s.log.Warn("photo request viewers", "frame", frameID, "err", err)
+		return nil
+	}
+	skip := make(map[uuid.UUID]bool, len(except))
+	for _, u := range except {
+		skip[u] = true
+	}
+	var out []uuid.UUID
+	for _, u := range viewers {
+		if !skip[u] {
+			out = append(out, u)
+		}
+	}
+	return out
 }
 
 func requestPush(r *store.PhotoRequest) *notify.Push {
@@ -375,6 +401,7 @@ func (s *Server) publishPhotoRequestUpdate(ctx context.Context, r *store.PhotoRe
 		return
 	}
 	to = engUnique(append(to, r.NotifiedUserIDs...))
+	to = append(to, s.photoRequestOthers(ctx, r.FrameID, to)...)
 	s.notify.Users(to, notify.Event{"type": "photo_request.updated", "request": s.renderPhotoRequest(ctx, r)}, nil)
 }
 

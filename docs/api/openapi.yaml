@@ -9152,6 +9152,12 @@ components:
         answered_at: { type: [string, 'null'], format: date-time }
         answered_by: { oneOf: [ { $ref: '#/components/schemas/PersonRef' }, { type: 'null' } ] }
         freshness: { $ref: '#/components/schemas/Freshness' }
+        feed_ids:
+          type: array
+          items: { $ref: '#/components/schemas/Id' }
+          description: |
+            The families with an active subscription to the frame. A family member who is not on the frame answers
+            the request by posting to one of these (the apps preselect it when sending).
 
     FramePhotoRequest:
       type: object

@@ -1,5 +1,6 @@
 // What a browser tells the server when it enrolls as a frame, and its heartbeat.
 import type { DeviceEnroll, Heartbeat } from './client';
+import { SOCIAL_FEATURES } from './social';
 
 /** Frame renditions are made for this screen; very large TVs get at most this long edge. */
 export const MAX_EDGE = 2560;
@@ -56,6 +57,8 @@ export function heartbeat(startedAt: number, screenState: Heartbeat['screen_stat
 		uptime_s: Math.round((Date.now() - startedAt) / 1000),
 		screen_state: screenState,
 		local_time: new Date().toISOString(),
+		// What this frame app can show (informational for the social features, README §5.20).
+		features: [...SOCIAL_FEATURES],
 		timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
 	};
 }

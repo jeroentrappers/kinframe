@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '@fontsource-variable/fraunces';
 	import '../app.css';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, untrack, type Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api, call } from '$lib/api/client';
@@ -22,6 +22,7 @@
 	import Logo from '$components/Logo.svelte';
 	import Icon from '$components/Icon.svelte';
 	import TvMiniBar from '$components/TvMiniBar.svelte';
+	import { requestSendUrl } from '$lib/engagement';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -162,7 +163,7 @@
 				void frames.load(true);
 				const r = e.request;
 				toasts.show(t('engagement.wouldLikeToast', { frame: r.frame_name }), {
-					action: { label: t('engagement.sendPhotos'), run: () => goto(`/send?frame=${r.frame_id}`) },
+					action: { label: t('engagement.sendPhotos'), run: () => goto(requestSendUrl(r.frame_id, r.id)) },
 					duration: 12000
 				});
 			} else if (e.type === 'photo_request.updated') {
@@ -205,8 +206,11 @@
 			live.stop();
 			frames.reset();
 			feeds.reset();
-			chats.reset();
-			badge.reset();
+			// These read what they reset (the badge paints the title): untracked, or signed-out pages loop forever.
+			untrack(() => {
+				chats.reset();
+				badge.reset();
+			});
 		}
 	});
 

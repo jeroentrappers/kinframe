@@ -13,7 +13,7 @@
 	import AudiencePicker from '$components/social/AudiencePicker.svelte';
 	import { canPostToFeed } from '$lib/feeds';
 	import { api, call } from '$lib/api/client';
-	import { currentPrompt } from '$lib/engagement';
+	import { currentPrompt, familiesToPreselect } from '$lib/engagement';
 	import { formatBytes, formatDuration } from '$lib/format';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
@@ -56,8 +56,32 @@
 		const wantedFeed = page.url.searchParams.get('feed');
 		if (wanted && sendable.some((f) => f.id === wanted)) compose.frameIds = [wanted];
 		else if (wantedFeed && postable.some((f) => f.id === wantedFeed)) compose.feedIds = [wantedFeed];
+		else if (wanted && postable.length) void preselectFamiliesOf(wanted, page.url.searchParams.get('request'));
 		else if (!wanted && !wantedFeed && sendable.length === 1 && postable.length === 0) compose.frameIds = [sendable[0]!.id];
 	});
+
+	// A frame you're not on (a frame request or a quiet-frame reminder reached you through a family): preselect the
+	// families whose posts reach it. The request names them (`PhotoRequest.feed_ids`); otherwise ask the families.
+	async function preselectFamiliesOf(frameId: string, requestId: string | null) {
+		let reaching: string[] = [];
+		if (requestId && discovery.engagement) {
+			reaching = await call(api.GET('/v1/photo-requests/{requestId}', { params: { path: { requestId } } }))
+				.then((r) => (r.frame_id === frameId ? (r.feed_ids ?? []) : []))
+				.catch(() => []);
+		}
+		if (!reaching.length) {
+			const subs = await Promise.all(
+				postable.map((f) =>
+					call(api.GET('/v1/feeds/{feedId}/subscriptions', { params: { path: { feedId: f.id }, query: { status: 'active' } } }))
+						.then((l) => (l.some((s) => s.frame.id === frameId) ? f.id : null))
+						.catch(() => null)
+				)
+			);
+			reaching = subs.filter((x): x is string => !!x);
+		}
+		const ids = familiesToPreselect(reaching, postable.map((f) => f.id));
+		if (ids.length && !compose.hasRecipients) compose.feedIds = ids;
+	}
 
 	// Answer a weekly prompt: ?feed=<id>&prompt=<id> from the prompt card (README §5.20).
 	$effect(() => {
