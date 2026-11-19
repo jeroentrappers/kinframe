@@ -195,3 +195,93 @@ export function reservationBody(form: ReservationForm, shop: Pick<Shop, 'product
 		...(honeypot ? { website: honeypot } : {})
 	};
 }
+
+export type ShopElsewhereLink = Schemas['ShopElsewhereLink'];
+
+/** A plain text split at blank lines (the shop file's `notice` and `diy.body`), each paragraph trimmed. */
+export function paragraphs(text: string | null | undefined): string[] {
+	return (text ?? '')
+		.replace(/\r\n/g, '\n')
+		.split(/\n[ \t]*\n/)
+		.map((p) => p.trim())
+		.filter(Boolean);
+}
+
+/** The region of each browser language ("nl-BE" → BE, "nl" → NL by likely region), in order, without repeats. */
+export function browserRegions(languages: readonly string[]): string[] {
+	const out: string[] = [];
+	for (const l of languages) {
+		try {
+			const region = new Intl.Locale(l).maximize().region;
+			if (region && !out.includes(region)) out.push(region);
+		} catch {
+			/* malformed tag */
+		}
+	}
+	return out;
+}
+
+/**
+ * The visitor's country as the shop page guesses it from the browser languages. Only regions the browser states count
+ * ("nl-BE", "fr-FR"): the first one the shop ships to (so "fr-FR, nl-BE" is BE for a Belgian shop), else the first one.
+ * A browser that states no region at all ("nl", "fr") is taken to be in the first shipping country: on the shop's own
+ * domain that is far likelier than the country a bare language maps to (plain "nl" would otherwise mean NL). Null when
+ * nothing can be guessed.
+ */
+export function visitorCountry(languages: readonly string[], shipping: readonly string[]): string | null {
+	const stated: string[] = [];
+	for (const l of languages) {
+		try {
+			const region = new Intl.Locale(l).region;
+			if (region && !stated.includes(region)) stated.push(region);
+		} catch {
+			/* malformed tag */
+		}
+	}
+	if (stated.length) return stated.find((r) => shipping.includes(r)) ?? stated[0] ?? null;
+	return shipping[0] ?? browserRegions(languages)[0] ?? null;
+}
+
+/** Retailer links in one section: buttons, small "also at" text links, and whether to show the affiliate disclosure. */
+export interface RetailerLinks {
+	main: ShopElsewhereLink[];
+	secondary: ShopElsewhereLink[];
+	affiliate: boolean;
+}
+
+function retailerLinks(links: ShopElsewhereLink[]): RetailerLinks {
+	return {
+		main: links.filter((l) => !l.secondary),
+		secondary: links.filter((l) => !!l.secondary),
+		affiliate: links.some((l) => l.affiliate)
+	};
+}
+
+/**
+ * Which retailer section a visitor sees. In a shipping country: `diy`, the links that list that country ("buy it
+ * yourself and convert it"). Elsewhere, or when the country is unknown: `outside`, the links for countries the shop
+ * doesn't ship to ("Outside Belgium?"). Each is null when it has no links.
+ */
+export function elsewhereSections(
+	shop: Pick<Shop, 'shipping' | 'elsewhere'>,
+	country: string | null
+): { diy: RetailerLinks | null; outside: RetailerLinks | null } {
+	const all = shop.elsewhere ?? [];
+	const ships = (c: string) => shop.shipping.countries.includes(c);
+	if (country && ships(country)) {
+		const diy = all.filter((l) => l.countries.includes(country));
+		return { diy: diy.length ? retailerLinks(diy) : null, outside: null };
+	}
+	const outside = all.filter((l) => l.countries.some((c) => !ships(c)));
+	return { diy: null, outside: outside.length ? retailerLinks(outside) : null };
+}
+
+/** The countries an outside link is for, without the shipping countries (those see it in the DIY section). */
+export function outsideCountries(link: ShopElsewhereLink, shipping: readonly string[]): string[] {
+	return link.countries.filter((c) => !shipping.includes(c));
+}
+
+/** navigator.languages, empty outside a browser. */
+export function browserLanguages(): readonly string[] {
+	return typeof navigator !== 'undefined' ? (navigator.languages ?? [navigator.language]) : [];
+}

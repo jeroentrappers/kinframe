@@ -6177,6 +6177,11 @@ type Shop struct {
 	// Example: nl
 	DefaultLocale *string `json:"default_locale,omitempty"`
 
+	// Diy Title and text of the "buy it yourself and convert it" section, shown to visitors in a shipping country when
+	// `elsewhere` has links for that country. Plain text; a blank line in `body` starts a new paragraph. Either may
+	// be absent; the web app then uses its own texts.
+	Diy *ShopDiy `json:"diy,omitempty"`
+
 	// Domains Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
 	// `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
 	// sign-in and the family app live. Absent when the operator configured none.
@@ -6185,14 +6190,21 @@ type Shop struct {
 	// Example: ["shop.example.org"]
 	Domains *[]string `json:"domains,omitempty"`
 
-	// Elsewhere Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
-	// affiliate links (shown with a disclosure). Absent when the operator configured none.
+	// Elsewhere Retailers selling a frame the convert tool supports. Links for countries outside `shipping.countries`
+	// are shown to visitors elsewhere ("Outside Belgium?"); links that list a shipping country are shown to
+	// visitors from that country in the "buy it yourself and convert it" section. The links may be affiliate
+	// links (shown with a disclosure). Absent when the operator configured none.
 	Elsewhere *[]ShopElsewhereLink `json:"elsewhere,omitempty"`
 
 	// EstimatedDelivery Language code → text; `en` is the fallback.
 	EstimatedDelivery *LocalizedText `json:"estimated_delivery,omitempty"`
-	Products          []ShopProduct  `json:"products"`
-	Seller            struct {
+
+	// Notice A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+	// "we resell converted frames"). Plain text, no HTML; a blank line starts a new paragraph. Absent when
+	// the operator configured none.
+	Notice   *LocalizedText `json:"notice,omitempty"`
+	Products []ShopProduct  `json:"products"`
+	Seller   struct {
 		// Address Seller's address (terms of sale).
 		Address *string             `json:"address,omitempty"`
 		Email   openapi_types.Email `json:"email"`
@@ -6222,7 +6234,18 @@ type Shop struct {
 	VatPercent float32 `json:"vat_percent"`
 }
 
-// ShopElsewhereLink A retailer selling a compatible frame in some countries the shop doesn't ship to.
+// ShopDiy Title and text of the "buy it yourself and convert it" section, shown to visitors in a shipping country when
+// `elsewhere` has links for that country. Plain text; a blank line in `body` starts a new paragraph. Either may
+// be absent; the web app then uses its own texts.
+type ShopDiy struct {
+	// Body Language code → text; `en` is the fallback.
+	Body *LocalizedText `json:"body,omitempty"`
+
+	// Title Language code → text; `en` is the fallback.
+	Title *LocalizedText `json:"title,omitempty"`
+}
+
+// ShopElsewhereLink A retailer selling a frame the convert tool supports, for visitors from some countries.
 type ShopElsewhereLink struct {
 	// Affiliate True for an affiliate link; the web app then shows a disclosure.
 	Affiliate *bool `json:"affiliate,omitempty"`
@@ -6239,7 +6262,10 @@ type ShopElsewhereLink struct {
 
 	// Retailer Example: bol.com
 	Retailer string `json:"retailer"`
-	Url      string `json:"url"`
+
+	// Secondary True for an alternative shown as a small text link ("Also at bol.com") below the main links.
+	Secondary *bool  `json:"secondary,omitempty"`
+	Url       string `json:"url"`
 }
 
 // ShopLine defines model for ShopLine.

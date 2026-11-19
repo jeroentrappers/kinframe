@@ -5,10 +5,13 @@
 	import { countryName, formatMoney, localized, type Shop } from '$lib/shop';
 	import Icon from './Icon.svelte';
 	import ShopAvailability from './ShopAvailability.svelte';
+	import ShopDiy from './ShopDiy.svelte';
 	import ShopElsewhere from './ShopElsewhere.svelte';
+	import ShopNotice from './ShopNotice.svelte';
 	import ShopPhotos from './ShopPhotos.svelte';
 
-	let { shop }: { shop: Shop } = $props();
+	// notes: the operator's notice and the DIY section above the products (the storefront shows them at its top).
+	let { shop, notes = true }: { shop: Shop; notes?: boolean } = $props();
 	// Shops with checkout sell (pay online); the others take reservations.
 	const checkout = $derived(!!shop.checkout);
 
@@ -29,6 +32,11 @@
 		<p class="lede">{t('shop.lede', { brand })}</p>
 		{#if when && !shop.stock}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
 	</div>
+
+	{#if notes}
+		<ShopNotice {shop} />
+		<ShopDiy {shop} />
+	{/if}
 
 	<div class="products">
 		{#each shop.products as p, i (p.id)}

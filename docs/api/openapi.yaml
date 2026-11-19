@@ -3619,12 +3619,21 @@ components:
           properties:
             ships_in_stock: { type: string, format: date }
             ships_out_of_stock: { type: string, format: date }
+        notice:
+          allOf: [{ $ref: '#/components/schemas/LocalizedText' }]
+          description: |
+            A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+            "we resell converted frames"). Plain text, no HTML; a blank line starts a new paragraph. Absent when
+            the operator configured none.
+        diy: { $ref: '#/components/schemas/ShopDiy' }
         elsewhere:
           type: array
           items: { $ref: '#/components/schemas/ShopElsewhereLink' }
           description: |
-            Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
-            affiliate links (shown with a disclosure). Absent when the operator configured none.
+            Retailers selling a frame the convert tool supports. Links for countries outside `shipping.countries`
+            are shown to visitors elsewhere ("Outside Belgium?"); links that list a shipping country are shown to
+            visitors from that country in the "buy it yourself and convert it" section. The links may be affiliate
+            links (shown with a disclosure). Absent when the operator configured none.
         domains:
           type: array
           items: { type: string }
@@ -3658,9 +3667,19 @@ components:
             vat_number: { type: string }
             phone: { type: string }
 
+    ShopDiy:
+      type: object
+      description: |
+        Title and text of the "buy it yourself and convert it" section, shown to visitors in a shipping country when
+        `elsewhere` has links for that country. Plain text; a blank line in `body` starts a new paragraph. Either may
+        be absent; the web app then uses its own texts.
+      properties:
+        title: { $ref: '#/components/schemas/LocalizedText' }
+        body: { $ref: '#/components/schemas/LocalizedText' }
+
     ShopElsewhereLink:
       type: object
-      description: A retailer selling a compatible frame in some countries the shop doesn't ship to.
+      description: A retailer selling a frame the convert tool supports, for visitors from some countries.
       required: [countries, retailer, product, url]
       properties:
         countries:
@@ -3672,6 +3691,10 @@ components:
         product: { type: string, description: The frame model., examples: [Denver PFF-1024] }
         url: { type: string, format: uri }
         affiliate: { type: boolean, default: false, description: True for an affiliate link; the web app then shows a disclosure. }
+        secondary:
+          type: boolean
+          default: false
+          description: True for an alternative shown as a small text link ("Also at bol.com") below the main links.
 
     LocalizedText:
       type: object

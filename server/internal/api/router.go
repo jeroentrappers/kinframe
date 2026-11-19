@@ -488,7 +488,7 @@ func (s *Server) spa() http.Handler {
 			lang := s.cfg.Shop.StorefrontLang(r.Header.Get("Accept-Language"))
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			w.Header().Set("Vary", "Accept-Language")
-			_, _ = w.Write(s.cfg.Shop.StorefrontIndex(b, s.shopOrigin(r.Context()), lang))
+			_, _ = w.Write(s.cfg.Shop.StorefrontIndex(b, s.shopOrigin(r.Context()), s.cfg.PublicURL, lang))
 			return
 		}
 		http.ServeFile(w, r, index)

@@ -70,10 +70,28 @@ func shopJSON(c *shop.Config) *gen.Shop {
 		d := gen.LocalizedText(c.EstimatedDelivery)
 		out.EstimatedDelivery = &d
 	}
+	if len(c.Notice) > 0 {
+		n := gen.LocalizedText(c.Notice)
+		out.Notice = &n
+	}
+	if d := c.DIY; d != nil && (len(d.Title) > 0 || len(d.Body) > 0) {
+		out.Diy = &gen.ShopDiy{}
+		if len(d.Title) > 0 {
+			t := gen.LocalizedText(d.Title)
+			out.Diy.Title = &t
+		}
+		if len(d.Body) > 0 {
+			b := gen.LocalizedText(d.Body)
+			out.Diy.Body = &b
+		}
+	}
 	if len(c.Elsewhere) > 0 {
 		links := make([]gen.ShopElsewhereLink, len(c.Elsewhere))
 		for i, l := range c.Elsewhere {
 			links[i] = gen.ShopElsewhereLink{Countries: l.Countries, Retailer: l.Retailer, Product: l.Product, Url: l.URL, Affiliate: ptr(l.Affiliate)}
+			if l.Secondary {
+				links[i].Secondary = ptr(true)
+			}
 		}
 		out.Elsewhere = &links
 	}

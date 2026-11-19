@@ -80,6 +80,36 @@ test.describe('shop', () => {
 		expect(call?.headers?.['authorization']).toBeUndefined();
 	});
 
+	test.describe('a Belgian visitor', () => {
+		test.use({ locale: 'en-BE' });
+
+		test('the landing section shows the notice and the DIY links above the products', async ({ page }) => {
+			const state = emptyState();
+			state.discovery.shop = {
+				...shopFixture(),
+				shipping: { countries: ['BE'], flat_cents: 695 },
+				notice: { en: 'We resell converted Denver frames.' },
+				elsewhere: [
+					{ countries: ['BE'], retailer: 'Amazon', product: 'Denver PFF-1024', url: 'https://www.amazon.com.be/dp/B0TEST1', affiliate: true },
+					{ countries: ['BE'], retailer: 'bol.com', product: 'Denver PFF-1024', url: 'https://www.bol.com/be/p/1', secondary: true },
+					{ countries: ['*'], retailer: 'Amazon.de', product: 'Denver PFF-1024', url: 'https://www.amazon.de/dp/B0TEST3', affiliate: true }
+				]
+			};
+			await mockApi(page, state);
+			await page.goto('/');
+			const section = page.getByRole('region', { name: 'Get a kinframe' });
+			await expect(section.getByTestId('shop-notice')).toHaveText('We resell converted Denver frames.');
+			const diy = section.getByRole('region', { name: 'Buy it yourself and convert it' });
+			await expect(diy.getByText('Prefer to do it yourself? Buy a compatible frame and turn it into a kinframe with our free convert tool.')).toBeVisible();
+			await expect(diy.getByRole('link', { name: 'Denver PFF-1024 · Amazon' })).toHaveAttribute('rel', 'sponsored noopener');
+			await expect(diy.getByRole('link', { name: 'Also at bol.com' })).toBeVisible();
+			await expect(diy.getByRole('link', { name: 'How to convert a frame' })).toHaveAttribute('href', /\/convert$/);
+			// The "*" link is for other countries: not shown to a Belgian visitor, and no "Outside Belgium?".
+			await expect(page.getByText('Amazon.de')).toHaveCount(0);
+			await expect(page.getByTestId('shop-elsewhere')).toHaveCount(0);
+		});
+	});
+
 	test('server field errors are shown on the form', async ({ page }) => {
 		const state = emptyState();
 		state.discovery.shop = shopFixture();

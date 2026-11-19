@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"maps"
 	"net/mail"
 	"net/url"
 	"os"
@@ -15,8 +16,11 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/jeroentrappers/kinframe/server/internal/i18n"
 )
 
 // Config is the operator's shop configuration (YAML or JSON).
@@ -35,8 +39,18 @@ type Config struct {
 	Shipping   Shipping  `yaml:"shipping"`
 	// EstimatedDelivery is free text per language, e.g. {en: "early 2027", nl: "begin 2027"}.
 	EstimatedDelivery Localized `yaml:"estimated_delivery"`
-	// Elsewhere links visitors outside Shipping.Countries to retailers selling a
-	// frame the convert tool supports (affiliate links allowed).
+	// Notice is shown prominently at the top of the storefront, above the
+	// products, per language ("we resell converted frames"). Plain text; a blank
+	// line starts a new paragraph.
+	Notice Localized `yaml:"notice"`
+	// DIY titles the "buy it yourself and convert it" section that visitors in
+	// a shipping country see when Elsewhere has links for their country. Nil =
+	// the web app's own texts.
+	DIY *DIY `yaml:"diy"`
+	// Elsewhere links visitors to retailers selling a frame the convert tool
+	// supports (affiliate links allowed): outside Shipping.Countries in the
+	// "Outside {countries}?" section, and in a shipping country (an entry that
+	// lists it) in the DIY section.
 	Elsewhere []ElsewhereLink `yaml:"elsewhere"`
 	// NotifyEmail receives a message for every new reservation and cancellation.
 	NotifyEmail string `yaml:"notify_email"`
@@ -111,6 +125,36 @@ type ElsewhereLink struct {
 	URL       string   `yaml:"url"`
 	// Affiliate marks an affiliate link: the web app shows a disclosure.
 	Affiliate bool `yaml:"affiliate"`
+	// Secondary shows the link as a small text link ("Also at bol.com") below
+	// the main ones instead of a button.
+	Secondary bool `yaml:"secondary"`
+}
+
+// DIY is the title and text of the "buy it yourself and convert it" section;
+// an empty map means the web app's default text.
+type DIY struct {
+	Title Localized `yaml:"title"`
+	Body  Localized `yaml:"body"`
+}
+
+// hasPrimaryLink reports whether visitors from country (or "*") get a main,
+// non-secondary Elsewhere link.
+func (c *Config) hasPrimaryLink(country string) bool {
+	return slices.ContainsFunc(c.Elsewhere, func(l ElsewhereLink) bool {
+		return !l.Secondary && (slices.Contains(l.Countries, country) || (country != "*" && !c.ShipsTo(country) && slices.Contains(l.Countries, "*")))
+	})
+}
+
+// DIYLinks are the Elsewhere links for visitors in a shipping country: the
+// entries that list one, shown in the "buy it yourself and convert it" section.
+func (c *Config) DIYLinks() []ElsewhereLink {
+	var out []ElsewhereLink
+	for _, l := range c.Elsewhere {
+		if slices.ContainsFunc(l.Countries, c.ShipsTo) {
+			out = append(out, l)
+		}
+	}
+	return out
 }
 
 type Shipping struct {
@@ -130,6 +174,19 @@ func (l Localized) Get(lang string) string {
 	}
 	return l["en"]
 }
+
+// Paragraphs splits a plain text at blank lines, trimming each paragraph.
+func Paragraphs(s string) []string {
+	var out []string
+	for _, p := range blankLineRe.Split(strings.ReplaceAll(s, "\r\n", "\n"), -1) {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+var blankLineRe = regexp.MustCompile(`\n[ \t]*\n`)
 
 // SpecsFor returns the product's bullets for lang, else English.
 func (p Product) SpecsFor(lang string) []string {
@@ -322,6 +379,30 @@ func (c *Config) validate() error {
 	if len(c.EstimatedDelivery) > 0 && c.EstimatedDelivery["en"] == "" {
 		bad("estimated_delivery needs an en text (the fallback)")
 	}
+	checkText := func(where string, l Localized, max int) {
+		if len(l) == 0 {
+			return
+		}
+		if strings.TrimSpace(l["en"]) == "" {
+			bad("%s needs an en text (the fallback)", where)
+		}
+		for _, lang := range slices.Sorted(maps.Keys(l)) {
+			if !slices.Contains(i18n.Languages, lang) {
+				bad("%s: %q is not a language code like nl or zh-TW (docs/i18n.md)", where, lang)
+			}
+			if n := utf8.RuneCountInString(l[lang]); n > max {
+				bad("%s.%s: at most %d characters, got %d", where, lang, max, n)
+			}
+			if strings.ContainsAny(l[lang], "<>") {
+				bad("%s.%s: plain text only, no HTML", where, lang)
+			}
+		}
+	}
+	checkText("notice", c.Notice, 2000)
+	if c.DIY != nil {
+		checkText("diy.title", c.DIY.Title, 120)
+		checkText("diy.body", c.DIY.Body, 2000)
+	}
 	for i, l := range c.Elsewhere {
 		where := fmt.Sprintf("elsewhere[%d]", i)
 		if len(l.Countries) == 0 {
@@ -337,6 +418,9 @@ func (c *Config) validate() error {
 		}
 		if u, err := url.Parse(l.URL); err != nil || u.Scheme != "https" || u.Host == "" {
 			bad("%s.url must be an absolute https URL", where)
+		}
+		if l.Secondary && !slices.ContainsFunc(l.Countries, c.hasPrimaryLink) {
+			bad("%s is secondary (a small \"also at\" link) but none of its countries has a main link", where)
 		}
 	}
 	for i, d := range c.Domains {

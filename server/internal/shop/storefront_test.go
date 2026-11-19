@@ -69,7 +69,7 @@ func TestStorefrontIndex(t *testing.T) {
 	</head>
 	<body></body>
 </html>`)
-	out := string(c.StorefrontIndex(index, "https://shop.example.org", "nl"))
+	out := string(c.StorefrontIndex(index, "https://shop.example.org", "https://app.example.org", "nl"))
 	for _, want := range []string{
 		`<html lang="nl">`,
 		`<title>Kader &amp; Co: het fotokader voor de hele familie</title>`,
@@ -106,7 +106,7 @@ func TestStorefrontIndex(t *testing.T) {
 	if _, desc := paid.StorefrontMeta("nl"); !strings.HasSuffix(desc, "Bestel online en betaal veilig.") {
 		t.Errorf("checkout description %q", desc)
 	}
-	po := string(paid.StorefrontIndex(index, "https://shop.example.org", "nl"))
+	po := string(paid.StorefrontIndex(index, "https://shop.example.org", "https://app.example.org", "nl"))
 	for _, want := range []string{"Bestellen", "Betalen: Bancontact, kredietkaart, Apple Pay."} {
 		if !strings.Contains(po, want) {
 			t.Errorf("checkout noscript missing %s", want)
@@ -115,5 +115,62 @@ func TestStorefrontIndex(t *testing.T) {
 	// Unknown languages fall back to English texts.
 	if title, _ := c.StorefrontMeta("ja"); title != "Kader & Co: the photo frame for the whole family" {
 		t.Errorf("fallback title %q", title)
+	}
+}
+
+// The plain HTML storefront says what the web app says: the notice at the top
+// and the DIY links for the shipping countries, before the products.
+func TestStorefrontNoscriptNoticeDIY(t *testing.T) {
+	c, err := Parse([]byte(diySource("domains: [shop.example.org]\n")), "kinframe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	index := []byte(`<!doctype html><html lang="en"><head><title>kinframe</title></head><body></body></html>`)
+	out := string(c.StorefrontIndex(index, "https://shop.example.org", "https://app.example.org/", "fr"))
+	nos := out[strings.Index(out, "<noscript>"):]
+	want := []string{
+		`<div role="note"`, "<p>We resell Denver frames, converted to kinframe.</p><p>Prefer to do it yourself? See below.</p></div>",
+		"<h2>Buy it yourself and convert it</h2><p>Buy a Denver frame and convert it with our free tool.</p>",
+		`<a href="https://www.amazon.com.be/dp/B000000001" rel="sponsored noopener">Denver PFF-1024 · Amazon</a>`,
+		`<small><a href="https://www.bol.com/be/p/1" rel="noopener">Aussi chez bol.com</a></small>`,
+		`<a href="https://app.example.org/convert">Comment convertir un cadre</a>`,
+		"Ce sont des liens affiliés",
+		"<h2>Nos cadres</h2>",
+	}
+	last := -1
+	for _, w := range want {
+		i := strings.Index(nos, w)
+		if i < 0 {
+			t.Fatalf("noscript missing %s in\n%s", w, nos)
+		}
+		if i < last {
+			t.Errorf("%s is out of order in\n%s", w, nos)
+		}
+		last = i
+	}
+	// The "*" link is for countries the shop doesn't ship to: not in the DIY section.
+	if strings.Contains(nos, "shop.example.org/frame-x") {
+		t.Errorf("other-country link in the DIY section:\n%s", nos)
+	}
+	// Dutch: the localized notice and title; the body falls back to English.
+	nl := string(c.StorefrontIndex(index, "https://shop.example.org", "https://app.example.org", "nl"))
+	for _, w := range []string{"<p>Wij verkopen omgezette Denver-kaders.</p>", "<h2>Zelf kopen en omzetten</h2>", "Ook bij bol.com", "Zo zet je een kader om"} {
+		if !strings.Contains(nl, w) {
+			t.Errorf("nl noscript missing %s", w)
+		}
+	}
+	// Without a notice or DIY links: neither, as before.
+	plain := string(sampleConfig(t).StorefrontIndex(index, "https://shop.example.org", "https://app.example.org", "en"))
+	if strings.Contains(plain, `role="note"`) || strings.Contains(plain, "convert") {
+		t.Errorf("plain noscript has notice or DIY:\n%s", plain)
+	}
+	// Default DIY texts when the shop file has no diy block.
+	d, err := Parse([]byte(strings.Replace(diySource(""), sampleDIY, "", 1)), "kinframe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	def := string(d.StorefrontIndex(index, "https://shop.example.org", "https://app.example.org", "en"))
+	if !strings.Contains(def, "<h2>Buy it yourself and convert it</h2><p>Prefer to do it yourself? Buy a compatible frame and turn it into a kinframe with our free convert tool.</p>") {
+		t.Errorf("default DIY texts:\n%s", def)
 	}
 }

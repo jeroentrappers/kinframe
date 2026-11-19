@@ -144,3 +144,100 @@ test.describe('storefront language', () => {
 		});
 	});
 });
+
+// Like the live shop: converted Denver frames, shipping to Belgium only, and retailer links to buy and convert one.
+function resaleState(): MockState {
+	const state = storefrontState();
+	state.discovery.shop = {
+		...state.discovery.shop!,
+		shipping: { countries: ['BE'], flat_cents: 695, free_from_cents: 10000 },
+		notice: {
+			en: 'We resell Denver frames that we converted to Fotokader.\n\nPrefer to do it yourself? Buy one and convert it with our free tool.',
+			nl: 'Wij verkopen Denver-kaders die we omgezet hebben naar Fotokader.'
+		},
+		diy: { title: { en: 'Convert one yourself', nl: 'Zet er zelf een om' } },
+		elsewhere: [
+			{ countries: ['BE'], retailer: 'Amazon', product: 'Denver PFF-1024', url: 'https://www.amazon.com.be/dp/B0TEST1', affiliate: true },
+			{ countries: ['BE'], retailer: 'bol.com', product: 'Denver PFF-1024', url: 'https://www.bol.com/be/p/1', secondary: true },
+			{ countries: ['NL'], retailer: 'Amazon.nl', product: 'Denver PFF-1024', url: 'https://www.amazon.nl/dp/B0TEST2', affiliate: true },
+			{ countries: ['NL'], retailer: 'bol.com', product: 'Denver PFF-1024', url: 'https://www.bol.com/nl/p/1', secondary: true }
+		]
+	};
+	return state;
+}
+
+test.describe('storefront: resale notice and DIY links, Belgian visitor', () => {
+	test.use({ locale: 'en-BE' });
+
+	test('sees the notice first, then the DIY section with the Amazon link and a small bol.com link', async ({ page }) => {
+		await open(page, resaleState());
+
+		const notice = page.getByTestId('shop-notice');
+		await expect(notice).toBeVisible();
+		await expect(notice.locator('p')).toHaveText([
+			'We resell Denver frames that we converted to Fotokader.',
+			'Prefer to do it yourself? Buy one and convert it with our free tool.'
+		]);
+
+		const diy = page.getByRole('region', { name: 'Convert one yourself' });
+		await expect(diy).toBeVisible();
+		const amazon = diy.getByRole('link', { name: 'Denver PFF-1024 · Amazon' });
+		await expect(amazon).toHaveAttribute('href', 'https://www.amazon.com.be/dp/B0TEST1');
+		await expect(amazon).toHaveAttribute('rel', 'sponsored noopener');
+		const bol = diy.getByRole('link', { name: 'Also at bol.com' });
+		await expect(bol).toHaveAttribute('href', 'https://www.bol.com/be/p/1');
+		await expect(bol).toHaveAttribute('rel', 'noopener');
+		await expect(bol).not.toHaveClass(/btn/);
+		await expect(diy.getByRole('link', { name: 'How to convert a frame' })).toHaveAttribute('href', `${APP}/convert`);
+		await expect(diy.getByText('These are affiliate links: we may earn a small commission, at no extra cost to you.')).toBeVisible();
+		// The bol.com link is plain small text, not one of the buttons.
+		expect(await bol.evaluate((a) => parseFloat(getComputedStyle(a).fontSize))).toBeLessThan(
+			await amazon.evaluate((a) => parseFloat(getComputedStyle(a).fontSize))
+		);
+		await expect(diy.getByText('Amazon.nl')).toHaveCount(0);
+
+		// Notice and DIY come before the products; no "Outside Belgium?" for a Belgian visitor.
+		const products = page.getByRole('region', { name: 'Get a Fotokader' });
+		const y = async (l: ReturnType<typeof page.getByTestId>) => (await l.boundingBox())!.y;
+		expect(await y(notice)).toBeLessThan(await y(diy));
+		expect(await y(diy)).toBeLessThan(await y(products.getByRole('heading', { name: 'kinframe 10.1"' })));
+		await expect(page.getByTestId('shop-elsewhere')).toHaveCount(0);
+		await expect(page.getByTestId('shop-notice')).toHaveCount(1);
+
+		// The shop page says the same above the order form.
+		await products.getByRole('link', { name: 'Reserve the kinframe 10.1"' }).click();
+		await expect(page.getByRole('heading', { name: 'Reserve your Fotokader' })).toBeVisible();
+		await expect(page.getByTestId('shop-notice')).toContainText('We resell Denver frames');
+		await expect(page.getByRole('region', { name: 'Convert one yourself' }).getByRole('link', { name: 'Also at bol.com' })).toBeVisible();
+		expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+	});
+
+	test('Dutch: the notice and title in Dutch, the default body', async ({ page }) => {
+		await page.addInitScript(() => localStorage.setItem('kinframe.locale', 'nl'));
+		await open(page, resaleState());
+		await expect(page.getByTestId('shop-notice')).toHaveText('Wij verkopen Denver-kaders die we omgezet hebben naar Fotokader.');
+		const diy = page.getByRole('region', { name: 'Zet er zelf een om' });
+		await expect(diy.getByText('Doe je het liever zelf? Koop een geschikt fotokader en maak er met onze gratis tool zelf een Fotokader van.')).toBeVisible();
+		await expect(diy.getByRole('link', { name: 'Ook bij bol.com' })).toBeVisible();
+	});
+});
+
+test.describe('storefront: resale notice and DIY links, Dutch visitor', () => {
+	test.use({ locale: 'en-NL' });
+
+	test('sees "Outside Belgium?" with bol.com as a small secondary link', async ({ page }) => {
+		await open(page, resaleState());
+		await expect(page.getByTestId('shop-notice')).toBeVisible();
+		await expect(page.getByTestId('shop-diy')).toHaveCount(0);
+
+		const outside = page.getByRole('region', { name: 'Outside Belgium?' });
+		await expect(outside).toBeVisible();
+		const amazon = outside.getByRole('link', { name: /Netherlands\s*Denver PFF-1024 · Amazon\.nl/ });
+		await expect(amazon).toHaveAttribute('rel', 'sponsored noopener');
+		const bol = outside.getByRole('link', { name: 'Also at bol.com' });
+		await expect(bol).toHaveAttribute('href', 'https://www.bol.com/nl/p/1');
+		await expect(bol).toHaveAttribute('rel', 'noopener');
+		await expect(outside.getByRole('link', { name: /amazon\.com\.be|Denver PFF-1024 · Amazon$/ })).toHaveCount(0);
+		await expect(outside.getByText('These are affiliate links', { exact: false })).toBeVisible();
+	});
+});

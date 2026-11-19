@@ -3438,8 +3438,17 @@ export interface components {
                 ships_out_of_stock: string;
             };
             /**
-             * @description Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
-             *     affiliate links (shown with a disclosure). Absent when the operator configured none.
+             * @description A notice shown prominently at the top of the storefront and the shop page, above the products (e.g.
+             *     "we resell converted frames"). Plain text, no HTML; a blank line starts a new paragraph. Absent when
+             *     the operator configured none.
+             */
+            notice?: components["schemas"]["LocalizedText"];
+            diy?: components["schemas"]["ShopDiy"];
+            /**
+             * @description Retailers selling a frame the convert tool supports. Links for countries outside `shipping.countries`
+             *     are shown to visitors elsewhere ("Outside Belgium?"); links that list a shipping country are shown to
+             *     visitors from that country in the "buy it yourself and convert it" section. The links may be affiliate
+             *     links (shown with a disclosure). Absent when the operator configured none.
              */
             elsewhere?: components["schemas"]["ShopElsewhereLink"][];
             /**
@@ -3482,7 +3491,16 @@ export interface components {
                 phone?: string;
             };
         };
-        /** @description A retailer selling a compatible frame in some countries the shop doesn't ship to. */
+        /**
+         * @description Title and text of the "buy it yourself and convert it" section, shown to visitors in a shipping country when
+         *     `elsewhere` has links for that country. Plain text; a blank line in `body` starts a new paragraph. Either may
+         *     be absent; the web app then uses its own texts.
+         */
+        ShopDiy: {
+            title?: components["schemas"]["LocalizedText"];
+            body?: components["schemas"]["LocalizedText"];
+        };
+        /** @description A retailer selling a frame the convert tool supports, for visitors from some countries. */
         ShopElsewhereLink: {
             /**
              * @description ISO 3166-1 alpha-2 codes; `*` means every other country.
@@ -3505,6 +3523,11 @@ export interface components {
              * @default false
              */
             affiliate?: boolean;
+            /**
+             * @description True for an alternative shown as a small text link ("Also at bol.com") below the main links.
+             * @default false
+             */
+            secondary?: boolean;
         };
         /** @description Language code → text; `en` is the fallback. */
         LocalizedText: {

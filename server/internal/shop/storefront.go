@@ -96,8 +96,9 @@ var (
 // StorefrontIndex rewrites the web app's index.html for a storefront host:
 // the brand's title, description and language, plus Open Graph tags so a
 // shared link previews as the brand rather than the software. origin is the
-// storefront's own origin ("https://shop.example.org").
-func (c *Config) StorefrontIndex(index []byte, origin, lang string) []byte {
+// storefront's own origin ("https://shop.example.org"), app the web app's
+// (KINFRAME_PUBLIC_URL), where the convert tool lives.
+func (c *Config) StorefrontIndex(index []byte, origin, app, lang string) []byte {
 	title, desc := c.StorefrontMeta(lang)
 	e := html.EscapeString
 	s := string(index)
@@ -114,7 +115,7 @@ func (c *Config) StorefrontIndex(index []byte, origin, lang string) []byte {
 		s = s[:i] + og + s[i:]
 	}
 	if loc := bodyRe.FindStringIndex(s); loc != nil {
-		s = s[:loc[1]] + c.storefrontNoscript(lang, title, desc) + s[loc[1]:]
+		s = s[:loc[1]] + c.storefrontNoscript(lang, title, desc, app) + s[loc[1]:]
 	}
 	return []byte(s)
 }
@@ -126,25 +127,82 @@ var noscriptTexts = map[string]map[string]string{
 		"shipping": "Delivery in {countries}. Shipping {flat}, free from {free}.", "shippingFlat": "Delivery in {countries}. Shipping {flat}.",
 		"pay": "Payment: {methods}.", "seller": "Seller", "terms": "Terms of sale", "privacy": "Privacy",
 		"js": "This shop works best with JavaScript turned on.", "creditcard": "credit card",
+		"diyTitle": "Buy it yourself and convert it", "diyBody": "Prefer to do it yourself? Buy a compatible frame and turn it into a {brand} with our free convert tool.",
+		"convert": "How to convert a frame", "alsoAt": "Also at {retailer}", "disclosure": "These are affiliate links: we may earn a small commission, at no extra cost to you.",
 	},
 	"nl": {
 		"products": "Onze fotokaders", "vat": "incl. {vat}% btw", "order": "Bestellen", "reserve": "Reserveren",
 		"shipping": "Levering in {countries}. Verzending {flat}, gratis vanaf {free}.", "shippingFlat": "Levering in {countries}. Verzending {flat}.",
 		"pay": "Betalen: {methods}.", "seller": "Verkoper", "terms": "Verkoopsvoorwaarden", "privacy": "Privacy",
 		"js": "Deze winkel werkt het best met JavaScript ingeschakeld.", "creditcard": "kredietkaart",
+		"diyTitle": "Zelf kopen en omzetten", "diyBody": "Doe je het liever zelf? Koop een geschikt fotokader en maak er met onze gratis tool zelf een {brand} van.",
+		"convert": "Zo zet je een kader om", "alsoAt": "Ook bij {retailer}", "disclosure": "Dit zijn affiliate links: we kunnen een kleine commissie krijgen, zonder extra kosten voor jou.",
 	},
 	"fr": {
 		"products": "Nos cadres", "vat": "TVA {vat} % incl.", "order": "Commander", "reserve": "Réserver",
 		"shipping": "Livraison en {countries}. Frais d’envoi {flat}, gratuits dès {free}.", "shippingFlat": "Livraison en {countries}. Frais d’envoi {flat}.",
 		"pay": "Paiement : {methods}.", "seller": "Vendeur", "terms": "Conditions de vente", "privacy": "Vie privée",
 		"js": "Cette boutique fonctionne mieux avec JavaScript activé.", "creditcard": "carte de crédit",
+		"diyTitle": "Achetez-le et convertissez-le vous-même", "diyBody": "Vous préférez le faire vous-même ? Achetez un cadre compatible et transformez-le en {brand} avec notre outil gratuit.",
+		"convert": "Comment convertir un cadre", "alsoAt": "Aussi chez {retailer}", "disclosure": "Ce sont des liens affiliés : nous pouvons toucher une petite commission, sans frais supplémentaires pour vous.",
 	},
 	"de": {
 		"products": "Unsere Fotorahmen", "vat": "inkl. {vat} % MwSt.", "order": "Bestellen", "reserve": "Reservieren",
 		"shipping": "Lieferung nach {countries}. Versand {flat}, kostenlos ab {free}.", "shippingFlat": "Lieferung nach {countries}. Versand {flat}.",
 		"pay": "Zahlung: {methods}.", "seller": "Verkäufer", "terms": "AGB", "privacy": "Datenschutz",
 		"js": "Dieser Shop funktioniert am besten mit aktiviertem JavaScript.", "creditcard": "Kreditkarte",
+		"diyTitle": "Selbst kaufen und umbauen", "diyBody": "Lieber selbst machen? Kauf einen kompatiblen Rahmen und mach ihn mit unserem kostenlosen Tool selbst zu einem {brand}.",
+		"convert": "So wandelst du einen Rahmen um", "alsoAt": "Auch bei {retailer}", "disclosure": "Das sind Affiliate-Links: Wir erhalten eventuell eine kleine Provision, ohne Mehrkosten für dich.",
 	},
+}
+
+// noscriptDIY is the "buy it yourself and convert it" section: the Elsewhere
+// links for the shipping countries (the page can't tell the visitor's country).
+func (c *Config) noscriptDIY(b *strings.Builder, l string, tx map[string]string, app string) {
+	links := c.DIYLinks()
+	if len(links) == 0 {
+		return
+	}
+	e := html.EscapeString
+	title, body := tx["diyTitle"], fill(tx["diyBody"], map[string]string{"brand": c.Brand})
+	if c.DIY != nil {
+		if t := c.DIY.Title.Get(l); t != "" {
+			title = t
+		}
+		if t := c.DIY.Body.Get(l); t != "" {
+			body = t
+		}
+	}
+	rel := func(x ElsewhereLink) string {
+		if x.Affiliate {
+			return "sponsored noopener"
+		}
+		return "noopener"
+	}
+	b.WriteString("<section><h2>" + e(title) + "</h2>")
+	for _, p := range Paragraphs(body) {
+		b.WriteString("<p>" + e(p) + "</p>")
+	}
+	b.WriteString("<ul>")
+	affiliate := false
+	for _, x := range links {
+		if !x.Secondary {
+			b.WriteString(`<li><a href="` + e(x.URL) + `" rel="` + rel(x) + `">` + e(x.Product) + " · " + e(x.Retailer) + "</a></li>")
+			affiliate = affiliate || x.Affiliate
+		}
+	}
+	b.WriteString("</ul>")
+	for _, x := range links {
+		if x.Secondary {
+			b.WriteString(`<p><small><a href="` + e(x.URL) + `" rel="` + rel(x) + `">` + e(fill(tx["alsoAt"], map[string]string{"retailer": x.Retailer})) + "</a></small></p>")
+			affiliate = affiliate || x.Affiliate
+		}
+	}
+	b.WriteString(`<p><a href="` + e(strings.TrimRight(app, "/")+"/convert") + `">` + e(tx["convert"]) + "</a></p>")
+	if affiliate {
+		b.WriteString("<p><small>" + e(tx["disclosure"]) + "</small></p>")
+	}
+	b.WriteString("</section>")
 }
 
 // methodNames are the payment methods' display names (creditcard is translated).
@@ -156,7 +214,7 @@ var methodNames = map[string]string{
 // storefrontNoscript is the shop as plain HTML for visitors and checkers that
 // don't run the web app: products and prices, shipping, payment and the
 // seller's details with the terms and privacy links.
-func (c *Config) storefrontNoscript(lang, title, desc string) string {
+func (c *Config) storefrontNoscript(lang, title, desc, app string) string {
 	l := emailLang(lang)
 	tx := noscriptTexts[l]
 	e := html.EscapeString
@@ -164,6 +222,14 @@ func (c *Config) storefrontNoscript(lang, title, desc string) string {
 	var b strings.Builder
 	b.WriteString(`<noscript><main style="max-width:40rem;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5">`)
 	b.WriteString("<h1>" + e(title) + "</h1><p>" + e(desc) + "</p>")
+	if n := c.Notice.Get(l); n != "" {
+		b.WriteString(`<div role="note" style="border:2px solid #2f6fdd;border-radius:8px;padding:0 1rem;margin:1rem 0;background:#eef4ff;color:#0b1f44">`)
+		for _, p := range Paragraphs(n) {
+			b.WriteString("<p>" + e(p) + "</p>")
+		}
+		b.WriteString("</div>")
+	}
+	c.noscriptDIY(&b, l, tx, app)
 	b.WriteString("<h2>" + e(tx["products"]) + "</h2>")
 	action := tx["reserve"]
 	if c.Checkout() {

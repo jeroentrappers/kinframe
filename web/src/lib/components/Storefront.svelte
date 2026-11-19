@@ -8,6 +8,8 @@
 	import LanguagePicker from './LanguagePicker.svelte';
 	import Logo from './Logo.svelte';
 	import SellerFooter from './SellerFooter.svelte';
+	import ShopDiy from './ShopDiy.svelte';
+	import ShopNotice from './ShopNotice.svelte';
 	import ShopSection from './ShopSection.svelte';
 	import StorefrontArt from './StorefrontArt.svelte';
 
@@ -50,6 +52,7 @@
 	</header>
 
 	<main id="main">
+		{#if shop.notice}<div class="container notice"><ShopNotice {shop} /></div>{/if}
 		<section class="container hero" aria-labelledby="hero-title">
 			<div class="copy">
 				<p class="eyebrow"><span class="dot" aria-hidden="true"></span>{t('shop.eyebrow')}</p>
@@ -64,6 +67,8 @@
 			<div class="art"><StorefrontArt /></div>
 		</section>
 
+		<div class="container"><ShopDiy {shop} /></div>
+
 		<section id="how" class="container how" aria-labelledby="how-title">
 			<h2 id="how-title">{t('storefront.howTitle')}</h2>
 			<ol>
@@ -77,7 +82,7 @@
 			</ol>
 		</section>
 
-		<ShopSection {shop} />
+		<ShopSection {shop} notes={false} />
 
 		<section class="container faq" aria-labelledby="faq-title">
 			<h2 id="faq-title">{t('storefront.faqTitle')}</h2>
@@ -144,6 +149,9 @@
 	}
 	.home {
 		text-decoration: none;
+	}
+	.notice {
+		padding-block: var(--s-2) var(--s-3);
 	}
 	.hero {
 		display: grid;

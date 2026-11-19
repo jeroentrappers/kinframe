@@ -9,6 +9,7 @@
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { problemMessage } from '$lib/problem';
 	import {
+		browserLanguages,
 		clampQty,
 		countryName,
 		dispatchDay,
@@ -19,6 +20,7 @@
 		quote,
 		reservationBody,
 		validateReservation,
+		visitorCountry,
 		type FormErrors,
 		type FormField,
 		type ReservationForm,
@@ -29,6 +31,8 @@
 	import Logo from '$components/Logo.svelte';
 	import SellerFooter from '$components/SellerFooter.svelte';
 	import ShopAvailability from '$components/ShopAvailability.svelte';
+	import ShopDiy from '$components/ShopDiy.svelte';
+	import ShopNotice from '$components/ShopNotice.svelte';
 	import ShopPhotos from '$components/ShopPhotos.svelte';
 
 	const shop = $derived(discovery.shop);
@@ -48,15 +52,8 @@
 	function initialCountry(): string {
 		const countries = discovery.shop?.shipping.countries ?? [];
 		if (countries.length === 1) return countries[0]!;
-		for (const l of typeof navigator !== 'undefined' ? navigator.languages ?? [] : []) {
-			try {
-				const region = new Intl.Locale(l).maximize().region;
-				if (region && countries.includes(region)) return region;
-			} catch {
-				/* malformed tag */
-			}
-		}
-		return '';
+		const region = visitorCountry(browserLanguages(), countries);
+		return region && countries.includes(region) ? region : '';
 	}
 
 	let form = $state<ReservationForm>({
@@ -220,6 +217,11 @@
 			<div class="head">
 				<h1>{checkout ? t('shop.orderPageTitle', { brand }) : t('shop.pageTitle', { brand })}</h1>
 				<p class="lede">{checkout ? t('shop.orderPageLede') : t('shop.pageLede')}</p>
+			</div>
+
+			<div class="notes">
+				<ShopNotice {shop} />
+				<ShopDiy {shop} />
 			</div>
 
 			<section class="how" aria-labelledby="how-title">
@@ -532,6 +534,13 @@
 		margin-top: var(--s-2);
 		font-size: 1.08rem;
 		color: var(--text-muted);
+	}
+	.notes {
+		display: grid;
+		gap: var(--s-4);
+	}
+	.notes:has(> :global(*)) {
+		margin-bottom: var(--s-5);
 	}
 	.how {
 		display: grid;

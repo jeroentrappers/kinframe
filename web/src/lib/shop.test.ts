@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+	browserRegions,
 	clampQty,
+	elsewhereSections,
+	outsideCountries,
+	paragraphs,
+	visitorCountry,
 	countryName,
 	dispatchDay,
 	errorsFromProblem,
@@ -165,5 +170,57 @@ describe('validation', () => {
 			postalCode: 'required',
 			street: 'required'
 		});
+	});
+});
+
+describe('notice, DIY and elsewhere sections', () => {
+	const amazonBE = { countries: ['BE'], retailer: 'Amazon', product: 'Denver PFF-1024', url: 'https://www.amazon.com.be/dp/X', affiliate: true };
+	const bolBE = { countries: ['BE', 'NL'], retailer: 'bol.com', product: 'Denver PFF-1024', url: 'https://www.bol.com/p/1', secondary: true };
+	const amazonNL = { countries: ['NL'], retailer: 'Amazon', product: 'Denver PFF-1024', url: 'https://www.amazon.nl/dp/X', affiliate: true };
+	const other = { countries: ['*'], retailer: 'Shop', product: 'Denver PFF-1024', url: 'https://shop.example.org/x' };
+	const s = { shipping: { countries: ['BE'], flat_cents: 0 }, elsewhere: [amazonBE, bolBE, amazonNL, other] };
+
+	it('splits plain text at blank lines', () => {
+		expect(paragraphs('We resell converted frames.\n\n  Or do it yourself.\nReally. \r\n \r\n\n')).toEqual([
+			'We resell converted frames.',
+			'Or do it yourself.\nReally.'
+		]);
+		expect(paragraphs(undefined)).toEqual([]);
+		expect(paragraphs('   ')).toEqual([]);
+	});
+
+	it('guesses the visitor country from the browser languages, preferring a shipping country', () => {
+		expect(browserRegions(['nl-BE', 'nl', 'en-US', 'bad tag!'])).toEqual(['BE', 'NL', 'US']);
+		expect(visitorCountry(['fr-FR', 'nl-BE'], ['BE'])).toBe('BE');
+		expect(visitorCountry(['nl-NL', 'en'], ['BE'])).toBe('NL');
+		// No stated region: the first shipping country, not the country a bare language maps to.
+		expect(visitorCountry(['nl'], ['BE'])).toBe('BE');
+		expect(visitorCountry(['fr', 'en'], ['BE'])).toBe('BE');
+		expect(visitorCountry([], ['BE'])).toBe('BE');
+		expect(visitorCountry([], [])).toBeNull();
+	});
+
+	it('a visitor in a shipping country gets the DIY links for that country only', () => {
+		const { diy, outside } = elsewhereSections(s, 'BE');
+		expect(outside).toBeNull();
+		expect(diy?.main).toEqual([amazonBE]);
+		expect(diy?.secondary).toEqual([bolBE]);
+		expect(diy?.affiliate).toBe(true);
+	});
+
+	it('other visitors keep the outside section, without the links for shipping countries only', () => {
+		const { diy, outside } = elsewhereSections(s, 'NL');
+		expect(diy).toBeNull();
+		expect(outside?.main).toEqual([amazonNL, other]);
+		expect(outside?.secondary).toEqual([bolBE]);
+		expect(elsewhereSections(s, null).outside?.main).toEqual([amazonNL, other]);
+		expect(outsideCountries(bolBE, ['BE'])).toEqual(['NL']);
+	});
+
+	it('the disclosure only for affiliate links; no section without links', () => {
+		const plain = { ...s, elsewhere: [{ ...amazonBE, affiliate: false }, bolBE] };
+		expect(elsewhereSections(plain, 'BE').diy?.affiliate).toBe(false);
+		expect(elsewhereSections({ ...s, elsewhere: [amazonNL] }, 'BE')).toEqual({ diy: null, outside: null });
+		expect(elsewhereSections({ ...s, elsewhere: undefined }, 'DE')).toEqual({ diy: null, outside: null });
 	});
 });

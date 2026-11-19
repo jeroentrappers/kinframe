@@ -231,3 +231,76 @@ func TestCountryName(t *testing.T) {
 		t.Fatal(CountryName("NL", "fr"), CountryName("BE", "nl"))
 	}
 }
+
+// The resale notice, the DIY section and secondary ("also at") links.
+const sampleDIY = `
+notice:
+  en: "We resell Denver frames, converted to kinframe.\n\nPrefer to do it yourself? See below."
+  nl: Wij verkopen omgezette Denver-kaders.
+diy:
+  title: { en: Buy it yourself and convert it, nl: Zelf kopen en omzetten }
+  body: { en: Buy a Denver frame and convert it with our free tool. }
+`
+
+func diySource(extra string) string {
+	return strings.Replace(sample, "elsewhere:\n", "elsewhere:\n"+
+		`  - { countries: [BE], retailer: Amazon, product: Denver PFF-1024, url: "https://www.amazon.com.be/dp/B000000001", affiliate: true }`+"\n"+
+		`  - { countries: [BE, DE], retailer: bol.com, product: Denver PFF-1024, url: "https://www.bol.com/be/p/1", secondary: true }`+"\n", 1) + sampleDIY + extra
+}
+
+func TestParseNoticeDIYSecondary(t *testing.T) {
+	c, err := Parse([]byte(diySource("")), "kinframe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := Paragraphs(c.Notice.Get("fr")); len(got) != 2 || got[0] != "We resell Denver frames, converted to kinframe." || got[1] != "Prefer to do it yourself? See below." {
+		t.Fatalf("notice paragraphs: %q", got)
+	}
+	if c.Notice.Get("nl") != "Wij verkopen omgezette Denver-kaders." || c.DIY.Title.Get("nl") != "Zelf kopen en omzetten" || c.DIY.Body.Get("nl") != "Buy a Denver frame and convert it with our free tool." {
+		t.Fatalf("diy: %+v notice %v", c.DIY, c.Notice)
+	}
+	if !c.Elsewhere[1].Secondary || c.Elsewhere[0].Secondary {
+		t.Fatalf("secondary: %+v", c.Elsewhere)
+	}
+	// Entries that list a shipping country (BE, NL) are the DIY links; "*" is for other countries only.
+	diy := c.DIYLinks()
+	if len(diy) != 2 || diy[0].Retailer != "Amazon" || diy[1].Retailer != "bol.com" {
+		t.Fatalf("diy links: %+v", diy)
+	}
+	// Without the new fields nothing changes.
+	if old := sampleConfig(t); len(old.Notice) != 0 || old.DIY != nil || len(old.DIYLinks()) != 0 {
+		t.Fatalf("old config: %+v", old)
+	}
+	if got := Paragraphs("a\r\n \r\nb\nc\n\n\n"); len(got) != 2 || got[1] != "b\nc" {
+		t.Fatalf("paragraphs: %q", got)
+	}
+}
+
+func TestParseNoticeDIYErrors(t *testing.T) {
+	for name, tc := range map[string]struct{ from, to, extra, want string }{
+		"notice without en":   {"  en: \"We resell", "  de: \"We resell", "", "notice needs an en text"},
+		"notice bad language": {"  nl: Wij", "  xx: Wij", "", `notice: "xx" is not a language code`},
+		"notice html":         {"converted to kinframe.", "converted to <b>kinframe</b>.", "", "notice.en: plain text only"},
+		"notice too long":     {"Wij verkopen omgezette Denver-kaders.", strings.Repeat("x", 2001), "", "notice.nl: at most 2000 characters"},
+		"diy title no en":     {"title: { en: Buy it yourself and convert it, nl:", "title: { fr: Achetez, nl:", "", "diy.title needs an en text"},
+		"diy body language":   {"body: { en: Buy", "body: { nl-BE: Koop, en: Buy", "", `diy.body: "nl-BE" is not a language code`},
+		"diy unknown field":   {"", "", "  subtitle: { en: x }\n", "field subtitle not found"},
+		// NL ships, so "*" doesn't cover it: an "also at" link needs a main link for one of its countries.
+		"secondary alone": {"countries: [BE, DE], retailer: bol.com", "countries: [NL], retailer: bol.com", "", "elsewhere[1] is secondary"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			src := diySource(tc.extra)
+			if tc.from != "" {
+				next := strings.Replace(src, tc.from, tc.to, 1)
+				if next == src {
+					t.Fatal("replacement did not apply")
+				}
+				src = next
+			}
+			_, err := Parse([]byte(src), "kinframe")
+			if err == nil || !strings.Contains(err.Error(), tc.want) {
+				t.Fatalf("err = %v, want %q", err, tc.want)
+			}
+		})
+	}
+}
