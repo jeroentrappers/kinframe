@@ -67,6 +67,12 @@ remote management, web upload, album sync, an owner role and home-automation hoo
   the server about every 30 minutes: an Immich album (a shared link, recommended, or an API key) or an iCloud shared
   album's public link (best effort, no official API). New photos arrive as a send by the person who set it up
   ("Anna via Immich"); removals follow for albums, not for feeds, by default. See `photo-sources.md`.
+- **Inbox address**: an email address of a frame or a feed (`<slug>-<random>@<inbox domain>`). Photos mailed to it
+  by members or approved senders become a send to the frame or a feed post, credited "Jan via email"; others wait for
+  a manager's approval. See `email-inbox.md`.
+- **Telegram chat**: a Telegram group (or a private chat with the server's bot) connected to a frame or a feed.
+  Photos posted there become a send to the frame or a feed post, credited "Jan via Telegram"; the bot confirms with a
+  reaction and points people to the app once. See `telegram.md`.
 - **Google Photos import**: "Add from Google Photos" copies the photos someone picks in Google's own picker into an
   album or a feed, once. Google no longer lets apps read a library or album, so it is not a sync. See
   `photo-sources.md` §7.
@@ -117,7 +123,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | Unsend | Not possible on the free tier | The sender can always remove their own items from frames. | P |
 | Duplicate guard | "Already sent" badge | Server-side duplicate detection (exact and perceptual hash), so the same photo isn't sent twice to a frame by different senders. | + |
 | Greetings | Themed overlay templates | — for now. Possible later as user-contributed SVG themes. | — |
-| Email to frame | None | Each frame gets an optional secret inbound address. Attachments from approved senders become items. | + |
+| Email to frame | None | Frames and feeds get optional inbox addresses (`oma-k7q2m9@in.example.org`). Photos and videos mailed by members (from their verified account email) or approved senders become a send or a feed post, credited "Jan via email"; mail from anyone else waits for a manager's approval, and only DMARC-authenticated mail counts as from its sender. See `email-inbox.md`. | + |
 
 ### 4.4 Frame: slideshow and display
 
@@ -196,7 +202,7 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 | PC transfer | USB MTP into the camera folder | — on the frame. Web upload replaces it. | — |
 | Backup | SD backup (free); cloud backup (paid) with recovery key | **Inherent**: the server holds every item's master rendition. The operator backs up the server. Per-frame export to SD on demand. | M |
 | Restore | Only on a reset frame, needs a tap on the frame | Replace a frame from the app: "Move to new frame" swaps the device credential and the new frame downloads everything. Nobody needs to touch the old one. | P |
-| App updates | Self-update every 24 h, beta channel | Self-update from the server (which mirrors signed releases) with stable and beta channels, silent install via root, rollback on crash loop. | P |
+| App updates | Self-update every 24 h, beta channel | Self-update from the server (which mirrors signed releases) with stable and beta channels, silent install via root, rollback on crash loop. The Google Play build for tablets updates through Play instead (in-app updates on the same cadence, no root; `play-frame.md`). | P |
 | Crash-loop guard | Skip the current media, then a recovery screen | Same. Also reports to the owner. | P |
 | Diagnostics | Support page plus QR | Same QR idea, plus owner-visible health in the app (Wi-Fi strength, storage, uptime, app version, last sync). | P |
 | Factory reset | Clear data / OS reset | Clear data from frame settings or remotely by the owner. | P |
@@ -209,13 +215,14 @@ Phase key: **M** = MVP (v0.1, first end-to-end loop), **P** = parity (v0.5, ever
 |---|---|
 | Home Assistant integration (MQTT discovery or REST): screen on/off, brightness, next/previous, show item, presence wake, frame state as entities | + (1) |
 | Photo sources (`photo-sources.md`): sync an Immich album (shared link or API key) or an iCloud shared album link (best effort) into an album or a feed; one-time "Add from Google Photos" through Google's picker (the only official route since 31 March 2025). WebDAV/Nextcloud folders, Immich people albums and two-way sync later | + (2) |
-| Email-to-frame inbox | + (3) |
+| Email-to-frame inbox (`email-inbox.md`): addresses per frame or feed, an allow-list plus members' verified emails, pending senders approved once, DMARC-aligned SPF/DKIM against spoofing, replies that promote the app with a join link; received by a built-in SMTP receiver or an operator webhook | + (3) |
 | "On this day" and scheduled albums | + (4) |
 | Moderation queue: the owner approves items before they show (useful for frames in care homes) | + (5) |
 | Google Cast / DLNA: show a frame's library on a TV, mirror a frame live, or use a TV or browser as a frame of its own (see kinframe-additions, "TV modes") | + (6) |
 | Optional pre-order shop for operators who sell frames: product cards on the landing page, reservations without payment, operator list and CSV export (API README §5.11). Off unless configured; open-source servers have no shop | + (7) |
 | Feeds and subscriptions: private family channels that frames subscribe to (`feeds.md`) | + (8) |
 | Birthdays: a birthday list per feed, shown on every subscribed frame, with greetings and morning notifications (`birthdays.md`) | + (9) |
+| Telegram bridge (`telegram.md`): the server's bot connects a family Telegram group (or a private chat) to a frame or a feed with a one-time deep link; photos, image files, videos and albums become sends or posts credited "Jan via Telegram", linked Telegram accounts send as themselves, the bot confirms with reactions and mirrors the frame's ❤, and its one-time message promotes the app with a join link | + (10) |
 
 ## 5. Non-functional requirements
 
@@ -300,6 +307,13 @@ The defaults are Frameo's, except the last three rows.
    sources on albums and feeds), then Google Photos import (server, web, operator docs), then the family apps, then
    iCloud shared albums (best effort, all clients), then the frame's "via Immich" credit. Older frames show synced
    photos as normal photos.
+7. **v1.4 Email to frame** (`email-inbox.md` §17.1): server and web first (addresses, senders, held mail, the
+   operator webhook, authentication, replies with the app block), then the built-in SMTP receiver, then the family
+   apps, then the frame's "via email" credit. Older frames show mailed photos as normal photos.
+8. **v1.5 Telegram** (`telegram.md` §17): server and web first (the bot with webhook or long polling, connecting
+   groups and private chats to frames and feeds, linking accounts, batching, reactions back, commands in all
+   languages), then the family apps, then the frame's "via Telegram" credit, then the operator docs (BotFather,
+   privacy mode, local Bot API server). Older frames show Telegram photos as normal photos.
 
 ## 8. Decisions
 
@@ -345,3 +359,21 @@ Decided by the project owner on 2026-11-19.
    Credentials are sealed like calendar credentials and write-only; user-supplied URLs go through a network guard
    (private networks only where the operator allows them). WebDAV/Nextcloud, Immich people albums, two-way sync,
    Google shared-album links and frame-local sources are later.
+7. **Email to frame** (`email-inbox.md`). Frames and feeds get inbox addresses `<slug>-<random>@<inbox domain>`
+   (several per target, paused, renamed, regenerated or deleted by frame managers / feed owner and admins). A mail
+   counts as from its `From:` address only when it passes DMARC-aligned SPF or DKIM; members are matched by their
+   verified account email and send as themselves, approved senders send through the address owner with the credit
+   "Jan via email", everyone else is held (at most 14 days) for a manager to approve once or reject. One mail is one
+   send or post; the existing moderation applies. Replies (delivered, held, failures) go only to authenticated
+   senders, rate limited, and always promote the app (long once, a footer afterwards, with an approval-required join
+   link for allowed senders). Mail arrives through a built-in SMTP receiver (port 25, no relaying) or a signed operator
+   webhook; raw mail is never kept. Reactions forwarded by mail are later.
+8. **Telegram bridge** (`telegram.md`). One bot per server, configured by the operator (BotFather token, `_FILE`
+   supported), reached by webhook with Telegram's secret token or by long polling behind NAT, and hidden when
+   unconfigured. Frame managers and feed owner/admins connect a group (`?startgroup=`) or a private chat (`?start=`)
+   with a one-time code; one chat sends to one target, a target has up to 5 chats. The group is the trust boundary
+   (optionally "only linked members"); linked Telegram accounts send as themselves, everyone else through the chat's
+   owner with the credit "Jan via Telegram", always moderated on moderated frames. Feedback in the chat is quiet
+   (reactions, rate-limited error replies), and the app is promoted once per person with an approval-required join
+   link. Telegram deletions don't unsend; the cloud Bot API's 20 MB download limit applies unless the operator runs
+   a local Bot API server.

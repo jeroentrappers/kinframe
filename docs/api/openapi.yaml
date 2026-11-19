@@ -33,6 +33,10 @@ tags:
     description: A frame subscribing to a feed, managed from both sides.
   - name: photo-sources
     description: Immich and iCloud albums synced into an album or a feed, and one-time imports from Google Photos (docs/spec/photo-sources.md).
+  - name: email-inbox
+    description: Inbox addresses that turn mailed photos into sends to a frame or posts to a feed, their senders and held mail, and the operator's inbound webhook (docs/spec/email-inbox.md).
+  - name: telegram
+    description: Telegram groups and private chats connected to a frame or a feed through the server's bot, linked Telegram accounts, and Telegram's webhook (docs/spec/telegram.md).
   - name: settings
   - name: tv
     description: Show a frame's library on a TV (Google Cast, Presentation API or a full-screen TV page).
@@ -943,7 +947,7 @@ paths:
     get:
       tags: [feeds]
       operationId: listFeedJoinRequests
-      description: Owner or admin. Pending requests from join invites (`via` is always `invite`).
+      description: Owner or admin. Pending requests from join invites (`via` is `invite`, `email` for join links mailed to senders, or `telegram` for join links the Telegram bot gave).
       parameters: [ { $ref: '#/components/parameters/FeedId' } ]
       responses:
         '200':
@@ -1681,6 +1685,500 @@ paths:
       responses:
         '302': { description: Redirect to the import's `return_uri` }
         '400': { description: 'Unknown, expired or reused state (HTML page)', content: { text/html: { schema: { type: string } } } }
+
+  # ---------------------------------------------------------------- email inbox (docs/spec/email-inbox.md)
+  /v1/frames/{frameId}/email-addresses:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [email-inbox]
+      operationId: listFrameEmailAddresses
+      description: 'The frame''s inbox addresses (frame managers: owner, admin, `change_settings`; others `403 missing_permission`).'
+      responses:
+        '200':
+          description: Addresses, oldest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/EmailAddress' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [email-inbox]
+      operationId: createFrameEmailAddress
+      description: |
+        A new address that fills this frame (frame managers). The caller becomes its `owner`: mail from senders without
+        a matching account is sent by them. `409 limit_reached` beyond `limits.max_email_addresses_per_target`,
+        `503 feature_disabled` without discovery `email_inbox`. Rate-limited (30/h per user).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddressCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddress' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/email-addresses:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [email-inbox]
+      operationId: listFeedEmailAddresses
+      description: The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`).
+      responses:
+        '200':
+          description: Addresses, oldest first
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/EmailAddress' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [email-inbox]
+      operationId: createFeedEmailAddress
+      description: A new address that posts to this feed (feed owner and admins). Otherwise as `createFrameEmailAddress`.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddressCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddress' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}:
+    parameters: [ { $ref: '#/components/parameters/AddressId' } ]
+    get:
+      tags: [email-inbox]
+      operationId: getEmailAddress
+      description: Managers of the target (frame managers, feed owner/admins). Others get `404 not_found`.
+      responses:
+        '200': { description: Address, content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddress' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [email-inbox]
+      operationId: updateEmailAddress
+      description: |
+        Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op;
+        mail to a paused address is refused with `550 5.2.1`). A new `slug` changes the address (the random part
+        stays) and retires the old one at once. `take_over: true` makes the caller the owner.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddressUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddress' } } } }
+        '422': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [email-inbox]
+      operationId: deleteEmailAddress
+      description: |
+        Managers of the target. The address stops working at once and is never issued again; its senders, held mail
+        and email join links go with it. Photos already delivered stay.
+      responses:
+        '204': { description: Deleted }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/regenerate:
+    post:
+      tags: [email-inbox]
+      operationId: regenerateEmailAddress
+      description: |
+        A new random part (managers of the target): the old address stops working at once and is never issued again.
+        Senders, settings and held mail stay. Rate-limited (10/h per address).
+      parameters: [ { $ref: '#/components/parameters/AddressId' } ]
+      responses:
+        '200': { description: Regenerated, content: { application/json: { schema: { $ref: '#/components/schemas/EmailAddress' } } } }
+        '429': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/senders:
+    parameters: [ { $ref: '#/components/parameters/AddressId' } ]
+    get:
+      tags: [email-inbox]
+      operationId: listEmailSenders
+      description: |
+        The allowed and blocked senders (managers of the target), by email. Members of the target are allowed
+        automatically by their verified account email and are not listed. Pending senders are in
+        `listEmailPendingSenders`.
+      responses:
+        '200':
+          description: Senders
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/EmailSender' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [email-inbox]
+      operationId: addEmailSender
+      description: |
+        Allow (or with `blocked: true` block) an address (managers of the target). A pending sender with that address
+        is approved (and their held mail delivered) or rejected and blocked. `409 duplicate_sender` when it is already
+        allowed or blocked (`detail`: its id), `409 limit_reached` beyond `limits.max_email_senders_per_address`.
+        Rate-limited (120/h per user).
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailSenderCreate' } } }
+      responses:
+        '201': { description: Added, content: { application/json: { schema: { $ref: '#/components/schemas/EmailSender' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/senders/{senderId}:
+    parameters:
+      - { $ref: '#/components/parameters/AddressId' }
+      - { $ref: '#/components/parameters/SenderId' }
+    patch:
+      tags: [email-inbox]
+      operationId: updateEmailSender
+      description: 'Rename, block (`blocked: true`) or unblock (`blocked: false`) an allowed or blocked sender (managers of the target).'
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailSenderUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/EmailSender' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [email-inbox]
+      operationId: removeEmailSender
+      description: |
+        Remove an allowed or blocked sender (managers of the target): their next mail is held as from an unknown
+        sender again. Their unused email join link is revoked.
+      responses:
+        '204': { description: Removed }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/pending-senders:
+    get:
+      tags: [email-inbox]
+      operationId: listEmailPendingSenders
+      description: Senders waiting for approval, with their held mail (managers of the target), newest first.
+      parameters: [ { $ref: '#/components/parameters/AddressId' } ]
+      responses:
+        '200':
+          description: Pending senders
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/EmailPendingSender' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve:
+    post:
+      tags: [email-inbox]
+      operationId: approveEmailSender
+      description: |
+        Allow a pending sender (managers of the target). With `deliver` (default) their authenticated held mail is
+        delivered now (unverified held mail stays held; deliver it one by one with `deliverEmailHeldMessage`). The
+        sender gets a `delivered` reply when the address sends confirmations. `409 already_decided` when someone else
+        decided first.
+      parameters:
+        - { $ref: '#/components/parameters/AddressId' }
+        - { $ref: '#/components/parameters/SenderId' }
+      requestBody:
+        required: false
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailSenderApprove' } } }
+      responses:
+        '200': { description: Approved, content: { application/json: { schema: { $ref: '#/components/schemas/EmailSender' } } } }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject:
+    post:
+      tags: [email-inbox]
+      operationId: rejectEmailSender
+      description: |
+        Reject a pending sender (managers of the target): their held mail is deleted, nobody tells them. With `block`
+        their later mail is dropped silently (`204` either way). `409 already_decided` when someone else decided first.
+      parameters:
+        - { $ref: '#/components/parameters/AddressId' }
+        - { $ref: '#/components/parameters/SenderId' }
+      requestBody:
+        required: false
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailSenderReject' } } }
+      responses:
+        '204': { description: Rejected }
+        '409': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/held-messages/{messageId}:
+    parameters:
+      - { $ref: '#/components/parameters/AddressId' }
+      - { $ref: '#/components/parameters/HeldMessageId' }
+    get:
+      tags: [email-inbox]
+      operationId: getEmailHeldMessage
+      description: One held mail with its photos and videos as short-lived thumbnail URLs (managers of the target).
+      responses:
+        '200': { description: Held mail, content: { application/json: { schema: { $ref: '#/components/schemas/EmailHeldMessage' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [email-inbox]
+      operationId: deleteEmailHeldMessage
+      description: Delete one held mail without deciding about its sender (managers of the target).
+      responses:
+        '204': { description: Deleted }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver:
+    post:
+      tags: [email-inbox]
+      operationId: deliverEmailHeldMessage
+      description: |
+        Deliver this one held mail (managers of the target), also an unverified one (`reason: unverified_sender`):
+        sent by the address owner, credited to the claimed name, never answered. The sender is not allowed by it.
+      parameters:
+        - { $ref: '#/components/parameters/AddressId' }
+        - { $ref: '#/components/parameters/HeldMessageId' }
+      responses:
+        '200': { description: Delivered, content: { application/json: { schema: { $ref: '#/components/schemas/EmailMessage' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/email-addresses/{addressId}/messages:
+    get:
+      tags: [email-inbox]
+      operationId: listEmailMessages
+      description: Recent mail (last 30 days) to the address and what became of it (managers of the target), newest first.
+      parameters:
+        - { $ref: '#/components/parameters/AddressId' }
+        - { $ref: '#/components/parameters/Cursor' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { description: Recent mail, content: { application/json: { schema: { $ref: '#/components/schemas/EmailMessagePage' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/inbound/email:
+    post:
+      tags: [email-inbox]
+      operationId: receiveInboundEmail
+      security: [ { inboundWebhook: [] } ]
+      description: |
+        **Operator integration, not for clients.** A mail provider or forwarding service posts one received message
+        (raw MIME, exactly as received) for kinframe to process (docs/spec/email-inbox.md §6.3). Only when the
+        operator set `KINFRAME_EMAIL_WEBHOOK_SECRET` (`404 not_found` otherwise; `503 feature_disabled` while the
+        inbox is off). Signed with HMAC-SHA256 (`inboundWebhook`); a bad or replayed signature or a timestamp more than
+        5 minutes off is `401 unauthorized`. `413 upload_too_large` above `limits.max_email_message_bytes`. The
+        message is queued and processed asynchronously; the answer reports each envelope recipient. Do not retry a
+        `2xx` or `4xx`; retry `429` and `5xx` (a retried message is recognised and not delivered twice). Rate-limited
+        (600/min).
+      parameters:
+        - { name: X-Kinframe-Timestamp, in: header, required: true, description: Unix seconds when the request was signed., schema: { type: string, pattern: '^[0-9]{1,12}$' } }
+        - { name: X-Kinframe-Envelope-To, in: header, required: true, description: 'The envelope recipient(s) (SMTP RCPT TO), comma-separated. BCC recipients exist only here.', schema: { type: string, maxLength: 4096 } }
+        - { name: X-Kinframe-Envelope-From, in: header, description: The envelope sender (SMTP MAIL FROM); empty for the null sender., schema: { type: string, maxLength: 512 } }
+        - { name: X-Kinframe-Client-Ip, in: header, description: The IP address of the server that delivered the mail to the provider. Without it SPF is not checked (DKIM only)., schema: { type: string, maxLength: 64 } }
+        - { name: X-Kinframe-Helo, in: header, description: That server's HELO/EHLO name., schema: { type: string, maxLength: 255 } }
+      requestBody:
+        required: true
+        content:
+          message/rfc822:
+            schema: { type: string, format: binary }
+      responses:
+        '202': { description: Queued, content: { application/json: { schema: { $ref: '#/components/schemas/EmailInboundResult' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '413': { $ref: '#/components/responses/Problem' }
+        '429': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/inbound/email:check:
+    post:
+      tags: [email-inbox]
+      operationId: checkInboundEmailRecipients
+      security: [ { inboundWebhook: [] } ]
+      description: |
+        **Operator integration, not for clients.** Which recipients exist and are active, so a provider can refuse
+        unknown ones during its own SMTP dialogue. Signed like `receiveInboundEmail`, with the JSON body as the body and
+        empty envelope fields.
+      parameters:
+        - { name: X-Kinframe-Timestamp, in: header, required: true, schema: { type: string, pattern: '^[0-9]{1,12}$' } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/EmailRecipientCheck' } } }
+      responses:
+        '200': { description: Recipients, content: { application/json: { schema: { $ref: '#/components/schemas/EmailRecipientCheckResult' } } } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '503': { $ref: '#/components/responses/Problem' }
+        default: { $ref: '#/components/responses/Problem' }
+
+  # ---------------------------------------------------------------- telegram (docs/spec/telegram.md)
+  /v1/frames/{frameId}/telegram-chats:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    get:
+      tags: [telegram]
+      operationId: listFrameTelegramChats
+      description: |
+        Frame managers (owner, admin, `change_settings`). The Telegram chats connected to this frame: live ones first,
+        then those disconnected in the last 30 days. `503 feature_disabled` without discovery `telegram`.
+      responses:
+        '200': { description: Chats, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TelegramChat' } } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/frames/{frameId}/telegram-codes:
+    parameters: [ { $ref: '#/components/parameters/FrameId' } ]
+    post:
+      tags: [telegram]
+      operationId: createFrameTelegramCode
+      description: |
+        Frame managers. A one-time connect code in a Telegram deep link (docs/spec/telegram.md §5.1): `chat_kind:
+        group` gives `https://t.me/<bot>?startgroup=<code>` (pick a group; the bot joins and binds it), `private`
+        gives `https://t.me/<bot>?start=<code>` (a private chat with the bot). The caller becomes the chat's owner. The
+        code is single use and expires after 30 minutes; a new code for the same frame and kind revokes the caller's
+        previous open one. `409 limit_reached` at `limits.max_telegram_chats_per_target` or
+        `max_telegram_chats_per_user`, `409 telegram_already_linked` for `link_account` when the caller is linked
+        already, `503 feature_disabled` without a bot, `429 rate_limited` (30/h per user).
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TelegramConnectCodeCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramCode' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/telegram-chats:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    get:
+      tags: [telegram]
+      operationId: listFeedTelegramChats
+      description: Feed owner and admins. As `listFrameTelegramChats`.
+      responses:
+        '200': { description: Chats, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TelegramChat' } } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/feeds/{feedId}/telegram-codes:
+    parameters: [ { $ref: '#/components/parameters/FeedId' } ]
+    post:
+      tags: [telegram]
+      operationId: createFeedTelegramCode
+      description: Feed owner and admins. As `createFrameTelegramCode`; each batch from the chat becomes a post.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TelegramConnectCodeCreate' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramCode' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/telegram-codes/{codeId}:
+    parameters: [ { name: codeId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } } ]
+    get:
+      tags: [telegram]
+      operationId: getTelegramCode
+      description: The caller's own code, to follow it until it is used (or listen to `telegram_code.updated`).
+      responses:
+        '200': { description: Code, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramCode' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [telegram]
+      operationId: revokeTelegramCode
+      description: Revokes an open code of the caller (repeating it is a no-op).
+      responses:
+        '204': { description: Revoked }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/telegram-chats/{chatId}:
+    parameters: [ { $ref: '#/components/parameters/TelegramChatId' } ]
+    get:
+      tags: [telegram]
+      operationId: getTelegramChat
+      description: Managers of the chat's target. Unknown chats and chats the caller may not manage are `404 not_found`.
+      responses:
+        '200': { description: Chat, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramChat' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [telegram]
+      operationId: updateTelegramChat
+      description: |
+        Managers of the target. `paused` pauses (media is ignored, the bot stays silent) or resumes; `take_over: true`
+        makes the caller the owner (the sender of outside contributions from now on; an owner who loses their rights is
+        replaced by the frame's or feed's owner automatically). `notify_reactions` is the owner's own switch
+        (`403 forbidden` for others). `topic_id` must be one of `topics` or null. `409 invalid_transition` on a
+        disconnected chat.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TelegramChatUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramChat' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [telegram]
+      operationId: disconnectTelegramChat
+      description: |
+        Managers of the target. The bot says goodbye and leaves the group (`ended_reason: disconnected`). Photos already
+        sent stay (unsend them from history). The chat's join invites are revoked.
+      responses:
+        '204': { description: Disconnected }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/telegram-chats/{chatId}/contributors:
+    parameters: [ { $ref: '#/components/parameters/TelegramChatId' } ]
+    get:
+      tags: [telegram]
+      operationId: listTelegramContributors
+      description: Managers of the target. The people whose media the bot saw in this chat, most recent first.
+      responses:
+        '200': { description: Contributors, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TelegramContributor' } } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/telegram-chats/{chatId}/contributors/{contributorId}:
+    parameters:
+      - { $ref: '#/components/parameters/TelegramChatId' }
+      - { name: contributorId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    patch:
+      tags: [telegram]
+      operationId: updateTelegramContributor
+      description: Managers of the target. A blocked contributor's media is ignored silently in this chat, and their join invite is revoked.
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/TelegramContributorUpdate' } } }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramContributor' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/telegram:
+    get:
+      tags: [telegram, me]
+      operationId: getTelegramLink
+      description: The Telegram account linked to the caller. `404 not_found` when none is linked.
+      responses:
+        '200': { description: Link, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramLink' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+    delete:
+      tags: [telegram, me]
+      operationId: unlinkTelegram
+      description: Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's.
+      responses:
+        '204': { description: Unlinked }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/me/telegram/link-code:
+    post:
+      tags: [telegram, me]
+      operationId: createTelegramLinkCode
+      description: |
+        "Link my Telegram": a one-time code in `https://t.me/<bot>?start=<code>`. Opening it and tapping Start in the
+        private chat with the bot links that Telegram account to the caller (docs/spec/telegram.md §5.1). Single use, 30
+        minutes. `409 telegram_already_linked` when the caller has a link already (unlink first), `503
+        feature_disabled`, `429 rate_limited`.
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/TelegramCode' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/telegram/webhook:
+    post:
+      tags: [telegram]
+      operationId: telegramWebhook
+      security: [ { telegramWebhook: [] } ]
+      description: |
+        **Called by Telegram only, not for clients** (docs/spec/telegram.md §7). Registered by the server with
+        `setWebhook` when it runs in webhook mode. A wrong or missing `X-Telegram-Bot-Api-Secret-Token` is `401`;
+        `404 not_found` when no bot is configured or the server long-polls. The update is filtered, stored and
+        acknowledged with an empty `200` at once; processing is asynchronous. Body at most 1 MiB.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true, description: 'A Telegram Bot API `Update` object.' }
+      responses:
+        '200': { description: Accepted (also for updates the server ignores) }
+        '401': { description: Wrong or missing secret token }
+        '404': { description: 'No bot configured, or the server polls' }
+        '413': { description: Body too large }
 
   # ---------------------------------------------------------------- settings
   # ---------------------------------------------------------------- tv
@@ -2861,6 +3359,22 @@ components:
       scheme: bearer
       bearerFormat: JWT
       description: Device access token from /v1/devices/token.
+    inboundWebhook:
+      type: apiKey
+      in: header
+      name: X-Kinframe-Signature
+      description: |
+        Operator integration only (docs/spec/email-inbox.md §6.3): `v1=<hex>`, the HMAC-SHA256 with
+        `KINFRAME_EMAIL_WEBHOOK_SECRET` over `"v1" LF X-Kinframe-Timestamp LF X-Kinframe-Envelope-To LF
+        X-Kinframe-Envelope-From LF X-Kinframe-Client-Ip LF X-Kinframe-Helo LF hex(sha256(body))` (absent headers as
+        empty strings). Timestamps more than 5 minutes off and signatures seen in the last 10 minutes are refused.
+    telegramWebhook:
+      type: apiKey
+      in: header
+      name: X-Telegram-Bot-Api-Secret-Token
+      description: |
+        Telegram only (docs/spec/telegram.md §7): the `secret_token` the server passed to `setWebhook`, derived from
+        its secrets key (HKDF-SHA256, info `kinframe telegram webhook v1`). Compared in constant time.
 
   parameters:
     FrameId: { name: frameId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
@@ -2877,6 +3391,10 @@ components:
     BirthdayId: { name: birthdayId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     SourceId: { name: sourceId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     ImportId: { name: importId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    AddressId: { name: addressId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    SenderId: { name: senderId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    HeldMessageId: { name: messageId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
+    TelegramChatId: { name: chatId, in: path, required: true, schema: { $ref: '#/components/schemas/Id' } }
     InviteToken: { name: token, in: path, required: true, schema: { type: string, minLength: 22, maxLength: 64 } }
     Cursor: { name: cursor, in: query, schema: { type: string } }
     Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 200, default: 50 } }
@@ -2951,6 +3469,8 @@ components:
         - duplicate_birthday
         - duplicate_source
         - source_test_failed
+        - duplicate_sender
+        - telegram_already_linked
         - server_error
 
     AppVersionPolicy:
@@ -3039,6 +3559,35 @@ components:
           type: boolean
           default: false
           description: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+        email_inbox:
+          type: boolean
+          default: false
+          description: |
+            True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
+            (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
+        email_inbox_domain:
+          type: [string, 'null']
+          description: The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
+          examples: [in.kinframe.appmire.be]
+        telegram:
+          type: boolean
+          default: false
+          description: |
+            True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
+            accounts can link Telegram (docs/spec/telegram.md). Clients hide every Telegram section otherwise.
+        telegram_bot_username:
+          type: [string, 'null']
+          description: The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
+          examples: [kinframe_bot]
+        telegram_privacy_mode:
+          type: boolean
+          default: false
+          description: |
+            True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
+            so the connect sheet says so up front (docs/spec/telegram.md §6).
+        telegram_max_file_bytes:
+          type: [integer, 'null']
+          description: The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`.
         webpush_public_key:
           type: [string, 'null']
           description: |
@@ -3286,6 +3835,14 @@ components:
         max_photo_source_items: { type: integer, default: 10000, description: Live imported items per photo source; newer upstream items beyond it are skipped. }
         max_photo_source_run_bytes: { type: integer, default: 2147483648, description: Bytes one sync run downloads; the rest follows in the next runs. }
         max_google_import_items: { type: integer, default: 500, description: Items per Google Photos import (the picker's own maximum is 2000). }
+        max_email_addresses_per_target: { type: integer, default: 5, description: Inbox addresses per frame or feed. }
+        max_email_senders_per_address: { type: integer, default: 200, description: Allowed and blocked senders per inbox address. }
+        max_email_message_bytes: { type: integer, default: 52428800, description: 'One mail as received (SMTP SIZE, webhook body).' }
+        max_email_messages_per_address_day: { type: integer, default: 200, description: Mails processed per inbox address per day; more are dropped. }
+        max_email_held_messages: { type: integer, default: 100, description: Held mails per inbox address (10 per pending sender); the oldest go first. }
+        max_telegram_chats_per_target: { type: integer, default: 5, description: Connected Telegram chats per frame or feed. }
+        max_telegram_chats_per_user: { type: integer, default: 20, description: Connected Telegram chats one account owns. }
+        max_telegram_items_per_chat_hour: { type: integer, default: 300, description: Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat. }
 
     Place:
       type: object
@@ -3412,7 +3969,8 @@ components:
             quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
             backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
             the `birthdays` change (informational only: nothing is withheld; apps use it for
-            `Subscription.frame.birthdays_supported`).
+            `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
+            (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
           items: { type: string }
         uptime_s: { type: integer }
         wifi_ssid: { type: [string, 'null'] }
@@ -3490,9 +4048,28 @@ components:
             id: { $ref: '#/components/schemas/Id' }
             display_name: { type: string }
             avatar_url: { type: [string, 'null'] }
-        via: { type: string, enum: [frame_code, invite] }
+        via:
+          type: string
+          description: |
+            How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
+            add only a value): `email`, from the join link in a reply to someone who mailed photos
+            (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
+            private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
+          enum: [frame_code, invite, email, telegram]
         invited_by_name: { type: [string, 'null'] }
         note: { type: [string, 'null'] }
+        via_name:
+          type: [string, 'null']
+          description: |
+            Channel requests only: who the channel invited, as managers should see it (for `email`: the sender's name and
+            address, "Jan · jan.peeters@telenet.be"; for `telegram`: the Telegram name and the chat, "Ben · Telegram,
+            Peeters family").
+        via_matches:
+          type: [boolean, 'null']
+          description: |
+            Channel requests only: whether the requester's verified identity matches the one the link was sent to (for
+            `email`: the account's verified email is that address); null when the channel can't tell (always for
+            `telegram`).
         created_at: { type: string, format: date-time }
 
     Invite:
@@ -3656,9 +4233,12 @@ components:
           description: The original sender's display name in that app, when known.
         via:
           description: |
-            Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
-            sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
-            for feed placements). Optional: clients that don't know it show the sender only.
+            Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
+            that were mailed to an inbox address (`service: email`, docs/spec/email-inbox.md §9) or posted in a
+            connected Telegram chat (`service: telegram`, docs/spec/telegram.md §8). The sender is the account that set
+            it up (for mail and Telegram: the matched or linked account, or the address's or chat's owner); clients and
+            frames show "Anna via Immich" ("Anna · Feed via Immich" for feed placements), or "Jan via email" / "Jan via
+            Telegram". Optional: clients that don't know it show the sender only.
           oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
         motion:
           description: |
@@ -3679,18 +4259,32 @@ components:
 
     PhotoService:
       type: string
-      description: The outside service a photo came from.
-      enum: [immich, icloud, google_photos]
+      description: 'The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).'
+      enum: [immich, icloud, google_photos, email, telegram]
 
     ItemVia:
       type: object
       required: [service, label]
       properties:
         service: { $ref: '#/components/schemas/PhotoService' }
-        label: { type: string, description: 'Service name to show, not translated: "Immich", "iCloud", "Google Photos".', examples: [Immich] }
+        label:
+          type: string
+          description: |
+            Photo services: the service name to show, not translated ("Immich", "iCloud", "Google Photos"); frames show
+            "<sender> via <label>". `email`, `telegram`: the name of the person who mailed or posted it ("Jan"; for
+            Telegram the linked account's display name, else the Telegram display name); frames show "<label> via
+            email" / "<label> via Telegram" (localized) **instead of** the sender's name, since the sender may be the
+            address's or chat's owner sending on Jan's behalf.
+          examples: [Immich, Jan]
         source_id:
           oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
           description: The photo source that synced it, while it exists (null for Google imports and deleted sources).
+        address_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: '`email`: the inbox address it was mailed to, while it exists.'
+        telegram_chat_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: '`telegram`: the Telegram chat it was posted in (`TelegramChat`), while it exists.'
 
     ItemMotion:
       type: object
@@ -3790,7 +4384,9 @@ components:
         via:
           description: |
             Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
-            run or import). Such sends get no `delivered` push.
+            run or import), when it came by mail (`service: email`, one send per mail), or from a connected Telegram
+            chat (`service: telegram`, one send per batch). Such sends get no `delivered` push, except Telegram sends by
+            a linked account (they are that person's own sends).
           oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
         feeds:
           type: array
@@ -4151,7 +4747,7 @@ components:
           description: The poster's send (own posts only).
         created_at: { type: string, format: date-time }
         via:
-          description: 'Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".'
+          description: 'Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").'
           oneOf: [ { $ref: '#/components/schemas/ItemVia' }, { type: 'null' } ]
         items: { type: array, description: Live items in send order., items: { $ref: '#/components/schemas/Item' } }
         receipts:
@@ -4681,6 +5277,492 @@ components:
         created_at: { type: string, format: date-time }
         updated_at: { type: [string, 'null'], format: date-time }
         finished_at: { type: [string, 'null'], format: date-time }
+
+    # ---------------------------------------------------------------- email inbox (docs/spec/email-inbox.md)
+    EmailAddressStatus:
+      type: string
+      description: '`active`: mail is accepted. `paused`: mail to it is refused (`550 5.2.1 This address is paused`); resume to reopen.'
+      enum: [active, paused]
+
+    EmailAddressTarget:
+      type: object
+      description: What the address fills. Exactly one of `frame_id` (a direct send) or `feed_id` (a post) is set.
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [frame, feed] }
+        frame_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        frame_name: { type: [string, 'null'] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        feed_name: { type: [string, 'null'] }
+
+    EmailAddress:
+      type: object
+      required: [id, address, slug, name, target, status, anyone_may_send, send_confirmations, offer_app_invite, notify_reactions, counts, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        address:
+          type: string
+          format: email
+          description: 'The full address, `<slug>-<random>@<email_inbox_domain>`. A capability: shown to managers only.'
+          examples: [oma-k7q2m9@in.kinframe.appmire.be]
+        slug: { type: string, description: The friendly part., examples: [oma] }
+        name: { type: string, description: 'Label in the apps and in replies to senders ("Oma''s frame").' }
+        target: { $ref: '#/components/schemas/EmailAddressTarget' }
+        owner:
+          description: |
+            Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+            the creator lost their rights). Null only briefly while ownership passes on.
+          oneOf:
+            - type: object
+              required: [user_id, display_name]
+              properties:
+                user_id: { $ref: '#/components/schemas/Id' }
+                display_name: { type: string }
+                avatar_url: { type: [string, 'null'], format: uri }
+            - { type: 'null' }
+        status: { $ref: '#/components/schemas/EmailAddressStatus' }
+        anyone_may_send: { type: boolean, description: 'Mail from anyone with the address is delivered without approval (default off).' }
+        send_confirmations: { type: boolean, description: 'Authenticated senders get a short "delivered" reply (default on).' }
+        offer_app_invite: { type: boolean, description: 'Replies to allowed, authenticated senders include a link to join the frame or feed in the app (an invite that always needs approval; default on).' }
+        notify_reactions: { type: boolean, description: 'The owner gets reaction and reply notifications for photos they sent on behalf of non-account senders (the owner''s own switch).' }
+        replies_available: { type: boolean, description: 'False when the server can''t send mail (no outgoing mail configured): senders get no replies at all.' }
+        counts:
+          type: object
+          required: [allowed_senders, pending_senders, held_messages]
+          properties:
+            allowed_senders: { type: integer }
+            blocked_senders: { type: integer }
+            pending_senders: { type: integer }
+            held_messages: { type: integer }
+            delivered_30d: { type: integer, description: Mails delivered in the last 30 days. }
+        last_received_at: { type: [string, 'null'], format: date-time }
+        regenerated_at: { type: [string, 'null'], format: date-time }
+        can_manage: { type: boolean }
+        is_owner: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    EmailAddressCreate:
+      type: object
+      properties:
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 24
+          pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$'
+          description: The friendly part; defaults to one made from the target's name (lower case, accents removed, `oma`).
+        name: { type: string, minLength: 1, maxLength: 60, description: Label; defaults to the target's name. }
+        anyone_may_send: { type: boolean, default: false }
+        send_confirmations: { type: boolean, default: true }
+        offer_app_invite: { type: boolean, default: true }
+        notify_reactions: { type: boolean, default: true }
+
+    EmailAddressUpdate:
+      type: object
+      description: At least one field.
+      properties:
+        name: { type: string, minLength: 1, maxLength: 60 }
+        slug: { type: string, minLength: 1, maxLength: 24, pattern: '^[a-z0-9]([a-z0-9-]*[a-z0-9])?$', description: A new friendly part; the old address stops working at once. }
+        paused: { type: boolean, description: 'true pauses, false resumes.' }
+        anyone_may_send: { type: boolean }
+        send_confirmations: { type: boolean }
+        offer_app_invite: { type: boolean }
+        notify_reactions: { type: boolean, description: The owner's own switch; only the owner may change it. }
+        take_over: { type: boolean, description: The caller becomes the owner. }
+
+    EmailSenderState:
+      type: string
+      description: '`allowed`: mail is delivered (when authenticated). `blocked`: mail is dropped silently. `pending`: mail is held until a manager decides.'
+      enum: [allowed, blocked, pending]
+
+    EmailSender:
+      type: object
+      required: [id, email, state, origin, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        email: { type: string, format: email }
+        display_name: { type: [string, 'null'], description: 'Name for the credit ("Jan via email") when the mail has none.' }
+        state: { $ref: '#/components/schemas/EmailSenderState' }
+        origin:
+          type: string
+          description: '`manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.'
+          enum: [manual, approved, mail]
+        added_by_name: { type: [string, 'null'] }
+        last_message_at: { type: [string, 'null'], format: date-time }
+        created_at: { type: string, format: date-time }
+
+    EmailSenderCreate:
+      type: object
+      required: [email]
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        display_name: { type: string, maxLength: 40 }
+        blocked: { type: boolean, default: false, description: Block instead of allow. }
+
+    EmailSenderUpdate:
+      type: object
+      properties:
+        display_name: { type: [string, 'null'], maxLength: 40 }
+        blocked: { type: boolean }
+
+    EmailSenderApprove:
+      type: object
+      properties:
+        deliver: { type: boolean, default: true, description: Deliver their authenticated held mail now. }
+        display_name: { type: string, maxLength: 40 }
+
+    EmailSenderReject:
+      type: object
+      properties:
+        block: { type: boolean, default: false, description: Drop their later mail silently. }
+
+    EmailAuthResult:
+      type: object
+      description: How the mail was checked (docs/spec/email-inbox.md §7). Only `authenticated` mail is matched, allowed or answered.
+      required: [authenticated]
+      properties:
+        authenticated: { type: boolean, description: DMARC-aligned SPF or DKIM passed for the From domain. }
+        from_domain: { type: [string, 'null'] }
+        spf: { type: string, enum: [pass, fail, softfail, neutral, none, temperror, permerror, not_checked] }
+        dkim: { type: string, enum: [pass, fail, none, temperror, permerror] }
+        dkim_domain: { type: [string, 'null'], description: The `d=` of the passing signature. }
+        dmarc: { type: string, enum: [pass, fail, none, temperror] }
+        dmarc_policy: { type: [string, 'null'], description: 'The From domain''s policy: `none`, `quarantine` or `reject`; null without a DMARC record.' }
+        aligned: { type: [string, 'null'], description: 'Which check aligned: `spf` or `dkim`; null when neither.' }
+
+    EmailHeldReason:
+      type: string
+      description: |
+        `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+        couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+      enum: [unknown_sender, unverified_sender]
+
+    EmailSkipCounts:
+      type: object
+      description: Files in a mail that were not used.
+      properties:
+        too_small: { type: integer, description: 'Images under 300 px on the long side (signatures, logos).' }
+        duplicate: { type: integer, description: Already in the mail or on the frame / in the feed. }
+        unsupported: { type: integer }
+        too_large: { type: integer }
+        too_long: { type: integer, description: Videos longer than `limits.max_video_seconds`. }
+        over_limit: { type: integer }
+
+    EmailHeldMessageSummary:
+      type: object
+      required: [id, reason, received_at, expires_at, media_count, authenticated]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        reason: { $ref: '#/components/schemas/EmailHeldReason' }
+        subject: { type: [string, 'null'] }
+        received_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time, description: Deleted then (at most 14 days after it arrived). }
+        media_count: { type: integer }
+        authenticated: { type: boolean }
+        thumb_urls:
+          type: array
+          maxItems: 4
+          description: The first thumbnails; short-lived signed URLs (about 1 h).
+          items: { type: string, format: uri }
+
+    EmailHeldMessage:
+      type: object
+      required: [id, address_id, sender_email, reason, received_at, expires_at, auth, media]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        address_id: { $ref: '#/components/schemas/Id' }
+        sender_id: { $ref: '#/components/schemas/Id' }
+        sender_email: { type: string, description: 'As the From header says; trustworthy only when `auth.authenticated`.' }
+        sender_name: { type: [string, 'null'] }
+        reason: { $ref: '#/components/schemas/EmailHeldReason' }
+        subject: { type: [string, 'null'] }
+        caption: { type: [string, 'null'], description: The caption the photos would get. }
+        received_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        auth: { $ref: '#/components/schemas/EmailAuthResult' }
+        media:
+          type: array
+          items:
+            type: object
+            required: [kind]
+            properties:
+              kind: { $ref: '#/components/schemas/MediaKind' }
+              width: { type: [integer, 'null'] }
+              height: { type: [integer, 'null'] }
+              duration_ms: { type: [integer, 'null'] }
+              bytes: { type: [integer, 'null'] }
+              filename: { type: [string, 'null'] }
+              thumb_url: { type: [string, 'null'], format: uri, description: Short-lived signed URL (about 1 h); null while processing. }
+        skipped: { $ref: '#/components/schemas/EmailSkipCounts' }
+
+    EmailPendingSender:
+      type: object
+      required: [id, email, authenticated, first_held_at, last_held_at, messages]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        email: { type: string, description: 'As claimed; trustworthy only when `authenticated`.' }
+        display_name: { type: [string, 'null'] }
+        authenticated: { type: boolean, description: The latest held mail was authenticated. }
+        first_held_at: { type: string, format: date-time }
+        last_held_at: { type: string, format: date-time }
+        messages: { type: array, description: 'Held mail, newest first.', items: { $ref: '#/components/schemas/EmailHeldMessageSummary' } }
+
+    EmailOutcome:
+      type: string
+      description: What became of a mail (texts in docs/spec/email-inbox.md §13).
+      enum: [delivered, held, no_media, too_large, encrypted, duplicate, blocked, rejected_dmarc, ignored, rate_limited, failed]
+
+    EmailReplyKind:
+      type: string
+      enum: [delivered, held, no_media, too_large, encrypted]
+
+    EmailMessage:
+      type: object
+      required: [id, received_at, authenticated, outcome]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        received_at: { type: string, format: date-time }
+        sender_email: { type: [string, 'null'] }
+        sender_name: { type: [string, 'null'] }
+        authenticated: { type: boolean }
+        outcome: { $ref: '#/components/schemas/EmailOutcome' }
+        items: { type: integer, description: Photos and videos delivered or held. }
+        skipped: { $ref: '#/components/schemas/EmailSkipCounts' }
+        send_ids: { type: array, items: { $ref: '#/components/schemas/Id' } }
+        reply: { oneOf: [ { $ref: '#/components/schemas/EmailReplyKind' }, { type: 'null' } ], description: 'The reply the sender got, if any.' }
+
+    EmailMessagePage:
+      type: object
+      required: [items]
+      properties:
+        items: { type: array, items: { $ref: '#/components/schemas/EmailMessage' } }
+        next_cursor: { type: [string, 'null'] }
+
+    EmailInboundResult:
+      type: object
+      required: [id, recipients]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        recipients:
+          type: array
+          items:
+            type: object
+            required: [address, outcome]
+            properties:
+              address: { type: string }
+              outcome: { type: string, enum: [accepted, unknown_recipient, paused, rejected_dmarc, too_large] }
+
+    EmailRecipientCheck:
+      type: object
+      required: [recipients]
+      properties:
+        recipients: { type: array, minItems: 1, maxItems: 50, items: { type: string, maxLength: 320 } }
+
+    EmailRecipientCheckResult:
+      type: object
+      required: [recipients]
+      properties:
+        recipients:
+          type: array
+          items:
+            type: object
+            required: [address, outcome]
+            properties:
+              address: { type: string }
+              outcome: { type: string, enum: [accepted, unknown_recipient, paused] }
+
+    TelegramChatKind:
+      type: string
+      description: '`group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.'
+      enum: [group, private]
+
+    TelegramConnectCodeCreate:
+      type: object
+      required: [chat_kind]
+      properties:
+        chat_kind: { $ref: '#/components/schemas/TelegramChatKind' }
+        link_account:
+          type: boolean
+          default: false
+          description: |
+            `chat_kind: private` only ("Send from my Telegram"): also link the Telegram account that redeems the code to
+            the caller. Without it the redeemer is an outside contributor sent for by the caller ("Invite someone to
+            send by Telegram").
+
+    TelegramCodePurpose:
+      type: string
+      enum: [connect, link]
+
+    TelegramCodeStatus:
+      type: string
+      enum: [open, used, expired, revoked]
+
+    TelegramCodeErrorCode:
+      type: string
+      description: Why the last attempt to redeem the code in Telegram failed (the code may still be open).
+      enum: [code_expired, code_used, already_connected, limit_reached, wrong_chat_kind, already_linked, missing_permission]
+
+    TelegramCode:
+      type: object
+      required: [id, purpose, status, expires_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        purpose: { $ref: '#/components/schemas/TelegramCodePurpose' }
+        chat_kind: { oneOf: [ { $ref: '#/components/schemas/TelegramChatKind' }, { type: 'null' } ] }
+        link_account: { type: boolean }
+        target:
+          description: '`connect` codes: the frame or feed.'
+          oneOf: [ { $ref: '#/components/schemas/TelegramChatTarget' }, { type: 'null' } ]
+        code: { type: [string, 'null'], description: Only in the create response. }
+        url:
+          type: [string, 'null']
+          format: uri
+          description: |
+            Only in the create response: `https://t.me/<bot>?startgroup=<code>` (groups) or `?start=<code>`. Show it as
+            a button (opens Telegram) and as a QR code (for another device).
+          examples: ['https://t.me/kinframe_bot?startgroup=cA7f9QxK2mPz4LwN8']
+        status: { $ref: '#/components/schemas/TelegramCodeStatus' }
+        expires_at: { type: string, format: date-time }
+        chat_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: '`connect`, once used: the `TelegramChat` it created.'
+        error_code:
+          oneOf: [ { $ref: '#/components/schemas/TelegramCodeErrorCode' }, { type: 'null' } ]
+
+    TelegramChatTarget:
+      type: object
+      description: What the chat fills. Exactly one of `frame_id` (a direct send per batch) or `feed_id` (a post per batch) is set.
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [frame, feed] }
+        frame_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        frame_name: { type: [string, 'null'] }
+        feed_id: { oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ] }
+        feed_name: { type: [string, 'null'] }
+
+    TelegramChatStatus:
+      type: string
+      description: |
+        `active`: media is accepted. `needs_attention`: a person must fix `error_code`. `paused`: paused in the app,
+        media ignored. `disconnected`: ended (`ended_reason`); listed for 30 days, then deleted.
+      enum: [active, needs_attention, paused, disconnected]
+
+    TelegramChatErrorCode:
+      type: string
+      description: '`privacy_mode`: the bot only sees commands in the group (make it an admin, or the operator turns privacy mode off). `bot_changed`: the server now uses another bot; connect again.'
+      enum: [privacy_mode, bot_changed]
+
+    TelegramChatWarning:
+      type: string
+      description: '`cannot_post`: the bot may not post in the group, so it can''t reply. `reactions_off`: the group restricts reactions, so confirmations are silent.'
+      enum: [cannot_post, reactions_off]
+
+    TelegramChatEndedReason:
+      type: string
+      enum: [disconnected, stopped, bot_removed, chat_gone, bot_blocked, target_deleted]
+
+    TelegramContributorsMode:
+      type: string
+      description: |
+        `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+        users linked to a kinframe account that may send to the target.
+      enum: [everyone, linked_only]
+
+    TelegramTopic:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: integer, format: int64, description: Telegram `message_thread_id` (1 = General). }
+        name: { type: string }
+
+    TelegramChat:
+      type: object
+      required: [id, chat_kind, title, target, status, contributors, frame_replies, notify_reactions, offer_app_invite, counts, created_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        chat_kind: { $ref: '#/components/schemas/TelegramChatKind' }
+        title: { type: string, description: 'The group''s title, or for a private chat the Telegram user''s display name.' }
+        is_forum: { type: boolean }
+        target: { $ref: '#/components/schemas/TelegramChatTarget' }
+        owner:
+          description: |
+            Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+            their rights). Null only briefly while ownership passes on.
+          oneOf:
+            - type: object
+              required: [user_id, display_name]
+              properties:
+                user_id: { $ref: '#/components/schemas/Id' }
+                display_name: { type: string }
+                avatar_url: { type: [string, 'null'], format: uri }
+            - { type: 'null' }
+        status: { $ref: '#/components/schemas/TelegramChatStatus' }
+        error_code: { oneOf: [ { $ref: '#/components/schemas/TelegramChatErrorCode' }, { type: 'null' } ] }
+        warnings: { type: array, items: { $ref: '#/components/schemas/TelegramChatWarning' } }
+        ended_reason: { oneOf: [ { $ref: '#/components/schemas/TelegramChatEndedReason' }, { type: 'null' } ] }
+        ended_by_name: { type: [string, 'null'], description: 'Who disconnected it (`disconnected`, `stopped`).' }
+        ended_at: { type: [string, 'null'], format: date-time }
+        bot_is_admin: { type: boolean }
+        sees_all_messages: { type: boolean, description: 'False: privacy mode hides photos from the bot (`error_code: privacy_mode`).' }
+        contributors: { $ref: '#/components/schemas/TelegramContributorsMode' }
+        frame_replies: { type: boolean, description: Post frames' quick replies into the chat as replies (default false). }
+        notify_reactions: { type: boolean, description: 'The owner gets reaction and reply notifications for outside contributions (default false: the chat already shows them). The owner''s own switch.' }
+        offer_app_invite: { type: boolean, description: 'The bot''s one-time app message includes an "Ask to join" link (an invite that always needs approval; default true).' }
+        topic_id: { type: [integer, 'null'], format: int64, description: 'Forum groups: only this topic counts; null = all topics.' }
+        topics: { type: array, description: 'Forum groups: topics the bot has seen (Telegram offers no list).', items: { $ref: '#/components/schemas/TelegramTopic' } }
+        counts:
+          type: object
+          required: [sent, contributors]
+          properties:
+            sent: { type: integer, description: Photos and videos sent. }
+            duplicates: { type: integer }
+            skipped: { type: integer }
+            failed: { type: integer }
+            contributors: { type: integer }
+        last_delivery_at: { type: [string, 'null'], format: date-time }
+        can_manage: { type: boolean }
+        is_owner: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    TelegramChatUpdate:
+      type: object
+      properties:
+        paused: { type: boolean }
+        contributors: { $ref: '#/components/schemas/TelegramContributorsMode' }
+        frame_replies: { type: boolean }
+        notify_reactions: { type: boolean }
+        offer_app_invite: { type: boolean }
+        topic_id: { type: [integer, 'null'], format: int64 }
+        take_over: { type: boolean, description: The caller becomes the owner (the sender of outside contributions from now on). }
+
+    TelegramContributor:
+      type: object
+      required: [id, display_name, linked, blocked, sent_count, last_seen_at]
+      properties:
+        id: { $ref: '#/components/schemas/Id' }
+        display_name: { type: string, description: 'The Telegram display name, or the kinframe name when linked.' }
+        linked: { type: boolean }
+        user_id:
+          oneOf: [ { $ref: '#/components/schemas/Id' }, { type: 'null' } ]
+          description: The linked kinframe account, when it is a member of the target.
+        blocked: { type: boolean }
+        sent_count: { type: integer }
+        first_seen_at: { type: string, format: date-time }
+        last_seen_at: { type: string, format: date-time }
+
+    TelegramContributorUpdate:
+      type: object
+      required: [blocked]
+      properties:
+        blocked: { type: boolean }
+
+    TelegramLink:
+      type: object
+      required: [display_name, can_message, linked_at]
+      properties:
+        display_name: { type: string }
+        username: { type: [string, 'null'], description: Without "@". }
+        can_message: { type: boolean, description: False when the user blocked the bot. }
+        linked_at: { type: string, format: date-time }
 
     TvLinkCreate:
       type: object

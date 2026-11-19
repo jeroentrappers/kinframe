@@ -18,6 +18,8 @@
  browser (SvelteKit SPA) ────────┼── HTTPS ── backend ───┤
                                  │   (REST + WS)         └─ Postgres (kinframe db), media volume
  frame (Kotlin / Compose) ───────┘   outbound only: frames never accept inbound connections
+ senders' mail servers ── SMTP :25 (or a provider's signed webhook) ──▶ backend   (email to frame, optional)
+ Telegram Bot API ◀── long polling / getFile ── backend ◀── webhook (secret token) ── Telegram   (optional)
 ```
 
 ## Identity and auth
@@ -93,6 +95,21 @@ GET /.well-known/kinframe
   are the existing ones. "Add from Google Photos" is a one-time import: the server runs the OAuth consent with an
   operator-configured Google client, creates a Photos Picker session that the client opens, and copies the picked
   items; no long-lived Google token is kept.
+- **Email to frame** (`docs/spec/email-inbox.md`): the backend can also receive mail. A small SMTP receiver
+  (`go-smtp`, port 25 published from the container, STARTTLS, recipients checked during the dialogue, never relaying)
+  or an HMAC-signed webhook for a mail provider hands each message to a queue; the worker checks SPF/DKIM/DMARC,
+  decides whether the sender is allowed, extracts the photos and videos from the MIME tree into the normal media
+  pipeline and creates one send or feed post, so placements, moderation and receipts are the existing ones. Replies to
+  senders go out through the server's outgoing mail settings. The raw mail is deleted after processing. This is the
+  only inbound listener besides HTTPS; frames stay outbound-only.
+- **Telegram bridge** (`docs/spec/telegram.md`): one bot per server (operator's BotFather token). With a public HTTPS
+  URL the backend registers a webhook (`/v1/telegram/webhook`, checked against Telegram's secret-token header);
+  behind NAT it long-polls `getUpdates` instead, so no inbound port is needed. One process (Postgres advisory lock)
+  polls or registers. Updates are filtered (only media, the bot's commands and membership changes are kept; message
+  text never), deduplicated by `update_id` and processed in order per chat: media is downloaded with `getFile`
+  (20 MB on the cloud Bot API; an optional local Bot API server lifts it), goes through the normal media pipeline, and
+  each burst from one person becomes one send or feed post. Reactions and the bot's few messages go back through the
+  Bot API with rate limits.
 - Phone notifications: UnifiedPush/ntfy by default (no Google dependency), with FCM/APNs optional for store builds.
 
 ## Emoji on Android 6 frames

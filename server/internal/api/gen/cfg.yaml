@@ -9,6 +9,11 @@ output-options:
   skip-prune: true
   # Hand-written in internal/api: tus (tusd library), binary media, multi-type avatar upload.
   exclude-operation-ids:
+    # Hand-written: inbound email webhook (raw MIME, HMAC over the envelope) and its recipient pre-check.
+    - receiveInboundEmail
+    - checkInboundEmailRecipients
+    # Hand-written: Telegram's webhook (secret header, raw Update JSON, immediate 200).
+    - telegramWebhook
     - tusCreateUpload
     - putAvatar
     - putFeedBirthdayPhoto

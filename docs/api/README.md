@@ -96,6 +96,9 @@ User ─┬─< Membership >─┬─ Frame ──── Device (current credent
 
 PhotoSource (owner: User) ──▶ Album (of one frame) or Feed      (Immich / iCloud sync: one send per run, Item.via)
 GoogleImport (User) ──▶ Album or Feed                           (one-time copy from Google's picker)
+EmailAddress (owner: User) ──▶ Frame or Feed ─< EmailSender     (mailed photos: one send per mail, Item.via email)
+TelegramChat (owner: User) ──▶ Frame or Feed ─< TelegramContributor   (one send per batch, Item.via telegram)
+TelegramLink: User ── one Telegram account
 ```
 
 - **Item**: one photo or video, owned by its sender. It has caption, capture time, focal point and fit mode. The
@@ -374,6 +377,9 @@ GitHub Releases (or a drop-in directory) ──poll 30 min──▶ server mirro
   the screen was not switched off by hand. Before installing it verifies sha256, package name, signing certificate
   (must equal the installed app's) and that the version code is higher. With root it runs `pm install -r`; without
   root it opens the system installer and shows a notice.
+- **Google Play build** (`docs/play-frame.md`): the frame app's `play` flavor, for Android tablets, never calls
+  `GET /device/update` and never installs APKs. It updates through Google Play's in-app updates on the same cadence
+  and idle rules, and right away after a `426`. Its heartbeat lists `play` in `features`.
 - **Public download** (no sign-in): `GET /v1/frame-app/latest?sdk=` returns the newest stable `FrameUpdate` (or
   `204`) with `url` → `GET /v1/frame-app/apk/{code}`. The website's convert tool (`/convert`,
   `tools/convert/README.md`) uses it to install kinframe on a stock frame over USB without a cross-origin download
@@ -828,6 +834,14 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 | `photo_source.updated` | `source` (`PhotoSource`) | A photo source's status, counts or last run changed (the target's managers and the source owner; §5.14) |
 | `photo_source.removed` | `source_id`, `album_id`?, `feed_id`? | A photo source was deleted, also with its album or feed (the same people) |
 | `google_import.updated` | `import` (`GoogleImport`) | Status or progress of the caller's Google Photos import changed |
+| `email_address.updated` | `address` (`EmailAddress`) | An inbox address was created, changed, paused, regenerated or taken over, or its counts changed (the target's managers; §5.16) |
+| `email_address.removed` | `address_id`, `frame_id`?, `feed_id`? | An inbox address was deleted, also with its frame or feed (the same people) |
+| `email_sender.pending` | `address_id`, `pending` (`EmailPendingSender`) | Someone not yet allowed mailed the address, or mailed again (the target's managers) |
+| `email_sender.decided` | `address_id`, `sender_id`, `decision` (`approved`, `rejected`, `blocked`, `added`, `removed`, `unblocked`) | A pending sender was decided or the sender list changed (the target's managers) |
+| `telegram_chat.updated` | `chat` (`TelegramChat`) | A Telegram chat was connected, changed, paused, taken over or disconnected, or its status or counts changed (the target's managers and the owner; §5.17) |
+| `telegram_chat.removed` | `chat_id`, `frame_id`?, `feed_id`? | A disconnected chat was deleted after 30 days, or its frame or feed was deleted (the same people) |
+| `telegram_code.updated` | `code` (`TelegramCode`) | The caller's connect or link code was used, or redeeming it failed |
+| `telegram_link.updated` | `link` (`TelegramLink` or null) | The caller's Telegram account was linked, unlinked, or blocked the bot |
 
 ### 6.3 Push
 
@@ -838,7 +852,8 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   using discovery's `webpush_public_key` (VAPID, RFC 8292), then register `{kind: "webpush", endpoint,
   webpush_keys: {p256dh, auth}, locale}`. Messages are encrypted with RFC 8291 (`aes128gcm`). The decrypted payload is
   `{type, key, title, body, ids}` (`ids` may hold `send_id`, `placement_id`, `frame_id`, `request_id`, `feed_id`,
-  `post_id`, `subscription_id`, `birthday_id`, `greeting_id`, `source_id`, `album_id`, `import_id`). Endpoints the push service reports as gone (404/410) are deleted by the server.
+  `post_id`, `subscription_id`, `birthday_id`, `greeting_id`, `source_id`, `album_id`, `import_id`, `address_id`,
+  `sender_id`, `chat_id`). Endpoints the push service reports as gone (404/410) are deleted by the server.
 - Feed keys: `subscription_request` (feed owner/admins), `subscription_decided` (the requester),
   `subscription_removed` (frame owner/admins, when a feed admin removed it or the feed was deleted),
   `feed_join_request` (feed owner/admins), `feed_membership` (the member); reactions and replies on feed placements
@@ -858,6 +873,15 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
   `ids`: `import_id`). New photos from sources are **never** pushed, and source sends get no `delivered` push.
   Reactions and replies on source photos go to the owner as `reaction`/`reply`, unless the source has
   `notify_reactions: false`.
+- Email keys (§5.16): `email_pending_sender` (the address's managers: frame owner, admins and `change_settings`
+  members, or feed owner and admins; once per pending sender per 7 days, at most 10 per address a day; text
+  `email_pending_expiring` once, 3 days before the held mail is deleted; `ids`: `address_id`, `sender_id`,
+  `frame_id` or `feed_id`). Delivered mail is never pushed, and email sends get no `delivered` push. Join requests
+  from email join links use `join_request`/`feed_join_request`.
+- Telegram key (§5.17): `telegram_attention` (the chat's owner only: the chat needs attention, the bot was removed or
+  the group is gone, or ownership passed to them; at most once per chat and code per 7 days; `ids`: `chat_id`, and
+  `frame_id` or `feed_id`). Photos from Telegram are never pushed; sends of outside contributions get no `delivered`
+  push. Join requests from Telegram join links use `join_request`/`feed_join_request`.
 - `delivered` is pushed once per send and frame, when the last of its photos reaches that frame.
   Placements shared from another frame count for the sharer instead: they get `delivered` (event `share.delivered`)
   once everything they shared to a frame has arrived.
@@ -899,6 +923,165 @@ header and is never blocked: it always serves the current version.
   page for the app) and "Check again"; nothing else is usable. Below `recommended_build` it shows a banner "A new
   version of kinframe is available" with Update and dismiss; a dismissal is remembered per recommended build.
 - The frame app has its own mechanism (§5.7: `KINFRAME_MIN_FRAME_APP_VERSION_CODE` and self-update).
+
+### 5.16 Email to frame (inbox addresses)
+
+Product spec: `docs/spec/email-inbox.md`. Discovery says `email_inbox: true` and `email_inbox_domain` when frames and
+feeds can have inbox addresses; clients hide "Email photos to this frame" otherwise.
+
+**Addresses** (tag `email-inbox`)
+- An `EmailAddress` (`<slug>-<random>@<email_inbox_domain>`, e.g. `oma-k7q2m9@in.kinframe.appmire.be`) fills one
+  target: a **frame** (each mail becomes a direct send) or a **feed** (each mail becomes a post, split at
+  `max_items_per_send`). Frame addresses are managed by frame managers (owner, admin, `change_settings`), feed
+  addresses by the feed's owner and admins. The creator is the `owner`: mail from senders without a matching account
+  is sent by them. If the owner loses their rights, the frame's or feed's owner takes over automatically.
+- `GET|POST /v1/frames/{id}/email-addresses`, `GET|POST /v1/feeds/{id}/email-addresses` (`EmailAddressCreate`:
+  `slug` (default from the target's name), `name` (label), `anyone_may_send` (default off), `send_confirmations`
+  (default on), `offer_app_invite` (default on), `notify_reactions`). `409 limit_reached` beyond
+  `limits.max_email_addresses_per_target`.
+- `PATCH /v1/email-addresses/{id}`: `name`, `slug` (changes the address; the old one stops at once), `paused`
+  (mail is refused while paused), settings, `take_over`. `POST …/regenerate`: a new random part, the old address stops
+  at once, senders and settings stay. `DELETE` removes it (delivered photos stay). Retired addresses are never
+  issued again.
+- The address is a capability shown to managers only. Clients offer **Copy** and **Share** with a ready-made message
+  in the user's language: "You can now email photos to {name}: {address}. Just attach them; the subject becomes the
+  caption. The first time, {owner} approves your address."
+- `EmailAddress.replies_available: false` when the server has no outgoing mail: say that senders get no replies.
+
+**Senders**
+- Allowed automatically: the target's members (frame members with `send`, any feed member) mailing from their
+  **verified account email**. They are never listed (their emails are not shown to managers).
+- `GET|POST /v1/email-addresses/{id}/senders` (`EmailSender`: `email`, `display_name`, `state` `allowed`/`blocked`,
+  `origin`), `PATCH|DELETE …/senders/{sid}` (rename, block/unblock, remove). Adding an address that is pending approves
+  it; `409 duplicate_sender` when it is already listed.
+- **Pending senders**: `GET …/pending-senders` (`EmailPendingSender` with `messages`: subject, time, `media_count`,
+  up to 4 `thumb_urls`, `expires_at`). `POST …/pending-senders/{sid}/approve {deliver: true}` allows the sender and
+  delivers their held mail; `POST …/reject {block}` deletes it silently (and blocks). `409 already_decided` when
+  another manager was first.
+- **Held mail**: `GET …/held-messages/{mid}` (`EmailHeldMessage`: sender as claimed, subject, caption, `auth`, every
+  photo and video with a short-lived `thumb_url`), `DELETE` it, or `POST …/deliver` for one mail. Mail that could not
+  be authenticated (`reason: unverified_sender`, `auth.authenticated: false`) is never matched to an account or the
+  allow-list; show "We couldn't verify that this really comes from {email}" and offer only **Deliver this one** and
+  **Delete**. Held mail is deleted after 14 days.
+- **Recent mail**: `GET …/messages` (30 days, cursor): time, sender, `outcome` (`delivered`, `held`, `no_media`,
+  `too_large`, `encrypted`, `duplicate`, `blocked`, `rejected_dmarc`, `ignored`, `rate_limited`, `failed`), item
+  count, skipped files, the reply the sender got.
+
+**What a mail produces**
+- One send per mail (`Send.via {service: "email", label, address_id}`), by the matched account or by the address
+  owner. Frame: placements on the frame (new, not quiet). Feed: one post (`FeedPost.via`). Moderation applies; mail
+  the owner sends on behalf of a non-account sender is always moderated on a moderated frame. Renditions, receipts,
+  reactions and unsend are as for any send; email sends get no `delivered` push.
+- Credit: for `ItemVia.service == "email"` show `label` **instead of** the sender's name: "Jan via email",
+  "Jan · Peeters kids via email". Clients that don't know `via` show the sender.
+- Captions come from the subject (reply/forward markers stripped) or the first body line; files under 300 px,
+  duplicates, unsupported, too large or too long files are skipped (`EmailSkipCounts`).
+
+**Join links for senders**
+- Replies to allowed, authenticated senders carry a join link (an invite that always needs approval). Its join request
+  arrives as usual (`join_request` / `feed.join_request`) with `JoinRequest.via: "email"`, `via_name` (the sender
+  as managers see it, "Jan · jan.peeters@telenet.be") and `via_matches` (the requester's verified email is that
+  address). `via_name`/`via_matches` are generic for every outside channel (Telegram adds `via: "telegram"`). Show
+  "asked to join from the email link" and `via_name` with a check mark when it matches. These invites are not in
+  `listInvites` / `listFeedInvites`.
+
+**Webhook for operators** (`POST /v1/inbound/email`, security `inboundWebhook`; not for clients)
+- For servers that can't receive mail on port 25: the mail provider (or a small forwarder) posts each message raw
+  (`Content-Type: message/rfc822`) with `X-Kinframe-Envelope-To` (required), `X-Kinframe-Envelope-From`,
+  `X-Kinframe-Client-Ip` and `X-Kinframe-Helo` when known, `X-Kinframe-Timestamp` and `X-Kinframe-Signature:
+  v1=<hex HMAC-SHA256(secret, "v1\n" + ts + "\n" + to + "\n" + from + "\n" + ip + "\n" + helo + "\n" +
+  hex(sha256(body)))>`. `202` lists an outcome per recipient (`accepted`, `unknown_recipient`, `paused`,
+  `rejected_dmarc`, `too_large`); `401` bad signature, `413` too big. Retry only `429`/`5xx`; duplicates are
+  recognised. `POST /v1/inbound/email:check {recipients}` (same signature, JSON body) tells which recipients exist,
+  for providers that can reject during their own SMTP dialogue. Examples (Cloudflare Email Worker, Postfix `pipe` to
+  `kinframe-server deliver-email`) are in the spec, §6.3 and §14.3.
+
+**Events and notifications**
+- Websocket (managers of the target): `email_address.updated` (`address`), `email_address.removed`,
+  `email_sender.pending` (`address_id`, `pending`), `email_sender.decided` (`address_id`, `sender_id`, `decision`).
+- Push `email_pending_sender` to the managers when someone new is waiting (once per pending sender per 7 days; text
+  `email_pending_expiring` 3 days before held mail expires). `ids`: `address_id`, `sender_id`, and `frame_id` or
+  `feed_id`. Tapping opens the address's pending list. No push for delivered mail.
+- Reactions and replies on mailed photos go to the send's sender (`reaction`/`reply`): the matched account, or the
+  address owner unless `notify_reactions` is off.
+
+### 5.17 Telegram (groups and private chats)
+
+Product spec: `docs/spec/telegram.md`. Discovery says `telegram: true` with `telegram_bot_username` when the operator
+configured the server's one Telegram bot, `telegram_privacy_mode` when a group must make the bot an admin before it
+sees photos, and `telegram_max_file_bytes` (20 MB on Telegram's cloud Bot API). Clients hide every Telegram section
+otherwise.
+
+**Connecting a chat** (tag `telegram`)
+- A `TelegramChat` binds one Telegram chat to one target: a **frame** (each batch becomes a direct send) or a **feed**
+  (each batch becomes a post). Frame chats are managed by frame managers (owner, admin, `change_settings`), feed
+  chats by the feed's owner and admins. The creator is the `owner`: contributions from people who aren't linked
+  kinframe users are sent by them. If the owner loses their rights, the frame's or feed's owner takes over
+  automatically; `PATCH {take_over: true}` lets any manager take over.
+- `POST /v1/frames/{id}/telegram-codes` or `POST /v1/feeds/{id}/telegram-codes` (`TelegramConnectCodeCreate`:
+  `chat_kind` `group` or `private`, `link_account`) returns a `TelegramCode` with `url` (only in this response):
+  `https://t.me/<bot>?startgroup=<code>` for a group, `?start=<code>` for a private chat. Open it (Telegram's app
+  handles `t.me` links) and show it as a QR code for another device. Single use, 30 minutes; follow it with
+  `telegram_code.updated` or `GET /v1/telegram-codes/{id}` until `status: used` (`chat_id`) or an `error_code`
+  (`code_expired`, `already_connected`, `limit_reached`, `wrong_chat_kind`, …). `DELETE` revokes it.
+- Three entry points in the apps: **Connect a Telegram group** (`group`), **Send from my Telegram** (`private` with
+  `link_account: true`: the caller's own Telegram account is linked and its private chat with the bot sends to the
+  target), **Invite someone to send by Telegram** (`private`, share the link with a relative who has no app).
+- `GET /v1/frames/{id}/telegram-chats`, `GET /v1/feeds/{id}/telegram-chats` (live first, then disconnected ones for 30
+  days), `GET|PATCH|DELETE /v1/telegram-chats/{cid}`. `PATCH`: `paused`, `contributors` (`everyone` default,
+  `linked_only`), `frame_replies` (post frames' quick replies into the chat, default off), `notify_reactions` (the
+  owner's own switch, default off), `offer_app_invite` (default on), `topic_id` (forum groups: one of `topics`, or
+  null for all). `DELETE` disconnects: the bot says goodbye and leaves; photos already sent stay.
+- `GET /v1/telegram-chats/{cid}/contributors` (`TelegramContributor`: display name, linked, counts),
+  `PATCH …/contributors/{id} {blocked}` ignores one person's media in that chat. Telegram user ids are never exposed.
+- **Status**: `active`; `needs_attention` with `error_code` `privacy_mode` (show "Make the bot an admin of the
+  group", and `sees_all_messages: false`) or `bot_changed` (connect again); `paused`; `disconnected` with
+  `ended_reason` (`disconnected`, `stopped` by `/stop`, `bot_removed`, `chat_gone`, `bot_blocked`, `target_deleted`).
+  `warnings`: `cannot_post`, `reactions_off`. Texts per code: `telegram.md` §15.
+
+**Linking a Telegram account**
+- `POST /v1/me/telegram/link-code` → `TelegramCode` with `url` `https://t.me/<bot>?start=<code>`; tapping Start in
+  the private chat links that Telegram account to the caller. `GET /v1/me/telegram` (`TelegramLink`: display name,
+  `username`, `can_message`), `DELETE` unlinks. One Telegram account per kinframe account (`409
+  telegram_already_linked`).
+- A linked user's media in a connected chat is **their own send** (their name, receipts, reactions, moderation role)
+  when they may send to the target (frame member with `send`, any feed member); otherwise it counts as an outside
+  contribution.
+
+**What a chat produces**
+- A **batch** per chat and contributor (closed after 60 s without new media, after 10 minutes, or at
+  `max_items_per_send`; Telegram albums are never split) becomes one send (`Send.via {service: "telegram", label,
+  telegram_chat_id}`), by the linked account or by the chat's owner. Frame: placements on the frame (new, not quiet).
+  Feed: one post (`FeedPost.via`). Moderation applies; outside contributions are always moderated on a moderated
+  frame. Outside-contribution sends get no `delivered` push.
+- Credit: for `ItemVia.service == "telegram"` show `label` **instead of** the sender's name, like email: "Jan via
+  Telegram", "Jan · Peeters kids via Telegram". Older frames show the sender's name (the owner, for outside
+  contributions).
+- In the chat the bot confirms with a 👍 reaction, mirrors frame reactions (❤ 😁 🤩 😢) on the message, and replies only
+  to errors (too big for the bot, too long, unreadable), rate-limited. Deleting a message in Telegram does **not**
+  unsend it (the Bot API reports no deletions); unsend in the app.
+
+**Join links**
+- The bot's one-time app message to a new contributor carries "Ask to join", delivered through a private chat with
+  the bot so the right Telegram user gets it. It is the email inbox's channel invite (§5.16): single use, 30 days,
+  always needs approval, not in `listInvites`/`listFeedInvites`. Its join request arrives as usual with
+  `JoinRequest.via: "telegram"`, `via_name` ("Ben · Telegram, Peeters family") and `via_matches: null`; show "asked
+  to join from Telegram". Accepting the link also links the requester's Telegram account.
+
+**Telegram's webhook** (`POST /v1/telegram/webhook`, security `telegramWebhook`; not for clients)
+- Registered by the server with `setWebhook` when `KINFRAME_PUBLIC_URL` is public HTTPS; otherwise the server
+  long-polls and this endpoint answers `404`. The header `X-Telegram-Bot-Api-Secret-Token` must carry the server's
+  derived secret (`401` otherwise); the update is stored and acknowledged with `200` at once.
+
+**Events and notifications**
+- Websocket: `telegram_chat.updated` (`chat`, to the target's managers and the owner), `telegram_chat.removed`
+  (`chat_id`, `frame_id`?, `feed_id`?), `telegram_code.updated` (`code`, to its creator), `telegram_link.updated`
+  (`link` or null, to the account).
+- Push `telegram_attention` to the chat's owner only: it needs attention, the bot was removed or the group is gone,
+  or ownership passed to them; at most once per chat and code per 7 days. `ids`: `chat_id`, and `frame_id` or
+  `feed_id`. No push for new photos.
+- Reactions and replies on Telegram photos go to the send's sender (`reaction`/`reply`): the linked account, or the
+  chat's owner only with `notify_reactions`.
 
 ## 7. Versioning
 

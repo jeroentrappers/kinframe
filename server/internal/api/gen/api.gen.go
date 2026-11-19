@@ -316,6 +316,309 @@ func (e DeviceKind) Valid() bool {
 	}
 }
 
+// Defines values for EmailAddressStatus.
+const (
+	EmailAddressStatusActive EmailAddressStatus = "active"
+	EmailAddressStatusPaused EmailAddressStatus = "paused"
+)
+
+// Valid indicates whether the value is a known member of the EmailAddressStatus enum.
+func (e EmailAddressStatus) Valid() bool {
+	switch e {
+	case EmailAddressStatusActive:
+		return true
+	case EmailAddressStatusPaused:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailAddressTargetKind.
+const (
+	EmailAddressTargetKindFeed  EmailAddressTargetKind = "feed"
+	EmailAddressTargetKindFrame EmailAddressTargetKind = "frame"
+)
+
+// Valid indicates whether the value is a known member of the EmailAddressTargetKind enum.
+func (e EmailAddressTargetKind) Valid() bool {
+	switch e {
+	case EmailAddressTargetKindFeed:
+		return true
+	case EmailAddressTargetKindFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailAuthResultDkim.
+const (
+	EmailAuthResultDkimFail      EmailAuthResultDkim = "fail"
+	EmailAuthResultDkimNone      EmailAuthResultDkim = "none"
+	EmailAuthResultDkimPass      EmailAuthResultDkim = "pass"
+	EmailAuthResultDkimPermerror EmailAuthResultDkim = "permerror"
+	EmailAuthResultDkimTemperror EmailAuthResultDkim = "temperror"
+)
+
+// Valid indicates whether the value is a known member of the EmailAuthResultDkim enum.
+func (e EmailAuthResultDkim) Valid() bool {
+	switch e {
+	case EmailAuthResultDkimFail:
+		return true
+	case EmailAuthResultDkimNone:
+		return true
+	case EmailAuthResultDkimPass:
+		return true
+	case EmailAuthResultDkimPermerror:
+		return true
+	case EmailAuthResultDkimTemperror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailAuthResultDmarc.
+const (
+	EmailAuthResultDmarcFail      EmailAuthResultDmarc = "fail"
+	EmailAuthResultDmarcNone      EmailAuthResultDmarc = "none"
+	EmailAuthResultDmarcPass      EmailAuthResultDmarc = "pass"
+	EmailAuthResultDmarcTemperror EmailAuthResultDmarc = "temperror"
+)
+
+// Valid indicates whether the value is a known member of the EmailAuthResultDmarc enum.
+func (e EmailAuthResultDmarc) Valid() bool {
+	switch e {
+	case EmailAuthResultDmarcFail:
+		return true
+	case EmailAuthResultDmarcNone:
+		return true
+	case EmailAuthResultDmarcPass:
+		return true
+	case EmailAuthResultDmarcTemperror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailAuthResultSpf.
+const (
+	EmailAuthResultSpfFail       EmailAuthResultSpf = "fail"
+	EmailAuthResultSpfNeutral    EmailAuthResultSpf = "neutral"
+	EmailAuthResultSpfNone       EmailAuthResultSpf = "none"
+	EmailAuthResultSpfNotChecked EmailAuthResultSpf = "not_checked"
+	EmailAuthResultSpfPass       EmailAuthResultSpf = "pass"
+	EmailAuthResultSpfPermerror  EmailAuthResultSpf = "permerror"
+	EmailAuthResultSpfSoftfail   EmailAuthResultSpf = "softfail"
+	EmailAuthResultSpfTemperror  EmailAuthResultSpf = "temperror"
+)
+
+// Valid indicates whether the value is a known member of the EmailAuthResultSpf enum.
+func (e EmailAuthResultSpf) Valid() bool {
+	switch e {
+	case EmailAuthResultSpfFail:
+		return true
+	case EmailAuthResultSpfNeutral:
+		return true
+	case EmailAuthResultSpfNone:
+		return true
+	case EmailAuthResultSpfNotChecked:
+		return true
+	case EmailAuthResultSpfPass:
+		return true
+	case EmailAuthResultSpfPermerror:
+		return true
+	case EmailAuthResultSpfSoftfail:
+		return true
+	case EmailAuthResultSpfTemperror:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailHeldReason.
+const (
+	UnknownSender    EmailHeldReason = "unknown_sender"
+	UnverifiedSender EmailHeldReason = "unverified_sender"
+)
+
+// Valid indicates whether the value is a known member of the EmailHeldReason enum.
+func (e EmailHeldReason) Valid() bool {
+	switch e {
+	case UnknownSender:
+		return true
+	case UnverifiedSender:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailInboundResultRecipientsOutcome.
+const (
+	EmailInboundResultRecipientsOutcomeAccepted         EmailInboundResultRecipientsOutcome = "accepted"
+	EmailInboundResultRecipientsOutcomePaused           EmailInboundResultRecipientsOutcome = "paused"
+	EmailInboundResultRecipientsOutcomeRejectedDmarc    EmailInboundResultRecipientsOutcome = "rejected_dmarc"
+	EmailInboundResultRecipientsOutcomeTooLarge         EmailInboundResultRecipientsOutcome = "too_large"
+	EmailInboundResultRecipientsOutcomeUnknownRecipient EmailInboundResultRecipientsOutcome = "unknown_recipient"
+)
+
+// Valid indicates whether the value is a known member of the EmailInboundResultRecipientsOutcome enum.
+func (e EmailInboundResultRecipientsOutcome) Valid() bool {
+	switch e {
+	case EmailInboundResultRecipientsOutcomeAccepted:
+		return true
+	case EmailInboundResultRecipientsOutcomePaused:
+		return true
+	case EmailInboundResultRecipientsOutcomeRejectedDmarc:
+		return true
+	case EmailInboundResultRecipientsOutcomeTooLarge:
+		return true
+	case EmailInboundResultRecipientsOutcomeUnknownRecipient:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailOutcome.
+const (
+	EmailOutcomeBlocked       EmailOutcome = "blocked"
+	EmailOutcomeDelivered     EmailOutcome = "delivered"
+	EmailOutcomeDuplicate     EmailOutcome = "duplicate"
+	EmailOutcomeEncrypted     EmailOutcome = "encrypted"
+	EmailOutcomeFailed        EmailOutcome = "failed"
+	EmailOutcomeHeld          EmailOutcome = "held"
+	EmailOutcomeIgnored       EmailOutcome = "ignored"
+	EmailOutcomeNoMedia       EmailOutcome = "no_media"
+	EmailOutcomeRateLimited   EmailOutcome = "rate_limited"
+	EmailOutcomeRejectedDmarc EmailOutcome = "rejected_dmarc"
+	EmailOutcomeTooLarge      EmailOutcome = "too_large"
+)
+
+// Valid indicates whether the value is a known member of the EmailOutcome enum.
+func (e EmailOutcome) Valid() bool {
+	switch e {
+	case EmailOutcomeBlocked:
+		return true
+	case EmailOutcomeDelivered:
+		return true
+	case EmailOutcomeDuplicate:
+		return true
+	case EmailOutcomeEncrypted:
+		return true
+	case EmailOutcomeFailed:
+		return true
+	case EmailOutcomeHeld:
+		return true
+	case EmailOutcomeIgnored:
+		return true
+	case EmailOutcomeNoMedia:
+		return true
+	case EmailOutcomeRateLimited:
+		return true
+	case EmailOutcomeRejectedDmarc:
+		return true
+	case EmailOutcomeTooLarge:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailRecipientCheckResultRecipientsOutcome.
+const (
+	EmailRecipientCheckResultRecipientsOutcomeAccepted         EmailRecipientCheckResultRecipientsOutcome = "accepted"
+	EmailRecipientCheckResultRecipientsOutcomePaused           EmailRecipientCheckResultRecipientsOutcome = "paused"
+	EmailRecipientCheckResultRecipientsOutcomeUnknownRecipient EmailRecipientCheckResultRecipientsOutcome = "unknown_recipient"
+)
+
+// Valid indicates whether the value is a known member of the EmailRecipientCheckResultRecipientsOutcome enum.
+func (e EmailRecipientCheckResultRecipientsOutcome) Valid() bool {
+	switch e {
+	case EmailRecipientCheckResultRecipientsOutcomeAccepted:
+		return true
+	case EmailRecipientCheckResultRecipientsOutcomePaused:
+		return true
+	case EmailRecipientCheckResultRecipientsOutcomeUnknownRecipient:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailReplyKind.
+const (
+	EmailReplyKindDelivered EmailReplyKind = "delivered"
+	EmailReplyKindEncrypted EmailReplyKind = "encrypted"
+	EmailReplyKindHeld      EmailReplyKind = "held"
+	EmailReplyKindNoMedia   EmailReplyKind = "no_media"
+	EmailReplyKindTooLarge  EmailReplyKind = "too_large"
+)
+
+// Valid indicates whether the value is a known member of the EmailReplyKind enum.
+func (e EmailReplyKind) Valid() bool {
+	switch e {
+	case EmailReplyKindDelivered:
+		return true
+	case EmailReplyKindEncrypted:
+		return true
+	case EmailReplyKindHeld:
+		return true
+	case EmailReplyKindNoMedia:
+		return true
+	case EmailReplyKindTooLarge:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailSenderOrigin.
+const (
+	EmailSenderOriginApproved EmailSenderOrigin = "approved"
+	EmailSenderOriginMail     EmailSenderOrigin = "mail"
+	EmailSenderOriginManual   EmailSenderOrigin = "manual"
+)
+
+// Valid indicates whether the value is a known member of the EmailSenderOrigin enum.
+func (e EmailSenderOrigin) Valid() bool {
+	switch e {
+	case EmailSenderOriginApproved:
+		return true
+	case EmailSenderOriginMail:
+		return true
+	case EmailSenderOriginManual:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for EmailSenderState.
+const (
+	EmailSenderStateAllowed EmailSenderState = "allowed"
+	EmailSenderStateBlocked EmailSenderState = "blocked"
+	EmailSenderStatePending EmailSenderState = "pending"
+)
+
+// Valid indicates whether the value is a known member of the EmailSenderState enum.
+func (e EmailSenderState) Valid() bool {
+	switch e {
+	case EmailSenderStateAllowed:
+		return true
+	case EmailSenderStateBlocked:
+		return true
+	case EmailSenderStatePending:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for EventInvitationStatus.
 const (
 	EventInvitationStatusAccepted  EventInvitationStatus = "accepted"
@@ -1041,16 +1344,22 @@ func (e ItemOrigin) Valid() bool {
 
 // Defines values for JoinRequestVia.
 const (
+	JoinRequestViaEmail     JoinRequestVia = "email"
 	JoinRequestViaFrameCode JoinRequestVia = "frame_code"
 	JoinRequestViaInvite    JoinRequestVia = "invite"
+	JoinRequestViaTelegram  JoinRequestVia = "telegram"
 )
 
 // Valid indicates whether the value is a known member of the JoinRequestVia enum.
 func (e JoinRequestVia) Valid() bool {
 	switch e {
+	case JoinRequestViaEmail:
+		return true
 	case JoinRequestViaFrameCode:
 		return true
 	case JoinRequestViaInvite:
+		return true
+	case JoinRequestViaTelegram:
 		return true
 	default:
 		return false
@@ -1284,19 +1593,25 @@ func (e NowShowingType) Valid() bool {
 
 // Defines values for PhotoService.
 const (
-	GooglePhotos PhotoService = "google_photos"
-	Icloud       PhotoService = "icloud"
-	Immich       PhotoService = "immich"
+	PhotoServiceEmail        PhotoService = "email"
+	PhotoServiceGooglePhotos PhotoService = "google_photos"
+	PhotoServiceIcloud       PhotoService = "icloud"
+	PhotoServiceImmich       PhotoService = "immich"
+	PhotoServiceTelegram     PhotoService = "telegram"
 )
 
 // Valid indicates whether the value is a known member of the PhotoService enum.
 func (e PhotoService) Valid() bool {
 	switch e {
-	case GooglePhotos:
+	case PhotoServiceEmail:
 		return true
-	case Icloud:
+	case PhotoServiceGooglePhotos:
 		return true
-	case Immich:
+	case PhotoServiceIcloud:
+		return true
+	case PhotoServiceImmich:
+		return true
+	case PhotoServiceTelegram:
 		return true
 	default:
 		return false
@@ -1623,41 +1938,43 @@ func (e PluginInstanceVisibility) Valid() bool {
 
 // Defines values for ProblemCode.
 const (
-	ProblemCodeAlreadyDecided      ProblemCode = "already_decided"
-	ProblemCodeAlreadyMember       ProblemCode = "already_member"
-	ProblemCodeAlreadySubscribed   ProblemCode = "already_subscribed"
-	ProblemCodeAppUpdateRequired   ProblemCode = "app_update_required"
-	ProblemCodeCodeExpired         ProblemCode = "code_expired"
-	ProblemCodeCodeInvalid         ProblemCode = "code_invalid"
-	ProblemCodeCommandTimeout      ProblemCode = "command_timeout"
-	ProblemCodeCorruptMedia        ProblemCode = "corrupt_media"
-	ProblemCodeDeviceRevoked       ProblemCode = "device_revoked"
-	ProblemCodeDuplicateBirthday   ProblemCode = "duplicate_birthday"
-	ProblemCodeDuplicateSource     ProblemCode = "duplicate_source"
-	ProblemCodeFeatureDisabled     ProblemCode = "feature_disabled"
-	ProblemCodeForbidden           ProblemCode = "forbidden"
-	ProblemCodeFrameOffline        ProblemCode = "frame_offline"
-	ProblemCodeInvalidTransition   ProblemCode = "invalid_transition"
-	ProblemCodeInviteExpired       ProblemCode = "invite_expired"
-	ProblemCodeInviteInvalid       ProblemCode = "invite_invalid"
-	ProblemCodeLimitReached        ProblemCode = "limit_reached"
-	ProblemCodeLinkExpired         ProblemCode = "link_expired"
-	ProblemCodeMissingPermission   ProblemCode = "missing_permission"
-	ProblemCodeNotFound            ProblemCode = "not_found"
-	ProblemCodeOwnerCannotLeave    ProblemCode = "owner_cannot_leave"
-	ProblemCodeRateLimited         ProblemCode = "rate_limited"
-	ProblemCodeServerError         ProblemCode = "server_error"
-	ProblemCodeSourceTestFailed    ProblemCode = "source_test_failed"
-	ProblemCodeTokenExpired        ProblemCode = "token_expired"
-	ProblemCodeTooManyItems        ProblemCode = "too_many_items"
-	ProblemCodeUnauthorized        ProblemCode = "unauthorized"
-	ProblemCodeUnsupportedMedia    ProblemCode = "unsupported_media"
-	ProblemCodeUploadNotFound      ProblemCode = "upload_not_found"
-	ProblemCodeUploadTooLarge      ProblemCode = "upload_too_large"
-	ProblemCodeUpstreamUnavailable ProblemCode = "upstream_unavailable"
-	ProblemCodeValidationFailed    ProblemCode = "validation_failed"
-	ProblemCodeVersionConflict     ProblemCode = "version_conflict"
-	ProblemCodeVideoTooLong        ProblemCode = "video_too_long"
+	ProblemCodeAlreadyDecided        ProblemCode = "already_decided"
+	ProblemCodeAlreadyMember         ProblemCode = "already_member"
+	ProblemCodeAlreadySubscribed     ProblemCode = "already_subscribed"
+	ProblemCodeAppUpdateRequired     ProblemCode = "app_update_required"
+	ProblemCodeCodeExpired           ProblemCode = "code_expired"
+	ProblemCodeCodeInvalid           ProblemCode = "code_invalid"
+	ProblemCodeCommandTimeout        ProblemCode = "command_timeout"
+	ProblemCodeCorruptMedia          ProblemCode = "corrupt_media"
+	ProblemCodeDeviceRevoked         ProblemCode = "device_revoked"
+	ProblemCodeDuplicateBirthday     ProblemCode = "duplicate_birthday"
+	ProblemCodeDuplicateSender       ProblemCode = "duplicate_sender"
+	ProblemCodeDuplicateSource       ProblemCode = "duplicate_source"
+	ProblemCodeFeatureDisabled       ProblemCode = "feature_disabled"
+	ProblemCodeForbidden             ProblemCode = "forbidden"
+	ProblemCodeFrameOffline          ProblemCode = "frame_offline"
+	ProblemCodeInvalidTransition     ProblemCode = "invalid_transition"
+	ProblemCodeInviteExpired         ProblemCode = "invite_expired"
+	ProblemCodeInviteInvalid         ProblemCode = "invite_invalid"
+	ProblemCodeLimitReached          ProblemCode = "limit_reached"
+	ProblemCodeLinkExpired           ProblemCode = "link_expired"
+	ProblemCodeMissingPermission     ProblemCode = "missing_permission"
+	ProblemCodeNotFound              ProblemCode = "not_found"
+	ProblemCodeOwnerCannotLeave      ProblemCode = "owner_cannot_leave"
+	ProblemCodeRateLimited           ProblemCode = "rate_limited"
+	ProblemCodeServerError           ProblemCode = "server_error"
+	ProblemCodeSourceTestFailed      ProblemCode = "source_test_failed"
+	ProblemCodeTelegramAlreadyLinked ProblemCode = "telegram_already_linked"
+	ProblemCodeTokenExpired          ProblemCode = "token_expired"
+	ProblemCodeTooManyItems          ProblemCode = "too_many_items"
+	ProblemCodeUnauthorized          ProblemCode = "unauthorized"
+	ProblemCodeUnsupportedMedia      ProblemCode = "unsupported_media"
+	ProblemCodeUploadNotFound        ProblemCode = "upload_not_found"
+	ProblemCodeUploadTooLarge        ProblemCode = "upload_too_large"
+	ProblemCodeUpstreamUnavailable   ProblemCode = "upstream_unavailable"
+	ProblemCodeValidationFailed      ProblemCode = "validation_failed"
+	ProblemCodeVersionConflict       ProblemCode = "version_conflict"
+	ProblemCodeVideoTooLong          ProblemCode = "video_too_long"
 )
 
 // Valid indicates whether the value is a known member of the ProblemCode enum.
@@ -1682,6 +1999,8 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeDeviceRevoked:
 		return true
 	case ProblemCodeDuplicateBirthday:
+		return true
+	case ProblemCodeDuplicateSender:
 		return true
 	case ProblemCodeDuplicateSource:
 		return true
@@ -1712,6 +2031,8 @@ func (e ProblemCode) Valid() bool {
 	case ProblemCodeServerError:
 		return true
 	case ProblemCodeSourceTestFailed:
+		return true
+	case ProblemCodeTelegramAlreadyLinked:
 		return true
 	case ProblemCodeTokenExpired:
 		return true
@@ -2113,6 +2434,225 @@ func (e SubscriptionStatus) Valid() bool {
 	case SubscriptionStatusRejected:
 		return true
 	case SubscriptionStatusRemoved:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatEndedReason.
+const (
+	TelegramChatEndedReasonBotBlocked    TelegramChatEndedReason = "bot_blocked"
+	TelegramChatEndedReasonBotRemoved    TelegramChatEndedReason = "bot_removed"
+	TelegramChatEndedReasonChatGone      TelegramChatEndedReason = "chat_gone"
+	TelegramChatEndedReasonDisconnected  TelegramChatEndedReason = "disconnected"
+	TelegramChatEndedReasonStopped       TelegramChatEndedReason = "stopped"
+	TelegramChatEndedReasonTargetDeleted TelegramChatEndedReason = "target_deleted"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatEndedReason enum.
+func (e TelegramChatEndedReason) Valid() bool {
+	switch e {
+	case TelegramChatEndedReasonBotBlocked:
+		return true
+	case TelegramChatEndedReasonBotRemoved:
+		return true
+	case TelegramChatEndedReasonChatGone:
+		return true
+	case TelegramChatEndedReasonDisconnected:
+		return true
+	case TelegramChatEndedReasonStopped:
+		return true
+	case TelegramChatEndedReasonTargetDeleted:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatErrorCode.
+const (
+	BotChanged  TelegramChatErrorCode = "bot_changed"
+	PrivacyMode TelegramChatErrorCode = "privacy_mode"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatErrorCode enum.
+func (e TelegramChatErrorCode) Valid() bool {
+	switch e {
+	case BotChanged:
+		return true
+	case PrivacyMode:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatKind.
+const (
+	Group   TelegramChatKind = "group"
+	Private TelegramChatKind = "private"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatKind enum.
+func (e TelegramChatKind) Valid() bool {
+	switch e {
+	case Group:
+		return true
+	case Private:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatStatus.
+const (
+	TelegramChatStatusActive         TelegramChatStatus = "active"
+	TelegramChatStatusDisconnected   TelegramChatStatus = "disconnected"
+	TelegramChatStatusNeedsAttention TelegramChatStatus = "needs_attention"
+	TelegramChatStatusPaused         TelegramChatStatus = "paused"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatStatus enum.
+func (e TelegramChatStatus) Valid() bool {
+	switch e {
+	case TelegramChatStatusActive:
+		return true
+	case TelegramChatStatusDisconnected:
+		return true
+	case TelegramChatStatusNeedsAttention:
+		return true
+	case TelegramChatStatusPaused:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatTargetKind.
+const (
+	TelegramChatTargetKindFeed  TelegramChatTargetKind = "feed"
+	TelegramChatTargetKindFrame TelegramChatTargetKind = "frame"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatTargetKind enum.
+func (e TelegramChatTargetKind) Valid() bool {
+	switch e {
+	case TelegramChatTargetKindFeed:
+		return true
+	case TelegramChatTargetKindFrame:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramChatWarning.
+const (
+	CannotPost   TelegramChatWarning = "cannot_post"
+	ReactionsOff TelegramChatWarning = "reactions_off"
+)
+
+// Valid indicates whether the value is a known member of the TelegramChatWarning enum.
+func (e TelegramChatWarning) Valid() bool {
+	switch e {
+	case CannotPost:
+		return true
+	case ReactionsOff:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramCodeErrorCode.
+const (
+	TelegramCodeErrorCodeAlreadyConnected  TelegramCodeErrorCode = "already_connected"
+	TelegramCodeErrorCodeAlreadyLinked     TelegramCodeErrorCode = "already_linked"
+	TelegramCodeErrorCodeCodeExpired       TelegramCodeErrorCode = "code_expired"
+	TelegramCodeErrorCodeCodeUsed          TelegramCodeErrorCode = "code_used"
+	TelegramCodeErrorCodeLimitReached      TelegramCodeErrorCode = "limit_reached"
+	TelegramCodeErrorCodeMissingPermission TelegramCodeErrorCode = "missing_permission"
+	TelegramCodeErrorCodeWrongChatKind     TelegramCodeErrorCode = "wrong_chat_kind"
+)
+
+// Valid indicates whether the value is a known member of the TelegramCodeErrorCode enum.
+func (e TelegramCodeErrorCode) Valid() bool {
+	switch e {
+	case TelegramCodeErrorCodeAlreadyConnected:
+		return true
+	case TelegramCodeErrorCodeAlreadyLinked:
+		return true
+	case TelegramCodeErrorCodeCodeExpired:
+		return true
+	case TelegramCodeErrorCodeCodeUsed:
+		return true
+	case TelegramCodeErrorCodeLimitReached:
+		return true
+	case TelegramCodeErrorCodeMissingPermission:
+		return true
+	case TelegramCodeErrorCodeWrongChatKind:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramCodePurpose.
+const (
+	Connect TelegramCodePurpose = "connect"
+	Link    TelegramCodePurpose = "link"
+)
+
+// Valid indicates whether the value is a known member of the TelegramCodePurpose enum.
+func (e TelegramCodePurpose) Valid() bool {
+	switch e {
+	case Connect:
+		return true
+	case Link:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramCodeStatus.
+const (
+	TelegramCodeStatusExpired TelegramCodeStatus = "expired"
+	TelegramCodeStatusOpen    TelegramCodeStatus = "open"
+	TelegramCodeStatusRevoked TelegramCodeStatus = "revoked"
+	TelegramCodeStatusUsed    TelegramCodeStatus = "used"
+)
+
+// Valid indicates whether the value is a known member of the TelegramCodeStatus enum.
+func (e TelegramCodeStatus) Valid() bool {
+	switch e {
+	case TelegramCodeStatusExpired:
+		return true
+	case TelegramCodeStatusOpen:
+		return true
+	case TelegramCodeStatusRevoked:
+		return true
+	case TelegramCodeStatusUsed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for TelegramContributorsMode.
+const (
+	Everyone   TelegramContributorsMode = "everyone"
+	LinkedOnly TelegramContributorsMode = "linked_only"
+)
+
+// Valid indicates whether the value is a known member of the TelegramContributorsMode enum.
+func (e TelegramContributorsMode) Valid() bool {
+	switch e {
+	case Everyone:
+		return true
+	case LinkedOnly:
 		return true
 	default:
 		return false
@@ -3161,6 +3701,15 @@ type Discovery struct {
 	// DevAuth True only on development servers running dev auth mode (POST /dev/token). Never true in production.
 	DevAuth *bool `json:"dev_auth,omitempty"`
 
+	// EmailInbox True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
+	// (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
+	EmailInbox *bool `json:"email_inbox,omitempty"`
+
+	// EmailInboxDomain The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
+	//
+	// Example: in.kinframe.appmire.be
+	EmailInboxDomain *string `json:"email_inbox_domain,omitempty"`
+
 	// Feeds True when the server supports feeds and subscriptions (docs/spec/feeds.md).
 	Feeds *bool `json:"feeds,omitempty"`
 
@@ -3182,8 +3731,24 @@ type Discovery struct {
 	// Shop Pre-order shop run by the server operator (README §5.11). Present only when the operator configured one
 	// (KINFRAME_SHOP_FILE). Prices include VAT. Localized texts are maps from a language code (see docs/i18n.md)
 	// to text; `en` is always present and is the fallback.
-	Shop    *Shop  `json:"shop,omitempty"`
-	Version string `json:"version"`
+	Shop *Shop `json:"shop,omitempty"`
+
+	// Telegram True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
+	// accounts can link Telegram (docs/spec/telegram.md). Clients hide every Telegram section otherwise.
+	Telegram *bool `json:"telegram,omitempty"`
+
+	// TelegramBotUsername The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
+	//
+	// Example: kinframe_bot
+	TelegramBotUsername *string `json:"telegram_bot_username,omitempty"`
+
+	// TelegramMaxFileBytes The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`.
+	TelegramMaxFileBytes *int `json:"telegram_max_file_bytes,omitempty"`
+
+	// TelegramPrivacyMode True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
+	// so the connect sheet says so up front (docs/spec/telegram.md §6).
+	TelegramPrivacyMode *bool  `json:"telegram_privacy_mode,omitempty"`
+	Version             string `json:"version"`
 
 	// Weather True when the server fetches weather for frames and serves `/v1/geocode`.
 	Weather *bool   `json:"weather,omitempty"`
@@ -3192,6 +3757,370 @@ type Discovery struct {
 	// WebpushPublicKey VAPID application server public key (uncompressed P-256 point, base64url) for browser push
 	// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
 	WebpushPublicKey *string `json:"webpush_public_key,omitempty"`
+}
+
+// EmailAddress defines model for EmailAddress.
+type EmailAddress struct {
+	// Address The full address, `<slug>-<random>@<email_inbox_domain>`. A capability: shown to managers only.
+	//
+	// Example: oma-k7q2m9@in.kinframe.appmire.be
+	Address openapi_types.Email `json:"address"`
+
+	// AnyoneMaySend Mail from anyone with the address is delivered without approval (default off).
+	AnyoneMaySend bool  `json:"anyone_may_send"`
+	CanManage     *bool `json:"can_manage,omitempty"`
+	Counts        struct {
+		AllowedSenders int  `json:"allowed_senders"`
+		BlockedSenders *int `json:"blocked_senders,omitempty"`
+
+		// Delivered30d Mails delivered in the last 30 days.
+		Delivered30d   *int `json:"delivered_30d,omitempty"`
+		HeldMessages   int  `json:"held_messages"`
+		PendingSenders int  `json:"pending_senders"`
+	} `json:"counts"`
+	CreatedAt time.Time `json:"created_at"`
+
+	// Id UUIDv7
+	Id             Id         `json:"id"`
+	IsOwner        *bool      `json:"is_owner,omitempty"`
+	LastReceivedAt *time.Time `json:"last_received_at,omitempty"`
+
+	// Name Label in the apps and in replies to senders ("Oma's frame").
+	Name string `json:"name"`
+
+	// NotifyReactions The owner gets reaction and reply notifications for photos they sent on behalf of non-account senders (the owner's own switch).
+	NotifyReactions bool `json:"notify_reactions"`
+
+	// OfferAppInvite Replies to allowed, authenticated senders include a link to join the frame or feed in the app (an invite that always needs approval; default on).
+	OfferAppInvite bool `json:"offer_app_invite"`
+
+	// Owner Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+	// the creator lost their rights). Null only briefly while ownership passes on.
+	Owner *struct {
+		AvatarUrl   *string `json:"avatar_url,omitempty"`
+		DisplayName string  `json:"display_name"`
+
+		// UserId UUIDv7
+		UserId Id `json:"user_id"`
+	} `json:"owner,omitempty"`
+	RegeneratedAt *time.Time `json:"regenerated_at,omitempty"`
+
+	// RepliesAvailable False when the server can't send mail (no outgoing mail configured): senders get no replies at all.
+	RepliesAvailable *bool `json:"replies_available,omitempty"`
+
+	// SendConfirmations Authenticated senders get a short "delivered" reply (default on).
+	SendConfirmations bool `json:"send_confirmations"`
+
+	// Slug The friendly part.
+	//
+	// Example: oma
+	Slug string `json:"slug"`
+
+	// Status `active`: mail is accepted. `paused`: mail to it is refused (`550 5.2.1 This address is paused`); resume to reopen.
+	Status EmailAddressStatus `json:"status"`
+
+	// Target What the address fills. Exactly one of `frame_id` (a direct send) or `feed_id` (a post) is set.
+	Target EmailAddressTarget `json:"target"`
+}
+
+// EmailAddressCreate defines model for EmailAddressCreate.
+type EmailAddressCreate struct {
+	AnyoneMaySend *bool `json:"anyone_may_send,omitempty"`
+
+	// Name Label; defaults to the target's name.
+	Name              *string `json:"name,omitempty"`
+	NotifyReactions   *bool   `json:"notify_reactions,omitempty"`
+	OfferAppInvite    *bool   `json:"offer_app_invite,omitempty"`
+	SendConfirmations *bool   `json:"send_confirmations,omitempty"`
+
+	// Slug The friendly part; defaults to one made from the target's name (lower case, accents removed, `oma`).
+	Slug *string `json:"slug,omitempty"`
+}
+
+// EmailAddressStatus `active`: mail is accepted. `paused`: mail to it is refused (`550 5.2.1 This address is paused`); resume to reopen.
+type EmailAddressStatus string
+
+// EmailAddressTarget What the address fills. Exactly one of `frame_id` (a direct send) or `feed_id` (a post) is set.
+type EmailAddressTarget struct {
+	FeedId    *Id                    `json:"feed_id,omitempty"`
+	FeedName  *string                `json:"feed_name,omitempty"`
+	FrameId   *Id                    `json:"frame_id,omitempty"`
+	FrameName *string                `json:"frame_name,omitempty"`
+	Kind      EmailAddressTargetKind `json:"kind"`
+}
+
+// EmailAddressTargetKind defines model for EmailAddressTarget.Kind.
+type EmailAddressTargetKind string
+
+// EmailAddressUpdate At least one field.
+type EmailAddressUpdate struct {
+	AnyoneMaySend *bool   `json:"anyone_may_send,omitempty"`
+	Name          *string `json:"name,omitempty"`
+
+	// NotifyReactions The owner's own switch; only the owner may change it.
+	NotifyReactions *bool `json:"notify_reactions,omitempty"`
+	OfferAppInvite  *bool `json:"offer_app_invite,omitempty"`
+
+	// Paused true pauses, false resumes.
+	Paused            *bool `json:"paused,omitempty"`
+	SendConfirmations *bool `json:"send_confirmations,omitempty"`
+
+	// Slug A new friendly part; the old address stops working at once.
+	Slug *string `json:"slug,omitempty"`
+
+	// TakeOver The caller becomes the owner.
+	TakeOver *bool `json:"take_over,omitempty"`
+}
+
+// EmailAuthResult How the mail was checked (docs/spec/email-inbox.md §7). Only `authenticated` mail is matched, allowed or answered.
+type EmailAuthResult struct {
+	// Aligned Which check aligned: `spf` or `dkim`; null when neither.
+	Aligned *string `json:"aligned,omitempty"`
+
+	// Authenticated DMARC-aligned SPF or DKIM passed for the From domain.
+	Authenticated bool                 `json:"authenticated"`
+	Dkim          *EmailAuthResultDkim `json:"dkim,omitempty"`
+
+	// DkimDomain The `d=` of the passing signature.
+	DkimDomain *string               `json:"dkim_domain,omitempty"`
+	Dmarc      *EmailAuthResultDmarc `json:"dmarc,omitempty"`
+
+	// DmarcPolicy The From domain's policy: `none`, `quarantine` or `reject`; null without a DMARC record.
+	DmarcPolicy *string             `json:"dmarc_policy,omitempty"`
+	FromDomain  *string             `json:"from_domain,omitempty"`
+	Spf         *EmailAuthResultSpf `json:"spf,omitempty"`
+}
+
+// EmailAuthResultDkim defines model for EmailAuthResult.Dkim.
+type EmailAuthResultDkim string
+
+// EmailAuthResultDmarc defines model for EmailAuthResult.Dmarc.
+type EmailAuthResultDmarc string
+
+// EmailAuthResultSpf defines model for EmailAuthResult.Spf.
+type EmailAuthResultSpf string
+
+// EmailHeldMessage defines model for EmailHeldMessage.
+type EmailHeldMessage struct {
+	// AddressId UUIDv7
+	AddressId Id `json:"address_id"`
+
+	// Auth How the mail was checked (docs/spec/email-inbox.md §7). Only `authenticated` mail is matched, allowed or answered.
+	Auth EmailAuthResult `json:"auth"`
+
+	// Caption The caption the photos would get.
+	Caption   *string   `json:"caption,omitempty"`
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// Id UUIDv7
+	Id    Id `json:"id"`
+	Media []struct {
+		Bytes      *int    `json:"bytes,omitempty"`
+		DurationMs *int    `json:"duration_ms,omitempty"`
+		Filename   *string `json:"filename,omitempty"`
+		Height     *int    `json:"height,omitempty"`
+
+		// Kind `live` is a Live Photo (iOS) or Motion Photo (Android): a still plus a short motion clip (`Item.motion`).
+		// Clients that don't know `live` treat it as `photo`: every photo field (size, thumbnails, the frame's
+		// `media`) describes the still. As a library filter, `photo` includes live items and `live` only them.
+		Kind MediaKind `json:"kind"`
+
+		// ThumbUrl Short-lived signed URL (about 1 h); null while processing.
+		ThumbUrl *string `json:"thumb_url,omitempty"`
+		Width    *int    `json:"width,omitempty"`
+	} `json:"media"`
+
+	// Reason `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+	// couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+	Reason     EmailHeldReason `json:"reason"`
+	ReceivedAt time.Time       `json:"received_at"`
+
+	// SenderEmail As the From header says; trustworthy only when `auth.authenticated`.
+	SenderEmail string `json:"sender_email"`
+
+	// SenderId UUIDv7
+	SenderId   *Id     `json:"sender_id,omitempty"`
+	SenderName *string `json:"sender_name,omitempty"`
+
+	// Skipped Files in a mail that were not used.
+	Skipped *EmailSkipCounts `json:"skipped,omitempty"`
+	Subject *string          `json:"subject,omitempty"`
+}
+
+// EmailHeldMessageSummary defines model for EmailHeldMessageSummary.
+type EmailHeldMessageSummary struct {
+	Authenticated bool `json:"authenticated"`
+
+	// ExpiresAt Deleted then (at most 14 days after it arrived).
+	ExpiresAt time.Time `json:"expires_at"`
+
+	// Id UUIDv7
+	Id         Id  `json:"id"`
+	MediaCount int `json:"media_count"`
+
+	// Reason `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+	// couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+	Reason     EmailHeldReason `json:"reason"`
+	ReceivedAt time.Time       `json:"received_at"`
+	Subject    *string         `json:"subject,omitempty"`
+
+	// ThumbUrls The first thumbnails; short-lived signed URLs (about 1 h).
+	ThumbUrls *[]string `json:"thumb_urls,omitempty"`
+}
+
+// EmailHeldReason `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+// couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+type EmailHeldReason string
+
+// EmailInboundResult defines model for EmailInboundResult.
+type EmailInboundResult struct {
+	// Id UUIDv7
+	Id         Id `json:"id"`
+	Recipients []struct {
+		Address string                              `json:"address"`
+		Outcome EmailInboundResultRecipientsOutcome `json:"outcome"`
+	} `json:"recipients"`
+}
+
+// EmailInboundResultRecipientsOutcome defines model for EmailInboundResult.Recipients.Outcome.
+type EmailInboundResultRecipientsOutcome string
+
+// EmailMessage defines model for EmailMessage.
+type EmailMessage struct {
+	Authenticated bool `json:"authenticated"`
+
+	// Id UUIDv7
+	Id Id `json:"id"`
+
+	// Items Photos and videos delivered or held.
+	Items *int `json:"items,omitempty"`
+
+	// Outcome What became of a mail (texts in docs/spec/email-inbox.md §13).
+	Outcome    EmailOutcome `json:"outcome"`
+	ReceivedAt time.Time    `json:"received_at"`
+
+	// Reply The reply the sender got, if any.
+	Reply       *EmailReplyKind `json:"reply,omitempty"`
+	SendIds     *[]Id           `json:"send_ids,omitempty"`
+	SenderEmail *string         `json:"sender_email,omitempty"`
+	SenderName  *string         `json:"sender_name,omitempty"`
+
+	// Skipped Files in a mail that were not used.
+	Skipped *EmailSkipCounts `json:"skipped,omitempty"`
+}
+
+// EmailMessagePage defines model for EmailMessagePage.
+type EmailMessagePage struct {
+	Items      []EmailMessage `json:"items"`
+	NextCursor *string        `json:"next_cursor,omitempty"`
+}
+
+// EmailOutcome What became of a mail (texts in docs/spec/email-inbox.md §13).
+type EmailOutcome string
+
+// EmailPendingSender defines model for EmailPendingSender.
+type EmailPendingSender struct {
+	// Authenticated The latest held mail was authenticated.
+	Authenticated bool    `json:"authenticated"`
+	DisplayName   *string `json:"display_name,omitempty"`
+
+	// Email As claimed; trustworthy only when `authenticated`.
+	Email       string    `json:"email"`
+	FirstHeldAt time.Time `json:"first_held_at"`
+
+	// Id UUIDv7
+	Id         Id        `json:"id"`
+	LastHeldAt time.Time `json:"last_held_at"`
+
+	// Messages Held mail, newest first.
+	Messages []EmailHeldMessageSummary `json:"messages"`
+}
+
+// EmailRecipientCheck defines model for EmailRecipientCheck.
+type EmailRecipientCheck struct {
+	Recipients []string `json:"recipients"`
+}
+
+// EmailRecipientCheckResult defines model for EmailRecipientCheckResult.
+type EmailRecipientCheckResult struct {
+	Recipients []struct {
+		Address string                                     `json:"address"`
+		Outcome EmailRecipientCheckResultRecipientsOutcome `json:"outcome"`
+	} `json:"recipients"`
+}
+
+// EmailRecipientCheckResultRecipientsOutcome defines model for EmailRecipientCheckResult.Recipients.Outcome.
+type EmailRecipientCheckResultRecipientsOutcome string
+
+// EmailReplyKind defines model for EmailReplyKind.
+type EmailReplyKind string
+
+// EmailSender defines model for EmailSender.
+type EmailSender struct {
+	AddedByName *string   `json:"added_by_name,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+
+	// DisplayName Name for the credit ("Jan via email") when the mail has none.
+	DisplayName *string             `json:"display_name,omitempty"`
+	Email       openapi_types.Email `json:"email"`
+
+	// Id UUIDv7
+	Id            Id         `json:"id"`
+	LastMessageAt *time.Time `json:"last_message_at,omitempty"`
+
+	// Origin `manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.
+	Origin EmailSenderOrigin `json:"origin"`
+
+	// State `allowed`: mail is delivered (when authenticated). `blocked`: mail is dropped silently. `pending`: mail is held until a manager decides.
+	State EmailSenderState `json:"state"`
+}
+
+// EmailSenderOrigin `manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.
+type EmailSenderOrigin string
+
+// EmailSenderApprove defines model for EmailSenderApprove.
+type EmailSenderApprove struct {
+	// Deliver Deliver their authenticated held mail now.
+	Deliver     *bool   `json:"deliver,omitempty"`
+	DisplayName *string `json:"display_name,omitempty"`
+}
+
+// EmailSenderCreate defines model for EmailSenderCreate.
+type EmailSenderCreate struct {
+	// Blocked Block instead of allow.
+	Blocked     *bool               `json:"blocked,omitempty"`
+	DisplayName *string             `json:"display_name,omitempty"`
+	Email       openapi_types.Email `json:"email"`
+}
+
+// EmailSenderReject defines model for EmailSenderReject.
+type EmailSenderReject struct {
+	// Block Drop their later mail silently.
+	Block *bool `json:"block,omitempty"`
+}
+
+// EmailSenderState `allowed`: mail is delivered (when authenticated). `blocked`: mail is dropped silently. `pending`: mail is held until a manager decides.
+type EmailSenderState string
+
+// EmailSenderUpdate defines model for EmailSenderUpdate.
+type EmailSenderUpdate struct {
+	Blocked     *bool   `json:"blocked,omitempty"`
+	DisplayName *string `json:"display_name,omitempty"`
+}
+
+// EmailSkipCounts Files in a mail that were not used.
+type EmailSkipCounts struct {
+	// Duplicate Already in the mail or on the frame / in the feed.
+	Duplicate *int `json:"duplicate,omitempty"`
+	OverLimit *int `json:"over_limit,omitempty"`
+	TooLarge  *int `json:"too_large,omitempty"`
+
+	// TooLong Videos longer than `limits.max_video_seconds`.
+	TooLong *int `json:"too_long,omitempty"`
+
+	// TooSmall Images under 300 px on the long side (signatures, logos).
+	TooSmall    *int `json:"too_small,omitempty"`
+	Unsupported *int `json:"unsupported,omitempty"`
 }
 
 // EventInvitation defines model for EventInvitation.
@@ -3478,7 +4407,7 @@ type FeedPost struct {
 	// SendId The poster's send (own posts only).
 	SendId *Id `json:"send_id,omitempty"`
 
-	// Via Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+	// Via Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").
 	Via *ItemVia `json:"via,omitempty"`
 }
 
@@ -4013,7 +4942,8 @@ type Heartbeat struct {
 	// quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
 	// backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
 	// the `birthdays` change (informational only: nothing is withheld; apps use it for
-	// `Subscription.frame.birthdays_supported`).
+	// `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
+	// (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
 	Features          *[]string `json:"features,omitempty"`
 	LastShutdownClean *bool     `json:"last_shutdown_clean,omitempty"`
 
@@ -4159,9 +5089,12 @@ type Item struct {
 	// ThumbUrl Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
 	ThumbUrl *string `json:"thumb_url,omitempty"`
 
-	// Via Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
-	// sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
-	// for feed placements). Optional: clients that don't know it show the sender only.
+	// Via Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
+	// that were mailed to an inbox address (`service: email`, docs/spec/email-inbox.md §9) or posted in a
+	// connected Telegram chat (`service: telegram`, docs/spec/telegram.md §8). The sender is the account that set
+	// it up (for mail and Telegram: the matched or linked account, or the address's or chat's owner); clients and
+	// frames show "Anna via Immich" ("Anna · Feed via Immich" for feed placements), or "Jan via email" / "Jan via
+	// Telegram". Optional: clients that don't know it show the sender only.
 	Via   *ItemVia `json:"via,omitempty"`
 	Width *int     `json:"width,omitempty"`
 }
@@ -4186,16 +5119,27 @@ type ItemOrigin string
 
 // ItemVia defines model for ItemVia.
 type ItemVia struct {
-	// Label Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+	// AddressId `email`: the inbox address it was mailed to, while it exists.
+	AddressId *Id `json:"address_id,omitempty"`
+
+	// Label Photo services: the service name to show, not translated ("Immich", "iCloud", "Google Photos"); frames show
+	// "<sender> via <label>". `email`, `telegram`: the name of the person who mailed or posted it ("Jan"; for
+	// Telegram the linked account's display name, else the Telegram display name); frames show "<label> via
+	// email" / "<label> via Telegram" (localized) **instead of** the sender's name, since the sender may be the
+	// address's or chat's owner sending on Jan's behalf.
+	//
 	//
 	// Example: Immich
 	Label string `json:"label"`
 
-	// Service The outside service a photo came from.
+	// Service The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).
 	Service PhotoService `json:"service"`
 
 	// SourceId The photo source that synced it, while it exists (null for Google imports and deleted sources).
 	SourceId *Id `json:"source_id,omitempty"`
+
+	// TelegramChatId `telegram`: the Telegram chat it was posted in (`TelegramChat`), while it exists.
+	TelegramChatId *Id `json:"telegram_chat_id,omitempty"`
 }
 
 // JoinRequest defines model for JoinRequest.
@@ -4213,16 +5157,49 @@ type JoinRequest struct {
 		// Id UUIDv7
 		Id *Id `json:"id,omitempty"`
 	} `json:"user"`
+
+	// Via How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
+	// add only a value): `email`, from the join link in a reply to someone who mailed photos
+	// (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
+	// private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
 	Via JoinRequestVia `json:"via"`
+
+	// ViaMatches Channel requests only: whether the requester's verified identity matches the one the link was sent to (for
+	// `email`: the account's verified email is that address); null when the channel can't tell (always for
+	// `telegram`).
+	ViaMatches *bool `json:"via_matches,omitempty"`
+
+	// ViaName Channel requests only: who the channel invited, as managers should see it (for `email`: the sender's name and
+	// address, "Jan · jan.peeters@telenet.be"; for `telegram`: the Telegram name and the chat, "Ben · Telegram,
+	// Peeters family").
+	ViaName *string `json:"via_name,omitempty"`
 }
 
-// JoinRequestVia defines model for JoinRequest.Via.
+// JoinRequestVia How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
+// add only a value): `email`, from the join link in a reply to someone who mailed photos
+// (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
+// private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
 type JoinRequestVia string
 
 // Limits defines model for Limits.
 type Limits struct {
 	// MaxBirthdaysPerFeed Birthday people per feed (pending and approved).
 	MaxBirthdaysPerFeed *int `json:"max_birthdays_per_feed,omitempty"`
+
+	// MaxEmailAddressesPerTarget Inbox addresses per frame or feed.
+	MaxEmailAddressesPerTarget *int `json:"max_email_addresses_per_target,omitempty"`
+
+	// MaxEmailHeldMessages Held mails per inbox address (10 per pending sender); the oldest go first.
+	MaxEmailHeldMessages *int `json:"max_email_held_messages,omitempty"`
+
+	// MaxEmailMessageBytes One mail as received (SMTP SIZE, webhook body).
+	MaxEmailMessageBytes *int `json:"max_email_message_bytes,omitempty"`
+
+	// MaxEmailMessagesPerAddressDay Mails processed per inbox address per day; more are dropped.
+	MaxEmailMessagesPerAddressDay *int `json:"max_email_messages_per_address_day,omitempty"`
+
+	// MaxEmailSendersPerAddress Allowed and blocked senders per inbox address.
+	MaxEmailSendersPerAddress *int `json:"max_email_senders_per_address,omitempty"`
 
 	// MaxFeedBackfillItems Cap of `history: all` per subscription (newest first).
 	MaxFeedBackfillItems *int `json:"max_feed_backfill_items,omitempty"`
@@ -4246,9 +5223,18 @@ type Limits struct {
 	// MaxPhotoSourcesPerUser Photo sources one account owns.
 	MaxPhotoSourcesPerUser  *int `json:"max_photo_sources_per_user,omitempty"`
 	MaxSubscriptionsPerFeed *int `json:"max_subscriptions_per_feed,omitempty"`
-	MaxUploadBytes          int  `json:"max_upload_bytes"`
-	MaxVideoSeconds         int  `json:"max_video_seconds"`
-	TrashRetentionDays      *int `json:"trash_retention_days,omitempty"`
+
+	// MaxTelegramChatsPerTarget Connected Telegram chats per frame or feed.
+	MaxTelegramChatsPerTarget *int `json:"max_telegram_chats_per_target,omitempty"`
+
+	// MaxTelegramChatsPerUser Connected Telegram chats one account owns.
+	MaxTelegramChatsPerUser *int `json:"max_telegram_chats_per_user,omitempty"`
+
+	// MaxTelegramItemsPerChatHour Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat.
+	MaxTelegramItemsPerChatHour *int `json:"max_telegram_items_per_chat_hour,omitempty"`
+	MaxUploadBytes              int  `json:"max_upload_bytes"`
+	MaxVideoSeconds             int  `json:"max_video_seconds"`
+	TrashRetentionDays          *int `json:"trash_retention_days,omitempty"`
 }
 
 // LocalizedText Language code → text; `en` is the fallback.
@@ -4419,7 +5405,7 @@ type Permissions struct {
 	Send           *bool `json:"send,omitempty"`
 }
 
-// PhotoService The outside service a photo came from.
+// PhotoService The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).
 type PhotoService string
 
 // PhotoSource defines model for PhotoSource.
@@ -5069,7 +6055,9 @@ type Send struct {
 	} `json:"summary,omitempty"`
 
 	// Via Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
-	// run or import). Such sends get no `delivered` push.
+	// run or import), when it came by mail (`service: email`, one send per mail), or from a connected Telegram
+	// chat (`service: telegram`, one send per batch). Such sends get no `delivered` push, except Telegram sends by
+	// a linked account (they are that person's own sends).
 	Via *ItemVia `json:"via,omitempty"`
 }
 
@@ -5646,6 +6634,216 @@ type SubscriptionUpdate struct {
 	HistoryCount *int `json:"history_count,omitempty"`
 }
 
+// TelegramChat defines model for TelegramChat.
+type TelegramChat struct {
+	BotIsAdmin *bool `json:"bot_is_admin,omitempty"`
+	CanManage  *bool `json:"can_manage,omitempty"`
+
+	// ChatKind `group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.
+	ChatKind TelegramChatKind `json:"chat_kind"`
+
+	// Contributors `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+	// users linked to a kinframe account that may send to the target.
+	Contributors TelegramContributorsMode `json:"contributors"`
+	Counts       struct {
+		Contributors int  `json:"contributors"`
+		Duplicates   *int `json:"duplicates,omitempty"`
+		Failed       *int `json:"failed,omitempty"`
+
+		// Sent Photos and videos sent.
+		Sent    int  `json:"sent"`
+		Skipped *int `json:"skipped,omitempty"`
+	} `json:"counts"`
+	CreatedAt time.Time  `json:"created_at"`
+	EndedAt   *time.Time `json:"ended_at,omitempty"`
+
+	// EndedByName Who disconnected it (`disconnected`, `stopped`).
+	EndedByName *string                  `json:"ended_by_name,omitempty"`
+	EndedReason *TelegramChatEndedReason `json:"ended_reason,omitempty"`
+	ErrorCode   *TelegramChatErrorCode   `json:"error_code,omitempty"`
+
+	// FrameReplies Post frames' quick replies into the chat as replies (default false).
+	FrameReplies bool `json:"frame_replies"`
+
+	// Id UUIDv7
+	Id             Id         `json:"id"`
+	IsForum        *bool      `json:"is_forum,omitempty"`
+	IsOwner        *bool      `json:"is_owner,omitempty"`
+	LastDeliveryAt *time.Time `json:"last_delivery_at,omitempty"`
+
+	// NotifyReactions The owner gets reaction and reply notifications for outside contributions (default false: the chat already shows them). The owner's own switch.
+	NotifyReactions bool `json:"notify_reactions"`
+
+	// OfferAppInvite The bot's one-time app message includes an "Ask to join" link (an invite that always needs approval; default true).
+	OfferAppInvite bool `json:"offer_app_invite"`
+
+	// Owner Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+	// their rights). Null only briefly while ownership passes on.
+	Owner *struct {
+		AvatarUrl   *string `json:"avatar_url,omitempty"`
+		DisplayName string  `json:"display_name"`
+
+		// UserId UUIDv7
+		UserId Id `json:"user_id"`
+	} `json:"owner,omitempty"`
+
+	// SeesAllMessages False: privacy mode hides photos from the bot (`error_code: privacy_mode`).
+	SeesAllMessages *bool `json:"sees_all_messages,omitempty"`
+
+	// Status `active`: media is accepted. `needs_attention`: a person must fix `error_code`. `paused`: paused in the app,
+	// media ignored. `disconnected`: ended (`ended_reason`); listed for 30 days, then deleted.
+	Status TelegramChatStatus `json:"status"`
+
+	// Target What the chat fills. Exactly one of `frame_id` (a direct send per batch) or `feed_id` (a post per batch) is set.
+	Target TelegramChatTarget `json:"target"`
+
+	// Title The group's title, or for a private chat the Telegram user's display name.
+	Title string `json:"title"`
+
+	// TopicId Forum groups: only this topic counts; null = all topics.
+	TopicId *int64 `json:"topic_id,omitempty"`
+
+	// Topics Forum groups: topics the bot has seen (Telegram offers no list).
+	Topics   *[]TelegramTopic       `json:"topics,omitempty"`
+	Warnings *[]TelegramChatWarning `json:"warnings,omitempty"`
+}
+
+// TelegramChatEndedReason defines model for TelegramChatEndedReason.
+type TelegramChatEndedReason string
+
+// TelegramChatErrorCode `privacy_mode`: the bot only sees commands in the group (make it an admin, or the operator turns privacy mode off). `bot_changed`: the server now uses another bot; connect again.
+type TelegramChatErrorCode string
+
+// TelegramChatKind `group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.
+type TelegramChatKind string
+
+// TelegramChatStatus `active`: media is accepted. `needs_attention`: a person must fix `error_code`. `paused`: paused in the app,
+// media ignored. `disconnected`: ended (`ended_reason`); listed for 30 days, then deleted.
+type TelegramChatStatus string
+
+// TelegramChatTarget What the chat fills. Exactly one of `frame_id` (a direct send per batch) or `feed_id` (a post per batch) is set.
+type TelegramChatTarget struct {
+	FeedId    *Id                    `json:"feed_id,omitempty"`
+	FeedName  *string                `json:"feed_name,omitempty"`
+	FrameId   *Id                    `json:"frame_id,omitempty"`
+	FrameName *string                `json:"frame_name,omitempty"`
+	Kind      TelegramChatTargetKind `json:"kind"`
+}
+
+// TelegramChatTargetKind defines model for TelegramChatTarget.Kind.
+type TelegramChatTargetKind string
+
+// TelegramChatUpdate defines model for TelegramChatUpdate.
+type TelegramChatUpdate struct {
+	// Contributors `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+	// users linked to a kinframe account that may send to the target.
+	Contributors    *TelegramContributorsMode `json:"contributors,omitempty"`
+	FrameReplies    *bool                     `json:"frame_replies,omitempty"`
+	NotifyReactions *bool                     `json:"notify_reactions,omitempty"`
+	OfferAppInvite  *bool                     `json:"offer_app_invite,omitempty"`
+	Paused          *bool                     `json:"paused,omitempty"`
+
+	// TakeOver The caller becomes the owner (the sender of outside contributions from now on).
+	TakeOver *bool  `json:"take_over,omitempty"`
+	TopicId  *int64 `json:"topic_id,omitempty"`
+}
+
+// TelegramChatWarning `cannot_post`: the bot may not post in the group, so it can't reply. `reactions_off`: the group restricts reactions, so confirmations are silent.
+type TelegramChatWarning string
+
+// TelegramCode defines model for TelegramCode.
+type TelegramCode struct {
+	// ChatId `connect`, once used: the `TelegramChat` it created.
+	ChatId   *Id               `json:"chat_id,omitempty"`
+	ChatKind *TelegramChatKind `json:"chat_kind,omitempty"`
+
+	// Code Only in the create response.
+	Code      *string                `json:"code,omitempty"`
+	ErrorCode *TelegramCodeErrorCode `json:"error_code,omitempty"`
+	ExpiresAt time.Time              `json:"expires_at"`
+
+	// Id UUIDv7
+	Id          Id                  `json:"id"`
+	LinkAccount *bool               `json:"link_account,omitempty"`
+	Purpose     TelegramCodePurpose `json:"purpose"`
+	Status      TelegramCodeStatus  `json:"status"`
+
+	// Target `connect` codes: the frame or feed.
+	Target *TelegramChatTarget `json:"target,omitempty"`
+
+	// Url Only in the create response: `https://t.me/<bot>?startgroup=<code>` (groups) or `?start=<code>`. Show it as
+	// a button (opens Telegram) and as a QR code (for another device).
+	//
+	//
+	// Example: https://t.me/kinframe_bot?startgroup=cA7f9QxK2mPz4LwN8
+	Url *string `json:"url,omitempty"`
+}
+
+// TelegramCodeErrorCode Why the last attempt to redeem the code in Telegram failed (the code may still be open).
+type TelegramCodeErrorCode string
+
+// TelegramCodePurpose defines model for TelegramCodePurpose.
+type TelegramCodePurpose string
+
+// TelegramCodeStatus defines model for TelegramCodeStatus.
+type TelegramCodeStatus string
+
+// TelegramConnectCodeCreate defines model for TelegramConnectCodeCreate.
+type TelegramConnectCodeCreate struct {
+	// ChatKind `group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.
+	ChatKind TelegramChatKind `json:"chat_kind"`
+
+	// LinkAccount `chat_kind: private` only ("Send from my Telegram"): also link the Telegram account that redeems the code to
+	// the caller. Without it the redeemer is an outside contributor sent for by the caller ("Invite someone to
+	// send by Telegram").
+	LinkAccount *bool `json:"link_account,omitempty"`
+}
+
+// TelegramContributor defines model for TelegramContributor.
+type TelegramContributor struct {
+	Blocked bool `json:"blocked"`
+
+	// DisplayName The Telegram display name, or the kinframe name when linked.
+	DisplayName string     `json:"display_name"`
+	FirstSeenAt *time.Time `json:"first_seen_at,omitempty"`
+
+	// Id UUIDv7
+	Id         Id        `json:"id"`
+	LastSeenAt time.Time `json:"last_seen_at"`
+	Linked     bool      `json:"linked"`
+	SentCount  int       `json:"sent_count"`
+
+	// UserId The linked kinframe account, when it is a member of the target.
+	UserId *Id `json:"user_id,omitempty"`
+}
+
+// TelegramContributorUpdate defines model for TelegramContributorUpdate.
+type TelegramContributorUpdate struct {
+	Blocked bool `json:"blocked"`
+}
+
+// TelegramContributorsMode `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+// users linked to a kinframe account that may send to the target.
+type TelegramContributorsMode string
+
+// TelegramLink defines model for TelegramLink.
+type TelegramLink struct {
+	// CanMessage False when the user blocked the bot.
+	CanMessage  bool      `json:"can_message"`
+	DisplayName string    `json:"display_name"`
+	LinkedAt    time.Time `json:"linked_at"`
+
+	// Username Without "@".
+	Username *string `json:"username,omitempty"`
+}
+
+// TelegramTopic defines model for TelegramTopic.
+type TelegramTopic struct {
+	// Id Telegram `message_thread_id` (1 = General).
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 // TvLink defines model for TvLink.
 type TvLink struct {
 	AlbumId       *openapi_types.UUID `json:"album_id,omitempty"`
@@ -5849,6 +7047,9 @@ type WeatherUnitsTemperature string
 // WeatherUnitsWindSpeed defines model for Weather.Units.WindSpeed.
 type WeatherUnitsWindSpeed string
 
+// AddressId UUIDv7
+type AddressId = Id
+
 // BirthdayId UUIDv7
 type BirthdayId = Id
 
@@ -5869,6 +7070,9 @@ type FeedId = Id
 
 // FrameId UUIDv7
 type FrameId = Id
+
+// HeldMessageId UUIDv7
+type HeldMessageId = Id
 
 // IdempotencyKey defines model for IdempotencyKey.
 type IdempotencyKey = string
@@ -5897,11 +7101,17 @@ type PlacementId = Id
 // PostId UUIDv7
 type PostId = Id
 
+// SenderId UUIDv7
+type SenderId = Id
+
 // SourceId UUIDv7
 type SourceId = Id
 
 // SubscriptionId UUIDv7
 type SubscriptionId = Id
+
+// TelegramChatId UUIDv7
+type TelegramChatId = Id
 
 // UserId UUIDv7
 type UserId = Id
@@ -6024,6 +7234,12 @@ type DeviceTokenJSONBody struct {
 	DeviceSecret string `json:"device_secret"`
 }
 
+// ListEmailMessagesParams defines parameters for ListEmailMessages.
+type ListEmailMessagesParams struct {
+	Cursor *Cursor `form:"cursor,omitempty" json:"cursor,omitempty"`
+	Limit  *Limit  `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // AcceptFeedInviteParams defines parameters for AcceptFeedInvite.
 type AcceptFeedInviteParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
@@ -6058,6 +7274,11 @@ type ListFeedBirthdaysParams struct {
 
 // CreateFeedBirthdayParams defines parameters for CreateFeedBirthday.
 type CreateFeedBirthdayParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// CreateFeedEmailAddressParams defines parameters for CreateFeedEmailAddress.
+type CreateFeedEmailAddressParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
@@ -6107,6 +7328,11 @@ type RequestSubscriptionParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
+// CreateFeedTelegramCodeParams defines parameters for CreateFeedTelegramCode.
+type CreateFeedTelegramCodeParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
 // TransferFeedOwnershipJSONBody defines parameters for TransferFeedOwnership.
 type TransferFeedOwnershipJSONBody struct {
 	// UserId UUIDv7
@@ -6149,6 +7375,11 @@ type UpdateAlbumParams struct {
 
 // CreateCalendarParams defines parameters for CreateCalendar.
 type CreateCalendarParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
+// CreateFrameEmailAddressParams defines parameters for CreateFrameEmailAddress.
+type CreateFrameEmailAddressParams struct {
 	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
@@ -6270,6 +7501,11 @@ type ListFrameSubscriptionsParams struct {
 	Status *SubscriptionStatus `form:"status,omitempty" json:"status,omitempty"`
 }
 
+// CreateFrameTelegramCodeParams defines parameters for CreateFrameTelegramCode.
+type CreateFrameTelegramCodeParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
+}
+
 // TransferOwnershipJSONBody defines parameters for TransferOwnership.
 type TransferOwnershipJSONBody struct {
 	// UserId UUIDv7
@@ -6317,6 +7553,11 @@ type UpdateMeJSONBody struct {
 	//
 	// Example: Europe/Brussels
 	Timezone *string `json:"timezone,omitempty"`
+}
+
+// CreateTelegramLinkCodeParams defines parameters for CreateTelegramLinkCode.
+type CreateTelegramLinkCodeParams struct {
+	IdempotencyKey *IdempotencyKey `json:"Idempotency-Key,omitempty"`
 }
 
 // OperatorListReservationsParams defines parameters for OperatorListReservations.
@@ -6433,6 +7674,21 @@ type EnrollDeviceJSONRequestBody = DeviceEnroll
 // DeviceTokenJSONRequestBody defines body for DeviceToken for application/json ContentType.
 type DeviceTokenJSONRequestBody DeviceTokenJSONBody
 
+// UpdateEmailAddressJSONRequestBody defines body for UpdateEmailAddress for application/json ContentType.
+type UpdateEmailAddressJSONRequestBody = EmailAddressUpdate
+
+// ApproveEmailSenderJSONRequestBody defines body for ApproveEmailSender for application/json ContentType.
+type ApproveEmailSenderJSONRequestBody = EmailSenderApprove
+
+// RejectEmailSenderJSONRequestBody defines body for RejectEmailSender for application/json ContentType.
+type RejectEmailSenderJSONRequestBody = EmailSenderReject
+
+// AddEmailSenderJSONRequestBody defines body for AddEmailSender for application/json ContentType.
+type AddEmailSenderJSONRequestBody = EmailSenderCreate
+
+// UpdateEmailSenderJSONRequestBody defines body for UpdateEmailSender for application/json ContentType.
+type UpdateEmailSenderJSONRequestBody = EmailSenderUpdate
+
 // AcceptFeedInviteJSONRequestBody defines body for AcceptFeedInvite for application/json ContentType.
 type AcceptFeedInviteJSONRequestBody = FeedInviteAccept
 
@@ -6451,6 +7707,9 @@ type CreateFeedBirthdayJSONRequestBody = BirthdayPersonCreate
 // UpdateFeedBirthdayJSONRequestBody defines body for UpdateFeedBirthday for application/json ContentType.
 type UpdateFeedBirthdayJSONRequestBody = BirthdayPersonUpdate
 
+// CreateFeedEmailAddressJSONRequestBody defines body for CreateFeedEmailAddress for application/json ContentType.
+type CreateFeedEmailAddressJSONRequestBody = EmailAddressCreate
+
 // CreateFeedInviteJSONRequestBody defines body for CreateFeedInvite for application/json ContentType.
 type CreateFeedInviteJSONRequestBody = FeedInviteCreate
 
@@ -6465,6 +7724,9 @@ type UpdateFeedPreferencesJSONRequestBody = FeedPreferencesUpdate
 
 // RequestSubscriptionJSONRequestBody defines body for RequestSubscription for application/json ContentType.
 type RequestSubscriptionJSONRequestBody = SubscriptionRequest
+
+// CreateFeedTelegramCodeJSONRequestBody defines body for CreateFeedTelegramCode for application/json ContentType.
+type CreateFeedTelegramCodeJSONRequestBody = TelegramConnectCodeCreate
 
 // TransferFeedOwnershipJSONRequestBody defines body for TransferFeedOwnership for application/json ContentType.
 type TransferFeedOwnershipJSONRequestBody TransferFeedOwnershipJSONBody
@@ -6493,6 +7755,9 @@ type TestCalendarJSONRequestBody = CalendarSourceCreate
 // SendFrameCommandJSONRequestBody defines body for SendFrameCommand for application/json ContentType.
 type SendFrameCommandJSONRequestBody = FrameCommand
 
+// CreateFrameEmailAddressJSONRequestBody defines body for CreateFrameEmailAddress for application/json ContentType.
+type CreateFrameEmailAddressJSONRequestBody = EmailAddressCreate
+
 // SendEventToFrameJSONRequestBody defines body for SendEventToFrame for application/json ContentType.
 type SendEventToFrameJSONRequestBody = EventInvitationCreate
 
@@ -6519,6 +7784,9 @@ type ReplaceDeviceJSONRequestBody ReplaceDeviceJSONBody
 
 // UpdateFrameSettingsApplicationMergePatchPlusJSONRequestBody defines body for UpdateFrameSettings for application/merge-patch+json ContentType.
 type UpdateFrameSettingsApplicationMergePatchPlusJSONRequestBody = FrameSettingsPatch
+
+// CreateFrameTelegramCodeJSONRequestBody defines body for CreateFrameTelegramCode for application/json ContentType.
+type CreateFrameTelegramCodeJSONRequestBody = TelegramConnectCodeCreate
 
 // TransferOwnershipJSONRequestBody defines body for TransferOwnership for application/json ContentType.
 type TransferOwnershipJSONRequestBody TransferOwnershipJSONBody
@@ -6579,6 +7847,12 @@ type CancelShopReservationJSONRequestBody CancelShopReservationJSONBody
 
 // UpdateSubscriptionJSONRequestBody defines body for UpdateSubscription for application/json ContentType.
 type UpdateSubscriptionJSONRequestBody = SubscriptionUpdate
+
+// UpdateTelegramChatJSONRequestBody defines body for UpdateTelegramChat for application/json ContentType.
+type UpdateTelegramChatJSONRequestBody = TelegramChatUpdate
+
+// UpdateTelegramContributorJSONRequestBody defines body for UpdateTelegramContributor for application/json ContentType.
+type UpdateTelegramContributorJSONRequestBody = TelegramContributorUpdate
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -6661,6 +7935,51 @@ type ServerInterface interface {
 	// (POST /v1/devices/token)
 	DeviceToken(w http.ResponseWriter, r *http.Request)
 
+	// (DELETE /v1/email-addresses/{addressId})
+	DeleteEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (GET /v1/email-addresses/{addressId})
+	GetEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (PATCH /v1/email-addresses/{addressId})
+	UpdateEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (DELETE /v1/email-addresses/{addressId}/held-messages/{messageId})
+	DeleteEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId)
+
+	// (GET /v1/email-addresses/{addressId}/held-messages/{messageId})
+	GetEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId)
+
+	// (POST /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver)
+	DeliverEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId)
+
+	// (GET /v1/email-addresses/{addressId}/messages)
+	ListEmailMessages(w http.ResponseWriter, r *http.Request, addressId AddressId, params ListEmailMessagesParams)
+
+	// (GET /v1/email-addresses/{addressId}/pending-senders)
+	ListEmailPendingSenders(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve)
+	ApproveEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId)
+
+	// (POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject)
+	RejectEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId)
+
+	// (POST /v1/email-addresses/{addressId}/regenerate)
+	RegenerateEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (GET /v1/email-addresses/{addressId}/senders)
+	ListEmailSenders(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (POST /v1/email-addresses/{addressId}/senders)
+	AddEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId)
+
+	// (DELETE /v1/email-addresses/{addressId}/senders/{senderId})
+	RemoveEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId)
+
+	// (PATCH /v1/email-addresses/{addressId}/senders/{senderId})
+	UpdateEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId)
+
 	// (GET /v1/feed-invites/{token})
 	PreviewFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken)
 
@@ -6711,6 +8030,12 @@ type ServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(w http.ResponseWriter, r *http.Request, feedId FeedId, birthdayId BirthdayId)
+
+	// (GET /v1/feeds/{feedId}/email-addresses)
+	ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/email-addresses)
+	CreateFeedEmailAddress(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedEmailAddressParams)
 
 	// (GET /v1/feeds/{feedId}/invites)
 	ListFeedInvites(w http.ResponseWriter, r *http.Request, feedId FeedId)
@@ -6765,6 +8090,12 @@ type ServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/subscriptions)
 	RequestSubscription(w http.ResponseWriter, r *http.Request, feedId FeedId, params RequestSubscriptionParams)
+
+	// (GET /v1/feeds/{feedId}/telegram-chats)
+	ListFeedTelegramChats(w http.ResponseWriter, r *http.Request, feedId FeedId)
+
+	// (POST /v1/feeds/{feedId}/telegram-codes)
+	CreateFeedTelegramCode(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedTelegramCodeParams)
 
 	// (POST /v1/feeds/{feedId}/transfer)
 	TransferFeedOwnership(w http.ResponseWriter, r *http.Request, feedId FeedId)
@@ -6828,6 +8159,12 @@ type ServerInterface interface {
 
 	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
 	SetCountdown(w http.ResponseWriter, r *http.Request, frameId FrameId, eventId EventId)
+
+	// (GET /v1/frames/{frameId}/email-addresses)
+	ListFrameEmailAddresses(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/email-addresses)
+	CreateFrameEmailAddress(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateFrameEmailAddressParams)
 
 	// (GET /v1/frames/{frameId}/events)
 	ListEventInvitations(w http.ResponseWriter, r *http.Request, frameId FrameId)
@@ -6898,6 +8235,12 @@ type ServerInterface interface {
 	// (GET /v1/frames/{frameId}/subscriptions)
 	ListFrameSubscriptions(w http.ResponseWriter, r *http.Request, frameId FrameId, params ListFrameSubscriptionsParams)
 
+	// (GET /v1/frames/{frameId}/telegram-chats)
+	ListFrameTelegramChats(w http.ResponseWriter, r *http.Request, frameId FrameId)
+
+	// (POST /v1/frames/{frameId}/telegram-codes)
+	CreateFrameTelegramCode(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateFrameTelegramCodeParams)
+
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId)
 
@@ -6954,6 +8297,15 @@ type ServerInterface interface {
 
 	// (DELETE /v1/me/push-endpoints/{endpointId})
 	DeletePushEndpoint(w http.ResponseWriter, r *http.Request, endpointId EndpointId)
+
+	// (DELETE /v1/me/telegram)
+	UnlinkTelegram(w http.ResponseWriter, r *http.Request)
+
+	// (GET /v1/me/telegram)
+	GetTelegramLink(w http.ResponseWriter, r *http.Request)
+
+	// (POST /v1/me/telegram/link-code)
+	CreateTelegramLinkCode(w http.ResponseWriter, r *http.Request, params CreateTelegramLinkCodeParams)
 
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(w http.ResponseWriter, r *http.Request)
@@ -7053,6 +8405,27 @@ type ServerInterface interface {
 
 	// (POST /v1/subscriptions/{subscriptionId}/resume)
 	ResumeSubscription(w http.ResponseWriter, r *http.Request, subscriptionId SubscriptionId)
+
+	// (DELETE /v1/telegram-chats/{chatId})
+	DisconnectTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId)
+
+	// (GET /v1/telegram-chats/{chatId})
+	GetTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId)
+
+	// (PATCH /v1/telegram-chats/{chatId})
+	UpdateTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId)
+
+	// (GET /v1/telegram-chats/{chatId}/contributors)
+	ListTelegramContributors(w http.ResponseWriter, r *http.Request, chatId TelegramChatId)
+
+	// (PATCH /v1/telegram-chats/{chatId}/contributors/{contributorId})
+	UpdateTelegramContributor(w http.ResponseWriter, r *http.Request, chatId TelegramChatId, contributorId Id)
+
+	// (DELETE /v1/telegram-codes/{codeId})
+	RevokeTelegramCode(w http.ResponseWriter, r *http.Request, codeId Id)
+
+	// (GET /v1/telegram-codes/{codeId})
+	GetTelegramCode(w http.ResponseWriter, r *http.Request, codeId Id)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(w http.ResponseWriter, r *http.Request, token string)
@@ -7807,6 +9180,488 @@ func (siw *ServerInterfaceWrapper) DeviceToken(w http.ResponseWriter, r *http.Re
 	handler.ServeHTTP(w, r)
 }
 
+// DeleteEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) DeleteEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteEmailAddress(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) GetEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetEmailAddress(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) UpdateEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateEmailAddress(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteEmailHeldMessage operation middleware
+func (siw *ServerInterfaceWrapper) DeleteEmailHeldMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId HeldMessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteEmailHeldMessage(w, r, addressId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetEmailHeldMessage operation middleware
+func (siw *ServerInterfaceWrapper) GetEmailHeldMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId HeldMessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetEmailHeldMessage(w, r, addressId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeliverEmailHeldMessage operation middleware
+func (siw *ServerInterfaceWrapper) DeliverEmailHeldMessage(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "messageId" -------------
+	var messageId HeldMessageId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "messageId", r.PathValue("messageId"), &messageId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "messageId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeliverEmailHeldMessage(w, r, addressId, messageId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListEmailMessages operation middleware
+func (siw *ServerInterfaceWrapper) ListEmailMessages(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params ListEmailMessagesParams
+
+	// ------------- Optional query parameter "cursor" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "cursor", r.URL.Query(), &params.Cursor, runtime.BindQueryParameterOptions{Type: "string", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "cursor"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "cursor", Err: err})
+		}
+		return
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameterWithOptions("form", true, false, "limit", r.URL.Query(), &params.Limit, runtime.BindQueryParameterOptions{Type: "integer", Format: ""})
+	if err != nil {
+		var requiredError *runtime.RequiredParameterError
+		if errors.As(err, &requiredError) {
+			siw.ErrorHandlerFunc(w, r, &RequiredParamError{ParamName: "limit"})
+		} else {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "limit", Err: err})
+		}
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListEmailMessages(w, r, addressId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListEmailPendingSenders operation middleware
+func (siw *ServerInterfaceWrapper) ListEmailPendingSenders(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListEmailPendingSenders(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ApproveEmailSender operation middleware
+func (siw *ServerInterfaceWrapper) ApproveEmailSender(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "senderId" -------------
+	var senderId SenderId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "senderId", r.PathValue("senderId"), &senderId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "senderId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ApproveEmailSender(w, r, addressId, senderId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RejectEmailSender operation middleware
+func (siw *ServerInterfaceWrapper) RejectEmailSender(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "senderId" -------------
+	var senderId SenderId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "senderId", r.PathValue("senderId"), &senderId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "senderId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RejectEmailSender(w, r, addressId, senderId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RegenerateEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) RegenerateEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RegenerateEmailAddress(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListEmailSenders operation middleware
+func (siw *ServerInterfaceWrapper) ListEmailSenders(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListEmailSenders(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// AddEmailSender operation middleware
+func (siw *ServerInterfaceWrapper) AddEmailSender(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.AddEmailSender(w, r, addressId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RemoveEmailSender operation middleware
+func (siw *ServerInterfaceWrapper) RemoveEmailSender(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "senderId" -------------
+	var senderId SenderId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "senderId", r.PathValue("senderId"), &senderId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "senderId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RemoveEmailSender(w, r, addressId, senderId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateEmailSender operation middleware
+func (siw *ServerInterfaceWrapper) UpdateEmailSender(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "addressId" -------------
+	var addressId AddressId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "addressId", r.PathValue("addressId"), &addressId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "addressId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "senderId" -------------
+	var senderId SenderId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "senderId", r.PathValue("senderId"), &senderId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "senderId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateEmailSender(w, r, addressId, senderId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // PreviewFeedInvite operation middleware
 func (siw *ServerInterfaceWrapper) PreviewFeedInvite(w http.ResponseWriter, r *http.Request) {
 
@@ -8404,6 +10259,82 @@ func (siw *ServerInterfaceWrapper) RejectFeedBirthday(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.RejectFeedBirthday(w, r, feedId, birthdayId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFeedEmailAddresses operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedEmailAddresses(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFeedEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) CreateFeedEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFeedEmailAddressParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFeedEmailAddress(w, r, feedId, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -9093,6 +11024,82 @@ func (siw *ServerInterfaceWrapper) RequestSubscription(w http.ResponseWriter, r 
 	handler.ServeHTTP(w, r)
 }
 
+// ListFeedTelegramChats operation middleware
+func (siw *ServerInterfaceWrapper) ListFeedTelegramChats(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFeedTelegramChats(w, r, feedId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFeedTelegramCode operation middleware
+func (siw *ServerInterfaceWrapper) CreateFeedTelegramCode(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "feedId" -------------
+	var feedId FeedId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "feedId", r.PathValue("feedId"), &feedId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "feedId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFeedTelegramCodeParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFeedTelegramCode(w, r, feedId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // TransferFeedOwnership operation middleware
 func (siw *ServerInterfaceWrapper) TransferFeedOwnership(w http.ResponseWriter, r *http.Request) {
 
@@ -9773,6 +11780,82 @@ func (siw *ServerInterfaceWrapper) SetCountdown(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.SetCountdown(w, r, frameId, eventId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListFrameEmailAddresses operation middleware
+func (siw *ServerInterfaceWrapper) ListFrameEmailAddresses(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFrameEmailAddresses(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFrameEmailAddress operation middleware
+func (siw *ServerInterfaceWrapper) CreateFrameEmailAddress(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFrameEmailAddressParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFrameEmailAddress(w, r, frameId, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -10704,6 +12787,82 @@ func (siw *ServerInterfaceWrapper) ListFrameSubscriptions(w http.ResponseWriter,
 	handler.ServeHTTP(w, r)
 }
 
+// ListFrameTelegramChats operation middleware
+func (siw *ServerInterfaceWrapper) ListFrameTelegramChats(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListFrameTelegramChats(w, r, frameId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateFrameTelegramCode operation middleware
+func (siw *ServerInterfaceWrapper) CreateFrameTelegramCode(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "frameId" -------------
+	var frameId FrameId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "frameId", r.PathValue("frameId"), &frameId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "frameId", Err: err})
+		return
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateFrameTelegramCodeParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateFrameTelegramCode(w, r, frameId, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // TransferOwnership operation middleware
 func (siw *ServerInterfaceWrapper) TransferOwnership(w http.ResponseWriter, r *http.Request) {
 
@@ -11181,6 +13340,75 @@ func (siw *ServerInterfaceWrapper) DeletePushEndpoint(w http.ResponseWriter, r *
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeletePushEndpoint(w, r, endpointId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UnlinkTelegram operation middleware
+func (siw *ServerInterfaceWrapper) UnlinkTelegram(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UnlinkTelegram(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetTelegramLink operation middleware
+func (siw *ServerInterfaceWrapper) GetTelegramLink(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTelegramLink(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// CreateTelegramLinkCode operation middleware
+func (siw *ServerInterfaceWrapper) CreateTelegramLinkCode(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params CreateTelegramLinkCodeParams
+
+	headers := r.Header
+
+	// ------------- Optional header parameter "Idempotency-Key" -------------
+	if valueList, found := headers[http.CanonicalHeaderKey("Idempotency-Key")]; found {
+		var IdempotencyKey IdempotencyKey
+		n := len(valueList)
+		if n != 1 {
+			siw.ErrorHandlerFunc(w, r, &TooManyValuesForParamError{ParamName: "Idempotency-Key", Count: n})
+			return
+		}
+
+		err = runtime.BindStyledParameterWithOptions("simple", "Idempotency-Key", valueList[0], &IdempotencyKey, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationHeader, Explode: false, Required: false, Type: "string", Format: ""})
+		if err != nil {
+			siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "Idempotency-Key", Err: err})
+			return
+		}
+
+		params.IdempotencyKey = &IdempotencyKey
+
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.CreateTelegramLinkCode(w, r, params)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -12044,6 +14272,197 @@ func (siw *ServerInterfaceWrapper) ResumeSubscription(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
+// DisconnectTelegramChat operation middleware
+func (siw *ServerInterfaceWrapper) DisconnectTelegramChat(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "chatId" -------------
+	var chatId TelegramChatId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", r.PathValue("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chatId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DisconnectTelegramChat(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetTelegramChat operation middleware
+func (siw *ServerInterfaceWrapper) GetTelegramChat(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "chatId" -------------
+	var chatId TelegramChatId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", r.PathValue("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chatId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTelegramChat(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateTelegramChat operation middleware
+func (siw *ServerInterfaceWrapper) UpdateTelegramChat(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "chatId" -------------
+	var chatId TelegramChatId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", r.PathValue("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chatId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateTelegramChat(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// ListTelegramContributors operation middleware
+func (siw *ServerInterfaceWrapper) ListTelegramContributors(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "chatId" -------------
+	var chatId TelegramChatId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", r.PathValue("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chatId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.ListTelegramContributors(w, r, chatId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UpdateTelegramContributor operation middleware
+func (siw *ServerInterfaceWrapper) UpdateTelegramContributor(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "chatId" -------------
+	var chatId TelegramChatId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "chatId", r.PathValue("chatId"), &chatId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "chatId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "contributorId" -------------
+	var contributorId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "contributorId", r.PathValue("contributorId"), &contributorId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "contributorId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UpdateTelegramContributor(w, r, chatId, contributorId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// RevokeTelegramCode operation middleware
+func (siw *ServerInterfaceWrapper) RevokeTelegramCode(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "codeId" -------------
+	var codeId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "codeId", r.PathValue("codeId"), &codeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "codeId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.RevokeTelegramCode(w, r, codeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetTelegramCode operation middleware
+func (siw *ServerInterfaceWrapper) GetTelegramCode(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "codeId" -------------
+	var codeId Id
+
+	err = runtime.BindStyledParameterWithOptions("simple", "codeId", r.PathValue("codeId"), &codeId, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: "uuid", ValueIsUnescaped: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "codeId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetTelegramCode(w, r, codeId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetTvSlideshow operation middleware
 func (siw *ServerInterfaceWrapper) GetTvSlideshow(w http.ResponseWriter, r *http.Request) {
 
@@ -12216,6 +14635,21 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/device/state", wrapper.DeviceGetState)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/enroll", wrapper.EnrollDevice)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/devices/token", wrapper.DeviceToken)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/email-addresses/{addressId}", wrapper.DeleteEmailAddress)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/email-addresses/{addressId}", wrapper.GetEmailAddress)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/email-addresses/{addressId}", wrapper.UpdateEmailAddress)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/email-addresses/{addressId}/held-messages/{messageId}", wrapper.DeleteEmailHeldMessage)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/email-addresses/{addressId}/held-messages/{messageId}", wrapper.GetEmailHeldMessage)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver", wrapper.DeliverEmailHeldMessage)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/email-addresses/{addressId}/messages", wrapper.ListEmailMessages)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/email-addresses/{addressId}/pending-senders", wrapper.ListEmailPendingSenders)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve", wrapper.ApproveEmailSender)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject", wrapper.RejectEmailSender)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/email-addresses/{addressId}/regenerate", wrapper.RegenerateEmailAddress)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/email-addresses/{addressId}/senders", wrapper.ListEmailSenders)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/email-addresses/{addressId}/senders", wrapper.AddEmailSender)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/email-addresses/{addressId}/senders/{senderId}", wrapper.RemoveEmailSender)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/email-addresses/{addressId}/senders/{senderId}", wrapper.UpdateEmailSender)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feed-invites/{token}", wrapper.PreviewFeedInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feed-invites/{token}/accept", wrapper.AcceptFeedInvite)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feed-invites:lookup", wrapper.LookupFeedInvite)
@@ -12233,6 +14667,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/approve", wrapper.ApproveFeedBirthday)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/photo", wrapper.DeleteFeedBirthdayPhoto)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/birthdays/{birthdayId}/reject", wrapper.RejectFeedBirthday)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/email-addresses", wrapper.ListFeedEmailAddresses)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/email-addresses", wrapper.CreateFeedEmailAddress)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.ListFeedInvites)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/invites", wrapper.CreateFeedInvite)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/feeds/{feedId}/invites/{inviteId}", wrapper.RevokeFeedInvite)
@@ -12251,6 +14687,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/feeds/{feedId}/preferences", wrapper.UpdateFeedPreferences)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.ListFeedSubscriptions)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/subscriptions", wrapper.RequestSubscription)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/feeds/{feedId}/telegram-chats", wrapper.ListFeedTelegramChats)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/telegram-codes", wrapper.CreateFeedTelegramCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/feeds/{feedId}/transfer", wrapper.TransferFeedOwnership)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames", wrapper.ListMyFrames)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}", wrapper.RemoveFrame)
@@ -12271,6 +14709,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/commands", wrapper.SendFrameCommand)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.ClearCountdown)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/frames/{frameId}/countdowns/{eventId}", wrapper.SetCountdown)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/email-addresses", wrapper.ListFrameEmailAddresses)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/email-addresses", wrapper.CreateFrameEmailAddress)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.ListEventInvitations)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/events", wrapper.SendEventToFrame)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/frames/{frameId}/events/{invitationId}", wrapper.WithdrawEventInvitation)
@@ -12294,6 +14734,8 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.GetFrameSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/frames/{frameId}/settings", wrapper.UpdateFrameSettings)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/subscriptions", wrapper.ListFrameSubscriptions)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/telegram-chats", wrapper.ListFrameTelegramChats)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/telegram-codes", wrapper.CreateFrameTelegramCode)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/transfer", wrapper.TransferOwnership)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.ListTvLinks)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/frames/{frameId}/tv-links", wrapper.CreateTvLink)
@@ -12314,6 +14756,9 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/push-endpoints", wrapper.ListPushEndpoints)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/me/push-endpoints", wrapper.RegisterPushEndpoint)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/push-endpoints/{endpointId}", wrapper.DeletePushEndpoint)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/me/telegram", wrapper.UnlinkTelegram)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/me/telegram", wrapper.GetTelegramLink)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/me/telegram/link-code", wrapper.CreateTelegramLinkCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorGetLimits)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/v1/operator/limits", wrapper.OperatorSetLimits)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/operator/reservations", wrapper.OperatorListReservations)
@@ -12347,6 +14792,13 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/pause", wrapper.PauseSubscription)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/reject", wrapper.RejectSubscription)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/v1/subscriptions/{subscriptionId}/resume", wrapper.ResumeSubscription)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/telegram-chats/{chatId}", wrapper.DisconnectTelegramChat)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/telegram-chats/{chatId}", wrapper.GetTelegramChat)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/telegram-chats/{chatId}", wrapper.UpdateTelegramChat)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/telegram-chats/{chatId}/contributors", wrapper.ListTelegramContributors)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/v1/telegram-chats/{chatId}/contributors/{contributorId}", wrapper.UpdateTelegramContributor)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/v1/telegram-codes/{codeId}", wrapper.RevokeTelegramCode)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/telegram-codes/{codeId}", wrapper.GetTelegramCode)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/v1/tv/{token}", wrapper.GetTvSlideshow)
 
 	return m
@@ -13111,6 +15563,688 @@ func (response DeviceToken401ApplicationProblemPlusJSONResponse) VisitDeviceToke
 	}
 	w.Header().Set("Content-Type", "application/problem+json")
 	w.WriteHeader(401)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteEmailAddressRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+}
+
+type DeleteEmailAddressResponseObject interface {
+	VisitDeleteEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type DeleteEmailAddress204Response struct {
+}
+
+func (response DeleteEmailAddress204Response) VisitDeleteEmailAddressResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitDeleteEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetEmailAddressRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+}
+
+type GetEmailAddressResponseObject interface {
+	VisitGetEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type GetEmailAddress200JSONResponse EmailAddress
+
+func (response GetEmailAddress200JSONResponse) VisitGetEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitGetEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateEmailAddressRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	Body      *UpdateEmailAddressJSONRequestBody
+}
+
+type UpdateEmailAddressResponseObject interface {
+	VisitUpdateEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type UpdateEmailAddress200JSONResponse EmailAddress
+
+func (response UpdateEmailAddress200JSONResponse) VisitUpdateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateEmailAddress422ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response UpdateEmailAddress422ApplicationProblemPlusJSONResponse) VisitUpdateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitUpdateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeleteEmailHeldMessageRequestObject struct {
+	AddressId AddressId     `json:"addressId"`
+	MessageId HeldMessageId `json:"messageId"`
+}
+
+type DeleteEmailHeldMessageResponseObject interface {
+	VisitDeleteEmailHeldMessageResponse(w http.ResponseWriter) error
+}
+
+type DeleteEmailHeldMessage204Response struct {
+}
+
+func (response DeleteEmailHeldMessage204Response) VisitDeleteEmailHeldMessageResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteEmailHeldMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeleteEmailHeldMessagedefaultApplicationProblemPlusJSONResponse) VisitDeleteEmailHeldMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetEmailHeldMessageRequestObject struct {
+	AddressId AddressId     `json:"addressId"`
+	MessageId HeldMessageId `json:"messageId"`
+}
+
+type GetEmailHeldMessageResponseObject interface {
+	VisitGetEmailHeldMessageResponse(w http.ResponseWriter) error
+}
+
+type GetEmailHeldMessage200JSONResponse EmailHeldMessage
+
+func (response GetEmailHeldMessage200JSONResponse) VisitGetEmailHeldMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetEmailHeldMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetEmailHeldMessagedefaultApplicationProblemPlusJSONResponse) VisitGetEmailHeldMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeliverEmailHeldMessageRequestObject struct {
+	AddressId AddressId     `json:"addressId"`
+	MessageId HeldMessageId `json:"messageId"`
+}
+
+type DeliverEmailHeldMessageResponseObject interface {
+	VisitDeliverEmailHeldMessageResponse(w http.ResponseWriter) error
+}
+
+type DeliverEmailHeldMessage200JSONResponse EmailMessage
+
+func (response DeliverEmailHeldMessage200JSONResponse) VisitDeliverEmailHeldMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type DeliverEmailHeldMessagedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DeliverEmailHeldMessagedefaultApplicationProblemPlusJSONResponse) VisitDeliverEmailHeldMessageResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailMessagesRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	Params    ListEmailMessagesParams
+}
+
+type ListEmailMessagesResponseObject interface {
+	VisitListEmailMessagesResponse(w http.ResponseWriter) error
+}
+
+type ListEmailMessages200JSONResponse EmailMessagePage
+
+func (response ListEmailMessages200JSONResponse) VisitListEmailMessagesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailMessagesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListEmailMessagesdefaultApplicationProblemPlusJSONResponse) VisitListEmailMessagesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailPendingSendersRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+}
+
+type ListEmailPendingSendersResponseObject interface {
+	VisitListEmailPendingSendersResponse(w http.ResponseWriter) error
+}
+
+type ListEmailPendingSenders200JSONResponse []EmailPendingSender
+
+func (response ListEmailPendingSenders200JSONResponse) VisitListEmailPendingSendersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailPendingSendersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListEmailPendingSendersdefaultApplicationProblemPlusJSONResponse) VisitListEmailPendingSendersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveEmailSenderRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	SenderId  SenderId  `json:"senderId"`
+	Body      *ApproveEmailSenderJSONRequestBody
+}
+
+type ApproveEmailSenderResponseObject interface {
+	VisitApproveEmailSenderResponse(w http.ResponseWriter) error
+}
+
+type ApproveEmailSender200JSONResponse EmailSender
+
+func (response ApproveEmailSender200JSONResponse) VisitApproveEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveEmailSender409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response ApproveEmailSender409ApplicationProblemPlusJSONResponse) VisitApproveEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ApproveEmailSenderdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ApproveEmailSenderdefaultApplicationProblemPlusJSONResponse) VisitApproveEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectEmailSenderRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	SenderId  SenderId  `json:"senderId"`
+	Body      *RejectEmailSenderJSONRequestBody
+}
+
+type RejectEmailSenderResponseObject interface {
+	VisitRejectEmailSenderResponse(w http.ResponseWriter) error
+}
+
+type RejectEmailSender204Response struct {
+}
+
+func (response RejectEmailSender204Response) VisitRejectEmailSenderResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RejectEmailSender409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response RejectEmailSender409ApplicationProblemPlusJSONResponse) VisitRejectEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RejectEmailSenderdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RejectEmailSenderdefaultApplicationProblemPlusJSONResponse) VisitRejectEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RegenerateEmailAddressRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+}
+
+type RegenerateEmailAddressResponseObject interface {
+	VisitRegenerateEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type RegenerateEmailAddress200JSONResponse EmailAddress
+
+func (response RegenerateEmailAddress200JSONResponse) VisitRegenerateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RegenerateEmailAddress429ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response RegenerateEmailAddress429ApplicationProblemPlusJSONResponse) VisitRegenerateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RegenerateEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RegenerateEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitRegenerateEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailSendersRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+}
+
+type ListEmailSendersResponseObject interface {
+	VisitListEmailSendersResponse(w http.ResponseWriter) error
+}
+
+type ListEmailSenders200JSONResponse []EmailSender
+
+func (response ListEmailSenders200JSONResponse) VisitListEmailSendersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListEmailSendersdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListEmailSendersdefaultApplicationProblemPlusJSONResponse) VisitListEmailSendersResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddEmailSenderRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	Body      *AddEmailSenderJSONRequestBody
+}
+
+type AddEmailSenderResponseObject interface {
+	VisitAddEmailSenderResponse(w http.ResponseWriter) error
+}
+
+type AddEmailSender201JSONResponse EmailSender
+
+func (response AddEmailSender201JSONResponse) VisitAddEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddEmailSender409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response AddEmailSender409ApplicationProblemPlusJSONResponse) VisitAddEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddEmailSender422ApplicationProblemPlusJSONResponse Problem
+
+func (response AddEmailSender422ApplicationProblemPlusJSONResponse) VisitAddEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddEmailSender429ApplicationProblemPlusJSONResponse Problem
+
+func (response AddEmailSender429ApplicationProblemPlusJSONResponse) VisitAddEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type AddEmailSenderdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response AddEmailSenderdefaultApplicationProblemPlusJSONResponse) VisitAddEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RemoveEmailSenderRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	SenderId  SenderId  `json:"senderId"`
+}
+
+type RemoveEmailSenderResponseObject interface {
+	VisitRemoveEmailSenderResponse(w http.ResponseWriter) error
+}
+
+type RemoveEmailSender204Response struct {
+}
+
+func (response RemoveEmailSender204Response) VisitRemoveEmailSenderResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RemoveEmailSenderdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RemoveEmailSenderdefaultApplicationProblemPlusJSONResponse) VisitRemoveEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateEmailSenderRequestObject struct {
+	AddressId AddressId `json:"addressId"`
+	SenderId  SenderId  `json:"senderId"`
+	Body      *UpdateEmailSenderJSONRequestBody
+}
+
+type UpdateEmailSenderResponseObject interface {
+	VisitUpdateEmailSenderResponse(w http.ResponseWriter) error
+}
+
+type UpdateEmailSender200JSONResponse EmailSender
+
+func (response UpdateEmailSender200JSONResponse) VisitUpdateEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateEmailSenderdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateEmailSenderdefaultApplicationProblemPlusJSONResponse) VisitUpdateEmailSenderResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
 	_, err := buf.WriteTo(w)
 	return err
 }
@@ -13914,6 +17048,144 @@ func (response RejectFeedBirthdaydefaultApplicationProblemPlusJSONResponse) Visi
 	return err
 }
 
+type ListFeedEmailAddressesRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedEmailAddressesResponseObject interface {
+	VisitListFeedEmailAddressesResponse(w http.ResponseWriter) error
+}
+
+type ListFeedEmailAddresses200JSONResponse []EmailAddress
+
+func (response ListFeedEmailAddresses200JSONResponse) VisitListFeedEmailAddressesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedEmailAddressesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedEmailAddressesdefaultApplicationProblemPlusJSONResponse) VisitListFeedEmailAddressesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddressRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params CreateFeedEmailAddressParams
+	Body   *CreateFeedEmailAddressJSONRequestBody
+}
+
+type CreateFeedEmailAddressResponseObject interface {
+	VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type CreateFeedEmailAddress201JSONResponse EmailAddress
+
+func (response CreateFeedEmailAddress201JSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddress409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateFeedEmailAddress409ApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddress422ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFeedEmailAddress422ApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddress429ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFeedEmailAddress429ApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddress503ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFeedEmailAddress503ApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFeedEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitCreateFeedEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type ListFeedInvitesRequestObject struct {
 	FeedId FeedId `json:"feedId"`
 }
@@ -14638,6 +17910,86 @@ type RequestSubscriptiondefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response RequestSubscriptiondefaultApplicationProblemPlusJSONResponse) VisitRequestSubscriptionResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedTelegramChatsRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+}
+
+type ListFeedTelegramChatsResponseObject interface {
+	VisitListFeedTelegramChatsResponse(w http.ResponseWriter) error
+}
+
+type ListFeedTelegramChats200JSONResponse []TelegramChat
+
+func (response ListFeedTelegramChats200JSONResponse) VisitListFeedTelegramChatsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFeedTelegramChatsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFeedTelegramChatsdefaultApplicationProblemPlusJSONResponse) VisitListFeedTelegramChatsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedTelegramCodeRequestObject struct {
+	FeedId FeedId `json:"feedId"`
+	Params CreateFeedTelegramCodeParams
+	Body   *CreateFeedTelegramCodeJSONRequestBody
+}
+
+type CreateFeedTelegramCodeResponseObject interface {
+	VisitCreateFeedTelegramCodeResponse(w http.ResponseWriter) error
+}
+
+type CreateFeedTelegramCode201JSONResponse TelegramCode
+
+func (response CreateFeedTelegramCode201JSONResponse) VisitCreateFeedTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFeedTelegramCodedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFeedTelegramCodedefaultApplicationProblemPlusJSONResponse) VisitCreateFeedTelegramCodeResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -15460,6 +18812,144 @@ type SetCountdowndefaultApplicationProblemPlusJSONResponse struct {
 }
 
 func (response SetCountdowndefaultApplicationProblemPlusJSONResponse) VisitSetCountdownResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameEmailAddressesRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListFrameEmailAddressesResponseObject interface {
+	VisitListFrameEmailAddressesResponse(w http.ResponseWriter) error
+}
+
+type ListFrameEmailAddresses200JSONResponse []EmailAddress
+
+func (response ListFrameEmailAddresses200JSONResponse) VisitListFrameEmailAddressesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameEmailAddressesdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFrameEmailAddressesdefaultApplicationProblemPlusJSONResponse) VisitListFrameEmailAddressesResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddressRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  CreateFrameEmailAddressParams
+	Body    *CreateFrameEmailAddressJSONRequestBody
+}
+
+type CreateFrameEmailAddressResponseObject interface {
+	VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error
+}
+
+type CreateFrameEmailAddress201JSONResponse EmailAddress
+
+func (response CreateFrameEmailAddress201JSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddress409ApplicationProblemPlusJSONResponse struct {
+	ProblemApplicationProblemPlusJSONResponse
+}
+
+func (response CreateFrameEmailAddress409ApplicationProblemPlusJSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(409)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddress422ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFrameEmailAddress422ApplicationProblemPlusJSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(422)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddress429ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFrameEmailAddress429ApplicationProblemPlusJSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(429)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddress503ApplicationProblemPlusJSONResponse Problem
+
+func (response CreateFrameEmailAddress503ApplicationProblemPlusJSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(503)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameEmailAddressdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFrameEmailAddressdefaultApplicationProblemPlusJSONResponse) VisitCreateFrameEmailAddressResponse(w http.ResponseWriter) error {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
@@ -16312,6 +19802,86 @@ func (response ListFrameSubscriptionsdefaultApplicationProblemPlusJSONResponse) 
 	return err
 }
 
+type ListFrameTelegramChatsRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+}
+
+type ListFrameTelegramChatsResponseObject interface {
+	VisitListFrameTelegramChatsResponse(w http.ResponseWriter) error
+}
+
+type ListFrameTelegramChats200JSONResponse []TelegramChat
+
+func (response ListFrameTelegramChats200JSONResponse) VisitListFrameTelegramChatsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListFrameTelegramChatsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListFrameTelegramChatsdefaultApplicationProblemPlusJSONResponse) VisitListFrameTelegramChatsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameTelegramCodeRequestObject struct {
+	FrameId FrameId `json:"frameId"`
+	Params  CreateFrameTelegramCodeParams
+	Body    *CreateFrameTelegramCodeJSONRequestBody
+}
+
+type CreateFrameTelegramCodeResponseObject interface {
+	VisitCreateFrameTelegramCodeResponse(w http.ResponseWriter) error
+}
+
+type CreateFrameTelegramCode201JSONResponse TelegramCode
+
+func (response CreateFrameTelegramCode201JSONResponse) VisitCreateFrameTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateFrameTelegramCodedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateFrameTelegramCodedefaultApplicationProblemPlusJSONResponse) VisitCreateFrameTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type TransferOwnershipRequestObject struct {
 	FrameId FrameId `json:"frameId"`
 	Body    *TransferOwnershipJSONRequestBody
@@ -17076,6 +20646,115 @@ type DeletePushEndpoint204Response struct {
 func (response DeletePushEndpoint204Response) VisitDeletePushEndpointResponse(w http.ResponseWriter) error {
 	w.WriteHeader(204)
 	return nil
+}
+
+type UnlinkTelegramRequestObject struct {
+}
+
+type UnlinkTelegramResponseObject interface {
+	VisitUnlinkTelegramResponse(w http.ResponseWriter) error
+}
+
+type UnlinkTelegram204Response struct {
+}
+
+func (response UnlinkTelegram204Response) VisitUnlinkTelegramResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type UnlinkTelegramdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UnlinkTelegramdefaultApplicationProblemPlusJSONResponse) VisitUnlinkTelegramResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramLinkRequestObject struct {
+}
+
+type GetTelegramLinkResponseObject interface {
+	VisitGetTelegramLinkResponse(w http.ResponseWriter) error
+}
+
+type GetTelegramLink200JSONResponse TelegramLink
+
+func (response GetTelegramLink200JSONResponse) VisitGetTelegramLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramLinkdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTelegramLinkdefaultApplicationProblemPlusJSONResponse) VisitGetTelegramLinkResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTelegramLinkCodeRequestObject struct {
+	Params CreateTelegramLinkCodeParams
+}
+
+type CreateTelegramLinkCodeResponseObject interface {
+	VisitCreateTelegramLinkCodeResponse(w http.ResponseWriter) error
+}
+
+type CreateTelegramLinkCode201JSONResponse TelegramCode
+
+func (response CreateTelegramLinkCode201JSONResponse) VisitCreateTelegramLinkCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type CreateTelegramLinkCodedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response CreateTelegramLinkCodedefaultApplicationProblemPlusJSONResponse) VisitCreateTelegramLinkCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
 }
 
 type OperatorGetLimitsRequestObject struct {
@@ -18574,6 +22253,270 @@ func (response ResumeSubscriptiondefaultApplicationProblemPlusJSONResponse) Visi
 	return err
 }
 
+type DisconnectTelegramChatRequestObject struct {
+	ChatId TelegramChatId `json:"chatId"`
+}
+
+type DisconnectTelegramChatResponseObject interface {
+	VisitDisconnectTelegramChatResponse(w http.ResponseWriter) error
+}
+
+type DisconnectTelegramChat204Response struct {
+}
+
+func (response DisconnectTelegramChat204Response) VisitDisconnectTelegramChatResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DisconnectTelegramChatdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response DisconnectTelegramChatdefaultApplicationProblemPlusJSONResponse) VisitDisconnectTelegramChatResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramChatRequestObject struct {
+	ChatId TelegramChatId `json:"chatId"`
+}
+
+type GetTelegramChatResponseObject interface {
+	VisitGetTelegramChatResponse(w http.ResponseWriter) error
+}
+
+type GetTelegramChat200JSONResponse TelegramChat
+
+func (response GetTelegramChat200JSONResponse) VisitGetTelegramChatResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramChatdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTelegramChatdefaultApplicationProblemPlusJSONResponse) VisitGetTelegramChatResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateTelegramChatRequestObject struct {
+	ChatId TelegramChatId `json:"chatId"`
+	Body   *UpdateTelegramChatJSONRequestBody
+}
+
+type UpdateTelegramChatResponseObject interface {
+	VisitUpdateTelegramChatResponse(w http.ResponseWriter) error
+}
+
+type UpdateTelegramChat200JSONResponse TelegramChat
+
+func (response UpdateTelegramChat200JSONResponse) VisitUpdateTelegramChatResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateTelegramChatdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateTelegramChatdefaultApplicationProblemPlusJSONResponse) VisitUpdateTelegramChatResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListTelegramContributorsRequestObject struct {
+	ChatId TelegramChatId `json:"chatId"`
+}
+
+type ListTelegramContributorsResponseObject interface {
+	VisitListTelegramContributorsResponse(w http.ResponseWriter) error
+}
+
+type ListTelegramContributors200JSONResponse []TelegramContributor
+
+func (response ListTelegramContributors200JSONResponse) VisitListTelegramContributorsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type ListTelegramContributorsdefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response ListTelegramContributorsdefaultApplicationProblemPlusJSONResponse) VisitListTelegramContributorsResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateTelegramContributorRequestObject struct {
+	ChatId        TelegramChatId `json:"chatId"`
+	ContributorId Id             `json:"contributorId"`
+	Body          *UpdateTelegramContributorJSONRequestBody
+}
+
+type UpdateTelegramContributorResponseObject interface {
+	VisitUpdateTelegramContributorResponse(w http.ResponseWriter) error
+}
+
+type UpdateTelegramContributor200JSONResponse TelegramContributor
+
+func (response UpdateTelegramContributor200JSONResponse) VisitUpdateTelegramContributorResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type UpdateTelegramContributordefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response UpdateTelegramContributordefaultApplicationProblemPlusJSONResponse) VisitUpdateTelegramContributorResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type RevokeTelegramCodeRequestObject struct {
+	CodeId Id `json:"codeId"`
+}
+
+type RevokeTelegramCodeResponseObject interface {
+	VisitRevokeTelegramCodeResponse(w http.ResponseWriter) error
+}
+
+type RevokeTelegramCode204Response struct {
+}
+
+func (response RevokeTelegramCode204Response) VisitRevokeTelegramCodeResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type RevokeTelegramCodedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response RevokeTelegramCodedefaultApplicationProblemPlusJSONResponse) VisitRevokeTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramCodeRequestObject struct {
+	CodeId Id `json:"codeId"`
+}
+
+type GetTelegramCodeResponseObject interface {
+	VisitGetTelegramCodeResponse(w http.ResponseWriter) error
+}
+
+type GetTelegramCode200JSONResponse TelegramCode
+
+func (response GetTelegramCode200JSONResponse) VisitGetTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
+type GetTelegramCodedefaultApplicationProblemPlusJSONResponse struct {
+	Body       Problem
+	StatusCode int
+}
+
+func (response GetTelegramCodedefaultApplicationProblemPlusJSONResponse) VisitGetTelegramCodeResponse(w http.ResponseWriter) error {
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(response.Body); err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/problem+json")
+	w.WriteHeader(response.StatusCode)
+	_, err := buf.WriteTo(w)
+	return err
+}
+
 type GetTvSlideshowRequestObject struct {
 	Token string `json:"token"`
 }
@@ -18694,6 +22637,51 @@ type StrictServerInterface interface {
 	// (POST /v1/devices/token)
 	DeviceToken(ctx context.Context, request DeviceTokenRequestObject) (DeviceTokenResponseObject, error)
 
+	// (DELETE /v1/email-addresses/{addressId})
+	DeleteEmailAddress(ctx context.Context, request DeleteEmailAddressRequestObject) (DeleteEmailAddressResponseObject, error)
+
+	// (GET /v1/email-addresses/{addressId})
+	GetEmailAddress(ctx context.Context, request GetEmailAddressRequestObject) (GetEmailAddressResponseObject, error)
+
+	// (PATCH /v1/email-addresses/{addressId})
+	UpdateEmailAddress(ctx context.Context, request UpdateEmailAddressRequestObject) (UpdateEmailAddressResponseObject, error)
+
+	// (DELETE /v1/email-addresses/{addressId}/held-messages/{messageId})
+	DeleteEmailHeldMessage(ctx context.Context, request DeleteEmailHeldMessageRequestObject) (DeleteEmailHeldMessageResponseObject, error)
+
+	// (GET /v1/email-addresses/{addressId}/held-messages/{messageId})
+	GetEmailHeldMessage(ctx context.Context, request GetEmailHeldMessageRequestObject) (GetEmailHeldMessageResponseObject, error)
+
+	// (POST /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver)
+	DeliverEmailHeldMessage(ctx context.Context, request DeliverEmailHeldMessageRequestObject) (DeliverEmailHeldMessageResponseObject, error)
+
+	// (GET /v1/email-addresses/{addressId}/messages)
+	ListEmailMessages(ctx context.Context, request ListEmailMessagesRequestObject) (ListEmailMessagesResponseObject, error)
+
+	// (GET /v1/email-addresses/{addressId}/pending-senders)
+	ListEmailPendingSenders(ctx context.Context, request ListEmailPendingSendersRequestObject) (ListEmailPendingSendersResponseObject, error)
+
+	// (POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve)
+	ApproveEmailSender(ctx context.Context, request ApproveEmailSenderRequestObject) (ApproveEmailSenderResponseObject, error)
+
+	// (POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject)
+	RejectEmailSender(ctx context.Context, request RejectEmailSenderRequestObject) (RejectEmailSenderResponseObject, error)
+
+	// (POST /v1/email-addresses/{addressId}/regenerate)
+	RegenerateEmailAddress(ctx context.Context, request RegenerateEmailAddressRequestObject) (RegenerateEmailAddressResponseObject, error)
+
+	// (GET /v1/email-addresses/{addressId}/senders)
+	ListEmailSenders(ctx context.Context, request ListEmailSendersRequestObject) (ListEmailSendersResponseObject, error)
+
+	// (POST /v1/email-addresses/{addressId}/senders)
+	AddEmailSender(ctx context.Context, request AddEmailSenderRequestObject) (AddEmailSenderResponseObject, error)
+
+	// (DELETE /v1/email-addresses/{addressId}/senders/{senderId})
+	RemoveEmailSender(ctx context.Context, request RemoveEmailSenderRequestObject) (RemoveEmailSenderResponseObject, error)
+
+	// (PATCH /v1/email-addresses/{addressId}/senders/{senderId})
+	UpdateEmailSender(ctx context.Context, request UpdateEmailSenderRequestObject) (UpdateEmailSenderResponseObject, error)
+
 	// (GET /v1/feed-invites/{token})
 	PreviewFeedInvite(ctx context.Context, request PreviewFeedInviteRequestObject) (PreviewFeedInviteResponseObject, error)
 
@@ -18744,6 +22732,12 @@ type StrictServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/birthdays/{birthdayId}/reject)
 	RejectFeedBirthday(ctx context.Context, request RejectFeedBirthdayRequestObject) (RejectFeedBirthdayResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/email-addresses)
+	ListFeedEmailAddresses(ctx context.Context, request ListFeedEmailAddressesRequestObject) (ListFeedEmailAddressesResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/email-addresses)
+	CreateFeedEmailAddress(ctx context.Context, request CreateFeedEmailAddressRequestObject) (CreateFeedEmailAddressResponseObject, error)
 
 	// (GET /v1/feeds/{feedId}/invites)
 	ListFeedInvites(ctx context.Context, request ListFeedInvitesRequestObject) (ListFeedInvitesResponseObject, error)
@@ -18798,6 +22792,12 @@ type StrictServerInterface interface {
 
 	// (POST /v1/feeds/{feedId}/subscriptions)
 	RequestSubscription(ctx context.Context, request RequestSubscriptionRequestObject) (RequestSubscriptionResponseObject, error)
+
+	// (GET /v1/feeds/{feedId}/telegram-chats)
+	ListFeedTelegramChats(ctx context.Context, request ListFeedTelegramChatsRequestObject) (ListFeedTelegramChatsResponseObject, error)
+
+	// (POST /v1/feeds/{feedId}/telegram-codes)
+	CreateFeedTelegramCode(ctx context.Context, request CreateFeedTelegramCodeRequestObject) (CreateFeedTelegramCodeResponseObject, error)
 
 	// (POST /v1/feeds/{feedId}/transfer)
 	TransferFeedOwnership(ctx context.Context, request TransferFeedOwnershipRequestObject) (TransferFeedOwnershipResponseObject, error)
@@ -18861,6 +22861,12 @@ type StrictServerInterface interface {
 
 	// (PUT /v1/frames/{frameId}/countdowns/{eventId})
 	SetCountdown(ctx context.Context, request SetCountdownRequestObject) (SetCountdownResponseObject, error)
+
+	// (GET /v1/frames/{frameId}/email-addresses)
+	ListFrameEmailAddresses(ctx context.Context, request ListFrameEmailAddressesRequestObject) (ListFrameEmailAddressesResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/email-addresses)
+	CreateFrameEmailAddress(ctx context.Context, request CreateFrameEmailAddressRequestObject) (CreateFrameEmailAddressResponseObject, error)
 
 	// (GET /v1/frames/{frameId}/events)
 	ListEventInvitations(ctx context.Context, request ListEventInvitationsRequestObject) (ListEventInvitationsResponseObject, error)
@@ -18931,6 +22937,12 @@ type StrictServerInterface interface {
 	// (GET /v1/frames/{frameId}/subscriptions)
 	ListFrameSubscriptions(ctx context.Context, request ListFrameSubscriptionsRequestObject) (ListFrameSubscriptionsResponseObject, error)
 
+	// (GET /v1/frames/{frameId}/telegram-chats)
+	ListFrameTelegramChats(ctx context.Context, request ListFrameTelegramChatsRequestObject) (ListFrameTelegramChatsResponseObject, error)
+
+	// (POST /v1/frames/{frameId}/telegram-codes)
+	CreateFrameTelegramCode(ctx context.Context, request CreateFrameTelegramCodeRequestObject) (CreateFrameTelegramCodeResponseObject, error)
+
 	// (POST /v1/frames/{frameId}/transfer)
 	TransferOwnership(ctx context.Context, request TransferOwnershipRequestObject) (TransferOwnershipResponseObject, error)
 
@@ -18987,6 +22999,15 @@ type StrictServerInterface interface {
 
 	// (DELETE /v1/me/push-endpoints/{endpointId})
 	DeletePushEndpoint(ctx context.Context, request DeletePushEndpointRequestObject) (DeletePushEndpointResponseObject, error)
+
+	// (DELETE /v1/me/telegram)
+	UnlinkTelegram(ctx context.Context, request UnlinkTelegramRequestObject) (UnlinkTelegramResponseObject, error)
+
+	// (GET /v1/me/telegram)
+	GetTelegramLink(ctx context.Context, request GetTelegramLinkRequestObject) (GetTelegramLinkResponseObject, error)
+
+	// (POST /v1/me/telegram/link-code)
+	CreateTelegramLinkCode(ctx context.Context, request CreateTelegramLinkCodeRequestObject) (CreateTelegramLinkCodeResponseObject, error)
 
 	// (GET /v1/operator/limits)
 	OperatorGetLimits(ctx context.Context, request OperatorGetLimitsRequestObject) (OperatorGetLimitsResponseObject, error)
@@ -19086,6 +23107,27 @@ type StrictServerInterface interface {
 
 	// (POST /v1/subscriptions/{subscriptionId}/resume)
 	ResumeSubscription(ctx context.Context, request ResumeSubscriptionRequestObject) (ResumeSubscriptionResponseObject, error)
+
+	// (DELETE /v1/telegram-chats/{chatId})
+	DisconnectTelegramChat(ctx context.Context, request DisconnectTelegramChatRequestObject) (DisconnectTelegramChatResponseObject, error)
+
+	// (GET /v1/telegram-chats/{chatId})
+	GetTelegramChat(ctx context.Context, request GetTelegramChatRequestObject) (GetTelegramChatResponseObject, error)
+
+	// (PATCH /v1/telegram-chats/{chatId})
+	UpdateTelegramChat(ctx context.Context, request UpdateTelegramChatRequestObject) (UpdateTelegramChatResponseObject, error)
+
+	// (GET /v1/telegram-chats/{chatId}/contributors)
+	ListTelegramContributors(ctx context.Context, request ListTelegramContributorsRequestObject) (ListTelegramContributorsResponseObject, error)
+
+	// (PATCH /v1/telegram-chats/{chatId}/contributors/{contributorId})
+	UpdateTelegramContributor(ctx context.Context, request UpdateTelegramContributorRequestObject) (UpdateTelegramContributorResponseObject, error)
+
+	// (DELETE /v1/telegram-codes/{codeId})
+	RevokeTelegramCode(ctx context.Context, request RevokeTelegramCodeRequestObject) (RevokeTelegramCodeResponseObject, error)
+
+	// (GET /v1/telegram-codes/{codeId})
+	GetTelegramCode(ctx context.Context, request GetTelegramCodeRequestObject) (GetTelegramCodeResponseObject, error)
 
 	// (GET /v1/tv/{token})
 	GetTvSlideshow(ctx context.Context, request GetTvSlideshowRequestObject) (GetTvSlideshowResponseObject, error)
@@ -19873,6 +23915,445 @@ func (sh *strictHandler) DeviceToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteEmailAddress operation middleware
+func (sh *strictHandler) DeleteEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request DeleteEmailAddressRequestObject
+
+	request.AddressId = addressId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteEmailAddress(ctx, request.(DeleteEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteEmailAddressResponseObject); ok {
+		if err := validResponse.VisitDeleteEmailAddressResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetEmailAddress operation middleware
+func (sh *strictHandler) GetEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request GetEmailAddressRequestObject
+
+	request.AddressId = addressId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetEmailAddress(ctx, request.(GetEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetEmailAddressResponseObject); ok {
+		if err := validResponse.VisitGetEmailAddressResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateEmailAddress operation middleware
+func (sh *strictHandler) UpdateEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request UpdateEmailAddressRequestObject
+
+	request.AddressId = addressId
+
+	var body UpdateEmailAddressJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateEmailAddress(ctx, request.(UpdateEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateEmailAddressResponseObject); ok {
+		if err := validResponse.VisitUpdateEmailAddressResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteEmailHeldMessage operation middleware
+func (sh *strictHandler) DeleteEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId) {
+	var request DeleteEmailHeldMessageRequestObject
+
+	request.AddressId = addressId
+	request.MessageId = messageId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteEmailHeldMessage(ctx, request.(DeleteEmailHeldMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteEmailHeldMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteEmailHeldMessageResponseObject); ok {
+		if err := validResponse.VisitDeleteEmailHeldMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetEmailHeldMessage operation middleware
+func (sh *strictHandler) GetEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId) {
+	var request GetEmailHeldMessageRequestObject
+
+	request.AddressId = addressId
+	request.MessageId = messageId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetEmailHeldMessage(ctx, request.(GetEmailHeldMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetEmailHeldMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetEmailHeldMessageResponseObject); ok {
+		if err := validResponse.VisitGetEmailHeldMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeliverEmailHeldMessage operation middleware
+func (sh *strictHandler) DeliverEmailHeldMessage(w http.ResponseWriter, r *http.Request, addressId AddressId, messageId HeldMessageId) {
+	var request DeliverEmailHeldMessageRequestObject
+
+	request.AddressId = addressId
+	request.MessageId = messageId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeliverEmailHeldMessage(ctx, request.(DeliverEmailHeldMessageRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeliverEmailHeldMessage")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeliverEmailHeldMessageResponseObject); ok {
+		if err := validResponse.VisitDeliverEmailHeldMessageResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListEmailMessages operation middleware
+func (sh *strictHandler) ListEmailMessages(w http.ResponseWriter, r *http.Request, addressId AddressId, params ListEmailMessagesParams) {
+	var request ListEmailMessagesRequestObject
+
+	request.AddressId = addressId
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListEmailMessages(ctx, request.(ListEmailMessagesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListEmailMessages")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListEmailMessagesResponseObject); ok {
+		if err := validResponse.VisitListEmailMessagesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListEmailPendingSenders operation middleware
+func (sh *strictHandler) ListEmailPendingSenders(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request ListEmailPendingSendersRequestObject
+
+	request.AddressId = addressId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListEmailPendingSenders(ctx, request.(ListEmailPendingSendersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListEmailPendingSenders")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListEmailPendingSendersResponseObject); ok {
+		if err := validResponse.VisitListEmailPendingSendersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ApproveEmailSender operation middleware
+func (sh *strictHandler) ApproveEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId) {
+	var request ApproveEmailSenderRequestObject
+
+	request.AddressId = addressId
+	request.SenderId = senderId
+
+	var body ApproveEmailSenderJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ApproveEmailSender(ctx, request.(ApproveEmailSenderRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ApproveEmailSender")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ApproveEmailSenderResponseObject); ok {
+		if err := validResponse.VisitApproveEmailSenderResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RejectEmailSender operation middleware
+func (sh *strictHandler) RejectEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId) {
+	var request RejectEmailSenderRequestObject
+
+	request.AddressId = addressId
+	request.SenderId = senderId
+
+	var body RejectEmailSenderJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if !errors.Is(err, io.EOF) {
+			sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+			return
+		}
+	} else {
+		request.Body = &body
+	}
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RejectEmailSender(ctx, request.(RejectEmailSenderRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RejectEmailSender")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RejectEmailSenderResponseObject); ok {
+		if err := validResponse.VisitRejectEmailSenderResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RegenerateEmailAddress operation middleware
+func (sh *strictHandler) RegenerateEmailAddress(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request RegenerateEmailAddressRequestObject
+
+	request.AddressId = addressId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RegenerateEmailAddress(ctx, request.(RegenerateEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RegenerateEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RegenerateEmailAddressResponseObject); ok {
+		if err := validResponse.VisitRegenerateEmailAddressResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListEmailSenders operation middleware
+func (sh *strictHandler) ListEmailSenders(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request ListEmailSendersRequestObject
+
+	request.AddressId = addressId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListEmailSenders(ctx, request.(ListEmailSendersRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListEmailSenders")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListEmailSendersResponseObject); ok {
+		if err := validResponse.VisitListEmailSendersResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// AddEmailSender operation middleware
+func (sh *strictHandler) AddEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId) {
+	var request AddEmailSenderRequestObject
+
+	request.AddressId = addressId
+
+	var body AddEmailSenderJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.AddEmailSender(ctx, request.(AddEmailSenderRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "AddEmailSender")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(AddEmailSenderResponseObject); ok {
+		if err := validResponse.VisitAddEmailSenderResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RemoveEmailSender operation middleware
+func (sh *strictHandler) RemoveEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId) {
+	var request RemoveEmailSenderRequestObject
+
+	request.AddressId = addressId
+	request.SenderId = senderId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RemoveEmailSender(ctx, request.(RemoveEmailSenderRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RemoveEmailSender")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RemoveEmailSenderResponseObject); ok {
+		if err := validResponse.VisitRemoveEmailSenderResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateEmailSender operation middleware
+func (sh *strictHandler) UpdateEmailSender(w http.ResponseWriter, r *http.Request, addressId AddressId, senderId SenderId) {
+	var request UpdateEmailSenderRequestObject
+
+	request.AddressId = addressId
+	request.SenderId = senderId
+
+	var body UpdateEmailSenderJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateEmailSender(ctx, request.(UpdateEmailSenderRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateEmailSender")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateEmailSenderResponseObject); ok {
+		if err := validResponse.VisitUpdateEmailSenderResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // PreviewFeedInvite operation middleware
 func (sh *strictHandler) PreviewFeedInvite(w http.ResponseWriter, r *http.Request, token InviteToken) {
 	var request PreviewFeedInviteRequestObject
@@ -20359,6 +24840,66 @@ func (sh *strictHandler) RejectFeedBirthday(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RejectFeedBirthdayResponseObject); ok {
 		if err := validResponse.VisitRejectFeedBirthdayResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedEmailAddresses operation middleware
+func (sh *strictHandler) ListFeedEmailAddresses(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedEmailAddressesRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedEmailAddresses(ctx, request.(ListFeedEmailAddressesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedEmailAddresses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedEmailAddressesResponseObject); ok {
+		if err := validResponse.VisitListFeedEmailAddressesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFeedEmailAddress operation middleware
+func (sh *strictHandler) CreateFeedEmailAddress(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedEmailAddressParams) {
+	var request CreateFeedEmailAddressRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body CreateFeedEmailAddressJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFeedEmailAddress(ctx, request.(CreateFeedEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFeedEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFeedEmailAddressResponseObject); ok {
+		if err := validResponse.VisitCreateFeedEmailAddressResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -20880,6 +25421,66 @@ func (sh *strictHandler) RequestSubscription(w http.ResponseWriter, r *http.Requ
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(RequestSubscriptionResponseObject); ok {
 		if err := validResponse.VisitRequestSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFeedTelegramChats operation middleware
+func (sh *strictHandler) ListFeedTelegramChats(w http.ResponseWriter, r *http.Request, feedId FeedId) {
+	var request ListFeedTelegramChatsRequestObject
+
+	request.FeedId = feedId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFeedTelegramChats(ctx, request.(ListFeedTelegramChatsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFeedTelegramChats")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFeedTelegramChatsResponseObject); ok {
+		if err := validResponse.VisitListFeedTelegramChatsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFeedTelegramCode operation middleware
+func (sh *strictHandler) CreateFeedTelegramCode(w http.ResponseWriter, r *http.Request, feedId FeedId, params CreateFeedTelegramCodeParams) {
+	var request CreateFeedTelegramCodeRequestObject
+
+	request.FeedId = feedId
+	request.Params = params
+
+	var body CreateFeedTelegramCodeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFeedTelegramCode(ctx, request.(CreateFeedTelegramCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFeedTelegramCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFeedTelegramCodeResponseObject); ok {
+		if err := validResponse.VisitCreateFeedTelegramCodeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -21498,6 +26099,66 @@ func (sh *strictHandler) SetCountdown(w http.ResponseWriter, r *http.Request, fr
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(SetCountdownResponseObject); ok {
 		if err := validResponse.VisitSetCountdownResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListFrameEmailAddresses operation middleware
+func (sh *strictHandler) ListFrameEmailAddresses(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListFrameEmailAddressesRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFrameEmailAddresses(ctx, request.(ListFrameEmailAddressesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFrameEmailAddresses")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFrameEmailAddressesResponseObject); ok {
+		if err := validResponse.VisitListFrameEmailAddressesResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFrameEmailAddress operation middleware
+func (sh *strictHandler) CreateFrameEmailAddress(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateFrameEmailAddressParams) {
+	var request CreateFrameEmailAddressRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body CreateFrameEmailAddressJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFrameEmailAddress(ctx, request.(CreateFrameEmailAddressRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFrameEmailAddress")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFrameEmailAddressResponseObject); ok {
+		if err := validResponse.VisitCreateFrameEmailAddressResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -22184,6 +26845,66 @@ func (sh *strictHandler) ListFrameSubscriptions(w http.ResponseWriter, r *http.R
 	}
 }
 
+// ListFrameTelegramChats operation middleware
+func (sh *strictHandler) ListFrameTelegramChats(w http.ResponseWriter, r *http.Request, frameId FrameId) {
+	var request ListFrameTelegramChatsRequestObject
+
+	request.FrameId = frameId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListFrameTelegramChats(ctx, request.(ListFrameTelegramChatsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListFrameTelegramChats")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListFrameTelegramChatsResponseObject); ok {
+		if err := validResponse.VisitListFrameTelegramChatsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateFrameTelegramCode operation middleware
+func (sh *strictHandler) CreateFrameTelegramCode(w http.ResponseWriter, r *http.Request, frameId FrameId, params CreateFrameTelegramCodeParams) {
+	var request CreateFrameTelegramCodeRequestObject
+
+	request.FrameId = frameId
+	request.Params = params
+
+	var body CreateFrameTelegramCodeJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateFrameTelegramCode(ctx, request.(CreateFrameTelegramCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateFrameTelegramCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateFrameTelegramCodeResponseObject); ok {
+		if err := validResponse.VisitCreateFrameTelegramCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
 // TransferOwnership operation middleware
 func (sh *strictHandler) TransferOwnership(w http.ResponseWriter, r *http.Request, frameId FrameId) {
 	var request TransferOwnershipRequestObject
@@ -22702,6 +27423,80 @@ func (sh *strictHandler) DeletePushEndpoint(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(DeletePushEndpointResponseObject); ok {
 		if err := validResponse.VisitDeletePushEndpointResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UnlinkTelegram operation middleware
+func (sh *strictHandler) UnlinkTelegram(w http.ResponseWriter, r *http.Request) {
+	var request UnlinkTelegramRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UnlinkTelegram(ctx, request.(UnlinkTelegramRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UnlinkTelegram")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UnlinkTelegramResponseObject); ok {
+		if err := validResponse.VisitUnlinkTelegramResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTelegramLink operation middleware
+func (sh *strictHandler) GetTelegramLink(w http.ResponseWriter, r *http.Request) {
+	var request GetTelegramLinkRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTelegramLink(ctx, request.(GetTelegramLinkRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTelegramLink")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTelegramLinkResponseObject); ok {
+		if err := validResponse.VisitGetTelegramLinkResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// CreateTelegramLinkCode operation middleware
+func (sh *strictHandler) CreateTelegramLinkCode(w http.ResponseWriter, r *http.Request, params CreateTelegramLinkCodeParams) {
+	var request CreateTelegramLinkCodeRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.CreateTelegramLinkCode(ctx, request.(CreateTelegramLinkCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "CreateTelegramLinkCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(CreateTelegramLinkCodeResponseObject); ok {
+		if err := validResponse.VisitCreateTelegramLinkCodeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -23640,6 +28435,203 @@ func (sh *strictHandler) ResumeSubscription(w http.ResponseWriter, r *http.Reque
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(ResumeSubscriptionResponseObject); ok {
 		if err := validResponse.VisitResumeSubscriptionResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DisconnectTelegramChat operation middleware
+func (sh *strictHandler) DisconnectTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId) {
+	var request DisconnectTelegramChatRequestObject
+
+	request.ChatId = chatId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DisconnectTelegramChat(ctx, request.(DisconnectTelegramChatRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DisconnectTelegramChat")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DisconnectTelegramChatResponseObject); ok {
+		if err := validResponse.VisitDisconnectTelegramChatResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTelegramChat operation middleware
+func (sh *strictHandler) GetTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId) {
+	var request GetTelegramChatRequestObject
+
+	request.ChatId = chatId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTelegramChat(ctx, request.(GetTelegramChatRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTelegramChat")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTelegramChatResponseObject); ok {
+		if err := validResponse.VisitGetTelegramChatResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateTelegramChat operation middleware
+func (sh *strictHandler) UpdateTelegramChat(w http.ResponseWriter, r *http.Request, chatId TelegramChatId) {
+	var request UpdateTelegramChatRequestObject
+
+	request.ChatId = chatId
+
+	var body UpdateTelegramChatJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateTelegramChat(ctx, request.(UpdateTelegramChatRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateTelegramChat")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateTelegramChatResponseObject); ok {
+		if err := validResponse.VisitUpdateTelegramChatResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// ListTelegramContributors operation middleware
+func (sh *strictHandler) ListTelegramContributors(w http.ResponseWriter, r *http.Request, chatId TelegramChatId) {
+	var request ListTelegramContributorsRequestObject
+
+	request.ChatId = chatId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.ListTelegramContributors(ctx, request.(ListTelegramContributorsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "ListTelegramContributors")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(ListTelegramContributorsResponseObject); ok {
+		if err := validResponse.VisitListTelegramContributorsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateTelegramContributor operation middleware
+func (sh *strictHandler) UpdateTelegramContributor(w http.ResponseWriter, r *http.Request, chatId TelegramChatId, contributorId Id) {
+	var request UpdateTelegramContributorRequestObject
+
+	request.ChatId = chatId
+	request.ContributorId = contributorId
+
+	var body UpdateTelegramContributorJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateTelegramContributor(ctx, request.(UpdateTelegramContributorRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateTelegramContributor")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UpdateTelegramContributorResponseObject); ok {
+		if err := validResponse.VisitUpdateTelegramContributorResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// RevokeTelegramCode operation middleware
+func (sh *strictHandler) RevokeTelegramCode(w http.ResponseWriter, r *http.Request, codeId Id) {
+	var request RevokeTelegramCodeRequestObject
+
+	request.CodeId = codeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.RevokeTelegramCode(ctx, request.(RevokeTelegramCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "RevokeTelegramCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(RevokeTelegramCodeResponseObject); ok {
+		if err := validResponse.VisitRevokeTelegramCodeResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetTelegramCode operation middleware
+func (sh *strictHandler) GetTelegramCode(w http.ResponseWriter, r *http.Request, codeId Id) {
+	var request GetTelegramCodeRequestObject
+
+	request.CodeId = codeId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetTelegramCode(ctx, request.(GetTelegramCodeRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetTelegramCode")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetTelegramCodeResponseObject); ok {
+		if err := validResponse.VisitGetTelegramCodeResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

@@ -239,6 +239,45 @@ Frame column is the Android frame app; the browser frame (`/tv/frame`) follows i
 | "via Immich" in history, feed posts and the library | planned | planned | new | — | `Send.via`, `FeedPost.via`, `Item.via`. |
 | Credit "Anna via Immich" / "Anna · Peeters kids via Immich" | — | — | — | planned | Older frames show "Anna" / "Anna · Peeters kids". |
 
+## Email to frame
+
+Inbox addresses for frames and feeds (`docs/spec/email-inbox.md`, API guide §5.16). Designed, not built. Hidden when
+discovery doesn't say `email_inbox: true`. Managers only: frame owner, admins and `change_settings` members; feed
+owner and admins.
+
+| Feature | Web | Android | iOS | Frame | Notes |
+|---|---|---|---|---|---|
+| "Email photos to this frame" in frame settings and "Email" in feed settings: list addresses with status and last mail | planned | planned | planned | — | |
+| Create an address (friendly part prefilled from the name), rename, change the friendly part, pause/resume, regenerate, delete | planned | planned | planned | — | Regenerate and slug changes say the old address stops at once. |
+| Copy the address; Share with a ready-made message for a relative | planned | planned | planned | — | Android: share sheet; iOS: `ShareLink`; web: Web Share API, else copy. Text in the user's language. |
+| Settings: anyone may send, confirmations to senders, join link in replies, reaction notifications | planned | planned | planned | — | "Senders get no replies" note when `replies_available` is false. |
+| Allowed senders: add (with a name), remove, block, unblock | planned | planned | planned | — | Members are not listed: "Members can send from their account email". |
+| Pending senders with held mail previews (sender, subject, time, thumbnails); approve, reject, block; deliver or delete one held mail | planned | planned | planned | — | Unverified mail: warning and only "Deliver this one" / "Delete". |
+| Recent mail (30 days) with outcomes and replies | planned | planned | planned | — | |
+| Notifications: someone new is waiting; held mail expires soon | planned | planned | planned | — | `email_pending_sender`; tap opens the pending list. |
+| Join requests "from the email link", with the email match | planned | planned | planned | — | `JoinRequest.via: email`, `via_name`, `via_matches` (generic for all channels). |
+| "via email" in history, feed posts and the library | planned | planned | planned | — | `Send.via`, `FeedPost.via`, `Item.via` with `service: email`: show `label` instead of the sender. |
+| Credit "Jan via email" / "Jan · Peeters kids via email" | — | — | — | planned | Older frames show the sender's name (the address owner for non-account mail). |
+
+## Telegram
+
+Telegram groups and private chats connected to frames and feeds (`docs/spec/telegram.md`, API guide §5.17).
+Designed, not built. Hidden when discovery doesn't say `telegram: true`. Chats are managed by frame owner, admins and
+`change_settings` members, or feed owner and admins; linking an account is for everyone.
+
+| Feature | Web | Android | iOS | Frame | Notes |
+|---|---|---|---|---|---|
+| "Telegram" in frame settings and feed settings: connected chats with title, status, last photo, owner | planned | planned | planned | — | Disconnected chats under "Earlier" for 30 days. |
+| Connect a Telegram group: open the `?startgroup=` link, or show it as a QR code; follow the code until connected | planned | planned | planned | — | Phones open Telegram with the link; web shows the QR and the link. `telegram_privacy_mode`: say up front to make the bot an admin. |
+| Send from my Telegram (private chat, links the account) and Invite someone to send by Telegram (share the `?start=` link) | planned | planned | planned | — | Share text in the user's language. |
+| Chat settings: who can send (everyone / only linked members), frame replies into the chat, join link in the app message, reaction notifications (owner), topic (forum groups); pause, resume, take over, disconnect | planned | planned | planned | — | `notify_reactions` only for the owner. |
+| Status and fixes: privacy mode ("make the bot an admin"), bot changed, can't post, reactions off | planned | planned | planned | — | Texts per code: `telegram.md` §15. |
+| People in a chat: display name, linked, count; block, unblock | planned | planned | planned | — | Telegram user ids are never shown. |
+| Notification: a chat needs attention, was disconnected, or passed to you | planned | planned | planned | — | `telegram_attention`; tap opens the chat. |
+| Join requests "from Telegram" | planned | planned | planned | — | `JoinRequest.via: telegram`, `via_name`; `via_matches` is always null. |
+| "via Telegram" in history, feed posts and the library | planned | planned | planned | — | `Send.via`, `FeedPost.via`, `Item.via` with `service: telegram`: show `label` instead of the sender. |
+| Credit "Jan via Telegram" / "Jan · Peeters kids via Telegram" | — | — | — | planned | Older frames show the sender's name (the chat's owner for outside contributions). |
+
 ## Account settings
 
 | Feature | Web | Android | iOS | Notes |
@@ -248,6 +287,7 @@ Frame column is the Android frame app; the browser frame (`/tv/frame`) follows i
 | Language | yes | new | differs | See "Language picker". |
 | Notifications on/off | yes | differs | differs | Android: UnifiedPush or Firebase, and the system notification permission. iOS: APNs, behind a build flag that is off by default because the server can't send APNs yet; without it Settings says this version doesn't get notifications. |
 | Server info and limits | yes | yes | yes | |
+| Link my Telegram: link (opens `?start=` in Telegram), show the linked name, unlink | planned | planned | planned | Only with discovery `telegram`. |
 | Sign out | yes | yes | yes | |
 | Privacy and terms links | yes | new | new | |
 

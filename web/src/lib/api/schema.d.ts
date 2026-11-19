@@ -769,7 +769,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Owner or admin. Pending requests from join invites (`via` is always `invite`). */
+        /** @description Owner or admin. Pending requests from join invites (`via` is `invite`, `email` for join links mailed to senders, or `telegram` for join links the Telegram bot gave). */
         get: operations["listFeedJoinRequests"];
         put?: never;
         post?: never;
@@ -1531,6 +1531,553 @@ export interface paths {
         get: operations["googleOAuthCallback"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/email-addresses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /** @description The frame's inbox addresses (frame managers: owner, admin, `change_settings`; others `403 missing_permission`). */
+        get: operations["listFrameEmailAddresses"];
+        put?: never;
+        /**
+         * @description A new address that fills this frame (frame managers). The caller becomes its `owner`: mail from senders without
+         *     a matching account is sent by them. `409 limit_reached` beyond `limits.max_email_addresses_per_target`,
+         *     `503 feature_disabled` without discovery `email_inbox`. Rate-limited (30/h per user).
+         */
+        post: operations["createFrameEmailAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/email-addresses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`). */
+        get: operations["listFeedEmailAddresses"];
+        put?: never;
+        /** @description A new address that posts to this feed (feed owner and admins). Otherwise as `createFrameEmailAddress`. */
+        post: operations["createFeedEmailAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        /** @description Managers of the target (frame managers, feed owner/admins). Others get `404 not_found`. */
+        get: operations["getEmailAddress"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Managers of the target. The address stops working at once and is never issued again; its senders, held mail
+         *     and email join links go with it. Photos already delivered stay.
+         */
+        delete: operations["deleteEmailAddress"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op;
+         *     mail to a paused address is refused with `550 5.2.1`). A new `slug` changes the address (the random part
+         *     stays) and retires the old one at once. `take_over: true` makes the caller the owner.
+         */
+        patch: operations["updateEmailAddress"];
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description A new random part (managers of the target): the old address stops working at once and is never issued again.
+         *     Senders, settings and held mail stay. Rate-limited (10/h per address).
+         */
+        post: operations["regenerateEmailAddress"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/senders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description The allowed and blocked senders (managers of the target), by email. Members of the target are allowed
+         *     automatically by their verified account email and are not listed. Pending senders are in
+         *     `listEmailPendingSenders`.
+         */
+        get: operations["listEmailSenders"];
+        put?: never;
+        /**
+         * @description Allow (or with `blocked: true` block) an address (managers of the target). A pending sender with that address
+         *     is approved (and their held mail delivered) or rejected and blocked. `409 duplicate_sender` when it is already
+         *     allowed or blocked (`detail`: its id), `409 limit_reached` beyond `limits.max_email_senders_per_address`.
+         *     Rate-limited (120/h per user).
+         */
+        post: operations["addEmailSender"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/senders/{senderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                senderId: components["parameters"]["SenderId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Remove an allowed or blocked sender (managers of the target): their next mail is held as from an unknown
+         *     sender again. Their unused email join link is revoked.
+         */
+        delete: operations["removeEmailSender"];
+        options?: never;
+        head?: never;
+        /** @description Rename, block (`blocked: true`) or unblock (`blocked: false`) an allowed or blocked sender (managers of the target). */
+        patch: operations["updateEmailSender"];
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/pending-senders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Senders waiting for approval, with their held mail (managers of the target), newest first. */
+        get: operations["listEmailPendingSenders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Allow a pending sender (managers of the target). With `deliver` (default) their authenticated held mail is
+         *     delivered now (unverified held mail stays held; deliver it one by one with `deliverEmailHeldMessage`). The
+         *     sender gets a `delivered` reply when the address sends confirmations. `409 already_decided` when someone else
+         *     decided first.
+         */
+        post: operations["approveEmailSender"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Reject a pending sender (managers of the target): their held mail is deleted, nobody tells them. With `block`
+         *     their later mail is dropped silently (`204` either way). `409 already_decided` when someone else decided first.
+         */
+        post: operations["rejectEmailSender"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/held-messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                messageId: components["parameters"]["HeldMessageId"];
+            };
+            cookie?: never;
+        };
+        /** @description One held mail with its photos and videos as short-lived thumbnail URLs (managers of the target). */
+        get: operations["getEmailHeldMessage"];
+        put?: never;
+        post?: never;
+        /** @description Delete one held mail without deciding about its sender (managers of the target). */
+        delete: operations["deleteEmailHeldMessage"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Deliver this one held mail (managers of the target), also an unverified one (`reason: unverified_sender`):
+         *     sent by the address owner, credited to the claimed name, never answered. The sender is not allowed by it.
+         */
+        post: operations["deliverEmailHeldMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/email-addresses/{addressId}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Recent mail (last 30 days) to the address and what became of it (managers of the target), newest first. */
+        get: operations["listEmailMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/inbound/email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description **Operator integration, not for clients.** A mail provider or forwarding service posts one received message
+         *     (raw MIME, exactly as received) for kinframe to process (docs/spec/email-inbox.md §6.3). Only when the
+         *     operator set `KINFRAME_EMAIL_WEBHOOK_SECRET` (`404 not_found` otherwise; `503 feature_disabled` while the
+         *     inbox is off). Signed with HMAC-SHA256 (`inboundWebhook`); a bad or replayed signature or a timestamp more than
+         *     5 minutes off is `401 unauthorized`. `413 upload_too_large` above `limits.max_email_message_bytes`. The
+         *     message is queued and processed asynchronously; the answer reports each envelope recipient. Do not retry a
+         *     `2xx` or `4xx`; retry `429` and `5xx` (a retried message is recognised and not delivered twice). Rate-limited
+         *     (600/min).
+         */
+        post: operations["receiveInboundEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/inbound/email:check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description **Operator integration, not for clients.** Which recipients exist and are active, so a provider can refuse
+         *     unknown ones during its own SMTP dialogue. Signed like `receiveInboundEmail`, with the JSON body as the body and
+         *     empty envelope fields.
+         */
+        post: operations["checkInboundEmailRecipients"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/telegram-chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * @description Frame managers (owner, admin, `change_settings`). The Telegram chats connected to this frame: live ones first,
+         *     then those disconnected in the last 30 days. `503 feature_disabled` without discovery `telegram`.
+         */
+        get: operations["listFrameTelegramChats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/frames/{frameId}/telegram-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Frame managers. A one-time connect code in a Telegram deep link (docs/spec/telegram.md §5.1): `chat_kind:
+         *     group` gives `https://t.me/<bot>?startgroup=<code>` (pick a group; the bot joins and binds it), `private`
+         *     gives `https://t.me/<bot>?start=<code>` (a private chat with the bot). The caller becomes the chat's owner. The
+         *     code is single use and expires after 30 minutes; a new code for the same frame and kind revokes the caller's
+         *     previous open one. `409 limit_reached` at `limits.max_telegram_chats_per_target` or
+         *     `max_telegram_chats_per_user`, `409 telegram_already_linked` for `link_account` when the caller is linked
+         *     already, `503 feature_disabled` without a bot, `429 rate_limited` (30/h per user).
+         */
+        post: operations["createFrameTelegramCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/telegram-chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        /** @description Feed owner and admins. As `listFrameTelegramChats`. */
+        get: operations["listFeedTelegramChats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/feeds/{feedId}/telegram-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Feed owner and admins. As `createFrameTelegramCode`; each batch from the chat becomes a post. */
+        post: operations["createFeedTelegramCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/telegram-codes/{codeId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                codeId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        /** @description The caller's own code, to follow it until it is used (or listen to `telegram_code.updated`). */
+        get: operations["getTelegramCode"];
+        put?: never;
+        post?: never;
+        /** @description Revokes an open code of the caller (repeating it is a no-op). */
+        delete: operations["revokeTelegramCode"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/telegram-chats/{chatId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        /** @description Managers of the chat's target. Unknown chats and chats the caller may not manage are `404 not_found`. */
+        get: operations["getTelegramChat"];
+        put?: never;
+        post?: never;
+        /**
+         * @description Managers of the target. The bot says goodbye and leaves the group (`ended_reason: disconnected`). Photos already
+         *     sent stay (unsend them from history). The chat's join invites are revoked.
+         */
+        delete: operations["disconnectTelegramChat"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Managers of the target. `paused` pauses (media is ignored, the bot stays silent) or resumes; `take_over: true`
+         *     makes the caller the owner (the sender of outside contributions from now on; an owner who loses their rights is
+         *     replaced by the frame's or feed's owner automatically). `notify_reactions` is the owner's own switch
+         *     (`403 forbidden` for others). `topic_id` must be one of `topics` or null. `409 invalid_transition` on a
+         *     disconnected chat.
+         */
+        patch: operations["updateTelegramChat"];
+        trace?: never;
+    };
+    "/v1/telegram-chats/{chatId}/contributors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        /** @description Managers of the target. The people whose media the bot saw in this chat, most recent first. */
+        get: operations["listTelegramContributors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/telegram-chats/{chatId}/contributors/{contributorId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+                contributorId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Managers of the target. A blocked contributor's media is ignored silently in this chat, and their join invite is revoked. */
+        patch: operations["updateTelegramContributor"];
+        trace?: never;
+    };
+    "/v1/me/telegram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The Telegram account linked to the caller. `404 not_found` when none is linked. */
+        get: operations["getTelegramLink"];
+        put?: never;
+        post?: never;
+        /** @description Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's. */
+        delete: operations["unlinkTelegram"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/me/telegram/link-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description "Link my Telegram": a one-time code in `https://t.me/<bot>?start=<code>`. Opening it and tapping Start in the
+         *     private chat with the bot links that Telegram account to the caller (docs/spec/telegram.md §5.1). Single use, 30
+         *     minutes. `409 telegram_already_linked` when the caller has a link already (unlink first), `503
+         *     feature_disabled`, `429 rate_limited`.
+         */
+        post: operations["createTelegramLinkCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/telegram/webhook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description **Called by Telegram only, not for clients** (docs/spec/telegram.md §7). Registered by the server with
+         *     `setWebhook` when it runs in webhook mode. A wrong or missing `X-Telegram-Bot-Api-Secret-Token` is `401`;
+         *     `404 not_found` when no bot is configured or the server long-polls. The update is filtered, stored and
+         *     acknowledged with an empty `200` at once; processing is asynchronous. Body at most 1 MiB.
+         */
+        post: operations["telegramWebhook"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2732,7 +3279,7 @@ export interface components {
             }[];
         };
         /** @enum {string} */
-        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "server_error";
+        ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "duplicate_sender" | "telegram_already_linked" | "server_error";
         /** @description Version policy for one family app platform (README §5.15). */
         AppVersionPolicy: {
             /** @description Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum. */
@@ -2819,6 +3366,36 @@ export interface components {
              * @default false
              */
             google_photos_import?: boolean;
+            /**
+             * @description True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
+             *     (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
+             * @default false
+             */
+            email_inbox?: boolean;
+            /**
+             * @description The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
+             * @example in.kinframe.appmire.be
+             */
+            email_inbox_domain?: string | null;
+            /**
+             * @description True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
+             *     accounts can link Telegram (docs/spec/telegram.md). Clients hide every Telegram section otherwise.
+             * @default false
+             */
+            telegram?: boolean;
+            /**
+             * @description The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
+             * @example kinframe_bot
+             */
+            telegram_bot_username?: string | null;
+            /**
+             * @description True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
+             *     so the connect sheet says so up front (docs/spec/telegram.md §6).
+             * @default false
+             */
+            telegram_privacy_mode?: boolean;
+            /** @description The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`. */
+            telegram_max_file_bytes?: number | null;
             /**
              * @description VAPID application server public key (uncompressed P-256 point, base64url) for browser push
              *     subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
@@ -3132,6 +3709,46 @@ export interface components {
              * @default 500
              */
             max_google_import_items?: number;
+            /**
+             * @description Inbox addresses per frame or feed.
+             * @default 5
+             */
+            max_email_addresses_per_target?: number;
+            /**
+             * @description Allowed and blocked senders per inbox address.
+             * @default 200
+             */
+            max_email_senders_per_address?: number;
+            /**
+             * @description One mail as received (SMTP SIZE, webhook body).
+             * @default 52428800
+             */
+            max_email_message_bytes?: number;
+            /**
+             * @description Mails processed per inbox address per day; more are dropped.
+             * @default 200
+             */
+            max_email_messages_per_address_day?: number;
+            /**
+             * @description Held mails per inbox address (10 per pending sender); the oldest go first.
+             * @default 100
+             */
+            max_email_held_messages?: number;
+            /**
+             * @description Connected Telegram chats per frame or feed.
+             * @default 5
+             */
+            max_telegram_chats_per_target?: number;
+            /**
+             * @description Connected Telegram chats one account owns.
+             * @default 20
+             */
+            max_telegram_chats_per_user?: number;
+            /**
+             * @description Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat.
+             * @default 300
+             */
+            max_telegram_items_per_chat_hour?: number;
         };
         /** @description A geocoding result (Open-Meteo geocoding API). */
         Place: {
@@ -3248,7 +3865,8 @@ export interface components {
              *     quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
              *     backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
              *     the `birthdays` change (informational only: nothing is withheld; apps use it for
-             *     `Subscription.frame.birthdays_supported`).
+             *     `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
+             *     (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
              */
             features?: string[];
             uptime_s: number;
@@ -3320,10 +3938,28 @@ export interface components {
                 display_name?: string;
                 avatar_url?: string | null;
             };
-            /** @enum {string} */
-            via: "frame_code" | "invite";
+            /**
+             * @description How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
+             *     add only a value): `email`, from the join link in a reply to someone who mailed photos
+             *     (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
+             *     private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
+             * @enum {string}
+             */
+            via: "frame_code" | "invite" | "email" | "telegram";
             invited_by_name?: string | null;
             note?: string | null;
+            /**
+             * @description Channel requests only: who the channel invited, as managers should see it (for `email`: the sender's name and
+             *     address, "Jan · jan.peeters@telenet.be"; for `telegram`: the Telegram name and the chat, "Ben · Telegram,
+             *     Peeters family").
+             */
+            via_name?: string | null;
+            /**
+             * @description Channel requests only: whether the requester's verified identity matches the one the link was sent to (for
+             *     `email`: the account's verified email is that address); null when the channel can't tell (always for
+             *     `telegram`).
+             */
+            via_matches?: boolean | null;
             /** Format: date-time */
             created_at: string;
         };
@@ -3455,9 +4091,12 @@ export interface components {
             /** @description The original sender's display name in that app, when known. */
             imported_sender_name?: string | null;
             /**
-             * @description Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
-             *     sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
-             *     for feed placements). Optional: clients that don't know it show the sender only.
+             * @description Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
+             *     that were mailed to an inbox address (`service: email`, docs/spec/email-inbox.md §9) or posted in a
+             *     connected Telegram chat (`service: telegram`, docs/spec/telegram.md §8). The sender is the account that set
+             *     it up (for mail and Telegram: the matched or linked account, or the address's or chat's owner); clients and
+             *     frames show "Anna via Immich" ("Anna · Feed via Immich" for feed placements), or "Jan via email" / "Jan via
+             *     Telegram". Optional: clients that don't know it show the sender only.
              */
             via?: components["schemas"]["ItemVia"] | null;
             /**
@@ -3477,19 +4116,28 @@ export interface components {
          */
         ItemOrigin: "frameo";
         /**
-         * @description The outside service a photo came from.
+         * @description The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).
          * @enum {string}
          */
-        PhotoService: "immich" | "icloud" | "google_photos";
+        PhotoService: "immich" | "icloud" | "google_photos" | "email" | "telegram";
         ItemVia: {
             service: components["schemas"]["PhotoService"];
             /**
-             * @description Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+             * @description Photo services: the service name to show, not translated ("Immich", "iCloud", "Google Photos"); frames show
+             *     "<sender> via <label>". `email`, `telegram`: the name of the person who mailed or posted it ("Jan"; for
+             *     Telegram the linked account's display name, else the Telegram display name); frames show "<label> via
+             *     email" / "<label> via Telegram" (localized) **instead of** the sender's name, since the sender may be the
+             *     address's or chat's owner sending on Jan's behalf.
              * @example Immich
+             * @example Jan
              */
             label: string;
             /** @description The photo source that synced it, while it exists (null for Google imports and deleted sources). */
             source_id?: components["schemas"]["Id"] | null;
+            /** @description `email`: the inbox address it was mailed to, while it exists. */
+            address_id?: components["schemas"]["Id"] | null;
+            /** @description `telegram`: the Telegram chat it was posted in (`TelegramChat`), while it exists. */
+            telegram_chat_id?: components["schemas"]["Id"] | null;
         };
         ItemMotion: {
             /** @enum {string} */
@@ -3569,7 +4217,9 @@ export interface components {
             items: components["schemas"]["Item"][];
             /**
              * @description Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
-             *     run or import). Such sends get no `delivered` push.
+             *     run or import), when it came by mail (`service: email`, one send per mail), or from a connected Telegram
+             *     chat (`service: telegram`, one send per batch). Such sends get no `delivered` push, except Telegram sends by
+             *     a linked account (they are that person's own sends).
              */
             via?: components["schemas"]["ItemVia"] | null;
             /** @description The feeds this send was posted to, with receipts (docs/spec/feeds.md §7). */
@@ -3915,7 +4565,7 @@ export interface components {
             send_id?: components["schemas"]["Id"] | null;
             /** Format: date-time */
             created_at: string;
-            /** @description Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich". */
+            /** @description Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos"). */
             via?: components["schemas"]["ItemVia"] | null;
             /** @description Live items in send order. */
             items: components["schemas"]["Item"][];
@@ -4440,6 +5090,478 @@ export interface components {
             updated_at?: string | null;
             /** Format: date-time */
             finished_at?: string | null;
+        };
+        /**
+         * @description `active`: mail is accepted. `paused`: mail to it is refused (`550 5.2.1 This address is paused`); resume to reopen.
+         * @enum {string}
+         */
+        EmailAddressStatus: "active" | "paused";
+        /** @description What the address fills. Exactly one of `frame_id` (a direct send) or `feed_id` (a post) is set. */
+        EmailAddressTarget: {
+            /** @enum {string} */
+            kind: "frame" | "feed";
+            frame_id?: components["schemas"]["Id"] | null;
+            frame_name?: string | null;
+            feed_id?: components["schemas"]["Id"] | null;
+            feed_name?: string | null;
+        };
+        EmailAddress: {
+            id: components["schemas"]["Id"];
+            /**
+             * Format: email
+             * @description The full address, `<slug>-<random>@<email_inbox_domain>`. A capability: shown to managers only.
+             * @example oma-k7q2m9@in.kinframe.appmire.be
+             */
+            address: string;
+            /**
+             * @description The friendly part.
+             * @example oma
+             */
+            slug: string;
+            /** @description Label in the apps and in replies to senders ("Oma's frame"). */
+            name: string;
+            target: components["schemas"]["EmailAddressTarget"];
+            /**
+             * @description Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+             *     the creator lost their rights). Null only briefly while ownership passes on.
+             */
+            owner?: {
+                user_id: components["schemas"]["Id"];
+                display_name: string;
+                /** Format: uri */
+                avatar_url?: string | null;
+            } | null;
+            status: components["schemas"]["EmailAddressStatus"];
+            /** @description Mail from anyone with the address is delivered without approval (default off). */
+            anyone_may_send: boolean;
+            /** @description Authenticated senders get a short "delivered" reply (default on). */
+            send_confirmations: boolean;
+            /** @description Replies to allowed, authenticated senders include a link to join the frame or feed in the app (an invite that always needs approval; default on). */
+            offer_app_invite: boolean;
+            /** @description The owner gets reaction and reply notifications for photos they sent on behalf of non-account senders (the owner's own switch). */
+            notify_reactions: boolean;
+            /** @description False when the server can't send mail (no outgoing mail configured): senders get no replies at all. */
+            replies_available?: boolean;
+            counts: {
+                allowed_senders: number;
+                blocked_senders?: number;
+                pending_senders: number;
+                held_messages: number;
+                /** @description Mails delivered in the last 30 days. */
+                delivered_30d?: number;
+            };
+            /** Format: date-time */
+            last_received_at?: string | null;
+            /** Format: date-time */
+            regenerated_at?: string | null;
+            can_manage?: boolean;
+            is_owner?: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        EmailAddressCreate: {
+            /** @description The friendly part; defaults to one made from the target's name (lower case, accents removed, `oma`). */
+            slug?: string;
+            /** @description Label; defaults to the target's name. */
+            name?: string;
+            /** @default false */
+            anyone_may_send?: boolean;
+            /** @default true */
+            send_confirmations?: boolean;
+            /** @default true */
+            offer_app_invite?: boolean;
+            /** @default true */
+            notify_reactions?: boolean;
+        };
+        /** @description At least one field. */
+        EmailAddressUpdate: {
+            name?: string;
+            /** @description A new friendly part; the old address stops working at once. */
+            slug?: string;
+            /** @description true pauses, false resumes. */
+            paused?: boolean;
+            anyone_may_send?: boolean;
+            send_confirmations?: boolean;
+            offer_app_invite?: boolean;
+            /** @description The owner's own switch; only the owner may change it. */
+            notify_reactions?: boolean;
+            /** @description The caller becomes the owner. */
+            take_over?: boolean;
+        };
+        /**
+         * @description `allowed`: mail is delivered (when authenticated). `blocked`: mail is dropped silently. `pending`: mail is held until a manager decides.
+         * @enum {string}
+         */
+        EmailSenderState: "allowed" | "blocked" | "pending";
+        EmailSender: {
+            id: components["schemas"]["Id"];
+            /** Format: email */
+            email: string;
+            /** @description Name for the credit ("Jan via email") when the mail has none. */
+            display_name?: string | null;
+            state: components["schemas"]["EmailSenderState"];
+            /**
+             * @description `manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.
+             * @enum {string}
+             */
+            origin: "manual" | "approved" | "mail";
+            added_by_name?: string | null;
+            /** Format: date-time */
+            last_message_at?: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        EmailSenderCreate: {
+            /** Format: email */
+            email: string;
+            display_name?: string;
+            /**
+             * @description Block instead of allow.
+             * @default false
+             */
+            blocked?: boolean;
+        };
+        EmailSenderUpdate: {
+            display_name?: string | null;
+            blocked?: boolean;
+        };
+        EmailSenderApprove: {
+            /**
+             * @description Deliver their authenticated held mail now.
+             * @default true
+             */
+            deliver?: boolean;
+            display_name?: string;
+        };
+        EmailSenderReject: {
+            /**
+             * @description Drop their later mail silently.
+             * @default false
+             */
+            block?: boolean;
+        };
+        /** @description How the mail was checked (docs/spec/email-inbox.md §7). Only `authenticated` mail is matched, allowed or answered. */
+        EmailAuthResult: {
+            /** @description DMARC-aligned SPF or DKIM passed for the From domain. */
+            authenticated: boolean;
+            from_domain?: string | null;
+            /** @enum {string} */
+            spf?: "pass" | "fail" | "softfail" | "neutral" | "none" | "temperror" | "permerror" | "not_checked";
+            /** @enum {string} */
+            dkim?: "pass" | "fail" | "none" | "temperror" | "permerror";
+            /** @description The `d=` of the passing signature. */
+            dkim_domain?: string | null;
+            /** @enum {string} */
+            dmarc?: "pass" | "fail" | "none" | "temperror";
+            /** @description The From domain's policy: `none`, `quarantine` or `reject`; null without a DMARC record. */
+            dmarc_policy?: string | null;
+            /** @description Which check aligned: `spf` or `dkim`; null when neither. */
+            aligned?: string | null;
+        };
+        /**
+         * @description `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+         *     couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+         * @enum {string}
+         */
+        EmailHeldReason: "unknown_sender" | "unverified_sender";
+        /** @description Files in a mail that were not used. */
+        EmailSkipCounts: {
+            /** @description Images under 300 px on the long side (signatures, logos). */
+            too_small?: number;
+            /** @description Already in the mail or on the frame / in the feed. */
+            duplicate?: number;
+            unsupported?: number;
+            too_large?: number;
+            /** @description Videos longer than `limits.max_video_seconds`. */
+            too_long?: number;
+            over_limit?: number;
+        };
+        EmailHeldMessageSummary: {
+            id: components["schemas"]["Id"];
+            reason: components["schemas"]["EmailHeldReason"];
+            subject?: string | null;
+            /** Format: date-time */
+            received_at: string;
+            /**
+             * Format: date-time
+             * @description Deleted then (at most 14 days after it arrived).
+             */
+            expires_at: string;
+            media_count: number;
+            authenticated: boolean;
+            /** @description The first thumbnails; short-lived signed URLs (about 1 h). */
+            thumb_urls?: string[];
+        };
+        EmailHeldMessage: {
+            id: components["schemas"]["Id"];
+            address_id: components["schemas"]["Id"];
+            sender_id?: components["schemas"]["Id"];
+            /** @description As the From header says; trustworthy only when `auth.authenticated`. */
+            sender_email: string;
+            sender_name?: string | null;
+            reason: components["schemas"]["EmailHeldReason"];
+            subject?: string | null;
+            /** @description The caption the photos would get. */
+            caption?: string | null;
+            /** Format: date-time */
+            received_at: string;
+            /** Format: date-time */
+            expires_at: string;
+            auth: components["schemas"]["EmailAuthResult"];
+            media: {
+                kind: components["schemas"]["MediaKind"];
+                width?: number | null;
+                height?: number | null;
+                duration_ms?: number | null;
+                bytes?: number | null;
+                filename?: string | null;
+                /**
+                 * Format: uri
+                 * @description Short-lived signed URL (about 1 h); null while processing.
+                 */
+                thumb_url?: string | null;
+            }[];
+            skipped?: components["schemas"]["EmailSkipCounts"];
+        };
+        EmailPendingSender: {
+            id: components["schemas"]["Id"];
+            /** @description As claimed; trustworthy only when `authenticated`. */
+            email: string;
+            display_name?: string | null;
+            /** @description The latest held mail was authenticated. */
+            authenticated: boolean;
+            /** Format: date-time */
+            first_held_at: string;
+            /** Format: date-time */
+            last_held_at: string;
+            /** @description Held mail, newest first. */
+            messages: components["schemas"]["EmailHeldMessageSummary"][];
+        };
+        /**
+         * @description What became of a mail (texts in docs/spec/email-inbox.md §13).
+         * @enum {string}
+         */
+        EmailOutcome: "delivered" | "held" | "no_media" | "too_large" | "encrypted" | "duplicate" | "blocked" | "rejected_dmarc" | "ignored" | "rate_limited" | "failed";
+        /** @enum {string} */
+        EmailReplyKind: "delivered" | "held" | "no_media" | "too_large" | "encrypted";
+        EmailMessage: {
+            id: components["schemas"]["Id"];
+            /** Format: date-time */
+            received_at: string;
+            sender_email?: string | null;
+            sender_name?: string | null;
+            authenticated: boolean;
+            outcome: components["schemas"]["EmailOutcome"];
+            /** @description Photos and videos delivered or held. */
+            items?: number;
+            skipped?: components["schemas"]["EmailSkipCounts"];
+            send_ids?: components["schemas"]["Id"][];
+            /** @description The reply the sender got, if any. */
+            reply?: components["schemas"]["EmailReplyKind"] | null;
+        };
+        EmailMessagePage: {
+            items: components["schemas"]["EmailMessage"][];
+            next_cursor?: string | null;
+        };
+        EmailInboundResult: {
+            id: components["schemas"]["Id"];
+            recipients: {
+                address: string;
+                /** @enum {string} */
+                outcome: "accepted" | "unknown_recipient" | "paused" | "rejected_dmarc" | "too_large";
+            }[];
+        };
+        EmailRecipientCheck: {
+            recipients: string[];
+        };
+        EmailRecipientCheckResult: {
+            recipients: {
+                address: string;
+                /** @enum {string} */
+                outcome: "accepted" | "unknown_recipient" | "paused";
+            }[];
+        };
+        /**
+         * @description `group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.
+         * @enum {string}
+         */
+        TelegramChatKind: "group" | "private";
+        TelegramConnectCodeCreate: {
+            chat_kind: components["schemas"]["TelegramChatKind"];
+            /**
+             * @description `chat_kind: private` only ("Send from my Telegram"): also link the Telegram account that redeems the code to
+             *     the caller. Without it the redeemer is an outside contributor sent for by the caller ("Invite someone to
+             *     send by Telegram").
+             * @default false
+             */
+            link_account?: boolean;
+        };
+        /** @enum {string} */
+        TelegramCodePurpose: "connect" | "link";
+        /** @enum {string} */
+        TelegramCodeStatus: "open" | "used" | "expired" | "revoked";
+        /**
+         * @description Why the last attempt to redeem the code in Telegram failed (the code may still be open).
+         * @enum {string}
+         */
+        TelegramCodeErrorCode: "code_expired" | "code_used" | "already_connected" | "limit_reached" | "wrong_chat_kind" | "already_linked" | "missing_permission";
+        TelegramCode: {
+            id: components["schemas"]["Id"];
+            purpose: components["schemas"]["TelegramCodePurpose"];
+            chat_kind?: components["schemas"]["TelegramChatKind"] | null;
+            link_account?: boolean;
+            /** @description `connect` codes: the frame or feed. */
+            target?: components["schemas"]["TelegramChatTarget"] | null;
+            /** @description Only in the create response. */
+            code?: string | null;
+            /**
+             * Format: uri
+             * @description Only in the create response: `https://t.me/<bot>?startgroup=<code>` (groups) or `?start=<code>`. Show it as
+             *     a button (opens Telegram) and as a QR code (for another device).
+             * @example https://t.me/kinframe_bot?startgroup=cA7f9QxK2mPz4LwN8
+             */
+            url?: string | null;
+            status: components["schemas"]["TelegramCodeStatus"];
+            /** Format: date-time */
+            expires_at: string;
+            /** @description `connect`, once used: the `TelegramChat` it created. */
+            chat_id?: components["schemas"]["Id"] | null;
+            error_code?: components["schemas"]["TelegramCodeErrorCode"] | null;
+        };
+        /** @description What the chat fills. Exactly one of `frame_id` (a direct send per batch) or `feed_id` (a post per batch) is set. */
+        TelegramChatTarget: {
+            /** @enum {string} */
+            kind: "frame" | "feed";
+            frame_id?: components["schemas"]["Id"] | null;
+            frame_name?: string | null;
+            feed_id?: components["schemas"]["Id"] | null;
+            feed_name?: string | null;
+        };
+        /**
+         * @description `active`: media is accepted. `needs_attention`: a person must fix `error_code`. `paused`: paused in the app,
+         *     media ignored. `disconnected`: ended (`ended_reason`); listed for 30 days, then deleted.
+         * @enum {string}
+         */
+        TelegramChatStatus: "active" | "needs_attention" | "paused" | "disconnected";
+        /**
+         * @description `privacy_mode`: the bot only sees commands in the group (make it an admin, or the operator turns privacy mode off). `bot_changed`: the server now uses another bot; connect again.
+         * @enum {string}
+         */
+        TelegramChatErrorCode: "privacy_mode" | "bot_changed";
+        /**
+         * @description `cannot_post`: the bot may not post in the group, so it can't reply. `reactions_off`: the group restricts reactions, so confirmations are silent.
+         * @enum {string}
+         */
+        TelegramChatWarning: "cannot_post" | "reactions_off";
+        /** @enum {string} */
+        TelegramChatEndedReason: "disconnected" | "stopped" | "bot_removed" | "chat_gone" | "bot_blocked" | "target_deleted";
+        /**
+         * @description `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+         *     users linked to a kinframe account that may send to the target.
+         * @enum {string}
+         */
+        TelegramContributorsMode: "everyone" | "linked_only";
+        TelegramTopic: {
+            /**
+             * Format: int64
+             * @description Telegram `message_thread_id` (1 = General).
+             */
+            id: number;
+            name: string;
+        };
+        TelegramChat: {
+            id: components["schemas"]["Id"];
+            chat_kind: components["schemas"]["TelegramChatKind"];
+            /** @description The group's title, or for a private chat the Telegram user's display name. */
+            title: string;
+            is_forum?: boolean;
+            target: components["schemas"]["TelegramChatTarget"];
+            /**
+             * @description Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+             *     their rights). Null only briefly while ownership passes on.
+             */
+            owner?: {
+                user_id: components["schemas"]["Id"];
+                display_name: string;
+                /** Format: uri */
+                avatar_url?: string | null;
+            } | null;
+            status: components["schemas"]["TelegramChatStatus"];
+            error_code?: components["schemas"]["TelegramChatErrorCode"] | null;
+            warnings?: components["schemas"]["TelegramChatWarning"][];
+            ended_reason?: components["schemas"]["TelegramChatEndedReason"] | null;
+            /** @description Who disconnected it (`disconnected`, `stopped`). */
+            ended_by_name?: string | null;
+            /** Format: date-time */
+            ended_at?: string | null;
+            bot_is_admin?: boolean;
+            /** @description False: privacy mode hides photos from the bot (`error_code: privacy_mode`). */
+            sees_all_messages?: boolean;
+            contributors: components["schemas"]["TelegramContributorsMode"];
+            /** @description Post frames' quick replies into the chat as replies (default false). */
+            frame_replies: boolean;
+            /** @description The owner gets reaction and reply notifications for outside contributions (default false: the chat already shows them). The owner's own switch. */
+            notify_reactions: boolean;
+            /** @description The bot's one-time app message includes an "Ask to join" link (an invite that always needs approval; default true). */
+            offer_app_invite: boolean;
+            /**
+             * Format: int64
+             * @description Forum groups: only this topic counts; null = all topics.
+             */
+            topic_id?: number | null;
+            /** @description Forum groups: topics the bot has seen (Telegram offers no list). */
+            topics?: components["schemas"]["TelegramTopic"][];
+            counts: {
+                /** @description Photos and videos sent. */
+                sent: number;
+                duplicates?: number;
+                skipped?: number;
+                failed?: number;
+                contributors: number;
+            };
+            /** Format: date-time */
+            last_delivery_at?: string | null;
+            can_manage?: boolean;
+            is_owner?: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        TelegramChatUpdate: {
+            paused?: boolean;
+            contributors?: components["schemas"]["TelegramContributorsMode"];
+            frame_replies?: boolean;
+            notify_reactions?: boolean;
+            offer_app_invite?: boolean;
+            /** Format: int64 */
+            topic_id?: number | null;
+            /** @description The caller becomes the owner (the sender of outside contributions from now on). */
+            take_over?: boolean;
+        };
+        TelegramContributor: {
+            id: components["schemas"]["Id"];
+            /** @description The Telegram display name, or the kinframe name when linked. */
+            display_name: string;
+            linked: boolean;
+            /** @description The linked kinframe account, when it is a member of the target. */
+            user_id?: components["schemas"]["Id"] | null;
+            blocked: boolean;
+            sent_count: number;
+            /** Format: date-time */
+            first_seen_at?: string;
+            /** Format: date-time */
+            last_seen_at: string;
+        };
+        TelegramContributorUpdate: {
+            blocked: boolean;
+        };
+        TelegramLink: {
+            display_name: string;
+            /** @description Without "@". */
+            username?: string | null;
+            /** @description False when the user blocked the bot. */
+            can_message: boolean;
+            /** Format: date-time */
+            linked_at: string;
         };
         TvLinkCreate: {
             /**
@@ -5611,6 +6733,10 @@ export interface components {
         BirthdayId: components["schemas"]["Id"];
         SourceId: components["schemas"]["Id"];
         ImportId: components["schemas"]["Id"];
+        AddressId: components["schemas"]["Id"];
+        SenderId: components["schemas"]["Id"];
+        HeldMessageId: components["schemas"]["Id"];
+        TelegramChatId: components["schemas"]["Id"];
         InviteToken: string;
         Cursor: string;
         Limit: number;
@@ -8384,6 +9510,939 @@ export interface operations {
                 content: {
                     "text/html": string;
                 };
+            };
+        };
+    };
+    listFrameEmailAddresses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Addresses, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFrameEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailAddressCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedEmailAddresses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Addresses, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFeedEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailAddressCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Address */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailAddressUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"];
+                };
+            };
+            422: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    regenerateEmailAddress: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Regenerated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailAddress"];
+                };
+            };
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listEmailSenders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Senders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailSender"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    addEmailSender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailSenderCreate"];
+            };
+        };
+        responses: {
+            /** @description Added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailSender"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    removeEmailSender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                senderId: components["parameters"]["SenderId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Removed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateEmailSender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                senderId: components["parameters"]["SenderId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailSenderUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailSender"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listEmailPendingSenders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending senders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailPendingSender"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    approveEmailSender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                senderId: components["parameters"]["SenderId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EmailSenderApprove"];
+            };
+        };
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailSender"];
+                };
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    rejectEmailSender: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                senderId: components["parameters"]["SenderId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["EmailSenderReject"];
+            };
+        };
+        responses: {
+            /** @description Rejected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            409: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    getEmailHeldMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                messageId: components["parameters"]["HeldMessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Held mail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailHeldMessage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deleteEmailHeldMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                messageId: components["parameters"]["HeldMessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    deliverEmailHeldMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+                messageId: components["parameters"]["HeldMessageId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Delivered */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailMessage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listEmailMessages: {
+        parameters: {
+            query?: {
+                cursor?: components["parameters"]["Cursor"];
+                limit?: components["parameters"]["Limit"];
+            };
+            header?: never;
+            path: {
+                addressId: components["parameters"]["AddressId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Recent mail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailMessagePage"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    receiveInboundEmail: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Unix seconds when the request was signed. */
+                "X-Kinframe-Timestamp": string;
+                /** @description The envelope recipient(s) (SMTP RCPT TO), comma-separated. BCC recipients exist only here. */
+                "X-Kinframe-Envelope-To": string;
+                /** @description The envelope sender (SMTP MAIL FROM); empty for the null sender. */
+                "X-Kinframe-Envelope-From"?: string;
+                /** @description The IP address of the server that delivered the mail to the provider. Without it SPF is not checked (DKIM only). */
+                "X-Kinframe-Client-Ip"?: string;
+                /** @description That server's HELO/EHLO name. */
+                "X-Kinframe-Helo"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "message/rfc822": string;
+            };
+        };
+        responses: {
+            /** @description Queued */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailInboundResult"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            413: components["responses"]["Problem"];
+            429: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    checkInboundEmailRecipients: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-Kinframe-Timestamp": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmailRecipientCheck"];
+            };
+        };
+        responses: {
+            /** @description Recipients */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailRecipientCheckResult"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            503: components["responses"]["Problem"];
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFrameTelegramChats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chats */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramChat"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFrameTelegramCode: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                frameId: components["parameters"]["FrameId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramConnectCodeCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramCode"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listFeedTelegramChats: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chats */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramChat"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createFeedTelegramCode: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path: {
+                feedId: components["parameters"]["FeedId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramConnectCodeCreate"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramCode"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTelegramCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                codeId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Code */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramCode"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    revokeTelegramCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                codeId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTelegramChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Chat */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramChat"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    disconnectTelegramChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Disconnected */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateTelegramChat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramChatUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramChat"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    listTelegramContributors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contributors */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramContributor"][];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    updateTelegramContributor: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chatId: components["parameters"]["TelegramChatId"];
+                contributorId: components["schemas"]["Id"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TelegramContributorUpdate"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramContributor"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    getTelegramLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Link */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramLink"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    unlinkTelegram: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Unlinked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    createTelegramLinkCode: {
+        parameters: {
+            query?: never;
+            header?: {
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TelegramCode"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    telegramWebhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            /** @description Accepted (also for updates the server ignores) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Wrong or missing secret token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No bot configured, or the server polls */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Body too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
