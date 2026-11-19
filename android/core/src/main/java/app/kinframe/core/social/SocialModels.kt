@@ -90,6 +90,8 @@ data class FrameReactionRef(
     val reaction: String,
     val itemId: String? = null,
     val at: String? = null,
+    /** A frame on another server: "Oma's frame (kinframe.appmire.be)" (README §5.22). */
+    val serverName: String? = null,
 )
 
 /** The reaction row of a post, post item, comment or message: people and frames together. */
@@ -135,6 +137,8 @@ data class CommentFrame(
     val itemId: String? = null,
     val reaction: String? = null,
     val reply: String? = null,
+    /** A frame on another server: "Oma's frame (kinframe.appmire.be)" (README §5.22). */
+    val serverName: String? = null,
 )
 
 @Serializable

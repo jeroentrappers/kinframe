@@ -75,6 +75,17 @@ data class Discovery(
     val engagement: Boolean = false,
     /** The server can send mail: people can choose an email digest. */
     val emailDigest: Boolean = false,
+    // ---- leaving and other servers (docs/spec/leaving.md, docs/spec/multi-server.md, README §5.21, §5.22)
+    /** Stable random id of the server: apps signed in to several servers deduplicate accounts by it. */
+    val serverId: String? = null,
+    /** The server chip's label ("Janssens"); default the host name. */
+    val serverName: String? = null,
+    /** The public base URL (the `server` field of push payloads). */
+    val baseUrl: String? = null,
+    /** Leave sheets with a photo choice, take away, keep requests, memories (README §5.21). */
+    val leaving: Boolean = false,
+    /** Frames here can follow families on other servers, families here can allow them (README §5.22). */
+    val remoteFamilies: Boolean = false,
 ) {
     /** The photo source providers to offer: none when the server has sources off. */
     val sourceProviders: List<String>
@@ -262,6 +273,11 @@ data class Item(
     val importedSenderName: String? = null,
     /** Synced by a photo source or copied by a Google Photos import: "Anna via Immich" (photo-sources.md §9.5). */
     val via: ItemVia? = null,
+    // ---- leaving and other servers (README §5.21, §5.22)
+    /** Copied from a family on another server: credit [app.kinframe.core.servers.ItemRemoteSender.name]. */
+    val remoteSender: app.kinframe.core.servers.ItemRemoteSender? = null,
+    /** Handed over at account deletion: credit "<name> (former member)". */
+    val formerSenderName: String? = null,
 ) {
     /** A Live/Motion Photo: a still plus a short clip. Every photo field describes the still. */
     val isLive: Boolean get() = kind == MediaKind.LIVE
@@ -351,6 +367,11 @@ data class Placement(
     val backfill: Boolean = false,
     /** Feed placements whose post answers a weekly prompt ([FramePrompt.promptId]): the title card shows before them. */
     val promptId: String? = null,
+    // ---- leaving and other servers (README §5.21, §5.22)
+    /** Taken away by its sender, waiting in the trash ("Taken away by Tom"). */
+    val takenAway: app.kinframe.core.leaving.PlacementTakenAway? = null,
+    /** A copy of a post of a family on another server. */
+    val originRemote: app.kinframe.core.servers.PlacementRemote? = null,
 ) {
     /** The feed to credit ("Anna · Peeters kids"), when the placement came through one. */
     val creditFeedName: String? get() = originFeedName?.takeIf { origin == PlacementOrigin.FEED && it.isNotBlank() }
