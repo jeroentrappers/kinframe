@@ -236,6 +236,14 @@ class DeviceApi(
         url(endpoint("device/birthdays/$birthdayId/greetings/$date")).put(ByteArray(0).toRequestBody(null))
     }.expectOk()
 
+    /**
+     * `POST /device/photo-requests` ("Ask for new photos", README §5.20): `201` asked, `200` already asked within 24 h
+     * (the same request, nobody notified again). `403` when the owner turned the button off.
+     */
+    suspend fun requestPhotos(): FramePhotoRequest = authed {
+        url(endpoint("device/photo-requests")).post(ByteArray(0).toRequestBody(null))
+    }.decode(FramePhotoRequest.serializer())
+
     /** `POST /device/calendar/sync`: "Sync now" for all of the frame's calendars (the server does the work). */
     suspend fun syncCalendars() = authed { url(endpoint("device/calendar/sync")).post(ByteArray(0).toRequestBody(null)) }.expectOk()
 

@@ -328,6 +328,8 @@ data class Placement(
     val feedIds: List<String> = emptyList(),
     /** Placed as feed history: not new on the frame (no "N new" card, no screen wake); `received_at` is the post time. */
     val backfill: Boolean = false,
+    /** Feed placements whose post answers a weekly prompt ([FramePrompt.promptId]): the title card shows before them. */
+    val promptId: String? = null,
 ) {
     /** The feed to credit ("Anna · Peeters kids"), when the placement came through one. */
     val creditFeedName: String? get() = originFeedName?.takeIf { origin == PlacementOrigin.FEED && it.isNotBlank() }
@@ -364,6 +366,10 @@ object ChangeType {
     const val CALENDAR = "calendar"
     /** The frame's birthday people ([FrameBirthdays]); `birthdays: null` means drop them. */
     const val BIRTHDAYS = "birthdays"
+    // Family social (README §5.20): entity = the placement, the frame, the frame.
+    const val COMMENTS = "comments"
+    const val PHOTO_REQUEST = "photo_request"
+    const val PROMPTS = "prompts"
     const val RESET = "reset"
 }
 
@@ -382,6 +388,10 @@ data class Change(
     val calendar: JsonObject? = null,
     /** The frame's birthday people ([FrameBirthdays]); null means "drop your birthdays". */
     val birthdays: JsonObject? = null,
+    /** Family social ([PlacementComments], [FramePhotoRequest], [FramePrompts]); null means "drop it". */
+    val comments: JsonObject? = null,
+    val photoRequest: JsonObject? = null,
+    val prompts: JsonObject? = null,
 )
 
 @Serializable
@@ -437,8 +447,13 @@ object FrameFeatures {
      */
     const val PLAY = "play"
 
+    /** Family social (README §5.20, informational): the comment card, "Ask for new photos" and prompt title cards. */
+    const val COMMENTS = "comments"
+    const val PHOTO_REQUESTS = "photo_requests"
+    const val PROMPTS = "prompts"
+
     /** Everything this build supports, sent in every heartbeat. */
-    val SUPPORTED: List<String> = listOf(FEED_BACKFILL, BIRTHDAYS)
+    val SUPPORTED: List<String> = listOf(FEED_BACKFILL, BIRTHDAYS, COMMENTS, PHOTO_REQUESTS, PROMPTS)
 
     /** [SUPPORTED] plus the distribution marker: [PLAY] for the Google Play build, nothing for the GitHub build. */
     fun forDistribution(distribution: String): List<String> = if (distribution == "play") SUPPORTED + PLAY else SUPPORTED
