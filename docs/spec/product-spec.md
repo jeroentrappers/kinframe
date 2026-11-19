@@ -11,6 +11,10 @@ a server the family controls. It matches Frameo's ease of use (a code on the fra
 appear in seconds) without paywalls, vendor lock-in, telemetry or fragile frames, and adds what Frameo users ask for:
 remote management, web upload, album sync, an owner role and home-automation hooks.
 
+The direction beyond that: kinframe becomes the **private digital social hub for the extended family**. Photos with
+comment threads, family and one-to-one chats, and gentle encouragement to share, with the frames as members of the
+family (`family-social.md`).
+
 **Principles**
 
 1. **Grandparent-proof frame.** Nobody at the frame ever has to do anything after setup. Everything can be managed
