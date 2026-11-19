@@ -229,6 +229,11 @@ func TestFederationTwoServers(t *testing.T) {
 	if !strings.Contains(string(mustJSON(t, post)), `"server_name":"Appmire"`) {
 		t.Fatalf("reaction row without the remote frame: %v", post)
 	}
+	// The full list (the reactions dialog) names the server as well.
+	rl := a.get("/v1/reactions/post/"+fresh, anna.token).m(t)
+	if fr := rl["frames"].([]any); len(fr) != 1 || dig(fr[0].(map[string]any), "server_name") != "Appmire" {
+		t.Fatalf("reactions list without the server: %v", rl)
+	}
 
 	// --- a removal on A disappears on B
 	a.expect(req{method: "DELETE", path: "/v1/feeds/" + feed + "/posts/" + old, token: anna.token}, 204)

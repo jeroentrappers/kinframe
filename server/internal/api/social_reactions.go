@@ -186,7 +186,8 @@ func (s *Server) ListReactions(ctx context.Context, req gen.ListReactionsRequest
 				continue
 			}
 			item, at := r.ItemID, r.At
-			out.Frames = append(out.Frames, gen.FrameReactionRef{FrameId: r.FrameID, FrameName: r.FrameName, Reaction: gen.Reaction(r.Reaction), ItemId: &item, At: &at})
+			out.Frames = append(out.Frames, gen.FrameReactionRef{FrameId: r.FrameID, FrameName: r.FrameName, Reaction: gen.Reaction(r.Reaction), ItemId: &item, At: &at,
+				ServerName: r.ServerName})
 		}
 	}
 	return ok(out), nil
