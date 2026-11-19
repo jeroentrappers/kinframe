@@ -124,6 +124,43 @@ extension Components {
             case sourceTestFailed = "source_test_failed"
             case serverError = "server_error"
         }
+        /// Version policy for one family app platform (README §5.15).
+        ///
+        /// - Remark: Generated from `#/components/schemas/AppVersionPolicy`.
+        public struct AppVersionPolicy: Codable, Hashable, Sendable {
+            /// Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum.
+            ///
+            /// - Remark: Generated from `#/components/schemas/AppVersionPolicy/minimum_build`.
+            public var minimumBuild: Swift.Int?
+            /// Apps below this build show an "update available" banner; null: none.
+            ///
+            /// - Remark: Generated from `#/components/schemas/AppVersionPolicy/recommended_build`.
+            public var recommendedBuild: Swift.Int?
+            /// Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app's own default.
+            ///
+            /// - Remark: Generated from `#/components/schemas/AppVersionPolicy/store_url`.
+            public var storeUrl: Swift.String?
+            /// Creates a new `AppVersionPolicy`.
+            ///
+            /// - Parameters:
+            ///   - minimumBuild: Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum.
+            ///   - recommendedBuild: Apps below this build show an "update available" banner; null: none.
+            ///   - storeUrl: Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app's own default.
+            public init(
+                minimumBuild: Swift.Int? = nil,
+                recommendedBuild: Swift.Int? = nil,
+                storeUrl: Swift.String? = nil
+            ) {
+                self.minimumBuild = minimumBuild
+                self.recommendedBuild = recommendedBuild
+                self.storeUrl = storeUrl
+            }
+            public enum CodingKeys: String, CodingKey {
+                case minimumBuild = "minimum_build"
+                case recommendedBuild = "recommended_build"
+                case storeUrl = "store_url"
+            }
+        }
         /// - Remark: Generated from `#/components/schemas/Discovery`.
         public struct Discovery: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/Discovery/name`.
@@ -195,6 +232,49 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/calendar`.
             public var calendar: Swift.Bool?
+            /// Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+            /// for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+            /// (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+            /// that can be dismissed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/app_versions`.
+            public struct AppVersionsPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/Discovery/app_versions/android`.
+                public var android: Components.Schemas.AppVersionPolicy?
+                /// - Remark: Generated from `#/components/schemas/Discovery/app_versions/ios`.
+                public var ios: Components.Schemas.AppVersionPolicy?
+                /// - Remark: Generated from `#/components/schemas/Discovery/app_versions/macos`.
+                public var macos: Components.Schemas.AppVersionPolicy?
+                /// Creates a new `AppVersionsPayload`.
+                ///
+                /// - Parameters:
+                ///   - android:
+                ///   - ios:
+                ///   - macos:
+                public init(
+                    android: Components.Schemas.AppVersionPolicy? = nil,
+                    ios: Components.Schemas.AppVersionPolicy? = nil,
+                    macos: Components.Schemas.AppVersionPolicy? = nil
+                ) {
+                    self.android = android
+                    self.ios = ios
+                    self.macos = macos
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case android
+                    case ios
+                    case macos
+                }
+            }
+            /// Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+            /// for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+            /// (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+            /// that can be dismissed.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/app_versions`.
+            public var appVersions: Components.Schemas.Discovery.AppVersionsPayload?
             /// True when the server supports feeds and subscriptions (docs/spec/feeds.md).
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/feeds`.
@@ -241,6 +321,7 @@ extension Components {
             ///   - devAuth: True only on development servers running dev auth mode (POST /dev/token). Never true in production.
             ///   - weather: True when the server fetches weather for frames and serves `/v1/geocode`.
             ///   - calendar: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+            ///   - appVersions: Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
             ///   - feeds: True when the server supports feeds and subscriptions (docs/spec/feeds.md).
             ///   - birthdays: True when feeds have birthday lists (docs/spec/birthdays.md). Only true together with `feeds`.
             ///   - photoSources: True when albums and feeds can sync from Immich or iCloud (docs/spec/photo-sources.md).
@@ -259,6 +340,7 @@ extension Components {
                 devAuth: Swift.Bool? = nil,
                 weather: Swift.Bool? = nil,
                 calendar: Swift.Bool? = nil,
+                appVersions: Components.Schemas.Discovery.AppVersionsPayload? = nil,
                 feeds: Swift.Bool? = nil,
                 birthdays: Swift.Bool? = nil,
                 photoSources: Swift.Bool? = nil,
@@ -277,6 +359,7 @@ extension Components {
                 self.devAuth = devAuth
                 self.weather = weather
                 self.calendar = calendar
+                self.appVersions = appVersions
                 self.feeds = feeds
                 self.birthdays = birthdays
                 self.photoSources = photoSources
@@ -296,6 +379,7 @@ extension Components {
                 case devAuth = "dev_auth"
                 case weather
                 case calendar
+                case appVersions = "app_versions"
                 case feeds
                 case birthdays
                 case photoSources = "photo_sources"

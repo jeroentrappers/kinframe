@@ -72,10 +72,12 @@ class ServerRepository(
         _current.value = null
     }
 
-    /** Re-reads discovery (limits or client ids may change); keeps the stored copy when offline. */
-    suspend fun refresh() {
-        val cur = _current.value ?: return
-        runCatching { discovery.fetch(cur.url) }.onSuccess { d -> if (_current.value?.url == cur.url) choose(cur.copy(discovery = d)) }
+    /** Re-reads discovery (limits, client ids or the app version policy may change); keeps the stored copy when offline. */
+    suspend fun refresh(): Boolean {
+        val cur = _current.value ?: return false
+        return runCatching { discovery.fetch(cur.url) }
+            .onSuccess { d -> if (_current.value?.url == cur.url) choose(cur.copy(discovery = d)) }
+            .isSuccess
     }
 
     companion object {

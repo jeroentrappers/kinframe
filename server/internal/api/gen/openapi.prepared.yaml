@@ -195,6 +195,23 @@ components:
                             type: string
                     type: object
             type: object
+        AppVersionPolicy:
+            description: Version policy for one family app platform (README §5.15).
+            properties:
+                minimum_build:
+                    description: 'Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum.'
+                    nullable: true
+                    type: integer
+                recommended_build:
+                    description: 'Apps below this build show an "update available" banner; null: none.'
+                    nullable: true
+                    type: integer
+                store_url:
+                    description: 'Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app''s own default.'
+                    format: uri
+                    nullable: true
+                    type: string
+            type: object
         BirthdayPerson:
             description: |
                 A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
@@ -1061,6 +1078,20 @@ components:
                 api:
                     format: uri
                     type: string
+                app_versions:
+                    description: |
+                        Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+                        for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+                        (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+                        that can be dismissed.
+                    properties:
+                        android:
+                            $ref: '#/components/schemas/AppVersionPolicy'
+                        ios:
+                            $ref: '#/components/schemas/AppVersionPolicy'
+                        macos:
+                            $ref: '#/components/schemas/AppVersionPolicy'
+                    type: object
                 auth:
                     properties:
                         api_resource:

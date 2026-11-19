@@ -13,6 +13,8 @@ import UniformTypeIdentifiers
 public final class ShareModel {
     public enum Phase: Equatable {
         case loading, signedOut, noFrames, ready, sending, failed(String)
+        /// This build is below the server's minimum (README §5.15): the app has to be updated first.
+        case updateRequired
     }
 
     private weak var context: NSExtensionContext?
@@ -48,13 +50,23 @@ public final class ShareModel {
             phase = .signedOut
             return
         }
+        if AppUpdatePolicy.prompt(server.discovery.appVersions, build: .current).isBlocking {
+            await files
+            phase = .updateRequired
+            return
+        }
         let api = API(baseURL: server.apiBase, tokens: auth)
         let feedsOn = server.discovery.feeds
-        async let allFrames: [FrameSummary]? = try? await api.call { try await $0.listMyFrames().ok.body.json }
+        async let allFrames = Self.capture { try await api.call { try await $0.listMyFrames().ok.body.json } }
         async let allFeeds: [FeedSummary]? = feedsOn ? (try? await api.myFeeds()) : nil
-        frames = ((await allFrames) ?? []).filter { $0.can(\.send) }
+        let frameResult = await allFrames
+        frames = ((try? frameResult.get()) ?? []).filter { $0.can(\.send) }
         feeds = (await allFeeds) ?? []
         await files
+        if case .failure(let error) = frameResult, (error as? APIError)?.isAppUpdateRequired == true {
+            phase = .updateRequired
+            return
+        }
         if frames.isEmpty, feeds.isEmpty {
             phase = .noFrames
             return
@@ -68,6 +80,14 @@ public final class ShareModel {
             compose.feedIds = Set(feeds.map(\.id)).intersection(lastFeeds)
         }
         phase = .ready
+    }
+
+    private nonisolated static func capture<T: Sendable>(_ operation: @Sendable () async throws -> T) async -> Result<T, Error> {
+        do {
+            return .success(try await operation())
+        } catch {
+            return .failure(error)
+        }
     }
 
     /// Copy every shared image and movie into the App Group (provider URLs are only valid during the callback).
@@ -135,7 +155,7 @@ public final class ShareModel {
                 // Nothing was uploaded: take the job out of the queue and say why.
                 await runner.cancel(job.id)
                 progress = nil
-                phase = .failed(APIError(status: 0, code: failed).message)
+                phase = failed == AppUpdateSignal.code ? .updateRequired : .failed(APIError(status: 0, code: failed).message)
                 return
             }
             progress = nil
@@ -144,7 +164,7 @@ public final class ShareModel {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
             context?.completeRequest(returningItems: nil)
         } catch {
-            phase = .failed(errorMessage(error))
+            phase = (error as? APIError)?.isAppUpdateRequired == true ? .updateRequired : .failed(errorMessage(error))
         }
     }
 
@@ -213,6 +233,8 @@ public struct ShareRootView: View {
                         LoadingIndicator()
                     case .signedOut:
                         Callout(L("ios.share.signedOut"), kind: .warn)
+                    case .updateRequired:
+                        Callout(L("ios.appUpdate.share"), kind: .warn)
                     case .noFrames:
                         Callout(L("send.noFramesBody"), kind: .warn)
                     case .failed(let message):

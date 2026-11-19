@@ -170,6 +170,10 @@ func (s *Server) resolveUser(ctx context.Context, token string) (*principal, *pr
 
 func (s *Server) userAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if s.familyAppTooOld(r) {
+			writeAppUpdateRequired(w, r)
+			return
+		}
 		p, prob := s.resolveUser(r.Context(), bearer(r))
 		if prob != nil {
 			s.writeError(w, r, prob)

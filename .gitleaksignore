@@ -1,0 +1,6 @@
+# Fake tokens in test fixtures (feed invite token, iCloud shared-album link), not secrets.
+33ecb64ab15b1d7c525bd023470c2f9a7afc5687:ios/KinframeTests/FeedTests.swift:generic-api-key:213
+33ecb64ab15b1d7c525bd023470c2f9a7afc5687:ios/KinframeTests/FeedTests.swift:generic-api-key:326
+33ecb64ab15b1d7c525bd023470c2f9a7afc5687:ios/KinframeTests/FeedTests.swift:generic-api-key:331
+33ecb64ab15b1d7c525bd023470c2f9a7afc5687:web/src/lib/photoSources.test.ts:generic-api-key:88
+33ecb64ab15b1d7c525bd023470c2f9a7afc5687:web/src/lib/photoSources.test.ts:generic-api-key:89

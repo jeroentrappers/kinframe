@@ -2733,6 +2733,18 @@ export interface components {
         };
         /** @enum {string} */
         ProblemCode: "unauthorized" | "token_expired" | "device_revoked" | "forbidden" | "missing_permission" | "not_found" | "code_invalid" | "code_expired" | "invite_invalid" | "invite_expired" | "link_expired" | "already_member" | "validation_failed" | "too_many_items" | "video_too_long" | "upload_too_large" | "upload_not_found" | "unsupported_media" | "corrupt_media" | "version_conflict" | "frame_offline" | "command_timeout" | "owner_cannot_leave" | "rate_limited" | "app_update_required" | "upstream_unavailable" | "feature_disabled" | "already_decided" | "already_subscribed" | "invalid_transition" | "limit_reached" | "duplicate_birthday" | "duplicate_source" | "source_test_failed" | "server_error";
+        /** @description Version policy for one family app platform (README §5.15). */
+        AppVersionPolicy: {
+            /** @description Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum. */
+            minimum_build?: number | null;
+            /** @description Apps below this build show an "update available" banner; null: none. */
+            recommended_build?: number | null;
+            /**
+             * Format: uri
+             * @description Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app's own default.
+             */
+            store_url?: string | null;
+        };
         Discovery: {
             name: string;
             version: string;
@@ -2768,6 +2780,17 @@ export interface components {
              * @default false
              */
             calendar?: boolean;
+            /**
+             * @description Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+             *     for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+             *     (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+             *     that can be dismissed.
+             */
+            app_versions?: {
+                android?: components["schemas"]["AppVersionPolicy"];
+                ios?: components["schemas"]["AppVersionPolicy"];
+                macos?: components["schemas"]["AppVersionPolicy"];
+            };
             /**
              * @description True when the server supports feeds and subscriptions (docs/spec/feeds.md).
              * @default false

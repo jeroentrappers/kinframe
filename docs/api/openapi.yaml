@@ -2953,6 +2953,21 @@ components:
         - source_test_failed
         - server_error
 
+    AppVersionPolicy:
+      type: object
+      description: Version policy for one family app platform (README §5.15).
+      properties:
+        minimum_build:
+          type: [integer, 'null']
+          description: 'Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum.'
+        recommended_build:
+          type: [integer, 'null']
+          description: 'Apps below this build show an "update available" banner; null: none.'
+        store_url:
+          type: [string, 'null']
+          format: uri
+          description: 'Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app''s own default.'
+
     Discovery:
       type: object
       required: [name, version, api, auth, limits]
@@ -2987,6 +3002,17 @@ components:
           type: boolean
           default: false
           description: True when the server syncs calendars for frames (ICS/webcal and CalDAV).
+        app_versions:
+          type: object
+          description: |
+            Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+            for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+            (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+            that can be dismissed.
+          properties:
+            android: { $ref: '#/components/schemas/AppVersionPolicy' }
+            ios: { $ref: '#/components/schemas/AppVersionPolicy' }
+            macos: { $ref: '#/components/schemas/AppVersionPolicy' }
         feeds:
           type: boolean
           default: false

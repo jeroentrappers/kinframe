@@ -55,6 +55,7 @@ enum DebugLaunch {
         var request = URLRequest(url: base.appending(path: "dev/token"))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.identifyApp()
         var body: [String: Any] = ["email": email, "operator": true]
         if let name { body["name"] = name }
         request.httpBody = try? JSONSerialization.data(withJSONObject: body)

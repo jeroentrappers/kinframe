@@ -142,3 +142,54 @@ func TestAppleAppIDs(t *testing.T) {
 		t.Fatalf("bundle = %v", got)
 	}
 }
+
+func TestAppVersions(t *testing.T) {
+	base := func() map[string]string {
+		return map[string]string{"KINFRAME_DATABASE_URL": "postgres://x", "KINFRAME_DEV_AUTH": "1",
+			"KINFRAME_SIGNING_KEY": strings.Repeat("ab", 32), "KINFRAME_DATA_DIR": t.TempDir()}
+	}
+	env := base()
+	c, err := load(func(k string) string { return env[k] })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(c.AppVersions) != 0 {
+		t.Fatalf("nothing set: %v", c.AppVersions)
+	}
+
+	env = base()
+	env["KINFRAME_APP_ANDROID_MIN_BUILD"] = "100"
+	env["KINFRAME_APP_ANDROID_RECOMMENDED_BUILD"] = "120"
+	env["KINFRAME_APP_ANDROID_STORE_URL"] = "https://play.google.com/store/apps/details?id=app.kinframe"
+	env["KINFRAME_APP_IOS_MIN_BUILD"] = "7"
+	env["KINFRAME_APP_MACOS_STORE_URL"] = "http://apps.example.org/kinframe"
+	if c, err = load(func(k string) string { return env[k] }); err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]AppVersionPolicy{
+		"android": {MinBuild: 100, RecommendedBuild: 120, StoreURL: "https://play.google.com/store/apps/details?id=app.kinframe"},
+		"ios":     {MinBuild: 7},
+		"macos":   {StoreURL: "http://apps.example.org/kinframe"},
+	}
+	if len(c.AppVersions) != len(want) {
+		t.Fatalf("app versions = %v", c.AppVersions)
+	}
+	for k, v := range want {
+		if c.AppVersions[k] != v {
+			t.Errorf("%s = %+v, want %+v", k, c.AppVersions[k], v)
+		}
+	}
+
+	for name, tc := range map[string][2]string{
+		"bad store scheme":   {"KINFRAME_APP_IOS_STORE_URL", "itms-apps://apps.apple.com/app/id1"},
+		"store without host": {"KINFRAME_APP_ANDROID_STORE_URL", "https://"},
+		"not a number":       {"KINFRAME_APP_MACOS_MIN_BUILD", "1.2"},
+		"negative":           {"KINFRAME_APP_ANDROID_RECOMMENDED_BUILD", "-1"},
+	} {
+		env = base()
+		env[tc[0]] = tc[1]
+		if _, err := load(func(k string) string { return env[k] }); err == nil || !strings.Contains(err.Error(), tc[0]) {
+			t.Errorf("%s: error = %v, want mentioning %s", name, err, tc[0])
+		}
+	}
+}

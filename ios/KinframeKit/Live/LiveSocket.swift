@@ -157,7 +157,11 @@ public final class LiveSocket {
     private var attempt = 0
     private var retry: Task<Void, Never>?
     private var generation = 0
-    private let session = URLSession(configuration: .default)
+    private let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.identifyApp()
+        return URLSession(configuration: config)
+    }()
 
     public init() {}
 
@@ -205,7 +209,9 @@ public final class LiveSocket {
             c.scheme = c.scheme == "https" ? "wss" : "ws"
             c.queryItems = [URLQueryItem(name: "access_token", value: token)]
             guard let url = c.url else { return }
-            let ws = self.session.webSocketTask(with: url)
+            var handshake = URLRequest(url: url)
+            handshake.identifyApp()
+            let ws = self.session.webSocketTask(with: handshake)
             self.task = ws
             ws.resume()
             self.receive(ws, gen: gen)
@@ -247,6 +253,10 @@ public final class LiveSocket {
 
     private func closed(_ ws: URLSessionWebSocketTask) {
         task = nil
+        // The handshake was refused because this build is no longer served (README §5.15).
+        if (ws.response as? HTTPURLResponse)?.statusCode == 426 {
+            AppUpdateSignal.raise()
+        }
         if ws.closeCode.rawValue == 4401, let api {
             // Token expired: get a fresh one and reconnect right away.
             Task {

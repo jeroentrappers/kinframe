@@ -20,8 +20,21 @@ struct RootView: View {
                 MainTabs()
                     .transition(.opacity)
             }
+            // Below the server's minimum build nothing else is usable (README §5.15).
+            if case .blocking(let storeURL) = app.appUpdate {
+                AppUpdateView(storeURL: storeURL)
+                    .transition(.opacity)
+                    .zIndex(1)
+            }
         }
         .animation(.easeInOut(duration: 0.25), value: app.phase)
+        .animation(.easeInOut(duration: 0.25), value: app.appUpdate.isBlocking)
+        .onChange(of: app.appUpdate.isBlocking) { _, blocked in
+            if blocked {
+                app.activeLink = nil
+                app.serverSwitch = nil
+            }
+        }
         .overlay(alignment: .bottom) { ToastOverlay(center: app.toasts) }
         .tint(Palette.primary)
         .id(languageVersion)
@@ -123,9 +136,16 @@ struct MainTabs: View {
             GoogleImportSheet(controller: app.googleImport)
         }
         .overlay(alignment: .top) {
-            if app.unreachable {
-                OfflineBanner()
+            VStack(spacing: 6) {
+                if case .banner(let build, let storeURL) = app.appUpdate {
+                    AppUpdateBanner(recommendedBuild: build, storeURL: storeURL)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+                if app.unreachable {
+                    OfflineBanner()
+                }
             }
+            .animation(.easeInOut(duration: 0.2), value: app.appUpdate)
         }
     }
 }

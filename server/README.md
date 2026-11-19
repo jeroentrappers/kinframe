@@ -73,6 +73,9 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_TRASH_RETENTION_DAYS` | `30` | Default trash retention |
 | `KINFRAME_FEED_RETENTION_DAYS` | `30` | Removal entries kept in the change feed; older devices get `reset` |
 | `KINFRAME_MIN_FRAME_APP_VERSION_CODE` | `0` (off) | Frames below this get `426 app_update_required` |
+| `KINFRAME_APP_ANDROID_MIN_BUILD`, `KINFRAME_APP_IOS_MIN_BUILD`, `KINFRAME_APP_MACOS_MIN_BUILD` | unset (off) | Family apps (`X-Kinframe-App: kinframe-family-<platform>/…`) below this build (versionCode / `CFBundleVersion`) get `426 app_update_required` on user endpoints and a blocking update screen (API README §5.15) |
+| `KINFRAME_APP_ANDROID_RECOMMENDED_BUILD`, `KINFRAME_APP_IOS_RECOMMENDED_BUILD`, `KINFRAME_APP_MACOS_RECOMMENDED_BUILD` | unset | Family apps below this build show an "update available" banner |
+| `KINFRAME_APP_ANDROID_STORE_URL`, `KINFRAME_APP_IOS_STORE_URL`, `KINFRAME_APP_MACOS_STORE_URL` | unset (the app's default store page) | Where the update button goes; must be an `http(s)` URL |
 | `KINFRAME_COMMAND_TIMEOUT_SECONDS` | `10` | Remote command wait before `504` |
 | `KINFRAME_JANITOR_INTERVAL_SECONDS` | `600` | Trash purge, feed pruning, upload expiry |
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |

@@ -64,6 +64,13 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - `426 app_update_required` compares the device's `app_version_code` (from enrollment, updated by heartbeats) with
   `KINFRAME_MIN_FRAME_APP_VERSION_CODE`; heartbeat, state and the update endpoints stay allowed. Only
   `GET /v1/device/update` parses `X-Kinframe-App` (the version code in parentheses), falling back to the stored code.
+- Family app version policy (README §5.15): the gate sits in front of user authentication (`userAuth` and the user
+  websocket), so only user endpoints are gated and an outdated app gets 426 even with an expired token. Discovery,
+  `/healthz`, `/.well-known/*`, the Google OAuth callback and every public unauthenticated endpoint (tv, shop,
+  stations, signed media, avatars, the SPA) never see it. Only `kinframe-family-{android,ios,macos}/<name> (<build>)`
+  counts; a missing, unparsable or frame header is never blocked. Refusals are logged at debug level (platform, build,
+  minimum, running count; no user data). The 426 reuses the problem title "The frame app must be updated"; apps act on
+  `code`, not the title.
 
 ## Frame updates
 

@@ -150,6 +150,8 @@ import app.kinframe.family.ui.send.ItemEditor
 import app.kinframe.family.ui.settings.SettingsScreen
 import app.kinframe.family.util.DeepLink
 import app.kinframe.family.util.Problems
+import app.kinframe.family.update.UpdateState
+import app.kinframe.family.update.openStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -178,6 +180,14 @@ fun tvTarget(f: app.kinframe.core.api.Frame, scope: TvScope) =
 fun FamilyRoot(graph: AppGraph, app: AppViewModel) {
     val phase by app.phase.collectAsStateWithLifecycle()
     val switch by app.switchPrompt.collectAsStateWithLifecycle()
+    val update by graph.updates.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // Below the server's minimum build (or after a 426) nothing else is usable (README §5.15).
+    (update as? UpdateState.Required)?.let { required ->
+        val checking by graph.updates.checking.collectAsStateWithLifecycle()
+        UpdateRequiredScreen(checking, onUpdate = { context.openStore(required.storeUrl) }, onCheckAgain = graph.updates::checkAgain)
+        return
+    }
     Box(Modifier.fillMaxSize().background(Kin.colors.paper)) {
         AnimatedContent(phase, contentKey = { it::class }, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "phase") { target ->
             when (val p = target) {
@@ -429,6 +439,10 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                     },
                 ) { pad ->
                     Column(Modifier.fillMaxSize().padding(pad)) {
+                        val update by graph.updates.state.collectAsStateWithLifecycle()
+                        (update as? UpdateState.Available)?.takeIf { showChrome }?.let { available ->
+                            UpdateBanner(onUpdate = { context.openStore(available.storeUrl) }, onDismiss = graph.updates::dismiss)
+                        }
                         TvMiniBar(
                             tvState,
                             onOpen = { tvState.frameId?.let { id -> tvOpen = TvTarget(id, tvState.frameName, true, false, TvScope.All) } },

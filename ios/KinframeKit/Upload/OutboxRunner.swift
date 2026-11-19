@@ -426,6 +426,7 @@ public actor OutboxRunner {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             request.setValue(job.idempotencyKey, forHTTPHeaderField: "Idempotency-Key")
+            request.identifyApp()
             request.setValue(L10n.code, forHTTPHeaderField: "Accept-Language")
             guard let token = try await tokens.accessToken() else { throw APIError.unauthorized }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")

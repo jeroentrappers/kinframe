@@ -49,11 +49,32 @@ data class Discovery(
     val photoSourcesPrivateNetworks: Boolean = false,
     /** The operator configured a Google OAuth client: apps offer "Add from Google Photos". */
     val googlePhotosImport: Boolean = false,
+    /** Family app version policy per platform (README §5.15); null on servers without one. */
+    val appVersions: AppVersions? = null,
 ) {
     /** The photo source providers to offer: none when the server has sources off. */
     val sourceProviders: List<String>
         get() = if (!photoSources) emptyList() else photoSourceProviders.filter { it in PhotoSourceProvider.all }
 }
+
+/** Discovery `app_versions`: a platform with nothing set is left out (README §5.15). */
+@Serializable
+data class AppVersions(
+    val android: AppVersionPolicy? = null,
+    val ios: AppVersionPolicy? = null,
+    val macos: AppVersionPolicy? = null,
+)
+
+/** Version policy for one family app platform (`AppVersionPolicy`, README §5.15). */
+@Serializable
+data class AppVersionPolicy(
+    /** Lowest build the server still serves; below it requests get `426 app_update_required`. Null: no minimum. */
+    val minimumBuild: Int? = null,
+    /** Apps below this build show an "update available" banner. Null: none. */
+    val recommendedBuild: Int? = null,
+    /** Where to update; null: the app's own store page. */
+    val storeUrl: String? = null,
+)
 
 @Serializable
 data class DiscoveryAuth(

@@ -6,7 +6,12 @@ import android.net.Uri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import app.kinframe.core.api.AppVersionInterceptor
 import app.kinframe.core.api.DevAuthClient
+import app.kinframe.core.api.FamilyAppHeader
+import app.kinframe.family.update.AppUpdates
+import app.kinframe.family.update.PrefsDismissStore
+import kotlinx.coroutines.flow.map
 import app.kinframe.core.api.DiscoveryClient
 import app.kinframe.core.api.HttpKinApi
 import app.kinframe.core.api.KinApi
@@ -67,7 +72,11 @@ class AppGraph(
 ) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
+    /** `X-Kinframe-App` on every request (README §5.15). */
+    val appHeader = FamilyAppHeader.value(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
+
     val http: OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AppVersionInterceptor(appHeader) { updates.onUpdateRequired() })
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(120, TimeUnit.SECONDS)
@@ -76,6 +85,16 @@ class AppGraph(
     private val prefs = app.getSharedPreferences("kinframe", Context.MODE_PRIVATE)
 
     val servers = ServerRepository(prefs, DiscoveryClient(http))
+
+    /** Force update and "new version available" (discovery `app_versions.android`). */
+    val updates = AppUpdates(
+        build = BuildConfig.VERSION_CODE,
+        policy = servers.current.map { it?.discovery?.appVersions?.android }
+            .stateIn(scope, SharingStarted.Eagerly, servers.current.value?.discovery?.appVersions?.android),
+        dismissals = PrefsDismissStore(prefs),
+        refreshDiscovery = { servers.refresh() },
+        scope = scope,
+    )
     val auth = AuthRepository(app, secure, DevAuthClient(http), { servers.current.value })
 
     private val userAgent = "kinframe-family/${BuildConfig.VERSION_NAME} (Android ${android.os.Build.VERSION.RELEASE})"
@@ -86,7 +105,7 @@ class AppGraph(
         if (s == null || a !is AuthState.SignedIn) null
         else {
             val key = s.apiBase.toString()
-            apiCache?.takeIf { it.first == key }?.second ?: HttpKinApi(http, s.apiBase, auth, userAgent) { Locale.getDefault().toLanguageTag() }
+            apiCache?.takeIf { it.first == key }?.second ?: HttpKinApi(http, s.apiBase, auth, userAgent, appHeader) { Locale.getDefault().toLanguageTag() }
                 .also { apiCache = key to it }
         }
     }.stateIn(scope, SharingStarted.Eagerly, null)
@@ -129,7 +148,8 @@ class AppGraph(
             override fun onStart(owner: LifecycleOwner) {
                 foreground = true
                 updateLive()
-                scope.launch { servers.refresh() }
+                // Re-reads discovery (throttled): limits, features and the app version policy.
+                updates.onForeground()
             }
 
             override fun onStop(owner: LifecycleOwner) {

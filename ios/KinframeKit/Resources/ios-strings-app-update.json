@@ -1,0 +1,30 @@
+{
+  "ios.appUpdate.banner": {
+    "en": "A new version of kinframe is available",
+    "nl": "Er is een nieuwe versie van kinframe beschikbaar"
+  },
+  "ios.appUpdate.body": {
+    "en": "This version of kinframe is no longer supported by your server. Update the app to keep using it.",
+    "nl": "Je server ondersteunt deze versie van kinframe niet meer. Werk de app bij om ze te blijven gebruiken."
+  },
+  "ios.appUpdate.checkAgain": {
+    "en": "Check again",
+    "nl": "Opnieuw controleren"
+  },
+  "ios.appUpdate.share": {
+    "en": "This version of kinframe needs an update. Open the kinframe app to update it, then share again.",
+    "nl": "Deze versie van kinframe moet bijgewerkt worden. Open de kinframe-app om ze bij te werken en deel daarna opnieuw."
+  },
+  "ios.appUpdate.title": {
+    "en": "Update kinframe",
+    "nl": "kinframe bijwerken"
+  },
+  "ios.appUpdate.update": {
+    "en": "Update",
+    "nl": "Bijwerken"
+  },
+  "ios.appUpdate.version": {
+    "en": "This version: {version} ({build})",
+    "nl": "Deze versie: {version} ({build})"
+  }
+}

@@ -33,6 +33,10 @@ final class AppModel {
     var feedsLoaded = false
     var liveStatus: LiveSocket.Status = .idle
     var unreachable = false
+    /// The server answered `426 app_update_required` and discovery couldn't be re-read since: block.
+    var updateRequiredByServer = false
+    /// The recommended build whose "new version" banner was dismissed.
+    var dismissedUpdateBuild: Int? = AppUpdateDismissals().dismissedBuild
 
     var tab: Tab = .frames
     var framesPath = NavigationPath()
@@ -61,6 +65,9 @@ final class AppModel {
     let outbox: OutboxMonitor
     private(set) var api: API?
     private let live = LiveSocket()
+    /// Discovery on returning to the foreground: at most hourly. After a 426: at most once a minute.
+    private var activeRefresh = DiscoveryRefreshThrottle(interval: 3600)
+    private var updateRefresh = DiscoveryRefreshThrottle(interval: 60)
     /// Live events for screens that care (history, frame detail).
     let events = EventHub()
 
@@ -75,6 +82,10 @@ final class AppModel {
         outbox.onSent = { [weak self] send in
             self?.historyVersion += 1
             self?.events.post(.sendUpdated(sendId: send.id))
+        }
+        // A 426 from any request (API, uploads, websocket, wherever it ran): re-read discovery (README §5.15).
+        NotificationCenter.default.addObserver(forName: AppUpdateSignal.notification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.serverRequiresUpdate() }
         }
         // Set up the session right away: the system may launch the app in the background just to finish uploads.
         server = ServerStore.load()
@@ -92,6 +103,11 @@ final class AppModel {
     var birthdaysEnabled: Bool { feedsEnabled && discovery?.birthdays == true }
     /// Photo sources and Google Photos import, as far as discovery offers them.
     var photoSources: PhotoSourceFeatures { PhotoSourceFeatures(discovery) }
+    /// The update page or banner this build gets under the server's `app_versions`.
+    var appUpdate: AppUpdatePrompt {
+        AppUpdatePolicy.prompt(discovery?.appVersions, build: .current, dismissedBuild: dismissedUpdateBuild,
+                               updateRequired: updateRequiredByServer)
+    }
 
     // MARK: Launch
 
@@ -101,6 +117,7 @@ final class AppModel {
         await DebugLaunch.beforeLaunch(self)
         defer { DebugLaunch.afterLaunch(self) }
         #endif
+        _ = activeRefresh.shouldRefresh(force: true)
         if let server, auth.isSignedIn {
             connect(server)
             phase = .main
@@ -111,21 +128,61 @@ final class AppModel {
             }
         } else {
             phase = .onboarding
+            // A chosen server whose sign-in isn't done yet still decides whether this build may be used.
+            if server != nil { await refreshDiscovery() }
         }
     }
 
-    /// Re-read discovery so limits and auth settings stay current.
-    func refreshDiscovery() async {
-        guard let server else { return }
-        if let fresh = try? await DiscoveryClient.fetch(server.url) {
-            let updated = ServerConfig(url: server.url, discovery: fresh)
-            if updated != server {
-                self.server = updated
-                ServerStore.save(updated)
-                auth.configure(fresh)
-            }
-            unreachable = false
+    /// Re-read discovery so limits, auth settings and the app version policy stay current. True when it was read.
+    @discardableResult
+    func refreshDiscovery() async -> Bool {
+        guard let server else { return false }
+        guard let fresh = try? await DiscoveryClient.fetch(server.url) else { return false }
+        // `self.server` may have changed while fetching (sign-out, another server).
+        guard self.server?.url == server.url, let current = self.server else { return true }
+        let updated = ServerConfig(url: current.url, discovery: fresh)
+        if updated != current {
+            self.server = updated
+            ServerStore.save(updated)
+            auth.configure(fresh)
         }
+        unreachable = false
+        // Discovery decides now (below the minimum blocks through `app_versions`).
+        updateRequiredByServer = false
+        return true
+    }
+
+    // MARK: App version (README §5.15)
+
+    /// A request got `426 app_update_required`: re-read discovery, which says whether to block. If it can't be read,
+    /// block anyway (the server just said this build is no longer served).
+    private func serverRequiresUpdate() {
+        guard updateRefresh.shouldRefresh() else {
+            if discovery?.appVersions == nil { updateRequiredByServer = true }
+            return
+        }
+        Task {
+            if await !refreshDiscovery() { updateRequiredByServer = true }
+        }
+    }
+
+    /// "Check again" on the update page.
+    func checkForAppUpdate() async {
+        _ = activeRefresh.shouldRefresh(force: true)
+        let wasBlocked = appUpdate.isBlocking
+        if await refreshDiscovery() {
+            if wasBlocked, !appUpdate.isBlocking, auth.isSignedIn {
+                // Probably a lowered minimum: catch up on what failed while blocked.
+                await loadFrames()
+                await loadFeeds()
+            }
+        }
+    }
+
+    /// Hide the "new version" banner until the server recommends a newer build.
+    func dismissAppUpdate(_ recommendedBuild: Int) {
+        AppUpdateDismissals().dismiss(recommendedBuild: recommendedBuild)
+        dismissedUpdateBuild = recommendedBuild
     }
 
     // MARK: Server and session
@@ -366,8 +423,10 @@ final class AppModel {
         outbox.kick()
         googleImport.appBecameActive()
         PushRegistrar.shared.tidyBirthdayNotifications()
+        // Discovery at most hourly, unless the app is blocked or nagging: then updating may have changed the answer.
+        let rereadDiscovery = activeRefresh.shouldRefresh(force: appUpdate != .none)
         Task {
-            await refreshDiscovery()
+            if rereadDiscovery { await refreshDiscovery() }
             await loadFrames()
             await loadFeeds()
             await syncTimeZone()

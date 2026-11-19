@@ -27,6 +27,10 @@ func (s *Server) deviceWS(w http.ResponseWriter, r *http.Request) {
 // userWS is GET /v1/ws?access_token=… (README §6.2): browsers cannot set
 // headers on websockets, so the token travels in the query string.
 func (s *Server) userWS(w http.ResponseWriter, r *http.Request) {
+	if s.familyAppTooOld(r) {
+		writeAppUpdateRequired(w, r)
+		return
+	}
 	token := r.URL.Query().Get("access_token")
 	if token == "" {
 		token = bearer(r)

@@ -48,7 +48,7 @@ internal fun Response.throwForStatus(): Nothing {
     val p = use { problemOrNull() }
     when {
         code == 401 && p?.code == ProblemCode.DEVICE_REVOKED -> throw DeviceRevokedException(p)
-        code == 426 -> throw AppUpdateRequiredException(p)
+        code == 426 || p?.code == ProblemCode.APP_UPDATE_REQUIRED -> throw AppUpdateRequiredException(p)
         else -> throw ApiException(code, p)
     }
 }

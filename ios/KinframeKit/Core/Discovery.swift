@@ -57,6 +57,8 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var photoSourcesPrivateNetworks: Bool = false
     /// "Add from Google Photos" is offered (`google_photos_import`).
     public var googlePhotosImport: Bool = false
+    /// Per-platform version policy of the family apps (`app_versions`, README §5.15); nil when none is set.
+    public var appVersions: AppVersions?
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -76,6 +78,7 @@ public struct Discovery: Codable, Equatable, Sendable {
         case photoSourceProviders = "photo_source_providers"
         case photoSourcesPrivateNetworks = "photo_sources_private_networks"
         case googlePhotosImport = "google_photos_import"
+        case appVersions = "app_versions"
     }
 
     public init(from decoder: Decoder) throws {
@@ -95,6 +98,7 @@ public struct Discovery: Codable, Equatable, Sendable {
         photoSourceProviders = photoSources ? ((try? c.decodeIfPresent([String].self, forKey: .photoSourceProviders)) ?? []) : []
         photoSourcesPrivateNetworks = (try? c.decodeIfPresent(Bool.self, forKey: .photoSourcesPrivateNetworks)) ?? false
         googlePhotosImport = (try? c.decodeIfPresent(Bool.self, forKey: .googlePhotosImport)) ?? false
+        appVersions = (try? c.decodeIfPresent(AppVersions.self, forKey: .appVersions)) ?? nil
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b
@@ -176,6 +180,7 @@ public enum DiscoveryClient {
     public static func fetch(_ server: URL, session: URLSession = .shared) async throws -> Discovery {
         var request = URLRequest(url: ServerAddress.discoveryURL(for: server), timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.identifyApp()
         let data: Data, response: URLResponse
         do {
             (data, response) = try await session.data(for: request)

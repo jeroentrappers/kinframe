@@ -90,9 +90,12 @@ public final class BackgroundUploadTransport: NSObject, UploadTransport, URLSess
 
     public init(identifier: String) {
         self.identifier = identifier
-        plain = URLSession(configuration: .default)
+        let plainConfig = URLSessionConfiguration.default
+        plainConfig.identifyApp()
+        plain = URLSession(configuration: plainConfig)
         super.init()
         let config = URLSessionConfiguration.background(withIdentifier: identifier)
+        config.identifyApp()
         config.sharedContainerIdentifier = AppGroup.identifier
         config.sessionSendsLaunchEvents = true
         config.isDiscretionary = false

@@ -297,6 +297,7 @@ extension API {
             if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             request.setValue(L10n.code, forHTTPHeaderField: "Accept-Language")
+            request.identifyApp()
             guard let token = try await tokens.accessToken() else { throw APIError.unauthorized }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             let data: Data, response: URLResponse

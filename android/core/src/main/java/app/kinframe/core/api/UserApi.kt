@@ -230,6 +230,8 @@ class HttpKinApi(
     @Volatile var apiBase: HttpUrl,
     private val tokens: AccessTokenSource,
     private val userAgent: String = "kinframe-family",
+    /** `X-Kinframe-App` ([FamilyAppHeader.value]); null leaves it to an [AppVersionInterceptor] on [http] (or out). */
+    private val appHeader: String? = null,
     private val acceptLanguage: () -> String? = { null },
 ) : KinApi {
 
@@ -257,6 +259,7 @@ class HttpKinApi(
             val req = Request.Builder()
                 .header("Accept", "application/json")
                 .header("User-Agent", userAgent)
+                .apply { appHeader?.let { header(FamilyAppHeader.NAME, it) } }
                 .apply { acceptLanguage()?.let { header("Accept-Language", it) } }
                 .spec()
                 .header("Authorization", "Bearer $token")
@@ -742,7 +745,8 @@ class HttpKinApi(
 
     override suspend fun webSocketRequest(): Request {
         val token = tokens.accessToken()
-        return Request.Builder().url(ep("ws", mapOf("access_token" to token))).header("User-Agent", userAgent).build()
+        return Request.Builder().url(ep("ws", mapOf("access_token" to token))).header("User-Agent", userAgent)
+            .apply { appHeader?.let { header(FamilyAppHeader.NAME, it) } }.build()
     }
 }
 

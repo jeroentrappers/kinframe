@@ -111,6 +111,7 @@ public enum Tus {
             r.setValue("application/offset+octet-stream", forHTTPHeaderField: "Content-Type")
         }
         r.setValue(version, forHTTPHeaderField: "Tus-Resumable")
+        r.identifyApp()
         r.timeoutInterval = 120
         return r
     }
@@ -123,6 +124,8 @@ public enum Tus {
         let serverOffset = header("Upload-Offset").flatMap { Int64($0.trimmingCharacters(in: .whitespaces)) }
 
         if status == 401 { throw TusError.unauthorized }
+        // Any step: this build is no longer served (README §5.15); retrying can't help.
+        if status == 426 { throw TusError.failed(APIError.from(status: status, body: nil)) }
         if status == 413 { throw TusError.failed(APIError(status: 413, code: "upload_too_large")) }
 
         switch step {

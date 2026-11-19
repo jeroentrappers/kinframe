@@ -15,6 +15,7 @@ extension API {
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             request.setValue("\"\(album.version)\"", forHTTPHeaderField: "If-Match")
             request.setValue(L10n.code, forHTTPHeaderField: "Accept-Language")
+            request.identifyApp()
             guard let token = try await tokens.accessToken() else { throw APIError.unauthorized }
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             let data: Data, response: URLResponse

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app version policy (README §5.15) -->
+    <string name="update_required_title">Update kinframe</string>
+    <string name="update_required_body">Deze versie van de app werkt niet meer met je kinframe-server. Update de app om foto’s naar je kaders te blijven sturen.</string>
+    <string name="update_action">Updaten</string>
+    <string name="update_check_again">Opnieuw controleren</string>
+    <string name="update_checking">Bezig met controleren…</string>
+    <string name="update_available">Er is een nieuwe versie van kinframe beschikbaar</string>
+    <string name="update_dismiss">Sluiten</string>
+</resources>

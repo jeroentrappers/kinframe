@@ -2535,6 +2535,18 @@ type AlbumWrite struct {
 	} `json:"schedule,omitempty"`
 }
 
+// AppVersionPolicy Version policy for one family app platform (README §5.15).
+type AppVersionPolicy struct {
+	// MinimumBuild Lowest build (Android versionCode, Apple CFBundleVersion) the server still serves; null: no minimum.
+	MinimumBuild *int `json:"minimum_build,omitempty"`
+
+	// RecommendedBuild Apps below this build show an "update available" banner; null: none.
+	RecommendedBuild *int `json:"recommended_build,omitempty"`
+
+	// StoreUrl Where to update: the App Store, Mac App Store, Google Play, F-Droid or an APK page; null: the app's own default.
+	StoreUrl *string `json:"store_url,omitempty"`
+}
+
 // BirthdayPerson A person with a birthday in a feed (docs/spec/birthdays.md). People, not accounts: `user_id` optionally links
 // a feed member.
 type BirthdayPerson struct {
@@ -3113,7 +3125,22 @@ type DiscoveredService struct {
 
 // Discovery defines model for Discovery.
 type Discovery struct {
-	Api  string `json:"api"`
+	Api string `json:"api"`
+
+	// AppVersions Family app version policy per platform (README §5.15). A platform is left out when the operator set nothing
+	// for it. Apps compare their own build number: below `minimum_build` they show a blocking "update" screen
+	// (the server also answers `426 app_update_required` to their requests), below `recommended_build` a banner
+	// that can be dismissed.
+	AppVersions *struct {
+		// Android Version policy for one family app platform (README §5.15).
+		Android *AppVersionPolicy `json:"android,omitempty"`
+
+		// Ios Version policy for one family app platform (README §5.15).
+		Ios *AppVersionPolicy `json:"ios,omitempty"`
+
+		// Macos Version policy for one family app platform (README §5.15).
+		Macos *AppVersionPolicy `json:"macos,omitempty"`
+	} `json:"app_versions,omitempty"`
 	Auth struct {
 		ApiResource string `json:"api_resource"`
 

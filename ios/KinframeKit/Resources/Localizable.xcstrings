@@ -14128,6 +14128,125 @@
         }
       }
     },
+    "ios.appUpdate.banner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A new version of kinframe is available"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is een nieuwe versie van kinframe beschikbaar"
+          }
+        }
+      }
+    },
+    "ios.appUpdate.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of kinframe is no longer supported by your server. Update the app to keep using it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je server ondersteunt deze versie van kinframe niet meer. Werk de app bij om ze te blijven gebruiken."
+          }
+        }
+      }
+    },
+    "ios.appUpdate.checkAgain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw controleren"
+          }
+        }
+      }
+    },
+    "ios.appUpdate.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of kinframe needs an update. Open the kinframe app to update it, then share again."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze versie van kinframe moet bijgewerkt worden. Open de kinframe-app om ze bij te werken en deel daarna opnieuw."
+          }
+        }
+      }
+    },
+    "ios.appUpdate.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update kinframe"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kinframe bijwerken"
+          }
+        }
+      }
+    },
+    "ios.appUpdate.update": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijwerken"
+          }
+        }
+      }
+    },
+    "ios.appUpdate.version": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version: {version} ({build})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze versie: {version} ({build})"
+          }
+        }
+      }
+    },
     "ios.back": {
       "extractionState": "manual",
       "localizations": {

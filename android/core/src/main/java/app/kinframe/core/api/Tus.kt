@@ -176,6 +176,7 @@ class TusUploader(
         return when {
             r.code == 404 || r.code == 410 -> UploadGoneException(p)
             r.code == 409 || r.code == 423 || r.code >= 500 || r.code == 429 -> TransientUploadException(ApiException(r.code, p))
+            r.code == 426 -> AppUpdateRequiredException(p)
             r.code == 413 -> ApiException(413, p ?: Problem(code = ProblemCode.UPLOAD_TOO_LARGE, status = 413))
             else -> ApiException(r.code, p)
         }

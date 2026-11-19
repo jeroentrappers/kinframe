@@ -39,6 +39,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	if s.cfg.DesktopClientID != "" {
 		d.Auth.DesktopClientId = ptr(s.cfg.DesktopClientID)
 	}
+	d.AppVersions = appVersionsJSON(s.cfg.AppVersions)
 	d.DevAuth = ptr(s.dev != nil)
 	d.Weather = ptr(s.weather != nil)
 	d.Calendar = ptr(s.calendar != nil)

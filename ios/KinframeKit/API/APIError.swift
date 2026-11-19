@@ -30,6 +30,11 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
     public static let unauthorized = APIError(status: 401, code: "unauthorized")
     public static let unexpected = APIError(status: 0, code: "server_error")
 
+    /// The server no longer serves this build (`426 app_update_required`): the app shows "Update kinframe".
+    public var isAppUpdateRequired: Bool {
+        AppUpdateSignal.isUpdateRequired(status: status, code: code)
+    }
+
     /// Build from a problem+json body; falls back to a status-based code.
     public static func from(status: Int, body: Data?, retryAfter: Int? = nil) -> APIError {
         struct Problem: Decodable {
@@ -50,11 +55,14 @@ public struct APIError: Error, Equatable, Sendable, LocalizedError {
         case 409: "version_conflict"
         case 412: "version_conflict"
         case 413: "upload_too_large"
+        case 426: AppUpdateSignal.code
         case 429: "rate_limited"
         default: "server_error"
         }
         var e = APIError(status: status, code: p?.code ?? fallback, title: p?.title, detail: p?.detail, retryAfter: retryAfter)
         e.fieldErrors = (p?.errors ?? []).compactMap { f in f.field.map { FieldError(field: $0, code: f.code ?? "invalid") } }
+        // This build is below the server's minimum (README §5.15): tell the app, whichever call got it.
+        if e.isAppUpdateRequired { AppUpdateSignal.raise() }
         return e
     }
 

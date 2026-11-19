@@ -880,6 +880,26 @@ server closes with `4401` at token expiry so the client reconnects with a fresh 
 - The remote in the app moves the frame itself (`POST /frames/{id}/commands` `next`/`previous`, `change_settings`), and
   the TV follows.
 
+### 5.15 Family app versions (force update)
+
+The Android, iOS and Mac (Catalyst) family apps identify themselves on every request with
+`X-Kinframe-App: kinframe-family-<platform>/<version name> (<build>)`, where `<platform>` is `android`, `ios` or
+`macos` and `<build>` is the Android versionCode or the Apple `CFBundleVersion` (an integer). The website sends no such
+header and is never blocked: it always serves the current version.
+
+- **Policy**: the operator sets, per platform, `KINFRAME_APP_<PLATFORM>_MIN_BUILD`, `KINFRAME_APP_<PLATFORM>_RECOMMENDED_BUILD`
+  and `KINFRAME_APP_<PLATFORM>_STORE_URL` (`ANDROID`, `IOS`, `MACOS`). Discovery returns them as `app_versions`
+  (`AppVersionPolicy`); a platform with nothing set is left out.
+- **Blocking**: a family-app request whose build is below its platform's `minimum_build` gets
+  `426 app_update_required` (problem body as usual), except `GET /v1/discovery` and the public, unauthenticated
+  endpoints the app needs to show the update screen. Requests without the header (the website, apps from before this
+  feature) are never blocked; so a minimum only reaches apps that send the header.
+- **Apps**: on start, on returning to the foreground and after any 426 the app (re)reads discovery. Below
+  `minimum_build` it shows a full-screen "Update kinframe" page with a button to `store_url` (or the platform's store
+  page for the app) and "Check again"; nothing else is usable. Below `recommended_build` it shows a banner "A new
+  version of kinframe is available" with Update and dismiss; a dismissal is remembered per recommended build.
+- The frame app has its own mechanism (§5.7: `KINFRAME_MIN_FRAME_APP_VERSION_CODE` and self-update).
+
 ## 7. Versioning
 
 - Breaking changes need `/v2`. Additive changes (new fields, new event types, new change types) are not breaking.

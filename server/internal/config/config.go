@@ -68,11 +68,14 @@ type Config struct {
 
 	FeedRetention      time.Duration
 	MinFrameAppVersion int
-	CommandTimeout     time.Duration
-	DefaultLimits      Limits
-	LogLevel           slog.Level
-	LogJSON            bool
-	PushEnabled        bool
+	// AppVersions is the family app version policy per platform (docs/api/README.md §5.15),
+	// keyed by AppPlatforms; a platform the operator set nothing for is absent.
+	AppVersions    map[string]AppVersionPolicy
+	CommandTimeout time.Duration
+	DefaultLimits  Limits
+	LogLevel       slog.Level
+	LogJSON        bool
+	PushEnabled    bool
 	// WebPush (RFC 8291/8292). The VAPID key pair comes from KINFRAME_VAPID_PUBLIC_KEY and
 	// KINFRAME_VAPID_PRIVATE_KEY, or is generated once into <data dir>/vapid.json.
 	VAPIDPublicKey  string // base64url uncompressed P-256 point
@@ -152,6 +155,17 @@ type Config struct {
 	MollieAPIKey string
 	// MollieBaseURL overrides the Mollie API endpoint (tests).
 	MollieBaseURL string
+}
+
+// AppPlatforms are the family app platforms, as named in `X-Kinframe-App: kinframe-family-<platform>/…`.
+var AppPlatforms = []string{"android", "ios", "macos"}
+
+// AppVersionPolicy is one platform's KINFRAME_APP_<PLATFORM>_{MIN_BUILD,RECOMMENDED_BUILD,STORE_URL}.
+// Zero builds and an empty URL mean "not set".
+type AppVersionPolicy struct {
+	MinBuild         int
+	RecommendedBuild int
+	StoreURL         string
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -311,6 +325,31 @@ func load(get func(string) string) (*Config, error) {
 		PluginRegistryInterval: time.Duration(intv("KINFRAME_PLUGIN_REGISTRY_POLL_MINUTES", 60)) * time.Minute,
 
 		StationForwardURL: env("KINFRAME_STATION_FORWARD_URL", "http://rtupdate.wunderground.com/weatherstation/updateweatherstation.php"),
+	}
+	for _, p := range AppPlatforms {
+		prefix := "KINFRAME_APP_" + strings.ToUpper(p) + "_"
+		v := AppVersionPolicy{
+			MinBuild:         intv(prefix+"MIN_BUILD", 0),
+			RecommendedBuild: intv(prefix+"RECOMMENDED_BUILD", 0),
+			StoreURL:         env(prefix+"STORE_URL", ""),
+		}
+		if v.MinBuild < 0 {
+			errs = append(errs, fmt.Errorf("%sMIN_BUILD must not be negative", prefix))
+		}
+		if v.RecommendedBuild < 0 {
+			errs = append(errs, fmt.Errorf("%sRECOMMENDED_BUILD must not be negative", prefix))
+		}
+		if v.StoreURL != "" {
+			if u, err := url.Parse(v.StoreURL); err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+				errs = append(errs, fmt.Errorf("%sSTORE_URL must be an http(s) URL, got %q", prefix, v.StoreURL))
+			}
+		}
+		if v != (AppVersionPolicy{}) {
+			if c.AppVersions == nil {
+				c.AppVersions = map[string]AppVersionPolicy{}
+			}
+			c.AppVersions[p] = v
+		}
 	}
 	c.AppleTeamID = env("KINFRAME_APPLE_TEAM_ID", "")
 	c.AppleBundleID = env("KINFRAME_APPLE_BUNDLE_ID", "app.kinframe.family")

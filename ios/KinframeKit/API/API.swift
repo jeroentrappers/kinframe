@@ -34,6 +34,7 @@ public struct API: Sendable {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 30
         config.waitsForConnectivity = false
+        config.identifyApp()
         return URLSession(configuration: config)
     }
 
@@ -76,6 +77,7 @@ struct APIMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var request = request
         request.headerFields[.acceptLanguage] = L10n.code
+        request.headerFields[.kinframeApp] = AppIdentity.headerValue
         // The generator percent-encodes header parameters; If-Match must reach the server as a quoted version ("7").
         if let ifMatch = request.headerFields[.ifMatch], let decoded = ifMatch.removingPercentEncoding {
             request.headerFields[.ifMatch] = decoded
@@ -98,6 +100,11 @@ struct APIMiddleware: ClientMiddleware {
         let retryAfter = response.headerFields[.retryAfter].flatMap { Int($0) }
         throw APIError.from(status: response.status.code, body: data, retryAfter: retryAfter)
     }
+}
+
+extension HTTPField.Name {
+    /// `X-Kinframe-App` (README §5.15).
+    static let kinframeApp = HTTPField.Name(AppIdentity.headerName)!
 }
 
 /// RFC 3339 dates with or without fractional seconds (Go emits fractions only when non-zero).

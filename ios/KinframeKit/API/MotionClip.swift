@@ -8,6 +8,7 @@ public enum MotionClip {
         let url = api.url("v1/items/\(itemId)/media/motion")
         var request = URLRequest(url: url)
         request.setValue("bytes=0-0", forHTTPHeaderField: "Range")
+        request.identifyApp()
         guard let token = try await api.token() else { throw APIError.unauthorized }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         let (data, response) = try await api.session.data(for: request, delegate: NoRedirect())
@@ -19,7 +20,7 @@ public enum MotionClip {
             }
             return AVURLAsset(url: target.absoluteURL)
         case 200..<300:
-            return AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": ["Authorization": "Bearer \(token)"]])
+            return AVURLAsset(url: url, options: ["AVURLAssetHTTPHeaderFieldsKey": ["Authorization": "Bearer \(token)", AppIdentity.headerName: AppIdentity.headerValue]])
         default:
             throw APIError.from(status: http.statusCode, body: data)
         }
