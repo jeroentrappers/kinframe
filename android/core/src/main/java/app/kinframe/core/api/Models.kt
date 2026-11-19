@@ -63,6 +63,18 @@ data class Discovery(
     val telegramPrivacyMode: Boolean = false,
     /** The largest file the bot can download (20 MB on Telegram's cloud Bot API); null without [telegram]. */
     val telegramMaxFileBytes: Long? = null,
+    // ---- family social (docs/spec/family-social.md, README §5.18–§5.20)
+    /** Home timeline, threads, people's reactions, mentions, the `member` role and circles; only with [feeds]. */
+    val social: Boolean = false,
+    /** Conversations (direct, group, family, circle), blocks and reports. */
+    val chats: Boolean = false,
+    val voiceMessages: Boolean = false,
+    /** The operator turned on link previews; otherwise links show without a preview. */
+    val linkPreviews: Boolean = false,
+    /** Freshness, "Ask for new photos", reminders, streaks, prompts, On this day, summaries, recaps, milestones. */
+    val engagement: Boolean = false,
+    /** The server can send mail: people can choose an email digest. */
+    val emailDigest: Boolean = false,
 ) {
     /** The photo source providers to offer: none when the server has sources off. */
     val sourceProviders: List<String>
@@ -135,6 +147,15 @@ data class Limits(
     val maxTelegramChatsPerUser: Int = 20,
     /** Photos and videos accepted per Telegram chat per hour. */
     val maxTelegramItemsPerChatHour: Int = 300,
+    // ---- family social (README §5.18–§5.20)
+    val maxCommentChars: Int = 2000,
+    val maxMessageChars: Int = 4000,
+    val maxMentions: Int = 20,
+    val maxMessageItems: Int = 30,
+    val maxGroupMembers: Int = 100,
+    val maxCirclesPerFeed: Int = 20,
+    val maxVoiceSeconds: Int = 300,
+    val messageEditHours: Int = 24,
 )
 
 @Serializable

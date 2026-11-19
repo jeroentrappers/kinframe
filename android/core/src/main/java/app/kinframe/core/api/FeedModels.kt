@@ -12,6 +12,8 @@ object FeedRole {
     const val OWNER = "owner"
     const val ADMIN = "admin"
     const val POSTER = "poster"
+    /** Reads, comments, reacts and chats, but does not post photos (family social, README §5.18). */
+    const val MEMBER = "member"
 }
 
 /**
@@ -49,7 +51,24 @@ data class Feed(
     /** Owner and admins only (0 for posters). */
     val pendingSubscriptionCount: Int = 0,
     val pendingJoinRequestCount: Int = 0,
+    // ---- family social (README §5.18–§5.20); absent on servers without it.
+    /** Every member sees per-frame receipts of every post. */
+    val membersSeeReceipts: Boolean = false,
+    /** Joiners become posters (true) or members (false). */
+    val newMembersCanPost: Boolean = true,
+    val membersCanCreateCircles: Boolean = true,
+    val circleCount: Int = 0,
+    /** The caller's mute for this family ([app.kinframe.core.social.FeedMute]). */
+    val mute: String = app.kinframe.core.social.FeedMute.NONE,
+    val freshness: app.kinframe.core.social.Freshness? = null,
+    /** Null when the family turned streaks off. */
+    val streak: app.kinframe.core.social.FeedStreakSummary? = null,
+    /** The family chat. */
+    val conversationId: String? = null,
 ) {
+    /** Posters and above post photos; `member` only reads, comments, reacts and chats. */
+    val canPost: Boolean get() = role != FeedRole.MEMBER
+
     val isOwner: Boolean get() = role == FeedRole.OWNER
 
     /** Owner or admin: members, invites, subscriptions, settings and removing any post. */
@@ -67,7 +86,8 @@ data class FeedCreate(
     val name: String,
     val autoApproveSubscriptions: Boolean = false,
     val inviteRequiresApproval: Boolean = true,
-    val membersSeeReactions: Boolean = false,
+    /** Frames' reactions for every member: on by default since family social. */
+    val membersSeeReactions: Boolean = true,
     val postersCanInvite: Boolean = false,
     val postersCanAddBirthdays: Boolean = false,
 )
@@ -305,6 +325,13 @@ data class FeedPost(
     val reactions: List<FeedReaction>? = null,
     /** A photo source or Google Photos import made this post for the poster: "Anna · 14 photos via Immich". */
     val via: ItemVia? = null,
+    // ---- family social (README §5.18, §5.20)
+    /** The circle this post was shared with; null for the whole family. */
+    val circleId: String? = null,
+    val circleName: String? = null,
+    val promptId: String? = null,
+    /** Comments and people's reactions; absent without `social`. */
+    val thread: app.kinframe.core.social.ThreadSummary? = null,
 )
 
 @Serializable

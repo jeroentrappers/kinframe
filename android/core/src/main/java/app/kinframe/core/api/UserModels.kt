@@ -21,6 +21,8 @@ data class User(
     val timezone: String? = null,
     val isOperator: Boolean = false,
     val createdAt: String? = null,
+    /** Read receipts in chats (README §5.19); off also hides others' read state. */
+    val showReadReceipts: Boolean = true,
 ) {
     companion object {
         /** The server's name for accounts that have no name yet (server NOTES "Auth"). */
@@ -92,6 +94,10 @@ data class Frame(
     val createdAt: String? = null,
     /** `frame` (a device on the wall) or `browser` (a TV or computer browser that became a frame). */
     val deviceKind: String? = null,
+    // ---- family social (README §5.20): absent on servers without `engagement`.
+    val freshness: app.kinframe.core.social.Freshness? = null,
+    /** The open "Ask for new photos", or one answered in the last 24 hours. */
+    val photoRequest: app.kinframe.core.social.PhotoRequest? = null,
 ) {
     val isManager: Boolean get() = role == Role.OWNER || role == Role.ADMIN
 
@@ -206,11 +212,20 @@ object PreparedProfile {
  * [feedIds] is left out of the body when there are none, so servers without feeds see the request they know.
  */
 @Serializable
-data class SendCreate(val frameIds: List<String>, val items: List<SendItemCreate>, val feedIds: List<String>? = null) {
+data class SendCreate(
+    val frameIds: List<String>, val items: List<SendItemCreate>, val feedIds: List<String>? = null,
+    /** Family social: at most one circle per feed as that feed's audience (README §5.18). */
+    val circleIds: List<String>? = null,
+    /** Tag the feed post as an answer to this weekly prompt (README §5.20). */
+    val promptId: String? = null,
+) {
     companion object {
-        fun of(frameIds: List<String>, feedIds: List<String>, items: List<SendItemCreate>): SendCreate {
+        fun of(
+            frameIds: List<String>, feedIds: List<String>, items: List<SendItemCreate>,
+            circleIds: List<String> = emptyList(), promptId: String? = null,
+        ): SendCreate {
             require(frameIds.isNotEmpty() || feedIds.isNotEmpty()) { "a send needs at least one frame or feed" }
-            return SendCreate(frameIds, items, feedIds.takeIf { it.isNotEmpty() })
+            return SendCreate(frameIds, items, feedIds.takeIf { it.isNotEmpty() }, circleIds.takeIf { it.isNotEmpty() }, promptId)
         }
     }
 }
