@@ -177,6 +177,13 @@ struct MainTabs: View {
                 AddServerSheet(request: request)
             }
         }
+        .background {
+            Color.clear.sheet(item: $accounts.remoteFollow) { request in
+                if let api = request.model.api {
+                    RemoteFollowSheet(api: api, inviteURL: request.inviteURL).environment(request.model)
+                }
+            }
+        }
         .alert(
             L("servers.account.foreignTitle"),
             isPresented: Binding(get: { accounts.foreignLink != nil }, set: { if !$0 { accounts.foreignLink = nil } }),
@@ -185,6 +192,13 @@ struct MainTabs: View {
             Button(L("servers.account.foreignSignIn")) {
                 accounts.foreignLink = nil
                 accounts.startAdding(server: request.server, link: request.link)
+            }
+            // A family invite can also be followed by a frame you manage here, without an account there.
+            if let m = accounts.followAccount(for: request.link), let url = Accounts.inviteURL(request.link, server: request.server) {
+                Button(L("servers.account.foreignFollow")) {
+                    accounts.foreignLink = nil
+                    accounts.remoteFollow = .init(model: m, inviteURL: url)
+                }
             }
             Button(L("common.cancel"), role: .cancel) { accounts.foreignLink = nil }
         } message: { request in

@@ -52582,6 +52582,23 @@
         }
       }
     },
+    "servers.account.foreignFollow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show it on one of my frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon ze op een van mijn fotokaders"
+          }
+        }
+      }
+    },
     "servers.account.foreignFrame": {
       "extractionState": "manual",
       "localizations": {

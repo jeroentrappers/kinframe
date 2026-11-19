@@ -15,6 +15,26 @@ final class Accounts {
     var adding: AddServerRequest?
     /// A link of a server without an account here: asks first ("This family is on kinframe.janssens.be…").
     var foreignLink: ForeignLink?
+    /// "Show it on one of my frames": follow another server's family from a frame here (README §5.22).
+    var remoteFollow: RemoteFollowRequest?
+
+    struct RemoteFollowRequest: Identifiable {
+        let id = UUID()
+        let model: AppModel
+        let inviteURL: URL
+    }
+
+    /// An account that can follow the link's family with one of its frames: remote families on, a frame it manages.
+    func followAccount(for link: DeepLink) -> AppModel? {
+        guard case .feedInvite = link else { return nil }
+        return active.first { m in m.remoteFamiliesEnabled && m.frames.contains { $0.can(\.changeSettings) } }
+    }
+
+    /// The invite's web address, for `previewRemoteInvite`.
+    static func inviteURL(_ link: DeepLink, server: URL) -> URL? {
+        guard case .feedInvite(_, let token) = link else { return nil }
+        return server.appending(path: "fi/\(token)")
+    }
 
     struct AddServerRequest: Identifiable {
         let id = UUID()
