@@ -56,6 +56,8 @@ public enum LiveEvent: Equatable, Sendable {
     case telegramLinkUpdated(TelegramLink?)
     /// Family social: timeline, threads, reactions, circles, chats, badge and encouragement (SocialEvents.swift).
     case social(SocialEvent)
+    /// Leaving (Leaving.swift): placements taken away or restored, keep requests.
+    case leaving(LeavingEvent)
 
     public struct BirthdayRef: Equatable, Sendable {
         public var feedId: String
@@ -167,7 +169,7 @@ public enum LiveEvent: Equatable, Sendable {
                   let invitation = try? OutboxRunner.decoder.decode(EventInvitation.self, from: raw) else { return nil }
             return .invitationDecided(frameId: f, invitation: invitation)
         default:
-            return SocialEvent.parse(type, obj).map { .social($0) }
+            return SocialEvent.parse(type, obj).map { .social($0) } ?? LeavingEvent.parse(type, obj).map { .leaving($0) }
         }
     }
 

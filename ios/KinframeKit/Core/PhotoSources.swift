@@ -769,7 +769,7 @@ public enum Credit {
     public static func item(_ item: Item, template: String = L("ios.ps.via"), email: String = L("ios.via.email"),
                             telegram: String = L("ios.via.telegram")) -> String? {
         let personLabel = item.via.flatMap { $0.knownService?.labelIsPerson == true ? $0.label : nil }
-        guard let name = item.senderName ?? personLabel else { return nil }
+        guard let name = LeavingText.formerSender(item) ?? item.senderName ?? personLabel else { return nil }
         return sender(name, via: item.via, template: template, email: email, telegram: telegram)
     }
 
