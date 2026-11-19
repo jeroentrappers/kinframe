@@ -96,6 +96,10 @@ fun HistoryScreen(
     onLoadMore: () -> Unit,
     onRetryOutbox: (String) -> Unit,
     onDiscardOutbox: (String) -> Unit,
+    /** A send's server chip when signed in to several servers (multi-server.md §2.2: merged history), else null. */
+    serverChip: (Send) -> String? = { null },
+    /** A queued send's server chip (its `server`), likewise. */
+    outboxChip: (OutboxSend) -> String? = { null },
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -129,7 +133,7 @@ fun HistoryScreen(
             }
             items(outbox, key = { "o-" + it.id }) { o ->
                 Box(Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) {
-                    OutboxCard(o, progress[o.id], { onRetryOutbox(o.id) }, { onDiscardOutbox(o.id) })
+                    OutboxCard(o, progress[o.id], { onRetryOutbox(o.id) }, { onDiscardOutbox(o.id) }, server = outboxChip(o))
                 }
             }
             when (val s = state.sends) {
@@ -152,7 +156,7 @@ fun HistoryScreen(
                             }
                         }
                         item(key = send.id) {
-                            Box(Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) { SendCard(send) { onOpen(send) } }
+                            Box(Modifier.widthIn(max = ContentMaxWidth).fillMaxWidth().padding(horizontal = 20.dp, vertical = 6.dp)) { SendCard(send, server = serverChip(send)) { onOpen(send) } }
                         }
                     }
                     if (state.loadingMore) item { SkeletonList(1, 120.dp) }
@@ -163,9 +167,10 @@ fun HistoryScreen(
 }
 
 @Composable
-fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard: () -> Unit) {
+fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard: () -> Unit, server: String? = null) {
     val c = Kin.colors
     Surface(Modifier.fillMaxWidth()) {
+        server?.let { app.kinframe.family.ui.Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Thumb(o.items.firstOrNull()?.let { it.localPath?.let { p -> java.io.File(p) } ?: android.net.Uri.parse(it.uri) }, null, Modifier.size(56.dp))
             Column(Modifier.weight(1f)) {
@@ -193,7 +198,7 @@ fun OutboxCard(o: OutboxSend, p: OutboxProgress?, onRetry: () -> Unit, onDiscard
 }
 
 @Composable
-fun SendCard(send: Send, onOpen: () -> Unit) {
+fun SendCard(send: Send, server: String? = null, onOpen: () -> Unit) {
     val c = Kin.colors
     val deliveries = Delivery.frames(send)
     val (photos, videos) = Delivery.kindCounts(send)
@@ -203,6 +208,8 @@ fun SendCard(send: Send, onOpen: () -> Unit) {
     ).joinToString(" · ")
     val label = stringResource(R.string.history_open_send, Format.time(send.createdAt))
     Surface(Modifier.fillMaxWidth(), onClick = onOpen) {
+        // Several servers: which server the send is on (multi-server.md §2.2).
+        server?.let { app.kinframe.family.ui.Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             send.items.take(4).forEachIndexed { i, item ->
                 Box(Modifier.weight(1f).aspectRatio(1f)) {
