@@ -28,9 +28,12 @@ type User struct {
 	EmailVerified bool       `db:"email_verified"`
 	CreatedAt     time.Time  `db:"created_at"`
 	DeletedAt     *time.Time `db:"deleted_at"`
+	// ShowReadReceipts: "Seen" in chats, shown and seen (README §5.19).
+	ShowReadReceipts bool `db:"show_read_receipts"`
 }
 
-const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, timezone, email_verified, created_at, deleted_at`
+const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, timezone, email_verified, created_at, deleted_at,
+	show_read_receipts`
 
 // DefaultDisplayName derives a display name from token claims (README §3.1).
 func DefaultDisplayName(name, email string) string {

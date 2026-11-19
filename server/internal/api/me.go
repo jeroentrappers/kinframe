@@ -149,6 +149,11 @@ func (s *Server) UpdateMe(ctx context.Context, req gen.UpdateMeRequestObject) (g
 	if err != nil {
 		return nil, err
 	}
+	if b.ShowReadReceipts != nil { // chats (README §5.19)
+		if u, err = s.st.SetShowReadReceipts(ctx, u.ID, *b.ShowReadReceipts); err != nil {
+			return nil, err
+		}
+	}
 	if p.DisplayName != nil {
 		if err := s.bumpMemberEverywhere(ctx, u.ID); err != nil {
 			return nil, err

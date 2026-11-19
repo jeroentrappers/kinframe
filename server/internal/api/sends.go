@@ -806,6 +806,9 @@ func (s *Server) getItemMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	allowed, err := s.st.UserCanSeeItem(ctx, me(ctx).ID, itemID)
+	if err == nil && !allowed {
+		allowed, err = s.st.ChatCanSeeItem(ctx, me(ctx).ID, itemID) // items of conversations (store/chat.go)
+	}
 	if err != nil {
 		s.writeError(w, r, err)
 		return
@@ -955,6 +958,7 @@ func (s *Server) MediaFailed(mediaID uuid.UUID) {
 	}
 	rows.Close()
 	s.publishSendUpdates(ctx, sends, "failed")
+	s.chatMediaChanged(mediaID) // chat photos, videos and voice messages (chat_events.go)
 }
 
 // preparedOriginal is the client-declared sha256 of a prepared upload's
