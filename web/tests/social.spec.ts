@@ -282,6 +282,27 @@ test('sending: readers can’t post, a circle as the audience, and a prompt answ
 	expect(call(s.st, 'POST', '/v1/sends')?.body).toMatchObject({ feed_ids: [s.feed.id], circle_ids: [s.soc.circles[s.feed.id]![0]!.id], prompt_id: s.promptId });
 });
 
+test('a frame request for a frame you’re not on preselects the family that reaches it', async ({ page }) => {
+	const s = socialState();
+	const opa = 'ffffffff-0000-7000-8000-00000000f0a1';
+	const req = 'ffffffff-0000-7000-8000-00000000f0b2';
+	s.soc.photoRequests.push({ id: req, frame_id: opa, frame_name: 'Opa’s frame', state: 'open', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 86_400_000).toISOString(), feed_ids: [s.feed.id] });
+	await signIn(page, s.st);
+	// From the frame_request push or toast: the request names the families.
+	await page.goto(`/send?frame=${opa}&request=${req}`);
+	await expect(page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+});
+
+test('a quiet-frame reminder for a frame you’re not on preselects the family that reaches it', async ({ page }) => {
+	const s = socialState();
+	const opa = 'ffffffff-0000-7000-8000-00000000f0a1';
+	// No request: the families' subscriptions say which one reaches the frame.
+	s.st.subscriptions.push({ id: 'sb-1', status: 'active', history: 'none', feed: { id: s.feed.id, name: 'Peeters' }, frame: { id: opa, name: 'Opa’s frame' }, created_at: new Date().toISOString() } as never);
+	await signIn(page, s.st);
+	await page.goto(`/send?frame=${opa}`);
+	await expect(page.getByRole('checkbox', { name: /Peeters/ })).toBeChecked();
+});
+
 test('the badge shows in the tab title and on Chats', async ({ page }) => {
 	const s = socialState();
 	await signIn(page, s.st);

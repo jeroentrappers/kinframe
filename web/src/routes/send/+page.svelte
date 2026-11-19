@@ -73,7 +73,7 @@
 			const subs = await Promise.all(
 				postable.map((f) =>
 					call(api.GET('/v1/feeds/{feedId}/subscriptions', { params: { path: { feedId: f.id }, query: { status: 'active' } } }))
-						.then((l) => (l.some((s) => s.frame_id === frameId) ? f.id : null))
+						.then((l) => (l.some((s) => s.frame.id === frameId) ? f.id : null))
 						.catch(() => null)
 				)
 			);
