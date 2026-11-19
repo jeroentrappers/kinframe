@@ -44,6 +44,34 @@ extension Components {
         public typealias TelegramChatId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/InviteToken`.
         public typealias InviteToken = Swift.String
+        /// - Remark: Generated from `#/components/parameters/CommentId`.
+        public typealias CommentId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/CircleId`.
+        public typealias CircleId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/ConversationId`.
+        public typealias ConversationId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/MessageId`.
+        public typealias MessageId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/ReportId`.
+        public typealias ReportId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/RequestId`.
+        public typealias RequestId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/TargetKind`.
+        public typealias TargetKind = Components.Schemas.ReactionTargetKind
+        /// - Remark: Generated from `#/components/parameters/TargetId`.
+        public typealias TargetId = Components.Schemas.Id
+        /// A Monday (YYYY-MM-DD); other days answer `422 validation_failed`.
+        ///
+        /// - Remark: Generated from `#/components/parameters/WeekOf`.
+        public typealias WeekOf = Swift.String
+        /// Chronological lists (timeline, messages): return what comes before this cursor (a `next_before` value, or a message id).
+        ///
+        /// - Remark: Generated from `#/components/parameters/Before`.
+        public typealias Before = Swift.String
+        /// Chronological lists (comments, messages): return what comes after this id.
+        ///
+        /// - Remark: Generated from `#/components/parameters/After`.
+        public typealias After = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/Cursor`.
         public typealias Cursor = Swift.String
         /// - Remark: Generated from `#/components/parameters/Limit`.

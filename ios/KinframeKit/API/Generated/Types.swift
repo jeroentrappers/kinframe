@@ -167,7 +167,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/items/{itemId}`.
     /// - Remark: Generated from `#/paths//v1/items/{itemId}/patch(updateItem)`.
     func updateItem(_ input: Operations.UpdateItem.Input) async throws -> Operations.UpdateItem.Output
-    /// Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
+    /// Thumbnails and the master rendition for app/web, for everyone who may see the item (its sender, frames' library viewers, feed and circle members, and members of conversations it was sent in). Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
     ///
     /// - Remark: HTTP `GET /v1/items/{itemId}/media/{variant}`.
     /// - Remark: Generated from `#/paths//v1/items/{itemId}/media/{variant}/get(getItemMedia)`.
@@ -277,7 +277,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/members`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/get(listFeedMembers)`.
     func listFeedMembers(_ input: Operations.ListFeedMembers.Input) async throws -> Operations.ListFeedMembers.Output
-    /// Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+    /// Owner or admin. Admins cannot change the owner or other admins, and only change posters and members. Ownership moves with `transferFeedOwnership`.
     ///
     /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/members/{userId}`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)`.
@@ -292,7 +292,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
     func listFeedJoinRequests(_ input: Operations.ListFeedJoinRequests.Input) async throws -> Operations.ListFeedJoinRequests.Output
-    /// Owner or admin. Approved requesters become posters.
+    /// Owner or admin. Approved requesters become posters, or members when the feed has `new_members_can_post` off.
     ///
     /// - Remark: HTTP `POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision}`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)`.
@@ -340,9 +340,10 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/feed-invites/{token}/accept`.
     /// - Remark: Generated from `#/paths//v1/feed-invites/{token}/accept/post(acceptFeedInvite)`.
     func acceptFeedInvite(_ input: Operations.AcceptFeedInvite.Input) async throws -> Operations.AcceptFeedInvite.Output
-    /// Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
-    /// for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
-    /// they are null. Post as a feed is done with `createSend` (`feed_ids`).
+    /// Any feed member, newest first. `receipts` are present on the caller's own posts, on every post for owner and
+    /// admins, and on every post for everyone when the feed has `members_see_receipts`; `reactions` (frames'
+    /// reactions and replies) likewise with `members_see_reactions`; otherwise they are null. Circle posts only for
+    /// circle members. Post as a feed is done with `createSend` (`feed_ids`).
     ///
     ///
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts`.
@@ -365,7 +366,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/posts/{postId}/items/{itemId}/delete(removeFeedPostItem)`.
     func removeFeedPostItem(_ input: Operations.RemoveFeedPostItem.Input) async throws -> Operations.RemoveFeedPostItem.Output
     /// Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
-    /// (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+    /// (`members_see_receipts`; `403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
     /// for direct sends; who moderated is never revealed.
     ///
     ///
@@ -884,6 +885,409 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/telegram/webhook`.
     /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)`.
     func telegramWebhook(_ input: Operations.TelegramWebhook.Input) async throws -> Operations.TelegramWebhook.Output
+    /// Home: posts from every family (feed) the caller is a member of, with `member` and every other role, plus
+    /// frame posts (direct sends to frames) the caller may see (README §5.18), newest first. Circle posts only for
+    /// circle members. Chronological, never ranked. Removed posts are left out.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/timeline`.
+    /// - Remark: Generated from `#/paths//v1/timeline/get(getTimeline)`.
+    func getTimeline(_ input: Operations.GetTimeline.Input) async throws -> Operations.GetTimeline.Output
+    /// One feed post or frame post as on the timeline (push deep links, shared post cards). `404 not_found` when the
+    /// caller may not see it or it was removed.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/get(getPost)`.
+    func getPost(_ input: Operations.GetPost.Input) async throws -> Operations.GetPost.Output
+    /// The thread, oldest first, flat: replies carry `parent_id` (always a top-level comment) and come after their
+    /// parent; clients nest them. Frame entries (`kind: frame`) are in the same list. Comments by people the caller
+    /// blocked are left out; comments removed by an admin are left out for everyone except their author.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/posts/{postId}/comments`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/get(listComments)`.
+    func listComments(_ input: Operations.ListComments.Input) async throws -> Operations.ListComments.Output
+    /// Anyone who may see the post (README §5.18). `409 comments_closed` when the thread is closed. Replies:
+    /// `parent_id` is a top-level comment of this thread; a reply to a reply is sent with the top comment as
+    /// `parent_id` and the person replied to as `quoted_user_id`. Mentions must point at people who may see the post
+    /// (`422 validation_failed`, field `mentions`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/posts/{postId}/comments`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/post(createComment)`.
+    func createComment(_ input: Operations.CreateComment.Input) async throws -> Operations.CreateComment.Output
+    /// The author only, any time (shows "edited"). Frame entries can't be edited (`403 forbidden`).
+    ///
+    /// - Remark: HTTP `PATCH /v1/posts/{postId}/comments/{commentId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/{commentId}/patch(updateComment)`.
+    func updateComment(_ input: Operations.UpdateComment.Input) async throws -> Operations.UpdateComment.Output
+    /// The author (a top comment with replies stays as a `deleted` tombstone, otherwise it disappears), or a
+    /// moderator (feed owner/admin; for frame posts the frame's owner/admin): removed without a tombstone, with its
+    /// replies; its author still sees it with `removed_by_admin`.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/posts/{postId}/comments/{commentId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/{commentId}/delete(deleteComment)`.
+    func deleteComment(_ input: Operations.DeleteComment.Input) async throws -> Operations.DeleteComment.Output
+    /// The poster, or a moderator (feed owner/admin; frame owner/admin for frame posts). Closing keeps existing comments and reactions; new comments get `409 comments_closed`.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/thread`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/thread/put(setThreadState)`.
+    func setThreadState(_ input: Operations.SetThreadState.Input) async throws -> Operations.SetThreadState.Output
+    /// Marks the thread read up to `up_to` (a comment id of this thread). Never moves backwards. Sends `thread.read` to the caller's other connections.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/read`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/read/put(markThreadRead)`.
+    func markThreadRead(_ input: Operations.MarkThreadRead.Input) async throws -> Operations.MarkThreadRead.Output
+    /// Mute or unmute pushes for this thread (comments, replies and mentions in it) for the caller.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/mute`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/mute/put(setThreadMute)`.
+    func setThreadMute(_ input: Operations.SetThreadMute.Input) async throws -> Operations.SetThreadMute.Output
+    /// The poster: tag a feed post as an answer to one of its family's weekly prompts (the current week's or the
+    /// previous week's), or untag it with null. Frame posts can't be tagged (`422 validation_failed`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/prompt`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/prompt/put(tagPostPrompt)`.
+    func tagPostPrompt(_ input: Operations.TagPostPrompt.Input) async throws -> Operations.TagPostPrompt.Output
+    /// Who reacted (people and, for posts and post items, frames), newest first. Same visibility as the target.
+    ///
+    /// - Remark: HTTP `GET /v1/reactions/{targetKind}/{targetId}`.
+    /// - Remark: Generated from `#/paths//v1/reactions/{targetKind}/{targetId}/get(listReactions)`.
+    func listReactions(_ input: Operations.ListReactions.Input) async throws -> Operations.ListReactions.Output
+    /// The caller's reaction on a post, one item of a post, a comment or a chat message: one per person and target,
+    /// the latest wins, null removes it. Allowed on closed threads. Not on frame entries or system messages
+    /// (`422 validation_failed`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/reactions/{targetKind}/{targetId}`.
+    /// - Remark: Generated from `#/paths//v1/reactions/{targetKind}/{targetId}/put(setReaction)`.
+    func setReaction(_ input: Operations.SetReaction.Input) async throws -> Operations.SetReaction.Output
+    /// The circles of this family the caller is in; the feed's owner and admins see every circle (names and members, not their posts).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/circles`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/get(listCircles)`.
+    func listCircles(_ input: Operations.ListCircles.Input) async throws -> Operations.ListCircles.Output
+    /// Feed owner/admin, or any member when the feed has `members_can_create_circles` (default on). The creator is a
+    /// circle admin; `member_ids` must be feed members. At most `limits.max_circles_per_feed` (`409 limit_reached`).
+    /// Names are unique per family, case-insensitive (`422 validation_failed`, field `name`, code `duplicate`). The
+    /// circle's chat (kind `circle`) is created with it.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/circles`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/post(createCircle)`.
+    func createCircle(_ input: Operations.CreateCircle.Input) async throws -> Operations.CreateCircle.Output
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/get(getCircle)`.
+    func getCircle(_ input: Operations.GetCircle.Input) async throws -> Operations.GetCircle.Output
+    /// Circle admins and the feed's owner/admins. `frame_ids` replaces the extra frames the circle's posts reach.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/patch(updateCircle)`.
+    func updateCircle(_ input: Operations.UpdateCircle.Input) async throws -> Operations.UpdateCircle.Output
+    /// Circle admins and the feed's owner/admins. Removes the circle's posts everywhere (like `removeFeedPost`:
+    /// frames, timeline, threads) and archives its chat. Clients warn first.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/delete(deleteCircle)`.
+    func deleteCircle(_ input: Operations.DeleteCircle.Input) async throws -> Operations.DeleteCircle.Output
+    /// Circle admins and the feed's owner/admins add feed members (already present ones are ignored). They join the circle's chat.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/circles/{circleId}/members`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/post(addCircleMembers)`.
+    func addCircleMembers(_ input: Operations.AddCircleMembers.Input) async throws -> Operations.AddCircleMembers.Output
+    /// Circle admins and the feed's owner/admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/circles/{circleId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/{userId}/patch(updateCircleMember)`.
+    func updateCircleMember(_ input: Operations.UpdateCircleMember.Input) async throws -> Operations.UpdateCircleMember.Output
+    /// Circle admins and the feed's owner/admins remove anyone; any member removes themself (leave). Their posts to the circle stay. Leaving the family leaves its circles.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/circles/{circleId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/{userId}/delete(removeCircleMember)`.
+    func removeCircleMember(_ input: Operations.RemoveCircleMember.Input) async throws -> Operations.RemoveCircleMember.Output
+    /// Every conversation the caller is in (family and circle chats included), most recent activity first, with
+    /// unread counts and the last message. Family-sized, so not paged. Archived conversations (the caller's own
+    /// `archived`, or a deleted family or circle) only with `archived=true`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/conversations`.
+    /// - Remark: Generated from `#/paths//v1/conversations/get(listConversations)`.
+    func listConversations(_ input: Operations.ListConversations.Input) async throws -> Operations.ListConversations.Output
+    /// Start a `direct` or `group` chat (family and circle chats exist with their family or circle). Everyone in
+    /// `member_ids` must share a family or a frame with the caller and must not have blocked them
+    /// (`403 cannot_message`, `detail` names nobody). `direct`: exactly one other person; idempotent per pair: the
+    /// existing conversation is returned with `200`. `group`: 2–99 others (3–100 people with the caller) and a
+    /// `name`; the caller is its admin.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations`.
+    /// - Remark: Generated from `#/paths//v1/conversations/post(createConversation)`.
+    func createConversation(_ input: Operations.CreateConversation.Input) async throws -> Operations.CreateConversation.Output
+    /// Members only; everyone else gets `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/get(getConversation)`.
+    func getConversation(_ input: Operations.GetConversation.Input) async throws -> Operations.GetConversation.Output
+    /// Groups only (`409 invalid_transition` otherwise; family and circle chats take their name from the family or circle). Group admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/patch(updateConversation)`.
+    func updateConversation(_ input: Operations.UpdateConversation.Input) async throws -> Operations.UpdateConversation.Output
+    /// Group admins. Like `putAvatar`: the server crops to a 256x256 WebP at a public, unguessable URL. Groups only.
+    ///
+    /// - Remark: HTTP `PUT /v1/conversations/{conversationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/photo/put(putConversationPhoto)`.
+    func putConversationPhoto(_ input: Operations.PutConversationPhoto.Input) async throws -> Operations.PutConversationPhoto.Output
+    /// Group admins.
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/photo/delete(deleteConversationPhoto)`.
+    func deleteConversationPhoto(_ input: Operations.DeleteConversationPhoto.Input) async throws -> Operations.DeleteConversationPhoto.Output
+    /// Groups only. Any member may add people who share a family or a frame with them and have not blocked them
+    /// (`403 cannot_message`), up to 100 people. New members see messages from the moment they were added.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/members`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/post(addConversationMembers)`.
+    func addConversationMembers(_ input: Operations.AddConversationMembers.Input) async throws -> Operations.AddConversationMembers.Output
+    /// Groups only, group admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/{userId}/patch(updateConversationMember)`.
+    func updateConversationMember(_ input: Operations.UpdateConversationMember.Input) async throws -> Operations.UpdateConversationMember.Output
+    /// Groups only. Admins remove anyone; anyone removes themself (leave). When the last admin leaves, the
+    /// longest-standing member becomes admin. Direct, family and circle chats can't be left (`409 invalid_transition`):
+    /// archive or mute them, or leave the family or circle.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/{userId}/delete(removeConversationMember)`.
+    func removeConversationMember(_ input: Operations.RemoveConversationMember.Input) async throws -> Operations.RemoveConversationMember.Output
+    /// The caller's own mute and archive state for this conversation. A new message un-archives it.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/preferences`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/preferences/patch(updateConversationPreferences)`.
+    func updateConversationPreferences(_ input: Operations.UpdateConversationPreferences.Input) async throws -> Operations.UpdateConversationPreferences.Output
+    /// A page of messages, always oldest first within the page. Neither cursor: the newest `limit` messages.
+    /// `before`: the `limit` messages just before that message (scrolling up). `after`: the `limit` messages just
+    /// after it (catching up after a reconnect). Both: `422 validation_failed`. Messages before the caller joined a
+    /// group are not returned; messages from people the caller blocked are left out.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/get(listMessages)`.
+    func listMessages(_ input: Operations.ListMessages.Input) async throws -> Operations.ListMessages.Output
+    /// At least one of `body`, `items`, `voice` and `shared_post_id`. Photos and videos use the normal uploads (tus, prepared
+    /// uploads) and become ordinary items (`status: processing` until ready; `message.updated` follows). A voice
+    /// message has `voice` and no `items` (README §5.19). Idempotent on `client_id` per author
+    /// and conversation as well as on `Idempotency-Key`. Direct chats with someone who blocked the caller, or whose
+    /// account is gone, answer `403 cannot_message`. Archived conversations are read-only (`409 invalid_transition`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/post(sendMessage)`.
+    func sendMessage(_ input: Operations.SendMessage.Input) async throws -> Operations.SendMessage.Output
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/get(getMessage)`.
+    func getMessage(_ input: Operations.GetMessage.Input) async throws -> Operations.GetMessage.Output
+    /// The author, within `limits.message_edit_hours` (24) of sending (`409 invalid_transition` after). Text only; items can't change.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/patch(updateMessage)`.
+    func updateMessage(_ input: Operations.UpdateMessage.Input) async throws -> Operations.UpdateMessage.Output
+    /// The author, any time: the message stays as a tombstone ("This message was deleted"): `deleted: true`, no body,
+    /// items or preview. Moderators (group admins; the feed's owner/admins in family and circle chats) may remove
+    /// anyone's message: a tombstone with `removed_by_admin: true`. Items already put on a frame stay there.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/delete(deleteMessage)`.
+    func deleteMessage(_ input: Operations.DeleteMessage.Input) async throws -> Operations.DeleteMessage.Output
+    /// "Put on a frame": a normal send of the message's photos and videos (no new upload), to frames the caller may
+    /// send to and families they may post to, with the usual limits, moderation and receipts. `item_ids` picks some
+    /// (default: every photo and video; a voice recording is never sent). Items of other people's
+    /// messages go to frames like `sharePlacements` (credit "Ben · shared by Anna", README §5.3) and can't be posted
+    /// to families (`403 forbidden` when `feed_ids` is not empty). The conversation gets a `put_on_frame` system
+    /// message, and frame reactions and quick replies on these placements show under the original message.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/messages/{messageId}/send`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/send/post(putMessageOnFrame)`.
+    func putMessageOnFrame(_ input: Operations.PutMessageOnFrame.Input) async throws -> Operations.PutMessageOnFrame.Output
+    /// The caller read up to `message_id`. Never moves backwards. Other members get `read.updated` only when
+    /// read receipts are shown in this conversation (README §5.19); the caller's other connections always do.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/conversations/{conversationId}/read`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/read/put(markConversationRead)`.
+    func markConversationRead(_ input: Operations.MarkConversationRead.Input) async throws -> Operations.MarkConversationRead.Output
+    /// The caller is typing (or recording a voice message). Not stored: the other members who are connected get a
+    /// `typing` event that expires after 6 s. Clients send it at most every 3 s while typing; more are ignored.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/typing`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/typing/post(sendTyping)`.
+    func sendTyping(_ input: Operations.SendTyping.Input) async throws -> Operations.SendTyping.Output
+    /// People the caller shares at least one family or frame with: the only people they can start a chat with or add
+    /// to a group. There is no search beyond this list. Sorted by display name.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/contacts`.
+    /// - Remark: Generated from `#/paths//v1/contacts/get(listContacts)`.
+    func listContacts(_ input: Operations.ListContacts.Input) async throws -> Operations.ListContacts.Output
+    /// A contact's profile (`404 not_found` for anyone who isn't a contact). The caller's own id returns their own profile with every milestone.
+    ///
+    /// - Remark: HTTP `GET /v1/people/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/people/{userId}/get(getPerson)`.
+    func getPerson(_ input: Operations.GetPerson.Input) async throws -> Operations.GetPerson.Output
+    /// The app badge (README §5.19), also sent as `badge.updated` whenever it changes.
+    ///
+    /// - Remark: HTTP `GET /v1/me/badge`.
+    /// - Remark: Generated from `#/paths//v1/me/badge/get(getBadge)`.
+    func getBadge(_ input: Operations.GetBadge.Input) async throws -> Operations.GetBadge.Output
+    /// Only when discovery has `link_previews: true` (the operator's opt-in; `503 feature_disabled` otherwise). The
+    /// server fetches the page itself (README §5.19: public addresses only, size and time limits) and returns the
+    /// cached preview. The composer uses it to show the preview before sending; `sendMessage` attaches the preview
+    /// of the body's first link by itself.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/link-previews`.
+    /// - Remark: Generated from `#/paths//v1/link-previews/post(createLinkPreview)`.
+    func createLinkPreview(_ input: Operations.CreateLinkPreview.Input) async throws -> Operations.CreateLinkPreview.Output
+    /// - Remark: HTTP `GET /v1/blocks`.
+    /// - Remark: Generated from `#/paths//v1/blocks/get(listBlocks)`.
+    func listBlocks(_ input: Operations.ListBlocks.Input) async throws -> Operations.ListBlocks.Output
+    /// Idempotent. Hides the person's comments, messages and reactions from the caller, stops their direct messages
+    /// (they get `403 cannot_message`, without being told why) and stops them adding the caller to groups. Shared
+    /// families, circles and groups stay (removing people is the admins' call). The blocked person is not notified.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/blocks/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/blocks/{userId}/put(blockUser)`.
+    func blockUser(_ input: Operations.BlockUser.Input) async throws -> Operations.BlockUser.Output
+    /// - Remark: HTTP `DELETE /v1/blocks/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/blocks/{userId}/delete(unblockUser)`.
+    func unblockUser(_ input: Operations.UnblockUser.Input) async throws -> Operations.UnblockUser.Output
+    /// Report a comment, a message or a post the caller can see. In a family (a feed post, its comments, a family or
+    /// circle chat) the feed's owner and admins get it; anything else (direct and group chats, frame posts) goes to
+    /// the server operator. The reporter stays anonymous to the reported person. One open report per reporter and
+    /// target (repeating returns the existing one).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/reports`.
+    /// - Remark: Generated from `#/paths//v1/reports/post(createReport)`.
+    func createReport(_ input: Operations.CreateReport.Input) async throws -> Operations.CreateReport.Output
+    /// The feed's owner and admins. Open reports first, then the last 30 days of resolved ones.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/reports`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/reports/get(listFeedReports)`.
+    func listFeedReports(_ input: Operations.ListFeedReports.Input) async throws -> Operations.ListFeedReports.Output
+    /// Operator only (`kinframe:operate`). Reports that don't belong to a family.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reports`.
+    /// - Remark: Generated from `#/paths//v1/operator/reports/get(listOperatorReports)`.
+    func listOperatorReports(_ input: Operations.ListOperatorReports.Input) async throws -> Operations.ListOperatorReports.Output
+    /// Whoever handles the report (feed owner/admin, or the operator). `remove` removes the content like a moderator
+    /// delete (`deleteComment`, `deleteMessage`, `removeFeedPost`); `dismiss` keeps it. `409 already_decided` when
+    /// someone else resolved it first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/reports/{reportId}/resolve`.
+    /// - Remark: Generated from `#/paths//v1/reports/{reportId}/resolve/post(resolveReport)`.
+    func resolveReport(_ input: Operations.ResolveReport.Input) async throws -> Operations.ResolveReport.Output
+    /// Any member. The family's streak, prompt, reminder and recap settings.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/engagement`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/engagement/get(getFeedEngagement)`.
+    func getFeedEngagement(_ input: Operations.GetFeedEngagement.Input) async throws -> Operations.GetFeedEngagement.Output
+    /// Owner or admin.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/engagement`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/engagement/patch(updateFeedEngagement)`.
+    func updateFeedEngagement(_ input: Operations.UpdateFeedEngagement.Input) async throws -> Operations.UpdateFeedEngagement.Output
+    /// Any member. `404 not_found` is never used for a disabled streak; it reports `enabled: false`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/streak`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/streak/get(getFeedStreak)`.
+    func getFeedStreak(_ input: Operations.GetFeedStreak.Input) async throws -> Operations.GetFeedStreak.Output
+    /// Any member. The current week's prompt, the next 4 weeks (as planned: the server's choice unless an admin set
+    /// one) and the past 12 weeks, newest first. Empty while `prompts_enabled` is off. Titles are in the caller's
+    /// language for server prompts.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/prompts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/get(listFeedPrompts)`.
+    func listFeedPrompts(_ input: Operations.ListFeedPrompts.Input) async throws -> Operations.ListFeedPrompts.Output
+    /// Owner or admin: choose the prompt of the current or a future week: one from the server's list (`library_key`),
+    /// an own `title`, or `skip: true` (no prompt that week). Exactly one of the three (`422 validation_failed`).
+    /// Past weeks can't change (`409 invalid_transition`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/feeds/{feedId}/prompts/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/{weekOf}/put(setFeedPrompt)`.
+    func setFeedPrompt(_ input: Operations.SetFeedPrompt.Input) async throws -> Operations.SetFeedPrompt.Output
+    /// Owner or admin. Back to the server's choice for that week (current or future).
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/prompts/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/{weekOf}/delete(resetFeedPrompt)`.
+    func resetFeedPrompt(_ input: Operations.ResetFeedPrompt.Input) async throws -> Operations.ResetFeedPrompt.Output
+    /// The server's prompt list in the caller's language (`Accept-Language`), for the admin's picker.
+    ///
+    /// - Remark: HTTP `GET /v1/prompts`.
+    /// - Remark: Generated from `#/paths//v1/prompts/get(listPromptLibrary)`.
+    func listPromptLibrary(_ input: Operations.ListPromptLibrary.Input) async throws -> Operations.ListPromptLibrary.Output
+    /// "On this day" for Home: posts from today's date in earlier years (in the caller's `timezone`) in the caller's
+    /// families, newest year first, at most 3 groups of 12 items. Empty when there is nothing (Home then hides the
+    /// card). Same visibility as the timeline.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/on-this-day`.
+    /// - Remark: Generated from `#/paths//v1/me/on-this-day/get(getOnThisDay)`.
+    func getOnThisDay(_ input: Operations.GetOnThisDay.Input) async throws -> Operations.GetOnThisDay.Output
+    /// The caller's "seen and loved" summary of one week (Monday, in the caller's time zone), kept 12 weeks. `404 not_found` for weeks without one.
+    ///
+    /// - Remark: HTTP `GET /v1/me/weekly-summaries/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/me/weekly-summaries/{weekOf}/get(getWeeklySummary)`.
+    func getWeeklySummary(_ input: Operations.GetWeeklySummary.Input) async throws -> Operations.GetWeeklySummary.Output
+    /// Any member. The monthly family recap (also posted as a `monthly_recap` system message in the family chat). `404 not_found` before it was made.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/recaps/{month}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/recaps/{month}/get(getFeedRecap)`.
+    func getFeedRecap(_ input: Operations.GetFeedRecap.Input) async throws -> Operations.GetFeedRecap.Output
+    /// The caller's personal milestones (private unless `shown`). Only achieved ones are listed.
+    ///
+    /// - Remark: HTTP `GET /v1/me/milestones`.
+    /// - Remark: Generated from `#/paths//v1/me/milestones/get(listMyMilestones)`.
+    func listMyMilestones(_ input: Operations.ListMyMilestones.Input) async throws -> Operations.ListMyMilestones.Output
+    /// Show a milestone on the caller's profile (`getPerson`, to their contacts) or hide it again; `seen` dismisses its card.
+    ///
+    /// - Remark: HTTP `PATCH /v1/me/milestones/{milestoneKey}`.
+    /// - Remark: Generated from `#/paths//v1/me/milestones/{milestoneKey}/patch(updateMyMilestone)`.
+    func updateMyMilestone(_ input: Operations.UpdateMyMilestone.Input) async throws -> Operations.UpdateMyMilestone.Output
+    /// - Remark: HTTP `GET /v1/me/reminders`.
+    /// - Remark: Generated from `#/paths//v1/me/reminders/get(getReminderPreferences)`.
+    func getReminderPreferences(_ input: Operations.GetReminderPreferences.Input) async throws -> Operations.GetReminderPreferences.Output
+    /// Also what the push actions call: **Snooze 1 month** sends `{snooze_days: 30}`, **Fewer reminders**
+    /// `{level: fewer}`. `snooze_days: 0` ends a snooze.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/me/reminders`.
+    /// - Remark: Generated from `#/paths//v1/me/reminders/patch(updateReminderPreferences)`.
+    func updateReminderPreferences(_ input: Operations.UpdateReminderPreferences.Input) async throws -> Operations.UpdateReminderPreferences.Output
+    /// A frame's "Ask for new photos" (push deep link). Members of the frame and of families whose posts reach it.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-requests/{requestId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-requests/{requestId}/get(getPhotoRequest)`.
+    func getPhotoRequest(_ input: Operations.GetPhotoRequest.Input) async throws -> Operations.GetPhotoRequest.Output
+    /// Frame members. The frame's requests of the last 30 days, newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/photo-requests`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/photo-requests/get(listFramePhotoRequests)`.
+    func listFramePhotoRequests(_ input: Operations.ListFramePhotoRequests.Input) async throws -> Operations.ListFramePhotoRequests.Output
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -1213,6 +1617,15 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PUT /v1/device/birthdays/{birthdayId}/greetings/{date}`.
     /// - Remark: Generated from `#/paths//v1/device/birthdays/{birthdayId}/greetings/{date}/put(deviceGreetBirthday)`.
     func deviceGreetBirthday(_ input: Operations.DeviceGreetBirthday.Input) async throws -> Operations.DeviceGreetBirthday.Output
+    /// "Ask for new photos" from the frame's quick menu (README §5.20). Creates a request and notifies the family,
+    /// at most one per frame per 24 hours: within that time the open (or last) request is returned with `200`
+    /// and nobody is notified again. `403 forbidden` when the owner turned the button off
+    /// (`settings.social.ask_for_photos`). The frame shows `photo_request` from the change feed afterwards.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/device/photo-requests`.
+    /// - Remark: Generated from `#/paths//v1/device/photo-requests/post(deviceRequestPhotos)`.
+    func deviceRequestPhotos(_ input: Operations.DeviceRequestPhotos.Input) async throws -> Operations.DeviceRequestPhotos.Output
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
     /// whose `min_sdk` the device meets; `204` when there is none. Allowed even when the app is below the
@@ -1736,7 +2149,7 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Thumbnails and the master rendition for app/web. Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
+    /// Thumbnails and the master rendition for app/web, for everyone who may see the item (its sender, frames' library viewers, feed and circle members, and members of conversations it was sent in). Responds 302 to a short-lived signed URL (`/v1/media/signed/{token}`, HMAC + expiry, ~1 h) that needs no Authorization header and supports Range and ETag, so it works in <img>/<video> tags.
     ///
     /// - Remark: HTTP `GET /v1/items/{itemId}/media/{variant}`.
     /// - Remark: Generated from `#/paths//v1/items/{itemId}/media/{variant}/get(getItemMedia)`.
@@ -2004,7 +2417,7 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Owner or admin. Admins cannot change the owner or other admins. Ownership moves with `transferFeedOwnership`.
+    /// Owner or admin. Admins cannot change the owner or other admins, and only change posters and members. Ownership moves with `transferFeedOwnership`.
     ///
     /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/members/{userId}`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/patch(updateFeedMember)`.
@@ -2047,7 +2460,7 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Owner or admin. Approved requesters become posters.
+    /// Owner or admin. Approved requesters become posters, or members when the feed has `new_members_can_post` off.
     ///
     /// - Remark: HTTP `POST /v1/feeds/{feedId}/join-requests/{requestId}/{decision}`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/{requestId}/{decision}/post(decideFeedJoinRequest)`.
@@ -2155,9 +2568,10 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Any feed member, newest first. `receipts` and `reactions` are present on the caller's own posts, on every post
-    /// for owner and admins, and on every post for everyone when the feed has `members_see_reactions`; otherwise
-    /// they are null. Post as a feed is done with `createSend` (`feed_ids`).
+    /// Any feed member, newest first. `receipts` are present on the caller's own posts, on every post for owner and
+    /// admins, and on every post for everyone when the feed has `members_see_receipts`; `reactions` (frames'
+    /// reactions and replies) likewise with `members_see_reactions`; otherwise they are null. Circle posts only for
+    /// circle members. Post as a feed is done with `createSend` (`feed_ids`).
     ///
     ///
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/posts`.
@@ -2214,7 +2628,7 @@ extension APIProtocol {
         ))
     }
     /// Per-frame delivery, seen state, reactions and replies of one post. Same visibility as `FeedPost.receipts`
-    /// (`403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
+    /// (`members_see_receipts`; `403 missing_permission` otherwise). Hidden and trashed placements are reported as delivered or seen, like
     /// for direct sends; who moderated is never revealed.
     ///
     ///
@@ -3323,6 +3737,945 @@ extension APIProtocol {
     public func telegramWebhook(body: Operations.TelegramWebhook.Input.Body) async throws -> Operations.TelegramWebhook.Output {
         try await telegramWebhook(Operations.TelegramWebhook.Input(body: body))
     }
+    /// Home: posts from every family (feed) the caller is a member of, with `member` and every other role, plus
+    /// frame posts (direct sends to frames) the caller may see (README §5.18), newest first. Circle posts only for
+    /// circle members. Chronological, never ranked. Removed posts are left out.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/timeline`.
+    /// - Remark: Generated from `#/paths//v1/timeline/get(getTimeline)`.
+    public func getTimeline(
+        query: Operations.GetTimeline.Input.Query = .init(),
+        headers: Operations.GetTimeline.Input.Headers = .init()
+    ) async throws -> Operations.GetTimeline.Output {
+        try await getTimeline(Operations.GetTimeline.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// One feed post or frame post as on the timeline (push deep links, shared post cards). `404 not_found` when the
+    /// caller may not see it or it was removed.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/posts/{postId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/get(getPost)`.
+    public func getPost(
+        path: Operations.GetPost.Input.Path,
+        headers: Operations.GetPost.Input.Headers = .init()
+    ) async throws -> Operations.GetPost.Output {
+        try await getPost(Operations.GetPost.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The thread, oldest first, flat: replies carry `parent_id` (always a top-level comment) and come after their
+    /// parent; clients nest them. Frame entries (`kind: frame`) are in the same list. Comments by people the caller
+    /// blocked are left out; comments removed by an admin are left out for everyone except their author.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/posts/{postId}/comments`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/get(listComments)`.
+    public func listComments(
+        path: Operations.ListComments.Input.Path,
+        query: Operations.ListComments.Input.Query = .init(),
+        headers: Operations.ListComments.Input.Headers = .init()
+    ) async throws -> Operations.ListComments.Output {
+        try await listComments(Operations.ListComments.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Anyone who may see the post (README §5.18). `409 comments_closed` when the thread is closed. Replies:
+    /// `parent_id` is a top-level comment of this thread; a reply to a reply is sent with the top comment as
+    /// `parent_id` and the person replied to as `quoted_user_id`. Mentions must point at people who may see the post
+    /// (`422 validation_failed`, field `mentions`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/posts/{postId}/comments`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/post(createComment)`.
+    public func createComment(
+        path: Operations.CreateComment.Input.Path,
+        headers: Operations.CreateComment.Input.Headers = .init(),
+        body: Operations.CreateComment.Input.Body
+    ) async throws -> Operations.CreateComment.Output {
+        try await createComment(Operations.CreateComment.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The author only, any time (shows "edited"). Frame entries can't be edited (`403 forbidden`).
+    ///
+    /// - Remark: HTTP `PATCH /v1/posts/{postId}/comments/{commentId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/{commentId}/patch(updateComment)`.
+    public func updateComment(
+        path: Operations.UpdateComment.Input.Path,
+        headers: Operations.UpdateComment.Input.Headers = .init(),
+        body: Operations.UpdateComment.Input.Body
+    ) async throws -> Operations.UpdateComment.Output {
+        try await updateComment(Operations.UpdateComment.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The author (a top comment with replies stays as a `deleted` tombstone, otherwise it disappears), or a
+    /// moderator (feed owner/admin; for frame posts the frame's owner/admin): removed without a tombstone, with its
+    /// replies; its author still sees it with `removed_by_admin`.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/posts/{postId}/comments/{commentId}`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/comments/{commentId}/delete(deleteComment)`.
+    public func deleteComment(
+        path: Operations.DeleteComment.Input.Path,
+        headers: Operations.DeleteComment.Input.Headers = .init()
+    ) async throws -> Operations.DeleteComment.Output {
+        try await deleteComment(Operations.DeleteComment.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The poster, or a moderator (feed owner/admin; frame owner/admin for frame posts). Closing keeps existing comments and reactions; new comments get `409 comments_closed`.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/thread`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/thread/put(setThreadState)`.
+    public func setThreadState(
+        path: Operations.SetThreadState.Input.Path,
+        headers: Operations.SetThreadState.Input.Headers = .init(),
+        body: Operations.SetThreadState.Input.Body
+    ) async throws -> Operations.SetThreadState.Output {
+        try await setThreadState(Operations.SetThreadState.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Marks the thread read up to `up_to` (a comment id of this thread). Never moves backwards. Sends `thread.read` to the caller's other connections.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/read`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/read/put(markThreadRead)`.
+    public func markThreadRead(
+        path: Operations.MarkThreadRead.Input.Path,
+        headers: Operations.MarkThreadRead.Input.Headers = .init(),
+        body: Operations.MarkThreadRead.Input.Body
+    ) async throws -> Operations.MarkThreadRead.Output {
+        try await markThreadRead(Operations.MarkThreadRead.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Mute or unmute pushes for this thread (comments, replies and mentions in it) for the caller.
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/mute`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/mute/put(setThreadMute)`.
+    public func setThreadMute(
+        path: Operations.SetThreadMute.Input.Path,
+        headers: Operations.SetThreadMute.Input.Headers = .init(),
+        body: Operations.SetThreadMute.Input.Body
+    ) async throws -> Operations.SetThreadMute.Output {
+        try await setThreadMute(Operations.SetThreadMute.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The poster: tag a feed post as an answer to one of its family's weekly prompts (the current week's or the
+    /// previous week's), or untag it with null. Frame posts can't be tagged (`422 validation_failed`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/posts/{postId}/prompt`.
+    /// - Remark: Generated from `#/paths//v1/posts/{postId}/prompt/put(tagPostPrompt)`.
+    public func tagPostPrompt(
+        path: Operations.TagPostPrompt.Input.Path,
+        headers: Operations.TagPostPrompt.Input.Headers = .init(),
+        body: Operations.TagPostPrompt.Input.Body
+    ) async throws -> Operations.TagPostPrompt.Output {
+        try await tagPostPrompt(Operations.TagPostPrompt.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Who reacted (people and, for posts and post items, frames), newest first. Same visibility as the target.
+    ///
+    /// - Remark: HTTP `GET /v1/reactions/{targetKind}/{targetId}`.
+    /// - Remark: Generated from `#/paths//v1/reactions/{targetKind}/{targetId}/get(listReactions)`.
+    public func listReactions(
+        path: Operations.ListReactions.Input.Path,
+        query: Operations.ListReactions.Input.Query = .init(),
+        headers: Operations.ListReactions.Input.Headers = .init()
+    ) async throws -> Operations.ListReactions.Output {
+        try await listReactions(Operations.ListReactions.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// The caller's reaction on a post, one item of a post, a comment or a chat message: one per person and target,
+    /// the latest wins, null removes it. Allowed on closed threads. Not on frame entries or system messages
+    /// (`422 validation_failed`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/reactions/{targetKind}/{targetId}`.
+    /// - Remark: Generated from `#/paths//v1/reactions/{targetKind}/{targetId}/put(setReaction)`.
+    public func setReaction(
+        path: Operations.SetReaction.Input.Path,
+        query: Operations.SetReaction.Input.Query = .init(),
+        headers: Operations.SetReaction.Input.Headers = .init(),
+        body: Operations.SetReaction.Input.Body
+    ) async throws -> Operations.SetReaction.Output {
+        try await setReaction(Operations.SetReaction.Input(
+            path: path,
+            query: query,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The circles of this family the caller is in; the feed's owner and admins see every circle (names and members, not their posts).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/circles`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/get(listCircles)`.
+    public func listCircles(
+        path: Operations.ListCircles.Input.Path,
+        headers: Operations.ListCircles.Input.Headers = .init()
+    ) async throws -> Operations.ListCircles.Output {
+        try await listCircles(Operations.ListCircles.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Feed owner/admin, or any member when the feed has `members_can_create_circles` (default on). The creator is a
+    /// circle admin; `member_ids` must be feed members. At most `limits.max_circles_per_feed` (`409 limit_reached`).
+    /// Names are unique per family, case-insensitive (`422 validation_failed`, field `name`, code `duplicate`). The
+    /// circle's chat (kind `circle`) is created with it.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/circles`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/post(createCircle)`.
+    public func createCircle(
+        path: Operations.CreateCircle.Input.Path,
+        headers: Operations.CreateCircle.Input.Headers = .init(),
+        body: Operations.CreateCircle.Input.Body
+    ) async throws -> Operations.CreateCircle.Output {
+        try await createCircle(Operations.CreateCircle.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/get(getCircle)`.
+    public func getCircle(
+        path: Operations.GetCircle.Input.Path,
+        headers: Operations.GetCircle.Input.Headers = .init()
+    ) async throws -> Operations.GetCircle.Output {
+        try await getCircle(Operations.GetCircle.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Circle admins and the feed's owner/admins. `frame_ids` replaces the extra frames the circle's posts reach.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/patch(updateCircle)`.
+    public func updateCircle(
+        path: Operations.UpdateCircle.Input.Path,
+        headers: Operations.UpdateCircle.Input.Headers = .init(),
+        body: Operations.UpdateCircle.Input.Body
+    ) async throws -> Operations.UpdateCircle.Output {
+        try await updateCircle(Operations.UpdateCircle.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Circle admins and the feed's owner/admins. Removes the circle's posts everywhere (like `removeFeedPost`:
+    /// frames, timeline, threads) and archives its chat. Clients warn first.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/circles/{circleId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/delete(deleteCircle)`.
+    public func deleteCircle(
+        path: Operations.DeleteCircle.Input.Path,
+        headers: Operations.DeleteCircle.Input.Headers = .init()
+    ) async throws -> Operations.DeleteCircle.Output {
+        try await deleteCircle(Operations.DeleteCircle.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Circle admins and the feed's owner/admins add feed members (already present ones are ignored). They join the circle's chat.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/circles/{circleId}/members`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/post(addCircleMembers)`.
+    public func addCircleMembers(
+        path: Operations.AddCircleMembers.Input.Path,
+        headers: Operations.AddCircleMembers.Input.Headers = .init(),
+        body: Operations.AddCircleMembers.Input.Body
+    ) async throws -> Operations.AddCircleMembers.Output {
+        try await addCircleMembers(Operations.AddCircleMembers.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Circle admins and the feed's owner/admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/circles/{circleId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/{userId}/patch(updateCircleMember)`.
+    public func updateCircleMember(
+        path: Operations.UpdateCircleMember.Input.Path,
+        headers: Operations.UpdateCircleMember.Input.Headers = .init(),
+        body: Operations.UpdateCircleMember.Input.Body
+    ) async throws -> Operations.UpdateCircleMember.Output {
+        try await updateCircleMember(Operations.UpdateCircleMember.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Circle admins and the feed's owner/admins remove anyone; any member removes themself (leave). Their posts to the circle stay. Leaving the family leaves its circles.
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/circles/{circleId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/circles/{circleId}/members/{userId}/delete(removeCircleMember)`.
+    public func removeCircleMember(
+        path: Operations.RemoveCircleMember.Input.Path,
+        headers: Operations.RemoveCircleMember.Input.Headers = .init()
+    ) async throws -> Operations.RemoveCircleMember.Output {
+        try await removeCircleMember(Operations.RemoveCircleMember.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Every conversation the caller is in (family and circle chats included), most recent activity first, with
+    /// unread counts and the last message. Family-sized, so not paged. Archived conversations (the caller's own
+    /// `archived`, or a deleted family or circle) only with `archived=true`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/conversations`.
+    /// - Remark: Generated from `#/paths//v1/conversations/get(listConversations)`.
+    public func listConversations(
+        query: Operations.ListConversations.Input.Query = .init(),
+        headers: Operations.ListConversations.Input.Headers = .init()
+    ) async throws -> Operations.ListConversations.Output {
+        try await listConversations(Operations.ListConversations.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Start a `direct` or `group` chat (family and circle chats exist with their family or circle). Everyone in
+    /// `member_ids` must share a family or a frame with the caller and must not have blocked them
+    /// (`403 cannot_message`, `detail` names nobody). `direct`: exactly one other person; idempotent per pair: the
+    /// existing conversation is returned with `200`. `group`: 2–99 others (3–100 people with the caller) and a
+    /// `name`; the caller is its admin.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations`.
+    /// - Remark: Generated from `#/paths//v1/conversations/post(createConversation)`.
+    public func createConversation(
+        headers: Operations.CreateConversation.Input.Headers = .init(),
+        body: Operations.CreateConversation.Input.Body
+    ) async throws -> Operations.CreateConversation.Output {
+        try await createConversation(Operations.CreateConversation.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Members only; everyone else gets `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/get(getConversation)`.
+    public func getConversation(
+        path: Operations.GetConversation.Input.Path,
+        headers: Operations.GetConversation.Input.Headers = .init()
+    ) async throws -> Operations.GetConversation.Output {
+        try await getConversation(Operations.GetConversation.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Groups only (`409 invalid_transition` otherwise; family and circle chats take their name from the family or circle). Group admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/patch(updateConversation)`.
+    public func updateConversation(
+        path: Operations.UpdateConversation.Input.Path,
+        headers: Operations.UpdateConversation.Input.Headers = .init(),
+        body: Operations.UpdateConversation.Input.Body
+    ) async throws -> Operations.UpdateConversation.Output {
+        try await updateConversation(Operations.UpdateConversation.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Group admins. Like `putAvatar`: the server crops to a 256x256 WebP at a public, unguessable URL. Groups only.
+    ///
+    /// - Remark: HTTP `PUT /v1/conversations/{conversationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/photo/put(putConversationPhoto)`.
+    public func putConversationPhoto(
+        path: Operations.PutConversationPhoto.Input.Path,
+        headers: Operations.PutConversationPhoto.Input.Headers = .init(),
+        body: Operations.PutConversationPhoto.Input.Body
+    ) async throws -> Operations.PutConversationPhoto.Output {
+        try await putConversationPhoto(Operations.PutConversationPhoto.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Group admins.
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/photo`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/photo/delete(deleteConversationPhoto)`.
+    public func deleteConversationPhoto(
+        path: Operations.DeleteConversationPhoto.Input.Path,
+        headers: Operations.DeleteConversationPhoto.Input.Headers = .init()
+    ) async throws -> Operations.DeleteConversationPhoto.Output {
+        try await deleteConversationPhoto(Operations.DeleteConversationPhoto.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Groups only. Any member may add people who share a family or a frame with them and have not blocked them
+    /// (`403 cannot_message`), up to 100 people. New members see messages from the moment they were added.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/members`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/post(addConversationMembers)`.
+    public func addConversationMembers(
+        path: Operations.AddConversationMembers.Input.Path,
+        headers: Operations.AddConversationMembers.Input.Headers = .init(),
+        body: Operations.AddConversationMembers.Input.Body
+    ) async throws -> Operations.AddConversationMembers.Output {
+        try await addConversationMembers(Operations.AddConversationMembers.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Groups only, group admins.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/{userId}/patch(updateConversationMember)`.
+    public func updateConversationMember(
+        path: Operations.UpdateConversationMember.Input.Path,
+        headers: Operations.UpdateConversationMember.Input.Headers = .init(),
+        body: Operations.UpdateConversationMember.Input.Body
+    ) async throws -> Operations.UpdateConversationMember.Output {
+        try await updateConversationMember(Operations.UpdateConversationMember.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Groups only. Admins remove anyone; anyone removes themself (leave). When the last admin leaves, the
+    /// longest-standing member becomes admin. Direct, family and circle chats can't be left (`409 invalid_transition`):
+    /// archive or mute them, or leave the family or circle.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/members/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/members/{userId}/delete(removeConversationMember)`.
+    public func removeConversationMember(
+        path: Operations.RemoveConversationMember.Input.Path,
+        headers: Operations.RemoveConversationMember.Input.Headers = .init()
+    ) async throws -> Operations.RemoveConversationMember.Output {
+        try await removeConversationMember(Operations.RemoveConversationMember.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The caller's own mute and archive state for this conversation. A new message un-archives it.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/preferences`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/preferences/patch(updateConversationPreferences)`.
+    public func updateConversationPreferences(
+        path: Operations.UpdateConversationPreferences.Input.Path,
+        headers: Operations.UpdateConversationPreferences.Input.Headers = .init(),
+        body: Operations.UpdateConversationPreferences.Input.Body
+    ) async throws -> Operations.UpdateConversationPreferences.Output {
+        try await updateConversationPreferences(Operations.UpdateConversationPreferences.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// A page of messages, always oldest first within the page. Neither cursor: the newest `limit` messages.
+    /// `before`: the `limit` messages just before that message (scrolling up). `after`: the `limit` messages just
+    /// after it (catching up after a reconnect). Both: `422 validation_failed`. Messages before the caller joined a
+    /// group are not returned; messages from people the caller blocked are left out.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/get(listMessages)`.
+    public func listMessages(
+        path: Operations.ListMessages.Input.Path,
+        query: Operations.ListMessages.Input.Query = .init(),
+        headers: Operations.ListMessages.Input.Headers = .init()
+    ) async throws -> Operations.ListMessages.Output {
+        try await listMessages(Operations.ListMessages.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// At least one of `body`, `items`, `voice` and `shared_post_id`. Photos and videos use the normal uploads (tus, prepared
+    /// uploads) and become ordinary items (`status: processing` until ready; `message.updated` follows). A voice
+    /// message has `voice` and no `items` (README §5.19). Idempotent on `client_id` per author
+    /// and conversation as well as on `Idempotency-Key`. Direct chats with someone who blocked the caller, or whose
+    /// account is gone, answer `403 cannot_message`. Archived conversations are read-only (`409 invalid_transition`).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/post(sendMessage)`.
+    public func sendMessage(
+        path: Operations.SendMessage.Input.Path,
+        headers: Operations.SendMessage.Input.Headers = .init(),
+        body: Operations.SendMessage.Input.Body
+    ) async throws -> Operations.SendMessage.Output {
+        try await sendMessage(Operations.SendMessage.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/get(getMessage)`.
+    public func getMessage(
+        path: Operations.GetMessage.Input.Path,
+        headers: Operations.GetMessage.Input.Headers = .init()
+    ) async throws -> Operations.GetMessage.Output {
+        try await getMessage(Operations.GetMessage.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The author, within `limits.message_edit_hours` (24) of sending (`409 invalid_transition` after). Text only; items can't change.
+    ///
+    /// - Remark: HTTP `PATCH /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/patch(updateMessage)`.
+    public func updateMessage(
+        path: Operations.UpdateMessage.Input.Path,
+        headers: Operations.UpdateMessage.Input.Headers = .init(),
+        body: Operations.UpdateMessage.Input.Body
+    ) async throws -> Operations.UpdateMessage.Output {
+        try await updateMessage(Operations.UpdateMessage.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The author, any time: the message stays as a tombstone ("This message was deleted"): `deleted: true`, no body,
+    /// items or preview. Moderators (group admins; the feed's owner/admins in family and circle chats) may remove
+    /// anyone's message: a tombstone with `removed_by_admin: true`. Items already put on a frame stay there.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/conversations/{conversationId}/messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/delete(deleteMessage)`.
+    public func deleteMessage(
+        path: Operations.DeleteMessage.Input.Path,
+        headers: Operations.DeleteMessage.Input.Headers = .init()
+    ) async throws -> Operations.DeleteMessage.Output {
+        try await deleteMessage(Operations.DeleteMessage.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// "Put on a frame": a normal send of the message's photos and videos (no new upload), to frames the caller may
+    /// send to and families they may post to, with the usual limits, moderation and receipts. `item_ids` picks some
+    /// (default: every photo and video; a voice recording is never sent). Items of other people's
+    /// messages go to frames like `sharePlacements` (credit "Ben · shared by Anna", README §5.3) and can't be posted
+    /// to families (`403 forbidden` when `feed_ids` is not empty). The conversation gets a `put_on_frame` system
+    /// message, and frame reactions and quick replies on these placements show under the original message.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/messages/{messageId}/send`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/messages/{messageId}/send/post(putMessageOnFrame)`.
+    public func putMessageOnFrame(
+        path: Operations.PutMessageOnFrame.Input.Path,
+        headers: Operations.PutMessageOnFrame.Input.Headers = .init(),
+        body: Operations.PutMessageOnFrame.Input.Body
+    ) async throws -> Operations.PutMessageOnFrame.Output {
+        try await putMessageOnFrame(Operations.PutMessageOnFrame.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The caller read up to `message_id`. Never moves backwards. Other members get `read.updated` only when
+    /// read receipts are shown in this conversation (README §5.19); the caller's other connections always do.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/conversations/{conversationId}/read`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/read/put(markConversationRead)`.
+    public func markConversationRead(
+        path: Operations.MarkConversationRead.Input.Path,
+        headers: Operations.MarkConversationRead.Input.Headers = .init(),
+        body: Operations.MarkConversationRead.Input.Body
+    ) async throws -> Operations.MarkConversationRead.Output {
+        try await markConversationRead(Operations.MarkConversationRead.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The caller is typing (or recording a voice message). Not stored: the other members who are connected get a
+    /// `typing` event that expires after 6 s. Clients send it at most every 3 s while typing; more are ignored.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/conversations/{conversationId}/typing`.
+    /// - Remark: Generated from `#/paths//v1/conversations/{conversationId}/typing/post(sendTyping)`.
+    public func sendTyping(
+        path: Operations.SendTyping.Input.Path,
+        headers: Operations.SendTyping.Input.Headers = .init(),
+        body: Operations.SendTyping.Input.Body? = nil
+    ) async throws -> Operations.SendTyping.Output {
+        try await sendTyping(Operations.SendTyping.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// People the caller shares at least one family or frame with: the only people they can start a chat with or add
+    /// to a group. There is no search beyond this list. Sorted by display name.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/contacts`.
+    /// - Remark: Generated from `#/paths//v1/contacts/get(listContacts)`.
+    public func listContacts(headers: Operations.ListContacts.Input.Headers = .init()) async throws -> Operations.ListContacts.Output {
+        try await listContacts(Operations.ListContacts.Input(headers: headers))
+    }
+    /// A contact's profile (`404 not_found` for anyone who isn't a contact). The caller's own id returns their own profile with every milestone.
+    ///
+    /// - Remark: HTTP `GET /v1/people/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/people/{userId}/get(getPerson)`.
+    public func getPerson(
+        path: Operations.GetPerson.Input.Path,
+        headers: Operations.GetPerson.Input.Headers = .init()
+    ) async throws -> Operations.GetPerson.Output {
+        try await getPerson(Operations.GetPerson.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The app badge (README §5.19), also sent as `badge.updated` whenever it changes.
+    ///
+    /// - Remark: HTTP `GET /v1/me/badge`.
+    /// - Remark: Generated from `#/paths//v1/me/badge/get(getBadge)`.
+    public func getBadge(headers: Operations.GetBadge.Input.Headers = .init()) async throws -> Operations.GetBadge.Output {
+        try await getBadge(Operations.GetBadge.Input(headers: headers))
+    }
+    /// Only when discovery has `link_previews: true` (the operator's opt-in; `503 feature_disabled` otherwise). The
+    /// server fetches the page itself (README §5.19: public addresses only, size and time limits) and returns the
+    /// cached preview. The composer uses it to show the preview before sending; `sendMessage` attaches the preview
+    /// of the body's first link by itself.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/link-previews`.
+    /// - Remark: Generated from `#/paths//v1/link-previews/post(createLinkPreview)`.
+    public func createLinkPreview(
+        headers: Operations.CreateLinkPreview.Input.Headers = .init(),
+        body: Operations.CreateLinkPreview.Input.Body
+    ) async throws -> Operations.CreateLinkPreview.Output {
+        try await createLinkPreview(Operations.CreateLinkPreview.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /v1/blocks`.
+    /// - Remark: Generated from `#/paths//v1/blocks/get(listBlocks)`.
+    public func listBlocks(headers: Operations.ListBlocks.Input.Headers = .init()) async throws -> Operations.ListBlocks.Output {
+        try await listBlocks(Operations.ListBlocks.Input(headers: headers))
+    }
+    /// Idempotent. Hides the person's comments, messages and reactions from the caller, stops their direct messages
+    /// (they get `403 cannot_message`, without being told why) and stops them adding the caller to groups. Shared
+    /// families, circles and groups stay (removing people is the admins' call). The blocked person is not notified.
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/blocks/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/blocks/{userId}/put(blockUser)`.
+    public func blockUser(
+        path: Operations.BlockUser.Input.Path,
+        headers: Operations.BlockUser.Input.Headers = .init()
+    ) async throws -> Operations.BlockUser.Output {
+        try await blockUser(Operations.BlockUser.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// - Remark: HTTP `DELETE /v1/blocks/{userId}`.
+    /// - Remark: Generated from `#/paths//v1/blocks/{userId}/delete(unblockUser)`.
+    public func unblockUser(
+        path: Operations.UnblockUser.Input.Path,
+        headers: Operations.UnblockUser.Input.Headers = .init()
+    ) async throws -> Operations.UnblockUser.Output {
+        try await unblockUser(Operations.UnblockUser.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Report a comment, a message or a post the caller can see. In a family (a feed post, its comments, a family or
+    /// circle chat) the feed's owner and admins get it; anything else (direct and group chats, frame posts) goes to
+    /// the server operator. The reporter stays anonymous to the reported person. One open report per reporter and
+    /// target (repeating returns the existing one).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/reports`.
+    /// - Remark: Generated from `#/paths//v1/reports/post(createReport)`.
+    public func createReport(
+        headers: Operations.CreateReport.Input.Headers = .init(),
+        body: Operations.CreateReport.Input.Body
+    ) async throws -> Operations.CreateReport.Output {
+        try await createReport(Operations.CreateReport.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The feed's owner and admins. Open reports first, then the last 30 days of resolved ones.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/reports`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/reports/get(listFeedReports)`.
+    public func listFeedReports(
+        path: Operations.ListFeedReports.Input.Path,
+        headers: Operations.ListFeedReports.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedReports.Output {
+        try await listFeedReports(Operations.ListFeedReports.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Operator only (`kinframe:operate`). Reports that don't belong to a family.
+    ///
+    /// - Remark: HTTP `GET /v1/operator/reports`.
+    /// - Remark: Generated from `#/paths//v1/operator/reports/get(listOperatorReports)`.
+    public func listOperatorReports(
+        query: Operations.ListOperatorReports.Input.Query = .init(),
+        headers: Operations.ListOperatorReports.Input.Headers = .init()
+    ) async throws -> Operations.ListOperatorReports.Output {
+        try await listOperatorReports(Operations.ListOperatorReports.Input(
+            query: query,
+            headers: headers
+        ))
+    }
+    /// Whoever handles the report (feed owner/admin, or the operator). `remove` removes the content like a moderator
+    /// delete (`deleteComment`, `deleteMessage`, `removeFeedPost`); `dismiss` keeps it. `409 already_decided` when
+    /// someone else resolved it first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/reports/{reportId}/resolve`.
+    /// - Remark: Generated from `#/paths//v1/reports/{reportId}/resolve/post(resolveReport)`.
+    public func resolveReport(
+        path: Operations.ResolveReport.Input.Path,
+        headers: Operations.ResolveReport.Input.Headers = .init(),
+        body: Operations.ResolveReport.Input.Body
+    ) async throws -> Operations.ResolveReport.Output {
+        try await resolveReport(Operations.ResolveReport.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Any member. The family's streak, prompt, reminder and recap settings.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/engagement`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/engagement/get(getFeedEngagement)`.
+    public func getFeedEngagement(
+        path: Operations.GetFeedEngagement.Input.Path,
+        headers: Operations.GetFeedEngagement.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedEngagement.Output {
+        try await getFeedEngagement(Operations.GetFeedEngagement.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin.
+    ///
+    /// - Remark: HTTP `PATCH /v1/feeds/{feedId}/engagement`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/engagement/patch(updateFeedEngagement)`.
+    public func updateFeedEngagement(
+        path: Operations.UpdateFeedEngagement.Input.Path,
+        headers: Operations.UpdateFeedEngagement.Input.Headers = .init(),
+        body: Operations.UpdateFeedEngagement.Input.Body
+    ) async throws -> Operations.UpdateFeedEngagement.Output {
+        try await updateFeedEngagement(Operations.UpdateFeedEngagement.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Any member. `404 not_found` is never used for a disabled streak; it reports `enabled: false`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/streak`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/streak/get(getFeedStreak)`.
+    public func getFeedStreak(
+        path: Operations.GetFeedStreak.Input.Path,
+        headers: Operations.GetFeedStreak.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedStreak.Output {
+        try await getFeedStreak(Operations.GetFeedStreak.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Any member. The current week's prompt, the next 4 weeks (as planned: the server's choice unless an admin set
+    /// one) and the past 12 weeks, newest first. Empty while `prompts_enabled` is off. Titles are in the caller's
+    /// language for server prompts.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/prompts`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/get(listFeedPrompts)`.
+    public func listFeedPrompts(
+        path: Operations.ListFeedPrompts.Input.Path,
+        headers: Operations.ListFeedPrompts.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedPrompts.Output {
+        try await listFeedPrompts(Operations.ListFeedPrompts.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Owner or admin: choose the prompt of the current or a future week: one from the server's list (`library_key`),
+    /// an own `title`, or `skip: true` (no prompt that week). Exactly one of the three (`422 validation_failed`).
+    /// Past weeks can't change (`409 invalid_transition`).
+    ///
+    ///
+    /// - Remark: HTTP `PUT /v1/feeds/{feedId}/prompts/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/{weekOf}/put(setFeedPrompt)`.
+    public func setFeedPrompt(
+        path: Operations.SetFeedPrompt.Input.Path,
+        headers: Operations.SetFeedPrompt.Input.Headers = .init(),
+        body: Operations.SetFeedPrompt.Input.Body
+    ) async throws -> Operations.SetFeedPrompt.Output {
+        try await setFeedPrompt(Operations.SetFeedPrompt.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Owner or admin. Back to the server's choice for that week (current or future).
+    ///
+    /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/prompts/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/prompts/{weekOf}/delete(resetFeedPrompt)`.
+    public func resetFeedPrompt(
+        path: Operations.ResetFeedPrompt.Input.Path,
+        headers: Operations.ResetFeedPrompt.Input.Headers = .init()
+    ) async throws -> Operations.ResetFeedPrompt.Output {
+        try await resetFeedPrompt(Operations.ResetFeedPrompt.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The server's prompt list in the caller's language (`Accept-Language`), for the admin's picker.
+    ///
+    /// - Remark: HTTP `GET /v1/prompts`.
+    /// - Remark: Generated from `#/paths//v1/prompts/get(listPromptLibrary)`.
+    public func listPromptLibrary(headers: Operations.ListPromptLibrary.Input.Headers = .init()) async throws -> Operations.ListPromptLibrary.Output {
+        try await listPromptLibrary(Operations.ListPromptLibrary.Input(headers: headers))
+    }
+    /// "On this day" for Home: posts from today's date in earlier years (in the caller's `timezone`) in the caller's
+    /// families, newest year first, at most 3 groups of 12 items. Empty when there is nothing (Home then hides the
+    /// card). Same visibility as the timeline.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/me/on-this-day`.
+    /// - Remark: Generated from `#/paths//v1/me/on-this-day/get(getOnThisDay)`.
+    public func getOnThisDay(headers: Operations.GetOnThisDay.Input.Headers = .init()) async throws -> Operations.GetOnThisDay.Output {
+        try await getOnThisDay(Operations.GetOnThisDay.Input(headers: headers))
+    }
+    /// The caller's "seen and loved" summary of one week (Monday, in the caller's time zone), kept 12 weeks. `404 not_found` for weeks without one.
+    ///
+    /// - Remark: HTTP `GET /v1/me/weekly-summaries/{weekOf}`.
+    /// - Remark: Generated from `#/paths//v1/me/weekly-summaries/{weekOf}/get(getWeeklySummary)`.
+    public func getWeeklySummary(
+        path: Operations.GetWeeklySummary.Input.Path,
+        headers: Operations.GetWeeklySummary.Input.Headers = .init()
+    ) async throws -> Operations.GetWeeklySummary.Output {
+        try await getWeeklySummary(Operations.GetWeeklySummary.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Any member. The monthly family recap (also posted as a `monthly_recap` system message in the family chat). `404 not_found` before it was made.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/recaps/{month}`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/recaps/{month}/get(getFeedRecap)`.
+    public func getFeedRecap(
+        path: Operations.GetFeedRecap.Input.Path,
+        headers: Operations.GetFeedRecap.Input.Headers = .init()
+    ) async throws -> Operations.GetFeedRecap.Output {
+        try await getFeedRecap(Operations.GetFeedRecap.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The caller's personal milestones (private unless `shown`). Only achieved ones are listed.
+    ///
+    /// - Remark: HTTP `GET /v1/me/milestones`.
+    /// - Remark: Generated from `#/paths//v1/me/milestones/get(listMyMilestones)`.
+    public func listMyMilestones(headers: Operations.ListMyMilestones.Input.Headers = .init()) async throws -> Operations.ListMyMilestones.Output {
+        try await listMyMilestones(Operations.ListMyMilestones.Input(headers: headers))
+    }
+    /// Show a milestone on the caller's profile (`getPerson`, to their contacts) or hide it again; `seen` dismisses its card.
+    ///
+    /// - Remark: HTTP `PATCH /v1/me/milestones/{milestoneKey}`.
+    /// - Remark: Generated from `#/paths//v1/me/milestones/{milestoneKey}/patch(updateMyMilestone)`.
+    public func updateMyMilestone(
+        path: Operations.UpdateMyMilestone.Input.Path,
+        headers: Operations.UpdateMyMilestone.Input.Headers = .init(),
+        body: Operations.UpdateMyMilestone.Input.Body
+    ) async throws -> Operations.UpdateMyMilestone.Output {
+        try await updateMyMilestone(Operations.UpdateMyMilestone.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// - Remark: HTTP `GET /v1/me/reminders`.
+    /// - Remark: Generated from `#/paths//v1/me/reminders/get(getReminderPreferences)`.
+    public func getReminderPreferences(headers: Operations.GetReminderPreferences.Input.Headers = .init()) async throws -> Operations.GetReminderPreferences.Output {
+        try await getReminderPreferences(Operations.GetReminderPreferences.Input(headers: headers))
+    }
+    /// Also what the push actions call: **Snooze 1 month** sends `{snooze_days: 30}`, **Fewer reminders**
+    /// `{level: fewer}`. `snooze_days: 0` ends a snooze.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/me/reminders`.
+    /// - Remark: Generated from `#/paths//v1/me/reminders/patch(updateReminderPreferences)`.
+    public func updateReminderPreferences(
+        headers: Operations.UpdateReminderPreferences.Input.Headers = .init(),
+        body: Operations.UpdateReminderPreferences.Input.Body
+    ) async throws -> Operations.UpdateReminderPreferences.Output {
+        try await updateReminderPreferences(Operations.UpdateReminderPreferences.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// A frame's "Ask for new photos" (push deep link). Members of the frame and of families whose posts reach it.
+    ///
+    /// - Remark: HTTP `GET /v1/photo-requests/{requestId}`.
+    /// - Remark: Generated from `#/paths//v1/photo-requests/{requestId}/get(getPhotoRequest)`.
+    public func getPhotoRequest(
+        path: Operations.GetPhotoRequest.Input.Path,
+        headers: Operations.GetPhotoRequest.Input.Headers = .init()
+    ) async throws -> Operations.GetPhotoRequest.Output {
+        try await getPhotoRequest(Operations.GetPhotoRequest.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame members. The frame's requests of the last 30 days, newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/photo-requests`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/photo-requests/get(listFramePhotoRequests)`.
+    public func listFramePhotoRequests(
+        path: Operations.ListFramePhotoRequests.Input.Path,
+        headers: Operations.ListFramePhotoRequests.Input.Headers = .init()
+    ) async throws -> Operations.ListFramePhotoRequests.Output {
+        try await listFramePhotoRequests(Operations.ListFramePhotoRequests.Input(
+            path: path,
+            headers: headers
+        ))
+    }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -4029,6 +5382,17 @@ extension APIProtocol {
             path: path,
             headers: headers
         ))
+    }
+    /// "Ask for new photos" from the frame's quick menu (README §5.20). Creates a request and notifies the family,
+    /// at most one per frame per 24 hours: within that time the open (or last) request is returned with `200`
+    /// and nobody is notified again. `403 forbidden` when the owner turned the button off
+    /// (`settings.social.ask_for_photos`). The frame shows `photo_request` from the change feed afterwards.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/device/photo-requests`.
+    /// - Remark: Generated from `#/paths//v1/device/photo-requests/post(deviceRequestPhotos)`.
+    public func deviceRequestPhotos(headers: Operations.DeviceRequestPhotos.Input.Headers = .init()) async throws -> Operations.DeviceRequestPhotos.Output {
+        try await deviceRequestPhotos(Operations.DeviceRequestPhotos.Input(headers: headers))
     }
     /// Self-update check (README §5.7). Answers with the newest frame app release on the channel that is newer
     /// than the caller's version code (from `X-Kinframe-App`, else the code last reported by the device) and
