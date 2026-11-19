@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { api, call, type Frame, type Member } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
+	import { discovery } from '$lib/discovery.svelte';
+	import { resultMessage } from '$lib/leavingText';
 	import { problemMessage } from '$lib/problem';
 	import { toasts } from '$lib/toast.svelte';
 	import { t } from '$lib/i18n/index.svelte';
@@ -8,6 +10,7 @@
 	import Dialog from '../Dialog.svelte';
 	import Icon from '../Icon.svelte';
 	import RoleBadge from '../RoleBadge.svelte';
+	import LeaveSheet from '../leaving/LeaveSheet.svelte';
 
 	let {
 		open = $bindable(false),
@@ -22,7 +25,8 @@
 		preselect?: string | null;
 		/** Opened from "Leave frame": the owner leaves right after handing over. */
 		leaving?: boolean;
-		ondone: (result: { left: boolean; newOwner: Member }) => void;
+		/** `message`: the leave sheet's result line when the owner left through it (README §5.21). */
+		ondone: (result: { left: boolean; newOwner: Member; message?: string }) => void;
 	} = $props();
 
 	const id = $props.id();
@@ -33,6 +37,19 @@
 	let leaveAfter = $state(false);
 	let removeMine = $state(false);
 	let busy = $state(false);
+	// Leaving after the handover: servers with leaving ask the photo question in the leave sheet (README §5.21).
+	const withSheet = $derived(discovery.leaving === true);
+	let sheetOpen = $state(false);
+	let handedTo = $state<Member | null>(null);
+
+	// The sheet closed without leaving: the handover stands, the caller stays as admin.
+	$effect(() => {
+		if (handedTo && !sheetOpen) {
+			const to = handedTo;
+			handedTo = null;
+			ondone({ left: false, newOwner: to });
+		}
+	});
 
 	$effect(() => {
 		if (!open) return;
@@ -69,6 +86,13 @@
 			return;
 		}
 		let left = false;
+		if (leaveAfter && withSheet) {
+			busy = false;
+			open = false;
+			handedTo = chosen;
+			sheetOpen = true;
+			return;
+		}
 		if (leaveAfter) {
 			try {
 				await call(api.POST('/v1/frames/{frameId}/leave', { params: { path: { frameId: frame.id } }, body: { remove_my_items: removeMine } }));
@@ -110,7 +134,7 @@
 			{#if !leaving}
 				<label class="switch"><input type="checkbox" bind:checked={leaveAfter} /><span>{t('transfer.alsoLeave')}</span></label>
 			{/if}
-			{#if leaveAfter}
+			{#if leaveAfter && !withSheet}
 				<label class="switch"><input type="checkbox" bind:checked={removeMine} /><span>{t('overview.removeMine')}</span></label>
 			{/if}
 		</div>
@@ -142,6 +166,20 @@
 		{/if}
 	{/snippet}
 </Dialog>
+
+{#if withSheet}
+	<LeaveSheet
+		bind:open={sheetOpen}
+		scope="frame"
+		id={frame.id}
+		name={frame.name}
+		ondone={({ result, frameNames }) => {
+			const to = handedTo;
+			handedTo = null;
+			if (to) ondone({ left: true, newOwner: to, message: resultMessage(result, frameNames, frame.name) });
+		}}
+	/>
+{/if}
 
 <style>
 	.people {

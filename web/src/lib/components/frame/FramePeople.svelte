@@ -2,7 +2,8 @@
 	import { joinVia } from '$lib/joinRequests';
 	import { api, call, type Frame, type Invite, type JoinRequest, type Member, type Permissions } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
-	import { can } from '$lib/frames.svelte';
+	import { goto } from '$app/navigation';
+	import { can, frames } from '$lib/frames.svelte';
 	import { live } from '$lib/live.svelte';
 	import { newIdempotencyKey } from '$lib/logic';
 	import { relativeTime } from '$lib/format';
@@ -399,6 +400,13 @@
 	{frame}
 	preselect={transferTo}
 	ondone={(r) => {
+		if (r.left) {
+			// Handed over and left ("Leave this frame too" after the handover).
+			frames.remove(frame.id);
+			toasts.success(r.message ?? t('transfer.doneLeft', { name: r.newOwner.display_name, frame: frame.name }));
+			void goto('/frames');
+			return;
+		}
 		toasts.success(t('transfer.done', { name: r.newOwner.display_name }));
 		expanded = null;
 		void load();
