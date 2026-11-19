@@ -100,6 +100,12 @@ class AccountIndex(private val capacity: Int = 5000, var onChange: (() -> Unit)?
             is MessagePage -> collect(v.messages, out, depth + 1)
             is Person -> out += v.person.userId
             is Circle -> out += v.id
+            is app.kinframe.core.api.Album -> out += v.id
+            is app.kinframe.core.api.PhotoSource -> { out += v.id; out += v.target.albumId; out += v.target.feedId; out += v.target.frameId }
+            is app.kinframe.core.api.GoogleImport -> out += v.id
+            is app.kinframe.core.social.PhotoRequest -> { out += v.id; out += v.frameId; out.addAll(v.feedIds) }
+            is app.kinframe.core.social.OnThisDay -> collect(v.groups, out, depth + 1)
+            is app.kinframe.core.social.OnThisDayGroup -> { out += v.feedId; out.addAll(v.postIds); v.items.forEach { out += it.id } }
             else -> Unit
         }
     }
@@ -124,6 +130,12 @@ class Routes(
 
     /** More than one server: lists show a server chip. */
     val several: Boolean get() = all().size > 1
+
+    /**
+     * Only [account] (for an action that names no id of its server yet: a new family, a typed frame code, a photo
+     * source of that account). Everything goes to that account and what it answers is recorded for it.
+     */
+    fun only(account: String): Routes = Routes({ all().filter { it.id == account } }, index)
 }
 
 /**

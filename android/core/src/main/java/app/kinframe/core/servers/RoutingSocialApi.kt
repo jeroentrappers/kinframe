@@ -55,6 +55,7 @@ class RoutingSocialApi(private val routes: Routes, primary: SocialApi) : SocialA
     override suspend fun createConversation(create: ConversationCreate, idempotencyKey: String): Conversation =
         on(create.memberIds.firstOrNull()) { createConversation(create, idempotencyKey) }
 
+    /** Every account's memories; each group's family and posts are recorded for their account ("Don't show again"). */
     override suspend fun onThisDay(): OnThisDay {
         val days = eachSocial({ it.discovery.engagement }) { _, a -> a.onThisDay() }.map { it.second }
         return OnThisDay(days.firstOrNull()?.date.orEmpty(), days.flatMap { it.groups })
