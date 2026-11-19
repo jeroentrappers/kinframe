@@ -670,6 +670,8 @@ final class AppModel {
             noteChatState(c)
         case .social(let e):
             handleSocial(e)
+        case .remoteSubscriptionUpdated:
+            break
         case .sendUpdated, .reply, .feedReply, .feedPostUpdated, .birthdayUpdated, .birthdayRemoved, .photoSourceRemoved,
              .emailAddressUpdated, .emailAddressRemoved, .emailSenderDecided, .telegramChatRemoved, .telegramCodeUpdated,
              .telegramLinkUpdated:

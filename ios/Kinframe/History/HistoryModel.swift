@@ -115,6 +115,8 @@ final class HistoryModel {
              .emailAddressUpdated, .emailAddressRemoved, .emailSenderPending, .emailSenderDecided, .telegramChatUpdated,
              .telegramChatRemoved, .telegramCodeUpdated, .telegramLinkUpdated, .social:
             break
+        case .remoteSubscriptionUpdated:
+            break
         }
     }
 

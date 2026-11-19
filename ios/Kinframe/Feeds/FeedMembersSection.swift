@@ -367,6 +367,8 @@ private struct FeedInviteCreateSheet: View {
     @State private var singleUse = true
     @State private var note = ""
     @State private var busy = false
+    /// Frames on other servers may use this link (README §5.22).
+    @State private var allowRemote = false
 
     var body: some View {
         NavigationStack {
@@ -381,6 +383,13 @@ private struct FeedInviteCreateSheet: View {
                     } footer: {
                         Text(purpose == .join ? (model.feed?.value2.inviteRequiresApproval ?? true ? L("ios.feeds.inviteHintApproval") : L("ios.feeds.inviteHint"))
                                               : L("ios.feeds.inviteSubscribeHint"))
+                    }
+                }
+                if purpose == .subscribe, app.remoteFamiliesEnabled, model.feed?.value2.allowRemoteFrames == true {
+                    Section {
+                        Toggle(L("servers.remote.inviteAllow"), isOn: $allowRemote).tint(Palette.accent)
+                    } footer: {
+                        Text(L("servers.remote.inviteAllowHint"))
                     }
                 }
                 Section(L("people.expires")) {
@@ -420,7 +429,8 @@ private struct FeedInviteCreateSheet: View {
         busy = true
         defer { busy = false }
         do {
-            let invite = try await model.createInvite(purpose: purpose, hours: hours, singleUse: singleUse, note: note)
+            let invite = try await model.createInvite(purpose: purpose, hours: hours, singleUse: singleUse, note: note,
+                                                      allowRemote: allowRemote)
             dismiss()
             created(invite)
         } catch {

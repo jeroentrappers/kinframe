@@ -270,6 +270,21 @@ Snooze 1 month and Fewer reminders (category `kinframe.reminder`), chat notifica
 `ios-strings-social.json`, `ios-strings-chat.json` and `ios-strings-engagement.json`. Debug builds also take
 `-kfTab home|chats`, `-kfPost <id>` and `-kfChat <id>`.
 
+**Families on other servers** (`docs/spec/multi-server.md` §3, README §5.22) appear only when discovery says
+`remote_families`. A frame's settings get *Families on other servers*: "Add a family from another server" takes a
+pasted `/fi/<token>` link of another kinframe server (also the `app.kinframe://fi/…?server=` form), checks it with
+`previewRemoteInvite` and confirms naming both servers, that this server's operator can see the copies, and whether
+the family's admins approve first, with the history option, birthdays and what happens to the copies when it ends;
+the list shows each follow's status (waiting, following, not syncing with the error, ended with its reason), copy
+progress, photo count and last sync, with the on-end choice and unsubscribe (keep or remove the photos), kept fresh
+by `remote_subscription.updated`. `RemoteFollowSheet(api:frame:inviteURL:done:)` is the same flow without a fixed
+frame (pick one you manage). Family settings get "Allow frames on other servers" (turning it off ends every remote
+follow, asked first) and the blocked servers; subscribe invites can allow frames on other servers; remote frames in
+the Frames section carry their server and "Block this server". Remote frame entries and reactions read "Oma's frame
+(kinframe.appmire.be)", and copied photos in the library are credited "Lies · Janssens". The rules are in
+`KinframeKit/Core/RemoteFamilies.swift`, the calls in `KinframeKit/API/RemoteAPI.swift`, the screens in
+`Kinframe/Remote/`, the strings in `ios-strings-remote.json`.
+
 **Push.** APNs is behind the `KINFRAME_APNS_ENABLED` build setting (off). When on, the app asks for notification
 permission after the first send and registers the device token with `POST /v1/me/push-endpoints {kind: "apns"}`.
 The server can't send APNs yet; until then the websocket covers the app while it's open.

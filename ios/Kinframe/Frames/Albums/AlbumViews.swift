@@ -376,7 +376,7 @@ struct AlbumArrangeSheet: View {
                             Text("\(i + 1)").font(.subheadline.monospacedDigit()).foregroundStyle(Palette.textMuted).frame(minWidth: 24)
                             RemoteThumb(url: p.item.thumbUrl, kind: p.item.kind, cornerRadius: 8).frame(width: 56, height: 56)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(p.item.caption.flatMap { $0.isEmpty ? nil : $0 } ?? L("library.from", ["name": Credit.item(p.item) ?? "?"]))
+                                Text(p.item.caption.flatMap { $0.isEmpty ? nil : $0 } ?? L("library.from", ["name": RemoteLabel.credit(p) ?? Credit.item(p.item) ?? "?"]))
                                     .lineLimit(1).foregroundStyle(Palette.text)
                                 if let taken = p.item.capturedAt {
                                     Text(Format.dateTime(taken, locale: L10n.locale)).font(.caption).foregroundStyle(Palette.textMuted)

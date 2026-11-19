@@ -94,6 +94,8 @@ struct SubscriptionRow: View {
     /// Frame side, when the server has birthdays: the "Show birthdays" switch (nil: shown without a switch).
     var showBirthdays = false
     var onBirthdays: ((Bool) -> Void)?
+    /// Feed side, a frame on another server (README §5.22): "Block this server".
+    var onBlockServer: ((FeedSubscription) -> Void)? = nil
     let perform: (SubscriptionAction) -> Void
 
     var body: some View {
@@ -102,6 +104,8 @@ struct SubscriptionRow: View {
             HStack(spacing: 12) {
                 if side == .frame {
                     FeedCover(url: s.feed.coverUrl, name: s.feed.name, size: 44)
+                } else if s.remote != nil {
+                    Image(systemName: "globe").foregroundStyle(Palette.textMuted).accessibilityHidden(true)
                 } else {
                     StatusDot(online: s.frame.online ?? false)
                 }
@@ -131,6 +135,13 @@ struct SubscriptionRow: View {
                         .disabled(busy)
                     }
                 }
+            }
+            if side == .feed, s.remote != nil, let onBlockServer {
+                Button(role: .destructive) { onBlockServer(s) } label: {
+                    Label(L("servers.remote.block"), systemImage: "nosign")
+                }
+                .buttonStyle(.kf(.dangerGhost))
+                .disabled(busy)
             }
         }
         .card(padding: 14)
@@ -163,8 +174,9 @@ struct SubscriptionRow: View {
         let s = subscription
         var parts: [String] = []
         if side == .feed {
+            if let r = s.remote { parts.append(L("servers.remote.otherServer", ["server": r.host ?? r.serverName])) }
             if let loc = s.frame.location, !loc.isEmpty { parts.append(loc) }
-            if s.status == .pending, let who = s.requestedByName { parts.append(L("ios.feeds.requestedBy", ["name": who])) }
+            if s.status == .pending, let who = s.requestedByName ?? s.remote?.requestedByName { parts.append(L("ios.feeds.requestedBy", ["name": who])) }
             if s.viaInvite == true { parts.append(L("ios.feeds.viaInvite")) }
         } else {
             if let admins = s.feed.adminNames, !admins.isEmpty { parts.append(L("ios.feeds.byAdmins", ["names": admins.joined(separator: ", ")])) }
