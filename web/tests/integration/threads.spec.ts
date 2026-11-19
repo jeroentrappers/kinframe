@@ -122,3 +122,23 @@ test('join from an invite link: a poster, and a Reader when new members don’t 
 	await expect(A.page.getByText('Reader').first()).toBeVisible();
 	for (const w of [A, B, D]) clean(w.watch);
 });
+
+test('a mention counts on the badge until the thread is read', async ({ browser }) => {
+	const api = await newCtx();
+	const anna = await user(api, 'Anna');
+	const ben = await user(api, 'Ben');
+	const feed = await createFamily(anna, 'Peeters');
+	await join(anna, ben, feed);
+	const s = await send(anna, { feeds: [feed], caption: 'Garden' });
+	const post = await postOf(anna, s.id, feed);
+	const B = await signedIn(browser, ben);
+	await B.page.goto('/home');
+	await anna.post(`/v1/posts/${post}/comments`, { body: 'Hey @Ben', mentions: [{ user_id: ben.id, start: 4, length: 4 }] }, 201);
+	await expect.poll(async () => (await ben.get('/v1/me/badge')).threads).toBe(1);
+	await expect.poll(() => B.page.title()).toMatch(/^\(1\) /);
+	await B.page.goto(`/posts/${post}`);
+	await expect(B.page.getByText('Hey')).toBeVisible();
+	await expect.poll(async () => (await ben.get('/v1/me/badge')).threads).toBe(0);
+	await expect.poll(() => B.page.title()).not.toMatch(/^\(/);
+	clean(B.watch);
+});
