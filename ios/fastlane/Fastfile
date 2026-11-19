@@ -64,7 +64,7 @@ platform :ios do
     )
   end
 
-  desc "Submit build_number (waits for processing) for App Review with the current listing. Manual release after approval."
+  desc "Submit build_number (waits for processing) for App Review with the current listing. Released automatically after approval."
   lane :submit do |options|
     deliver(
       api_key: asc_key,
