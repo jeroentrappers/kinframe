@@ -61,7 +61,11 @@ func (s *Store) EnsureLinkPreview(ctx context.Context, normalized string) (p *Li
 	if err != nil {
 		return nil, false, err
 	}
-	if p.Status == "pending" || p.Fresh(time.Now()) {
+	if p.Status == "pending" {
+		// Being fetched; a fetch that never finished (lost job) is retried after 10 minutes.
+		return p, time.Since(p.CreatedAt) > 10*time.Minute && (p.FetchedAt == nil || (p.ExpiresAt != nil && time.Since(*p.ExpiresAt) > 10*time.Minute)), nil
+	}
+	if p.Fresh(time.Now()) {
 		return p, false, nil
 	}
 	// Expired: claim the refresh once (concurrent senders see it pending already).

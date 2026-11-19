@@ -42,6 +42,7 @@ type chatState struct {
 	voice    bool                 // ffmpeg and ffprobe are there: voice messages
 	previews *linkpreview.Fetcher // nil: link previews off
 	typing   *ratelimit.Limiter   // one typing event per person and conversation every 3 s
+	preview  *ratelimit.Limiter   // createLinkPreview fetches per person
 
 	mu        sync.Mutex
 	badges    map[uuid.UUID]gen.Badge // last badge sent per user (badge.updated only on change)
@@ -53,7 +54,7 @@ type chatState struct {
 
 // setupChat prepares chats: voice messages need ffmpeg, link previews the operator's opt-in.
 func (s *Server) setupChat() error {
-	c := &chatState{typing: ratelimit.New(1, 3*time.Second), badges: map[uuid.UUID]gen.Badge{}, operators: map[uuid.UUID]time.Time{}}
+	c := &chatState{typing: ratelimit.New(1, 3*time.Second), preview: ratelimit.New(120, time.Hour), badges: map[uuid.UUID]gen.Badge{}, operators: map[uuid.UUID]time.Time{}}
 	_, errF := exec.LookPath(s.tools.FFmpeg)
 	if s.tools.FFmpeg == "" {
 		_, errF = exec.LookPath("ffmpeg")

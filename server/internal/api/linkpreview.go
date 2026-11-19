@@ -60,6 +60,11 @@ func (s *Server) CreateLinkPreview(ctx context.Context, req gen.CreateLinkPrevie
 		return nil, err
 	}
 	if stale || p.Status == "pending" {
+		if allowed, retry := s.chat.preview.Allow(me(ctx).ID.String()); !allowed {
+			pr := problem.New(problem.RateLimited, "")
+			pr.RetryAfter = retry
+			return nil, pr
+		}
 		// The composer waits for it (at most the fetch time limit and the image).
 		if err := s.fetchLinkPreview(ctx, p.ID); err != nil {
 			return nil, err
