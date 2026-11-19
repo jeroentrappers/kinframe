@@ -398,7 +398,7 @@ func (s *Store) DedupeUsed(ctx context.Context, key string) (bool, error) {
 // unanswered counter.
 func (s *Store) NudgesShared(ctx context.Context, userID uuid.UUID, at time.Time) (int64, error) {
 	tag, err := s.Pool.Exec(ctx, `UPDATE nudges SET outcome = 'shared', outcome_at = $2
-		WHERE user_id = $1 AND outcome = 'pending' AND sent_at >= $2 - interval '24 hours' AND sent_at <= $2`, userID, at)
+		WHERE user_id = $1 AND outcome = 'pending' AND sent_at >= $2::timestamptz - interval '24 hours' AND sent_at <= $2::timestamptz`, userID, at)
 	if err != nil {
 		return 0, err
 	}
