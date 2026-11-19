@@ -15,7 +15,8 @@ Supported and untested frames: [`docs/hardware/supported-devices.md`](../../docs
 
 ## Before you start
 
-1. On the frame, open Settings → About and turn on ADB access (on some frames it is under the beta program).
+1. Denver frames have USB access (ADB) turned on from the factory: skip to step 2. On other Frameo frames, open
+   Settings → About and turn on ADB access first (on some frames it is under the beta program).
 2. Connect the frame to the computer with a USB cable. The first time, the frame asks to allow the computer: tick
    "Always allow" and tap OK.
 3. Only one program can use the frame's USB connection. For the website, stop adb first (`adb kill-server`) and

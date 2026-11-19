@@ -380,6 +380,7 @@
 				<li class="card card-pad">
 					<h2><span class="num-badge">1</span>{t('convert.prepareTitle')}</h2>
 					<p>{t('convert.prepareBody')}</p>
+					<p class="hint">{t('convert.prepareOther')}</p>
 					<p class="hint">{t('convert.prepareHint')}</p>
 				</li>
 
