@@ -77,6 +77,7 @@ func (r Response) VisitGetGoogleImportResponse(w http.ResponseWriter) error     
 func (r Response) VisitGetMeResponse(w http.ResponseWriter) error                  { return r.write(w) }
 func (r Response) VisitGetPhotoSourceResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitGetSendResponse(w http.ResponseWriter) error                { return r.write(w) }
+func (r Response) VisitGetShopOrderStatusResponse(w http.ResponseWriter) error     { return r.write(w) }
 func (r Response) VisitGetStationLatestResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetStationPublicResponse(w http.ResponseWriter) error       { return r.write(w) }
 func (r Response) VisitGetSubscriptionResponse(w http.ResponseWriter) error        { return r.write(w) }
@@ -116,8 +117,10 @@ func (r Response) VisitOperatorGetLimitsResponse(w http.ResponseWriter) error   
 func (r Response) VisitOperatorListReservationsResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }
-func (r Response) VisitOperatorSetLimitsResponse(w http.ResponseWriter) error { return r.write(w) }
-func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitOperatorListShopStockResponse(w http.ResponseWriter) error { return r.write(w) }
+func (r Response) VisitOperatorSetLimitsResponse(w http.ResponseWriter) error     { return r.write(w) }
+func (r Response) VisitOperatorSetShopStockResponse(w http.ResponseWriter) error  { return r.write(w) }
+func (r Response) VisitOperatorStatsResponse(w http.ResponseWriter) error         { return r.write(w) }
 func (r Response) VisitOperatorUpdateReservationResponse(w http.ResponseWriter) error {
 	return r.write(w)
 }

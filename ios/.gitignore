@@ -4,3 +4,10 @@ DerivedData/
 build/
 .build/
 .spm/
+
+# fastlane (Bundler)
+vendor/bundle/
+.bundle/
+fastlane/report.xml
+fastlane/README.md
+fastlane/screenshots/

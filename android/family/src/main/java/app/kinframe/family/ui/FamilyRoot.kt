@@ -3,6 +3,7 @@ package app.kinframe.family.ui
 import app.kinframe.family.ui.sources.*
 import app.kinframe.core.api.PhotoSourceLinks
 import app.kinframe.core.api.SourceLink
+import app.kinframe.core.api.Role as ApiRole
 import android.Manifest
 import android.app.Activity
 import android.content.ClipData
@@ -70,6 +71,8 @@ import app.kinframe.core.api.Limits
 import app.kinframe.core.design.Kin
 import app.kinframe.core.design.KinIcons
 import app.kinframe.family.AppGraph
+import app.kinframe.family.BuildConfig
+import app.kinframe.family.DebugLaunch
 import app.kinframe.family.R
 import app.kinframe.family.auth.AuthMode
 import app.kinframe.family.notify.Notifications
@@ -335,6 +338,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     }
     AskForNotifications()
     PhotoSourcesHome(graph, ready, nav)
+    if (BuildConfig.DEBUG) DebugLaunch.Effect(nav, composer)
     // Someone asks to join a frame you manage while the app is open (web: a toast with Review).
     LaunchedEffect(graph) {
         graph.live.events.collect { e ->
@@ -495,6 +499,8 @@ private fun Screen(
         Route.Settings -> {
             val push by graph.push.status.collectAsStateWithLifecycle()
             val ps by app.profileState.collectAsStateWithLifecycle()
+            val fs by frames.state.collectAsStateWithLifecycle()
+            var deletingAccount by remember { mutableStateOf(false) }
             var allowed by remember { mutableStateOf(Notifications.canPost(context)) }
             val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed = it }
             val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -519,6 +525,12 @@ private fun Screen(
                     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(web.trimEnd('/') + path)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 },
                 onPhotoSources = if (ready.server.discovery.sourceProviders.isNotEmpty()) ({ nav.push(Route.PhotoSources) }) else null,
+                ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
+                onDeleteAccount = { removeItems ->
+                    deletingAccount = true
+                    app.deleteAccount(removeItems) { err -> deletingAccount = false; toaster.show(res.getString(err)) }
+                },
+                deletingAccount = deletingAccount,
             )
         }
         is Route.AddFrame -> {

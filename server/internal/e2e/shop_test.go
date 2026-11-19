@@ -392,3 +392,48 @@ func TestShopRateLimit(t *testing.T) {
 		t.Fatalf("11th request: %d %s", r.StatusCode, r.body)
 	}
 }
+
+func TestShopPhotos(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "frame-10-front.jpg"), []byte("\xff\xd8\xff\xe0 fake jpeg"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "secret.txt"), []byte("no"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	yaml := strings.Replace(testShop, "image: frame-10,", "image: frame-10, photos: [frame-10-front.jpg],", 1)
+	c, err := shop.Parse([]byte(yaml), "kinframe test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.CheckMedia(""); err == nil {
+		t.Fatal("photos without a media dir must fail")
+	}
+	if err := c.CheckMedia(t.TempDir()); err == nil {
+		t.Fatal("a missing photo must fail")
+	}
+	if err := c.CheckMedia(dir); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := shop.Parse([]byte(strings.Replace(testShop, "image: frame-10,", "image: frame-10, photos: [../etc/passwd.jpg],", 1)), "x"); err == nil {
+		t.Fatal("a path must be refused")
+	}
+	e := newEnv(t, func(cfg *config.Config) { cfg.Shop = c; cfg.ShopMediaDir = dir })
+
+	p := dig(e.get("/.well-known/kinframe", "").m(t), "shop", "products").([]any)
+	if photos := p[0].(map[string]any)["photos"]; !slices.Equal(toStrings(photos), []string{"/v1/shop/media/frame-10-front.jpg"}) {
+		t.Fatalf("photos: %v", photos)
+	}
+	if _, has := p[1].(map[string]any)["photos"]; has {
+		t.Fatal("frame-15 has no photos")
+	}
+	r := e.get("/v1/shop/media/frame-10-front.jpg", "")
+	if r.StatusCode != 200 || r.Header.Get("Content-Type") != "image/jpeg" || !strings.Contains(r.Header.Get("Cache-Control"), "public") || string(r.body) != "\xff\xd8\xff\xe0 fake jpeg" {
+		t.Fatalf("photo: %d %v", r.StatusCode, r.Header)
+	}
+	for _, bad := range []string{"secret.txt", "nope.jpg", "..%2Fsecret.txt"} {
+		if r := e.do(req{method: "GET", path: "/v1/shop/media/" + bad}); r.StatusCode != 404 {
+			t.Fatalf("%s: %d", bad, r.StatusCode)
+		}
+	}
+}

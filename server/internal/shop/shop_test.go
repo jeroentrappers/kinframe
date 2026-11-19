@@ -39,6 +39,9 @@ shipping:
   countries: [BE, NL]
   flat_cents: 695
   free_from_cents: 10000
+elsewhere:
+  - { countries: [DE, FR], retailer: Amazon, product: Frame X, url: "https://www.amazon.de/dp/B000000000", affiliate: true }
+  - { countries: ["*"], retailer: Shop, product: Frame X, url: "https://shop.example.org/frame-x" }
 `
 
 func sampleConfig(t *testing.T) *Config {
@@ -57,6 +60,9 @@ func TestParseDefaultsAndJSON(t *testing.T) {
 	}
 	if got := c.Products[0].SpecsFor("fr"); got[0] != "1280×800 IPS touchscreen" {
 		t.Fatalf("specs fallback: %v", got)
+	}
+	if len(c.Elsewhere) != 2 || c.Elsewhere[0].Countries[1] != "FR" || c.Elsewhere[1].Countries[0] != "*" || !c.Elsewhere[0].Affiliate || c.Elsewhere[1].Affiliate {
+		t.Fatalf("elsewhere: %+v", c.Elsewhere)
 	}
 	if c.EstimatedDelivery.Get("nl") != "begin 2027" || c.EstimatedDelivery.Get("fr") != "early 2027" {
 		t.Fatalf("delivery: %v", c.EstimatedDelivery)
@@ -82,14 +88,17 @@ func TestParseDisabled(t *testing.T) {
 
 func TestParseErrors(t *testing.T) {
 	for name, tc := range map[string]struct{ from, to, want string }{
-		"unknown field":   {"vat_percent: 21", "vat_percent: 21\nvat: 3", "field vat not found"},
-		"bad seller mail": {"email: shop@example.org", "email: nope", "seller.email"},
-		"bad country":     {"[BE, NL]", "[BE, Netherlands]", "shipping.countries"},
-		"bad price":       {"price_cents: 7900", "price_cents: 0", "price_cents"},
-		"bad image":       {"image: frame-10", "image: photo.jpg", "image"},
-		"duplicate id":    {"id: frame-15", "id: frame-10", "used twice"},
-		"no notify":       {"notify_email: orders@example.org", "notify_email: ''", "notify_email"},
-		"bad max qty":     {"max_qty: 5\n    image: frame-15", "max_qty: 0\n    image: frame-15", "max_qty"},
+		"unknown field":      {"vat_percent: 21", "vat_percent: 21\nvat: 3", "field vat not found"},
+		"bad seller mail":    {"email: shop@example.org", "email: nope", "seller.email"},
+		"bad country":        {"[BE, NL]", "[BE, Netherlands]", "shipping.countries"},
+		"bad price":          {"price_cents: 7900", "price_cents: 0", "price_cents"},
+		"bad image":          {"image: frame-10", "image: photo.jpg", "image"},
+		"duplicate id":       {"id: frame-15", "id: frame-10", "used twice"},
+		"no notify":          {"notify_email: orders@example.org", "notify_email: ''", "notify_email"},
+		"elsewhere country":  {"[DE, FR]", "[DE, France]", "elsewhere[0].countries"},
+		"elsewhere http":     {"https://www.amazon.de", "http://www.amazon.de", "elsewhere[0].url"},
+		"elsewhere retailer": {"retailer: Amazon", "retailer: ''", "elsewhere[0].retailer"},
+		"bad max qty":        {"max_qty: 5\n    image: frame-15", "max_qty: 0\n    image: frame-15", "max_qty"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			src := strings.Replace(sample, tc.from, tc.to, 1)

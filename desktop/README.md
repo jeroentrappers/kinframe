@@ -157,10 +157,16 @@ CI (`.github/workflows/desktop.yml`) runs fmt, clippy and tests, then builds art
 
 Builds are **unsigned** for now: macOS Gatekeeper and Windows SmartScreen will warn.
 
-- **macOS**: sign with a Developer ID Application certificate of the **Appmire** Apple team and notarize. The plan:
-  repository secrets `APPLE_CERTIFICATE` (base64 .p12), `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`,
-  `APPLE_TEAM_ID`, `APPLE_ID` and `APPLE_PASSWORD` (app-specific), imported into a temporary keychain in the macOS
-  job; cargo-packager's `macos.signing-identity` signs the .app and `notarytool` notarizes and staples the .dmg.
+- **macOS**: `packaging/macos-release.sh [aarch64-apple-darwin|x86_64-apple-darwin]` builds, signs and notarizes
+  on a Mac. It signs with the Developer ID Application certificate of the **Appmire** Apple team
+  (`APPLE_SIGNING_IDENTITY`, default `Developer ID Application: Appmire GCV (QB4NQU492U)`) with the hardened
+  runtime: cargo-packager reads `macos.signing-identity` only from its config, so the script passes the
+  `Cargo.toml` config with the identity added. cargo-packager notarizes and staples the .app, the script the
+  .dmg. Notarization uses an App Store Connect API key: `APPLE_API_KEY` (the key ID), `APPLE_API_ISSUER` and
+  `APPLE_API_KEY_PATH` (the .p8), or `~/.appstoreconnect/env`; without a key the build is signed only.
+  For CI the plan is repository secrets `APPLE_CERTIFICATE` (base64 .p12) and `APPLE_CERTIFICATE_PASSWORD`,
+  imported into a temporary keychain, plus `APPLE_API_KEY_ID`, `APPLE_API_ISSUER` and `APPLE_API_KEY_P8` (the
+  key's contents, written to a file), on `desktop-v*` tags only.
 - **Windows**: Authenticode-sign the .exe/.msi (cargo-packager's `windows.sign-command`, e.g. Azure Trusted Signing
   or a code-signing certificate from secrets).
 - **Linux**: optionally a detached GPG signature for the AppImage; the .deb could go into an apt repository.

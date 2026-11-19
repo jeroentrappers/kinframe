@@ -425,7 +425,7 @@ All go over the user websocket and, without an open websocket, as push, localize
 
 ## 12. Data model
 
-Migration `00014_birthdays.sql` (proposal, against `00013_feeds.sql`):
+Migration `00018_birthdays.sql` (proposal, against `00017_feeds.sql`):
 
 ```sql
 ALTER TABLE feeds ADD COLUMN posters_can_add_birthdays boolean NOT NULL DEFAULT false;

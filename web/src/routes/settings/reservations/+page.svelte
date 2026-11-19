@@ -1,11 +1,14 @@
 <script lang="ts">
-	// Operator view of the shop's pre-order reservations: filter, status, internal notes and a CSV export.
+	// Operator view of the shop's reservations, or its orders when the shop takes payment (checkout): filter, status,
+	// internal notes and a CSV export. Orders show the delivery address and payment; unpaid ones are hidden by default.
+	// Paid orders take the carrier's tracking link, which the server emails to the customer once the order is shipped.
+	// Shops with stock management: the count of frames ready to ship per product.
 	import { api, authFetch, call } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { discovery } from '$lib/discovery.svelte';
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { problemMessage } from '$lib/problem';
-	import { countryName, formatMoney, RESERVATION_STATUSES, type ShopReservation, type ShopReservationStatus } from '$lib/shop';
+	import { countryName, formatMoney, ORDER_STATUSES, RESERVATION_STATUSES, type ShopReservation, type ShopReservationStatus } from '$lib/shop';
 	import { toasts } from '$lib/toast.svelte';
 	import Icon from '$components/Icon.svelte';
 
@@ -14,7 +17,56 @@
 	let list = $state<ShopReservation[] | null>(null);
 	let error = $state<string | null>(null);
 	let notes = $state<Record<string, string>>({});
+	let tracking = $state<Record<string, string>>({});
+	/** An absolute http(s) link, as the server accepts it. */
+	const validLink = (v: string) => {
+		try {
+			const u = new URL(v);
+			return (u.protocol === 'https:' || u.protocol === 'http:') && !/\s/.test(v);
+		} catch {
+			return false;
+		}
+	};
 	let downloading = $state(false);
+	const checkout = $derived(!!discovery.shop?.checkout);
+	const statuses = $derived(checkout ? ORDER_STATUSES : RESERVATION_STATUSES);
+	/** The status choices for one entry: its own status stays selectable (older reservations can be "contacted"). */
+	const choices = (r: ShopReservation) => (statuses.includes(r.status) ? statuses : [...statuses, r.status]);
+	let showUnpaid = $state(false);
+	const stocked = $derived(!!discovery.shop?.stock);
+	let stock = $state<Record<string, number> | null>(null);
+	let stockEdit = $state<Record<string, number | null>>({});
+
+	async function loadStock() {
+		try {
+			const res = await call(api.GET('/v1/operator/shop/stock'));
+			stock = Object.fromEntries(res.stock.map((x) => [x.product_id, x.quantity]));
+			stockEdit = { ...stock };
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		}
+	}
+
+	$effect(() => {
+		if (allowed && stocked) void loadStock();
+	});
+
+	const stockValid = (n: number | null | undefined): n is number => typeof n === 'number' && Number.isInteger(n) && n >= 0 && n <= 100000;
+
+	async function saveStock(productId: string) {
+		const n = stockEdit[productId];
+		if (!stockValid(n)) return;
+		try {
+			const saved = await call(api.PUT('/v1/operator/shop/stock/{productId}', { params: { path: { productId } }, body: { quantity: n } }));
+			stock = { ...stock, [productId]: saved.quantity };
+			toasts.success(t('reservations.stockSaved'));
+		} catch (e) {
+			toasts.error(problemMessage(e));
+		}
+	}
+	const unpaid = (r: ShopReservation) => r.payment_status != null && r.payment_status !== 'paid';
+	const shown = $derived(list?.filter((r) => showUnpaid || !unpaid(r)) ?? null);
+	const hiddenCount = $derived((list?.length ?? 0) - (shown?.length ?? 0));
 
 	async function load() {
 		error = null;
@@ -22,6 +74,7 @@
 			const res = await call(api.GET('/v1/operator/reservations', { params: { query: filter ? { status: filter } : {} } }));
 			list = res.reservations;
 			notes = Object.fromEntries(res.reservations.map((r) => [r.id, r.internal_note ?? '']));
+			tracking = Object.fromEntries(res.reservations.map((r) => [r.id, r.tracking_url ?? '']));
 		} catch (e) {
 			error = problemMessage(e);
 		}
@@ -32,11 +85,12 @@
 		if (allowed) void load();
 	});
 
-	async function update(r: ShopReservation, body: { status?: ShopReservationStatus; internal_note?: string | null }) {
+	async function update(r: ShopReservation, body: { status?: ShopReservationStatus; internal_note?: string | null; tracking_url?: string | null }) {
 		try {
 			const next = await call(api.PATCH('/v1/operator/reservations/{reservationId}', { params: { path: { reservationId: r.id } }, body }));
 			if (list) list = list.map((x) => (x.id === r.id ? next : x)).filter((x) => !filter || x.status === filter);
 			notes[r.id] = next.internal_note ?? '';
+			tracking[r.id] = next.tracking_url ?? '';
 			toasts.success(t('reservations.saved'));
 		} catch (e) {
 			toasts.error(problemMessage(e));
@@ -65,13 +119,13 @@
 	const frames = (r: ShopReservation) => r.items.reduce((a, l) => a + l.quantity, 0);
 </script>
 
-<svelte:head><title>{t('reservations.title')} · kinframe</title></svelte:head>
+<svelte:head><title>{checkout ? t('reservations.titleOrders') : t('reservations.title')} · kinframe</title></svelte:head>
 
 <div class="container page">
 	<div class="page-header">
 		<div>
 			<a class="back" href="/settings"><Icon name="chevronLeft" size={18} />{t('settings.title')}</a>
-			<h1>{t('reservations.title')}</h1>
+			<h1>{checkout ? t('reservations.titleOrders') : t('reservations.title')}</h1>
 		</div>
 	</div>
 
@@ -79,18 +133,42 @@
 		<p class="callout callout-warn"><Icon name="shield" size={18} />{t('reservations.forbidden')}</p>
 	{:else}
 		<p class="muted lede">{t('reservations.lede')}</p>
+		{#if stocked && discovery.shop}
+			<section class="card card-pad stock" aria-labelledby="stock-title" data-testid="stock">
+				<h2 id="stock-title">{t('reservations.stockTitle')}</h2>
+				{#if stock === null}
+					<div class="skeleton" style="height: 40px"></div>
+				{:else}
+					<div class="stock-rows">
+						{#each discovery.shop.products as p (p.id)}
+							<div class="stock-row">
+								<label for="stock-{p.id}">{t('reservations.stockLabel', { name: p.name })}</label>
+								<input id="stock-{p.id}" class="input num" type="number" min="0" max="100000" step="1" inputmode="numeric" bind:value={stockEdit[p.id]} />
+								<button class="btn" disabled={!stockValid(stockEdit[p.id]) || stockEdit[p.id] === stock[p.id]} onclick={() => saveStock(p.id)}
+									>{t('common.save')}</button
+								>
+							</div>
+						{/each}
+					</div>
+				{/if}
+				<p class="hint">{t('reservations.stockHint')}</p>
+			</section>
+		{/if}
 		<div class="toolbar">
 			<label class="filter">
 				<span class="label">{t('reservations.filterLabel')}</span>
 				<select class="select" bind:value={filter}>
 					<option value="">{t('reservations.filterAll')}</option>
-					{#each RESERVATION_STATUSES as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
+					{#each statuses as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
 				</select>
 			</label>
-			{#if list}
+			{#if shown}
 				<span class="muted small num">
-					{list.length} · {t('reservations.framesCount', { count: list.filter((r) => r.status !== 'cancelled').reduce((a, r) => a + frames(r), 0) })}
+					{shown.length} · {t('reservations.framesCount', { count: shown.filter((r) => r.status !== 'cancelled').reduce((a, r) => a + frames(r), 0) })}
 				</span>
+			{/if}
+			{#if checkout}
+				<label class="unpaid-toggle small"><input type="checkbox" bind:checked={showUnpaid} />{t('reservations.showUnpaid')}</label>
 			{/if}
 			<div class="spacer"></div>
 			<button class="btn" onclick={download} disabled={downloading}>
@@ -103,22 +181,35 @@
 			<p class="callout callout-error" role="alert">{error}</p>
 		{:else if list === null}
 			<div class="skeleton" style="height: 120px"></div>
-		{:else if list.length === 0}
+		{:else if !shown || shown.length === 0}
 			<p class="card card-pad muted">{filter ? t('reservations.emptyFilter') : t('reservations.empty')}</p>
+			{#if hiddenCount > 0}<p class="muted small">{t('reservations.unpaidHidden')}</p>{/if}
 		{:else}
+			{#if hiddenCount > 0}<p class="muted small">{t('reservations.unpaidHidden')}</p>{/if}
 			<ul class="list">
-				{#each list as r (r.id)}
+				{#each shown as r (r.id)}
 					<li class="card card-pad res" data-testid="reservation">
 						<div class="res-head">
 							<strong class="ref">{r.reference}</strong>
 							<span class="badge status-{r.status}">{t(`reservations.status.${r.status}`)}</span>
-							<span class="faint small">{t('reservations.reservedOn', { date: date(r.created_at) })}</span>
+							{#if r.payment_status}
+								<span class="badge pay-{r.payment_status}" data-testid="payment-status">{t(`reservations.payment.${r.payment_status}`)}</span>
+							{/if}
+							<span class="faint small">{r.paid_at ? t('reservations.paidOn', { date: date(r.paid_at) }) : t('reservations.reservedOn', { date: date(r.created_at) })}</span>
 						</div>
 						<div class="res-grid">
 							<div>
 								<p class="who">{r.name}</p>
 								<p><a href="mailto:{r.email}?subject={encodeURIComponent(r.reference)}">{r.email}</a></p>
-								<p class="muted small">{countryName(r.country, i18n.tag)}{r.postal_code ? ` · ${r.postal_code}` : ''} · {r.locale}</p>
+								{#if r.street}
+									<p class="address small" aria-label={t('reservations.address')}>
+										{r.street}<br />{r.postal_code} {r.city}<br />{countryName(r.country, i18n.tag)}
+									</p>
+									{#if r.phone}<p class="small">{t('reservations.phone')}: <a href="tel:{r.phone}">{r.phone}</a></p>{/if}
+									<p class="muted small">{r.locale}</p>
+								{:else}
+									<p class="muted small">{countryName(r.country, i18n.tag)}{r.postal_code ? ` · ${r.postal_code}` : ''} · {r.locale}</p>
+								{/if}
 							</div>
 							<div>
 								{#each r.items as l (l.product_id)}<p>{l.quantity} × {l.name}</p>{/each}
@@ -133,7 +224,7 @@
 							<label class="field">
 								<span class="label">{t('reservations.statusLabel')}</span>
 								<select class="select" value={r.status} onchange={(e) => update(r, { status: e.currentTarget.value as ShopReservationStatus })}>
-									{#each RESERVATION_STATUSES as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
+									{#each choices(r) as s (s)}<option value={s}>{t(`reservations.status.${s}`)}</option>{/each}
 								</select>
 							</label>
 							<div class="field grow">
@@ -148,6 +239,37 @@
 								</div>
 								<span id="note-hint-{r.id}" class="hint">{t('reservations.internalNoteHint')}</span>
 							</div>
+							{#if r.paid_at || r.tracking_url}
+								{@const link = (tracking[r.id] ?? '').trim()}
+								<div class="field grow">
+									<label for="track-{r.id}">{t('reservations.tracking')}</label>
+									<div class="note-row">
+										<input
+											id="track-{r.id}"
+											class="input"
+											type="url"
+											inputmode="url"
+											maxlength="2000"
+											placeholder="https://"
+											bind:value={tracking[r.id]}
+											aria-invalid={link !== '' && !validLink(link)}
+											aria-describedby="track-hint-{r.id}"
+											data-testid="tracking-input"
+										/>
+										{#if r.tracking_url}
+											<a class="btn btn-icon" href={r.tracking_url} target="_blank" rel="noopener noreferrer" aria-label={t('reservations.tracking')}
+												><Icon name="link" size={16} /></a
+											>
+										{/if}
+										<button
+											class="btn"
+											disabled={link === (r.tracking_url ?? '') || (link !== '' && !validLink(link))}
+											onclick={() => update(r, { tracking_url: link || null })}>{t('common.save')}</button
+										>
+									</div>
+									<span id="track-hint-{r.id}" class="hint">{t('reservations.trackingHint')}</span>
+								</div>
+							{/if}
 						</div>
 					</li>
 				{/each}
@@ -157,6 +279,43 @@
 </div>
 
 <style>
+	.stock {
+		display: grid;
+		gap: var(--s-3);
+		margin-bottom: var(--s-4);
+	}
+	.stock h2 {
+		font-size: 1.1rem;
+		margin: 0;
+	}
+	.stock-rows {
+		display: grid;
+		gap: var(--s-2);
+	}
+	.stock-row {
+		display: grid;
+		grid-template-columns: 1fr 7rem auto;
+		align-items: center;
+		gap: var(--s-2);
+	}
+	.unpaid-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.address {
+		margin: 4px 0;
+	}
+	.pay-paid {
+		background: var(--accent-soft);
+		color: var(--accent);
+	}
+	.pay-open,
+	.pay-pending,
+	.pay-authorized {
+		background: var(--warn-soft);
+		color: var(--warn);
+	}
 	.back {
 		display: inline-flex;
 		align-items: center;
@@ -213,7 +372,8 @@
 		background: var(--warn-soft);
 		color: var(--warn);
 	}
-	.status-confirmed {
+	.status-confirmed,
+	.status-shipped {
 		background: var(--accent-soft);
 		color: var(--accent-text);
 	}

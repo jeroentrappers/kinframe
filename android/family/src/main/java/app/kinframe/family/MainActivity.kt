@@ -50,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handle(intent: Intent?) {
         intent ?: return
+        if (BuildConfig.DEBUG) DebugLaunch.handle(graph, intent)
         when (intent.action) {
             Intent.ACTION_SEND, Intent.ACTION_SEND_MULTIPLE -> {
                 val uris = sharedUris(intent)

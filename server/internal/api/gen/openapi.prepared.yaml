@@ -4474,6 +4474,12 @@ components:
                     description: Consumer-facing brand name, e.g. in "Get a {brand}". Defaults to the server name.
                     example: kinframe
                     type: string
+                checkout:
+                    default: false
+                    description: |
+                        True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+                        with a `checkout_url` to send the customer to. False: reservations without payment.
+                    type: boolean
                 currency:
                     description: ISO 4217
                     example: EUR
@@ -4487,12 +4493,19 @@ components:
                 domains:
                     description: |
                         Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-                        `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+                        `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
                         sign-in and the family app live. Absent when the operator configured none.
                     example:
                         - shop.example.org
                     items:
                         type: string
+                    type: array
+                elsewhere:
+                    description: |
+                        Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+                        affiliate links (shown with a disclosure). Absent when the operator configured none.
+                    items:
+                        $ref: '#/components/schemas/ShopElsewhereLink'
                     type: array
                 estimated_delivery:
                     $ref: '#/components/schemas/LocalizedText'
@@ -4502,6 +4515,9 @@ components:
                     type: array
                 seller:
                     properties:
+                        address:
+                            description: Seller's address (terms of sale).
+                            type: string
                         email:
                             format: email
                             type: string
@@ -4510,8 +4526,16 @@ components:
                             type: string
                         name:
                             type: string
+                        phone:
+                            type: string
                         privacy_url:
                             format: uri
+                            type: string
+                        terms_url:
+                            description: Terms of sale; absent = the web app's own page `/shop/terms`.
+                            format: uri
+                            type: string
+                        vat_number:
                             type: string
                     required:
                         - name
@@ -4519,6 +4543,21 @@ components:
                     type: object
                 shipping:
                     $ref: '#/components/schemas/ShopShipping'
+                stock:
+                    description: |
+                        Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+                        (the next business day) and when one is not. Business days are Belgian working days.
+                    properties:
+                        ships_in_stock:
+                            format: date
+                            type: string
+                        ships_out_of_stock:
+                            format: date
+                            type: string
+                    required:
+                        - ships_in_stock
+                        - ships_out_of_stock
+                    type: object
                 vat_percent:
                     description: VAT included in all prices
                     example: 21
@@ -4530,6 +4569,36 @@ components:
                 - products
                 - shipping
                 - seller
+            type: object
+        ShopElsewhereLink:
+            description: A retailer selling a compatible frame in some countries the shop doesn't ship to.
+            properties:
+                affiliate:
+                    default: false
+                    description: True for an affiliate link; the web app then shows a disclosure.
+                    type: boolean
+                countries:
+                    description: ISO 3166-1 alpha-2 codes; `*` means every other country.
+                    example:
+                        - NL
+                    items:
+                        type: string
+                    type: array
+                product:
+                    description: The frame model.
+                    example: Denver PFF-1024
+                    type: string
+                retailer:
+                    example: bol.com
+                    type: string
+                url:
+                    format: uri
+                    type: string
+            required:
+                - countries
+                - retailer
+                - product
+                - url
             type: object
         ShopLine:
             properties:
@@ -4550,6 +4619,17 @@ components:
                 - unit_cents
                 - line_cents
             type: object
+        ShopPaymentStatus:
+            description: The payment at the provider (shops with `checkout`); `paid` confirms the order.
+            enum:
+                - open
+                - pending
+                - authorized
+                - paid
+                - failed
+                - canceled
+                - expired
+            type: string
         ShopProduct:
             properties:
                 id:
@@ -4559,12 +4639,23 @@ components:
                     description: 'Illustration key: frame-10 or frame-15'
                     example: frame-10
                     type: string
+                in_stock:
+                    description: 'Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).'
+                    minimum: 0
+                    type: integer
                 max_qty:
                     minimum: 1
                     type: integer
                 name:
                     example: kinframe 10.1"
                     type: string
+                photos:
+                    description: |
+                        Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+                        for a day). Absent = show the `image` illustration.
+                    items:
+                        type: string
+                    type: array
                 price_cents:
                     description: Unit price incl. VAT, in cents
                     type: integer
@@ -4589,6 +4680,9 @@ components:
             properties:
                 cancelled_at:
                     format: date-time
+                    nullable: true
+                    type: string
+                city:
                     nullable: true
                     type: string
                 country:
@@ -4616,19 +4710,42 @@ components:
                 note:
                     nullable: true
                     type: string
+                paid_at:
+                    format: date-time
+                    nullable: true
+                    type: string
+                payment_status:
+                    $ref: '#/components/schemas/ShopPaymentStatus'
+                phone:
+                    nullable: true
+                    type: string
                 postal_code:
                     nullable: true
                     type: string
                 reference:
                     type: string
+                shipped_at:
+                    format: date-time
+                    nullable: true
+                    type: string
                 shipping_cents:
                     type: integer
+                ships_on:
+                    format: date
+                    nullable: true
+                    type: string
                 status:
                     $ref: '#/components/schemas/ShopReservationStatus'
+                street:
+                    nullable: true
+                    type: string
                 subtotal_cents:
                     type: integer
                 total_cents:
                     type: integer
+                tracking_url:
+                    nullable: true
+                    type: string
                 updated_at:
                     format: date-time
                     type: string
@@ -4650,8 +4767,14 @@ components:
             type: object
         ShopReservationCreate:
             properties:
+                city:
+                    description: Required when the shop has `checkout`.
+                    maxLength: 100
+                    type: string
                 consent:
-                    description: Must be true. The customer agrees to be contacted about this reservation.
+                    description: |
+                        Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+                        `checkout`: the customer accepts the terms of sale.
                     type: boolean
                 country:
                     example: BE
@@ -4689,8 +4812,17 @@ components:
                 note:
                     maxLength: 1000
                     type: string
+                phone:
+                    description: Optional
+                    for the delivery.: null
+                    maxLength: 30
+                    type: string
                 postal_code:
                     maxLength: 12
+                    type: string
+                street:
+                    description: Street and number (required when the shop has `checkout`).
+                    maxLength: 200
                     type: string
                 website:
                     description: Honeypot; leave empty.
@@ -4705,6 +4837,13 @@ components:
             type: object
         ShopReservationReceipt:
             properties:
+                checkout_url:
+                    description: |
+                        Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+                        final.
+                    format: uri
+                    nullable: true
+                    type: string
                 currency:
                     type: string
                 email:
@@ -4713,11 +4852,18 @@ components:
                     items:
                         $ref: '#/components/schemas/ShopLine'
                     type: array
+                payment_status:
+                    $ref: '#/components/schemas/ShopPaymentStatus'
                 reference:
                     example: KF-7Q3M
                     type: string
                 shipping_cents:
                     type: integer
+                ships_on:
+                    description: 'Shops with `stock`: the promised dispatch day.'
+                    format: date
+                    nullable: true
+                    type: string
                 status:
                     $ref: '#/components/schemas/ShopReservationStatus'
                 subtotal_cents:
@@ -4739,6 +4885,7 @@ components:
                 - new
                 - contacted
                 - confirmed
+                - shipped
                 - cancelled
             type: string
         ShopShipping:
@@ -4761,6 +4908,17 @@ components:
             required:
                 - countries
                 - flat_cents
+            type: object
+        ShopStockItem:
+            properties:
+                product_id:
+                    type: string
+                quantity:
+                    minimum: 0
+                    type: integer
+            required:
+                - product_id
+                - quantity
             type: object
         SleepSchedule:
             properties:
@@ -8779,7 +8937,7 @@ paths:
                 - sends
     /v1/me:
         delete:
-            description: Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+            description: Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
             operationId: deleteMe
             parameters:
                 - description: Also remove everything this user sent from all frames.
@@ -9076,6 +9234,11 @@ paths:
                                     type: string
                                 status:
                                     $ref: '#/components/schemas/ShopReservationStatus'
+                                tracking_url:
+                                    description: The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link.
+                                    maxLength: 2000
+                                    nullable: true
+                                    type: string
                             type: object
                 required: true
             responses:
@@ -9084,6 +9247,70 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ShopReservation'
+                    description: Updated
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/shop/stock:
+        get:
+            description: |
+                Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+                counted have 0. `404 not_found` when the server has no shop or no stock management.
+            operationId: operatorListShopStock
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    stock:
+                                        items:
+                                            $ref: '#/components/schemas/ShopStockItem'
+                                        type: array
+                                required:
+                                    - stock
+                                type: object
+                    description: Stock
+                default:
+                    $ref: '#/components/responses/Problem'
+            security:
+                - userAuth:
+                    - kinframe:operate
+            tags:
+                - operator
+    /v1/operator/shop/stock/{productId}:
+        put:
+            description: Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+            operationId: operatorSetShopStock
+            parameters:
+                - in: path
+                  name: productId
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                quantity:
+                                    maximum: 100000
+                                    minimum: 0
+                                    type: integer
+                            required:
+                                - quantity
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShopStockItem'
                     description: Updated
                 default:
                     $ref: '#/components/responses/Problem'
@@ -9479,11 +9706,47 @@ paths:
                     description: Accepted
             tags:
                 - sends
+    /v1/shop/orders/status:
+        post:
+            description: |
+                The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+                signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+                also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+            operationId: getShopOrderStatus
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                token:
+                                    maxLength: 200
+                                    minLength: 10
+                                    type: string
+                            required:
+                                - token
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ShopReservationReceipt'
+                    description: The order
+                default:
+                    $ref: '#/components/responses/Problem'
+            security: []
+            tags:
+                - shop
     /v1/shop/reservations:
         post:
             description: |
-                Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-                emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+                Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+                order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+                `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+                reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+                `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+                `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
                 Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
                 Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
                 not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields

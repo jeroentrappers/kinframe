@@ -1,0 +1,17 @@
+Your photos, on their frame, in seconds.
+
+kinframe sends photos and videos to the family's photo frames. No subscriptions, no tracking, and the server belongs to your family.
+
+SEND FROM ANYWHERE
+Pick photos and videos in the app, or share them straight from your gallery with the share menu. They show up on the frame a few seconds later. Add a caption and send to several frames at once.
+
+SEE THE SMILE
+You can see when a photo arrives and when it's been seen. Hearts and quick replies from the frame come right back to you.
+
+MANAGE YOUR FRAMES
+Add a frame, invite the family, and decide who can send. Arrange albums, set when the frame turns its screen on and off, add calendars and widgets, or show a slideshow on your TV with Chromecast.
+
+YOURS TO KEEP
+kinframe is open source and free software (AGPL-3.0), with no ads, no analytics and no telemetry. Use the hosted service at kinframe.appmire.be, with servers in Germany, or run your own server: the app works with both.
+
+kinframe needs a kinframe photo frame: a Wi-Fi photo frame running the kinframe frame app.

@@ -20,4 +20,5 @@ export interface LegalDoc {
 	sections: LegalSection[];
 }
 
-export type LegalKind = 'privacy' | 'terms';
+/** privacy policy, terms of use, and the shop's terms of sale. */
+export type LegalKind = 'privacy' | 'terms' | 'sales';

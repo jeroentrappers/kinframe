@@ -78,7 +78,9 @@ Procedure:
    `docker compose logs logto-bootstrap | grep KINFRAME_LOGTO_M2M`.
 3. Store `KINFRAME_LOGTO_M2M_ID` and `KINFRAME_LOGTO_M2M_SECRET` in the vault and set them for the job. Later runs use
    them instead of the admin password, which can then be removed from the job's environment (keep it in the vault: it
-   is the console login).
+   is the console login). Set them for the **server** too, with `KINFRAME_LOGTO_URL: http://logto:3001`: then
+   deleting an account in the apps also deletes the Logto account (App Store and Play require in-app deletion).
+   Without them, only the kinframe account is deleted and the Logto user stays behind.
 4. Operators: list their emails in `KINFRAME_OPERATOR_EMAILS`. Users must have signed up before the role can be
    assigned; re-run the job after they did (`docker compose run --rm logto-bootstrap`). Their clients must request the
    `kinframe:operate` scope to get it in the token.
@@ -314,6 +316,11 @@ kinframe_shop:
     countries: [BE, NL]              # ISO codes; the form only offers these
     flat_cents: 695
     free_from_cents: 10000           # item subtotal for free shipping; null = never free
+  elsewhere:                         # optional: where visitors outside shipping.countries can buy a frame the
+                                     # convert tool supports (docs/hardware/supported-devices.md)
+    - { countries: [NL], retailer: bol.com, product: Denver PFF-1024, url: "https://www.bol.com/nl/nl/p/…" }
+    - { countries: ["*"], retailer: Amazon.de, product: Denver PFF-1024, url: "https://www.amazon.de/dp/…?tag=…", affiliate: true }
+                                     # "*" = every other country; affiliate: true adds rel="sponsored" and a disclosure
   domains: [shop.example.org]        # optional storefront host names, see "Storefront domain" below
   default_locale: en                 # storefront language when the browser asks for none of en/nl/fr/de
 ```
@@ -331,6 +338,59 @@ the time of consent (the form has an explicit, unticked consent checkbox). No IP
 deleted automatically `retention_days` after their last change, cancelled ones 30 days after cancelling; the CSV
 export is for the operator's own follow-up. The site footer names the seller, the legal line and this policy.
 
+#### Online payment (orders)
+
+With a `payments` section the shop **sells** instead of taking reservations: the form asks for the delivery
+address, the customer accepts the terms of sale and pays on the provider's page (Mollie: Bancontact, cards, Apple
+Pay, iDEAL… whatever is enabled in the Mollie dashboard), and lands on `/shop/order`. The order emails go out only
+once Mollie reports the payment as paid; the operator marks orders shipped under Settings → Shop reservations
+(now "Orders"), which emails the customer. Cancelling with the link in the email is the legal 14-day withdrawal:
+the operator refunds in the Mollie dashboard.
+
+```yaml
+kinframe_shop:
+  # … as above, plus:
+  seller:
+    name: Example BV
+    email: shop@example.org
+    legal: "Example BV · Example Street 1, 1000 Brussels · VAT BE0000.000.000"
+    address: "Example Street 1, 1000 Brussels, Belgium"   # required with payments
+    vat_number: BE0000000000                               # required with payments
+    phone: "+32 2 000 00 00"                               # optional
+    terms_url: https://example.org/terms-of-sale           # optional; default: the web app's /shop/terms
+  payments:
+    provider: mollie
+    methods: [bancontact, creditcard, applepay]            # optional; default: every method enabled at Mollie
+```
+
+The API key comes from the vault as `KINFRAME_MOLLIE_API_KEY` (`test_…` while testing, `live_…` in production);
+the server refuses to start with `payments` and no key. Mollie posts payment changes to
+`<KINFRAME_PUBLIC_URL>/v1/shop/payments/webhook` (only sent when the public URL is a real https host); the server
+always reads the status back from Mollie, so the webhook can't be forged. The order page also asks Mollie, so a
+missed webhook only delays the emails until the customer looks.
+
+`/shop/terms` is the hosted instance's terms of sale (Appmire; en/nl/fr), like `/privacy` and `/terms`. Other
+operators set `seller.terms_url` to their own. Paid orders are kept seven years (accounting law); unpaid ones are
+deleted after 30 days.
+
+Shipped orders can carry the carrier's **tracking link** (Settings → Orders): the shipped email links to it, and
+adding or changing it on an order that is already shipped emails the customer the new link.
+
+#### Stock
+
+With a `stock` section the operator keeps the number of frames ready to ship per product (Settings → Orders →
+Stock). Paid orders lower the count; cancelled ones don't raise it again (correct it by hand when a frame comes
+back). The shop then shows per frame "In stock · shipped Tuesday 17 November" (the next business day) or, when it
+is out of stock, the day `restock_days` business days later, and the order emails state the promised dispatch day.
+Business days are Belgian working days (weekends and public holidays skipped). `estimated_delivery` is then only
+shown in the storefront FAQ.
+
+```yaml
+kinframe_shop:
+  stock:
+    restock_days: 3   # extra business days when out of stock (default 3)
+```
+
 #### Storefront domain
 
 The shop can also live on its own domain under the consumer brand, while the server, the API, sign-in and the
@@ -338,7 +398,7 @@ family app stay on `KINFRAME_PUBLIC_URL`. List the host names in `kinframe_shop.
 not the app's own host). On those hosts the same server and the same web build act as a storefront:
 
 - `/` is a landing page for the brand (`brand`): hero, how it works, the products, a short FAQ, and a footer link
-  "Already have a frame? Open the app" to the app's origin. `/shop` and `/shop/cancel` work as on the app.
+  "Already have a frame? Open the app" to the app's origin. The `/shop` pages work as on the app.
 - Every other path (frames, send, settings, `/callback`, join links…) redirects to the same path on the app's
   origin (discovery `web`). Nobody signs in on a storefront, so Logto needs no extra redirect URIs or CORS origins.
 - The web app calls the API on the storefront's own origin (`https://<storefront>/v1/...`), so no CORS is needed;

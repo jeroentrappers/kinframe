@@ -1,0 +1,3 @@
+# The service account (Release manager on Play Console) and the upload key live outside git:
+# ~/.config/play/kinframe-signing.env sets SUPPLY_JSON_KEY and KINFRAME_UPLOAD_*.
+package_name("app.kinframe.family")

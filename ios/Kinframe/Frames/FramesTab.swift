@@ -9,12 +9,14 @@ struct FramesTab: View {
         @Bindable var app = app
         NavigationStack(path: $app.framesPath) {
             ScrollView {
-                LazyVStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 16) {
                     if !app.framesLoaded, app.frames.isEmpty {
                         if let error = app.framesError {
                             ErrorRetryView(message: error) { Task { await app.loadFrames() } }
                         } else {
-                            ForEach(0..<2, id: \.self) { _ in FrameCardSkeleton() }
+                            LazyVGrid(columns: cardColumns(), spacing: 16) {
+                                ForEach(0..<2, id: \.self) { _ in FrameCardSkeleton() }
+                            }
                         }
                     } else if app.frames.isEmpty {
                         EmptyStateView(title: L("frames.emptyTitle"), message: L("frames.emptyBody")) {
@@ -22,24 +24,26 @@ struct FramesTab: View {
                                 .buttonStyle(.kf(.primary, large: true))
                         }
                         .card(padding: 8)
+                        .frame(maxWidth: PageWidth.text)
+                        .frame(maxWidth: .infinity)
                     } else {
                         Text(summary)
                             .font(.subheadline)
                             .foregroundStyle(Palette.textMuted)
-                            .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.top, -8)
-                        ForEach(app.frames) { frame in
-                            NavigationLink(value: FrameRoute(id: frame.id)) {
-                                FrameCard(frame: frame)
+                        // One column on phones; two or more on iPad, iPhone Duo unfolded and in landscape.
+                        LazyVGrid(columns: cardColumns(), spacing: 16) {
+                            ForEach(app.frames) { frame in
+                                NavigationLink(value: FrameRoute(id: frame.id)) {
+                                    FrameCard(frame: frame)
+                                }
+                                .buttonStyle(CardButtonStyle())
+                                .accessibilityHint(L("frames.open", ["name": frame.name]))
                             }
-                            .buttonStyle(CardButtonStyle())
-                            .accessibilityHint(L("frames.open", ["name": frame.name]))
                         }
                     }
                 }
-                .padding(16)
-                .frame(maxWidth: 720)
-                .frame(maxWidth: .infinity)
+                .pageColumn(PageWidth.wide)
             }
             .refreshable { await app.loadFrames() }
             .pageBackground()

@@ -128,7 +128,7 @@ paths:
     delete:
       tags: [me]
       operationId: deleteMe
-      description: Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+      description: Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
       parameters:
         - name: remove_items
           in: query
@@ -2625,8 +2625,12 @@ paths:
       operationId: createShopReservation
       security: []
       description: |
-        Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-        emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+        Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+        order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+        `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+        reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+        `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+        `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
         Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
         Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
         not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -2637,6 +2641,28 @@ paths:
         content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationCreate' } } }
       responses:
         '201': { description: Reserved, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationReceipt' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/shop/orders/status:
+    post:
+      tags: [shop]
+      operationId: getShopOrderStatus
+      security: []
+      description: |
+        The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+        signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+        also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, minLength: 10, maxLength: 200 }
+      responses:
+        '200': { description: The order, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservationReceipt' } } } }
         default: { $ref: '#/components/responses/Problem' }
 
   /v1/shop/reservations/cancel:
@@ -2740,6 +2766,47 @@ paths:
                   reservations: { type: array, items: { $ref: '#/components/schemas/ShopReservation' } }
         default: { $ref: '#/components/responses/Problem' }
 
+  /v1/operator/shop/stock:
+    get:
+      tags: [operator]
+      operationId: operatorListShopStock
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: |
+        Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+        counted have 0. `404 not_found` when the server has no shop or no stock management.
+      responses:
+        '200':
+          description: Stock
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [stock]
+                properties:
+                  stock: { type: array, items: { $ref: '#/components/schemas/ShopStockItem' } }
+        default: { $ref: '#/components/responses/Problem' }
+
+  /v1/operator/shop/stock/{productId}:
+    put:
+      tags: [operator]
+      operationId: operatorSetShopStock
+      security: [ { userAuth: ['kinframe:operate'] } ]
+      description: Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+      parameters:
+        - { name: productId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity: { type: integer, minimum: 0, maximum: 100000 }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ShopStockItem' } } } }
+        default: { $ref: '#/components/responses/Problem' }
+
   /v1/operator/reservations.csv:
     get:
       tags: [operator]
@@ -2768,6 +2835,12 @@ paths:
               properties:
                 status: { $ref: '#/components/schemas/ShopReservationStatus' }
                 internal_note: { type: [string, 'null'], maxLength: 2000, description: Only for the operator; never emailed. }
+                tracking_url:
+                  type: [string, 'null']
+                  maxLength: 2000
+                  description: >-
+                    The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or
+                    changing it on an order that is already shipped emails the customer the new link.
       responses:
         '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/ShopReservation' } } } }
         default: { $ref: '#/components/responses/Problem' }
@@ -2962,12 +3035,27 @@ components:
         products: { type: array, items: { $ref: '#/components/schemas/ShopProduct' } }
         shipping: { $ref: '#/components/schemas/ShopShipping' }
         estimated_delivery: { $ref: '#/components/schemas/LocalizedText' }
+        stock:
+          type: object
+          description: |
+            Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+            (the next business day) and when one is not. Business days are Belgian working days.
+          required: [ships_in_stock, ships_out_of_stock]
+          properties:
+            ships_in_stock: { type: string, format: date }
+            ships_out_of_stock: { type: string, format: date }
+        elsewhere:
+          type: array
+          items: { $ref: '#/components/schemas/ShopElsewhereLink' }
+          description: |
+            Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+            affiliate links (shown with a disclosure). Absent when the operator configured none.
         domains:
           type: array
           items: { type: string }
           description: |
             Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-            `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+            `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
             sign-in and the family app live. Absent when the operator configured none.
           examples: [[shop.example.org]]
         default_locale:
@@ -2976,6 +3064,12 @@ components:
             Storefront language for visitors whose browser prefers none of `en`, `nl`, `fr`, `de` (the languages
             the shop emails in). Defaults to `en`.
           examples: [nl]
+        checkout:
+          type: boolean
+          default: false
+          description: |
+            True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+            with a `checkout_url` to send the customer to. False: reservations without payment.
         seller:
           type: object
           required: [name, email]
@@ -2984,6 +3078,25 @@ components:
             email: { type: string, format: email }
             legal: { type: string, description: 'Legal line for the footer, e.g. company, address and VAT number.' }
             privacy_url: { type: string, format: uri }
+            terms_url: { type: string, format: uri, description: Terms of sale; absent = the web app's own page `/shop/terms`. }
+            address: { type: string, description: Seller's address (terms of sale). }
+            vat_number: { type: string }
+            phone: { type: string }
+
+    ShopElsewhereLink:
+      type: object
+      description: A retailer selling a compatible frame in some countries the shop doesn't ship to.
+      required: [countries, retailer, product, url]
+      properties:
+        countries:
+          type: array
+          items: { type: string }
+          description: ISO 3166-1 alpha-2 codes; `*` means every other country.
+          examples: [[NL]]
+        retailer: { type: string, examples: [bol.com] }
+        product: { type: string, description: The frame model., examples: [Denver PFF-1024] }
+        url: { type: string, format: uri }
+        affiliate: { type: boolean, default: false, description: True for an affiliate link; the web app then shows a disclosure. }
 
     LocalizedText:
       type: object
@@ -2999,7 +3112,17 @@ components:
         size: { type: string, description: Screen size label, examples: ['10.1"'] }
         price_cents: { type: integer, description: 'Unit price incl. VAT, in cents' }
         max_qty: { type: integer, minimum: 1 }
+        in_stock:
+          type: integer
+          minimum: 0
+          description: 'Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown).'
         image: { type: string, description: 'Illustration key: frame-10 or frame-15', examples: [frame-10] }
+        photos:
+          type: array
+          items: { type: string }
+          description: |
+            Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+            for a day). Absent = show the `image` illustration.
         specs:
           type: object
           description: Language code → short spec bullets; `en` is the fallback.
@@ -3015,7 +3138,12 @@ components:
 
     ShopReservationStatus:
       type: string
-      enum: [new, contacted, confirmed, cancelled]
+      enum: [new, contacted, confirmed, shipped, cancelled]
+
+    ShopPaymentStatus:
+      type: string
+      description: The payment at the provider (shops with `checkout`); `paid` confirms the order.
+      enum: [open, pending, authorized, paid, failed, canceled, expired]
 
     ShopReservationCreate:
       type: object
@@ -3025,6 +3153,9 @@ components:
         email: { type: string, maxLength: 254 }
         country: { type: string, minLength: 2, maxLength: 2, examples: [BE] }
         postal_code: { type: string, maxLength: 12 }
+        street: { type: string, maxLength: 200, description: Street and number (required when the shop has `checkout`). }
+        city: { type: string, maxLength: 100, description: Required when the shop has `checkout`. }
+        phone: { type: string, maxLength: 30, description: Optional, for the delivery. }
         items:
           type: array
           maxItems: 20
@@ -3036,7 +3167,11 @@ components:
               quantity: { type: integer, minimum: 1, maximum: 99 }
         note: { type: string, maxLength: 1000 }
         locale: { type: string, maxLength: 35, description: Language for the emails (falls back to English), examples: [nl] }
-        consent: { type: boolean, description: Must be true. The customer agrees to be contacted about this reservation. }
+        consent:
+          type: boolean
+          description: |
+            Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+            `checkout`: the customer accepts the terms of sale.
         website: { type: string, maxLength: 200, description: Honeypot; leave empty. }
 
     ShopLine:
@@ -3061,6 +3196,14 @@ components:
         shipping_cents: { type: integer }
         total_cents: { type: integer }
         currency: { type: string }
+        payment_status: { $ref: '#/components/schemas/ShopPaymentStatus' }
+        checkout_url:
+          type: [string, 'null']
+          format: uri
+          description: |
+            Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+            final.
+        ships_on: { type: [string, 'null'], format: date, description: 'Shops with `stock`: the promised dispatch day.' }
 
     ShopReservation:
       type: object
@@ -3084,6 +3227,21 @@ components:
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
         cancelled_at: { type: [string, 'null'], format: date-time }
+        street: { type: [string, 'null'] }
+        city: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
+        payment_status: { $ref: '#/components/schemas/ShopPaymentStatus' }
+        paid_at: { type: [string, 'null'], format: date-time }
+        shipped_at: { type: [string, 'null'], format: date-time }
+        tracking_url: { type: [string, 'null'] }
+        ships_on: { type: [string, 'null'], format: date }
+
+    ShopStockItem:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id: { type: string }
+        quantity: { type: integer, minimum: 0 }
 
     Limits:
       type: object

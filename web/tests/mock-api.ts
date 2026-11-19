@@ -81,6 +81,8 @@ export interface MockState {
 	googleImports: (S['GoogleImport'] & { return_uri?: string })[];
 	/** Make the next "Sync now" answer 429 with this Retry-After. */
 	syncRetryAfter?: number;
+	/** Shop stock per product id (shops with `stock`). */
+	stock: Record<string, number>;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -129,6 +131,7 @@ export function emptyState(): MockState {
 		birthdayGreetings: {},
 		photoSources: [],
 		googleImports: [],
+		stock: {},
 		calls: [],
 		ws: null
 	};
@@ -351,6 +354,8 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (!shop.shipping.countries.includes(b.country)) errors.push({ field: 'country', code: 'enum' });
 			if (!b.consent) errors.push({ field: 'consent', code: 'required' });
 			if (!b.items.length) errors.push({ field: 'items', code: 'minItems' });
+			if (shop.checkout)
+				for (const f of ['street', 'postal_code', 'city'] as const) if (!b[f]?.trim()) errors.push({ field: f, code: 'minLength' });
 			if (errors.length)
 				return route.fulfill({
 					status: 422,
@@ -381,11 +386,25 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 				internal_note: null,
 				created_at: new Date().toISOString(),
 				updated_at: new Date().toISOString(),
-				cancelled_at: null
+				cancelled_at: null,
+				...(shop.checkout ? { street: b.street, city: b.city, phone: b.phone ?? null, payment_status: 'open' as const } : {})
 			};
 			if (!b.website) state.reservations.unshift(r);
 			const { reference, status, email, subtotal_cents, shipping_cents, total_cents, currency } = r;
-			return json(route, 201, { reference, status, email, items, subtotal_cents, shipping_cents, total_cents, currency });
+			// Checkout: the "payment page" is the order page itself, so the test stays in the app (the mock pays on arrival).
+			const checkout = shop.checkout ? { payment_status: 'open', checkout_url: `/shop/order?token=tok-${reference}` } : {};
+			return json(route, 201, { reference, status, email, items, subtotal_cents, shipping_cents, total_cents, currency, ...checkout });
+		}
+		if (path === '/v1/shop/orders/status' && method === 'POST') {
+			const token = (body as { token: string }).token;
+			const r = state.reservations.find((x) => `tok-${x.reference}` === token);
+			if (!state.discovery.shop || !r) return problem(route, 404, 'not_found', 'Not found');
+			if (r.payment_status === 'open') {
+				r.payment_status = 'paid';
+				r.paid_at = new Date().toISOString();
+			}
+			const { reference, status, email, items, subtotal_cents, shipping_cents, total_cents, currency, payment_status } = r;
+			return json(route, 200, { reference, status, email, items, subtotal_cents, shipping_cents, total_cents, currency, payment_status });
 		}
 		if (path === '/v1/shop/reservations/cancel' && method === 'POST') {
 			const token = (body as { token: string }).token;
@@ -423,6 +442,17 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
 			const st = url.searchParams.get('status');
 			return json(route, 200, { reservations: state.reservations.filter((r) => !st || r.status === st) });
+		}
+		if (path === '/v1/operator/shop/stock' && method === 'GET') {
+			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
+			const products = state.discovery.shop?.products ?? [];
+			return json(route, 200, { stock: products.map((p) => ({ product_id: p.id, quantity: state.stock[p.id] ?? 0 })) });
+		}
+		if ((m = path.match(/^\/v1\/operator\/shop\/stock\/([^/]+)$/)) && method === 'PUT') {
+			if (!state.me?.is_operator) return problem(route, 403, 'forbidden', 'Operator only');
+			const quantity = (body as { quantity: number }).quantity;
+			state.stock[m[1]!] = quantity;
+			return json(route, 200, { product_id: m[1], quantity });
 		}
 		if (path === '/v1/operator/reservations.csv' && method === 'GET') {
 			const rows = state.reservations.map((r) => `${r.reference},${r.status},${r.email}`);

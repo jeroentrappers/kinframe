@@ -2,7 +2,7 @@ import type { LegalDoc } from './types';
 
 const doc: LegalDoc = {
 	title: 'Privacybeleid',
-	updated: '2026-10-28',
+	updated: '2026-11-14',
 	intro: [
 		'Met kinframe sturen families foto’s, video’s en berichten naar een fotokader thuis. Dit beleid legt uit welke persoonsgegevens de gehoste kinframe-dienst op https://kinframe.appmire.be verzamelt, waarom, wie er nog bij betrokken is, hoelang we ze bewaren en hoe je ze kunt laten wissen. Het geldt voor de website, de kinframe-apps en kaders wanneer ze deze server gebruiken, de aanmeldpagina’s op auth.kinframe.appmire.be en de webshop voor reservaties.',
 		'Kort gezegd: we gebruiken je gegevens alleen om de dienst te laten werken. Geen advertenties, geen analytics en geen tracking, en we verkopen of delen niets voor marketing. De servers staan in Duitsland.'
@@ -32,7 +32,7 @@ const doc: LegalDoc = {
 						'Plug-ins (widgets op het kader): welke plug-ins een kader gebruikt en hun instellingen, zoals het adres van een toestel bij je thuis of een toegangstoken voor Home Assistant. Tokens en andere geheimen worden versleuteld bewaard en alleen naar het kader gestuurd. Voor de plug-ininstellingen in de apps meldt het kader ook of elke widget werkt, de laatste fout, de namen en adressen van toestellen die het in je thuisnetwerk vond en, voor Home Assistant, de namen en eenheden van je entiteiten. We bewaren alleen de laatste melding. Uploadt je weerstation naar kinframe, dan bewaren we zijn metingen 48 uur, met zijn stations-ID; zijn sleutel staat alleen versleuteld in de instellingen van het kader. Zet je zijn openbare pagina aan, dan kan iedereen die metingen zien, op zijn pagina en in de lijst met openbare stations, onder de stations-ID en de titel die je koos; niets over jou of je kader staat daarop.',
 						'Gegevens van het kader: merk en model, schermgrootte, Android- en appversie, taal, tijdzone, opslaggebruik, de naam en signaalsterkte van het wifinetwerk, de tijd sinds het opstarten en het aantal recente crashes. We bewaren alleen het laatste rapport. We verzamelen geen serienummers, MAC-adressen, batterijniveaus of de positie van het kader.',
 						'Meldingen: als je ze aanzet, het adres van je pushabonnement (van je browser of telefoon), een toestellabel zoals “Chrome op Android” en je taal.',
-						'Reservaties in de webshop: je naam, e-mailadres, land, een optionele postcode en opmerking, je taal, wat je reserveert en het moment waarop je toestemming gaf. Geen betaalgegevens en geen IP-adressen.',
+						'Reservaties en bestellingen in de webshop: je naam, e-mailadres, land, postcode en opmerking, je taal, wat je reserveert of koopt en het moment waarop je toestemming gaf; bij bestellingen ook je leveradres, een optioneel telefoonnummer en de status van je betaling. Geen kaart- of bankgegevens en geen IP-adressen: betalingen lopen via Mollie, dat ons alleen laat weten of je betaald hebt.',
 						'Technische gegevens: onze servers zien je IP-adres als je verbinding maakt. De kinframe-server gebruikt het in het geheugen om misbruik te beperken (rate limits) en bewaart het niet bij je gegevens. De webserver en de aanmelddienst houden logs bij (zie “Hoelang we gegevens bewaren”).'
 					]
 				}
@@ -46,7 +46,7 @@ const doc: LegalDoc = {
 					list: [
 						'Om de dienst te leveren waarvoor je je aanmeldde: je account, wat je stuurt bij de juiste kaders afleveren, tonen wie het stuurde, reacties, agenda’s, het weer en meldingen (uitvoering van een overeenkomst, artikel 6, lid 1, b AVG).',
 						'Om de dienst veilig en werkend te houden: veilig aanmelden, misbruik voorkomen, fouten oplossen en kaders up-to-date houden (ons gerechtvaardigd belang, artikel 6, lid 1, f).',
-						'Om je aanmeldcodes te sturen en, voor de webshop, de bevestiging van je reservatie en de opvolging ervan (overeenkomst of stappen vóór een overeenkomst, en je toestemming in het reservatieformulier).',
+						'Om je aanmeldcodes te sturen en, voor de webshop, om je reservatie of bestelling af te handelen, te leveren en te bevestigen (overeenkomst of stappen vóór een overeenkomst), en om de boekhouding bij te houden die de wet oplegt (wettelijke verplichting).',
 						'Pushmeldingen alleen als je ze aanzet; je kunt ze altijd weer uitzetten (toestemming, artikel 6, lid 1, a).',
 						'Om aan wettelijke verplichtingen te voldoen, bijvoorbeeld als de overheid rechtmatig om informatie vraagt (artikel 6, lid 1, c).'
 					]
@@ -71,7 +71,7 @@ const doc: LegalDoc = {
 						'Google Cast: alleen als je kiest om een diavoorstelling op een Chromecast te tonen, laadt je browser de Cast-software van Google en haalt de Chromecast de foto’s bij onze server.',
 						'E-mail: aanmeldcodes en e-mails van de webshop gaan via de eigen mailserver van Appmire. Ze bevatten geen trackingpixels.',
 						'GitHub: onze server haalt updates van de kinframe-apps en het register met communityplug-ins op bij GitHub Releases. Daarbij worden geen persoonsgegevens verstuurd; kaders halen updates alleen bij onze server.',
-						'Webshop: reservaties worden afgehandeld door de verkoper die op de shoppagina en in de bevestigingsmail vermeld staat, en die ze alleen voor die reservatie gebruikt.'
+						'Webshop: reservaties en bestellingen worden afgehandeld door de verkoper die op de shoppagina en in de bevestigingsmail vermeld staat, en die ze alleen voor die reservatie of bestelling gebruikt. Betalingen worden verwerkt door Mollie B.V. (Amsterdam, Nederland), onder haar eigen privacybeleid op https://www.mollie.com/privacy; pakjes worden geleverd door een post- of koeriersdienst die je naam en adres krijgt.'
 					]
 				},
 				'We verkopen je gegevens niet en delen ze met niemand anders, tenzij de wet het verplicht.'
@@ -97,7 +97,7 @@ const doc: LegalDoc = {
 						'Pushabonnementen: tot je meldingen uitzet, je afmeldt in de app of de pushdienst laat weten dat het abonnement verlopen is.',
 						'Plug-ins: hun instellingen tot de eigenaar de widget of het kader verwijdert; de plug-inmelding van het kader: alleen de laatste.',
 						'Agenda’s: tot je de agenda of het kader verwijdert.',
-						'Reservaties in de webshop: automatisch gewist een jaar na de laatste wijziging, of 30 dagen nadat je annuleert.',
+						'Reservaties in de webshop: automatisch gewist een jaar na de laatste wijziging, of 30 dagen nadat je annuleert. Onbetaalde bestellingen: 30 dagen. Betaalde bestellingen: zeven jaar bewaard, zoals de boekhoudwetgeving vraagt.',
 						'Logs: de kinframe-server logt bij normale werking geen verzoeken of IP-adressen. Onze webserver houdt toegangslogs bij (IP-adres, tijdstip, opgevraagd adres, browser), hoogstens 14 dagen, voor de beveiliging. De aanmelddienst houdt aanmeldingen bij (tijdstip, IP-adres en browser) om je account te beschermen.'
 					]
 				}
@@ -116,7 +116,7 @@ const doc: LegalDoc = {
 						'Meldingen: zet ze uit bij Instellingen; het pushabonnement wordt gewist.'
 					]
 				},
-				'Je account verwijderen: daar is in de apps nog geen knop voor. Stuur een e-mail naar jeroen@appmire.be vanaf het adres waarmee je je aanmeldt, met als onderwerp “Verwijder mijn kinframe-account”, en zeg of de foto’s die je stuurde op de kaders mogen blijven of verwijderd moeten worden. We verwijderen je account, je aanmeldidentiteit (ook een koppeling met Apple, Google, Microsoft, Facebook of GitHub), je profielfoto en je pushabonnementen, en op vraag je foto’s. Ben je eigenaar van een kader, laat dan weten of we het moeten verwijderen of aan een ander lid overdragen. We doen dit binnen een maand en bevestigen het per e-mail. Items die je op een kader laat staan, tonen nog steeds je naam.',
+				'Je account verwijderen: ga in de app of op de website naar Instellingen → Account verwijderen. Je kiest of de foto’s en video’s die je stuurde op de kaders blijven of verwijderd worden. Je account, je aanmeldidentiteit (ook een koppeling met Apple, Google, Microsoft, Facebook of GitHub), je profielfoto en je pushabonnementen worden meteen verwijderd, en je verlaat al je kaders. Ben je eigenaar van een kader, geef het dan eerst aan een ander lid of verwijder het. Items die je op een kader laat staan, tonen nog steeds je naam. Je kunt ook een e-mail sturen naar jeroen@appmire.be vanaf het adres waarmee je je aanmeldt, met als onderwerp “Verwijder mijn kinframe-account”: dan doen we het binnen een maand en bevestigen we het per e-mail.',
 				'Bestanden volledig wissen: wil je dat de bewaarde bestanden van foto’s die je stuurde, of alle gegevens van een verwijderd kader, van onze servers gewist worden (en niet alleen uit beeld verdwijnen), vraag het ons op hetzelfde adres en we doen het binnen een maand.',
 				'Meldde je je aan met Facebook, dan kun je kinframe ook uit je Facebook-account verwijderen via Instellingen en privacy → Instellingen → Apps en websites. Dan deelt Facebook geen gegevens meer met ons; om de gegevens te wissen die we al hebben, stuur je ons de e-mail hierboven. Hetzelfde geldt voor Apple, Google, Microsoft en GitHub in hun accountinstellingen.',
 				'Onze back-ups worden in de normale back-upcyclus overschreven, zodat gewiste gegevens er na verloop van tijd ook uit verdwijnen.'

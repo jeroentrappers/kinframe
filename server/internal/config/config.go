@@ -49,6 +49,14 @@ type Config struct {
 	// LogtoConfigFile is where `bootstrap-logto` writes the Logto client
 	// settings; values from it fill in OIDC settings not set in the env.
 	LogtoConfigFile string
+	// LogtoEndpoint is Logto's public endpoint (the issuer without /oidc) and
+	// LogtoURL where the server reaches it (KINFRAME_LOGTO_URL, default the
+	// endpoint). With the bootstrap M2M app's credentials, deleting a kinframe
+	// account also deletes its Logto account.
+	LogtoEndpoint  string
+	LogtoURL       string
+	LogtoM2MID     string
+	LogtoM2MSecret string
 
 	TrustProxy bool
 
@@ -70,6 +78,13 @@ type Config struct {
 	VAPIDPublicKey  string // base64url uncompressed P-256 point
 	VAPIDPrivateKey string // base64url scalar
 	VAPIDSubject    string // mailto: or https: contact for push services
+	// FCM for the family app's store builds: a Firebase service account JSON key (KINFRAME_FCM_CREDENTIALS_FILE).
+	FCMCredentials []byte
+	// APNs for the iOS app: a .p8 key (KINFRAME_APNS_KEY_FILE) with its key ID, the team ID and the bundle ID.
+	APNsKey         []byte
+	APNsKeyID       string
+	APNsTeamID      string
+	APNsTopic       string
 	UploadExpiry    time.Duration
 	JanitorInterval time.Duration
 
@@ -130,6 +145,13 @@ type Config struct {
 	SMTP *shop.SMTP
 	// Shop is the optional pre-order shop (KINFRAME_SHOP_FILE); nil = no shop.
 	Shop *shop.Config
+	// ShopMediaDir holds the shop's product photos (KINFRAME_SHOP_MEDIA_DIR).
+	ShopMediaDir string
+	// MollieAPIKey pays shop orders (KINFRAME_MOLLIE_API_KEY; test_… or live_…),
+	// required when the shop file has payments.
+	MollieAPIKey string
+	// MollieBaseURL overrides the Mollie API endpoint (tests).
+	MollieBaseURL string
 }
 
 // Limits are the operator-adjustable limits; these are the startup defaults.
@@ -379,6 +401,14 @@ func load(get func(string) string) (*Config, error) {
 			if u, err := url.Parse(c.PublicURL); err == nil && c.Shop.IsStorefront(u.Hostname()) {
 				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: domains must not include the app's own host %q (KINFRAME_PUBLIC_URL)", u.Hostname()))
 			}
+			c.ShopMediaDir = env("KINFRAME_SHOP_MEDIA_DIR", "")
+			if err := c.Shop.CheckMedia(c.ShopMediaDir); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_SHOP_FILE: %w", err))
+			}
+			c.MollieAPIKey = get("KINFRAME_MOLLIE_API_KEY")
+			if c.Shop.Checkout() && !strings.HasPrefix(c.MollieAPIKey, "test_") && !strings.HasPrefix(c.MollieAPIKey, "live_") {
+				errs = append(errs, errors.New("KINFRAME_MOLLIE_API_KEY must be a Mollie API key (test_… or live_…) when the shop has payments"))
+			}
 		}
 	}
 	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
@@ -396,6 +426,12 @@ func load(get func(string) string) (*Config, error) {
 		c.OIDCAudience = env("KINFRAME_OIDC_AUDIENCE", lf.APIResource)
 	}
 	c.OIDCAudience = cmp.Or(c.OIDCAudience, env("KINFRAME_OIDC_AUDIENCE", c.APIURL()))
+	c.LogtoEndpoint = strings.TrimSuffix(c.OIDCIssuer, "/oidc")
+	c.LogtoURL = strings.TrimRight(env("KINFRAME_LOGTO_URL", c.LogtoEndpoint), "/")
+	c.LogtoM2MID, c.LogtoM2MSecret = env("KINFRAME_LOGTO_M2M_ID", ""), get("KINFRAME_LOGTO_M2M_SECRET")
+	if (c.LogtoM2MID == "") != (c.LogtoM2MSecret == "") {
+		errs = append(errs, errors.New("set both KINFRAME_LOGTO_M2M_ID and KINFRAME_LOGTO_M2M_SECRET, or neither"))
+	}
 	if err := c.LogLevel.UnmarshalText([]byte(env("KINFRAME_LOG_LEVEL", "info"))); err != nil {
 		errs = append(errs, fmt.Errorf("KINFRAME_LOG_LEVEL: %w", err))
 	}
@@ -446,6 +482,21 @@ func load(get func(string) string) (*Config, error) {
 			}
 		}
 		c.VAPIDPublicKey, c.VAPIDPrivateKey = pub, priv
+		if f := env("KINFRAME_APNS_KEY_FILE", ""); f != "" {
+			if c.APNsKey, err = os.ReadFile(f); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_APNS_KEY_FILE: %w", err))
+			}
+			c.APNsKeyID, c.APNsTeamID = env("KINFRAME_APNS_KEY_ID", ""), env("KINFRAME_APNS_TEAM_ID", "")
+			c.APNsTopic = env("KINFRAME_APNS_TOPIC", "app.kinframe.family")
+			if c.APNsKeyID == "" || c.APNsTeamID == "" {
+				errs = append(errs, errors.New("KINFRAME_APNS_KEY_FILE needs KINFRAME_APNS_KEY_ID and KINFRAME_APNS_TEAM_ID"))
+			}
+		}
+		if f := env("KINFRAME_FCM_CREDENTIALS_FILE", ""); f != "" {
+			if c.FCMCredentials, err = os.ReadFile(f); err != nil {
+				errs = append(errs, fmt.Errorf("KINFRAME_FCM_CREDENTIALS_FILE: %w", err))
+			}
+		}
 		c.VAPIDSubject = env("KINFRAME_VAPID_SUBJECT", "")
 		if c.VAPIDSubject == "" {
 			if strings.HasPrefix(c.PublicURL, "https://") {

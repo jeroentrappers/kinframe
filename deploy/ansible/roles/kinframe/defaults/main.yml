@@ -90,14 +90,28 @@ kinframe_social_remove_unconfigured: false
 kinframe_social_link_by_email: true
 # Logto sign-in page: kinframe look (logo, colours, CSS) and optional legal links (empty = no link).
 kinframe_logto_branding: true
+# Accounts with a password (e.g. App Review) may sign in with it; codes stay the default.
+kinframe_logto_password_signin: false
 kinframe_terms_url: ""
 kinframe_privacy_url: ""
 
 # Optional pre-order shop (docs/deploy.md "Pre-order shop"). Empty = no shop (the default). A dict with the
-# server's shop file fields (brand, seller, products, shipping, estimated_delivery, notify_email, domains,
+# server's shop file fields (brand, seller, products, shipping, estimated_delivery, elsewhere, notify_email, domains,
 # default_locale, …); the role
 # writes it to <kinframe_dir>/shop.json and sets KINFRAME_SHOP_FILE. Mails go out over kinframe_smtp_*.
 kinframe_shop: {}
+# Product photos for the shop (products[].photos): a directory on the control machine, copied to
+# <kinframe_dir>/shop-media and served at /v1/shop/media/{name}. Empty = none.
+kinframe_shop_media_src: ""
+# Mollie API key (vault) for a shop with payments (online orders); empty = none.
+kinframe_mollie_api_key: ""
+# Firebase service account JSON key (vault) for FCM push to the family app's Play builds; empty = no FCM.
+kinframe_fcm_credentials: ""
+# APNs auth key (.p8 contents, vault) for push to the iOS app; empty = no APNs.
+kinframe_apns_key: ""
+kinframe_apns_key_id: ""
+kinframe_apns_team_id: QB4NQU492U
+kinframe_apns_topic: app.kinframe.family
 
 # Extra environment for the server container (e.g. bootstrap credentials).
 kinframe_extra_env: {}

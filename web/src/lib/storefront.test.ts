@@ -30,7 +30,7 @@ describe('storefront detection', () => {
 
 describe('storefront paths', () => {
 	it('keeps the landing page and the shop pages', () => {
-		for (const p of ['/', '/shop', '/shop/', '/shop/cancel']) expect(isStorefrontPath(p), p).toBe(true);
+		for (const p of ['/', '/shop', '/shop/', '/shop/cancel', '/shop/order', '/shop/terms']) expect(isStorefrontPath(p), p).toBe(true);
 	});
 	it('sends everything else to the app', () => {
 		for (const p of ['/frames', '/send', '/settings', '/settings/reservations', '/callback', '/f/12345678', '/i/abc', '/tv/x', '/shopping', '/shop/x'])

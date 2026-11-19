@@ -9,7 +9,11 @@ export type ShopReservation = Schemas['ShopReservation'];
 export type ShopReservationStatus = Schemas['ShopReservationStatus'];
 export type ShopReceipt = Schemas['ShopReservationReceipt'];
 
+export type ShopPaymentStatus = Schemas['ShopPaymentStatus'];
+
 export const RESERVATION_STATUSES: ShopReservationStatus[] = ['new', 'contacted', 'confirmed', 'cancelled'];
+/** Statuses for paid orders (shops with checkout). */
+export const ORDER_STATUSES: ShopReservationStatus[] = ['new', 'confirmed', 'shipped', 'cancelled'];
 
 /** Quantity per product id. */
 export type Quantities = Record<string, number>;
@@ -66,6 +70,29 @@ export function quote(shop: Pick<Shop, 'products' | 'shipping'>, qty: Quantities
 	};
 }
 
+/**
+ * Shops with stock: the dispatch day (YYYY-MM-DD) of these quantities, the next business day when every frame is in
+ * stock, else the later day. Null without stock management or for an empty order.
+ */
+export function dispatchDay(shop: Pick<Shop, 'products' | 'stock'>, qty: Quantities): string | null {
+	if (!shop.stock) return null;
+	const chosen = shop.products.filter((p) => (qty[p.id] ?? 0) > 0);
+	if (chosen.length === 0) return null;
+	const inStock = chosen.every((p) => clampQty(qty[p.id] ?? 0, p) <= (p.in_stock ?? 0));
+	return inStock ? shop.stock.ships_in_stock : shop.stock.ships_out_of_stock;
+}
+
+/** A calendar day (YYYY-MM-DD) as "Tuesday 17 November" in the UI language. */
+export function formatDay(day: string, tag: string): string {
+	const [y, m, d] = day.split('-').map(Number);
+	const date = new Date(y!, (m ?? 1) - 1, d ?? 1);
+	try {
+		return new Intl.DateTimeFormat(tag, { weekday: 'long', day: 'numeric', month: 'long' }).format(date);
+	} catch {
+		return day;
+	}
+}
+
 /** "€79.00", "€ 79,00", "79,00 €" by the UI language. Whole amounts keep their cents for clarity in totals. */
 export function formatMoney(cents: number, currency: string, tag: string, opts: { compact?: boolean } = {}): string {
 	const whole = opts.compact && cents % 100 === 0;
@@ -104,9 +131,13 @@ export interface ReservationForm {
 	note: string;
 	consent: boolean;
 	qty: Quantities;
+	// Delivery address and phone: shops with checkout only.
+	street: string;
+	city: string;
+	phone: string;
 }
 
-export type FormField = 'items' | 'name' | 'email' | 'country' | 'consent';
+export type FormField = 'items' | 'name' | 'email' | 'country' | 'street' | 'postalCode' | 'city' | 'consent';
 export type FormErrors = Partial<Record<FormField, 'required' | 'format'>>;
 
 // Deliberately simple: something@something.tld. The server checks again.
@@ -117,13 +148,18 @@ export function isEmail(s: string): boolean {
 }
 
 /** Client-side checks, in form order. Empty object = OK to submit. */
-export function validateReservation(form: ReservationForm, shop: Pick<Shop, 'products' | 'shipping'>): FormErrors {
+export function validateReservation(form: ReservationForm, shop: Pick<Shop, 'products' | 'shipping' | 'checkout'>): FormErrors {
 	const errors: FormErrors = {};
 	if (quote(shop, form.qty).count === 0) errors.items = 'required';
 	if (!form.name.trim()) errors.name = 'required';
 	if (!form.email.trim()) errors.email = 'required';
 	else if (!isEmail(form.email)) errors.email = 'format';
 	if (!shop.shipping.countries.includes(form.country)) errors.country = 'required';
+	if (shop.checkout) {
+		if (!form.street.trim()) errors.street = 'required';
+		if (!form.postalCode.trim()) errors.postalCode = 'required';
+		if (!form.city.trim()) errors.city = 'required';
+	}
 	if (!form.consent) errors.consent = 'required';
 	return errors;
 }
@@ -135,13 +171,14 @@ export function errorsFromProblem(errs: { field?: string; code?: string }[] | un
 		const f = (e.field ?? '').split('.')[0];
 		if (f === 'items') out.items = 'required';
 		else if (f === 'email') out.email = e.code === 'format' ? 'format' : 'required';
-		else if (f === 'name' || f === 'country' || f === 'consent') out[f] = 'required';
+		else if (f === 'name' || f === 'country' || f === 'consent' || f === 'street' || f === 'city') out[f] = 'required';
+		else if (f === 'postal_code') out.postalCode = 'required';
 	}
 	return out;
 }
 
 /** The request body for POST /v1/shop/reservations. Prices are never sent. */
-export function reservationBody(form: ReservationForm, shop: Pick<Shop, 'products' | 'shipping'>, locale: string, honeypot: string) {
+export function reservationBody(form: ReservationForm, shop: Pick<Shop, 'products' | 'shipping' | 'checkout'>, locale: string, honeypot: string) {
 	const q = quote(shop, form.qty);
 	return {
 		name: form.name.trim(),
@@ -150,6 +187,9 @@ export function reservationBody(form: ReservationForm, shop: Pick<Shop, 'product
 		...(form.postalCode.trim() ? { postal_code: form.postalCode.trim() } : {}),
 		items: q.lines.map((l) => ({ product_id: l.product.id, quantity: l.quantity })),
 		...(form.note.trim() ? { note: form.note.trim() } : {}),
+		...(shop.checkout
+			? { street: form.street.trim(), city: form.city.trim(), ...(form.phone.trim() ? { phone: form.phone.trim() } : {}) }
+			: {}),
 		locale,
 		consent: form.consent,
 		...(honeypot ? { website: honeypot } : {})

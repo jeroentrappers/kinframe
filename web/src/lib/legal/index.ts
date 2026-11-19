@@ -15,7 +15,8 @@ type Loader = () => Promise<{ default: LegalDoc }>;
 
 const LOADERS: Record<LegalKind, Record<LegalLanguage, Loader>> = {
 	privacy: { en: () => import('./privacy.en'), nl: () => import('./privacy.nl'), fr: () => import('./privacy.fr') },
-	terms: { en: () => import('./terms.en'), nl: () => import('./terms.nl'), fr: () => import('./terms.fr') }
+	terms: { en: () => import('./terms.en'), nl: () => import('./terms.nl'), fr: () => import('./terms.fr') },
+	sales: { en: () => import('./sales.en'), nl: () => import('./sales.nl'), fr: () => import('./sales.fr') }
 };
 
 /** The language a legal text is shown in for a UI locale: the locale itself when the text exists, else English. */

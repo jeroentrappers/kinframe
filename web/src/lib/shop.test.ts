@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
 	clampQty,
 	countryName,
+	dispatchDay,
 	errorsFromProblem,
+	formatDay,
 	formatMoney,
 	isEmail,
 	localized,
@@ -60,6 +62,25 @@ describe('quote', () => {
 	});
 });
 
+describe('stock', () => {
+	const stocked: Shop = {
+		...shop,
+		products: [{ ...shop.products[0]!, in_stock: 2 }, { ...shop.products[1]!, in_stock: 0 }],
+		stock: { ships_in_stock: '2026-11-17', ships_out_of_stock: '2026-11-20' }
+	};
+	it('ships the next business day only when every frame is in stock', () => {
+		expect(dispatchDay(shop, { 'frame-10': 1 })).toBeNull();
+		expect(dispatchDay(stocked, {})).toBeNull();
+		expect(dispatchDay(stocked, { 'frame-10': 2 })).toBe('2026-11-17');
+		expect(dispatchDay(stocked, { 'frame-10': 3 })).toBe('2026-11-20');
+		expect(dispatchDay(stocked, { 'frame-10': 1, 'frame-15': 1 })).toBe('2026-11-20');
+	});
+	it('formats a day without shifting it by time zone', () => {
+		expect(formatDay('2026-11-17', 'en-GB')).toBe('Tuesday 17 November');
+		expect(formatDay('2026-11-17', 'nl-BE')).toBe('dinsdag 17 november');
+	});
+});
+
 describe('formatting', () => {
 	it('formats money by language', () => {
 		expect(formatMoney(7900, 'EUR', 'en-GB')).toBe('€79.00');
@@ -84,7 +105,7 @@ describe('formatting', () => {
 });
 
 describe('validation', () => {
-	const ok: ReservationForm = { name: 'An', email: 'an@example.org', country: 'BE', postalCode: '', note: '', consent: true, qty: { 'frame-10': 1 } };
+	const ok: ReservationForm = { name: 'An', email: 'an@example.org', country: 'BE', postalCode: '', note: '', consent: true, qty: { 'frame-10': 1 }, street: '', city: '', phone: '' };
 
 	it('accepts a complete form', () => {
 		expect(validateReservation(ok, shop)).toEqual({});
@@ -129,5 +150,20 @@ describe('validation', () => {
 		});
 		expect(JSON.stringify(body)).not.toContain('cents');
 		expect(reservationBody(ok, shop, 'en', 'spam')).toHaveProperty('website', 'spam');
+	});
+	it('needs the delivery address when the shop takes payment, and sends it', () => {
+		const paid = { ...shop, checkout: true };
+		expect(validateReservation(ok, paid)).toEqual({ street: 'required', postalCode: 'required', city: 'required' });
+		expect(validateReservation(ok, shop)).toEqual({});
+		const full = { ...ok, street: ' Veldstraat 10 ', postalCode: '9000', city: 'Gent', phone: '' };
+		expect(validateReservation(full, paid)).toEqual({});
+		const body = reservationBody(full, paid, 'nl', '');
+		expect(body).toMatchObject({ street: 'Veldstraat 10', city: 'Gent', postal_code: '9000' });
+		expect(body).not.toHaveProperty('phone');
+		expect(reservationBody(full, shop, 'nl', '')).not.toHaveProperty('street');
+		expect(errorsFromProblem([{ field: 'postal_code', code: 'minLength' }, { field: 'street', code: 'minLength' }])).toEqual({
+			postalCode: 'required',
+			street: 'required'
+		});
 	});
 });

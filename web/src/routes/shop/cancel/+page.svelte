@@ -11,6 +11,8 @@
 	import SellerFooter from '$components/SellerFooter.svelte';
 
 	const token = page.url.searchParams.get('token') ?? '';
+	// Shops with checkout sell (paid orders): cancelling is the legal withdrawal.
+	const order = $derived(!!discovery.shop?.checkout);
 	let busy = $state(false);
 	let done = $state<string | null>(null);
 	let invalid = $state(token.length < 10);
@@ -31,7 +33,7 @@
 	}
 </script>
 
-<svelte:head><title>{t('shop.cancelTitle')} · {discovery.storefront ? discovery.brand : discovery.name}</title></svelte:head>
+<svelte:head><title>{(order ? t('shop.withdrawTitle') : t('shop.cancelTitle'))} · {discovery.storefront ? discovery.brand : discovery.name}</title></svelte:head>
 
 <div class="cancel-page">
 	<header class="container top">
@@ -47,24 +49,24 @@
 				<a class="btn" href="/">{t('shop.backHome')}</a>
 			{:else if done}
 				<span class="icon ok" aria-hidden="true"><Icon name="check" size={28} /></span>
-				<h1>{t('shop.cancelledTitle')}</h1>
-				<p class="muted">{t('shop.cancelledBody', { reference: done })}</p>
+				<h1>{(order ? t('shop.withdrawnTitle') : t('shop.cancelledTitle'))}</h1>
+				<p class="muted">{(order ? t('shop.withdrawnBody', { reference: done }) : t('shop.cancelledBody', { reference: done }))}</p>
 				<a class="btn" href="/">{t('shop.backHome')}</a>
 			{:else if invalid}
 				<span class="icon warn" aria-hidden="true"><Icon name="alert" size={28} /></span>
-				<h1>{t('shop.cancelTitle')}</h1>
+				<h1>{(order ? t('shop.withdrawTitle') : t('shop.cancelTitle'))}</h1>
 				<p class="callout callout-warn" role="alert">{t('shop.cancelInvalid')}</p>
 				<a class="btn" href="/">{t('shop.backHome')}</a>
 			{:else}
-				<h1>{t('shop.cancelTitle')}</h1>
-				<p class="muted">{t('shop.cancelBody')}</p>
+				<h1>{(order ? t('shop.withdrawTitle') : t('shop.cancelTitle'))}</h1>
+				<p class="muted">{(order ? t('shop.withdrawBody') : t('shop.cancelBody'))}</p>
 				{#if failure}<p class="callout callout-error" role="alert">{failure}</p>{/if}
 				<div class="row-wrap">
 					<button class="btn btn-danger" onclick={cancel} disabled={busy}>
 						{#if busy}<span class="spinner" aria-hidden="true"></span>{/if}
-						{t('shop.cancelConfirm')}
+						{(order ? t('shop.withdrawConfirm') : t('shop.cancelConfirm'))}
 					</button>
-					<a class="btn btn-ghost" href="/">{t('shop.cancelKeep')}</a>
+					<a class="btn btn-ghost" href="/">{(order ? t('shop.withdrawKeep') : t('shop.cancelKeep'))}</a>
 				</div>
 			{/if}
 		</section>

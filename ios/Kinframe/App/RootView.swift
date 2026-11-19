@@ -110,6 +110,7 @@ struct MainTabs: View {
                 .tabItem { Label(L("nav.settings"), systemImage: "gearshape") }
                 .tag(AppModel.Tab.settings)
         }
+        .adaptiveTabStyle()
         .onAppear { app.consumePendingLink() }
         .onChange(of: app.feedsEnabled) { _, on in
             if !on, app.tab == .feeds { app.tab = .frames }
@@ -125,6 +126,18 @@ struct MainTabs: View {
             if app.unreachable {
                 OfflineBanner()
             }
+        }
+    }
+}
+
+private extension View {
+    /// iPad: the tab bar can also be shown as a sidebar (iOS 18+). iPhone keeps the tab bar.
+    @ViewBuilder
+    func adaptiveTabStyle() -> some View {
+        if #available(iOS 18.0, *) {
+            tabViewStyle(.sidebarAdaptable)
+        } else {
+            self
         }
     }
 }

@@ -605,4 +605,10 @@
     <string name="fs_live_on">Afspelen bij tonen</string>
     <string name="fs_live_tap">Afspelen bij tikken</string>
     <string name="fs_live_off">Alleen foto</string>
+    <string name="account_delete">Account verwijderen</string>
+    <string name="account_delete_title">Je account verwijderen?</string>
+    <string name="account_delete_body">Je account, je profielfoto en je aanmelding worden voorgoed verwijderd, en je verlaat al je kaders. Dit kan niet ongedaan worden gemaakt.</string>
+    <string name="account_delete_items">Ook de foto’s en video’s verwijderen die ik stuurde</string>
+    <string name="account_delete_items_hint">Anders blijven ze op de kaders staan, met je naam.</string>
+    <string name="account_delete_owner">Jij bent eigenaar van %1$s. Geef elk kader aan een ander lid of verwijder het voor je je account verwijdert.</string>
 </resources>

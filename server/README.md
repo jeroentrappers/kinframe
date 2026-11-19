@@ -58,6 +58,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_OIDC_JWKS_URL` | from OIDC discovery | Override the JWKS location |
 | `KINFRAME_OIDC_WEB_CLIENT_ID` / `KINFRAME_OIDC_MOBILE_CLIENT_ID` / `KINFRAME_OIDC_DESKTOP_CLIENT_ID` | — | Published in discovery |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `<data dir>/logto.json` | Written by `bootstrap-logto` (`issuer`, `web_client_id`, `mobile_client_id`, `desktop_client_id`, `api_resource`). Read at start; fills in the OIDC settings above when their env vars are unset (env vars win) |
+| `KINFRAME_LOGTO_M2M_ID` / `KINFRAME_LOGTO_M2M_SECRET` | — | The `kinframe bootstrap` M2M app (printed once by `bootstrap-logto`). When set, `DELETE /v1/me` also deletes the user's Logto account, with its social sign-in links; without them only the kinframe account is deleted |
+| `KINFRAME_LOGTO_URL` | the issuer without `/oidc` | Where the server reaches Logto for that (e.g. `http://logto:3001`); requests carry the issuer's host in `Host`/`X-Forwarded-*` |
 | `KINFRAME_DEV_AUTH` | off | Enable `POST /dev/token` (never in production) |
 | `KINFRAME_TRUST_PROXY` | off | Use `X-Forwarded-For`/`X-Real-IP` for client IPs (rate limits) |
 | `KINFRAME_WORKERS` | CPUs/2 | Media worker goroutines |
@@ -75,6 +77,8 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_JANITOR_INTERVAL_SECONDS` | `600` | Trash purge, feed pruning, upload expiry |
 | `KINFRAME_PUSH_DISABLED` | off | Disable push delivery |
 | `KINFRAME_VAPID_PUBLIC_KEY` / `KINFRAME_VAPID_PRIVATE_KEY` | generated | WebPush VAPID key pair (base64url P-256 public point and private scalar). Set both or neither; when unset the server generates a pair once and keeps it in `<data dir>/vapid.json` (mode 0600). Keep it stable: browser subscriptions are bound to the public key |
+| `KINFRAME_FCM_CREDENTIALS_FILE` | — | Firebase service account JSON key; enables FCM push to the family app’s store builds (needs push enabled) |
+| `KINFRAME_APNS_KEY_FILE` | — | APNs auth key (.p8) for push to the iOS app (needs push enabled); with `KINFRAME_APNS_KEY_ID`, `KINFRAME_APNS_TEAM_ID` and `KINFRAME_APNS_TOPIC` (default `app.kinframe.family`) |
 | `KINFRAME_VAPID_SUBJECT` | public URL if https, else `mailto:kinframe@localhost` | Contact push services see in the VAPID token (`mailto:` or `https://`) |
 | `KINFRAME_LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `KINFRAME_LOG_FORMAT` | `text` | `text` or `json` |
@@ -104,6 +108,7 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_WEATHER_REFRESH_MINUTES` | `30` | How long fetched weather stays fresh (minimum 15); up to 5 min jitter is added |
 | `KINFRAME_CALENDAR` | `on` | `off` disables calendar sync, sent events and countdowns (discovery `calendar: false`) |
 | `KINFRAME_SHOP_FILE` | — | Optional pre-order shop config (YAML or JSON, see `docs/deploy.md` → *Pre-order shop*). Unset = no shop. Validated at startup |
+| `KINFRAME_MOLLIE_API_KEY` | — | Mollie API key (`test_…`/`live_…`) for shops with `payments` (online orders); required then. Secret |
 | `KINFRAME_SMTP_HOST` / `_PORT` / `_USER` / `_PASSWORD` / `_FROM` | port `587` | The server's own mail (shop confirmations); the same variables configure Logto's sign-in mails. 465 = implicit TLS, 587 = STARTTLS required, other ports STARTTLS if offered. `_FROM` is required with `_HOST` |
 | `KINFRAME_CALENDAR_SYNC_MINUTES` | `15` | Interval between syncs of each ICS/CalDAV source (minimum 5); up to 3 min jitter, back-off to 2 h on errors |
 | `KINFRAME_SECRETS_KEY` | derived from `KINFRAME_SIGNING_KEY` | 32+ bytes (hex or base64) that encrypt stored calendar links and CalDAV passwords, photo source links, passwords and API keys and Google access tokens (AES-256-GCM, a separate HKDF key per kind). When unset, a key is derived from the signing key with HKDF, so rotating the signing key then also invalidates stored calendar credentials: affected calendars show `auth_failed` until the link or password is entered again. Set a dedicated key to rotate them independently |
@@ -252,6 +257,7 @@ Management API access, in order of preference:
 | `KINFRAME_SOCIAL_REMOVE_UNCONFIGURED` | `false` | Delete kinframe's connectors for providers whose env vars are gone |
 | `KINFRAME_SOCIAL_LINK_BY_EMAIL` | `true` | Link a first social sign-in to the existing account with the same verified email (Logto `automaticAccountLinking`); `false` makes Logto ask the user |
 | `KINFRAME_LOGTO_BRANDING` | `true` | Apply the kinframe logo, colours and CSS to Logto's sign-in pages |
+| `KINFRAME_LOGTO_PASSWORD_SIGNIN` | `false` | Let accounts that have a password (set by an admin, e.g. an App Review account) sign in with it next to email codes; sign-up stays passwordless |
 | `KINFRAME_TERMS_URL` / `KINFRAME_PRIVACY_URL` | — | Legal links on the sign-up page; none when unset |
 | `KINFRAME_LOGTO_CONFIG_FILE` | `$KINFRAME_DATA_DIR/logto.json` | Output file |
 

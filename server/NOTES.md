@@ -132,7 +132,7 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Feeds
 
-- Migration `00013_feeds.sql`: the tables of docs/spec/feeds-data-model.md, plus `feeds.posters_can_invite`,
+- Migration `00017_feeds.sql`: the tables of docs/spec/feeds-data-model.md, plus `feeds.posters_can_invite`,
   `subscriptions.via_invite` (survives the invite row), `subscriptions.backfill_placed/backfill_total` (progress),
   `placements.origin/origin_feed_id/held_directly/feed_suspended/backfill`, and `devices.features` (the latest
   heartbeat's `features`). Existing placements get `origin` from their data (share, import, else send).
@@ -189,7 +189,7 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Birthdays
 
-- Migration `00014_birthdays.sql`: the tables of birthdays.md §12, plus `frame_birthdays (frame_id, digest,
+- Migration `00018_birthdays.sql`: the tables of birthdays.md §12, plus `frame_birthdays (frame_id, digest,
   emitted_at)` (what each frame was last sent) and indexes on greetings per frame and entries per linked user. The
   date CHECK is an inline `CASE` on the month (no `make_date`), with the leap-year CHECK as specified.
 - The `birthdays` change (kind `birthdays`, entity = frame id) is rendered from current state at read time;
@@ -240,7 +240,7 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 
 ## Photo sources and Google Photos import
 
-- Migration `00015_photo_sources.sql`: the tables of photo-sources.md §15, plus `photo_sources.server_url`
+- Migration `00019_photo_sources.sql`: the tables of photo-sources.md §15, plus `photo_sources.server_url`
   (`immich_api` display URL), `upstream_count`, `hold_since`/`last_new_at` (feed debounce),
   `photo_source_items.replacement_media_id` (a changed upstream file, swapped in once processed), `upstream_added_at`
   (iCloud `batchDateCreated`), `retry_at` (failed rows), `google_imports.target_kind`, `auth_url_enc`, `done_ids`

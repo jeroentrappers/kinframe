@@ -1,0 +1,12 @@
+# Store listing for `bundle exec fastlane store_listing`: metadata/ and screenshots/ (made by tools/storeshots).
+# Never submits for review. The review password comes from REVIEW_PASSWORD (~/.appstoreconnect/review.env), not git.
+app_identifier("app.kinframe.family")
+platform("ios")
+metadata_path("./fastlane/metadata")
+screenshots_path("./fastlane/screenshots")
+skip_binary_upload(true)
+submit_for_review(false)
+automatic_release(false)
+overwrite_screenshots(true)
+force(true)
+precheck_include_in_app_purchases(false)

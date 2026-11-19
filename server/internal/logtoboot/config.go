@@ -46,6 +46,12 @@ type Config struct {
 	// with the same verified email (KINFRAME_SOCIAL_LINK_BY_EMAIL, default on).
 	SocialLinkByEmail bool
 
+	// PasswordSignIn lets accounts that have a password sign in with it, next
+	// to email codes (still the default). Sign-up stays passwordless; nobody
+	// gets a password unless an admin sets one, e.g. for an App Review
+	// account (KINFRAME_LOGTO_PASSWORD_SIGNIN, default off).
+	PasswordSignIn bool
+
 	// Branding applies the kinframe look to Logto's sign-in pages
 	// (KINFRAME_LOGTO_BRANDING, default on).
 	Branding   bool
@@ -177,6 +183,7 @@ func loadConfig(get func(string) string) (*Config, error) {
 	c.SocialRemoveUnconfigured = parseBool("KINFRAME_SOCIAL_REMOVE_UNCONFIGURED", false)
 	c.SocialLinkByEmail = parseBool("KINFRAME_SOCIAL_LINK_BY_EMAIL", true)
 	c.Branding = parseBool("KINFRAME_LOGTO_BRANDING", true)
+	c.PasswordSignIn = parseBool("KINFRAME_LOGTO_PASSWORD_SIGNIN", false)
 	for _, x := range []struct {
 		k   string
 		dst *string

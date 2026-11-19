@@ -16,7 +16,12 @@ public enum AppGroup {
     /// Root of the shared container, or Application Support when the group isn't available.
     public static var container: URL {
         if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier) {
+            #if DEBUG
+            // Unsigned debug builds on the Mac get the path but may not write there.
+            if FileManager.default.isWritableFile(atPath: url.path) { return url }
+            #else
             return url
+            #endif
         }
         let fallback = URL.applicationSupportDirectory.appending(path: "kinframe-group")
         try? FileManager.default.createDirectory(at: fallback, withIntermediateDirectories: true)
@@ -29,18 +34,30 @@ public enum AppGroup {
 public enum Keychain {
     static let service = "app.kinframe.family"
 
+    #if DEBUG
+    /// Unsigned debug builds (Mac Catalyst screenshots) can't use the keychain: keep items in memory instead.
+    nonisolated(unsafe) private static var memory: [String: Data] = [:]
+    #endif
+
     public static func data(_ account: String) -> Data? {
         var query = base(account)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var out: CFTypeRef?
-        guard SecItemCopyMatching(query as CFDictionary, &out) == errSecSuccess else { return nil }
+        let status = SecItemCopyMatching(query as CFDictionary, &out)
+        #if DEBUG
+        if status != errSecSuccess, let kept = memory[account] { return kept }
+        #endif
+        guard status == errSecSuccess else { return nil }
         return out as? Data
     }
 
     public static func set(_ data: Data?, for account: String) {
         let query = base(account)
         guard let data else {
+            #if DEBUG
+            memory[account] = nil
+            #endif
             SecItemDelete(query as CFDictionary)
             return
         }
@@ -48,9 +65,13 @@ public enum Keychain {
             kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
         ]
-        if SecItemUpdate(query as CFDictionary, attrs as CFDictionary) == errSecItemNotFound {
-            SecItemAdd(query.merging(attrs) { $1 } as CFDictionary, nil)
+        var status = SecItemUpdate(query as CFDictionary, attrs as CFDictionary)
+        if status == errSecItemNotFound {
+            status = SecItemAdd(query.merging(attrs) { $1 } as CFDictionary, nil)
         }
+        #if DEBUG
+        if status != errSecSuccess { memory[account] = data }
+        #endif
     }
 
     public static func string(_ account: String) -> String? {

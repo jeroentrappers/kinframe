@@ -179,6 +179,21 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
         profile.update { ProfileState() }
     }
 
+    /** Deletes the account (`DELETE /v1/me`) and signs out locally: the tokens are void once the account is gone. */
+    fun deleteAccount(removeItems: Boolean, onError: (Int) -> Unit) {
+        val api = graph.api.value ?: return
+        viewModelScope.launch {
+            try {
+                api.deleteMe(removeItems)
+            } catch (e: Exception) {
+                onError(Problems.message(e))
+                return@launch
+            }
+            graph.signOut(null)
+            profile.update { ProfileState() }
+        }
+    }
+
     fun changeServer() = viewModelScope.launch {
         graph.forgetServer()
         profile.update { ProfileState() }

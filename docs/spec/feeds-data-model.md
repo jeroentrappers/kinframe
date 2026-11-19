@@ -1,8 +1,7 @@
 # Feeds: data model and materialization
 
-Status: **proposal** (2026-11-18) for `feeds.md`. Written against the schema in
-`server/internal/db/migrations/00001_init.sql` … `00012` and the stores in `server/internal/store/`. Nothing here is
-implemented yet; the migration would be `00013_feeds.sql`.
+Status: **implemented** in `server/internal/db/migrations/00017_feeds.sql` (designed 2026-11-18 against `00001_init.sql`
+… `00012` and the stores in `server/internal/store/`; server/NOTES.md lists what the build added).
 
 ## 1. Tables
 

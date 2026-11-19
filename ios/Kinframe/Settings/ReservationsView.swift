@@ -210,7 +210,7 @@ struct ReservationsView: View {
         switch s {
         case .new: (Palette.primarySoftText, Palette.primarySoft)
         case .contacted: (Palette.warn, Palette.warnSoft)
-        case .confirmed: (Palette.accentText, Palette.accentSoft)
+        case .confirmed, .shipped: (Palette.accentText, Palette.accentSoft)
         case .cancelled: (Palette.textMuted, Palette.surface2)
         }
     }

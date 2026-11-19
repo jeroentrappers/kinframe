@@ -6,6 +6,7 @@ import SwiftUI
 /// photos.
 struct FrameLibrarySection: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.horizontalSizeClass) private var sizeClass
     let frame: FrameSummary
     @State private var model: LibraryModel
     @State private var open: Placement?
@@ -83,7 +84,7 @@ struct FrameLibrarySection: View {
             } else if model.placements.isEmpty {
                 emptyState
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 4)], spacing: 4) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: sizeClass == .regular ? 180 : 100), spacing: 4)], spacing: 4) {
                     ForEach(model.placements) { p in
                         tile(p)
                     }

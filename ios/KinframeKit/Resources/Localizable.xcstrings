@@ -52,6 +52,125 @@
         }
       }
     },
+    "account.delete": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete account"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account verwijderen"
+          }
+        }
+      }
+    },
+    "account.deleteBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account, profile photo and sign-in are deleted for good, and you leave all your frames. This can’t be undone."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account, je profielfoto en je aanmelding worden voorgoed verwijderd, en je verlaat al je kaders. Dit kan niet ongedaan worden gemaakt."
+          }
+        }
+      }
+    },
+    "account.deleteItems": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also remove the photos and videos I sent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook de foto’s en video’s verwijderen die ik stuurde"
+          }
+        }
+      }
+    },
+    "account.deleteItemsHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otherwise they stay on the frames, with your name."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anders blijven ze op de kaders staan, met je naam."
+          }
+        }
+      }
+    },
+    "account.deleteOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You own {frames}. Hand each frame over to another member, or remove it, before you delete your account."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jij bent eigenaar van {frames}. Geef elk kader aan een ander lid of verwijder het voor je je account verwijdert."
+          }
+        }
+      }
+    },
+    "account.deleteTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete your account?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account verwijderen?"
+          }
+        }
+      }
+    },
+    "account.deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your account has been deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je account is verwijderd."
+          }
+        }
+      }
+    },
     "add.alreadyBody": {
       "extractionState": "manual",
       "localizations": {
@@ -24192,6 +24311,23 @@
         }
       }
     },
+    "landing.appStore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download on the App Store"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Download in de App Store"
+          }
+        }
+      }
+    },
     "landing.devEmail": {
       "extractionState": "manual",
       "localizations": {
@@ -24426,6 +24562,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "kinframe is vrije software (AGPL-3.0)"
+          }
+        }
+      }
+    },
+    "landing.googlePlay": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get it on Google Play"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ontdek het op Google Play"
           }
         }
       }
@@ -30363,6 +30516,23 @@
         }
       }
     },
+    "reservations.address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivery address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leveringsadres"
+          }
+        }
+      }
+    },
     "reservations.customerNote": {
       "extractionState": "manual",
       "localizations": {
@@ -30550,6 +30720,176 @@
         }
       }
     },
+    "reservations.paidOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paid on {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaald op {date}"
+          }
+        }
+      }
+    },
+    "reservations.payment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaling"
+          }
+        }
+      }
+    },
+    "reservations.payment.authorized": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authorized"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geautoriseerd"
+          }
+        }
+      }
+    },
+    "reservations.payment.canceled": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment cancelled"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaling geannuleerd"
+          }
+        }
+      }
+    },
+    "reservations.payment.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment expired"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaling verlopen"
+          }
+        }
+      }
+    },
+    "reservations.payment.failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment failed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaling mislukt"
+          }
+        }
+      }
+    },
+    "reservations.payment.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not paid yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog niet betaald"
+          }
+        }
+      }
+    },
+    "reservations.payment.paid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paid"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaald"
+          }
+        }
+      }
+    },
+    "reservations.payment.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Payment pending"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaling in behandeling"
+          }
+        }
+      }
+    },
+    "reservations.phone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telefoon"
+          }
+        }
+      }
+    },
     "reservations.reservedOn": {
       "extractionState": "manual",
       "localizations": {
@@ -30614,6 +30954,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reservaties uit de winkel"
+          }
+        }
+      }
+    },
+    "reservations.showUnpaid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show unpaid orders"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onbetaalde bestellingen tonen"
           }
         }
       }
@@ -30686,6 +31043,23 @@
         }
       }
     },
+    "reservations.status.shipped": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shipped"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzonden"
+          }
+        }
+      }
+    },
     "reservations.statusLabel": {
       "extractionState": "manual",
       "localizations": {
@@ -30703,6 +31077,74 @@
         }
       }
     },
+    "reservations.stockHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames ready to ship. Paid orders lower the count. In stock, the shop promises dispatch the next business day; otherwise a few business days later."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotokaders die klaar zijn voor verzending. Betaalde bestellingen verlagen het aantal. Op voorraad belooft de shop verzending de volgende werkdag; anders een paar werkdagen later."
+          }
+        }
+      }
+    },
+    "reservations.stockLabel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} in stock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} op voorraad"
+          }
+        }
+      }
+    },
+    "reservations.stockSaved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stock updated"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorraad bijgewerkt"
+          }
+        }
+      }
+    },
+    "reservations.stockTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorraad"
+          }
+        }
+      }
+    },
     "reservations.title": {
       "extractionState": "manual",
       "localizations": {
@@ -30716,6 +31158,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reservaties"
+          }
+        }
+      }
+    },
+    "reservations.titleOrders": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orders"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestellingen"
+          }
+        }
+      }
+    },
+    "reservations.tracking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tracking link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Track-and-tracelink"
+          }
+        }
+      }
+    },
+    "reservations.trackingHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The customer gets this link by e-mail when the order ships, or right away if it has already shipped."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De klant krijgt deze link per e-mail zodra de bestelling verzonden is, of meteen als ze al verzonden is."
+          }
+        }
+      }
+    },
+    "reservations.unpaidHidden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unpaid orders are hidden."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onbetaalde bestellingen zijn verborgen."
           }
         }
       }
@@ -33508,6 +34018,23 @@
         }
       }
     },
+    "shop.addressTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delivery address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leveringsadres"
+          }
+        }
+      }
+    },
     "shop.backHome": {
       "extractionState": "manual",
       "localizations": {
@@ -33521,6 +34048,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Terug naar de startpagina"
+          }
+        }
+      }
+    },
+    "shop.buy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopen"
+          }
+        }
+      }
+    },
+    "shop.buyProduct": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy the {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} kopen"
           }
         }
       }
@@ -33661,6 +34222,23 @@
         }
       }
     },
+    "shop.city": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "City"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemeente"
+          }
+        }
+      }
+    },
     "shop.consent": {
       "extractionState": "manual",
       "localizations": {
@@ -33797,6 +34375,108 @@
         }
       }
     },
+    "shop.dispatch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expected dispatch: {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwachte verzending: {date}"
+          }
+        }
+      }
+    },
+    "shop.elsewhereBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We only ship to {countries} for now. Elsewhere, you can buy a compatible frame and turn it into a {brand} yourself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We leveren voorlopig alleen in {countries}. Elders kun je een geschikt fotokader kopen en er zelf een {brand} van maken."
+          }
+        }
+      }
+    },
+    "shop.elsewhereConvert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to convert a frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zo zet je een kader om"
+          }
+        }
+      }
+    },
+    "shop.elsewhereDisclosure": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These are affiliate links: we may earn a small commission, at no extra cost to you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit zijn affiliate links: we kunnen een kleine commissie krijgen, zonder extra kosten voor jou."
+          }
+        }
+      }
+    },
+    "shop.elsewhereOther": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other countries"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere landen"
+          }
+        }
+      }
+    },
+    "shop.elsewhereTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outside {countries}?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buiten {countries}?"
+          }
+        }
+      }
+    },
     "shop.email": {
       "extractionState": "manual",
       "localizations": {
@@ -33827,6 +34507,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hier sturen we je bevestiging naartoe."
+          }
+        }
+      }
+    },
+    "shop.errCity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your city."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul je gemeente in."
           }
         }
       }
@@ -33933,6 +34630,57 @@
         }
       }
     },
+    "shop.errOrderConsent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please accept the terms of sale."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ga akkoord met de algemene verkoopsvoorwaarden."
+          }
+        }
+      }
+    },
+    "shop.errPostalCode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your postal code."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul je postcode in."
+          }
+        }
+      }
+    },
+    "shop.errStreet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter your street and number."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul je straat en huisnummer in."
+          }
+        }
+      }
+    },
     "shop.errorSummary": {
       "extractionState": "manual",
       "localizations": {
@@ -33956,13 +34704,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pre-order now"
+            "value": "Available now"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nu reserveren"
+            "value": "Nu verkrijgbaar"
           }
         }
       }
@@ -34082,6 +34830,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zo werkt reserveren"
+          }
+        }
+      }
+    },
+    "shop.inStockShips": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In stock · shipped {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op voorraad · verzonden op {date}"
           }
         }
       }
@@ -34222,6 +34987,380 @@
         }
       }
     },
+    "shop.orderConsent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I accept the terms of sale of {seller}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ik ga akkoord met de algemene verkoopsvoorwaarden van {seller}."
+          }
+        }
+      }
+    },
+    "shop.orderConsentHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We only use your details to deliver and handle your order. They’re never shared or used for advertising."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We gebruiken je gegevens alleen om je bestelling te leveren en af te handelen. Ze worden nooit gedeeld of voor reclame gebruikt."
+          }
+        }
+      }
+    },
+    "shop.orderFailedBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing was charged. You can try again with a new order."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er werd niets aangerekend. Je kunt het opnieuw proberen met een nieuwe bestelling."
+          }
+        }
+      }
+    },
+    "shop.orderFailedTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The payment didn’t go through"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De betaling is niet gelukt"
+          }
+        }
+      }
+    },
+    "shop.orderHow1": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your frames and enter your delivery address."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies je fotokaders en vul je leveringsadres in."
+          }
+        }
+      }
+    },
+    "shop.orderHow2": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay securely with Bancontact, a card or another method."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Betaal veilig met Bancontact, een kaart of een andere betaalmethode."
+          }
+        }
+      }
+    },
+    "shop.orderHow3": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We ship your order and email you when it’s on its way."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We versturen je bestelling en mailen je zodra ze onderweg is."
+          }
+        }
+      }
+    },
+    "shop.orderHowTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How ordering works"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zo werkt bestellen"
+          }
+        }
+      }
+    },
+    "shop.orderInvalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This order link isn’t valid. Use the full link, or email us and we’ll help."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze bestellink is niet geldig. Gebruik de volledige link, of mail ons en we helpen je verder."
+          }
+        }
+      }
+    },
+    "shop.orderOpenBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You haven’t finished paying. You can pay now, or come back later with the link in your browser history."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt de betaling nog niet afgerond. Je kunt nu betalen, of later terugkomen via de link in je browsergeschiedenis."
+          }
+        }
+      }
+    },
+    "shop.orderOpenTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your order isn’t paid yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bestelling is nog niet betaald"
+          }
+        }
+      }
+    },
+    "shop.orderPageLede": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your frames, enter your delivery address and pay securely online."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies je fotokaders, vul je leveringsadres in en betaal veilig online."
+          }
+        }
+      }
+    },
+    "shop.orderPageTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order your {brand}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestel je {brand}"
+          }
+        }
+      }
+    },
+    "shop.orderPaidNext": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We’ll email you as soon as your order is on its way."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We mailen je zodra je bestelling onderweg is."
+          }
+        }
+      }
+    },
+    "shop.orderPaidTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thank you! Your order is paid."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedankt! Je bestelling is betaald."
+          }
+        }
+      }
+    },
+    "shop.orderPayNow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nu betalen"
+          }
+        }
+      }
+    },
+    "shop.orderPendingBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This can take a moment. This page updates by itself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kan even duren. Deze pagina wordt vanzelf bijgewerkt."
+          }
+        }
+      }
+    },
+    "shop.orderPendingTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We’re waiting for your payment"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We wachten op je betaling"
+          }
+        }
+      }
+    },
+    "shop.orderPrivacyNote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order details (name, email, address, phone and note) are only used to deliver and handle your order. We keep them as long as the law requires for our accounts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bestelgegevens (naam, e-mail, adres, telefoon en opmerking) gebruiken we alleen om je bestelling te leveren en af te handelen. We bewaren ze zo lang als de wet voorschrijft voor onze boekhouding."
+          }
+        }
+      }
+    },
+    "shop.orderRef": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your order number"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bestelnummer"
+          }
+        }
+      }
+    },
+    "shop.orderSubmit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order and pay {total}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestellen en {total} betalen"
+          }
+        }
+      }
+    },
+    "shop.orderTryAgain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw proberen"
+          }
+        }
+      }
+    },
     "shop.pageLede": {
       "extractionState": "manual",
       "localizations": {
@@ -34252,6 +35391,125 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reserveer je {brand}"
+          }
+        }
+      }
+    },
+    "shop.payMethods": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Secure payment with Bancontact, cards and more"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veilig betalen met Bancontact, kaarten en meer"
+          }
+        }
+      }
+    },
+    "shop.phone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telefoon"
+          }
+        }
+      }
+    },
+    "shop.phoneHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only used for the delivery."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen voor de levering."
+          }
+        }
+      }
+    },
+    "shop.photoAlt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name}, photo {n} of {count}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name}, foto {n} van {count}"
+          }
+        }
+      }
+    },
+    "shop.photoNext": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volgende foto"
+          }
+        }
+      }
+    },
+    "shop.photoOpen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enlarge the photo of {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto van {name} vergroten"
+          }
+        }
+      }
+    },
+    "shop.photoPrev": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous photo"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vorige foto"
           }
         }
       }
@@ -34320,6 +35578,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen betaling en geen verplichting. We mailen je zodra de fotokaders op voorraad zijn."
+          }
+        }
+      }
+    },
+    "shop.pointPaySecure": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pay securely online"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veilig online betalen"
+          }
+        }
+      }
+    },
+    "shop.pointPaySecureBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With Bancontact, a card or another method you know. You have 14 days after delivery to change your mind."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met Bancontact, een kaart of een andere betaalmethode die je kent. Na de levering heb je 14 dagen bedenktijd."
           }
         }
       }
@@ -34460,6 +35752,23 @@
         }
       }
     },
+    "shop.redirecting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taking you to the payment page…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We brengen je naar de betaalpagina…"
+          }
+        }
+      }
+    },
     "shop.reserve": {
       "extractionState": "manual",
       "localizations": {
@@ -34545,6 +35854,23 @@
         }
       }
     },
+    "shop.shipsOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shipped {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzonden op {date}"
+          }
+        }
+      }
+    },
     "shop.soldBy": {
       "extractionState": "manual",
       "localizations": {
@@ -34558,6 +35884,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De fotokaders worden verkocht door {seller}."
+          }
+        }
+      }
+    },
+    "shop.street": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Street and number"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Straat en huisnummer"
           }
         }
       }
@@ -34626,6 +35969,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Overzicht"
+          }
+        }
+      }
+    },
+    "shop.termsLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read the terms of sale"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lees de algemene verkoopsvoorwaarden"
+          }
+        }
+      }
+    },
+    "shop.termsTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms of sale"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Algemene verkoopsvoorwaarden"
           }
         }
       }
@@ -34779,6 +36156,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle prijzen zijn inclusief {vat}% btw."
+          }
+        }
+      }
+    },
+    "shop.withdrawBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We’ll cancel your order. If it was already delivered, send the frame back to us. We refund you within 14 days."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We annuleren je bestelling. Werd ze al geleverd, stuur het fotokader dan naar ons terug. We betalen je binnen 14 dagen terug."
+          }
+        }
+      }
+    },
+    "shop.withdrawConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yes, withdraw from my order"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ja, herroep mijn bestelling"
+          }
+        }
+      }
+    },
+    "shop.withdrawKeep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No, keep my order"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nee, bestelling behouden"
+          }
+        }
+      }
+    },
+    "shop.withdrawTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Withdraw from your order?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bestelling herroepen?"
+          }
+        }
+      }
+    },
+    "shop.withdrawnBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order {reference} is cancelled. We’ll email you about the return and the refund."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestelling {reference} is geannuleerd. We mailen je over het terugsturen en de terugbetaling."
+          }
+        }
+      }
+    },
+    "shop.withdrawnTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your withdrawal is registered"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je herroeping is geregistreerd"
           }
         }
       }
@@ -38026,6 +39505,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stuur foto’s vanaf je smartphone en binnen enkele seconden staan ze op het kader. Eenvoudig voor oma en opa, zonder abonnement. Nu reserveren, later betalen."
+          }
+        }
+      }
+    },
+    "storefront.metaDescriptionOrder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send photos from your phone and they appear on the frame within seconds. Easy for grandma and grandpa, no subscription. Order online."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stuur foto’s vanaf je smartphone en binnen enkele seconden staan ze op het kader. Eenvoudig voor oma en opa, zonder abonnement. Bestel online."
           }
         }
       }

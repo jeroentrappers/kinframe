@@ -1,5 +1,5 @@
 // Storefront mode (README §5.11, discovery `shop.domains`): on one of the operator's storefront domains the web
-// app is the brand's shop only: landing page, /shop and /shop/cancel. Sign-in and the family app stay on the main
+// app is the brand's shop only: landing page, /shop, /shop/cancel, /shop/order and /shop/terms. Sign-in and the family app stay on the main
 // origin (discovery `web`), where Logto's redirect URIs are registered. Pure logic, unit-tested in storefront.test.ts.
 import { matchLocale, type Locale } from './i18n/locales';
 
@@ -24,7 +24,7 @@ export function isStorefrontHost(host: string, domains: readonly string[] | null
 
 /** The pages a storefront serves itself; every other path belongs to the app. */
 export function isStorefrontPath(pathname: string): boolean {
-	return /^\/(shop(\/cancel)?)?$/.test(pathname.replace(/\/+$/, '') || '/');
+	return /^\/(shop(\/(cancel|order|terms))?)?$/.test(pathname.replace(/\/+$/, '') || '/');
 }
 
 /**

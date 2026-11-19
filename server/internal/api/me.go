@@ -16,6 +16,7 @@ import (
 	"github.com/jeroentrappers/kinframe/server/internal/auth"
 	"github.com/jeroentrappers/kinframe/server/internal/blob"
 	"github.com/jeroentrappers/kinframe/server/internal/config"
+	"github.com/jeroentrappers/kinframe/server/internal/db"
 	"github.com/jeroentrappers/kinframe/server/internal/media"
 	"github.com/jeroentrappers/kinframe/server/internal/problem"
 	"github.com/jeroentrappers/kinframe/server/internal/store"
@@ -56,6 +57,13 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	}
 	if s.cfg.Shop != nil {
 		d.Shop = shopJSON(s.cfg.Shop)
+		if s.cfg.Shop.Stock != nil {
+			stock, err := s.stockCached(ctx)
+			if err != nil {
+				return nil, err
+			}
+			withStock(d.Shop, s.cfg.Shop, stock, time.Now())
+		}
 	}
 	return ok(d), nil
 }
@@ -159,25 +167,25 @@ func (s *Server) bumpMemberEverywhere(ctx context.Context, userID uuid.UUID) err
 
 func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (gen.DeleteMeResponseObject, error) {
 	u := me(ctx)
+	if err := s.ownsNoFrames(ctx, s.st.Q(), u.ID); err != nil {
+		return nil, err
+	}
+	// The sign-in account goes first: if that fails nothing has changed and the
+	// app can try again; the kinframe account is still there for its token.
+	if s.accounts != nil && u.Sub != nil && !strings.HasPrefix(*u.Sub, "dev|") {
+		if err := s.accounts.Delete(ctx, *u.Sub); err != nil {
+			s.log.Error("delete sign-in account", "user", u.ID, "err", err)
+			return nil, problem.New(problem.UpstreamUnavailable, "the sign-in account could not be deleted; try again later")
+		}
+	}
 	var notifyFrames []uuid.UUID
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
+		if err := s.ownsNoFrames(ctx, tx, u.ID); err != nil {
+			return err
+		}
 		ms, err := s.st.FramesOfUser(ctx, tx, u.ID)
 		if err != nil {
 			return err
-		}
-		for _, m := range ms {
-			if m.Role == "owner" {
-				return problem.New(problem.OwnerCannotLeave, "transfer or remove your frames before deleting your account")
-			}
-		}
-		fms, err := s.st.FeedMembershipsOfUser(ctx, tx, u.ID)
-		if err != nil {
-			return err
-		}
-		for _, m := range fms {
-			if m.Role == "owner" {
-				return problem.New(problem.OwnerCannotLeave, "transfer or delete your feeds before deleting your account")
-			}
 		}
 		if req.Params.RemoveItems {
 			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1) OR p.shared_by_user_id = $1`, u.ID); err != nil {
@@ -231,6 +239,30 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 		s.deleteBlob(ctx, *u.AvatarKey)
 	}
 	return noContent(), nil
+}
+
+// ownsNoFrames refuses account deletion while the user owns a frame: the
+// frame needs a new owner, or to be removed, first.
+func (s *Server) ownsNoFrames(ctx context.Context, q db.DBTX, userID uuid.UUID) error {
+	ms, err := s.st.FramesOfUser(ctx, q, userID)
+	if err != nil {
+		return err
+	}
+	for _, m := range ms {
+		if m.Role == "owner" {
+			return problem.New(problem.OwnerCannotLeave, "transfer or remove your frames before deleting your account")
+		}
+	}
+	fms, err := s.st.FeedMembershipsOfUser(ctx, q, userID)
+	if err != nil {
+		return err
+	}
+	for _, m := range fms {
+		if m.Role == "owner" {
+			return problem.New(problem.OwnerCannotLeave, "transfer or delete your feeds before deleting your account")
+		}
+	}
+	return nil
 }
 
 // putAvatar stores a 256×256 WebP avatar cropped from the centre.

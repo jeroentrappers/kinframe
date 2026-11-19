@@ -71,6 +71,8 @@ func (s *Server) Handler() (http.Handler, error) {
 	mux.Handle("GET /v1/frames/{frameId}/events/{invitationId}/photo", user(http.HandlerFunc(s.getEventInvitationPhoto)))
 	mux.Handle("GET /v1/operator/reservations.csv", user(http.HandlerFunc(s.exportReservations)))
 	mux.HandleFunc("GET /v1/oauth/google/callback", s.googleOAuthCallback) // no sign-in: Google's browser redirect
+	mux.HandleFunc("POST /v1/shop/payments/webhook", s.shopPaymentWebhook)
+	mux.HandleFunc("GET /v1/shop/media/{name}", s.shopMedia)
 	mux.HandleFunc("GET /v1/ws", s.userWS)
 	mux.HandleFunc("GET /v1/tv/{token}/mirror", s.tvMirrorWS)
 	mux.HandleFunc("GET /v1/media/signed/{key...}", s.signedMedia)
@@ -155,7 +157,10 @@ func (s *Server) resolveUser(ctx context.Context, token string) (*principal, *pr
 		}
 		return nil, authProblem(err)
 	}
-	u, err := s.st.UpsertUserBySub(ctx, claims.Subject, claims.Email, claims.Name)
+	u, err := s.st.UpsertUserBySub(ctx, claims.Subject, claims.Email, claims.Name, claims.IssuedAt)
+	if errors.Is(err, store.ErrAccountDeleted) {
+		return nil, problem.New(problem.Unauthorized, "invalid access token")
+	}
 	if err != nil {
 		p := problem.Internal(err)
 		return nil, p

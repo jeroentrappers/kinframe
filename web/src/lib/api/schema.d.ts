@@ -51,7 +51,7 @@ export interface paths {
         get: operations["getMe"];
         put?: never;
         post?: never;
-        /** @description Deletes the kinframe user. The Logto account is deleted separately via Logto's account API. */
+        /** @description Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too. */
         delete: operations["deleteMe"];
         options?: never;
         head?: never;
@@ -2529,8 +2529,12 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-         *     emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+         * @description Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+         *     order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+         *     `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+         *     reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+         *     `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+         *     `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
          *     Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
          *     Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
          *     not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -2538,6 +2542,27 @@ export interface paths {
          *     `items.<i>.quantity`/`maximum`, `consent`/`required`.
          */
         post: operations["createShopReservation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/shop/orders/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+         *     signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+         *     also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+         */
+        post: operations["getShopOrderStatus"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2607,6 +2632,43 @@ export interface paths {
         /** @description Shop reservations, newest first. `404 not_found` when the server has no shop. */
         get: operations["operatorListReservations"];
         put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/shop/stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+         *     counted have 0. `404 not_found` when the server has no shop or no stock management.
+         */
+        get: operations["operatorListShopStock"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/operator/shop/stock/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again. */
+        put: operations["operatorSetShopStock"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2766,8 +2828,23 @@ export interface components {
             shipping: components["schemas"]["ShopShipping"];
             estimated_delivery?: components["schemas"]["LocalizedText"];
             /**
+             * @description Shops with stock management: the dispatch day of an order placed now, when every item is in stock
+             *     (the next business day) and when one is not. Business days are Belgian working days.
+             */
+            stock?: {
+                /** Format: date */
+                ships_in_stock: string;
+                /** Format: date */
+                ships_out_of_stock: string;
+            };
+            /**
+             * @description Where visitors outside `shipping.countries` can buy a frame the convert tool supports. The links may be
+             *     affiliate links (shown with a disclosure). Absent when the operator configured none.
+             */
+            elsewhere?: components["schemas"]["ShopElsewhereLink"][];
+            /**
              * @description Storefront host names (no scheme or port). On these hosts the web app is the brand's shop: landing page,
-             *     `/shop` and `/shop/cancel`, calling the API on its own origin; every other path goes to `web`, where
+             *     `/shop`, `/shop/cancel`, `/shop/order` and `/shop/terms`, calling the API on its own origin; every other path goes to `web`, where
              *     sign-in and the family app live. Absent when the operator configured none.
              * @example [
              *       "shop.example.org"
@@ -2780,6 +2857,12 @@ export interface components {
              * @example nl
              */
             default_locale?: string;
+            /**
+             * @description True when orders are paid online: `createShopReservation` then needs the delivery address and answers
+             *     with a `checkout_url` to send the customer to. False: reservations without payment.
+             * @default false
+             */
+            checkout?: boolean;
             seller: {
                 name: string;
                 /** Format: email */
@@ -2788,7 +2871,40 @@ export interface components {
                 legal?: string;
                 /** Format: uri */
                 privacy_url?: string;
+                /**
+                 * Format: uri
+                 * @description Terms of sale; absent = the web app's own page `/shop/terms`.
+                 */
+                terms_url?: string;
+                /** @description Seller's address (terms of sale). */
+                address?: string;
+                vat_number?: string;
+                phone?: string;
             };
+        };
+        /** @description A retailer selling a compatible frame in some countries the shop doesn't ship to. */
+        ShopElsewhereLink: {
+            /**
+             * @description ISO 3166-1 alpha-2 codes; `*` means every other country.
+             * @example [
+             *       "NL"
+             *     ]
+             */
+            countries: string[];
+            /** @example bol.com */
+            retailer: string;
+            /**
+             * @description The frame model.
+             * @example Denver PFF-1024
+             */
+            product: string;
+            /** Format: uri */
+            url: string;
+            /**
+             * @description True for an affiliate link; the web app then shows a disclosure.
+             * @default false
+             */
+            affiliate?: boolean;
         };
         /** @description Language code → text; `en` is the fallback. */
         LocalizedText: {
@@ -2807,11 +2923,18 @@ export interface components {
             /** @description Unit price incl. VAT, in cents */
             price_cents: number;
             max_qty: number;
+            /** @description Shops with `stock`: frames ready to ship, at most `max_qty` (the real count is not shown). */
+            in_stock?: number;
             /**
              * @description Illustration key: frame-10 or frame-15
              * @example frame-10
              */
             image?: string;
+            /**
+             * @description Product photos, the first one leading: paths on the API origin (`/v1/shop/media/{name}`, public, cached
+             *     for a day). Absent = show the `image` illustration.
+             */
+            photos?: string[];
             /** @description Language code → short spec bullets; `en` is the fallback. */
             specs?: {
                 [key: string]: string[];
@@ -2831,13 +2954,24 @@ export interface components {
             free_from_cents?: number | null;
         };
         /** @enum {string} */
-        ShopReservationStatus: "new" | "contacted" | "confirmed" | "cancelled";
+        ShopReservationStatus: "new" | "contacted" | "confirmed" | "shipped" | "cancelled";
+        /**
+         * @description The payment at the provider (shops with `checkout`); `paid` confirms the order.
+         * @enum {string}
+         */
+        ShopPaymentStatus: "open" | "pending" | "authorized" | "paid" | "failed" | "canceled" | "expired";
         ShopReservationCreate: {
             name: string;
             email: string;
             /** @example BE */
             country: string;
             postal_code?: string;
+            /** @description Street and number (required when the shop has `checkout`). */
+            street?: string;
+            /** @description Required when the shop has `checkout`. */
+            city?: string;
+            /** @description Optional */
+            phone?: string;
             items: {
                 product_id: string;
                 quantity: number;
@@ -2848,7 +2982,10 @@ export interface components {
              * @example nl
              */
             locale?: string;
-            /** @description Must be true. The customer agrees to be contacted about this reservation. */
+            /**
+             * @description Must be true. Reservations: the customer agrees to be contacted about this reservation. Shops with
+             *     `checkout`: the customer accepts the terms of sale.
+             */
             consent: boolean;
             /** @description Honeypot; leave empty. */
             website?: string;
@@ -2870,6 +3007,18 @@ export interface components {
             shipping_cents: number;
             total_cents: number;
             currency: string;
+            payment_status?: components["schemas"]["ShopPaymentStatus"];
+            /**
+             * Format: uri
+             * @description Shops with `checkout`: where the customer pays (the provider's payment page). Null once the payment is
+             *     final.
+             */
+            checkout_url?: string | null;
+            /**
+             * Format: date
+             * @description Shops with `stock`: the promised dispatch day.
+             */
+            ships_on?: string | null;
         };
         ShopReservation: {
             id: components["schemas"]["Id"];
@@ -2893,6 +3042,21 @@ export interface components {
             updated_at: string;
             /** Format: date-time */
             cancelled_at?: string | null;
+            street?: string | null;
+            city?: string | null;
+            phone?: string | null;
+            payment_status?: components["schemas"]["ShopPaymentStatus"];
+            /** Format: date-time */
+            paid_at?: string | null;
+            /** Format: date-time */
+            shipped_at?: string | null;
+            tracking_url?: string | null;
+            /** Format: date */
+            ships_on?: string | null;
+        };
+        ShopStockItem: {
+            product_id: string;
+            quantity: number;
         };
         Limits: {
             /** @default 200 */
@@ -9719,6 +9883,33 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    getShopOrderStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    token: string;
+                };
+            };
+        };
+        responses: {
+            /** @description The order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopReservationReceipt"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     cancelShopReservation: {
         parameters: {
             query?: never;
@@ -9858,6 +10049,58 @@ export interface operations {
             default: components["responses"]["Problem"];
         };
     };
+    operatorListShopStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stock */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        stock: components["schemas"]["ShopStockItem"][];
+                    };
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
+    operatorSetShopStock: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    quantity: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShopStockItem"];
+                };
+            };
+            default: components["responses"]["Problem"];
+        };
+    };
     operatorExportReservations: {
         parameters: {
             query?: {
@@ -9896,6 +10139,8 @@ export interface operations {
                     status?: components["schemas"]["ShopReservationStatus"];
                     /** @description Only for the operator; never emailed. */
                     internal_note?: string | null;
+                    /** @description The carrier's tracking link (http or https). The shipped email of a paid order links to it; setting or changing it on an order that is already shipped emails the customer the new link. */
+                    tracking_url?: string | null;
                 };
             };
         };

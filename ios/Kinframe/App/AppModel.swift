@@ -199,6 +199,16 @@ final class AppModel {
         phase = .onboarding
     }
 
+    /// `DELETE /v1/me`, then sign out. The server refuses the old token from now on, so sign-out must not call the
+    /// API again (push endpoints are already gone with the account).
+    func deleteAccount(removeItems: Bool) async throws {
+        guard let api else { return }
+        _ = try await api.call { try await $0.deleteMe(query: .init(removeItems: removeItems)).noContent }
+        self.api = nil
+        await signOut()
+        toasts.show(L("account.deleted"))
+    }
+
     /// The refresh token was rejected: back to sign-in, keeping the server.
     private func sessionEnded() {
         guard phase == .main else { return }

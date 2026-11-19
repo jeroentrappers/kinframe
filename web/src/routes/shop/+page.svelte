@@ -1,6 +1,7 @@
 <script lang="ts">
-	// Pre-order reservation (README §5.11): choose frames, leave contact details, no payment. Only on servers with a
-	// shop; the server recomputes every price, the live total here is a preview of the same rule.
+	// The shop (README §5.11): choose frames and leave your details. Shops with checkout: an order with the delivery
+	// address, paid on the provider's page (we redirect there); otherwise a reservation without payment. Only on servers
+	// with a shop; the server recomputes every price, the live total here is a preview of the same rule.
 	import { tick } from 'svelte';
 	import { page } from '$app/state';
 	import { api, ApiError, call } from '$lib/api/client';
@@ -10,7 +11,9 @@
 	import {
 		clampQty,
 		countryName,
+		dispatchDay,
 		errorsFromProblem,
+		formatDay,
 		formatMoney,
 		localized,
 		quote,
@@ -25,9 +28,12 @@
 	import LanguagePicker from '$components/LanguagePicker.svelte';
 	import Logo from '$components/Logo.svelte';
 	import SellerFooter from '$components/SellerFooter.svelte';
-	import ShopFrameArt from '$components/ShopFrameArt.svelte';
+	import ShopAvailability from '$components/ShopAvailability.svelte';
+	import ShopPhotos from '$components/ShopPhotos.svelte';
 
 	const shop = $derived(discovery.shop);
+	const checkout = $derived(!!discovery.shop?.checkout);
+	const termsUrl = $derived(discovery.shop?.seller.terms_url ?? '/shop/terms');
 	const brand = $derived(discovery.brand);
 
 	function initialQty(): Record<string, number> {
@@ -53,7 +59,19 @@
 		return '';
 	}
 
-	let form = $state<ReservationForm>({ name: '', email: '', country: initialCountry(), postalCode: '', note: '', consent: false, qty: initialQty() });
+	let form = $state<ReservationForm>({
+		name: '',
+		email: '',
+		country: initialCountry(),
+		postalCode: '',
+		note: '',
+		consent: false,
+		qty: initialQty(),
+		street: '',
+		city: '',
+		phone: ''
+	});
+	let redirecting = $state(false);
 	let honeypot = $state('');
 	let errors = $state<FormErrors>({});
 	let submitted = $state(false);
@@ -66,7 +84,9 @@
 	const q = $derived(shop ? quote(shop, form.qty) : null);
 	const money = (cents: number) => (shop ? formatMoney(cents, shop.currency, i18n.tag) : '');
 	const vat = $derived(shop ? new Intl.NumberFormat(i18n.tag).format(shop.vat_percent) : '');
-	const when = $derived(localized(shop?.estimated_delivery, i18n.locale));
+	const when = $derived(shop?.stock ? undefined : localized(shop?.estimated_delivery, i18n.locale));
+	/** Shops with stock: the dispatch day of the frames chosen now. */
+	const dispatch = $derived(shop ? dispatchDay(shop, form.qty) : null);
 	const countryOptions = $derived(
 		(shop?.shipping.countries ?? [])
 			.map((c) => ({ code: c, name: countryName(c, i18n.tag) }))
@@ -89,9 +109,21 @@
 		name: () => t('shop.errName'),
 		email: (c) => (c === 'format' ? t('shop.errEmailFormat') : t('shop.errEmail')),
 		country: () => t('shop.errCountry'),
-		consent: () => t('shop.errConsent')
+		street: () => t('shop.errStreet'),
+		postalCode: () => t('shop.errPostalCode'),
+		city: () => t('shop.errCity'),
+		consent: () => (checkout ? t('shop.errOrderConsent') : t('shop.errConsent'))
 	};
-	const FIELD_IDS: Record<FormField, string> = { items: 'qty-first', name: 'r-name', email: 'r-email', country: 'r-country', consent: 'r-consent' };
+	const FIELD_IDS: Record<FormField, string> = {
+		items: 'qty-first',
+		name: 'r-name',
+		email: 'r-email',
+		country: 'r-country',
+		street: 'r-street',
+		postalCode: 'r-postal',
+		city: 'r-city',
+		consent: 'r-consent'
+	};
 	const errorList = $derived((Object.keys(errors) as FormField[]).map((f) => ({ field: f, text: MESSAGES[f](errors[f]!) })));
 
 	async function showErrors() {
@@ -108,7 +140,14 @@
 		if (Object.keys(errors).length) return showErrors();
 		busy = true;
 		try {
-			receipt = await call(api.POST('/v1/shop/reservations', { body: reservationBody(form, shop, i18n.locale, honeypot) }));
+			const r = await call(api.POST('/v1/shop/reservations', { body: reservationBody(form, shop, i18n.locale, honeypot) }));
+			if (checkout && r.checkout_url) {
+				// Pay on the provider's page; it returns to /shop/order. Keep the button busy until we're gone.
+				redirecting = true;
+				window.location.assign(r.checkout_url);
+				return;
+			}
+			receipt = r;
 			window.scrollTo({ top: 0 });
 			await tick();
 			thanksEl?.focus();
@@ -119,13 +158,14 @@
 			}
 			failure = problemMessage(err);
 		} finally {
-			busy = false;
+			if (!redirecting) busy = false;
 		}
 	}
 
 	function again() {
 		receipt = null;
 		submitted = false;
+		redirecting = false;
 		errors = {};
 		form = { ...form, note: '', consent: false, qty: initialQty() };
 	}
@@ -134,7 +174,7 @@
 </script>
 
 <svelte:head>
-	<title>{shop ? t('shop.pageTitle', { brand }) : t('shop.unavailable')}{discovery.storefront ? '' : ` · ${discovery.name}`}</title>
+	<title>{shop ? (checkout ? t('shop.orderPageTitle', { brand }) : t('shop.pageTitle', { brand })) : t('shop.unavailable')}{discovery.storefront ? '' : ` · ${discovery.name}`}</title>
 </svelte:head>
 
 <div class="shop-page">
@@ -170,7 +210,7 @@
 				</ul>
 				<p class="muted small">{t('shop.vatNote', { vat })}</p>
 				<p>{t('shop.thanksEmail', { email: receipt.email })}</p>
-				<p class="callout callout-ok"><Icon name="info" size={18} />{t('shop.thanksNext')}{#if when}&nbsp;{t('shop.delivery', { when })}.{/if}</p>
+				<p class="callout callout-ok"><Icon name="info" size={18} />{t('shop.thanksNext')}{#if receipt.ships_on}&nbsp;{t('shop.dispatch', { date: formatDay(receipt.ships_on, i18n.tag) })}.{:else if when}&nbsp;{t('shop.delivery', { when })}.{/if}</p>
 				<div class="row-wrap">
 					<a class="btn btn-primary" href="/">{t('shop.backHome')}</a>
 					<button class="btn btn-ghost" type="button" onclick={again}>{t('shop.thanksAgain')}</button>
@@ -178,16 +218,16 @@
 			</section>
 		{:else}
 			<div class="head">
-				<h1>{t('shop.pageTitle', { brand })}</h1>
-				<p class="lede">{t('shop.pageLede')}</p>
+				<h1>{checkout ? t('shop.orderPageTitle', { brand }) : t('shop.pageTitle', { brand })}</h1>
+				<p class="lede">{checkout ? t('shop.orderPageLede') : t('shop.pageLede')}</p>
 			</div>
 
 			<section class="how" aria-labelledby="how-title">
-				<h2 id="how-title" class="visually-hidden">{t('shop.howTitle')}</h2>
+				<h2 id="how-title" class="visually-hidden">{checkout ? t('shop.orderHowTitle') : t('shop.howTitle')}</h2>
 				<ol>
-					<li><span class="step" aria-hidden="true">1</span>{t('shop.how1')}</li>
-					<li><span class="step" aria-hidden="true">2</span>{t('shop.how2')}</li>
-					<li><span class="step" aria-hidden="true">3</span>{t('shop.how3')}</li>
+					<li><span class="step" aria-hidden="true">1</span>{checkout ? t('shop.orderHow1') : t('shop.how1')}</li>
+					<li><span class="step" aria-hidden="true">2</span>{checkout ? t('shop.orderHow2') : t('shop.how2')}</li>
+					<li><span class="step" aria-hidden="true">3</span>{checkout ? t('shop.orderHow3') : t('shop.how3')}</li>
 				</ol>
 				{#if when}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
 			</section>
@@ -215,11 +255,12 @@
 								{@const n = form.qty[p.id] ?? 0}
 								{@const specs = localized(p.specs, i18n.locale) ?? []}
 								<div class="product" class:chosen={n > 0}>
-									<div class="p-art"><ShopFrameArt image={p.image ?? (i === 0 ? 'frame-10' : 'frame-15')} /></div>
+									<div class="p-art"><ShopPhotos product={p} fallback={i === 0 ? 'frame-10' : 'frame-15'} compact /></div>
 									<div class="p-info">
 										<h3 id="pname-{p.id}">{p.name}</h3>
 										<p class="p-price"><span class="num">{money(p.price_cents)}</span> <span class="hint">{t('shop.inclVat', { vat })}</span></p>
 										{#if specs.length}<p class="hint p-specs">{specs.join(' · ')}</p>{/if}
+										<ShopAvailability {shop} product={p} />
 									</div>
 									<div class="stepper" role="group" aria-labelledby="pname-{p.id}">
 										<button
@@ -304,11 +345,70 @@
 								</select>
 								{#if errors.country}<p id="r-country-error" class="error-text">{MESSAGES.country('required')}</p>{/if}
 							</div>
-							<div class="field">
-								<label for="r-postal">{t('shop.postalCode')} <span class="hint">({t('common.optional')})</span></label>
-								<input id="r-postal" class="input" autocomplete="postal-code" maxlength="12" bind:value={form.postalCode} />
-							</div>
+							{#if !checkout}
+								<div class="field">
+									<label for="r-postal">{t('shop.postalCode')} <span class="hint">({t('common.optional')})</span></label>
+									<input id="r-postal" class="input" autocomplete="postal-code" maxlength="12" bind:value={form.postalCode} />
+								</div>
+							{/if}
 						</div>
+						{#if checkout}
+							<h3 class="sub-legend">{t('shop.addressTitle')}</h3>
+							<div class="field">
+								<label for="r-street">{t('shop.street')}</label>
+								<input
+									id="r-street"
+									class="input"
+									autocomplete="street-address"
+									maxlength="200"
+									bind:value={form.street}
+									aria-invalid={errors.street ? 'true' : undefined}
+									aria-describedby={describedBy(errors.street && 'r-street-error')}
+								/>
+								{#if errors.street}<p id="r-street-error" class="error-text">{MESSAGES.street('required')}</p>{/if}
+							</div>
+							<div class="grid2">
+								<div class="field">
+									<label for="r-postal">{t('shop.postalCode')}</label>
+									<input
+										id="r-postal"
+										class="input"
+										autocomplete="postal-code"
+										maxlength="12"
+										bind:value={form.postalCode}
+										aria-invalid={errors.postalCode ? 'true' : undefined}
+										aria-describedby={describedBy(errors.postalCode && 'r-postal-error')}
+									/>
+									{#if errors.postalCode}<p id="r-postal-error" class="error-text">{MESSAGES.postalCode('required')}</p>{/if}
+								</div>
+								<div class="field">
+									<label for="r-city">{t('shop.city')}</label>
+									<input
+										id="r-city"
+										class="input"
+										autocomplete="address-level2"
+										maxlength="100"
+										bind:value={form.city}
+										aria-invalid={errors.city ? 'true' : undefined}
+										aria-describedby={describedBy(errors.city && 'r-city-error')}
+									/>
+									{#if errors.city}<p id="r-city-error" class="error-text">{MESSAGES.city('required')}</p>{/if}
+								</div>
+								<div class="field">
+									<label for="r-phone">{t('shop.phone')} <span class="hint">({t('common.optional')})</span></label>
+									<input
+										id="r-phone"
+										class="input"
+										type="tel"
+										autocomplete="tel"
+										maxlength="30"
+										bind:value={form.phone}
+										aria-describedby="r-phone-hint"
+									/>
+									<span id="r-phone-hint" class="hint">{t('shop.phoneHint')}</span>
+								</div>
+							</div>
+						{/if}
 						<div class="field">
 							<label for="r-note">{t('shop.note')} <span class="hint">({t('common.optional')})</span></label>
 							<textarea id="r-note" class="textarea" maxlength="1000" rows="3" placeholder={t('shop.notePlaceholder')} bind:value={form.note}></textarea>
@@ -327,8 +427,15 @@
 								aria-describedby={describedBy('r-consent-hint', errors.consent && 'r-consent-error')}
 							/>
 							<div>
-								<label for="r-consent">{t('shop.consent', { seller: shop.seller.name })}</label>
-								<p id="r-consent-hint" class="hint">{t('shop.consentHint')}</p>
+								{#if checkout}
+									<label for="r-consent">{t('shop.orderConsent', { seller: shop.seller.name })}</label>
+									<p id="r-consent-hint" class="hint">
+										<a href={termsUrl} target="_blank" rel="noopener">{t('shop.termsLink')}</a>. {t('shop.orderConsentHint')}
+									</p>
+								{:else}
+									<label for="r-consent">{t('shop.consent', { seller: shop.seller.name })}</label>
+									<p id="r-consent-hint" class="hint">{t('shop.consentHint')}</p>
+								{/if}
 								{#if errors.consent}<p id="r-consent-error" class="error-text">{MESSAGES.consent('required')}</p>{/if}
 							</div>
 						</div>
@@ -351,6 +458,9 @@
 									</li>
 									<li class="total"><span>{t('shop.total')}</span><span class="num" data-testid="shop-total">{money(q.totalCents)}</span></li>
 								</ul>
+								{#if dispatch}
+									<p class="free-hint reached" data-testid="dispatch"><Icon name="calendar" size={16} />{t('shop.dispatch', { date: formatDay(dispatch, i18n.tag) })}</p>
+								{/if}
 								{#if q.missingForFreeCents != null}
 									<p class="free-hint" data-testid="free-hint"><Icon name="send" size={16} />{t('shop.freeShippingHint', { amount: money(q.missingForFreeCents) })}</p>
 								{:else if q.freeFromCents != null}
@@ -367,9 +477,11 @@
 						{#if failure}<p class="callout callout-error small" role="alert"><Icon name="alert" size={18} />{failure}</p>{/if}
 						<button class="btn btn-primary btn-lg btn-block" type="submit" disabled={busy}>
 							{#if busy}<span class="spinner" aria-hidden="true"></span>{/if}
-							{t('shop.submit')}
+							{#if redirecting}{t('shop.redirecting')}{:else if checkout && q && q.lines.length}{t('shop.orderSubmit', { total: money(q.totalCents) })}{:else if checkout}{t(
+									'shop.buy'
+								)}{:else}{t('shop.submit')}{/if}
 						</button>
-						<p class="hint center">{t('shop.noPaymentNow')}</p>
+						<p class="hint center">{checkout ? t('shop.payMethods') : t('shop.noPaymentNow')}</p>
 					</div>
 				</aside>
 			</form>
@@ -489,6 +601,10 @@
 		min-width: 0;
 		display: grid;
 		gap: var(--s-4);
+	}
+	.sub-legend {
+		font-size: var(--fs-md, 1rem);
+		margin: var(--s-4) 0 var(--s-2);
 	}
 	.section-legend {
 		float: left;

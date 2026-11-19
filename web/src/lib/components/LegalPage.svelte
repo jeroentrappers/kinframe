@@ -44,12 +44,15 @@
 		doc ? new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : lang === 'nl' ? 'nl-BE' : 'fr-BE', { dateStyle: 'long' }).format(new Date(`${doc.updated}T12:00:00Z`)) : ''
 	);
 	const fallback = $derived(doc !== null && lang !== i18n.locale);
-	const otherServer = $derived(typeof location !== 'undefined' && location.hostname !== HOSTED_HOST);
-	const other = $derived(kind === 'privacy' ? { href: '/terms', label: t('legal.terms') } : { href: '/privacy', label: t('legal.privacy') });
+	// The terms of sale belong to the shop, wherever it runs; the other texts describe the hosted service.
+	const otherServer = $derived(kind !== 'sales' && typeof location !== 'undefined' && location.hostname !== HOSTED_HOST);
+	const other = $derived(
+		kind === 'privacy' ? { href: '/terms', label: t('legal.terms') } : { href: kind === 'sales' ? 'https://kinframe.appmire.be/privacy' : '/privacy', label: t('legal.privacy') }
+	);
 </script>
 
 <svelte:head>
-	<title>{doc?.title ?? (kind === 'privacy' ? t('legal.privacy') : t('legal.terms'))} · {discovery.siteName}</title>
+	<title>{doc?.title ?? (kind === 'privacy' ? t('legal.privacy') : kind === 'sales' ? t('shop.termsTitle') : t('legal.terms'))} · {discovery.siteName}</title>
 </svelte:head>
 
 {#snippet rich(text: string)}

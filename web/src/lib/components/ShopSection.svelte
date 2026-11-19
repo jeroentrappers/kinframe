@@ -4,9 +4,13 @@
 	import { i18n, t } from '$lib/i18n/index.svelte';
 	import { countryName, formatMoney, localized, type Shop } from '$lib/shop';
 	import Icon from './Icon.svelte';
-	import ShopFrameArt from './ShopFrameArt.svelte';
+	import ShopAvailability from './ShopAvailability.svelte';
+	import ShopElsewhere from './ShopElsewhere.svelte';
+	import ShopPhotos from './ShopPhotos.svelte';
 
 	let { shop }: { shop: Shop } = $props();
+	// Shops with checkout sell (pay online); the others take reservations.
+	const checkout = $derived(!!shop.checkout);
 
 	const brand = $derived(discovery.brand);
 	const money = (cents: number, compact = true) => formatMoney(cents, shop.currency, i18n.tag, { compact });
@@ -23,14 +27,14 @@
 		<p class="eyebrow">{t('shop.eyebrow')}</p>
 		<h2 id="shop-title">{t('shop.title', { brand })}</h2>
 		<p class="lede">{t('shop.lede', { brand })}</p>
-		{#if when}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
+		{#if when && !shop.stock}<p class="delivery"><Icon name="calendar" size={16} />{t('shop.delivery', { when })}</p>{/if}
 	</div>
 
 	<div class="products">
 		{#each shop.products as p, i (p.id)}
 			{@const specs = localized(p.specs, i18n.locale) ?? []}
 			<article class="product" aria-labelledby="product-{p.id}">
-				<div class="art"><ShopFrameArt image={p.image ?? (i === 0 ? 'frame-10' : 'frame-15')} /></div>
+				<div class="art" class:has-photos={!!p.photos?.length}><ShopPhotos product={p} fallback={i === 0 ? 'frame-10' : 'frame-15'} /></div>
 				<div class="body">
 					<div class="name-row">
 						<h3 id="product-{p.id}">{p.name}</h3>
@@ -40,6 +44,7 @@
 						<span class="amount num">{money(p.price_cents)}</span>
 						<span class="vat">{t('shop.inclVat', { vat })}</span>
 					</p>
+					<ShopAvailability {shop} product={p} />
 					{#if specs.length}
 						<ul class="specs">
 							{#each specs as s (s)}
@@ -47,8 +52,8 @@
 							{/each}
 						</ul>
 					{/if}
-					<a class="btn btn-primary reserve" href="/shop?product={encodeURIComponent(p.id)}" aria-label={t('shop.reserveProduct', { name: p.name })}>
-						{t('shop.reserve')}
+					<a class="btn btn-primary reserve" href="/shop?product={encodeURIComponent(p.id)}" aria-label={checkout ? t('shop.buyProduct', { name: p.name }) : t('shop.reserveProduct', { name: p.name })}>
+						{checkout ? t('shop.buy') : t('shop.reserve')}
 						<Icon name="chevronRight" size={18} />
 					</a>
 				</div>
@@ -67,8 +72,8 @@
 		<li>
 			<span class="p-icon"><Icon name="heart" size={20} /></span>
 			<div>
-				<strong>{t('shop.pointPayLater')}</strong>
-				<p>{t('shop.pointPayLaterBody')}</p>
+				<strong>{checkout ? t('shop.pointPaySecure') : t('shop.pointPayLater')}</strong>
+				<p>{checkout ? t('shop.pointPaySecureBody') : t('shop.pointPayLaterBody')}</p>
 			</div>
 		</li>
 		<li>
@@ -84,6 +89,8 @@
 			</div>
 		</li>
 	</ul>
+
+	<ShopElsewhere {shop} />
 </section>
 
 <style>
@@ -146,6 +153,10 @@
 		border: 1px solid var(--border);
 		box-shadow: var(--shadow);
 		overflow: hidden;
+	}
+	.art.has-photos {
+		padding: var(--s-3);
+		background: var(--surface);
 	}
 	.art {
 		padding: var(--s-5) var(--s-5) var(--s-2);

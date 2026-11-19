@@ -124,12 +124,59 @@
   register: shop_file
   when: kinframe_shop | length > 0
 
+- name: Shop photos
+  ansible.builtin.copy:
+    src: "{{ kinframe_shop_media_src | regex_replace('/*$', '') }}/"
+    dest: "{{ kinframe_dir }}/shop-media/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+  register: shop_media
+  when: kinframe_shop | length > 0 and kinframe_shop_media_src | length > 0
+
 - name: No shop file without kinframe_shop
   ansible.builtin.file:
     path: "{{ kinframe_dir }}/shop.json"
     state: absent
   register: shop_file_removed
   when: kinframe_shop | length == 0
+
+- name: FCM credentials
+  ansible.builtin.copy:
+    content: "{{ kinframe_fcm_credentials if kinframe_fcm_credentials is string else (kinframe_fcm_credentials | to_json) }}"
+    dest: "{{ kinframe_dir }}/fcm.json"
+    owner: "10001"
+    group: root
+    mode: "0400"
+  no_log: true
+  register: fcm_file
+  when: kinframe_fcm_credentials | length > 0
+
+- name: No FCM credentials without kinframe_fcm_credentials
+  ansible.builtin.file:
+    path: "{{ kinframe_dir }}/fcm.json"
+    state: absent
+  register: fcm_file_removed
+  when: kinframe_fcm_credentials | length == 0
+
+- name: APNs key
+  ansible.builtin.copy:
+    content: "{{ kinframe_apns_key | trim }}\n"
+    dest: "{{ kinframe_dir }}/apns.p8"
+    owner: "10001"
+    group: root
+    mode: "0400"
+  no_log: true
+  register: apns_file
+  when: kinframe_apns_key | length > 0
+
+- name: No APNs key without kinframe_apns_key
+  ansible.builtin.file:
+    path: "{{ kinframe_dir }}/apns.p8"
+    state: absent
+  register: apns_file_removed
+  when: kinframe_apns_key | length == 0
 
 - name: Object store bootstrap script
   ansible.builtin.copy:
@@ -213,12 +260,12 @@
   register: server_up
   changed_when: "'Started' in server_up.stderr or 'Created' in server_up.stderr or 'Recreate' in server_up.stderr"
 
-# The server reads the Logto client IDs (/data/logto.json) and the shop file at start.
+# The server reads the Logto client IDs (/data/logto.json), the shop file and the push keys at start.
 - name: Restart the server after a Logto or shop change
   ansible.builtin.command:
     cmd: docker compose restart server
     chdir: "{{ kinframe_dir }}"
-  when: (bootstrap is changed or shop_file is changed) and server_up is not changed
+  when: (bootstrap is changed or shop_file is changed or shop_media is changed or fcm_file is changed or apns_file is changed) and server_up is not changed
   changed_when: true
 
 - name: Wait for the kinframe server

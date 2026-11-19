@@ -878,7 +878,7 @@ holds the `PhotoSourceErrorCode`), `duplicate_source` (`409`, the same outside a
 
 ## 15. Data model
 
-Migration `00015_photo_sources.sql` (as built it adds a few columns to this proposal, listed in server/NOTES.md
+Migration `00019_photo_sources.sql` (as built it adds a few columns to this proposal, listed in server/NOTES.md
 "Photo sources": `server_url`, `upstream_count`, `hold_since`/`last_new_at` for the feed debounce,
 `replacement_media_id`, `upstream_added_at`, `retry_at`, `google_imports.target_kind`/`auth_url_enc`/`done_ids`,
 `feed_posts.quiet`, `albums.only_in_album_mode`):

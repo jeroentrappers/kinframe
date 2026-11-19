@@ -11,6 +11,7 @@ import (
 	"net/mail"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -34,6 +35,9 @@ type Config struct {
 	Shipping   Shipping  `yaml:"shipping"`
 	// EstimatedDelivery is free text per language, e.g. {en: "early 2027", nl: "begin 2027"}.
 	EstimatedDelivery Localized `yaml:"estimated_delivery"`
+	// Elsewhere links visitors outside Shipping.Countries to retailers selling a
+	// frame the convert tool supports (affiliate links allowed).
+	Elsewhere []ElsewhereLink `yaml:"elsewhere"`
 	// NotifyEmail receives a message for every new reservation and cancellation.
 	NotifyEmail string `yaml:"notify_email"`
 	// RetentionDays: reservations are deleted this many days after their last
@@ -46,13 +50,40 @@ type Config struct {
 	// DefaultLocale is the storefront's language for visitors whose browser
 	// prefers none of the shop languages (EmailLanguages). Default "en".
 	DefaultLocale string `yaml:"default_locale"`
+	// Payments turns reservations into paid orders: the customer pays online
+	// (KINFRAME_MOLLIE_API_KEY) and the order is confirmed once paid. Nil =
+	// reservations without payment.
+	Payments *Payments `yaml:"payments"`
+	// Stock turns on stock management (dispatch.go); nil = no stock, and the
+	// shop shows EstimatedDelivery only.
+	Stock *Stock `yaml:"stock"`
 }
+
+// Payments configures online payment of orders.
+type Payments struct {
+	// Provider is the payment provider; only "mollie".
+	Provider string `yaml:"provider"`
+	// Methods limits the payment methods (Mollie ids: bancontact, creditcard,
+	// applepay, ideal, …); empty = every method enabled in the provider's dashboard.
+	Methods []string `yaml:"methods"`
+}
+
+// Checkout reports whether orders are paid online.
+func (c *Config) Checkout() bool { return c.Payments != nil }
 
 type Seller struct {
 	Name       string `yaml:"name"`
 	Email      string `yaml:"email"`
 	Legal      string `yaml:"legal"`
 	PrivacyURL string `yaml:"privacy_url"`
+	// TermsURL is the terms of sale (required with payments); empty = the
+	// web app's own page /shop/terms, built from the seller details.
+	TermsURL string `yaml:"terms_url"`
+	// Address and VATNumber identify the seller on the terms of sale and in
+	// order emails (required with payments).
+	Address   string `yaml:"address"`
+	VATNumber string `yaml:"vat_number"`
+	Phone     string `yaml:"phone"`
 }
 
 type Product struct {
@@ -65,6 +96,21 @@ type Product struct {
 	Image string `yaml:"image"`
 	// Specs are short bullets per language; "en" is required and the fallback.
 	Specs map[string][]string `yaml:"specs"`
+	// Photos are product photo file names in the shop's media directory
+	// (KINFRAME_SHOP_MEDIA_DIR), the first one leading; served at
+	// /v1/shop/media/{name}. Empty = the web illustration (Image).
+	Photos []string `yaml:"photos"`
+}
+
+// ElsewhereLink is a retailer selling a compatible frame in some countries.
+type ElsewhereLink struct {
+	// Countries are ISO 3166-1 alpha-2 codes; "*" means every other country.
+	Countries []string `yaml:"countries"`
+	Retailer  string   `yaml:"retailer"`
+	Product   string   `yaml:"product"`
+	URL       string   `yaml:"url"`
+	// Affiliate marks an affiliate link: the web app shows a disclosure.
+	Affiliate bool `yaml:"affiliate"`
 }
 
 type Shipping struct {
@@ -111,6 +157,7 @@ var Images = []string{"frame-10", "frame-15"}
 
 var (
 	idRe       = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,63}$`)
+	photoRe    = regexp.MustCompile(`^[a-z0-9][a-z0-9._-]{0,99}\.(jpg|jpeg|png|webp)$`)
 	countryRe  = regexp.MustCompile(`^[A-Z]{2}$`)
 	currencyRe = regexp.MustCompile(`^[A-Z]{3}$`)
 	prefixRe   = regexp.MustCompile(`^[A-Z]{1,4}$`)
@@ -154,6 +201,9 @@ func Parse(b []byte, serverName string) (*Config, error) {
 	if c.DefaultLocale == "" {
 		c.DefaultLocale = "en"
 	}
+	if c.Stock != nil && c.Stock.RestockDays == 0 {
+		c.Stock.RestockDays = 3
+	}
 	for i, d := range c.Domains {
 		c.Domains[i] = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(d)), ".")
 	}
@@ -191,6 +241,24 @@ func (c *Config) validate() error {
 			bad("seller.privacy_url must be an absolute http(s) URL")
 		}
 	}
+	if c.Seller.TermsURL != "" {
+		if u, err := url.Parse(c.Seller.TermsURL); err != nil || (u.Scheme != "https" && u.Scheme != "http") || u.Host == "" {
+			bad("seller.terms_url must be an absolute http(s) URL")
+		}
+	}
+	if p := c.Payments; p != nil {
+		if p.Provider != "mollie" {
+			bad("payments.provider must be mollie, got %q", p.Provider)
+		}
+		for _, m := range p.Methods {
+			if !idRe.MatchString(m) {
+				bad("payments.methods: %q is not a payment method id like bancontact", m)
+			}
+		}
+		if strings.TrimSpace(c.Seller.Address) == "" || strings.TrimSpace(c.Seller.VATNumber) == "" {
+			bad("seller.address and seller.vat_number are required with payments (terms of sale, order emails)")
+		}
+	}
 	if !validEmail(c.NotifyEmail) {
 		bad("notify_email must be an email address, got %q", c.NotifyEmail)
 	}
@@ -205,6 +273,14 @@ func (c *Config) validate() error {
 		where := fmt.Sprintf("products[%d]", i)
 		if !idRe.MatchString(p.ID) {
 			bad("%s.id must be lowercase letters, digits and dashes, got %q", where, p.ID)
+		}
+		if len(p.Photos) > 12 {
+			bad("%s.photos: at most 12", where)
+		}
+		for _, f := range p.Photos {
+			if !photoRe.MatchString(f) || strings.Contains(f, "..") {
+				bad("%s.photos: %q must be a lowercase file name ending in .jpg, .png or .webp", where, f)
+			}
 		}
 		if seen[p.ID] {
 			bad("%s.id %q is used twice", where, p.ID)
@@ -240,8 +316,28 @@ func (c *Config) validate() error {
 	if f := c.Shipping.FreeFromCents; f != nil && *f < 0 {
 		bad("shipping.free_from_cents must not be negative")
 	}
+	if c.Stock != nil && (c.Stock.RestockDays < 0 || c.Stock.RestockDays > 60) {
+		bad("stock.restock_days must be between 1 and 60")
+	}
 	if len(c.EstimatedDelivery) > 0 && c.EstimatedDelivery["en"] == "" {
 		bad("estimated_delivery needs an en text (the fallback)")
+	}
+	for i, l := range c.Elsewhere {
+		where := fmt.Sprintf("elsewhere[%d]", i)
+		if len(l.Countries) == 0 {
+			bad("%s.countries is required", where)
+		}
+		for _, cc := range l.Countries {
+			if cc != "*" && !countryRe.MatchString(cc) {
+				bad("%s.countries: %q is not an ISO 3166-1 alpha-2 code or *", where, cc)
+			}
+		}
+		if strings.TrimSpace(l.Retailer) == "" || strings.TrimSpace(l.Product) == "" {
+			bad("%s.retailer and product are required", where)
+		}
+		if u, err := url.Parse(l.URL); err != nil || u.Scheme != "https" || u.Host == "" {
+			bad("%s.url must be an absolute https URL", where)
+		}
 	}
 	for i, d := range c.Domains {
 		if len(d) > 253 || !domainRe.MatchString(d) {
@@ -334,4 +430,31 @@ func (c *Config) ShippingFor(subtotal int) int {
 		return 0
 	}
 	return c.Shipping.FlatCents
+}
+
+// Photo reports whether name is one of the products' photos (only those are
+// served from the media directory).
+func (c *Config) Photo(name string) bool {
+	for _, p := range c.Products {
+		if slices.Contains(p.Photos, name) {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckMedia checks that every product photo is a readable file in dir.
+func (c *Config) CheckMedia(dir string) error {
+	var errs []error
+	for _, p := range c.Products {
+		for _, f := range p.Photos {
+			if dir == "" {
+				return errors.New("products have photos but KINFRAME_SHOP_MEDIA_DIR is not set")
+			}
+			if st, err := os.Stat(filepath.Join(dir, f)); err != nil || !st.Mode().IsRegular() {
+				errs = append(errs, fmt.Errorf("photo %s of %s is not a file in %s", f, p.ID, dir))
+			}
+		}
+	}
+	return errors.Join(errs...)
 }

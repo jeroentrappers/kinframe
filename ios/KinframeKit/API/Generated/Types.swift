@@ -22,7 +22,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `PATCH /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/patch(updateMe)`.
     func updateMe(_ input: Operations.UpdateMe.Input) async throws -> Operations.UpdateMe.Output
-    /// Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+    /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.
@@ -1000,8 +1000,12 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/frame-app/apk/{versionCode}`.
     /// - Remark: Generated from `#/paths//v1/frame-app/apk/{versionCode}/get(getFrameAppApk)`.
     func getFrameAppApk(_ input: Operations.GetFrameAppApk.Input) async throws -> Operations.GetFrameAppApk.Output
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -1012,6 +1016,14 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `POST /v1/shop/reservations`.
     /// - Remark: Generated from `#/paths//v1/shop/reservations/post(createShopReservation)`.
     func createShopReservation(_ input: Operations.CreateShopReservation.Input) async throws -> Operations.CreateShopReservation.Output
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    func getShopOrderStatus(_ input: Operations.GetShopOrderStatus.Input) async throws -> Operations.GetShopOrderStatus.Output
     /// Cancels a reservation with the signed token from the link in the confirmation email (the web page
     /// `/shop/cancel?token=…` asks for a confirmation and then calls this). Idempotent. `404 not_found` for an
     /// invalid token or a deleted reservation.
@@ -1034,6 +1046,18 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/operator/reservations`.
     /// - Remark: Generated from `#/paths//v1/operator/reservations/get(operatorListReservations)`.
     func operatorListReservations(_ input: Operations.OperatorListReservations.Input) async throws -> Operations.OperatorListReservations.Output
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    func operatorListShopStock(_ input: Operations.OperatorListShopStock.Input) async throws -> Operations.OperatorListShopStock.Output
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    func operatorSetShopStock(_ input: Operations.OperatorSetShopStock.Input) async throws -> Operations.OperatorSetShopStock.Output
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
     ///
     /// - Remark: HTTP `GET /v1/operator/reservations.csv`.
@@ -1083,7 +1107,7 @@ extension APIProtocol {
             body: body
         ))
     }
-    /// Deletes the kinframe user. The Logto account is deleted separately via Logto's account API.
+    /// Deletes the kinframe user. When the server has Logto management credentials, it deletes the Logto account too.
     ///
     /// - Remark: HTTP `DELETE /v1/me`.
     /// - Remark: Generated from `#/paths//v1/me/delete(deleteMe)`.
@@ -3295,8 +3319,12 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Pre-order reservation for a frame sold by the server operator. No sign-in and no payment: the customer is
-    /// emailed when stock is in. Only on servers with a shop (discovery `shop`); `404 not_found` otherwise.
+    /// Order or reservation for a frame sold by the server operator, without sign-in. Shops with `checkout`: an
+    /// order the customer pays online; the answer has `checkout_url` (the provider's payment page, which returns to
+    /// `/shop/order?token=…`) and the emails go out once the provider reports the payment as paid. Otherwise a
+    /// reservation without payment; the customer is emailed right away. Only on servers with a shop (discovery
+    /// `shop`); `404 not_found` otherwise. With `checkout` also `street`/`minLength`, `city`/`minLength`,
+    /// `postal_code`/`minLength`; `502 server_error` when the payment provider fails.
     /// Prices and totals are recomputed by the server from its own configuration; the client never sends prices.
     /// Rate limited per IP (`429 rate_limited`). `website` is a honeypot that people never fill in: when it is
     /// not empty the server answers as usual but stores and sends nothing. Field errors (`422`) use these fields
@@ -3311,6 +3339,22 @@ extension APIProtocol {
         body: Operations.CreateShopReservation.Input.Body
     ) async throws -> Operations.CreateShopReservation.Output {
         try await createShopReservation(Operations.CreateShopReservation.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The order and its payment, for the page the payment provider returns to (`/shop/order?token=…`, with the
+    /// signed token from that link). Asks the provider for the latest status while the payment is still open, so it
+    /// also works where the provider can't reach the webhook. `404 not_found` for an invalid token.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/shop/orders/status`.
+    /// - Remark: Generated from `#/paths//v1/shop/orders/status/post(getShopOrderStatus)`.
+    public func getShopOrderStatus(
+        headers: Operations.GetShopOrderStatus.Input.Headers = .init(),
+        body: Operations.GetShopOrderStatus.Input.Body
+    ) async throws -> Operations.GetShopOrderStatus.Output {
+        try await getShopOrderStatus(Operations.GetShopOrderStatus.Input(
             headers: headers,
             body: body
         ))
@@ -3363,6 +3407,30 @@ extension APIProtocol {
         try await operatorListReservations(Operations.OperatorListReservations.Input(
             query: query,
             headers: headers
+        ))
+    }
+    /// Frames ready to ship per product (shops with `stock`), in the order of the shop's products; products never
+    /// counted have 0. `404 not_found` when the server has no shop or no stock management.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/operator/shop/stock`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/get(operatorListShopStock)`.
+    public func operatorListShopStock(headers: Operations.OperatorListShopStock.Input.Headers = .init()) async throws -> Operations.OperatorListShopStock.Output {
+        try await operatorListShopStock(Operations.OperatorListShopStock.Input(headers: headers))
+    }
+    /// Sets a product's stock count. Paid orders lower it; cancelled orders don't raise it again.
+    ///
+    /// - Remark: HTTP `PUT /v1/operator/shop/stock/{productId}`.
+    /// - Remark: Generated from `#/paths//v1/operator/shop/stock/{productId}/put(operatorSetShopStock)`.
+    public func operatorSetShopStock(
+        path: Operations.OperatorSetShopStock.Input.Path,
+        headers: Operations.OperatorSetShopStock.Input.Headers = .init(),
+        body: Operations.OperatorSetShopStock.Input.Body
+    ) async throws -> Operations.OperatorSetShopStock.Output {
+        try await operatorSetShopStock(Operations.OperatorSetShopStock.Input(
+            path: path,
+            headers: headers,
+            body: body
         ))
     }
     /// All reservations as CSV (UTF-8 with BOM, comma-separated), newest first; `status` filters.
