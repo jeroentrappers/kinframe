@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Gunakan tablet ini sebagai bingkai foto</string>
+    <string name="setup_home_body">Jadikan kinframe aplikasi layar utama tablet. Dengan begitu, kinframe terbuka sendiri saat tablet dinyalakan, dan tombol Beranda selalu membawa Anda kembali ke foto.</string>
+    <string name="setup_home_choose">Pilih aplikasi layar utama</string>
+    <string name="setup_home_hint">Pilih kinframe di daftar dan konfirmasikan sebagai default.</string>
+    <string name="setup_home_power_title">Biarkan tetap tersambung ke pengisi daya</string>
+    <string name="setup_home_power_body">Bingkai foto menyala sepanjang hari, jadi biarkan pengisi daya tetap tersambung. Pada malam hari, jadwal tidur yang Anda atur di aplikasi meredupkan layar.</string>
+    <string name="setup_home_not_now">Lain kali</string>
+    <string name="settings_home_title">Mode bingkai foto</string>
+    <string name="settings_home_body">kinframe belum menjadi aplikasi layar utama tablet ini, jadi tidak terbuka sendiri saat tablet dinyalakan.</string>
+    <string name="updates_from_play">Bingkai ini mendapat pembaruan dari Google Play.</string>
+    <string name="updates_open_play">Buka di Play Store</string>
+    <string name="updates_play_prompt">Pembaruan sudah siap. Ikuti langkah dari Google Play untuk memasangnya.</string>
+</resources>

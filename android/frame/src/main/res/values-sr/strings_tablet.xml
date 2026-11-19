@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Користите овај таблет као фото-рам</string>
+    <string name="setup_home_body">Подесите kinframe као апликацију почетног екрана таблета. Тада се сам покреће када се таблет укључи, а дугме Почетна вас увек враћа на фотографије.</string>
+    <string name="setup_home_choose">Изабери апликацију почетног екрана</string>
+    <string name="setup_home_hint">Изаберите kinframe са листе и потврдите га као подразумевани.</string>
+    <string name="setup_home_power_title">Оставите га на пуњачу</string>
+    <string name="setup_home_power_body">Фото-рам је укључен цео дан, зато оставите пуњач прикључен. Ноћу распоред спавања који подесите у апликацији затамњује екран.</string>
+    <string name="setup_home_not_now">Не сада</string>
+    <string name="settings_home_title">Режим фото-рама</string>
+    <string name="settings_home_body">kinframe још увек није апликација почетног екрана овог таблета, па се не покреће сам када се таблет укључи.</string>
+    <string name="updates_from_play">Овај рам добија ажурирања са Google Play-а.</string>
+    <string name="updates_open_play">Отвори у Play продавници</string>
+    <string name="updates_play_prompt">Ажурирање је спремно. Пратите кораке у Google Play-у да бисте га инсталирали.</string>
+</resources>

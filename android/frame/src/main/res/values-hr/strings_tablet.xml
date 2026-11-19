@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Koristite ovaj tablet kao foto okvir</string>
+    <string name="setup_home_body">Postavite kinframe kao aplikaciju početnog zaslona tableta. Tada se sam pokreće kad se tablet uključi, a tipka Početna uvijek vas vraća na fotografije.</string>
+    <string name="setup_home_choose">Odaberi aplikaciju početnog zaslona</string>
+    <string name="setup_home_hint">Odaberite kinframe na popisu i potvrdite ga kao zadani.</string>
+    <string name="setup_home_power_title">Ostavite ga na punjaču</string>
+    <string name="setup_home_power_body">Foto okvir je uključen cijeli dan, zato ostavite punjač priključen. Noću raspored mirovanja koji postavite u aplikaciji zatamnjuje zaslon.</string>
+    <string name="setup_home_not_now">Ne sada</string>
+    <string name="settings_home_title">Način foto okvira</string>
+    <string name="settings_home_body">kinframe još nije aplikacija početnog zaslona ovog tableta, pa se ne pokreće sam kad se tablet uključi.</string>
+    <string name="updates_from_play">Ovaj okvir prima ažuriranja s Google Playa.</string>
+    <string name="updates_open_play">Otvori u Trgovini Play</string>
+    <string name="updates_play_prompt">Ažuriranje je spremno. Slijedite korake Google Playa da biste ga instalirali.</string>
+</resources>

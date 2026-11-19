@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">استخدم هذا الجهاز اللوحي كإطار صور</string>
+    <string name="setup_home_body">اجعل kinframe تطبيق الشاشة الرئيسية للجهاز اللوحي. عندها يبدأ تلقائيًا عند تشغيل الجهاز، ويعيدك زر الشاشة الرئيسية دائمًا إلى الصور.</string>
+    <string name="setup_home_choose">اختيار تطبيق الشاشة الرئيسية</string>
+    <string name="setup_home_hint">اختر kinframe من القائمة وأكّد أنه التطبيق الافتراضي.</string>
+    <string name="setup_home_power_title">أبقِه موصولًا بالشاحن</string>
+    <string name="setup_home_power_body">يعمل إطار الصور طوال اليوم، لذا اترك الشاحن موصولًا. في الليل يُعتم جدول النوم الذي تضبطه في التطبيق الشاشة.</string>
+    <string name="setup_home_not_now">ليس الآن</string>
+    <string name="settings_home_title">وضع إطار الصور</string>
+    <string name="settings_home_body">kinframe ليس تطبيق الشاشة الرئيسية لهذا الجهاز اللوحي بعد، لذلك لا يبدأ تلقائيًا عند تشغيل الجهاز.</string>
+    <string name="updates_from_play">يحصل هذا الإطار على التحديثات من Google Play.</string>
+    <string name="updates_open_play">فتح في Play Store</string>
+    <string name="updates_play_prompt">يتوفر تحديث. اتبع خطوات Google Play لتثبيته.</string>
+</resources>

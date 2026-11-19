@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">ใช้แท็บเล็ตเครื่องนี้เป็นกรอบรูป</string>
+    <string name="setup_home_body">ตั้ง kinframe เป็นแอปหน้าจอหลักของแท็บเล็ต แล้วแอปจะเริ่มทำงานเองเมื่อเปิดแท็บเล็ต และปุ่มหน้าแรกจะพาคุณกลับมาที่รูปภาพเสมอ</string>
+    <string name="setup_home_choose">เลือกแอปหน้าจอหลัก</string>
+    <string name="setup_home_hint">เลือก kinframe ในรายการ แล้วยืนยันให้เป็นค่าเริ่มต้น</string>
+    <string name="setup_home_power_title">เสียบสายชาร์จไว้ตลอด</string>
+    <string name="setup_home_power_body">กรอบรูปเปิดอยู่ทั้งวัน จึงควรเสียบที่ชาร์จไว้ ตอนกลางคืน ตารางเวลาพักหน้าจอที่คุณตั้งในแอปจะทำให้หน้าจอมืดลง</string>
+    <string name="setup_home_not_now">ไว้ทีหลัง</string>
+    <string name="settings_home_title">โหมดกรอบรูป</string>
+    <string name="settings_home_body">kinframe ยังไม่ใช่แอปหน้าจอหลักของแท็บเล็ตเครื่องนี้ จึงไม่เริ่มทำงานเองเมื่อเปิดแท็บเล็ต</string>
+    <string name="updates_from_play">กรอบรูปนี้รับอัปเดตจาก Google Play</string>
+    <string name="updates_open_play">เปิดใน Play Store</string>
+    <string name="updates_play_prompt">มีอัปเดตพร้อมแล้ว ทำตามขั้นตอนของ Google Play เพื่อติดตั้ง</string>
+</resources>

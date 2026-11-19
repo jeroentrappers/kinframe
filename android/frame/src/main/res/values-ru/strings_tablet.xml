@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Используйте этот планшет как фоторамку</string>
+    <string name="setup_home_body">Сделайте kinframe приложением главного экрана планшета. Тогда он будет запускаться сам при включении планшета, а кнопка «Домой» всегда вернёт вас к фотографиям.</string>
+    <string name="setup_home_choose">Выбрать приложение главного экрана</string>
+    <string name="setup_home_hint">Выберите kinframe в списке и подтвердите его по умолчанию.</string>
+    <string name="setup_home_power_title">Держите его на зарядке</string>
+    <string name="setup_home_power_body">Фоторамка работает весь день, поэтому не отключайте зарядку. Ночью расписание сна, заданное в приложении, затемняет экран.</string>
+    <string name="setup_home_not_now">Не сейчас</string>
+    <string name="settings_home_title">Режим фоторамки</string>
+    <string name="settings_home_body">kinframe ещё не стал приложением главного экрана этого планшета, поэтому не запускается сам при его включении.</string>
+    <string name="updates_from_play">Эта рамка получает обновления из Google Play.</string>
+    <string name="updates_open_play">Открыть в Play Маркете</string>
+    <string name="updates_play_prompt">Обновление готово. Установите его, следуя шагам в Google Play.</string>
+</resources>

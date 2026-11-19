@@ -25,7 +25,8 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.io.IOException
 import java.time.Instant
 
-enum class SetupStep { Language, Wifi, TimeZone, Server, Enrolling, Update, Code, Celebrate }
+/** Persisted by ordinal (up to [Server]): only ever append. */
+enum class SetupStep { Language, Wifi, TimeZone, Server, Enrolling, Update, Code, Celebrate, HomeApp }
 
 sealed interface ServerCheck {
     data object Idle : ServerCheck
@@ -53,7 +54,8 @@ data class SetupState(
 
 /**
  * The first-run wizard (product spec 4.8): language → Wi-Fi → time zone → server → enroll → update → frame code →
- * "Connected".
+ * "Connected" → on a tablet that doesn't have kinframe as its home app yet, "Use this tablet as a photo frame"
+ * ([HomeApp], docs/play-frame.md).
  * Progress is persisted so a power cut during setup resumes at the same step.
  */
 class SetupController(private val c: FrameController) {
@@ -108,13 +110,15 @@ class SetupController(private val c: FrameController) {
 
     fun updateStatus() = c.update.status
 
+    fun updatesFromStore() = c.update.fromStore
+
     fun suggestedTimezones(): List<String> =
         TimeZones.suggest(java.util.TimeZone.getDefault().id, java.util.Locale.getDefault().country)
 
     /** Update step (product spec 4.8): look for a newer version and install it right away, before the code. */
     fun startUpdateCheck() {
         updateCheckStarted = true
-        c.update.requestCheck(app.kinframe.frame.update.UpdateManager.Trigger.User)
+        c.update.requestCheck(app.kinframe.frame.update.UpdateTrigger.User)
     }
 
     var updateCheckStarted = false
@@ -126,6 +130,14 @@ class SetupController(private val c: FrameController) {
         goTo(SetupStep.Code)
         startCodeLoop()
     }
+
+    /** Leaves the home-app step: kinframe is the home app now, or "Not now". */
+    fun finishHomeAppStep() {
+        if (_state.value.step != SetupStep.HomeApp) return
+        c.finishSetup()
+    }
+
+    fun homeApp() = c.homeApp
 
     fun setUseCustom(custom: Boolean) = _state.update { it.copy(useCustomServer = custom, check = ServerCheck.Idle) }
     fun setCustomUrl(url: String) = _state.update { it.copy(customUrl = url, check = ServerCheck.Idle) }
@@ -253,7 +265,7 @@ class SetupController(private val c: FrameController) {
             g.prefs.ownerName = owner
             _state.update { it.copy(ownerName = owner) }
             delay(CELEBRATE_MS)
-            c.finishSetup()
+            if (HomeAppPolicy.offerInSetup(c.homeApp.refresh())) goTo(SetupStep.HomeApp) else c.finishSetup()
         }
         codeJob?.cancel()
     }

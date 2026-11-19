@@ -56,7 +56,7 @@ func TestReadAPKManifest(t *testing.T) {
 	}
 }
 
-// TestRealAPK parses an APK built by Gradle: KINFRAME_TEST_FRAME_APK=../android/frame/build/outputs/apk/release/frame-release.apk
+// TestRealAPK parses an APK built by Gradle: KINFRAME_TEST_FRAME_APK=../android/frame/build/outputs/apk/github/release/frame-github-release.apk
 func TestRealAPK(t *testing.T) {
 	p := os.Getenv("KINFRAME_TEST_FRAME_APK")
 	if p == "" {

@@ -66,7 +66,8 @@ import app.kinframe.frame.kiosk.SetPinFlow
 import app.kinframe.frame.R
 import app.kinframe.frame.schedule.SleepPlanner
 import app.kinframe.frame.setup.signalWord
-import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.update.UpdatePhase
+import app.kinframe.frame.update.UpdateTrigger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -113,6 +114,7 @@ fun SettingsScreen(c: FrameController, onClose: () -> Unit) {
                 Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 88.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
+                HomeAppSection(c)
                 SlideshowSection(c, s, ::section)
                 VideoSection(s, ::section)
                 DisplaySection(c, s, ::section)
@@ -390,32 +392,71 @@ private fun OwnerPinSection(c: FrameController, s: FrameSettings, onChoose: () -
 @Composable
 private fun UpdatesSection(c: FrameController, s: FrameSettings, section: (String, Array<out Pair<String, Any?>>) -> Unit) {
     val status by c.update.status.collectAsState()
+    val context = LocalContext.current
+    val store = c.update.fromStore
     SectionCard(stringResource(R.string.settings_updates)) {
-        Labeled(stringResource(R.string.updates_channel)) {
-            ChoiceChips(
-                listOf("stable" to stringResource(R.string.updates_channel_stable), "beta" to stringResource(R.string.updates_channel_beta)),
-                if (s.updates.channel == "beta") "beta" else "stable",
-                { section("updates", arrayOf("channel" to it)) },
-            )
+        if (store) {
+            // Google Play build: Play's tracks replace the release channel (docs/play-frame.md).
+            Text(stringResource(R.string.updates_from_play), style = Kin.type.body, color = Kin.colors.inkSoft)
+        } else {
+            Labeled(stringResource(R.string.updates_channel)) {
+                ChoiceChips(
+                    listOf("stable" to stringResource(R.string.updates_channel_stable), "beta" to stringResource(R.string.updates_channel_beta)),
+                    if (s.updates.channel == "beta") "beta" else "stable",
+                    { section("updates", arrayOf("channel" to it)) },
+                )
+            }
         }
         val name = status.versionName.orEmpty()
         val line = when (status.phase) {
-            UpdateManager.Phase.Idle -> null
-            UpdateManager.Phase.Checking -> stringResource(R.string.updates_checking)
-            UpdateManager.Phase.UpToDate -> stringResource(R.string.updates_up_to_date)
-            UpdateManager.Phase.Downloading -> stringResource(R.string.updates_downloading, name, ((status.progress ?: 0f) * 100).toInt())
-            UpdateManager.Phase.Waiting -> stringResource(R.string.updates_waiting, name)
-            UpdateManager.Phase.Installing -> stringResource(R.string.updates_installing, name)
-            UpdateManager.Phase.NeedsUser -> stringResource(R.string.update_notice_needs_user)
-            UpdateManager.Phase.Failed -> stringResource(R.string.updates_failed)
+            UpdatePhase.Idle -> null
+            UpdatePhase.Checking -> stringResource(R.string.updates_checking)
+            UpdatePhase.UpToDate -> stringResource(R.string.updates_up_to_date)
+            UpdatePhase.Downloading -> stringResource(R.string.updates_downloading, name, ((status.progress ?: 0f) * 100).toInt())
+            UpdatePhase.Waiting -> stringResource(R.string.updates_waiting, name)
+            UpdatePhase.Installing -> stringResource(R.string.updates_installing, name)
+            UpdatePhase.NeedsUser -> stringResource(if (store) R.string.updates_play_prompt else R.string.update_notice_needs_user)
+            UpdatePhase.Failed -> stringResource(R.string.updates_failed)
         }
         if (line != null) Text(line, style = Kin.type.body, color = Kin.colors.inkSoft)
-        val busy = status.phase in setOf(UpdateManager.Phase.Checking, UpdateManager.Phase.Downloading, UpdateManager.Phase.Installing)
-        KinButton(
-            stringResource(if (status.phase == UpdateManager.Phase.Waiting) R.string.updates_install_now else R.string.updates_check),
-            { c.update.requestCheck(UpdateManager.Trigger.User) },
-            style = KinButtonStyle.Secondary, enabled = !busy,
-        )
+        val busy = status.phase in setOf(UpdatePhase.Checking, UpdatePhase.Downloading, UpdatePhase.Installing)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            KinButton(
+                stringResource(if (status.phase == UpdatePhase.Waiting) R.string.updates_install_now else R.string.updates_check),
+                { c.update.requestCheck(UpdateTrigger.User) },
+                style = KinButtonStyle.Secondary, enabled = !busy,
+            )
+            if (store) {
+                KinButton(stringResource(R.string.updates_open_play), {
+                    (context as? Activity)?.let { a -> c.gate.authorize(OwnerGate.Reason.ExitKiosk) { openStoreListing(a) } }
+                }, style = KinButtonStyle.Quiet)
+            }
+        }
+    }
+}
+
+/** The app's Play Store page: the Play Store app, else the web page. */
+private fun openStoreListing(a: Activity) {
+    val id = a.packageName
+    runCatching { a.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("market://details?id=$id")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+        .recoverCatching { a.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=$id")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+}
+
+/** On a tablet that doesn't have kinframe as its home app yet: explain, and open Android's chooser (docs/play-frame.md). */
+@Composable
+private fun HomeAppSection(c: FrameController) {
+    val isHome by c.homeApp.isHome.collectAsState()
+    if (isHome) return
+    val chooser = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+    ) { c.homeApp.refresh() }
+    SectionCard(stringResource(R.string.settings_home_title)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            KinIcon(KinIcons.Home, null, tint = Kin.colors.accent)
+            Text(stringResource(R.string.settings_home_body), style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.padding(start = 14.dp))
+        }
+        Text(stringResource(R.string.setup_home_hint), style = Kin.type.body, color = Kin.colors.inkSoft)
+        KinButton(stringResource(R.string.setup_home_choose), { runCatching { chooser.launch(c.homeApp.chooserIntent()) } }, style = KinButtonStyle.Secondary)
     }
 }
 

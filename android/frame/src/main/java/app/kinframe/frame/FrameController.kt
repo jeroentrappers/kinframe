@@ -21,7 +21,9 @@ import app.kinframe.frame.setup.SetupController
 import app.kinframe.frame.slideshow.SlideshowController
 import app.kinframe.frame.sync.FrameSession
 import app.kinframe.frame.system.PowerActions
+import app.kinframe.frame.update.AppUpdates
 import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.update.UpdateTrigger
 import app.kinframe.frame.weather.Weather
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -70,10 +72,13 @@ class FrameController(val g: FrameGraph) {
     val session: StateFlow<FrameSession?> = _session
 
     val setup = SetupController(this)
+    /** Whether kinframe is the home app, and the chooser to make it so (a tablet used as a frame). */
+    val homeApp = app.kinframe.frame.setup.HomeApp(g.app)
     val display = DisplayController(this)
     val slideshow by lazy { SlideshowController(this) }
     val power = PowerActions(this)
-    val update = UpdateManager(this)
+    /** Self-update (github) or Google Play in-app updates (play): the flavor's [UpdateManager]. */
+    val update: AppUpdates = UpdateManager(this)
     val gate = OwnerGate(
         pinHash = { g.settings.settings.value.kiosk.ownerPinHash },
         attempts = PinAttempts(g.prefs.pinAttempts) { g.clock.nowMs() },
@@ -421,7 +426,7 @@ class FrameController(val g: FrameGraph) {
             "sync_now" -> {
                 _session.value?.requestPull(); _session.value?.sendHeartbeatNow()
                 calendar.syncNow()
-                update.requestCheck(UpdateManager.Trigger.Remote)
+                update.requestCheck(UpdateTrigger.Remote)
                 null
             }
             "identify" -> {
@@ -462,7 +467,7 @@ class FrameController(val g: FrameGraph) {
             timezone = g.clock.zone.id,
             updateState = updateState,
             lastUpdateError = updateError,
-            features = app.kinframe.core.api.FrameFeatures.SUPPORTED,
+            features = Distribution.heartbeatFeatures(),
         )
     }
 

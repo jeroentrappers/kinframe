@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">将这台平板用作相框</string>
+    <string name="setup_home_body">将 kinframe 设为平板的主屏幕应用。这样平板开机时它会自动启动，按主屏幕键也总能回到照片。</string>
+    <string name="setup_home_choose">选择主屏幕应用</string>
+    <string name="setup_home_hint">在列表中选择 kinframe，并确认设为默认。</string>
+    <string name="setup_home_power_title">保持插着充电器</string>
+    <string name="setup_home_power_body">相框整天开着，请一直连接充电器。夜间，你在应用中设置的睡眠时间表会让屏幕变暗。</string>
+    <string name="setup_home_not_now">以后再说</string>
+    <string name="settings_home_title">相框模式</string>
+    <string name="settings_home_body">kinframe 还不是这台平板的主屏幕应用，因此平板开机时不会自动启动。</string>
+    <string name="updates_from_play">此相框通过 Google Play 获取更新。</string>
+    <string name="updates_open_play">在 Play 商店中打开</string>
+    <string name="updates_play_prompt">更新已准备就绪。请按照 Google Play 的步骤进行安装。</string>
+</resources>

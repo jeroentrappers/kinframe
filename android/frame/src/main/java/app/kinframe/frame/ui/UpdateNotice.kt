@@ -24,25 +24,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.kinframe.core.design.Kin
 import app.kinframe.frame.R
-import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.update.AppUpdates
+import app.kinframe.frame.update.UpdateAnnouncement
 import kotlinx.coroutines.delay
 
 /** Small, calm message at the bottom of the frame about a self-update ("Updated to 0.2.0"). Tap or wait to dismiss. */
 @Composable
-fun UpdateNotice(update: UpdateManager) {
+fun UpdateNotice(update: AppUpdates) {
     val notice by update.notice.collectAsState()
     LaunchedEffect(notice) {
         if (notice != null) {
-            delay(if (notice is UpdateManager.Notice.NeedsUser) 30_000 else 8_000)
+            delay(if (notice is UpdateAnnouncement.NeedsUser) 30_000 else 8_000)
             update.dismissNotice()
         }
     }
     Box(Modifier.fillMaxSize().padding(bottom = 40.dp), contentAlignment = Alignment.BottomCenter) {
         AnimatedVisibility(visible = notice != null, enter = fadeIn(), exit = fadeOut()) {
             val text = when (val n = notice) {
-                is UpdateManager.Notice.Updated -> stringResource(R.string.update_notice_updated, n.versionName)
-                UpdateManager.Notice.RolledBack -> stringResource(R.string.update_notice_rolled_back)
-                UpdateManager.Notice.NeedsUser -> stringResource(R.string.update_notice_needs_user)
+                is UpdateAnnouncement.Updated -> stringResource(R.string.update_notice_updated, n.versionName)
+                UpdateAnnouncement.RolledBack -> stringResource(R.string.update_notice_rolled_back)
+                UpdateAnnouncement.NeedsUser -> stringResource(R.string.update_notice_needs_user)
                 null -> ""
             }
             Text(

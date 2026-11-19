@@ -27,8 +27,14 @@ realm = "10.19.0"
 quickjs = "1.0.15"
 androidxTestRunner = "1.7.0"
 androidxTestJunit = "1.3.0"
+playAppUpdate = "2.1.0"
+fragment = "1.8.9"
 
 [libraries]
+# Frame, Google Play flavor only: Play in-app updates (docs/play-frame.md).
+play-app-update = { module = "com.google.android.play:app-update", version.ref = "playAppUpdate" }
+# Play services pull in Fragment 1.0, whose activity results are broken; the activity-result API needs 1.3+.
+androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
 # Frame only: reads the Realm database Frameo leaves on a converted frame (docs/spec/frameo-import.md).
 realm-android = { module = "io.realm:realm-android-library", version.ref = "realm" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }

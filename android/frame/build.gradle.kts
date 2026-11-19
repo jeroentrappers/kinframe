@@ -15,6 +15,9 @@ val frameVersionCode: Int = providers.gradleProperty("versionCode").map { it.toI
 fun signingValue(name: String): String? =
     providers.environmentVariable(name).orElse(providers.gradleProperty(name)).orNull?.takeIf { it.isNotBlank() }
 val releaseKeystore: String? = signingValue("KINFRAME_KEYSTORE_FILE")
+// Google Play (the `play` flavor, docs/play-frame.md): the AAB is signed with the frame's upload key; Play re-signs it
+// with the app signing key, which is the GitHub release key handed over through Play App Signing.
+val playUploadKeystore: String? = signingValue("KINFRAME_FRAME_UPLOAD_KEYSTORE")
 val emulatorAbis: List<String> = providers.gradleProperty("emulatorAbis").map { p -> p.split(',').map { it.trim() }.filter { it.isNotEmpty() } }.getOrElse(emptyList())
 
 android {
@@ -44,6 +47,34 @@ android {
                 keyAlias = signingValue("KINFRAME_KEY_ALIAS")
                 keyPassword = signingValue("KINFRAME_KEY_PASSWORD")
             }
+        }
+        if (playUploadKeystore != null) {
+            create("playUpload") {
+                storeFile = file(playUploadKeystore)
+                storePassword = signingValue("KINFRAME_FRAME_UPLOAD_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("KINFRAME_FRAME_UPLOAD_KEY_ALIAS")
+                keyPassword = signingValue("KINFRAME_FRAME_UPLOAD_KEY_PASSWORD")
+            }
+        }
+    }
+
+    // Where the app comes from (docs/play-frame.md). Same application id and version scheme for both.
+    // - github: GitHub releases, installed by the convert tool; self-updates from the kinframe server, uses root
+    //   where the frame has it. The default (CI release, convert tool, local development).
+    // - play: Google Play, for ordinary Android tablets: updates through Play's in-app updates, never installs APKs,
+    //   never runs su, and leaves out the permissions only converted frames need (src/play/AndroidManifest.xml).
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") {
+            dimension = "distribution"
+            isDefault = true
+            buildConfigField("String", "DISTRIBUTION", "\"github\"")
+            buildConfigField("boolean", "ROOT_ALLOWED", "true")
+        }
+        create("play") {
+            dimension = "distribution"
+            buildConfigField("String", "DISTRIBUTION", "\"play\"")
+            buildConfigField("boolean", "ROOT_ALLOWED", "false")
         }
     }
 
@@ -120,6 +151,10 @@ androidComponents {
     onVariants { variant ->
         variant.sources.assets?.addGeneratedSourceDirectory(bundlePlugins, BundlePlugins::output)
     }
+    // Play release builds are signed with the upload key instead (fastlane `frame_build`); without it, the debug key.
+    onVariants(selector().withFlavor("distribution" to "play").withBuildType("release")) { variant ->
+        variant.signingConfig.from(android.signingConfigs.findByName("playUpload") ?: android.signingConfigs.getByName("debug"))
+    }
 }
 
 // JVM unit tests run the plugins in the desktop build of the same QuickJS binding (the Android .so can't load there).
@@ -144,6 +179,9 @@ dependencies {
     implementation(libs.realm.android)
     // The plugin host's JavaScript engine (docs/plugins.md §5): QuickJS with coroutine-friendly bindings.
     implementation(libs.quickjs.kt)
+    // Google Play builds only: Play's in-app updates instead of the self-update (docs/play-frame.md).
+    "playImplementation"(libs.play.app.update)
+    "playImplementation"(libs.androidx.fragment)
 
     testImplementation(libs.junit)
     testImplementation(libs.okhttp.mockwebserver)

@@ -1,0 +1,23 @@
+Give the old tablet in the drawer a second life: kinframe turns it into a photo frame for the living room, the kitchen or grandma's sideboard. The family sends photos and videos from their phones, and a few seconds later they're on the frame. No subscriptions, no ads, no tracking.
+
+HOW IT WORKS
+Install kinframe on the tablet, pick a language and Wi-Fi, and the frame shows an 8-digit code. Enter that code in the kinframe app on your phone (Android or iPhone) or on kinframe.appmire.be and the frame is yours. Invite the family, and everyone can send.
+
+MADE TO RUN ALL DAY
+• Make kinframe the tablet's home app and it starts by itself when the tablet turns on. The setup shows you how.
+• Keep the tablet plugged in: kinframe keeps the screen on and darkens it at night on the sleep schedule you choose.
+• Photos are kept on the tablet, so the slideshow keeps going when the Wi-Fi drops.
+• An owner PIN keeps settings and Android's menus out of reach of little fingers.
+
+MORE THAN A SLIDESHOW
+• Captions, hearts and quick replies: a tap on the frame lets the sender know the photo made someone smile.
+• Videos and live photos, with sound if you like.
+• Albums, "on this day", a clock, the weather, calendars and countdowns, and birthday cards with balloons.
+• Live widgets from your home: Home Assistant, HomeWizard and more.
+
+YOURS TO KEEP
+kinframe is open source and free software (AGPL-3.0). Use the hosted service at kinframe.appmire.be, with servers in Germany, or run your own kinframe server: the frame works with both. There are no ads, no analytics and no telemetry.
+
+WHAT YOU NEED
+• An Android tablet with Android 6.0 or newer and Wi-Fi.
+• Someone in the family with the kinframe app or a web browser to claim the frame and send photos.

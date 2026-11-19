@@ -1,12 +1,23 @@
-# Google Play for the family app (app.kinframe.family). The frame app is not on Play: it ships as GitHub releases.
+# Google Play for the family app (app.kinframe.family) and the frame app's Play build (app.kinframe.frame, the `play`
+# flavor, docs/play-frame.md). Converted frames keep getting the frame app from GitHub releases.
 #
+# Family app:
 #   bundle exec fastlane android build              signed AAB in family/build/outputs/bundle/release/
 #   bundle exec fastlane android internal           build + upload to the internal testing track
 #   bundle exec fastlane android metadata version_code:305   store listing only (fastlane/metadata/android/)
 #   bundle exec fastlane android promote track:production rollout:0.1
 #
-# Signing and Firebase come from ~/.config/play/kinframe-signing.env (KINFRAME_UPLOAD_*, KINFRAME_GOOGLE_SERVICES).
-# Version: VERSION_NAME (default: latest v* tag), VERSION_CODE (default: git commit count, like iOS).
+# Frame app (Play build), for a release tag (default: the v* tag on HEAD):
+#   bundle exec fastlane android frame_build tag:v0.3.0        signed AAB in frame/build/outputs/bundle/playRelease/
+#   bundle exec fastlane android frame_internal tag:v0.3.0     build + upload to the internal testing track
+#   bundle exec fastlane android frame_metadata version_code:30099   store listing (fastlane/frame-metadata/android/)
+#   bundle exec fastlane android frame_promote track:production rollout:0.1
+#
+# Signing and Firebase come from ~/.config/play/kinframe-signing.env: KINFRAME_UPLOAD_* and KINFRAME_GOOGLE_SERVICES
+# for the family app, KINFRAME_FRAME_UPLOAD_* for the frame app (its own upload key), SUPPLY_JSON_KEY for both.
+# Family version: VERSION_NAME (default: latest v* tag), VERSION_CODE (default: git commit count, like iOS).
+# Frame version: from the tag, exactly as .github/workflows/release-frame.yml computes it for the GitHub release, so
+# both builds of a tag carry the same version and update each other.
 
 default_platform(:android)
 
@@ -52,6 +63,55 @@ platform :android do
                          skip_upload_metadata: true, skip_upload_changelogs: true, skip_upload_images: true,
                          skip_upload_screenshots: true)
   end
+
+  # ------------------------------------------------------------------ frame app (Play build)
+
+  FRAME_PACKAGE = "app.kinframe.frame"
+  FRAME_METADATA = File.expand_path("frame-metadata/android", __dir__)
+  FRAME_AAB = File.expand_path("../frame/build/outputs/bundle/playRelease/frame-play-release.aab", __dir__)
+
+  lane :frame_build do |options|
+    UI.user_error!("KINFRAME_FRAME_UPLOAD_KEYSTORE is not set") if ENV["KINFRAME_FRAME_UPLOAD_KEYSTORE"].to_s.empty?
+    tag = options[:tag] || ENV["FRAME_TAG"] || sh("git describe --tags --exact-match --match 'v*' HEAD 2>/dev/null || true").strip
+    UI.user_error!("No release tag: pass tag:vX.Y.Z (or vX.Y.Z-beta.N), or check out a tagged commit") if tag.empty?
+    v = frame_version(tag)
+    UI.message("kinframe frame (Play) #{v[:name]} (#{v[:code]})#{v[:beta] ? ' beta' : ''}")
+    gradle(task: ":frame:bundle", flavor: "Play", build_type: "Release", print_command: false,
+           properties: { "versionName" => v[:name], "versionCode" => v[:code].to_s })
+  end
+
+  # Beta tags (vX.Y.Z-beta.N) go to internal too; promote them to `beta` (open testing) rather than production.
+  lane :frame_internal do |options|
+    frame_build(options)
+    upload_to_play_store(package_name: FRAME_PACKAGE, metadata_path: FRAME_METADATA, aab: FRAME_AAB,
+                         track: "internal", release_status: options_status, skip_upload_apk: true,
+                         skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true)
+  end
+
+  lane :frame_metadata do |options|
+    upload_to_play_store(package_name: FRAME_PACKAGE, metadata_path: FRAME_METADATA,
+                         track: options.fetch(:track, "internal"), version_code: options.fetch(:version_code).to_i,
+                         skip_upload_apk: true, skip_upload_aab: true, skip_upload_changelogs: true)
+  end
+
+  lane :frame_promote do |options|
+    upload_to_play_store(package_name: FRAME_PACKAGE, metadata_path: FRAME_METADATA,
+                         track: "internal", track_promote_to: options.fetch(:track, "production"),
+                         rollout: options.fetch(:rollout, "0.1").to_s, skip_upload_apk: true, skip_upload_aab: true,
+                         skip_upload_metadata: true, skip_upload_changelogs: true, skip_upload_images: true,
+                         skip_upload_screenshots: true)
+  end
+end
+
+# vX.Y.Z → X.Y.Z, X*1_000_000 + Y*10_000 + Z*100 + 99; vX.Y.Z-beta.N → + N (1..98). Same as release-frame.yml.
+def frame_version(tag)
+  m = /\Av(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d+))?\z/.match(tag)
+  UI.user_error!("tag #{tag} is not vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-beta.N") unless m
+  major, minor, patch = m[1].to_i, m[2].to_i, m[3].to_i
+  UI.user_error!("minor and patch must be at most 99") if minor > 99 || patch > 99
+  beta = m[4]&.to_i
+  UI.user_error!("beta number must be 1..98") if beta && !(1..98).cover?(beta)
+  { name: tag.delete_prefix("v"), code: major * 1_000_000 + minor * 10_000 + patch * 100 + (beta || 99), beta: !beta.nil? }
 end
 
 # A new app stays in draft on every track until Google has reviewed the first release and the listing is complete.

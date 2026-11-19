@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Utiliser cette tablette comme cadre photo</string>
+    <string name="setup_home_body">Faites de kinframe l’application d’écran d’accueil de la tablette. Il démarre alors tout seul quand la tablette s’allume, et le bouton Accueil vous ramène toujours aux photos.</string>
+    <string name="setup_home_choose">Choisir l’application d’accueil</string>
+    <string name="setup_home_hint">Choisissez kinframe dans la liste et confirmez-le par défaut.</string>
+    <string name="setup_home_power_title">Laissez-la branchée</string>
+    <string name="setup_home_power_body">Un cadre photo reste allumé toute la journée : laissez le chargeur branché. La nuit, le programme de veille que vous réglez dans l’application assombrit l’écran.</string>
+    <string name="setup_home_not_now">Plus tard</string>
+    <string name="settings_home_title">Mode cadre photo</string>
+    <string name="settings_home_body">kinframe n’est pas encore l’application d’accueil de cette tablette : il ne démarre donc pas tout seul quand elle s’allume.</string>
+    <string name="updates_from_play">Ce cadre reçoit ses mises à jour via Google Play.</string>
+    <string name="updates_open_play">Ouvrir dans le Play Store</string>
+    <string name="updates_play_prompt">Une mise à jour est prête. Suivez les étapes de Google Play pour l’installer.</string>
+</resources>

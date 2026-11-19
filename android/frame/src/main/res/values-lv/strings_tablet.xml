@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Izmantojiet šo planšetdatoru kā fotorāmi</string>
+    <string name="setup_home_body">Iestatiet kinframe kā planšetdatora sākuma ekrāna lietotni. Tad tā pati startē, kad planšetdators tiek ieslēgts, un poga Sākums vienmēr atgriež jūs pie fotoattēliem.</string>
+    <string name="setup_home_choose">Izvēlēties sākuma ekrāna lietotni</string>
+    <string name="setup_home_hint">Sarakstā izvēlieties kinframe un apstipriniet to kā noklusējumu.</string>
+    <string name="setup_home_power_title">Atstājiet to pie lādētāja</string>
+    <string name="setup_home_power_body">Fotorāmis ir ieslēgts visu dienu, tāpēc atstājiet lādētāju pievienotu. Naktī lietotnē iestatītais miega grafiks aptumšo ekrānu.</string>
+    <string name="setup_home_not_now">Ne tagad</string>
+    <string name="settings_home_title">Fotorāmja režīms</string>
+    <string name="settings_home_body">kinframe vēl nav šī planšetdatora sākuma ekrāna lietotne, tāpēc tā pati nestartē, kad planšetdators tiek ieslēgts.</string>
+    <string name="updates_from_play">Šis rāmis saņem atjauninājumus no Google Play.</string>
+    <string name="updates_open_play">Atvērt Play veikalā</string>
+    <string name="updates_play_prompt">Atjauninājums ir gatavs. Instalējiet to, sekojot Google Play norādēm.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Folosește această tabletă ca ramă foto</string>
+    <string name="setup_home_body">Setează kinframe ca aplicație pentru ecranul de pornire al tabletei. Atunci pornește singură când tableta se aprinde, iar butonul Acasă te readuce mereu la fotografii.</string>
+    <string name="setup_home_choose">Alege aplicația pentru ecranul de pornire</string>
+    <string name="setup_home_hint">Alege kinframe din listă și confirm-o ca implicită.</string>
+    <string name="setup_home_power_title">Las-o la încărcător</string>
+    <string name="setup_home_power_body">O ramă foto stă aprinsă toată ziua, așa că lasă încărcătorul conectat. Noaptea, programul de repaus pe care îl setezi în aplicație întunecă ecranul.</string>
+    <string name="setup_home_not_now">Nu acum</string>
+    <string name="settings_home_title">Mod ramă foto</string>
+    <string name="settings_home_body">kinframe nu este încă aplicația pentru ecranul de pornire al acestei tablete, așa că nu pornește singură când tableta se aprinde.</string>
+    <string name="updates_from_play">Această ramă primește actualizări din Google Play.</string>
+    <string name="updates_open_play">Deschide în Magazin Play</string>
+    <string name="updates_play_prompt">O actualizare este gata. Urmează pașii din Google Play pentru a o instala.</string>
+</resources>

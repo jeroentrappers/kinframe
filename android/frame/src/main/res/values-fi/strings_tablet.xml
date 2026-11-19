@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Käytä tätä tablettia valokuvakehyksenä</string>
+    <string name="setup_home_body">Tee kinframesta tabletin aloitusnäyttösovellus. Silloin se käynnistyy itsestään, kun tabletti käynnistetään, ja Koti-painike vie sinut aina takaisin kuviin.</string>
+    <string name="setup_home_choose">Valitse aloitusnäyttösovellus</string>
+    <string name="setup_home_hint">Valitse luettelosta kinframe ja vahvista se oletukseksi.</string>
+    <string name="setup_home_power_title">Pidä se laturissa</string>
+    <string name="setup_home_power_body">Valokuvakehys on päällä koko päivän, joten jätä laturi kiinni. Yöllä sovelluksessa asettamasi lepoaikataulu himmentää näytön.</string>
+    <string name="setup_home_not_now">Ei nyt</string>
+    <string name="settings_home_title">Valokuvakehystila</string>
+    <string name="settings_home_body">kinframe ei ole vielä tämän tabletin aloitusnäyttösovellus, joten se ei käynnisty itsestään, kun tabletti käynnistetään.</string>
+    <string name="updates_from_play">Tämä kehys saa päivitykset Google Playsta.</string>
+    <string name="updates_open_play">Avaa Play Kaupassa</string>
+    <string name="updates_play_prompt">Päivitys on valmis. Asenna se Google Playn ohjeiden mukaan.</string>
+</resources>

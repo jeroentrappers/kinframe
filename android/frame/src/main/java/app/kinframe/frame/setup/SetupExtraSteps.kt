@@ -1,5 +1,7 @@
 package app.kinframe.frame.setup
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -49,7 +51,7 @@ import app.kinframe.core.design.KinIcons
 import app.kinframe.core.design.KinShapeM
 import app.kinframe.frame.R
 import app.kinframe.frame.ui.Format
-import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.update.UpdatePhase
 import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
@@ -191,39 +193,39 @@ internal fun UpdateStep(c: SetupController) {
         delay(25_000)
         if (!sawWork) gaveUp = true
     }
-    if (status.phase != UpdateManager.Phase.Idle && status.phase != UpdateManager.Phase.UpToDate) sawWork = true
-    val upToDate = sawWork && status.phase == UpdateManager.Phase.UpToDate
+    if (status.phase != UpdatePhase.Idle && status.phase != UpdatePhase.UpToDate) sawWork = true
+    val upToDate = sawWork && status.phase == UpdatePhase.UpToDate
     LaunchedEffect(upToDate) { if (upToDate) { delay(1_500); c.finishUpdateStep() } }
     val phase = when {
-        upToDate -> UpdateManager.Phase.UpToDate
-        gaveUp && !sawWork -> UpdateManager.Phase.Failed
-        !sawWork -> UpdateManager.Phase.Checking
+        upToDate -> UpdatePhase.UpToDate
+        gaveUp && !sawWork -> UpdatePhase.Failed
+        !sawWork -> UpdatePhase.Checking
         else -> status.phase
     }
-    UpdateStepView(phase, status.versionName, status.progress, onSkip = { c.finishUpdateStep() })
+    UpdateStepView(phase, status.versionName, status.progress, onSkip = { c.finishUpdateStep() }, fromStore = c.updatesFromStore())
 }
 
 @Composable
-fun UpdateStepView(phase: UpdateManager.Phase, versionName: String?, progress: Float?, onSkip: () -> Unit) {
-    val failed = phase == UpdateManager.Phase.Failed
-    val busy = phase == UpdateManager.Phase.Downloading || phase == UpdateManager.Phase.Installing || phase == UpdateManager.Phase.Waiting
+fun UpdateStepView(phase: UpdatePhase, versionName: String?, progress: Float?, fromStore: Boolean = false, onSkip: () -> Unit) {
+    val failed = phase == UpdatePhase.Failed
+    val busy = phase == UpdatePhase.Downloading || phase == UpdatePhase.Installing || phase == UpdatePhase.Waiting
     StepScaffold(
         index = 4, onBack = null,
         primary = {
             when {
-                failed || phase == UpdateManager.Phase.UpToDate -> KinButton(stringResource(R.string.action_continue), onSkip)
-                phase != UpdateManager.Phase.Installing -> KinButton(stringResource(R.string.setup_update_skip), onSkip, style = KinButtonStyle.Quiet)
+                failed || phase == UpdatePhase.UpToDate -> KinButton(stringResource(R.string.action_continue), onSkip)
+                phase != UpdatePhase.Installing -> KinButton(stringResource(R.string.setup_update_skip), onSkip, style = KinButtonStyle.Quiet)
             }
         },
     ) {
         Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Box(
-                Modifier.size(112.dp).clip(CircleShape).background(if (failed) Kin.colors.paperDeep else if (phase == UpdateManager.Phase.UpToDate) Kin.colors.sageSoft else Kin.colors.accentSoft),
+                Modifier.size(112.dp).clip(CircleShape).background(if (failed) Kin.colors.paperDeep else if (phase == UpdatePhase.UpToDate) Kin.colors.sageSoft else Kin.colors.accentSoft),
                 contentAlignment = Alignment.Center,
             ) {
                 when {
-                    phase == UpdateManager.Phase.Checking -> CircularProgressIndicator(Modifier.size(52.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
-                    phase == UpdateManager.Phase.UpToDate -> KinIcon(KinIcons.Check, null, tint = Kin.colors.sage, size = 52.dp)
+                    phase == UpdatePhase.Checking -> CircularProgressIndicator(Modifier.size(52.dp), color = Kin.colors.accent, strokeWidth = 3.dp)
+                    phase == UpdatePhase.UpToDate -> KinIcon(KinIcons.Check, null, tint = Kin.colors.sage, size = 52.dp)
                     failed -> KinIcon(KinIcons.WifiOff, null, tint = Kin.colors.inkSoft, size = 48.dp)
                     else -> KinIcon(KinIcons.Download, null, tint = Kin.colors.accent, size = 52.dp)
                 }
@@ -231,19 +233,20 @@ fun UpdateStepView(phase: UpdateManager.Phase, versionName: String?, progress: F
             Spacer(Modifier.height(32.dp))
             val name = versionName.orEmpty()
             val (title, body) = when (phase) {
-                UpdateManager.Phase.UpToDate -> stringResource(R.string.setup_update_current) to stringResource(R.string.setup_update_current_body)
-                UpdateManager.Phase.Downloading, UpdateManager.Phase.Waiting ->
+                UpdatePhase.UpToDate -> stringResource(R.string.setup_update_current) to stringResource(R.string.setup_update_current_body)
+                UpdatePhase.Downloading, UpdatePhase.Waiting ->
                     stringResource(R.string.setup_update_downloading, name) to stringResource(R.string.setup_update_downloading_body)
-                UpdateManager.Phase.Installing -> stringResource(R.string.setup_update_installing, name) to stringResource(R.string.setup_update_installing_body)
-                UpdateManager.Phase.NeedsUser -> stringResource(R.string.setup_update_installing, name) to stringResource(R.string.update_notice_needs_user)
-                UpdateManager.Phase.Failed -> stringResource(R.string.setup_update_failed) to stringResource(R.string.setup_update_failed_body)
+                UpdatePhase.Installing -> stringResource(R.string.setup_update_installing, name) to stringResource(R.string.setup_update_installing_body)
+                UpdatePhase.NeedsUser -> stringResource(R.string.setup_update_installing, name) to
+                    stringResource(if (fromStore) R.string.updates_play_prompt else R.string.update_notice_needs_user)
+                UpdatePhase.Failed -> stringResource(R.string.setup_update_failed) to stringResource(R.string.setup_update_failed_body)
                 else -> stringResource(R.string.setup_update_checking) to stringResource(R.string.setup_update_checking_body)
             }
             KinHeading(title, body, Modifier.widthIn(max = 620.dp), center = true)
             if (busy) {
                 Spacer(Modifier.height(32.dp))
                 val p = progress
-                if (phase == UpdateManager.Phase.Downloading && p != null) {
+                if (phase == UpdatePhase.Downloading && p != null) {
                     LinearProgressIndicator(
                         progress = { p.coerceIn(0f, 1f) },
                         modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().height(10.dp).clip(CircleShape),
@@ -255,6 +258,59 @@ fun UpdateStepView(phase: UpdateManager.Phase, versionName: String?, progress: F
                         modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().height(10.dp).clip(CircleShape),
                         color = Kin.colors.accent, trackColor = Kin.colors.paperDeep,
                     )
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------- home app
+
+/**
+ * Last step on a tablet (docs/play-frame.md): make kinframe the home app so it starts at power-on and behaves as a
+ * frame; keep the tablet plugged in. Continues by itself once kinframe is the home app.
+ */
+@Composable
+internal fun HomeAppStep(c: SetupController) {
+    val home = c.homeApp()
+    val isHome by home.isHome.collectAsState()
+    LaunchedEffect(isHome) { if (isHome) c.finishHomeAppStep() }
+    val chooser = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { home.refresh() }
+    StepScaffold(
+        index = 5, onBack = null,
+        primary = {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                KinButton(stringResource(R.string.setup_home_not_now), { c.finishHomeAppStep() }, style = KinButtonStyle.Quiet)
+                KinButton(stringResource(R.string.setup_home_choose), {
+                    // No chooser on some firmwares: nothing to open, the person can still continue.
+                    runCatching { chooser.launch(home.chooserIntent()) }
+                })
+            }
+        },
+    ) {
+        HomeAppExplanation()
+    }
+}
+
+@Composable
+internal fun HomeAppExplanation() {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        Box(Modifier.size(112.dp).clip(CircleShape).background(Kin.colors.accentSoft), contentAlignment = Alignment.Center) {
+            KinIcon(KinIcons.Home, null, tint = Kin.colors.accent, size = 52.dp)
+        }
+        Spacer(Modifier.height(32.dp))
+        KinHeading(stringResource(R.string.setup_home_title), stringResource(R.string.setup_home_body), Modifier.widthIn(max = 640.dp), center = true)
+        Text(
+            stringResource(R.string.setup_home_hint), style = Kin.type.body, color = Kin.colors.inkSoft, textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 640.dp).padding(top = 12.dp),
+        )
+        Spacer(Modifier.height(28.dp))
+        KinCard(Modifier.widthIn(max = 640.dp).fillMaxWidth(), padding = 20.dp) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                KinIcon(KinIcons.Plug, null, tint = Kin.colors.sage, size = 32.dp)
+                Column(Modifier.padding(start = 16.dp)) {
+                    Text(stringResource(R.string.setup_home_power_title), style = Kin.type.bodyStrong)
+                    Text(stringResource(R.string.setup_home_power_body), style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.padding(top = 4.dp))
                 }
             }
         }

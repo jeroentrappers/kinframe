@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">שימוש בטאבלט הזה כמסגרת תמונות</string>
+    <string name="setup_home_body">הגדירו את kinframe כאפליקציית מסך הבית של הטאבלט. כך היא תיפתח מעצמה כשהטאבלט נדלק, ולחצן הבית תמיד יחזיר אתכם לתמונות.</string>
+    <string name="setup_home_choose">בחירת אפליקציית מסך הבית</string>
+    <string name="setup_home_hint">בחרו ב‑kinframe ברשימה ואשרו אותה כברירת מחדל.</string>
+    <string name="setup_home_power_title">השאירו אותו מחובר למטען</string>
+    <string name="setup_home_power_body">מסגרת תמונות דולקת כל היום, לכן השאירו את המטען מחובר. בלילה לוח השינה שהגדרתם באפליקציה מחשיך את המסך.</string>
+    <string name="setup_home_not_now">לא עכשיו</string>
+    <string name="settings_home_title">מצב מסגרת תמונות</string>
+    <string name="settings_home_body">kinframe עדיין אינה אפליקציית מסך הבית של הטאבלט, ולכן היא לא נפתחת מעצמה כשהטאבלט נדלק.</string>
+    <string name="updates_from_play">המסגרת הזו מקבלת עדכונים מ‑Google Play.</string>
+    <string name="updates_open_play">פתיחה ב‑Play Store</string>
+    <string name="updates_play_prompt">יש עדכון מוכן. פעלו לפי השלבים של Google Play כדי להתקין אותו.</string>
+</resources>

@@ -79,12 +79,13 @@ jobs:
           KINFRAME_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KINFRAME_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          ./gradlew --no-daemon :frame:testDebugUnitTest :frame:assembleRelease \
+          # The `github` flavor: the self-updating build the convert tool installs (docs/play-frame.md for `play`).
+          ./gradlew --no-daemon :frame:testGithubDebugUnitTest :frame:assembleGithubRelease \
             -PversionName='${{ steps.version.outputs.name }}' -PversionCode='${{ steps.version.outputs.code }}'
 
       - name: Verify signature and package
         run: |
-          apk=frame/build/outputs/apk/release/frame-release.apk
+          apk=frame/build/outputs/apk/github/release/frame-github-release.apk
           bt=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
           "$bt/apksigner" verify --verbose --print-certs "$apk" | tee "$RUNNER_TEMP/certs.txt"
           if grep -q "CN=Android Debug" "$RUNNER_TEMP/certs.txt"; then echo "::error::APK is signed with the debug key"; exit 1; fi
@@ -96,7 +97,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/dist"
           asset='${{ steps.version.outputs.asset }}'
-          cp frame/build/outputs/apk/release/frame-release.apk "$RUNNER_TEMP/dist/$asset"
+          cp frame/build/outputs/apk/github/release/frame-github-release.apk "$RUNNER_TEMP/dist/$asset"
           (cd "$RUNNER_TEMP/dist" && sha256sum "$asset" > "$asset.sha256" && cat "$asset.sha256")
           echo "dir=$RUNNER_TEMP/dist" >> "$GITHUB_OUTPUT"
 

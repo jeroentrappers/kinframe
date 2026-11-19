@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Usa questo tablet come cornice digitale</string>
+    <string name="setup_home_body">Imposta kinframe come app della schermata Home del tablet. Così si avvia da sola quando accendi il tablet e il tasto Home ti riporta sempre alle foto.</string>
+    <string name="setup_home_choose">Scegli l’app Home</string>
+    <string name="setup_home_hint">Scegli kinframe nell’elenco e confermala come predefinita.</string>
+    <string name="setup_home_power_title">Tienilo in carica</string>
+    <string name="setup_home_power_body">Una cornice digitale resta accesa tutto il giorno, quindi lascia collegato il caricatore. Di notte la programmazione del riposo che imposti nell’app scurisce lo schermo.</string>
+    <string name="setup_home_not_now">Non ora</string>
+    <string name="settings_home_title">Modalità cornice</string>
+    <string name="settings_home_body">kinframe non è ancora l’app Home di questo tablet, quindi non si avvia da sola quando lo accendi.</string>
+    <string name="updates_from_play">Questa cornice riceve gli aggiornamenti da Google Play.</string>
+    <string name="updates_open_play">Apri nel Play Store</string>
+    <string name="updates_play_prompt">Un aggiornamento è pronto. Segui i passaggi di Google Play per installarlo.</string>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Dieses Tablet als Bilderrahmen nutzen</string>
+    <string name="setup_home_body">Mach kinframe zur Startbildschirm-App des Tablets. Dann startet es von selbst, wenn das Tablet eingeschaltet wird, und die Home-Taste bringt dich immer zurück zu den Fotos.</string>
+    <string name="setup_home_choose">Startbildschirm-App wählen</string>
+    <string name="setup_home_hint">Wähle kinframe in der Liste und bestätige es als Standard.</string>
+    <string name="setup_home_power_title">Am Ladegerät lassen</string>
+    <string name="setup_home_power_body">Ein Bilderrahmen ist den ganzen Tag an, also lass das Ladegerät angeschlossen. Nachts dunkelt der Ruheplan, den du in der App festlegst, den Bildschirm ab.</string>
+    <string name="setup_home_not_now">Nicht jetzt</string>
+    <string name="settings_home_title">Bilderrahmen-Modus</string>
+    <string name="settings_home_body">kinframe ist noch nicht die Startbildschirm-App dieses Tablets und startet deshalb nicht von selbst, wenn das Tablet eingeschaltet wird.</string>
+    <string name="updates_from_play">Dieser Rahmen erhält Updates über Google Play.</string>
+    <string name="updates_open_play">Im Play Store öffnen</string>
+    <string name="updates_play_prompt">Ein Update ist bereit. Folge den Schritten von Google Play, um es zu installieren.</string>
+</resources>

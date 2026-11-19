@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">이 태블릿을 디지털 액자로 사용하기</string>
+    <string name="setup_home_body">kinframe을 태블릿의 홈 앱으로 설정하세요. 그러면 태블릿을 켤 때 자동으로 시작되고, 홈 버튼을 누르면 언제든 사진으로 돌아옵니다.</string>
+    <string name="setup_home_choose">홈 앱 선택</string>
+    <string name="setup_home_hint">목록에서 kinframe을 선택하고 기본 앱으로 확인하세요.</string>
+    <string name="setup_home_power_title">충전기에 연결해 두세요</string>
+    <string name="setup_home_power_body">액자는 하루 종일 켜져 있으니 충전기를 연결해 두세요. 밤에는 앱에서 설정한 절전 일정에 따라 화면이 어두워집니다.</string>
+    <string name="setup_home_not_now">나중에</string>
+    <string name="settings_home_title">액자 모드</string>
+    <string name="settings_home_body">kinframe이 아직 이 태블릿의 홈 앱이 아니어서 태블릿을 켜도 자동으로 시작되지 않습니다.</string>
+    <string name="updates_from_play">이 액자는 Google Play에서 업데이트를 받습니다.</string>
+    <string name="updates_open_play">Play 스토어에서 열기</string>
+    <string name="updates_play_prompt">업데이트가 준비되었습니다. Google Play의 안내에 따라 설치하세요.</string>
+</resources>

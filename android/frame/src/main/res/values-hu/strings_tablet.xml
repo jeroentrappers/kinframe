@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Használja ezt a táblagépet képkeretként</string>
+    <string name="setup_home_body">Állítsa be a kinframe-et a táblagép kezdőképernyő-alkalmazásának. Ekkor magától elindul, amikor a táblagép bekapcsol, és a Kezdőlap gomb mindig visszavisz a fotókhoz.</string>
+    <string name="setup_home_choose">Kezdőképernyő-alkalmazás kiválasztása</string>
+    <string name="setup_home_hint">Válassza ki a listából a kinframe-et, és erősítse meg alapértelmezettként.</string>
+    <string name="setup_home_power_title">Hagyja a töltőn</string>
+    <string name="setup_home_power_body">A képkeret egész nap be van kapcsolva, ezért hagyja csatlakoztatva a töltőt. Éjszaka az alkalmazásban beállított alvási ütemezés elsötétíti a képernyőt.</string>
+    <string name="setup_home_not_now">Most nem</string>
+    <string name="settings_home_title">Képkeret mód</string>
+    <string name="settings_home_body">A kinframe még nem ennek a táblagépnek a kezdőképernyő-alkalmazása, ezért nem indul el magától, amikor a táblagép bekapcsol.</string>
+    <string name="updates_from_play">Ez a keret a Google Playen keresztül kap frissítéseket.</string>
+    <string name="updates_open_play">Megnyitás a Play Áruházban</string>
+    <string name="updates_play_prompt">Egy frissítés készen áll. Telepítse a Google Play lépéseit követve.</string>
+</resources>

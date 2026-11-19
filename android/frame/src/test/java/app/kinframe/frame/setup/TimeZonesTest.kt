@@ -3,7 +3,7 @@ package app.kinframe.frame.setup
 import android.app.Application
 import app.kinframe.frame.Paper
 import app.kinframe.frame.Screenshots.shot
-import app.kinframe.frame.update.UpdateManager
+import app.kinframe.frame.update.UpdatePhase
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -70,11 +70,11 @@ class SetupStepsScreenshotTest {
 
     @Test fun updateDownloading() = shot("setup_update_downloading") {
         Paper()
-        UpdateStepView(UpdateManager.Phase.Downloading, "0.3.0", 0.42f) {}
+        UpdateStepView(UpdatePhase.Downloading, "0.3.0", 0.42f) {}
     }
 
     @Test fun updateFailed() = shot("setup_update_failed") {
         Paper()
-        UpdateStepView(UpdateManager.Phase.Failed, null, null) {}
+        UpdateStepView(UpdatePhase.Failed, null, null) {}
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Χρησιμοποιήστε αυτό το tablet ως κορνίζα</string>
+    <string name="setup_home_body">Ορίστε το kinframe ως εφαρμογή αρχικής οθόνης του tablet. Τότε ξεκινά μόνο του όταν ανοίγει το tablet, και το κουμπί Αρχικής σάς επιστρέφει πάντα στις φωτογραφίες.</string>
+    <string name="setup_home_choose">Επιλογή εφαρμογής αρχικής οθόνης</string>
+    <string name="setup_home_hint">Επιλέξτε το kinframe στη λίστα και επιβεβαιώστε το ως προεπιλογή.</string>
+    <string name="setup_home_power_title">Αφήστε το στον φορτιστή</string>
+    <string name="setup_home_power_body">Μια κορνίζα είναι αναμμένη όλη μέρα, οπότε αφήστε τον φορτιστή συνδεδεμένο. Τη νύχτα το πρόγραμμα ύπνου που ορίζετε στην εφαρμογή σκουραίνει την οθόνη.</string>
+    <string name="setup_home_not_now">Όχι τώρα</string>
+    <string name="settings_home_title">Λειτουργία κορνίζας</string>
+    <string name="settings_home_body">Το kinframe δεν είναι ακόμη η εφαρμογή αρχικής οθόνης αυτού του tablet, γι’ αυτό δεν ξεκινά μόνο του όταν ανοίγει.</string>
+    <string name="updates_from_play">Αυτή η κορνίζα λαμβάνει ενημερώσεις από το Google Play.</string>
+    <string name="updates_open_play">Άνοιγμα στο Play Store</string>
+    <string name="updates_play_prompt">Μια ενημέρωση είναι έτοιμη. Ακολουθήστε τα βήματα του Google Play για να την εγκαταστήσετε.</string>
+</resources>

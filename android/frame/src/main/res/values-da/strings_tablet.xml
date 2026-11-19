@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Brug denne tablet som fotoramme</string>
+    <string name="setup_home_body">Gør kinframe til tablettens startskærmsapp. Så starter den af sig selv, når tabletten tændes, og Hjem-knappen bringer dig altid tilbage til billederne.</string>
+    <string name="setup_home_choose">Vælg startskærmsapp</string>
+    <string name="setup_home_hint">Vælg kinframe på listen, og bekræft den som standard.</string>
+    <string name="setup_home_power_title">Lad den sidde i opladeren</string>
+    <string name="setup_home_power_body">En fotoramme er tændt hele dagen, så lad opladeren være tilsluttet. Om natten gør den søvnplan, du indstiller i appen, skærmen mørk.</string>
+    <string name="setup_home_not_now">Ikke nu</string>
+    <string name="settings_home_title">Fotorammetilstand</string>
+    <string name="settings_home_body">kinframe er endnu ikke tablettens startskærmsapp, så den starter ikke af sig selv, når tabletten tændes.</string>
+    <string name="updates_from_play">Denne ramme får opdateringer fra Google Play.</string>
+    <string name="updates_open_play">Åbn i Play Butik</string>
+    <string name="updates_play_prompt">En opdatering er klar. Følg trinnene fra Google Play for at installere den.</string>
+</resources>

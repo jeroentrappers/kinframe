@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">このタブレットをフォトフレームとして使う</string>
+    <string name="setup_home_body">kinframe をタブレットのホームアプリにしましょう。タブレットの電源を入れると自動で起動し、ホームボタンでいつでも写真に戻れます。</string>
+    <string name="setup_home_choose">ホームアプリを選ぶ</string>
+    <string name="setup_home_hint">一覧から kinframe を選び、デフォルトとして確定してください。</string>
+    <string name="setup_home_power_title">充電器につないだままに</string>
+    <string name="setup_home_power_body">フォトフレームは一日中表示し続けるので、充電器はつないだままにしてください。夜はアプリで設定したスリープスケジュールで画面が暗くなります。</string>
+    <string name="setup_home_not_now">後で</string>
+    <string name="settings_home_title">フォトフレームモード</string>
+    <string name="settings_home_body">kinframe はまだこのタブレットのホームアプリではないため、電源を入れても自動では起動しません。</string>
+    <string name="updates_from_play">このフレームは Google Play からアップデートを受け取ります。</string>
+    <string name="updates_open_play">Play ストアで開く</string>
+    <string name="updates_play_prompt">アップデートの準備ができました。Google Play の手順に従ってインストールしてください。</string>
+</resources>

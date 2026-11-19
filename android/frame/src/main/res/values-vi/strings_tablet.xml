@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Dùng máy tính bảng này làm khung ảnh</string>
+    <string name="setup_home_body">Đặt kinframe làm ứng dụng màn hình chính của máy tính bảng. Khi đó ứng dụng tự mở khi bật máy, và nút Màn hình chính luôn đưa bạn trở lại ảnh.</string>
+    <string name="setup_home_choose">Chọn ứng dụng màn hình chính</string>
+    <string name="setup_home_hint">Chọn kinframe trong danh sách và xác nhận làm mặc định.</string>
+    <string name="setup_home_power_title">Luôn cắm sạc</string>
+    <string name="setup_home_power_body">Khung ảnh bật cả ngày, vì vậy hãy để bộ sạc luôn được cắm. Ban đêm, lịch ngủ bạn đặt trong ứng dụng sẽ làm tối màn hình.</string>
+    <string name="setup_home_not_now">Để sau</string>
+    <string name="settings_home_title">Chế độ khung ảnh</string>
+    <string name="settings_home_body">kinframe chưa phải là ứng dụng màn hình chính của máy tính bảng này, nên không tự mở khi bật máy.</string>
+    <string name="updates_from_play">Khung này nhận bản cập nhật từ Google Play.</string>
+    <string name="updates_open_play">Mở trong Cửa hàng Play</string>
+    <string name="updates_play_prompt">Đã có bản cập nhật. Làm theo các bước của Google Play để cài đặt.</string>
+</resources>

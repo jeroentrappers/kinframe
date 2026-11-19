@@ -106,6 +106,10 @@ class MainActivity : ComponentActivity() {
         applyDeviceMode()
         // Back from Android's settings (by the floating button or otherwise).
         app.kinframe.frame.system.ReturnButton.hide(this)
+        // Play's in-app update screens show over this activity (Google Play build).
+        graph.controller.update.attach(this)
+        // Back from the home-app chooser: the setup step and settings follow the choice.
+        graph.controller.homeApp.refresh()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -114,6 +118,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        graph.controller.update.attach(null)
         runCatching { unregisterReceiver(screenOffReceiver) }
         super.onDestroy()
     }

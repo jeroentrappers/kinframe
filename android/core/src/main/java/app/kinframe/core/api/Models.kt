@@ -403,8 +403,17 @@ object FrameFeatures {
     /** The frame shows the `birthdays` change (informational: the server withholds nothing). */
     const val BIRTHDAYS = "birthdays"
 
+    /**
+     * Informational: the frame app was installed from Google Play (docs/play-frame.md). It updates through Play, not
+     * from the server's release mirror, and runs without root. Owners and the server can tell the two builds apart.
+     */
+    const val PLAY = "play"
+
     /** Everything this build supports, sent in every heartbeat. */
     val SUPPORTED: List<String> = listOf(FEED_BACKFILL, BIRTHDAYS)
+
+    /** [SUPPORTED] plus the distribution marker: [PLAY] for the Google Play build, nothing for the GitHub build. */
+    fun forDistribution(distribution: String): List<String> = if (distribution == "play") SUPPORTED + PLAY else SUPPORTED
 }
 
 /** `FrameUpdate`: a frame app release mirrored by the server (`GET /device/update`). */

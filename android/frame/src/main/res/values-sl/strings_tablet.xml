@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Uporabite ta tablični računalnik kot foto okvir</string>
+    <string name="setup_home_body">Nastavite kinframe kot aplikacijo začetnega zaslona tabličnega računalnika. Tako se sam zažene ob vklopu, gumb Domov pa vas vedno vrne k fotografijam.</string>
+    <string name="setup_home_choose">Izberi aplikacijo začetnega zaslona</string>
+    <string name="setup_home_hint">Na seznamu izberite kinframe in ga potrdite kot privzetega.</string>
+    <string name="setup_home_power_title">Pustite ga na polnilniku</string>
+    <string name="setup_home_power_body">Foto okvir je prižgan ves dan, zato pustite polnilnik priključen. Ponoči urnik mirovanja, ki ga nastavite v aplikaciji, zatemni zaslon.</string>
+    <string name="setup_home_not_now">Ne zdaj</string>
+    <string name="settings_home_title">Način foto okvirja</string>
+    <string name="settings_home_body">kinframe še ni aplikacija začetnega zaslona tega tabličnega računalnika, zato se ob vklopu ne zažene sam.</string>
+    <string name="updates_from_play">Ta okvir prejema posodobitve iz Google Play.</string>
+    <string name="updates_open_play">Odpri v Trgovini Play</string>
+    <string name="updates_play_prompt">Posodobitev je pripravljena. Namestite jo po korakih v Google Play.</string>
+</resources>

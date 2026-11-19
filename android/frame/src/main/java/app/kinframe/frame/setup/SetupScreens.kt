@@ -119,6 +119,7 @@ fun SetupFlow(controller: SetupController) {
                 SetupStep.Update -> UpdateStep(controller)
                 SetupStep.Code -> CodeStep(controller, state)
                 SetupStep.Celebrate -> CelebrateStep(state.ownerName)
+                SetupStep.HomeApp -> HomeAppStep(controller)
             }
         }
     }

@@ -33,34 +33,24 @@ import java.io.File
  *
  * State lives in [UpdateStore] so it survives the process being killed by the install.
  */
-class UpdateManager(private val c: FrameController) {
+class UpdateManager(private val c: FrameController) : AppUpdates {
     private val g = c.g
     private val dir = File(g.app.filesDir, "updates")
     val store = UpdateStore(File(g.stateDir, "update.json"))
     private val installer = Installer(g.app, g.root, dir)
     private val downloader = ApkDownloader(g.api, dir)
     private val busy = Mutex()
-    private val triggers = Channel<Trigger>(Channel.UNLIMITED)
+    private val triggers = Channel<UpdateTrigger>(Channel.UNLIMITED)
     @Volatile private var installNow = false
     @Volatile private var lastRequiredCheck = 0L
 
-    enum class Trigger { Scheduled, User, Remote, Required }
+    private val _status = MutableStateFlow(UpdateStatus())
+    override val status: StateFlow<UpdateStatus> = _status
 
-    enum class Phase { Idle, Checking, UpToDate, Downloading, Waiting, Installing, NeedsUser, Failed }
+    private val _notice = MutableStateFlow<UpdateAnnouncement?>(null)
+    override val notice: StateFlow<UpdateAnnouncement?> = _notice
 
-    data class Status(val phase: Phase = Phase.Idle, val versionName: String? = null, val progress: Float? = null, val error: String? = null)
-
-    private val _status = MutableStateFlow(Status())
-    val status: StateFlow<Status> = _status
-
-    sealed interface Notice {
-        data class Updated(val versionName: String) : Notice
-        data object RolledBack : Notice
-        data object NeedsUser : Notice
-    }
-
-    private val _notice = MutableStateFlow<Notice?>(null)
-    val notice: StateFlow<Notice?> = _notice
+    override val fromStore = false
 
     private fun now() = System.currentTimeMillis()
 
@@ -70,7 +60,7 @@ class UpdateManager(private val c: FrameController) {
      * Runs once per process before the first screen is chosen: settles an install the previous process started,
      * and rolls back when this freshly installed version is crash-looping. Returns true while a rollback runs.
      */
-    suspend fun onAppStart(): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun onAppStart(): Boolean = withContext(Dispatchers.IO) {
         runCatching { dir.mkdirs(); installer.startedMarker(BuildConfig.VERSION_CODE).createNewFile() }
         store.record.pending?.let { settle(it) }
         val r = store.record
@@ -128,7 +118,7 @@ class UpdateManager(private val c: FrameController) {
                 }
                 dropPrevious()
                 g.crashGuard.clearLoop()
-                _notice.value = Notice.RolledBack
+                _notice.value = UpdateAnnouncement.RolledBack
             }
         }
         if (store.record.pending == null) {
@@ -142,13 +132,13 @@ class UpdateManager(private val c: FrameController) {
     }
 
     /** Starts the scheduler. Call once, after [onAppStart]. */
-    fun start() {
+    override fun start() {
         g.api.onUpdateRequired = ::onUpdateRequired
         store.update { it.copy(nextCheckAt = UpdatePolicy.firstCheckAt(now(), it.nextCheckAt, UpdatePolicy.jitter())) }
         store.record.announce?.let { name ->
             c.scope.launch {
                 delay(3_000)
-                _notice.value = Notice.Updated(name)
+                _notice.value = UpdateAnnouncement.Updated(name)
                 store.update { it.copy(announce = null) }
             }
         }
@@ -158,7 +148,7 @@ class UpdateManager(private val c: FrameController) {
                 try {
                     when {
                         t != null -> check(t)
-                        now() >= store.record.nextCheckAt && interruptible(userInitiated = false) -> check(Trigger.Scheduled)
+                        now() >= store.record.nextCheckAt && interruptible(userInitiated = false) -> check(UpdateTrigger.Scheduled)
                     }
                     store.record.pending?.let { p -> if (!busy.isLocked) settle(p) }
                 } catch (e: CancellationException) {
@@ -170,23 +160,23 @@ class UpdateManager(private val c: FrameController) {
         }
     }
 
-    fun requestCheck(trigger: Trigger) {
-        if (trigger == Trigger.User) installNow = true
+    override fun requestCheck(trigger: UpdateTrigger) {
+        if (trigger == UpdateTrigger.User) installNow = true
         triggers.trySend(trigger)
     }
 
     /** Hook for `426 app_update_required` (called on an OkHttp thread). */
-    fun onUpdateRequired() {
+    override fun onUpdateRequired() {
         val t = SystemClock.elapsedRealtime()
         if (lastRequiredCheck != 0L && t - lastRequiredCheck < 10 * 60_000L) return
         lastRequiredCheck = t
-        requestCheck(Trigger.Required)
+        requestCheck(UpdateTrigger.Required)
     }
 
-    fun dismissNotice() { _notice.value = null }
+    override fun dismissNotice() { _notice.value = null }
 
     /** Heartbeat fields `update_state` and `last_update_error`. */
-    fun heartbeatState(): Pair<String, String?> = store.record.let { it.state to it.lastError }
+    override fun heartbeatState(): Pair<String, String?> = store.record.let { it.state to it.lastError }
 
     // ------------------------------------------------------------------ check, download, install
 
@@ -198,17 +188,17 @@ class UpdateManager(private val c: FrameController) {
         ) == UpdatePolicy.Block.None
     }
 
-    private suspend fun check(trigger: Trigger) {
+    private suspend fun check(trigger: UpdateTrigger) {
         if (!busy.tryLock()) return
-        val userInitiated = trigger == Trigger.User
+        val userInitiated = trigger == UpdateTrigger.User
         if (userInitiated) installNow = true
         try {
             if (store.record.pending != null) return
             if (c.session.value == null) {
-                if (userInitiated) _status.value = Status(Phase.Failed, error = "offline")
+                if (userInitiated) _status.value = UpdateStatus(UpdatePhase.Failed, error = "offline")
                 return
             }
-            _status.value = Status(Phase.Checking)
+            _status.value = UpdateStatus(UpdatePhase.Checking)
             val channel = g.settings.settings.value.updates.channel.takeIf { it == "stable" || it == "beta" }
             val offer = try {
                 g.api.checkUpdate(channel, store.record.skipped)
@@ -216,18 +206,18 @@ class UpdateManager(private val c: FrameController) {
                 throw e
             } catch (e: Exception) {
                 Log.i(TAG, "update check failed: ${e.message}")
-                _status.value = Status(Phase.Failed, error = "server_unreachable")
+                _status.value = UpdateStatus(UpdatePhase.Failed, error = "server_unreachable")
                 store.update { it.copy(nextCheckAt = now() + UpdatePolicy.RETRY_AFTER_FAILURE_MS) }
                 return
             }
             store.update { it.copy(lastCheckAt = now(), nextCheckAt = UpdatePolicy.nextCheckAfter(now(), UpdatePolicy.jitter())) }
             if (offer == null) {
-                _status.value = Status(Phase.UpToDate)
+                _status.value = UpdateStatus(UpdatePhase.UpToDate)
                 return
             }
             UpdatePolicy.rejectOffer(offer, BuildConfig.VERSION_CODE, Build.VERSION.SDK_INT, store.record.skipped)?.let {
                 Log.i(TAG, "ignoring offered ${offer.versionCode}: $it")
-                _status.value = Status(Phase.UpToDate)
+                _status.value = UpdateStatus(UpdatePhase.UpToDate)
                 return
             }
             Log.i(TAG, "update available: ${offer.versionName} (${offer.versionCode}), trigger $trigger")
@@ -240,9 +230,9 @@ class UpdateManager(private val c: FrameController) {
 
     private suspend fun downloadAndInstall(offer: FrameUpdate) {
         store.update { it.copy(state = "downloading", lastError = null) }
-        _status.value = Status(Phase.Downloading, offer.versionName, 0f)
+        _status.value = UpdateStatus(UpdatePhase.Downloading, offer.versionName, 0f)
         val apk = try {
-            downloader.fetch(offer) { done -> _status.value = Status(Phase.Downloading, offer.versionName, done.toFloat() / offer.size) }
+            downloader.fetch(offer) { done -> _status.value = UpdateStatus(UpdatePhase.Downloading, offer.versionName, done.toFloat() / offer.size) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -259,7 +249,7 @@ class UpdateManager(private val c: FrameController) {
             return fail(error, offer)
         }
         store.update { it.copy(state = "waiting") }
-        _status.value = Status(Phase.Waiting, offer.versionName)
+        _status.value = UpdateStatus(UpdatePhase.Waiting, offer.versionName)
         while (!interruptible(userInitiated = installNow)) delay(5_000)
         install(offer, apk)
     }
@@ -267,7 +257,7 @@ class UpdateManager(private val c: FrameController) {
     private fun fail(error: String, offer: FrameUpdate?) {
         Log.w(TAG, "update ${offer?.versionCode} failed: $error")
         store.update { it.copy(state = "failed", lastError = error, nextCheckAt = now() + UpdatePolicy.RETRY_AFTER_FAILURE_MS) }
-        _status.value = Status(Phase.Failed, offer?.versionName, error = error)
+        _status.value = UpdateStatus(UpdatePhase.Failed, offer?.versionName, error = error)
         c.session.value?.sendHeartbeatNow()
     }
 
@@ -285,15 +275,15 @@ class UpdateManager(private val c: FrameController) {
         // Tell the owner before the process goes away.
         withTimeoutOrNull(3_000) { c.session.value?.sendHeartbeatNow()?.join() }
         if (!root) {
-            _status.value = Status(Phase.NeedsUser, offer.versionName)
-            _notice.value = Notice.NeedsUser
+            _status.value = UpdateStatus(UpdatePhase.NeedsUser, offer.versionName)
+            _notice.value = UpdateAnnouncement.NeedsUser
             if (!installer.launchSystemInstaller(apk)) {
                 store.update { it.copy(pending = null) }
                 fail("installer_unavailable", offer)
             }
             return
         }
-        _status.value = Status(Phase.Installing, offer.versionName)
+        _status.value = UpdateStatus(UpdatePhase.Installing, offer.versionName)
         withContext(Dispatchers.IO) { runCatching { g.db.checkpoint() } }
         Log.i(TAG, "installing ${offer.versionName} (${offer.versionCode}) with root")
         installer.scheduleRelaunch(60_000)
@@ -305,7 +295,7 @@ class UpdateManager(private val c: FrameController) {
             val p = store.record.pending ?: return
             settle(p)
             if (store.record.pending == null) {
-                _status.value = Status(Phase.Failed, offer.versionName, error = store.record.lastError)
+                _status.value = UpdateStatus(UpdatePhase.Failed, offer.versionName, error = store.record.lastError)
                 c.session.value?.sendHeartbeatNow()
                 return
             }

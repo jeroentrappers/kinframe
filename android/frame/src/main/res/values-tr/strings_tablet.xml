@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Bu tableti fotoğraf çerçevesi olarak kullanın</string>
+    <string name="setup_home_body">kinframe’i tabletin ana ekran uygulaması yapın. Böylece tablet açıldığında kendiliğinden başlar ve Ana ekran düğmesi sizi her zaman fotoğraflara geri getirir.</string>
+    <string name="setup_home_choose">Ana ekran uygulamasını seç</string>
+    <string name="setup_home_hint">Listeden kinframe’i seçin ve varsayılan olarak onaylayın.</string>
+    <string name="setup_home_power_title">Şarjda bırakın</string>
+    <string name="setup_home_power_body">Fotoğraf çerçevesi gün boyu açık kalır, bu yüzden şarj cihazını takılı bırakın. Geceleri uygulamada ayarladığınız uyku programı ekranı karartır.</string>
+    <string name="setup_home_not_now">Şimdi değil</string>
+    <string name="settings_home_title">Fotoğraf çerçevesi modu</string>
+    <string name="settings_home_body">kinframe henüz bu tabletin ana ekran uygulaması değil, bu yüzden tablet açıldığında kendiliğinden başlamaz.</string>
+    <string name="updates_from_play">Bu çerçeve güncellemeleri Google Play’den alır.</string>
+    <string name="updates_open_play">Play Store’da aç</string>
+    <string name="updates_play_prompt">Bir güncelleme hazır. Yüklemek için Google Play’in adımlarını izleyin.</string>
+</resources>

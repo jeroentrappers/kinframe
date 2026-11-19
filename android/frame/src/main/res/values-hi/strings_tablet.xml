@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">इस टैबलेट को फ़ोटो फ़्रेम की तरह इस्तेमाल करें</string>
+    <string name="setup_home_body">kinframe को टैबलेट का होम ऐप बनाएं। तब यह टैबलेट चालू होते ही अपने-आप शुरू होगा, और होम बटन आपको हमेशा फ़ोटो पर वापस लाएगा।</string>
+    <string name="setup_home_choose">होम ऐप चुनें</string>
+    <string name="setup_home_hint">सूची में kinframe चुनें और उसे डिफ़ॉल्ट के रूप में पक्का करें।</string>
+    <string name="setup_home_power_title">इसे चार्जर से जोड़े रखें</string>
+    <string name="setup_home_power_body">फ़ोटो फ़्रेम पूरे दिन चालू रहता है, इसलिए चार्जर जुड़ा रहने दें। रात में ऐप में सेट किया गया स्लीप शेड्यूल स्क्रीन को गहरा कर देता है।</string>
+    <string name="setup_home_not_now">अभी नहीं</string>
+    <string name="settings_home_title">फ़ोटो फ़्रेम मोड</string>
+    <string name="settings_home_body">kinframe अभी इस टैबलेट का होम ऐप नहीं है, इसलिए टैबलेट चालू होने पर यह अपने-आप शुरू नहीं होता।</string>
+    <string name="updates_from_play">इस फ़्रेम को अपडेट Google Play से मिलते हैं।</string>
+    <string name="updates_open_play">Play Store में खोलें</string>
+    <string name="updates_play_prompt">एक अपडेट तैयार है। इसे इंस्टॉल करने के लिए Google Play के चरणों का पालन करें।</string>
+</resources>

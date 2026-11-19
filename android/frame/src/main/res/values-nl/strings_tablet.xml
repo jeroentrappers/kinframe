@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Gebruik deze tablet als fotolijst</string>
+    <string name="setup_home_body">Maak kinframe de startscherm-app van de tablet. Dan start kinframe vanzelf als de tablet aangaat, en brengt de startknop je altijd terug naar de foto’s.</string>
+    <string name="setup_home_choose">Startscherm-app kiezen</string>
+    <string name="setup_home_hint">Kies kinframe in de lijst en stel het in als standaard.</string>
+    <string name="setup_home_power_title">Laat hem aan de lader</string>
+    <string name="setup_home_power_body">Een fotolijst staat de hele dag aan, dus laat de lader aangesloten. ’s Nachts maakt het slaapschema dat je in de app instelt het scherm donker.</string>
+    <string name="setup_home_not_now">Niet nu</string>
+    <string name="settings_home_title">Fotolijstmodus</string>
+    <string name="settings_home_body">kinframe is nog niet de startscherm-app van deze tablet, dus het start niet vanzelf als de tablet aangaat.</string>
+    <string name="updates_from_play">Deze fotolijst krijgt updates via Google Play.</string>
+    <string name="updates_open_play">Openen in Play Store</string>
+    <string name="updates_play_prompt">Er staat een update klaar. Volg de stappen van Google Play om hem te installeren.</string>
+</resources>

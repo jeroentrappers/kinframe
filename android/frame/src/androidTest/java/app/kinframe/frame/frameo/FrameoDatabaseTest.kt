@@ -19,7 +19,7 @@ import java.util.Date
  * Reads a Realm file laid out like the one a Frameo frame keeps (docs/spec/frameo-import.md) with the real native
  * library. Emulator only, since Realm's library for x86 is left out of normal builds:
  *
- *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedDebugAndroidTest -PemulatorAbis=x86_64
+ *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedGithubDebugAndroidTest -PemulatorAbis=x86_64
  *
  * (Connected tests install on every attached device: set ANDROID_SERIAL so a frame in daily use is left alone.)
  *

@@ -47,6 +47,38 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 
 
+### android frame_build
+
+```sh
+[bundle exec] fastlane android frame_build
+```
+
+
+
+### android frame_internal
+
+```sh
+[bundle exec] fastlane android frame_internal
+```
+
+
+
+### android frame_metadata
+
+```sh
+[bundle exec] fastlane android frame_metadata
+```
+
+
+
+### android frame_promote
+
+```sh
+[bundle exec] fastlane android frame_promote
+```
+
+
+
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.

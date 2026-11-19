@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Google Play build (docs/play-frame.md, "Permissions"). Leaves out what only a converted frame uses; everything
+    else comes from src/main/AndroidManifest.xml.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- No self-update: Play delivers updates (in-app updates), the app never installs APKs. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <!-- Only granted with adb at provisioning on converted frames; the window brightness is enough on a tablet. -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:node="remove" />
+    <!-- Sleep schedule boundaries: the frame is in the foreground with the screen on, so its 30 s re-evaluation and
+         inexact alarms are enough; exact alarms are reserved for alarm and calendar apps. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" tools:node="remove" />
+    <!-- Wi-Fi scan results on Android 6-9: only granted at provisioning; a tablet is already on Wi-Fi. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
+    <!-- SD card / USB stick export and import. Android 13+ ignores it; the folder picker is used there. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+
+    <application>
+        <!-- Shared downloaded update APKs with the system installer: not in this build. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            tools:node="remove" />
+    </application>
+</manifest>

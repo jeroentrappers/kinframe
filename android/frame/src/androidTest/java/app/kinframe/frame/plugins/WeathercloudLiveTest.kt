@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
  * otherwise, so CI never calls the unofficial endpoint). Checks TLS on Android 6 (the chain ends in USERTrust RSA) and
  * that the live response still parses:
  *
- *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedDebugAndroidTest -PemulatorAbis=x86_64 \
+ *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedGithubDebugAndroidTest -PemulatorAbis=x86_64 \
  *       -Pandroid.testInstrumentationRunnerArguments.class=app.kinframe.frame.plugins.WeathercloudLiveTest \
  *       -Pandroid.testInstrumentationRunnerArguments.weathercloudCode=<code>
  */

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Używaj tego tabletu jako ramki na zdjęcia</string>
+    <string name="setup_home_body">Ustaw kinframe jako aplikację ekranu głównego tabletu. Wtedy uruchomi się sama po włączeniu tabletu, a przycisk ekranu głównego zawsze przeniesie cię z powrotem do zdjęć.</string>
+    <string name="setup_home_choose">Wybierz aplikację ekranu głównego</string>
+    <string name="setup_home_hint">Wybierz kinframe z listy i potwierdź jako domyślną.</string>
+    <string name="setup_home_power_title">Zostaw go podłączonego do ładowarki</string>
+    <string name="setup_home_power_body">Ramka na zdjęcia działa przez cały dzień, więc zostaw podłączoną ładowarkę. W nocy harmonogram uśpienia ustawiony w aplikacji przyciemnia ekran.</string>
+    <string name="setup_home_not_now">Nie teraz</string>
+    <string name="settings_home_title">Tryb ramki na zdjęcia</string>
+    <string name="settings_home_body">kinframe nie jest jeszcze aplikacją ekranu głównego tego tabletu, więc nie uruchamia się sama po jego włączeniu.</string>
+    <string name="updates_from_play">Ta ramka otrzymuje aktualizacje z Google Play.</string>
+    <string name="updates_open_play">Otwórz w Sklepie Play</string>
+    <string name="updates_play_prompt">Aktualizacja jest gotowa. Zainstaluj ją, postępując zgodnie z instrukcjami Google Play.</string>
+</resources>

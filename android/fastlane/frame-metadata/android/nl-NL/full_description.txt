@@ -1,0 +1,23 @@
+Geef die oude tablet in de schuif een tweede leven: kinframe maakt er een fotolijst van voor de woonkamer, de keuken of het dressoir van oma. De familie stuurt foto's en video's vanaf hun telefoon, en een paar seconden later staan ze op de fotolijst. Geen abonnementen, geen reclame, geen tracking.
+
+ZO WERKT HET
+Installeer kinframe op de tablet, kies een taal en wifi, en de fotolijst toont een code van 8 cijfers. Vul die code in de kinframe-app op je telefoon (Android of iPhone) of op kinframe.appmire.be in, en de fotolijst is van jou. Nodig de familie uit, en iedereen kan foto's sturen.
+
+GEMAAKT OM DE HELE DAG AAN TE STAAN
+• Maak kinframe de startscherm-app van de tablet en het start vanzelf als de tablet aangaat. De installatie legt uit hoe.
+• Laat de tablet aan de lader: kinframe houdt het scherm aan en maakt het 's nachts donker volgens het slaapschema dat je kiest.
+• Foto's blijven op de tablet bewaard, dus de diavoorstelling loopt door als de wifi even wegvalt.
+• Een pincode voor de eigenaar houdt de instellingen en de menu's van Android buiten bereik van kleine vingers.
+
+MEER DAN EEN DIAVOORSTELLING
+• Bijschriften, hartjes en snelle antwoorden: met een tik op de fotolijst weet de afzender dat de foto iemand blij maakte.
+• Video's en live foto's, met geluid als je wilt.
+• Albums, "op deze dag", een klok, het weer, agenda's en aftellers, en verjaardagskaarten met ballonnen.
+• Live widgets uit je huis: Home Assistant, HomeWizard en meer.
+
+VAN JOU
+kinframe is open source en vrije software (AGPL-3.0). Gebruik de gehoste dienst op kinframe.appmire.be, met servers in Duitsland, of draai je eigen kinframe-server: de fotolijst werkt met allebei. Geen reclame, geen analytics en geen telemetrie.
+
+WAT JE NODIG HEBT
+• Een Android-tablet met Android 6.0 of nieuwer en wifi.
+• Iemand in de familie met de kinframe-app of een webbrowser om de fotolijst te koppelen en foto's te sturen.

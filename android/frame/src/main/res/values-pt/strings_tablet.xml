@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Use este tablet como porta-retrato</string>
+    <string name="setup_home_body">Defina o kinframe como app da tela inicial do tablet. Assim ele abre sozinho quando o tablet liga, e o botão Início sempre leva você de volta às fotos.</string>
+    <string name="setup_home_choose">Escolher app da tela inicial</string>
+    <string name="setup_home_hint">Escolha o kinframe na lista e confirme como padrão.</string>
+    <string name="setup_home_power_title">Deixe-o na tomada</string>
+    <string name="setup_home_power_body">Um porta-retrato fica ligado o dia todo, então deixe o carregador conectado. À noite, a programação de descanso que você define no app escurece a tela.</string>
+    <string name="setup_home_not_now">Agora não</string>
+    <string name="settings_home_title">Modo porta-retrato</string>
+    <string name="settings_home_body">O kinframe ainda não é o app da tela inicial deste tablet, por isso não abre sozinho quando o tablet liga.</string>
+    <string name="updates_from_play">Este porta-retrato recebe atualizações pelo Google Play.</string>
+    <string name="updates_open_play">Abrir na Play Store</string>
+    <string name="updates_play_prompt">Uma atualização está pronta. Siga as etapas do Google Play para instalá-la.</string>
+</resources>

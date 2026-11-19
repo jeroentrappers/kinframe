@@ -26,7 +26,7 @@ import java.util.Locale
  * the prelude come from the APK's assets, and its view code runs inside the per-call CPU budget. Logs the JavaScript
  * time per render (`KinQuickJsTest`), the number to compare with the RK3126:
  *
- *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedDebugAndroidTest -PemulatorAbis=x86_64 \
+ *     ANDROID_SERIAL=emulator-5554 ./gradlew :frame:connectedGithubDebugAndroidTest -PemulatorAbis=x86_64 \
  *       -Pandroid.testInstrumentationRunnerArguments.class=app.kinframe.frame.plugins.QuickJsOnDeviceTest
  */
 @RunWith(AndroidJUnit4::class)

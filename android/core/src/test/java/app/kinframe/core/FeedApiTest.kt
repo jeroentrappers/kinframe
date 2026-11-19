@@ -257,6 +257,16 @@ class FeedApiTest {
     }
 
     @Test
+    fun heartbeatTellsThePlayBuildApart() {
+        val f = app.kinframe.core.api.FrameFeatures
+        // The GitHub build sends exactly what it always sent; the Play build adds the informational "play".
+        assertEquals(f.SUPPORTED, f.forDistribution("github"))
+        assertEquals(f.SUPPORTED + "play", f.forDistribution("play"))
+        val hb = app.kinframe.core.api.Heartbeat(appVersion = "0.7.0", uptimeS = 5, features = f.forDistribution("play"))
+        assertTrue(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb).contains(""""features":["feed_backfill","birthdays","play"]"""))
+    }
+
+    @Test
     fun feedCodesTellLettersFromFrameDigits() {
         assertEquals("KF7QM2XA", FeedCodes.normalize("kf7q-m2xa"))
         assertEquals("KF7QM2XA", FeedCodes.normalize(" KF7Q M2XA "))

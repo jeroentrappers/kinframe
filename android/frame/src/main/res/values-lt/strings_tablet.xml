@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Naudokite šią planšetę kaip nuotraukų rėmelį</string>
+    <string name="setup_home_body">Nustatykite kinframe kaip planšetės pagrindinio ekrano programą. Tada ji pati pasileis įjungus planšetę, o mygtukas Pradžia visada grąžins jus prie nuotraukų.</string>
+    <string name="setup_home_choose">Pasirinkti pagrindinio ekrano programą</string>
+    <string name="setup_home_hint">Sąraše pasirinkite kinframe ir patvirtinkite kaip numatytąją.</string>
+    <string name="setup_home_power_title">Laikykite prijungtą prie įkroviklio</string>
+    <string name="setup_home_power_body">Nuotraukų rėmelis veikia visą dieną, todėl palikite įkroviklį prijungtą. Naktį programėlėje nustatytas miego grafikas patamsina ekraną.</string>
+    <string name="setup_home_not_now">Ne dabar</string>
+    <string name="settings_home_title">Nuotraukų rėmelio režimas</string>
+    <string name="settings_home_body">kinframe dar nėra šios planšetės pagrindinio ekrano programa, todėl ji pati nepasileidžia įjungus planšetę.</string>
+    <string name="updates_from_play">Šis rėmelis gauna naujinius iš Google Play.</string>
+    <string name="updates_open_play">Atidaryti Play parduotuvėje</string>
+    <string name="updates_play_prompt">Naujinys paruoštas. Įdiekite jį vadovaudamiesi Google Play nurodymais.</string>
+</resources>

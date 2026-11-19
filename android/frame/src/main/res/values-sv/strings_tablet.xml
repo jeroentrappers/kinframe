@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Använd den här surfplattan som fotoram</string>
+    <string name="setup_home_body">Gör kinframe till surfplattans startskärmsapp. Då startar den av sig själv när surfplattan slås på, och hemknappen tar dig alltid tillbaka till bilderna.</string>
+    <string name="setup_home_choose">Välj startskärmsapp</string>
+    <string name="setup_home_hint">Välj kinframe i listan och bekräfta den som standard.</string>
+    <string name="setup_home_power_title">Låt den sitta i laddaren</string>
+    <string name="setup_home_power_body">En fotoram är på hela dagen, så låt laddaren vara ansluten. På natten gör sovschemat du ställer in i appen skärmen mörk.</string>
+    <string name="setup_home_not_now">Inte nu</string>
+    <string name="settings_home_title">Fotoramsläge</string>
+    <string name="settings_home_body">kinframe är inte surfplattans startskärmsapp än, så den startar inte av sig själv när surfplattan slås på.</string>
+    <string name="updates_from_play">Den här fotoramen får uppdateringar från Google Play.</string>
+    <string name="updates_open_play">Öppna i Play Butik</string>
+    <string name="updates_play_prompt">En uppdatering är klar. Följ stegen från Google Play för att installera den.</string>
+</resources>

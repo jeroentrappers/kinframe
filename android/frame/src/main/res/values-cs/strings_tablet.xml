@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <string name="setup_home_title">Použijte tento tablet jako fotorámeček</string>
+    <string name="setup_home_body">Nastavte kinframe jako aplikaci domovské obrazovky tabletu. Pak se sám spustí po zapnutí tabletu a tlačítko Domů vás vždy vrátí k fotkám.</string>
+    <string name="setup_home_choose">Vybrat aplikaci domovské obrazovky</string>
+    <string name="setup_home_hint">Vyberte v seznamu kinframe a potvrďte ho jako výchozí.</string>
+    <string name="setup_home_power_title">Nechte ho v nabíječce</string>
+    <string name="setup_home_power_body">Fotorámeček svítí celý den, proto nechte nabíječku připojenou. V noci obrazovku ztlumí plán spánku, který nastavíte v aplikaci.</string>
+    <string name="setup_home_not_now">Teď ne</string>
+    <string name="settings_home_title">Režim fotorámečku</string>
+    <string name="settings_home_body">kinframe zatím není aplikací domovské obrazovky tohoto tabletu, takže se po zapnutí tabletu sám nespustí.</string>
+    <string name="updates_from_play">Tento rámeček dostává aktualizace z Google Play.</string>
+    <string name="updates_open_play">Otevřít v Obchodě Play</string>
+    <string name="updates_play_prompt">Aktualizace je připravená. Nainstalujte ji podle pokynů Google Play.</string>
+</resources>

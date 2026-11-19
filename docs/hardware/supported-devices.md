@@ -1,5 +1,12 @@
 # Supported frames
 
+kinframe runs on two kinds of devices:
+
+- **Converted Frameo frames** (below): the convert tool replaces the stock app with kinframe's GitHub build, which uses
+  the frame's root for the things only root can do.
+- **Android tablets** (and phones), with the frame app from Google Play: see
+  [Android tablets from Google Play](#android-tablets-from-google-play) and [play-frame.md](../play-frame.md).
+
 Which stock photo frames the convert tool (website `/convert`, `tools/convert/kinframe-convert.sh`) can turn into
 kinframe frames. Both tools read the model from `ro.product.brand` and `ro.product.device` and compare it with
 `SUPPORTED_MODELS` in `web/src/lib/convert/plan.ts`.
@@ -45,3 +52,34 @@ Run the tool's dry run (website: tick "Dry run"; CLI: `--dry-run`) and open an i
 
 The log contains the model, Android version, fingerprint and the installed app versions. It holds no Wi-Fi
 passwords, photos or account details.
+
+## Android tablets from Google Play
+
+Any Android tablet can be a kinframe frame with the frame app's Google Play build (`play` flavor,
+[play-frame.md](../play-frame.md)). Nothing is converted: install kinframe from Play, go through the setup, and in its
+last step make kinframe the home app.
+
+| Requirement | Why |
+|---|---|
+| Android 6.0 (API 23) or newer | The frame app's `minSdk`. |
+| ARM CPU (`armeabi-v7a` or `arm64-v8a`) | Native libraries (QuickJS for widgets). Play doesn't offer the app to x86 tablets. |
+| Wi-Fi | Photos come from the kinframe server. |
+| Google Play (Store and services) | To install it and for updates. Without Play, the GitHub APK can be installed by hand; it then updates itself from the server. |
+| kinframe as the home app (recommended) | Starts at power-on, shows over the lock screen, Back stays in kinframe. Without it kinframe is an ordinary app. |
+| Charger connected (recommended) | The screen stays on all day. |
+
+What works without root (everything else is the same as on a converted frame):
+
+| Feature | On a tablet from Play |
+|---|---|
+| Slideshow, videos, captions, reactions, widgets, calendars, birthdays, weather, owner PIN | Same. |
+| Sleep schedule | The screen goes black at the lowest backlight instead of the backlight switching off; touch wakes it. On LCD panels a faint glow can show in the dark. |
+| Brightness | kinframe's own window brightness; the tablet's system brightness stays as it was. |
+| Updates | Google Play in-app updates (asks once when the frame is idle, installs when idle again; at once when the server requires a newer version). No rollback. |
+| Clock | Android's network time. If the clock is wrong (no network after a restart), the frame says so and hides the time until it is right. |
+| Start at power-on | Only when kinframe is the home app. |
+| Restart (frame menu, remote `restart`) | Restarts the app, not the tablet. |
+| Power off | Stops playback, saves everything and shows "safe to unplug"; file systems are not remounted read-only. Holding the tablet's power button is the better way to switch it off. |
+| SD card / USB stick export and import | Through Android's folder picker; eject from Android's settings. |
+| Importing photos from Frameo | Not applicable (Frameo isn't installed). |
+| Boot logo, boot animation, Let's Encrypt root | Not changed (that's the convert tool's job on frames). Android 6 tablets get the Let's Encrypt roots from the app itself. |

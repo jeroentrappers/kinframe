@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A tablet used as a frame: the home-app step and Google Play updates (docs/play-frame.md). -->
+<resources>
+    <!-- Setup wizard, last step on a tablet that doesn't have kinframe as its home app (docs/play-frame.md). -->
+    <string name="setup_home_title">Use this tablet as a photo frame</string>
+    <string name="setup_home_body">Make kinframe the tablet’s home app. It then starts by itself when the tablet turns on, and the Home button always brings you back to the photos.</string>
+    <!-- Opens Android's home-app chooser. -->
+    <string name="setup_home_choose">Choose home app</string>
+    <string name="setup_home_hint">Pick kinframe in the list and confirm it as the default.</string>
+    <string name="setup_home_power_title">Keep it plugged in</string>
+    <string name="setup_home_power_body">A photo frame is on all day, so leave the charger connected. At night the sleep schedule you set in the app darkens the screen.</string>
+    <string name="setup_home_not_now">Not now</string>
+    <!-- Frame settings, shown while kinframe is not the home app. -->
+    <string name="settings_home_title">Photo frame mode</string>
+    <string name="settings_home_body">kinframe is not this tablet’s home app yet, so it does not start by itself when the tablet turns on.</string>
+    <!-- Google Play build: updates come from Google Play. "Google Play" and "Play Store" are names, keep them as Google writes them in your language. -->
+    <string name="updates_from_play">This frame gets its updates from Google Play.</string>
+    <string name="updates_open_play">Open in Play Store</string>
+    <string name="updates_play_prompt">An update is ready. Follow the steps from Google Play to install it.</string>
+</resources>
