@@ -162,6 +162,11 @@
         <item quantity="other">Fix or remove the %1$d highlighted items to send.</item>
     </plurals>
     <string name="send_over_limit">You can send up to %1$d at a time. %2$d were left out.</string>
+    <!-- Android only: no web key. Several servers: the strictest chosen server's limit applies to the whole send. -->
+    <string name="send_limit_items">You can send up to %1$d at a time. Remove some to send.</string>
+    <string name="send_limit_items_server">%1$s takes up to %2$d at a time. Remove some, or send to %1$s separately.</string>
+    <string name="send_limit_upload_server">Too large for %1$s. The limit there is %2$s.</string>
+    <string name="send_limit_video_server">Too long for %1$s. Videos can be up to %2$s there. Trim it to send.</string>
     <plurals name="send_skipped">
         <item quantity="one">%1$d file was skipped because it isn’t a photo or video.</item>
         <item quantity="other">%1$d files were skipped because they aren’t photos or videos.</item>

@@ -107,8 +107,10 @@ fun ItemEditor(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 val issue = state.issue(item)
-                if (issue == ItemIssue.TooLarge) Note(stringResource(R.string.send_issue_too_large, Format.bytes(LocalContext.current, state.limits.maxUploadBytes)), tone = NoteTone.Danger)
-                if (issue == ItemIssue.TooLong) Note(stringResource(R.string.send_issue_too_long, Format.clock(state.limits.maxVideoSeconds * 1000L)), tone = NoteTone.Danger)
+                if (issue == ItemIssue.TooLarge) Note(state.sendLimits.uploadServer?.let { stringResource(R.string.send_limit_upload_server, it, Format.bytes(LocalContext.current, state.sendLimits.limits.maxUploadBytes)) }
+                    ?: stringResource(R.string.send_issue_too_large, Format.bytes(LocalContext.current, state.sendLimits.limits.maxUploadBytes)), tone = NoteTone.Danger)
+                if (issue == ItemIssue.TooLong) Note(state.sendLimits.videoServer?.let { stringResource(R.string.send_limit_video_server, it, Format.clock(state.sendLimits.limits.maxVideoSeconds * 1000L)) }
+                    ?: stringResource(R.string.send_issue_too_long, Format.clock(state.sendLimits.limits.maxVideoSeconds * 1000L)), tone = NoteTone.Danger)
                 if (issue == ItemIssue.TooShort) Note(stringResource(R.string.send_trim_min), tone = NoteTone.Danger)
 
                 FocalPicker(item, enabled = item.fill) { x, y -> onFocal(item.id, x, y) }
@@ -133,7 +135,7 @@ fun ItemEditor(
                     }
                 }
 
-                if (item.isVideo && item.info.durationMs != null) TrimEditor(item, state.limits.maxVideoSeconds * 1000L, onTrim, onAudio)
+                if (item.isVideo && item.info.durationMs != null) TrimEditor(item, state.sendLimits.limits.maxVideoSeconds * 1000L, onTrim, onAudio)
                 if (item.info.motionPhoto) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (item.sendLive) LiveBadge()
