@@ -7,6 +7,7 @@
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import Icon from '../Icon.svelte';
 	import ReactionsDialog from './ReactionsDialog.svelte';
+	import { remoteFrameName } from '$lib/leavingText';
 
 	let {
 		summary,
@@ -38,7 +39,7 @@
 	let busy = $state(false);
 	const uid = $props.id();
 
-	const line = $derived(reactionLine(current, auth.me?.id, t('social.you')));
+	const line = $derived(reactionLine(current, auth.me?.id, t('social.you'), remoteFrameName));
 	const mine = $derived(current?.mine ?? null);
 	const names = $derived(new Intl.ListFormat(i18n.tag, { type: 'conjunction' }).format(line.names));
 

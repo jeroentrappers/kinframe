@@ -4,7 +4,7 @@
 	import { discovery } from '$lib/discovery.svelte';
 	import { formatDateTime, relativeTime } from '$lib/format';
 	import { authorCredit } from '$lib/sender';
-	import { personName, postPlace } from '$lib/social';
+	import { personName, posterName, postPlace } from '$lib/social';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import { softFly } from '$lib/motion';
 	import Avatar from '../Avatar.svelte';
@@ -17,7 +17,7 @@
 	let { post, onreactions, showPrompt = true }: { post: TimelinePost; onreactions?: (s: ReactionSummary) => void; showPrompt?: boolean } = $props();
 
 	const place = $derived(postPlace(post));
-	const poster = $derived(personName(post.poster, t('social.formerMember')));
+	const poster = $derived(posterName(post, t('social.formerMember'), (name) => t('leaving.formerMember', { name })));
 	const caption = $derived(post.items.find((i) => i.caption)?.caption ?? null);
 	const thread = $derived(post.thread);
 	const own = $derived(post.poster.user_id === auth.me?.id);

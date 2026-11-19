@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Comment, ReactionSummary, TimelinePost } from './api/client';
 import {
+	posterName,
 	appendPosts,
 	badgeTitle,
 	cleanMentions,
@@ -61,6 +62,11 @@ describe('reaction row', () => {
 
 	it('says "You" for the caller', () => {
 		expect(reactionLine(s, 'me', 'You').names).toEqual(['Oma’s frame', 'You']);
+	});
+
+	it('names frames on other servers with their server', () => {
+		const remote = { ...s, frames: [{ frame_id: 'rs', frame_name: 'Oma’s frame', reaction: 'love' as const, server_name: 'Appmire' }] };
+		expect(reactionLine(remote, 'me', 'You', (n, srv) => (srv ? `${n} (${srv})` : n)).names).toEqual(['Oma’s frame (Appmire)', 'You']);
 	});
 
 	it('is empty without reactions', () => {
@@ -239,5 +245,15 @@ describe('badge', () => {
 		expect(badgeTitle('(3) Home · kinframe', 0)).toBe('Home · kinframe');
 		expect(badgeTitle('Home', 120)).toBe('(99+) Home');
 		expect(badgeTitle('(99+) Home', 0)).toBe('Home');
+	});
+});
+
+describe('posterName', () => {
+	const named = (n: string) => `${n} (former member)`;
+	it('names handed-over posts by the frozen name on their items', () => {
+		const poster = { user_id: 'u1', display_name: '', former_member: true };
+		expect(posterName({ poster, items: [{ former_sender_name: null }, { former_sender_name: 'Tom' }] }, 'Former member', named)).toBe('Tom (former member)');
+		expect(posterName({ poster, items: [] }, 'Former member', named)).toBe('Former member');
+		expect(posterName({ poster: { user_id: 'u2', display_name: 'Lies' }, items: [{ former_sender_name: 'Tom' }] }, 'Former member', named)).toBe('Lies');
 	});
 });

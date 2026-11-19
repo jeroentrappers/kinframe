@@ -8,7 +8,7 @@
 	import { live } from '$lib/live.svelte';
 	import { isCode, problemMessage } from '$lib/problem';
 	import { authorCredit } from '$lib/sender';
-	import { personName, postPlace } from '$lib/social';
+	import { posterName, postPlace } from '$lib/social';
 	import { toasts } from '$lib/toast.svelte';
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import Avatar from '$components/Avatar.svelte';
@@ -73,7 +73,7 @@
 
 	const own = $derived(!!post && post.poster.user_id === auth.me?.id);
 	const place = $derived(post ? postPlace(post) : null);
-	const poster = $derived(post ? personName(post.poster, t('social.formerMember')) : '');
+	const poster = $derived(post ? posterName(post, t('social.formerMember'), (name) => t('leaving.formerMember', { name })) : '');
 	const caption = $derived(post?.items.find((i) => i.caption)?.caption ?? null);
 
 	// ---- prompts the poster can tag the post with (this and last week's)

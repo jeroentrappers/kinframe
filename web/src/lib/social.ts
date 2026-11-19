@@ -29,14 +29,25 @@ export interface ReactionLine {
 	total: number;
 }
 
-export function reactionLine(s: ReactionSummary | null | undefined, meId?: string, youLabel = 'You'): ReactionLine {
+/**
+ * `frameName` names a frame: frames on other servers get their server ("Oma's frame (Appmire)", README §5.22).
+ */
+export function reactionLine(
+	s: ReactionSummary | null | undefined,
+	meId?: string,
+	youLabel = 'You',
+	frameName: (name: string, server: string | null | undefined) => string = (name) => name
+): ReactionLine {
 	if (!s || s.total <= 0) return { emojis: [], names: [], others: 0, total: 0 };
 	const emojis = s.counts
 		.filter((c) => c.count > 0)
 		.slice(0, 3)
 		.map((c) => PERSON_EMOJI[c.emoji]);
 	const all: string[] = [];
-	for (const f of s.frames ?? []) if (!all.includes(f.frame_name)) all.push(f.frame_name);
+	for (const f of s.frames ?? []) {
+		const n = frameName(f.frame_name, f.server_name);
+		if (!all.includes(n)) all.push(n);
+	}
 	for (const p of s.people ?? []) {
 		const n = p.person.user_id === meId ? youLabel : p.person.display_name;
 		if (n && !all.includes(n)) all.push(n);
@@ -334,6 +345,22 @@ export function postPlace(p: Pick<TimelinePost, 'kind' | 'feed_name' | 'circle_n
 export function personName(p: PersonRef | null | undefined, formerLabel: string): string {
 	if (!p) return formerLabel;
 	return p.former_member || !p.display_name ? formerLabel : p.display_name;
+}
+
+/**
+ * A post's poster. Posts handed over at account deletion (README §5.21) have a former-member poster but keep the
+ * frozen name on their items: "Tom (former member)" (`formerNamed`) instead of the bare "Former member".
+ */
+export function posterName(
+	post: { poster: PersonRef; items?: { former_sender_name?: string | null }[] | null },
+	formerLabel: string,
+	formerNamed: (name: string) => string
+): string {
+	if (post.poster.former_member) {
+		const name = post.items?.map((i) => i.former_sender_name?.trim()).find((n) => !!n);
+		if (name) return formerNamed(name);
+	}
+	return personName(post.poster, formerLabel);
 }
 
 // ---------------------------------------------------------------- badge
