@@ -1592,7 +1592,7 @@ const sv: Catalog = {
 	'frameFeeds.resumedToast': '{feed} återupptaget',
 	'frameFeeds.unsubscribe': 'Sluta följa',
 	'frameFeeds.unsubscribeConfirm': 'Sluta följa {feed}?',
-	'frameFeeds.unsubscribeBody': 'Flödets foton försvinner från {frame}, om de inte också skickades direkt till fotoramen.',
+	'frameFeeds.unsubscribeBody': 'Familjens foton försvinner från {frame}, om de inte också skickades direkt till fotoramen.',
 	'frameFeeds.unsubscribed': '{feed} visas inte längre på fotoramen',
 	'frameFeeds.withdraw': 'Återkalla förfrågan',
 	'frameFeeds.withdrawConfirm': 'Återkalla förfrågan om {feed}?',

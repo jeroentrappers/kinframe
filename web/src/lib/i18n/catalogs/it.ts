@@ -1643,7 +1643,7 @@ const it: Catalog = {
 	'frameFeeds.playOnly': 'Riproduci solo questa famiglia',
 	'frameFeeds.changeHistory': 'Post precedenti',
 	'frameFeeds.historyTitle': 'Post precedenti di {feed}',
-	'frameFeeds.historyChangeHint': 'Sceglierne di più aggiunge foto precedenti; sceglierne di meno le toglie di nuovo. I post da quando segui il feed restano sempre.',
+	'frameFeeds.historyChangeHint': 'Sceglierne di più aggiunge foto precedenti; sceglierne di meno le toglie di nuovo. I post da quando segui la famiglia restano sempre.',
 	'frameFeeds.historySaved': 'Salvato. La cornice si aggiorna in background.',
 	'frameFeeds.pausedToast': '{feed} in pausa',
 	'frameFeeds.resumedToast': '{feed} ripreso',

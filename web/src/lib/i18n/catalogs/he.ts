@@ -1417,7 +1417,7 @@ const he: Catalog = {
 	'live.feedJoinRequest': '{name} רוצה להצטרף אל {feed}',
 	'live.subscriptionRequest': '{name} רוצה להציג את {feed} ב-{frame}',
 	'live.subscriptionApproved': '{feed} מוצג עכשיו ב-{frame}',
-	'live.subscriptionRejected': 'הפיד {feed} דחה את ההצגה ב-{frame}',
+	'live.subscriptionRejected': 'המשפחה {feed} דחתה את ההצגה ב-{frame}',
 	'live.subscriptionRemoved': '{feed} כבר לא מוצג ב-{frame}: המשפחה הסירה אותה',
 	'live.feedDeleted': '{feed} נמחק וכבר לא מוצג ב-{frame}',
 
@@ -1748,7 +1748,7 @@ const he: Catalog = {
 	'birthdays.showAgeHint': 'המסגרות מציגות את הגיל החדש. נדרשת שנת לידה.',
 	'birthdays.link': 'חבר במשפחה',
 	'birthdays.linkHint': 'כשאין תמונה, משתמשים בתמונת הפרופיל של החבר. הוא גם יכול לשנות בעצמו את יום ההולדת שלו.',
-	'birthdays.linkNone': 'לא חבר בפיד',
+	'birthdays.linkNone': 'לא חבר במשפחה',
 	'birthdays.photo': 'תמונה',
 	'birthdays.choosePhoto': 'בחירת תמונה',
 	'birthdays.removePhoto': 'הסרת התמונה',

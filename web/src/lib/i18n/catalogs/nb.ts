@@ -1592,7 +1592,7 @@ const nb: Catalog = {
 	'frameFeeds.resumedToast': '{feed} er gjenopptatt',
 	'frameFeeds.unsubscribe': 'Slutt å følge',
 	'frameFeeds.unsubscribeConfirm': 'Slutte å følge {feed}?',
-	'frameFeeds.unsubscribeBody': 'Kanalens bilder forsvinner fra {frame}, med mindre de også ble sendt direkte til fotorammen.',
+	'frameFeeds.unsubscribeBody': 'Familiens bilder forsvinner fra {frame}, med mindre de også ble sendt direkte til fotorammen.',
 	'frameFeeds.unsubscribed': '{feed} vises ikke lenger på denne fotorammen',
 	'frameFeeds.withdraw': 'Trekk tilbake forespørselen',
 	'frameFeeds.withdrawConfirm': 'Trekke tilbake forespørselen om {feed}?',

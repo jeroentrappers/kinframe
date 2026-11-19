@@ -1533,7 +1533,7 @@ const ar: Catalog = {
 	'feeds.name': 'الاسم',
 	'feeds.namePlaceholder': 'مثلًا: أطفال عائلة بيترز',
 	'feeds.create': 'إنشاء العائلة',
-	'feeds.created': 'القناة {feed} جاهزة. ادعُ أحدًا للبدء.',
+	'feeds.created': 'العائلة {feed} جاهزة. ادعُ أحدًا للبدء.',
 	'feeds.limitReached': 'يمكنك امتلاك {max} عائلة كحد أقصى على هذا الخادم.',
 	'feeds.emptyTitle': 'لا توجد عائلات بعد',
 	'feeds.emptyBody': 'أنشئ عائلة: ينشر فيها الجميع مرة واحدة، ويعرض كل إطار يتابعها الصور.',
