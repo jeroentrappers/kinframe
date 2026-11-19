@@ -32,6 +32,7 @@ type feedSummaryJSON struct {
 	SubscriptionCount int        `json:"subscription_count"`
 	LastPostAt        *time.Time `json:"last_post_at,omitempty"`
 	CreatedAt         time.Time  `json:"created_at"`
+	ConversationID    *uuid.UUID `json:"conversation_id,omitempty"` // the family chat (chats: feedChats)
 
 	feedEngagementJSON // engagement: freshness and streak (listMyFeeds, getFeed)
 }
@@ -187,6 +188,7 @@ func (s *Server) ListMyFeeds(ctx context.Context, _ gen.ListMyFeedsRequestObject
 		out[i] = s.feedSummaryOut(&vs[i])
 	}
 	s.fillFeedEngagement(ctx, out) // engagement
+	s.feedChats(ctx, out)
 	return ok(out), nil
 }
 
@@ -277,6 +279,7 @@ func (s *Server) GetFeed(ctx context.Context, req gen.GetFeedRequestObject) (gen
 	}
 	out := s.feedOut(v)
 	out.feedEngagementJSON = s.feedEngagementFields(ctx, v.ID) // engagement
+	s.feedChat(ctx, &out.feedSummaryJSON)
 	return ok(out), nil
 }
 

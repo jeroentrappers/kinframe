@@ -102,6 +102,7 @@ type Server struct {
 	// Family social (docs/spec/family-social.md, README §5.18–§5.19): comment, message and report excerpt bodies
 	// are sealed with it; nil without KINFRAME_SECRETS_KEY, and then they are stored as plain text.
 	bodies *secrets.Sealer
+	chat   *chatState // chats (chat.go)
 
 	// Photo sources and Google imports (docs/spec/photo-sources.md).
 	guard            *netguard.Guard
@@ -242,6 +243,9 @@ func New(d Deps) (*Server, error) {
 	}
 	if err := s.setupTus(); err != nil {
 		return nil, err
+	}
+	if err := s.setupChat(); err != nil {
+		return nil, fmt.Errorf("chats: %w", err)
 	}
 	return s, nil
 }

@@ -283,7 +283,7 @@ func (s *Server) commentPushes(ctx context.Context, postID uuid.UUID, c *store.C
 	if err != nil {
 		return out
 	}
-	authorBlocked, err := s.st.BlockedBy(ctx, s.st.Q(), author)
+	authorBlocked, err := s.st.BlockedByUser(ctx, s.st.Q(), author)
 	if err != nil {
 		return out
 	}
@@ -406,7 +406,7 @@ func (s *Server) flushCommentBundle(ctx context.Context, b store.PushBundle) boo
 	if err != nil || c.AuthorID == nil {
 		return false
 	}
-	blocked, err := s.st.BlockedBy(ctx, s.st.Q(), b.UserID)
+	blocked, err := s.st.BlockedByUser(ctx, s.st.Q(), b.UserID)
 	if err != nil {
 		return false
 	}
@@ -417,7 +417,7 @@ func (s *Server) flushCommentBundle(ctx context.Context, b store.PushBundle) boo
 		}
 	}
 	text := ""
-	if t := s.openBody(c); t != nil {
+	if t := s.openCommentBody(c); t != nil {
 		text = pushText(*t)
 	}
 	s.notify.PushOnly(b.UserID, "comment.created", s.commentBundlePush(ctx, p, b.UserID, actors, c.ID, c.AuthorName, text))

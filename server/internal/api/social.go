@@ -22,7 +22,7 @@ import (
 // Limits of family social (discovery `limits`).
 const (
 	maxCommentChars   = 2000
-	maxMentions       = 20
+	maxCommentMentions       = 20
 	maxCirclesPerFeed = 20
 )
 
@@ -40,7 +40,7 @@ func (s *Server) visiblePost(ctx context.Context, viewer, postID uuid.UUID) (*st
 // ---------------------------------------------------------------- people
 
 // personRef renders a person next to a comment, reaction or post; deleted accounts are "Former member".
-func (s *Server) personRef(id *uuid.UUID, name string, avatarKey *string, deleted bool) gen.PersonRef {
+func (s *Server) socialPersonRef(id *uuid.UUID, name string, avatarKey *string, deleted bool) gen.PersonRef {
 	out := gen.PersonRef{DisplayName: name, AvatarUrl: s.avatarURL(avatarKey)}
 	if id != nil {
 		out.UserId = *id
@@ -54,7 +54,7 @@ func (s *Server) personRef(id *uuid.UUID, name string, avatarKey *string, delete
 // ---------------------------------------------------------------- bodies
 
 // sealBody stores a comment body sealed when the server has an at-rest key (README §5.18 "Storage").
-func (s *Server) sealBody(text string) (*string, []byte) {
+func (s *Server) sealCommentBody(text string) (*string, []byte) {
 	if s.bodies != nil {
 		return nil, s.bodies.Seal(text)
 	}
@@ -62,7 +62,7 @@ func (s *Server) sealBody(text string) (*string, []byte) {
 }
 
 // openBody returns a comment's body, sealed or plain; nil for tombstones and frame entries.
-func (s *Server) openBody(c *store.Comment) *string {
+func (s *Server) openCommentBody(c *store.Comment) *string {
 	if c.BodyEnc != nil {
 		if s.bodies == nil {
 			s.log.Warn("sealed comment body but no secrets key", "comment", c.ID)
@@ -94,11 +94,11 @@ type viewerCtx struct {
 func (s *Server) viewer(ctx context.Context, id uuid.UUID, people []uuid.UUID) (*viewerCtx, error) {
 	v := &viewerCtx{id: id, contacts: map[uuid.UUID]bool{}}
 	var err error
-	if v.blocked, err = s.st.BlockedBy(ctx, s.st.Q(), id); err != nil {
+	if v.blocked, err = s.st.BlockedByUser(ctx, s.st.Q(), id); err != nil {
 		return nil, err
 	}
 	if len(people) > 0 {
-		if v.contacts, err = s.st.Contacts(ctx, s.st.Q(), id, people); err != nil {
+		if v.contacts, err = s.st.ContactsAmong(ctx, s.st.Q(), id, people); err != nil {
 			return nil, err
 		}
 	}
@@ -112,7 +112,7 @@ func (s *Server) viewer(ctx context.Context, id uuid.UUID, people []uuid.UUID) (
 
 // reactionSummary builds the reaction row of one target for the viewer: people (newest first) and frames
 // (newest first, at most one per frame and item as given) together.
-func (s *Server) reactionSummary(v *viewerCtx, people []store.PersonReactionRow, frames []gen.FrameReactionRef) gen.ReactionSummary {
+func (s *Server) socialReactionSummary(v *viewerCtx, people []store.PersonReactionRow, frames []gen.FrameReactionRef) gen.ReactionSummary {
 	out := gen.ReactionSummary{People: []struct {
 		Emoji  gen.PersonReaction `json:"emoji"`
 		Person gen.PersonRef      `json:"person"`
@@ -159,7 +159,7 @@ func (s *Server) reactionSummary(v *viewerCtx, people []store.PersonReactionRow,
 		out.People = append(out.People, struct {
 			Emoji  gen.PersonReaction `json:"emoji"`
 			Person gen.PersonRef      `json:"person"`
-		}{gen.PersonReaction(r.Emoji), s.personRef(&id, r.Name, r.AvatarKey, r.Deleted)})
+		}{gen.PersonReaction(r.Emoji), s.socialPersonRef(&id, r.Name, r.AvatarKey, r.Deleted)})
 	}
 	if len(frames) > 3 {
 		frames = frames[:3]
@@ -213,10 +213,10 @@ func (s *Server) commentOut(v *viewerCtx, p *store.SocialPost, c *store.Comment,
 		out.Frame = f
 		return out
 	}
-	author := s.personRef(c.AuthorID, c.AuthorName, c.AuthorAvatarKey, c.AuthorDeleted)
+	author := s.socialPersonRef(c.AuthorID, c.AuthorName, c.AuthorAvatarKey, c.AuthorDeleted)
 	out.Author = &author
 	if c.QuotedID != nil {
-		q := s.personRef(c.QuotedID, c.QuotedName, c.QuotedAvatarKey, c.QuotedDeleted)
+		q := s.socialPersonRef(c.QuotedID, c.QuotedName, c.QuotedAvatarKey, c.QuotedDeleted)
 		out.Quoted = &q
 	}
 	mine := c.AuthorID != nil && *c.AuthorID == v.id
@@ -225,7 +225,7 @@ func (s *Server) commentOut(v *viewerCtx, p *store.SocialPost, c *store.Comment,
 		out.Deleted = ptr(true)
 		out.Mentions = &[]gen.Mention{}
 	default:
-		out.Body = s.openBody(c)
+		out.Body = s.openCommentBody(c)
 		ms := make([]gen.Mention, len(c.Mentions))
 		for i, m := range c.Mentions {
 			ms[i] = gen.Mention{UserId: m.UserID, Start: m.Start, Length: m.Length}
@@ -241,7 +241,7 @@ func (s *Server) commentOut(v *viewerCtx, p *store.SocialPost, c *store.Comment,
 	live := c.Live()
 	out.CanEdit = ptr(live && mine)
 	out.CanDelete = ptr(live && (mine || p.Moderator()))
-	sum := s.reactionSummary(v, reactions, nil)
+	sum := s.socialReactionSummary(v, reactions, nil)
 	out.Reactions = &sum
 	return out
 }
@@ -308,7 +308,7 @@ func (s *Server) threadSummaries(ctx context.Context, v *viewerCtx, posts []stor
 		reactors = append(reactors, r.UserID)
 	}
 	if len(reactors) > 0 {
-		if v.contacts, err = s.st.Contacts(ctx, s.st.Q(), v.id, reactors); err != nil {
+		if v.contacts, err = s.st.ContactsAmong(ctx, s.st.Q(), v.id, reactors); err != nil {
 			return nil, err
 		}
 	}
@@ -322,7 +322,7 @@ func (s *Server) threadSummaries(ctx context.Context, v *viewerCtx, posts []stor
 		out[p.ID] = gen.ThreadSummary{
 			PostId: p.ID, State: gen.ThreadState(p.ThreadState), CommentCount: p.CommentCount, LatestComments: cs,
 			UnreadCount: ptr(u.Unread), UnreadMentions: ptr(u.Mentions), ReadUpTo: p.ReadUpTo, Muted: ptr(p.Muted),
-			Reactions:  s.reactionSummary(v, byPost[p.ID], frameRefs(frames, p.ID, nil)),
+			Reactions:  s.socialReactionSummary(v, byPost[p.ID], frameRefs(frames, p.ID, nil)),
 			CanComment: ptr(p.ThreadState == "open"), CanModerate: ptr(p.Moderator()),
 		}
 	}
@@ -344,7 +344,7 @@ func (s *Server) timelinePosts(ctx context.Context, v *viewerCtx, posts []store.
 		idx[p.ID] = i
 		t := gen.TimelinePost{Id: p.ID, Kind: gen.PostKind(p.Kind), FeedId: p.FeedID, FeedName: p.FeedName, CircleId: p.CircleID,
 			CircleName: p.CircleName, FrameId: p.FrameID, FrameName: p.FrameName, CreatedAt: p.CreatedAt, Items: []gen.Item{},
-			Poster: s.personRef(p.PosterID, p.PosterName, p.PosterAvatarKey, p.PosterDeleted),
+			Poster: s.socialPersonRef(p.PosterID, p.PosterName, p.PosterAvatarKey, p.PosterDeleted),
 			Via:    tgCredit(viaCredit(viaJSON(p.Via, p.ViaSourceID), p.ViaLabel, p.ViaEmailAddressID), p.ViaTelegramChatID)}
 		if p.IsPoster(v.id) {
 			t.SendId = p.SendID

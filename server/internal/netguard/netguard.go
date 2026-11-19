@@ -334,6 +334,9 @@ type Options struct {
 	Jar http.CookieJar
 	// MaxRedirects defaults to 5; negative disables following redirects.
 	MaxRedirects int
+	// AllowPlainHTTP lets plain http:// reach public addresses too (link previews, which send no
+	// credentials). Address checks are unchanged.
+	AllowPlainHTTP bool
 }
 
 // Pinned reports whether host is one of suffixes or a subdomain of one.
@@ -349,8 +352,9 @@ func Pinned(host string, suffixes []string) bool {
 }
 
 type guardedTransport struct {
-	base   *http.Transport
-	pinned []string
+	base      *http.Transport
+	pinned    []string
+	plainOkay bool
 }
 
 func (t *guardedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -360,7 +364,7 @@ func (t *guardedTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	if len(t.pinned) > 0 && !Pinned(req.URL.Hostname(), t.pinned) {
 		return nil, &BlockedError{Host: req.URL.Hostname(), Reason: ReasonPinned}
 	}
-	if req.URL.Scheme == "http" {
+	if req.URL.Scheme == "http" && !t.plainOkay {
 		req = req.WithContext(context.WithValue(req.Context(), plainKey{}, true))
 	}
 	return t.base.RoundTrip(req)
@@ -383,7 +387,7 @@ func (g *Guard) Client(o Options) *http.Client {
 	if max == 0 {
 		max = 5
 	}
-	c := &http.Client{Transport: &guardedTransport{base: tr, pinned: o.Pinned}, Timeout: o.Timeout, Jar: o.Jar}
+	c := &http.Client{Transport: &guardedTransport{base: tr, pinned: o.Pinned, plainOkay: o.AllowPlainHTTP}, Timeout: o.Timeout, Jar: o.Jar}
 	c.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		if max < 0 {
 			return http.ErrUseLastResponse

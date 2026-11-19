@@ -730,15 +730,6 @@ func (tx *Tx) SetPersonReaction(ctx context.Context, kind string, targetID, scop
 
 // ---------------------------------------------------------------- people
 
-// BlockedBy lists the people userID blocked.
-func (s *Store) BlockedBy(ctx context.Context, q db.DBTX, userID uuid.UUID) (map[uuid.UUID]bool, error) {
-	rows, err := q.Query(ctx, `SELECT blocked_user_id FROM blocks WHERE user_id = $1`, userID)
-	if err != nil {
-		return nil, err
-	}
-	return idSet(rows)
-}
-
 // WhoBlocked lists which of users blocked author.
 func (s *Store) WhoBlocked(ctx context.Context, q db.DBTX, author uuid.UUID, users []uuid.UUID) (map[uuid.UUID]bool, error) {
 	rows, err := q.Query(ctx, `SELECT user_id FROM blocks WHERE blocked_user_id = $1 AND user_id = ANY($2)`, author, users)
@@ -755,8 +746,8 @@ func (s *Store) Blocked(ctx context.Context, q db.DBTX, a, b uuid.UUID) (bool, e
 	return ok, err
 }
 
-// Contacts lists which of users share a live feed or a frame with viewer.
-func (s *Store) Contacts(ctx context.Context, q db.DBTX, viewer uuid.UUID, users []uuid.UUID) (map[uuid.UUID]bool, error) {
+// ContactsAmong lists which of users share a live feed or a frame with viewer.
+func (s *Store) ContactsAmong(ctx context.Context, q db.DBTX, viewer uuid.UUID, users []uuid.UUID) (map[uuid.UUID]bool, error) {
 	rows, err := q.Query(ctx, `SELECT o.user_id FROM feed_members me JOIN feeds f ON f.id = me.feed_id AND f.deleted_at IS NULL
 		JOIN feed_members o ON o.feed_id = me.feed_id WHERE me.user_id = $1 AND o.user_id = ANY($2)
 		UNION SELECT o.user_id FROM memberships me JOIN memberships o ON o.frame_id = me.frame_id WHERE me.user_id = $1 AND o.user_id = ANY($2)`,

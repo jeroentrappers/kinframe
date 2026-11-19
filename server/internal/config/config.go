@@ -169,6 +169,9 @@ type Config struct {
 	// TelegramCloudURL replaces Telegram's cloud Bot API (tests with a fake; no environment variable).
 	TelegramCloudURL string
 
+	// Chats (README §5.19): LinkPreviews (KINFRAME_LINK_PREVIEWS) lets the server fetch link previews.
+	LinkPreviews bool
+
 	// Email to frame (docs/spec/email-inbox.md), config/email.go.
 	Email EmailConfig
 }
@@ -455,6 +458,9 @@ func load(get func(string) string) (*Config, error) {
 		c.SecretsKey = sk
 	}
 	if err := loadTelegram(c, get, env, intv); err != nil {
+		errs = append(errs, err)
+	}
+	if err := loadChat(c, env); err != nil {
 		errs = append(errs, err)
 	}
 	if c.WeatherRefresh < 15*time.Minute {

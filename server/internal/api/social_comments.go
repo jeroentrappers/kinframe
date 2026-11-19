@@ -39,13 +39,13 @@ func commentBody(raw string) (body string, shift int, err error) {
 func utf16Len(s string) int { return len(utf16.Encode([]rune(s))) }
 
 // commentMentions validates mention spans against the (trimmed) body: inside it, not overlapping, at most
-// maxMentions, and only people who may see the post.
+// maxCommentMentions, and only people who may see the post.
 func (s *Server) commentMentions(ctx context.Context, postID uuid.UUID, body string, shift int, in *[]gen.Mention) ([]store.MentionSpan, error) {
 	if in == nil || len(*in) == 0 {
 		return nil, nil
 	}
-	if len(*in) > maxMentions {
-		return nil, problem.New(problem.ValidationFailed, "at most %d mentions per comment", maxMentions).WithField("mentions", "maxItems")
+	if len(*in) > maxCommentMentions {
+		return nil, problem.New(problem.ValidationFailed, "at most %d mentions per comment", maxCommentMentions).WithField("mentions", "maxItems")
 	}
 	n := utf16Len(body)
 	out := make([]store.MentionSpan, 0, len(*in))
@@ -204,7 +204,7 @@ func (s *Server) CreateComment(ctx context.Context, req gen.CreateCommentRequest
 			return nil, problem.Validation("quoted_user_id", "not_commenter", "the person you reply to must have commented on this post")
 		}
 	}
-	plain, sealed := s.sealBody(body)
+	plain, sealed := s.sealCommentBody(body)
 	nc := store.NewComment{ID: store.NewID(), PostID: p.ID, ParentID: b.ParentId, AuthorID: u.ID, QuotedID: b.QuotedUserId,
 		Body: plain, BodyEnc: sealed, Mentions: mentions}
 	err = s.st.InTx(ctx, func(tx *store.Tx) error {
@@ -301,7 +301,7 @@ func (s *Server) UpdateComment(ctx context.Context, req gen.UpdateCommentRequest
 			fresh = append(fresh, id)
 		}
 	}
-	plain, sealed := s.sealBody(body)
+	plain, sealed := s.sealCommentBody(body)
 	if err := s.st.InTx(ctx, func(tx *store.Tx) error { return tx.UpdateCommentBody(ctx, c.ID, plain, sealed, mentions) }); err != nil {
 		return nil, err
 	}

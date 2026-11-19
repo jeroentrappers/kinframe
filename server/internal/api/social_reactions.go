@@ -116,7 +116,7 @@ func (s *Server) resolveReactionTarget(ctx context.Context, viewer uuid.UUID, ki
 
 // blocks reports whether viewer blocked other.
 func (s *Server) blocks(ctx context.Context, viewer, other uuid.UUID) (bool, error) {
-	b, err := s.st.BlockedBy(ctx, s.st.Q(), viewer)
+	b, err := s.st.BlockedByUser(ctx, s.st.Q(), viewer)
 	return b[other], err
 }
 
@@ -174,7 +174,7 @@ func (s *Server) ListReactions(ctx context.Context, req gen.ListReactionsRequest
 			At     time.Time          `json:"at"`
 			Emoji  gen.PersonReaction `json:"emoji"`
 			Person gen.PersonRef      `json:"person"`
-		}{r.CreatedAt, gen.PersonReaction(r.Emoji), s.personRef(&id, r.Name, r.AvatarKey, r.Deleted)})
+		}{r.CreatedAt, gen.PersonReaction(r.Emoji), s.socialPersonRef(&id, r.Name, r.AvatarKey, r.Deleted)})
 	}
 	if (t.kind == "post" || t.kind == "post_item") && t.post.SeesFrameReactions(u.ID) {
 		rows, err := s.st.FrameReactions(ctx, s.st.Q(), []uuid.UUID{t.post.ID})
@@ -236,7 +236,7 @@ func (s *Server) SetReaction(ctx context.Context, req gen.SetReactionRequestObje
 	if err != nil {
 		return nil, err
 	}
-	return ok(s.reactionSummary(v, people, frames)), nil
+	return ok(s.socialReactionSummary(v, people, frames)), nil
 }
 
 // publishReaction sends reaction.updated (the summary for each receiver) to everyone who sees the target, with
@@ -275,7 +275,7 @@ func (s *Server) publishReaction(ctx context.Context, t *reactionTarget, push *n
 		if err != nil {
 			return
 		}
-		ev := notify.Event{"type": "reaction.updated", "target_kind": t.kind, "target_id": t.id, "summary": s.reactionSummary(v, people, frames)}
+		ev := notify.Event{"type": "reaction.updated", "target_kind": t.kind, "target_id": t.id, "summary": s.socialReactionSummary(v, people, frames)}
 		if t.post != nil {
 			ev["post_id"] = t.post.ID
 		}

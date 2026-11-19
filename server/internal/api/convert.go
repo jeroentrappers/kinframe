@@ -39,6 +39,7 @@ func (s *Server) userJSON(ctx context.Context, u *store.User) gen.User {
 		Timezone:           u.Timezone,
 		IsOperator:         ptr(isOperator(ctx)),
 		CreatedAt:          ptr(u.CreatedAt),
+		ShowReadReceipts:   ptr(u.ShowReadReceipts),
 	}
 }
 

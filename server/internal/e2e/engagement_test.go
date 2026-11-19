@@ -33,13 +33,6 @@ func local(s string) time.Time {
 	return t
 }
 
-func (e *env) sql(q string, args ...any) {
-	e.t.Helper()
-	if _, err := e.app.Pool.Exec(context.Background(), q, args...); err != nil {
-		e.t.Fatalf("%s: %v", q, err)
-	}
-}
-
 func (e *env) count(q string, args ...any) int {
 	e.t.Helper()
 	var n int

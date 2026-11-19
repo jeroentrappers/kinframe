@@ -242,6 +242,9 @@ func (w *Worker) processMedia(ctx context.Context, mediaID uuid.UUID) error {
 	if m.Status != "processing" {
 		return w.ensureRenditions(ctx, mediaID)
 	}
+	if m.Kind == string(media.Audio) {
+		return w.processAudio(ctx, m) // voice messages (audio.go)
+	}
 	if m.SourcePath == nil {
 		w.failMedia(ctx, mediaID, "corrupt_media")
 		return nil
@@ -270,6 +273,7 @@ func (w *Worker) processMedia(ctx context.Context, mediaID uuid.UUID) error {
 			return err
 		}
 	}
+	w.mediaReady(mediaID) // chat items have no placements to report (audio.go)
 	return w.ensureRenditions(ctx, mediaID)
 }
 
