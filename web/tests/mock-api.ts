@@ -1825,3 +1825,96 @@ export async function gradientPng(width: number, height: number, hue = 20): Prom
 		chunk('IEND', Buffer.alloc(0))
 	]);
 }
+
+// ---- the device API, for a browser that is a frame (/tv/frame): enrolment, token, state, the change feed, media,
+// acks and heartbeat, "Ask for new photos", and the device websocket.
+
+export interface DeviceMock {
+	claimed: boolean;
+	/** The change feed; `pushChange` numbers them. */
+	changes: S['Change'][];
+	calls: { method: string; path: string; body: unknown }[];
+	/** `POST /v1/device/photo-requests`: 201 asked, 200 already asked, 403, 404, or 0 to fail like the network. */
+	photoRequestStatus: number;
+	/** Refuse device websocket connections (the frame is offline). */
+	socketDown: boolean;
+	ws: WebSocketRoute | null;
+	/** Connection attempts of the device websocket. */
+	sockets: number;
+}
+
+export function deviceState(o: Partial<DeviceMock> = {}): DeviceMock {
+	return { claimed: true, changes: [], calls: [], photoRequestStatus: 201, socketDown: false, ws: null, sockets: 0, ...o };
+}
+
+export function pushChange(dev: DeviceMock, c: Omit<S['Change'], 'seq'>): void {
+	dev.changes.push({ ...c, seq: dev.changes.length + 1 } as S['Change']);
+}
+
+/** Tells the frame that there are changes (the websocket nudge), as the server does. */
+export function nudgeDevice(dev: DeviceMock): void {
+	dev.ws?.send(JSON.stringify({ type: 'changes', latest_seq: dev.changes.length }));
+}
+
+/** A ready photo placement as the change feed carries it. */
+export function devicePlacement(
+	id: string,
+	o: Partial<{ sender: string; caption: string; minutesAgo: number; origin: S['PlacementOrigin']; promptId: string }> = {}
+): S['Placement'] {
+	const at = iso(o.minutesAgo ?? 5);
+	return {
+		id, frame_id: 'f-1', status: 'ready', hidden: false, trashed: false, received_at: at, album_ids: [],
+		...(o.origin ? { origin: o.origin } : {}),
+		...(o.promptId ? { prompt_id: o.promptId } : {}),
+		item: { id: `it-${id}`, kind: 'photo', status: 'ready', sender_id: 'u-1', sender_name: o.sender ?? 'Anna', caption: o.caption ?? null, created_at: at, width: 640, height: 480 },
+		media: { url: `${BASE}/v1/device/media/${id}`, sha256: 'x', bytes: 1, mime: 'image/svg+xml', width: 640, height: 480 }
+	} as S['Placement'];
+}
+
+export async function mockDevice(page: Page, dev: DeviceMock = deviceState()): Promise<DeviceMock> {
+	await page.route(/\/v1\/devices?\//, async (route) => {
+		const req = route.request();
+		const url = new URL(req.url());
+		const path = url.pathname;
+		const method = req.method();
+		let body: unknown;
+		try {
+			body = req.postDataJSON();
+		} catch {
+			body = undefined;
+		}
+		dev.calls.push({ method, path, body });
+		if (path === '/v1/devices/enroll') return json(route, 201, { device_id: 'd-1', device_secret: 's' });
+		if (path === '/v1/devices/token') return json(route, 200, { access_token: 'devtok', expires_in: 3600 });
+		if (path === '/v1/device/state')
+			return json(route, 200, {
+				device_id: 'd-1', claimed: dev.claimed, latest_seq: dev.changes.length,
+				...(dev.claimed ? { frame_id: 'f-1', frame_name: 'Living room TV', owner_name: 'Jeroen' } : {})
+			});
+		if (path === '/v1/device/code') return json(route, 200, { code: '12345678', expires_at: iso(-600), join_url: `${BASE}/f/12345678`, claimed: dev.claimed });
+		if (path === '/v1/device/changes') {
+			const since = Number(url.searchParams.get('since') ?? 0);
+			const changes = dev.changes.filter((c) => c.seq > since);
+			return json(route, 200, { changes, next_seq: changes.length ? changes[changes.length - 1]!.seq : since, has_more: false });
+		}
+		if (path.startsWith('/v1/device/media/')) return route.fulfill({ status: 200, contentType: 'image/svg+xml', body: photoSvg(path.length) });
+		if (path === '/v1/device/photo-requests' && method === 'POST') {
+			if (dev.photoRequestStatus === 0) return route.abort('internetdisconnected');
+			if (dev.photoRequestStatus >= 400) {
+				const code = dev.photoRequestStatus === 403 ? 'forbidden' : 'not_found';
+				return json(route, dev.photoRequestStatus, { type: 'about:blank', title: code, status: dev.photoRequestStatus, code });
+			}
+			const now = Date.now();
+			return json(route, dev.photoRequestStatus, { id: 'req-1', state: 'open', created_at: new Date(now).toISOString(), next_allowed_at: new Date(now + 24 * 3600_000).toISOString() });
+		}
+		return route.fulfill({ status: 204 });
+	});
+	await page.routeWebSocket(/\/v1\/device\/ws/, (ws) => {
+		dev.sockets++;
+		if (dev.socketDown) return void ws.close({ code: 4000, reason: 'down' });
+		dev.ws = ws;
+		ws.onMessage(() => {});
+		ws.send(JSON.stringify({ type: 'hello', latest_seq: dev.changes.length }));
+	});
+	return dev;
+}
