@@ -52,6 +52,8 @@ class ChatsViewModel(
     /** The conversation on screen: its new messages don't count as unread here. */
     private val open: () -> String? = { null },
     private val newKey: () -> String = { UUID.randomUUID().toString() },
+    /** Whether a user id is the person (any of their accounts: Chats merges every server's conversations). */
+    private val isMe: (String?) -> Boolean = { it != null && it == me() },
 ) : ViewModel() {
     private val _state = MutableStateFlow(ChatsState())
     val state: StateFlow<ChatsState> = _state.asStateFlow()
@@ -83,7 +85,7 @@ class ChatsViewModel(
 
     fun loadContacts() = viewModelScope.launch {
         try {
-            _state.update { it.copy(contacts = Load.Ready(api.contacts().filter { p -> !p.blocked && p.person.userId != me() }.sortedBy { p -> p.person.displayName.lowercase() })) }
+            _state.update { it.copy(contacts = Load.Ready(api.contacts().filter { p -> !p.blocked && !isMe(p.person.userId) }.sortedBy { p -> p.person.displayName.lowercase() })) }
         } catch (e: Exception) {
             _state.update { it.copy(contacts = Load.Error(SocialProblems.message(e))) }
         }
@@ -136,7 +138,7 @@ class ChatsViewModel(
             is SocialLive.MessageCreated -> {
                 val known = (state.value.conversations as? Load.Ready)?.value?.firstOrNull { it.id == e.conversationId }
                 if (known == null) { refresh(); return }
-                val mine = e.message.author?.userId == me()
+                val mine = isMe(e.message.author?.userId)
                 val counts = !mine && !e.message.isSystem && open() != e.conversationId
                 list { l ->
                     ChatList.upsert(l, known.copy(
@@ -147,7 +149,7 @@ class ChatsViewModel(
                 }
             }
             is SocialLive.MessageUpdated -> list { l -> l.map { if (it.id == e.conversationId && it.lastMessage?.id == e.message.id) it.copy(lastMessage = e.message) else it } }
-            is SocialLive.ReadUpdated -> if (e.userId == me()) list { l -> l.map { if (it.id == e.conversationId) it.copy(unreadCount = 0, unreadMentions = 0, readUpTo = e.lastReadMessageId) else it } }
+            is SocialLive.ReadUpdated -> if (isMe(e.userId)) list { l -> l.map { if (it.id == e.conversationId) it.copy(unreadCount = 0, unreadMentions = 0, readUpTo = e.lastReadMessageId) else it } }
             // Family and circle chats follow the family's and circle's members (README §5.18).
             is LiveEvent.FeedMembershipUpdated, is SocialLive.CircleUpdated, is SocialLive.CircleRemoved -> refresh()
             else -> Unit

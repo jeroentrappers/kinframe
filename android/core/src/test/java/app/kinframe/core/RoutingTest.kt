@@ -1,10 +1,20 @@
 package app.kinframe.core
 
 import app.kinframe.core.api.Discovery
+import app.kinframe.core.api.Feed
+import app.kinframe.core.api.FeedCreate
 import app.kinframe.core.api.Frame
 import app.kinframe.core.api.KinApi
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.PhotoSource
+import app.kinframe.core.api.PhotoSourceConnection
+import app.kinframe.core.api.PhotoSourceCreate
 import app.kinframe.core.api.Send
+import app.kinframe.core.api.SendCreate
 import app.kinframe.core.api.SendsPage
+import app.kinframe.core.social.OnThisDay
+import app.kinframe.core.social.OnThisDayGroup
+import app.kinframe.core.social.PhotoRequest
 import app.kinframe.core.leaving.LeavingApi
 import app.kinframe.core.servers.AccountIndex
 import app.kinframe.core.servers.Merging
@@ -134,6 +144,74 @@ class RoutingTest {
         assertEquals("pb1", api.post("pb1").id)
         assertEquals(listOf("cb", "ca"), api.conversations().map { it.id })
         assertEquals(Badge(7, 6, 1), api.badge())
+    }
+
+    @Test
+    fun sendsSourcesAndPinnedCallsGoToTheTargetsServer() = runBlocking {
+        val callsA = mutableListOf<String>()
+        val callsB = mutableListOf<String>()
+        val a = fake<KinApi>(callsA) { n, _ ->
+            when (n) {
+                "createSend" -> Send(id = "sa", createdAt = "2026-11-19T10:00:00Z")
+                "myPhotoSources" -> listOf(PhotoSource(id = "psa", provider = "immich", name = "A"))
+                else -> null
+            }
+        }
+        val b = fake<KinApi>(callsB) { n, args ->
+            when (n) {
+                "createSend" -> Send(id = "sb", createdAt = "2026-11-19T10:00:00Z")
+                "createFeed" -> Feed(id = "fdb", name = (args[0] as FeedCreate).name)
+                "myPhotoSources" -> listOf(PhotoSource(id = "psb", provider = "immich", name = "B"))
+                "createPhotoSource" -> PhotoSource(id = "psb2", provider = "immich", name = "B2")
+                else -> null
+            }
+        }
+        val index = AccountIndex()
+        val withSources = { n: String -> disco(n).copy(photoSources = true, photoSourceProviders = listOf("immich_link")) }
+        val routes = Routes({ listOf(R("A", a, null, withSources("A")), R("B", b, null, withSources("B"))) }, index)
+        val api = RoutingKinApi(routes, a)
+        index.put("feedB", "B")
+        assertEquals("sb", api.createSend(SendCreate.of(emptyList(), listOf("feedB"), emptyList()), "k").id)
+        assertTrue(callsA.none { it.startsWith("createSend") })
+        assertEquals(listOf("psa", "psb"), api.myPhotoSources().map { it.id })
+        assertEquals("B", index.get("psb"))
+        api.createPhotoSource(PhotoSourceCreate(PhotoSourceConnection(provider = "immich"), feedId = "feedB"), "k")
+        assertTrue(callsB.any { it.startsWith("createPhotoSource") })
+        // Pinned to B: a new family is created there and recorded as B's.
+        val created = api.forAccount("B").createFeed(FeedCreate("Peeters"), "k")
+        assertEquals("B", index.get(created.id))
+        assertTrue(callsA.none { it.startsWith("createFeed") })
+    }
+
+    @Test
+    fun memoriesAndPhotoRequestsAreRecordedForTheirAccount() = runBlocking {
+        val sb = fake<SocialApi> { n, _ ->
+            when (n) {
+                "onThisDay" -> OnThisDay("2026-11-19", listOf(OnThisDayGroup("feedB", "Peeters", 2, listOf("p1"))))
+                "photoRequest" -> PhotoRequest(id = "rq", frameId = "frB", feedIds = listOf("feedB2"))
+                else -> null
+            }
+        }
+        val sa = fake<SocialApi> { n, _ -> if (n == "onThisDay") OnThisDay("2026-11-19") else null }
+        val kin = fake<KinApi> { _, _ -> null }
+        val index = AccountIndex()
+        val eng = { n: String -> disco(n).copy(engagement = true) }
+        val routes = Routes({ listOf(R("A", kin, sa, eng("A")), R("B", kin, sb, eng("B"))) }, index)
+        val api = RoutingSocialApi(routes, sa)
+        assertEquals(1, api.onThisDay().groups.size)
+        assertEquals("B", index.get("p1"))
+        assertEquals("B", index.get("feedB"))
+        index.put("rq", "B")
+        assertEquals(listOf("feedB2"), api.photoRequest("rq").feedIds)
+        assertEquals("B", index.get("feedB2"))
+        assertEquals("B", index.get("frB"))
+    }
+
+    @Test
+    fun photoRequestFeedIdsAreRead() {
+        val r = KinJson.decodeFromString(PhotoRequest.serializer(), "{\"id\":\"r\",\"frame_id\":\"f\",\"state\":\"open\",\"feed_ids\":[\"a\",\"b\"]}")
+        assertEquals(listOf("a", "b"), r.feedIds)
+        assertEquals(emptyList<String>(), KinJson.decodeFromString(PhotoRequest.serializer(), "{\"id\":\"r\",\"frame_id\":\"f\"}").feedIds)
     }
 
     @Test

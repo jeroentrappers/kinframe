@@ -222,6 +222,11 @@ data class PhotoRequest(
     val answeredAt: String? = null,
     val answeredBy: PersonRef? = null,
     val freshness: Freshness? = null,
+    /**
+     * The families with an active subscription to the frame: a family member who is not on the frame answers the
+     * request by posting to one of these (the apps preselect them when sending).
+     */
+    val feedIds: List<String> = emptyList(),
 ) {
     val isOpen: Boolean get() = state == PhotoRequestState.OPEN
 }

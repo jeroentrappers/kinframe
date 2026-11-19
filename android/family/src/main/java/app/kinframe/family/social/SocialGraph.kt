@@ -49,11 +49,19 @@ class SocialGraph(private val graph: AppGraph) {
             ?: RoutingSocialApi(graph.accounts.routes, primary.social).also { cache = k to it }
     }.stateIn(graph.scope, SharingStarted.Eagerly, null)
 
-    private val discovery: Discovery? get() = graph.server.value?.discovery
+    /**
+     * The merged areas' flags: Home, Chats and the badge show when any signed-in account's server has them
+     * (multi-server.md §2.2); each detail screen checks its own server's flags.
+     */
+    val flags: app.kinframe.family.ui.SocialFlags get() {
+        val all: List<Discovery> = graph.accounts.signedIn.mapNotNull { it.server?.discovery }
+            .ifEmpty { listOfNotNull(graph.server.value?.discovery) }
+        return app.kinframe.family.ui.SocialFlags.any(all)
+    }
 
-    val socialOn: Boolean get() = discovery?.let { it.feeds && it.social } == true
-    val chatsOn: Boolean get() = discovery?.chats == true
-    val engagementOn: Boolean get() = discovery?.engagement == true
+    val socialOn: Boolean get() = flags.social
+    val chatsOn: Boolean get() = flags.chats
+    val engagementOn: Boolean get() = flags.engagement
 
     private val _badge = MutableStateFlow(Badge())
     /** The app badge (`getBadge`, `badge.updated`): unread chats and threads with unread mentions or replies. */

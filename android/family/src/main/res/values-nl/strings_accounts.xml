@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Een server kiezen als de app bij meerdere servers aangemeld is (docs/spec/multi-server.md §2.1–2.2).
+  Alleen Android: de web-app is bij één server aangemeld en heeft deze sleutels niet.
+-->
+<resources>
+    <string name="servers_pick_title">Welke server?</string>
+    <string name="servers_pick_feed_hint">De nieuwe familie wordt op deze server gemaakt. Alleen mensen op die server kunnen lid worden.</string>
+    <string name="servers_pick_code_hint">De code van het kader wordt op deze server gecontroleerd.</string>
+    <string name="servers_pick_sources_hint">Fotobronnen draaien op de server van het kader of de familie die ze vullen.</string>
+</resources>

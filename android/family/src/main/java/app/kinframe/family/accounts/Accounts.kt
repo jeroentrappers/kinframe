@@ -237,4 +237,67 @@ class AccountManager(private val deps: AccountDeps, rootPrefs: SharedPreferences
         if (account.id != AccountStore.MAIN) runtimes.remove(account.id)
         reload()
     }
+
+    /** The context of the account [key] (a frame, family, post, conversation, person… id) belongs to. */
+    fun contextFor(key: String?): AccountContext = forKey(key).let { AccountContext(it.id, it.server, it.me.value) }
+
+    /** The person's user id on [key]'s server. */
+    fun meIdFor(key: String?): String? = forKey(key).me.value?.id
+
+    /**
+     * Whether [userId] is the person on any of the accounts, for merged lists (Home, Chats): user ids are random
+     * UUIDs, so ids of two servers don't collide.
+     */
+    fun isMe(userId: String?): Boolean =
+        userId != null && (primary.value.me.value?.id == userId || _accounts.value.any { it.me.value?.id == userId })
+
+    /**
+     * The account of a push: the payload's `server`, else the endpoint's account ([instanceAccount]: UnifiedPush has
+     * one per account). Its ids are then recorded for that account, so the tap opens screens on the right server.
+     * Without either (FCM has one token for every account, and servers that don't send `server` yet), the account
+     * the ids are already known for answers, else the primary one; the index is then left as it is, so a guess never
+     * overwrites what the lists taught it.
+     */
+    fun accountForPush(server: String?, ids: Map<String, String>, instanceAccount: String?): Account {
+        val keys = ids.filterKeys { it.endsWith("_id") }.values
+        val sure = forServer(server?.ifBlank { null }) ?: byId(instanceAccount)
+        if (sure != null) { index.putAll(keys, sure.id); return sure }
+        return keys.firstNotNullOfOrNull { byId(index.get(it)) } ?: primary.value
+    }
+
+    /** Whether two ids (frames, families, posts…) belong to the same account. */
+    fun sameAccount(a: String?, b: String?): Boolean = forKey(a).id == forKey(b).id
+
+    /** Signed-in accounts, primary first, for "which server?" pickers. */
+    val signedIn: List<Account> get() = _accounts.value.filter { it.signedIn }
+}
+
+/**
+ * The account an entity on screen belongs to, and what its screens need of it (multi-server.md §2.1): that server's
+ * discovery flags and limits, and the person's profile there (user id, operator), never the primary account's.
+ */
+data class AccountContext(val accountId: String, val server: ServerChoice?, val me: User?) {
+    val discovery: Discovery? get() = server?.discovery
+    val limits: app.kinframe.core.api.Limits get() = server?.limits ?: app.kinframe.core.api.Limits()
+    val meId: String? get() = me?.id
+    val isOperator: Boolean get() = me?.isOperator == true
+}
+
+/**
+ * Server chips in merged lists (multi-server.md §2.2): every row gets one when there are several accounts; Home's strip
+ * only names the server where the same name is used on two servers.
+ */
+object ServerChips {
+    /** Ids among [items] whose name (case-insensitive) is used on more than one account. */
+    fun <T> repeatedAcrossServers(items: List<T>, id: (T) -> String, name: (T) -> String, accountOf: (String) -> String?): Set<String> =
+        items.groupBy { name(it).trim().lowercase() }.values
+            .filter { same -> same.map { accountOf(id(it)) }.distinct().size > 1 }
+            .flatten().map(id).toSet()
+
+    /** [items] grouped by account in the order of [accounts] (primary first); unknown ids go with the first. */
+    fun <T> byAccount(items: List<T>, id: (T) -> String, accountOf: (String) -> String?, accounts: List<String>): List<Pair<String, List<T>>> {
+        val first = accounts.firstOrNull().orEmpty()
+        val groups = items.groupBy { accountOf(id(it))?.takeIf { a -> a in accounts } ?: first }
+        return accounts.mapNotNull { a -> groups[a]?.let { a to it } }
+    }
 }

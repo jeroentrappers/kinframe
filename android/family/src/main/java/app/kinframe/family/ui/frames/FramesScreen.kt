@@ -62,6 +62,8 @@ fun FramesScreen(
     onOpen: (Frame) -> Unit,
     onAdd: () -> Unit,
     onSendTo: (Frame) -> Unit,
+    /** A frame's server chip when signed in to several servers (multi-server.md §2.2), else null. */
+    serverChip: (Frame) -> String? = { null },
 ) {
     val c = Kin.colors
     PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = onRefresh, modifier = Modifier.fillMaxSize().background(c.paper)) {
@@ -92,7 +94,7 @@ fun FramesScreen(
                             )
                         }
                     }
-                    items(f.value, key = { it.id }) { frame -> FrameCard(frame, { onOpen(frame) }, { onSendTo(frame) }) }
+                    items(f.value, key = { it.id }) { frame -> FrameCard(frame, { onOpen(frame) }, { onSendTo(frame) }, serverChip(frame)) }
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(Modifier.fillMaxWidth().padding(top = 4.dp), contentAlignment = Alignment.Center) {
                             SecondaryButton(stringResource(R.string.frames_add), onAdd, icon = KinIcons.Plus)
@@ -105,7 +107,7 @@ fun FramesScreen(
 }
 
 @Composable
-fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit) {
+fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit, server: String? = null) {
     val c = Kin.colors
     val (a, b) = frameTint(frame.id)
     val status = stringResource(if (frame.online) R.string.a11y_frame_status_online else R.string.a11y_frame_status_offline, frame.name)
@@ -141,6 +143,7 @@ fun FrameCard(frame: Frame, onOpen: () -> Unit, onSend: () -> Unit) {
                 RoleBadge(frame.role)
                 if (frame.deviceKind == "browser") Pill(stringResource(R.string.frames_browser_badge), Kin.colors.paperDeep, Kin.colors.inkSoft, icon = KinIcons.Tv)
             }
+            server?.let { Pill(it, c.paperDeep, c.inkSoft, icon = KinIcons.Server) }
             frame.location?.takeIf { it.isNotBlank() }?.let {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Icon(KinIcons.MapPin, null, Modifier.size(15.dp), tint = c.inkSoft)

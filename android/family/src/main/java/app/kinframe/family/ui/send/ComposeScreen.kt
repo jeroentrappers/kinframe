@@ -56,6 +56,38 @@ import app.kinframe.family.ui.Thumb
 import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
 
+/** One server's frames and families in the Send tab ("Frames" and "Families" sections when both exist). */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun RecipientChips(
+    frames: List<app.kinframe.core.api.Frame>, feeds: List<app.kinframe.core.api.Feed>, state: ComposerState,
+    onToggleFrame: (String) -> Unit, onToggleFeed: (String) -> Unit, sections: Boolean,
+) {
+    val c = Kin.colors
+    if (frames.isNotEmpty()) {
+        if (sections) Text(stringResource(R.string.send_frames_section), style = Kin.type.label, color = c.inkSoft)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            frames.forEach { f ->
+                ToggleChip(f.name, f.id in state.selected, { onToggleFrame(f.id) }) {
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(if (f.online) c.sage else c.inkFaint))
+                }
+            }
+        }
+    }
+    // Feeds in their own section: "Peeters kids · 5 frames" (feeds.md §3.5).
+    if (feeds.isNotEmpty()) {
+        Text(stringResource(R.string.send_feeds_section), style = Kin.type.label, color = c.inkSoft)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            feeds.forEach { f ->
+                val label = f.name + " · " + pluralStringResource(R.plurals.feed_frames_count, f.subscriptionCount, f.subscriptionCount)
+                ToggleChip(label, f.id in state.selectedFeeds, { onToggleFeed(f.id) }) {
+                    Icon(KinIcons.People, null, Modifier.size(14.dp), tint = c.inkSoft)
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ComposeScreen(
@@ -118,27 +150,11 @@ fun ComposeScreen(
                     Load.Loading -> SkeletonList(1, 48.dp)
                     is Load.Error -> ErrorPanel(frames.message, onRetryFrames)
                     is Load.Ready -> {
-                        if (state.feeds.isNotEmpty() && state.sendableFrames.isNotEmpty()) {
-                            Text(stringResource(R.string.send_frames_section), style = Kin.type.label, color = c.inkSoft)
-                        }
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            state.sendableFrames.forEach { f ->
-                                ToggleChip(f.name, f.id in state.selected, { onToggleFrame(f.id) }) {
-                                    Box(Modifier.size(8.dp).clip(CircleShape).background(if (f.online) c.sage else c.inkFaint))
-                                }
-                            }
-                        }
-                        // Feeds in their own section: "Peeters kids · 5 frames" (feeds.md §3.5).
-                        if (state.feeds.isNotEmpty()) {
-                            Text(stringResource(R.string.send_feeds_section), style = Kin.type.label, color = c.inkSoft)
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                state.feeds.forEach { f ->
-                                    val label = f.name + " · " + pluralStringResource(R.plurals.feed_frames_count, f.subscriptionCount, f.subscriptionCount)
-                                    ToggleChip(label, f.id in state.selectedFeeds, { onToggleFeed(f.id) }) {
-                                        Icon(KinIcons.People, null, Modifier.size(14.dp), tint = c.inkSoft)
-                                    }
-                                }
-                            }
+                        // Several servers: recipients grouped per server (multi-server.md §2.2); a send to two
+                        // servers goes out as one upload per server.
+                        state.recipientGroups.forEach { g ->
+                            if (g.server != null) Text(g.server, style = Kin.type.title, color = c.ink)
+                            RecipientChips(g.frames, g.feeds, state, onToggleFrame, onToggleFeed, sections = state.feeds.isNotEmpty() && state.sendableFrames.isNotEmpty())
                         }
                         audience?.invoke()
                         val anyOffline = state.sendableFrames.any { it.id in state.selected && !it.online }

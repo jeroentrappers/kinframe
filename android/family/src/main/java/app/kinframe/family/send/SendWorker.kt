@@ -75,7 +75,8 @@ class SendWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         }
         return when (outcome) {
             is SendRunner.Outcome.Sent -> {
-                before?.items?.filter { it.localPath == null }?.forEach { MediaFiles.release(applicationContext.contentResolver, Uri.parse(it.uri)) }
+                // Another part of a send split across servers may still read the same files.
+                before?.let { SendRunner.urisToRelease(it, graph.outbox.sends.value) }?.forEach { MediaFiles.release(applicationContext.contentResolver, Uri.parse(it)) }
                 graph.onSent(outcome.sendId)
                 Result.success()
             }

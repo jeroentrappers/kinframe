@@ -49,6 +49,10 @@ class ShareTest {
     @Test fun targetsAreOtherFramesYouCanSendTo() {
         val frames = listOf(frame("src", "Oma"), frame("a", "Opa"), frame("b", "Tom", send = false))
         assertEquals(listOf("a"), Sharing.targets(frames, "src").map { it.id })
+        // Several servers: sharing copies placements on one server, so frames of another one aren't offered.
+        val account = mapOf("src" to "A", "a" to "B", "c" to "A")
+        val more = frames + frame("c", "Kitchen")
+        assertEquals(listOf("c"), Sharing.targets(more, "src") { x, y -> account[x] == account[y] }.map { it.id })
     }
 
     private val send = Send(

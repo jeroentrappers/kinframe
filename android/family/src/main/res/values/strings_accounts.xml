@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Choosing a server when the app is signed in to several (docs/spec/multi-server.md §2.1–2.2).
+  Android-only: the web app is signed in to one server, so it has no such keys.
+-->
+<resources>
+    <string name="servers_pick_title">Which server?</string>
+    <string name="servers_pick_feed_hint">The new family is made on this server. Only people on it can join.</string>
+    <string name="servers_pick_code_hint">The frame code is checked on this server.</string>
+    <string name="servers_pick_sources_hint">Photo sources run on the server of the frame or family they fill.</string>
+</resources>

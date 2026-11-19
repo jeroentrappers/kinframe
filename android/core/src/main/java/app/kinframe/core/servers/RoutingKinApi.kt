@@ -35,6 +35,28 @@ class RoutingKinApi(private val routes: Routes, primary: KinApi) : KinApi by pri
         )
     }
 
+    // ---- routed by the target in the request body
+
+    /** A send goes to the server of its frames and families (the app splits sends across servers first). */
+    override suspend fun createSend(request: SendCreate, idempotencyKey: String): Send =
+        on(request.frameIds.firstOrNull() ?: request.feedIds?.firstOrNull()) { createSend(request, idempotencyKey) }
+
+    override suspend fun createPhotoSource(request: PhotoSourceCreate, idempotencyKey: String): PhotoSource =
+        on(request.albumId ?: request.feedId) { createPhotoSource(request, idempotencyKey) }
+
+    override suspend fun startGoogleImport(request: GoogleImportCreate, idempotencyKey: String): GoogleImport =
+        on(request.albumId ?: request.feedId) { startGoogleImport(request, idempotencyKey) }
+
+    /** Every account's photo sources (each one runs on its own server). */
+    override suspend fun myPhotoSources(): List<PhotoSource> =
+        routes.each(routes.all().filter { it.discovery.sourceProviders.isNotEmpty() }) { it.kin.myPhotoSources() }.flatMap { it.second }
+
+    /** A new family is made on the primary account, or on the account of a client from [forAccount]. */
+    override suspend fun createFeed(request: FeedCreate, idempotencyKey: String): Feed = on(null) { createFeed(request, idempotencyKey) }
+
+    /** The same client pinned to one account: calls without an id of theirs (a new family, a typed code) go there. */
+    fun forAccount(account: String): KinApi = routes.byId(account)?.let { RoutingKinApi(routes.only(account), it.kin) } ?: this
+
     // ---- routed by id (generated from the KinApi interface)
 
     override suspend fun frame(frameId: String): Frame = on(frameId) { frame(frameId) }

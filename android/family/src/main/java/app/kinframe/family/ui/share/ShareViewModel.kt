@@ -62,9 +62,12 @@ object Sharing {
         }
     }
 
-    /** Frames you can send to, except the source. */
-    fun targets(frames: List<Frame>, sourceFrameId: String): List<Frame> =
-        frames.filter { it.id != sourceFrameId && it.can { p -> p.send } }
+    /**
+     * Frames you can send to, except the source. Sharing copies placements on one server, so with several accounts
+     * only frames on the source frame's server ([sameServer]) are offered.
+     */
+    fun targets(frames: List<Frame>, sourceFrameId: String, sameServer: (String, String) -> Boolean = { _, _ -> true }): List<Frame> =
+        frames.filter { it.id != sourceFrameId && it.can { p -> p.send } && sameServer(it.id, sourceFrameId) }
 
     /** The first frame of a send that still holds every one of [itemIds], with those placements. */
     fun source(send: Send, itemIds: List<String>): ShareSource? {
@@ -83,7 +86,11 @@ object Sharing {
  * "Share to another frame" (README §5.3): pick frames you can send to (a dry run marks the ones that already have
  * the photos), share without uploading again, and undo by purging exactly the placements that were created.
  */
-class ShareViewModel(private val api: KinApi) : ViewModel() {
+class ShareViewModel(
+    private val api: KinApi,
+    /** Whether two frames are on the same server (several accounts). */
+    private val sameServer: (String, String) -> Boolean = { _, _ -> true },
+) : ViewModel() {
     private val _state = MutableStateFlow(ShareState())
     val state: StateFlow<ShareState> = _state.asStateFlow()
     private val _events = MutableSharedFlow<ShareEvent>(extraBufferCapacity = 4)
@@ -94,7 +101,7 @@ class ShareViewModel(private val api: KinApi) : ViewModel() {
         _state.value = ShareState(source = source)
         viewModelScope.launch {
             try {
-                val targets = Sharing.targets(api.frames(), source.frameId).sortedBy { it.name.lowercase() }
+                val targets = Sharing.targets(api.frames(), source.frameId, sameServer).sortedBy { it.name.lowercase() }
                 val coverage = if (targets.isEmpty()) emptyMap() else runCatching {
                     Sharing.coverage(api.sharePlacements(source.frameId, source.placementIds, targets.map { it.id }, dryRun = true).skipped,
                         targets.map { it.id }, source.placementIds.size)

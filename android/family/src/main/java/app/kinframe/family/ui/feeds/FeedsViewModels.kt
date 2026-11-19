@@ -129,13 +129,17 @@ class FeedsViewModel(private val api: KinApi, live: Flow<LiveEvent>, private val
     }
 
     /** "New feed": the caller becomes its owner. */
-    fun create(name: String, onCreated: (Feed) -> Unit) {
+    /**
+     * Makes a family. With several accounts, [on] is the client of the account the person chose (the family lives on
+     * that server); the primary account's otherwise.
+     */
+    fun create(name: String, on: KinApi? = null, onCreated: (Feed) -> Unit) {
         val n = name.trim().take(NAME_MAX)
         if (n.isEmpty() || state.value.creating) return
         _state.update { it.copy(creating = true, createError = null) }
         viewModelScope.launch {
             try {
-                val f = api.createFeed(FeedCreate(n), newKey())
+                val f = (on ?: api).createFeed(FeedCreate(n), newKey())
                 upsert(f)
                 _state.update { it.copy(creating = false) }
                 onCreated(f)

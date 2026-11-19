@@ -4,50 +4,55 @@
     <string name="leaving_leave">Leave</string>
     <string name="leaving_leave_family_title">Leave %1$s?</string>
     <string name="leaving_leave_frame_title">Leave %1$s?</string>
-    <string name="leaving_owner_first">You own this. Make someone else the owner first.</string>
+    <string name="leaving_owner_first">You own this. Hand it over to another member before you leave.</string>
     <plurals name="leaving_your_photos">
         <item quantity="one">Your photos (%d)</item>
         <item quantity="other">Your photos (%d)</item>
     </plurals>
     <string name="leaving_photos_keep_family">Leave them with the family</string>
     <string name="leaving_photos_keep_frame">Leave them on the frame</string>
+    <!-- Android only: no web key -->
     <string name="leaving_photos_keep_hint">They stay where they are, still credited to you.</string>
     <string name="leaving_photos_take">Take them with me</string>
+    <!-- Android only: no web key -->
     <string name="leaving_photos_take_hint">They are removed at once. Frames keep them in their trash for 30 days and their owners are told.</string>
     <plurals name="leaving_your_comments">
         <item quantity="one">Your comments (%d)</item>
         <item quantity="other">Your comments (%d)</item>
     </plurals>
     <string name="leaving_comments_keep">Leave them</string>
-    <string name="leaving_comments_delete">Delete my comments too</string>
+    <string name="leaving_comments_delete">Delete them too</string>
     <string name="leaving_frames_title">Frames you are a member of through this family</string>
     <string name="leaving_frame_too">Leave %1$s too</string>
-    <string name="leaving_frame_owner">You own this frame: make someone else the owner first.</string>
+    <string name="leaving_frame_owner">You own this frame. Hand it over first to leave it.</string>
     <string name="leaving_later_hint">You can still remove any of your photos later from your history.</string>
+    <!-- Android only: no web key -->
     <string name="leaving_done_kept">You left. Your photos stay where they were.</string>
     <plurals name="leaving_done_taken">
         <item quantity="one">%d photo was taken away.</item>
         <item quantity="other">%d photos were taken away.</item>
     </plurals>
-    <string name="leaving_done_until">They stay in the frames\' trash until %1$s.</string>
+    <string name="leaving_done_until">Frames keep them in their trash until %1$s.</string>
     <plurals name="leaving_done_remote">
-        <item quantity="one">%d frame on another server was told to remove them.</item>
-        <item quantity="other">%d frames on other servers were told to remove them.</item>
+        <item quantity="one">Frames on other servers told to remove them: %d.</item>
+        <item quantity="other">Frames on other servers told to remove them: %d.</item>
     </plurals>
 
-    <string name="leaving_former_title">Places you left</string>
-    <string name="leaving_former_lede">Families and frames you left or were removed from, where your photos still are. Your photos are yours: you can take them away at any time.</string>
+    <string name="leaving_former_title">Families and frames you left</string>
+    <string name="leaving_former_lede">Your photos are still there. You decide whether they stay.</string>
+    <!-- Android only: no web key -->
     <string name="leaving_former_empty">Nothing here</string>
     <string name="leaving_former_entry_hint">Take your photos away from families and frames you left</string>
     <plurals name="leaving_former_photos">
-        <item quantity="one">%d of your photos is still there</item>
-        <item quantity="other">%d of your photos are still there</item>
+        <item quantity="one">%d photo still there</item>
+        <item quantity="other">%d photos still there</item>
     </plurals>
     <string name="leaving_take_away">Take them away</string>
     <string name="leaving_take_away_from">Take my photos away from %1$s</string>
     <string name="leaving_take_away_title">Take your photos away from %1$s?</string>
 
-    <string name="leaving_keep_title">Requests to keep photos</string>
+    <string name="leaving_keep_title">Asked to keep your photos</string>
+    <!-- Android only: no web key -->
     <string name="leaving_keep_entry_hint">When someone asks to keep photos you took away</string>
     <plurals name="leaving_keep_open">
         <item quantity="one">%d request waits for your answer</item>
@@ -58,13 +63,15 @@
         <item quantity="one">%1$s asks to keep %2$d photo on %3$s.</item>
         <item quantity="other">%1$s asks to keep %2$d photos on %3$s.</item>
     </plurals>
-    <string name="leaving_keep_until">Answer before %1$s</string>
+    <string name="leaving_keep_until">Answer by %1$s</string>
     <string name="leaving_keep_answer_hint">Tap photos to leave them out. Allowed photos go back as before and stay yours: you can take them away again later.</string>
+    <!-- Android only: no web key -->
     <string name="leaving_keep_toggle">Allow or leave out</string>
     <string name="leaving_keep_picked">%1$d of %2$d chosen</string>
     <string name="leaving_keep_allow_all">Allow all</string>
-    <string name="leaving_keep_allow_some">Allow these</string>
+    <string name="leaving_keep_allow_some">Allow some</string>
     <string name="leaving_keep_decline">Decline</string>
+    <!-- Android only: no web key -->
     <string name="leaving_keep_allowed">%2$s may keep %1$d photos.</string>
     <string name="leaving_keep_declined">You declined %2$s\'s request.</string>
     <string name="leaving_keep_status_open">Waiting for an answer</string>
@@ -75,53 +82,60 @@
 
     <string name="leaving_taken_title">Taken away</string>
     <string name="leaving_taken_by">Taken away by %1$s</string>
+    <!-- Android only: no web key -->
     <plurals name="leaving_taken_line">
         <item quantity="one">%1$d photo, taken away on %2$s. In the trash until %3$s.</item>
         <item quantity="other">%1$d photos, taken away on %2$s. In the trash until %3$s.</item>
     </plurals>
-    <string name="leaving_taken_asked">You asked to keep them: %1$s</string>
+    <string name="leaving_taken_asked">Your request: %1$s</string>
     <string name="leaving_ask_button">Ask %1$s to keep them</string>
-    <string name="leaving_ask_hint">%1$s gets one notification and decides. You can pick the photos to ask for.</string>
-    <string name="leaving_ask_note">A few words (optional)</string>
+    <string name="leaving_ask_hint">%1$s gets one notification and decides. You can ask once.</string>
+    <string name="leaving_ask_note">A few words</string>
     <string name="leaving_ask_send">Ask</string>
-    <string name="leaving_ask_sent">%1$s was asked.</string>
-    <string name="leaving_ask_blocked">%1$s doesn\'t accept requests.</string>
-    <string name="leaving_ask_deleted">This account was deleted: there is nobody to ask.</string>
+    <string name="leaving_ask_sent">Asked %1$s. You’ll hear when they answer.</string>
+    <string name="leaving_ask_blocked">%1$s doesn’t accept requests</string>
+    <string name="leaving_ask_deleted">Their account was deleted</string>
+    <!-- Android only: no web key -->
     <string name="leaving_problem_forbidden">That isn\'t possible for you here.</string>
-    <string name="leaving_problem_already_asked">You already asked for these photos.</string>
-    <string name="leaving_problem_expired">The 30 days are over.</string>
+    <string name="leaving_problem_already_asked">You already asked</string>
+    <string name="leaving_problem_expired">The 30 days are over</string>
 
+    <!-- Android only: no web key -->
     <string name="leaving_settings_title">Leaving and memories</string>
     <string name="leaving_memories_title">Memories</string>
-    <string name="leaving_memories_entry_hint">Leave people out of On this day, recaps and summaries</string>
+    <string name="leaving_memories_entry_hint">Leave people out of On this day, recaps and suggestions.</string>
+    <!-- Android only: no web key -->
     <string name="leaving_memories_on">Memories on %1$s</string>
-    <string name="leaving_memories_lede">On this day, the monthly recap, suggestions and the weekly summary won\'t show posts by the people you leave out. Frames are not affected.</string>
+    <string name="leaving_memories_lede">Their posts no longer show up in your On this day, the monthly recap, suggestions and the weekly summary.</string>
     <string name="leaving_memories_people">Leave people out</string>
     <string name="leaving_memories_people_none">Nobody is left out.</string>
-    <string name="leaving_memories_add">Leave someone out</string>
+    <string name="leaving_memories_add">Add someone</string>
+    <!-- Android only: no web key -->
     <string name="leaving_memories_no_people">No people to choose from.</string>
     <string name="leaving_memories_show">Show again</string>
     <string name="leaving_memories_hidden">Hidden memories</string>
     <plurals name="leaving_memories_hidden_count">
-        <item quantity="one">%d memory is hidden.</item>
-        <item quantity="other">%d memories are hidden.</item>
+        <item quantity="one">Memories you chose not to see again: %d</item>
+        <item quantity="other">Memories you chose not to see again: %d</item>
     </plurals>
     <string name="leaving_memories_show_all">Show them all again</string>
-    <string name="leaving_memories_private">Private: nobody is told, and nothing changes for anyone else. This doesn\'t block anyone.</string>
+    <string name="leaving_memories_private">Only you see this: nobody is told, and frames still show what the family sent.</string>
     <string name="leaving_memories_person_hidden">%1$s is left out of your memories.</string>
     <string name="leaving_memories_person_shown">%1$s is back in your memories.</string>
+    <!-- Android only: no web key -->
     <string name="leaving_memories_all_shown">Hidden memories can show again.</string>
-    <string name="leaving_memory_hide">Don\'t show this memory again</string>
-    <string name="leaving_memory_hidden">This memory won\'t show again.</string>
+    <string name="leaving_memory_hide">Don’t show this memory again</string>
+    <string name="leaving_memory_hidden">You won’t see this memory again.</string>
 
     <string name="leaving_chat_no_longer">You can no longer message %1$s.</string>
     <string name="leaving_former_member">%1$s (former member)</string>
 
     <string name="leaving_delete_take">Take my photos with me</string>
-    <string name="leaving_delete_take_hint">They leave every frame and family. Frames keep them in their trash for 30 days.</string>
+    <string name="leaving_delete_take_hint">They leave every frame and family. Frames keep them in their trash for 30 days, and their owners are told.</string>
     <string name="leaving_delete_leave">Leave my photos to the families</string>
-    <string name="leaving_delete_leave_hint">Each photo goes to the owner of its family or frame and stays credited to you as a former member.</string>
+    <string name="leaving_delete_leave_hint">Each photo goes to the owner of the family or frame it is in, still credited to you as a former member. Photos only in your history are deleted.</string>
 
+    <!-- Android only: no web key -->
     <string name="leaving_notif_taken_title">Photos taken away</string>
     <string name="leaving_notif_keep_request_title">Someone asks to keep your photos</string>
     <string name="leaving_notif_keep_answered_title">Your request was answered</string>

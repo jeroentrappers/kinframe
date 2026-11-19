@@ -85,6 +85,15 @@ class HomeActions(
     val hideMemory: ((OnThisDayGroup) -> Unit)? = null,
     /** The server chip of a post when signed in to several servers (multi-server.md §2.2), else null. */
     val serverChip: (TimelinePost) -> String? = { null },
+    /** The person's user id on a post's server (Home merges every account's timeline). */
+    val meFor: (TimelinePost) -> String? = { me },
+    /** Whether a memory's server lets it be hidden (discovery `leaving` there). */
+    val canHideMemory: (OnThisDayGroup) -> Boolean = { true },
+    /**
+     * The strip's server label for a frame or family whose name is also used on another server (multi-server.md
+     * §2.2: grouped by server only when the same name appears twice), else null.
+     */
+    val stripServer: (String) -> String? = { null },
 )
 
 @Composable
@@ -146,7 +155,7 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                     }
                 }
                 s.onThisDay?.groups?.takeIf { it.isNotEmpty() }?.let { groups ->
-                    item("otd") { OnThisDayCard(groups, a.shareAgain, a.hideMemory) }
+                    item("otd") { OnThisDayCard(groups, a.shareAgain, a.hideMemory, a.canHideMemory) }
                 }
                 when (val p = s.posts) {
                     Load.Loading -> item("loading") { SkeletonList(2, 320.dp) }
@@ -165,9 +174,10 @@ fun HomeScreen(s: HomeState, a: HomeActions) {
                                 a.serverChip(e.post)?.let { chip ->
                                     app.kinframe.family.ui.Pill(chip, c.paperDeep, c.inkSoft, Modifier.padding(bottom = 4.dp), icon = KinIcons.Server)
                                 }
+                                val me = a.meFor(e.post)
                                 TimelineCard(
-                                e.post, a.me, onOpen = { a.openPost(e.post) }, onReact = { r -> a.vm.react(e.post, r) }, onWho = { a.who(e.post) },
-                                onPoster = { a.openPerson(e.post.poster.userId) }.takeIf { !e.post.poster.formerMember && e.post.poster.userId != a.me },
+                                e.post, me, onOpen = { a.openPost(e.post) }, onReact = { r -> a.vm.react(e.post, r) }, onWho = { a.who(e.post) },
+                                onPoster = { a.openPerson(e.post.poster.userId) }.takeIf { !e.post.poster.formerMember && e.post.poster.userId != me },
                                 onShare = a.share?.let { f -> { f(e.post) } },
                             )
                             }
@@ -192,13 +202,13 @@ private fun Strip(s: HomeState, a: HomeActions) {
     val c = Kin.colors
     LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
         items(s.frames, key = { "fr" + it.id }) { f ->
-            StripItem(f.name, freshnessLabel(f.freshness), f.freshness?.level, badge = f.photoRequest?.isOpen == true, onClick = { a.openFrame(f) }) {
+            StripItem(f.name, freshnessLabel(f.freshness), f.freshness?.level, badge = f.photoRequest?.isOpen == true, onClick = { a.openFrame(f) }, server = a.stripServer(f.id)) {
                 Icon(KinIcons.Frame, null, Modifier.size(26.dp), tint = c.inkSoft)
             }
         }
         items(s.feeds, key = { "fd" + it.id }) { f ->
             val streak = f.streak?.takeIf { it.currentWeeks > 0 }?.let { stringResource(R.string.engagement_streak_short, it.currentWeeks) }
-            StripItem(f.name, streak ?: freshnessLabel(f.freshness), f.freshness?.level, badge = false, onClick = { a.openFeed(f) }) {
+            StripItem(f.name, streak ?: freshnessLabel(f.freshness), f.freshness?.level, badge = false, onClick = { a.openFeed(f) }, server = a.stripServer(f.id)) {
                 if (f.coverUrl != null) Thumb(f.coverUrl, null, Modifier.fillMaxSize(), corner = 40.dp) else Icon(KinIcons.People, null, Modifier.size(26.dp), tint = c.inkSoft)
             }
         }
@@ -206,7 +216,7 @@ private fun Strip(s: HomeState, a: HomeActions) {
 }
 
 @Composable
-private fun StripItem(name: String, label: String?, level: Double?, badge: Boolean, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun StripItem(name: String, label: String?, level: Double?, badge: Boolean, onClick: () -> Unit, server: String? = null, content: @Composable () -> Unit) {
     val c = Kin.colors
     Column(
         Modifier.width(76.dp).clip(RoundedCornerShape(12.dp)).clickable(role = Role.Button, onClick = onClick).padding(vertical = 4.dp),
@@ -219,12 +229,14 @@ private fun StripItem(name: String, label: String?, level: Double?, badge: Boole
             }
         }
         Text(name, style = Kin.type.caption, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+        // The same name on two servers: which one this is.
+        server?.let { Text(it, style = Kin.type.caption, color = c.inkSoft, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center) }
         label?.let { Text(it, style = Kin.type.caption, color = c.inkFaint, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center) }
     }
 }
 
 @Composable
-private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup) -> Unit, onHide: ((OnThisDayGroup) -> Unit)? = null) {
+private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup) -> Unit, onHide: ((OnThisDayGroup) -> Unit)? = null, canHide: (OnThisDayGroup) -> Boolean = { true }) {
     val c = Kin.colors
     Surface(Modifier.fillMaxWidth()) {
         Text(stringResource(R.string.engagement_on_this_day), style = Kin.type.title, color = c.ink)
@@ -234,7 +246,7 @@ private fun OnThisDayCard(groups: List<OnThisDayGroup>, onShare: (OnThisDayGroup
                 items(g.items, key = { it.id }) { item -> Thumb(item.thumbUrl, item.caption, Modifier.size(96.dp).aspectRatio(1f)) }
             }
             SecondaryButton(stringResource(R.string.engagement_share_again), { onShare(g) }, icon = KinIcons.Send)
-            if (onHide != null) QuietButton(stringResource(R.string.leaving_memory_hide), { onHide(g) })
+            if (onHide != null && canHide(g)) QuietButton(stringResource(R.string.leaving_memory_hide), { onHide(g) })
         }
     }
 }

@@ -212,4 +212,48 @@ class SendRunnerTest {
         assertEquals("POST", first.method) // a new upload, not a HEAD on the old original
         assertTrue(first.headers["Upload-Metadata"]!!.contains("prepared " + java.util.Base64.getEncoder().encodeToString("photo-master-v1".toByteArray())))
     }
+
+    @Test
+    fun aSendSplitAcrossServersIsPreparedOnceAndItsFilesStayUntilTheLastPart() = runBlocking {
+        val dir = tmp.newFolder("outbox-split")
+        val http = OkHttpClient.Builder().retryOnConnectionFailure(false).build()
+        var preps = 0
+        val sharing = SendRunner(store, HttpKinApi(http, server.url("/v1"), tokens),
+            TusUploader(http, server.url("/v1/uploads"), tokens, chunkSize = 6, retryDelaysMs = emptyList()),
+            sourceFor = { ByteArraySource(bytes) },
+            prepare = { key, item, _ ->
+                preps++
+                val f = java.io.File(dir, "$key-${item.id}.webp").apply { writeBytes(bytes) }
+                item.withPrep(PrepResult.Prepared(f.absolutePath, 10, "photo-master-v1", "image/webp", 800, 600))
+            },
+        )
+        store.remove("idem-1")
+        val whole = OutboxSend(
+            id = "split", server = "a", frameIds = listOf("fa", "fb"), frameNames = listOf("Oma", "Opa"), createdAt = 0,
+            items = listOf(OutboxItem("i1", "content://1", mime = "image/jpeg", name = "a.jpg", size = 10)),
+        )
+        val parts = app.kinframe.family.send.ServerSplit.split(whole, "A", accountOf = { if (it == "fb") "B" else "A" }, serverOf = { it }, newId = { "p2" })
+        assertEquals(2, parts.size)
+        parts.forEach { store.add(it) }
+        val second = parts[1]
+        assertEquals("split", second.group)
+        assertEquals("i1", second.items.single().prepOf)
+
+        repeat(2) {
+            server.enqueue(created()); server.enqueue(patched(6)); server.enqueue(patched(10))
+            server.enqueue(MockResponse.Builder().code(202).body(sendJson).build())
+        }
+        assertTrue(sharing.run("split") is SendRunner.Outcome.Sent)
+        // The first part is done: the second already holds the prepared file, which is still there.
+        val waiting = store.get(second.id)!!.items.single()
+        val path = waiting.preparedPath!!
+        assertTrue(java.io.File(path).exists())
+        assertNull(waiting.uploadId)
+        assertTrue(sharing.run(second.id) is SendRunner.Outcome.Sent)
+        assertEquals(1, preps)
+        // The last part removes the shared files.
+        assertTrue(!java.io.File(path).exists())
+        assertEquals(listOf("content://1"), SendRunner.urisToRelease(whole, emptyList()))
+        assertEquals(emptyList<String>(), SendRunner.urisToRelease(whole, listOf(second)))
+    }
 }

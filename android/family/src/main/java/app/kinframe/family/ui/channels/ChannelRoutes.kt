@@ -48,14 +48,24 @@ private fun handle(e: ChannelNotice, context: Context, res: Resources, toaster: 
 fun ChannelRoute(graph: AppGraph, ready: Phase.Ready, r: Route, nav: Navigator) {
     val api = ready.api
     val k = System.identityHashCode(api)
-    val d = ready.server.discovery
-    val me = ready.me.displayName
+    // The frame's or family's own server: its flags and limits, and the person's name there.
+    val key = when (r) {
+        is Route.EmailInbox -> r.scope.id
+        is Route.EmailAddress -> r.addressId
+        is Route.TelegramChats -> r.scope.id
+        is Route.TelegramChat -> r.chatId
+        else -> null
+    }
+    val acct = app.kinframe.family.ui.rememberAccountContext(graph, key, ready)
+    val d = acct.discovery ?: ready.server.discovery
+    val limits = acct.limits
+    val me = acct.me?.displayName ?: ready.me.displayName
     when (r) {
         is Route.EmailInbox -> {
             val vm: EmailInboxViewModel = viewModel(key = "email-${r.scope.kind}-${r.scope.id}-$k") { EmailInboxViewModel(api, r.scope, graph.live.events) }
             val st by vm.state.collectAsStateWithLifecycle()
             Notices(vm.events)
-            EmailInboxScreen(st, vm, ready.server.limits.maxEmailAddressesPerTarget, me, { nav.pop() }) { a -> nav.push(Route.EmailAddress(a.id)) }
+            EmailInboxScreen(st, vm, limits.maxEmailAddressesPerTarget, me, { nav.pop() }) { a -> nav.push(Route.EmailAddress(a.id)) }
         }
         is Route.EmailAddress -> {
             val vm: EmailAddressViewModel = viewModel(key = "email-address-${r.addressId}-$k") { EmailAddressViewModel(api, r.addressId, graph.live.events) }
@@ -69,7 +79,7 @@ fun ChannelRoute(graph: AppGraph, ready: Phase.Ready, r: Route, nav: Navigator) 
             Notices(vm.events)
             // Back from Telegram: the chat may be connected already.
             LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { vm.load() }
-            TelegramChatsScreen(st, vm, d.telegramPrivacyMode, ready.server.limits.maxTelegramChatsPerTarget, { nav.pop() }) { c -> nav.push(Route.TelegramChat(c.id)) }
+            TelegramChatsScreen(st, vm, d.telegramPrivacyMode, limits.maxTelegramChatsPerTarget, { nav.pop() }) { c -> nav.push(Route.TelegramChat(c.id)) }
         }
         is Route.TelegramChat -> {
             val vm: TelegramChatViewModel = viewModel(key = "telegram-chat-${r.chatId}-$k") { TelegramChatViewModel(api, r.chatId, graph.live.events) }

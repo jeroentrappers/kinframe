@@ -74,6 +74,8 @@ class HomeViewModel(
     live: Flow<LiveEvent>,
     private val engagement: Boolean,
     private val today: () -> LocalDate = { LocalDate.now() },
+    /** Whether a user id is the person (any of their accounts: Home merges every server's timeline). */
+    private val isMe: (String?) -> Boolean = { it != null && it == me() },
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -170,10 +172,14 @@ class HomeViewModel(
         when (e) {
             is SocialLive.PostUpdated -> e.thread?.let { t -> posts { TimelineLogic.upsertThread(it, e.postId) { t } } }
             is SocialLive.PostRemoved -> posts { l -> l.filterNot { it.id == e.postId } }
-            is SocialLive.CommentCreated -> posts { TimelineLogic.upsertThread(it, e.postId) { t -> ThreadLogic.withComment(t, e.comment, e.comment.author?.userId == me()) } }
+            is SocialLive.CommentCreated -> posts { TimelineLogic.upsertThread(it, e.postId) { t -> ThreadLogic.withComment(t, e.comment, isMe(e.comment.author?.userId)) } }
             is SocialLive.ReactionUpdated -> if (e.targetKind == ReactionTarget.POST) posts { TimelineLogic.upsertThread(it, e.targetId) { t -> t.copy(reactions = e.summary) } }
             is SocialLive.ThreadRead -> posts { TimelineLogic.upsertThread(it, e.postId) { t -> t.copy(readUpTo = e.readUpTo, unreadCount = 0, unreadMentions = 0) } }
-            is SocialLive.PhotoRequestChanged -> _state.update { s -> s.copy(frames = s.frames.map { if (it.id == e.request.frameId) it.copy(photoRequest = e.request) else it }) }
+            // The frame's own members and its families' members hear of a request too (README §5.20): a frame not in the
+            // strip (reached through a family) only refreshes it.
+            is SocialLive.PhotoRequestChanged -> if (state.value.frames.any { it.id == e.request.frameId }) {
+                _state.update { s -> s.copy(frames = s.frames.map { if (it.id == e.request.frameId) it.copy(photoRequest = e.request) else it }) }
+            } else viewModelScope.launch { loadStrip() }
             is SocialLive.StreakUpdated -> _state.update { s -> s.copy(feeds = s.feeds.map { if (it.id == e.feedId) it.copy(streak = e.streak) else it }) }
             is SocialLive.PromptUpdated -> _state.update { s ->
                 val others = s.prompts.filterNot { it.feedId == e.feedId }

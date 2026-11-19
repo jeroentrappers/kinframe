@@ -10,6 +10,13 @@ import app.kinframe.family.accounts.AccountDeps
 import app.kinframe.family.accounts.AccountManager
 import app.kinframe.family.accounts.AccountStore
 import app.kinframe.family.accounts.AlreadySignedInException
+import app.kinframe.family.ui.send.Recipients
+import app.kinframe.family.ui.Load
+import app.kinframe.family.ui.send.ComposerState
+import app.kinframe.core.api.Permissions
+import app.kinframe.core.api.Frame
+import app.kinframe.family.accounts.ServerChips
+import app.kinframe.core.api.User
 import app.kinframe.family.data.MemorySecureStore
 import app.kinframe.family.data.ServerChoice
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -179,5 +186,72 @@ class ServersTest {
         assertNull(parts[1].items.single().uploadId)
         // One server: unchanged apart from the server.
         assertEquals(1, ServerSplit.split(send.copy(frameIds = listOf("fb"), frameNames = listOf("Oma"), feedIds = emptyList(), feedNames = emptyList()), "B", { accountOf[it] }, { "https://$it/" }).size)
+    }
+
+    @Test
+    fun detailScreensUseTheirOwnAccountsProfileAndFlags() {
+        seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/"))
+        val m = manager()
+        val d = m.newDraft()
+        d.servers.choose(ServerChoice("https://kinframe.janssens.be/".toHttpUrl(), disco("Janssens", "s-a", "https://kinframe.janssens.be/").copy(social = true, leaving = true)))
+        m.commit(d)
+        val b = m.accounts.value.first { it.id != AccountStore.MAIN }
+        m.primary.value.me.value = User(id = "me-a", displayName = "An")
+        b.me.value = User(id = "me-b", displayName = "An", isOperator = true)
+        m.index.put("post-b", b.id)
+        val ctx = m.contextFor("post-b")
+        assertEquals(b.id, ctx.accountId)
+        assertEquals("me-b", ctx.meId)
+        assertTrue(ctx.isOperator)
+        assertTrue(ctx.discovery!!.leaving)
+        assertEquals("me-a", m.contextFor("post-a").meId)
+        assertFalse(m.contextFor("post-a").discovery!!.leaving)
+        assertEquals("me-b", m.meIdFor("post-b"))
+        // Merged lists: either id is the person.
+        assertTrue(m.isMe("me-a")); assertTrue(m.isMe("me-b")); assertFalse(m.isMe("someone")); assertFalse(m.isMe(null))
+        assertTrue(m.sameAccount("post-b", "post-b"))
+        assertFalse(m.sameAccount("post-b", "frame-a"))
+    }
+
+    @Test
+    fun stripNamesTheServerOnlyWhenANameRepeatsAcrossServers() {
+        val items = listOf("f1" to "Oma", "f2" to "oma ", "f3" to "Kitchen", "f4" to "Kitchen")
+        val account = mapOf("f1" to "A", "f2" to "B", "f3" to "A", "f4" to "A")
+        assertEquals(setOf("f1", "f2"), ServerChips.repeatedAcrossServers(items, { it.first }, { it.second }) { account[it] })
+        val groups = ServerChips.byAccount(items, { it.first }, { account[it] }, listOf("B", "A"))
+        assertEquals(listOf("B", "A"), groups.map { it.first })
+        assertEquals(listOf("f2"), groups[0].second.map { it.first })
+    }
+
+    @Test
+    fun theComposerGroupsRecipientsPerServer() {
+        val fa = Frame(id = "fa", name = "Kitchen", permissions = Permissions(send = true))
+        val fb = Frame(id = "fb", name = "Oma", permissions = Permissions(send = true))
+        val s = ComposerState(frames = Load.Ready(listOf(fa, fb)))
+        assertEquals(listOf(null), s.recipientGroups.map { it.server })
+        val g = s.copy(serverOf = mapOf("fa" to "appmire", "fb" to "Janssens")).recipientGroups
+        assertEquals(listOf("appmire", "Janssens"), g.map { it.server })
+        assertEquals(listOf("fb"), g[1].frames.map { it.id })
+        assertEquals(listOf("c", "b"), Recipients.familiesToPreselect(setOf("b", "c"), listOf("a", "c", "b")))
+    }
+
+    @Test
+    fun aPushWithoutServerUsesWhatTheIndexKnowsAndNeverOverwritesIt() {
+        seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/"))
+        val m = manager()
+        val d = m.newDraft()
+        d.servers.choose(ServerChoice("https://kinframe.janssens.be/".toHttpUrl(), disco("Janssens", "s-a", "https://kinframe.janssens.be/")))
+        m.commit(d)
+        m.index.put("post-b", d.id)
+        // FCM, no `server`: the post is known to be the Janssens account's.
+        assertEquals(d.id, m.accountForPush("", mapOf("post_id" to "post-b", "comment_id" to "c1"), null).id)
+        assertEquals(d.id, m.index.get("post-b"))
+        assertNull(m.index.get("c1"))
+        // Nothing known: the primary account, and the guess isn't recorded.
+        assertEquals(AccountStore.MAIN, m.accountForPush(null, mapOf("post_id" to "post-x"), null).id)
+        assertNull(m.index.get("post-x"))
+        // With `server`: recorded for that account.
+        assertEquals(d.id, m.accountForPush("https://kinframe.janssens.be/", mapOf("post_id" to "post-y"), null).id)
+        assertEquals(d.id, m.index.get("post-y"))
     }
 }
