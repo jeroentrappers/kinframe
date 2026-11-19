@@ -720,7 +720,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
     val me by graph.me.collectAsStateWithLifecycle()
     val feedName = s.feedOrNull?.name.orEmpty()
     // Birthdays (docs/spec/birthdays.md), only when the server has them.
-    val birthdaysOn = graph.servers.current.value?.discovery?.birthdays == true
+    val birthdaysOn = ready.server.discovery.birthdays
     val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${r.feedId}-${System.identityHashCode(api)}") {
         app.kinframe.family.ui.feeds.FeedBirthdaysViewModel(
             api, r.feedId, graph.live.events,
@@ -751,7 +751,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 app.kinframe.family.ui.feeds.BirthdayActions(b, me?.id, me?.displayName, s.members, setNotifications = { on -> vm.setBirthdayNotifications(on) })
             },
             birthdaysState = bs,
-            sources = if (graph.servers.current.value?.discovery?.sourceProviders.isNullOrEmpty()) null else ({
+            sources = if (ready.server.discovery.sourceProviders.isEmpty()) null else ({
                 val svm: PhotoSourcesViewModel = viewModel(key = "feed-sources-${r.feedId}-${System.identityHashCode(api)}") {
                     PhotoSourcesViewModel(api, SourceScope.Feed(r.feedId), graph.live.events)
                 }
@@ -760,7 +760,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 PhotoSourcesSection(sst, svm, feed = true,
                     onAdd = { nav.push(Route.AddPhotoSource(SourceTarget.feed(r.feedId, feedName))) }, onGoogle = null)
             }),
-            channels = graph.servers.current.value?.discovery?.takeIf { it.emailInbox || it.telegram }?.let { d ->
+            channels = ready.server.discovery.takeIf { it.emailInbox || it.telegram }?.let { d ->
                 val scope = app.kinframe.family.ui.channels.ChannelScope.feed(r.feedId, feedName)
                 ({
                     app.kinframe.family.ui.channels.ChannelsSection(feed = true,
@@ -768,7 +768,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                         onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
                 })
             },
-            addFromGoogle = if (graph.servers.current.value?.discovery?.googlePhotosImport == true) ({
+            addFromGoogle = if (ready.server.discovery.googlePhotosImport) ({
                 graph.googleImports.start(SourceTarget.feed(r.feedId, feedName))
             }) else null,
             social = feedSocialSlots(graph, ready, nav, s.feedOrNull, onFeedChanged = { f -> feeds.upsert(f); vm.load() }, setFlag = vm::setFlag, busy = s.busy),

@@ -158,7 +158,7 @@ private fun ShareAgainHost(graph: AppGraph, ready: Phase.Ready, social: SocialAp
     val res = LocalResources.current
     val toaster = LocalToaster.current
     val scope = rememberCoroutineScope()
-    val me = graph.me.value?.id
+    val me = ready.me.id
     val own = group.items.filter { it.senderId == me }
     var targets by remember { mutableStateOf<PutOnFrameTargets?>(null) }
     var inChat by remember { mutableStateOf(own.isEmpty()) }
@@ -436,7 +436,14 @@ private fun ConversationRouteScreen(graph: AppGraph, ready: Phase.Ready, nav: Na
         SocialNotifications.clearConversation(context, r.conversationId)
         onDispose { if (graph.social.openConversation == r.conversationId) graph.social.openConversation = null }
     }
-    // Back to the screen (app reopened, socket reconnected): fetch what arrived meanwhile.
+    // Back to the screen (app reopened; the socket was closed meanwhile) or a media message left the outbox: fetch
+    // what arrived meanwhile (`after` = the newest message we have, README §5.19).
+    var resumed by remember { mutableStateOf(false) }
+    androidx.lifecycle.compose.LifecycleResumeEffect(vm) {
+        if (resumed) vm.catchUp()
+        resumed = true
+        onPauseOrDispose { }
+    }
     LaunchedEffect(Unit) { graph.sent.collect { vm.catchUp() } }
     LaunchedEffect(vm) {
         vm.events.collect { e ->
