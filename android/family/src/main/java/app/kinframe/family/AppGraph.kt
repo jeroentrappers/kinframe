@@ -35,6 +35,7 @@ import app.kinframe.family.send.OutboxState
 import app.kinframe.family.send.OutboxStore
 import app.kinframe.family.send.SendRunner
 import app.kinframe.family.send.SendWorker
+import app.kinframe.family.social.SocialGraph
 import app.kinframe.family.util.DeepLink
 import app.kinframe.family.ui.sources.GoogleImportFlow
 import app.kinframe.family.ui.tv.TvPresenter
@@ -63,6 +64,8 @@ data class OpenTarget(
     val sourceId: String? = null, val importId: String? = null,
     /** Email to frame and Telegram: the address with pending senders, the chat that needs attention. */
     val addressId: String? = null, val chatId: String? = null,
+    /** Family social: the push's other ids (`conversation_id`, `comment_id`, `week_of`, …; README §6.3). */
+    val ids: Map<String, String> = emptyMap(),
 )
 
 /**
@@ -143,6 +146,9 @@ class AppGraph(
     private val _pushes = MutableSharedFlow<PushMessage>(extraBufferCapacity = 8)
     val pushes: SharedFlow<PushMessage> = _pushes.asSharedFlow()
 
+    /** Family social: timeline, threads, chats, encouragement (docs/spec/family-social.md). */
+    val social = SocialGraph(this)
+
     private var foreground = false
 
     init {
@@ -176,7 +182,8 @@ class AppGraph(
         val preparer = MediaPreparer(app)
         return SendRunner(outbox, a, tus, sourceFor = { ItemSource(app, it) }, hash = { item ->
             runCatching { MediaFiles.sha256(ItemSource(app, item).open(0)) }.getOrNull()
-        }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) })
+        }, prepare = { sendId, item, onProgress -> preparer.prepare(item, SendRunner.outboxDir(app, sendId), onProgress) },
+            sendChat = social.chatSender)
     }
 
     /**

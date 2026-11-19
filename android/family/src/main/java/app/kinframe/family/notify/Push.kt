@@ -32,6 +32,8 @@ data class PushMessage(
     val type: String, val title: String, val body: String, val ids: Map<String, String>, val key: String = "",
     /** Notification tag set by the server (greetings: `birthday:<birthday_id>:<date>`, so a newer one replaces the older). */
     val tag: String = "",
+    /** Notification buttons (`snooze_month`, `fewer_reminders` on reminders; README §6.3). */
+    val actions: List<String> = emptyList(),
 ) {
     /** The push key (`subscription_request`…), falling back to the type for servers that send only one. */
     val kind: String get() = key.ifBlank { type }
@@ -41,7 +43,8 @@ data class PushMessage(
             val o = KinJson.parseToJsonElement(bytes.toString(Charsets.UTF_8)).jsonObject
             fun s(k: String) = o[k]?.jsonPrimitive?.contentOrNull.orEmpty()
             val ids = (o["ids"]?.jsonObject ?: emptyMap()).mapNotNull { (k, v) -> v.jsonPrimitive.contentOrNull?.let { k to it } }.toMap()
-            PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"))
+            val actions = (o["actions"] as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { it.jsonPrimitive.contentOrNull }
+            PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"), actions)
         }.getOrNull()
     }
 }

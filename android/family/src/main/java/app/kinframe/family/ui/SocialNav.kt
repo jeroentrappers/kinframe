@@ -1,0 +1,50 @@
+package app.kinframe.family.ui
+
+/** Family social screens (docs/spec/family-social.md); routed by `SocialRoot`. */
+sealed interface SocialRoute : Route
+
+/** The Home and Chats tabs. */
+sealed interface SocialTab : SocialRoute
+
+/** Home: the timeline of every family, the frames and families strip, On this day (discovery `social`). */
+data object HomeRoute : SocialTab
+
+/** Chats: family, circle, group and direct conversations (discovery `chats`). */
+data object ChatsRoute : SocialTab
+
+/** One post with its thread; [commentId] scrolls to a comment (from a notification). */
+data class PostRoute(val postId: String, val commentId: String? = null) : SocialRoute
+
+data class ConversationRoute(val conversationId: String) : SocialRoute
+
+/** "New chat" ([group] false) or "New group". */
+data class NewChatRoute(val group: Boolean = false) : SocialRoute
+
+/** A conversation's details: members, name and photo, mute, leave. */
+data class ConversationInfoRoute(val conversationId: String) : SocialRoute
+
+data class PersonRoute(val userId: String) : SocialRoute
+
+data class CirclesRoute(val feedId: String) : SocialRoute
+
+data class CircleRoute(val feedId: String, val circleId: String) : SocialRoute
+
+data object BlockedPeopleRoute : SocialRoute
+
+/** A family's reports for its admins, or (null) the operator's. */
+data class ReportsRoute(val feedId: String? = null) : SocialRoute
+
+/** Settings → Reminders: level, frame requests, summary, birthdays, snooze, quiet hours, email digest, read receipts. */
+data object RemindersRoute : SocialRoute
+
+/** A family's streak and weekly prompts, with the admins' settings. */
+data class FeedEngagementRoute(val feedId: String) : SocialRoute
+
+data class WeeklySummaryRoute(val weekOf: String) : SocialRoute
+
+data class RecapRoute(val feedId: String, val month: String) : SocialRoute
+
+data object MilestonesRoute : SocialRoute
+
+/** "Send something to Oma's frame": the frame's freshness, its photo request and suggestions. */
+data class FreshFrameRoute(val frameId: String) : SocialRoute

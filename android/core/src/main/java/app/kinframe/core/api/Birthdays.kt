@@ -104,7 +104,11 @@ data class BirthdayPersonUpdate(
 
 /** `FeedPreferencesUpdate` (`PATCH /feeds/{id}/preferences`): the caller's own preferences in a feed. */
 @Serializable
-data class FeedPreferencesUpdate(val birthdayNotifications: Boolean? = null)
+data class FeedPreferencesUpdate(
+    val birthdayNotifications: Boolean? = null,
+    /** Family social: [app.kinframe.core.social.FeedMute]. */
+    val mute: String? = null,
+)
 
 /** A frame said happy birthday to a person of this feed on their day. Also the `birthday.greeting` payload. */
 @Serializable

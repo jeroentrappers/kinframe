@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <!-- Voice messages in chats (docs/spec/family-social.md): asked for only when someone records one. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <!-- "Add from Google Photos" opens Google's picker in the Google Photos app when it is installed (README §5.14). -->
     <queries>
@@ -114,6 +117,11 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <!-- Notification buttons of family social pushes: reminder Snooze / Fewer, chat Reply and Mark as read. -->
+        <receiver
+            android:name=".notify.SocialActionReceiver"
+            android:exported="false" />
 
         <!-- Uploads run as a WorkManager job in a dataSync foreground service. -->
         <service

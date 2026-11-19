@@ -253,27 +253,41 @@ private fun Onboarding(graph: AppGraph, phase: Phase) {
 
 private data class TabSpec(val route: Route, val icon: ImageVector, val label: Int)
 
-/** The bottom tabs; Feeds only when the server has them (discovery `feeds`). */
-private fun tabs(feeds: Boolean) = listOfNotNull(
+/** The bottom tabs; Feeds only when the server has them (discovery `feeds`); Home and Chats with family social. */
+private fun tabs(feeds: Boolean, social: SocialFlags = SocialFlags(false, false, false, false, false)) = listOfNotNull(
+    if (social.social) TabSpec(HomeRoute, KinIcons.Home, R.string.social_nav_home) else null,
     TabSpec(Route.Frames, KinIcons.Frame, R.string.nav_frames),
     TabSpec(Route.Send, KinIcons.Send, R.string.nav_send),
     TabSpec(Route.History, KinIcons.History, R.string.nav_history),
+    if (social.chats) TabSpec(ChatsRoute, KinIcons.Message, R.string.chat_nav) else null,
     if (feeds) TabSpec(Route.Feeds, KinIcons.People, R.string.nav_feeds) else null,
     TabSpec(Route.Settings, KinIcons.Settings, R.string.nav_settings),
 )
+
+/** The tab's badge: unread chats on Chats, threads with mentions or replies to you on Home (README §5.19). */
+private fun tabBadge(route: Route, b: app.kinframe.core.social.Badge): Int = when (route) {
+    ChatsRoute -> b.conversations
+    HomeRoute -> b.threads
+    else -> 0
+}
 
 @Composable
 private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     val api = ready.api
     val context = LocalContext.current
     val res = LocalResources.current
-    val nav = remember(api) { Navigator() }
+    val socialFlags = remember(ready.server.discovery) { SocialFlags.of(ready.server.discovery) }
+    val nav = remember(api) { Navigator(if (socialFlags.social) HomeRoute else Route.Frames) }
+    val homeTab: Route = if (socialFlags.social) HomeRoute else Route.Frames
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val toaster = remember { Toaster(snackbar, scope) }
     val k = System.identityHashCode(api)
     val feedsOn = ready.server.discovery.feeds
-    val TABS = remember(feedsOn) { tabs(feedsOn) }
+    val TABS = remember(feedsOn, socialFlags) { tabs(feedsOn, socialFlags) }
+    // A phone's bottom bar holds five: with Home and Chats, History and Settings move to the top bar of those tabs.
+    val BAR = remember(TABS) { if (TABS.size <= 5) TABS else TABS.filter { it.route != Route.History && it.route != Route.Settings } }
+    val badge by graph.social.badge.collectAsStateWithLifecycle()
 
     val frames: FramesViewModel = viewModel(key = "frames-$k") { FramesViewModel(api, graph.live.events) }
     val feeds: FeedsViewModel = viewModel(key = "feeds-$k") { FeedsViewModel(api, graph.live.events) }
@@ -284,6 +298,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
             inspect = { uri -> withContext(Dispatchers.IO) { MediaFiles.inspect(context.applicationContext, uri) } },
             enqueue = { send -> queueSend(graph, send) },
             feedsEnabled = { graph.servers.current.value?.discovery?.feeds == true },
+            social = { graph.social.api.value?.takeIf { graph.social.socialOn } },
         )
     }
     val history: HistoryViewModel = viewModel(key = "history-$k") { HistoryViewModel(api, graph.live.events, graph.sent) }
@@ -301,7 +316,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         }
     }
 
-    BackHandler(enabled = nav.stack.size > 1 || nav.tab != Route.Frames) { if (!nav.pop()) nav.selectTab(Route.Frames) }
+    BackHandler(enabled = nav.stack.size > 1 || nav.tab != homeTab) { if (!nav.pop()) nav.selectTab(homeTab) }
 
     // Incoming: share sheet, links, notification taps.
     val shared by graph.incomingShare.collectAsStateWithLifecycle()
@@ -322,6 +337,8 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
     LaunchedEffect(target) {
         val t = target ?: return@LaunchedEffect
         graph.openTarget.value = null
+        // Family social pushes (comments, chats, reminders…): ui/SocialRoot.kt.
+        if (openSocialTarget(t, nav, ready)) return@LaunchedEffect
         when (t.target) {
             Notifications.TARGET_PEOPLE -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it, FrameTab.People)) }
             Notifications.TARGET_FRAME -> t.frameId?.let { nav.selectTab(Route.Frames); nav.push(Route.FrameDetail(it)) }
@@ -426,7 +443,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                         TABS.forEach { t ->
                             NavigationRailItem(
                                 selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
-                                icon = { Icon(t.icon, null) }, label = { Text(stringResource(t.label)) },
+                                icon = { BadgedIcon(t.icon, tabBadge(t.route, badge)) }, label = { Text(stringResource(t.label)) },
                                 colors = NavigationRailItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
                                     selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
                             )
@@ -440,10 +457,10 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                     bottomBar = {
                         if (!wide && showChrome) {
                             NavigationBar(containerColor = Kin.colors.surface) {
-                                TABS.forEach { t ->
+                                BAR.forEach { t ->
                                     NavigationBarItem(
                                         selected = nav.tab == t.route, onClick = { nav.selectTab(t.route) },
-                                        icon = { Icon(t.icon, null) }, label = { Text(stringResource(t.label)) },
+                                        icon = { BadgedIcon(t.icon, tabBadge(t.route, badge)) }, label = { Text(stringResource(t.label), maxLines = 1) },
                                         colors = NavigationBarItemDefaults.colors(selectedIconColor = Kin.colors.onAccentSoft, indicatorColor = Kin.colors.accentSoft,
                                             selectedTextColor = Kin.colors.ink, unselectedIconColor = Kin.colors.inkSoft, unselectedTextColor = Kin.colors.inkSoft),
                                     )
@@ -463,7 +480,10 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
                             onPrevious = graph.tv::previous, onToggle = graph.tv::toggle, onNext = graph.tv::next,
                             onStop = { graph.tv.stop(); toaster.show(res.getString(R.string.tv_stopped)) },
                         )
-                        Box(Modifier.weight(1f)) { Screen(graph, app, ready, nav, frames, composer, history, pick, feeds) }
+                        val overflow: @Composable () -> Unit = if (!wide && BAR.size < TABS.size) ({
+                            OverflowActions({ nav.selectTab(Route.History) }, { nav.selectTab(Route.Settings) })
+                        }) else ({})
+                        Box(Modifier.weight(1f)) { Screen(graph, app, ready, nav, frames, composer, history, pick, feeds, overflow) }
                     }
                     tvOpen?.let { t -> TvRoute(graph, api, t, ready, tvState, { tvOpen = null }, frames) }
                     ShareSheet(shareState, share::toggle, share::confirm, share::dismiss, share::retry)
@@ -484,6 +504,7 @@ private fun Screen(
     history: HistoryViewModel,
     pick: () -> Unit,
     feeds: FeedsViewModel,
+    overflow: @Composable () -> Unit = {},
 ) {
     val api = ready.api
     val feedsOn = ready.server.discovery.feeds
@@ -510,7 +531,8 @@ private fun Screen(
                 )
             } else {
                 ComposeScreen(s, pick, composer::edit, composer::remove, composer::clear, composer::toggleFrame, composer::send,
-                    { nav.selectTab(Route.Frames); nav.push(Route.AddFrame()) }, { composer.loadFrames() }, composer::toggleFeed)
+                    { nav.selectTab(Route.Frames); nav.push(Route.AddFrame()) }, { composer.loadFrames() }, composer::toggleFeed,
+                    audience = if (s.circles.isNotEmpty() || s.prompts.isNotEmpty()) ({ SendAudience(s, composer) }) else null)
             }
         }
         Route.History -> {
@@ -518,7 +540,7 @@ private fun Screen(
             val outbox by graph.outbox.sends.collectAsStateWithLifecycle()
             val progress by graph.outbox.progress.collectAsStateWithLifecycle()
             HistoryScreen(
-                s, outbox.sortedByDescending { it.createdAt }, progress, history::setFilter, { nav.push(Route.SendDetail(it.id)) },
+                s, outbox.filter { it.chat == null }.sortedByDescending { it.createdAt }, progress, history::setFilter, { nav.push(Route.SendDetail(it.id)) },
                 history::refresh, history::loadMore,
                 onRetryOutbox = { id -> graph.outbox.update(id) { it.copy(state = OutboxState.QUEUED, error = null) }; SendWorker.enqueue(context, id) },
                 onDiscardOutbox = { id -> discardOutbox(graph, context, id) },
@@ -554,6 +576,7 @@ private fun Screen(
                 },
                 onPhotoSources = if (ready.server.discovery.sourceProviders.isNotEmpty()) ({ nav.push(Route.PhotoSources) }) else null,
                 telegram = if (ready.server.discovery.telegram) ({ TelegramLinkSettings(graph, ready) }) else null,
+                social = { SocialSettingsSection(ready, nav) },
                 ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
                 onDeleteAccount = { removeItems ->
                     deletingAccount = true
@@ -629,7 +652,8 @@ private fun Screen(
             FeedsScreen(s, feeds::refresh, { nav.push(Route.FeedDetail(it.id)) }, { name -> feeds.create(name) { f -> nav.push(Route.FeedDetail(f.id)) } },
                 onEnterCode = { nav.push(Route.AddFrame()) })
         }
-        is Route.FeedDetail -> FeedDetailRoute(graph, api, r, nav, frames, feeds, composer)
+        is Route.FeedDetail -> FeedDetailRoute(graph, api, r, nav, frames, feeds, composer, ready)
+        is SocialRoute -> SocialRouteScreen(graph, ready, nav, r, composer, frames, feeds, overflow)
         Route.PhotoSources -> {
             val vm: PhotoSourcesViewModel = viewModel(key = "my-sources-${System.identityHashCode(api)}") {
                 PhotoSourcesViewModel(api, SourceScope.Mine, graph.live.events)
@@ -665,7 +689,7 @@ private fun Screen(
 }
 
 @Composable
-private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel) {
+private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, nav: Navigator, frames: FramesViewModel, feeds: FeedsViewModel, composer: ComposerViewModel, ready: Phase.Ready) {
     val context = LocalContext.current
     val res = LocalResources.current
     val toaster = LocalToaster.current
@@ -696,7 +720,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
     val me by graph.me.collectAsStateWithLifecycle()
     val feedName = s.feedOrNull?.name.orEmpty()
     // Birthdays (docs/spec/birthdays.md), only when the server has them.
-    val birthdaysOn = graph.servers.current.value?.discovery?.birthdays == true
+    val birthdaysOn = ready.server.discovery.birthdays
     val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${r.feedId}-${System.identityHashCode(api)}") {
         app.kinframe.family.ui.feeds.FeedBirthdaysViewModel(
             api, r.feedId, graph.live.events,
@@ -727,7 +751,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 app.kinframe.family.ui.feeds.BirthdayActions(b, me?.id, me?.displayName, s.members, setNotifications = { on -> vm.setBirthdayNotifications(on) })
             },
             birthdaysState = bs,
-            sources = if (graph.servers.current.value?.discovery?.sourceProviders.isNullOrEmpty()) null else ({
+            sources = if (ready.server.discovery.sourceProviders.isEmpty()) null else ({
                 val svm: PhotoSourcesViewModel = viewModel(key = "feed-sources-${r.feedId}-${System.identityHashCode(api)}") {
                     PhotoSourcesViewModel(api, SourceScope.Feed(r.feedId), graph.live.events)
                 }
@@ -736,7 +760,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 PhotoSourcesSection(sst, svm, feed = true,
                     onAdd = { nav.push(Route.AddPhotoSource(SourceTarget.feed(r.feedId, feedName))) }, onGoogle = null)
             }),
-            channels = graph.servers.current.value?.discovery?.takeIf { it.emailInbox || it.telegram }?.let { d ->
+            channels = ready.server.discovery.takeIf { it.emailInbox || it.telegram }?.let { d ->
                 val scope = app.kinframe.family.ui.channels.ChannelScope.feed(r.feedId, feedName)
                 ({
                     app.kinframe.family.ui.channels.ChannelsSection(feed = true,
@@ -744,9 +768,10 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                         onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
                 })
             },
-            addFromGoogle = if (graph.servers.current.value?.discovery?.googlePhotosImport == true) ({
+            addFromGoogle = if (ready.server.discovery.googlePhotosImport) ({
                 graph.googleImports.start(SourceTarget.feed(r.feedId, feedName))
             }) else null,
+            social = feedSocialSlots(graph, ready, nav, s.feedOrNull, onFeedChanged = { f -> feeds.upsert(f); vm.load() }, setFlag = vm::setFlag, busy = s.busy),
         ),
     )
 }
@@ -891,10 +916,13 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                 val d = ready.server.discovery
                 val scope = app.kinframe.family.ui.channels.ChannelScope.frame(f.id, f.name)
                 val manages = f.can { it.changeSettings }
-                SettingsTab(f, ss, d.weather, fs, plugins = { PluginsSection(ps, pv) }, channels = if (!manages || (!d.emailInbox && !d.telegram)) null else ({
-                    app.kinframe.family.ui.channels.ChannelsSection(feed = false,
+                val socialFrame = manages && (SocialFlags.of(d).social || SocialFlags.of(d).engagement)
+                SettingsTab(f, ss, d.weather, fs, plugins = { PluginsSection(ps, pv) }, channels = if (!manages || (!d.emailInbox && !d.telegram && !socialFrame)) null else ({
+                    if (d.emailInbox || d.telegram) app.kinframe.family.ui.channels.ChannelsSection(feed = false,
                         onEmail = if (d.emailInbox) ({ nav.push(Route.EmailInbox(scope)) }) else null,
                         onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
+                    // Family social on the frame: show comments, ask for photos, prompt cards, "new photos from".
+                    if (socialFrame) FrameSocialSettingsSlot(ready, fs)
                 }))
             }
         },

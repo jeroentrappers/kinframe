@@ -19,7 +19,7 @@
     <string name="birthday_suggestions">Voorstellen</string>
     <string name="birthday_your_suggestions">Jouw voorstellen</string>
     <string name="birthday_list_title">Binnenkort</string>
-    <string name="birthday_empty">Nog geen verjaardagen. Voeg oma, opa of de nieuwe baby toe: elke fotolijst van deze feed toont ze.</string>
+    <string name="birthday_empty">Nog geen verjaardagen. Voeg oma, opa of de nieuwe baby toe: elke fotolijst van deze familie toont ze.</string>
     <string name="birthday_declined">Afgewezen</string>
     <string name="birthday_declined_by">Afgewezen door %1$s</string>
     <string name="birthday_notifications_title">Meldingen</string>
@@ -45,7 +45,7 @@
     <string name="birthday_show_age">Leeftijd tonen</string>
     <string name="birthday_show_age_hint">Fotolijsten tonen \"Oma wordt vandaag 80!\"</string>
     <string name="birthday_show_age_needs_year">Hiervoor is het jaar nodig</string>
-    <string name="birthday_link">Wie is het in deze feed?</string>
+    <string name="birthday_link">Wie is het in deze familie?</string>
     <string name="birthday_link_none">Geen lid</string>
     <string name="birthday_photo_choose">Foto kiezen</string>
     <string name="birthday_photo_remove">Foto verwijderen</string>
@@ -57,9 +57,9 @@
     <string name="birthday_error_date">Kies een dag en maand die bestaan</string>
     <string name="birthday_error_year">Het jaar moet tussen 1900 en dit jaar liggen</string>
     <string name="birthday_error_leap">29 februari bestaat alleen in schrikkeljaren</string>
-    <string name="birthday_limit_reached">Deze feed heeft het maximum aantal verjaardagen bereikt</string>
+    <string name="birthday_limit_reached">Deze familie heeft het maximum aantal verjaardagen bereikt</string>
     <string name="birthday_saved">Opgeslagen</string>
-    <string name="birthday_added">%1$s toegevoegd: elke fotolijst van deze feed toont het</string>
+    <string name="birthday_added">%1$s toegevoegd: elke fotolijst van deze familie toont het</string>
     <string name="birthday_suggested">%1$s voorgesteld: wacht op een beheerder</string>
     <string name="birthday_duplicate">%1$s met deze verjaardag staat al op de lijst</string>
     <string name="birthday_duplicate_approve">%1$s staat al op de lijst: wijs dit voorstel af of pas het aan</string>
@@ -70,10 +70,10 @@
     <string name="feed_setting_posters_birthdays">Posters kunnen verjaardagen toevoegen</string>
     <string name="feed_setting_posters_birthdays_hint">Anders wachten hun toevoegingen als voorstel op een beheerder</string>
     <string name="frame_feeds_show_birthdays">Verjaardagen tonen</string>
-    <string name="frame_feeds_show_birthdays_hint">De verjaardagen van de feed op de fotolijst: een kaartje op de dag en aftellen vanaf een week ervoor</string>
+    <string name="frame_feeds_show_birthdays_hint">De verjaardagen van de familie op de fotolijst: een kaartje op de dag en aftellen vanaf een week ervoor</string>
     <plurals name="frame_feeds_birthday_count">
-        <item quantity="one">%d verjaardag uit deze feed</item>
-        <item quantity="other">%d verjaardagen uit deze feed</item>
+        <item quantity="one">%d verjaardag uit deze familie</item>
+        <item quantity="other">%d verjaardagen uit deze familie</item>
     </plurals>
     <string name="frame_feeds_birthdays_update_app">Werk de app op %1$s bij om verjaardagen te tonen</string>
     <string name="frame_feeds_birthdays_on">Verjaardagen uit %1$s worden getoond</string>

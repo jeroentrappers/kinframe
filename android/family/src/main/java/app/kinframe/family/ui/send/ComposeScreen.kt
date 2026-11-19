@@ -69,6 +69,8 @@ fun ComposeScreen(
     onAddFrame: () -> Unit,
     onRetryFrames: () -> Unit,
     onToggleFeed: (String) -> Unit = {},
+    /** Family social: "Share with" a circle per family, and "Answers this week's prompt". */
+    audience: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val frames = state.frames
@@ -138,6 +140,7 @@ fun ComposeScreen(
                                 }
                             }
                         }
+                        audience?.invoke()
                         val anyOffline = state.sendableFrames.any { it.id in state.selected && !it.online }
                         if (anyOffline) Note(stringResource(R.string.send_offline_note))
                         if (state.items.isNotEmpty() && !state.hasRecipients) {
