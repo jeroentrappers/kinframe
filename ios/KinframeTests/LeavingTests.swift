@@ -50,7 +50,7 @@ final class LeavingTests: XCTestCase {
         """)
         XCTAssertEqual(LeavingText.groupTitle(blocked), "Taken away by Tom")
         XCTAssertEqual(LeavingText.groupDetail(blocked, locale: en), "12 photos · until December 19")
-        XCTAssertEqual(LeavingText.cannotAsk(blocked), "Tom doesn’t accept requests.")
+        XCTAssertEqual(LeavingText.cannotAsk(blocked), "Tom doesn’t accept requests")
         let open = try decode(TakenAwayGroup.self, """
         {"taking_id":"t1","by_name":"Tom","taken_at":"2026-11-19T10:00:00Z","until":"2026-12-19T10:00:00Z","count":1,"can_ask":true}
         """)

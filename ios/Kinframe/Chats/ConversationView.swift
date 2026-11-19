@@ -46,7 +46,7 @@ struct ConversationView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 if let c = model?.conversation {
                     Button { showInfo = true } label: { ConversationAvatar(conversation: c, size: 32) }
-                        .accessibilityLabel(L("chat.info.title"))
+                        .accessibilityLabel(L("chat.details"))
                 }
             }
         }
@@ -210,7 +210,7 @@ struct ConversationView: View {
                                      matching: .any(of: [.images, .videos]), preferredItemEncoding: .current) {
                             Image(systemName: "photo.on.rectangle").font(.title3).frame(width: 40, height: 44)
                         }
-                        .accessibilityLabel(L("chat.attach"))
+                        .accessibilityLabel(L("chat.addPhotos"))
                     }
                     MentionField(placeholder: L("chat.placeholder"), text: $text, picks: $picks, candidates: candidates(c), me: me,
                                  maxLength: app.limits.maxMessageChars, focused: $focused)
@@ -226,7 +226,7 @@ struct ConversationView: View {
                         Button { Task { await startRecording(model) } } label: {
                             Image(systemName: "mic.fill").font(.title3).foregroundStyle(Palette.primary).frame(width: 44, height: 44)
                         }
-                        .accessibilityLabel(L("chat.voice.record"))
+                        .accessibilityLabel(L("chat.recordVoice"))
                     } else {
                         Button { Task { await send(model) } } label: {
                             Image(systemName: "arrow.up.circle.fill").font(.title).foregroundStyle(Palette.primary).frame(width: 44, height: 44)

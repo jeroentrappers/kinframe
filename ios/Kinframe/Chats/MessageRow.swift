@@ -80,7 +80,7 @@ struct MessageRow: View {
         }
         .padding(.top, continues ? 1 : 8)
         .confirmationDialog(L(own ? "chat.message.deleteConfirm" : "chat.message.removeConfirm"), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(L(own ? "chat.message.delete" : "chat.message.remove"), role: .destructive) {
+            Button(L(own ? "chat.message.delete" : "chat.removeMessage"), role: .destructive) {
                 Task { do { try await model.delete(message) } catch { app.toasts.error(error) } }
             }
             Button(L("common.cancel"), role: .cancel) {}
@@ -92,7 +92,7 @@ struct MessageRow: View {
 
     @ViewBuilder private var bubble: some View {
         if message.deleted {
-            Text(L(message.removedByAdmin == true ? "chat.message.removed" : "chat.message.deleted"))
+            Text(L(message.removedByAdmin == true ? "chat.messageRemoved" : "chat.messageDeleted"))
                 .font(.subheadline).italic().foregroundStyle(Palette.textFaint)
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(RoundedRectangle(cornerRadius: Radius.lg, style: .continuous).strokeBorder(Palette.border))
@@ -194,7 +194,7 @@ struct MessageRow: View {
             if !continues || isLastOwn {
                 Text(message.createdAt.formatted(date: .omitted, time: .shortened)).font(.caption2).foregroundStyle(Palette.textFaint)
             }
-            if message.editedAt != nil, !message.deleted { Text(L("social.comment.edited")).font(.caption2).foregroundStyle(Palette.textFaint) }
+            if message.editedAt != nil, !message.deleted { Text(L("social.edited")).font(.caption2).foregroundStyle(Palette.textFaint) }
             if isLastOwn, let seen = ReadReceipts.text(ReadReceipts.seenBy(message, in: model.conversation ?? conversation, me: me), kind: conversation.kind) {
                 Text(seen).font(.caption2.weight(.semibold)).foregroundStyle(Palette.accentText)
             }
@@ -219,11 +219,11 @@ struct MessageRow: View {
                 Button { actions.edit(message) } label: { Label(L("common.edit"), systemImage: "pencil") }
             }
             if !own {
-                Button { actions.report(message) } label: { Label(L("chat.report.action"), systemImage: "flag") }
+                Button { actions.report(message) } label: { Label(L("chat.report"), systemImage: "flag") }
             }
             if MessageLogic.canDelete(message, me: me, moderator: actions.moderator) {
                 Button(role: .destructive) { confirmDelete = true } label: {
-                    Label(L(own ? "chat.message.delete" : "chat.message.remove"), systemImage: "trash")
+                    Label(L(own ? "chat.message.delete" : "chat.removeMessage"), systemImage: "trash")
                 }
             }
         }
@@ -252,13 +252,13 @@ struct SharedPostCard: View {
                         }
                         .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
                     }
-                    Text(PersonName.display(card.poster) + " · " + (card.feedName ?? card.frameName.map { L("social.post.toFrame", ["frame": $0]) } ?? ""))
+                    Text(PersonName.display(card.poster) + " · " + (card.feedName ?? card.frameName.map { L("social.toFrame", ["frame": $0]) } ?? ""))
                         .font(.caption.weight(.semibold)).foregroundStyle(Palette.textMuted)
                     if let c = card.caption, !c.isEmpty { Text(c).font(.footnote).foregroundStyle(Palette.text).lineLimit(2) }
                 }
                 .frame(width: 240, alignment: .leading)
             } else {
-                Label(L("chat.post.unavailable"), systemImage: "eye.slash").font(.footnote).foregroundStyle(Palette.textMuted)
+                Label(L("chat.postUnavailable"), systemImage: "eye.slash").font(.footnote).foregroundStyle(Palette.textMuted)
             }
         }
         .buttonStyle(.plain)
@@ -280,7 +280,7 @@ struct RecapSheet: View {
                     Text(SummaryText.recap(recap)).foregroundStyle(Palette.textMuted)
                     if let loved = recap.mostLoved {
                         VStack(alignment: .leading, spacing: 6) {
-                            SectionHeader(L("engagement.recap.mostLoved"))
+                            SectionHeader(L("engagement.recapMostLoved"))
                             ItemThumb(item: loved.item).frame(height: 240).clipShape(RoundedRectangle(cornerRadius: Radius.md))
                         }
                     }
@@ -306,7 +306,7 @@ struct RecapSheet: View {
                 .padding(16)
             }
             .pageBackground()
-            .navigationTitle(L("engagement.recap.title"))
+            .navigationTitle(L("engagement.monthlyRecap"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button(L("common.done")) { dismiss() } } }
         }

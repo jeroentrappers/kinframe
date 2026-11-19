@@ -2755,6 +2755,91 @@
         }
       }
     },
+    "browserFrame.askAnswered": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} sent new photos 💛"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} stuurde nieuwe foto’s 💛"
+          }
+        }
+      }
+    },
+    "browserFrame.askOffline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your family will be asked as soon as the frame is back online 💛"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je familie wordt gevraagd zodra de fotolijst weer online is 💛"
+          }
+        }
+      }
+    },
+    "browserFrame.askPhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask for new photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vraag om nieuwe foto’s"
+          }
+        }
+      }
+    },
+    "browserFrame.askSent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your family has been asked for new photos 💛"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je familie is gevraagd om nieuwe foto’s 💛"
+          }
+        }
+      }
+    },
+    "browserFrame.askedToday": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked today 💛"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag gevraagd 💛"
+          }
+        }
+      }
+    },
     "browserFrame.codeIntro": {
       "extractionState": "manual",
       "localizations": {
@@ -2908,6 +2993,57 @@
         }
       }
     },
+    "browserFrame.newPhotosFromMore": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New photos from {name}, {other} and others"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe foto’s van {name}, {other} en anderen"
+          }
+        }
+      }
+    },
+    "browserFrame.newPhotosFromOne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New photos from {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe foto’s van {name}"
+          }
+        }
+      }
+    },
+    "browserFrame.newPhotosFromTwo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New photos from {name} and {other}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe foto’s van {name} en {other}"
+          }
+        }
+      }
+    },
     "browserFrame.offlineBody": {
       "extractionState": "manual",
       "localizations": {
@@ -2955,6 +3091,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "kinframe op dit scherm"
+          }
+        }
+      }
+    },
+    "browserFrame.promptThisWeek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This week"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze week"
+          }
+        }
+      }
+    },
+    "browserFrame.promptThisWeekIn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This week · {family}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze week · {family}"
           }
         }
       }
@@ -5957,13 +6127,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Archive"
+            "value": "Archive chat"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Archiveren"
+            "value": "Chat archiveren"
           }
         }
       }
@@ -5985,53 +6155,19 @@
         }
       }
     },
-    "chat.archivedEmpty": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No archived chats."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen gearchiveerde chats."
-          }
-        }
-      }
-    },
     "chat.archivedToast": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Archived. A new message brings it back."
+            "value": "Chat archived. A new message brings it back."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gearchiveerd. Een nieuw bericht haalt de chat terug."
-          }
-        }
-      }
-    },
-    "chat.attach": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add photos or videos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto’s of video’s toevoegen"
+            "value": "Chat gearchiveerd. Een nieuw bericht haalt hem terug."
           }
         }
       }
@@ -6155,23 +6291,6 @@
         }
       }
     },
-    "chat.blocked.empty": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You haven’t blocked anyone."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je hebt niemand geblokkeerd."
-          }
-        }
-      }
-    },
     "chat.blocked.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -6185,23 +6304,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geblokkeerde mensen kunnen je geen berichten sturen of aan groepen toevoegen; jij ziet niet wat ze schrijven."
-          }
-        }
-      }
-    },
-    "chat.blocked.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blocked people"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geblokkeerde mensen"
           }
         }
       }
@@ -6518,13 +6620,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Editing your message"
+            "value": "Editing message"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je bericht bewerken"
+            "value": "Bericht bewerken"
           }
         }
       }
@@ -6682,57 +6784,6 @@
         }
       }
     },
-    "chat.info.add": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toevoegen"
-          }
-        }
-      }
-    },
-    "chat.info.addPeople": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add people"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mensen toevoegen"
-          }
-        }
-      }
-    },
-    "chat.info.leave": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave group"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Groep verlaten"
-          }
-        }
-      }
-    },
     "chat.info.leaveConfirm": {
       "extractionState": "manual",
       "localizations": {
@@ -6746,23 +6797,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze groep verlaten?"
-          }
-        }
-      }
-    },
-    "chat.info.makeAdmin": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Make admin"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beheerder maken"
           }
         }
       }
@@ -6852,74 +6886,6 @@
         }
       }
     },
-    "chat.info.notifications": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Notifications"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meldingen"
-          }
-        }
-      }
-    },
-    "chat.info.openFamily": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open the family"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De familie openen"
-          }
-        }
-      }
-    },
-    "chat.info.photo": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Change photo"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto wijzigen"
-          }
-        }
-      }
-    },
-    "chat.info.profile": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "View profile"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profiel bekijken"
-          }
-        }
-      }
-    },
     "chat.info.remove": {
       "extractionState": "manual",
       "localizations": {
@@ -6933,40 +6899,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uit de groep verwijderen"
-          }
-        }
-      }
-    },
-    "chat.info.removePhoto": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove photo"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto verwijderen"
-          }
-        }
-      }
-    },
-    "chat.info.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chat details"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Over deze chat"
           }
         }
       }
@@ -7079,13 +7011,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Circle chat"
+            "value": "Circle"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kringchat"
+            "value": "Kring"
           }
         }
       }
@@ -7113,13 +7045,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Family chat"
+            "value": "Family"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Familiechat"
+            "value": "Familie"
           }
         }
       }
@@ -7205,23 +7137,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je familiechats verschijnen hier. Begin er een met iedereen met wie je een familie of kader deelt."
-          }
-        }
-      }
-    },
-    "chat.list.emptyTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No chats yet"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog geen chats"
           }
         }
       }
@@ -7396,40 +7311,6 @@
         }
       }
     },
-    "chat.message.deleted": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This message was deleted"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dit bericht is verwijderd"
-          }
-        }
-      }
-    },
-    "chat.message.remove": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove message"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht weghalen"
-          }
-        }
-      }
-    },
     "chat.message.removeConfirm": {
       "extractionState": "manual",
       "localizations": {
@@ -7443,23 +7324,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dit bericht voor iedereen weghalen?"
-          }
-        }
-      }
-    },
-    "chat.message.removed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This message was removed"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dit bericht is weggehaald"
           }
         }
       }
@@ -7583,23 +7447,6 @@
         }
       }
     },
-    "chat.mute.action": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mute"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dempen"
-          }
-        }
-      }
-    },
     "chat.mute.always": {
       "extractionState": "manual",
       "localizations": {
@@ -7613,74 +7460,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Altijd"
-          }
-        }
-      }
-    },
-    "chat.mute.eightHours": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For 8 hours"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "8 uur"
-          }
-        }
-      }
-    },
-    "chat.mute.hour": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For 1 hour"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 uur"
-          }
-        }
-      }
-    },
-    "chat.mute.off": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Not muted"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niet gedempt"
-          }
-        }
-      }
-    },
-    "chat.mute.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mute"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dempen"
           }
         }
       }
@@ -7872,57 +7651,6 @@
         }
       }
     },
-    "chat.new.createGroup": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Create group"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Groep maken"
-          }
-        }
-      }
-    },
-    "chat.new.groupName": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Group name"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Naam van de groep"
-          }
-        }
-      }
-    },
-    "chat.new.groupNamePlaceholder": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cousins weekend"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neven-en-nichtenweekend"
-          }
-        }
-      }
-    },
     "chat.new.groupNeedsName": {
       "extractionState": "manual",
       "localizations": {
@@ -7987,40 +7715,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nog niemand om mee te chatten: word eerst lid van een familie of deel een kader."
-          }
-        }
-      }
-    },
-    "chat.new.start": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start chat"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chat beginnen"
-          }
-        }
-      }
-    },
-    "chat.new.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New chat"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nieuwe chat"
           }
         }
       }
@@ -8320,13 +8014,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chats aren’t end-to-end encrypted: whoever runs {server} could read them."
+            "value": "Chats are private to the people in them, but not end-to-end encrypted: whoever runs {server} could read them."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chats zijn niet end-to-end versleuteld: wie {server} beheert, zou ze kunnen lezen."
+            "value": "Chats zijn privé voor de mensen die erin zitten, maar niet end-to-end versleuteld: wie {server} beheert, zou ze kunnen lezen."
           }
         }
       }
@@ -8399,23 +8093,6 @@
         }
       }
     },
-    "chat.person.block": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Block"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blokkeren"
-          }
-        }
-      }
-    },
     "chat.person.blockBody": {
       "extractionState": "manual",
       "localizations": {
@@ -8428,7 +8105,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je ziet hun reacties en berichten niet meer, en ze kunnen je geen berichten sturen of aan groepen toevoegen. Ze krijgen dat niet te horen. Gedeelde families blijven."
+            "value": "Je ziet hun opmerkingen, berichten en reacties niet meer, en ze kunnen je geen berichten sturen of aan groepen toevoegen. Ze krijgen dat niet te horen. Gedeelde families blijven."
           }
         }
       }
@@ -8463,23 +8140,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geblokkeerd"
-          }
-        }
-      }
-    },
-    "chat.person.blockedToast": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} is blocked"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} is geblokkeerd"
           }
         }
       }
@@ -8531,23 +8191,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bericht sturen"
-          }
-        }
-      }
-    },
-    "chat.person.unblock": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unblock"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deblokkeren"
           }
         }
       }
@@ -8637,23 +8280,6 @@
         }
       }
     },
-    "chat.post.unavailable": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This post isn’t available"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dit bericht is niet beschikbaar"
-          }
-        }
-      }
-    },
     "chat.postUnavailable": {
       "extractionState": "manual",
       "localizations": {
@@ -8718,23 +8344,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "📷 {count} foto’s"
-          }
-        }
-      }
-    },
-    "chat.preview.post": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shared a post"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deelde een bericht"
           }
         }
       }
@@ -9102,13 +8711,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This chat is read-only now."
+            "value": "This chat is read-only."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deze chat kan alleen nog gelezen worden."
+            "value": "In deze chat kun je alleen lezen."
           }
         }
       }
@@ -9453,23 +9062,6 @@
         }
       }
     },
-    "chat.report.action": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Melden"
-          }
-        }
-      }
-    },
     "chat.report.dismiss": {
       "extractionState": "manual",
       "localizations": {
@@ -9483,74 +9075,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Laten staan"
-          }
-        }
-      }
-    },
-    "chat.report.familyTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reports"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meldingen"
-          }
-        }
-      }
-    },
-    "chat.report.kind.comment": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comment"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactie"
-          }
-        }
-      }
-    },
-    "chat.report.kind.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Message"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht"
-          }
-        }
-      }
-    },
-    "chat.report.kind.post": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Post"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht"
           }
         }
       }
@@ -9606,23 +9130,6 @@
         }
       }
     },
-    "chat.report.open": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Openen"
-          }
-        }
-      }
-    },
     "chat.report.operatorTitle": {
       "extractionState": "manual",
       "localizations": {
@@ -9636,91 +9143,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldingen aan de beheerder"
-          }
-        }
-      }
-    },
-    "chat.report.reason": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What’s wrong?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wat is er mis?"
-          }
-        }
-      }
-    },
-    "chat.report.reason.inappropriate": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inappropriate"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ongepast"
-          }
-        }
-      }
-    },
-    "chat.report.reason.other": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something else"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iets anders"
-          }
-        }
-      }
-    },
-    "chat.report.reason.spam": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spam"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spam"
-          }
-        }
-      }
-    },
-    "chat.report.reason.unkind": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unkind or hurtful"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Onvriendelijk of kwetsend"
           }
         }
       }
@@ -9742,23 +9164,6 @@
         }
       }
     },
-    "chat.report.send": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Melden"
-          }
-        }
-      }
-    },
     "chat.report.sent": {
       "extractionState": "manual",
       "localizations": {
@@ -9776,23 +9181,6 @@
         }
       }
     },
-    "chat.report.status.dismissed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kept"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Behouden"
-          }
-        }
-      }
-    },
     "chat.report.status.open": {
       "extractionState": "manual",
       "localizations": {
@@ -9806,74 +9194,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open"
-          }
-        }
-      }
-    },
-    "chat.report.status.removed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Removed"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weggehaald"
-          }
-        }
-      }
-    },
-    "chat.report.title.comment": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report comment"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactie melden"
-          }
-        }
-      }
-    },
-    "chat.report.title.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report message"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht melden"
-          }
-        }
-      }
-    },
-    "chat.report.title.post": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report post"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht melden"
           }
         }
       }
@@ -9908,23 +9228,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "De beheerder van de server krijgt de melding. Niemand komt te weten wie meldde."
-          }
-        }
-      }
-    },
-    "chat.report.toastNew": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something was reported"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Er is iets gemeld"
           }
         }
       }
@@ -10275,13 +9578,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sending…"
+            "value": "Sending"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Versturen…"
+            "value": "Wordt verstuurd"
           }
         }
       }
@@ -10299,23 +9602,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voorbereiden en uploaden…"
-          }
-        }
-      }
-    },
-    "chat.settings.readReceipts": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Read receipts"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leesbevestigingen"
           }
         }
       }
@@ -10677,40 +9963,6 @@
         }
       }
     },
-    "chat.system.joined": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} joined"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} kwam erbij"
-          }
-        }
-      }
-    },
-    "chat.system.left": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} left"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} is vertrokken"
-          }
-        }
-      }
-    },
     "chat.system.prompt": {
       "extractionState": "manual",
       "localizations": {
@@ -10758,23 +10010,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "{name} zette {count} foto’s op {places}"
-          }
-        }
-      }
-    },
-    "chat.system.recap": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The family’s {month}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De familie in {month}"
           }
         }
       }
@@ -10915,23 +10150,6 @@
         }
       }
     },
-    "chat.typing.recordingOne": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} is recording…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} neemt op…"
-          }
-        }
-      }
-    },
     "chat.typing.two": {
       "extractionState": "manual",
       "localizations": {
@@ -10955,13 +10173,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Back to chats"
+            "value": "Move out of the archive"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Terug bij de chats"
+            "value": "Uit het archief halen"
           }
         }
       }
@@ -10972,13 +10190,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Back in your chats"
+            "value": "Chat moved out of the archive"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Terug bij je chats"
+            "value": "Chat uit het archief gehaald"
           }
         }
       }
@@ -11040,13 +10258,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 unread message"
+            "value": "{count} unread message"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 ongelezen bericht"
+            "value": "{count} ongelezen bericht"
           }
         }
       }
@@ -11221,23 +10439,6 @@
         }
       }
     },
-    "chat.voice.pause": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pause"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pauzeren"
-          }
-        }
-      }
-    },
     "chat.voice.play": {
       "extractionState": "manual",
       "localizations": {
@@ -11251,40 +10452,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afspelen"
-          }
-        }
-      }
-    },
-    "chat.voice.processing": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Processing…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verwerken…"
-          }
-        }
-      }
-    },
-    "chat.voice.record": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record a voice message"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spraakbericht opnemen"
           }
         }
       }
@@ -17392,23 +16559,6 @@
         }
       }
     },
-    "engagement.digest.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unread comments and messages by email, for when you don’t open the app."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ongelezen reacties en berichten per e-mail, voor als je de app niet opent."
-          }
-        }
-      }
-    },
     "engagement.digest.off": {
       "extractionState": "manual",
       "localizations": {
@@ -17579,23 +16729,6 @@
         }
       }
     },
-    "engagement.family.promptsHint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A small theme every Monday, like “Something you cooked”."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elke maandag een klein thema, zoals “Iets wat je kookte”."
-          }
-        }
-      }
-    },
     "engagement.family.quietAfter.one": {
       "extractionState": "manual",
       "localizations": {
@@ -17643,23 +16776,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dan krijgen een of twee mensen die eerder stuurden een vriendelijke herinnering."
-          }
-        }
-      }
-    },
-    "engagement.family.recap": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Monthly recap"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maandoverzicht"
           }
         }
       }
@@ -17745,23 +16861,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dat is geen tijdzone, zoals Europe/Brussels."
-          }
-        }
-      }
-    },
-    "engagement.family.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encouragement"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aanmoediging"
           }
         }
       }
@@ -17885,19 +16984,19 @@
         }
       }
     },
-    "engagement.fresh.askedBody": {
+    "engagement.fresh.cannotSend": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} would like new photos 💛"
+            "value": "You can’t send to {frame}: none of your families reaches it."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{frame} wil graag nieuwe foto’s 💛"
+            "value": "Je kunt niets naar {frame} sturen: geen van je families komt erop."
           }
         }
       }
@@ -17970,23 +17069,6 @@
         }
       }
     },
-    "engagement.fresh.fresh": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fresh"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vers"
-          }
-        }
-      }
-    },
     "engagement.fresh.last": {
       "extractionState": "manual",
       "localizations": {
@@ -18021,40 +17103,6 @@
         }
       }
     },
-    "engagement.fresh.never": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No photos yet"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog geen foto’s"
-          }
-        }
-      }
-    },
-    "engagement.fresh.pick": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto’s kiezen"
-          }
-        }
-      }
-    },
     "engagement.fresh.privacy": {
       "extractionState": "manual",
       "localizations": {
@@ -18072,19 +17120,19 @@
         }
       }
     },
-    "engagement.fresh.title": {
+    "engagement.fresh.viaFamilies": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Send something to {frame}"
+            "value": "You’re not on {frame}: your photos go to {families}, whose posts reach it."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iets sturen naar {frame}"
+            "value": "Je staat niet op {frame}: je foto’s gaan naar {families}, en hun berichten komen op het kader."
           }
         }
       }
@@ -18282,13 +17330,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your first photo shared"
+            "value": "You shared your first photo"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je eerste foto gedeeld"
+            "value": "Je deelde je eerste foto"
           }
         }
       }
@@ -18299,13 +17347,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your first video shared"
+            "value": "Your first video"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je eerste video gedeeld"
+            "value": "Je eerste video"
           }
         }
       }
@@ -18333,13 +17381,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "100 ❤️ from the frames"
+            "value": "100 hearts from the frames"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "100 ❤️ van de kaders"
+            "value": "100 hartjes van de kaders"
           }
         }
       }
@@ -18418,13 +17466,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "1000 photos shared"
+            "value": "1,000 photos shared"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "1000 foto’s gedeeld"
+            "value": "1.000 foto’s gedeeld"
           }
         }
       }
@@ -18442,23 +17490,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alleen jij ziet dit, tenzij je het op je profiel toont."
-          }
-        }
-      }
-    },
-    "engagement.milestone.show": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show on my profile"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Op mijn profiel tonen"
           }
         }
       }
@@ -18526,7 +17557,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Een jaar delen"
+            "value": "Een jaar lang gedeeld"
           }
         }
       }
@@ -18820,23 +17851,6 @@
         }
       }
     },
-    "engagement.otd.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On this day"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Op deze dag"
-          }
-        }
-      }
-    },
     "engagement.otd.yearsAgo.one": {
       "extractionState": "manual",
       "localizations": {
@@ -18918,23 +17932,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vorige weken"
-          }
-        }
-      }
-    },
-    "engagement.prompt.answer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Answer with a photo"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Antwoorden met een foto"
           }
         }
       }
@@ -19551,23 +18548,6 @@
         }
       }
     },
-    "engagement.recap.mostLoved": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Most loved"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meest geliefd"
-          }
-        }
-      }
-    },
     "engagement.recap.newMembers": {
       "extractionState": "manual",
       "localizations": {
@@ -19649,23 +18629,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "door {count} personen"
-          }
-        }
-      }
-    },
-    "engagement.recap.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Monthly recap"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maandoverzicht"
           }
         }
       }
@@ -20010,23 +18973,6 @@
         }
       }
     },
-    "engagement.reminders.birthdays": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Birthday reminders"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verjaardagsherinneringen"
-          }
-        }
-      }
-    },
     "engagement.reminders.birthdaysHint": {
       "extractionState": "manual",
       "localizations": {
@@ -20061,23 +19007,6 @@
         }
       }
     },
-    "engagement.reminders.frameRequests": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When a frame asks for photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Als een kader om foto’s vraagt"
-          }
-        }
-      }
-    },
     "engagement.reminders.frameRequestsHint": {
       "extractionState": "manual",
       "localizations": {
@@ -20091,176 +19020,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "“Oma wil graag nieuwe foto’s 💛”"
-          }
-        }
-      }
-    },
-    "engagement.reminders.level": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "How often"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hoe vaak"
-          }
-        }
-      }
-    },
-    "engagement.reminders.level.fewer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fewer"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Minder"
-          }
-        }
-      }
-    },
-    "engagement.reminders.level.normal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Normal"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Normaal"
-          }
-        }
-      }
-    },
-    "engagement.reminders.level.off": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uit"
-          }
-        }
-      }
-    },
-    "engagement.reminders.levelHint.fewer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "At most one a week, and no streak reminders."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hoogstens één per week, en geen herinneringen over de reeks."
-          }
-        }
-      }
-    },
-    "engagement.reminders.levelHint.normal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "At most two gentle reminders a week, for example when a frame gets quiet."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hoogstens twee vriendelijke herinneringen per week, bijvoorbeeld als een kader stil wordt."
-          }
-        }
-      }
-    },
-    "engagement.reminders.levelHint.off": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No reminders. Requests from frames follow their own switch."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen herinneringen. Vragen van kaders volgen hun eigen schakelaar."
-          }
-        }
-      }
-    },
-    "engagement.reminders.quiet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quiet hours"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rustige uren"
-          }
-        }
-      }
-    },
-    "engagement.reminders.quietFrom": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "From"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Van"
-          }
-        }
-      }
-    },
-    "engagement.reminders.quietHint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reminders wait until the morning."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Herinneringen wachten tot de ochtend."
           }
         }
       }
@@ -20380,23 +19139,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Op zondagavond, hoe je foto’s bekeken werden. Overgeslagen als er niets is."
-          }
-        }
-      }
-    },
-    "engagement.reminders.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reminders"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Herinneringen"
           }
         }
       }
@@ -20584,23 +19326,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sturen"
-          }
-        }
-      }
-    },
-    "engagement.request.toast": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} would like new photos 💛"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} wil graag nieuwe foto’s 💛"
           }
         }
       }
@@ -43011,23 +41736,6 @@
         }
       }
     },
-    "leaving.account.leave": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave my photos to the families"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mijn foto’s aan de families laten"
-          }
-        }
-      }
-    },
     "leaving.account.leaveHint": {
       "extractionState": "manual",
       "localizations": {
@@ -43041,40 +41749,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Elke foto die nog in een familie of op een kader staat, gaat naar de eigenaar van die familie of dat kader en blijft op jouw naam staan, met “(voormalig lid)”. Foto’s die alleen in je geschiedenis staan, worden verwijderd."
-          }
-        }
-      }
-    },
-    "leaving.account.photos": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je foto’s"
-          }
-        }
-      }
-    },
-    "leaving.account.take": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take my photos with me"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mijn foto’s meenemen"
           }
         }
       }
@@ -43096,6 +41770,193 @@
         }
       }
     },
+    "leaving.addPerson": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add someone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iemand toevoegen"
+          }
+        }
+      }
+    },
+    "leaving.allowAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow all"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles toestaan"
+          }
+        }
+      }
+    },
+    "leaving.allowNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decline"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weigeren"
+          }
+        }
+      }
+    },
+    "leaving.allowSome": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow some"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een deel toestaan"
+          }
+        }
+      }
+    },
+    "leaving.allowedOf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{n} of {total} allowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{n} van {total} toegestaan"
+          }
+        }
+      }
+    },
+    "leaving.alreadyTaken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos you took away earlier, still waiting in a trash: {n}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s die je eerder weghaalde en nog in een prullenbak liggen: {n}."
+          }
+        }
+      }
+    },
+    "leaving.answer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwoorden"
+          }
+        }
+      }
+    },
+    "leaving.answerBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed photos go back as before and stay yours: you can take them away again later. The rest are deleted on {date}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toegestane foto’s komen terug zoals voorheen en blijven van jou: je kunt ze later opnieuw weghalen. De rest wordt verwijderd op {date}."
+          }
+        }
+      }
+    },
+    "leaving.answerFinal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The answer is final."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het antwoord is definitief."
+          }
+        }
+      }
+    },
+    "leaving.answerTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep photos on {place}?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s houden op {place}?"
+          }
+        }
+      }
+    },
+    "leaving.answered": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your answer was sent to {name}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je antwoord is naar {name} gestuurd."
+          }
+        }
+      }
+    },
     "leaving.ask.body": {
       "extractionState": "manual",
       "localizations": {
@@ -43113,23 +41974,6 @@
         }
       }
     },
-    "leaving.ask.button": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ask {name} to keep them"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} vragen ze te laten staan"
-          }
-        }
-      }
-    },
     "leaving.ask.notePlaceholder": {
       "extractionState": "manual",
       "localizations": {
@@ -43143,23 +41987,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Een woordje (optioneel), bv. “Die met de kinderen, voor oma”"
-          }
-        }
-      }
-    },
-    "leaving.ask.pick": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pick photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto’s kiezen"
           }
         }
       }
@@ -43232,7 +42059,126 @@
         }
       }
     },
-    "leaving.ask.title": {
+    "leaving.askAll": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All of them ({n})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allemaal ({n})"
+          }
+        }
+      }
+    },
+    "leaving.askBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} gets one notification and decides. You can ask once."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} krijgt één melding en beslist. Je kunt het één keer vragen."
+          }
+        }
+      }
+    },
+    "leaving.askNote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A few words"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een paar woorden"
+          }
+        }
+      }
+    },
+    "leaving.askNotePlaceholder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The ones with the children, for Oma"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die met de kinderen, voor oma"
+          }
+        }
+      }
+    },
+    "leaving.askPick": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s kiezen"
+          }
+        }
+      }
+    },
+    "leaving.askSend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vragen"
+          }
+        }
+      }
+    },
+    "leaving.askTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask {name} to keep photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vragen om foto’s te houden"
+          }
+        }
+      }
+    },
+    "leaving.askToKeep": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43244,7 +42190,24 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{name} vragen ze te laten staan"
+            "value": "{name} vragen om ze te houden"
+          }
+        }
+      }
+    },
+    "leaving.asked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked {name}. You’ll hear when they answer."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd aan {name}. Je hoort het als er een antwoord is."
           }
         }
       }
@@ -43266,19 +42229,53 @@
         }
       }
     },
+    "leaving.cannotAsk.account_deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their account was deleted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het account is verwijderd"
+          }
+        }
+      }
+    },
+    "leaving.cannotAsk.already_asked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You already asked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt het al gevraagd"
+          }
+        }
+      }
+    },
     "leaving.cannotAsk.blocked": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "{name} doesn’t accept requests."
+            "value": "{name} doesn’t accept requests"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{name} aanvaardt geen verzoeken."
+            "value": "{name} neemt geen verzoeken aan"
           }
         }
       }
@@ -43289,35 +42286,35 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The 30 days are over."
+            "value": "The 30 days are over"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "De 30 dagen zijn voorbij."
+            "value": "De 30 dagen zijn voorbij"
           }
         }
       }
     },
-    "leaving.chat.noLongerContacts": {
+    "leaving.cannotAsk.not_allowed": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can no longer message {name}."
+            "value": "Only owners and admins can ask"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je kunt {name} geen berichten meer sturen."
+            "value": "Alleen eigenaars en beheerders kunnen het vragen"
           }
         }
       }
     },
-    "leaving.comments.delete": {
+    "leaving.commentsDelete": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43329,12 +42326,29 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ook verwijderen"
+            "value": "Verwijder ze ook"
           }
         }
       }
     },
-    "leaving.comments.keep": {
+    "leaving.commentsDeleteHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They show as “Comment deleted”."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er staat dan “Reactie verwijderd”."
+          }
+        }
+      }
+    },
+    "leaving.commentsKeep": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43346,41 +42360,109 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laten staan"
+            "value": "Laat ze staan"
           }
         }
       }
     },
-    "leaving.comments.title.one": {
+    "leaving.commentsLegend": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your comment (1)"
+            "value": "Your comments ({n})"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je reactie (1)"
+            "value": "Je reacties ({n})"
           }
         }
       }
     },
-    "leaving.comments.title.other": {
+    "leaving.deleteLeave": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your comments ({count})"
+            "value": "Leave my photos to the families"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je reacties ({count})"
+            "value": "Mijn foto’s achterlaten bij de families"
+          }
+        }
+      }
+    },
+    "leaving.deleteLeaveHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Each photo goes to the owner of the family or frame it is in, credited “{name} (former member)”. Photos only in your history are deleted."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elke foto gaat naar de eigenaar van de familie of het kader waar hij in staat, met de vermelding “{name} (voormalig lid)”. Foto’s die alleen in Verstuurd staan, worden verwijderd."
+          }
+        }
+      }
+    },
+    "leaving.deleteLegend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s"
+          }
+        }
+      }
+    },
+    "leaving.deleteTake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take my photos with me"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s meenemen"
+          }
+        }
+      }
+    },
+    "leaving.deleteTakeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They leave every frame and family. Frames keep them in their trash for 30 days, and their owners are told."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze verdwijnen van elk kader en uit elke familie. Kaders bewaren ze 30 dagen in hun prullenbak, en de eigenaars krijgen een bericht."
           }
         }
       }
@@ -43402,19 +42484,19 @@
         }
       }
     },
-    "leaving.former.header": {
+    "leaving.formerLede": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Families and frames you left"
+            "value": "Your photos are still there. You decide whether they stay."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Families en kaders die je verliet"
+            "value": "Je foto’s staan er nog. Jij beslist of ze blijven."
           }
         }
       }
@@ -43436,6 +42518,74 @@
         }
       }
     },
+    "leaving.formerStill": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{photos} still there"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{photos} staan er nog"
+          }
+        }
+      }
+    },
+    "leaving.formerTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families and frames you left"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families en kaders die je verliet"
+          }
+        }
+      }
+    },
+    "leaving.frameDirect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos sent straight to this frame: {n}. The same choice applies to them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s die je rechtstreeks naar dit kader stuurde: {n}. Voor die foto’s geldt dezelfde keuze."
+          }
+        }
+      }
+    },
+    "leaving.frameOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You own this frame. Hand it over first to leave it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent eigenaar van dit kader. Draag het eerst over om het te verlaten."
+          }
+        }
+      }
+    },
     "leaving.frames.leaveToo": {
       "extractionState": "manual",
       "localizations": {
@@ -43453,7 +42603,7 @@
         }
       }
     },
-    "leaving.frames.title": {
+    "leaving.framesLegend": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43521,40 +42671,6 @@
         }
       }
     },
-    "leaving.group.header": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Taken away"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weggehaald"
-          }
-        }
-      }
-    },
-    "leaving.group.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Taken away by {name}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weggehaald door {name}"
-          }
-        }
-      }
-    },
     "leaving.group.until": {
       "extractionState": "manual",
       "localizations": {
@@ -43572,7 +42688,126 @@
         }
       }
     },
-    "leaving.laterHint": {
+    "leaving.hiddenCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memories you chose not to see again: {n}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herinneringen die je niet meer wilt zien: {n}"
+          }
+        }
+      }
+    },
+    "leaving.hiddenNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You haven’t hidden any memories."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt geen herinneringen verborgen."
+          }
+        }
+      }
+    },
+    "leaving.hiddenTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hidden memories"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verborgen herinneringen"
+          }
+        }
+      }
+    },
+    "leaving.hideMemory": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t show this memory again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze herinnering niet meer tonen"
+          }
+        }
+      }
+    },
+    "leaving.hidePhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s verbergen"
+          }
+        }
+      }
+    },
+    "leaving.include": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weer tonen"
+          }
+        }
+      }
+    },
+    "leaving.included": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is back in your memories."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} staat weer in je herinneringen."
+          }
+        }
+      }
+    },
+    "leaving.laterLine": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43584,7 +42819,24 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je kunt al je foto’s later nog altijd weghalen via je geschiedenis."
+            "value": "Je kunt al je foto’s later nog altijd verwijderen via Verstuurd."
+          }
+        }
+      }
+    },
+    "leaving.leave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlaten"
           }
         }
       }
@@ -43606,7 +42858,58 @@
         }
       }
     },
-    "leaving.leaveFeedTitle": {
+    "leaving.leaveFrameToo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave {frame} too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook {frame} verlaten"
+          }
+        }
+      }
+    },
+    "leaving.leaveOutHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their posts no longer show up in your On this day, the monthly recap, suggestions and the weekly summary."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hun berichten verschijnen niet meer in je Op deze dag, de maandelijkse terugblik, suggesties en het wekelijkse overzicht."
+          }
+        }
+      }
+    },
+    "leaving.leaveOutTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave people out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mensen weglaten"
+          }
+        }
+      }
+    },
+    "leaving.leaveTitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43619,6 +42922,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "{name} verlaten?"
+          }
+        }
+      }
+    },
+    "leaving.leftOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Left {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlaten {when}"
+          }
+        }
+      }
+    },
+    "leaving.leftOut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is left out of your memories."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} wordt weggelaten uit je herinneringen."
           }
         }
       }
@@ -43674,23 +43011,6 @@
         }
       }
     },
-    "leaving.memories.hidden": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hidden memories"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verborgen herinneringen"
-          }
-        }
-      }
-    },
     "leaving.memories.hiddenCount.one": {
       "extractionState": "manual",
       "localizations": {
@@ -43738,40 +43058,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Herinneringen die je niet meer wilt zien, via “Deze herinnering niet meer tonen”."
-          }
-        }
-      }
-    },
-    "leaving.memories.hiddenToast": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You won’t see this memory again."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je ziet deze herinnering niet meer."
-          }
-        }
-      }
-    },
-    "leaving.memories.hideThis": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don’t show this memory again"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deze herinnering niet meer tonen"
           }
         }
       }
@@ -43827,23 +43113,6 @@
         }
       }
     },
-    "leaving.memories.people": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave people out"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mensen weglaten"
-          }
-        }
-      }
-    },
     "leaving.memories.peopleHint": {
       "extractionState": "manual",
       "localizations": {
@@ -43861,41 +43130,41 @@
         }
       }
     },
-    "leaving.memories.showAgain": {
+    "leaving.memoriesHint": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show again"
+            "value": "Leave people out of On this day, recaps and suggestions."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Weer tonen"
+            "value": "Laat mensen weg uit Op deze dag, terugblikken en suggesties."
           }
         }
       }
     },
-    "leaving.memories.showAll": {
+    "leaving.memoriesLede": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Show them all again"
+            "value": "Only you see this: nobody is told, and frames still show what the family sent."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alles weer tonen"
+            "value": "Alleen jij ziet dit: niemand krijgt een bericht, en kaders tonen nog altijd wat de familie stuurde."
           }
         }
       }
     },
-    "leaving.memories.title": {
+    "leaving.memoriesTitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -43912,70 +43181,444 @@
         }
       }
     },
-    "leaving.photos.choice": {
+    "leaving.memoryHidden": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your photos"
+            "value": "You won’t see this memory again."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je foto’s"
+            "value": "Je ziet deze herinnering niet meer."
           }
         }
       }
     },
-    "leaving.photos.keep": {
+    "leaving.noLongerContacts": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Leave them with the family"
+            "value": "You can no longer message {name}."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bij de familie laten"
+            "value": "Je kunt {name} geen berichten meer sturen."
           }
         }
       }
     },
-    "leaving.photos.keepHint": {
+    "leaving.noPhotos": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "They stay in the family and on its frames, still credited to you."
+            "value": "You have no photos here."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ze blijven in de familie en op haar kaders, nog altijd op jouw naam."
+            "value": "Je hebt hier geen foto’s."
           }
         }
       }
     },
-    "leaving.photos.take": {
+    "leaving.noneLeftOut": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Take them with me"
+            "value": "Nobody is left out."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Meenemen"
+            "value": "Er wordt niemand weggelaten."
+          }
+        }
+      }
+    },
+    "leaving.opDone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} now owns {scope}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} is nu eigenaar van {scope}."
+          }
+        }
+      }
+    },
+    "leaving.opFeeds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families"
+          }
+        }
+      }
+    },
+    "leaving.opFrames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders"
+          }
+        }
+      }
+    },
+    "leaving.opLede": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move a frame or family to another member, for example when people disagree about who owns it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef een kader of familie aan een ander lid, bijvoorbeeld als mensen het oneens zijn over wie de eigenaar is."
+          }
+        }
+      }
+    },
+    "leaving.opLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ownership transfers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenaarschap overdragen"
+          }
+        }
+      }
+    },
+    "leaving.opLinkHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move frames and families to another member."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef kaders en families aan een ander lid."
+          }
+        }
+      }
+    },
+    "leaving.opLog": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Logboek"
+          }
+        }
+      }
+    },
+    "leaving.opLogBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "by {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "door {name}"
+          }
+        }
+      }
+    },
+    "leaving.opLogEmpty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No transfers yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen overdrachten."
+          }
+        }
+      }
+    },
+    "leaving.opLogHandover": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{from} left photos to the families: {n}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{from} liet foto’s achter bij de families: {n}"
+          }
+        }
+      }
+    },
+    "leaving.opLogTransfer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{scope}: {from} → {to}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{scope}: {from} → {to}"
+          }
+        }
+      }
+    },
+    "leaving.opNewOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe eigenaar"
+          }
+        }
+      }
+    },
+    "leaving.opNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing found."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets gevonden."
+          }
+        }
+      }
+    },
+    "leaving.opOwner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenaar"
+          }
+        }
+      }
+    },
+    "leaving.opReason": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reason (kept in the log, not shown to the people)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reden (bewaard in het logboek, niet zichtbaar voor de betrokkenen)"
+          }
+        }
+      }
+    },
+    "leaving.opRemovePrevious": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove {name} instead of making them admin"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} verwijderen in plaats van beheerder maken"
+          }
+        }
+      }
+    },
+    "leaving.opSearch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frame, family, email or name"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kader, familie, e-mail of naam"
+          }
+        }
+      }
+    },
+    "leaving.opSearchButton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoeken"
+          }
+        }
+      }
+    },
+    "leaving.opTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ownership"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenaarschap"
+          }
+        }
+      }
+    },
+    "leaving.opTransfer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer ownership"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigenaarschap overdragen"
+          }
+        }
+      }
+    },
+    "leaving.opTransferTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transfer {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} overdragen"
+          }
+        }
+      }
+    },
+    "leaving.ownerFirst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You own {name}. Hand it over to another member before you leave."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent eigenaar van {name}. Draag het over aan een ander lid voor je vertrekt."
           }
         }
       }
@@ -44027,6 +43670,176 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je foto’s ({count})"
+          }
+        }
+      }
+    },
+    "leaving.photosKeep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave them with the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laat ze bij de familie"
+          }
+        }
+      }
+    },
+    "leaving.photosKeepFrame": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave them on the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laat ze op het kader"
+          }
+        }
+      }
+    },
+    "leaving.photosKeepFrameHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They stay on {name}, still credited to you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze blijven op {name}, nog altijd op jouw naam."
+          }
+        }
+      }
+    },
+    "leaving.photosKeepHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They stay in the family and on its frames, still credited to you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze blijven in de familie en op haar kaders, nog altijd op jouw naam."
+          }
+        }
+      }
+    },
+    "leaving.photosLegend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your photos ({n})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s ({n})"
+          }
+        }
+      }
+    },
+    "leaving.photosTake": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take them with me"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neem ze mee"
+          }
+        }
+      }
+    },
+    "leaving.photosTakeFrameHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They leave the frame. It keeps them in its trash for 30 days, and its owner is told."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze verdwijnen van het kader. Het bewaart ze 30 dagen in de prullenbak, en de eigenaar krijgt een bericht."
+          }
+        }
+      }
+    },
+    "leaving.photosTakeHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "They leave the family and its frames. The frames keep them in their trash for 30 days, and their owners are told."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ze verdwijnen uit de familie en van haar kaders. De kaders bewaren ze 30 dagen in hun prullenbak, en de eigenaars krijgen een bericht."
+          }
+        }
+      }
+    },
+    "leaving.pickCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{n} of {total} chosen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{n} van {total} gekozen"
+          }
+        }
+      }
+    },
+    "leaving.pickPerson": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a person"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies een persoon"
           }
         }
       }
@@ -44116,6 +43929,74 @@
         }
       }
     },
+    "leaving.requestAnswerBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Answer by {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwoord vóór {date}"
+          }
+        }
+      }
+    },
+    "leaving.requestLine": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} asks to keep {photos} on {place}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} vraagt om {photos} te houden op {place}."
+          }
+        }
+      }
+    },
+    "leaving.requestStatus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your request: {status}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je verzoek: {status}"
+          }
+        }
+      }
+    },
+    "leaving.requestsTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked to keep your photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd om je foto’s te houden"
+          }
+        }
+      }
+    },
     "leaving.result.comments.one": {
       "extractionState": "manual",
       "localizations": {
@@ -44128,7 +44009,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "1 reactie werd verwijderd."
+            "value": "1 opmerking werd verwijderd."
           }
         }
       }
@@ -44145,7 +44026,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "{count} reacties werden verwijderd."
+            "value": "{count} opmerkingen werden verwijderd."
           }
         }
       }
@@ -44235,6 +44116,244 @@
         }
       }
     },
+    "leaving.resultComments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comments deleted: {n}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reacties verwijderd: {n}."
+          }
+        }
+      }
+    },
+    "leaving.resultFrames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You also left {frames}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt ook {frames} verlaten."
+          }
+        }
+      }
+    },
+    "leaving.resultLeft": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You left {name}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt {name} verlaten."
+          }
+        }
+      }
+    },
+    "leaving.resultNothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There was nothing left to take away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er was niets meer om weg te halen."
+          }
+        }
+      }
+    },
+    "leaving.resultRemote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames on other servers told to remove them: {n}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders op andere servers gevraagd ze te verwijderen: {n}."
+          }
+        }
+      }
+    },
+    "leaving.resultTaken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{photos} taken away. Frames keep them in their trash until {date}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{photos} weggehaald. Kaders bewaren ze in hun prullenbak tot {date}."
+          }
+        }
+      }
+    },
+    "leaving.sendAnswer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send answer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwoord sturen"
+          }
+        }
+      }
+    },
+    "leaving.showAllAgain": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show them all again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles weer tonen"
+          }
+        }
+      }
+    },
+    "leaving.showPhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s tonen"
+          }
+        }
+      }
+    },
+    "leaving.status.allowed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toegestaan"
+          }
+        }
+      }
+    },
+    "leaving.status.declined": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declined"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geweigerd"
+          }
+        }
+      }
+    },
+    "leaving.status.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expired"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlopen"
+          }
+        }
+      }
+    },
+    "leaving.status.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for an answer"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wacht op antwoord"
+          }
+        }
+      }
+    },
+    "leaving.status.partly_allowed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partly allowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deels toegestaan"
+          }
+        }
+      }
+    },
     "leaving.takeAway.bodyFeed.one": {
       "extractionState": "manual",
       "localizations": {
@@ -44303,23 +44422,6 @@
         }
       }
     },
-    "leaving.takeAway.button": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Take my photos away from {name}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mijn foto’s weghalen uit {name}"
-          }
-        }
-      }
-    },
     "leaving.takeAway.deleteComments": {
       "extractionState": "manual",
       "localizations": {
@@ -44332,24 +44434,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mijn reacties daar ook verwijderen"
-          }
-        }
-      }
-    },
-    "leaving.takeAway.nothing": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "There was nothing left to take away."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Er was niets meer om weg te halen."
+            "value": "Mijn opmerkingen daar ook verwijderen"
           }
         }
       }
@@ -44388,19 +44473,138 @@
         }
       }
     },
-    "leaving.toMe.allowAll": {
+    "leaving.takeAwayBody": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allow all"
+            "value": "Your photos leave {name}. Frames keep them in their trash for 30 days and their owners are told; they can ask you to let some stay."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alles toelaten"
+            "value": "Je foto’s verdwijnen uit {name}. Kaders bewaren ze 30 dagen in hun prullenbak en de eigenaars krijgen een bericht; zij kunnen je vragen om er een paar te laten staan."
+          }
+        }
+      }
+    },
+    "leaving.takeAwayButton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take them away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weghalen"
+          }
+        }
+      }
+    },
+    "leaving.takeAwayFrom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take my photos away from {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn foto’s weghalen bij {name}"
+          }
+        }
+      }
+    },
+    "leaving.takeAwayTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take your photos away from {name}?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je foto’s weghalen bij {name}?"
+          }
+        }
+      }
+    },
+    "leaving.takenAwayBy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken away by {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weggehaald door {name}"
+          }
+        }
+      }
+    },
+    "leaving.takenAwayTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weggehaald"
+          }
+        }
+      }
+    },
+    "leaving.takenOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taken away {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weggehaald {when}"
+          }
+        }
+      }
+    },
+    "leaving.takenUntil": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the trash until {date}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In de prullenbak tot {date}"
           }
         }
       }
@@ -44422,23 +44626,6 @@
         }
       }
     },
-    "leaving.toMe.allowSome": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Allow some"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Een paar toelaten"
-          }
-        }
-      }
-    },
     "leaving.toMe.allowed": {
       "extractionState": "manual",
       "localizations": {
@@ -44452,23 +44639,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klaar. De foto’s staan er weer."
-          }
-        }
-      }
-    },
-    "leaving.toMe.decline": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Decline"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weigeren"
           }
         }
       }
@@ -44571,23 +44741,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "{name} vraagt om {count} foto’s op {place} te laten staan."
-          }
-        }
-      }
-    },
-    "leaving.toMe.header": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Asked to keep your photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gevraagd om je foto’s te laten staan"
           }
         }
       }
@@ -49443,13 +49596,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This voice message is too long."
+            "value": "That voice message is too long."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dit spraakbericht is te lang."
+            "value": "Dat spraakbericht is te lang."
           }
         }
       }
@@ -49460,13 +49613,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can’t send messages to this person."
+            "value": "You can’t send this person a message."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je kunt deze persoon geen berichten sturen."
+            "value": "Je kunt deze persoon geen bericht sturen."
           }
         }
       }
@@ -49534,7 +49687,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reageren is uitgezet voor dit bericht."
+            "value": "Opmerkingen staan uit voor dit bericht."
           }
         }
       }
@@ -50368,6 +50521,1264 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wauw"
+          }
+        }
+      }
+    },
+    "remote.add": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a family from another server"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Familie van een andere server toevoegen"
+          }
+        }
+      }
+    },
+    "remote.addBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste the invite link the family’s admin sent you."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plak de uitnodigingslink die de beheerder van de familie je stuurde."
+          }
+        }
+      }
+    },
+    "remote.addServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a server"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server toevoegen"
+          }
+        }
+      }
+    },
+    "remote.allowFrames": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow frames on other servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders op andere servers toestaan"
+          }
+        }
+      }
+    },
+    "remote.allowFramesHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames on other kinframe servers may follow this family with a frame invite that allows it. Turning this off ends them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders op andere kinframe-servers mogen deze familie volgen met een uitnodiging voor kaders die dat toestaat. Zet je dit uit, dan stopt dat."
+          }
+        }
+      }
+    },
+    "remote.already": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This frame already follows that family."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit kader volgt die familie al."
+          }
+        }
+      }
+    },
+    "remote.block": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blokkeren"
+          }
+        }
+      }
+    },
+    "remote.blockBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Its frames stop following this family, and new requests from it are refused."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De kaders van die server volgen deze familie niet meer, en nieuwe verzoeken van die server worden geweigerd."
+          }
+        }
+      }
+    },
+    "remote.blockHost": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveradres"
+          }
+        }
+      }
+    },
+    "remote.blockReason": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reason"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reden"
+          }
+        }
+      }
+    },
+    "remote.blockServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Block {server}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{server} blokkeren"
+          }
+        }
+      }
+    },
+    "remote.blocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geblokkeerd"
+          }
+        }
+      }
+    },
+    "remote.blockedNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No servers are blocked."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er zijn geen servers geblokkeerd."
+          }
+        }
+      }
+    },
+    "remote.blockedTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geblokkeerde servers"
+          }
+        }
+      }
+    },
+    "remote.blockedToast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{host} is blocked."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{host} is geblokkeerd."
+          }
+        }
+      }
+    },
+    "remote.ended": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestopt"
+          }
+        }
+      }
+    },
+    "remote.feedBlockedHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames on these servers can’t follow this family."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders op deze servers kunnen deze familie niet volgen."
+          }
+        }
+      }
+    },
+    "remote.feedBlockedTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geblokkeerde servers"
+          }
+        }
+      }
+    },
+    "remote.follow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show on {frame}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tonen op {frame}"
+          }
+        }
+      }
+    },
+    "remote.followed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{feed} will show on {frame}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{feed} wordt getoond op {frame}."
+          }
+        }
+      }
+    },
+    "remote.followsTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families on other servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Families op andere servers"
+          }
+        }
+      }
+    },
+    "remote.frameOnServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} ({server})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{frame} ({server})"
+          }
+        }
+      }
+    },
+    "remote.inviteAllow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames on other servers may use this link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders op andere servers mogen deze link gebruiken"
+          }
+        }
+      }
+    },
+    "remote.inviteAllowHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Their server gets copies of the family’s photos."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hun server krijgt kopieën van de foto’s van de familie."
+          }
+        }
+      }
+    },
+    "remote.inviteAllowsRemote": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other servers too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook andere servers"
+          }
+        }
+      }
+    },
+    "remote.inviteLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invite link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitnodigingslink"
+          }
+        }
+      }
+    },
+    "remote.lastContact": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last contact {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste contact {when}"
+          }
+        }
+      }
+    },
+    "remote.lastSync": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated {when}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijgewerkt {when}"
+          }
+        }
+      }
+    },
+    "remote.linkInvalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That isn’t an invite link for frames."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dat is geen uitnodigingslink voor kaders."
+          }
+        }
+      }
+    },
+    "remote.needsApproval": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The family’s admins approve the request first."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De beheerders van de familie keuren het verzoek eerst goed."
+          }
+        }
+      }
+    },
+    "remote.never": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Never reached"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nooit bereikt"
+          }
+        }
+      }
+    },
+    "remote.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This server doesn’t follow families on other servers."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze server volgt geen families op andere servers."
+          }
+        }
+      }
+    },
+    "remote.onEnd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If it ends"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als het stopt"
+          }
+        }
+      }
+    },
+    "remote.onEnd.keep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep the photos already on the frame"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s die al op het kader staan houden"
+          }
+        }
+      }
+    },
+    "remote.onEnd.remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the copied photos"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekopieerde foto’s verwijderen"
+          }
+        }
+      }
+    },
+    "remote.onServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On {server}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op {server}"
+          }
+        }
+      }
+    },
+    "remote.opBlockBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every subscription with {host} ends on both sides, and it can no longer reach this server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elk abonnement met {host} stopt aan beide kanten, en die server kan deze server niet meer bereiken."
+          }
+        }
+      }
+    },
+    "remote.opFollows": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames here following families there: {n}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders hier die families daar volgen: {n}"
+          }
+        }
+      }
+    },
+    "remote.opKnown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Known servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekende servers"
+          }
+        }
+      }
+    },
+    "remote.opKnownNone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No other servers yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen andere servers."
+          }
+        }
+      }
+    },
+    "remote.opLede": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kinframe servers with frames that follow families here, or with families that frames here follow."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kinframe-servers met kaders die families hier volgen, of met families die kaders hier volgen."
+          }
+        }
+      }
+    },
+    "remote.opLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere servers"
+          }
+        }
+      }
+    },
+    "remote.opLinkHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Known servers and blocked servers."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekende en geblokkeerde servers."
+          }
+        }
+      }
+    },
+    "remote.opSubscribers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frames there following families here: {n}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaders daar die families hier volgen: {n}"
+          }
+        }
+      }
+    },
+    "remote.opTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Andere servers"
+          }
+        }
+      }
+    },
+    "remote.open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Openen"
+          }
+        }
+      }
+    },
+    "remote.otherServersBody": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This website only shows {server}. Open another server’s own website to see its families."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze website toont alleen {server}. Open de website van een andere server om de families daar te zien."
+          }
+        }
+      }
+    },
+    "remote.otherServersHint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You also use kinframe on other servers? The apps show them all together."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebruik je kinframe ook op andere servers? De apps tonen ze allemaal samen."
+          }
+        }
+      }
+    },
+    "remote.otherServersTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your other servers"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je andere servers"
+          }
+        }
+      }
+    },
+    "remote.previewCopy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photos from this family will be copied to this server ({server}) and shown on {frame}."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto’s van deze familie worden gekopieerd naar deze server ({server}) en getoond op {frame}."
+          }
+        }
+      }
+    },
+    "remote.previewOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{feed} (on {host})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{feed} (op {host})"
+          }
+        }
+      }
+    },
+    "remote.previewOperator": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whoever runs {server} can see the copies, like any photo on this server."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie {server} beheert, kan de kopieën zien, net als elke andere foto op deze server."
+          }
+        }
+      }
+    },
+    "remote.reason.feed_deleted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The family was deleted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De familie is verwijderd"
+          }
+        }
+      }
+    },
+    "remote.reason.rejected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declined"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geweigerd"
+          }
+        }
+      }
+    },
+    "remote.reason.removed_by_feed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Removed by the family"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijderd door de familie"
+          }
+        }
+      }
+    },
+    "remote.reason.server_blocked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server was blocked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De server is geblokkeerd"
+          }
+        }
+      }
+    },
+    "remote.reason.unsubscribed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unfollowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet meer gevolgd"
+          }
+        }
+      }
+    },
+    "remote.reason.withdrawn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request withdrawn"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verzoek ingetrokken"
+          }
+        }
+      }
+    },
+    "remote.refused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The other server refused: the family may not allow frames on other servers, or the servers don’t accept each other."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De andere server weigerde: misschien staat de familie geen kaders op andere servers toe, of accepteren de servers elkaar niet."
+          }
+        }
+      }
+    },
+    "remote.removeServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove {name}"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} verwijderen"
+          }
+        }
+      }
+    },
+    "remote.requested": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asked {feed} to show on {frame}. You’ll hear when they decide."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevraagd of {feed} op {frame} mag verschijnen. Je hoort het als ze beslist hebben."
+          }
+        }
+      }
+    },
+    "remote.serverAddress": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serveradres"
+          }
+        }
+      }
+    },
+    "remote.serverInvalid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a server address, like kinframe.example.org."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vul een serveradres in, zoals kinframe.example.org."
+          }
+        }
+      }
+    },
+    "remote.status.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actief"
+          }
+        }
+      }
+    },
+    "remote.status.error": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t reach the server"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server niet bereikbaar"
+          }
+        }
+      }
+    },
+    "remote.status.pending": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for approval"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wacht op goedkeuring"
+          }
+        }
+      }
+    },
+    "remote.status.rejected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declined"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geweigerd"
+          }
+        }
+      }
+    },
+    "remote.status.removed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestopt"
+          }
+        }
+      }
+    },
+    "remote.thisServer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This server"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze server"
+          }
+        }
+      }
+    },
+    "remote.unblock": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unblock"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deblokkeren"
+          }
+        }
+      }
+    },
+    "remote.unblockedToast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{host} is unblocked."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{host} is gedeblokkeerd."
+          }
+        }
+      }
+    },
+    "remote.unreachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The other server can’t be reached right now. Try again later."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De andere server is nu niet bereikbaar. Probeer het later opnieuw."
+          }
+        }
+      }
+    },
+    "remote.unsubscribeTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stop showing {feed}?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{feed} niet meer tonen?"
+          }
+        }
+      }
+    },
+    "remote.wantsToShow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} wants to show {feed} on {frame} ({server})"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "{name} wil {feed} tonen op {frame} ({server})"
           }
         }
       }
@@ -52820,53 +54231,70 @@
         }
       }
     },
-    "servers.remote.add": {
+    "servers.choose.code": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Add a family from another server"
+            "value": "A code belongs to the server the frame or family is on. Pick that server."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Een familie van een andere server toevoegen"
+            "value": "Een code hoort bij de server waar het fotokader of de familie op staat. Kies die server."
           }
         }
       }
     },
-    "servers.remote.allow": {
+    "servers.choose.family": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allow frames on other servers"
+            "value": "The family lives on this server: its members sign in there."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kaders op andere servers toestaan"
+            "value": "De familie staat op deze server: haar leden melden zich daar aan."
           }
         }
       }
     },
-    "servers.remote.allowHint": {
+    "servers.choose.hint": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frames on other kinframe servers may follow this family through subscribe links that allow it. Their server gets copies of whole-family posts, never circles, chats or members."
+            "value": "Continue on {server}"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kaders op andere kinframe-servers mogen deze familie volgen via abonneerlinks die dat toestaan. Hun server krijgt kopieën van berichten aan de hele familie, nooit kringen, chats of leden."
+            "value": "Verder op {server}"
+          }
+        }
+      }
+    },
+    "servers.choose.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which server?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welke server?"
           }
         }
       }
@@ -52990,74 +54418,6 @@
         }
       }
     },
-    "servers.remote.blocked.do": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Block"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blokkeren"
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.done": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{host} is blocked for this family."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{host} is geblokkeerd voor deze familie."
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frames on a blocked server can’t follow this family; the ones that did stop."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaders op een geblokkeerde server kunnen deze familie niet volgen; wie dat deed, stopt."
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.host": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Server address"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Serveradres"
-          }
-        }
-      }
-    },
     "servers.remote.blocked.hostPlaceholder": {
       "extractionState": "manual",
       "localizations": {
@@ -53075,108 +54435,6 @@
         }
       }
     },
-    "servers.remote.blocked.invalid": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter a server address like kinframe.example.org."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vul een serveradres in, zoals kinframe.example.org."
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.none": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No servers are blocked."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen servers geblokkeerd."
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.reason": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reason (only admins see it)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reden (alleen beheerders zien die)"
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Blocked servers"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geblokkeerde servers"
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.unblock": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unblock"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deblokkeren"
-          }
-        }
-      }
-    },
-    "servers.remote.blocked.unblocked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{host} is no longer blocked."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{host} is niet meer geblokkeerd."
-          }
-        }
-      }
-    },
     "servers.remote.check": {
       "extractionState": "manual",
       "localizations": {
@@ -53190,23 +54448,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Link controleren"
-          }
-        }
-      }
-    },
-    "servers.remote.confirmBody": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photos from this family will be copied to this server ({server}) and shown on {frame}."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto’s van deze familie worden naar deze server ({server}) gekopieerd en getoond op {frame}."
           }
         }
       }
@@ -53330,23 +54571,6 @@
         }
       }
     },
-    "servers.remote.followed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} now follows {feed}."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} volgt nu {feed}."
-          }
-        }
-      }
-    },
     "servers.remote.frameCount.one": {
       "extractionState": "manual",
       "localizations": {
@@ -53381,23 +54605,6 @@
         }
       }
     },
-    "servers.remote.frameOnServer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} ({server})"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{frame} ({server})"
-          }
-        }
-      }
-    },
     "servers.remote.instant": {
       "extractionState": "manual",
       "localizations": {
@@ -53411,108 +54618,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "De link is al goedgekeurd: de foto’s komen meteen binnen."
-          }
-        }
-      }
-    },
-    "servers.remote.invalidUrl": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "That isn’t a kinframe subscribe link. It looks like https://server/fi/…"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dat is geen kinframe-abonneerlink. Die ziet eruit als https://server/fi/…"
-          }
-        }
-      }
-    },
-    "servers.remote.inviteAllow": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frames on other servers may use this link"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaders op andere servers mogen deze link gebruiken"
-          }
-        }
-      }
-    },
-    "servers.remote.inviteAllowHint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off by default. Their server gets copies of the family’s posts."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Standaard uit. Hun server krijgt kopieën van de berichten van de familie."
-          }
-        }
-      }
-    },
-    "servers.remote.lastSync": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Synced {when}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesynchroniseerd {when}"
-          }
-        }
-      }
-    },
-    "servers.remote.lede": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paste the subscribe link an admin of a family on another kinframe server gave you."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plak de abonneerlink die een beheerder van een familie op een andere kinframe-server je gaf."
-          }
-        }
-      }
-    },
-    "servers.remote.needsApproval": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The family’s admins approve it first."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De beheerders van de familie keuren het eerst goed."
           }
         }
       }
@@ -53564,91 +54669,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wat er met de gekopieerde foto’s gebeurt als de familie of jij het stopzet."
-          }
-        }
-      }
-    },
-    "servers.remote.onEnd.keep": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep the photos already there"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Foto’s die er al zijn houden"
-          }
-        }
-      }
-    },
-    "servers.remote.onEnd.remove": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove the copied photos"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gekopieerde foto’s verwijderen"
-          }
-        }
-      }
-    },
-    "servers.remote.onEnd.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When it ends"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Als het stopt"
-          }
-        }
-      }
-    },
-    "servers.remote.operatorNote": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Whoever runs {server} can see the copies, as with any photo on it."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wie {server} beheert, kan de kopieën zien, zoals elke foto op die server."
-          }
-        }
-      }
-    },
-    "servers.remote.otherServer": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On {server}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Op {server}"
           }
         }
       }
@@ -53806,125 +54826,6 @@
         }
       }
     },
-    "servers.remote.requested": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Asked {feed} to approve {frame}."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{feed} gevraagd om {frame} goed te keuren."
-          }
-        }
-      }
-    },
-    "servers.remote.status.active": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Following"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Volgt"
-          }
-        }
-      }
-    },
-    "servers.remote.status.error": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Can’t reach the other server; retrying"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De andere server is niet bereikbaar; we proberen opnieuw"
-          }
-        }
-      }
-    },
-    "servers.remote.status.pending": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Waiting for the family’s admins"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wacht op de beheerders van de familie"
-          }
-        }
-      }
-    },
-    "servers.remote.status.rejected": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Declined by the family"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geweigerd door de familie"
-          }
-        }
-      }
-    },
-    "servers.remote.status.removed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ended"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gestopt"
-          }
-        }
-      }
-    },
-    "servers.remote.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Families on other servers"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Families op andere servers"
-          }
-        }
-      }
-    },
     "servers.remote.unsubscribe": {
       "extractionState": "manual",
       "localizations": {
@@ -53976,23 +54877,6 @@
         }
       }
     },
-    "servers.remote.unsubscribeTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stop following {feed}?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{feed} niet meer volgen?"
-          }
-        }
-      }
-    },
     "servers.remote.unsubscribed": {
       "extractionState": "manual",
       "localizations": {
@@ -54006,23 +54890,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "{frame} volgt {feed} niet meer."
-          }
-        }
-      }
-    },
-    "servers.remote.urlLabel": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Invite link"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uitnodigingslink"
           }
         }
       }
@@ -54057,6 +54924,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Intrekken"
+          }
+        }
+      }
+    },
+    "servers.share.link": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open kinframe to continue: this link is waiting there."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open kinframe om verder te gaan: deze link wacht daar."
+          }
+        }
+      }
+    },
+    "servers.share.notLink": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This isn’t a kinframe link. Share photos or videos, or a kinframe join or invite link."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit is geen kinframe-link. Deel foto’s of video’s, of een kinframe-link om mee te doen of uit te nodigen."
           }
         }
       }
@@ -58141,23 +59042,6 @@
         }
       }
     },
-    "social.circle.delete": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete circle"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kring verwijderen"
-          }
-        }
-      }
-    },
     "social.circle.deleteBody": {
       "extractionState": "manual",
       "localizations": {
@@ -58175,23 +59059,6 @@
         }
       }
     },
-    "social.circle.deleteConfirm": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete {name}?"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "{name} verwijderen?"
-          }
-        }
-      }
-    },
     "social.circle.emptyBody": {
       "extractionState": "manual",
       "localizations": {
@@ -58205,23 +59072,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maak er een voor een tak van de familie."
-          }
-        }
-      }
-    },
-    "social.circle.emptyTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No circles yet"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog geen kringen"
           }
         }
       }
@@ -58256,23 +59106,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaders van de familie met een beheerder in de kring krijgen de berichten. Zet andere aan om ze toe te voegen."
-          }
-        }
-      }
-    },
-    "social.circle.leave": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leave circle"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kring verlaten"
           }
         }
       }
@@ -58362,23 +59195,6 @@
         }
       }
     },
-    "social.circle.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Name"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Naam"
-          }
-        }
-      }
-    },
     "social.circle.nameEmpty": {
       "extractionState": "manual",
       "localizations": {
@@ -58413,23 +59229,6 @@
         }
       }
     },
-    "social.circle.namePlaceholder": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The cousins"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De neven en nichten"
-          }
-        }
-      }
-    },
     "social.circle.nameTaken": {
       "extractionState": "manual",
       "localizations": {
@@ -58447,23 +59246,6 @@
         }
       }
     },
-    "social.circle.new": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New circle"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nieuwe kring"
-          }
-        }
-      }
-    },
     "social.circle.notIn": {
       "extractionState": "manual",
       "localizations": {
@@ -58477,23 +59259,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "jij zit er niet in"
-          }
-        }
-      }
-    },
-    "social.circle.tab": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Circles"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kringen"
           }
         }
       }
@@ -58838,23 +59603,6 @@
         }
       }
     },
-    "social.comment.delete": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete comment"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactie verwijderen"
-          }
-        }
-      }
-    },
     "social.comment.deleteBody": {
       "extractionState": "manual",
       "localizations": {
@@ -58867,7 +59615,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Een reactie met antwoorden blijft staan als “Reactie verwijderd”."
+            "value": "Een opmerking met antwoorden blijft staan als “Opmerking verwijderd”."
           }
         }
       }
@@ -58884,58 +59632,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Deze reactie verwijderen?"
-          }
-        }
-      }
-    },
-    "social.comment.deleted": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comment deleted"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactie verwijderd"
-          }
-        }
-      }
-    },
-    "social.comment.edited": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "edited"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "bewerkt"
-          }
-        }
-      }
-    },
-    "social.comment.remove": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove comment"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactie weghalen"
+            "value": "Deze opmerking verwijderen?"
           }
         }
       }
@@ -58970,23 +59667,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verwijderd door een beheerder van de familie"
-          }
-        }
-      }
-    },
-    "social.comment.reply": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reply"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Antwoorden"
           }
         }
       }
@@ -59399,23 +60079,6 @@
         }
       }
     },
-    "social.family.chat": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Family chat"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Familiechat"
-          }
-        }
-      }
-    },
     "social.family.circles": {
       "extractionState": "manual",
       "localizations": {
@@ -59479,7 +60142,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Uit: wie erbij komt, volgt mee als lid (reageren en chatten) tot een beheerder plaatsen toestaat."
+            "value": "Uit: wie erbij komt, volgt mee als lid (plaatst opmerkingen en chat) tot een beheerder plaatsen toestaat."
           }
         }
       }
@@ -59547,7 +60210,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reacties en kringen"
+            "value": "Opmerkingen en kringen"
           }
         }
       }
@@ -59739,23 +60402,6 @@
         }
       }
     },
-    "social.frame.showComments": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show comments"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reacties tonen"
-          }
-        }
-      }
-    },
     "social.frame.showCommentsHint": {
       "extractionState": "manual",
       "localizations": {
@@ -59768,24 +60414,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Als een foto met reacties verschijnt, komt de nieuwste 8 seconden in beeld, één keer per dag."
-          }
-        }
-      }
-    },
-    "social.frame.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Family on the frame"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Familie op het kader"
+            "value": "Als een foto met opmerkingen verschijnt, komt de nieuwste 8 seconden in beeld, één keer per dag."
           }
         }
       }
@@ -59994,23 +60623,6 @@
         }
       }
     },
-    "social.home.emptyTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing shared yet"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog niets gedeeld"
-          }
-        }
-      }
-    },
     "social.home.stripOnly": {
       "extractionState": "manual",
       "localizations": {
@@ -60024,23 +60636,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hoe vers je kaders en families zijn. Tik erop om iets te sturen."
-          }
-        }
-      }
-    },
-    "social.home.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Home"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Thuis"
           }
         }
       }
@@ -60221,13 +60816,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Everything muted"
+            "value": "Mute everything"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alles gedempt"
+            "value": "Alles dempen"
           }
         }
       }
@@ -60238,13 +60833,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chat muted"
+            "value": "Mute the chat"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Chat gedempt"
+            "value": "De chat dempen"
           }
         }
       }
@@ -60255,13 +60850,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Everything"
+            "value": "All notifications"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alles"
+            "value": "Alle meldingen"
           }
         }
       }
@@ -60272,13 +60867,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Posts muted (mentions still come)"
+            "value": "Mute posts"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Berichten gedempt (vermeldingen komen nog)"
+            "value": "Berichten dempen"
           }
         }
       }
@@ -60827,40 +61422,6 @@
         }
       }
     },
-    "social.post.shareInChat": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Share in chat"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delen in een chat"
-          }
-        }
-      }
-    },
-    "social.post.toFrame": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To {frame}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Naar {frame}"
-          }
-        }
-      }
-    },
     "social.postActions": {
       "extractionState": "manual",
       "localizations": {
@@ -61037,13 +61598,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Laugh"
+            "value": "Haha"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lach"
+            "value": "Haha"
           }
         }
       }
@@ -61077,24 +61638,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Dank je"
-          }
-        }
-      }
-    },
-    "social.reaction.react": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "React"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reageer"
+            "value": "Dankjewel"
           }
         }
       }
@@ -61286,40 +61830,6 @@
         }
       }
     },
-    "social.reactions.people": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "People"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mensen"
-          }
-        }
-      }
-    },
-    "social.reactions.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reactions"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reacties"
-          }
-        }
-      }
-    },
     "social.reactions.two": {
       "extractionState": "manual",
       "localizations": {
@@ -61502,7 +62012,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Plaatsers en beheerders plaatsen foto’s; leden volgen mee, reageren en chatten. De kaders horen ook bij de familie."
+            "value": "Plaatsers en beheerders plaatsen foto’s; leden volgen mee, plaatsen opmerkingen en chatten. De kaders horen ook bij de familie."
           }
         }
       }
@@ -61813,57 +62323,6 @@
         }
       }
     },
-    "social.thread.close": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn comments off"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reageren uitzetten"
-          }
-        }
-      }
-    },
-    "social.thread.closed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comments are turned off for this post."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reageren is uitgezet voor dit bericht."
-          }
-        }
-      }
-    },
-    "social.thread.closedShort": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comments off"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reacties uit"
-          }
-        }
-      }
-    },
     "social.thread.comment": {
       "extractionState": "manual",
       "localizations": {
@@ -61876,7 +62335,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reageren"
+            "value": "Opmerking"
           }
         }
       }
@@ -61893,24 +62352,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je reactie bewerken"
-          }
-        }
-      }
-    },
-    "social.thread.empty": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No comments yet. Say something nice!"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nog geen reacties. Zeg iets liefs!"
+            "value": "Je opmerking bewerken"
           }
         }
       }
@@ -61983,23 +62425,6 @@
         }
       }
     },
-    "social.thread.open": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Turn comments on"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reageren aanzetten"
-          }
-        }
-      }
-    },
     "social.thread.placeholder": {
       "extractionState": "manual",
       "localizations": {
@@ -62012,41 +62437,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Schrijf een reactie… (@ om iemand te noemen)"
-          }
-        }
-      }
-    },
-    "social.thread.readOnly": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You can see this post but not comment on it."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Je kunt dit bericht zien, maar er niet op reageren."
-          }
-        }
-      }
-    },
-    "social.thread.replyingTo": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Replying to {name}"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Antwoord aan {name}"
+            "value": "Schrijf een opmerking… (@ om iemand te noemen)"
           }
         }
       }
@@ -62063,24 +62454,7 @@
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reactie plaatsen"
-          }
-        }
-      }
-    },
-    "social.thread.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Post"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht"
+            "value": "Opmerking plaatsen"
           }
         }
       }
@@ -62098,40 +62472,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dit bericht niet meer dempen"
-          }
-        }
-      }
-    },
-    "social.thread.viewAll.one": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "View the comment"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bekijk de reactie"
-          }
-        }
-      }
-    },
-    "social.thread.viewAll.other": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "View all {count} comments"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bekijk alle {count} reacties"
           }
         }
       }

@@ -16,10 +16,10 @@ struct FrameSocialSettingsCard: View {
     var body: some View {
         if social.social || social.engagement {
             VStack(alignment: .leading, spacing: 8) {
-                SectionHeader(L("social.frame.title"))
+                SectionHeader(L("social.frameSettingsTitle"))
                 VStack(spacing: 0) {
                     if social.social {
-                        toggle("social.show_comments", false, L("social.frame.showComments"), L("social.frame.showCommentsHint"), feature: "comments")
+                        toggle("social.show_comments", false, L("social.showComments"), L("social.frame.showCommentsHint"), feature: "comments")
                     }
                     if social.engagement {
                         if social.social { Divider().overlay(Palette.border) }

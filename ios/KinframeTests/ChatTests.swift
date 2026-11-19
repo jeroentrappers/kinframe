@@ -180,7 +180,7 @@ final class EngagementTests: XCTestCase {
         XCTAssertEqual(SummaryText.details(s), "❤️ 4 loves from the frames · 2 comments")
         let ms = try SocialFixtures.decode([Milestone].self, #"[{"key":"first_photo","achieved_at":"2026-01-01T00:00:00Z","shown":false,"seen":true},{"key":"photos_10","achieved_at":"2026-02-01T00:00:00Z","shown":false,"seen":false}]"#)
         XCTAssertEqual(MilestoneLogic.unseen(ms).map(\.key), [.photos10])
-        XCTAssertEqual(MilestoneKey.loves100.title, "100 ❤️ from the frames")
+        XCTAssertEqual(MilestoneKey.loves100.title, "100 hearts from the frames")
     }
 }
 
@@ -230,7 +230,7 @@ final class ConversationModelTests: XCTestCase {
         let pending = try XCTUnwrap(model.messages.first)
         XCTAssertTrue(MessageLogic.isPending(pending))
         XCTAssertNotNil(model.failed[pending.clientId ?? ""])
-        XCTAssertEqual(model.error, "You can’t send messages to this person.")
+        XCTAssertEqual(model.error, "You can’t send this person a message.")
         model.discard(pending)
         XCTAssertTrue(model.messages.isEmpty)
     }

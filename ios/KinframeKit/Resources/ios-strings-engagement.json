@@ -7,25 +7,9 @@
     "en": "Snooze 1 month",
     "nl": "Een maand pauzeren"
   },
-  "engagement.digest.daily": {
-    "en": "Daily",
-    "nl": "Dagelijks"
-  },
-  "engagement.digest.hint": {
-    "en": "Unread comments and messages by email, for when you don’t open the app.",
-    "nl": "Ongelezen reacties en berichten per e-mail, voor als je de app niet opent."
-  },
-  "engagement.digest.off": {
-    "en": "Off",
-    "nl": "Uit"
-  },
   "engagement.digest.title": {
     "en": "Email digest",
     "nl": "Samenvatting per e-mail"
-  },
-  "engagement.digest.weekly": {
-    "en": "Weekly",
-    "nl": "Wekelijks"
   },
   "engagement.family.goal.one": {
     "en": "Goal: 1 photo a week",
@@ -43,10 +27,6 @@
     "en": "Weekly prompts",
     "nl": "Vraag van de week"
   },
-  "engagement.family.promptsHint": {
-    "en": "A small theme every Monday, like “Something you cooked”.",
-    "nl": "Elke maandag een klein thema, zoals “Iets wat je kookte”."
-  },
   "engagement.family.quietAfter.one": {
     "en": "Quiet after 1 day",
     "nl": "Stil na 1 dag"
@@ -58,10 +38,6 @@
   "engagement.family.quietAfterHint": {
     "en": "Then one or two people who sent before get a gentle reminder.",
     "nl": "Dan krijgen een of twee mensen die eerder stuurden een vriendelijke herinnering."
-  },
-  "engagement.family.recap": {
-    "en": "Monthly recap",
-    "nl": "Maandoverzicht"
   },
   "engagement.family.recapHint": {
     "en": "On the 1st, a card in the family chat about the month.",
@@ -83,17 +59,13 @@
     "en": "That isn’t a time zone, like Europe/Brussels.",
     "nl": "Dat is geen tijdzone, zoals Europe/Brussels."
   },
-  "engagement.family.title": {
-    "en": "Encouragement",
-    "nl": "Aanmoediging"
-  },
   "engagement.family.useMine": {
     "en": "Use mine ({zone})",
     "nl": "Die van mij gebruiken ({zone})"
   },
-  "engagement.fresh.askedBody": {
-    "en": "{frame} would like new photos 💛",
-    "nl": "{frame} wil graag nieuwe foto’s 💛"
+  "engagement.fresh.cannotSend": {
+    "en": "You can’t send to {frame}: none of your families reaches it.",
+    "nl": "Je kunt niets naar {frame} sturen: geen van je families komt erop."
   },
   "engagement.fresh.days.one": {
     "en": "1 day",
@@ -111,10 +83,6 @@
     "en": "{count} days quiet",
     "nl": "{count} dagen stil"
   },
-  "engagement.fresh.fresh": {
-    "en": "Fresh",
-    "nl": "Vers"
-  },
   "engagement.fresh.last": {
     "en": "Last new photo {when}",
     "nl": "Laatste nieuwe foto {when}"
@@ -123,21 +91,13 @@
     "en": "{name} shared {when}",
     "nl": "{name} deelde {when}"
   },
-  "engagement.fresh.never": {
-    "en": "No photos yet",
-    "nl": "Nog geen foto’s"
-  },
-  "engagement.fresh.pick": {
-    "en": "Choose photos",
-    "nl": "Foto’s kiezen"
-  },
   "engagement.fresh.privacy": {
     "en": "Your newest photos come first in the picker. Nothing leaves your phone until you pick it.",
     "nl": "Je nieuwste foto’s staan vooraan. Niets verlaat je telefoon tot je het kiest."
   },
-  "engagement.fresh.title": {
-    "en": "Send something to {frame}",
-    "nl": "Iets sturen naar {frame}"
+  "engagement.fresh.viaFamilies": {
+    "en": "You’re not on {frame}: your photos go to {families}, whose posts reach it.",
+    "nl": "Je staat niet op {frame}: je foto’s gaan naar {families}, en hun berichten komen op het kader."
   },
   "engagement.fresh.weeksQuiet.one": {
     "en": "1 week quiet",
@@ -147,21 +107,9 @@
     "en": "{count} weeks quiet",
     "nl": "{count} weken stil"
   },
-  "engagement.milestone.first_photo": {
-    "en": "Your first photo shared",
-    "nl": "Je eerste foto gedeeld"
-  },
-  "engagement.milestone.first_video": {
-    "en": "Your first video shared",
-    "nl": "Je eerste video gedeeld"
-  },
   "engagement.milestone.hint": {
     "en": "Shown milestones are visible to the people you share a family or frame with.",
     "nl": "Getoonde mijlpalen zijn zichtbaar voor wie een familie of kader met je deelt."
-  },
-  "engagement.milestone.loves_100": {
-    "en": "100 ❤️ from the frames",
-    "nl": "100 ❤️ van de kaders"
   },
   "engagement.milestone.mine": {
     "en": "Your milestones",
@@ -171,25 +119,9 @@
     "en": "No milestones yet. They come with sharing.",
     "nl": "Nog geen mijlpalen. Die komen met het delen."
   },
-  "engagement.milestone.photos_10": {
-    "en": "10 photos shared",
-    "nl": "10 foto’s gedeeld"
-  },
-  "engagement.milestone.photos_100": {
-    "en": "100 photos shared",
-    "nl": "100 foto’s gedeeld"
-  },
-  "engagement.milestone.photos_1000": {
-    "en": "1000 photos shared",
-    "nl": "1000 foto’s gedeeld"
-  },
   "engagement.milestone.private": {
     "en": "Only you see this, unless you show it on your profile.",
     "nl": "Alleen jij ziet dit, tenzij je het op je profiel toont."
-  },
-  "engagement.milestone.show": {
-    "en": "Show on my profile",
-    "nl": "Op mijn profiel tonen"
   },
   "engagement.milestone.shown": {
     "en": "Milestones",
@@ -203,17 +135,9 @@
     "en": "Milestone: {title}",
     "nl": "Mijlpaal: {title}"
   },
-  "engagement.milestone.year_of_sharing": {
-    "en": "A year of sharing",
-    "nl": "Een jaar delen"
-  },
   "engagement.otd.open": {
     "en": "Open to share again",
     "nl": "Openen om opnieuw te delen"
-  },
-  "engagement.otd.title": {
-    "en": "On this day",
-    "nl": "Op deze dag"
   },
   "engagement.otd.yearsAgo.one": {
     "en": "1 year ago in {feed}",
@@ -222,10 +146,6 @@
   "engagement.otd.yearsAgo.other": {
     "en": "{count} years ago in {feed}",
     "nl": "{count} jaar geleden in {feed}"
-  },
-  "engagement.prompt.answer": {
-    "en": "Answer with a photo",
-    "nl": "Antwoorden met een foto"
   },
   "engagement.prompt.answerCount.one": {
     "en": "1 answer so far",
@@ -291,10 +211,6 @@
     "en": "Freshest frames",
     "nl": "Verste kaders"
   },
-  "engagement.recap.mostLoved": {
-    "en": "Most loved",
-    "nl": "Meest geliefd"
-  },
   "engagement.recap.newMembers": {
     "en": "New in the family",
     "nl": "Nieuw in de familie"
@@ -315,10 +231,6 @@
     "en": "by {count} people",
     "nl": "door {count} personen"
   },
-  "engagement.recap.title": {
-    "en": "Monthly recap",
-    "nl": "Maandoverzicht"
-  },
   "engagement.recap.videos.one": {
     "en": "1 video",
     "nl": "1 video"
@@ -331,10 +243,6 @@
     "en": "You didn’t answer the last reminders, so you get fewer now. Change it here.",
     "nl": "Je reageerde niet op de laatste herinneringen, dus je krijgt er nu minder. Pas het hier aan."
   },
-  "engagement.reminders.birthdays": {
-    "en": "Birthday reminders",
-    "nl": "Verjaardagsherinneringen"
-  },
   "engagement.reminders.birthdaysHint": {
     "en": "Three days before a birthday in your families.",
     "nl": "Drie dagen voor een verjaardag in je families."
@@ -343,53 +251,9 @@
     "en": "End the snooze",
     "nl": "Pauze beëindigen"
   },
-  "engagement.reminders.frameRequests": {
-    "en": "When a frame asks for photos",
-    "nl": "Als een kader om foto’s vraagt"
-  },
   "engagement.reminders.frameRequestsHint": {
     "en": "“Oma would like new photos 💛”",
     "nl": "“Oma wil graag nieuwe foto’s 💛”"
-  },
-  "engagement.reminders.level": {
-    "en": "How often",
-    "nl": "Hoe vaak"
-  },
-  "engagement.reminders.level.fewer": {
-    "en": "Fewer",
-    "nl": "Minder"
-  },
-  "engagement.reminders.level.normal": {
-    "en": "Normal",
-    "nl": "Normaal"
-  },
-  "engagement.reminders.level.off": {
-    "en": "Off",
-    "nl": "Uit"
-  },
-  "engagement.reminders.levelHint.fewer": {
-    "en": "At most one a week, and no streak reminders.",
-    "nl": "Hoogstens één per week, en geen herinneringen over de reeks."
-  },
-  "engagement.reminders.levelHint.normal": {
-    "en": "At most two gentle reminders a week, for example when a frame gets quiet.",
-    "nl": "Hoogstens twee vriendelijke herinneringen per week, bijvoorbeeld als een kader stil wordt."
-  },
-  "engagement.reminders.levelHint.off": {
-    "en": "No reminders. Requests from frames follow their own switch.",
-    "nl": "Geen herinneringen. Vragen van kaders volgen hun eigen schakelaar."
-  },
-  "engagement.reminders.quiet": {
-    "en": "Quiet hours",
-    "nl": "Rustige uren"
-  },
-  "engagement.reminders.quietFrom": {
-    "en": "From",
-    "nl": "Van"
-  },
-  "engagement.reminders.quietHint": {
-    "en": "Reminders wait until the morning.",
-    "nl": "Herinneringen wachten tot de ochtend."
   },
   "engagement.reminders.quietTo": {
     "en": "To",
@@ -418,10 +282,6 @@
   "engagement.reminders.summaryHint": {
     "en": "On Sunday evening, how your photos were seen. Skipped when there’s nothing.",
     "nl": "Op zondagavond, hoe je foto’s bekeken werden. Overgeslagen als er niets is."
-  },
-  "engagement.reminders.title": {
-    "en": "Reminders",
-    "nl": "Herinneringen"
   },
   "engagement.request.answered": {
     "en": "{name} answered",
@@ -458,10 +318,6 @@
   "engagement.request.send": {
     "en": "Send",
     "nl": "Sturen"
-  },
-  "engagement.request.toast": {
-    "en": "{frame} would like new photos 💛",
-    "nl": "{frame} wil graag nieuwe foto’s 💛"
   },
   "engagement.settings.title": {
     "en": "Reminders and milestones",
@@ -558,9 +414,5 @@
   "engagement.summary.title": {
     "en": "Seen and loved",
     "nl": "Gezien en geliefd"
-  },
-  "engagement.weekOf": {
-    "en": "Week of {date}",
-    "nl": "Week van {date}"
   }
 }

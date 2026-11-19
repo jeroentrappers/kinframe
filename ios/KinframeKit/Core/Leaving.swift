@@ -90,7 +90,7 @@ public enum LeavingText {
 
     /// "Taken away by Tom" with "214 photos · until 19 December".
     public static func groupTitle(_ g: TakenAwayGroup) -> String {
-        L("leaving.group.title", ["name": g.byName])
+        L("leaving.takenAwayBy", ["name": g.byName])
     }
 
     public static func groupDetail(_ g: TakenAwayGroup, locale: Locale = L10n.locale) -> String {
@@ -136,7 +136,7 @@ public enum LeavingText {
     public static func readOnlyLine(_ c: Conversation) -> String? {
         guard c.readOnly == true, c.readOnlyReason == .noLongerContacts else { return nil }
         let name = ChatList.title(c)
-        return L("leaving.chat.noLongerContacts", ["name": name])
+        return L("leaving.noLongerContacts", ["name": name])
     }
 }
 

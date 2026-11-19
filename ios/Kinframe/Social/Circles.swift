@@ -21,7 +21,7 @@ struct CirclesSection: View {
             Text(L("social.circle.lede")).font(.subheadline).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
             if let circles {
                 if circles.isEmpty {
-                    EmptyStateView(systemImage: "person.2.circle", title: L("social.circle.emptyTitle"), message: L("social.circle.emptyBody"))
+                    EmptyStateView(systemImage: "person.2.circle", title: L("social.noCircles"), message: L("social.circle.emptyBody"))
                         .card(padding: 8)
                 }
                 VStack(spacing: 0) {
@@ -47,7 +47,7 @@ struct CirclesSection: View {
                 }
                 .card(padding: 0)
                 if canCreate {
-                    Button { creating = true } label: { Label(L("social.circle.new"), systemImage: "plus") }.buttonStyle(.kf(.secondary))
+                    Button { creating = true } label: { Label(L("social.newCircle"), systemImage: "plus") }.buttonStyle(.kf(.secondary))
                 }
             } else {
                 LoadingView()
@@ -89,10 +89,10 @@ struct CircleEditSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(L("social.circle.namePlaceholder"), text: $name)
+                    TextField(L("social.circleNamePlaceholder"), text: $name)
                         .onChange(of: name) { if name.count > CircleLogic.maxName { name = String(name.prefix(CircleLogic.maxName)) } }
                 } header: {
-                    Text(L("social.circle.name"))
+                    Text(L("social.circleName"))
                 } footer: {
                     if !name.isEmpty, let p = problem { Text(p) }
                 }
@@ -117,7 +117,7 @@ struct CircleEditSheet: View {
             }
             .scrollContentBackground(.hidden)
             .pageBackground()
-            .navigationTitle(L("social.circle.new"))
+            .navigationTitle(L("social.newCircle"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
@@ -165,7 +165,7 @@ struct CircleDetailView: View {
                 Form {
                     Section {
                         if canManage {
-                            TextField(L("social.circle.name"), text: $name).onSubmit { Task { await rename() } }
+                            TextField(L("social.circleName"), text: $name).onSubmit { Task { await rename() } }
                         } else {
                             Text(c.name).font(.headline)
                         }
@@ -184,7 +184,7 @@ struct CircleDetailView: View {
                             }
                             .contextMenu {
                                 if canManage, m.userId != app.me?.id {
-                                    Button(L(m.role == .admin ? "chat.info.makeMember" : "chat.info.makeAdmin")) { Task { await setAdmin(m, m.role != .admin) } }
+                                    Button(L(m.role == .admin ? "chat.info.makeMember" : "chat.makeAdmin")) { Task { await setAdmin(m, m.role != .admin) } }
                                     Button(L("chat.info.remove"), role: .destructive) { Task { await remove(m.userId) } }
                                 }
                             }
@@ -215,10 +215,10 @@ struct CircleDetailView: View {
                     .listRowBackground(Palette.surface)
                     Section {
                         if c.myRole != nil {
-                            Button(L("social.circle.leave"), role: .destructive) { Task { await leave() } }
+                            Button(L("social.leaveCircle"), role: .destructive) { Task { await leave() } }
                         }
                         if canManage {
-                            Button(L("social.circle.delete"), role: .destructive) { confirmDelete = true }
+                            Button(L("social.deleteCircle"), role: .destructive) { confirmDelete = true }
                         }
                     }
                     .listRowBackground(Palette.surface)
@@ -239,8 +239,8 @@ struct CircleDetailView: View {
                 Task { await add(ids) }
             }
         }
-        .confirmationDialog(L("social.circle.deleteConfirm", ["name": circle?.name ?? ""]), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(L("social.circle.delete"), role: .destructive) { Task { await delete() } }
+        .confirmationDialog(L("social.deleteCircleTitle", ["name": circle?.name ?? ""]), isPresented: $confirmDelete, titleVisibility: .visible) {
+            Button(L("social.deleteCircle"), role: .destructive) { Task { await delete() } }
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
             Text(L("social.circle.deleteBody"))
@@ -351,7 +351,7 @@ private struct CircleAddSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L("chat.info.add")) { done(Array(chosen)); dismiss() }.disabled(chosen.isEmpty)
+                    Button(L("chat.add")) { done(Array(chosen)); dismiss() }.disabled(chosen.isEmpty)
                 }
             }
         }

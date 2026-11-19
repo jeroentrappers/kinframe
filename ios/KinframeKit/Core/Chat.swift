@@ -104,7 +104,7 @@ public enum MessageText {
 
     /// What a message holds, in a few words.
     public static func summary(_ m: Message) -> String {
-        if m.deleted { return L(m.removedByAdmin == true ? "chat.message.removed" : "chat.message.deleted") }
+        if m.deleted { return L(m.removedByAdmin == true ? "chat.messageRemoved" : "chat.messageDeleted") }
         if let body = m.body?.trimmingCharacters(in: .whitespacesAndNewlines), !body.isEmpty { return body }
         if m.voice != nil { return L("chat.preview.voice") }
         if !m.items.isEmpty {
@@ -112,7 +112,7 @@ public enum MessageText {
             if videos == m.items.count { return Lp("chat.preview.videos", count: videos) }
             return Lp("chat.preview.photos", count: m.items.count)
         }
-        if m.sharedPost != nil { return L("chat.preview.post") }
+        if m.sharedPost != nil { return L("chat.sharedPost") }
         return ""
     }
 
@@ -127,13 +127,13 @@ public enum MessageText {
         case .streakMilestone:
             return Lp("chat.system.streak", count: s.weeks ?? 0)
         case .monthlyRecap:
-            return L("chat.system.recap", ["month": MonthText.name(s.month)])
+            return L("chat.sys.recap", ["month": MonthText.name(s.month)])
         case .prompt:
             return L("chat.system.prompt", ["title": s.promptTitle ?? ""])
         case .memberJoined:
-            return L("chat.system.joined", ["name": who])
+            return L("chat.sys.joined", ["name": who])
         case .memberLeft:
-            return L("chat.system.left", ["name": who])
+            return L("chat.sys.left", ["name": who])
         }
     }
 
@@ -285,7 +285,7 @@ public struct TypingState: Equatable, Sendable {
         guard !live.isEmpty else { return nil }
         if live.count == 1 {
             let e = live[0]
-            return L(e.recording ? "chat.typing.recordingOne" : "chat.typing.one", ["name": e.name])
+            return L(e.recording ? "chat.recording" : "chat.typing.one", ["name": e.name])
         }
         if live.count == 2 { return L("chat.typing.two", ["a": live[0].name, "b": live[1].name]) }
         return L("chat.typing.many")
@@ -303,9 +303,9 @@ public struct TypingState: Equatable, Sendable {
 extension Components.Schemas.MuteFor {
     public var label: String {
         switch self {
-        case .off: L("chat.mute.off")
-        case ._1h: L("chat.mute.hour")
-        case ._8h: L("chat.mute.eightHours")
+        case .off: L("chat.muteFor.off")
+        case ._1h: L("chat.muteFor.1h")
+        case ._8h: L("chat.muteFor.8h")
         case ._1w: L("chat.mute.week")
         case .always: L("chat.mute.always")
         }
@@ -420,20 +420,20 @@ public enum VoiceLogic {
 // MARK: Reports
 
 extension Components.Schemas.ReportReason {
-    public var label: String { L("chat.report.reason.\(rawValue)") }
+    public var label: String { L("chat.reason.\(rawValue)") }
 }
 
 public enum ReportText {
     public static func status(_ r: Report) -> String {
         switch r.status {
         case .open: L("chat.report.status.open")
-        case .removed: L("chat.report.status.removed")
-        case .dismissed: L("chat.report.status.dismissed")
+        case .removed: L("chat.reportRemoved")
+        case .dismissed: L("chat.reportDismissed")
         }
     }
 
     public static func kind(_ r: Report) -> String {
-        L("chat.report.kind.\(r.targetKind.rawValue)")
+        L("chat.reportKind.\(r.targetKind.rawValue)")
     }
 }
 

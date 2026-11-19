@@ -16,7 +16,7 @@ struct FamilySocialHeader: View {
                 if features.engagement, let s = streak, s.enabled { streakCard(s) }
                 HStack(spacing: 10) {
                     if features.chats, let conv = feed.summary.conversationId {
-                        Button { app.openChat(conv) } label: { Label(L("social.family.chat"), systemImage: "bubble.left.and.bubble.right") }
+                        Button { app.openChat(conv) } label: { Label(L("social.familyChat"), systemImage: "bubble.left.and.bubble.right") }
                             .buttonStyle(.kf(.secondary))
                     }
                     if features.social || features.chats {
@@ -25,7 +25,7 @@ struct FamilySocialHeader: View {
                                 ForEach(FeedMute.allCases, id: \.self) { m in Text(m.label).tag(m) }
                             }
                         } label: {
-                            Label((feed.value2.mute ?? .none) == .none ? L("social.mute.title") : (feed.value2.mute ?? .none).label,
+                            Label((feed.value2.mute ?? .none) == .none ? L("social.mute.title") : L("chat.muted"),
                                   systemImage: (feed.value2.mute ?? .none) == .none ? "bell" : "bell.slash")
                         }
                         .buttonStyle(.kf(.ghost))
@@ -150,7 +150,7 @@ struct FamilySocialSettings: View {
                 }
             }
             if features.engagement, let e = engagement {
-                group(L("engagement.family.title")) {
+                group(L("engagement.settingsTitle")) {
                     engagementToggle(e.streakEnabled, L("engagement.family.streak"), L("engagement.family.streakHint")) { .init(streakEnabled: $0) }
                     if e.streakEnabled {
                         Divider().overlay(Palette.border)
@@ -163,7 +163,7 @@ struct FamilySocialSettings: View {
                         .padding(14)
                     }
                     Divider().overlay(Palette.border)
-                    engagementToggle(e.promptsEnabled, L("engagement.family.prompts"), L("engagement.family.promptsHint")) { .init(promptsEnabled: $0) }
+                    engagementToggle(e.promptsEnabled, L("engagement.family.prompts"), L("engagement.promptsEnabledHint")) { .init(promptsEnabled: $0) }
                     Divider().overlay(Palette.border)
                     Stepper(value: Binding(get: { e.quietAfterDays }, set: { v in Task { await update(.init(quietAfterDays: v)) } }), in: 3...30) {
                         VStack(alignment: .leading, spacing: 2) {
@@ -173,7 +173,7 @@ struct FamilySocialSettings: View {
                     }
                     .padding(14)
                     Divider().overlay(Palette.border)
-                    engagementToggle(e.monthlyRecap, L("engagement.family.recap"), L("engagement.family.recapHint")) { .init(monthlyRecap: $0) }
+                    engagementToggle(e.monthlyRecap, L("engagement.monthlyRecap"), L("engagement.family.recapHint")) { .init(monthlyRecap: $0) }
                     Divider().overlay(Palette.border)
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L("engagement.family.timezone"))
@@ -195,7 +195,7 @@ struct FamilySocialSettings: View {
             }
             if features.chats || features.social {
                 Button { reports = true } label: {
-                    Label(L("chat.report.familyTitle"), systemImage: "flag")
+                    Label(L("chat.operatorReports"), systemImage: "flag")
                 }
                 .buttonStyle(.kf(.secondary))
             }

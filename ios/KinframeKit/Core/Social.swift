@@ -251,7 +251,7 @@ public enum ThreadLogic {
 
     /// "View all 6 comments" (only when there are more than the two shown).
     public static func viewAllText(_ t: ThreadSummary) -> String? {
-        t.commentCount > t.latestComments.count ? Lp("social.thread.viewAll", count: t.commentCount) : nil
+        t.commentCount > t.latestComments.count ? Lp("social.viewAll", count: t.commentCount) : nil
     }
 
     /// The thread after a comment of the caller was added: count and the two latest.
@@ -437,7 +437,7 @@ public enum TimelineLogic {
     public static func label(_ p: TimelinePost) -> String {
         switch p.kind {
         case .frame:
-            return L("social.post.toFrame", ["frame": p.frameName ?? ""])
+            return L("social.toFrame", ["frame": p.frameName ?? ""])
         case .feed:
             if let circle = p.circleName, !circle.isEmpty {
                 return L("social.post.inCircle", ["feed": p.feedName ?? "", "circle": circle])

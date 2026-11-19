@@ -180,7 +180,7 @@ struct PostDetailView: View {
                             postHeader(post)
                             Divider().overlay(Palette.border)
                             if model.nodes.isEmpty {
-                                Text(L("social.thread.empty")).font(.subheadline).foregroundStyle(Palette.textMuted)
+                                Text(L("social.noCommentsYet")).font(.subheadline).foregroundStyle(Palette.textMuted)
                             }
                             ForEach(model.nodes) { node in
                                 CommentRow(comment: node.comment, model: model, reply: { startReply($0) }, edit: { startEdit($0) }, report: { reporting = $0 })
@@ -211,7 +211,7 @@ struct PostDetailView: View {
             }
         }
         .pageBackground()
-        .navigationTitle(L("social.thread.title"))
+        .navigationTitle(L("social.post"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { ToolbarItem(placement: .topBarTrailing) { if let post = model?.post { menu(post) } } }
         .task {
@@ -263,7 +263,7 @@ struct PostDetailView: View {
     private func menu(_ post: TimelinePost) -> some View {
         Menu {
             if app.social.features.chats {
-                Button { sharing = true } label: { Label(L("social.post.shareInChat"), systemImage: "bubble.left.and.bubble.right") }
+                Button { sharing = true } label: { Label(L("social.shareInChat"), systemImage: "bubble.left.and.bubble.right") }
             }
             Button {
                 Task { try? await model?.setMuted(!(post.thread.muted ?? false)) }
@@ -274,12 +274,12 @@ struct PostDetailView: View {
                 Button {
                     Task { do { try await model?.setOpen(post.thread.state == .closed) } catch { app.toasts.error(error) } }
                 } label: {
-                    post.thread.state == .closed ? Label(L("social.thread.open"), systemImage: "text.bubble") : Label(L("social.thread.close"), systemImage: "nosign")
+                    post.thread.state == .closed ? Label(L("social.openComments"), systemImage: "text.bubble") : Label(L("social.closeComments"), systemImage: "nosign")
                 }
             }
             if post.poster.userId != me {
                 Button { reporting = ReportTarget(kind: .post, id: post.id, inFamily: post.kind == .feed) } label: {
-                    Label(L("chat.report.action"), systemImage: "flag")
+                    Label(L("chat.report"), systemImage: "flag")
                 }
             }
         } label: {
@@ -293,10 +293,10 @@ struct PostDetailView: View {
     @ViewBuilder private func composer(_ post: TimelinePost) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if !TimelineLogic.canComment(post), editing == nil {
-                Callout(L(post.thread.state == .closed ? "social.thread.closed" : "social.thread.readOnly"))
+                Callout(L(post.thread.state == .closed ? "problem.comments_closed" : "social.cannotComment"))
             } else {
                 if let r = replyTo {
-                    banner(L("social.thread.replyingTo", ["name": PersonName.display(r.author)])) { replyTo = nil }
+                    banner(L("social.replyingTo", ["name": PersonName.display(r.author)])) { replyTo = nil }
                 }
                 if editing != nil {
                     banner(L("social.thread.editing")) { cancelEdit() }
@@ -402,7 +402,7 @@ private struct CommentRow: View {
             }
             .accessibilityElement(children: .combine)
         case .tombstone:
-            Text(L("social.comment.deleted")).font(.subheadline).italic().foregroundStyle(Palette.textFaint)
+            Text(L("social.commentDeleted")).font(.subheadline).italic().foregroundStyle(Palette.textFaint)
                 .padding(.leading, 42)
         case .person, .removedByAdmin:
             person
@@ -420,7 +420,7 @@ private struct CommentRow: View {
                 HStack(spacing: 6) {
                     Text(PersonName.display(comment.author, me: me, you: true)).font(.subheadline.weight(.semibold))
                     Text(Format.relative(comment.createdAt, locale: L10n.locale)).font(.caption).foregroundStyle(Palette.textFaint)
-                    if comment.editedAt != nil { Text(L("social.comment.edited")).font(.caption).foregroundStyle(Palette.textFaint) }
+                    if comment.editedAt != nil { Text(L("social.edited")).font(.caption).foregroundStyle(Palette.textFaint) }
                 }
                 if let q = comment.quoted {
                     Text("↪︎ " + PersonName.display(q)).font(.caption.weight(.semibold)).foregroundStyle(Palette.primarySoftText)
@@ -434,7 +434,7 @@ private struct CommentRow: View {
                     .textSelection(.enabled)
                 HStack(spacing: 14) {
                     if ThreadLogic.display(comment) == .person {
-                        Button(L("social.comment.reply")) { reply(comment) }
+                        Button(L("social.reply")) { reply(comment) }
                             .font(.caption.weight(.semibold)).foregroundStyle(Palette.textMuted).buttonStyle(.plain)
                             .disabled(model.post.map { !TimelineLogic.canComment($0) } ?? true)
                     }
@@ -448,7 +448,7 @@ private struct CommentRow: View {
         .contentShape(Rectangle())
         .contextMenu { menu }
         .confirmationDialog(L("social.comment.deleteConfirm"), isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button(L("social.comment.delete"), role: .destructive) {
+            Button(L("social.deleteComment"), role: .destructive) {
                 Task { do { try await model.delete(comment) } catch { app.toasts.error(error) } }
             }
             Button(L("common.cancel"), role: .cancel) {}
@@ -462,20 +462,20 @@ private struct CommentRow: View {
             ReactionMenuItems(mine: comment.reactions?.mine) { e in
                 Task { do { try await model.react(comment, e) } catch { app.toasts.error(error) } }
             }
-            Button { reply(comment) } label: { Label(L("social.comment.reply"), systemImage: "arrowshape.turn.up.left") }
+            Button { reply(comment) } label: { Label(L("social.reply"), systemImage: "arrowshape.turn.up.left") }
             Button { UIPasteboard.general.string = comment.body } label: { Label(L("social.comment.copy"), systemImage: "doc.on.doc") }
             if comment.canEdit == true {
                 Button { edit(comment) } label: { Label(L("common.edit"), systemImage: "pencil") }
             }
             if comment.author?.userId != me {
                 Button { report(ReportTarget(kind: .comment, id: comment.id, inFamily: model.post?.kind == .feed)) } label: {
-                    Label(L("chat.report.action"), systemImage: "flag")
+                    Label(L("chat.report"), systemImage: "flag")
                 }
             }
         }
         if comment.canDelete == true {
             Button(role: .destructive) { confirmDelete = true } label: {
-                Label(L(comment.author?.userId == me ? "social.comment.delete" : "social.comment.remove"), systemImage: "trash")
+                Label(L(comment.author?.userId == me ? "social.deleteComment" : "social.removeComment"), systemImage: "trash")
             }
         }
     }

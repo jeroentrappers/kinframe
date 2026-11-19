@@ -53,7 +53,7 @@ struct RemoteFollowSheet: View {
                 .frame(maxWidth: .infinity)
             }
             .pageBackground()
-            .navigationTitle(preview.map { L("servers.remote.confirmTitle", ["feed": $0.feedName]) } ?? L("servers.remote.add"))
+            .navigationTitle(preview.map { L("servers.remote.confirmTitle", ["feed": $0.feedName]) } ?? L("remote.add"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button(L("common.cancel")) { dismiss() } }
@@ -75,8 +75,8 @@ struct RemoteFollowSheet: View {
 
     private var entry: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L("servers.remote.lede")).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
-            SectionHeader(L("servers.remote.urlLabel"))
+            Text(L("remote.addBody")).foregroundStyle(Palette.textMuted).fixedSize(horizontal: false, vertical: true)
+            SectionHeader(L("remote.inviteLink"))
             HStack(spacing: 8) {
                 TextField(L("servers.remote.urlPlaceholder"), text: $typed)
                     .textFieldStyle(KFFieldStyle())
@@ -115,8 +115,8 @@ struct RemoteFollowSheet: View {
         if let f = chosenFrame {
             Text(RemoteSubscriptionLogic.confirmation(p, frameName: f.name)).fixedSize(horizontal: false, vertical: true)
         }
-        Callout(L("servers.remote.operatorNote", ["server": p.thisServerHost ?? p.thisServerName]))
-        Text(p.requiresApproval == true ? L("servers.remote.needsApproval") : L("servers.remote.instant"))
+        Callout(L("remote.previewOperator", ["server": p.thisServerHost ?? p.thisServerName]))
+        Text(p.requiresApproval == true ? L("remote.needsApproval") : L("servers.remote.instant"))
             .font(.footnote).foregroundStyle(Palette.textMuted)
         HistoryPicker(choice: $history, maxAll: app.limits.maxFeedBackfillItems)
         if app.birthdaysEnabled { BirthdaysSwitch(on: $birthdays) }
@@ -158,7 +158,7 @@ struct RemoteFollowSheet: View {
     private func check() async {
         error = nil
         guard let url = RemoteInvite.normalize(typed) else {
-            error = L("servers.remote.invalidUrl")
+            error = L("remote.linkInvalid")
             return
         }
         busy = true
@@ -179,8 +179,8 @@ struct RemoteFollowSheet: View {
         do {
             let s = try await api.createRemoteSubscription(frameId: f.id, inviteURL: link, history: history,
                                                            birthdays: app.birthdaysEnabled ? birthdays : true, onEnd: onEnd)
-            app.toasts.show(s.status == .pending ? L("servers.remote.requested", ["feed": p.feedName, "frame": f.name])
-                                                 : L("servers.remote.followed", ["feed": p.feedName, "frame": f.name]))
+            app.toasts.show(s.status == .pending ? L("remote.requested", ["feed": p.feedName, "frame": f.name])
+                                                 : L("remote.followed", ["feed": p.feedName, "frame": f.name]))
             done?(s)
             dismiss()
         } catch {
@@ -195,11 +195,11 @@ struct RemoteOnEndPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(L("servers.remote.onEnd.title"))
+            SectionHeader(L("remote.onEnd"))
             VStack(alignment: .leading, spacing: 10) {
-                Picker(L("servers.remote.onEnd.title"), selection: $onEnd) {
-                    Text(L("servers.remote.onEnd.remove")).tag(RemoteOnEnd.remove)
-                    Text(L("servers.remote.onEnd.keep")).tag(RemoteOnEnd.keep)
+                Picker(L("remote.onEnd"), selection: $onEnd) {
+                    Text(L("remote.onEnd.remove")).tag(RemoteOnEnd.remove)
+                    Text(L("remote.onEnd.keep")).tag(RemoteOnEnd.keep)
                 }
                 .pickerStyle(.inline)
                 .labelsHidden()
