@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.withTransaction
 
 @Database(
-    entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class, FeedTombstoneEntity::class, BirthdayGreetingEntity::class, AlbumFlagEntity::class],
-    version = 11,
+    entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class, FeedTombstoneEntity::class, BirthdayGreetingEntity::class, AlbumFlagEntity::class, PlacementCommentsEntity::class, CommentCardShownEntity::class],
+    version = 12,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -20,6 +20,7 @@ abstract class FrameDatabase : RoomDatabase() {
     abstract fun feedTombstones(): FeedTombstoneDao
     abstract fun birthdayGreetings(): BirthdayGreetingDao
     abstract fun albumFlags(): AlbumFlagDao
+    abstract fun social(): SocialDao
 
     suspend fun <R> tx(block: suspend () -> R): R = withTransaction(block)
 
@@ -35,6 +36,23 @@ abstract class FrameDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "frame.db"
+
+        /**
+         * v12: family social (docs/spec/family-social.md §8, §9.3): the prompt a placement answers, the frame's photo
+         * request, the week's prompts, who sent new photos not announced yet, the comments per placement and the comment
+         * cards shown per day. Nothing is dropped: the cursor stays, and the new change types arrive with later pulls.
+         */
+        val MIGRATION_11_12 = object : androidx.room.migration.Migration(11, 12) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN promptId TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN photoRequestJson TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN photoRequestAskedAt INTEGER DEFAULT NULL")
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN promptsJson TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE sync_state ADD COLUMN newPhotosFrom TEXT DEFAULT NULL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `placement_comments` (`placementId` TEXT NOT NULL, `json` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`placementId`))")
+                db.execSQL("CREATE TABLE IF NOT EXISTS `comment_cards_shown` (`placementId` TEXT NOT NULL, `date` TEXT NOT NULL, PRIMARY KEY(`placementId`, `date`))")
+            }
+        }
 
         /** v11: email to frame and Telegram: the service of `item.via`, so the caption reads "Jan via email" (email-inbox.md §9.2). */
         val MIGRATION_10_11 = object : androidx.room.migration.Migration(10, 11) {
@@ -132,7 +150,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

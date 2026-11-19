@@ -251,7 +251,7 @@ class FeedApiTest {
     @Test
     fun heartbeatFeatures() {
         val hb = app.kinframe.core.api.Heartbeat(appVersion = "0.7.0", uptimeS = 5, features = app.kinframe.core.api.FrameFeatures.SUPPORTED)
-        assertTrue(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb).contains(""""features":["feed_backfill","birthdays"]"""))
+        assertTrue(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb).contains(""""features":["feed_backfill","birthdays","comments","photo_requests","prompts"]"""))
         // Without features the field is left out, as before.
         assertFalse(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb.copy(features = null)).contains("features"))
     }
@@ -263,7 +263,7 @@ class FeedApiTest {
         assertEquals(f.SUPPORTED, f.forDistribution("github"))
         assertEquals(f.SUPPORTED + "play", f.forDistribution("play"))
         val hb = app.kinframe.core.api.Heartbeat(appVersion = "0.7.0", uptimeS = 5, features = f.forDistribution("play"))
-        assertTrue(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb).contains(""""features":["feed_backfill","birthdays","play"]"""))
+        assertTrue(KinJson.encodeToString(app.kinframe.core.api.Heartbeat.serializer(), hb).contains(""""features":["feed_backfill","birthdays","comments","photo_requests","prompts","play"]"""))
     }
 
     @Test

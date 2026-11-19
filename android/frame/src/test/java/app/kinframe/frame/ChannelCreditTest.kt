@@ -105,7 +105,7 @@ class ChannelCreditTest : SyncTestBase() {
             d.version = 10
         }
         val room = Room.databaseBuilder(app, FrameDatabase::class.java, file.absolutePath)
-            .addMigrations(FrameDatabase.MIGRATION_10_11).allowMainThreadQueries().build()
+            .addMigrations(FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12).allowMainThreadQueries().build()
         val p = room.placements().get("p1")!!
         assertEquals("Immich", p.viaLabel)
         assertNull(p.viaService)

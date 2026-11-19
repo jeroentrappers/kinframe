@@ -82,6 +82,8 @@ data class PlacementEntity(
     val viaLabel: String? = null,
     /** `item.via.service`; `email` and `telegram` credit [viaLabel] instead of the sender. */
     val viaService: String? = null,
+    /** The weekly prompt this feed post answers (`Placement.prompt_id`): its title card shows first (family-social.md §9.3). */
+    val promptId: String? = null,
 ) {
     val feedIdList: List<String> get() = feedIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     /** The feed to credit, when this photo came through one. */
@@ -118,6 +120,15 @@ data class SyncStateEntity(
     val calendarJson: String? = null,
     /** Last `birthdays` change (`FrameBirthdays`), so birthdays show offline on the day (birthdays.md §6.1). */
     val birthdaysJson: String? = null,
+    // ---- family social (family-social.md §8, §9.3), kept so it all works offline after a reboot
+    /** Last `photo_request` change or `deviceRequestPhotos` answer (`FramePhotoRequest`). */
+    val photoRequestJson: String? = null,
+    /** When "Ask for new photos" was tapped here (queued until online): "Asked today 💛" right away. */
+    val photoRequestAskedAt: Long? = null,
+    /** Last `prompts` change (`FramePrompts`). */
+    val promptsJson: String? = null,
+    /** Who sent the new photos not announced yet (JSON array of names): "New photos from Ben" on the next wake. */
+    val newPhotosFrom: String? = null,
 )
 
 /**
@@ -168,6 +179,8 @@ data class OutboxEntity(
         const val COUNTDOWN = "countdown"
         /** "Say happy birthday"; `placementId` holds the birthday id, the payload the local date. */
         const val BIRTHDAY_GREETING = "birthday_greeting"
+        /** "Ask for new photos" (`deviceRequestPhotos`); at most one queued. */
+        const val PHOTO_REQUEST = "photo_request"
     }
 }
 

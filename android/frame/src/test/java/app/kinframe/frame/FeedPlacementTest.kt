@@ -138,7 +138,7 @@ class FeedPlacementTest : SyncTestBase() {
         assertTrue(app.kinframe.core.api.FrameFeatures.FEED_BACKFILL in app.kinframe.core.api.FrameFeatures.SUPPORTED)
         api.heartbeat(app.kinframe.core.api.Heartbeat(appVersion = "t", uptimeS = 1, features = app.kinframe.core.api.FrameFeatures.SUPPORTED))
         val body = fake.requests.last { it.url.encodedPath.endsWith("/device/heartbeat") }.body!!.utf8()
-        assertTrue(body, body.contains(""""features":["feed_backfill","birthdays"]"""))
+        assertTrue(body, body.contains(""""features":["feed_backfill","birthdays","comments","photo_requests","prompts"]"""))
     }
 
     /** v7 → v8 keeps every placement and adds the feed columns with their defaults. */

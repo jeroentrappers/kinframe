@@ -97,7 +97,7 @@ class PhotoSourceCreditTest : SyncTestBase() {
             d.version = 9
         }
         val room = Room.databaseBuilder(app, FrameDatabase::class.java, file.absolutePath)
-            .addMigrations(FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11).allowMainThreadQueries().build()
+            .addMigrations(FrameDatabase.MIGRATION_9_10, FrameDatabase.MIGRATION_10_11, FrameDatabase.MIGRATION_11_12).allowMainThreadQueries().build()
         val p = room.placements().get("p1")!!
         assertEquals("Ann", p.senderName)
         assertNull(p.viaLabel)

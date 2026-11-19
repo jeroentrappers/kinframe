@@ -4,6 +4,7 @@ import android.util.Log
 import app.kinframe.core.api.Change
 import app.kinframe.core.api.ChangeType
 import app.kinframe.core.api.DeviceApi
+import app.kinframe.core.api.FramePhotoRequest
 import app.kinframe.core.api.KinJson
 import app.kinframe.core.api.Placement
 import app.kinframe.frame.data.AlbumFlagEntity
@@ -12,8 +13,10 @@ import app.kinframe.frame.data.FrameDatabase
 import app.kinframe.frame.data.MediaCache
 import app.kinframe.frame.data.MemberEntity
 import app.kinframe.frame.data.OutboxEntity
+import app.kinframe.frame.data.PlacementCommentsEntity
 import app.kinframe.frame.data.PlacementEntity
 import app.kinframe.frame.data.SyncStateEntity
+import app.kinframe.frame.social.SocialLogic
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonObject
@@ -70,6 +73,9 @@ class SyncEngine(
         var applied = 0
         var newItems = 0
         val orphans = mutableSetOf<String>()
+        // Family social: who sent this page's new photos ("New photos from Ben" on the next wake).
+        val newFrom = ArrayList<String>()
+        var answeredBy: String? = null
         for (c in changes) {
             when (c.type) {
                 ChangeType.PLACEMENT_UPSERT -> {
@@ -81,13 +87,17 @@ class SyncEngine(
                             placements.delete(p.id)
                             rememberFeedRemoval(existing)
                         }
+                        db.social().deleteComments(p.id)
                     } else {
                         // Back after a pause (feeds.md §5.1): restored, not new.
                         val restored = existing == null && db.feedTombstones().has(p.id)
                         if (restored) db.feedTombstones().delete(p.id)
                         val merged = withPendingLocalActions(merge(existing, p, initial, restored))
                         if (existing?.localFile != null && merged.localFile == null) orphans += existing.localFile
-                        if (existing == null && merged.isNew) newItems++
+                        if (existing == null && merged.isNew) {
+                            newItems++
+                            SocialLogic.senderName(p)?.let { newFrom += it }
+                        }
                         placements.upsert(merged)
                     }
                 }
@@ -97,6 +107,7 @@ class SyncEngine(
                     gone?.localFile?.let { orphans += it }
                     placements.delete(id)
                     gone?.let { rememberFeedRemoval(it) }
+                    db.social().deleteComments(id)
                     db.outbox().forPlacement(id).forEach { db.outbox().delete(it.id) }
                 }
                 ChangeType.SETTINGS -> c.settings?.let { state = state.copy(settingsJson = KinJson.encodeToString(JsonObject.serializer(), it)) }
@@ -117,6 +128,26 @@ class SyncEngine(
                 ChangeType.CALENDAR -> state = state.copy(calendarJson = c.calendar?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 // `birthdays: null` means no birthday subscription lists anyone any more (birthdays.md §11).
                 ChangeType.BIRTHDAYS -> state = state.copy(birthdaysJson = c.birthdays?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                // Family social (README §5.20). `comments: null` drops the placement's comments (setting off, removed).
+                ChangeType.COMMENTS -> {
+                    val id = c.id ?: (c.comments?.get("placement_id") as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull
+                    if (id != null) {
+                        val doc = c.comments
+                        if (doc == null) db.social().deleteComments(id)
+                        else db.social().putComments(PlacementCommentsEntity(id, KinJson.encodeToString(JsonObject.serializer(), doc), now()))
+                    }
+                }
+                ChangeType.PHOTO_REQUEST -> {
+                    val before = state.photoRequestJson?.let { runCatching { KinJson.parseToJsonElement(it).jsonObject }.getOrNull() }
+                        .let { FramePhotoRequest.parse(it) }
+                    val after = FramePhotoRequest.parse(c.photoRequest)
+                    // Someone answered "Ask for new photos": the frame says who on its next wake (§9.3).
+                    if (!initial && after != null && after.isAnswered && (before == null || before.id != after.id || !before.isAnswered)) {
+                        answeredBy = after.answeredByName?.trim()?.takeIf { it.isNotEmpty() }
+                    }
+                    state = state.copy(photoRequestJson = c.photoRequest?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
+                }
+                ChangeType.PROMPTS -> state = state.copy(promptsJson = c.prompts?.let { KinJson.encodeToString(JsonObject.serializer(), it) })
                 // Albums: only the "Only in album mode" flag matters to playback (photo-sources.md §9.1).
                 ChangeType.ALBUM_UPSERT -> c.album?.let { a ->
                     val id = (a["id"] as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull ?: return@let
@@ -133,15 +164,19 @@ class SyncEngine(
                     db.feedTombstones().deleteAll()
                     db.outbox().ofKind(OutboxEntity.PLACEMENT_PATCH).forEach { db.outbox().delete(it.id) }
                     db.outbox().ofKind(OutboxEntity.REACTION).forEach { db.outbox().delete(it.id) }
+                    db.social().deleteAllComments()
                     // Media files stay: they are content-addressed and re-linked by the downloader.
                     // Snapshots omit `birthdays` when there are none, so a stale list must not survive the reset.
-                    db.syncState().put(state.copy(nextSeq = 0, birthdaysJson = null))
+                    // Likewise the prompts and the photo request: the snapshot brings the current ones back.
+                    db.syncState().put(state.copy(nextSeq = 0, birthdaysJson = null, promptsJson = null, photoRequestJson = null))
                     return@tx PageResult(applied, 0, true, emptySet())
                 }
                 else -> Unit // unknown types are ignored (README §7)
             }
             applied++
         }
+        if (newFrom.isNotEmpty()) state = state.copy(newPhotosFrom = SocialLogic.addNames(state.newPhotosFrom, newFrom))
+        answeredBy?.let { state = state.copy(newPhotosFrom = SocialLogic.addNames(state.newPhotosFrom, listOf(it), first = true)) }
         db.syncState().put(state.copy(nextSeq = nextSeq))
         db.feedTombstones().prune(now() - FeedTombstoneEntity.KEEP_MS)
         PageResult(applied, newItems, false, orphans)
@@ -171,6 +206,7 @@ class SyncEngine(
             importedSenderName = item.importedSenderName,
             viaLabel = item.via?.let { v -> if (v.isChannel) v.personLabel else v.displayLabel },
             viaService = item.via?.service,
+            promptId = p.promptId,
             origin = p.origin,
             originFeedId = p.originFeedId,
             originFeedName = p.originFeedName,

@@ -34,6 +34,8 @@ class Outbox(
     /** Called when settings were rejected with 412: pull the change feed so the next attempt has the new version. */
     var onVersionConflict: suspend () -> Unit = {}
     var onRevoked: () -> Unit = {}
+    /** The server has no "Ask for new photos" (yet): the quick menu hides the button for a while. */
+    var onPhotoRequestUnavailable: () -> Unit = {}
 
     fun kick() { wake.trySend(Unit) }
 
@@ -152,6 +154,22 @@ class Outbox(
         return queued
     }
 
+    /**
+     * "Ask for new photos" from the quick menu (family-social.md §8): remembered locally at once (the button says
+     * "Asked today 💛", offline too) and queued; false when a request is already waiting to be sent.
+     */
+    suspend fun photoRequest(): Boolean {
+        val queued = db.tx {
+            if (db.outbox().ofKind(OutboxEntity.PHOTO_REQUEST).isNotEmpty()) return@tx false
+            val st = db.syncState().get() ?: app.kinframe.frame.data.SyncStateEntity()
+            db.syncState().put(st.copy(photoRequestAskedAt = now()))
+            db.outbox().insert(OutboxEntity(kind = OutboxEntity.PHOTO_REQUEST, placementId = null, payload = "{}", notBefore = now(), createdAt = now()))
+            true
+        }
+        if (queued) kick()
+        return queued
+    }
+
     /** Merges [patch] into the single pending settings patch. */
     suspend fun settingsPatch(patch: JsonObject) {
         db.tx {
@@ -222,6 +240,27 @@ class Outbox(
             OutboxEntity.BIRTHDAY_GREETING -> if (now() - o.createdAt <= GREETING_MAX_AGE_MS) {
                 api.greetBirthday(o.placementId!!, payload["date"]!!.jsonPrimitive.content)
             } else Log.i(TAG, "dropping a greeting queued more than two days ago")
+            // A day later the button offers to ask again anyway: an old tap is not sent any more. `403` (the owner
+            // turned the button off) is dropped like any other refusal.
+            OutboxEntity.PHOTO_REQUEST -> if (now() - o.createdAt <= PHOTO_REQUEST_MAX_AGE_MS) {
+                val r = try {
+                    api.requestPhotos()
+                } catch (e: ApiException) {
+                    // A server without "Ask for new photos" (404, or 501 while it is being built), or the owner turned
+                    // the button off (403): nobody was asked, so the button must not say "Asked today".
+                    if (e.status != 404 && e.status != 501 && e.status != 403) throw e
+                    db.tx {
+                        val st = db.syncState().get() ?: app.kinframe.frame.data.SyncStateEntity()
+                        db.syncState().put(st.copy(photoRequestAskedAt = null))
+                    }
+                    if (e.status != 403) onPhotoRequestUnavailable()
+                    return
+                }
+                db.tx {
+                    val st = db.syncState().get() ?: app.kinframe.frame.data.SyncStateEntity()
+                    db.syncState().put(st.copy(photoRequestJson = KinJson.encodeToString(app.kinframe.core.api.FramePhotoRequest.serializer(), r)))
+                }
+            } else Log.i(TAG, "dropping a photo request queued more than a day ago")
             OutboxEntity.SETTINGS_PATCH -> {
                 val version = currentSettingsVersion()
                 val result = api.patchSettings(version, payload)
@@ -246,5 +285,7 @@ class Outbox(
         /** Queued greetings older than this are dropped (birthdays.md §7). */
         const val GREETING_MAX_AGE_MS = 2 * 24 * 3_600_000L
         private const val GREETING_MARK_KEEP_MS = 7 * 24 * 3_600_000L
+        /** Queued "Ask for new photos" taps older than this are dropped. */
+        const val PHOTO_REQUEST_MAX_AGE_MS = 24 * 3_600_000L
     }
 }

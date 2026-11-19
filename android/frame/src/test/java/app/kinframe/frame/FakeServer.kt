@@ -17,6 +17,8 @@ class FakeServer : Dispatcher() {
     var settingsStatus = 200
     /** Path → HTTP status (with a problem body) for any other endpoint. */
     val status = mutableMapOf<String, Int>()
+    /** Answer of `POST /device/photo-requests` (family social). */
+    var photoRequest = """{"id":"r1","state":"open","created_at":"2026-11-19T10:00:00Z","next_allowed_at":"2026-11-20T10:00:00Z"}"""
 
     override fun dispatch(request: RecordedRequest): MockResponse {
         requests += request
@@ -35,6 +37,7 @@ class FakeServer : Dispatcher() {
             // Live photo clips are served as "<id>?motion" (`?variant=motion`).
             path.contains("/device/media/") -> mediaResponse(request, path.substringAfterLast('/') + if (request.url.queryParameter("variant") == "motion") "?motion" else "")
             path.endsWith("/device/acks") -> MockResponse.Builder().code(204).build()
+            path.endsWith("/device/photo-requests") -> MockResponse.Builder().code(201).addHeader("Content-Type", "application/json").body(photoRequest).build()
             path.endsWith("/device/settings") ->
                 if (settingsStatus == 200) json("""{"version":9,"slideshow":{"interval_s":10}}""")
                 else MockResponse.Builder().code(settingsStatus).addHeader("Content-Type", "application/problem+json")
