@@ -428,6 +428,12 @@ func (s *Store) UserCanSeeItem(ctx context.Context, userID, itemID uuid.UUID) (b
 			JOIN frames f ON f.id = p.frame_id AND f.deleted_at IS NULL
 			WHERE p.item_id = $2 AND p.removed_at IS NULL
 			AND (m.role IN ('owner','admin') OR (m.permissions->>'see_library')::boolean))
+		-- photos taken away by their sender wait in the frame's trash for its library managers (README §5.21)
+		OR EXISTS (
+			SELECT 1 FROM placements p JOIN memberships m ON m.frame_id = p.frame_id AND m.user_id = $1
+			JOIN frames f ON f.id = p.frame_id AND f.deleted_at IS NULL
+			WHERE p.item_id = $2 AND p.taken_away_at IS NOT NULL AND p.taken_away_until > now()
+			AND (m.role IN ('owner','admin') OR (m.permissions->>'manage_library')::boolean))
 		OR EXISTS (
 			SELECT 1 FROM feed_post_items pi JOIN feed_posts p ON p.id = pi.post_id AND p.removed_at IS NULL
 			JOIN feeds f ON f.id = p.feed_id AND f.deleted_at IS NULL

@@ -18265,7 +18265,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Preview */
+            /** @description Preview, or an existing subscription */
             200: {
                 headers: {
                     [name: string]: unknown;

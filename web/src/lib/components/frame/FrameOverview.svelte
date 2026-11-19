@@ -131,10 +131,10 @@
 		transferOpen = true;
 	}
 
-	async function afterTransfer(r: { left: boolean; newOwner: { display_name: string } }) {
+	async function afterTransfer(r: { left: boolean; newOwner: { display_name: string }; message?: string }) {
 		if (r.left) {
 			frames.remove(frame.id);
-			toasts.success(t('transfer.doneLeft', { name: r.newOwner.display_name, frame: frame.name }));
+			toasts.success(r.message ?? t('transfer.doneLeft', { name: r.newOwner.display_name, frame: frame.name }));
 			await goto('/frames');
 			return;
 		}

@@ -1,6 +1,7 @@
 // Helpers for the integration specs: dev-auth users, devices (frames), uploads and a browser page signed in as a
 // user, all against the real server in REAL_SERVER. Every page records failed API calls and page errors so a spec
 // can assert that the app never hit a status it didn't expect.
+import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { expect, request as pwRequest, type APIRequestContext, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import { gradientPng } from '../mock-api';
@@ -33,11 +34,13 @@ async function parse(r: { status(): number; text(): Promise<string> }) {
 export class Client {
 	constructor(
 		public ctx: APIRequestContext,
-		public token: string
+		public token: string,
+		/** The server this client talks to (REAL_SERVER, or the second server of the federation specs). */
+		public base: string = BASE
 	) {}
 
 	async raw(method: string, path: string, body?: unknown, headers: Record<string, string> = {}) {
-		const r = await this.ctx.fetch(`${BASE}${path}`, {
+		const r = await this.ctx.fetch(`${this.base}${path}`, {
 			method,
 			headers: { Authorization: `Bearer ${this.token}`, Accept: 'application/json', ...headers },
 			...(body === undefined ? {} : Buffer.isBuffer(body) ? { data: body } : { data: body as object })
@@ -69,12 +72,13 @@ export async function newCtx() {
 }
 
 /** A fresh dev-auth account; the email is unique per run so specs can rerun against the same database. */
-export async function user(ctx: APIRequestContext, name: string): Promise<User> {
+export async function user(ctx: APIRequestContext, name: string, opts: { operator?: boolean; base?: string } = {}): Promise<User> {
+	const base = opts.base ?? BASE;
 	const email = `${name.toLowerCase().replace(/[^a-z]/g, '')}-${run}-${Math.random().toString(36).slice(2, 6)}@example.org`;
-	const r = await ctx.post(`${BASE}/dev/token`, { data: { email, name } });
+	const r = await ctx.post(`${base}/dev/token`, { data: { email, name, ...(opts.operator ? { operator: true } : {}) } });
 	expect(r.status(), await r.text()).toBe(200);
 	const token = ((await r.json()) as Json).access_token as string;
-	const c = new Client(ctx, token);
+	const c = new Client(ctx, token, base);
 	const me = await c.get('/v1/me');
 	if (me.display_name !== name) await c.patch('/v1/me', { display_name: name });
 	return Object.assign(c, { id: me.id as string, name, email });
@@ -85,8 +89,8 @@ export interface Device extends Client {
 	secret: string;
 }
 
-export async function enroll(ctx: APIRequestContext): Promise<Device> {
-	const r = await ctx.post(`${BASE}/v1/devices/enroll`, {
+export async function enroll(ctx: APIRequestContext, base = BASE): Promise<Device> {
+	const r = await ctx.post(`${base}/v1/devices/enroll`, {
 		data: {
 			hardware: { brand: 'denver', model: 'PFF_1024', board: 'rk312x', android_sdk: 23 },
 			screen: { width: 1280, height: 800, density_dpi: 160, orientation: 'landscape' },
@@ -97,13 +101,13 @@ export async function enroll(ctx: APIRequestContext): Promise<Device> {
 	});
 	expect(r.status()).toBe(201);
 	const d = (await r.json()) as Json;
-	const t = (await (await ctx.post(`${BASE}/v1/devices/token`, { data: { device_id: d.device_id, device_secret: d.device_secret } })).json()) as Json;
-	return Object.assign(new Client(ctx, t.access_token as string), { deviceId: d.device_id as string, secret: d.device_secret as string });
+	const t = (await (await ctx.post(`${base}/v1/devices/token`, { data: { device_id: d.device_id, device_secret: d.device_secret } })).json()) as Json;
+	return Object.assign(new Client(ctx, t.access_token as string, base), { deviceId: d.device_id as string, secret: d.device_secret as string });
 }
 
 /** Enrolls a device and has `owner` claim it as a frame called `name`. */
 export async function claimFrame(ctx: APIRequestContext, owner: User, name: string) {
-	const dev = await enroll(ctx);
+	const dev = await enroll(ctx, owner.base);
 	const { code } = await dev.post('/v1/device/code');
 	const res = await owner.post('/v1/frames/redeem', { code });
 	expect(res.status).toBe('claimed');
@@ -124,7 +128,7 @@ export async function upload(u: Client, hue = 20, name = 'photo.png', w = 640, h
 	});
 	expect(create.status, JSON.stringify(create.body)).toBe(201);
 	const loc = create.headers['location']!;
-	const r = await u.ctx.fetch(loc.startsWith('http') ? loc : `${BASE}${loc}`, {
+	const r = await u.ctx.fetch(loc.startsWith('http') ? loc : `${u.base}${loc}`, {
 		method: 'PATCH',
 		headers: { Authorization: `Bearer ${u.token}`, 'Tus-Resumable': '1.0.0', 'Upload-Offset': '0', 'Content-Type': 'application/offset+octet-stream' },
 		data
@@ -177,6 +181,54 @@ export async function join(admin: User, u: User, feedId: string) {
 	expect(r.status).toBe('joined');
 }
 
+/**
+ * Runs SQL against the server's database for what no API does (moving a post a year back for On this day). Needs
+ * REAL_PSQL, a command reading SQL on stdin (e.g. `docker exec -i kinframe-e2e-pg psql -U kinframe -d kinframe`);
+ * specs that need it skip without it.
+ */
+export const PSQL = process.env.REAL_PSQL ?? '';
+export function sql(query: string) {
+	execSync(PSQL, { input: query, stdio: ['pipe', 'ignore', 'inherit'] });
+}
+
+/** A heartbeat of a current frame app: it shows family history (restored and backfilled photos) too. */
+export async function heartbeat(dev: Client, features = ['feed_backfill', 'birthdays']) {
+	await dev.post('/v1/device/heartbeat', { app_version: '0.7.0', app_version_code: 70099, uptime_s: 60, features }, 204);
+}
+
+/** Makes `u` a member of `owner`'s frame through an invite link. */
+export async function joinFrame(owner: User, u: User, frameId: string) {
+	const inv = await owner.post(`/v1/frames/${frameId}/invites`, {}, 201);
+	const r = await u.post(`/v1/invites/${inv.token}/accept`);
+	if (r.status !== 'joined') {
+		// Invites that need approval: the owner approves the request.
+		const reqs = (await owner.get(`/v1/frames/${frameId}/join-requests`)) as Json;
+		const list = (Array.isArray(reqs) ? reqs : (reqs.requests ?? reqs.items ?? [])) as Json[];
+		for (const q of list) await owner.post(`/v1/frames/${frameId}/join-requests/${q.id}/approve`);
+	}
+}
+
+/** What the frame shows now, from its change feed: placement id → item id. */
+export async function onFrame(dev: Client): Promise<Map<string, string>> {
+	const out = new Map<string, string>();
+	let since = 0;
+	for (;;) {
+		const r = await dev.get(`/v1/device/changes?since=${since}`);
+		const changes = (r.changes as Json[]) ?? [];
+		for (const c of changes) {
+			if (c.type === 'reset') out.clear();
+			if (c.type === 'placement.upsert') {
+				const p = c.placement as Json;
+				if (p.hidden || p.trashed) out.delete(p.id as string);
+				else out.set(p.id as string, (p.item as Json).id as string);
+			}
+			if (c.type === 'placement.remove') out.delete(c.id as string);
+		}
+		if (!r.has_more || changes.length === 0) return out;
+		since = r.next_seq as number;
+	}
+}
+
 export interface Watch {
 	/** API responses at or above 400 that the spec did not mark as expected. */
 	failures: string[];
@@ -186,7 +238,7 @@ export interface Watch {
 
 /** A browser context signed in as `u`, with failed calls and page errors recorded. */
 export async function signedIn(browser: Browser, u: User): Promise<{ ctx: BrowserContext; page: Page; watch: Watch }> {
-	const ctx = await browser.newContext();
+	const ctx = await browser.newContext({ baseURL: u.base });
 	await ctx.addInitScript(
 		([token]) => {
 			try {
@@ -204,8 +256,8 @@ export async function signedIn(browser: Browser, u: User): Promise<{ ctx: Browse
 	const allowed: RegExp[] = [/^404 GET \/v1\/me\/weekly-summaries\//, /^404 GET \/v1\/items\/[^/]+\/media\/.*not available \(yet\)/];
 	const watch: Watch = { failures: [], errors: [], allow: (re) => allowed.push(re) };
 	page.on('response', async (r) => {
-		if (r.status() < 400 || !r.url().startsWith(BASE)) return;
-		const line = `${r.status()} ${r.request().method()} ${r.url().slice(BASE.length)} ${(await r.text().catch(() => '')).slice(0, 300)}`;
+		if (r.status() < 400 || !r.url().startsWith(u.base)) return;
+		const line = `${r.status()} ${r.request().method()} ${r.url().slice(u.base.length)} ${(await r.text().catch(() => '')).slice(0, 300)}`;
 		if (!allowed.some((re) => re.test(line))) watch.failures.push(line);
 	});
 	page.on('pageerror', (e) => watch.errors.push(String(e)));
