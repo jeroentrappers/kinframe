@@ -82,7 +82,11 @@ import app.kinframe.family.util.Format
 @Composable
 fun creditName(name: String, via: ItemVia?): String {
     val fmt = stringResource(R.string.source_credit_via)
-    return SourceCredit.text(name, via) { n, v -> fmt.format(n, v) }
+    val email = stringResource(R.string.channel_credit_email)
+    val telegram = stringResource(R.string.channel_credit_telegram)
+    return SourceCredit.text(name, via, { n, v -> fmt.format(n, v) }) { person, service ->
+        (if (service == app.kinframe.core.api.PhotoService.TELEGRAM) telegram else email).format(person)
+    }
 }
 
 // ---------------------------------------------------------------------------------------------------------- status

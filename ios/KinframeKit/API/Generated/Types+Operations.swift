@@ -8975,7 +8975,7 @@ public enum Operations {
             }
         }
     }
-    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    /// Owner or admin. Pending requests from join invites (`via` is `invite`, `email` for join links mailed to senders, or `telegram` for join links the Telegram bot gave).
     ///
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
@@ -17437,6 +17437,6129 @@ public enum Operations {
                     .html
                 ]
             }
+        }
+    }
+    /// The frame's inbox addresses (frame managers: owner, admin, `change_settings`; others `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/get(listFrameEmailAddresses)`.
+    public enum ListFrameEmailAddresses {
+        public static let id: Swift.String = "listFrameEmailAddresses"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListFrameEmailAddresses.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameEmailAddresses.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameEmailAddresses.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFrameEmailAddresses.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFrameEmailAddresses.Input.Path,
+                headers: Operations.ListFrameEmailAddresses.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EmailAddress])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EmailAddress] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFrameEmailAddresses.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFrameEmailAddresses.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Addresses, oldest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/get(listFrameEmailAddresses)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFrameEmailAddresses.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFrameEmailAddresses.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/get(listFrameEmailAddresses)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// A new address that fills this frame (frame managers). The caller becomes its `owner`: mail from senders without
+    /// a matching account is sent by them. `409 limit_reached` beyond `limits.max_email_addresses_per_target`,
+    /// `503 feature_disabled` without discovery `email_inbox`. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)`.
+    public enum CreateFrameEmailAddress {
+        public static let id: Swift.String = "createFrameEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.CreateFrameEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFrameEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFrameEmailAddress.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFrameEmailAddress.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailAddressCreate)
+            }
+            public var body: Operations.CreateFrameEmailAddress.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFrameEmailAddress.Input.Path,
+                headers: Operations.CreateFrameEmailAddress.Input.Headers = .init(),
+                body: Operations.CreateFrameEmailAddress.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/email-addresses/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.EmailAddress)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailAddress {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFrameEmailAddress.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFrameEmailAddress.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFrameEmailAddress.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFrameEmailAddress.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/get(listFeedEmailAddresses)`.
+    public enum ListFeedEmailAddresses {
+        public static let id: Swift.String = "listFeedEmailAddresses"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedEmailAddresses.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedEmailAddresses.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedEmailAddresses.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedEmailAddresses.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedEmailAddresses.Input.Path,
+                headers: Operations.ListFeedEmailAddresses.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EmailAddress])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EmailAddress] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedEmailAddresses.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedEmailAddresses.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Addresses, oldest first
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/get(listFeedEmailAddresses)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedEmailAddresses.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedEmailAddresses.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/get(listFeedEmailAddresses)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// A new address that posts to this feed (feed owner and admins). Otherwise as `createFrameEmailAddress`.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)`.
+    public enum CreateFeedEmailAddress {
+        public static let id: Swift.String = "createFeedEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.CreateFeedEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedEmailAddress.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFeedEmailAddress.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailAddressCreate)
+            }
+            public var body: Operations.CreateFeedEmailAddress.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFeedEmailAddress.Input.Path,
+                headers: Operations.CreateFeedEmailAddress.Input.Headers = .init(),
+                body: Operations.CreateFeedEmailAddress.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/email-addresses/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.EmailAddress)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailAddress {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFeedEmailAddress.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFeedEmailAddress.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFeedEmailAddress.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFeedEmailAddress.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target (frame managers, feed owner/admins). Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/get(getEmailAddress)`.
+    public enum GetEmailAddress {
+        public static let id: Swift.String = "getEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/GET/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.GetEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEmailAddress.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetEmailAddress.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetEmailAddress.Input.Path,
+                headers: Operations.GetEmailAddress.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailAddress)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailAddress {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetEmailAddress.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetEmailAddress.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Address
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/get(getEmailAddress)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetEmailAddress.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetEmailAddress.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/get(getEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op;
+    /// mail to a paused address is refused with `550 5.2.1`). A new `slug` changes the address (the random part
+    /// stays) and retires the old one at once. `take_over: true` makes the caller the owner.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)`.
+    public enum UpdateEmailAddress {
+        public static let id: Swift.String = "updateEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.UpdateEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateEmailAddress.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateEmailAddress.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailAddressUpdate)
+            }
+            public var body: Operations.UpdateEmailAddress.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateEmailAddress.Input.Path,
+                headers: Operations.UpdateEmailAddress.Input.Headers = .init(),
+                body: Operations.UpdateEmailAddress.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailAddress)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailAddress {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateEmailAddress.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateEmailAddress.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateEmailAddress.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateEmailAddress.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. The address stops working at once and is never issued again; its senders, held mail
+    /// and email join links go with it. Photos already delivered stay.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)`.
+    public enum DeleteEmailAddress {
+        public static let id: Swift.String = "deleteEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/DELETE/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.DeleteEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteEmailAddress.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteEmailAddress.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteEmailAddress.Input.Path,
+                headers: Operations.DeleteEmailAddress.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteEmailAddress.Output.NoContent)
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteEmailAddress.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// A new random part (managers of the target): the old address stops working at once and is never issued again.
+    /// Senders, settings and held mail stay. Rate-limited (10/h per address).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/regenerate`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)`.
+    public enum RegenerateEmailAddress {
+        public static let id: Swift.String = "regenerateEmailAddress"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/regenerate/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/regenerate/POST/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.RegenerateEmailAddress.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/regenerate/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RegenerateEmailAddress.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RegenerateEmailAddress.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RegenerateEmailAddress.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RegenerateEmailAddress.Input.Path,
+                headers: Operations.RegenerateEmailAddress.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/regenerate/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/regenerate/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailAddress)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailAddress {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.RegenerateEmailAddress.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.RegenerateEmailAddress.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Regenerated
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.RegenerateEmailAddress.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.RegenerateEmailAddress.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The allowed and blocked senders (managers of the target), by email. Members of the target are allowed
+    /// automatically by their verified account email and are not listed. Pending senders are in
+    /// `listEmailPendingSenders`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/get(listEmailSenders)`.
+    public enum ListEmailSenders {
+        public static let id: Swift.String = "listEmailSenders"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/GET/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.ListEmailSenders.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailSenders.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailSenders.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListEmailSenders.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListEmailSenders.Input.Path,
+                headers: Operations.ListEmailSenders.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EmailSender])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EmailSender] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListEmailSenders.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListEmailSenders.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Senders
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/get(listEmailSenders)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListEmailSenders.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListEmailSenders.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/get(listEmailSenders)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Allow (or with `blocked: true` block) an address (managers of the target). A pending sender with that address
+    /// is approved (and their held mail delivered) or rejected and blocked. `409 duplicate_sender` when it is already
+    /// allowed or blocked (`detail`: its id), `409 limit_reached` beyond `limits.max_email_senders_per_address`.
+    /// Rate-limited (120/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)`.
+    public enum AddEmailSender {
+        public static let id: Swift.String = "addEmailSender"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.AddEmailSender.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AddEmailSender.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.AddEmailSender.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.AddEmailSender.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailSenderCreate)
+            }
+            public var body: Operations.AddEmailSender.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.AddEmailSender.Input.Path,
+                headers: Operations.AddEmailSender.Input.Headers = .init(),
+                body: Operations.AddEmailSender.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.EmailSender)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailSender {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.AddEmailSender.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.AddEmailSender.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Added
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.AddEmailSender.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.AddEmailSender.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)/responses/422`.
+            ///
+            /// HTTP response code: `422 unprocessableContent`.
+            case unprocessableContent(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unprocessableContent`.
+            ///
+            /// - Throws: An error if `self` is not `.unprocessableContent`.
+            /// - SeeAlso: `.unprocessableContent`.
+            public var unprocessableContent: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unprocessableContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unprocessableContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Rename, block (`blocked: true`) or unblock (`blocked: false`) an allowed or blocked sender (managers of the target).
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/patch(updateEmailSender)`.
+    public enum UpdateEmailSender {
+        public static let id: Swift.String = "updateEmailSender"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/path/senderId`.
+                public var senderId: Components.Parameters.SenderId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - senderId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    senderId: Components.Parameters.SenderId
+                ) {
+                    self.addressId = addressId
+                    self.senderId = senderId
+                }
+            }
+            public var path: Operations.UpdateEmailSender.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateEmailSender.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateEmailSender.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateEmailSender.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailSenderUpdate)
+            }
+            public var body: Operations.UpdateEmailSender.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateEmailSender.Input.Path,
+                headers: Operations.UpdateEmailSender.Input.Headers = .init(),
+                body: Operations.UpdateEmailSender.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailSender)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailSender {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateEmailSender.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateEmailSender.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/patch(updateEmailSender)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateEmailSender.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateEmailSender.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/patch(updateEmailSender)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Remove an allowed or blocked sender (managers of the target): their next mail is held as from an unknown
+    /// sender again. Their unused email join link is revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)`.
+    public enum RemoveEmailSender {
+        public static let id: Swift.String = "removeEmailSender"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/DELETE/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/DELETE/path/senderId`.
+                public var senderId: Components.Parameters.SenderId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - senderId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    senderId: Components.Parameters.SenderId
+                ) {
+                    self.addressId = addressId
+                    self.senderId = senderId
+                }
+            }
+            public var path: Operations.RemoveEmailSender.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/senders/{senderId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveEmailSender.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RemoveEmailSender.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RemoveEmailSender.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RemoveEmailSender.Input.Path,
+                headers: Operations.RemoveEmailSender.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RemoveEmailSender.Output.NoContent)
+            /// Removed
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RemoveEmailSender.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Senders waiting for approval, with their held mail (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/pending-senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/get(listEmailPendingSenders)`.
+    public enum ListEmailPendingSenders {
+        public static let id: Swift.String = "listEmailPendingSenders"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/GET/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.ListEmailPendingSenders.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailPendingSenders.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailPendingSenders.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListEmailPendingSenders.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListEmailPendingSenders.Input.Path,
+                headers: Operations.ListEmailPendingSenders.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.EmailPendingSender])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.EmailPendingSender] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListEmailPendingSenders.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListEmailPendingSenders.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Pending senders
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/get(listEmailPendingSenders)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListEmailPendingSenders.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListEmailPendingSenders.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/get(listEmailPendingSenders)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Allow a pending sender (managers of the target). With `deliver` (default) their authenticated held mail is
+    /// delivered now (unverified held mail stays held; deliver it one by one with `deliverEmailHeldMessage`). The
+    /// sender gets a `delivered` reply when the address sends confirmations. `409 already_decided` when someone else
+    /// decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)`.
+    public enum ApproveEmailSender {
+        public static let id: Swift.String = "approveEmailSender"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/path/senderId`.
+                public var senderId: Components.Parameters.SenderId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - senderId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    senderId: Components.Parameters.SenderId
+                ) {
+                    self.addressId = addressId
+                    self.senderId = senderId
+                }
+            }
+            public var path: Operations.ApproveEmailSender.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveEmailSender.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ApproveEmailSender.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ApproveEmailSender.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailSenderApprove)
+            }
+            public var body: Operations.ApproveEmailSender.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.ApproveEmailSender.Input.Path,
+                headers: Operations.ApproveEmailSender.Input.Headers = .init(),
+                body: Operations.ApproveEmailSender.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailSender)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailSender {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ApproveEmailSender.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ApproveEmailSender.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Approved
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ApproveEmailSender.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ApproveEmailSender.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Reject a pending sender (managers of the target): their held mail is deleted, nobody tells them. With `block`
+    /// their later mail is dropped silently (`204` either way). `409 already_decided` when someone else decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)`.
+    public enum RejectEmailSender {
+        public static let id: Swift.String = "rejectEmailSender"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/path/senderId`.
+                public var senderId: Components.Parameters.SenderId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - senderId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    senderId: Components.Parameters.SenderId
+                ) {
+                    self.addressId = addressId
+                    self.senderId = senderId
+                }
+            }
+            public var path: Operations.RejectEmailSender.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectEmailSender.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RejectEmailSender.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RejectEmailSender.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailSenderReject)
+            }
+            public var body: Operations.RejectEmailSender.Input.Body?
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.RejectEmailSender.Input.Path,
+                headers: Operations.RejectEmailSender.Input.Headers = .init(),
+                body: Operations.RejectEmailSender.Input.Body? = nil
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Rejected
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RejectEmailSender.Output.NoContent)
+            /// Rejected
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RejectEmailSender.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)/responses/409`.
+            ///
+            /// HTTP response code: `409 conflict`.
+            case conflict(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.conflict`.
+            ///
+            /// - Throws: An error if `self` is not `.conflict`.
+            /// - SeeAlso: `.conflict`.
+            public var conflict: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .conflict(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "conflict",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// One held mail with its photos and videos as short-lived thumbnail URLs (managers of the target).
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/get(getEmailHeldMessage)`.
+    public enum GetEmailHeldMessage {
+        public static let id: Swift.String = "getEmailHeldMessage"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/path/messageId`.
+                public var messageId: Components.Parameters.HeldMessageId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - messageId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    messageId: Components.Parameters.HeldMessageId
+                ) {
+                    self.addressId = addressId
+                    self.messageId = messageId
+                }
+            }
+            public var path: Operations.GetEmailHeldMessage.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEmailHeldMessage.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetEmailHeldMessage.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetEmailHeldMessage.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetEmailHeldMessage.Input.Path,
+                headers: Operations.GetEmailHeldMessage.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailHeldMessage)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailHeldMessage {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetEmailHeldMessage.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetEmailHeldMessage.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Held mail
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/get(getEmailHeldMessage)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetEmailHeldMessage.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetEmailHeldMessage.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/get(getEmailHeldMessage)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Delete one held mail without deciding about its sender (managers of the target).
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)`.
+    public enum DeleteEmailHeldMessage {
+        public static let id: Swift.String = "deleteEmailHeldMessage"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/DELETE/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/DELETE/path/messageId`.
+                public var messageId: Components.Parameters.HeldMessageId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - messageId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    messageId: Components.Parameters.HeldMessageId
+                ) {
+                    self.addressId = addressId
+                    self.messageId = messageId
+                }
+            }
+            public var path: Operations.DeleteEmailHeldMessage.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteEmailHeldMessage.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeleteEmailHeldMessage.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeleteEmailHeldMessage.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeleteEmailHeldMessage.Input.Path,
+                headers: Operations.DeleteEmailHeldMessage.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DeleteEmailHeldMessage.Output.NoContent)
+            /// Deleted
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DeleteEmailHeldMessage.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Deliver this one held mail (managers of the target), also an unverified one (`reason: unverified_sender`):
+    /// sent by the address owner, credited to the claimed name, never answered. The sender is not allowed by it.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/post(deliverEmailHeldMessage)`.
+    public enum DeliverEmailHeldMessage {
+        public static let id: Swift.String = "deliverEmailHeldMessage"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/path/messageId`.
+                public var messageId: Components.Parameters.HeldMessageId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                ///   - messageId:
+                public init(
+                    addressId: Components.Parameters.AddressId,
+                    messageId: Components.Parameters.HeldMessageId
+                ) {
+                    self.addressId = addressId
+                    self.messageId = messageId
+                }
+            }
+            public var path: Operations.DeliverEmailHeldMessage.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeliverEmailHeldMessage.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DeliverEmailHeldMessage.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DeliverEmailHeldMessage.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DeliverEmailHeldMessage.Input.Path,
+                headers: Operations.DeliverEmailHeldMessage.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailMessage)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailMessage {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.DeliverEmailHeldMessage.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.DeliverEmailHeldMessage.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Delivered
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/post(deliverEmailHeldMessage)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.DeliverEmailHeldMessage.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.DeliverEmailHeldMessage.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/post(deliverEmailHeldMessage)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Recent mail (last 30 days) to the address and what became of it (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/messages/get(listEmailMessages)`.
+    public enum ListEmailMessages {
+        public static let id: Swift.String = "listEmailMessages"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/path/addressId`.
+                public var addressId: Components.Parameters.AddressId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - addressId:
+                public init(addressId: Components.Parameters.AddressId) {
+                    self.addressId = addressId
+                }
+            }
+            public var path: Operations.ListEmailMessages.Input.Path
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/query`.
+            public struct Query: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/query/cursor`.
+                public var cursor: Components.Parameters.Cursor?
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/query/limit`.
+                public var limit: Components.Parameters.Limit?
+                /// Creates a new `Query`.
+                ///
+                /// - Parameters:
+                ///   - cursor:
+                ///   - limit:
+                public init(
+                    cursor: Components.Parameters.Cursor? = nil,
+                    limit: Components.Parameters.Limit? = nil
+                ) {
+                    self.cursor = cursor
+                    self.limit = limit
+                }
+            }
+            public var query: Operations.ListEmailMessages.Input.Query
+            /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailMessages.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListEmailMessages.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListEmailMessages.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - query:
+            ///   - headers:
+            public init(
+                path: Operations.ListEmailMessages.Input.Path,
+                query: Operations.ListEmailMessages.Input.Query = .init(),
+                headers: Operations.ListEmailMessages.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.query = query
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/email-addresses/{addressId}/messages/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailMessagePage)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailMessagePage {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListEmailMessages.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListEmailMessages.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Recent mail
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/messages/get(listEmailMessages)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListEmailMessages.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListEmailMessages.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/messages/get(listEmailMessages)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// **Operator integration, not for clients.** A mail provider or forwarding service posts one received message
+    /// (raw MIME, exactly as received) for kinframe to process (docs/spec/email-inbox.md §6.3). Only when the
+    /// operator set `KINFRAME_EMAIL_WEBHOOK_SECRET` (`404 not_found` otherwise; `503 feature_disabled` while the
+    /// inbox is off). Signed with HMAC-SHA256 (`inboundWebhook`); a bad or replayed signature or a timestamp more than
+    /// 5 minutes off is `401 unauthorized`. `413 upload_too_large` above `limits.max_email_message_bytes`. The
+    /// message is queued and processed asynchronously; the answer reports each envelope recipient. Do not retry a
+    /// `2xx` or `4xx`; retry `429` and `5xx` (a retried message is recognised and not delivered twice). Rate-limited
+    /// (600/min).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)`.
+    public enum ReceiveInboundEmail {
+        public static let id: Swift.String = "receiveInboundEmail"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// Unix seconds when the request was signed.
+                ///
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header/X-Kinframe-Timestamp`.
+                public var xKinframeTimestamp: Swift.String
+                /// The envelope recipient(s) (SMTP RCPT TO), comma-separated. BCC recipients exist only here.
+                ///
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header/X-Kinframe-Envelope-To`.
+                public var xKinframeEnvelopeTo: Swift.String
+                /// The envelope sender (SMTP MAIL FROM); empty for the null sender.
+                ///
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header/X-Kinframe-Envelope-From`.
+                public var xKinframeEnvelopeFrom: Swift.String?
+                /// The IP address of the server that delivered the mail to the provider. Without it SPF is not checked (DKIM only).
+                ///
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header/X-Kinframe-Client-Ip`.
+                public var xKinframeClientIp: Swift.String?
+                /// That server's HELO/EHLO name.
+                ///
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/header/X-Kinframe-Helo`.
+                public var xKinframeHelo: Swift.String?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ReceiveInboundEmail.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - xKinframeTimestamp: Unix seconds when the request was signed.
+                ///   - xKinframeEnvelopeTo: The envelope recipient(s) (SMTP RCPT TO), comma-separated. BCC recipients exist only here.
+                ///   - xKinframeEnvelopeFrom: The envelope sender (SMTP MAIL FROM); empty for the null sender.
+                ///   - xKinframeClientIp: The IP address of the server that delivered the mail to the provider. Without it SPF is not checked (DKIM only).
+                ///   - xKinframeHelo: That server's HELO/EHLO name.
+                ///   - accept:
+                public init(
+                    xKinframeTimestamp: Swift.String,
+                    xKinframeEnvelopeTo: Swift.String,
+                    xKinframeEnvelopeFrom: Swift.String? = nil,
+                    xKinframeClientIp: Swift.String? = nil,
+                    xKinframeHelo: Swift.String? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ReceiveInboundEmail.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.xKinframeTimestamp = xKinframeTimestamp
+                    self.xKinframeEnvelopeTo = xKinframeEnvelopeTo
+                    self.xKinframeEnvelopeFrom = xKinframeEnvelopeFrom
+                    self.xKinframeClientIp = xKinframeClientIp
+                    self.xKinframeHelo = xKinframeHelo
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ReceiveInboundEmail.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/inbound/email/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/requestBody/content/message\/rfc822`.
+                case messageRfc822(OpenAPIRuntime.HTTPBody)
+            }
+            public var body: Operations.ReceiveInboundEmail.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.ReceiveInboundEmail.Input.Headers,
+                body: Operations.ReceiveInboundEmail.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Accepted: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/inbound/email/POST/responses/202/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/inbound/email/POST/responses/202/content/application\/json`.
+                    case json(Components.Schemas.EmailInboundResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailInboundResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ReceiveInboundEmail.Output.Accepted.Body
+                /// Creates a new `Accepted`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ReceiveInboundEmail.Output.Accepted.Body) {
+                    self.body = body
+                }
+            }
+            /// Queued
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/202`.
+            ///
+            /// HTTP response code: `202 accepted`.
+            case accepted(Operations.ReceiveInboundEmail.Output.Accepted)
+            /// The associated value of the enum case if `self` is `.accepted`.
+            ///
+            /// - Throws: An error if `self` is not `.accepted`.
+            /// - SeeAlso: `.accepted`.
+            public var accepted: Operations.ReceiveInboundEmail.Output.Accepted {
+                get throws {
+                    switch self {
+                    case let .accepted(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "accepted",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/429`.
+            ///
+            /// HTTP response code: `429 tooManyRequests`.
+            case tooManyRequests(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.tooManyRequests`.
+            ///
+            /// - Throws: An error if `self` is not `.tooManyRequests`.
+            /// - SeeAlso: `.tooManyRequests`.
+            public var tooManyRequests: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .tooManyRequests(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "tooManyRequests",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// **Operator integration, not for clients.** Which recipients exist and are active, so a provider can refuse
+    /// unknown ones during its own SMTP dialogue. Signed like `receiveInboundEmail`, with the JSON body as the body and
+    /// empty envelope fields.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email:check`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)`.
+    public enum CheckInboundEmailRecipients {
+        public static let id: Swift.String = "checkInboundEmailRecipients"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/header/X-Kinframe-Timestamp`.
+                public var xKinframeTimestamp: Swift.String
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CheckInboundEmailRecipients.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - xKinframeTimestamp:
+                ///   - accept:
+                public init(
+                    xKinframeTimestamp: Swift.String,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CheckInboundEmailRecipients.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.xKinframeTimestamp = xKinframeTimestamp
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CheckInboundEmailRecipients.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.EmailRecipientCheck)
+            }
+            public var body: Operations.CheckInboundEmailRecipients.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            ///   - body:
+            public init(
+                headers: Operations.CheckInboundEmailRecipients.Input.Headers,
+                body: Operations.CheckInboundEmailRecipients.Input.Body
+            ) {
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/inbound/email:check/POST/responses/200/content/application\/json`.
+                    case json(Components.Schemas.EmailRecipientCheckResult)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.EmailRecipientCheckResult {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CheckInboundEmailRecipients.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CheckInboundEmailRecipients.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Recipients
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.CheckInboundEmailRecipients.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.CheckInboundEmailRecipients.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)/responses/503`.
+            ///
+            /// HTTP response code: `503 serviceUnavailable`.
+            case serviceUnavailable(Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.serviceUnavailable`.
+            ///
+            /// - Throws: An error if `self` is not `.serviceUnavailable`.
+            /// - SeeAlso: `.serviceUnavailable`.
+            public var serviceUnavailable: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .serviceUnavailable(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "serviceUnavailable",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Frame managers (owner, admin, `change_settings`). The Telegram chats connected to this frame: live ones first,
+    /// then those disconnected in the last 30 days. `503 feature_disabled` without discovery `telegram`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-chats/get(listFrameTelegramChats)`.
+    public enum ListFrameTelegramChats {
+        public static let id: Swift.String = "listFrameTelegramChats"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-chats/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-chats/GET/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.ListFrameTelegramChats.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-chats/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameTelegramChats.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFrameTelegramChats.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFrameTelegramChats.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFrameTelegramChats.Input.Path,
+                headers: Operations.ListFrameTelegramChats.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-chats/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-chats/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.TelegramChat])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.TelegramChat] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFrameTelegramChats.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFrameTelegramChats.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Chats
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-chats/get(listFrameTelegramChats)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFrameTelegramChats.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFrameTelegramChats.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-chats/get(listFrameTelegramChats)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Frame managers. A one-time connect code in a Telegram deep link (docs/spec/telegram.md §5.1): `chat_kind:
+    /// group` gives `https://t.me/<bot>?startgroup=<code>` (pick a group; the bot joins and binds it), `private`
+    /// gives `https://t.me/<bot>?start=<code>` (a private chat with the bot). The caller becomes the chat's owner. The
+    /// code is single use and expires after 30 minutes; a new code for the same frame and kind revokes the caller's
+    /// previous open one. `409 limit_reached` at `limits.max_telegram_chats_per_target` or
+    /// `max_telegram_chats_per_user`, `409 telegram_already_linked` for `link_account` when the caller is linked
+    /// already, `503 feature_disabled` without a bot, `429 rate_limited` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-codes/post(createFrameTelegramCode)`.
+    public enum CreateFrameTelegramCode {
+        public static let id: Swift.String = "createFrameTelegramCode"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/path/frameId`.
+                public var frameId: Components.Parameters.FrameId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - frameId:
+                public init(frameId: Components.Parameters.FrameId) {
+                    self.frameId = frameId
+                }
+            }
+            public var path: Operations.CreateFrameTelegramCode.Input.Path
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFrameTelegramCode.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFrameTelegramCode.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFrameTelegramCode.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.TelegramConnectCodeCreate)
+            }
+            public var body: Operations.CreateFrameTelegramCode.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFrameTelegramCode.Input.Path,
+                headers: Operations.CreateFrameTelegramCode.Input.Headers = .init(),
+                body: Operations.CreateFrameTelegramCode.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/frames/{frameId}/telegram-codes/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.TelegramCode)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramCode {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFrameTelegramCode.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFrameTelegramCode.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-codes/post(createFrameTelegramCode)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFrameTelegramCode.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFrameTelegramCode.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-codes/post(createFrameTelegramCode)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feed owner and admins. As `listFrameTelegramChats`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-chats/get(listFeedTelegramChats)`.
+    public enum ListFeedTelegramChats {
+        public static let id: Swift.String = "listFeedTelegramChats"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-chats/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-chats/GET/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.ListFeedTelegramChats.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-chats/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedTelegramChats.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListFeedTelegramChats.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListFeedTelegramChats.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListFeedTelegramChats.Input.Path,
+                headers: Operations.ListFeedTelegramChats.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-chats/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-chats/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.TelegramChat])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.TelegramChat] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListFeedTelegramChats.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListFeedTelegramChats.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Chats
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-chats/get(listFeedTelegramChats)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListFeedTelegramChats.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListFeedTelegramChats.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-chats/get(listFeedTelegramChats)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Feed owner and admins. As `createFrameTelegramCode`; each batch from the chat becomes a post.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-codes/post(createFeedTelegramCode)`.
+    public enum CreateFeedTelegramCode {
+        public static let id: Swift.String = "createFeedTelegramCode"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/path/feedId`.
+                public var feedId: Components.Parameters.FeedId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - feedId:
+                public init(feedId: Components.Parameters.FeedId) {
+                    self.feedId = feedId
+                }
+            }
+            public var path: Operations.CreateFeedTelegramCode.Input.Path
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedTelegramCode.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateFeedTelegramCode.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateFeedTelegramCode.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/requestBody/content/application\/json`.
+                case json(Components.Schemas.TelegramConnectCodeCreate)
+            }
+            public var body: Operations.CreateFeedTelegramCode.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.CreateFeedTelegramCode.Input.Path,
+                headers: Operations.CreateFeedTelegramCode.Input.Headers = .init(),
+                body: Operations.CreateFeedTelegramCode.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/feeds/{feedId}/telegram-codes/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.TelegramCode)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramCode {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateFeedTelegramCode.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateFeedTelegramCode.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-codes/post(createFeedTelegramCode)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateFeedTelegramCode.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateFeedTelegramCode.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-codes/post(createFeedTelegramCode)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The caller's own code, to follow it until it is used (or listen to `telegram_code.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/get(getTelegramCode)`.
+    public enum GetTelegramCode {
+        public static let id: Swift.String = "getTelegramCode"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/GET/path/codeId`.
+                public var codeId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - codeId:
+                public init(codeId: Components.Schemas.Id) {
+                    self.codeId = codeId
+                }
+            }
+            public var path: Operations.GetTelegramCode.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramCode.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramCode.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetTelegramCode.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetTelegramCode.Input.Path,
+                headers: Operations.GetTelegramCode.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TelegramCode)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramCode {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetTelegramCode.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetTelegramCode.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Code
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/get(getTelegramCode)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetTelegramCode.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetTelegramCode.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/get(getTelegramCode)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Revokes an open code of the caller (repeating it is a no-op).
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)`.
+    public enum RevokeTelegramCode {
+        public static let id: Swift.String = "revokeTelegramCode"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/DELETE/path/codeId`.
+                public var codeId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - codeId:
+                public init(codeId: Components.Schemas.Id) {
+                    self.codeId = codeId
+                }
+            }
+            public var path: Operations.RevokeTelegramCode.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-codes/{codeId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeTelegramCode.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.RevokeTelegramCode.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.RevokeTelegramCode.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.RevokeTelegramCode.Input.Path,
+                headers: Operations.RevokeTelegramCode.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.RevokeTelegramCode.Output.NoContent)
+            /// Revoked
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.RevokeTelegramCode.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the chat's target. Unknown chats and chats the caller may not manage are `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/get(getTelegramChat)`.
+    public enum GetTelegramChat {
+        public static let id: Swift.String = "getTelegramChat"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/GET/path/chatId`.
+                public var chatId: Components.Parameters.TelegramChatId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - chatId:
+                public init(chatId: Components.Parameters.TelegramChatId) {
+                    self.chatId = chatId
+                }
+            }
+            public var path: Operations.GetTelegramChat.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramChat.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramChat.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetTelegramChat.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.GetTelegramChat.Input.Path,
+                headers: Operations.GetTelegramChat.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TelegramChat)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramChat {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetTelegramChat.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetTelegramChat.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Chat
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/get(getTelegramChat)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetTelegramChat.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetTelegramChat.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/get(getTelegramChat)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. `paused` pauses (media is ignored, the bot stays silent) or resumes; `take_over: true`
+    /// makes the caller the owner (the sender of outside contributions from now on; an owner who loses their rights is
+    /// replaced by the frame's or feed's owner automatically). `notify_reactions` is the owner's own switch
+    /// (`403 forbidden` for others). `topic_id` must be one of `topics` or null. `409 invalid_transition` on a
+    /// disconnected chat.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/patch(updateTelegramChat)`.
+    public enum UpdateTelegramChat {
+        public static let id: Swift.String = "updateTelegramChat"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/path/chatId`.
+                public var chatId: Components.Parameters.TelegramChatId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - chatId:
+                public init(chatId: Components.Parameters.TelegramChatId) {
+                    self.chatId = chatId
+                }
+            }
+            public var path: Operations.UpdateTelegramChat.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateTelegramChat.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateTelegramChat.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateTelegramChat.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.TelegramChatUpdate)
+            }
+            public var body: Operations.UpdateTelegramChat.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateTelegramChat.Input.Path,
+                headers: Operations.UpdateTelegramChat.Input.Headers = .init(),
+                body: Operations.UpdateTelegramChat.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TelegramChat)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramChat {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateTelegramChat.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateTelegramChat.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/patch(updateTelegramChat)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateTelegramChat.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateTelegramChat.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/patch(updateTelegramChat)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. The bot says goodbye and leaves the group (`ended_reason: disconnected`). Photos already
+    /// sent stay (unsend them from history). The chat's join invites are revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)`.
+    public enum DisconnectTelegramChat {
+        public static let id: Swift.String = "disconnectTelegramChat"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/DELETE/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/DELETE/path/chatId`.
+                public var chatId: Components.Parameters.TelegramChatId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - chatId:
+                public init(chatId: Components.Parameters.TelegramChatId) {
+                    self.chatId = chatId
+                }
+            }
+            public var path: Operations.DisconnectTelegramChat.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DisconnectTelegramChat.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.DisconnectTelegramChat.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.DisconnectTelegramChat.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.DisconnectTelegramChat.Input.Path,
+                headers: Operations.DisconnectTelegramChat.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Disconnected
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.DisconnectTelegramChat.Output.NoContent)
+            /// Disconnected
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.DisconnectTelegramChat.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. The people whose media the bot saw in this chat, most recent first.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}/contributors`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/get(listTelegramContributors)`.
+    public enum ListTelegramContributors {
+        public static let id: Swift.String = "listTelegramContributors"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/GET/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/GET/path/chatId`.
+                public var chatId: Components.Parameters.TelegramChatId
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - chatId:
+                public init(chatId: Components.Parameters.TelegramChatId) {
+                    self.chatId = chatId
+                }
+            }
+            public var path: Operations.ListTelegramContributors.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListTelegramContributors.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.ListTelegramContributors.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.ListTelegramContributors.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            public init(
+                path: Operations.ListTelegramContributors.Input.Path,
+                headers: Operations.ListTelegramContributors.Input.Headers = .init()
+            ) {
+                self.path = path
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/GET/responses/200/content/application\/json`.
+                    case json([Components.Schemas.TelegramContributor])
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: [Components.Schemas.TelegramContributor] {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.ListTelegramContributors.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.ListTelegramContributors.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Contributors
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/get(listTelegramContributors)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.ListTelegramContributors.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.ListTelegramContributors.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/get(listTelegramContributors)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Managers of the target. A blocked contributor's media is ignored silently in this chat, and their join invite is revoked.
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}/contributors/{contributorId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/{contributorId}/patch(updateTelegramContributor)`.
+    public enum UpdateTelegramContributor {
+        public static let id: Swift.String = "updateTelegramContributor"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/path`.
+            public struct Path: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/path/chatId`.
+                public var chatId: Components.Parameters.TelegramChatId
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/path/contributorId`.
+                public var contributorId: Components.Schemas.Id
+                /// Creates a new `Path`.
+                ///
+                /// - Parameters:
+                ///   - chatId:
+                ///   - contributorId:
+                public init(
+                    chatId: Components.Parameters.TelegramChatId,
+                    contributorId: Components.Schemas.Id
+                ) {
+                    self.chatId = chatId
+                    self.contributorId = contributorId
+                }
+            }
+            public var path: Operations.UpdateTelegramContributor.Input.Path
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateTelegramContributor.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UpdateTelegramContributor.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UpdateTelegramContributor.Input.Headers
+            /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/requestBody/content/application\/json`.
+                case json(Components.Schemas.TelegramContributorUpdate)
+            }
+            public var body: Operations.UpdateTelegramContributor.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - path:
+            ///   - headers:
+            ///   - body:
+            public init(
+                path: Operations.UpdateTelegramContributor.Input.Path,
+                headers: Operations.UpdateTelegramContributor.Input.Headers = .init(),
+                body: Operations.UpdateTelegramContributor.Input.Body
+            ) {
+                self.path = path
+                self.headers = headers
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/telegram-chats/{chatId}/contributors/{contributorId}/PATCH/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TelegramContributor)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramContributor {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.UpdateTelegramContributor.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.UpdateTelegramContributor.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Updated
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/{contributorId}/patch(updateTelegramContributor)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.UpdateTelegramContributor.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.UpdateTelegramContributor.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/{contributorId}/patch(updateTelegramContributor)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// The Telegram account linked to the caller. `404 not_found` when none is linked.
+    ///
+    /// - Remark: HTTP `GET /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/get(getTelegramLink)`.
+    public enum GetTelegramLink {
+        public static let id: Swift.String = "getTelegramLink"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/me/telegram/GET/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramLink.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.GetTelegramLink.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.GetTelegramLink.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.GetTelegramLink.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/me/telegram/GET/responses/200/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/me/telegram/GET/responses/200/content/application\/json`.
+                    case json(Components.Schemas.TelegramLink)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramLink {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.GetTelegramLink.Output.Ok.Body
+                /// Creates a new `Ok`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.GetTelegramLink.Output.Ok.Body) {
+                    self.body = body
+                }
+            }
+            /// Link
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/get(getTelegramLink)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.GetTelegramLink.Output.Ok)
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.GetTelegramLink.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/get(getTelegramLink)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's.
+    ///
+    /// - Remark: HTTP `DELETE /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)`.
+    public enum UnlinkTelegram {
+        public static let id: Swift.String = "unlinkTelegram"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/me/telegram/DELETE/header`.
+            public struct Headers: Sendable, Hashable {
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UnlinkTelegram.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - accept:
+                public init(accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.UnlinkTelegram.AcceptableContentType>] = .defaultValues()) {
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.UnlinkTelegram.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.UnlinkTelegram.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct NoContent: Sendable, Hashable {
+                /// Creates a new `NoContent`.
+                public init() {}
+            }
+            /// Unlinked
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            case noContent(Operations.UnlinkTelegram.Output.NoContent)
+            /// Unlinked
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)/responses/204`.
+            ///
+            /// HTTP response code: `204 noContent`.
+            public static var noContent: Self {
+                .noContent(.init())
+            }
+            /// The associated value of the enum case if `self` is `.noContent`.
+            ///
+            /// - Throws: An error if `self` is not `.noContent`.
+            /// - SeeAlso: `.noContent`.
+            public var noContent: Operations.UnlinkTelegram.Output.NoContent {
+                get throws {
+                    switch self {
+                    case let .noContent(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "noContent",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// "Link my Telegram": a one-time code in `https://t.me/<bot>?start=<code>`. Opening it and tapping Start in the
+    /// private chat with the bot links that Telegram account to the caller (docs/spec/telegram.md §5.1). Single use, 30
+    /// minutes. `409 telegram_already_linked` when the caller has a link already (unlink first), `503
+    /// feature_disabled`, `429 rate_limited`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/me/telegram/link-code`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/link-code/post(createTelegramLinkCode)`.
+    public enum CreateTelegramLinkCode {
+        public static let id: Swift.String = "createTelegramLinkCode"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/me/telegram/link-code/POST/header`.
+            public struct Headers: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/me/telegram/link-code/POST/header/Idempotency-Key`.
+                public var idempotencyKey: Components.Parameters.IdempotencyKey?
+                public var accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateTelegramLinkCode.AcceptableContentType>]
+                /// Creates a new `Headers`.
+                ///
+                /// - Parameters:
+                ///   - idempotencyKey:
+                ///   - accept:
+                public init(
+                    idempotencyKey: Components.Parameters.IdempotencyKey? = nil,
+                    accept: [OpenAPIRuntime.AcceptHeaderContentType<Operations.CreateTelegramLinkCode.AcceptableContentType>] = .defaultValues()
+                ) {
+                    self.idempotencyKey = idempotencyKey
+                    self.accept = accept
+                }
+            }
+            public var headers: Operations.CreateTelegramLinkCode.Input.Headers
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - headers:
+            public init(headers: Operations.CreateTelegramLinkCode.Input.Headers = .init()) {
+                self.headers = headers
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Created: Sendable, Hashable {
+                /// - Remark: Generated from `#/paths/v1/me/telegram/link-code/POST/responses/201/content`.
+                @frozen public enum Body: Sendable, Hashable {
+                    /// - Remark: Generated from `#/paths/v1/me/telegram/link-code/POST/responses/201/content/application\/json`.
+                    case json(Components.Schemas.TelegramCode)
+                    /// The associated value of the enum case if `self` is `.json`.
+                    ///
+                    /// - Throws: An error if `self` is not `.json`.
+                    /// - SeeAlso: `.json`.
+                    public var json: Components.Schemas.TelegramCode {
+                        get throws {
+                            switch self {
+                            case let .json(body):
+                                return body
+                            }
+                        }
+                    }
+                }
+                /// Received HTTP response body
+                public var body: Operations.CreateTelegramLinkCode.Output.Created.Body
+                /// Creates a new `Created`.
+                ///
+                /// - Parameters:
+                ///   - body: Received HTTP response body
+                public init(body: Operations.CreateTelegramLinkCode.Output.Created.Body) {
+                    self.body = body
+                }
+            }
+            /// Created
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/link-code/post(createTelegramLinkCode)/responses/201`.
+            ///
+            /// HTTP response code: `201 created`.
+            case created(Operations.CreateTelegramLinkCode.Output.Created)
+            /// The associated value of the enum case if `self` is `.created`.
+            ///
+            /// - Throws: An error if `self` is not `.created`.
+            /// - SeeAlso: `.created`.
+            public var created: Operations.CreateTelegramLinkCode.Output.Created {
+                get throws {
+                    switch self {
+                    case let .created(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "created",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Error (RFC 9457)
+            ///
+            /// - Remark: Generated from `#/paths//v1/me/telegram/link-code/post(createTelegramLinkCode)/responses/default`.
+            ///
+            /// HTTP response code: `default`.
+            case `default`(statusCode: Swift.Int, Components.Responses.Problem)
+            /// The associated value of the enum case if `self` is `.`default``.
+            ///
+            /// - Throws: An error if `self` is not `.`default``.
+            /// - SeeAlso: `.`default``.
+            public var `default`: Components.Responses.Problem {
+                get throws {
+                    switch self {
+                    case let .`default`(_, response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "default",
+                            response: self
+                        )
+                    }
+                }
+            }
+        }
+        @frozen public enum AcceptableContentType: AcceptableProtocol {
+            case json
+            case applicationProblemJson
+            case other(Swift.String)
+            public init?(rawValue: Swift.String) {
+                switch rawValue.lowercased() {
+                case "application/json":
+                    self = .json
+                case "application/problem+json":
+                    self = .applicationProblemJson
+                default:
+                    self = .other(rawValue)
+                }
+            }
+            public var rawValue: Swift.String {
+                switch self {
+                case let .other(string):
+                    return string
+                case .json:
+                    return "application/json"
+                case .applicationProblemJson:
+                    return "application/problem+json"
+                }
+            }
+            public static var allCases: [Self] {
+                [
+                    .json,
+                    .applicationProblemJson
+                ]
+            }
+        }
+    }
+    /// **Called by Telegram only, not for clients** (docs/spec/telegram.md §7). Registered by the server with
+    /// `setWebhook` when it runs in webhook mode. A wrong or missing `X-Telegram-Bot-Api-Secret-Token` is `401`;
+    /// `404 not_found` when no bot is configured or the server long-polls. The update is filtered, stored and
+    /// acknowledged with an empty `200` at once; processing is asynchronous. Body at most 1 MiB.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/telegram/webhook`.
+    /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)`.
+    public enum TelegramWebhook {
+        public static let id: Swift.String = "telegramWebhook"
+        public struct Input: Sendable, Hashable {
+            /// - Remark: Generated from `#/paths/v1/telegram/webhook/POST/requestBody`.
+            @frozen public enum Body: Sendable, Hashable {
+                /// A Telegram Bot API `Update` object.
+                ///
+                /// - Remark: Generated from `#/paths/v1/telegram/webhook/POST/requestBody/json`.
+                public struct JsonPayload: Codable, Hashable, Sendable {
+                    /// A container of undocumented properties.
+                    public var additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer
+                    /// Creates a new `JsonPayload`.
+                    ///
+                    /// - Parameters:
+                    ///   - additionalProperties: A container of undocumented properties.
+                    public init(additionalProperties: OpenAPIRuntime.OpenAPIObjectContainer = .init()) {
+                        self.additionalProperties = additionalProperties
+                    }
+                    public init(from decoder: any Swift.Decoder) throws {
+                        additionalProperties = try decoder.decodeAdditionalProperties(knownKeys: [])
+                    }
+                    public func encode(to encoder: any Swift.Encoder) throws {
+                        try encoder.encodeAdditionalProperties(additionalProperties)
+                    }
+                }
+                /// - Remark: Generated from `#/paths/v1/telegram/webhook/POST/requestBody/content/application\/json`.
+                case json(Operations.TelegramWebhook.Input.Body.JsonPayload)
+            }
+            public var body: Operations.TelegramWebhook.Input.Body
+            /// Creates a new `Input`.
+            ///
+            /// - Parameters:
+            ///   - body:
+            public init(body: Operations.TelegramWebhook.Input.Body) {
+                self.body = body
+            }
+        }
+        @frozen public enum Output: Sendable, Hashable {
+            public struct Ok: Sendable, Hashable {
+                /// Creates a new `Ok`.
+                public init() {}
+            }
+            /// Accepted (also for updates the server ignores)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            case ok(Operations.TelegramWebhook.Output.Ok)
+            /// Accepted (also for updates the server ignores)
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/200`.
+            ///
+            /// HTTP response code: `200 ok`.
+            public static var ok: Self {
+                .ok(.init())
+            }
+            /// The associated value of the enum case if `self` is `.ok`.
+            ///
+            /// - Throws: An error if `self` is not `.ok`.
+            /// - SeeAlso: `.ok`.
+            public var ok: Operations.TelegramWebhook.Output.Ok {
+                get throws {
+                    switch self {
+                    case let .ok(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "ok",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct Unauthorized: Sendable, Hashable {
+                /// Creates a new `Unauthorized`.
+                public init() {}
+            }
+            /// Wrong or missing secret token
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            case unauthorized(Operations.TelegramWebhook.Output.Unauthorized)
+            /// Wrong or missing secret token
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/401`.
+            ///
+            /// HTTP response code: `401 unauthorized`.
+            public static var unauthorized: Self {
+                .unauthorized(.init())
+            }
+            /// The associated value of the enum case if `self` is `.unauthorized`.
+            ///
+            /// - Throws: An error if `self` is not `.unauthorized`.
+            /// - SeeAlso: `.unauthorized`.
+            public var unauthorized: Operations.TelegramWebhook.Output.Unauthorized {
+                get throws {
+                    switch self {
+                    case let .unauthorized(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "unauthorized",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct NotFound: Sendable, Hashable {
+                /// Creates a new `NotFound`.
+                public init() {}
+            }
+            /// No bot configured, or the server polls
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            case notFound(Operations.TelegramWebhook.Output.NotFound)
+            /// No bot configured, or the server polls
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/404`.
+            ///
+            /// HTTP response code: `404 notFound`.
+            public static var notFound: Self {
+                .notFound(.init())
+            }
+            /// The associated value of the enum case if `self` is `.notFound`.
+            ///
+            /// - Throws: An error if `self` is not `.notFound`.
+            /// - SeeAlso: `.notFound`.
+            public var notFound: Operations.TelegramWebhook.Output.NotFound {
+                get throws {
+                    switch self {
+                    case let .notFound(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "notFound",
+                            response: self
+                        )
+                    }
+                }
+            }
+            public struct ContentTooLarge: Sendable, Hashable {
+                /// Creates a new `ContentTooLarge`.
+                public init() {}
+            }
+            /// Body too large
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            case contentTooLarge(Operations.TelegramWebhook.Output.ContentTooLarge)
+            /// Body too large
+            ///
+            /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)/responses/413`.
+            ///
+            /// HTTP response code: `413 contentTooLarge`.
+            public static var contentTooLarge: Self {
+                .contentTooLarge(.init())
+            }
+            /// The associated value of the enum case if `self` is `.contentTooLarge`.
+            ///
+            /// - Throws: An error if `self` is not `.contentTooLarge`.
+            /// - SeeAlso: `.contentTooLarge`.
+            public var contentTooLarge: Operations.TelegramWebhook.Output.ContentTooLarge {
+                get throws {
+                    switch self {
+                    case let .contentTooLarge(response):
+                        return response
+                    default:
+                        try throwUnexpectedResponseStatus(
+                            expectedStatus: "contentTooLarge",
+                            response: self
+                        )
+                    }
+                }
+            }
+            /// Undocumented response.
+            ///
+            /// A response with a code that is not documented in the OpenAPI document.
+            case undocumented(statusCode: Swift.Int, OpenAPIRuntime.UndocumentedPayload)
         }
     }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.

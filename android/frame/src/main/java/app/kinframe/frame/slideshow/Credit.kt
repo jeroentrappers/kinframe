@@ -16,12 +16,38 @@ object Credit {
     /**
      * The credit for a placement: [line], or "Anna · via Frameo" for a photo imported from the frame's old app. A photo a
      * photo source or a Google Photos import brought in adds the service: "Anna via Immich", "Anna · Peeters kids via
-     * Immich", "Anna via Immich · shared by Ben" (photo-sources.md §9.5).
+     * Immich", "Anna via Immich · shared by Ben" (photo-sources.md §9.5). Mail and Telegram credit the person instead of
+     * the sender: "Jan via email", "Ben · Peeters kids via Telegram".
      */
-    fun of(ctx: Context, p: app.kinframe.frame.data.PlacementEntity): String? = when {
-        p.importedFrom != null -> imported(ctx, p.importedFrom, p.importedSenderName)
-        p.creditFeedName != null -> via(ctx, feed(ctx, p.senderName, p.creditFeedName!!), p.viaLabel)
-        else -> line(ctx, p.senderName, p.sharedByName, p.viaLabel)
+    fun of(ctx: Context, p: app.kinframe.frame.data.PlacementEntity): String? {
+        if (p.importedFrom != null) return imported(ctx, p.importedFrom, p.importedSenderName)
+        // Mail and Telegram (email-inbox.md §9.2, telegram.md §8): the person who mailed or posted it takes the
+        // sender's place (the sender may be the address's or chat's owner): "Jan via email", "Jan · Peeters kids via
+        // Telegram", "Jan via email · shared by Ben".
+        if (channelFormat(p.viaService) != null) {
+            val person = p.viaLabel?.trim()?.takeIf { it.isNotEmpty() } ?: p.senderName
+            if (p.creditFeedName != null) return channel(ctx, feed(ctx, person, p.creditFeedName!!), p.viaService)
+            val s = person?.trim()?.takeIf { it.isNotEmpty() } ?: return null
+            val bidi = BidiFormatter.getInstance(ConfigurationCompat.getLocales(ctx.resources.configuration)[0] ?: Locale.getDefault())
+            val withVia = channel(ctx, bidi.unicodeWrap(s), p.viaService)!!
+            val b = p.sharedByName?.trim()?.takeIf { it.isNotEmpty() && it != s }
+            return if (b == null) withVia else ctx.getString(R.string.caption_shared_by, withVia, bidi.unicodeWrap(b))
+        }
+        return if (p.creditFeedName != null) via(ctx, feed(ctx, p.senderName, p.creditFeedName!!), p.viaLabel)
+        else line(ctx, p.senderName, p.sharedByName, p.viaLabel)
+    }
+
+    private fun channelFormat(service: String?): Int? = when (service) {
+        app.kinframe.core.api.PhotoService.EMAIL -> R.string.credit_via_email
+        app.kinframe.core.api.PhotoService.TELEGRAM -> R.string.credit_via_telegram
+        else -> null
+    }
+
+    /** "[credit] via email" / "[credit] via Telegram" (localized); [credit] as is for photo services. */
+    fun channel(ctx: Context, credit: String?, service: String?): String? {
+        val c = credit?.takeIf { it.isNotBlank() } ?: return null
+        val f = channelFormat(service) ?: return c
+        return ctx.getString(f, c)
     }
 
     /** "[credit] via [service]"; the service name is shown as given (not translated) and bidi-isolated. */

@@ -126,6 +126,16 @@ All configuration is environment variables. Secrets never go in this repo; see `
 | `KINFRAME_MAX_PHOTO_SOURCE_RUN_MB` | `2048` | Bytes one sync run downloads; the rest follows 2 minutes later |
 | `KINFRAME_GOOGLE_CLIENT_ID` / `KINFRAME_GOOGLE_CLIENT_SECRET` (or `KINFRAME_GOOGLE_CLIENT_SECRET_FILE`) | — | Google Cloud OAuth client (Web application) with the Photos Picker API enabled and the redirect URI `<public URL>/v1/oauth/google/callback`; enables "Add from Google Photos" (discovery `google_photos_import`). Set both or neither |
 | `KINFRAME_MAX_GOOGLE_IMPORT_ITEMS` | `500` | Items per Google Photos import (the picker caps at 2000) |
+| `KINFRAME_TELEGRAM_BOT_TOKEN` (or `…_FILE`) | — | The server's Telegram bot (BotFather token); enables the Telegram bridge (discovery `telegram`; docs/spec/telegram.md, see *Telegram* below). Secret |
+| `KINFRAME_TELEGRAM_MODE` | `auto` | `webhook` (Telegram calls `/v1/telegram/webhook`), `polling` (the server long-polls), `off`; `auto` = webhook when the public URL is `https://` on port 443, 80, 88 or 8443 and not a local or private host, else polling |
+| `KINFRAME_TELEGRAM_WEBHOOK_URL` | `<public URL>/v1/telegram/webhook` | Webhook address to register, behind unusual proxies (`https://` only) |
+| `KINFRAME_TELEGRAM_API_URL` | `https://api.telegram.org` | Bot API base; a local `telegram-bot-api` server lifts the 20 MB download limit |
+| `KINFRAME_TELEGRAM_LOCAL_FILES_DIR` | — | Where the local Bot API server's `--local` directory is mounted in this container (files are read and then deleted there) |
+| `KINFRAME_TELEGRAM_MAX_DOWNLOAD_MB` | `20` (`2000` with a local server) | Largest file the bot downloads (discovery `telegram_max_file_bytes`); `max_upload_bytes` always applies |
+| `KINFRAME_TELEGRAM_WORKERS` | `4` | Chats processed in parallel (each chat's updates in order) |
+| `KINFRAME_TELEGRAM_WEBHOOK_IP_CHECK` | `off` | `on` also requires webhook calls to come from Telegram's published ranges (needs `KINFRAME_TRUST_PROXY` behind a proxy) |
+| `KINFRAME_MAX_TELEGRAM_CHATS_PER_TARGET` / `KINFRAME_MAX_TELEGRAM_CHATS_PER_USER` | `5` / `20` | Connected Telegram chats per frame or feed, and per owner (operator can change them at runtime) |
+| `KINFRAME_MAX_TELEGRAM_ITEMS_PER_CHAT_HOUR` | `300` | Photos and videos accepted per Telegram chat per hour |
 
 ### Calendars
 
@@ -138,6 +148,68 @@ midnight, or a settings change) re-expands without a refetch. Each frame's sourc
 change, emitted only when what the frame shows changed. Frames never contact calendar servers. The server fetches
 whatever URL a member with `change_settings` enters, including LAN addresses (a Nextcloud next to the server is a
 normal setup), so only give that permission to people you trust.
+
+### Telegram
+
+One bot per server (docs/spec/telegram.md). Families connect a Telegram group (or a private chat with the bot) to a
+frame or a feed from the app; the bot turns each person's burst of photos into one send or post, confirms with a 👍
+reaction and mirrors the frame's reactions.
+
+1. In Telegram, talk to [@BotFather](https://t.me/BotFather): `/newbot`, pick a name and a username, copy the token
+   into `KINFRAME_TELEGRAM_BOT_TOKEN` (or a file named by `KINFRAME_TELEGRAM_BOT_TOKEN_FILE`).
+2. Recommended: `/setprivacy` → the bot → **Disable**. Bots in privacy mode only see commands in groups, so photos
+   stay invisible unless the family makes the bot an admin of the group. Telegram applies the change only to groups
+   the bot joins afterwards (a group that added it before must remove and add it again); the server notices it at
+   its next start (discovery `telegram_privacy_mode`), and chats that can't see photos show `privacy_mode`.
+3. Optionally `/setuserpic` and `/setdescription`; the server registers the command menu itself (every language).
+4. With a public `https://` `KINFRAME_PUBLIC_URL` the server registers its webhook at start (the secret is derived
+   from `KINFRAME_SECRETS_KEY`, or the signing key, so all processes agree); otherwise it long-polls. Only one process
+   (a Postgres advisory lock) polls and processes updates; any process may receive webhook calls.
+5. Files: Telegram's cloud Bot API lets bots download at most 20 MB. To accept up to 2 GB, run Telegram's
+   `telegram-bot-api` server with your own `api_id`/`api_hash` (my.telegram.org) in `--local` mode, point
+   `KINFRAME_TELEGRAM_API_URL` at it and mount its working directory into the kinframe container
+   (`KINFRAME_TELEGRAM_LOCAL_FILES_DIR`). The server calls `logOut` on the cloud API once before switching.
+
+Replacing the bot (a different bot id) puts every connected chat in `needs_attention (bot_changed)`; rotating the
+token of the same bot (`/revoke`) is transparent. Removing the token hides Telegram; connected chats wait in the
+database and resume when the same bot comes back.
+
+### Email to frame
+
+Frames and feeds can get inbox addresses (`<slug>-<random>@<inbox domain>`, docs/spec/email-inbox.md): allowed senders
+mail photos to them. Off by default; it needs an inbox domain and at least one way in.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `KINFRAME_EMAIL_INBOX` | `off` | `on` turns the feature on (discovery `email_inbox`, `email_inbox_domain`) |
+| `KINFRAME_EMAIL_INBOX_DOMAIN` | — | The inbox domain, used for nothing else (its MX points at this server or at the provider in front of the webhook). Must not be the domain of `KINFRAME_SMTP_FROM` |
+| `KINFRAME_EMAIL_SMTP_LISTEN` | empty | Built-in SMTP receiver, e.g. `:2525` (published as port 25). Receive only: no AUTH, no relaying |
+| `KINFRAME_EMAIL_SMTP_HOSTNAME` | the inbox domain | Greeting/EHLO name; match the MX host and the certificate |
+| `KINFRAME_EMAIL_TLS_CERT_FILE` / `_KEY_FILE` | empty | STARTTLS certificate (PEM), re-read when the files change; without them no STARTTLS (a start-up warning) |
+| `KINFRAME_EMAIL_REQUIRE_TLS` | `off` | Refuse `MAIL FROM` before STARTTLS |
+| `KINFRAME_EMAIL_PROXY_PROTOCOL` | `off` | Require a PROXY protocol v1/v2 header (TCP proxy in front) |
+| `KINFRAME_EMAIL_SMTP_MAX_SESSIONS` | `100` | Concurrent SMTP sessions (per client address: 5, 30 connections/min, 200 mails/h) |
+| `KINFRAME_EMAIL_WEBHOOK_SECRET` (or `_FILE`) | empty | Enables `POST /v1/inbound/email` and `…:check` (HMAC-SHA256); `new,old` rotates |
+| `KINFRAME_EMAIL_WEBHOOK_TRUST_AUTHSERV_ID` | empty | Trust the provider's own `Authentication-Results` (this authserv-id) instead of checking SPF/DKIM/DMARC |
+| `KINFRAME_EMAIL_DNS_SERVER` | system resolver | `host:port` for SPF/DKIM/DMARC lookups (a local validating resolver is recommended) |
+| `KINFRAME_EMAIL_REPLIES` | `on` | Replies to authenticated senders (also needs `KINFRAME_SMTP_*`) |
+| `KINFRAME_EMAIL_MAX_REPLIES_PER_HOUR` | `500` | Server-wide reply cap |
+| `KINFRAME_EMAIL_POSTMASTER` | empty | Where mail to `postmaster@`/`abuse@` the inbox domain is forwarded (as an attachment); empty: refused |
+| `KINFRAME_EMAIL_HELD_DAYS` | `14` | How long held mail is kept (1–14) |
+| `KINFRAME_MAX_EMAIL_ADDRESSES_PER_TARGET`, `_SENDERS_PER_ADDRESS`, `_MESSAGE_MB`, `_MESSAGES_PER_ADDRESS_DAY`, `_HELD_MESSAGES` | 5, 200, 50, 200, 100 | Limit defaults (`PUT /v1/operator/limits`) |
+
+Operator steps for the SMTP receiver: an MX record for the inbox domain pointing at the server's host name (with
+`A`/`AAAA` and matching reverse DNS), `v=spf1 -all` and `_dmarc … p=reject` on the inbox domain (it never sends),
+TCP 25 open inbound (host firewall and cloud provider), a container port mapping such as `25:2525`, and a certificate
+for the MX host name mounted read-only. The client IP must reach the server for SPF: with Docker's userland proxy the
+server sees a bridge address, skips SPF (DKIM still works) and warns once; use IPv6 in the container network, host
+networking or a TCP proxy with `KINFRAME_EMAIL_PROXY_PROTOCOL=on`. Test with `swaks --to <address> --server <mx>
+--tls --attach photo.jpg`, and check that `swaks --to someone@gmail.com --server <mx>` is refused (`550 5.7.1`).
+
+Without port 25, point the MX at a provider and post each raw message to the webhook (docs/spec/email-inbox.md §6.3,
+§14.3), or pipe from your own Postfix: `kinframe-server deliver-email --recipient ${recipient} --sender ${sender}
+--client-ip ${client_address} --helo ${client_helo}` (reads the message on stdin; needs
+`KINFRAME_EMAIL_WEBHOOK_SECRET` and `KINFRAME_PUBLIC_URL` or `--url`; exit 75 = try again, 67 = unknown recipient).
 
 ## Media storage
 
@@ -267,7 +339,7 @@ Management API access, in order of preference:
 ## Layout
 
 ```
-cmd/kinframe-server   main: serve, migrate, healthcheck, bootstrap-logto, migrate-blobs
+cmd/kinframe-server   main: serve, migrate, healthcheck, bootstrap-logto, migrate-blobs, deliver-email
 internal/api          HTTP handlers (strict server impl + tus, websockets, media), validation, auth middleware
 internal/api/gen      generated by oapi-codegen (do not edit), plus the prepared spec used for request validation
 internal/app          wiring and background loops (workers, janitor)
@@ -283,6 +355,7 @@ internal/settings     frame settings defaults and RFC 7396 merge patch
 internal/notify       websocket/push fan-out (UnifiedPush delivery)
 internal/releases     frame app release mirror (GitHub Releases + drop-in directory), APK manifest parser
 internal/weather      Open-Meteo client, per-location weather cache and refresh loop, place search
+internal/mailin       email to frame: SMTP receiver, webhook signatures, SPF/DKIM/DMARC, MIME walk, captions, replies
 internal/e2e          end-to-end tests over real HTTP
 tools/                specprep (OpenAPI 3.1 → codegen input), respgen
 ```

@@ -219,7 +219,7 @@ fun SendCard(send: Send, onOpen: () -> Unit) {
             repeat((4 - send.items.size).coerceAtLeast(0)) { Box(Modifier.weight(1f)) }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(send.via?.let { stringResource(R.string.source_credit_via, kinds, it.displayLabel) } ?: kinds, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
+            Text(send.via?.let { v -> if (v.isChannel) (v.personLabel?.let { kinds + " · " + app.kinframe.family.ui.sources.creditName(it, v) } ?: kinds) else stringResource(R.string.source_credit_via, kinds, v.displayLabel) } ?: kinds, style = Kin.type.bodyStrong, color = c.ink, modifier = Modifier.weight(1f))
             Text(Format.time(send.createdAt), style = Kin.type.caption, color = c.inkSoft, modifier = Modifier.semantics { contentDescriptionOf(label) })
         }
         send.items.firstOrNull { !it.caption.isNullOrBlank() }?.caption?.let {

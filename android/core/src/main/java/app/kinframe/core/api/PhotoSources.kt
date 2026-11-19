@@ -80,6 +80,10 @@ object PhotoService {
     const val IMMICH = "immich"
     const val ICLOUD = "icloud"
     const val GOOGLE_PHOTOS = "google_photos"
+    /** Mailed to an inbox address (docs/spec/email-inbox.md). */
+    const val EMAIL = "email"
+    /** Posted in a connected Telegram chat (docs/spec/telegram.md). */
+    const val TELEGRAM = "telegram"
 }
 
 /** Websocket message types of the user websocket for photo sources (README §6.2). */
@@ -98,8 +102,10 @@ object PhotoSourcePush {
 }
 
 /**
- * The credit on items, sends and posts a source or Google import made: "Anna via Immich". [label] is the service
- * name to show, not translated. Optional everywhere: clients that don't know it show the sender only.
+ * The credit on items, sends and posts a source, a Google import, a mail or a Telegram chat made: "Anna via Immich".
+ * For photo services [label] is the service name to show, not translated. For `email` and `telegram` ([isChannel])
+ * it is the person who mailed or posted it, shown **instead of** the sender: "Jan via email" (the sender may be the
+ * address's or chat's owner sending on Jan's behalf). Optional everywhere: clients that don't know it show the sender.
  */
 @Serializable
 data class ItemVia(
@@ -107,10 +113,20 @@ data class ItemVia(
     val label: String = "",
     /** The photo source that synced it, while it exists (null for Google imports and deleted sources). */
     val sourceId: String? = null,
+    /** `email`: the inbox address it was mailed to, while it exists. */
+    val addressId: String? = null,
+    /** `telegram`: the Telegram chat it was posted in, while it exists. */
+    val telegramChatId: String? = null,
 ) {
-    /** The name to show: the server's label, else a known service name. */
+    /** Mail or Telegram: [label] names the person, the service is a localized word ("via email"). */
+    val isChannel: Boolean get() = service == PhotoService.EMAIL || service == PhotoService.TELEGRAM
+
+    /** The person to credit for [isChannel] credits; null for photo services or an empty label. */
+    val personLabel: String? get() = if (isChannel) label.trim().takeIf { it.isNotEmpty() } else null
+
+    /** The service name to show for photo services: the server's label, else a known service name. */
     val displayLabel: String
-        get() = label.trim().ifEmpty {
+        get() = if (isChannel) label.trim() else label.trim().ifEmpty {
             when (service) {
                 PhotoService.IMMICH -> "Immich"
                 PhotoService.ICLOUD -> "iCloud"

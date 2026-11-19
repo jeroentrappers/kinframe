@@ -75,8 +75,13 @@ data class PlacementEntity(
     val feedIds: String? = null,
     /** Placed as feed history: never "new" (no card, no wake). */
     @ColumnInfo(defaultValue = "0") val backfill: Boolean = false,
-    /** A photo source or Google Photos import brought it in (`item.via.label`): the caption reads "sender via Immich". */
+    /**
+     * A photo source or Google Photos import brought it in (`item.via.label`): the caption reads "sender via Immich".
+     * For mail and Telegram ([viaService] `email`/`telegram`) it is the person who mailed or posted it: "Jan via email".
+     */
     val viaLabel: String? = null,
+    /** `item.via.service`; `email` and `telegram` credit [viaLabel] instead of the sender. */
+    val viaService: String? = null,
 ) {
     val feedIdList: List<String> get() = feedIds?.split(',')?.filter { it.isNotBlank() } ?: emptyList()
     /** The feed to credit, when this photo came through one. */

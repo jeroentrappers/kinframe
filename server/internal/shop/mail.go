@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"mime"
@@ -34,6 +35,20 @@ type Message struct {
 	Subject string
 	Text    string
 	HTML    string
+	// InReplyTo threads an answer to a received mail (In-Reply-To and References).
+	InReplyTo string
+	// AutoReply marks an automatic answer (RFC 3834): Auto-Submitted: auto-replied,
+	// X-Auto-Response-Suppress: All, Precedence: auto_reply.
+	AutoReply bool
+	// Attachment, if set, makes the message multipart/mixed with it after the text.
+	Attachment *Attachment
+}
+
+// Attachment is one attached file (the postmaster forward attaches a received mail).
+type Attachment struct {
+	Name        string
+	ContentType string // e.g. message/rfc822
+	Data        []byte
 }
 
 // Mailer sends messages.
@@ -121,7 +136,7 @@ func Build(from string, m Message, now time.Time) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, s := range []string{m.To, m.ReplyTo, m.Subject} {
+	for _, s := range []string{m.To, m.ReplyTo, m.Subject, m.InReplyTo} {
 		if strings.ContainsAny(s, "\r\n") {
 			return nil, fmt.Errorf("header contains a line break")
 		}
@@ -141,7 +156,23 @@ func Build(from string, m Message, now time.Time) ([]byte, error) {
 	h("Date", now.Format(time.RFC1123Z))
 	h("Message-ID", "<"+hex.EncodeToString(rnd)+"@"+domain+">")
 	h("MIME-Version", "1.0")
-	h("Auto-Submitted", "auto-generated")
+	if m.InReplyTo != "" {
+		h("In-Reply-To", m.InReplyTo)
+		h("References", m.InReplyTo)
+	}
+	if m.AutoReply {
+		h("Auto-Submitted", "auto-replied")
+		h("X-Auto-Response-Suppress", "All")
+		h("Precedence", "auto_reply")
+	} else {
+		h("Auto-Submitted", "auto-generated")
+	}
+	mixed := ""
+	if m.Attachment != nil {
+		mixed = "kfm-" + hex.EncodeToString(rnd)
+		h("Content-Type", `multipart/mixed; boundary="`+mixed+`"`)
+		b.WriteString("\r\n--" + mixed + "\r\n")
+	}
 	h("Content-Type", `multipart/alternative; boundary="`+boundary+`"`)
 	b.WriteString("\r\n")
 	part := func(ct, body string) error {
@@ -164,5 +195,29 @@ func Build(from string, m Message, now time.Time) ([]byte, error) {
 		return nil, err
 	}
 	b.WriteString("--" + boundary + "--\r\n")
+	if a := m.Attachment; a != nil {
+		if strings.ContainsAny(a.Name+a.ContentType, "\r\n\"") {
+			return nil, fmt.Errorf("attachment header contains a line break")
+		}
+		b.WriteString("\r\n--" + mixed + "\r\n")
+		b.WriteString("Content-Type: " + a.ContentType + "\r\nContent-Disposition: attachment; filename=\"" + a.Name + "\"\r\n")
+		if strings.HasPrefix(a.ContentType, "message/") {
+			// RFC 2046 5.2.1: message/rfc822 is 7bit, 8bit or binary, never base64.
+			b.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
+			b.Write(a.Data)
+			if !bytes.HasSuffix(a.Data, []byte("\n")) {
+				b.WriteString("\r\n")
+			}
+		} else {
+			b.WriteString("Content-Transfer-Encoding: base64\r\n\r\n")
+			enc := base64.StdEncoding.EncodeToString(a.Data)
+			for len(enc) > 76 {
+				b.WriteString(enc[:76] + "\r\n")
+				enc = enc[76:]
+			}
+			b.WriteString(enc + "\r\n")
+		}
+		b.WriteString("--" + mixed + "--\r\n")
+	}
 	return b.Bytes(), nil
 }

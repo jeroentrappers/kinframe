@@ -120,7 +120,7 @@ struct SendDetailView: View {
 
     private func header(_ send: Send) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(Credit.sender(kindSummary(send.items), via: send.via)).font(.display(.title)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
+            Text(Credit.summary(kindSummary(send.items), via: send.via)).font(.display(.title)).foregroundStyle(Palette.text).accessibilityAddTraits(.isHeader)
             Text(L("detail.sentAt", ["when": Format.dateTime(send.createdAt, locale: L10n.locale)])).foregroundStyle(Palette.textMuted)
         }
     }

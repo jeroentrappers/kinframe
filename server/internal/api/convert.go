@@ -128,6 +128,7 @@ func (s *Server) memberJSON(m *store.MemberView) gen.Member {
 func (s *Server) joinRequestJSON(j *store.JoinRequest) gen.JoinRequest {
 	out := gen.JoinRequest{
 		Id: j.ID, Via: gen.JoinRequestVia(j.Via), InvitedByName: j.InvitedByName, Note: j.Note, CreatedAt: j.CreatedAt,
+		ViaName: j.ViaName, ViaMatches: j.ViaMatches,
 	}
 	out.User.Id = ptr(j.UserID)
 	out.User.DisplayName = ptr(j.UserName)
@@ -172,7 +173,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 	if out.CapturedAt == nil {
 		out.CapturedAt = it.CapturedHint
 	}
-	out.Via = viaJSON(it.Via, it.ViaSourceID)
+	out.Via = tgCredit(viaCredit(viaJSON(it.Via, it.ViaSourceID), it.ViaLabel, it.ViaEmailAddressID), it.ViaTelegramChatID)
 	if it.Origin != nil {
 		out.ImportedFrom = ptr(gen.ItemOrigin(*it.Origin))
 		out.ImportedSenderName = it.OriginSenderName

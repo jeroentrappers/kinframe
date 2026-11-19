@@ -1,0 +1,42 @@
+{
+  "ios.join.matches": {
+    "en": "Their account has this email address",
+    "nl": "Hun account heeft dit e-mailadres"
+  },
+  "ios.join.noMatch": {
+    "en": "Not the same person as far as we can tell",
+    "nl": "Voor zover we weten niet dezelfde persoon"
+  },
+  "ios.join.noMatchEmail": {
+    "en": "Their account has a different email address",
+    "nl": "Hun account heeft een ander e-mailadres"
+  },
+  "ios.join.viaEmail": {
+    "en": "Asked to join from the email link",
+    "nl": "Vroeg om lid te worden via de link in een mail"
+  },
+  "ios.join.viaOther": {
+    "en": "Asked to join",
+    "nl": "Vroeg om lid te worden"
+  },
+  "ios.join.viaTelegram": {
+    "en": "Asked to join from Telegram",
+    "nl": "Vroeg om lid te worden via Telegram"
+  },
+  "ios.via.email": {
+    "en": "{name} via email",
+    "nl": "{name} via e-mail"
+  },
+  "ios.via.emailFrom": {
+    "en": "{summary} via email from {name}",
+    "nl": "{summary} via e-mail van {name}"
+  },
+  "ios.via.telegram": {
+    "en": "{name} via Telegram",
+    "nl": "{name} via Telegram"
+  },
+  "ios.via.telegramFrom": {
+    "en": "{summary} via Telegram from {name}",
+    "nl": "{summary} via Telegram van {name}"
+  }
+}

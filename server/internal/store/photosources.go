@@ -594,7 +594,9 @@ func (s *Store) MediaStatus(ctx context.Context, q db.DBTX, id uuid.UUID) (strin
 // its sender: false only when it came from a source with notify_reactions off.
 func (s *Store) NotifyReactions(ctx context.Context, itemID uuid.UUID) (bool, error) {
 	var on bool
+	// Email: items sent by an address owner on behalf of a non-account sender carry the address (email-inbox.md §9.1).
 	err := s.Pool.QueryRow(ctx, `SELECT COALESCE((SELECT ps.notify_reactions FROM items i JOIN photo_sources ps ON ps.id = i.via_source_id
+		WHERE i.id = $1), (SELECT ea.notify_reactions FROM items i JOIN email_addresses ea ON ea.id = i.via_email_address_id
 		WHERE i.id = $1), true)`, itemID).Scan(&on)
 	return on, err
 }

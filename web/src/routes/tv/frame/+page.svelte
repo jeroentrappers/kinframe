@@ -13,6 +13,7 @@
 	import { i18n, t, tn } from '$lib/i18n/index.svelte';
 	import { matchLocale } from '$lib/i18n/locales';
 	import { kenBurnsKeys } from '$lib/kenburns';
+	import { withVia } from '$lib/sender';
 	import type { StageSlide } from '$lib/tvstage';
 	import Icon from '$components/Icon.svelte';
 	import Logo from '$components/Logo.svelte';
@@ -94,7 +95,7 @@
 		const when = which === 'none' ? null : which === 'taken' ? (pl.capturedAt ?? pl.receivedAt) : pl.receivedAt;
 		const d = when ? new Date(when) : null;
 		const date = d && !Number.isNaN(d.getTime()) ? new Intl.DateTimeFormat(i18n.tag, { day: 'numeric', month: 'long', year: 'numeric' }).format(d) : '';
-		const who = pl.via ? (pl.senderName ? t('credit.via', { name: pl.senderName, service: pl.via }) : t('credit.viaOnly', { service: pl.via })) : pl.senderName;
+		const who = withVia(pl.senderName, pl.via && pl.viaService ? { service: pl.viaService, label: pl.via } : null);
 		return [who, date].filter(Boolean).join(' · ');
 	}
 

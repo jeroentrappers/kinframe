@@ -8,6 +8,9 @@
 //     call site like problem.New(code, "album changed since version %d", v)
 //     needs no key of its own; translations keep the same verbs in order.
 //
+// A feature may keep its texts in its own catalogs, locales/<feature>/<lang>.json
+// (same sections), merged into the language's catalog at load.
+//
 // English is the fallback for anything missing.
 package i18n
 
@@ -35,7 +38,7 @@ var Languages = []string{
 // Default is the fallback language.
 const Default = "en"
 
-//go:embed locales/*.json
+//go:embed locales/*.json locales/*/*.json
 var files embed.FS
 
 type catalog struct {
@@ -70,11 +73,56 @@ func load() {
 		}
 		catalogs[strings.TrimSuffix(path.Base(e), ".json")] = &c
 	}
+	if loadErr = mergeFeatureCatalogs(); loadErr != nil {
+		return
+	}
 	tags := make([]language.Tag, len(Languages))
 	for i, l := range Languages {
 		tags[i] = language.MustParse(l)
 	}
 	matcher = language.NewMatcher(tags)
+}
+
+// mergeFeatureCatalogs adds locales/<feature>/<lang>.json to the language catalogs.
+func mergeFeatureCatalogs() error {
+	extra, err := fs.Glob(files, "locales/*/*.json")
+	if err != nil {
+		return err
+	}
+	for _, e := range extra {
+		b, err := files.ReadFile(e)
+		if err != nil {
+			return err
+		}
+		var c catalog
+		if err := json.Unmarshal(b, &c); err != nil {
+			return fmt.Errorf("%s: %w", e, err)
+		}
+		lang := strings.TrimSuffix(path.Base(e), ".json")
+		into := catalogs[lang]
+		if into == nil {
+			return fmt.Errorf("%s: no locales/%s.json", e, lang)
+		}
+		if into.Messages == nil {
+			into.Messages = map[string]string{}
+		}
+		if into.Details == nil {
+			into.Details = map[string]string{}
+		}
+		for k, v := range c.Messages {
+			if _, dup := into.Messages[k]; dup {
+				return fmt.Errorf("%s: message %q is defined twice", e, k)
+			}
+			into.Messages[k] = v
+		}
+		for k, v := range c.Details {
+			if _, dup := into.Details[k]; dup {
+				return fmt.Errorf("%s: detail %q is defined twice", e, k)
+			}
+			into.Details[k] = v
+		}
+	}
+	return nil
 }
 
 func cat(lang string) *catalog {

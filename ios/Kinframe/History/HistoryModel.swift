@@ -111,7 +111,9 @@ final class HistoryModel {
             }
         case .joinRequest, .membershipUpdated, .invitationDecided, .feedReaction, .feedReply, .subscriptionRequest, .subscriptionUpdated,
              .feedJoinRequest, .feedMembershipUpdated, .birthdaySuggested, .birthdayDecided, .birthdayUpdated, .birthdayRemoved,
-             .birthdayToday, .birthdayGreeting, .photoSourceUpdated, .photoSourceRemoved, .googleImportUpdated:
+             .birthdayToday, .birthdayGreeting, .photoSourceUpdated, .photoSourceRemoved, .googleImportUpdated,
+             .emailAddressUpdated, .emailAddressRemoved, .emailSenderPending, .emailSenderDecided, .telegramChatUpdated,
+             .telegramChatRemoved, .telegramCodeUpdated, .telegramLinkUpdated:
             break
         }
     }

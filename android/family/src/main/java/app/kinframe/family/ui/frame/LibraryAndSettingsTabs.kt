@@ -347,6 +347,8 @@ fun SettingsTab(
     vm: FrameSettingsViewModel,
     /** The Plugins section (saved on its own, see [PluginsViewModel]). */
     plugins: (@Composable () -> Unit)? = null,
+    /** "Photos by email and Telegram" (frame managers; discovery `email_inbox` / `telegram`). */
+    channels: (@Composable () -> Unit)? = null,
 ) {
     val c = Kin.colors
     val context = LocalContext.current
@@ -481,6 +483,7 @@ fun SettingsTab(
                     }
                 }
 
+                channels?.invoke()
                 plugins?.invoke()
             }
         }

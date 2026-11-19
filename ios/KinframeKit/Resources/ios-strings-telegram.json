@@ -1,0 +1,454 @@
+{
+  "ios.tg.block": {
+    "en": "Block",
+    "nl": "Blokkeren"
+  },
+  "ios.tg.blocked": {
+    "en": "Blocked",
+    "nl": "Geblokkeerd"
+  },
+  "ios.tg.blockedToast": {
+    "en": "{name}’s photos are ignored from now on",
+    "nl": "Foto’s van {name} worden vanaf nu genegeerd"
+  },
+  "ios.tg.botBlocked": {
+    "en": "You blocked the bot in Telegram, so it can’t message you.",
+    "nl": "Je hebt de bot in Telegram geblokkeerd, dus kan hij je geen berichten sturen."
+  },
+  "ios.tg.codeErr.already_connected": {
+    "en": "That group already sends to a frame or feed. Disconnect it there first, or pick another group.",
+    "nl": "Die groep stuurt al naar een kader of feed. Verbreek die verbinding eerst, of kies een andere groep."
+  },
+  "ios.tg.codeErr.already_linked": {
+    "en": "This Telegram account is already linked to another kinframe account. Unlink it there first.",
+    "nl": "Dit Telegram-account is al gekoppeld aan een ander kinframe-account. Ontkoppel het daar eerst."
+  },
+  "ios.tg.codeErr.code_expired": {
+    "en": "This link has expired. Make a new one.",
+    "nl": "Deze link is verlopen. Maak een nieuwe."
+  },
+  "ios.tg.codeErr.code_used": {
+    "en": "This link was already used.",
+    "nl": "Deze link is al gebruikt."
+  },
+  "ios.tg.codeErr.limit_reached": {
+    "en": "{name} already has the most Telegram chats it can have.",
+    "nl": "{name} heeft al het maximale aantal Telegram-chats."
+  },
+  "ios.tg.codeErr.missing_permission": {
+    "en": "You can no longer manage this, so the link doesn’t work.",
+    "nl": "Je kunt dit niet meer beheren, dus de link werkt niet."
+  },
+  "ios.tg.codeErr.unknown": {
+    "en": "That didn’t work in Telegram. Try again.",
+    "nl": "Dat lukte niet in Telegram. Probeer het opnieuw."
+  },
+  "ios.tg.codeErr.wrong_chat_kind_group": {
+    "en": "Open the link on the device where you use Telegram and pick a group.",
+    "nl": "Open de link op het toestel waar je Telegram gebruikt en kies een groep."
+  },
+  "ios.tg.codeErr.wrong_chat_kind_private": {
+    "en": "Open this link in a private chat with the bot.",
+    "nl": "Open deze link in een privéchat met de bot."
+  },
+  "ios.tg.codeExpired": {
+    "en": "This link has expired.",
+    "nl": "Deze link is verlopen."
+  },
+  "ios.tg.connectGroup": {
+    "en": "Connect a Telegram group",
+    "nl": "Een Telegram-groep verbinden"
+  },
+  "ios.tg.connectedBy": {
+    "en": "connected by {name}",
+    "nl": "verbonden door {name}"
+  },
+  "ios.tg.connectedDone": {
+    "en": "Connected ✓",
+    "nl": "Verbonden ✓"
+  },
+  "ios.tg.connectedTo": {
+    "en": "Connected to {title} ✓",
+    "nl": "Verbonden met {title} ✓"
+  },
+  "ios.tg.count.people.one": {
+    "en": "{count} person",
+    "nl": "{count} persoon"
+  },
+  "ios.tg.count.people.other": {
+    "en": "{count} people",
+    "nl": "{count} personen"
+  },
+  "ios.tg.count.sent.one": {
+    "en": "{count} photo or video sent",
+    "nl": "{count} foto of video gestuurd"
+  },
+  "ios.tg.count.sent.other": {
+    "en": "{count} photos and videos sent",
+    "nl": "{count} foto’s en video’s gestuurd"
+  },
+  "ios.tg.disconnect": {
+    "en": "Disconnect",
+    "nl": "Verbinding verbreken"
+  },
+  "ios.tg.disconnectBody": {
+    "en": "The bot says goodbye and leaves the group. Photos already on {name} stay.",
+    "nl": "De bot neemt afscheid en verlaat de groep. Foto’s die al op {name} staan, blijven."
+  },
+  "ios.tg.disconnectBodyPrivate": {
+    "en": "The bot stops sending this chat’s photos. Photos already sent stay.",
+    "nl": "De bot stuurt de foto’s uit deze chat niet meer door. Foto’s die al gestuurd zijn, blijven."
+  },
+  "ios.tg.disconnectTitle": {
+    "en": "Disconnect {title}?",
+    "nl": "Verbinding met {title} verbreken?"
+  },
+  "ios.tg.disconnected": {
+    "en": "{title} is disconnected",
+    "nl": "Verbinding met {title} verbroken"
+  },
+  "ios.tg.earlier": {
+    "en": "Earlier",
+    "nl": "Eerder"
+  },
+  "ios.tg.ended.bot_blocked": {
+    "en": "{name} blocked the bot",
+    "nl": "{name} heeft de bot geblokkeerd"
+  },
+  "ios.tg.ended.bot_removed": {
+    "en": "The bot was removed from the group",
+    "nl": "De bot werd uit de groep verwijderd"
+  },
+  "ios.tg.ended.chat_gone": {
+    "en": "The group no longer exists",
+    "nl": "De groep bestaat niet meer"
+  },
+  "ios.tg.ended.disconnected": {
+    "en": "Disconnected",
+    "nl": "Verbinding verbroken"
+  },
+  "ios.tg.ended.disconnectedBy": {
+    "en": "Disconnected by {name}",
+    "nl": "Verbroken door {name}"
+  },
+  "ios.tg.ended.stopped": {
+    "en": "Disconnected with /stop",
+    "nl": "Verbroken met /stop"
+  },
+  "ios.tg.ended.stoppedBy": {
+    "en": "Disconnected with /stop by {name}",
+    "nl": "Verbroken met /stop door {name}"
+  },
+  "ios.tg.err.alreadyLinked": {
+    "en": "Your account already has a Telegram linked. Unlink it first.",
+    "nl": "Aan je account is al een Telegram gekoppeld. Ontkoppel dat eerst."
+  },
+  "ios.tg.err.disabled": {
+    "en": "Telegram is turned off on this server.",
+    "nl": "Telegram staat uit op deze server."
+  },
+  "ios.tg.err.disconnected": {
+    "en": "This chat is disconnected; connect it again to change it.",
+    "nl": "Deze chat is niet meer verbonden; verbind hem opnieuw om iets te wijzigen."
+  },
+  "ios.tg.err.limit": {
+    "en": "The limit of Telegram chats is reached ({count}).",
+    "nl": "Het maximale aantal Telegram-chats is bereikt ({count})."
+  },
+  "ios.tg.err.noLink": {
+    "en": "The server sent no Telegram link. Try again.",
+    "nl": "De server stuurde geen Telegram-link. Probeer het opnieuw."
+  },
+  "ios.tg.err.rateLimited": {
+    "en": "Too many links at once. Try again in a while.",
+    "nl": "Te veel links tegelijk. Probeer het straks opnieuw."
+  },
+  "ios.tg.expires": {
+    "en": "The link works until {when}.",
+    "nl": "De link werkt tot {when}."
+  },
+  "ios.tg.explainGroupFeed": {
+    "en": "Photos posted in the group are posted to {name}. Everyone in the group can send. Telegram asks which group; the bot joins and says hello once.",
+    "nl": "Foto’s die in de groep gepost worden, komen in {name}. Iedereen in de groep kan sturen. Telegram vraagt welke groep; de bot komt erbij en zegt één keer hallo."
+  },
+  "ios.tg.explainGroupFrame": {
+    "en": "Photos posted in the group appear on {name}. Everyone in the group can send. Telegram asks which group; the bot joins and says hello once.",
+    "nl": "Foto’s die in de groep gepost worden, verschijnen op {name}. Iedereen in de groep kan sturen. Telegram vraagt welke groep; de bot komt erbij en zegt één keer hallo."
+  },
+  "ios.tg.explainInvite": {
+    "en": "Share this link with someone without the app. They tap it and Start; what they send the bot goes to {name} in your name.",
+    "nl": "Deel deze link met iemand zonder de app. Die tikt erop en op Start; wat die naar de bot stuurt, gaat in jouw naam naar {name}."
+  },
+  "ios.tg.explainMine": {
+    "en": "Opens a chat with the bot in your Telegram and links it to your account. Whatever you send the bot goes to {name}, as you.",
+    "nl": "Opent een chat met de bot in je Telegram en koppelt die aan je account. Wat je naar de bot stuurt, gaat naar {name}, op jouw naam."
+  },
+  "ios.tg.fix.makeAdmin": {
+    "en": "In Telegram: open the group, Group info → Administrators → Add, and pick the bot. It needs no rights; you can untick them all.",
+    "nl": "In Telegram: open de groep, Groepsinfo → Beheerders → Toevoegen, en kies de bot. Hij heeft geen rechten nodig; je mag ze allemaal uitvinken."
+  },
+  "ios.tg.fix.reconnect": {
+    "en": "Connect again",
+    "nl": "Opnieuw verbinden"
+  },
+  "ios.tg.introFeed": {
+    "en": "Connect a Telegram group: photos posted there are posted to {name}.",
+    "nl": "Verbind een Telegram-groep: foto’s die daar gepost worden, komen in {name}."
+  },
+  "ios.tg.introFrame": {
+    "en": "Connect a Telegram group: photos posted there appear on {name}.",
+    "nl": "Verbind een Telegram-groep: foto’s die daar gepost worden, verschijnen op {name}."
+  },
+  "ios.tg.invite": {
+    "en": "Invite someone by Telegram",
+    "nl": "Iemand uitnodigen via Telegram"
+  },
+  "ios.tg.inviteSubject": {
+    "en": "Send photos to {name}",
+    "nl": "Foto’s sturen naar {name}"
+  },
+  "ios.tg.inviteText": {
+    "en": "Send photos to {name} with Telegram: open this link and tap Start. {url}",
+    "nl": "Stuur foto’s naar {name} met Telegram: open deze link en tik op Start. {url}"
+  },
+  "ios.tg.kind.group": {
+    "en": "Group",
+    "nl": "Groep"
+  },
+  "ios.tg.kind.private": {
+    "en": "Private chat",
+    "nl": "Privéchat"
+  },
+  "ios.tg.limit": {
+    "en": "This has the most Telegram chats it can have ({count}).",
+    "nl": "Dit heeft het maximale aantal Telegram-chats ({count})."
+  },
+  "ios.tg.linkHint": {
+    "en": "Your photos in connected groups then go out as yours.",
+    "nl": "Je foto’s in verbonden groepen gaan dan op jouw naam."
+  },
+  "ios.tg.linkMine": {
+    "en": "Link my Telegram",
+    "nl": "Mijn Telegram koppelen"
+  },
+  "ios.tg.linkWaiting": {
+    "en": "Tap Start in the chat with the bot…",
+    "nl": "Tik op Start in de chat met de bot…"
+  },
+  "ios.tg.linked": {
+    "en": "On kinframe",
+    "nl": "Op kinframe"
+  },
+  "ios.tg.linkedAs": {
+    "en": "Linked",
+    "nl": "Gekoppeld"
+  },
+  "ios.tg.linkedDone": {
+    "en": "Your Telegram is connected ✓",
+    "nl": "Je Telegram is verbonden ✓"
+  },
+  "ios.tg.linkedToast": {
+    "en": "Your Telegram is linked",
+    "nl": "Je Telegram is gekoppeld"
+  },
+  "ios.tg.live.attention": {
+    "en": "{name} needs your attention",
+    "nl": "{name} heeft je aandacht nodig"
+  },
+  "ios.tg.newLink": {
+    "en": "Make a new link",
+    "nl": "Een nieuwe link maken"
+  },
+  "ios.tg.openTelegram": {
+    "en": "Open Telegram",
+    "nl": "Telegram openen"
+  },
+  "ios.tg.pause": {
+    "en": "Pause",
+    "nl": "Pauzeren"
+  },
+  "ios.tg.pausedToast": {
+    "en": "Paused: photos in the chat are ignored",
+    "nl": "Gepauzeerd: foto’s in de chat worden genegeerd"
+  },
+  "ios.tg.peopleEmpty": {
+    "en": "Nobody has sent anything yet.",
+    "nl": "Nog niemand heeft iets gestuurd."
+  },
+  "ios.tg.peopleFooter": {
+    "en": "A blocked person’s photos are ignored in this chat, silently.",
+    "nl": "Foto’s van een geblokkeerd persoon worden in deze chat stil genegeerd."
+  },
+  "ios.tg.peopleTitle": {
+    "en": "People",
+    "nl": "Mensen"
+  },
+  "ios.tg.person.line.one": {
+    "en": "{count} sent · last {when}",
+    "nl": "{count} gestuurd · laatst {when}"
+  },
+  "ios.tg.person.line.other": {
+    "en": "{count} sent · last {when}",
+    "nl": "{count} gestuurd · laatst {when}"
+  },
+  "ios.tg.privacyUpFront": {
+    "en": "After connecting, make the bot an admin of the group, or it won’t see the photos.",
+    "nl": "Maak de bot na het verbinden beheerder van de groep, anders ziet hij de foto’s niet."
+  },
+  "ios.tg.qrHint": {
+    "en": "Telegram on another device? Scan this code there.",
+    "nl": "Telegram op een ander toestel? Scan deze code daar."
+  },
+  "ios.tg.qrInvite": {
+    "en": "Or let them scan this code.",
+    "nl": "Of laat deze code scannen."
+  },
+  "ios.tg.qrLabel": {
+    "en": "QR code with the Telegram link",
+    "nl": "QR-code met de Telegram-link"
+  },
+  "ios.tg.resume": {
+    "en": "Resume",
+    "nl": "Hervatten"
+  },
+  "ios.tg.resumed": {
+    "en": "Photos are accepted again",
+    "nl": "Foto’s worden weer aanvaard"
+  },
+  "ios.tg.sendMine": {
+    "en": "Send from my Telegram",
+    "nl": "Sturen vanuit mijn Telegram"
+  },
+  "ios.tg.set.allTopics": {
+    "en": "All topics",
+    "nl": "Alle onderwerpen"
+  },
+  "ios.tg.set.everyone": {
+    "en": "Everyone in the group",
+    "nl": "Iedereen in de groep"
+  },
+  "ios.tg.set.frameReplies": {
+    "en": "Post the frame’s replies in the chat",
+    "nl": "Antwoorden van het kader in de chat posten"
+  },
+  "ios.tg.set.frameRepliesHint": {
+    "en": "When someone taps a quick reply on the frame, the bot answers the photo in the group.",
+    "nl": "Als iemand op het kader een snel antwoord tikt, antwoordt de bot op de foto in de groep."
+  },
+  "ios.tg.set.invite": {
+    "en": "Offer the app with a join link",
+    "nl": "De app aanbieden met een lidmaatschapslink"
+  },
+  "ios.tg.set.inviteHint": {
+    "en": "The bot’s one-time message to new senders includes “Ask to join {name}” (you approve each request).",
+    "nl": "Het eenmalige bericht van de bot aan nieuwe afzenders bevat “Vragen om lid te worden van {name}” (jij keurt elke aanvraag goed)."
+  },
+  "ios.tg.set.linkedOnly": {
+    "en": "Only people who are on {name}",
+    "nl": "Alleen mensen die op {name} zitten"
+  },
+  "ios.tg.set.linkedOnlyFeed": {
+    "en": "Only members of {name}",
+    "nl": "Alleen leden van {name}"
+  },
+  "ios.tg.set.reactions": {
+    "en": "Notify me of reactions",
+    "nl": "Meld me reacties"
+  },
+  "ios.tg.set.reactionsHint": {
+    "en": "For photos sent in your name. Reactions already show in Telegram.",
+    "nl": "Voor foto’s die in jouw naam gestuurd worden. Reacties zijn al te zien in Telegram."
+  },
+  "ios.tg.set.topic": {
+    "en": "Topic",
+    "nl": "Onderwerp"
+  },
+  "ios.tg.set.who": {
+    "en": "Who can send",
+    "nl": "Wie kan sturen"
+  },
+  "ios.tg.settingsTitle": {
+    "en": "Settings",
+    "nl": "Instellingen"
+  },
+  "ios.tg.status.active": {
+    "en": "Connected",
+    "nl": "Verbonden"
+  },
+  "ios.tg.status.activeLast": {
+    "en": "Connected · last photo {when}",
+    "nl": "Verbonden · laatste foto {when}"
+  },
+  "ios.tg.status.attention": {
+    "en": "Needs attention",
+    "nl": "Heeft aandacht nodig"
+  },
+  "ios.tg.status.bot_changed": {
+    "en": "This server uses a different Telegram bot now. Connect the group again.",
+    "nl": "Deze server gebruikt nu een andere Telegram-bot. Verbind de groep opnieuw."
+  },
+  "ios.tg.status.paused": {
+    "en": "Paused",
+    "nl": "Gepauzeerd"
+  },
+  "ios.tg.status.privacy_mode": {
+    "en": "The bot only sees commands in {title}. Make it an admin of the group (Group info → Administrators), or ask the server’s operator to turn off privacy mode.",
+    "nl": "De bot ziet alleen opdrachten in {title}. Maak hem beheerder van de groep (Groepsinfo → Beheerders), of vraag de beheerder van de server om de privacymodus uit te zetten."
+  },
+  "ios.tg.status.unknown": {
+    "en": "Status unknown",
+    "nl": "Status onbekend"
+  },
+  "ios.tg.takeOver": {
+    "en": "Take over",
+    "nl": "Overnemen"
+  },
+  "ios.tg.takeOverHint": {
+    "en": "Photos from people without a linked account are sent in {name}’s name. Take over to send them in yours.",
+    "nl": "Foto’s van mensen zonder gekoppeld account worden in naam van {name} gestuurd. Neem over om ze in jouw naam te sturen."
+  },
+  "ios.tg.title": {
+    "en": "Telegram",
+    "nl": "Telegram"
+  },
+  "ios.tg.tookOver": {
+    "en": "Photos from the chat are now sent in your name",
+    "nl": "Foto’s uit de chat worden nu in jouw naam gestuurd"
+  },
+  "ios.tg.unblock": {
+    "en": "Unblock",
+    "nl": "Deblokkeren"
+  },
+  "ios.tg.unblockedToast": {
+    "en": "{name} can send again",
+    "nl": "{name} kan weer sturen"
+  },
+  "ios.tg.unlink": {
+    "en": "Unlink",
+    "nl": "Ontkoppelen"
+  },
+  "ios.tg.unlinkBody": {
+    "en": "Your photos in connected groups then count as from someone without an account.",
+    "nl": "Je foto’s in verbonden groepen tellen dan als van iemand zonder account."
+  },
+  "ios.tg.unlinkTitle": {
+    "en": "Unlink your Telegram?",
+    "nl": "Je Telegram ontkoppelen?"
+  },
+  "ios.tg.unlinked": {
+    "en": "Telegram unlinked",
+    "nl": "Telegram ontkoppeld"
+  },
+  "ios.tg.waiting": {
+    "en": "Waiting for Telegram…",
+    "nl": "Wachten op Telegram…"
+  },
+  "ios.tg.warn.cannot_post": {
+    "en": "The bot isn’t allowed to post in the group, so it can’t tell people when something goes wrong.",
+    "nl": "De bot mag niet posten in de groep, dus kan hij niet laten weten als er iets misloopt."
+  },
+  "ios.tg.warn.reactions_off": {
+    "en": "Reactions are turned off in this group, so the bot confirms photos silently.",
+    "nl": "Reacties staan uit in deze groep, dus de bot bevestigt foto’s stil."
+  }
+}

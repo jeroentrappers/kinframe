@@ -290,15 +290,18 @@ type Item struct {
 	Via              *string    `db:"via"`
 	ViaSourceID      *uuid.UUID `db:"via_source_id"`
 	CapturedOverride *time.Time `db:"captured_override"`
+	// ViaLabel is the credited name for email (and other outside channels): "Jan" in "Jan via email".
+	ViaLabel          *string    `db:"via_label"`
+	ViaEmailAddressID *uuid.UUID `db:"via_email_address_id"`
 }
 
 func (tx *Tx) CreateItem(ctx context.Context, it Item) error {
 	_, err := tx.Exec(ctx, `
 		INSERT INTO items (id, media_id, sender_user_id, sender_frame_id, caption, focal_x, focal_y, fit, captured_hint, motion_media_id,
-			origin, origin_sender_name, origin_key, via, via_source_id, captured_override)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+			origin, origin_sender_name, origin_key, via, via_source_id, captured_override, via_label, via_email_address_id)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
 		it.ID, it.MediaID, it.SenderUserID, it.SenderFrameID, it.Caption, it.FocalX, it.FocalY, it.Fit, it.CapturedHint, it.MotionMediaID,
-		it.Origin, it.OriginSenderName, it.OriginKey, it.Via, it.ViaSourceID, it.CapturedOverride)
+		it.Origin, it.OriginSenderName, it.OriginKey, it.Via, it.ViaSourceID, it.CapturedOverride, it.ViaLabel, it.ViaEmailAddressID)
 	return err
 }
 
@@ -344,6 +347,11 @@ type ItemRow struct {
 	// Via credits a photo source or Google import.
 	Via         *string    `db:"via"`
 	ViaSourceID *uuid.UUID `db:"via_source_id"`
+	// ViaLabel and ViaEmailAddressID: the credited name and inbox address of mailed photos.
+	ViaLabel          *string    `db:"via_label"`
+	ViaEmailAddressID *uuid.UUID `db:"via_email_address_id"`
+	// ViaTelegramChatID: the Telegram chat it was posted in (telegram.md §8).
+	ViaTelegramChatID *uuid.UUID `db:"via_telegram_chat_id"`
 }
 
 // IsLive reports whether the item is a Live/Motion Photo whose clip has not failed.
@@ -359,7 +367,8 @@ const itemRowCols = `i.id AS item_id, i.media_id, i.sender_user_id, i.sender_fra
 	COALESCE(i.captured_override, m.captured_at) AS captured_at,
 	m.master_key, m.master_mime, m.poster_key, i.motion_media_id, mm.status AS motion_status, mm.width AS motion_width,
 	mm.height AS motion_height, mm.duration_ms AS motion_duration_ms, mm.has_audio AS motion_has_audio,
-	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name, i.via, i.via_source_id`
+	mm.master_key AS motion_master_key, i.origin, i.origin_sender_name, i.via, i.via_source_id, i.via_label, i.via_email_address_id,
+	i.via_telegram_chat_id`
 
 const itemJoins = ` JOIN media m ON m.id = i.media_id LEFT JOIN media mm ON mm.id = i.motion_media_id
 	LEFT JOIN users su ON su.id = i.sender_user_id LEFT JOIN frames sf ON sf.id = i.sender_frame_id`

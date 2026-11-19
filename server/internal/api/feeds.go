@@ -822,7 +822,7 @@ type feedInvitePreviewJSON struct {
 func (s *Server) feedInvitePreview(ctx context.Context, inv *store.FeedInvite, v *store.FeedView) (feedInvitePreviewJSON, error) {
 	out := feedInvitePreviewJSON{
 		Token: inv.Token, Purpose: inv.Purpose, FeedName: v.Name, CoverURL: s.feedCoverURL(v.CoverThumbKey),
-		MemberCount: v.MemberCount, RequiresApproval: inv.Purpose == "join" && v.InviteRequiresApproval, AlreadyMember: v.Role != "",
+		MemberCount: v.MemberCount, RequiresApproval: inv.Purpose == "join" && (v.InviteRequiresApproval || inv.Via != nil), AlreadyMember: v.Role != "",
 	}
 	if v.OwnerName != nil {
 		out.OwnerName = *v.OwnerName
@@ -939,10 +939,15 @@ func (s *Server) AcceptFeedInvite(ctx context.Context, req gen.AcceptFeedInviteR
 			if err := tx.UseFeedInvite(ctx, inv.ID); err != nil {
 				return err
 			}
-			if v.InviteRequiresApproval {
+			if v.InviteRequiresApproval || inv.Via != nil { // channel invites always need approval
 				r, isNew, err := tx.CreateFeedJoinRequest(ctx, v.ID, u.ID, &inv.ID, inv.CreatedBy, inv.Note)
 				if err != nil {
 					return err
+				}
+				if isNew && inv.Via != nil {
+					if r, err = s.markChannelJoin(ctx, tx, r, inv.Via, inv.ViaRef, u, true); err != nil {
+						return err
+					}
 				}
 				out.Status, out.JoinRequestID = "pending", &r.ID
 				if isNew {

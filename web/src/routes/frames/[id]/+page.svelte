@@ -18,6 +18,8 @@
 	import FrameCalendar from '$components/frame/calendar/FrameCalendar.svelte';
 	import FrameFeeds from '$components/frame/FrameFeeds.svelte';
 	import { discovery } from '$lib/discovery.svelte';
+	import EmailInbox from '$components/inbox/EmailInbox.svelte';
+	import TelegramSection from '$components/telegram/TelegramSection.svelte';
 
 	type Tab = 'overview' | 'library' | 'people' | 'feeds' | 'calendar' | 'settings';
 
@@ -165,6 +167,13 @@
 				<FrameCalendar {frame} />
 			{:else if tab === 'settings'}
 				<FrameSettingsForm {frame} />
+				<!-- Email to frame and Telegram (email-inbox.md, telegram.md): frame managers only, like these settings. -->
+				{#if discovery.emailInbox}
+					<EmailInbox target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('email')} />
+				{/if}
+				{#if discovery.telegram}
+					<TelegramSection target={{ kind: 'frame', id: frame.id, name: frame.name }} focus={page.url.searchParams.get('telegram')} />
+				{/if}
 			{/if}
 		</div>
 	{/if}

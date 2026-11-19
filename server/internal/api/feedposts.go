@@ -228,7 +228,7 @@ func (s *Server) renderPosts(ctx context.Context, v *store.FeedView, posts []sto
 	for i := range posts {
 		p := &posts[i]
 		ids[i], idx[p.ID] = p.ID, i
-		out[i] = feedPostJSON{ID: p.ID, FeedID: p.FeedID, CreatedAt: p.CreatedAt, Items: []gen.Item{}, Via: viaJSON(p.Via, p.ViaSourceID),
+		out[i] = feedPostJSON{ID: p.ID, FeedID: p.FeedID, CreatedAt: p.CreatedAt, Items: []gen.Item{}, Via: tgCredit(viaCredit(viaJSON(p.Via, p.ViaSourceID), p.ViaLabel, p.ViaEmailAddressID), p.ViaTelegramChatID),
 			Poster: feedPosterJSON{DisplayName: p.PosterName, AvatarURL: s.avatarURL(p.PosterAvatarKey)}}
 		if p.PosterUserID != nil {
 			out[i].Poster.UserID = *p.PosterUserID

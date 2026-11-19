@@ -3,4 +3,7 @@
 <resources>
     <!-- Caption credit: the sender (or "sender · feed"), then the service name, which is never translated ("Immich", "iCloud", "Google Photos"). -->
     <string name="credit_via">%1$s via %2$s</string>
+    <!-- Mail and Telegram: the person who mailed or posted the photo, in place of the sender ("Jan via email"; "Jan · Peeters kids via Telegram"). Telegram is a name. -->
+    <string name="credit_via_email">%1$s via email</string>
+    <string name="credit_via_telegram">%1$s via Telegram</string>
 </resources>

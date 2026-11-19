@@ -16,6 +16,19 @@ describe('push payloads', () => {
 		expect(pushUrl({ ids: { send_id: '../../evil' } })).toBe('/history');
 	});
 
+	it('opens the email pending list and the Telegram chat in the settings', () => {
+		const FEED = '0192f0a0-0010-7000-8000-000000000003';
+		const ADDR = '0192f0a0-0020-7000-8000-000000000006';
+		const CHAT = '0192f0a0-0021-7000-8000-000000000007';
+		expect(pushUrl({ key: 'email_pending_sender', ids: { frame_id: FRAME, address_id: ADDR, sender_id: SEND } })).toBe(`/frames/${FRAME}?tab=settings&email=${ADDR}`);
+		expect(pushUrl({ key: 'email_pending_sender', ids: { feed_id: FEED, address_id: ADDR } })).toBe(`/feeds/${FEED}?tab=settings&email=${ADDR}`);
+		expect(pushUrl({ key: 'telegram_attention', ids: { frame_id: FRAME, chat_id: CHAT } })).toBe(`/frames/${FRAME}?tab=settings&telegram=${CHAT}`);
+		expect(pushUrl({ key: 'telegram_attention', ids: { feed_id: FEED, chat_id: CHAT } })).toBe(`/feeds/${FEED}?tab=settings&telegram=${CHAT}`);
+		expect(pushUrl({ key: 'telegram_attention', ids: { frame_id: FRAME, chat_id: '../x' } })).toBe(`/frames/${FRAME}?tab=settings`);
+		expect(pushTag({ key: 'email_pending_sender', ids: { address_id: ADDR, sender_id: SEND, frame_id: FRAME } })).toBe(`email_pending_sender:${SEND}`);
+		expect(pushTag({ key: 'telegram_attention', ids: { chat_id: CHAT, frame_id: FRAME } })).toBe(`telegram_attention:${CHAT}`);
+	});
+
 	it('opens the feed pages for feed notifications', () => {
 		const FEED = '0192f0a0-0010-7000-8000-000000000003';
 		const POST = '0192f0a0-0011-7000-8000-000000000004';

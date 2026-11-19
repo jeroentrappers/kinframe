@@ -219,6 +219,10 @@ func (a *App) RunBackground(ctx context.Context) *sync.WaitGroup {
 	go func() { defer wg.Done(); a.API.RunBirthdayMornings(ctx) }()
 	wg.Add(1)
 	go func() { defer wg.Done(); a.API.RunPhotoSources(ctx) }()
+	wg.Add(1)
+	go func() { defer wg.Done(); a.API.RunEmailInbox(ctx) }()
+	wg.Add(1)
+	go func() { defer wg.Done(); a.API.RunTelegram(ctx) }()
 	if a.Releases != nil {
 		wg.Add(1)
 		go func() { defer wg.Done(); a.Releases.Run(ctx) }()
@@ -305,6 +309,12 @@ func (a *App) Maintain(ctx context.Context) {
 	}
 	if err := a.API.PruneGoogleImports(ctx); err != nil {
 		log.Error("prune google imports", "err", err)
+	}
+	if err := a.API.PruneTelegram(ctx); err != nil {
+		log.Error("prune telegram", "err", err)
+	}
+	if err := a.API.PruneEmail(ctx); err != nil {
+		log.Error("prune email inbox", "err", err)
 	}
 	if _, err := a.Store.PruneSubscriptions(ctx); err != nil {
 		log.Error("prune ended subscriptions", "err", err)

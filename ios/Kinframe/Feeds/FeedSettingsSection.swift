@@ -38,6 +38,13 @@ struct FeedSettingsSection: View {
                     Task { await model.loadPosts() }
                 }
             }
+            // Owner and admins (this section is): mail and Telegram chats that post to the feed.
+            if ChannelFeatures(app.discovery).email, let feed {
+                EmailInboxCard(api: model.api, target: .feed(feed.id), targetName: feed.name)
+            }
+            if ChannelFeatures(app.discovery).telegram, let feed {
+                TelegramCard(api: model.api, target: .feed(feed.id), targetName: feed.name)
+            }
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeader(L("ios.feeds.name"))
                 TextField(L("ios.feeds.namePlaceholder"), text: $name)

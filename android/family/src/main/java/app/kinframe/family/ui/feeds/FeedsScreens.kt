@@ -310,6 +310,8 @@ class FeedActions(
     val sources: (@Composable () -> Unit)? = null,
     /** "Add from Google Photos" in the Posts tab (any member, discovery `google_photos_import`). */
     val addFromGoogle: (() -> Unit)? = null,
+    /** "Photos by email and Telegram" in Settings (owner/admins; discovery `email_inbox` / `telegram`); null hides it. */
+    val channels: (@Composable () -> Unit)? = null,
 )
 
 @Composable
@@ -631,7 +633,8 @@ private fun JoinRequestCard(r: JoinRequest, busy: Boolean, a: FeedActions) {
             Avatar(r.user.displayName.orEmpty(), r.user.avatarUrl)
             Column(Modifier.weight(1f)) {
                 Text(r.user.displayName.orEmpty(), style = Kin.type.bodyStrong, color = c.ink)
-                Text(stringResource(R.string.people_via_invite, r.invitedByName.orEmpty()), style = Kin.type.caption, color = c.inkSoft)
+                if (r.isChannel) app.kinframe.family.ui.channels.JoinRequestViaText(r)
+                else Text(stringResource(R.string.people_via_invite, r.invitedByName.orEmpty()), style = Kin.type.caption, color = c.inkSoft)
                 r.note?.let { Text("“$it”", style = Kin.type.caption, color = c.inkSoft) }
             }
         }
@@ -913,6 +916,7 @@ private fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
             SwitchRow(stringResource(R.string.feed_setting_posters_birthdays), feed.postersCanAddBirthdays, { a.vm.setFlag("posters_can_add_birthdays", it) },
                 hint = stringResource(R.string.feed_setting_posters_birthdays_hint), enabled = !state.busy)
         }
+        if (feed.isAdmin) a.channels?.invoke()
     }
     if (picking) CoverPicker(feed, (state.posts as? Load.Ready)?.value.orEmpty(), { picking = false }) { id -> picking = false; a.vm.setCover(id) }
 }

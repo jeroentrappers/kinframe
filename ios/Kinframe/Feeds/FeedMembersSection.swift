@@ -50,7 +50,7 @@ struct FeedMembersSection: View {
                         AvatarView(name: r.user.displayName, url: r.user.avatarUrl ?? nil, size: 40)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(r.user.displayName ?? "?").font(.headline)
-                            Text(L("people.viaInvite", ["name": r.invitedByName ?? "?"])).font(.subheadline).foregroundStyle(Palette.textMuted)
+                            JoinRequestOriginView(request: r)
                             if let note = r.note, !note.isEmpty { Text("“\(note)”").font(.subheadline).italic() }
                         }
                     }

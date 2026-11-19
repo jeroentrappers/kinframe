@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { joinVia } from '$lib/joinRequests';
 	import { api, call, type Frame, type Invite, type JoinRequest, type Member, type Permissions } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { can } from '$lib/frames.svelte';
@@ -218,8 +219,9 @@
 								<div class="who">
 									<strong>{r.user.display_name}</strong>
 									<span class="muted small">
-										{r.via === 'invite' && r.invited_by_name ? t('people.viaInvite', { name: r.invited_by_name }) : t('people.viaCode')} · {relativeTime(r.created_at, i18n.tag)}
+										{joinVia(r, t('people.viaCode'))} · {relativeTime(r.created_at, i18n.tag)}
 									</span>
+									{#if r.via_name}<span class="small via-name" data-testid="join-via-name">{r.via_name}{#if r.via_matches}<span class="match" title={t('people.viaMatches')}><Icon name="check" size={14} /><span class="visually-hidden">{t('people.viaMatches')}</span></span>{/if}</span>{/if}
 									{#if r.note}<span class="small">“{r.note}”</span>{/if}
 								</div>
 								<div class="row-wrap">
@@ -416,6 +418,16 @@
 </Dialog>
 
 <style>
+	.via-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		overflow-wrap: anywhere;
+	}
+	.via-name .match {
+		display: inline-flex;
+		color: var(--accent);
+	}
 	.grid {
 		display: grid;
 		gap: var(--s-4);

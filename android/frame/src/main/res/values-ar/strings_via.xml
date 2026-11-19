@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="credit_via">%1$s عبر %2$s</string>
+    <string name="credit_via_email">%1$s عبر البريد الإلكتروني</string>
+    <string name="credit_via_telegram">%1$s عبر تيليجرام</string>
 </resources>

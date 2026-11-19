@@ -42,6 +42,9 @@ struct SettingsTab: View {
                             }
                         }
                     }
+                    if ChannelFeatures(app.discovery).telegram, let api = app.api {
+                        TelegramLinkSection(api: api)
+                    }
                     if app.me?.isOperator == true, app.discovery?.shop == true, let api = app.api {
                         Section {
                             NavigationLink {

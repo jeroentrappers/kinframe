@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="credit_via">%1$s чрез %2$s</string>
+    <string name="credit_via_email">%1$s по имейл</string>
+    <string name="credit_via_telegram">%1$s чрез Telegram</string>
 </resources>

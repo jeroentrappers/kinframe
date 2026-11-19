@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="credit_via">%1$s ar %2$s starpniecību</string>
+    <string name="credit_via_email">%1$s pa e-pastu</string>
+    <string name="credit_via_telegram">%1$s ar Telegram starpniecību</string>
 </resources>

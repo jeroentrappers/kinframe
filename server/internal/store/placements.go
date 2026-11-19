@@ -218,7 +218,8 @@ type StatusChange struct {
 	Origin string `db:"origin"`
 	// NewlyDelivered is set when this change delivered the placement (it was pending or ready).
 	NewlyDelivered bool `db:"newly_delivered"`
-	// SourceSend: the placement belongs to a photo source's or Google import's send (no "delivered" push).
+	// SourceSend: the placement belongs to a photo source's or Google import's send (no "delivered" push), or one
+	// made on someone's behalf (email, an outside Telegram contribution); a linked Telegram user's own send isn't.
 	SourceSend bool `db:"source_send"`
 }
 
@@ -228,7 +229,7 @@ func (tx *Tx) MarkDelivered(ctx context.Context, frameID uuid.UUID, ids []uuid.U
 		UPDATE placements p SET status = 'delivered', delivered_at = now() FROM items i
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = ANY($2) AND p.status IN ('pending', 'ready') AND p.removed_at IS NULL
 		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, true AS newly_delivered,
-			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, frameID, ids))
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL AND (s.via <> 'telegram' OR s.telegram_outside)) AS source_send`, frameID, ids))
 }
 
 // MarkSeen moves placements to seen (delivered implied) at the given time.
@@ -238,7 +239,7 @@ func (tx *Tx) MarkSeen(ctx context.Context, frameID, id uuid.UUID, at time.Time)
 		FROM items i, (SELECT status AS old_status FROM placements WHERE id = $2) o
 		WHERE i.id = p.item_id AND p.frame_id = $1 AND p.id = $2 AND p.status IN ('pending', 'ready', 'delivered') AND p.removed_at IS NULL
 		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, o.old_status IN ('pending', 'ready') AS newly_delivered,
-			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, frameID, id, at))
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL AND (s.via <> 'telegram' OR s.telegram_outside)) AS source_send`, frameID, id, at))
 }
 
 // MarkReady moves pending placements of a media on a frame to ready.
@@ -247,7 +248,7 @@ func (tx *Tx) MarkReady(ctx context.Context, mediaID, frameID uuid.UUID) ([]Stat
 		UPDATE placements p SET status = 'ready' FROM items i
 		WHERE i.id = p.item_id AND i.media_id = $1 AND p.frame_id = $2 AND p.status = 'pending' AND p.removed_at IS NULL
 		RETURNING p.id, p.frame_id, p.send_id, i.sender_user_id, p.shared_by_user_id, p.origin, false AS newly_delivered,
-			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL) AS source_send`, mediaID, frameID))
+			EXISTS (SELECT 1 FROM sends s WHERE s.id = p.send_id AND s.via IS NOT NULL AND (s.via <> 'telegram' OR s.telegram_outside)) AS source_send`, mediaID, frameID))
 	if err != nil {
 		return nil, err
 	}
@@ -463,10 +464,15 @@ type Send struct {
 	// Via is set on sends a photo source or Google import made (immich, icloud, google_photos).
 	Via           *string    `db:"via"`
 	PhotoSourceID *uuid.UUID `db:"photo_source_id"`
+	// ViaLabel and EmailAddressID: email sends (the credited name, the inbox address).
+	ViaLabel       *string    `db:"via_label"`
+	EmailAddressID *uuid.UUID `db:"email_address_id"`
+	// TelegramChatID: Telegram sends (telegram.md §8.4).
+	TelegramChatID *uuid.UUID `db:"telegram_chat_id"`
 }
 
 func (s *Store) GetSend(ctx context.Context, q db.DBTX, id uuid.UUID) (*Send, error) {
-	return one[Send](q.Query(ctx, `SELECT id, sender_user_id, created_at, via, photo_source_id FROM sends WHERE id = $1`, id))
+	return one[Send](q.Query(ctx, `SELECT id, sender_user_id, created_at, via, photo_source_id, via_label, email_address_id, telegram_chat_id FROM sends WHERE id = $1`, id))
 }
 
 // ListSends pages the sender's sends, newest first. state: ongoing, delivered or all.
@@ -479,7 +485,7 @@ func (s *Store) ListSends(ctx context.Context, senderID uuid.UUID, state string,
 		filter = ` AND EXISTS (SELECT 1 FROM placements p WHERE p.send_id = s.id AND p.removed_at IS NULL)
 			AND NOT EXISTS (SELECT 1 FROM placements p WHERE p.send_id = s.id AND p.removed_at IS NULL AND p.status IN ('pending','ready'))`
 	}
-	return many[Send](s.Pool.Query(ctx, `SELECT s.id, s.sender_user_id, s.created_at, s.via, s.photo_source_id FROM sends s
+	return many[Send](s.Pool.Query(ctx, `SELECT s.id, s.sender_user_id, s.created_at, s.via, s.photo_source_id, s.via_label, s.email_address_id, s.telegram_chat_id FROM sends s
 		WHERE s.sender_user_id = $1 AND ($2::uuid IS NULL OR s.id < $2)`+filter+` ORDER BY s.id DESC LIMIT $3`, senderID, after, limit))
 }
 

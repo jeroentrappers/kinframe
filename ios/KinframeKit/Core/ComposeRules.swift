@@ -19,6 +19,11 @@ public struct Limits: Codable, Equatable, Sendable {
     public var maxPhotoSourcesPerUser: Int = 20
     public var maxPhotoSourceItems: Int = 10_000
     public var maxGoogleImportItems: Int = 500
+    /// Inbox addresses per frame or feed, and allowed or blocked senders per address (docs/spec/email-inbox.md §12).
+    public var maxEmailAddressesPerTarget: Int = 5
+    public var maxEmailSendersPerAddress: Int = 200
+    /// Connected Telegram chats per frame or feed (docs/spec/telegram.md §14).
+    public var maxTelegramChatsPerTarget: Int = 5
 
     public init(maxItemsPerSend: Int = 200, maxVideoSeconds: Int = 300, maxUploadBytes: Int64 = 2 << 30, trashRetentionDays: Int? = 30) {
         self.maxItemsPerSend = maxItemsPerSend
@@ -42,6 +47,9 @@ public struct Limits: Codable, Equatable, Sendable {
         case maxPhotoSourcesPerUser = "max_photo_sources_per_user"
         case maxPhotoSourceItems = "max_photo_source_items"
         case maxGoogleImportItems = "max_google_import_items"
+        case maxEmailAddressesPerTarget = "max_email_addresses_per_target"
+        case maxEmailSendersPerAddress = "max_email_senders_per_address"
+        case maxTelegramChatsPerTarget = "max_telegram_chats_per_target"
     }
 
     public init(from decoder: Decoder) throws {
@@ -58,6 +66,9 @@ public struct Limits: Codable, Equatable, Sendable {
         maxPhotoSourcesPerUser = (try? c.decodeIfPresent(Int.self, forKey: .maxPhotoSourcesPerUser)) ?? 20
         maxPhotoSourceItems = (try? c.decodeIfPresent(Int.self, forKey: .maxPhotoSourceItems)) ?? 10_000
         maxGoogleImportItems = (try? c.decodeIfPresent(Int.self, forKey: .maxGoogleImportItems)) ?? 500
+        maxEmailAddressesPerTarget = (try? c.decodeIfPresent(Int.self, forKey: .maxEmailAddressesPerTarget)) ?? 5
+        maxEmailSendersPerAddress = (try? c.decodeIfPresent(Int.self, forKey: .maxEmailSendersPerAddress)) ?? 200
+        maxTelegramChatsPerTarget = (try? c.decodeIfPresent(Int.self, forKey: .maxTelegramChatsPerTarget)) ?? 5
     }
 }
 

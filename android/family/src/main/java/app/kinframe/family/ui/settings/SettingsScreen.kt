@@ -67,6 +67,8 @@ fun SettingsScreen(
     onOpenWeb: ((String) -> Unit)? = null,
     /** Settings → My photo sources; null when the server has no photo sources. */
     onPhotoSources: (() -> Unit)? = null,
+    /** Settings → Telegram ("Link my Telegram"); null when the server has no Telegram bot. */
+    telegram: (@Composable () -> Unit)? = null,
     /** Names of the frames the person owns; they hand those over or remove them before deleting the account. */
     ownedFrames: List<String> = emptyList(),
     /** Deletes the account (removeItems: also what they sent); null hides the button. */
@@ -133,6 +135,8 @@ fun SettingsScreen(
                 Text(stringResource(R.string.source_settings_hint), style = Kin.type.caption, color = c.inkSoft)
             }
         }
+
+        telegram?.invoke()
 
         SectionTitle(stringResource(R.string.settings_server))
         Surface(Modifier.fillMaxWidth()) {

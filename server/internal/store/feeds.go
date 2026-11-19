@@ -245,6 +245,9 @@ type FeedInvite struct {
 	Note          *string    `db:"note"`
 	ExpiresAt     time.Time  `db:"expires_at"`
 	RevokedAt     *time.Time `db:"revoked_at"`
+	// Via, ViaRef: a channel invite (see Invite).
+	Via    *string `db:"via"`
+	ViaRef *string `db:"via_ref"`
 }
 
 // Usable reports whether the invite can still be accepted.
@@ -253,23 +256,23 @@ func (i FeedInvite) Usable(now time.Time) bool {
 }
 
 const feedInviteSelect = `SELECT i.id, i.feed_id, i.purpose, i.token, i.code, i.created_by, u.display_name AS created_by_name,
-	i.max_uses, i.uses, i.note, i.expires_at, i.revoked_at FROM feed_invites i LEFT JOIN users u ON u.id = i.created_by`
+	i.max_uses, i.uses, i.note, i.expires_at, i.revoked_at, i.via, i.via_ref FROM feed_invites i LEFT JOIN users u ON u.id = i.created_by`
 
 // CreateFeedInvite inserts an invite; a unique violation on the code means
 // the caller should retry with another code.
 func (s *Store) CreateFeedInvite(ctx context.Context, q db.DBTX, inv FeedInvite) (*FeedInvite, error) {
-	if _, err := q.Exec(ctx, `INSERT INTO feed_invites (id, feed_id, purpose, token, code, created_by, max_uses, note, expires_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		inv.ID, inv.FeedID, inv.Purpose, inv.Token, inv.Code, inv.CreatedBy, inv.MaxUses, inv.Note, inv.ExpiresAt); err != nil {
+	if _, err := q.Exec(ctx, `INSERT INTO feed_invites (id, feed_id, purpose, token, code, created_by, max_uses, note, expires_at, via, via_ref)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+		inv.ID, inv.FeedID, inv.Purpose, inv.Token, inv.Code, inv.CreatedBy, inv.MaxUses, inv.Note, inv.ExpiresAt, inv.Via, inv.ViaRef); err != nil {
 		return nil, err
 	}
 	return one[FeedInvite](q.Query(ctx, feedInviteSelect+` WHERE i.id = $1`, inv.ID))
 }
 
-// ListActiveFeedInvites lists usable invites; createdBy filters unless nil.
+// ListActiveFeedInvites lists usable invites; createdBy filters unless nil. Channel invites are not listed.
 func (s *Store) ListActiveFeedInvites(ctx context.Context, feedID uuid.UUID, createdBy *uuid.UUID) ([]FeedInvite, error) {
 	return many[FeedInvite](s.Pool.Query(ctx, feedInviteSelect+`
-		WHERE i.feed_id = $1 AND i.revoked_at IS NULL AND i.expires_at > now() AND (i.max_uses IS NULL OR i.uses < i.max_uses)
+		WHERE i.feed_id = $1 AND i.via IS NULL AND i.revoked_at IS NULL AND i.expires_at > now() AND (i.max_uses IS NULL OR i.uses < i.max_uses)
 		AND ($2::uuid IS NULL OR i.created_by = $2) ORDER BY i.id DESC`, feedID, createdBy))
 }
 
@@ -305,7 +308,7 @@ func (tx *Tx) LockFeedInvite(ctx context.Context, id uuid.UUID) error {
 // ---------------------------------------------------------------- join requests
 
 const feedJoinSelect = `SELECT j.id, j.feed_id AS frame_id, j.user_id, u.display_name AS user_name, u.avatar_key AS user_avatar_key,
-	'invite' AS via, ib.display_name AS invited_by_name, j.note, j.status, j.created_at
+	j.via, ib.display_name AS invited_by_name, j.note, j.status, j.created_at, j.via_name, j.via_matches
 	FROM feed_join_requests j JOIN users u ON u.id = j.user_id LEFT JOIN users ib ON ib.id = j.invited_by`
 
 // CreateFeedJoinRequest creates a pending request or returns the existing pending
@@ -337,6 +340,15 @@ func (tx *Tx) LockFeedJoinRequest(ctx context.Context, feedID, id uuid.UUID) (*J
 		return nil, err
 	}
 	return one[JoinRequest](tx.Query(ctx, feedJoinSelect+` WHERE j.id = $1 AND j.feed_id = $2`, id, feedID))
+}
+
+// SetFeedJoinRequestChannel marks a feed join request as coming from an outside channel.
+func (tx *Tx) SetFeedJoinRequestChannel(ctx context.Context, id uuid.UUID, c JoinChannel) (*JoinRequest, error) {
+	if _, err := tx.Exec(ctx, `UPDATE feed_join_requests SET via = $2, via_name = $3, via_ref = $4, via_matches = $5 WHERE id = $1`,
+		id, c.Via, c.Name, c.Ref, c.Matches); err != nil {
+		return nil, err
+	}
+	return one[JoinRequest](tx.Query(ctx, feedJoinSelect+` WHERE j.id = $1`, id))
 }
 
 func (tx *Tx) DecideFeedJoinRequest(ctx context.Context, id uuid.UUID, status string) error {
@@ -507,10 +519,16 @@ type FeedPost struct {
 	// Via is the send's credit (photo sources and Google imports).
 	Via         *string    `db:"via"`
 	ViaSourceID *uuid.UUID `db:"via_source_id"`
+	// ViaLabel and ViaEmailAddressID: email posts (the credited name, the inbox address).
+	ViaLabel          *string    `db:"via_label"`
+	ViaEmailAddressID *uuid.UUID `db:"via_email_address_id"`
+	// ViaTelegramChatID: Telegram posts.
+	ViaTelegramChatID *uuid.UUID `db:"via_telegram_chat_id"`
 }
 
 const feedPostSelect = `SELECT p.id, p.feed_id, p.send_id, p.poster_user_id, COALESCE(u.display_name, '') AS poster_name,
-	u.avatar_key AS poster_avatar_key, p.created_at, p.removed_at, fd.name AS feed_name, sd.via, sd.photo_source_id AS via_source_id
+	u.avatar_key AS poster_avatar_key, p.created_at, p.removed_at, fd.name AS feed_name, sd.via, sd.photo_source_id AS via_source_id,
+	sd.via_label, sd.email_address_id AS via_email_address_id, sd.telegram_chat_id AS via_telegram_chat_id
 	FROM feed_posts p JOIN feeds fd ON fd.id = p.feed_id LEFT JOIN users u ON u.id = p.poster_user_id LEFT JOIN sends sd ON sd.id = p.send_id`
 
 // CreateFeedPost inserts a post with the given items (in order).

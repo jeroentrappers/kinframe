@@ -85,6 +85,18 @@ func viaJSON(via *string, sourceID *uuid.UUID) *gen.ItemVia {
 	return &gen.ItemVia{Service: gen.PhotoService(*via), Label: label, SourceId: sourceID}
 }
 
+// viaCredit adds the credited name (email: "Jan") and the inbox address to a credit.
+func viaCredit(v *gen.ItemVia, label *string, addressID *uuid.UUID) *gen.ItemVia {
+	if v == nil {
+		return nil
+	}
+	if label != nil && *label != "" {
+		v.Label = *label
+	}
+	v.AddressId = addressID
+	return v
+}
+
 // ---------------------------------------------------------------- permissions
 
 // sourceTarget is what a source points at, resolved for permission checks.
@@ -1116,5 +1128,5 @@ func (s *Server) announceRemovedSources(rs []removedSource) {
 // about reactions and replies to its photos (they still show in history).
 func (s *Server) reactionsOn(ctx context.Context, itemID uuid.UUID) bool {
 	on, err := s.st.NotifyReactions(ctx, itemID)
-	return err != nil || on
+	return (err != nil || on) && s.telegramReactionsOn(ctx, itemID)
 }

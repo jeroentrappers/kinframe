@@ -8,7 +8,7 @@ import androidx.room.withTransaction
 
 @Database(
     entities = [PlacementEntity::class, MemberEntity::class, SyncStateEntity::class, AckEntity::class, OutboxEntity::class, FeedTombstoneEntity::class, BirthdayGreetingEntity::class, AlbumFlagEntity::class],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 abstract class FrameDatabase : RoomDatabase() {
@@ -35,6 +35,13 @@ abstract class FrameDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "frame.db"
+
+        /** v11: email to frame and Telegram: the service of `item.via`, so the caption reads "Jan via email" (email-inbox.md §9.2). */
+        val MIGRATION_10_11 = object : androidx.room.migration.Migration(10, 11) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE placements ADD COLUMN viaService TEXT DEFAULT NULL")
+            }
+        }
 
         /**
          * v10: photo sources (docs/spec/photo-sources.md): the service credited in the caption ("via Immich", §9.5) and
@@ -125,7 +132,7 @@ abstract class FrameDatabase : RoomDatabase() {
                 // slideshow read while the sync engine writes.
                 .setJournalMode(JournalMode.WRITE_AHEAD_LOGGING)
                 // The server is the source of truth: a schema change simply re-syncs from scratch.
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

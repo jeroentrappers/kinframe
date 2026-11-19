@@ -91,6 +91,49 @@ export type GoogleImportErrorCode = Schemas['GoogleImportErrorCode'];
 export type GoogleImportCreate = Schemas['GoogleImportCreate'];
 export type GoogleImport = Schemas['GoogleImport'];
 
+// Email to frame (docs/spec/email-inbox.md, README §5.16).
+export type EmailAddressStatus = Schemas['EmailAddressStatus'];
+export type EmailAddressTarget = Schemas['EmailAddressTarget'];
+export type EmailAddress = Schemas['EmailAddress'];
+export type EmailAddressCreate = Schemas['EmailAddressCreate'];
+export type EmailAddressUpdate = Schemas['EmailAddressUpdate'];
+export type EmailSenderState = Schemas['EmailSenderState'];
+export type EmailSender = Schemas['EmailSender'];
+export type EmailSenderCreate = Schemas['EmailSenderCreate'];
+export type EmailSenderUpdate = Schemas['EmailSenderUpdate'];
+export type EmailSenderApprove = Schemas['EmailSenderApprove'];
+export type EmailSenderReject = Schemas['EmailSenderReject'];
+export type EmailAuthResult = Schemas['EmailAuthResult'];
+export type EmailHeldReason = Schemas['EmailHeldReason'];
+export type EmailSkipCounts = Schemas['EmailSkipCounts'];
+export type EmailHeldMessageSummary = Schemas['EmailHeldMessageSummary'];
+export type EmailHeldMessage = Schemas['EmailHeldMessage'];
+export type EmailPendingSender = Schemas['EmailPendingSender'];
+export type EmailOutcome = Schemas['EmailOutcome'];
+export type EmailReplyKind = Schemas['EmailReplyKind'];
+export type EmailMessage = Schemas['EmailMessage'];
+export type EmailMessagePage = Schemas['EmailMessagePage'];
+
+// Telegram (docs/spec/telegram.md, README §5.17).
+export type TelegramChatKind = Schemas['TelegramChatKind'];
+export type TelegramConnectCodeCreate = Schemas['TelegramConnectCodeCreate'];
+export type TelegramCodePurpose = Schemas['TelegramCodePurpose'];
+export type TelegramCodeStatus = Schemas['TelegramCodeStatus'];
+export type TelegramCodeErrorCode = Schemas['TelegramCodeErrorCode'];
+export type TelegramCode = Schemas['TelegramCode'];
+export type TelegramChatTarget = Schemas['TelegramChatTarget'];
+export type TelegramChatStatus = Schemas['TelegramChatStatus'];
+export type TelegramChatErrorCode = Schemas['TelegramChatErrorCode'];
+export type TelegramChatWarning = Schemas['TelegramChatWarning'];
+export type TelegramChatEndedReason = Schemas['TelegramChatEndedReason'];
+export type TelegramContributorsMode = Schemas['TelegramContributorsMode'];
+export type TelegramTopic = Schemas['TelegramTopic'];
+export type TelegramChat = Schemas['TelegramChat'];
+export type TelegramChatUpdate = Schemas['TelegramChatUpdate'];
+export type TelegramContributor = Schemas['TelegramContributor'];
+export type TelegramContributorUpdate = Schemas['TelegramContributorUpdate'];
+export type TelegramLink = Schemas['TelegramLink'];
+
 /** An RFC 9457 problem (or a network failure, code `network`). */
 export class ApiError extends Error {
 	readonly status: number;

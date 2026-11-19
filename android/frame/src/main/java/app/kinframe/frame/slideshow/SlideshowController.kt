@@ -244,7 +244,7 @@ class SlideshowController(private val c: FrameController) {
             if (fresh.caption != cur.caption || fresh.reaction != cur.reaction || fresh.captionEdited != cur.captionEdited ||
                 fresh.fit != cur.fit || fresh.focalX != cur.focalX || fresh.focalY != cur.focalY || fresh.rotation != cur.rotation ||
                 fresh.originFeedName != cur.originFeedName || // a feed rename updates the credit
-                fresh.viaLabel != cur.viaLabel
+                fresh.viaLabel != cur.viaLabel || fresh.viaService != cur.viaService
             ) refresh = true
             _current.value = fresh
         }
@@ -464,7 +464,7 @@ class SlideshowController(private val c: FrameController) {
         val placed = if (split != null) Collage.placeInto(listOf(split.big, split.small), aspects, screenW, screenH) else Collage.place(aspects, screenW, screenH)
         val withLabels = settings.widgets.caption
         val ctx = app.kinframe.frame.Locales.wrap(g.app)
-        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}:${it.originFeedName}:${it.viaLabel}" } +
+        val key = "group|" + group.joinToString(",") { "${it.id}:${it.localFile}:${it.focalX}:${it.focalY}:${it.rotation}:${it.caption}:${it.sharedByName}:${it.originFeedName}:${it.viaLabel}:${it.viaService}" } +
             "|$withLabels|${screenW}x$screenH|${if (withLabels) corner() else ""}|split=${split != null}:$splitSide"
         cache[key]?.let { return it }
         val tiles = placed.cells.mapIndexed { i, cell -> Tile(group[placed.order[i]], cell) }

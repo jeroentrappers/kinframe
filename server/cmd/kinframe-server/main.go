@@ -5,6 +5,7 @@
 //	kinframe-server healthcheck  probe GET /healthz on the local listener (for Docker)
 //	kinframe-server bootstrap-logto  configure Logto for kinframe (idempotent, see server/README.md)
 //	kinframe-server migrate-blobs --from fs --to s3  copy stored media between blob backends
+//	kinframe-server deliver-email --recipient … [--sender …]  post a mail from stdin to the inbound webhook (Postfix pipe)
 package main
 
 import (
@@ -41,6 +42,9 @@ func run() error {
 	}
 	if len(os.Args) > 1 && os.Args[1] == "migrate-blobs" {
 		return migrateBlobs(os.Args[2:])
+	}
+	if len(os.Args) > 1 && os.Args[1] == "deliver-email" {
+		os.Exit(deliverEmail(os.Args[2:]))
 	}
 	cfg, err := config.Load()
 	if err != nil {

@@ -15,6 +15,7 @@
 	import Dialog from '$components/Dialog.svelte';
 	import Icon from '$components/Icon.svelte';
 	import LanguagePicker from '$components/LanguagePicker.svelte';
+	import TelegramLinkSection from '$components/telegram/TelegramLinkSection.svelte';
 
 	// After a first sign-in without a name claim: ask once, then continue where they were going.
 	const welcome = page.url.searchParams.get('welcome') === '1';
@@ -203,6 +204,10 @@
 				{/if}
 			{/if}
 		</section>
+
+		{#if discovery.telegram}
+			<TelegramLinkSection />
+		{/if}
 
 		{#if discovery.photoSources || discovery.googlePhotosImport}
 			<a class="card card-pad row between shop-link" href="/photo-sources">

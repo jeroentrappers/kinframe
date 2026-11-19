@@ -1,0 +1,646 @@
+{
+  "ios.em.addSender": {
+    "en": "Add a sender",
+    "nl": "Een afzender toevoegen"
+  },
+  "ios.em.allow": {
+    "en": "Allow",
+    "nl": "Toelaten"
+  },
+  "ios.em.allowedToast": {
+    "en": "{name} may send now",
+    "nl": "{name} mag nu sturen"
+  },
+  "ios.em.approve": {
+    "en": "Approve",
+    "nl": "Goedkeuren"
+  },
+  "ios.em.approveSender": {
+    "en": "Approve the sender",
+    "nl": "Afzender goedkeuren"
+  },
+  "ios.em.approveUnverifiedNote": {
+    "en": "Mail that couldn’t be verified stays here; deliver it one by one.",
+    "nl": "Mail die niet gecontroleerd kon worden, blijft hier; lever die één voor één af."
+  },
+  "ios.em.approved": {
+    "en": "{name} is allowed; their photos are on their way",
+    "nl": "{name} is toegelaten; de foto’s zijn onderweg"
+  },
+  "ios.em.block": {
+    "en": "Block",
+    "nl": "Blokkeren"
+  },
+  "ios.em.blocked": {
+    "en": "Blocked",
+    "nl": "Geblokkeerd"
+  },
+  "ios.em.blockedToast": {
+    "en": "{name} is blocked",
+    "nl": "{name} is geblokkeerd"
+  },
+  "ios.em.changeSlug": {
+    "en": "Change the friendly part",
+    "nl": "Herkenbaar deel wijzigen"
+  },
+  "ios.em.changeSlugHint": {
+    "en": "This changes the address. {address} stops working at once; share the new one.",
+    "nl": "Dit verandert het adres. {address} werkt meteen niet meer; deel het nieuwe."
+  },
+  "ios.em.copied": {
+    "en": "Address copied",
+    "nl": "Adres gekopieerd"
+  },
+  "ios.em.count.allowed.one": {
+    "en": "{count} allowed sender",
+    "nl": "{count} toegelaten afzender"
+  },
+  "ios.em.count.allowed.other": {
+    "en": "{count} allowed senders",
+    "nl": "{count} toegelaten afzenders"
+  },
+  "ios.em.count.delivered.one": {
+    "en": "{count} mail in 30 days",
+    "nl": "{count} mail in 30 dagen"
+  },
+  "ios.em.count.delivered.other": {
+    "en": "{count} mails in 30 days",
+    "nl": "{count} mails in 30 dagen"
+  },
+  "ios.em.count.pending.one": {
+    "en": "{count} waiting for your OK",
+    "nl": "{count} wacht op je akkoord"
+  },
+  "ios.em.count.pending.other": {
+    "en": "{count} waiting for your OK",
+    "nl": "{count} wachten op je akkoord"
+  },
+  "ios.em.create": {
+    "en": "Create an address",
+    "nl": "Een adres maken"
+  },
+  "ios.em.createButton": {
+    "en": "Create",
+    "nl": "Maken"
+  },
+  "ios.em.createTitle": {
+    "en": "New email address",
+    "nl": "Nieuw e-mailadres"
+  },
+  "ios.em.createdToast": {
+    "en": "{address} is ready",
+    "nl": "{address} is klaar"
+  },
+  "ios.em.delete": {
+    "en": "Delete address",
+    "nl": "Adres verwijderen"
+  },
+  "ios.em.deleteBody": {
+    "en": "The address stops working at once. Photos already delivered stay.",
+    "nl": "Het adres werkt meteen niet meer. Foto’s die al afgeleverd zijn, blijven."
+  },
+  "ios.em.deleteMail": {
+    "en": "Delete",
+    "nl": "Verwijderen"
+  },
+  "ios.em.deleteMailBody": {
+    "en": "Its photos won’t reach the frame. The sender is not told.",
+    "nl": "De foto’s komen niet op het kader. De afzender krijgt geen bericht."
+  },
+  "ios.em.deleteMailTitle": {
+    "en": "Delete this mail?",
+    "nl": "Deze mail verwijderen?"
+  },
+  "ios.em.deleteTitle": {
+    "en": "Delete {address}?",
+    "nl": "{address} verwijderen?"
+  },
+  "ios.em.deleted": {
+    "en": "Address deleted",
+    "nl": "Adres verwijderd"
+  },
+  "ios.em.deletedMail": {
+    "en": "Mail deleted",
+    "nl": "Mail verwijderd"
+  },
+  "ios.em.deliverOne": {
+    "en": "Deliver this one",
+    "nl": "Deze afleveren"
+  },
+  "ios.em.deliverUnverifiedNote": {
+    "en": "Delivering this mail doesn’t allow the sender: their next mail waits here again.",
+    "nl": "Deze mail afleveren laat de afzender niet toe: hun volgende mail wacht hier opnieuw."
+  },
+  "ios.em.deliveredOne": {
+    "en": "Delivered",
+    "nl": "Afgeleverd"
+  },
+  "ios.em.err.alreadyDecided": {
+    "en": "Someone else already decided about this sender.",
+    "nl": "Iemand anders heeft al over deze afzender beslist."
+  },
+  "ios.em.err.disabled": {
+    "en": "Email to frame is turned off on this server.",
+    "nl": "Mailen naar een kader staat uit op deze server."
+  },
+  "ios.em.err.duplicateSender": {
+    "en": "This address is already on the list.",
+    "nl": "Dit adres staat al op de lijst."
+  },
+  "ios.em.err.invalid": {
+    "en": "That isn’t valid. Check what you typed.",
+    "nl": "Dat is niet geldig. Kijk na wat je typte."
+  },
+  "ios.em.err.limit": {
+    "en": "The limit is reached ({count}).",
+    "nl": "De limiet is bereikt ({count})."
+  },
+  "ios.em.err.nameLong": {
+    "en": "The name is too long.",
+    "nl": "De naam is te lang."
+  },
+  "ios.em.err.rateLimited": {
+    "en": "Too many changes at once. Try again in a while.",
+    "nl": "Te veel wijzigingen tegelijk. Probeer het straks opnieuw."
+  },
+  "ios.em.err.slug": {
+    "en": "Use lower-case letters, digits and dashes (at most 24).",
+    "nl": "Gebruik kleine letters, cijfers en streepjes (hoogstens 24)."
+  },
+  "ios.em.explainFeed": {
+    "en": "Members of {name} can mail photos here from the email address of their kinframe account. Anyone else needs your OK the first time. Each mail becomes a post.",
+    "nl": "Leden van {name} kunnen hier foto’s naartoe mailen vanaf het e-mailadres van hun kinframe-account. Iedereen anders heeft de eerste keer jouw akkoord nodig. Elke mail wordt een bericht."
+  },
+  "ios.em.explainFrame": {
+    "en": "Family members can mail photos here from the email address of their kinframe account. Anyone else needs your OK the first time. Photos appear on {name}.",
+    "nl": "Familieleden kunnen hier foto’s naartoe mailen vanaf het e-mailadres van hun kinframe-account. Iedereen anders heeft de eerste keer jouw akkoord nodig. De foto’s verschijnen op {name}."
+  },
+  "ios.em.held.caption": {
+    "en": "Caption",
+    "nl": "Bijschrift"
+  },
+  "ios.em.held.expires.one": {
+    "en": "deleted in {count} day",
+    "nl": "verwijderd over {count} dag"
+  },
+  "ios.em.held.expires.other": {
+    "en": "deleted in {count} days",
+    "nl": "verwijderd over {count} dagen"
+  },
+  "ios.em.held.expiresToday": {
+    "en": "deleted today",
+    "nl": "wordt vandaag verwijderd"
+  },
+  "ios.em.held.from": {
+    "en": "From",
+    "nl": "Van"
+  },
+  "ios.em.held.received": {
+    "en": "Received",
+    "nl": "Ontvangen"
+  },
+  "ios.em.held.subject": {
+    "en": "Subject",
+    "nl": "Onderwerp"
+  },
+  "ios.em.held.unverified": {
+    "en": "We couldn’t verify that this really comes from {email}.",
+    "nl": "We konden niet nagaan of dit echt van {email} komt."
+  },
+  "ios.em.heldTitle": {
+    "en": "Waiting mail",
+    "nl": "Wachtende mail"
+  },
+  "ios.em.introFeed": {
+    "en": "Give {name} an email address: photos mailed to it are posted to the feed and reach every frame that follows it.",
+    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, komen in de feed en op elk kader dat de feed volgt."
+  },
+  "ios.em.introFrame": {
+    "en": "Give {name} an email address: photos mailed to it appear on the frame. Handy for relatives without the app.",
+    "nl": "Geef {name} een e-mailadres: foto’s die ernaar gemaild worden, verschijnen op het kader. Handig voor familie zonder de app."
+  },
+  "ios.em.items.one": {
+    "en": "{count} photo or video",
+    "nl": "{count} foto of video"
+  },
+  "ios.em.items.other": {
+    "en": "{count} photos and videos",
+    "nl": "{count} foto’s en video’s"
+  },
+  "ios.em.label": {
+    "en": "Name",
+    "nl": "Naam"
+  },
+  "ios.em.labelHint": {
+    "en": "Shown in the app and in replies to senders.",
+    "nl": "Te zien in de app en in antwoorden aan afzenders."
+  },
+  "ios.em.limit": {
+    "en": "This has the most addresses it can have ({count}).",
+    "nl": "Dit heeft het maximale aantal adressen ({count})."
+  },
+  "ios.em.loadMore": {
+    "en": "Show more",
+    "nl": "Meer tonen"
+  },
+  "ios.em.membersNote": {
+    "en": "Members of {name} can send from the email address of their account; they aren’t listed here.",
+    "nl": "Leden van {name} kunnen sturen vanaf het e-mailadres van hun account; ze staan hier niet."
+  },
+  "ios.em.membersNoteFeed": {
+    "en": "Members of {name} can send from the email address of their account; they aren’t listed here.",
+    "nl": "Leden van {name} kunnen sturen vanaf het e-mailadres van hun account; ze staan hier niet."
+  },
+  "ios.em.new": {
+    "en": "New address",
+    "nl": "Nieuw adres"
+  },
+  "ios.em.noReplies": {
+    "en": "This server can’t send mail, so senders get no replies.",
+    "nl": "Deze server kan geen mail versturen, dus afzenders krijgen geen antwoord."
+  },
+  "ios.em.noSubject": {
+    "en": "(no subject)",
+    "nl": "(geen onderwerp)"
+  },
+  "ios.em.openHint": {
+    "en": "Opens the address: senders, waiting mail and settings",
+    "nl": "Opent het adres: afzenders, wachtende mail en instellingen"
+  },
+  "ios.em.outcome.blocked": {
+    "en": "Blocked sender · dropped",
+    "nl": "Geblokkeerde afzender · genegeerd"
+  },
+  "ios.em.outcome.delivered.one": {
+    "en": "{name} · {count} photo delivered",
+    "nl": "{name} · {count} foto afgeleverd"
+  },
+  "ios.em.outcome.delivered.other": {
+    "en": "{name} · {count} photos delivered",
+    "nl": "{name} · {count} foto’s afgeleverd"
+  },
+  "ios.em.outcome.duplicate": {
+    "en": "{name} · already received",
+    "nl": "{name} · al ontvangen"
+  },
+  "ios.em.outcome.encrypted": {
+    "en": "{name} · encrypted, couldn’t be read",
+    "nl": "{name} · versleuteld, kon niet gelezen worden"
+  },
+  "ios.em.outcome.failed": {
+    "en": "Couldn’t be processed",
+    "nl": "Kon niet verwerkt worden"
+  },
+  "ios.em.outcome.held": {
+    "en": "{name} · waiting for your approval",
+    "nl": "{name} · wacht op je goedkeuring"
+  },
+  "ios.em.outcome.ignored": {
+    "en": "Automatic message · ignored",
+    "nl": "Automatisch bericht · genegeerd"
+  },
+  "ios.em.outcome.no_media": {
+    "en": "{name} · no photos found",
+    "nl": "{name} · geen foto’s gevonden"
+  },
+  "ios.em.outcome.rate_limited": {
+    "en": "Too many emails today",
+    "nl": "Te veel mails vandaag"
+  },
+  "ios.em.outcome.rejected_dmarc": {
+    "en": "Not really from {domain} · refused",
+    "nl": "Niet echt van {domain} · geweigerd"
+  },
+  "ios.em.outcome.too_large": {
+    "en": "{name} · too large or too long",
+    "nl": "{name} · te groot of te lang"
+  },
+  "ios.em.outcome.unknown": {
+    "en": "{name} · received",
+    "nl": "{name} · ontvangen"
+  },
+  "ios.em.ownerOther": {
+    "en": "Mail from people without an account is sent in {name}’s name.",
+    "nl": "Mail van mensen zonder account wordt in naam van {name} gestuurd."
+  },
+  "ios.em.ownerYou": {
+    "en": "Mail from people without an account is sent in your name.",
+    "nl": "Mail van mensen zonder account wordt in jouw naam gestuurd."
+  },
+  "ios.em.pause": {
+    "en": "Pause",
+    "nl": "Pauzeren"
+  },
+  "ios.em.pausedNote": {
+    "en": "Paused: mail to this address bounces with “This address is paused”. Resume to reopen it.",
+    "nl": "Gepauzeerd: mail naar dit adres komt terug met “Dit adres is gepauzeerd”. Hervat om het weer te openen."
+  },
+  "ios.em.pausedToast": {
+    "en": "Paused: mail to it bounces",
+    "nl": "Gepauzeerd: mail ernaar komt terug"
+  },
+  "ios.em.pending.wants.one": {
+    "en": "{name} wants to send a photo",
+    "nl": "{name} wil een foto sturen"
+  },
+  "ios.em.pending.wants.other": {
+    "en": "{name} wants to send {count} photos",
+    "nl": "{name} wil {count} foto’s sturen"
+  },
+  "ios.em.pendingTitle": {
+    "en": "Waiting for your OK",
+    "nl": "Wacht op je akkoord"
+  },
+  "ios.em.recent": {
+    "en": "Recent mail",
+    "nl": "Recente mail"
+  },
+  "ios.em.recentEmpty": {
+    "en": "No mail in the last 30 days.",
+    "nl": "Geen mail in de laatste 30 dagen."
+  },
+  "ios.em.regenerate": {
+    "en": "Get a new address",
+    "nl": "Een nieuw adres nemen"
+  },
+  "ios.em.regenerateBody": {
+    "en": "{address} stops working at once and is never used again. Allowed senders and settings stay; share the new address.",
+    "nl": "{address} werkt meteen niet meer en wordt nooit opnieuw gebruikt. Toegelaten afzenders en instellingen blijven; deel het nieuwe adres."
+  },
+  "ios.em.regenerateTitle": {
+    "en": "Get a new address?",
+    "nl": "Een nieuw adres nemen?"
+  },
+  "ios.em.regenerated": {
+    "en": "The new address is {address}",
+    "nl": "Het nieuwe adres is {address}"
+  },
+  "ios.em.reject": {
+    "en": "Reject",
+    "nl": "Weigeren"
+  },
+  "ios.em.rejectBlock": {
+    "en": "Reject and block this sender",
+    "nl": "Weigeren en deze afzender blokkeren"
+  },
+  "ios.em.rejectBody": {
+    "en": "Their waiting mail is deleted. They are not told.",
+    "nl": "De wachtende mail wordt verwijderd. De afzender krijgt geen bericht."
+  },
+  "ios.em.rejectTitle": {
+    "en": "Reject {name}?",
+    "nl": "{name} weigeren?"
+  },
+  "ios.em.rejected": {
+    "en": "{name} rejected",
+    "nl": "{name} geweigerd"
+  },
+  "ios.em.rejectedBlocked": {
+    "en": "{name} rejected and blocked",
+    "nl": "{name} geweigerd en geblokkeerd"
+  },
+  "ios.em.removeSender": {
+    "en": "Remove",
+    "nl": "Verwijderen"
+  },
+  "ios.em.removedSender": {
+    "en": "{name} removed",
+    "nl": "{name} verwijderd"
+  },
+  "ios.em.rename": {
+    "en": "Rename",
+    "nl": "Naam wijzigen"
+  },
+  "ios.em.renameSender": {
+    "en": "Change name",
+    "nl": "Naam wijzigen"
+  },
+  "ios.em.reply.delivered": {
+    "en": "Reply: delivered",
+    "nl": "Antwoord: afgeleverd"
+  },
+  "ios.em.reply.encrypted": {
+    "en": "Reply: encrypted mail",
+    "nl": "Antwoord: versleutelde mail"
+  },
+  "ios.em.reply.held": {
+    "en": "Reply: waiting for approval",
+    "nl": "Antwoord: wacht op goedkeuring"
+  },
+  "ios.em.reply.no_media": {
+    "en": "Reply: no photos found",
+    "nl": "Antwoord: geen foto’s gevonden"
+  },
+  "ios.em.reply.too_large": {
+    "en": "Reply: too large",
+    "nl": "Antwoord: te groot"
+  },
+  "ios.em.reply.unknown": {
+    "en": "A reply was sent",
+    "nl": "Er werd een antwoord gestuurd"
+  },
+  "ios.em.resume": {
+    "en": "Resume",
+    "nl": "Hervatten"
+  },
+  "ios.em.resumed": {
+    "en": "Mail is accepted again",
+    "nl": "Mail wordt weer aanvaard"
+  },
+  "ios.em.senderActions": {
+    "en": "Actions for {name}",
+    "nl": "Acties voor {name}"
+  },
+  "ios.em.senderBlock": {
+    "en": "Block instead of allow",
+    "nl": "Blokkeren in plaats van toelaten"
+  },
+  "ios.em.senderEmail": {
+    "en": "Email address",
+    "nl": "E-mailadres"
+  },
+  "ios.em.senderName": {
+    "en": "Name (optional)",
+    "nl": "Naam (optioneel)"
+  },
+  "ios.em.senderNameHint": {
+    "en": "Their photos are credited with this name when their mail has none: “Jan via email”.",
+    "nl": "Hun foto’s krijgen deze naam als hun mail er geen heeft: “Jan via e-mail”."
+  },
+  "ios.em.sendersFooter": {
+    "en": "Mail from anyone else waits for your OK.",
+    "nl": "Mail van iemand anders wacht op je akkoord."
+  },
+  "ios.em.sendersFooterOpen": {
+    "en": "Anyone may send to this address; blocked senders are still refused.",
+    "nl": "Iedereen mag naar dit adres sturen; geblokkeerde afzenders worden nog altijd geweigerd."
+  },
+  "ios.em.sendersTitle": {
+    "en": "Allowed senders",
+    "nl": "Toegelaten afzenders"
+  },
+  "ios.em.set.anyone": {
+    "en": "Anyone with the address may send",
+    "nl": "Iedereen met het adres mag sturen"
+  },
+  "ios.em.set.anyoneHint": {
+    "en": "No approval the first time. Only for addresses you share carefully.",
+    "nl": "Geen goedkeuring de eerste keer. Alleen voor adressen die je voorzichtig deelt."
+  },
+  "ios.em.set.confirmations": {
+    "en": "Confirm delivery to senders",
+    "nl": "Afzenders een bevestiging sturen"
+  },
+  "ios.em.set.confirmationsHint": {
+    "en": "A short reply: “Your 4 photos are on Oma’s frame.”",
+    "nl": "Een kort antwoord: “Je 4 foto’s staan op het kader van oma.”"
+  },
+  "ios.em.set.invite": {
+    "en": "Offer the app in replies",
+    "nl": "De app aanbieden in antwoorden"
+  },
+  "ios.em.set.inviteHint": {
+    "en": "Replies include a link to ask to join {name} in the app (you approve each request).",
+    "nl": "Antwoorden bevatten een link om in de app te vragen om lid te worden van {name} (jij keurt elke aanvraag goed)."
+  },
+  "ios.em.set.reactions": {
+    "en": "Notify me of reactions",
+    "nl": "Meld me reacties"
+  },
+  "ios.em.set.reactionsHint": {
+    "en": "For photos sent in your name for people without an account.",
+    "nl": "Voor foto’s die in jouw naam gestuurd worden voor mensen zonder account."
+  },
+  "ios.em.settingsTitle": {
+    "en": "Settings",
+    "nl": "Instellingen"
+  },
+  "ios.em.shareSubject": {
+    "en": "Email photos to {name}",
+    "nl": "Foto’s mailen naar {name}"
+  },
+  "ios.em.shareText": {
+    "en": "You can now email photos to {name}: {address}. Just attach them; the subject becomes the caption. The first time, {owner} approves your address.",
+    "nl": "Je kunt nu foto’s mailen naar {name}: {address}. Voeg ze gewoon als bijlage toe; het onderwerp wordt het bijschrift. De eerste keer keurt {owner} je adres goed."
+  },
+  "ios.em.shareTextOpen": {
+    "en": "You can now email photos to {name}: {address}. Just attach them; the subject becomes the caption.",
+    "nl": "Je kunt nu foto’s mailen naar {name}: {address}. Voeg ze gewoon als bijlage toe; het onderwerp wordt het bijschrift."
+  },
+  "ios.em.skip.duplicate.one": {
+    "en": "{count} already there",
+    "nl": "{count} stond er al"
+  },
+  "ios.em.skip.duplicate.other": {
+    "en": "{count} already there",
+    "nl": "{count} stonden er al"
+  },
+  "ios.em.skip.over_limit.one": {
+    "en": "{count} over the limit",
+    "nl": "{count} boven de limiet"
+  },
+  "ios.em.skip.over_limit.other": {
+    "en": "{count} over the limit",
+    "nl": "{count} boven de limiet"
+  },
+  "ios.em.skip.too_large.one": {
+    "en": "{count} too large",
+    "nl": "{count} te groot"
+  },
+  "ios.em.skip.too_large.other": {
+    "en": "{count} too large",
+    "nl": "{count} te groot"
+  },
+  "ios.em.skip.too_long.one": {
+    "en": "{count} video too long",
+    "nl": "{count} video te lang"
+  },
+  "ios.em.skip.too_long.other": {
+    "en": "{count} videos too long",
+    "nl": "{count} video’s te lang"
+  },
+  "ios.em.skip.too_small.one": {
+    "en": "{count} too small",
+    "nl": "{count} te klein"
+  },
+  "ios.em.skip.too_small.other": {
+    "en": "{count} too small",
+    "nl": "{count} te klein"
+  },
+  "ios.em.skip.unsupported.one": {
+    "en": "{count} unsupported file",
+    "nl": "{count} niet-ondersteund bestand"
+  },
+  "ios.em.skip.unsupported.other": {
+    "en": "{count} unsupported files",
+    "nl": "{count} niet-ondersteunde bestanden"
+  },
+  "ios.em.skippedPrefix": {
+    "en": "Left out:",
+    "nl": "Weggelaten:"
+  },
+  "ios.em.slug": {
+    "en": "Friendly part",
+    "nl": "Herkenbaar deel"
+  },
+  "ios.em.slugChanged": {
+    "en": "The address is now {address}",
+    "nl": "Het adres is nu {address}"
+  },
+  "ios.em.slugHint": {
+    "en": "Lower-case letters, digits and dashes. A random part is added so nobody can guess the address.",
+    "nl": "Kleine letters, cijfers en streepjes. Er komt een willekeurig deel bij, zodat niemand het adres kan raden."
+  },
+  "ios.em.slugPlaceholder": {
+    "en": "oma",
+    "nl": "oma"
+  },
+  "ios.em.status.paused": {
+    "en": "Paused: mail to it bounces",
+    "nl": "Gepauzeerd: mail ernaar komt terug"
+  },
+  "ios.em.status.ready": {
+    "en": "Ready",
+    "nl": "Klaar"
+  },
+  "ios.em.status.readyLast": {
+    "en": "Ready · last mail {when}",
+    "nl": "Klaar · laatste mail {when}"
+  },
+  "ios.em.status.unknown": {
+    "en": "Status unknown",
+    "nl": "Status onbekend"
+  },
+  "ios.em.takeOver": {
+    "en": "Take over",
+    "nl": "Overnemen"
+  },
+  "ios.em.titleFeed": {
+    "en": "Email photos to this feed",
+    "nl": "Foto’s mailen naar deze feed"
+  },
+  "ios.em.titleFrame": {
+    "en": "Email photos to this frame",
+    "nl": "Foto’s mailen naar dit kader"
+  },
+  "ios.em.tookOver": {
+    "en": "Mail from people without an account is now sent in your name",
+    "nl": "Mail van mensen zonder account wordt nu in jouw naam gestuurd"
+  },
+  "ios.em.unblock": {
+    "en": "Unblock",
+    "nl": "Deblokkeren"
+  },
+  "ios.em.unblockedToast": {
+    "en": "{name} is unblocked",
+    "nl": "{name} is gedeblokkeerd"
+  },
+  "ios.em.unverifiedOnly": {
+    "en": "Open a mail to deliver it or delete it.",
+    "nl": "Open een mail om ze af te leveren of te verwijderen."
+  },
+  "ios.em.unverifiedShort": {
+    "en": "{email} (not verified)",
+    "nl": "{email} (niet gecontroleerd)"
+  }
+}

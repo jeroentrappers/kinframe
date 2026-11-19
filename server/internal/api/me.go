@@ -53,6 +53,8 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 	d.PhotoSourceProviders = &providers
 	d.PhotoSourcesPrivateNetworks = ptr(len(providers) > 0 && s.guard.PrivateAllowed())
 	d.GooglePhotosImport = ptr(s.ps.google.Configured())
+	s.telegramDiscovery(&d)
+	d.EmailInbox, d.EmailInboxDomain = s.emailDiscovery()
 	if s.cfg.PushEnabled && s.cfg.VAPIDPublicKey != "" {
 		d.WebpushPublicKey = ptr(s.cfg.VAPIDPublicKey)
 	}
@@ -70,7 +72,7 @@ func (s *Server) GetDiscovery(ctx context.Context, _ gen.GetDiscoveryRequestObje
 }
 
 func limitsJSON(l config.Limits) gen.Limits {
-	return gen.Limits{
+	out := gen.Limits{
 		MaxItemsPerSend: l.MaxItemsPerSend, MaxVideoSeconds: l.MaxVideoSeconds,
 		MaxUploadBytes: int(l.MaxUploadBytes), TrashRetentionDays: ptr(l.TrashRetentionDays),
 		MaxFeedsPerUser: ptr(l.MaxFeedsPerUser), MaxSubscriptionsPerFeed: ptr(l.MaxSubscriptionsPerFeed),
@@ -79,6 +81,9 @@ func limitsJSON(l config.Limits) gen.Limits {
 		MaxPhotoSourceItems: ptr(l.MaxPhotoSourceItems), MaxPhotoSourceRunBytes: ptr(int(l.MaxPhotoSourceRunBytes)),
 		MaxGoogleImportItems: ptr(l.MaxGoogleImportItems),
 	}
+	emailLimitsJSON(l, &out)
+	telegramLimitsJSON(l, &out)
+	return out
 }
 
 // ---------------------------------------------------------------- dev auth
@@ -499,6 +504,8 @@ func (s *Server) OperatorSetLimits(ctx context.Context, req gen.OperatorSetLimit
 	if b.MaxBirthdaysPerFeed != nil {
 		l.MaxBirthdaysPerFeed = *b.MaxBirthdaysPerFeed
 	}
+	setEmailLimits(&l, cur, b)
+	setTelegramLimits(&l, cur, b)
 	p := problem.New(problem.ValidationFailed, "limits must be positive")
 	if l.MaxItemsPerSend < 1 {
 		p.WithField("max_items_per_send", "minimum")

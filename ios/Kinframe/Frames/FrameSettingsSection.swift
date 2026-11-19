@@ -32,6 +32,13 @@ struct FrameSettingsSection: View {
                 if app.feedsEnabled {
                     FrameFeedsCard(api: model.api, frame: frame, subscriptions: $subscriptions).id("feeds")
                 }
+                // Frame managers only (this section is): email to frame and Telegram, when the server offers them.
+                if ChannelFeatures(app.discovery).email {
+                    EmailInboxCard(api: model.api, target: .frame(frame.id), targetName: frame.name).id("email")
+                }
+                if ChannelFeatures(app.discovery).telegram {
+                    TelegramCard(api: model.api, target: .frame(frame.id), targetName: frame.name).id("telegram")
+                }
                 slideshow
                 display.id("display")
                 sleep

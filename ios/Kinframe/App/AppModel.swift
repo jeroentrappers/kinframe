@@ -395,6 +395,41 @@ final class AppModel {
             openPhotoSourceTarget(frameId: frameId, albumId: albumId, feedId: feedId)
         case .googleImport(let importId):
             Task { await googleImport.show(importId: importId) }
+        case .emailAddress(let addressId, let frameId, let feedId):
+            openChannel(.emailAddress(addressId), frameId: frameId, feedId: feedId)
+        case .telegramChat(let chatId, let frameId, let feedId):
+            openChannel(.telegramChat(chatId), frameId: frameId, feedId: feedId)
+        }
+    }
+
+    /// An inbox address or a Telegram chat to open once its frame's or feed's settings are on screen (from a
+    /// notification or a toast). The card that lists it opens it and clears this.
+    var channelFocus: ChannelFocus?
+
+    /// Open the settings of the frame or feed an address or chat fills, with it on top. Without ids (a toast), its
+    /// target is looked up first.
+    func openChannel(_ focus: ChannelFocus, frameId: String?, feedId: String?) {
+        if let feedId {
+            guard feedsEnabled else { return }
+            channelFocus = focus
+            openFeed(feedId, section: .settings)
+        } else if let frameId {
+            channelFocus = focus
+            tab = .frames
+            framesPath = NavigationPath([FrameRoute(id: frameId, section: .settings)])
+        } else if let api {
+            Task {
+                let target: ChannelTarget?
+                switch focus {
+                case .emailAddress(let id): target = (try? await api.emailAddress(id))?.channelTarget
+                case .telegramChat(let id): target = (try? await api.telegramChat(id))?.channelTarget
+                }
+                switch target {
+                case .frame(let id)?: openChannel(focus, frameId: id, feedId: nil)
+                case .feed(let id)?: openChannel(focus, frameId: nil, feedId: id)
+                case nil: break
+                }
+            }
         }
     }
 
@@ -510,13 +545,37 @@ final class AppModel {
             noteSourceState(s)
         case .googleImportUpdated:
             googleImport.handle(event)
-        case .sendUpdated, .reply, .feedReply, .feedPostUpdated, .birthdayUpdated, .birthdayRemoved, .photoSourceRemoved:
+        case .emailSenderPending(let addressId, let pending):
+            // Someone new is waiting for a manager's OK (the push says the same without an open websocket).
+            guard let pending, pending.messages.count <= 1, shownPendingSenders.insert(pending.id).inserted else { break }
+            toasts.show(EmailText.pending(pending).text, action: .init(title: L("common.review")) { [weak self] in
+                self?.openChannel(.emailAddress(addressId), frameId: nil, feedId: nil)
+            })
+        case .telegramChatUpdated(let c):
+            noteChatState(c)
+        case .sendUpdated, .reply, .feedReply, .feedPostUpdated, .birthdayUpdated, .birthdayRemoved, .photoSourceRemoved,
+             .emailAddressUpdated, .emailAddressRemoved, .emailSenderDecided, .telegramChatRemoved, .telegramCodeUpdated,
+             .telegramLinkUpdated:
             break
         }
         events.post(event)
     }
 
     private var shownGreetings: Set<String> = []
+    private var shownPendingSenders: Set<String> = []
+    private var chatStates: [String: String] = [:]
+
+    /// A Telegram chat you own just started needing you: say so once, with the way to it.
+    private func noteChatState(_ c: TelegramChat) {
+        guard c.isOwner == true else { return }
+        let before = chatStates[c.id]
+        chatStates[c.id] = c.status
+        guard let before, before != c.status, c.state == .needsAttention else { return }
+        let t = c.target
+        toasts.show(L("ios.tg.live.attention", ["name": c.title]), action: .init(title: L("common.review")) { [weak self] in
+            self?.openChannel(.telegramChat(c.id), frameId: t.frameId, feedId: t.feedId)
+        })
+    }
 
     /// A source you set up just started needing you: say so once, with the way to it (no toasts for new photos).
     private func noteSourceState(_ s: PhotoSource) {

@@ -155,6 +155,22 @@ type Config struct {
 	MollieAPIKey string
 	// MollieBaseURL overrides the Mollie API endpoint (tests).
 	MollieBaseURL string
+
+	// Telegram bridge (docs/spec/telegram.md §14). An empty token (or mode
+	// off) means no bot: discovery says telegram: false.
+	TelegramBotToken       string
+	TelegramMode           string // auto, webhook, polling, off
+	TelegramWebhookURL     string // default <public URL>/v1/telegram/webhook
+	TelegramAPIURL         string // default https://api.telegram.org; else a local Bot API server
+	TelegramLocalFilesDir  string // the local server's --local directory as mounted here
+	TelegramMaxDownload    int64  // bytes the bot downloads at most (20 MB cloud, 2000 MB local)
+	TelegramWorkers        int    // chats processed in parallel
+	TelegramWebhookIPCheck bool   // only Telegram's published addresses may call the webhook
+	// TelegramCloudURL replaces Telegram's cloud Bot API (tests with a fake; no environment variable).
+	TelegramCloudURL string
+
+	// Email to frame (docs/spec/email-inbox.md), config/email.go.
+	Email EmailConfig
 }
 
 // AppPlatforms are the family app platforms, as named in `X-Kinframe-App: kinframe-family-<platform>/…`.
@@ -186,6 +202,16 @@ type Limits struct {
 	MaxPhotoSourceItems      int   `json:"max_photo_source_items,omitempty"`
 	MaxPhotoSourceRunBytes   int64 `json:"max_photo_source_run_bytes,omitempty"`
 	MaxGoogleImportItems     int   `json:"max_google_import_items,omitempty"`
+	// Telegram (docs/spec/telegram.md §14). Zero means the default.
+	MaxTelegramChatsPerTarget   int `json:"max_telegram_chats_per_target,omitempty"`
+	MaxTelegramChatsPerUser     int `json:"max_telegram_chats_per_user,omitempty"`
+	MaxTelegramItemsPerChatHour int `json:"max_telegram_items_per_chat_hour,omitempty"`
+	// Email to frame (docs/spec/email-inbox.md §12.1). Zero means the default.
+	MaxEmailAddressesPerTarget    int   `json:"max_email_addresses_per_target,omitempty"`
+	MaxEmailSendersPerAddress     int   `json:"max_email_senders_per_address,omitempty"`
+	MaxEmailMessageBytes          int64 `json:"max_email_message_bytes,omitempty"`
+	MaxEmailMessagesPerAddressDay int   `json:"max_email_messages_per_address_day,omitempty"`
+	MaxEmailHeldMessages          int   `json:"max_email_held_messages,omitempty"`
 }
 
 // Feed limit defaults.
@@ -200,6 +226,10 @@ const (
 	DefaultMaxPhotoSourceItems            = 10000
 	DefaultMaxPhotoSourceRunBytes   int64 = 2 << 30
 	DefaultMaxGoogleImportItems           = 500
+
+	DefaultMaxTelegramChatsPerTarget   = 5
+	DefaultMaxTelegramChatsPerUser     = 20
+	DefaultMaxTelegramItemsPerChatHour = 300
 )
 
 // WithDefaults fills unset (zero) feed limits with their defaults.
@@ -231,6 +261,16 @@ func (l Limits) WithDefaults() Limits {
 	if l.MaxGoogleImportItems <= 0 {
 		l.MaxGoogleImportItems = DefaultMaxGoogleImportItems
 	}
+	if l.MaxTelegramChatsPerTarget <= 0 {
+		l.MaxTelegramChatsPerTarget = DefaultMaxTelegramChatsPerTarget
+	}
+	if l.MaxTelegramChatsPerUser <= 0 {
+		l.MaxTelegramChatsPerUser = DefaultMaxTelegramChatsPerUser
+	}
+	if l.MaxTelegramItemsPerChatHour <= 0 {
+		l.MaxTelegramItemsPerChatHour = DefaultMaxTelegramItemsPerChatHour
+	}
+	l.emailDefaults()
 	return l
 }
 
@@ -308,6 +348,10 @@ func load(get func(string) string) (*Config, error) {
 			MaxPhotoSourceItems:      intv("KINFRAME_MAX_PHOTO_SOURCE_ITEMS", DefaultMaxPhotoSourceItems),
 			MaxPhotoSourceRunBytes:   int64(intv("KINFRAME_MAX_PHOTO_SOURCE_RUN_MB", int(DefaultMaxPhotoSourceRunBytes>>20))) << 20,
 			MaxGoogleImportItems:     intv("KINFRAME_MAX_GOOGLE_IMPORT_ITEMS", DefaultMaxGoogleImportItems),
+
+			MaxTelegramChatsPerTarget:   intv("KINFRAME_MAX_TELEGRAM_CHATS_PER_TARGET", DefaultMaxTelegramChatsPerTarget),
+			MaxTelegramChatsPerUser:     intv("KINFRAME_MAX_TELEGRAM_CHATS_PER_USER", DefaultMaxTelegramChatsPerUser),
+			MaxTelegramItemsPerChatHour: intv("KINFRAME_MAX_TELEGRAM_ITEMS_PER_CHAT_HOUR", DefaultMaxTelegramItemsPerChatHour),
 		},
 		LogJSON:         env("KINFRAME_LOG_FORMAT", "text") == "json",
 		PushEnabled:     !boolv("KINFRAME_PUSH_DISABLED"),
@@ -410,6 +454,9 @@ func load(get func(string) string) (*Config, error) {
 	} else {
 		c.SecretsKey = sk
 	}
+	if err := loadTelegram(c, get, env, intv); err != nil {
+		errs = append(errs, err)
+	}
 	if c.WeatherRefresh < 15*time.Minute {
 		errs = append(errs, errors.New("KINFRAME_WEATHER_REFRESH_MINUTES must be at least 15"))
 	}
@@ -450,6 +497,7 @@ func load(get func(string) string) (*Config, error) {
 			}
 		}
 	}
+	errs = append(errs, loadEmail(get, c)...)
 	if c.Blob, err = LoadBlob(get, c.DataDir); err != nil {
 		errs = append(errs, err)
 	}

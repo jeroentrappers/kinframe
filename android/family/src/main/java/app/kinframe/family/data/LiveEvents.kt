@@ -68,6 +68,20 @@ sealed interface LiveEvent {
     data class PhotoSourceRemoved(val sourceId: String, val albumId: String?, val feedId: String?) : LiveEvent
     /** Status or progress of the caller's Google Photos import changed. */
     data class GoogleImportUpdated(val import: GoogleImport) : LiveEvent
+    /** An inbox address was created, changed, paused, regenerated or taken over, or its counts changed. */
+    data class EmailAddressUpdated(val address: app.kinframe.core.api.EmailAddress) : LiveEvent
+    data class EmailAddressRemoved(val addressId: String, val frameId: String?, val feedId: String?) : LiveEvent
+    /** Someone not yet allowed mailed the address, or mailed again. */
+    data class EmailSenderPending(val addressId: String, val pending: app.kinframe.core.api.EmailPendingSender) : LiveEvent
+    /** A pending sender was decided or the sender list changed ([app.kinframe.core.api.EmailSenderDecision]). */
+    data class EmailSenderDecided(val addressId: String, val senderId: String, val decision: String) : LiveEvent
+    /** A Telegram chat was connected, changed, paused, taken over or disconnected, or its status or counts changed. */
+    data class TelegramChatUpdated(val chat: app.kinframe.core.api.TelegramChat) : LiveEvent
+    data class TelegramChatRemoved(val chatId: String, val frameId: String?, val feedId: String?) : LiveEvent
+    /** The caller's connect or link code was used, or redeeming it failed. */
+    data class TelegramCodeUpdated(val code: app.kinframe.core.api.TelegramCode) : LiveEvent
+    /** The caller's Telegram account was linked ([link]), unlinked (null), or blocked the bot. */
+    data class TelegramLinkUpdated(val link: app.kinframe.core.api.TelegramLink?) : LiveEvent
 
     companion object {
         fun parse(text: String): LiveEvent? = runCatching {
@@ -105,6 +119,14 @@ sealed interface LiveEvent {
                 PhotoSourceEvents.UPDATED -> PhotoSourceUpdated(KinJson.decodeFromJsonElement(PhotoSource.serializer(), o["source"]!!))
                 PhotoSourceEvents.REMOVED -> PhotoSourceRemoved(s("source_id")!!, s("album_id"), s("feed_id"))
                 PhotoSourceEvents.GOOGLE_IMPORT_UPDATED -> GoogleImportUpdated(KinJson.decodeFromJsonElement(GoogleImport.serializer(), o["import"]!!))
+                app.kinframe.core.api.EmailEvents.ADDRESS_UPDATED -> EmailAddressUpdated(KinJson.decodeFromJsonElement(app.kinframe.core.api.EmailAddress.serializer(), o["address"]!!))
+                app.kinframe.core.api.EmailEvents.ADDRESS_REMOVED -> EmailAddressRemoved(s("address_id")!!, s("frame_id"), s("feed_id"))
+                app.kinframe.core.api.EmailEvents.SENDER_PENDING -> EmailSenderPending(s("address_id")!!, KinJson.decodeFromJsonElement(app.kinframe.core.api.EmailPendingSender.serializer(), o["pending"]!!))
+                app.kinframe.core.api.EmailEvents.SENDER_DECIDED -> EmailSenderDecided(s("address_id")!!, s("sender_id")!!, s("decision").orEmpty())
+                app.kinframe.core.api.TelegramEvents.CHAT_UPDATED -> TelegramChatUpdated(KinJson.decodeFromJsonElement(app.kinframe.core.api.TelegramChat.serializer(), o["chat"]!!))
+                app.kinframe.core.api.TelegramEvents.CHAT_REMOVED -> TelegramChatRemoved(s("chat_id")!!, s("frame_id"), s("feed_id"))
+                app.kinframe.core.api.TelegramEvents.CODE_UPDATED -> TelegramCodeUpdated(KinJson.decodeFromJsonElement(app.kinframe.core.api.TelegramCode.serializer(), o["code"]!!))
+                app.kinframe.core.api.TelegramEvents.LINK_UPDATED -> TelegramLinkUpdated((o["link"] as? JsonObject)?.let { KinJson.decodeFromJsonElement(app.kinframe.core.api.TelegramLink.serializer(), it) })
                 "frame.status" -> FrameStatus(s("frame_id")!!, o["online"]?.jsonPrimitive?.booleanOrNull ?: false, s("last_seen_at"))
                 "join_request" -> JoinRequested(
                     s("frame_id")!!,

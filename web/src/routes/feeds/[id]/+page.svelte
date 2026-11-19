@@ -19,6 +19,8 @@
 	import FeedSettings from '$components/feed/FeedSettings.svelte';
 	import FeedSubscriptions from '$components/feed/FeedSubscriptions.svelte';
 	import PhotoSources from '$components/sources/PhotoSources.svelte';
+	import EmailInbox from '$components/inbox/EmailInbox.svelte';
+	import TelegramSection from '$components/telegram/TelegramSection.svelte';
 
 	type Tab = 'posts' | 'birthdays' | 'members' | 'subscriptions' | 'sources' | 'invites' | 'settings';
 
@@ -162,6 +164,13 @@
 				<FeedInvites {feed} />
 			{:else if tab === 'settings'}
 				<FeedSettings {feed} onupdated={(f) => (feed = { ...feed!, ...f })} />
+				<!-- Email and Telegram post to the feed (email-inbox.md §4.2, telegram.md §4.2): the owner and admins. -->
+				{#if discovery.emailInbox}
+					<EmailInbox target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('email')} />
+				{/if}
+				{#if discovery.telegram}
+					<TelegramSection target={{ kind: 'feed', id: feed.id, name: feed.name }} focus={page.url.searchParams.get('telegram')} />
+				{/if}
 			{/if}
 		</div>
 	{/if}

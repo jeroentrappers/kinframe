@@ -66,7 +66,7 @@ func (s *Server) renderSends(ctx context.Context, q db.DBTX, sends []store.Send)
 		ids[i] = sd.ID
 		idx[sd.ID] = i
 		out[i] = sendJSON{ID: sd.ID, CreatedAt: sd.CreatedAt, Items: []gen.Item{}, Feeds: []sendFeedJSON{}, Frames: []sendFrameJSON{},
-			Via: viaJSON(sd.Via, sd.PhotoSourceID)}
+			Via: tgCredit(viaCredit(viaJSON(sd.Via, sd.PhotoSourceID), sd.ViaLabel, sd.EmailAddressID), sd.TelegramChatID)}
 	}
 	feeds, err := s.sendFeeds(ctx, ids)
 	if err != nil {
@@ -940,7 +940,8 @@ func (s *Server) deliveredPushes(ctx context.Context, f *store.Frame, changes []
 func (s *Server) MediaFailed(mediaID uuid.UUID) {
 	ctx := context.Background()
 	rows, err := s.st.Pool.Query(ctx, `SELECT DISTINCT si.send_id, s.sender_user_id FROM send_items si
-		JOIN items i ON i.id = si.item_id JOIN sends s ON s.id = si.send_id WHERE i.media_id = $1 AND s.via IS NULL`, mediaID)
+		JOIN items i ON i.id = si.item_id JOIN sends s ON s.id = si.send_id WHERE i.media_id = $1
+		AND (s.via IS NULL OR (s.via = 'telegram' AND NOT s.telegram_outside))`, mediaID)
 	if err != nil {
 		s.log.Warn("media failed lookup", "err", err)
 		return

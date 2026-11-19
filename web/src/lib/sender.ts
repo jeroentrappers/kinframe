@@ -20,9 +20,27 @@ export function senderLabel(item: Item): string {
  * (docs/spec/photo-sources.md §9.5). The service name is never translated; nothing changes without `via`.
  */
 export function withVia(text: string, via: ItemVia | null | undefined): string {
-	const service = via?.label?.trim();
-	if (!service) return text;
-	return text ? t('credit.via', { name: text, service }) : t('credit.viaOnly', { service });
+	const label = via?.label?.trim();
+	if (!label) return text;
+	// Email and Telegram: the label is the person who mailed or posted it, shown instead of the sender (who may be
+	// the address's or chat's owner sending on their behalf): "Jan via email" (email-inbox.md §9.2, telegram.md §2).
+	if (isChannel(via)) return channelCredit(label, via!.service);
+	return text ? t('credit.via', { name: text, service: label }) : t('credit.viaOnly', { service: label });
+}
+
+/** Whether `via` is an outside channel (email, Telegram) whose label is a person, not a service. */
+export function isChannel(via: Pick<ItemVia, 'service'> | null | undefined): boolean {
+	return via?.service === 'email' || via?.service === 'telegram';
+}
+
+/** "Jan via email", "Jan · Peeters kids via Telegram". */
+export function channelCredit(name: string, service: ItemVia['service']): string {
+	return service === 'telegram' ? t('credit.viaTelegram', { name }) : t('credit.viaEmail', { name });
+}
+
+/** A feed post's or send's author line: the person behind an email or Telegram send, else the poster. */
+export function authorCredit(poster: string, via: ItemVia | null | undefined): string {
+	return isChannel(via) && via?.label?.trim() ? channelCredit(via.label.trim(), via.service) : poster;
 }
 
 type Origin = Pick<Schemas['Placement'], 'origin' | 'origin_feed_name'> & { item: Item };
@@ -34,6 +52,9 @@ type Origin = Pick<Schemas['Placement'], 'origin' | 'origin_feed_name'> & { item
 export function placementCredit(p: Origin): string {
 	const feed = p.origin === 'feed' ? p.origin_feed_name?.trim() : '';
 	if (!feed) return senderLabel(p.item);
+	const via = p.item.imported_from === 'frameo' ? null : p.item.via;
+	const label = via?.label?.trim();
+	if (isChannel(via) && label) return channelCredit(t('library.viaFeed', { name: label, feed }), via!.service);
 	const sender = senderLabel({ ...p.item, via: null });
 	const base = sender ? t('library.viaFeed', { name: sender, feed }) : feed;
 	return p.item.imported_from === 'frameo' ? base : withVia(base, p.item.via);
@@ -41,6 +62,10 @@ export function placementCredit(p: Origin): string {
 
 /** A send's or post's "what" line with its service: "14 photos via Immich". */
 export function summaryVia(summary: string, via: ItemVia | null | undefined): string {
-	const service = via?.label?.trim();
-	return service ? t('credit.summaryVia', { summary, service }) : summary;
+	const label = via?.label?.trim();
+	if (!label) return summary;
+	// The owner's history: "4 photos via email from Jan" (email-inbox.md §9.1).
+	if (via!.service === 'email') return t('credit.summaryViaEmail', { summary, name: label });
+	if (via!.service === 'telegram') return t('credit.summaryViaTelegram', { summary, name: label });
+	return t('credit.summaryVia', { summary, service: label });
 }

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="credit_via">%1$s · %2$s 경유</string>
+    <string name="credit_via_email">%1$s · 이메일</string>
+    <string name="credit_via_telegram">%1$s · Telegram 경유</string>
 </resources>

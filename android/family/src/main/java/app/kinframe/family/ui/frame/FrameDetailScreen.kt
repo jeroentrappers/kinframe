@@ -349,10 +349,7 @@ private fun PeopleTab(frame: Frame, state: FrameDetailState, a: FrameActions) {
                         Avatar(r.user.displayName.orEmpty(), r.user.avatarUrl)
                         Column(Modifier.weight(1f)) {
                             Text(r.user.displayName.orEmpty(), style = Kin.type.bodyStrong, color = c.ink)
-                            Text(
-                                if (r.via == "invite") stringResource(R.string.people_via_invite, r.invitedByName.orEmpty()) else stringResource(R.string.people_via_code),
-                                style = Kin.type.caption, color = c.inkSoft,
-                            )
+                            app.kinframe.family.ui.channels.JoinRequestViaText(r)
                             r.note?.let { Text("“$it”", style = Kin.type.caption, color = c.inkSoft) }
                         }
                     }

@@ -51,6 +51,18 @@ data class Discovery(
     val googlePhotosImport: Boolean = false,
     /** Family app version policy per platform (README §5.15); null on servers without one. */
     val appVersions: AppVersions? = null,
+    /** Frames and feeds can have inbox addresses (docs/spec/email-inbox.md); apps hide "Email photos" otherwise. */
+    val emailInbox: Boolean = false,
+    /** The mail domain of inbox addresses; null without [emailInbox]. */
+    val emailInboxDomain: String? = null,
+    /** The operator configured a Telegram bot (docs/spec/telegram.md); apps hide every Telegram section otherwise. */
+    val telegram: Boolean = false,
+    /** The bot's username without "@"; null without [telegram]. */
+    val telegramBotUsername: String? = null,
+    /** A group must make the bot an admin before it sees photos: the connect sheet says so up front. */
+    val telegramPrivacyMode: Boolean = false,
+    /** The largest file the bot can download (20 MB on Telegram's cloud Bot API); null without [telegram]. */
+    val telegramMaxFileBytes: Long? = null,
 ) {
     /** The photo source providers to offer: none when the server has sources off. */
     val sourceProviders: List<String>
@@ -107,6 +119,22 @@ data class Limits(
     val maxPhotoSourceRunBytes: Long = 2147483648,
     /** Items per Google Photos import. */
     val maxGoogleImportItems: Int = 500,
+    /** Inbox addresses per frame or feed. */
+    val maxEmailAddressesPerTarget: Int = 5,
+    /** Allowed and blocked senders per inbox address. */
+    val maxEmailSendersPerAddress: Int = 200,
+    /** One mail as received. */
+    val maxEmailMessageBytes: Long = 52428800,
+    /** Mails processed per inbox address per day; more are dropped. */
+    val maxEmailMessagesPerAddressDay: Int = 200,
+    /** Held mails per inbox address (10 per pending sender). */
+    val maxEmailHeldMessages: Int = 100,
+    /** Connected Telegram chats per frame or feed. */
+    val maxTelegramChatsPerTarget: Int = 5,
+    /** Connected Telegram chats one account owns. */
+    val maxTelegramChatsPerUser: Int = 20,
+    /** Photos and videos accepted per Telegram chat per hour. */
+    val maxTelegramItemsPerChatHour: Int = 300,
 )
 
 @Serializable
@@ -435,11 +463,19 @@ data class FrameUpdate(
 data class JoinRequest(
     val id: String,
     val user: JoinRequestUser = JoinRequestUser(),
+    /** [JoinVia]: `frame_code`, `invite`, or an outside channel (`email`, `telegram`). */
     val via: String = "frame_code",
     val invitedByName: String? = null,
     val note: String? = null,
+    /** Channel requests only: who the channel invited, as managers should see it ("Jan · jan.peeters@telenet.be"). */
+    val viaName: String? = null,
+    /** Channel requests only: the requester's verified identity is the one the link went to; null when unknown. */
+    val viaMatches: Boolean? = null,
     val createdAt: String? = null,
-)
+) {
+    /** From an outside channel's join link (always needs approval). */
+    val isChannel: Boolean get() = via == JoinVia.EMAIL || via == JoinVia.TELEGRAM
+}
 
 @Serializable
 data class JoinRequestUser(val id: String? = null, val displayName: String? = null, val avatarUrl: String? = null)
@@ -496,6 +532,10 @@ object ProblemCode {
     const val SOURCE_TEST_FAILED = "source_test_failed"
     /** The same outside album already feeds this target (`detail`: the existing source id). */
     const val DUPLICATE_SOURCE = "duplicate_source"
+    /** The address is already on the inbox address's sender list (`detail`: its id). */
+    const val DUPLICATE_SENDER = "duplicate_sender"
+    /** Linking Telegram when the account already has a link: unlink first. */
+    const val TELEGRAM_ALREADY_LINKED = "telegram_already_linked"
     const val SERVER_ERROR = "server_error"
 }
 

@@ -40,6 +40,20 @@ public enum LiveEvent: Equatable, Sendable {
     case photoSourceRemoved(sourceId: String, albumId: String?, feedId: String?)
     /// Status or progress of your Google Photos import changed.
     case googleImportUpdated(GoogleImport)
+    /// An inbox address was created, changed, paused, regenerated or taken over, or its counts changed (its managers).
+    case emailAddressUpdated(EmailAddress)
+    case emailAddressRemoved(addressId: String, frameId: String?, feedId: String?)
+    /// Someone not yet allowed mailed an address, or mailed again.
+    case emailSenderPending(addressId: String, pending: EmailPendingSender?)
+    /// A pending sender was decided, or the sender list changed (`decision`: approved, rejected, blocked, added, …).
+    case emailSenderDecided(addressId: String, senderId: String?, decision: String?)
+    /// A Telegram chat was connected, changed, paused, taken over or disconnected, or its status or counts changed.
+    case telegramChatUpdated(TelegramChat)
+    case telegramChatRemoved(chatId: String, frameId: String?, feedId: String?)
+    /// Your connect or link code was used, or redeeming it failed.
+    case telegramCodeUpdated(TelegramCode)
+    /// Your Telegram account was linked, unlinked (nil) or blocked the bot.
+    case telegramLinkUpdated(TelegramLink?)
 
     public struct BirthdayRef: Equatable, Sendable {
         public var feedId: String
@@ -115,6 +129,26 @@ public enum LiveEvent: Equatable, Sendable {
             return .photoSourceRemoved(sourceId: id, albumId: str("album_id"), feedId: str("feed_id"))
         case "google_import.updated":
             return decode(GoogleImport.self, obj["import"]).map { .googleImportUpdated($0) }
+        case "email_address.updated":
+            return decode(EmailAddress.self, obj["address"]).map { .emailAddressUpdated($0) }
+        case "email_address.removed":
+            guard let id = str("address_id") else { return nil }
+            return .emailAddressRemoved(addressId: id, frameId: str("frame_id"), feedId: str("feed_id"))
+        case "email_sender.pending":
+            guard let id = str("address_id") else { return nil }
+            return .emailSenderPending(addressId: id, pending: decode(EmailPendingSender.self, obj["pending"]))
+        case "email_sender.decided":
+            guard let id = str("address_id") else { return nil }
+            return .emailSenderDecided(addressId: id, senderId: str("sender_id"), decision: str("decision"))
+        case "telegram_chat.updated":
+            return decode(TelegramChat.self, obj["chat"]).map { .telegramChatUpdated($0) }
+        case "telegram_chat.removed":
+            guard let id = str("chat_id") else { return nil }
+            return .telegramChatRemoved(chatId: id, frameId: str("frame_id"), feedId: str("feed_id"))
+        case "telegram_code.updated":
+            return decode(TelegramCode.self, obj["code"]).map { .telegramCodeUpdated($0) }
+        case "telegram_link.updated":
+            return .telegramLinkUpdated(decode(TelegramLink.self, obj["link"]))
         case "frame.status":
             guard let f = str("frame_id") else { return nil }
             return .frameStatus(frameId: f, online: obj["online"] as? Bool ?? false, lastSeenAt: str("last_seen_at").flatMap(FlexibleDateTranscoder.parse))

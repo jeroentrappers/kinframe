@@ -50,6 +50,7 @@ const (
 	LimitReached        Code = "limit_reached"
 	DuplicateBirthday   Code = "duplicate_birthday"
 	DuplicateSource     Code = "duplicate_source"
+	DuplicateSender     Code = "duplicate_sender"
 	SourceTestFailed    Code = "source_test_failed"
 	ServerError         Code = "server_error"
 )
@@ -92,6 +93,7 @@ var defaults = map[Code]struct {
 	LimitReached:        {409, "A limit was reached"},
 	DuplicateBirthday:   {409, "This birthday is already on the list"},
 	DuplicateSource:     {409, "This album already syncs from that outside album"},
+	DuplicateSender:     {409, "This address is already on the sender list"},
 	SourceTestFailed:    {422, "The outside album could not be read"},
 	ServerError:         {500, "Something went wrong on the server"},
 }

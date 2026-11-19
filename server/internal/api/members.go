@@ -306,7 +306,7 @@ func (s *Server) PreviewInvite(ctx context.Context, req gen.PreviewInviteRequest
 	}
 	return ok(gen.InvitePreview{
 		FrameName: f.Name, FrameLocation: f.Location, OwnerName: &owner, InvitedByName: by,
-		RequiresApproval: f.InviteRequiresApproval, AlreadyMember: ptr(merr == nil),
+		RequiresApproval: f.InviteRequiresApproval || inv.Via != nil, AlreadyMember: ptr(merr == nil),
 	}), nil
 }
 
@@ -331,10 +331,15 @@ func (s *Server) AcceptInvite(ctx context.Context, req gen.AcceptInviteRequestOb
 		if err := tx.UseInvite(ctx, inv.ID); err != nil {
 			return err
 		}
-		if f.InviteRequiresApproval {
+		if f.InviteRequiresApproval || inv.Via != nil { // channel invites always need approval
 			r, isNew, err := tx.CreateJoinRequest(ctx, f.ID, u.ID, "invite", &inv.ID, inv.CreatedBy, inv.Note)
 			if err != nil {
 				return err
+			}
+			if isNew && inv.Via != nil {
+				if r, err = s.markChannelJoin(ctx, tx, r, inv.Via, inv.ViaRef, u, false); err != nil {
+					return err
+				}
 			}
 			out = redeemOutcome{Status: "pending", FrameID: f.ID, JoinRequestID: &r.ID}
 			if isNew {

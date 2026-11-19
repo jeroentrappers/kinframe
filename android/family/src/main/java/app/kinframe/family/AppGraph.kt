@@ -61,6 +61,8 @@ data class OpenTarget(
     val feedId: String? = null, val postId: String? = null,
     /** Photo sources (README §6.3): the source that needs attention, the Google import that finished. */
     val sourceId: String? = null, val importId: String? = null,
+    /** Email to frame and Telegram: the address with pending senders, the chat that needs attention. */
+    val addressId: String? = null, val chatId: String? = null,
 )
 
 /**

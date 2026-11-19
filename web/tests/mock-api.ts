@@ -83,6 +83,17 @@ export interface MockState {
 	syncRetryAfter?: number;
 	/** Shop stock per product id (shops with `stock`). */
 	stock: Record<string, number>;
+	/** Email to frame (README §5.16); only reachable when discovery says `email_inbox: true`. */
+	emailAddresses: S['EmailAddress'][];
+	emailSenders: Record<string, S['EmailSender'][]>;
+	emailPending: Record<string, S['EmailPendingSender'][]>;
+	emailHeld: Record<string, S['EmailHeldMessage']>;
+	emailMessages: Record<string, S['EmailMessage'][]>;
+	/** Telegram (README §5.17); only reachable when discovery says `telegram: true`. */
+	telegramChats: S['TelegramChat'][];
+	telegramCodes: S['TelegramCode'][];
+	telegramContributors: Record<string, S['TelegramContributor'][]>;
+	telegramLink: S['TelegramLink'] | null;
 	calls: { method: string; path: string; body?: unknown; headers?: Record<string, string> }[];
 	ws: WebSocketRoute | null;
 }
@@ -132,6 +143,15 @@ export function emptyState(): MockState {
 		photoSources: [],
 		googleImports: [],
 		stock: {},
+		emailAddresses: [],
+		emailSenders: {},
+		emailPending: {},
+		emailHeld: {},
+		emailMessages: {},
+		telegramChats: [],
+		telegramCodes: [],
+		telegramContributors: {},
+		telegramLink: null,
 		calls: [],
 		ws: null
 	};
@@ -1338,6 +1358,215 @@ export async function mockApi(page: Page, state: MockState = emptyState()): Prom
 			}
 			if (method === 'PATCH') Object.assign(sub, { history_count: null }, body);
 			return json(route, 200, sub);
+		}
+
+		// ---- email to frame (README §5.16)
+		if ((m = path.match(/^\/v1\/(frames|feeds)\/([^/:]+)\/email-addresses$/))) {
+			const isFrame = m[1] === 'frames';
+			const tid = m[2]!;
+			const mine = state.emailAddresses.filter((a) => (isFrame ? a.target.frame_id : a.target.feed_id) === tid);
+			if (method === 'GET') return json(route, 200, mine);
+			const b = (body ?? {}) as S['EmailAddressCreate'];
+			if (mine.length >= (state.discovery.limits.max_email_addresses_per_target ?? 5)) return problem(route, 409, 'limit_reached', 'Limit reached');
+			const targetName = isFrame ? state.frames.find((f) => f.id === tid)?.name : state.feeds.find((f) => f.id === tid)?.name;
+			const slug = b.slug ?? 'oma';
+			const a: S['EmailAddress'] = {
+				id: uid('ea'),
+				address: `${slug}-k7q2m9@${state.discovery.email_inbox_domain ?? 'in.example.org'}`,
+				slug,
+				name: b.name ?? targetName ?? slug,
+				target: isFrame ? { kind: 'frame', frame_id: tid, frame_name: targetName } : { kind: 'feed', feed_id: tid, feed_name: targetName },
+				owner: { user_id: state.me!.id, display_name: state.me!.display_name },
+				status: 'active',
+				anyone_may_send: b.anyone_may_send ?? false,
+				send_confirmations: b.send_confirmations ?? true,
+				offer_app_invite: b.offer_app_invite ?? true,
+				notify_reactions: b.notify_reactions ?? true,
+				replies_available: true,
+				counts: { allowed_senders: 0, blocked_senders: 0, pending_senders: 0, held_messages: 0, delivered_30d: 0 },
+				last_received_at: null,
+				can_manage: true,
+				is_owner: true,
+				created_at: new Date().toISOString()
+			};
+			state.emailAddresses.push(a);
+			return json(route, 201, a);
+		}
+		if ((m = path.match(/^\/v1\/email-addresses\/([^/]+)(?:\/(.+))?$/))) {
+			const a = state.emailAddresses.find((x) => x.id === m![1]);
+			if (!a) return problem(route, 404, 'not_found', 'Not found');
+			const rest = m[2] ?? '';
+			const senders = (state.emailSenders[a.id] ??= []);
+			const pending = (state.emailPending[a.id] ??= []);
+			const recount = () => {
+				a.counts.allowed_senders = senders.filter((x) => x.state === 'allowed').length;
+				a.counts.blocked_senders = senders.filter((x) => x.state === 'blocked').length;
+				a.counts.pending_senders = pending.length;
+				a.counts.held_messages = pending.reduce((n, p) => n + p.messages.length, 0);
+			};
+			if (!rest) {
+				if (method === 'DELETE') {
+					state.emailAddresses = state.emailAddresses.filter((x) => x !== a);
+					return route.fulfill({ status: 204 });
+				}
+				if (method === 'PATCH') {
+					const b = body as S['EmailAddressUpdate'];
+					if (b.slug !== undefined) {
+						if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(b.slug)) return problem(route, 422, 'validation_failed', 'Bad slug');
+						a.slug = b.slug;
+						a.address = a.address.replace(/^[^@]+-([a-z0-9]+)@/, `${b.slug}-$1@`);
+					}
+					if (b.paused !== undefined) a.status = b.paused ? 'paused' : 'active';
+					if (b.take_over) {
+						a.owner = { user_id: state.me!.id, display_name: state.me!.display_name };
+						a.is_owner = true;
+					}
+					for (const k of ['name', 'anyone_may_send', 'send_confirmations', 'offer_app_invite', 'notify_reactions'] as const)
+						if (b[k] !== undefined) (a as Record<string, unknown>)[k] = b[k];
+				}
+				return json(route, 200, a);
+			}
+			if (rest === 'regenerate' && method === 'POST') {
+				a.address = a.address.replace(/-[a-z0-9]+@/, '-p3wd8h@');
+				a.regenerated_at = new Date().toISOString();
+				return json(route, 200, a);
+			}
+			if (rest === 'senders') {
+				if (method === 'GET') return json(route, 200, senders);
+				const b = body as S['EmailSenderCreate'];
+				const dup = senders.find((x) => x.email.toLowerCase() === b.email.toLowerCase());
+				if (dup) return route.fulfill({ status: 409, contentType: 'application/problem+json', body: JSON.stringify({ title: 'Duplicate', status: 409, code: 'duplicate_sender', detail: dup.id }) });
+				const sd: S['EmailSender'] = { id: uid('es'), email: b.email, display_name: b.display_name ?? null, state: b.blocked ? 'blocked' : 'allowed', origin: 'manual', added_by_name: state.me!.display_name, created_at: new Date().toISOString() };
+				senders.push(sd);
+				recount();
+				return json(route, 201, sd);
+			}
+			let sm: RegExpMatchArray | null;
+			if ((sm = rest.match(/^senders\/([^/]+)$/))) {
+				const sd = senders.find((x) => x.id === sm![1]);
+				if (!sd) return problem(route, 404, 'not_found', 'Not found');
+				if (method === 'DELETE') {
+					state.emailSenders[a.id] = senders.filter((x) => x !== sd);
+					return route.fulfill({ status: 204 });
+				}
+				const b = body as S['EmailSenderUpdate'];
+				if (b.blocked !== undefined) sd.state = b.blocked ? 'blocked' : 'allowed';
+				if (b.display_name !== undefined) sd.display_name = b.display_name;
+				recount();
+				return json(route, 200, sd);
+			}
+			if (rest === 'pending-senders') return json(route, 200, pending);
+			if ((sm = rest.match(/^pending-senders\/([^/]+)\/(approve|reject)$/))) {
+				const p = pending.find((x) => x.id === sm![1]);
+				if (!p) return problem(route, 409, 'already_decided', 'Already decided');
+				state.emailPending[a.id] = pending.filter((x) => x !== p);
+				for (const msg of p.messages) delete state.emailHeld[msg.id];
+				let sd: S['EmailSender'] | null = null;
+				if (sm[2] === 'approve' || (body as S['EmailSenderReject'])?.block) {
+					sd = { id: p.id, email: p.email, display_name: p.display_name ?? null, state: sm[2] === 'approve' ? 'allowed' : 'blocked', origin: 'approved', created_at: new Date().toISOString() };
+					senders.push(sd);
+				}
+				pending.splice(0, pending.length, ...state.emailPending[a.id]!);
+				recount();
+				return sm[2] === 'approve' ? json(route, 200, sd) : route.fulfill({ status: 204 });
+			}
+			if ((sm = rest.match(/^held-messages\/([^/]+)(\/deliver)?$/))) {
+				const h = state.emailHeld[sm[1]!];
+				if (!h) return problem(route, 404, 'not_found', 'Not found');
+				if (method === 'GET') return json(route, 200, h);
+				delete state.emailHeld[h.id];
+				for (const p of pending) p.messages = p.messages.filter((x) => x.id !== h.id);
+				state.emailPending[a.id] = pending.filter((p) => p.messages.length > 0);
+				pending.splice(0, pending.length, ...state.emailPending[a.id]!);
+				recount();
+				if (method === 'DELETE') return route.fulfill({ status: 204 });
+				const out: S['EmailMessage'] = { id: uid('em'), received_at: h.received_at, sender_email: h.sender_email, sender_name: h.sender_name, authenticated: h.auth.authenticated, outcome: 'delivered', items: h.media.length };
+				(state.emailMessages[a.id] ??= []).unshift(out);
+				return json(route, 200, out);
+			}
+			if (rest === 'messages') return json(route, 200, { items: state.emailMessages[a.id] ?? [], next_cursor: null });
+			return problem(route, 404, 'not_found', `No mock for ${method} ${path}`);
+		}
+
+		// ---- Telegram (README §5.17)
+		if ((m = path.match(/^\/v1\/(frames|feeds)\/([^/:]+)\/telegram-(chats|codes)$/))) {
+			const isFrame = m[1] === 'frames';
+			const tid = m[2]!;
+			if (m[3] === 'chats') return json(route, 200, state.telegramChats.filter((c) => (isFrame ? c.target.frame_id : c.target.feed_id) === tid));
+			const b = body as S['TelegramConnectCodeCreate'];
+			const secret = `${b.chat_kind === 'group' ? 'c' : 'p'}A7f9QxK2mPz4LwN8`;
+			const targetName = isFrame ? state.frames.find((f) => f.id === tid)?.name : state.feeds.find((f) => f.id === tid)?.name;
+			const code: S['TelegramCode'] = {
+				id: uid('tc'),
+				purpose: 'connect',
+				chat_kind: b.chat_kind,
+				link_account: b.link_account ?? false,
+				target: isFrame ? { kind: 'frame', frame_id: tid, frame_name: targetName } : { kind: 'feed', feed_id: tid, feed_name: targetName },
+				code: secret,
+				url: `https://t.me/${state.discovery.telegram_bot_username}?${b.chat_kind === 'group' ? 'startgroup' : 'start'}=${secret}`,
+				status: 'open',
+				expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
+				chat_id: null,
+				error_code: null
+			};
+			state.telegramCodes.push(code);
+			return json(route, 201, code);
+		}
+		if ((m = path.match(/^\/v1\/telegram-codes\/([^/]+)$/))) {
+			const c = state.telegramCodes.find((x) => x.id === m![1]);
+			if (!c) return problem(route, 404, 'not_found', 'Not found');
+			if (method === 'DELETE') {
+				c.status = 'revoked';
+				return route.fulfill({ status: 204 });
+			}
+			return json(route, 200, { ...c, url: null, code: null });
+		}
+		if ((m = path.match(/^\/v1\/telegram-chats\/([^/]+)(?:\/contributors(?:\/([^/]+))?)?$/))) {
+			const c = state.telegramChats.find((x) => x.id === m![1]);
+			if (!c) return problem(route, 404, 'not_found', 'Not found');
+			if (path.includes('/contributors')) {
+				const list = (state.telegramContributors[c.id] ??= []);
+				if (!m[2]) return json(route, 200, list);
+				const who = list.find((x) => x.id === m![2]);
+				if (!who) return problem(route, 404, 'not_found', 'Not found');
+				who.blocked = (body as S['TelegramContributorUpdate']).blocked;
+				return json(route, 200, who);
+			}
+			if (method === 'DELETE') {
+				Object.assign(c, { status: 'disconnected', ended_reason: 'disconnected', ended_by_name: state.me!.display_name, ended_at: new Date().toISOString() });
+				return route.fulfill({ status: 204 });
+			}
+			if (method === 'PATCH') {
+				const b = body as S['TelegramChatUpdate'];
+				if (b.paused !== undefined) c.status = b.paused ? 'paused' : 'active';
+				if (b.take_over) {
+					c.owner = { user_id: state.me!.id, display_name: state.me!.display_name };
+					c.is_owner = true;
+				}
+				for (const k of ['contributors', 'frame_replies', 'notify_reactions', 'offer_app_invite', 'topic_id'] as const)
+					if (b[k] !== undefined) (c as Record<string, unknown>)[k] = b[k];
+			}
+			return json(route, 200, c);
+		}
+		if (path === '/v1/me/telegram') {
+			if (method === 'DELETE') {
+				state.telegramLink = null;
+				return route.fulfill({ status: 204 });
+			}
+			return state.telegramLink ? json(route, 200, state.telegramLink) : problem(route, 404, 'not_found', 'Not linked');
+		}
+		if (path === '/v1/me/telegram/link-code' && method === 'POST') {
+			if (state.telegramLink) return problem(route, 409, 'telegram_already_linked', 'Already linked');
+			const code: S['TelegramCode'] = {
+				id: uid('tl'),
+				purpose: 'link',
+				code: 'lQ8m2Zx7Kp4Rt9Vw3',
+				url: `https://t.me/${state.discovery.telegram_bot_username}?start=lQ8m2Zx7Kp4Rt9Vw3`,
+				status: 'open',
+				expires_at: new Date(Date.now() + 30 * 60_000).toISOString()
+			};
+			state.telegramCodes.push(code);
+			return json(route, 201, code);
 		}
 
 		// ---- sends

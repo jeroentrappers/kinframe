@@ -110,6 +110,10 @@ type Server struct {
 	googleStartUser  *ratelimit.Limiter
 	clockMu          sync.RWMutex
 	clock            func() time.Time // nil: time.Now (tests inject one with SetClock)
+
+	tg *telegramBridge // Telegram bridge (telegram.go); nil without a bot
+
+	em *emailInbox // email to frame (email.go)
 }
 
 // now is the server's clock (birthday dates and windows).
@@ -220,6 +224,12 @@ func New(d Deps) (*Server, error) {
 	s.pluginSealer = ps
 	if err := s.setupPhotoSources(d.Guard); err != nil {
 		return nil, err
+	}
+	if err := s.setupEmail(); err != nil {
+		return nil, err
+	}
+	if err := s.setupTelegram(); err != nil {
+		return nil, fmt.Errorf("telegram: %w", err)
 	}
 	if err := s.setupTus(); err != nil {
 		return nil, err

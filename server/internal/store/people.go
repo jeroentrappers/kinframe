@@ -16,19 +16,21 @@ import (
 // ---------------------------------------------------------------- users
 
 type User struct {
-	ID                 uuid.UUID  `db:"id"`
-	Sub                *string    `db:"sub"`
-	Email              *string    `db:"email"`
-	DisplayName        string     `db:"display_name"`
-	AvatarKey          *string    `db:"avatar_key"`
-	ShareLocationNames bool       `db:"share_location_names"`
-	Locale             *string    `db:"locale"`
-	Timezone           *string    `db:"timezone"` // IANA zone reported by the apps
-	CreatedAt          time.Time  `db:"created_at"`
-	DeletedAt          *time.Time `db:"deleted_at"`
+	ID                 uuid.UUID `db:"id"`
+	Sub                *string   `db:"sub"`
+	Email              *string   `db:"email"`
+	DisplayName        string    `db:"display_name"`
+	AvatarKey          *string   `db:"avatar_key"`
+	ShareLocationNames bool      `db:"share_location_names"`
+	Locale             *string   `db:"locale"`
+	Timezone           *string   `db:"timezone"` // IANA zone reported by the apps
+	// EmailVerified: Email came verified from the identity provider (refreshed on sign-in).
+	EmailVerified bool       `db:"email_verified"`
+	CreatedAt     time.Time  `db:"created_at"`
+	DeletedAt     *time.Time `db:"deleted_at"`
 }
 
-const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, timezone, created_at, deleted_at`
+const userCols = `id, sub, email, display_name, avatar_key, share_location_names, locale, timezone, email_verified, created_at, deleted_at`
 
 // DefaultDisplayName derives a display name from token claims (README §3.1).
 func DefaultDisplayName(name, email string) string {
@@ -54,8 +56,14 @@ var ErrAccountDeleted = errors.New("account deleted")
 
 // UpsertUserBySub returns the user for an identity subject, creating it on
 // first use, except for a token issued before that subject's account was deleted.
-func (s *Store) UpsertUserBySub(ctx context.Context, sub, email, name string, issuedAt time.Time) (*User, error) {
+// The account's email and email_verified follow the token when they differ
+// (docs/spec/email-inbox.md §8.2).
+func (s *Store) UpsertUserBySub(ctx context.Context, sub, email, name string, issuedAt time.Time, emailVerified ...bool) (*User, error) {
+	verified := len(emailVerified) > 0 && emailVerified[0] && email != ""
 	u, err := one[User](s.Pool.Query(ctx, `SELECT `+userCols+` FROM users WHERE sub = $1`, sub))
+	if err == nil && email != "" && (u.Email == nil || *u.Email != email || u.EmailVerified != verified) {
+		return s.refreshEmail(ctx, u, email, verified)
+	}
 	if err != ErrNotFound {
 		return u, err
 	}
@@ -71,10 +79,39 @@ func (s *Store) UpsertUserBySub(ctx context.Context, sub, email, name string, is
 	if email != "" {
 		emailp = &email
 	}
-	return one[User](s.Pool.Query(ctx, `
+	u, err = one[User](s.Pool.Query(ctx, `
 		INSERT INTO users (id, sub, email, display_name) VALUES ($1, $2, $3, $4)
 		ON CONFLICT (sub) DO UPDATE SET sub = EXCLUDED.sub
 		RETURNING `+userCols, NewID(), sub, emailp, DefaultDisplayName(name, email)))
+	if err == nil && verified {
+		return s.refreshEmail(ctx, u, email, verified)
+	}
+	return u, err
+}
+
+// refreshEmail stores the token's email; it is verified only while no other
+// live account has the same verified email (users_email_verified_unique): an
+// email two accounts claim is matched to neither.
+func (s *Store) refreshEmail(ctx context.Context, u *User, email string, verified bool) (*User, error) {
+	if verified {
+		// Another live account with the same email: neither is verified.
+		tag, err := s.Pool.Exec(ctx, `UPDATE users SET email_verified = false
+			WHERE id <> $1 AND email_verified AND lower(email) = lower($2) AND deleted_at IS NULL`, u.ID, email)
+		if err != nil {
+			return nil, err
+		}
+		var dup bool
+		if err := s.Pool.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM users WHERE id <> $1 AND lower(email) = lower($2) AND deleted_at IS NULL)`,
+			u.ID, email).Scan(&dup); err != nil {
+			return nil, err
+		}
+		verified = !dup && tag.RowsAffected() == 0
+	}
+	out, err := one[User](s.Pool.Query(ctx, `UPDATE users SET email = $2, email_verified = $3 WHERE id = $1 RETURNING `+userCols, u.ID, email, verified))
+	if verified && db.IsUniqueViolation(err, "users_email_verified_unique") {
+		out, err = one[User](s.Pool.Query(ctx, `UPDATE users SET email = $2, email_verified = false WHERE id = $1 RETURNING `+userCols, u.ID, email))
+	}
+	return out, err
 }
 
 func (s *Store) GetUser(ctx context.Context, q db.DBTX, id uuid.UUID) (*User, error) {

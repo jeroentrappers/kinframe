@@ -143,7 +143,7 @@ struct SendCard: View {
             thumbs
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(Credit.sender(kindSummary(send.items), via: send.via)).font(.headline).foregroundStyle(Palette.text)
+                    Text(Credit.summary(kindSummary(send.items), via: send.via)).font(.headline).foregroundStyle(Palette.text)
                     Spacer()
                     Text(Format.relative(send.createdAt, locale: L10n.locale)).font(.subheadline).foregroundStyle(Palette.textMuted)
                 }

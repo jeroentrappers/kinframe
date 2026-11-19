@@ -284,10 +284,14 @@ type Invite struct {
 	Note          *string    `db:"note"`
 	ExpiresAt     time.Time  `db:"expires_at"`
 	RevokedAt     *time.Time `db:"revoked_at"`
+	// Via marks a channel invite the server made for an outside channel (email, ...): not listed, always needs
+	// approval. ViaRef is the channel's own reference (email: the email_senders id).
+	Via    *string `db:"via"`
+	ViaRef *string `db:"via_ref"`
 }
 
 const inviteSelect = `SELECT i.id, i.frame_id, i.token, i.created_by, u.display_name AS created_by_name, i.max_uses, i.uses, i.note,
-	i.expires_at, i.revoked_at FROM invites i LEFT JOIN users u ON u.id = i.created_by`
+	i.expires_at, i.revoked_at, i.via, i.via_ref FROM invites i LEFT JOIN users u ON u.id = i.created_by`
 
 // Usable reports whether the invite can still be accepted.
 func (i Invite) Usable(now time.Time) bool {
@@ -295,17 +299,17 @@ func (i Invite) Usable(now time.Time) bool {
 }
 
 func (s *Store) CreateInvite(ctx context.Context, q db.DBTX, inv Invite) (*Invite, error) {
-	if _, err := q.Exec(ctx, `INSERT INTO invites (id, frame_id, token, created_by, max_uses, note, expires_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		inv.ID, inv.FrameID, inv.Token, inv.CreatedBy, inv.MaxUses, inv.Note, inv.ExpiresAt); err != nil {
+	if _, err := q.Exec(ctx, `INSERT INTO invites (id, frame_id, token, created_by, max_uses, note, expires_at, via, via_ref) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		inv.ID, inv.FrameID, inv.Token, inv.CreatedBy, inv.MaxUses, inv.Note, inv.ExpiresAt, inv.Via, inv.ViaRef); err != nil {
 		return nil, err
 	}
 	return one[Invite](q.Query(ctx, inviteSelect+` WHERE i.id = $1`, inv.ID))
 }
 
-// ListActiveInvites lists usable invites; createdBy filters unless nil.
+// ListActiveInvites lists usable invites; createdBy filters unless nil. Channel invites are the server's, not listed.
 func (s *Store) ListActiveInvites(ctx context.Context, frameID uuid.UUID, createdBy *uuid.UUID) ([]Invite, error) {
 	return many[Invite](s.Pool.Query(ctx, inviteSelect+`
-		WHERE i.frame_id = $1 AND i.revoked_at IS NULL AND i.expires_at > now() AND (i.max_uses IS NULL OR i.uses < i.max_uses)
+		WHERE i.frame_id = $1 AND i.via IS NULL AND i.revoked_at IS NULL AND i.expires_at > now() AND (i.max_uses IS NULL OR i.uses < i.max_uses)
 		AND ($2::uuid IS NULL OR i.created_by = $2) ORDER BY i.id DESC`, frameID, createdBy))
 }
 
@@ -340,10 +344,14 @@ type JoinRequest struct {
 	Note          *string   `db:"note"`
 	Status        string    `db:"status"`
 	CreatedAt     time.Time `db:"created_at"`
+	// Channel requests (via email, ...): who the channel invited, as managers see it, and whether the
+	// requester's verified identity matches it.
+	ViaName    *string `db:"via_name"`
+	ViaMatches *bool   `db:"via_matches"`
 }
 
 const joinSelect = `SELECT j.id, j.frame_id, j.user_id, u.display_name AS user_name, u.avatar_key AS user_avatar_key, j.via,
-	ib.display_name AS invited_by_name, j.note, j.status, j.created_at
+	ib.display_name AS invited_by_name, j.note, j.status, j.created_at, j.via_name, j.via_matches
 	FROM join_requests j JOIN users u ON u.id = j.user_id LEFT JOIN users ib ON ib.id = j.invited_by`
 
 // CreateJoinRequest creates a pending request or returns the existing pending one.
@@ -374,6 +382,23 @@ func (tx *Tx) LockPendingJoinRequest(ctx context.Context, frameID, id uuid.UUID)
 		return nil, err
 	}
 	return one[JoinRequest](tx.Query(ctx, joinSelect+` WHERE j.id = $1 AND j.frame_id = $2 AND j.status = 'pending'`, id, frameID))
+}
+
+// JoinChannel is what a channel invite adds to a join request (docs/spec/email-inbox.md §10.4).
+type JoinChannel struct {
+	Via     string
+	Name    *string
+	Ref     *string
+	Matches *bool
+}
+
+// SetJoinRequestChannel marks a (frame) join request as coming from an outside channel.
+func (tx *Tx) SetJoinRequestChannel(ctx context.Context, id uuid.UUID, c JoinChannel) (*JoinRequest, error) {
+	if _, err := tx.Exec(ctx, `UPDATE join_requests SET via = $2, via_name = $3, via_ref = $4, via_matches = $5 WHERE id = $1`,
+		id, c.Via, c.Name, c.Ref, c.Matches); err != nil {
+		return nil, err
+	}
+	return one[JoinRequest](tx.Query(ctx, joinSelect+` WHERE j.id = $1`, id))
 }
 
 func (tx *Tx) DecideJoinRequest(ctx context.Context, id uuid.UUID, status string) error {

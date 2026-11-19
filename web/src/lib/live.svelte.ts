@@ -1,6 +1,8 @@
 import {
 	apiUrl,
 	type BirthdayPerson,
+	type EmailAddress,
+	type EmailPendingSender,
 	type EventInvitation,
 	type FeedBirthdayGreeting,
 	type FeedReceiptSummary,
@@ -9,7 +11,10 @@ import {
 	type PhotoSource,
 	type ReplyPreset,
 	type Send,
-	type Subscription
+	type Subscription,
+	type TelegramChat,
+	type TelegramCode,
+	type TelegramLink
 } from './api/client';
 import { backoffDelay, type Reaction } from './logic';
 
@@ -47,7 +52,17 @@ export type LiveEvent =
 	// Photo sources and Google Photos import (docs/spec/photo-sources.md §10)
 	| { type: 'photo_source.updated'; source: PhotoSource }
 	| { type: 'photo_source.removed'; source_id: string; album_id?: string; feed_id?: string }
-	| { type: 'google_import.updated'; import: GoogleImport };
+	| { type: 'google_import.updated'; import: GoogleImport }
+	// Email to frame (docs/spec/email-inbox.md §11)
+	| { type: 'email_address.updated'; address: EmailAddress }
+	| { type: 'email_address.removed'; address_id: string; frame_id?: string; feed_id?: string }
+	| { type: 'email_sender.pending'; address_id: string; pending: EmailPendingSender }
+	| { type: 'email_sender.decided'; address_id: string; sender_id: string; decision: string }
+	// Telegram (docs/spec/telegram.md, README §5.17)
+	| { type: 'telegram_chat.updated'; chat: TelegramChat }
+	| { type: 'telegram_chat.removed'; chat_id: string; frame_id?: string; feed_id?: string }
+	| { type: 'telegram_code.updated'; code: TelegramCode }
+	| { type: 'telegram_link.updated'; link: TelegramLink | null };
 
 type Handler = (e: LiveEvent) => void;
 

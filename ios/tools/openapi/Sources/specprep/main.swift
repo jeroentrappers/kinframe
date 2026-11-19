@@ -7,7 +7,8 @@
 //   - the string enums in `openEnums` lose their `enum` list and become plain strings. Generated enums reject values
 //     they don't know, and these are the ones a newer server is expected to extend (a new provider, status or error
 //     code must not make a whole list of sources, or an item's `via`, fail to decode). KinframeKit maps them to Swift
-//     enums with an `unknown` case (Core/PhotoSources.swift).
+//     enums whose `init?(rawValue:)` is nil for unknown values (Core/PhotoSources.swift, Core/EmailInbox.swift,
+//     Core/Telegram.swift). An entry may also name an inline enum property, "Schema.property".
 //
 // The output is only generator input; docs/api/openapi.yaml stays authoritative.
 import Foundation
@@ -57,18 +58,42 @@ func rewrite(_ node: Node) -> Node {
     }
 }
 
+// A component schema ("EmailOutcome"), or an enum property inside one ("EmailSender.origin").
 let openEnums = [
     "PhotoService", "PhotoSourceProvider", "PhotoSourceStatus", "PhotoSourceErrorCode", "PhotoSourceWarning",
     "PhotoSourceHistory", "PhotoSourceDeletePolicy", "GoogleImportStatus", "GoogleImportErrorCode",
+    // Join requests from outside channels (email, Telegram; later channels add a value).
+    "JoinRequest.via",
+    // Email inbox (docs/spec/email-inbox.md).
+    "EmailAddressStatus", "EmailSenderState", "EmailHeldReason", "EmailOutcome", "EmailReplyKind",
+    "EmailAddressTarget.kind", "EmailSender.origin", "EmailAuthResult.spf", "EmailAuthResult.dkim",
+    "EmailAuthResult.dmarc",
+    // Telegram (docs/spec/telegram.md).
+    "TelegramChatKind", "TelegramCodePurpose", "TelegramCodeStatus", "TelegramCodeErrorCode", "TelegramChatStatus",
+    "TelegramChatErrorCode", "TelegramChatWarning", "TelegramChatEndedReason", "TelegramContributorsMode",
+    "TelegramChatTarget.kind",
 ]
+
+func opened(_ node: Node?, _ path: ArraySlice<Substring>, _ name: String) -> Node {
+    guard var schema = node?.mapping else { fatalError("open enum \(name): no such schema or property") }
+    guard let key = path.first else {
+        guard schema["enum"] != nil else { fatalError("open enum \(name) is not a string enum in the spec") }
+        schema["enum"] = nil
+        return .mapping(schema)
+    }
+    guard var props = schema["properties"]?.mapping else { fatalError("open enum \(name): no properties") }
+    props[Node(String(key))] = opened(props[Node(String(key))], path.dropFirst(), name)
+    schema["properties"] = .mapping(props)
+    return .mapping(schema)
+}
 
 func openingEnums(_ root: Node) -> Node {
     guard var top = root.mapping, var components = top["components"]?.mapping,
           var schemas = components["schemas"]?.mapping else { fatalError("no components.schemas") }
     for name in openEnums {
-        guard var schema = schemas[Node(name)]?.mapping, schema["enum"] != nil else { fatalError("open enum \(name) is not a string enum in the spec") }
-        schema["enum"] = nil
-        schemas[Node(name)] = .mapping(schema)
+        let parts = name.split(separator: ".")
+        let schema = Node(String(parts[0]))
+        schemas[schema] = opened(schemas[schema], parts.dropFirst(), name)
     }
     components["schemas"] = .mapping(schemas)
     top["components"] = .mapping(components)

@@ -184,8 +184,17 @@ fun sourceProblem(e: Throwable): Int {
     }
 }
 
-/** "Anna via Immich" for the screens that show who a photo is from (photo-sources.md §9.5). */
+/**
+ * "Anna via Immich" for the screens that show who a photo is from (photo-sources.md §9.5). Mail and Telegram credit the
+ * person who mailed or posted it **instead of** the sender ([name] may be the address's or chat's owner): "Jan via
+ * email", "Ben via Telegram" ([channel] formats person and service; email-inbox.md §9.2, telegram.md §8).
+ */
 object SourceCredit {
-    fun text(name: String, via: ItemVia?, format: (String, String) -> String): String =
-        via?.let { v -> v.displayLabel.takeIf { it.isNotBlank() }?.let { format(name, it) } } ?: name
+    fun text(name: String, via: ItemVia?, format: (String, String) -> String, channel: ((String, String) -> String)? = null): String {
+        if (via?.isChannel == true) {
+            val person = via.personLabel ?: name
+            return channel?.invoke(person, via.service) ?: person
+        }
+        return via?.let { v -> v.displayLabel.takeIf { it.isNotBlank() }?.let { format(name, it) } } ?: name
+    }
 }

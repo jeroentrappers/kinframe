@@ -26,6 +26,13 @@ sealed interface Route {
     data object PhotoSources : Route
     /** "Sync from…" into an album or a feed; [link] when an Immich or iCloud link was shared into the app. */
     data class AddPhotoSource(val target: app.kinframe.family.ui.sources.SourceTarget, val link: String? = null) : Route
+    /** "Email photos to this frame/feed" (docs/spec/email-inbox.md): the target's inbox addresses. */
+    data class EmailInbox(val scope: app.kinframe.family.ui.channels.ChannelScope) : Route
+    /** One inbox address: senders, held mail, recent mail, settings. */
+    data class EmailAddress(val addressId: String) : Route
+    /** A frame's or feed's Telegram chats (docs/spec/telegram.md). */
+    data class TelegramChats(val scope: app.kinframe.family.ui.channels.ChannelScope) : Route
+    data class TelegramChat(val chatId: String) : Route
 
     val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings
 }

@@ -15,7 +15,15 @@ export const DEFAULT_LIMITS: Required<Limits> = {
 	max_photo_sources_per_user: 20,
 	max_photo_source_items: 10000,
 	max_photo_source_run_bytes: 2147483648,
-	max_google_import_items: 500
+	max_google_import_items: 500,
+	max_email_addresses_per_target: 5,
+	max_email_senders_per_address: 200,
+	max_email_message_bytes: 52428800,
+	max_email_messages_per_address_day: 200,
+	max_email_held_messages: 100,
+	max_telegram_chats_per_target: 5,
+	max_telegram_chats_per_user: 20,
+	max_telegram_items_per_chat_hour: 300
 };
 
 /**
@@ -94,6 +102,30 @@ class DiscoveryState {
 	/** "Add from Google Photos": the operator configured a Google OAuth client. */
 	get googlePhotosImport() {
 		return this.doc?.google_photos_import === true;
+	}
+
+	/** Email to frame (docs/spec/email-inbox.md): off hides every "Email photos to…" section. */
+	get emailInbox() {
+		return this.doc?.email_inbox === true;
+	}
+
+	/** The inbox addresses' mail domain ("in.kinframe.appmire.be"), for the create preview. */
+	get emailInboxDomain() {
+		return this.emailInbox ? (this.doc?.email_inbox_domain ?? null) : null;
+	}
+
+	/** The Telegram bridge (docs/spec/telegram.md): needs the bot's username for t.me links; off hides every Telegram UI. */
+	get telegram() {
+		return this.doc?.telegram === true && !!this.doc.telegram_bot_username;
+	}
+
+	get telegramBot(): string | null {
+		return this.telegram ? (this.doc?.telegram_bot_username ?? null) : null;
+	}
+
+	/** The bot runs in privacy mode: a group must make it an admin before it sees photos. */
+	get telegramPrivacyMode() {
+		return this.telegram && this.doc?.telegram_privacy_mode === true;
 	}
 
 	/** Logto is usable when the server published an issuer and a web client id. */

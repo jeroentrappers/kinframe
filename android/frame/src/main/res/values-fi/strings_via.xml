@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="credit_via">%1$s (lähde: %2$s)</string>
+    <string name="credit_via_email">%1$s (sähköpostitse)</string>
+    <string name="credit_via_telegram">%1$s (lähde: Telegram)</string>
 </resources>

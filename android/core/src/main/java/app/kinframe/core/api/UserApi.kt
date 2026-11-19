@@ -221,6 +221,60 @@ interface KinApi {
     suspend fun googleImport(importId: String): GoogleImport
     suspend fun cancelGoogleImport(importId: String): GoogleImport
 
+    // ---- email to frame (README §5.16, docs/spec/email-inbox.md)
+
+    /** The frame's inbox addresses (frame managers), oldest first. */
+    suspend fun frameEmailAddresses(frameId: String): List<EmailAddress>
+    /** The feed's inbox addresses (feed owner/admins), oldest first. */
+    suspend fun feedEmailAddresses(feedId: String): List<EmailAddress>
+    /** `409 limit_reached` beyond `limits.max_email_addresses_per_target`. */
+    suspend fun createFrameEmailAddress(frameId: String, request: EmailAddressCreate, idempotencyKey: String): EmailAddress
+    suspend fun createFeedEmailAddress(feedId: String, request: EmailAddressCreate, idempotencyKey: String): EmailAddress
+    suspend fun emailAddress(addressId: String): EmailAddress
+    /** Rename, new slug, pause/resume, settings, take over. Omitted fields are kept. */
+    suspend fun updateEmailAddress(addressId: String, update: EmailAddressUpdate): EmailAddress
+    suspend fun deleteEmailAddress(addressId: String)
+    /** A new random part: the old address stops working at once. */
+    suspend fun regenerateEmailAddress(addressId: String): EmailAddress
+    suspend fun emailSenders(addressId: String): List<EmailSender>
+    /** Allow (or block) an address; `409 duplicate_sender` when it is listed already. */
+    suspend fun addEmailSender(addressId: String, request: EmailSenderCreate): EmailSender
+    suspend fun updateEmailSender(addressId: String, senderId: String, update: EmailSenderUpdate): EmailSender
+    suspend fun removeEmailSender(addressId: String, senderId: String)
+    suspend fun emailPendingSenders(addressId: String): List<EmailPendingSender>
+    /** Allow a pending sender and (with `deliver`) deliver their authenticated held mail; `409 already_decided`. */
+    suspend fun approveEmailSender(addressId: String, senderId: String, request: EmailSenderApprove = EmailSenderApprove()): EmailSender
+    /** Delete their held mail silently; [block] drops their later mail too. */
+    suspend fun rejectEmailSender(addressId: String, senderId: String, block: Boolean = false)
+    suspend fun emailHeldMessage(addressId: String, messageId: String): EmailHeldMessage
+    suspend fun deleteEmailHeldMessage(addressId: String, messageId: String)
+    /** Deliver this one held mail (also an unverified one); the sender is not allowed by it. */
+    suspend fun deliverEmailHeldMessage(addressId: String, messageId: String): EmailMessage
+    /** Recent mail (30 days), newest first. */
+    suspend fun emailMessages(addressId: String, cursor: String? = null, limit: Int = 50): EmailMessagePage
+
+    // ---- Telegram (README §5.17, docs/spec/telegram.md)
+
+    /** Live chats first, then those disconnected in the last 30 days (frame managers). */
+    suspend fun frameTelegramChats(frameId: String): List<TelegramChat>
+    suspend fun feedTelegramChats(feedId: String): List<TelegramChat>
+    /** A one-time connect code with its `t.me` [TelegramCode.url] (only in this response). */
+    suspend fun createFrameTelegramCode(frameId: String, request: TelegramConnectCodeCreate, idempotencyKey: String): TelegramCode
+    suspend fun createFeedTelegramCode(feedId: String, request: TelegramConnectCodeCreate, idempotencyKey: String): TelegramCode
+    suspend fun telegramCode(codeId: String): TelegramCode
+    suspend fun revokeTelegramCode(codeId: String)
+    suspend fun telegramChat(chatId: String): TelegramChat
+    suspend fun updateTelegramChat(chatId: String, update: TelegramChatUpdate): TelegramChat
+    /** The bot says goodbye and leaves; photos already sent stay. */
+    suspend fun disconnectTelegramChat(chatId: String)
+    suspend fun telegramContributors(chatId: String): List<TelegramContributor>
+    suspend fun updateTelegramContributor(chatId: String, contributorId: String, blocked: Boolean): TelegramContributor
+    /** The caller's linked Telegram account, or null when none is linked (`404`). */
+    suspend fun telegramLink(): TelegramLink?
+    suspend fun unlinkTelegram()
+    /** "Link my Telegram": `409 telegram_already_linked` when linked already. */
+    suspend fun createTelegramLinkCode(idempotencyKey: String): TelegramCode
+
     /** The user websocket, `GET /v1/ws?access_token=…` (README §6.2). */
     suspend fun webSocketRequest(): Request
 }
@@ -742,6 +796,122 @@ class HttpKinApi(
 
     override suspend fun cancelGoogleImport(importId: String): GoogleImport =
         call { url(ep("google-imports/$importId/cancel")).post(empty) }.decode(GoogleImport.serializer())
+
+    // ------------------------------------------------------------------ email to frame
+
+    private val emailAddresses = ListSerializer(EmailAddress.serializer())
+
+    override suspend fun frameEmailAddresses(frameId: String): List<EmailAddress> =
+        call { url(ep("frames/$frameId/email-addresses")).get() }.decode(emailAddresses)
+
+    override suspend fun feedEmailAddresses(feedId: String): List<EmailAddress> =
+        call { url(ep("feeds/$feedId/email-addresses")).get() }.decode(emailAddresses)
+
+    override suspend fun createFrameEmailAddress(frameId: String, request: EmailAddressCreate, idempotencyKey: String): EmailAddress = call {
+        url(ep("frames/$frameId/email-addresses")).header("Idempotency-Key", idempotencyKey).post(json(request, EmailAddressCreate.serializer()))
+    }.decode(EmailAddress.serializer())
+
+    override suspend fun createFeedEmailAddress(feedId: String, request: EmailAddressCreate, idempotencyKey: String): EmailAddress = call {
+        url(ep("feeds/$feedId/email-addresses")).header("Idempotency-Key", idempotencyKey).post(json(request, EmailAddressCreate.serializer()))
+    }.decode(EmailAddress.serializer())
+
+    override suspend fun emailAddress(addressId: String): EmailAddress =
+        call { url(ep("email-addresses/$addressId")).get() }.decode(EmailAddress.serializer())
+
+    override suspend fun updateEmailAddress(addressId: String, update: EmailAddressUpdate): EmailAddress =
+        call { url(ep("email-addresses/$addressId")).patch(json(update, EmailAddressUpdate.serializer())) }.decode(EmailAddress.serializer())
+
+    override suspend fun deleteEmailAddress(addressId: String) = call { url(ep("email-addresses/$addressId")).delete() }.expectOk()
+
+    override suspend fun regenerateEmailAddress(addressId: String): EmailAddress =
+        call { url(ep("email-addresses/$addressId/regenerate")).post(empty) }.decode(EmailAddress.serializer())
+
+    override suspend fun emailSenders(addressId: String): List<EmailSender> =
+        call { url(ep("email-addresses/$addressId/senders")).get() }.decode(ListSerializer(EmailSender.serializer()))
+
+    override suspend fun addEmailSender(addressId: String, request: EmailSenderCreate): EmailSender = call {
+        url(ep("email-addresses/$addressId/senders")).post(json(request.copy(email = request.email.trim(), displayName = request.displayName?.trim()?.takeIf { it.isNotEmpty() }), EmailSenderCreate.serializer()))
+    }.decode(EmailSender.serializer())
+
+    override suspend fun updateEmailSender(addressId: String, senderId: String, update: EmailSenderUpdate): EmailSender =
+        call { url(ep("email-addresses/$addressId/senders/$senderId")).patch(json(update.toJson())) }.decode(EmailSender.serializer())
+
+    override suspend fun removeEmailSender(addressId: String, senderId: String) =
+        call { url(ep("email-addresses/$addressId/senders/$senderId")).delete() }.expectOk()
+
+    override suspend fun emailPendingSenders(addressId: String): List<EmailPendingSender> =
+        call { url(ep("email-addresses/$addressId/pending-senders")).get() }.decode(ListSerializer(EmailPendingSender.serializer()))
+
+    override suspend fun approveEmailSender(addressId: String, senderId: String, request: EmailSenderApprove): EmailSender = call {
+        url(ep("email-addresses/$addressId/pending-senders/$senderId/approve")).post(json(request, EmailSenderApprove.serializer()))
+    }.decode(EmailSender.serializer())
+
+    override suspend fun rejectEmailSender(addressId: String, senderId: String, block: Boolean) = call {
+        url(ep("email-addresses/$addressId/pending-senders/$senderId/reject")).post(json(EmailSenderReject(block), EmailSenderReject.serializer()))
+    }.expectOk()
+
+    override suspend fun emailHeldMessage(addressId: String, messageId: String): EmailHeldMessage =
+        call { url(ep("email-addresses/$addressId/held-messages/$messageId")).get() }.decode(EmailHeldMessage.serializer())
+
+    override suspend fun deleteEmailHeldMessage(addressId: String, messageId: String) =
+        call { url(ep("email-addresses/$addressId/held-messages/$messageId")).delete() }.expectOk()
+
+    override suspend fun deliverEmailHeldMessage(addressId: String, messageId: String): EmailMessage =
+        call { url(ep("email-addresses/$addressId/held-messages/$messageId/deliver")).post(empty) }.decode(EmailMessage.serializer())
+
+    override suspend fun emailMessages(addressId: String, cursor: String?, limit: Int): EmailMessagePage = call {
+        url(ep("email-addresses/$addressId/messages", mapOf("cursor" to cursor, "limit" to limit.toString()))).get()
+    }.decode(EmailMessagePage.serializer())
+
+    // ------------------------------------------------------------------ Telegram
+
+    private val telegramChats = ListSerializer(TelegramChat.serializer())
+
+    override suspend fun frameTelegramChats(frameId: String): List<TelegramChat> =
+        call { url(ep("frames/$frameId/telegram-chats")).get() }.decode(telegramChats)
+
+    override suspend fun feedTelegramChats(feedId: String): List<TelegramChat> =
+        call { url(ep("feeds/$feedId/telegram-chats")).get() }.decode(telegramChats)
+
+    override suspend fun createFrameTelegramCode(frameId: String, request: TelegramConnectCodeCreate, idempotencyKey: String): TelegramCode = call {
+        url(ep("frames/$frameId/telegram-codes")).header("Idempotency-Key", idempotencyKey).post(json(request, TelegramConnectCodeCreate.serializer()))
+    }.decode(TelegramCode.serializer())
+
+    override suspend fun createFeedTelegramCode(feedId: String, request: TelegramConnectCodeCreate, idempotencyKey: String): TelegramCode = call {
+        url(ep("feeds/$feedId/telegram-codes")).header("Idempotency-Key", idempotencyKey).post(json(request, TelegramConnectCodeCreate.serializer()))
+    }.decode(TelegramCode.serializer())
+
+    override suspend fun telegramCode(codeId: String): TelegramCode =
+        call { url(ep("telegram-codes/$codeId")).get() }.decode(TelegramCode.serializer())
+
+    override suspend fun revokeTelegramCode(codeId: String) = call { url(ep("telegram-codes/$codeId")).delete() }.expectOk()
+
+    override suspend fun telegramChat(chatId: String): TelegramChat =
+        call { url(ep("telegram-chats/$chatId")).get() }.decode(TelegramChat.serializer())
+
+    override suspend fun updateTelegramChat(chatId: String, update: TelegramChatUpdate): TelegramChat =
+        call { url(ep("telegram-chats/$chatId")).patch(json(update.toJson())) }.decode(TelegramChat.serializer())
+
+    override suspend fun disconnectTelegramChat(chatId: String) = call { url(ep("telegram-chats/$chatId")).delete() }.expectOk()
+
+    override suspend fun telegramContributors(chatId: String): List<TelegramContributor> =
+        call { url(ep("telegram-chats/$chatId/contributors")).get() }.decode(ListSerializer(TelegramContributor.serializer()))
+
+    override suspend fun updateTelegramContributor(chatId: String, contributorId: String, blocked: Boolean): TelegramContributor = call {
+        url(ep("telegram-chats/$chatId/contributors/$contributorId")).patch(json(TelegramContributorUpdate(blocked), TelegramContributorUpdate.serializer()))
+    }.decode(TelegramContributor.serializer())
+
+    override suspend fun telegramLink(): TelegramLink? {
+        val r = call { url(ep("me/telegram")).get() }
+        if (r.code == 404) { r.close(); return null }
+        return r.decode(TelegramLink.serializer())
+    }
+
+    override suspend fun unlinkTelegram() = call { url(ep("me/telegram")).delete() }.expectOk()
+
+    override suspend fun createTelegramLinkCode(idempotencyKey: String): TelegramCode = call {
+        url(ep("me/telegram/link-code")).header("Idempotency-Key", idempotencyKey).post(empty)
+    }.decode(TelegramCode.serializer())
 
     override suspend fun webSocketRequest(): Request {
         val token = tokens.accessToken()

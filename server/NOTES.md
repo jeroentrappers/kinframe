@@ -26,6 +26,7 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
 - Photo sources (docs/spec/photo-sources.md, README §5.14): no changes to the contract were needed. The coordinator
   added `Album.only_in_album_mode`; the server implements it. `ImmichAlbum.thumbnail_url` is always null (no proxy
   endpoint exists in the contract for it).
+- Telegram (docs/spec/telegram.md, README §5.17): no changes to the contract were needed.
 - Otherwise none made by the server work. The coordinator added `dev_auth` to Discovery, `POST /dev/token` (tag `dev`) and the
   signed media URL description; the server implements them. `/dev/token` additionally accepts `"operator": true` to
   get the `kinframe:operate` scope (dev only, not in the contract).
@@ -331,6 +332,90 @@ Decisions taken where `docs/api/` was silent or ambiguous, and known gaps. Contr
   `google_import_done` (text `google_import_failed` for failures) only without an open websocket. A restart resumes
   `picking`/`importing` imports; items copied before a crash but not yet placed are not placed (known gap).
 - Rate limits (in memory): test + Immich albums 30/h, create 30/h, sync now 30/h per user, Google starts 20/h.
+
+## Email to frame
+
+- Migration `00020_email_inbox.sql` exactly as docs/spec/email-inbox.md §16 (the generic channel columns on invites
+  and join requests are shared with Telegram). Code: `internal/mailin` (receiver, webhook signatures, SPF/DKIM/DMARC,
+  MIME walk, captions, reply texts), `internal/api/email*.go`, `internal/store/email.go`; the spec's
+  `internal/inbox`/`api/emailinbox.go` names were not used. Queue processing runs in its own loop
+  (`RunEmailInbox`, `FOR UPDATE SKIP LOCKED` with a 15-minute lease) instead of a worker job `email_process`.
+- Libraries (all permissive, AGPL-compatible): `github.com/emersion/go-smtp` (MIT), `github.com/emersion/go-message`
+  (MIT), `github.com/emersion/go-msgauth` (MIT), `blitiri.com.ar/go/spf` (MIT), `github.com/pires/go-proxyproto`
+  (Apache-2.0), `golang.org/x/net` publicsuffix/html/idna (BSD-3).
+- Verified emails: tokens carry `email_verified` (the bootstrap's access-token script sets it with `primaryEmail`;
+  dev tokens with an email). `users.email` and `email_verified` are refreshed on every request whose token differs; an
+  email another live account also has is verified for neither (both are unverified). Re-run `bootstrap-logto` so the
+  script adds the claim; until then nobody is matched by account (their mail is treated as from a non-account sender).
+- DKIM: go-msgauth refuses `l=` signatures outright (the spec would count them when they cover the whole body).
+  Expired `x=` fails. ARC is not evaluated. The SMTP greeting is go-smtp's (`220 <host> ESMTP Service Ready`), and
+  `250 2.0.0 Queued as <id>` is returned. The data phase is bounded by the 5-minute command timeout (not a separate
+  10 minutes); sessions end after 30 minutes. The TLS handshake has 10 s from the ClientHello.
+- Webhook mail is authenticated in the request (so `rejected_dmarc` can be answered); a temporary DNS error leaves it
+  to the worker, which retries 3 times 10 minutes apart and then treats the mail as unauthenticated. SMTP rejects with
+  `451` instead. Refused DMARC mail is logged in Recent mail for the webhook only.
+- Matched accounts: items of a matched account's mail carry no `via.address_id` (only the send does), so
+  `notify_reactions` (the owner's switch) applies exactly to on-behalf items. The `delivered` push is skipped for every
+  `via` send, email included.
+- Held mail: media rows are created (owner = address owner) and processed at once; 256 px webp previews are made by
+  the minutely loop from the master/poster (`email-held/…` blob keys), until then previews sign the master or poster.
+  Held media are deleted explicitly (rows and blob keys) on reject, delete, expiry and caps. Unverified mail that
+  claims a listed sender is held under that sender's row; the pending list includes listed senders with held mail.
+- Confirmations are coalesced per sender and address (one per 10 minutes; the minutely loop sends the summary once
+  the sender has been quiet for 10 minutes). "Already using the app" is a registered `unifiedpush`/`fcm`/`apns`
+  endpoint only (no per-user record of recent app requests exists). Store links come from
+  `KINFRAME_APP_{IOS,ANDROID}_STORE_URL`; without them the server's public URL is the download link.
+- Channel invites: `invites.via`/`feed_invites.via` set means not listed and always needing approval; redemption
+  calls a resolver registered per channel (`channelJoins`, email in `email_invite.go`) for `via_name`, `via_ref` and
+  `via_matches`.
+- Frames and feeds that are deleted keep their addresses until the janitor retires them (`PruneEmail`, every
+  janitor round); local parts of addresses removed by a hard delete before that are not retired (unlikely).
+- The shop mailer was extended in place (`In-Reply-To`/`References`, RFC 3834 headers, one attachment) rather than
+  moved to `internal/mail`.
+- Not built: the Ansible/compose variables and `docs/deploy.md` steps (§14.2, left to the deploy work), inbound-parse
+  adapters, HEIC/video fixtures in the e2e tests (sniffing and probing are the upload path's, tested there).
+
+## Telegram bridge
+
+- Migration `00021_telegram.sql`: the tables of telegram.md §16 plus `telegram_bot.webhook_hash` (sha256 of the
+  registered URL, secret and updates: `getWebhookInfo` doesn't return the secret), `api_base` (one cloud `logOut`
+  before a local Bot API server), `commands_hash`; `telegram_updates.next_attempt_at`; `telegram_strays` (groups the
+  bot was added to without a code: explained once after 20 s, left after 10 minutes); per contribution `media`
+  (what to download on a retry), `caption`, `message_date`, `thread_id`, `retry_at`, `replied_frames`, `closed`;
+  per chat `ready_sent_at`, `spoiler_notice_at`, `farewell_due`; batches `label` and `album_at`;
+  `sends.telegram_outside`. Frames and feeds are soft-deleted, so a trigger on `deleted_at` ends their chats with
+  `target_deleted` (the `ON DELETE SET NULL` of the spec never fires); the consumer then says goodbye and leaves.
+- Code: `internal/telegram` (Bot API client with token redaction, webhook secret, update reduction, batching rule,
+  outbound queue, poller, per-chat dispatcher, advisory-lock leadership; `telegramtest` is the fake Bot API),
+  `api/telegram.go` (start, consumer, webhook, intake), `telegram_chat.go` (membership, migration, commands, codes),
+  `telegram_media.go` (sender decision, downloads, batches, sends), `telegram_out.go` (messages, reactions,
+  promotion, join links, pushes), `telegram_api.go` (endpoints). Texts in `internal/i18n/locales/telegram/*.json`,
+  a feature catalog merged into each language at load.
+- One consumer: the process holding the advisory lock (re-checked every 15 s on its own connection) registers the
+  webhook or polls, processes updates and closes batches. Every process paces its own outbound calls (in memory, not
+  replayed after a restart: reactions and replies are best effort). The webhook stores and answers 200 in any
+  process; a 503 on a database error lets Telegram retry.
+- Updates are processed in order per chat; a failing update holds its chat back (retried after 1, 2 minutes, then
+  `failed`). Downloads that fail temporarily don't block the chat: the contribution waits (`retry_at`, 2 then 10
+  minutes, failed after 3 attempts) and a batch waits for it at most 10 minutes past its closing time.
+- Batches: an album message always joins the batch holding its album, so a batch can exceed `max_items_per_send` by
+  at most one album (albums are never split). The closer ticks every 5 s.
+- Sender decision: an anonymous admin or channel post (`sender_chat`) is one contributor keyed by that chat's id.
+  A linked user without send rights is credited with their kinframe name, sent by the owner. Owners are re-checked on
+  every media message (not only per batch).
+- Outside contributions: `sends.telegram_outside`; they get no `delivered`/`failed` push and their reactions reach
+  the owner only with `notify_reactions`. A linked user's Telegram send gets the normal pushes and `last_sent_at`.
+  Outside contributions are placed moderated whenever the frame moderates. Rejecting one does not change its
+  contribution row (counts are kept incrementally; the item simply isn't shown).
+- Join codes are reusable by the intended Telegram user while valid (tapping the button twice works). Accepting a
+  Telegram channel invite links the redeemer's Telegram account to the account that accepted (via the email inbox's
+  channel join resolver), so after approval their photos are their own sends.
+- "Get the app" in the welcome opens the server's web page (https) or the Play listing; private-chat app messages
+  carry App Store, Google Play (the operator's store URLs, else the public listings) and Web.
+- `/status` shows the last delivery in UTC (no time zone is known for a chat). Command menus are registered for every
+  language except zh-TW (Telegram's language codes have no script; zh gets Simplified Chinese).
+- Not done: `KINFRAME_TELEGRAM_WEBHOOK_IP_CHECK` uses the request's client address (set `KINFRAME_TRUST_PROXY`
+  behind a proxy); edited media, round videos (spec open questions) are ignored.
 
 ## Settings
 

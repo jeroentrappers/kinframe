@@ -74,6 +74,8 @@ class MainActivity : ComponentActivity() {
                 postId = intent.getStringExtra(Notifications.EXTRA_POST_ID),
                 sourceId = intent.getStringExtra(Notifications.EXTRA_SOURCE_ID),
                 importId = intent.getStringExtra(Notifications.EXTRA_IMPORT_ID),
+                addressId = intent.getStringExtra(Notifications.EXTRA_ADDRESS_ID),
+                chatId = intent.getStringExtra(Notifications.EXTRA_CHAT_ID),
             )
         }
     }

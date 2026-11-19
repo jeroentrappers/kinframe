@@ -15,6 +15,8 @@ export interface FramePlacement {
 	senderName: string;
 	/** The outside service a photo source or Google import got it from ("Immich"), for "Anna via Immich". */
 	via: string | null;
+	/** Which service `via` names; for `email` and `telegram` it is the person, shown instead of the sender. */
+	viaService: S['PhotoService'] | null;
 	senderId: string | null;
 	capturedAt: string | null;
 	receivedAt: string;
@@ -50,6 +52,7 @@ export function toFramePlacement(p: PlacementChange): FramePlacement {
 		caption: it.caption ?? null,
 		senderName: it.imported_sender_name ?? it.sender_name ?? '',
 		via: it.via?.label ?? null,
+		viaService: it.via?.service ?? null,
 		senderId: it.imported_from ? null : (it.sender_id ?? null),
 		capturedAt: it.captured_at ?? null,
 		receivedAt: p.received_at ?? it.created_at,

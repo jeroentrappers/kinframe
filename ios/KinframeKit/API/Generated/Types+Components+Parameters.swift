@@ -34,6 +34,14 @@ extension Components {
         public typealias SourceId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/ImportId`.
         public typealias ImportId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/AddressId`.
+        public typealias AddressId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/SenderId`.
+        public typealias SenderId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/HeldMessageId`.
+        public typealias HeldMessageId = Components.Schemas.Id
+        /// - Remark: Generated from `#/components/parameters/TelegramChatId`.
+        public typealias TelegramChatId = Components.Schemas.Id
         /// - Remark: Generated from `#/components/parameters/InviteToken`.
         public typealias InviteToken = Swift.String
         /// - Remark: Generated from `#/components/parameters/Cursor`.

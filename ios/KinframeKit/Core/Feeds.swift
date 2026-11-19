@@ -395,6 +395,11 @@ public enum PushRoute: Equatable, Sendable {
     case photoSource(sourceId: String, frameId: String?, albumId: String?, feedId: String?)
     /// A Google Photos import finished (`google_import_done`).
     case googleImport(importId: String)
+    /// Someone new is waiting at an inbox address (`email_pending_sender`): the address's pending list, in its frame's
+    /// or feed's settings.
+    case emailAddress(addressId: String, frameId: String?, feedId: String?)
+    /// A Telegram chat needs its owner (`telegram_attention`): the chat, in its frame's or feed's settings.
+    case telegramChat(chatId: String, frameId: String?, feedId: String?)
 
     public enum FeedSectionHint: String, Sendable {
         case posts, members, frames, birthdays, settings
@@ -429,7 +434,7 @@ public enum PushRoute: Equatable, Sendable {
         case "birthday_today":
             return id("feed_id").map { .feed(feedId: $0, section: .birthdays) } ?? .feeds
         default:
-            return PhotoSourcePush.route(key: key, id: id)
+            return PhotoSourcePush.route(key: key, id: id) ?? ChannelPush.route(key: key, id: id)
         }
     }
 }

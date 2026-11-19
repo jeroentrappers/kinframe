@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { joinVia } from '$lib/joinRequests';
 	import { api, call, type Feed, type FeedMember, type JoinRequest } from '$lib/api/client';
 	import { auth } from '$lib/auth.svelte';
 	import { canEditFeedMember, isFeedAdmin, sortFeedMembers } from '$lib/feeds';
@@ -173,8 +174,9 @@
 							<div class="who">
 								<strong>{r.user.display_name}</strong>
 								<span class="muted small">
-									{r.invited_by_name ? t('people.viaInvite', { name: r.invited_by_name }) : t('feedMembers.viaLink')} · {relativeTime(r.created_at, i18n.tag)}
+									{joinVia(r, t('feedMembers.viaLink'))} · {relativeTime(r.created_at, i18n.tag)}
 								</span>
+								{#if r.via_name}<span class="small via-name" data-testid="join-via-name">{r.via_name}{#if r.via_matches}<span class="match" title={t('people.viaMatches')}><Icon name="check" size={14} /><span class="visually-hidden">{t('people.viaMatches')}</span></span>{/if}</span>{/if}
 								{#if r.note}<span class="small">“{r.note}”</span>{/if}
 							</div>
 							<div class="row-wrap">
@@ -328,6 +330,16 @@
 </Dialog>
 
 <style>
+	.via-name {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		overflow-wrap: anywhere;
+	}
+	.via-name .match {
+		display: inline-flex;
+		color: var(--accent);
+	}
 	.requests {
 		border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 		background: color-mix(in srgb, var(--primary-soft) 35%, var(--surface));

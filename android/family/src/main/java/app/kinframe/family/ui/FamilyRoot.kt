@@ -1,5 +1,7 @@
 package app.kinframe.family.ui
 
+import app.kinframe.family.ui.channels.ChannelRoute
+import app.kinframe.family.ui.channels.TelegramLinkSettings
 import app.kinframe.family.ui.sources.*
 import app.kinframe.core.api.PhotoSourceLinks
 import app.kinframe.core.api.SourceLink
@@ -328,6 +330,18 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
             // A photo source needs its owner: My photo sources shows it with the fix (photo-sources.md §10).
             Notifications.TARGET_PHOTO_SOURCES -> { nav.selectTab(Route.Settings); nav.push(Route.PhotoSources) }
             Notifications.TARGET_GOOGLE_IMPORT -> t.importId?.let { graph.googleImports.resume(it) }
+            // Someone new mailed an address you manage: its pending list (email-inbox.md §11).
+            Notifications.TARGET_EMAIL_PENDING -> t.addressId?.let {
+                if (!ready.server.discovery.emailInbox) return@let
+                if (t.feedId != null && feedsOn) nav.selectTab(Route.Feeds) else nav.selectTab(Route.Frames)
+                nav.push(Route.EmailAddress(it))
+            }
+            // A Telegram chat needs its owner (telegram.md §15.1).
+            Notifications.TARGET_TELEGRAM_CHAT -> t.chatId?.let {
+                if (!ready.server.discovery.telegram) return@let
+                if (t.feedId != null && feedsOn) nav.selectTab(Route.Feeds) else nav.selectTab(Route.Frames)
+                nav.push(Route.TelegramChat(it))
+            }
             Notifications.TARGET_FEED, Notifications.TARGET_FEED_PEOPLE, Notifications.TARGET_FEED_FRAMES, Notifications.TARGET_FEED_BIRTHDAYS -> t.feedId?.let {
                 if (!feedsOn) return@let
                 nav.selectTab(Route.Feeds)
@@ -539,6 +553,7 @@ private fun Screen(
                     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(web.trimEnd('/') + path)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                 },
                 onPhotoSources = if (ready.server.discovery.sourceProviders.isNotEmpty()) ({ nav.push(Route.PhotoSources) }) else null,
+                telegram = if (ready.server.discovery.telegram) ({ TelegramLinkSettings(graph, ready) }) else null,
                 ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
                 onDeleteAccount = { removeItems ->
                     deletingAccount = true
@@ -634,6 +649,8 @@ private fun Screen(
                 nav.pop()
             }
         }
+        is Route.EmailInbox, is Route.EmailAddress, is Route.TelegramChats, is Route.TelegramChat ->
+            ChannelRoute(graph, ready, r, nav)
         is Route.FeedInvite -> {
             val vm: FeedInviteViewModel = viewModel(key = "feed-invite-${r.token}") {
                 FeedInviteViewModel(api, r.token, birthdays = graph.servers.current.value?.discovery?.birthdays == true)
@@ -719,6 +736,14 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
                 PhotoSourcesSection(sst, svm, feed = true,
                     onAdd = { nav.push(Route.AddPhotoSource(SourceTarget.feed(r.feedId, feedName))) }, onGoogle = null)
             }),
+            channels = graph.servers.current.value?.discovery?.takeIf { it.emailInbox || it.telegram }?.let { d ->
+                val scope = app.kinframe.family.ui.channels.ChannelScope.feed(r.feedId, feedName)
+                ({
+                    app.kinframe.family.ui.channels.ChannelsSection(feed = true,
+                        onEmail = if (d.emailInbox) ({ nav.push(Route.EmailInbox(scope)) }) else null,
+                        onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
+                })
+            },
             addFromGoogle = if (graph.servers.current.value?.discovery?.googlePhotosImport == true) ({
                 graph.googleImports.start(SourceTarget.feed(r.feedId, feedName))
             }) else null,
@@ -862,7 +887,16 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     }
                 }
             }
-            (s.frame as? Load.Ready)?.value?.let { f -> SettingsTab(f, ss, ready.server.discovery.weather, fs, plugins = { PluginsSection(ps, pv) }) }
+            (s.frame as? Load.Ready)?.value?.let { f ->
+                val d = ready.server.discovery
+                val scope = app.kinframe.family.ui.channels.ChannelScope.frame(f.id, f.name)
+                val manages = f.can { it.changeSettings }
+                SettingsTab(f, ss, d.weather, fs, plugins = { PluginsSection(ps, pv) }, channels = if (!manages || (!d.emailInbox && !d.telegram)) null else ({
+                    app.kinframe.family.ui.channels.ChannelsSection(feed = false,
+                        onEmail = if (d.emailInbox) ({ nav.push(Route.EmailInbox(scope)) }) else null,
+                        onTelegram = if (d.telegram) ({ nav.push(Route.TelegramChats(scope)) }) else null)
+                }))
+            }
         },
         calendar = if (!ready.server.discovery.calendar) null else ({
             (s.frame as? Load.Ready)?.value?.let { f -> CalendarRoute(graph, api, f, me) }

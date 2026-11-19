@@ -59,6 +59,15 @@ public struct Discovery: Codable, Equatable, Sendable {
     public var googlePhotosImport: Bool = false
     /// Per-platform version policy of the family apps (`app_versions`, README §5.15); nil when none is set.
     public var appVersions: AppVersions?
+    /// Frames and feeds can have inbox addresses (`email_inbox`, docs/spec/email-inbox.md), at `emailInboxDomain`.
+    public var emailInbox: Bool = false
+    public var emailInboxDomain: String?
+    /// The server has a Telegram bot (`telegram`, docs/spec/telegram.md): its username for t.me links, whether it runs
+    /// in privacy mode (a group must make it an admin) and the largest file it can download.
+    public var telegram: Bool = false
+    public var telegramBotUsername: String?
+    public var telegramPrivacyMode: Bool = false
+    public var telegramMaxFileBytes: Int64?
 
     public init(name: String, version: String, api: String, web: String? = nil, auth: Auth = Auth(), limits: Limits = .defaults, devAuth: Bool = false, weather: Bool = false) {
         self.name = name
@@ -79,6 +88,12 @@ public struct Discovery: Codable, Equatable, Sendable {
         case photoSourcesPrivateNetworks = "photo_sources_private_networks"
         case googlePhotosImport = "google_photos_import"
         case appVersions = "app_versions"
+        case emailInbox = "email_inbox"
+        case emailInboxDomain = "email_inbox_domain"
+        case telegram
+        case telegramBotUsername = "telegram_bot_username"
+        case telegramPrivacyMode = "telegram_privacy_mode"
+        case telegramMaxFileBytes = "telegram_max_file_bytes"
     }
 
     public init(from decoder: Decoder) throws {
@@ -99,6 +114,12 @@ public struct Discovery: Codable, Equatable, Sendable {
         photoSourcesPrivateNetworks = (try? c.decodeIfPresent(Bool.self, forKey: .photoSourcesPrivateNetworks)) ?? false
         googlePhotosImport = (try? c.decodeIfPresent(Bool.self, forKey: .googlePhotosImport)) ?? false
         appVersions = (try? c.decodeIfPresent(AppVersions.self, forKey: .appVersions)) ?? nil
+        emailInbox = (try? c.decodeIfPresent(Bool.self, forKey: .emailInbox)) ?? false
+        emailInboxDomain = emailInbox ? ((try? c.decodeIfPresent(String.self, forKey: .emailInboxDomain)) ?? nil) : nil
+        telegram = (try? c.decodeIfPresent(Bool.self, forKey: .telegram)) ?? false
+        telegramBotUsername = telegram ? ((try? c.decodeIfPresent(String.self, forKey: .telegramBotUsername)) ?? nil) : nil
+        telegramPrivacyMode = telegram && ((try? c.decodeIfPresent(Bool.self, forKey: .telegramPrivacyMode)) ?? false)
+        telegramMaxFileBytes = telegram ? ((try? c.decodeIfPresent(Int64.self, forKey: .telegramMaxFileBytes)) ?? nil) : nil
         // The server sends the shop's configuration (an object); we keep only whether there is one.
         if let b = try? c.decode(Bool.self, forKey: .shop) {
             shop = b

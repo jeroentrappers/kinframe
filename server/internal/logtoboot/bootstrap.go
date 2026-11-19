@@ -686,7 +686,9 @@ func (b *Bootstrapper) ensureSignInExperience(ctx context.Context) error {
 }
 
 // tokenClaimsScript is a Logto custom JWT script (runs inside Logto). It adds
-// the user's name and email to access tokens for the kinframe API only.
+// the user's name and email to access tokens for the kinframe API only. Logto
+// sets primaryEmail only after a verification code or from a social provider
+// that verified it, so it is sent as email_verified (docs/spec/email-inbox.md §8.2).
 const tokenClaimsScript = `const getCustomJwtClaims = async ({ token, context, environmentVariables }) => {
   const resource = environmentVariables.KINFRAME_API_RESOURCE;
   const aud = Array.isArray(token.aud) ? token.aud : [token.aud];
@@ -700,6 +702,7 @@ const tokenClaimsScript = `const getCustomJwtClaims = async ({ token, context, e
   }
   if (user.primaryEmail) {
     claims.email = user.primaryEmail;
+    claims.email_verified = true;
   }
   return claims;
 };

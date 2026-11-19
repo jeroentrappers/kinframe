@@ -20,7 +20,7 @@
 	import ReceiptSummary from './ReceiptSummary.svelte';
 	import GoogleImport from '../sources/GoogleImport.svelte';
 	import { discovery } from '$lib/discovery.svelte';
-	import { summaryVia } from '$lib/sender';
+	import { authorCredit, isChannel, summaryVia } from '$lib/sender';
 
 	let { feed }: { feed: Feed } = $props();
 
@@ -237,9 +237,9 @@
 				<header class="p-head">
 					<Avatar name={p.poster.display_name} url={p.poster.avatar_url} size={36} />
 					<div class="who">
-						<strong>{p.poster.display_name}{#if own}<span class="faint you">({t('people.you')})</span>{/if}</strong>
+						<strong>{authorCredit(p.poster.display_name, p.via)}{#if own}<span class="faint you">({t('people.you')})</span>{/if}</strong>
 						<time class="muted small" datetime={p.created_at} title={formatDateTime(p.created_at, i18n.tag)}>
-							{summaryVia(kindSummary(kindCounts(p.items)), p.via)} · {relativeTime(p.created_at, i18n.tag)}
+							{isChannel(p.via) ? kindSummary(kindCounts(p.items)) : summaryVia(kindSummary(kindCounts(p.items)), p.via)} · {relativeTime(p.created_at, i18n.tag)}
 						</time>
 					</div>
 					<button class="btn btn-ghost btn-sm" onclick={() => openDetail(p)}>{t('feedPosts.details')}</button>

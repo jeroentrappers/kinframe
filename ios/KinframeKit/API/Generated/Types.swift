@@ -287,7 +287,7 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `DELETE /v1/feeds/{feedId}/members/{userId}`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/members/{userId}/delete(removeFeedMember)`.
     func removeFeedMember(_ input: Operations.RemoveFeedMember.Input) async throws -> Operations.RemoveFeedMember.Output
-    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    /// Owner or admin. Pending requests from join invites (`via` is `invite`, `email` for join links mailed to senders, or `telegram` for join links the Telegram bot gave).
     ///
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
@@ -642,6 +642,248 @@ public protocol APIProtocol: Sendable {
     /// - Remark: HTTP `GET /v1/oauth/google/callback`.
     /// - Remark: Generated from `#/paths//v1/oauth/google/callback/get(googleOAuthCallback)`.
     func googleOAuthCallback(_ input: Operations.GoogleOAuthCallback.Input) async throws -> Operations.GoogleOAuthCallback.Output
+    /// The frame's inbox addresses (frame managers: owner, admin, `change_settings`; others `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/get(listFrameEmailAddresses)`.
+    func listFrameEmailAddresses(_ input: Operations.ListFrameEmailAddresses.Input) async throws -> Operations.ListFrameEmailAddresses.Output
+    /// A new address that fills this frame (frame managers). The caller becomes its `owner`: mail from senders without
+    /// a matching account is sent by them. `409 limit_reached` beyond `limits.max_email_addresses_per_target`,
+    /// `503 feature_disabled` without discovery `email_inbox`. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)`.
+    func createFrameEmailAddress(_ input: Operations.CreateFrameEmailAddress.Input) async throws -> Operations.CreateFrameEmailAddress.Output
+    /// The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/get(listFeedEmailAddresses)`.
+    func listFeedEmailAddresses(_ input: Operations.ListFeedEmailAddresses.Input) async throws -> Operations.ListFeedEmailAddresses.Output
+    /// A new address that posts to this feed (feed owner and admins). Otherwise as `createFrameEmailAddress`.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)`.
+    func createFeedEmailAddress(_ input: Operations.CreateFeedEmailAddress.Input) async throws -> Operations.CreateFeedEmailAddress.Output
+    /// Managers of the target (frame managers, feed owner/admins). Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/get(getEmailAddress)`.
+    func getEmailAddress(_ input: Operations.GetEmailAddress.Input) async throws -> Operations.GetEmailAddress.Output
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op;
+    /// mail to a paused address is refused with `550 5.2.1`). A new `slug` changes the address (the random part
+    /// stays) and retires the old one at once. `take_over: true` makes the caller the owner.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)`.
+    func updateEmailAddress(_ input: Operations.UpdateEmailAddress.Input) async throws -> Operations.UpdateEmailAddress.Output
+    /// Managers of the target. The address stops working at once and is never issued again; its senders, held mail
+    /// and email join links go with it. Photos already delivered stay.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)`.
+    func deleteEmailAddress(_ input: Operations.DeleteEmailAddress.Input) async throws -> Operations.DeleteEmailAddress.Output
+    /// A new random part (managers of the target): the old address stops working at once and is never issued again.
+    /// Senders, settings and held mail stay. Rate-limited (10/h per address).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/regenerate`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)`.
+    func regenerateEmailAddress(_ input: Operations.RegenerateEmailAddress.Input) async throws -> Operations.RegenerateEmailAddress.Output
+    /// The allowed and blocked senders (managers of the target), by email. Members of the target are allowed
+    /// automatically by their verified account email and are not listed. Pending senders are in
+    /// `listEmailPendingSenders`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/get(listEmailSenders)`.
+    func listEmailSenders(_ input: Operations.ListEmailSenders.Input) async throws -> Operations.ListEmailSenders.Output
+    /// Allow (or with `blocked: true` block) an address (managers of the target). A pending sender with that address
+    /// is approved (and their held mail delivered) or rejected and blocked. `409 duplicate_sender` when it is already
+    /// allowed or blocked (`detail`: its id), `409 limit_reached` beyond `limits.max_email_senders_per_address`.
+    /// Rate-limited (120/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)`.
+    func addEmailSender(_ input: Operations.AddEmailSender.Input) async throws -> Operations.AddEmailSender.Output
+    /// Rename, block (`blocked: true`) or unblock (`blocked: false`) an allowed or blocked sender (managers of the target).
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/patch(updateEmailSender)`.
+    func updateEmailSender(_ input: Operations.UpdateEmailSender.Input) async throws -> Operations.UpdateEmailSender.Output
+    /// Remove an allowed or blocked sender (managers of the target): their next mail is held as from an unknown
+    /// sender again. Their unused email join link is revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)`.
+    func removeEmailSender(_ input: Operations.RemoveEmailSender.Input) async throws -> Operations.RemoveEmailSender.Output
+    /// Senders waiting for approval, with their held mail (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/pending-senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/get(listEmailPendingSenders)`.
+    func listEmailPendingSenders(_ input: Operations.ListEmailPendingSenders.Input) async throws -> Operations.ListEmailPendingSenders.Output
+    /// Allow a pending sender (managers of the target). With `deliver` (default) their authenticated held mail is
+    /// delivered now (unverified held mail stays held; deliver it one by one with `deliverEmailHeldMessage`). The
+    /// sender gets a `delivered` reply when the address sends confirmations. `409 already_decided` when someone else
+    /// decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)`.
+    func approveEmailSender(_ input: Operations.ApproveEmailSender.Input) async throws -> Operations.ApproveEmailSender.Output
+    /// Reject a pending sender (managers of the target): their held mail is deleted, nobody tells them. With `block`
+    /// their later mail is dropped silently (`204` either way). `409 already_decided` when someone else decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)`.
+    func rejectEmailSender(_ input: Operations.RejectEmailSender.Input) async throws -> Operations.RejectEmailSender.Output
+    /// One held mail with its photos and videos as short-lived thumbnail URLs (managers of the target).
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/get(getEmailHeldMessage)`.
+    func getEmailHeldMessage(_ input: Operations.GetEmailHeldMessage.Input) async throws -> Operations.GetEmailHeldMessage.Output
+    /// Delete one held mail without deciding about its sender (managers of the target).
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)`.
+    func deleteEmailHeldMessage(_ input: Operations.DeleteEmailHeldMessage.Input) async throws -> Operations.DeleteEmailHeldMessage.Output
+    /// Deliver this one held mail (managers of the target), also an unverified one (`reason: unverified_sender`):
+    /// sent by the address owner, credited to the claimed name, never answered. The sender is not allowed by it.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/post(deliverEmailHeldMessage)`.
+    func deliverEmailHeldMessage(_ input: Operations.DeliverEmailHeldMessage.Input) async throws -> Operations.DeliverEmailHeldMessage.Output
+    /// Recent mail (last 30 days) to the address and what became of it (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/messages/get(listEmailMessages)`.
+    func listEmailMessages(_ input: Operations.ListEmailMessages.Input) async throws -> Operations.ListEmailMessages.Output
+    /// **Operator integration, not for clients.** A mail provider or forwarding service posts one received message
+    /// (raw MIME, exactly as received) for kinframe to process (docs/spec/email-inbox.md §6.3). Only when the
+    /// operator set `KINFRAME_EMAIL_WEBHOOK_SECRET` (`404 not_found` otherwise; `503 feature_disabled` while the
+    /// inbox is off). Signed with HMAC-SHA256 (`inboundWebhook`); a bad or replayed signature or a timestamp more than
+    /// 5 minutes off is `401 unauthorized`. `413 upload_too_large` above `limits.max_email_message_bytes`. The
+    /// message is queued and processed asynchronously; the answer reports each envelope recipient. Do not retry a
+    /// `2xx` or `4xx`; retry `429` and `5xx` (a retried message is recognised and not delivered twice). Rate-limited
+    /// (600/min).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)`.
+    func receiveInboundEmail(_ input: Operations.ReceiveInboundEmail.Input) async throws -> Operations.ReceiveInboundEmail.Output
+    /// **Operator integration, not for clients.** Which recipients exist and are active, so a provider can refuse
+    /// unknown ones during its own SMTP dialogue. Signed like `receiveInboundEmail`, with the JSON body as the body and
+    /// empty envelope fields.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email:check`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)`.
+    func checkInboundEmailRecipients(_ input: Operations.CheckInboundEmailRecipients.Input) async throws -> Operations.CheckInboundEmailRecipients.Output
+    /// Frame managers (owner, admin, `change_settings`). The Telegram chats connected to this frame: live ones first,
+    /// then those disconnected in the last 30 days. `503 feature_disabled` without discovery `telegram`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-chats/get(listFrameTelegramChats)`.
+    func listFrameTelegramChats(_ input: Operations.ListFrameTelegramChats.Input) async throws -> Operations.ListFrameTelegramChats.Output
+    /// Frame managers. A one-time connect code in a Telegram deep link (docs/spec/telegram.md §5.1): `chat_kind:
+    /// group` gives `https://t.me/<bot>?startgroup=<code>` (pick a group; the bot joins and binds it), `private`
+    /// gives `https://t.me/<bot>?start=<code>` (a private chat with the bot). The caller becomes the chat's owner. The
+    /// code is single use and expires after 30 minutes; a new code for the same frame and kind revokes the caller's
+    /// previous open one. `409 limit_reached` at `limits.max_telegram_chats_per_target` or
+    /// `max_telegram_chats_per_user`, `409 telegram_already_linked` for `link_account` when the caller is linked
+    /// already, `503 feature_disabled` without a bot, `429 rate_limited` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-codes/post(createFrameTelegramCode)`.
+    func createFrameTelegramCode(_ input: Operations.CreateFrameTelegramCode.Input) async throws -> Operations.CreateFrameTelegramCode.Output
+    /// Feed owner and admins. As `listFrameTelegramChats`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-chats/get(listFeedTelegramChats)`.
+    func listFeedTelegramChats(_ input: Operations.ListFeedTelegramChats.Input) async throws -> Operations.ListFeedTelegramChats.Output
+    /// Feed owner and admins. As `createFrameTelegramCode`; each batch from the chat becomes a post.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-codes/post(createFeedTelegramCode)`.
+    func createFeedTelegramCode(_ input: Operations.CreateFeedTelegramCode.Input) async throws -> Operations.CreateFeedTelegramCode.Output
+    /// The caller's own code, to follow it until it is used (or listen to `telegram_code.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/get(getTelegramCode)`.
+    func getTelegramCode(_ input: Operations.GetTelegramCode.Input) async throws -> Operations.GetTelegramCode.Output
+    /// Revokes an open code of the caller (repeating it is a no-op).
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)`.
+    func revokeTelegramCode(_ input: Operations.RevokeTelegramCode.Input) async throws -> Operations.RevokeTelegramCode.Output
+    /// Managers of the chat's target. Unknown chats and chats the caller may not manage are `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/get(getTelegramChat)`.
+    func getTelegramChat(_ input: Operations.GetTelegramChat.Input) async throws -> Operations.GetTelegramChat.Output
+    /// Managers of the target. `paused` pauses (media is ignored, the bot stays silent) or resumes; `take_over: true`
+    /// makes the caller the owner (the sender of outside contributions from now on; an owner who loses their rights is
+    /// replaced by the frame's or feed's owner automatically). `notify_reactions` is the owner's own switch
+    /// (`403 forbidden` for others). `topic_id` must be one of `topics` or null. `409 invalid_transition` on a
+    /// disconnected chat.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/patch(updateTelegramChat)`.
+    func updateTelegramChat(_ input: Operations.UpdateTelegramChat.Input) async throws -> Operations.UpdateTelegramChat.Output
+    /// Managers of the target. The bot says goodbye and leaves the group (`ended_reason: disconnected`). Photos already
+    /// sent stay (unsend them from history). The chat's join invites are revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)`.
+    func disconnectTelegramChat(_ input: Operations.DisconnectTelegramChat.Input) async throws -> Operations.DisconnectTelegramChat.Output
+    /// Managers of the target. The people whose media the bot saw in this chat, most recent first.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}/contributors`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/get(listTelegramContributors)`.
+    func listTelegramContributors(_ input: Operations.ListTelegramContributors.Input) async throws -> Operations.ListTelegramContributors.Output
+    /// Managers of the target. A blocked contributor's media is ignored silently in this chat, and their join invite is revoked.
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}/contributors/{contributorId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/{contributorId}/patch(updateTelegramContributor)`.
+    func updateTelegramContributor(_ input: Operations.UpdateTelegramContributor.Input) async throws -> Operations.UpdateTelegramContributor.Output
+    /// The Telegram account linked to the caller. `404 not_found` when none is linked.
+    ///
+    /// - Remark: HTTP `GET /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/get(getTelegramLink)`.
+    func getTelegramLink(_ input: Operations.GetTelegramLink.Input) async throws -> Operations.GetTelegramLink.Output
+    /// Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's.
+    ///
+    /// - Remark: HTTP `DELETE /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)`.
+    func unlinkTelegram(_ input: Operations.UnlinkTelegram.Input) async throws -> Operations.UnlinkTelegram.Output
+    /// "Link my Telegram": a one-time code in `https://t.me/<bot>?start=<code>`. Opening it and tapping Start in the
+    /// private chat with the bot links that Telegram account to the caller (docs/spec/telegram.md §5.1). Single use, 30
+    /// minutes. `409 telegram_already_linked` when the caller has a link already (unlink first), `503
+    /// feature_disabled`, `429 rate_limited`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/me/telegram/link-code`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/link-code/post(createTelegramLinkCode)`.
+    func createTelegramLinkCode(_ input: Operations.CreateTelegramLinkCode.Input) async throws -> Operations.CreateTelegramLinkCode.Output
+    /// **Called by Telegram only, not for clients** (docs/spec/telegram.md §7). Registered by the server with
+    /// `setWebhook` when it runs in webhook mode. A wrong or missing `X-Telegram-Bot-Api-Secret-Token` is `401`;
+    /// `404 not_found` when no bot is configured or the server long-polls. The update is filtered, stored and
+    /// acknowledged with an empty `200` at once; processing is asynchronous. Body at most 1 MiB.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/telegram/webhook`.
+    /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)`.
+    func telegramWebhook(_ input: Operations.TelegramWebhook.Input) async throws -> Operations.TelegramWebhook.Output
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///
     /// - Remark: HTTP `GET /v1/frames/{frameId}/tv-links`.
@@ -1792,7 +2034,7 @@ extension APIProtocol {
             headers: headers
         ))
     }
-    /// Owner or admin. Pending requests from join invites (`via` is always `invite`).
+    /// Owner or admin. Pending requests from join invites (`via` is `invite`, `email` for join links mailed to senders, or `telegram` for join links the Telegram bot gave).
     ///
     /// - Remark: HTTP `GET /v1/feeds/{feedId}/join-requests`.
     /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/join-requests/get(listFeedJoinRequests)`.
@@ -2550,6 +2792,536 @@ extension APIProtocol {
             query: query,
             headers: headers
         ))
+    }
+    /// The frame's inbox addresses (frame managers: owner, admin, `change_settings`; others `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/get(listFrameEmailAddresses)`.
+    public func listFrameEmailAddresses(
+        path: Operations.ListFrameEmailAddresses.Input.Path,
+        headers: Operations.ListFrameEmailAddresses.Input.Headers = .init()
+    ) async throws -> Operations.ListFrameEmailAddresses.Output {
+        try await listFrameEmailAddresses(Operations.ListFrameEmailAddresses.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// A new address that fills this frame (frame managers). The caller becomes its `owner`: mail from senders without
+    /// a matching account is sent by them. `409 limit_reached` beyond `limits.max_email_addresses_per_target`,
+    /// `503 feature_disabled` without discovery `email_inbox`. Rate-limited (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/email-addresses/post(createFrameEmailAddress)`.
+    public func createFrameEmailAddress(
+        path: Operations.CreateFrameEmailAddress.Input.Path,
+        headers: Operations.CreateFrameEmailAddress.Input.Headers = .init(),
+        body: Operations.CreateFrameEmailAddress.Input.Body
+    ) async throws -> Operations.CreateFrameEmailAddress.Output {
+        try await createFrameEmailAddress(Operations.CreateFrameEmailAddress.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The feed's inbox addresses (feed owner and admins; posters get `403 missing_permission`).
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/get(listFeedEmailAddresses)`.
+    public func listFeedEmailAddresses(
+        path: Operations.ListFeedEmailAddresses.Input.Path,
+        headers: Operations.ListFeedEmailAddresses.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedEmailAddresses.Output {
+        try await listFeedEmailAddresses(Operations.ListFeedEmailAddresses.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// A new address that posts to this feed (feed owner and admins). Otherwise as `createFrameEmailAddress`.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/email-addresses`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/email-addresses/post(createFeedEmailAddress)`.
+    public func createFeedEmailAddress(
+        path: Operations.CreateFeedEmailAddress.Input.Path,
+        headers: Operations.CreateFeedEmailAddress.Input.Headers = .init(),
+        body: Operations.CreateFeedEmailAddress.Input.Body
+    ) async throws -> Operations.CreateFeedEmailAddress.Output {
+        try await createFeedEmailAddress(Operations.CreateFeedEmailAddress.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Managers of the target (frame managers, feed owner/admins). Others get `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/get(getEmailAddress)`.
+    public func getEmailAddress(
+        path: Operations.GetEmailAddress.Input.Path,
+        headers: Operations.GetEmailAddress.Input.Headers = .init()
+    ) async throws -> Operations.GetEmailAddress.Output {
+        try await getEmailAddress(Operations.GetEmailAddress.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the target. Omitted fields are kept. `paused: true|false` pauses or resumes (repeating is a no-op;
+    /// mail to a paused address is refused with `550 5.2.1`). A new `slug` changes the address (the random part
+    /// stays) and retires the old one at once. `take_over: true` makes the caller the owner.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/patch(updateEmailAddress)`.
+    public func updateEmailAddress(
+        path: Operations.UpdateEmailAddress.Input.Path,
+        headers: Operations.UpdateEmailAddress.Input.Headers = .init(),
+        body: Operations.UpdateEmailAddress.Input.Body
+    ) async throws -> Operations.UpdateEmailAddress.Output {
+        try await updateEmailAddress(Operations.UpdateEmailAddress.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Managers of the target. The address stops working at once and is never issued again; its senders, held mail
+    /// and email join links go with it. Photos already delivered stay.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/delete(deleteEmailAddress)`.
+    public func deleteEmailAddress(
+        path: Operations.DeleteEmailAddress.Input.Path,
+        headers: Operations.DeleteEmailAddress.Input.Headers = .init()
+    ) async throws -> Operations.DeleteEmailAddress.Output {
+        try await deleteEmailAddress(Operations.DeleteEmailAddress.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// A new random part (managers of the target): the old address stops working at once and is never issued again.
+    /// Senders, settings and held mail stay. Rate-limited (10/h per address).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/regenerate`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/regenerate/post(regenerateEmailAddress)`.
+    public func regenerateEmailAddress(
+        path: Operations.RegenerateEmailAddress.Input.Path,
+        headers: Operations.RegenerateEmailAddress.Input.Headers = .init()
+    ) async throws -> Operations.RegenerateEmailAddress.Output {
+        try await regenerateEmailAddress(Operations.RegenerateEmailAddress.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// The allowed and blocked senders (managers of the target), by email. Members of the target are allowed
+    /// automatically by their verified account email and are not listed. Pending senders are in
+    /// `listEmailPendingSenders`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/get(listEmailSenders)`.
+    public func listEmailSenders(
+        path: Operations.ListEmailSenders.Input.Path,
+        headers: Operations.ListEmailSenders.Input.Headers = .init()
+    ) async throws -> Operations.ListEmailSenders.Output {
+        try await listEmailSenders(Operations.ListEmailSenders.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Allow (or with `blocked: true` block) an address (managers of the target). A pending sender with that address
+    /// is approved (and their held mail delivered) or rejected and blocked. `409 duplicate_sender` when it is already
+    /// allowed or blocked (`detail`: its id), `409 limit_reached` beyond `limits.max_email_senders_per_address`.
+    /// Rate-limited (120/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/post(addEmailSender)`.
+    public func addEmailSender(
+        path: Operations.AddEmailSender.Input.Path,
+        headers: Operations.AddEmailSender.Input.Headers = .init(),
+        body: Operations.AddEmailSender.Input.Body
+    ) async throws -> Operations.AddEmailSender.Output {
+        try await addEmailSender(Operations.AddEmailSender.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Rename, block (`blocked: true`) or unblock (`blocked: false`) an allowed or blocked sender (managers of the target).
+    ///
+    /// - Remark: HTTP `PATCH /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/patch(updateEmailSender)`.
+    public func updateEmailSender(
+        path: Operations.UpdateEmailSender.Input.Path,
+        headers: Operations.UpdateEmailSender.Input.Headers = .init(),
+        body: Operations.UpdateEmailSender.Input.Body
+    ) async throws -> Operations.UpdateEmailSender.Output {
+        try await updateEmailSender(Operations.UpdateEmailSender.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Remove an allowed or blocked sender (managers of the target): their next mail is held as from an unknown
+    /// sender again. Their unused email join link is revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/senders/{senderId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/senders/{senderId}/delete(removeEmailSender)`.
+    public func removeEmailSender(
+        path: Operations.RemoveEmailSender.Input.Path,
+        headers: Operations.RemoveEmailSender.Input.Headers = .init()
+    ) async throws -> Operations.RemoveEmailSender.Output {
+        try await removeEmailSender(Operations.RemoveEmailSender.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Senders waiting for approval, with their held mail (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/pending-senders`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/get(listEmailPendingSenders)`.
+    public func listEmailPendingSenders(
+        path: Operations.ListEmailPendingSenders.Input.Path,
+        headers: Operations.ListEmailPendingSenders.Input.Headers = .init()
+    ) async throws -> Operations.ListEmailPendingSenders.Output {
+        try await listEmailPendingSenders(Operations.ListEmailPendingSenders.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Allow a pending sender (managers of the target). With `deliver` (default) their authenticated held mail is
+    /// delivered now (unverified held mail stays held; deliver it one by one with `deliverEmailHeldMessage`). The
+    /// sender gets a `delivered` reply when the address sends confirmations. `409 already_decided` when someone else
+    /// decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/approve`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/approve/post(approveEmailSender)`.
+    public func approveEmailSender(
+        path: Operations.ApproveEmailSender.Input.Path,
+        headers: Operations.ApproveEmailSender.Input.Headers = .init(),
+        body: Operations.ApproveEmailSender.Input.Body? = nil
+    ) async throws -> Operations.ApproveEmailSender.Output {
+        try await approveEmailSender(Operations.ApproveEmailSender.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Reject a pending sender (managers of the target): their held mail is deleted, nobody tells them. With `block`
+    /// their later mail is dropped silently (`204` either way). `409 already_decided` when someone else decided first.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/pending-senders/{senderId}/reject`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/pending-senders/{senderId}/reject/post(rejectEmailSender)`.
+    public func rejectEmailSender(
+        path: Operations.RejectEmailSender.Input.Path,
+        headers: Operations.RejectEmailSender.Input.Headers = .init(),
+        body: Operations.RejectEmailSender.Input.Body? = nil
+    ) async throws -> Operations.RejectEmailSender.Output {
+        try await rejectEmailSender(Operations.RejectEmailSender.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// One held mail with its photos and videos as short-lived thumbnail URLs (managers of the target).
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/get(getEmailHeldMessage)`.
+    public func getEmailHeldMessage(
+        path: Operations.GetEmailHeldMessage.Input.Path,
+        headers: Operations.GetEmailHeldMessage.Input.Headers = .init()
+    ) async throws -> Operations.GetEmailHeldMessage.Output {
+        try await getEmailHeldMessage(Operations.GetEmailHeldMessage.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Delete one held mail without deciding about its sender (managers of the target).
+    ///
+    /// - Remark: HTTP `DELETE /v1/email-addresses/{addressId}/held-messages/{messageId}`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/delete(deleteEmailHeldMessage)`.
+    public func deleteEmailHeldMessage(
+        path: Operations.DeleteEmailHeldMessage.Input.Path,
+        headers: Operations.DeleteEmailHeldMessage.Input.Headers = .init()
+    ) async throws -> Operations.DeleteEmailHeldMessage.Output {
+        try await deleteEmailHeldMessage(Operations.DeleteEmailHeldMessage.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Deliver this one held mail (managers of the target), also an unverified one (`reason: unverified_sender`):
+    /// sent by the address owner, credited to the claimed name, never answered. The sender is not allowed by it.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/email-addresses/{addressId}/held-messages/{messageId}/deliver`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/held-messages/{messageId}/deliver/post(deliverEmailHeldMessage)`.
+    public func deliverEmailHeldMessage(
+        path: Operations.DeliverEmailHeldMessage.Input.Path,
+        headers: Operations.DeliverEmailHeldMessage.Input.Headers = .init()
+    ) async throws -> Operations.DeliverEmailHeldMessage.Output {
+        try await deliverEmailHeldMessage(Operations.DeliverEmailHeldMessage.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Recent mail (last 30 days) to the address and what became of it (managers of the target), newest first.
+    ///
+    /// - Remark: HTTP `GET /v1/email-addresses/{addressId}/messages`.
+    /// - Remark: Generated from `#/paths//v1/email-addresses/{addressId}/messages/get(listEmailMessages)`.
+    public func listEmailMessages(
+        path: Operations.ListEmailMessages.Input.Path,
+        query: Operations.ListEmailMessages.Input.Query = .init(),
+        headers: Operations.ListEmailMessages.Input.Headers = .init()
+    ) async throws -> Operations.ListEmailMessages.Output {
+        try await listEmailMessages(Operations.ListEmailMessages.Input(
+            path: path,
+            query: query,
+            headers: headers
+        ))
+    }
+    /// **Operator integration, not for clients.** A mail provider or forwarding service posts one received message
+    /// (raw MIME, exactly as received) for kinframe to process (docs/spec/email-inbox.md §6.3). Only when the
+    /// operator set `KINFRAME_EMAIL_WEBHOOK_SECRET` (`404 not_found` otherwise; `503 feature_disabled` while the
+    /// inbox is off). Signed with HMAC-SHA256 (`inboundWebhook`); a bad or replayed signature or a timestamp more than
+    /// 5 minutes off is `401 unauthorized`. `413 upload_too_large` above `limits.max_email_message_bytes`. The
+    /// message is queued and processed asynchronously; the answer reports each envelope recipient. Do not retry a
+    /// `2xx` or `4xx`; retry `429` and `5xx` (a retried message is recognised and not delivered twice). Rate-limited
+    /// (600/min).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email/post(receiveInboundEmail)`.
+    public func receiveInboundEmail(
+        headers: Operations.ReceiveInboundEmail.Input.Headers,
+        body: Operations.ReceiveInboundEmail.Input.Body
+    ) async throws -> Operations.ReceiveInboundEmail.Output {
+        try await receiveInboundEmail(Operations.ReceiveInboundEmail.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// **Operator integration, not for clients.** Which recipients exist and are active, so a provider can refuse
+    /// unknown ones during its own SMTP dialogue. Signed like `receiveInboundEmail`, with the JSON body as the body and
+    /// empty envelope fields.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/inbound/email:check`.
+    /// - Remark: Generated from `#/paths//v1/inbound/email:check/post(checkInboundEmailRecipients)`.
+    public func checkInboundEmailRecipients(
+        headers: Operations.CheckInboundEmailRecipients.Input.Headers,
+        body: Operations.CheckInboundEmailRecipients.Input.Body
+    ) async throws -> Operations.CheckInboundEmailRecipients.Output {
+        try await checkInboundEmailRecipients(Operations.CheckInboundEmailRecipients.Input(
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Frame managers (owner, admin, `change_settings`). The Telegram chats connected to this frame: live ones first,
+    /// then those disconnected in the last 30 days. `503 feature_disabled` without discovery `telegram`.
+    ///
+    ///
+    /// - Remark: HTTP `GET /v1/frames/{frameId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-chats/get(listFrameTelegramChats)`.
+    public func listFrameTelegramChats(
+        path: Operations.ListFrameTelegramChats.Input.Path,
+        headers: Operations.ListFrameTelegramChats.Input.Headers = .init()
+    ) async throws -> Operations.ListFrameTelegramChats.Output {
+        try await listFrameTelegramChats(Operations.ListFrameTelegramChats.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Frame managers. A one-time connect code in a Telegram deep link (docs/spec/telegram.md §5.1): `chat_kind:
+    /// group` gives `https://t.me/<bot>?startgroup=<code>` (pick a group; the bot joins and binds it), `private`
+    /// gives `https://t.me/<bot>?start=<code>` (a private chat with the bot). The caller becomes the chat's owner. The
+    /// code is single use and expires after 30 minutes; a new code for the same frame and kind revokes the caller's
+    /// previous open one. `409 limit_reached` at `limits.max_telegram_chats_per_target` or
+    /// `max_telegram_chats_per_user`, `409 telegram_already_linked` for `link_account` when the caller is linked
+    /// already, `503 feature_disabled` without a bot, `429 rate_limited` (30/h per user).
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/frames/{frameId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/frames/{frameId}/telegram-codes/post(createFrameTelegramCode)`.
+    public func createFrameTelegramCode(
+        path: Operations.CreateFrameTelegramCode.Input.Path,
+        headers: Operations.CreateFrameTelegramCode.Input.Headers = .init(),
+        body: Operations.CreateFrameTelegramCode.Input.Body
+    ) async throws -> Operations.CreateFrameTelegramCode.Output {
+        try await createFrameTelegramCode(Operations.CreateFrameTelegramCode.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Feed owner and admins. As `listFrameTelegramChats`.
+    ///
+    /// - Remark: HTTP `GET /v1/feeds/{feedId}/telegram-chats`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-chats/get(listFeedTelegramChats)`.
+    public func listFeedTelegramChats(
+        path: Operations.ListFeedTelegramChats.Input.Path,
+        headers: Operations.ListFeedTelegramChats.Input.Headers = .init()
+    ) async throws -> Operations.ListFeedTelegramChats.Output {
+        try await listFeedTelegramChats(Operations.ListFeedTelegramChats.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Feed owner and admins. As `createFrameTelegramCode`; each batch from the chat becomes a post.
+    ///
+    /// - Remark: HTTP `POST /v1/feeds/{feedId}/telegram-codes`.
+    /// - Remark: Generated from `#/paths//v1/feeds/{feedId}/telegram-codes/post(createFeedTelegramCode)`.
+    public func createFeedTelegramCode(
+        path: Operations.CreateFeedTelegramCode.Input.Path,
+        headers: Operations.CreateFeedTelegramCode.Input.Headers = .init(),
+        body: Operations.CreateFeedTelegramCode.Input.Body
+    ) async throws -> Operations.CreateFeedTelegramCode.Output {
+        try await createFeedTelegramCode(Operations.CreateFeedTelegramCode.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The caller's own code, to follow it until it is used (or listen to `telegram_code.updated`).
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/get(getTelegramCode)`.
+    public func getTelegramCode(
+        path: Operations.GetTelegramCode.Input.Path,
+        headers: Operations.GetTelegramCode.Input.Headers = .init()
+    ) async throws -> Operations.GetTelegramCode.Output {
+        try await getTelegramCode(Operations.GetTelegramCode.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Revokes an open code of the caller (repeating it is a no-op).
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-codes/{codeId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-codes/{codeId}/delete(revokeTelegramCode)`.
+    public func revokeTelegramCode(
+        path: Operations.RevokeTelegramCode.Input.Path,
+        headers: Operations.RevokeTelegramCode.Input.Headers = .init()
+    ) async throws -> Operations.RevokeTelegramCode.Output {
+        try await revokeTelegramCode(Operations.RevokeTelegramCode.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the chat's target. Unknown chats and chats the caller may not manage are `404 not_found`.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/get(getTelegramChat)`.
+    public func getTelegramChat(
+        path: Operations.GetTelegramChat.Input.Path,
+        headers: Operations.GetTelegramChat.Input.Headers = .init()
+    ) async throws -> Operations.GetTelegramChat.Output {
+        try await getTelegramChat(Operations.GetTelegramChat.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the target. `paused` pauses (media is ignored, the bot stays silent) or resumes; `take_over: true`
+    /// makes the caller the owner (the sender of outside contributions from now on; an owner who loses their rights is
+    /// replaced by the frame's or feed's owner automatically). `notify_reactions` is the owner's own switch
+    /// (`403 forbidden` for others). `topic_id` must be one of `topics` or null. `409 invalid_transition` on a
+    /// disconnected chat.
+    ///
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/patch(updateTelegramChat)`.
+    public func updateTelegramChat(
+        path: Operations.UpdateTelegramChat.Input.Path,
+        headers: Operations.UpdateTelegramChat.Input.Headers = .init(),
+        body: Operations.UpdateTelegramChat.Input.Body
+    ) async throws -> Operations.UpdateTelegramChat.Output {
+        try await updateTelegramChat(Operations.UpdateTelegramChat.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// Managers of the target. The bot says goodbye and leaves the group (`ended_reason: disconnected`). Photos already
+    /// sent stay (unsend them from history). The chat's join invites are revoked.
+    ///
+    ///
+    /// - Remark: HTTP `DELETE /v1/telegram-chats/{chatId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/delete(disconnectTelegramChat)`.
+    public func disconnectTelegramChat(
+        path: Operations.DisconnectTelegramChat.Input.Path,
+        headers: Operations.DisconnectTelegramChat.Input.Headers = .init()
+    ) async throws -> Operations.DisconnectTelegramChat.Output {
+        try await disconnectTelegramChat(Operations.DisconnectTelegramChat.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the target. The people whose media the bot saw in this chat, most recent first.
+    ///
+    /// - Remark: HTTP `GET /v1/telegram-chats/{chatId}/contributors`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/get(listTelegramContributors)`.
+    public func listTelegramContributors(
+        path: Operations.ListTelegramContributors.Input.Path,
+        headers: Operations.ListTelegramContributors.Input.Headers = .init()
+    ) async throws -> Operations.ListTelegramContributors.Output {
+        try await listTelegramContributors(Operations.ListTelegramContributors.Input(
+            path: path,
+            headers: headers
+        ))
+    }
+    /// Managers of the target. A blocked contributor's media is ignored silently in this chat, and their join invite is revoked.
+    ///
+    /// - Remark: HTTP `PATCH /v1/telegram-chats/{chatId}/contributors/{contributorId}`.
+    /// - Remark: Generated from `#/paths//v1/telegram-chats/{chatId}/contributors/{contributorId}/patch(updateTelegramContributor)`.
+    public func updateTelegramContributor(
+        path: Operations.UpdateTelegramContributor.Input.Path,
+        headers: Operations.UpdateTelegramContributor.Input.Headers = .init(),
+        body: Operations.UpdateTelegramContributor.Input.Body
+    ) async throws -> Operations.UpdateTelegramContributor.Output {
+        try await updateTelegramContributor(Operations.UpdateTelegramContributor.Input(
+            path: path,
+            headers: headers,
+            body: body
+        ))
+    }
+    /// The Telegram account linked to the caller. `404 not_found` when none is linked.
+    ///
+    /// - Remark: HTTP `GET /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/get(getTelegramLink)`.
+    public func getTelegramLink(headers: Operations.GetTelegramLink.Input.Headers = .init()) async throws -> Operations.GetTelegramLink.Output {
+        try await getTelegramLink(Operations.GetTelegramLink.Input(headers: headers))
+    }
+    /// Unlinks the caller's Telegram account. Later media from it counts as an outside contributor's.
+    ///
+    /// - Remark: HTTP `DELETE /v1/me/telegram`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/delete(unlinkTelegram)`.
+    public func unlinkTelegram(headers: Operations.UnlinkTelegram.Input.Headers = .init()) async throws -> Operations.UnlinkTelegram.Output {
+        try await unlinkTelegram(Operations.UnlinkTelegram.Input(headers: headers))
+    }
+    /// "Link my Telegram": a one-time code in `https://t.me/<bot>?start=<code>`. Opening it and tapping Start in the
+    /// private chat with the bot links that Telegram account to the caller (docs/spec/telegram.md §5.1). Single use, 30
+    /// minutes. `409 telegram_already_linked` when the caller has a link already (unlink first), `503
+    /// feature_disabled`, `429 rate_limited`.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/me/telegram/link-code`.
+    /// - Remark: Generated from `#/paths//v1/me/telegram/link-code/post(createTelegramLinkCode)`.
+    public func createTelegramLinkCode(headers: Operations.CreateTelegramLinkCode.Input.Headers = .init()) async throws -> Operations.CreateTelegramLinkCode.Output {
+        try await createTelegramLinkCode(Operations.CreateTelegramLinkCode.Input(headers: headers))
+    }
+    /// **Called by Telegram only, not for clients** (docs/spec/telegram.md §7). Registered by the server with
+    /// `setWebhook` when it runs in webhook mode. A wrong or missing `X-Telegram-Bot-Api-Secret-Token` is `401`;
+    /// `404 not_found` when no bot is configured or the server long-polls. The update is filtered, stored and
+    /// acknowledged with an empty `200` at once; processing is asynchronous. Body at most 1 MiB.
+    ///
+    ///
+    /// - Remark: HTTP `POST /v1/telegram/webhook`.
+    /// - Remark: Generated from `#/paths//v1/telegram/webhook/post(telegramWebhook)`.
+    public func telegramWebhook(body: Operations.TelegramWebhook.Input.Body) async throws -> Operations.TelegramWebhook.Output {
+        try await telegramWebhook(Operations.TelegramWebhook.Input(body: body))
     }
     /// Active (unexpired, unrevoked) TV links. Owner/admin see all; others see the links they created.
     ///

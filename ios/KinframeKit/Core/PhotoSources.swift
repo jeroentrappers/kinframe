@@ -91,15 +91,25 @@ public enum PhotoService: String, CaseIterable, Sendable {
     case immich
     case icloud
     case googlePhotos = "google_photos"
+    /// Mailed to an inbox address (docs/spec/email-inbox.md §9).
+    case email
+    /// Posted in a connected Telegram chat (docs/spec/telegram.md §8).
+    case telegram
 
-    /// The name to show; not translated (`ItemVia.label` is the same).
+    /// The name to show; not translated (`ItemVia.label` is the same for the photo services).
     public var label: String {
         switch self {
         case .immich: "Immich"
         case .icloud: "iCloud"
         case .googlePhotos: "Google Photos"
+        case .email: "email"
+        case .telegram: "Telegram"
         }
     }
+
+    /// Email and Telegram: `ItemVia.label` is the person who mailed or posted it, shown **instead of** the sender
+    /// (who may be the address's or chat's owner sending on their behalf): "Jan via email".
+    public var labelIsPerson: Bool { self == .email || self == .telegram }
 }
 
 public enum GoogleImportState: String, CaseIterable, Sendable {
@@ -514,14 +524,17 @@ public struct SourceLine: Equatable, Sendable {
     public var key: String
     public var args: [String: String]
     public var tone: Tone
+    /// Set for plural texts: `text` looks up `key.one` / `key.other` with `{count}`.
+    public var count: Int?
 
-    public init(_ key: String, _ args: [String: String] = [:], tone: Tone = .muted) {
+    public init(_ key: String, _ args: [String: String] = [:], tone: Tone = .muted, count: Int? = nil) {
         self.key = key
         self.args = args
         self.tone = tone
+        self.count = count
     }
 
-    public var text: String { L(key, args) }
+    public var text: String { count.map { Lp(key, count: $0, args) } ?? L(key, args) }
 }
 
 /// What a person can do about an error (the fix shown as a button, spec §5.1 "Amber, with the fix as a button").
@@ -720,20 +733,52 @@ public enum SourceErrors {
 // MARK: Credit
 
 /// "Anna via Immich" (album, direct), "Anna · Peeters kids via Immich" (feed), "12 photos via Immich" (history).
-/// The service name only, never the outside album's name or host (spec §9.5).
+/// The service name only, never the outside album's name or host (spec §9.5). Email and Telegram name the person
+/// instead of the sender: "Jan via email", "Jan · Peeters kids via Telegram" (docs/spec/email-inbox.md §9.2,
+/// docs/spec/telegram.md §2).
 public enum Credit {
-    /// `template` is "{name} via {service}" in the app's language (`ios.ps.via`).
-    public static func sender(_ name: String, via: ItemVia?, feed: String? = nil, template: String = L("ios.ps.via")) -> String {
+    /// `template` is "{name} via {service}" in the app's language (`ios.ps.via`); `email` and `telegram` are
+    /// "{name} via email" / "{name} via Telegram" (`ios.via.email`, `ios.via.telegram`).
+    public static func sender(_ name: String, via: ItemVia?, feed: String? = nil, template: String = L("ios.ps.via"),
+                              email: String = L("ios.via.email"), telegram: String = L("ios.via.telegram")) -> String {
+        if let via, let person = personTemplate(via, email: email, telegram: telegram) {
+            let label = via.label.trimmingCharacters(in: .whitespacesAndNewlines)
+            var who = label.isEmpty ? name : label
+            if let feed { who += " · \(feed)" }
+            return person.replacingOccurrences(of: "{name}", with: who)
+        }
         let who = feed.map { "\(name) · \($0)" } ?? name
         guard let via else { return who }
         let t = template.contains("{name}") ? template : "{name} via {service}"
         return t.replacingOccurrences(of: "{name}", with: who).replacingOccurrences(of: "{service}", with: via.displayLabel)
     }
 
-    /// An item's sender with its credit: "Anna via Immich" (just "Anna" without `via`).
-    public static func item(_ item: Item, template: String = L("ios.ps.via")) -> String? {
-        guard let name = item.senderName else { return nil }
-        return sender(name, via: item.via, template: template)
+    /// A send in the history: "12 photos via Immich", and for mail or Telegram whom it came from: "12 photos via email
+    /// from Jan" (`ios.via.emailFrom`, `ios.via.telegramFrom`; the owner sees sends made on Jan's behalf this way).
+    public static func summary(_ summary: String, via: ItemVia?, template: String = L("ios.ps.via"),
+                               emailFrom: String = L("ios.via.emailFrom"), telegramFrom: String = L("ios.via.telegramFrom")) -> String {
+        guard let via else { return summary }
+        guard let service = via.knownService, service.labelIsPerson else { return sender(summary, via: via, template: template) }
+        let label = via.label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let raw = service == .email ? emailFrom : telegramFrom
+        let t = raw.contains("{summary}") ? raw : (service == .email ? "{summary} via email from {name}" : "{summary} via Telegram from {name}")
+        return t.replacingOccurrences(of: "{summary}", with: summary).replacingOccurrences(of: "{name}", with: label.isEmpty ? "?" : label)
+    }
+
+    /// An item's sender with its credit: "Anna via Immich", "Jan via email" (just "Anna" without `via`).
+    public static func item(_ item: Item, template: String = L("ios.ps.via"), email: String = L("ios.via.email"),
+                            telegram: String = L("ios.via.telegram")) -> String? {
+        let personLabel = item.via.flatMap { $0.knownService?.labelIsPerson == true ? $0.label : nil }
+        guard let name = item.senderName ?? personLabel else { return nil }
+        return sender(name, via: item.via, template: template, email: email, telegram: telegram)
+    }
+
+    private static func personTemplate(_ via: ItemVia, email: String, telegram: String) -> String? {
+        switch via.knownService {
+        case .email: email.contains("{name}") ? email : "{name} via email"
+        case .telegram: telegram.contains("{name}") ? telegram : "{name} via Telegram"
+        default: nil
+        }
     }
 }
 

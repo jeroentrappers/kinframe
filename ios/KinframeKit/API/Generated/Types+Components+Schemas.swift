@@ -122,6 +122,8 @@ extension Components {
             case duplicateBirthday = "duplicate_birthday"
             case duplicateSource = "duplicate_source"
             case sourceTestFailed = "source_test_failed"
+            case duplicateSender = "duplicate_sender"
+            case telegramAlreadyLinked = "telegram_already_linked"
             case serverError = "server_error"
         }
         /// Version policy for one family app platform (README §5.15).
@@ -301,6 +303,36 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Discovery/google_photos_import`.
             public var googlePhotosImport: Swift.Bool?
+            /// True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
+            /// (docs/spec/email-inbox.md). Clients hide "Email photos to this frame" otherwise.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/email_inbox`.
+            public var emailInbox: Swift.Bool?
+            /// The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/email_inbox_domain`.
+            public var emailInboxDomain: Swift.String?
+            /// True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
+            /// accounts can link Telegram (docs/spec/telegram.md). Clients hide every Telegram section otherwise.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/telegram`.
+            public var telegram: Swift.Bool?
+            /// The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/telegram_bot_username`.
+            public var telegramBotUsername: Swift.String?
+            /// True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
+            /// so the connect sheet says so up front (docs/spec/telegram.md §6).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/telegram_privacy_mode`.
+            public var telegramPrivacyMode: Swift.Bool?
+            /// The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Discovery/telegram_max_file_bytes`.
+            public var telegramMaxFileBytes: Swift.Int?
             /// VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             /// subscriptions (`PushManager.subscribe({applicationServerKey})`). Null when the server has push disabled.
             ///
@@ -328,6 +360,12 @@ extension Components {
             ///   - photoSourceProviders: The providers this server allows (`icloud_link` can be turned off on its own). Empty without `photo_sources`.
             ///   - photoSourcesPrivateNetworks: True when sources may reach private network addresses (a home-network Immich such as
             ///   - googlePhotosImport: True when the operator configured a Google OAuth client, so clients offer "Add from Google Photos".
+            ///   - emailInbox: True when frames and feeds can have inbox addresses that turn mailed photos into sends and posts
+            ///   - emailInboxDomain: The mail domain of inbox addresses (`<slug>-<random>@<domain>`); null without `email_inbox`.
+            ///   - telegram: True when the operator configured a Telegram bot, so frames and feeds can connect Telegram chats and
+            ///   - telegramBotUsername: The bot's username without "@", for `https://t.me/<username>` links; null without `telegram`.
+            ///   - telegramPrivacyMode: True when the bot runs in Telegram's privacy mode: a group must make the bot an admin before it sees photos,
+            ///   - telegramMaxFileBytes: The largest file the bot can download (20 MB on Telegram's cloud Bot API, up to 2000 MB with a local Bot API server); null without `telegram`.
             ///   - webpushPublicKey: VAPID application server public key (uncompressed P-256 point, base64url) for browser push
             ///   - shop:
             public init(
@@ -347,6 +385,12 @@ extension Components {
                 photoSourceProviders: [Components.Schemas.PhotoSourceProvider]? = nil,
                 photoSourcesPrivateNetworks: Swift.Bool? = nil,
                 googlePhotosImport: Swift.Bool? = nil,
+                emailInbox: Swift.Bool? = nil,
+                emailInboxDomain: Swift.String? = nil,
+                telegram: Swift.Bool? = nil,
+                telegramBotUsername: Swift.String? = nil,
+                telegramPrivacyMode: Swift.Bool? = nil,
+                telegramMaxFileBytes: Swift.Int? = nil,
                 webpushPublicKey: Swift.String? = nil,
                 shop: Components.Schemas.Shop? = nil
             ) {
@@ -366,6 +410,12 @@ extension Components {
                 self.photoSourceProviders = photoSourceProviders
                 self.photoSourcesPrivateNetworks = photoSourcesPrivateNetworks
                 self.googlePhotosImport = googlePhotosImport
+                self.emailInbox = emailInbox
+                self.emailInboxDomain = emailInboxDomain
+                self.telegram = telegram
+                self.telegramBotUsername = telegramBotUsername
+                self.telegramPrivacyMode = telegramPrivacyMode
+                self.telegramMaxFileBytes = telegramMaxFileBytes
                 self.webpushPublicKey = webpushPublicKey
                 self.shop = shop
             }
@@ -386,6 +436,12 @@ extension Components {
                 case photoSourceProviders = "photo_source_providers"
                 case photoSourcesPrivateNetworks = "photo_sources_private_networks"
                 case googlePhotosImport = "google_photos_import"
+                case emailInbox = "email_inbox"
+                case emailInboxDomain = "email_inbox_domain"
+                case telegram
+                case telegramBotUsername = "telegram_bot_username"
+                case telegramPrivacyMode = "telegram_privacy_mode"
+                case telegramMaxFileBytes = "telegram_max_file_bytes"
                 case webpushPublicKey = "webpush_public_key"
                 case shop
             }
@@ -1298,6 +1354,38 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Limits/max_google_import_items`.
             public var maxGoogleImportItems: Swift.Int?
+            /// Inbox addresses per frame or feed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_email_addresses_per_target`.
+            public var maxEmailAddressesPerTarget: Swift.Int?
+            /// Allowed and blocked senders per inbox address.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_email_senders_per_address`.
+            public var maxEmailSendersPerAddress: Swift.Int?
+            /// One mail as received (SMTP SIZE, webhook body).
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_email_message_bytes`.
+            public var maxEmailMessageBytes: Swift.Int?
+            /// Mails processed per inbox address per day; more are dropped.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_email_messages_per_address_day`.
+            public var maxEmailMessagesPerAddressDay: Swift.Int?
+            /// Held mails per inbox address (10 per pending sender); the oldest go first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_email_held_messages`.
+            public var maxEmailHeldMessages: Swift.Int?
+            /// Connected Telegram chats per frame or feed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_telegram_chats_per_target`.
+            public var maxTelegramChatsPerTarget: Swift.Int?
+            /// Connected Telegram chats one account owns.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_telegram_chats_per_user`.
+            public var maxTelegramChatsPerUser: Swift.Int?
+            /// Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat.
+            ///
+            /// - Remark: Generated from `#/components/schemas/Limits/max_telegram_items_per_chat_hour`.
+            public var maxTelegramItemsPerChatHour: Swift.Int?
             /// Creates a new `Limits`.
             ///
             /// - Parameters:
@@ -1314,6 +1402,14 @@ extension Components {
             ///   - maxPhotoSourceItems: Live imported items per photo source; newer upstream items beyond it are skipped.
             ///   - maxPhotoSourceRunBytes: Bytes one sync run downloads; the rest follows in the next runs.
             ///   - maxGoogleImportItems: Items per Google Photos import (the picker's own maximum is 2000).
+            ///   - maxEmailAddressesPerTarget: Inbox addresses per frame or feed.
+            ///   - maxEmailSendersPerAddress: Allowed and blocked senders per inbox address.
+            ///   - maxEmailMessageBytes: One mail as received (SMTP SIZE, webhook body).
+            ///   - maxEmailMessagesPerAddressDay: Mails processed per inbox address per day; more are dropped.
+            ///   - maxEmailHeldMessages: Held mails per inbox address (10 per pending sender); the oldest go first.
+            ///   - maxTelegramChatsPerTarget: Connected Telegram chats per frame or feed.
+            ///   - maxTelegramChatsPerUser: Connected Telegram chats one account owns.
+            ///   - maxTelegramItemsPerChatHour: Photos and videos accepted per Telegram chat per hour; more are skipped with one reply in the chat.
             public init(
                 maxItemsPerSend: Swift.Int,
                 maxVideoSeconds: Swift.Int,
@@ -1327,7 +1423,15 @@ extension Components {
                 maxPhotoSourcesPerUser: Swift.Int? = nil,
                 maxPhotoSourceItems: Swift.Int? = nil,
                 maxPhotoSourceRunBytes: Swift.Int? = nil,
-                maxGoogleImportItems: Swift.Int? = nil
+                maxGoogleImportItems: Swift.Int? = nil,
+                maxEmailAddressesPerTarget: Swift.Int? = nil,
+                maxEmailSendersPerAddress: Swift.Int? = nil,
+                maxEmailMessageBytes: Swift.Int? = nil,
+                maxEmailMessagesPerAddressDay: Swift.Int? = nil,
+                maxEmailHeldMessages: Swift.Int? = nil,
+                maxTelegramChatsPerTarget: Swift.Int? = nil,
+                maxTelegramChatsPerUser: Swift.Int? = nil,
+                maxTelegramItemsPerChatHour: Swift.Int? = nil
             ) {
                 self.maxItemsPerSend = maxItemsPerSend
                 self.maxVideoSeconds = maxVideoSeconds
@@ -1342,6 +1446,14 @@ extension Components {
                 self.maxPhotoSourceItems = maxPhotoSourceItems
                 self.maxPhotoSourceRunBytes = maxPhotoSourceRunBytes
                 self.maxGoogleImportItems = maxGoogleImportItems
+                self.maxEmailAddressesPerTarget = maxEmailAddressesPerTarget
+                self.maxEmailSendersPerAddress = maxEmailSendersPerAddress
+                self.maxEmailMessageBytes = maxEmailMessageBytes
+                self.maxEmailMessagesPerAddressDay = maxEmailMessagesPerAddressDay
+                self.maxEmailHeldMessages = maxEmailHeldMessages
+                self.maxTelegramChatsPerTarget = maxTelegramChatsPerTarget
+                self.maxTelegramChatsPerUser = maxTelegramChatsPerUser
+                self.maxTelegramItemsPerChatHour = maxTelegramItemsPerChatHour
             }
             public enum CodingKeys: String, CodingKey {
                 case maxItemsPerSend = "max_items_per_send"
@@ -1357,6 +1469,14 @@ extension Components {
                 case maxPhotoSourceItems = "max_photo_source_items"
                 case maxPhotoSourceRunBytes = "max_photo_source_run_bytes"
                 case maxGoogleImportItems = "max_google_import_items"
+                case maxEmailAddressesPerTarget = "max_email_addresses_per_target"
+                case maxEmailSendersPerAddress = "max_email_senders_per_address"
+                case maxEmailMessageBytes = "max_email_message_bytes"
+                case maxEmailMessagesPerAddressDay = "max_email_messages_per_address_day"
+                case maxEmailHeldMessages = "max_email_held_messages"
+                case maxTelegramChatsPerTarget = "max_telegram_chats_per_target"
+                case maxTelegramChatsPerUser = "max_telegram_chats_per_user"
+                case maxTelegramItemsPerChatHour = "max_telegram_items_per_chat_hour"
             }
         }
         /// A geocoding result (Open-Meteo geocoding API).
@@ -1905,7 +2025,8 @@ extension Components {
             /// quietly (no "N new" card, no wake). Until a frame's latest heartbeat lists it, the server withholds
             /// backfilled feed placements from its change feed and emits them once it does. `birthdays`: the frame shows
             /// the `birthdays` change (informational only: nothing is withheld; apps use it for
-            /// `Subscription.frame.birthdays_supported`).
+            /// `Subscription.frame.birthdays_supported`). `play`: informational, the frame app is the Google Play build
+            /// (docs/play-frame.md): it updates through Google Play rather than from `GET /device/update`, and has no root.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Heartbeat/features`.
@@ -2268,17 +2389,32 @@ extension Components {
             }
             /// - Remark: Generated from `#/components/schemas/JoinRequest/user`.
             public var user: Components.Schemas.JoinRequest.UserPayload
+            /// How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
+            /// add only a value): `email`, from the join link in a reply to someone who mailed photos
+            /// (docs/spec/email-inbox.md §10.4); `telegram`, from the join link the bot gave a Telegram group member in a
+            /// private chat (docs/spec/telegram.md §10.3). Channel requests always need approval.
+            ///
+            ///
             /// - Remark: Generated from `#/components/schemas/JoinRequest/via`.
-            @frozen public enum ViaPayload: String, Codable, Hashable, Sendable, CaseIterable {
-                case frameCode = "frame_code"
-                case invite = "invite"
-            }
-            /// - Remark: Generated from `#/components/schemas/JoinRequest/via`.
-            public var via: Components.Schemas.JoinRequest.ViaPayload
+            public var via: Swift.String
             /// - Remark: Generated from `#/components/schemas/JoinRequest/invited_by_name`.
             public var invitedByName: Swift.String?
             /// - Remark: Generated from `#/components/schemas/JoinRequest/note`.
             public var note: Swift.String?
+            /// Channel requests only: who the channel invited, as managers should see it (for `email`: the sender's name and
+            /// address, "Jan · jan.peeters@telenet.be"; for `telegram`: the Telegram name and the chat, "Ben · Telegram,
+            /// Peeters family").
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/JoinRequest/via_name`.
+            public var viaName: Swift.String?
+            /// Channel requests only: whether the requester's verified identity matches the one the link was sent to (for
+            /// `email`: the account's verified email is that address); null when the channel can't tell (always for
+            /// `telegram`).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/JoinRequest/via_matches`.
+            public var viaMatches: Swift.Bool?
             /// - Remark: Generated from `#/components/schemas/JoinRequest/created_at`.
             public var createdAt: Foundation.Date
             /// Creates a new `JoinRequest`.
@@ -2286,16 +2422,20 @@ extension Components {
             /// - Parameters:
             ///   - id:
             ///   - user:
-            ///   - via:
+            ///   - via: How the request came. `frame_code`, `invite`: as before. Outside channels (one enum value each, later channels
             ///   - invitedByName:
             ///   - note:
+            ///   - viaName: Channel requests only: who the channel invited, as managers should see it (for `email`: the sender's name and
+            ///   - viaMatches: Channel requests only: whether the requester's verified identity matches the one the link was sent to (for
             ///   - createdAt:
             public init(
                 id: Components.Schemas.Id,
                 user: Components.Schemas.JoinRequest.UserPayload,
-                via: Components.Schemas.JoinRequest.ViaPayload,
+                via: Swift.String,
                 invitedByName: Swift.String? = nil,
                 note: Swift.String? = nil,
+                viaName: Swift.String? = nil,
+                viaMatches: Swift.Bool? = nil,
                 createdAt: Foundation.Date
             ) {
                 self.id = id
@@ -2303,6 +2443,8 @@ extension Components {
                 self.via = via
                 self.invitedByName = invitedByName
                 self.note = note
+                self.viaName = viaName
+                self.viaMatches = viaMatches
                 self.createdAt = createdAt
             }
             public enum CodingKeys: String, CodingKey {
@@ -2311,6 +2453,8 @@ extension Components {
                 case via
                 case invitedByName = "invited_by_name"
                 case note
+                case viaName = "via_name"
+                case viaMatches = "via_matches"
                 case createdAt = "created_at"
             }
         }
@@ -2737,9 +2881,12 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/Item/imported_sender_name`.
             public var importedSenderName: Swift.String?
-            /// Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
-            /// sender is the account that set it up; clients and frames show "Anna via Immich" ("Anna · Feed via Immich"
-            /// for feed placements). Optional: clients that don't know it show the sender only.
+            /// Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
+            /// that were mailed to an inbox address (`service: email`, docs/spec/email-inbox.md §9) or posted in a
+            /// connected Telegram chat (`service: telegram`, docs/spec/telegram.md §8). The sender is the account that set
+            /// it up (for mail and Telegram: the matched or linked account, or the address's or chat's owner); clients and
+            /// frames show "Anna via Immich" ("Anna · Feed via Immich" for feed placements), or "Jan via email" / "Jan via
+            /// Telegram". Optional: clients that don't know it show the sender only.
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Item/via`.
@@ -2776,7 +2923,7 @@ extension Components {
             ///   - createdAt:
             ///   - importedFrom: Set on items a frame imported from another app's leftover data (docs/spec/frameo-import.md). The sender is
             ///   - importedSenderName: The original sender's display name in that app, when known.
-            ///   - via: Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5). The
+            ///   - via: Set on items a photo source synced or a Google Photos import copied (docs/spec/photo-sources.md §9.5), or
             ///   - motion: Live items only: the motion clip. `GET /v1/items/{id}/media/motion` streams its master once `status` is
             ///   - thumbUrl: Short-lived signed URL (about 1 h) usable directly in <img src> without an Authorization header.
             public init(
@@ -2857,7 +3004,7 @@ extension Components {
         @frozen public enum ItemOrigin: String, Codable, Hashable, Sendable, CaseIterable {
             case frameo = "frameo"
         }
-        /// The outside service a photo came from.
+        /// The outside service a photo came from. `email`: mailed to an inbox address (docs/spec/email-inbox.md). `telegram`: posted in a connected Telegram chat (docs/spec/telegram.md).
         ///
         /// - Remark: Generated from `#/components/schemas/PhotoService`.
         public typealias PhotoService = Swift.String
@@ -2865,7 +3012,12 @@ extension Components {
         public struct ItemVia: Codable, Hashable, Sendable {
             /// - Remark: Generated from `#/components/schemas/ItemVia/service`.
             public var service: Components.Schemas.PhotoService
-            /// Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+            /// Photo services: the service name to show, not translated ("Immich", "iCloud", "Google Photos"); frames show
+            /// "<sender> via <label>". `email`, `telegram`: the name of the person who mailed or posted it ("Jan"; for
+            /// Telegram the linked account's display name, else the Telegram display name); frames show "<label> via
+            /// email" / "<label> via Telegram" (localized) **instead of** the sender's name, since the sender may be the
+            /// address's or chat's owner sending on Jan's behalf.
+            ///
             ///
             /// - Remark: Generated from `#/components/schemas/ItemVia/label`.
             public var label: Swift.String
@@ -2873,25 +3025,41 @@ extension Components {
             ///
             /// - Remark: Generated from `#/components/schemas/ItemVia/source_id`.
             public var sourceId: Components.Schemas.Id?
+            /// `email`: the inbox address it was mailed to, while it exists.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ItemVia/address_id`.
+            public var addressId: Components.Schemas.Id?
+            /// `telegram`: the Telegram chat it was posted in (`TelegramChat`), while it exists.
+            ///
+            /// - Remark: Generated from `#/components/schemas/ItemVia/telegram_chat_id`.
+            public var telegramChatId: Components.Schemas.Id?
             /// Creates a new `ItemVia`.
             ///
             /// - Parameters:
             ///   - service:
-            ///   - label: Service name to show, not translated: "Immich", "iCloud", "Google Photos".
+            ///   - label: Photo services: the service name to show, not translated ("Immich", "iCloud", "Google Photos"); frames show
             ///   - sourceId: The photo source that synced it, while it exists (null for Google imports and deleted sources).
+            ///   - addressId: `email`: the inbox address it was mailed to, while it exists.
+            ///   - telegramChatId: `telegram`: the Telegram chat it was posted in (`TelegramChat`), while it exists.
             public init(
                 service: Components.Schemas.PhotoService,
                 label: Swift.String,
-                sourceId: Components.Schemas.Id? = nil
+                sourceId: Components.Schemas.Id? = nil,
+                addressId: Components.Schemas.Id? = nil,
+                telegramChatId: Components.Schemas.Id? = nil
             ) {
                 self.service = service
                 self.label = label
                 self.sourceId = sourceId
+                self.addressId = addressId
+                self.telegramChatId = telegramChatId
             }
             public enum CodingKeys: String, CodingKey {
                 case service
                 case label
                 case sourceId = "source_id"
+                case addressId = "address_id"
+                case telegramChatId = "telegram_chat_id"
             }
         }
         /// - Remark: Generated from `#/components/schemas/ItemMotion`.
@@ -3232,7 +3400,9 @@ extension Components {
             /// - Remark: Generated from `#/components/schemas/Send/items`.
             public var items: [Components.Schemas.Item]
             /// Set when a photo source or a Google Photos import made this send on the sender's behalf (one send per sync
-            /// run or import). Such sends get no `delivered` push.
+            /// run or import), when it came by mail (`service: email`, one send per mail), or from a connected Telegram
+            /// chat (`service: telegram`, one send per batch). Such sends get no `delivered` push, except Telegram sends by
+            /// a linked account (they are that person's own sends).
             ///
             ///
             /// - Remark: Generated from `#/components/schemas/Send/via`.
@@ -4815,7 +4985,7 @@ extension Components {
             public var sendId: Components.Schemas.Id?
             /// - Remark: Generated from `#/components/schemas/FeedPost/created_at`.
             public var createdAt: Foundation.Date
-            /// Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+            /// Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").
             ///
             /// - Remark: Generated from `#/components/schemas/FeedPost/via`.
             public var via: Components.Schemas.ItemVia?
@@ -4839,7 +5009,7 @@ extension Components {
             ///   - poster:
             ///   - sendId: The poster's send (own posts only).
             ///   - createdAt:
-            ///   - via: Set when a photo source or a Google Photos import made this post for the poster: "Anna · 14 photos via Immich".
+            ///   - via: Set when a photo source or a Google Photos import made this post for the poster ("Anna · 14 photos via Immich"), it came by mail ("Jan via email · 14 photos"), or from a Telegram chat ("Ben via Telegram · 12 photos").
             ///   - items: Live items in send order.
             ///   - receipts: Own posts, owner/admins, or everyone with `members_see_reactions`; otherwise null.
             ///   - reactions: Same visibility as `receipts`. Latest reactions and replies first, at most 50 (all in `getFeedPostReceipts`).
@@ -6750,6 +6920,1820 @@ extension Components {
                 case createdAt = "created_at"
                 case updatedAt = "updated_at"
                 case finishedAt = "finished_at"
+            }
+        }
+        /// `active`: mail is accepted. `paused`: mail to it is refused (`550 5.2.1 This address is paused`); resume to reopen.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailAddressStatus`.
+        public typealias EmailAddressStatus = Swift.String
+        /// What the address fills. Exactly one of `frame_id` (a direct send) or `feed_id` (a post) is set.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailAddressTarget`.
+        public struct EmailAddressTarget: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailAddressTarget/kind`.
+            public var kind: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailAddressTarget/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressTarget/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressTarget/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressTarget/feed_name`.
+            public var feedName: Swift.String?
+            /// Creates a new `EmailAddressTarget`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - feedId:
+            ///   - feedName:
+            public init(
+                kind: Swift.String,
+                frameId: Components.Schemas.Id? = nil,
+                frameName: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                feedName: Swift.String? = nil
+            ) {
+                self.kind = kind
+                self.frameId = frameId
+                self.frameName = frameName
+                self.feedId = feedId
+                self.feedName = feedName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailAddress`.
+        public struct EmailAddress: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/id`.
+            public var id: Components.Schemas.Id
+            /// The full address, `<slug>-<random>@<email_inbox_domain>`. A capability: shown to managers only.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/address`.
+            public var address: Swift.String
+            /// The friendly part.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/slug`.
+            public var slug: Swift.String
+            /// Label in the apps and in replies to senders ("Oma's frame").
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/name`.
+            public var name: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/target`.
+            public var target: Components.Schemas.EmailAddressTarget
+            /// Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+            /// the creator lost their rights). Null only briefly while ownership passes on.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/owner`.
+            public struct OwnerPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/owner/user_id`.
+                public var userId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/owner/display_name`.
+                public var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/owner/avatar_url`.
+                public var avatarUrl: Swift.String?
+                /// Creates a new `OwnerPayload`.
+                ///
+                /// - Parameters:
+                ///   - userId:
+                ///   - displayName:
+                ///   - avatarUrl:
+                public init(
+                    userId: Components.Schemas.Id,
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.userId = userId
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case userId = "user_id"
+                    case displayName = "display_name"
+                    case avatarUrl = "avatar_url"
+                }
+            }
+            /// Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+            /// the creator lost their rights). Null only briefly while ownership passes on.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/owner`.
+            public var owner: Components.Schemas.EmailAddress.OwnerPayload?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/status`.
+            public var status: Components.Schemas.EmailAddressStatus
+            /// Mail from anyone with the address is delivered without approval (default off).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/anyone_may_send`.
+            public var anyoneMaySend: Swift.Bool
+            /// Authenticated senders get a short "delivered" reply (default on).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/send_confirmations`.
+            public var sendConfirmations: Swift.Bool
+            /// Replies to allowed, authenticated senders include a link to join the frame or feed in the app (an invite that always needs approval; default on).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/offer_app_invite`.
+            public var offerAppInvite: Swift.Bool
+            /// The owner gets reaction and reply notifications for photos they sent on behalf of non-account senders (the owner's own switch).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/notify_reactions`.
+            public var notifyReactions: Swift.Bool
+            /// False when the server can't send mail (no outgoing mail configured): senders get no replies at all.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/replies_available`.
+            public var repliesAvailable: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/counts`.
+            public struct CountsPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/counts/allowed_senders`.
+                public var allowedSenders: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/counts/blocked_senders`.
+                public var blockedSenders: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/counts/pending_senders`.
+                public var pendingSenders: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/counts/held_messages`.
+                public var heldMessages: Swift.Int
+                /// Mails delivered in the last 30 days.
+                ///
+                /// - Remark: Generated from `#/components/schemas/EmailAddress/counts/delivered_30d`.
+                public var delivered30d: Swift.Int?
+                /// Creates a new `CountsPayload`.
+                ///
+                /// - Parameters:
+                ///   - allowedSenders:
+                ///   - blockedSenders:
+                ///   - pendingSenders:
+                ///   - heldMessages:
+                ///   - delivered30d: Mails delivered in the last 30 days.
+                public init(
+                    allowedSenders: Swift.Int,
+                    blockedSenders: Swift.Int? = nil,
+                    pendingSenders: Swift.Int,
+                    heldMessages: Swift.Int,
+                    delivered30d: Swift.Int? = nil
+                ) {
+                    self.allowedSenders = allowedSenders
+                    self.blockedSenders = blockedSenders
+                    self.pendingSenders = pendingSenders
+                    self.heldMessages = heldMessages
+                    self.delivered30d = delivered30d
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case allowedSenders = "allowed_senders"
+                    case blockedSenders = "blocked_senders"
+                    case pendingSenders = "pending_senders"
+                    case heldMessages = "held_messages"
+                    case delivered30d = "delivered_30d"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/counts`.
+            public var counts: Components.Schemas.EmailAddress.CountsPayload
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/last_received_at`.
+            public var lastReceivedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/regenerated_at`.
+            public var regeneratedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/can_manage`.
+            public var canManage: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/is_owner`.
+            public var isOwner: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddress/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `EmailAddress`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - address: The full address, `<slug>-<random>@<email_inbox_domain>`. A capability: shown to managers only.
+            ///   - slug: The friendly part.
+            ///   - name: Label in the apps and in replies to senders ("Oma's frame").
+            ///   - target:
+            ///   - owner: Who mail from senders without a matching account is sent by (the creator, or the frame's or feed's owner after
+            ///   - status:
+            ///   - anyoneMaySend: Mail from anyone with the address is delivered without approval (default off).
+            ///   - sendConfirmations: Authenticated senders get a short "delivered" reply (default on).
+            ///   - offerAppInvite: Replies to allowed, authenticated senders include a link to join the frame or feed in the app (an invite that always needs approval; default on).
+            ///   - notifyReactions: The owner gets reaction and reply notifications for photos they sent on behalf of non-account senders (the owner's own switch).
+            ///   - repliesAvailable: False when the server can't send mail (no outgoing mail configured): senders get no replies at all.
+            ///   - counts:
+            ///   - lastReceivedAt:
+            ///   - regeneratedAt:
+            ///   - canManage:
+            ///   - isOwner:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                address: Swift.String,
+                slug: Swift.String,
+                name: Swift.String,
+                target: Components.Schemas.EmailAddressTarget,
+                owner: Components.Schemas.EmailAddress.OwnerPayload? = nil,
+                status: Components.Schemas.EmailAddressStatus,
+                anyoneMaySend: Swift.Bool,
+                sendConfirmations: Swift.Bool,
+                offerAppInvite: Swift.Bool,
+                notifyReactions: Swift.Bool,
+                repliesAvailable: Swift.Bool? = nil,
+                counts: Components.Schemas.EmailAddress.CountsPayload,
+                lastReceivedAt: Foundation.Date? = nil,
+                regeneratedAt: Foundation.Date? = nil,
+                canManage: Swift.Bool? = nil,
+                isOwner: Swift.Bool? = nil,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.address = address
+                self.slug = slug
+                self.name = name
+                self.target = target
+                self.owner = owner
+                self.status = status
+                self.anyoneMaySend = anyoneMaySend
+                self.sendConfirmations = sendConfirmations
+                self.offerAppInvite = offerAppInvite
+                self.notifyReactions = notifyReactions
+                self.repliesAvailable = repliesAvailable
+                self.counts = counts
+                self.lastReceivedAt = lastReceivedAt
+                self.regeneratedAt = regeneratedAt
+                self.canManage = canManage
+                self.isOwner = isOwner
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case address
+                case slug
+                case name
+                case target
+                case owner
+                case status
+                case anyoneMaySend = "anyone_may_send"
+                case sendConfirmations = "send_confirmations"
+                case offerAppInvite = "offer_app_invite"
+                case notifyReactions = "notify_reactions"
+                case repliesAvailable = "replies_available"
+                case counts
+                case lastReceivedAt = "last_received_at"
+                case regeneratedAt = "regenerated_at"
+                case canManage = "can_manage"
+                case isOwner = "is_owner"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailAddressCreate`.
+        public struct EmailAddressCreate: Codable, Hashable, Sendable {
+            /// The friendly part; defaults to one made from the target's name (lower case, accents removed, `oma`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/slug`.
+            public var slug: Swift.String?
+            /// Label; defaults to the target's name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/name`.
+            public var name: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/anyone_may_send`.
+            public var anyoneMaySend: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/send_confirmations`.
+            public var sendConfirmations: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/offer_app_invite`.
+            public var offerAppInvite: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressCreate/notify_reactions`.
+            public var notifyReactions: Swift.Bool?
+            /// Creates a new `EmailAddressCreate`.
+            ///
+            /// - Parameters:
+            ///   - slug: The friendly part; defaults to one made from the target's name (lower case, accents removed, `oma`).
+            ///   - name: Label; defaults to the target's name.
+            ///   - anyoneMaySend:
+            ///   - sendConfirmations:
+            ///   - offerAppInvite:
+            ///   - notifyReactions:
+            public init(
+                slug: Swift.String? = nil,
+                name: Swift.String? = nil,
+                anyoneMaySend: Swift.Bool? = nil,
+                sendConfirmations: Swift.Bool? = nil,
+                offerAppInvite: Swift.Bool? = nil,
+                notifyReactions: Swift.Bool? = nil
+            ) {
+                self.slug = slug
+                self.name = name
+                self.anyoneMaySend = anyoneMaySend
+                self.sendConfirmations = sendConfirmations
+                self.offerAppInvite = offerAppInvite
+                self.notifyReactions = notifyReactions
+            }
+            public enum CodingKeys: String, CodingKey {
+                case slug
+                case name
+                case anyoneMaySend = "anyone_may_send"
+                case sendConfirmations = "send_confirmations"
+                case offerAppInvite = "offer_app_invite"
+                case notifyReactions = "notify_reactions"
+            }
+        }
+        /// At least one field.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate`.
+        public struct EmailAddressUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/name`.
+            public var name: Swift.String?
+            /// A new friendly part; the old address stops working at once.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/slug`.
+            public var slug: Swift.String?
+            /// true pauses, false resumes.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/paused`.
+            public var paused: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/anyone_may_send`.
+            public var anyoneMaySend: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/send_confirmations`.
+            public var sendConfirmations: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/offer_app_invite`.
+            public var offerAppInvite: Swift.Bool?
+            /// The owner's own switch; only the owner may change it.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/notify_reactions`.
+            public var notifyReactions: Swift.Bool?
+            /// The caller becomes the owner.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAddressUpdate/take_over`.
+            public var takeOver: Swift.Bool?
+            /// Creates a new `EmailAddressUpdate`.
+            ///
+            /// - Parameters:
+            ///   - name:
+            ///   - slug: A new friendly part; the old address stops working at once.
+            ///   - paused: true pauses, false resumes.
+            ///   - anyoneMaySend:
+            ///   - sendConfirmations:
+            ///   - offerAppInvite:
+            ///   - notifyReactions: The owner's own switch; only the owner may change it.
+            ///   - takeOver: The caller becomes the owner.
+            public init(
+                name: Swift.String? = nil,
+                slug: Swift.String? = nil,
+                paused: Swift.Bool? = nil,
+                anyoneMaySend: Swift.Bool? = nil,
+                sendConfirmations: Swift.Bool? = nil,
+                offerAppInvite: Swift.Bool? = nil,
+                notifyReactions: Swift.Bool? = nil,
+                takeOver: Swift.Bool? = nil
+            ) {
+                self.name = name
+                self.slug = slug
+                self.paused = paused
+                self.anyoneMaySend = anyoneMaySend
+                self.sendConfirmations = sendConfirmations
+                self.offerAppInvite = offerAppInvite
+                self.notifyReactions = notifyReactions
+                self.takeOver = takeOver
+            }
+            public enum CodingKeys: String, CodingKey {
+                case name
+                case slug
+                case paused
+                case anyoneMaySend = "anyone_may_send"
+                case sendConfirmations = "send_confirmations"
+                case offerAppInvite = "offer_app_invite"
+                case notifyReactions = "notify_reactions"
+                case takeOver = "take_over"
+            }
+        }
+        /// `allowed`: mail is delivered (when authenticated). `blocked`: mail is dropped silently. `pending`: mail is held until a manager decides.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailSenderState`.
+        public typealias EmailSenderState = Swift.String
+        /// - Remark: Generated from `#/components/schemas/EmailSender`.
+        public struct EmailSender: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailSender/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailSender/email`.
+            public var email: Swift.String
+            /// Name for the credit ("Jan via email") when the mail has none.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSender/display_name`.
+            public var displayName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailSender/state`.
+            public var state: Components.Schemas.EmailSenderState
+            /// `manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSender/origin`.
+            public var origin: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailSender/added_by_name`.
+            public var addedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailSender/last_message_at`.
+            public var lastMessageAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/EmailSender/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `EmailSender`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - email:
+            ///   - displayName: Name for the credit ("Jan via email") when the mail has none.
+            ///   - state:
+            ///   - origin: `manual`: added by a manager. `approved`: a pending sender that was approved. `mail`: pending, came by mail.
+            ///   - addedByName:
+            ///   - lastMessageAt:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                email: Swift.String,
+                displayName: Swift.String? = nil,
+                state: Components.Schemas.EmailSenderState,
+                origin: Swift.String,
+                addedByName: Swift.String? = nil,
+                lastMessageAt: Foundation.Date? = nil,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.email = email
+                self.displayName = displayName
+                self.state = state
+                self.origin = origin
+                self.addedByName = addedByName
+                self.lastMessageAt = lastMessageAt
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case email
+                case displayName = "display_name"
+                case state
+                case origin
+                case addedByName = "added_by_name"
+                case lastMessageAt = "last_message_at"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailSenderCreate`.
+        public struct EmailSenderCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailSenderCreate/email`.
+            public var email: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailSenderCreate/display_name`.
+            public var displayName: Swift.String?
+            /// Block instead of allow.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSenderCreate/blocked`.
+            public var blocked: Swift.Bool?
+            /// Creates a new `EmailSenderCreate`.
+            ///
+            /// - Parameters:
+            ///   - email:
+            ///   - displayName:
+            ///   - blocked: Block instead of allow.
+            public init(
+                email: Swift.String,
+                displayName: Swift.String? = nil,
+                blocked: Swift.Bool? = nil
+            ) {
+                self.email = email
+                self.displayName = displayName
+                self.blocked = blocked
+            }
+            public enum CodingKeys: String, CodingKey {
+                case email
+                case displayName = "display_name"
+                case blocked
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailSenderUpdate`.
+        public struct EmailSenderUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailSenderUpdate/display_name`.
+            public var displayName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailSenderUpdate/blocked`.
+            public var blocked: Swift.Bool?
+            /// Creates a new `EmailSenderUpdate`.
+            ///
+            /// - Parameters:
+            ///   - displayName:
+            ///   - blocked:
+            public init(
+                displayName: Swift.String? = nil,
+                blocked: Swift.Bool? = nil
+            ) {
+                self.displayName = displayName
+                self.blocked = blocked
+            }
+            public enum CodingKeys: String, CodingKey {
+                case displayName = "display_name"
+                case blocked
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailSenderApprove`.
+        public struct EmailSenderApprove: Codable, Hashable, Sendable {
+            /// Deliver their authenticated held mail now.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSenderApprove/deliver`.
+            public var deliver: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/EmailSenderApprove/display_name`.
+            public var displayName: Swift.String?
+            /// Creates a new `EmailSenderApprove`.
+            ///
+            /// - Parameters:
+            ///   - deliver: Deliver their authenticated held mail now.
+            ///   - displayName:
+            public init(
+                deliver: Swift.Bool? = nil,
+                displayName: Swift.String? = nil
+            ) {
+                self.deliver = deliver
+                self.displayName = displayName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case deliver
+                case displayName = "display_name"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailSenderReject`.
+        public struct EmailSenderReject: Codable, Hashable, Sendable {
+            /// Drop their later mail silently.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSenderReject/block`.
+            public var block: Swift.Bool?
+            /// Creates a new `EmailSenderReject`.
+            ///
+            /// - Parameters:
+            ///   - block: Drop their later mail silently.
+            public init(block: Swift.Bool? = nil) {
+                self.block = block
+            }
+            public enum CodingKeys: String, CodingKey {
+                case block
+            }
+        }
+        /// How the mail was checked (docs/spec/email-inbox.md §7). Only `authenticated` mail is matched, allowed or answered.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailAuthResult`.
+        public struct EmailAuthResult: Codable, Hashable, Sendable {
+            /// DMARC-aligned SPF or DKIM passed for the From domain.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/authenticated`.
+            public var authenticated: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/from_domain`.
+            public var fromDomain: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/spf`.
+            public var spf: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/dkim`.
+            public var dkim: Swift.String?
+            /// The `d=` of the passing signature.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/dkim_domain`.
+            public var dkimDomain: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/dmarc`.
+            public var dmarc: Swift.String?
+            /// The From domain's policy: `none`, `quarantine` or `reject`; null without a DMARC record.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/dmarc_policy`.
+            public var dmarcPolicy: Swift.String?
+            /// Which check aligned: `spf` or `dkim`; null when neither.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailAuthResult/aligned`.
+            public var aligned: Swift.String?
+            /// Creates a new `EmailAuthResult`.
+            ///
+            /// - Parameters:
+            ///   - authenticated: DMARC-aligned SPF or DKIM passed for the From domain.
+            ///   - fromDomain:
+            ///   - spf:
+            ///   - dkim:
+            ///   - dkimDomain: The `d=` of the passing signature.
+            ///   - dmarc:
+            ///   - dmarcPolicy: The From domain's policy: `none`, `quarantine` or `reject`; null without a DMARC record.
+            ///   - aligned: Which check aligned: `spf` or `dkim`; null when neither.
+            public init(
+                authenticated: Swift.Bool,
+                fromDomain: Swift.String? = nil,
+                spf: Swift.String? = nil,
+                dkim: Swift.String? = nil,
+                dkimDomain: Swift.String? = nil,
+                dmarc: Swift.String? = nil,
+                dmarcPolicy: Swift.String? = nil,
+                aligned: Swift.String? = nil
+            ) {
+                self.authenticated = authenticated
+                self.fromDomain = fromDomain
+                self.spf = spf
+                self.dkim = dkim
+                self.dkimDomain = dkimDomain
+                self.dmarc = dmarc
+                self.dmarcPolicy = dmarcPolicy
+                self.aligned = aligned
+            }
+            public enum CodingKeys: String, CodingKey {
+                case authenticated
+                case fromDomain = "from_domain"
+                case spf
+                case dkim
+                case dkimDomain = "dkim_domain"
+                case dmarc
+                case dmarcPolicy = "dmarc_policy"
+                case aligned
+            }
+        }
+        /// `unknown_sender`: authenticated, but not allowed (approve or reject the sender). `unverified_sender`: the mail
+        /// couldn't be authenticated, so its From can't be trusted (deliver this one by hand, or delete it).
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailHeldReason`.
+        public typealias EmailHeldReason = Swift.String
+        /// Files in a mail that were not used.
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailSkipCounts`.
+        public struct EmailSkipCounts: Codable, Hashable, Sendable {
+            /// Images under 300 px on the long side (signatures, logos).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/too_small`.
+            public var tooSmall: Swift.Int?
+            /// Already in the mail or on the frame / in the feed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/duplicate`.
+            public var duplicate: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/unsupported`.
+            public var unsupported: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/too_large`.
+            public var tooLarge: Swift.Int?
+            /// Videos longer than `limits.max_video_seconds`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/too_long`.
+            public var tooLong: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/EmailSkipCounts/over_limit`.
+            public var overLimit: Swift.Int?
+            /// Creates a new `EmailSkipCounts`.
+            ///
+            /// - Parameters:
+            ///   - tooSmall: Images under 300 px on the long side (signatures, logos).
+            ///   - duplicate: Already in the mail or on the frame / in the feed.
+            ///   - unsupported:
+            ///   - tooLarge:
+            ///   - tooLong: Videos longer than `limits.max_video_seconds`.
+            ///   - overLimit:
+            public init(
+                tooSmall: Swift.Int? = nil,
+                duplicate: Swift.Int? = nil,
+                unsupported: Swift.Int? = nil,
+                tooLarge: Swift.Int? = nil,
+                tooLong: Swift.Int? = nil,
+                overLimit: Swift.Int? = nil
+            ) {
+                self.tooSmall = tooSmall
+                self.duplicate = duplicate
+                self.unsupported = unsupported
+                self.tooLarge = tooLarge
+                self.tooLong = tooLong
+                self.overLimit = overLimit
+            }
+            public enum CodingKeys: String, CodingKey {
+                case tooSmall = "too_small"
+                case duplicate
+                case unsupported
+                case tooLarge = "too_large"
+                case tooLong = "too_long"
+                case overLimit = "over_limit"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary`.
+        public struct EmailHeldMessageSummary: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/reason`.
+            public var reason: Components.Schemas.EmailHeldReason
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/subject`.
+            public var subject: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/received_at`.
+            public var receivedAt: Foundation.Date
+            /// Deleted then (at most 14 days after it arrived).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/media_count`.
+            public var mediaCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/authenticated`.
+            public var authenticated: Swift.Bool
+            /// The first thumbnails; short-lived signed URLs (about 1 h).
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessageSummary/thumb_urls`.
+            public var thumbUrls: [Swift.String]?
+            /// Creates a new `EmailHeldMessageSummary`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - reason:
+            ///   - subject:
+            ///   - receivedAt:
+            ///   - expiresAt: Deleted then (at most 14 days after it arrived).
+            ///   - mediaCount:
+            ///   - authenticated:
+            ///   - thumbUrls: The first thumbnails; short-lived signed URLs (about 1 h).
+            public init(
+                id: Components.Schemas.Id,
+                reason: Components.Schemas.EmailHeldReason,
+                subject: Swift.String? = nil,
+                receivedAt: Foundation.Date,
+                expiresAt: Foundation.Date,
+                mediaCount: Swift.Int,
+                authenticated: Swift.Bool,
+                thumbUrls: [Swift.String]? = nil
+            ) {
+                self.id = id
+                self.reason = reason
+                self.subject = subject
+                self.receivedAt = receivedAt
+                self.expiresAt = expiresAt
+                self.mediaCount = mediaCount
+                self.authenticated = authenticated
+                self.thumbUrls = thumbUrls
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case reason
+                case subject
+                case receivedAt = "received_at"
+                case expiresAt = "expires_at"
+                case mediaCount = "media_count"
+                case authenticated
+                case thumbUrls = "thumb_urls"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailHeldMessage`.
+        public struct EmailHeldMessage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/address_id`.
+            public var addressId: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/sender_id`.
+            public var senderId: Components.Schemas.Id?
+            /// As the From header says; trustworthy only when `auth.authenticated`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/sender_email`.
+            public var senderEmail: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/sender_name`.
+            public var senderName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/reason`.
+            public var reason: Components.Schemas.EmailHeldReason
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/subject`.
+            public var subject: Swift.String?
+            /// The caption the photos would get.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/caption`.
+            public var caption: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/auth`.
+            public var auth: Components.Schemas.EmailAuthResult
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload`.
+            public struct MediaPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/kind`.
+                public var kind: Components.Schemas.MediaKind
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/width`.
+                public var width: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/height`.
+                public var height: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/duration_ms`.
+                public var durationMs: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/bytes`.
+                public var bytes: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/filename`.
+                public var filename: Swift.String?
+                /// Short-lived signed URL (about 1 h); null while processing.
+                ///
+                /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/MediaPayload/thumb_url`.
+                public var thumbUrl: Swift.String?
+                /// Creates a new `MediaPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - kind:
+                ///   - width:
+                ///   - height:
+                ///   - durationMs:
+                ///   - bytes:
+                ///   - filename:
+                ///   - thumbUrl: Short-lived signed URL (about 1 h); null while processing.
+                public init(
+                    kind: Components.Schemas.MediaKind,
+                    width: Swift.Int? = nil,
+                    height: Swift.Int? = nil,
+                    durationMs: Swift.Int? = nil,
+                    bytes: Swift.Int? = nil,
+                    filename: Swift.String? = nil,
+                    thumbUrl: Swift.String? = nil
+                ) {
+                    self.kind = kind
+                    self.width = width
+                    self.height = height
+                    self.durationMs = durationMs
+                    self.bytes = bytes
+                    self.filename = filename
+                    self.thumbUrl = thumbUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case kind
+                    case width
+                    case height
+                    case durationMs = "duration_ms"
+                    case bytes
+                    case filename
+                    case thumbUrl = "thumb_url"
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/media`.
+            public typealias MediaPayload = [Components.Schemas.EmailHeldMessage.MediaPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/media`.
+            public var media: Components.Schemas.EmailHeldMessage.MediaPayload
+            /// - Remark: Generated from `#/components/schemas/EmailHeldMessage/skipped`.
+            public var skipped: Components.Schemas.EmailSkipCounts?
+            /// Creates a new `EmailHeldMessage`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - addressId:
+            ///   - senderId:
+            ///   - senderEmail: As the From header says; trustworthy only when `auth.authenticated`.
+            ///   - senderName:
+            ///   - reason:
+            ///   - subject:
+            ///   - caption: The caption the photos would get.
+            ///   - receivedAt:
+            ///   - expiresAt:
+            ///   - auth:
+            ///   - media:
+            ///   - skipped:
+            public init(
+                id: Components.Schemas.Id,
+                addressId: Components.Schemas.Id,
+                senderId: Components.Schemas.Id? = nil,
+                senderEmail: Swift.String,
+                senderName: Swift.String? = nil,
+                reason: Components.Schemas.EmailHeldReason,
+                subject: Swift.String? = nil,
+                caption: Swift.String? = nil,
+                receivedAt: Foundation.Date,
+                expiresAt: Foundation.Date,
+                auth: Components.Schemas.EmailAuthResult,
+                media: Components.Schemas.EmailHeldMessage.MediaPayload,
+                skipped: Components.Schemas.EmailSkipCounts? = nil
+            ) {
+                self.id = id
+                self.addressId = addressId
+                self.senderId = senderId
+                self.senderEmail = senderEmail
+                self.senderName = senderName
+                self.reason = reason
+                self.subject = subject
+                self.caption = caption
+                self.receivedAt = receivedAt
+                self.expiresAt = expiresAt
+                self.auth = auth
+                self.media = media
+                self.skipped = skipped
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case addressId = "address_id"
+                case senderId = "sender_id"
+                case senderEmail = "sender_email"
+                case senderName = "sender_name"
+                case reason
+                case subject
+                case caption
+                case receivedAt = "received_at"
+                case expiresAt = "expires_at"
+                case auth
+                case media
+                case skipped
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailPendingSender`.
+        public struct EmailPendingSender: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/id`.
+            public var id: Components.Schemas.Id
+            /// As claimed; trustworthy only when `authenticated`.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/email`.
+            public var email: Swift.String
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/display_name`.
+            public var displayName: Swift.String?
+            /// The latest held mail was authenticated.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/authenticated`.
+            public var authenticated: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/first_held_at`.
+            public var firstHeldAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/last_held_at`.
+            public var lastHeldAt: Foundation.Date
+            /// Held mail, newest first.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailPendingSender/messages`.
+            public var messages: [Components.Schemas.EmailHeldMessageSummary]
+            /// Creates a new `EmailPendingSender`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - email: As claimed; trustworthy only when `authenticated`.
+            ///   - displayName:
+            ///   - authenticated: The latest held mail was authenticated.
+            ///   - firstHeldAt:
+            ///   - lastHeldAt:
+            ///   - messages: Held mail, newest first.
+            public init(
+                id: Components.Schemas.Id,
+                email: Swift.String,
+                displayName: Swift.String? = nil,
+                authenticated: Swift.Bool,
+                firstHeldAt: Foundation.Date,
+                lastHeldAt: Foundation.Date,
+                messages: [Components.Schemas.EmailHeldMessageSummary]
+            ) {
+                self.id = id
+                self.email = email
+                self.displayName = displayName
+                self.authenticated = authenticated
+                self.firstHeldAt = firstHeldAt
+                self.lastHeldAt = lastHeldAt
+                self.messages = messages
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case email
+                case displayName = "display_name"
+                case authenticated
+                case firstHeldAt = "first_held_at"
+                case lastHeldAt = "last_held_at"
+                case messages
+            }
+        }
+        /// What became of a mail (texts in docs/spec/email-inbox.md §13).
+        ///
+        /// - Remark: Generated from `#/components/schemas/EmailOutcome`.
+        public typealias EmailOutcome = Swift.String
+        /// - Remark: Generated from `#/components/schemas/EmailReplyKind`.
+        public typealias EmailReplyKind = Swift.String
+        /// - Remark: Generated from `#/components/schemas/EmailMessage`.
+        public struct EmailMessage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/received_at`.
+            public var receivedAt: Foundation.Date
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/sender_email`.
+            public var senderEmail: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/sender_name`.
+            public var senderName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/authenticated`.
+            public var authenticated: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/outcome`.
+            public var outcome: Components.Schemas.EmailOutcome
+            /// Photos and videos delivered or held.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/items`.
+            public var items: Swift.Int?
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/skipped`.
+            public var skipped: Components.Schemas.EmailSkipCounts?
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/send_ids`.
+            public var sendIds: [Components.Schemas.Id]?
+            /// The reply the sender got, if any.
+            ///
+            /// - Remark: Generated from `#/components/schemas/EmailMessage/reply`.
+            public var reply: Components.Schemas.EmailReplyKind?
+            /// Creates a new `EmailMessage`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - receivedAt:
+            ///   - senderEmail:
+            ///   - senderName:
+            ///   - authenticated:
+            ///   - outcome:
+            ///   - items: Photos and videos delivered or held.
+            ///   - skipped:
+            ///   - sendIds:
+            ///   - reply: The reply the sender got, if any.
+            public init(
+                id: Components.Schemas.Id,
+                receivedAt: Foundation.Date,
+                senderEmail: Swift.String? = nil,
+                senderName: Swift.String? = nil,
+                authenticated: Swift.Bool,
+                outcome: Components.Schemas.EmailOutcome,
+                items: Swift.Int? = nil,
+                skipped: Components.Schemas.EmailSkipCounts? = nil,
+                sendIds: [Components.Schemas.Id]? = nil,
+                reply: Components.Schemas.EmailReplyKind? = nil
+            ) {
+                self.id = id
+                self.receivedAt = receivedAt
+                self.senderEmail = senderEmail
+                self.senderName = senderName
+                self.authenticated = authenticated
+                self.outcome = outcome
+                self.items = items
+                self.skipped = skipped
+                self.sendIds = sendIds
+                self.reply = reply
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case receivedAt = "received_at"
+                case senderEmail = "sender_email"
+                case senderName = "sender_name"
+                case authenticated
+                case outcome
+                case items
+                case skipped
+                case sendIds = "send_ids"
+                case reply
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailMessagePage`.
+        public struct EmailMessagePage: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailMessagePage/items`.
+            public var items: [Components.Schemas.EmailMessage]
+            /// - Remark: Generated from `#/components/schemas/EmailMessagePage/next_cursor`.
+            public var nextCursor: Swift.String?
+            /// Creates a new `EmailMessagePage`.
+            ///
+            /// - Parameters:
+            ///   - items:
+            ///   - nextCursor:
+            public init(
+                items: [Components.Schemas.EmailMessage],
+                nextCursor: Swift.String? = nil
+            ) {
+                self.items = items
+                self.nextCursor = nextCursor
+            }
+            public enum CodingKeys: String, CodingKey {
+                case items
+                case nextCursor = "next_cursor"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailInboundResult`.
+        public struct EmailInboundResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailInboundResult/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/EmailInboundResult/RecipientsPayload`.
+            public struct RecipientsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/EmailInboundResult/RecipientsPayload/address`.
+                public var address: Swift.String
+                /// - Remark: Generated from `#/components/schemas/EmailInboundResult/RecipientsPayload/outcome`.
+                @frozen public enum OutcomePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case accepted = "accepted"
+                    case unknownRecipient = "unknown_recipient"
+                    case paused = "paused"
+                    case rejectedDmarc = "rejected_dmarc"
+                    case tooLarge = "too_large"
+                }
+                /// - Remark: Generated from `#/components/schemas/EmailInboundResult/RecipientsPayload/outcome`.
+                public var outcome: Components.Schemas.EmailInboundResult.RecipientsPayloadPayload.OutcomePayload
+                /// Creates a new `RecipientsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - address:
+                ///   - outcome:
+                public init(
+                    address: Swift.String,
+                    outcome: Components.Schemas.EmailInboundResult.RecipientsPayloadPayload.OutcomePayload
+                ) {
+                    self.address = address
+                    self.outcome = outcome
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case address
+                    case outcome
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/EmailInboundResult/recipients`.
+            public typealias RecipientsPayload = [Components.Schemas.EmailInboundResult.RecipientsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/EmailInboundResult/recipients`.
+            public var recipients: Components.Schemas.EmailInboundResult.RecipientsPayload
+            /// Creates a new `EmailInboundResult`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - recipients:
+            public init(
+                id: Components.Schemas.Id,
+                recipients: Components.Schemas.EmailInboundResult.RecipientsPayload
+            ) {
+                self.id = id
+                self.recipients = recipients
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case recipients
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailRecipientCheck`.
+        public struct EmailRecipientCheck: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailRecipientCheck/recipients`.
+            public var recipients: [Swift.String]
+            /// Creates a new `EmailRecipientCheck`.
+            ///
+            /// - Parameters:
+            ///   - recipients:
+            public init(recipients: [Swift.String]) {
+                self.recipients = recipients
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recipients
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult`.
+        public struct EmailRecipientCheckResult: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/RecipientsPayload`.
+            public struct RecipientsPayloadPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/RecipientsPayload/address`.
+                public var address: Swift.String
+                /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/RecipientsPayload/outcome`.
+                @frozen public enum OutcomePayload: String, Codable, Hashable, Sendable, CaseIterable {
+                    case accepted = "accepted"
+                    case unknownRecipient = "unknown_recipient"
+                    case paused = "paused"
+                }
+                /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/RecipientsPayload/outcome`.
+                public var outcome: Components.Schemas.EmailRecipientCheckResult.RecipientsPayloadPayload.OutcomePayload
+                /// Creates a new `RecipientsPayloadPayload`.
+                ///
+                /// - Parameters:
+                ///   - address:
+                ///   - outcome:
+                public init(
+                    address: Swift.String,
+                    outcome: Components.Schemas.EmailRecipientCheckResult.RecipientsPayloadPayload.OutcomePayload
+                ) {
+                    self.address = address
+                    self.outcome = outcome
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case address
+                    case outcome
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/recipients`.
+            public typealias RecipientsPayload = [Components.Schemas.EmailRecipientCheckResult.RecipientsPayloadPayload]
+            /// - Remark: Generated from `#/components/schemas/EmailRecipientCheckResult/recipients`.
+            public var recipients: Components.Schemas.EmailRecipientCheckResult.RecipientsPayload
+            /// Creates a new `EmailRecipientCheckResult`.
+            ///
+            /// - Parameters:
+            ///   - recipients:
+            public init(recipients: Components.Schemas.EmailRecipientCheckResult.RecipientsPayload) {
+                self.recipients = recipients
+            }
+            public enum CodingKeys: String, CodingKey {
+                case recipients
+            }
+        }
+        /// `group`: a basic group or supergroup (forum groups included). `private`: a one-to-one chat with the bot.
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramChatKind`.
+        public typealias TelegramChatKind = Swift.String
+        /// - Remark: Generated from `#/components/schemas/TelegramConnectCodeCreate`.
+        public struct TelegramConnectCodeCreate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramConnectCodeCreate/chat_kind`.
+            public var chatKind: Components.Schemas.TelegramChatKind
+            /// `chat_kind: private` only ("Send from my Telegram"): also link the Telegram account that redeems the code to
+            /// the caller. Without it the redeemer is an outside contributor sent for by the caller ("Invite someone to
+            /// send by Telegram").
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramConnectCodeCreate/link_account`.
+            public var linkAccount: Swift.Bool?
+            /// Creates a new `TelegramConnectCodeCreate`.
+            ///
+            /// - Parameters:
+            ///   - chatKind:
+            ///   - linkAccount: `chat_kind: private` only ("Send from my Telegram"): also link the Telegram account that redeems the code to
+            public init(
+                chatKind: Components.Schemas.TelegramChatKind,
+                linkAccount: Swift.Bool? = nil
+            ) {
+                self.chatKind = chatKind
+                self.linkAccount = linkAccount
+            }
+            public enum CodingKeys: String, CodingKey {
+                case chatKind = "chat_kind"
+                case linkAccount = "link_account"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramCodePurpose`.
+        public typealias TelegramCodePurpose = Swift.String
+        /// - Remark: Generated from `#/components/schemas/TelegramCodeStatus`.
+        public typealias TelegramCodeStatus = Swift.String
+        /// Why the last attempt to redeem the code in Telegram failed (the code may still be open).
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramCodeErrorCode`.
+        public typealias TelegramCodeErrorCode = Swift.String
+        /// - Remark: Generated from `#/components/schemas/TelegramCode`.
+        public struct TelegramCode: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/purpose`.
+            public var purpose: Components.Schemas.TelegramCodePurpose
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/chat_kind`.
+            public var chatKind: Components.Schemas.TelegramChatKind?
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/link_account`.
+            public var linkAccount: Swift.Bool?
+            /// `connect` codes: the frame or feed.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/target`.
+            public var target: Components.Schemas.TelegramChatTarget?
+            /// Only in the create response.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/code`.
+            public var code: Swift.String?
+            /// Only in the create response: `https://t.me/<bot>?startgroup=<code>` (groups) or `?start=<code>`. Show it as
+            /// a button (opens Telegram) and as a QR code (for another device).
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/url`.
+            public var url: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/status`.
+            public var status: Components.Schemas.TelegramCodeStatus
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/expires_at`.
+            public var expiresAt: Foundation.Date
+            /// `connect`, once used: the `TelegramChat` it created.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/chat_id`.
+            public var chatId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TelegramCode/error_code`.
+            public var errorCode: Components.Schemas.TelegramCodeErrorCode?
+            /// Creates a new `TelegramCode`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - purpose:
+            ///   - chatKind:
+            ///   - linkAccount:
+            ///   - target: `connect` codes: the frame or feed.
+            ///   - code: Only in the create response.
+            ///   - url: Only in the create response: `https://t.me/<bot>?startgroup=<code>` (groups) or `?start=<code>`. Show it as
+            ///   - status:
+            ///   - expiresAt:
+            ///   - chatId: `connect`, once used: the `TelegramChat` it created.
+            ///   - errorCode:
+            public init(
+                id: Components.Schemas.Id,
+                purpose: Components.Schemas.TelegramCodePurpose,
+                chatKind: Components.Schemas.TelegramChatKind? = nil,
+                linkAccount: Swift.Bool? = nil,
+                target: Components.Schemas.TelegramChatTarget? = nil,
+                code: Swift.String? = nil,
+                url: Swift.String? = nil,
+                status: Components.Schemas.TelegramCodeStatus,
+                expiresAt: Foundation.Date,
+                chatId: Components.Schemas.Id? = nil,
+                errorCode: Components.Schemas.TelegramCodeErrorCode? = nil
+            ) {
+                self.id = id
+                self.purpose = purpose
+                self.chatKind = chatKind
+                self.linkAccount = linkAccount
+                self.target = target
+                self.code = code
+                self.url = url
+                self.status = status
+                self.expiresAt = expiresAt
+                self.chatId = chatId
+                self.errorCode = errorCode
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case purpose
+                case chatKind = "chat_kind"
+                case linkAccount = "link_account"
+                case target
+                case code
+                case url
+                case status
+                case expiresAt = "expires_at"
+                case chatId = "chat_id"
+                case errorCode = "error_code"
+            }
+        }
+        /// What the chat fills. Exactly one of `frame_id` (a direct send per batch) or `feed_id` (a post per batch) is set.
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramChatTarget`.
+        public struct TelegramChatTarget: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramChatTarget/kind`.
+            public var kind: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TelegramChatTarget/frame_id`.
+            public var frameId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatTarget/frame_name`.
+            public var frameName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatTarget/feed_id`.
+            public var feedId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatTarget/feed_name`.
+            public var feedName: Swift.String?
+            /// Creates a new `TelegramChatTarget`.
+            ///
+            /// - Parameters:
+            ///   - kind:
+            ///   - frameId:
+            ///   - frameName:
+            ///   - feedId:
+            ///   - feedName:
+            public init(
+                kind: Swift.String,
+                frameId: Components.Schemas.Id? = nil,
+                frameName: Swift.String? = nil,
+                feedId: Components.Schemas.Id? = nil,
+                feedName: Swift.String? = nil
+            ) {
+                self.kind = kind
+                self.frameId = frameId
+                self.frameName = frameName
+                self.feedId = feedId
+                self.feedName = feedName
+            }
+            public enum CodingKeys: String, CodingKey {
+                case kind
+                case frameId = "frame_id"
+                case frameName = "frame_name"
+                case feedId = "feed_id"
+                case feedName = "feed_name"
+            }
+        }
+        /// `active`: media is accepted. `needs_attention`: a person must fix `error_code`. `paused`: paused in the app,
+        /// media ignored. `disconnected`: ended (`ended_reason`); listed for 30 days, then deleted.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramChatStatus`.
+        public typealias TelegramChatStatus = Swift.String
+        /// `privacy_mode`: the bot only sees commands in the group (make it an admin, or the operator turns privacy mode off). `bot_changed`: the server now uses another bot; connect again.
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramChatErrorCode`.
+        public typealias TelegramChatErrorCode = Swift.String
+        /// `cannot_post`: the bot may not post in the group, so it can't reply. `reactions_off`: the group restricts reactions, so confirmations are silent.
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramChatWarning`.
+        public typealias TelegramChatWarning = Swift.String
+        /// - Remark: Generated from `#/components/schemas/TelegramChatEndedReason`.
+        public typealias TelegramChatEndedReason = Swift.String
+        /// `everyone`: every member of the chat may send (the chat is the trust boundary). `linked_only`: only Telegram
+        /// users linked to a kinframe account that may send to the target.
+        ///
+        ///
+        /// - Remark: Generated from `#/components/schemas/TelegramContributorsMode`.
+        public typealias TelegramContributorsMode = Swift.String
+        /// - Remark: Generated from `#/components/schemas/TelegramTopic`.
+        public struct TelegramTopic: Codable, Hashable, Sendable {
+            /// Telegram `message_thread_id` (1 = General).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramTopic/id`.
+            public var id: Swift.Int64
+            /// - Remark: Generated from `#/components/schemas/TelegramTopic/name`.
+            public var name: Swift.String
+            /// Creates a new `TelegramTopic`.
+            ///
+            /// - Parameters:
+            ///   - id: Telegram `message_thread_id` (1 = General).
+            ///   - name:
+            public init(
+                id: Swift.Int64,
+                name: Swift.String
+            ) {
+                self.id = id
+                self.name = name
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case name
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramChat`.
+        public struct TelegramChat: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/id`.
+            public var id: Components.Schemas.Id
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/chat_kind`.
+            public var chatKind: Components.Schemas.TelegramChatKind
+            /// The group's title, or for a private chat the Telegram user's display name.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/title`.
+            public var title: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/is_forum`.
+            public var isForum: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/target`.
+            public var target: Components.Schemas.TelegramChatTarget
+            /// Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+            /// their rights). Null only briefly while ownership passes on.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/owner`.
+            public struct OwnerPayload: Codable, Hashable, Sendable {
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/owner/user_id`.
+                public var userId: Components.Schemas.Id
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/owner/display_name`.
+                public var displayName: Swift.String
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/owner/avatar_url`.
+                public var avatarUrl: Swift.String?
+                /// Creates a new `OwnerPayload`.
+                ///
+                /// - Parameters:
+                ///   - userId:
+                ///   - displayName:
+                ///   - avatarUrl:
+                public init(
+                    userId: Components.Schemas.Id,
+                    displayName: Swift.String,
+                    avatarUrl: Swift.String? = nil
+                ) {
+                    self.userId = userId
+                    self.displayName = displayName
+                    self.avatarUrl = avatarUrl
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case userId = "user_id"
+                    case displayName = "display_name"
+                    case avatarUrl = "avatar_url"
+                }
+            }
+            /// Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+            /// their rights). Null only briefly while ownership passes on.
+            ///
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/owner`.
+            public var owner: Components.Schemas.TelegramChat.OwnerPayload?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/status`.
+            public var status: Components.Schemas.TelegramChatStatus
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/error_code`.
+            public var errorCode: Components.Schemas.TelegramChatErrorCode?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/warnings`.
+            public var warnings: [Components.Schemas.TelegramChatWarning]?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/ended_reason`.
+            public var endedReason: Components.Schemas.TelegramChatEndedReason?
+            /// Who disconnected it (`disconnected`, `stopped`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/ended_by_name`.
+            public var endedByName: Swift.String?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/ended_at`.
+            public var endedAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/bot_is_admin`.
+            public var botIsAdmin: Swift.Bool?
+            /// False: privacy mode hides photos from the bot (`error_code: privacy_mode`).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/sees_all_messages`.
+            public var seesAllMessages: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/contributors`.
+            public var contributors: Components.Schemas.TelegramContributorsMode
+            /// Post frames' quick replies into the chat as replies (default false).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/frame_replies`.
+            public var frameReplies: Swift.Bool
+            /// The owner gets reaction and reply notifications for outside contributions (default false: the chat already shows them). The owner's own switch.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/notify_reactions`.
+            public var notifyReactions: Swift.Bool
+            /// The bot's one-time app message includes an "Ask to join" link (an invite that always needs approval; default true).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/offer_app_invite`.
+            public var offerAppInvite: Swift.Bool
+            /// Forum groups: only this topic counts; null = all topics.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/topic_id`.
+            public var topicId: Swift.Int64?
+            /// Forum groups: topics the bot has seen (Telegram offers no list).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/topics`.
+            public var topics: [Components.Schemas.TelegramTopic]?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/counts`.
+            public struct CountsPayload: Codable, Hashable, Sendable {
+                /// Photos and videos sent.
+                ///
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/counts/sent`.
+                public var sent: Swift.Int
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/counts/duplicates`.
+                public var duplicates: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/counts/skipped`.
+                public var skipped: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/counts/failed`.
+                public var failed: Swift.Int?
+                /// - Remark: Generated from `#/components/schemas/TelegramChat/counts/contributors`.
+                public var contributors: Swift.Int
+                /// Creates a new `CountsPayload`.
+                ///
+                /// - Parameters:
+                ///   - sent: Photos and videos sent.
+                ///   - duplicates:
+                ///   - skipped:
+                ///   - failed:
+                ///   - contributors:
+                public init(
+                    sent: Swift.Int,
+                    duplicates: Swift.Int? = nil,
+                    skipped: Swift.Int? = nil,
+                    failed: Swift.Int? = nil,
+                    contributors: Swift.Int
+                ) {
+                    self.sent = sent
+                    self.duplicates = duplicates
+                    self.skipped = skipped
+                    self.failed = failed
+                    self.contributors = contributors
+                }
+                public enum CodingKeys: String, CodingKey {
+                    case sent
+                    case duplicates
+                    case skipped
+                    case failed
+                    case contributors
+                }
+            }
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/counts`.
+            public var counts: Components.Schemas.TelegramChat.CountsPayload
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/last_delivery_at`.
+            public var lastDeliveryAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/can_manage`.
+            public var canManage: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/is_owner`.
+            public var isOwner: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChat/created_at`.
+            public var createdAt: Foundation.Date
+            /// Creates a new `TelegramChat`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - chatKind:
+            ///   - title: The group's title, or for a private chat the Telegram user's display name.
+            ///   - isForum:
+            ///   - target:
+            ///   - owner: Who connected it: the sender of outside contributions (the frame's or feed's owner after the creator lost
+            ///   - status:
+            ///   - errorCode:
+            ///   - warnings:
+            ///   - endedReason:
+            ///   - endedByName: Who disconnected it (`disconnected`, `stopped`).
+            ///   - endedAt:
+            ///   - botIsAdmin:
+            ///   - seesAllMessages: False: privacy mode hides photos from the bot (`error_code: privacy_mode`).
+            ///   - contributors:
+            ///   - frameReplies: Post frames' quick replies into the chat as replies (default false).
+            ///   - notifyReactions: The owner gets reaction and reply notifications for outside contributions (default false: the chat already shows them). The owner's own switch.
+            ///   - offerAppInvite: The bot's one-time app message includes an "Ask to join" link (an invite that always needs approval; default true).
+            ///   - topicId: Forum groups: only this topic counts; null = all topics.
+            ///   - topics: Forum groups: topics the bot has seen (Telegram offers no list).
+            ///   - counts:
+            ///   - lastDeliveryAt:
+            ///   - canManage:
+            ///   - isOwner:
+            ///   - createdAt:
+            public init(
+                id: Components.Schemas.Id,
+                chatKind: Components.Schemas.TelegramChatKind,
+                title: Swift.String,
+                isForum: Swift.Bool? = nil,
+                target: Components.Schemas.TelegramChatTarget,
+                owner: Components.Schemas.TelegramChat.OwnerPayload? = nil,
+                status: Components.Schemas.TelegramChatStatus,
+                errorCode: Components.Schemas.TelegramChatErrorCode? = nil,
+                warnings: [Components.Schemas.TelegramChatWarning]? = nil,
+                endedReason: Components.Schemas.TelegramChatEndedReason? = nil,
+                endedByName: Swift.String? = nil,
+                endedAt: Foundation.Date? = nil,
+                botIsAdmin: Swift.Bool? = nil,
+                seesAllMessages: Swift.Bool? = nil,
+                contributors: Components.Schemas.TelegramContributorsMode,
+                frameReplies: Swift.Bool,
+                notifyReactions: Swift.Bool,
+                offerAppInvite: Swift.Bool,
+                topicId: Swift.Int64? = nil,
+                topics: [Components.Schemas.TelegramTopic]? = nil,
+                counts: Components.Schemas.TelegramChat.CountsPayload,
+                lastDeliveryAt: Foundation.Date? = nil,
+                canManage: Swift.Bool? = nil,
+                isOwner: Swift.Bool? = nil,
+                createdAt: Foundation.Date
+            ) {
+                self.id = id
+                self.chatKind = chatKind
+                self.title = title
+                self.isForum = isForum
+                self.target = target
+                self.owner = owner
+                self.status = status
+                self.errorCode = errorCode
+                self.warnings = warnings
+                self.endedReason = endedReason
+                self.endedByName = endedByName
+                self.endedAt = endedAt
+                self.botIsAdmin = botIsAdmin
+                self.seesAllMessages = seesAllMessages
+                self.contributors = contributors
+                self.frameReplies = frameReplies
+                self.notifyReactions = notifyReactions
+                self.offerAppInvite = offerAppInvite
+                self.topicId = topicId
+                self.topics = topics
+                self.counts = counts
+                self.lastDeliveryAt = lastDeliveryAt
+                self.canManage = canManage
+                self.isOwner = isOwner
+                self.createdAt = createdAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case chatKind = "chat_kind"
+                case title
+                case isForum = "is_forum"
+                case target
+                case owner
+                case status
+                case errorCode = "error_code"
+                case warnings
+                case endedReason = "ended_reason"
+                case endedByName = "ended_by_name"
+                case endedAt = "ended_at"
+                case botIsAdmin = "bot_is_admin"
+                case seesAllMessages = "sees_all_messages"
+                case contributors
+                case frameReplies = "frame_replies"
+                case notifyReactions = "notify_reactions"
+                case offerAppInvite = "offer_app_invite"
+                case topicId = "topic_id"
+                case topics
+                case counts
+                case lastDeliveryAt = "last_delivery_at"
+                case canManage = "can_manage"
+                case isOwner = "is_owner"
+                case createdAt = "created_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate`.
+        public struct TelegramChatUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/paused`.
+            public var paused: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/contributors`.
+            public var contributors: Components.Schemas.TelegramContributorsMode?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/frame_replies`.
+            public var frameReplies: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/notify_reactions`.
+            public var notifyReactions: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/offer_app_invite`.
+            public var offerAppInvite: Swift.Bool?
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/topic_id`.
+            public var topicId: Swift.Int64?
+            /// The caller becomes the owner (the sender of outside contributions from now on).
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramChatUpdate/take_over`.
+            public var takeOver: Swift.Bool?
+            /// Creates a new `TelegramChatUpdate`.
+            ///
+            /// - Parameters:
+            ///   - paused:
+            ///   - contributors:
+            ///   - frameReplies:
+            ///   - notifyReactions:
+            ///   - offerAppInvite:
+            ///   - topicId:
+            ///   - takeOver: The caller becomes the owner (the sender of outside contributions from now on).
+            public init(
+                paused: Swift.Bool? = nil,
+                contributors: Components.Schemas.TelegramContributorsMode? = nil,
+                frameReplies: Swift.Bool? = nil,
+                notifyReactions: Swift.Bool? = nil,
+                offerAppInvite: Swift.Bool? = nil,
+                topicId: Swift.Int64? = nil,
+                takeOver: Swift.Bool? = nil
+            ) {
+                self.paused = paused
+                self.contributors = contributors
+                self.frameReplies = frameReplies
+                self.notifyReactions = notifyReactions
+                self.offerAppInvite = offerAppInvite
+                self.topicId = topicId
+                self.takeOver = takeOver
+            }
+            public enum CodingKeys: String, CodingKey {
+                case paused
+                case contributors
+                case frameReplies = "frame_replies"
+                case notifyReactions = "notify_reactions"
+                case offerAppInvite = "offer_app_invite"
+                case topicId = "topic_id"
+                case takeOver = "take_over"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramContributor`.
+        public struct TelegramContributor: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/id`.
+            public var id: Components.Schemas.Id
+            /// The Telegram display name, or the kinframe name when linked.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/display_name`.
+            public var displayName: Swift.String
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/linked`.
+            public var linked: Swift.Bool
+            /// The linked kinframe account, when it is a member of the target.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/user_id`.
+            public var userId: Components.Schemas.Id?
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/blocked`.
+            public var blocked: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/sent_count`.
+            public var sentCount: Swift.Int
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/first_seen_at`.
+            public var firstSeenAt: Foundation.Date?
+            /// - Remark: Generated from `#/components/schemas/TelegramContributor/last_seen_at`.
+            public var lastSeenAt: Foundation.Date
+            /// Creates a new `TelegramContributor`.
+            ///
+            /// - Parameters:
+            ///   - id:
+            ///   - displayName: The Telegram display name, or the kinframe name when linked.
+            ///   - linked:
+            ///   - userId: The linked kinframe account, when it is a member of the target.
+            ///   - blocked:
+            ///   - sentCount:
+            ///   - firstSeenAt:
+            ///   - lastSeenAt:
+            public init(
+                id: Components.Schemas.Id,
+                displayName: Swift.String,
+                linked: Swift.Bool,
+                userId: Components.Schemas.Id? = nil,
+                blocked: Swift.Bool,
+                sentCount: Swift.Int,
+                firstSeenAt: Foundation.Date? = nil,
+                lastSeenAt: Foundation.Date
+            ) {
+                self.id = id
+                self.displayName = displayName
+                self.linked = linked
+                self.userId = userId
+                self.blocked = blocked
+                self.sentCount = sentCount
+                self.firstSeenAt = firstSeenAt
+                self.lastSeenAt = lastSeenAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case id
+                case displayName = "display_name"
+                case linked
+                case userId = "user_id"
+                case blocked
+                case sentCount = "sent_count"
+                case firstSeenAt = "first_seen_at"
+                case lastSeenAt = "last_seen_at"
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramContributorUpdate`.
+        public struct TelegramContributorUpdate: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramContributorUpdate/blocked`.
+            public var blocked: Swift.Bool
+            /// Creates a new `TelegramContributorUpdate`.
+            ///
+            /// - Parameters:
+            ///   - blocked:
+            public init(blocked: Swift.Bool) {
+                self.blocked = blocked
+            }
+            public enum CodingKeys: String, CodingKey {
+                case blocked
+            }
+        }
+        /// - Remark: Generated from `#/components/schemas/TelegramLink`.
+        public struct TelegramLink: Codable, Hashable, Sendable {
+            /// - Remark: Generated from `#/components/schemas/TelegramLink/display_name`.
+            public var displayName: Swift.String
+            /// Without "@".
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramLink/username`.
+            public var username: Swift.String?
+            /// False when the user blocked the bot.
+            ///
+            /// - Remark: Generated from `#/components/schemas/TelegramLink/can_message`.
+            public var canMessage: Swift.Bool
+            /// - Remark: Generated from `#/components/schemas/TelegramLink/linked_at`.
+            public var linkedAt: Foundation.Date
+            /// Creates a new `TelegramLink`.
+            ///
+            /// - Parameters:
+            ///   - displayName:
+            ///   - username: Without "@".
+            ///   - canMessage: False when the user blocked the bot.
+            ///   - linkedAt:
+            public init(
+                displayName: Swift.String,
+                username: Swift.String? = nil,
+                canMessage: Swift.Bool,
+                linkedAt: Foundation.Date
+            ) {
+                self.displayName = displayName
+                self.username = username
+                self.canMessage = canMessage
+                self.linkedAt = linkedAt
+            }
+            public enum CodingKeys: String, CodingKey {
+                case displayName = "display_name"
+                case username
+                case canMessage = "can_message"
+                case linkedAt = "linked_at"
             }
         }
         /// - Remark: Generated from `#/components/schemas/TvLinkCreate`.

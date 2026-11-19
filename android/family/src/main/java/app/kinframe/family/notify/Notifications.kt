@@ -59,6 +59,18 @@ object Notifications {
     const val PUSH_PHOTO_SOURCE_ATTENTION = app.kinframe.core.api.PhotoSourcePush.ATTENTION
     const val PUSH_GOOGLE_IMPORT_DONE = app.kinframe.core.api.PhotoSourcePush.GOOGLE_IMPORT_DONE
 
+    const val EXTRA_ADDRESS_ID = "app.kinframe.family.ADDRESS_ID"
+    const val EXTRA_CHAT_ID = "app.kinframe.family.CHAT_ID"
+    /** An inbox address's pending senders (docs/spec/email-inbox.md §11). */
+    const val TARGET_EMAIL_PENDING = "email_pending"
+    /** A Telegram chat that needs its owner (docs/spec/telegram.md §15.1). */
+    const val TARGET_TELEGRAM_CHAT = "telegram_chat"
+
+    /** Push keys for email to frame and Telegram (README §6.3). */
+    const val PUSH_EMAIL_PENDING_SENDER = app.kinframe.core.api.EmailPush.PENDING_SENDER
+    const val PUSH_EMAIL_PENDING_EXPIRING = app.kinframe.core.api.EmailPush.PENDING_EXPIRING
+    const val PUSH_TELEGRAM_ATTENTION = app.kinframe.core.api.TelegramPush.ATTENTION
+
     /** Push keys for birthdays (README §6.3, birthdays.md §8). */
     const val PUSH_BIRTHDAY_SUGGESTION = "birthday_suggestion"
     const val PUSH_BIRTHDAY_DECIDED = "birthday_decided"
@@ -97,6 +109,9 @@ object Notifications {
         "reaction", "reply" -> if (msg.ids["feed_id"] != null && msg.ids["post_id"] != null) TARGET_FEED else TARGET_HISTORY
         PUSH_PHOTO_SOURCE_ATTENTION -> TARGET_PHOTO_SOURCES
         PUSH_GOOGLE_IMPORT_DONE -> TARGET_GOOGLE_IMPORT
+        // Tapping opens the address's pending list (README §5.16).
+        PUSH_EMAIL_PENDING_SENDER, PUSH_EMAIL_PENDING_EXPIRING -> if (msg.ids["address_id"] != null) TARGET_EMAIL_PENDING else TARGET_HISTORY
+        PUSH_TELEGRAM_ATTENTION -> if (msg.ids["chat_id"] != null) TARGET_TELEGRAM_CHAT else TARGET_HISTORY
         else -> TARGET_HISTORY
     }
 
@@ -152,7 +167,8 @@ object Notifications {
     /** A push from the server: `{type, title, body, ids}` (README §6.3). */
     fun showPush(context: Context, msg: PushMessage) {
         val channel = when (msg.kind) {
-            "join_request", PUSH_SUBSCRIPTION_REQUEST, PUSH_FEED_JOIN_REQUEST, PUSH_FEED_MEMBERSHIP, PUSH_BIRTHDAY_SUGGESTION -> CHANNEL_PEOPLE
+            "join_request", PUSH_SUBSCRIPTION_REQUEST, PUSH_FEED_JOIN_REQUEST, PUSH_FEED_MEMBERSHIP, PUSH_BIRTHDAY_SUGGESTION,
+            PUSH_EMAIL_PENDING_SENDER, PUSH_EMAIL_PENDING_EXPIRING -> CHANNEL_PEOPLE
             "reaction", "reply", PUSH_BIRTHDAY_DECIDED, PUSH_BIRTHDAY_TODAY, PUSH_BIRTHDAY_GREETING, "birthday_approved", "birthday_rejected",
             PUSH_GOOGLE_IMPORT_DONE -> CHANNEL_ACTIVITY
             else -> CHANNEL_FRAMES
@@ -174,12 +190,14 @@ object Notifications {
                     PUSH_BIRTHDAY_GREETING -> R.string.notif_birthday_greeting_title
                     PUSH_PHOTO_SOURCE_ATTENTION -> R.string.notif_photo_source_title
                     PUSH_GOOGLE_IMPORT_DONE -> R.string.notif_google_done_title
+                    PUSH_EMAIL_PENDING_SENDER, PUSH_EMAIL_PENDING_EXPIRING -> R.string.notif_email_pending_title
+                    PUSH_TELEGRAM_ATTENTION -> R.string.notif_telegram_title
                     else -> R.string.app_name
                 },
             )
         }
         val key = msg.ids["send_id"] ?: msg.ids["placement_id"] ?: msg.ids["request_id"] ?: msg.ids["subscription_id"]
-            ?: msg.ids["source_id"] ?: msg.ids["import_id"]
+            ?: msg.ids["source_id"] ?: msg.ids["import_id"] ?: msg.ids["sender_id"] ?: msg.ids["chat_id"]
             ?: msg.ids["greeting_id"] ?: msg.ids["birthday_id"]
             ?: msg.ids["post_id"] ?: msg.ids["feed_id"] ?: msg.ids["frame_id"] ?: msg.kind
         val intent = openApp(context, key.hashCode()) {
@@ -191,6 +209,8 @@ object Notifications {
             msg.ids["post_id"]?.let { putExtra(EXTRA_POST_ID, it) }
             msg.ids["source_id"]?.let { putExtra(EXTRA_SOURCE_ID, it) }
             msg.ids["import_id"]?.let { putExtra(EXTRA_IMPORT_ID, it) }
+            msg.ids["address_id"]?.let { putExtra(EXTRA_ADDRESS_ID, it) }
+            msg.ids["chat_id"]?.let { putExtra(EXTRA_CHAT_ID, it) }
         }
         val tag = tagOf(msg)
         post(context, if (tag != null) 1 else (msg.kind + key).hashCode(), tag = tag, n = NotificationCompat.Builder(context, channel)

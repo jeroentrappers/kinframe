@@ -19,12 +19,14 @@ const OperatorScope = "kinframe:operate"
 
 // UserClaims is what the API needs from a person's access token.
 type UserClaims struct {
-	Subject   string
-	Email     string
-	Name      string
-	Scopes    []string
-	IssuedAt  time.Time
-	ExpiresAt time.Time
+	Subject string
+	Email   string
+	// EmailVerified: the identity provider checked Email (Logto: a primary email, docs/spec/email-inbox.md §8.2).
+	EmailVerified bool
+	Name          string
+	Scopes        []string
+	IssuedAt      time.Time
+	ExpiresAt     time.Time
 }
 
 func (c UserClaims) HasScope(s string) bool {
@@ -45,11 +47,13 @@ type tokenClaims struct {
 	jwt.RegisteredClaims
 	Scope string `json:"scope,omitempty"`
 	Email string `json:"email,omitempty"`
-	Name  string `json:"name,omitempty"`
+	// EmailVerified is set by the bootstrap's access-token script (and dev tokens).
+	EmailVerified bool   `json:"email_verified,omitempty"`
+	Name          string `json:"name,omitempty"`
 }
 
 func (c tokenClaims) user() UserClaims {
-	u := UserClaims{Subject: c.Subject, Email: c.Email, Name: c.Name, Scopes: strings.Fields(c.Scope)}
+	u := UserClaims{Subject: c.Subject, Email: c.Email, EmailVerified: c.EmailVerified && c.Email != "", Name: c.Name, Scopes: strings.Fields(c.Scope)}
 	if c.IssuedAt != nil {
 		u.IssuedAt = c.IssuedAt.Time
 	}
@@ -176,9 +180,10 @@ func (d *DevTokens) Issue(email, name string, operator bool) (string, int, error
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(d.TTL)),
 		},
-		Scope: scope,
-		Email: email,
-		Name:  name,
+		Scope:         scope,
+		Email:         email,
+		EmailVerified: email != "",
+		Name:          name,
 	}
 	s, err := jwt.NewWithClaims(jwt.SigningMethodHS256, c).SignedString(d.key)
 	return s, int(d.TTL.Seconds()), err

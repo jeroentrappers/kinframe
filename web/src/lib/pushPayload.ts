@@ -40,6 +40,20 @@ export function pushUrl(p: PushPayload): string {
 		const imp = id(p.ids?.import_id);
 		return imp ? `/photo-sources?google_import=${imp}` : '/photo-sources';
 	}
+	// Email to frame (README §5.16): the address's pending list, in the frame's or feed's settings.
+	if (p.key === 'email_pending_sender' || p.key === 'email_pending_expiring') {
+		const address = id(p.ids?.address_id);
+		const q = address ? `&email=${address}` : '';
+		if (frame) return `/frames/${frame}?tab=settings${q}`;
+		if (feed) return `/feeds/${feed}?tab=settings${q}`;
+	}
+	// Telegram (README §5.17): the chat in the frame's or feed's settings.
+	if (p.key === 'telegram_attention') {
+		const chat = id(p.ids?.chat_id);
+		const q = chat ? `&telegram=${chat}` : '';
+		if (frame) return `/frames/${frame}?tab=settings${q}`;
+		if (feed) return `/feeds/${feed}?tab=settings${q}`;
+	}
 	if (p.key === 'join_request' && frame) return `/frames/${frame}?tab=people`;
 	if ((p.type === 'event_invitation.decided' || p.key?.startsWith('event_invitation')) && frame) return `/frames/${frame}?tab=calendar`;
 	if (send) return `/history/${send}`;
@@ -55,7 +69,7 @@ export function pushTag(p: PushPayload, now: Date = new Date()): string {
 	// else the device's local date.
 	if (p.key === 'birthday_greeting' && ids.birthday_id) return `birthday:${ids.birthday_id}:${ids.date ?? localDate(now)}`;
 	if (p.key === 'birthday_today') return `birthday_today:${ids.date ?? localDate(now)}`;
-	return `${p.key ?? p.type ?? 'kinframe'}:${ids.post_id ?? ids.send_id ?? ids.source_id ?? ids.import_id ?? ids.subscription_id ?? ids.request_id ?? ids.birthday_id ?? ids.frame_id ?? ids.feed_id ?? ''}`;
+	return `${p.key ?? p.type ?? 'kinframe'}:${ids.post_id ?? ids.send_id ?? ids.sender_id ?? ids.chat_id ?? ids.source_id ?? ids.import_id ?? ids.subscription_id ?? ids.request_id ?? ids.birthday_id ?? ids.frame_id ?? ids.feed_id ?? ''}`;
 }
 
 function localDate(d: Date): string {
