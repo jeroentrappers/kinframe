@@ -3,6 +3,7 @@
 // and keeps localStorage for the credential only.
 import type { components } from '../api/schema';
 import type { Change, ChangesPage, DeviceClient } from './client';
+import { senderName, type FramePhotoRequest, type FramePrompt, type PlacementComments } from './social';
 
 type S = components['schemas'];
 export type FrameSettings = S['FrameSettings'];
@@ -31,6 +32,14 @@ export interface FramePlacement {
 	hasPoster: boolean;
 	/** In the slideshow: ready, not hidden, trashed or awaiting approval. */
 	visible: boolean;
+	/** How it got here (`send`, `share`, `feed`, `import`); null from an older server. */
+	origin: S['PlacementOrigin'] | null;
+	/** Imported (from Frameo or Google Photos): not a person's new photo. */
+	imported: boolean;
+	/** Placed as history: not new on the frame. */
+	backfill: boolean;
+	/** The weekly prompt this family post answers (`prompts` change): its title card shows before the first answer. */
+	promptId: string | null;
 }
 
 export interface FrameInfo {
@@ -65,7 +74,11 @@ export function toFramePlacement(p: PlacementChange): FramePlacement {
 		height: media?.height ?? it.height ?? 0,
 		durationMs: it.duration_ms ?? null,
 		hasPoster: !!media?.poster_url,
-		visible: !!media && !p.hidden && !p.trashed && !p.pending_moderation && p.status !== 'removed' && p.status !== 'failed'
+		visible: !!media && !p.hidden && !p.trashed && !p.pending_moderation && p.status !== 'removed' && p.status !== 'failed',
+		origin: p.origin ?? null,
+		imported: !!it.imported_from,
+		backfill: p.backfill ?? false,
+		promptId: p.prompt_id ?? null
 	};
 }
 
@@ -74,6 +87,12 @@ export interface ApplyResult {
 	added: string[];
 	settingsChanged: boolean;
 	reset: boolean;
+	/** Who sent the new (non-history) placements, for "New photos from Ben". */
+	newFrom: string[];
+	/** Someone answered this frame's "Ask for new photos" since the last pull. */
+	answeredBy: string | null;
+	/** Comments, the photo request or the prompts changed. */
+	socialChanged: boolean;
 }
 
 export class FrameFeed {
@@ -83,6 +102,10 @@ export class FrameFeed {
 	frame: FrameInfo | null = null;
 	weather: Weather | null = null;
 	members = new Map<string, { name: string; avatarUrl: string | null }>();
+	/** Family social (README §5.20): the newest comments per placement, the latest photo request, current prompts. */
+	comments = new Map<string, PlacementComments>();
+	photoRequest: FramePhotoRequest | null = null;
+	prompts = new Map<string, FramePrompt>();
 	/** True once the first snapshot (since=0) was applied. */
 	synced = false;
 	/** Placements that have been visible at some point: un-hiding one is not "new". */
@@ -92,6 +115,9 @@ export class FrameFeed {
 		this.seq = 0;
 		this.placements.clear();
 		this.members.clear();
+		this.comments.clear();
+		this.photoRequest = null;
+		this.prompts.clear();
 		this.settings = null;
 		this.frame = null;
 		this.weather = null;
@@ -101,7 +127,7 @@ export class FrameFeed {
 
 	/** Applies one page of changes in order. */
 	apply(page: ChangesPage): ApplyResult {
-		const out: ApplyResult = { added: [], settingsChanged: false, reset: false };
+		const out: ApplyResult = { added: [], settingsChanged: false, reset: false, newFrom: [], answeredBy: null, socialChanged: false };
 		for (const c of page.changes) {
 			switch (c.type) {
 				case 'reset':
@@ -114,12 +140,43 @@ export class FrameFeed {
 					this.placements.set(fp.id, fp);
 					if (fp.visible && !this.#shown.has(fp.id)) {
 						this.#shown.add(fp.id);
-						if (this.synced) out.added.push(fp.id);
+						if (this.synced && !fp.backfill) {
+							out.added.push(fp.id);
+							const name = senderName(fp);
+							if (name) out.newFrom.push(name);
+						}
 					}
 					break;
 				}
 				case 'placement.remove':
-					if (c.id) this.placements.delete(c.id);
+					if (c.id) {
+						this.placements.delete(c.id);
+						if (this.comments.delete(c.id)) out.socialChanged = true;
+					}
+					break;
+				case 'comments': {
+					// `comments: null` drops them (Show comments turned off, comments removed).
+					const id = c.id ?? c.comments?.placement_id;
+					if (!id) break;
+					if (c.comments) this.comments.set(id, c.comments);
+					else this.comments.delete(id);
+					out.socialChanged = true;
+					break;
+				}
+				case 'photo_request': {
+					const before = this.photoRequest;
+					const after = c.photo_request ?? null;
+					// Someone answered "Ask for new photos": the frame says who on its next wake (§9.3).
+					if (this.synced && after?.state === 'answered' && (before?.id !== after.id || before.state !== 'answered')) {
+						out.answeredBy = after.answered_by_name?.trim() || null;
+					}
+					this.photoRequest = after;
+					out.socialChanged = true;
+					break;
+				}
+				case 'prompts':
+					this.prompts = new Map((c.prompts?.prompts ?? []).map((p) => [p.prompt_id, p]));
+					out.socialChanged = true;
 					break;
 				case 'settings':
 					if (c.settings) {
@@ -140,7 +197,7 @@ export class FrameFeed {
 					if (c.id) this.members.delete(c.id);
 					break;
 				default:
-					// album.*, calendar: not shown by the browser frame yet (album_id filtering uses placement.album_ids).
+					// album.*, calendar, birthdays: not shown by the browser frame yet (album_id filtering uses placement.album_ids).
 					break;
 			}
 		}
@@ -150,13 +207,16 @@ export class FrameFeed {
 
 	/** Pulls every page after `seq`; a reset starts over from 0 once. */
 	async pull(client: Pick<DeviceClient, 'changes'>): Promise<ApplyResult> {
-		const total: ApplyResult = { added: [], settingsChanged: false, reset: false };
+		const total: ApplyResult = { added: [], settingsChanged: false, reset: false, newFrom: [], answeredBy: null, socialChanged: false };
 		for (let pages = 0; pages < 200; pages++) {
 			const page = await client.changes(this.seq);
 			if (!page) break;
 			const r = this.apply(page);
 			total.added.push(...r.added);
 			total.settingsChanged ||= r.settingsChanged;
+			total.newFrom.push(...r.newFrom);
+			total.answeredBy = r.answeredBy ?? total.answeredBy;
+			total.socialChanged ||= r.socialChanged || r.reset;
 			if (r.reset) {
 				if (total.reset) break;
 				total.reset = true;

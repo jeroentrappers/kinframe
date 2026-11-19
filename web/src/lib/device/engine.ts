@@ -10,6 +10,10 @@ import { DeviceApiError, DeviceRevokedError, type DeviceClient, type FrameCode, 
 import { FrameFeed, type FramePlacement, type FrameSettings, type Weather } from './feed';
 import { Playlist, type PlayOrder } from './playlist';
 import { sleepState } from './sleep';
+import {
+	addNames, askedUntil, askState, CARD_MS, CONFIRMATION_MS, DAY_MS, localDay, newestComment, NOTE_DELAY_MS, NOTE_MS, promptCard,
+	removeNames, sameAsk, socialSettings, SocialStore, UNAVAILABLE_HIDE_MS, type AskState, type FramePrompt, type PlacementComment
+} from './social';
 import type { DeviceSocket, ServerMessage, SocketEvents } from './socket';
 
 export type FrameStatus = 'starting' | 'enrolling' | 'code' | 'running' | 'revoked' | 'error';
@@ -47,6 +51,14 @@ export interface FrameView {
 	celebrate: { senderName: string; count: number } | null;
 	count: number;
 	paused: boolean;
+	/** "Ask for new photos" in the menu; null hides it (setting off, a server without it, not running). */
+	ask: AskState | null;
+	/** The line after a tap on "Ask for new photos": asked (online), or asked once back online. */
+	askConfirmation: 'asked' | 'willAsk' | null;
+	/** Cards over the photo that just appeared (8 s): the weekly prompt's title, the newest comment. */
+	cards: { seq: number; prompt: FramePrompt | null; comment: PlacementComment | null } | null;
+	/** "New photos from Ben": the names while it shows. */
+	note: string[] | null;
 }
 
 export interface EngineDeps {
@@ -59,6 +71,8 @@ export interface EngineDeps {
 	clearTimer?: (t: unknown) => void;
 	/** `restart`: reload the page. */
 	reload?: () => void;
+	/** What family social keeps across a reload (default: in memory only). */
+	social?: SocialStore;
 }
 
 type Events = {
@@ -75,13 +89,16 @@ const CODE_POLL_MS = 30_000;
 const SCHEDULE_MS = 30_000;
 const IDLE_WAKE_MS = 5 * 60_000;
 const CELEBRATE_MS = 6_000;
+/** A queued "Ask for new photos" is tried again this often while it cannot be sent. */
+const ASK_RETRY_MS = 60_000;
 
 export class FrameEngine {
 	readonly feed = new FrameFeed();
 	readonly playlist = new Playlist();
 	view: FrameView = {
 		status: 'starting', online: false, code: null, frameName: '', ownerName: '', settings: null, weather: null,
-		slide: null, next: null, screen: 'on', identify: null, celebrate: null, count: 0, paused: false
+		slide: null, next: null, screen: 'on', identify: null, celebrate: null, count: 0, paused: false,
+		ask: null, askConfirmation: null, cards: null, note: null
 	};
 
 	readonly #d: Required<EngineDeps>;
@@ -100,6 +117,12 @@ export class FrameEngine {
 	#pulling: Promise<void> | null = null;
 	#pullAgain = false;
 	#stopped = false;
+	readonly #social: SocialStore;
+	/** Until then "Ask for new photos" stays hidden: the server answered 404/501 (it has no such endpoint yet). */
+	#askUnavailableUntil = 0;
+	#asking = false;
+	/** The prompt of the slide before: a run of answers to the same prompt gets one title card. */
+	#previousPromptId: string | null = null;
 
 	constructor(deps: EngineDeps) {
 		this.#d = {
@@ -107,8 +130,10 @@ export class FrameEngine {
 			setTimer: (fn, ms) => setTimeout(fn, ms),
 			clearTimer: (t) => clearTimeout(t as ReturnType<typeof setTimeout>),
 			reload: () => location.reload(),
+			social: new SocialStore(null, ''),
 			...deps
 		};
+		this.#social = this.#d.social;
 	}
 
 	on<K extends keyof Events>(event: K, fn: (v: Events[K]) => void): () => void {
@@ -180,6 +205,7 @@ export class FrameEngine {
 		this.stop();
 		this.#d.client.forget();
 		this.feed.clear();
+		this.#clearSocial();
 		this.playlist.update([], 'received', false);
 		this.#set({ status: 'starting', slide: null, next: null, code: null, celebrate: null, count: 0 });
 		await this.start();
@@ -190,6 +216,7 @@ export class FrameEngine {
 			this.stop();
 			this.#d.client.forget();
 			this.feed.clear();
+			this.#clearSocial();
 			this.#set({ status: 'revoked', slide: null, next: null, code: null });
 			return;
 		}
@@ -207,7 +234,10 @@ export class FrameEngine {
 			message: (m) => this.#onMessage(m),
 			status: (open) => {
 				this.#set({ online: open });
-				if (open) this.#reportNowShowing();
+				if (open) {
+					this.#reportNowShowing();
+					void this.#sendAsk();
+				}
 			},
 			unauthorized: async () => {
 				try {
@@ -259,6 +289,8 @@ export class FrameEngine {
 		this.#after('heartbeat', 15_000, () => void this.#heartbeat());
 		this.#after('poll', POLL_MS, () => this.#poll());
 		this.#scheduleCheck();
+		// A tap queued before a reload (offline) goes out now.
+		void this.#sendAsk();
 	}
 
 	#poll(): void {
@@ -277,7 +309,12 @@ export class FrameEngine {
 				this.#pullAgain = false;
 				try {
 					const r = await this.feed.pull(this.#d.client);
+					// Who sent the new photos, and who answered "Ask for new photos" (first): "New photos from Ben".
+					let names = addNames(this.#social.names, r.newFrom);
+					if (r.answeredBy) names = addNames(names, [r.answeredBy], true);
+					if (names.join('|') !== this.#social.names.join('|')) this.#social.setNames(names);
 					this.#applyFeed(r.added);
+					this.#updateSocial();
 					this.#emit('changes', { added: r.added, settingsChanged: r.settingsChanged });
 				} catch (e) {
 					if (e instanceof DeviceRevokedError) return this.#fail(e);
@@ -359,6 +396,7 @@ export class FrameEngine {
 		this.#set({ slide, celebrate: o.fresh ? { senderName: p.senderName, count: pending + 1 } : null });
 		if (o.fresh) this.#after('celebrate', CELEBRATE_MS, () => this.#set({ celebrate: null }));
 		this.#updateNext();
+		this.#showCards(slide);
 		this.#markSeen(p.id);
 		this.#emit('slide', slide);
 		this.#reportNowShowing();
@@ -456,6 +494,7 @@ export class FrameEngine {
 			this.#set({ screen });
 			this.#reportNowShowing();
 			this.#scheduleNext();
+			this.#updateNote();
 		}
 	}
 
@@ -479,6 +518,131 @@ export class FrameEngine {
 	/** Any key press or touch on the page. */
 	activity(): void {
 		this.#poke();
+	}
+
+	// ------------------------------------------------------------------ family social (family-social.md §8, §9.3)
+
+	#clearSocial(): void {
+		this.#social.clear();
+		this.#previousPromptId = null;
+		this.#askUnavailableUntil = 0;
+		for (const t of ['note', 'cards', 'ask', 'askTick', 'askConfirmation']) this.#cancel(t);
+		this.#set({ ask: null, askConfirmation: null, cards: null, note: null });
+	}
+
+	/** The button's state and "New photos from Ben", after a pull, a setting change or the end of "asked today". */
+	#updateSocial(): void {
+		const s = socialSettings(this.feed.settings);
+		const now = this.#d.now();
+		const hidden = this.view.status !== 'running' || !s.askForPhotos || now < this.#askUnavailableUntil;
+		const ask = hidden ? null : askState(this.feed.photoRequest, this.#social.askedAt, now);
+		if (!sameAsk(ask, this.view.ask)) this.#set({ ask });
+		if (ask && ask.kind !== 'ready') {
+			const until = askedUntil(this.feed.photoRequest, this.#social.askedAt);
+			this.#after('askTick', Math.min(DAY_MS, Math.max(1000, until - now + 50)), () => this.#updateSocial());
+		} else if (this.#askUnavailableUntil > now) this.#after('askTick', this.#askUnavailableUntil - now + 50, () => this.#updateSocial());
+		else this.#cancel('askTick');
+		this.#updateNote();
+	}
+
+	/** "Ask for new photos": remembered at once (offline too), sent now or when the frame is back online. */
+	askForPhotos(): boolean {
+		if (this.view.ask?.kind !== 'ready') return false;
+		this.#poke();
+		this.#social.ask(this.#d.now());
+		this.#set({ askConfirmation: this.view.online ? 'asked' : 'willAsk' });
+		this.#after('askConfirmation', CONFIRMATION_MS, () => this.#set({ askConfirmation: null }));
+		this.#updateSocial();
+		void this.#sendAsk();
+		return true;
+	}
+
+	dismissAskConfirmation(): void {
+		this.#cancel('askConfirmation');
+		if (this.view.askConfirmation) this.#set({ askConfirmation: null });
+	}
+
+	async #sendAsk(): Promise<void> {
+		const at = this.#social.pendingAsk;
+		if (at === null || this.#asking || this.#stopped || this.view.status !== 'running') return;
+		this.#cancel('ask');
+		// A day later the button offers to ask again anyway: an old tap is not sent any more.
+		if (this.#d.now() - at > DAY_MS) {
+			this.#social.settleAsk(true);
+			return;
+		}
+		this.#asking = true;
+		try {
+			const r = await this.#d.client.requestPhotos();
+			if (r) this.feed.photoRequest = r;
+			this.#social.settleAsk(true);
+		} catch (e) {
+			if (e instanceof DeviceRevokedError) return this.#fail(e);
+			const status = e instanceof DeviceApiError ? e.status : 0;
+			if (status === 0 || status === 408 || status === 429 || (status >= 500 && status !== 501)) {
+				// Offline or the server is busy: keep it queued.
+				this.#after('ask', ASK_RETRY_MS, () => void this.#sendAsk());
+			} else {
+				// Refused (403: the owner turned the button off) or a server without it (404/501): nobody was asked,
+				// so the button must not say "Asked today".
+				this.#social.settleAsk(false);
+				this.dismissAskConfirmation();
+				if (status === 404 || status === 501) this.#askUnavailableUntil = this.#d.now() + UNAVAILABLE_HIDE_MS;
+			}
+		} finally {
+			this.#asking = false;
+			if (!this.#stopped) this.#updateSocial();
+		}
+	}
+
+	/** The prompt's title card and the newest comment over the slide that just appeared. */
+	#showCards(slide: ShownSlide): void {
+		const s = socialSettings(this.feed.settings);
+		const p = slide.placement;
+		const prompt = promptCard(s.promptCards, p.promptId, this.#previousPromptId, this.feed.prompts);
+		this.#previousPromptId = p.promptId;
+		let comment: PlacementComment | null = null;
+		if (s.showComments && this.view.screen === 'on' && !this.view.paused) {
+			const c = newestComment(this.feed.comments.get(p.id));
+			// Once per photo per day, in the frame's time zone.
+			if (c && this.#social.markCommentShown(p.id, localDay(this.#d.now(), this.feed.settings?.locale?.timezone))) comment = c;
+		}
+		if (!prompt && !comment) {
+			this.#cancel('cards');
+			if (this.view.cards) this.#set({ cards: null });
+			return;
+		}
+		this.#set({ cards: { seq: slide.seq, prompt, comment } });
+		this.#after('cards', CARD_MS, () => this.#set({ cards: null }));
+	}
+
+	/** "New photos from Ben" once the screen is awake: a moment after the wake, for 10 s; then those names are done. */
+	#updateNote(): void {
+		const on = this.view.status === 'running' && this.view.screen === 'on';
+		if (this.view.note) {
+			if (on) return;
+			// Asleep again before it was read: the names stay for the next wake.
+			this.#cancel('note');
+			this.#set({ note: null });
+			return;
+		}
+		if (!this.#social.names.length) return;
+		if (!socialSettings(this.feed.settings).newPhotosFrom) {
+			this.#social.setNames([]);
+			return;
+		}
+		if (!on) return this.#cancel('note');
+		if (this.#timers.has('note')) return;
+		this.#after('note', NOTE_DELAY_MS, () => {
+			const shown = [...this.#social.names];
+			if (!shown.length) return;
+			this.#set({ note: shown });
+			this.#after('note', NOTE_MS, () => {
+				this.#set({ note: null });
+				this.#social.setNames(removeNames(this.#social.names, shown));
+				this.#updateNote();
+			});
+		});
 	}
 
 	// ------------------------------------------------------------------ websocket
@@ -607,7 +771,10 @@ export class FrameEngine {
 	/** The page became visible or the network came back. */
 	resume(): void {
 		this.#socket?.reconnectNow();
-		if (this.view.status === 'running') void this.pull();
+		if (this.view.status === 'running') {
+			void this.pull();
+			void this.#sendAsk();
+		}
 		this.#evaluateScreen();
 	}
 }
