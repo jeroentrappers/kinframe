@@ -168,9 +168,17 @@ func TestSealer(t *testing.T) {
 	if got, err := a.Open(nil); err != nil || got != "" {
 		t.Fatal("nil should open to empty")
 	}
-	// A dedicated secrets key differs from the derived one.
+	// A dedicated secrets key configured later still opens what the derived key sealed, but seals with its own key.
 	b, _ := calendar.NewSealer([]byte(strings.Repeat("z", 32)), []byte(strings.Repeat("k", 32)))
-	if _, err := b.Open(box); err != calendar.ErrUnseal {
+	if got, err := b.Open(box); err != nil || got != "https://calendar.google.com/secret" {
+		t.Fatalf("secrets key added later: %q %v", got, err)
+	}
+	if _, err := a.Open(b.Seal("x")); err != calendar.ErrUnseal {
+		t.Fatalf("sealed with the secrets key, opened with the derived key: %v", err)
+	}
+	// Another signing key can't open it.
+	c, _ := calendar.NewSealer(nil, []byte(strings.Repeat("q", 32)))
+	if _, err := c.Open(box); err != calendar.ErrUnseal {
 		t.Fatalf("other key: %v", err)
 	}
 	if _, err := calendar.NewSealer(nil, []byte("short")); err == nil {

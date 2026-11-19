@@ -11,8 +11,9 @@ import (
 	"errors"
 )
 
-// Sealer encrypts and decrypts one kind of secret.
-type Sealer struct{ aead cipher.AEAD }
+// Sealer encrypts and decrypts one kind of secret. fallback, when set, is the key derived from the signing key:
+// secrets stored before KINFRAME_SECRETS_KEY was configured still open with it.
+type Sealer struct{ aead, fallback cipher.AEAD }
 
 const sealVersion = 1
 
@@ -21,12 +22,29 @@ var ErrUnseal = errors.New("stored credentials can't be decrypted; enter them ag
 
 // New derives the key with HKDF-SHA256 from secretsKey (KINFRAME_SECRETS_KEY)
 // with info secretsInfo when set, else from signingKey with signingInfo. Each
-// kind of secret uses its own info strings, so it gets its own key.
+// kind of secret uses its own info strings, so it gets its own key. When both
+// keys are there, Open also accepts values sealed with the signing-key-derived
+// key, so configuring KINFRAME_SECRETS_KEY later keeps existing secrets
+// readable (they are sealed with the new key the next time they are saved).
 func New(secretsKey, signingKey []byte, secretsInfo, signingInfo string) (*Sealer, error) {
 	ikm, info := secretsKey, secretsInfo
 	if len(ikm) == 0 {
 		ikm, info = signingKey, signingInfo
 	}
+	aead, err := newAEAD(ikm, info)
+	if err != nil {
+		return nil, err
+	}
+	x := &Sealer{aead: aead}
+	if len(secretsKey) > 0 && len(signingKey) >= 32 && signingInfo != "" {
+		if x.fallback, err = newAEAD(signingKey, signingInfo); err != nil {
+			return nil, err
+		}
+	}
+	return x, nil
+}
+
+func newAEAD(ikm []byte, info string) (cipher.AEAD, error) {
 	if len(ikm) < 32 {
 		return nil, errors.New("secrets key must be at least 32 bytes")
 	}
@@ -38,11 +56,7 @@ func New(secretsKey, signingKey []byte, secretsInfo, signingInfo string) (*Seale
 	if err != nil {
 		return nil, err
 	}
-	aead, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, err
-	}
-	return &Sealer{aead: aead}, nil
+	return cipher.NewGCM(block)
 }
 
 // Seal encrypts s; an empty string seals to nil.
@@ -66,6 +80,9 @@ func (x *Sealer) Open(b []byte) (string, error) {
 		return "", ErrUnseal
 	}
 	plain, err := x.aead.Open(nil, b[1:1+n], b[1+n:], []byte{sealVersion})
+	if err != nil && x.fallback != nil {
+		plain, err = x.fallback.Open(nil, b[1:1+n], b[1+n:], []byte{sealVersion})
+	}
 	if err != nil {
 		return "", ErrUnseal
 	}
