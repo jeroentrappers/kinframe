@@ -258,9 +258,9 @@ function retailerLinks(links: ShopElsewhereLink[]): RetailerLinks {
 }
 
 /**
- * Which retailer section a visitor sees. In a shipping country: `diy`, the links that list that country ("buy it
- * yourself and convert it"). Elsewhere, or when the country is unknown: `outside`, the links for countries the shop
- * doesn't ship to ("Outside Belgium?"). Each is null when it has no links.
+ * Which retailer sections a visitor sees. Everyone: `outside`, the links for countries the shop doesn't ship to
+ * ("Outside Belgium?"). In a shipping country also `diy`, the links that list that country ("buy it yourself and
+ * convert it"). Each is null when it has no links.
  */
 export function elsewhereSections(
 	shop: Pick<Shop, 'shipping' | 'elsewhere'>,
@@ -268,12 +268,15 @@ export function elsewhereSections(
 ): { diy: RetailerLinks | null; outside: RetailerLinks | null } {
 	const all = shop.elsewhere ?? [];
 	const ships = (c: string) => shop.shipping.countries.includes(c);
+	// The links for other countries stay visible for everyone (a Belgian may buy for family abroad); visitors in a
+	// shipping country also get their own country's links first, in the DIY section.
+	const outside = all.filter((l) => l.countries.some((c) => !ships(c)));
+	const out = outside.length ? retailerLinks(outside) : null;
 	if (country && ships(country)) {
 		const diy = all.filter((l) => l.countries.includes(country));
-		return { diy: diy.length ? retailerLinks(diy) : null, outside: null };
+		return { diy: diy.length ? retailerLinks(diy) : null, outside: out };
 	}
-	const outside = all.filter((l) => l.countries.some((c) => !ships(c)));
-	return { diy: null, outside: outside.length ? retailerLinks(outside) : null };
+	return { diy: null, outside: out };
 }
 
 /** The countries an outside link is for, without the shipping countries (those see it in the DIY section). */

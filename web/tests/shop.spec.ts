@@ -104,9 +104,9 @@ test.describe('shop', () => {
 			await expect(diy.getByRole('link', { name: 'Denver PFF-1024 · Amazon' })).toHaveAttribute('rel', 'sponsored noopener');
 			await expect(diy.getByRole('link', { name: 'Also at bol.com' })).toBeVisible();
 			await expect(diy.getByRole('link', { name: 'How to convert a frame' })).toHaveAttribute('href', /\/convert$/);
-			// The "*" link is for other countries: not shown to a Belgian visitor, and no "Outside Belgium?".
-			await expect(page.getByText('Amazon.de')).toHaveCount(0);
-			await expect(page.getByTestId('shop-elsewhere')).toHaveCount(0);
+			// The links for other countries stay visible to a Belgian visitor, under "Outside Belgium?".
+			await expect(page.getByTestId('shop-elsewhere')).toBeVisible();
+			await expect(page.getByTestId('shop-elsewhere').getByText('Amazon.de')).toBeVisible();
 		});
 	});
 

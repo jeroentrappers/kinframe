@@ -196,12 +196,12 @@ test.describe('storefront: resale notice and DIY links, Belgian visitor', () => 
 		);
 		await expect(diy.getByText('Amazon.nl')).toHaveCount(0);
 
-		// Notice and DIY come before the products; no "Outside Belgium?" for a Belgian visitor.
+		// Notice and DIY come before the products; "Outside Belgium?" stays for links to other countries.
 		const products = page.getByRole('region', { name: 'Get a Fotokader' });
 		const y = async (l: ReturnType<typeof page.getByTestId>) => (await l.boundingBox())!.y;
 		expect(await y(notice)).toBeLessThan(await y(diy));
 		expect(await y(diy)).toBeLessThan(await y(products.getByRole('heading', { name: 'kinframe 10.1"' })));
-		await expect(page.getByTestId('shop-elsewhere')).toHaveCount(0);
+		await expect(page.getByTestId('shop-elsewhere')).toHaveCount(1);
 		await expect(page.getByTestId('shop-notice')).toHaveCount(1);
 
 		// The shop page says the same above the order form.

@@ -200,9 +200,9 @@ describe('notice, DIY and elsewhere sections', () => {
 		expect(visitorCountry([], [])).toBeNull();
 	});
 
-	it('a visitor in a shipping country gets the DIY links for that country only', () => {
+	it('a visitor in a shipping country gets the DIY links for that country, and still the other countries', () => {
 		const { diy, outside } = elsewhereSections(s, 'BE');
-		expect(outside).toBeNull();
+		expect(outside?.main).toEqual([amazonNL, other]);
 		expect(diy?.main).toEqual([amazonBE]);
 		expect(diy?.secondary).toEqual([bolBE]);
 		expect(diy?.affiliate).toBe(true);
@@ -220,7 +220,8 @@ describe('notice, DIY and elsewhere sections', () => {
 	it('the disclosure only for affiliate links; no section without links', () => {
 		const plain = { ...s, elsewhere: [{ ...amazonBE, affiliate: false }, bolBE] };
 		expect(elsewhereSections(plain, 'BE').diy?.affiliate).toBe(false);
-		expect(elsewhereSections({ ...s, elsewhere: [amazonNL] }, 'BE')).toEqual({ diy: null, outside: null });
+		expect(elsewhereSections({ ...s, elsewhere: [amazonNL] }, 'BE').diy).toBeNull();
+		expect(elsewhereSections({ ...s, elsewhere: [amazonBE] }, 'DE')).toEqual({ diy: null, outside: null });
 		expect(elsewhereSections({ ...s, elsewhere: undefined }, 'DE')).toEqual({ diy: null, outside: null });
 	});
 });
