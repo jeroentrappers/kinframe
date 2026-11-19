@@ -57,7 +57,7 @@ public enum PhotoUpload {
                 failures = 0
                 progress(Double(upload.bytesDone) / Double(max(1, upload.size)))
             } catch TusError.unauthorized {
-                guard !refreshed, await api.refreshedToken() != nil else { throw APIError.unauthorized }
+                guard !refreshed, await api.refreshedToken(rejected: token) != nil else { throw APIError.unauthorized }
                 refreshed = true
             } catch TusError.failed(let e) {
                 throw e
