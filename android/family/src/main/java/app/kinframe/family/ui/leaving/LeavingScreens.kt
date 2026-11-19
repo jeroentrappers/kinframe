@@ -437,10 +437,11 @@ private fun PersonPicker(people: List<PersonRef>, onDismiss: () -> Unit, onPick:
 
 /** Settings → Memories, keep requests and places you left (only with discovery `leaving`). */
 @Composable
-fun LeavingSettingsSection(openKeepRequests: Int, onMemories: () -> Unit, onKeepRequests: () -> Unit, onFormerPlaces: () -> Unit) {
+fun LeavingSettingsSection(openKeepRequests: Int, onMemories: (() -> Unit)?, onKeepRequests: () -> Unit, onFormerPlaces: () -> Unit) {
     val c = Kin.colors
     SectionTitle(stringResource(R.string.leaving_settings_title))
-    Surface(Modifier.fillMaxWidth(), onClick = onMemories) {
+    // Null with several accounts: memories are per server, on each server's page.
+    if (onMemories != null) Surface(Modifier.fillMaxWidth(), onClick = onMemories) {
         Text(stringResource(R.string.leaving_memories_title), style = Kin.type.bodyStrong, color = c.ink)
         Text(stringResource(R.string.leaving_memories_entry_hint), style = Kin.type.caption, color = c.inkSoft)
     }

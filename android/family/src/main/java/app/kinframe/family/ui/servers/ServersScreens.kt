@@ -62,7 +62,7 @@ data class AccountRow(val id: String, val label: String, val host: String, val n
 
 /** Settings → Accounts (multi-server.md §2.1): every server the app is signed in to, add one, sign out of one, primary. */
 @Composable
-fun AccountsSection(rows: List<AccountRow>, onAdd: () -> Unit, onPrimary: (String) -> Unit, onSignOut: (String) -> Unit) {
+fun AccountsSection(rows: List<AccountRow>, onAdd: () -> Unit, onPrimary: (String) -> Unit, onSignOut: (String) -> Unit, onSettings: ((String) -> Unit)? = null) {
     val c = Kin.colors
     var signingOut by remember { mutableStateOf<AccountRow?>(null) }
     SectionTitle(stringResource(R.string.servers_accounts_title))
@@ -76,6 +76,10 @@ fun AccountsSection(rows: List<AccountRow>, onAdd: () -> Unit, onPrimary: (Strin
                     if (!r.signedIn) Text(stringResource(R.string.servers_accounts_signed_out), style = Kin.type.caption, color = c.danger)
                 }
                 if (r.primary) Pill(stringResource(R.string.servers_accounts_primary), c.accentSoft, c.onAccentSoft)
+            }
+            // Several accounts: each server's own settings (reminders and chats, Telegram, memories, deleting the account).
+            if (rows.size > 1 && r.signedIn && onSettings != null) {
+                SecondaryButton(stringResource(R.string.servers_account_settings), { onSettings(r.id) }, Modifier.fillMaxWidth(), icon = KinIcons.Settings)
             }
             if (rows.size > 1) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (!r.primary) QuietButton(stringResource(R.string.servers_accounts_make_primary), { onPrimary(r.id) })

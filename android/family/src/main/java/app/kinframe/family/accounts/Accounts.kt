@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.util.Locale
@@ -155,9 +157,21 @@ class AccountManager(private val deps: AccountDeps, rootPrefs: SharedPreferences
 
     private var saveJob: Job? = null
 
+    private val _learned = MutableStateFlow(0)
+    /**
+     * Bumps whenever the routing index records something new. A screen opened before its id's account was known
+     * (a tap on an older server's push, a link) follows [accountIdOf] and moves to the right account.
+     */
+    val learned: StateFlow<Int> = _learned.asStateFlow()
+
+    /** The account [key] is known for, following what the index learns (null while unknown: the primary one answers). */
+    fun accountIdOf(key: String?): kotlinx.coroutines.flow.Flow<String?> =
+        learned.map { index.get(key) }.distinctUntilChanged()
+
     init {
         store.loadIndex(index)
         index.onChange = {
+            _learned.update { it + 1 }
             saveJob?.cancel()
             saveJob = deps.scope.launch { delay(2_000); store.saveIndex(index) }
         }
@@ -240,6 +254,13 @@ class AccountManager(private val deps: AccountDeps, rootPrefs: SharedPreferences
 
     /** The context of the account [key] (a frame, family, post, conversation, person… id) belongs to. */
     fun contextFor(key: String?): AccountContext = forKey(key).let { AccountContext(it.id, it.server, it.me.value) }
+
+    /** The context of an account by its local id (a push's account, a per-server settings page); null or unknown: the primary one. */
+    fun contextOf(accountId: String?): AccountContext =
+        (byId(accountId) ?: primary.value).let { AccountContext(it.id, it.server, it.me.value) }
+
+    /** An account's server label when there are several accounts (per-server settings say which server), else null. */
+    fun labelIfSeveral(accountId: String?): String? = if (!several) null else (byId(accountId) ?: primary.value).label
 
     /** The person's user id on [key]'s server. */
     fun meIdFor(key: String?): String? = forKey(key).me.value?.id

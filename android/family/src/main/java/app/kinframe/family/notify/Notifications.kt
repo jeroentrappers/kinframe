@@ -26,6 +26,8 @@ object Notifications {
     const val EXTRA_FRAME_ID = "app.kinframe.family.FRAME_ID"
     const val EXTRA_PLACEMENT_ID = "app.kinframe.family.PLACEMENT_ID"
     const val EXTRA_TARGET = "app.kinframe.family.TARGET"
+    /** The local account a push was routed to ([PushMessage.account]): the tap opens that account's screens. */
+    const val EXTRA_ACCOUNT = "app.kinframe.family.ACCOUNT"
     const val TARGET_HISTORY = "history"
     const val TARGET_PEOPLE = "people"
     const val TARGET_FRAME = "frame"
@@ -209,6 +211,7 @@ object Notifications {
             ?: msg.ids["post_id"] ?: msg.ids["feed_id"] ?: msg.ids["frame_id"] ?: msg.kind
         val intent = openApp(context, key.hashCode()) {
             putExtra(EXTRA_TARGET, targetOf(msg))
+            msg.account.takeIf { it.isNotBlank() }?.let { putExtra(EXTRA_ACCOUNT, it) }
             msg.ids["send_id"]?.let { putExtra(EXTRA_SEND_ID, it) }
             msg.ids["frame_id"]?.let { putExtra(EXTRA_FRAME_ID, it) }
             msg.ids["placement_id"]?.let { putExtra(EXTRA_PLACEMENT_ID, it) }

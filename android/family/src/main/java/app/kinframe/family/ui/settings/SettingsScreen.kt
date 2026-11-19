@@ -177,7 +177,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismiss: () -> Unit, onDelete: (Boolean) -> Unit, choice: Boolean = false) {
+internal fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismiss: () -> Unit, onDelete: (Boolean) -> Unit, choice: Boolean = false) {
     val c = Kin.colors
     // With leaving the default is "Take my photos with me" (leaving.md decision A).
     var removeItems by rememberSaveable { mutableStateOf(choice) }
@@ -211,7 +211,7 @@ private fun DeleteAccountDialog(owned: List<String>, deleting: Boolean, onDismis
 }
 
 @Composable
-private fun Row2(label: String, value: String) {
+internal fun Row2(label: String, value: String) {
     Row(Modifier.fillMaxWidth()) {
         Text(label, style = Kin.type.body, color = Kin.colors.inkSoft, modifier = Modifier.weight(1f))
         Text(value, style = Kin.type.bodyStrong, color = Kin.colors.ink)

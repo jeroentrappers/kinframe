@@ -50,7 +50,8 @@ data class HomeState(
     val milestones: List<Milestone> = emptyList(),
     /** This week's prompts of families that have prompts on. */
     val prompts: List<FeedPrompt> = emptyList(),
-    val summary: WeeklySummary? = null,
+    /** Last week's "seen and loved" summaries: one per server that has one (multi-server.md §2.2). */
+    val summaries: List<HomeSummary> = emptyList(),
     val reminders: ReminderPreferences? = null,
 ) {
     val entries: List<HomeEntry> get() = TimelineLogic.entries((posts as? Load.Ready)?.value.orEmpty())
@@ -58,6 +59,9 @@ data class HomeState(
     /** Frames that asked for new photos and haven't been answered. */
     val openRequests: List<Frame> get() = frames.filter { it.photoRequest?.isOpen == true }
 }
+
+/** One server's weekly summary card on Home; [accountId] opens that server's summary (null: the only account). */
+data class HomeSummary(val summary: WeeklySummary, val accountId: String? = null)
 
 sealed interface HomeNotice {
     data class Message(@StringRes val message: Int) : HomeNotice
@@ -76,6 +80,11 @@ class HomeViewModel(
     private val today: () -> LocalDate = { LocalDate.now() },
     /** Whether a user id is the person (any of their accounts: Home merges every server's timeline). */
     private val isMe: (String?) -> Boolean = { it != null && it == me() },
+    /**
+     * Every server's summary of a week, by account (merged Home); by default the one client's, without an account.
+     * Servers without one that week are left out.
+     */
+    private val summaries: suspend (String) -> List<HomeSummary> = { week -> listOf(HomeSummary(api.weeklySummary(week))) },
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -109,7 +118,7 @@ class HomeViewModel(
         runCatching { api.milestones() }.onSuccess { m -> _state.update { it.copy(milestones = m.filter { x -> !x.seen }) } }
         runCatching { api.reminderPreferences() }.onSuccess { r -> _state.update { it.copy(reminders = r) } }
         // Last week's "seen and loved" summary, when there is one (404 otherwise).
-        runCatching { api.weeklySummary(lastWeek()) }.onSuccess { w -> _state.update { it.copy(summary = w.takeIf { x -> x.seenCount > 0 }) } }
+        runCatching { summaries(lastWeek()) }.onSuccess { w -> _state.update { it.copy(summaries = w.filter { x -> x.summary.seenCount > 0 }) } }
         val feeds = runCatching { kin.feeds() }.getOrDefault(emptyList())
         val prompts = feeds.take(MAX_PROMPT_FEEDS).mapNotNull { f ->
             runCatching { api.feedPrompts(f.id) }.getOrNull()?.firstOrNull { it.status == PromptStatus.CURRENT && it.title.isNotBlank() }
@@ -166,7 +175,7 @@ class HomeViewModel(
         runCatching { api.updateReminderPreferences(ReminderPreferencesUpdate(autoReducedSeen = true)) }
     }
 
-    fun dismissSummary() = _state.update { it.copy(summary = null) }
+    fun dismissSummary(card: HomeSummary) = _state.update { s -> s.copy(summaries = s.summaries - card) }
 
     private fun onLive(e: LiveEvent) {
         when (e) {

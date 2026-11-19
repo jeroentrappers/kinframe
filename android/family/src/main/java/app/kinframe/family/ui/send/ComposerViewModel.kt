@@ -48,6 +48,37 @@ data class DraftItem(
 
 enum class ItemIssue { TooLarge, TooLong, TooShort }
 
+/** One recipient's server limits (discovery `limits` there); [server] is its label with several accounts, else null. */
+data class ServerLimits(val server: String?, val limits: Limits)
+
+/**
+ * The limits of a send whose frames and families are on several servers (multi-server.md §2.2): each one the strictest
+ * of the chosen recipients' servers, with that server's label when the servers differ on it (null otherwise), so the
+ * Send tab can say which server holds the selection back.
+ */
+data class SendLimits(
+    val limits: Limits,
+    val itemsServer: String? = null,
+    val videoServer: String? = null,
+    val uploadServer: String? = null,
+) {
+    companion object {
+        /** [base] (the primary account's limits) while nothing is chosen yet. */
+        fun of(base: Limits, targets: List<ServerLimits>): SendLimits {
+            if (targets.isEmpty()) return SendLimits(base)
+            fun <T : Comparable<T>> strictest(f: (Limits) -> T): Pair<T, String?> {
+                val min = targets.minBy { f(it.limits) }
+                val differ = targets.map { f(it.limits) }.distinct().size > 1
+                return f(min.limits) to min.server.takeIf { differ }
+            }
+            val (items, itemsServer) = strictest { it.maxItemsPerSend }
+            val (video, videoServer) = strictest { it.maxVideoSeconds }
+            val (upload, uploadServer) = strictest { it.maxUploadBytes }
+            return SendLimits(base.copy(maxItemsPerSend = items, maxVideoSeconds = video, maxUploadBytes = upload), itemsServer, videoServer, uploadServer)
+        }
+    }
+}
+
 data class ComposerState(
     val items: List<DraftItem> = emptyList(),
     val frames: Load<List<Frame>> = Load.Loading,
@@ -75,7 +106,19 @@ data class ComposerState(
     val answering: String? = null,
     /** Several accounts: each frame's and family's server label (multi-server.md §2.2); empty with one account. */
     val serverOf: Map<String, String> = emptyMap(),
+    /** Each frame's and family's server limits; missing ones use [limits] (the primary account's). */
+    val limitsOf: Map<String, ServerLimits> = emptyMap(),
 ) {
+    /**
+     * What applies to this send: the strictest limits of the chosen recipients' servers (multi-server.md §2.2), else
+     * [limits]. Validation, trimming and the per-send count all use these.
+     */
+    val sendLimits: SendLimits get() =
+        SendLimits.of(limits, (selected + selectedFeeds).map { id -> limitsOf[id] ?: ServerLimits(serverOf[id], limits) })
+
+    /** More items than a chosen recipient's server takes in one send. */
+    val tooMany: Boolean get() = items.size > sendLimits.limits.maxItemsPerSend
+
     val sendableFrames: List<Frame> get() = (frames as? Load.Ready)?.value?.filter { it.can { p -> p.send } }.orEmpty()
 
     /**
@@ -95,14 +138,14 @@ data class ComposerState(
     val noRecipients: Boolean get() = frames is Load.Ready && sendableFrames.isEmpty() && feeds.isEmpty()
 
     fun issue(item: DraftItem): ItemIssue? = when {
-        item.info.size > limits.maxUploadBytes -> ItemIssue.TooLarge
-        item.isVideo && (item.sendDurationMs ?: 0) > limits.maxVideoSeconds * 1000L -> ItemIssue.TooLong
+        item.info.size > sendLimits.limits.maxUploadBytes -> ItemIssue.TooLarge
+        item.isVideo && (item.sendDurationMs ?: 0) > sendLimits.limits.maxVideoSeconds * 1000L -> ItemIssue.TooLong
         item.isVideo && item.info.durationMs != null && item.info.durationMs >= Framing.MIN_VIDEO_MS && (item.sendDurationMs ?: 0) < Framing.MIN_VIDEO_MS -> ItemIssue.TooShort
         else -> null
     }
 
     val issues: Int get() = items.count { issue(it) != null }
-    val canSend: Boolean get() = items.isNotEmpty() && issues == 0 && hasRecipients && !preparing
+    val canSend: Boolean get() = items.isNotEmpty() && issues == 0 && !tooMany && hasRecipients && !preparing
 }
 
 /** One server's recipients in the Send tab; [server] is null when everything is on one server. */
@@ -143,6 +186,8 @@ class ComposerViewModel(
     private val social: () -> app.kinframe.core.social.SocialApi? = { null },
     /** A frame's or family's server label when signed in to several servers, else null. */
     private val serverLabel: (String) -> String? = { null },
+    /** A frame's or family's server limits (its own server's discovery); null uses [limits]. */
+    private val limitsFor: (String) -> Limits? = { null },
 ) : ViewModel() {
     private val _state = MutableStateFlow(ComposerState(limits = limits()))
     val state: StateFlow<ComposerState> = _state.asStateFlow()
@@ -178,7 +223,8 @@ class ComposerViewModel(
                     sendable.size == 1 -> setOf(sendable.single().id)
                     else -> emptySet()
                 }
-                s.copy(frames = Load.Ready(frames), selected = sel, serverOf = s.serverOf + labels(frames.map { it.id }))
+                s.copy(frames = Load.Ready(frames), selected = sel, serverOf = s.serverOf + labels(frames.map { it.id }),
+                    limitsOf = s.limitsOf + serverLimits(frames.map { it.id }))
             }
             // A frame you're not on asked for photos (or went quiet) and reached you through a family: preselect the
             // families whose posts reach it (README §5.20).
@@ -196,12 +242,15 @@ class ComposerViewModel(
         _state.update { s ->
             val pre = preselectFeed?.takeIf { id -> feeds.any { it.id == id } }
             s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }),
-                serverOf = s.serverOf + labels(feeds.map { it.id }))
+                serverOf = s.serverOf + labels(feeds.map { it.id }), limitsOf = s.limitsOf + serverLimits(feeds.map { it.id }))
         }
         familiesReady?.complete(Unit)
     }
 
     private fun labels(ids: List<String>): Map<String, String> = ids.mapNotNull { id -> serverLabel(id)?.let { id to it } }.toMap()
+
+    private fun serverLimits(ids: List<String>): Map<String, ServerLimits> =
+        ids.mapNotNull { id -> limitsFor(id)?.let { id to ServerLimits(serverLabel(id), it) } }.toMap()
 
     private var familiesReady: kotlinx.coroutines.CompletableDeferred<Unit>? = null
 
@@ -290,8 +339,8 @@ class ComposerViewModel(
             val media = infos.mapNotNull { it.second }
             val skipped = infos.count { it.second == null }
             _state.update { s ->
-                val room = (s.limits.maxItemsPerSend - s.items.size).coerceAtLeast(0)
-                val maxMs = s.limits.maxVideoSeconds * 1000L
+                val room = (s.sendLimits.limits.maxItemsPerSend - s.items.size).coerceAtLeast(0)
+                val maxMs = s.sendLimits.limits.maxVideoSeconds * 1000L
                 val added = media.take(room).map { info ->
                     DraftItem(newId(), info, trim = if (info.kind == MediaKind.VIDEO) Framing.defaultTrim(info.durationMs, maxMs) else null)
                 }
@@ -328,7 +377,7 @@ class ComposerViewModel(
 
     fun setTrim(id: String, start: Long, end: Long, moved: TrimHandle) = change(id) { item ->
         val d = item.info.durationMs ?: return@change item
-        val (s, e) = Framing.clampTrim(start, end, d, state.value.limits.maxVideoSeconds * 1000L, moved)
+        val (s, e) = Framing.clampTrim(start, end, d, state.value.sendLimits.limits.maxVideoSeconds * 1000L, moved)
         item.copy(trim = if (s == 0L && e == d) null else s to e)
     }
 

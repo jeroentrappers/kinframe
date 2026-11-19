@@ -152,6 +152,7 @@ import app.kinframe.family.ui.send.ComposerEvent
 import app.kinframe.family.ui.send.ComposerViewModel
 import app.kinframe.family.ui.send.ItemEditor
 import app.kinframe.family.ui.settings.SettingsScreen
+import app.kinframe.family.ui.settings.AccountSettingsScreen
 import app.kinframe.family.util.DeepLink
 import app.kinframe.family.util.Problems
 import app.kinframe.family.update.UpdateState
@@ -319,6 +320,8 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
             feedsEnabled = { graph.accounts.signedIn.any { it.server?.discovery?.feeds == true } },
             social = { graph.social.api.value?.takeIf { graph.social.socialOn } },
             serverLabel = { id -> graph.accounts.chipFor(id) },
+            // Each recipient's own server limits: the strictest applies to the selection (multi-server.md §2.2).
+            limitsFor = { id -> graph.accounts.contextFor(id).server?.limits },
         )
     }
     val history: HistoryViewModel = viewModel(key = "history-$k") { HistoryViewModel(api, graph.live.events, graph.sent) }
@@ -361,6 +364,7 @@ private fun Home(graph: AppGraph, app: AppViewModel, ready: Phase.Ready) {
         val targets = SocialTargets(
             tabs = socialFlags,
             account = { key -> graph.accounts.contextFor(key) },
+            byAccount = { id -> graph.accounts.contextOf(id) },
             canSendTo = { id ->
                 val list = (frames.state.value.frames as? Load.Ready)?.value ?: runCatching { api.frames() }.getOrNull()
                 list == null || list.any { it.id == id && it.can { p -> p.send } }
@@ -575,6 +579,9 @@ private fun Screen(
                 history::refresh, history::loadMore,
                 onRetryOutbox = { id -> graph.outbox.update(id) { it.copy(state = OutboxState.QUEUED, error = null) }; SendWorker.enqueue(context, id) },
                 onDiscardOutbox = { id -> discardOutbox(graph, context, id) },
+                // Several servers: a chip on every send (the routing index knows each send's account).
+                serverChip = { send -> graph.accounts.chipFor(send.id) },
+                outboxChip = { o -> if (graph.accounts.several) graph.accounts.forServer(o.server)?.label else null },
             )
         }
         Route.Settings -> {
@@ -584,6 +591,10 @@ private fun Screen(
             var deletingAccount by remember { mutableStateOf(false) }
             var allowed by remember { mutableStateOf(Notifications.canPost(context)) }
             val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { allowed = it }
+            // Several accounts: what is each server's own (reminders and chats, Telegram, memories, deleting the
+            // account) moves to that server's page under Accounts (multi-server.md §2.1).
+            val accountsVersion by graph.accounts.version.collectAsStateWithLifecycle()
+            val several = remember(accountsVersion) { graph.accounts.several }
             val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
                 if (uri != null) app.setAvatar(uri) { err -> toaster.show(res.getString(err ?: R.string.settings_avatar_saved)) }
             }
@@ -607,17 +618,21 @@ private fun Screen(
                 },
                 // My photo sources lists every account's sources (each runs on its own server).
                 onPhotoSources = if (graph.accounts.signedIn.any { it.server?.discovery?.sourceProviders?.isNotEmpty() == true }) ({ nav.push(Route.PhotoSources) }) else null,
-                telegram = if (ready.server.discovery.telegram) ({ TelegramLinkSettings(graph, ready) }) else null,
-                social = { SocialSettingsSection(ready, nav) },
+                telegram = if (ready.server.discovery.telegram && !several) ({ TelegramLinkSettings(graph, ready) }) else null,
+                social = if (several) null else ({ SocialSettingsSection(ready, nav) }),
                 leaving = { LeavingSettingsSlot(graph, nav) },
                 deletionChoice = ready.server.discovery.leaving,
-                ownedFrames = (fs.frames as? Load.Ready)?.value.orEmpty().filter { it.role == ApiRole.OWNER }.map { it.name },
-                onDeleteAccount = { removeItems ->
+                ownedFrames = ownedFramesOn(graph, (fs.frames as? Load.Ready)?.value.orEmpty(), graph.accounts.primary.collectAsStateWithLifecycle().value.id),
+                onDeleteAccount = if (several) null else { removeItems ->
                     deletingAccount = true
                     app.deleteAccount(removeItems) { err -> deletingAccount = false; toaster.show(res.getString(err)) }
                 },
                 deletingAccount = deletingAccount,
             )
+        }
+        is Route.AccountSettings -> {
+            val fs by frames.state.collectAsStateWithLifecycle()
+            AccountSettingsScreen(graph, ready, nav, app, r.accountId, ownedFramesOn(graph, (fs.frames as? Load.Ready)?.value.orEmpty(), r.accountId))
         }
         is Route.AddFrame -> {
             // A code typed by hand with several accounts: the person picks the server (a link names its own).
@@ -648,7 +663,9 @@ private fun Screen(
                 onViewFrame = { id -> frames.refresh(); nav.replace(Route.FrameDetail(id)) })
         }
         is Route.SendDetail -> {
-            val vm: SendDetailViewModel = viewModel(key = "send-${r.sendId}") { SendDetailViewModel(api, r.sendId, graph.live.events) }
+            // Made again if the send's account becomes known after the screen opened (a push of an older server).
+            val sendAccount = rememberAccountContext(graph, r.sendId, ready).accountId
+            val vm: SendDetailViewModel = viewModel(key = "send-${r.sendId}-$sendAccount") { SendDetailViewModel(api, r.sendId, graph.live.events) }
             val s by vm.state.collectAsStateWithLifecycle()
             LaunchedEffect(vm) {
                 vm.events.collect { e ->
@@ -747,7 +764,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
     // The family's own server: its flags, and the person's user id there (multi-server.md §2.2).
     val acct = rememberAccountContext(graph, r.feedId, ready)
     val d = acct.discovery ?: ready.server.discovery
-    val vm: FeedDetailViewModel = viewModel(key = "feed-${r.feedId}-${System.identityHashCode(api)}") {
+    val vm: FeedDetailViewModel = viewModel(key = "feed-${r.feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
         FeedDetailViewModel(api, r.feedId, { graph.accounts.meIdFor(r.feedId) }, graph.live.events)
     }
     val s by vm.state.collectAsStateWithLifecycle()
@@ -774,7 +791,7 @@ private fun FeedDetailRoute(graph: AppGraph, api: KinApi, r: Route.FeedDetail, n
     val feedName = s.feedOrNull?.name.orEmpty()
     // Birthdays (docs/spec/birthdays.md), only when the server has them.
     val birthdaysOn = d.birthdays
-    val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${r.feedId}-${System.identityHashCode(api)}") {
+    val bvm: app.kinframe.family.ui.feeds.FeedBirthdaysViewModel? = if (!birthdaysOn) null else viewModel(key = "birthdays-${r.feedId}-${acct.accountId}-${System.identityHashCode(api)}") {
         app.kinframe.family.ui.feeds.FeedBirthdaysViewModel(
             api, r.feedId, graph.live.events,
             readPhoto = { uri -> kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { app.kinframe.family.ui.Avatars.squareJpeg(graph.app, uri) } },
@@ -853,7 +870,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
     // The frame's own server: its flags and limits, and the person's user id there (multi-server.md §2.2).
     val acct = rememberAccountContext(graph, r.frameId, ready)
     val disco = acct.discovery ?: ready.server.discovery
-    val vm: FrameDetailViewModel = viewModel(key = "frame-${r.frameId}-${System.identityHashCode(api)}") {
+    val vm: FrameDetailViewModel = viewModel(key = "frame-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") {
         FrameDetailViewModel(api, r.frameId, { graph.accounts.meIdFor(r.frameId) }, graph.live.events)
     }
     val s by vm.state.collectAsStateWithLifecycle()
@@ -900,7 +917,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
         overview = actions,
         library = {
             val canSettings = (s.frame as? Load.Ready)?.value?.can { it.changeSettings } == true
-            val lib: LibraryViewModel = viewModel(key = "lib-${r.frameId}-${System.identityHashCode(api)}") { LibraryViewModel(api, r.frameId, canSettings) }
+            val lib: LibraryViewModel = viewModel(key = "lib-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") { LibraryViewModel(api, r.frameId, canSettings) }
             val ls by lib.state.collectAsStateWithLifecycle()
             LaunchedEffect(lib) {
                 lib.events.collect { e ->
@@ -948,7 +965,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
             }
         },
         settings = {
-            val fs: FrameSettingsViewModel = viewModel(key = "fs-${r.frameId}-${System.identityHashCode(api)}") {
+            val fs: FrameSettingsViewModel = viewModel(key = "fs-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") {
                 FrameSettingsViewModel(api, r.frameId) { Locale.getDefault().language }
             }
             val ss by fs.state.collectAsStateWithLifecycle()
@@ -961,7 +978,7 @@ private fun FrameDetailRoute(graph: AppGraph, api: KinApi, r: Route.FrameDetail,
                     }
                 }
             }
-            val pv: PluginsViewModel = viewModel(key = "plugins-${r.frameId}-${System.identityHashCode(api)}") { PluginsViewModel(api, r.frameId) }
+            val pv: PluginsViewModel = viewModel(key = "plugins-${r.frameId}-${acct.accountId}-${System.identityHashCode(api)}") { PluginsViewModel(api, r.frameId) }
             val ps by pv.state.collectAsStateWithLifecycle()
             LaunchedEffect(pv) {
                 pv.events.collect { e ->
@@ -1133,6 +1150,10 @@ private suspend fun keepReadable(graph: AppGraph, send: app.kinframe.family.send
     send.copy(items = items)
 }
 
+/** Names of the frames on [accountId]'s server the person owns (handed over or removed before deleting the account there). */
+private fun ownedFramesOn(graph: AppGraph, frames: List<app.kinframe.core.api.Frame>, accountId: String): List<String> =
+    frames.filter { it.role == ApiRole.OWNER && graph.accounts.forKey(it.id).id == accountId }.map { it.name }
+
 private fun discardOutbox(graph: AppGraph, context: Context, id: String) {
     SendWorker.cancel(context, id)
     graph.outbox.get(id)?.let { s ->
@@ -1223,23 +1244,29 @@ private fun PhotoSourcesHome(graph: AppGraph, ready: Phase.Ready, nav: Navigator
 
     val shared by graph.incomingSourceLink.collectAsStateWithLifecycle()
     val link = remember(shared) { PhotoSourceLinks.parse(shared) }
+    // A source runs on the server of the album or family it fills (multi-server.md §2.2): the link's provider must be
+    // synced by that target's server, not the primary one's.
+    val providersOf = { key: String? -> graph.accounts.contextFor(key).discovery?.sourceProviders.orEmpty() }
+    val anyProviders = graph.accounts.signedIn.flatMap { it.server?.discovery?.sourceProviders.orEmpty() }.toSet().ifEmpty { d.sourceProviders.toSet() }
     LaunchedEffect(shared) {
         if (shared == null) return@LaunchedEffect
         val provider = link?.provider
         when {
-            d.sourceProviders.isEmpty() -> { toaster.show(res.getString(R.string.source_problem_disabled)); graph.incomingSourceLink.value = null }
-            provider == null || provider !in d.sourceProviders -> {
+            anyProviders.isEmpty() -> { toaster.show(res.getString(R.string.source_problem_disabled)); graph.incomingSourceLink.value = null }
+            provider == null || provider !in anyProviders -> {
                 toaster.show(res.getString(if (link is SourceLink.ICloudPhotosLink) R.string.source_err_unsupported_link else R.string.source_shared_not_supported))
                 graph.incomingSourceLink.value = null
             }
         }
     }
     val l = link
-    if (shared != null && l?.provider != null && l.provider in d.sourceProviders) {
+    if (shared != null && l?.provider != null && l.provider in anyProviders) {
         val choices by androidx.compose.runtime.produceState<List<SyncChoice>?>(null, ready.api) {
-            value = syncChoices(ready.api, d.feeds,
+            value = syncChoices(ready.api, graph.accounts.signedIn.any { it.server?.discovery?.feeds == true } || d.feeds,
                 feedLabel = { res.getString(R.string.source_shared_feed_choice, it) },
-                albumLabel = { a, f -> res.getString(R.string.source_shared_album_choice, a, f) })
+                albumLabel = { a, f -> res.getString(R.string.source_shared_album_choice, a, f) },
+                supports = { id -> l.provider in providersOf(id) },
+                server = { id -> graph.accounts.chipFor(id) })
         }
         SyncLinkDialog(l, choices, { graph.incomingSourceLink.value = null }) { ch ->
             graph.incomingSourceLink.value = null

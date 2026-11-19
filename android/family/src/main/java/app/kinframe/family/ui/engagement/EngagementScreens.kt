@@ -99,10 +99,12 @@ fun RemindersScreen(
     onBlocked: (() -> Unit)?,
     onMilestones: (() -> Unit)?,
     onReports: (() -> Unit)?,
+    /** The account's server label when there are several accounts. */
+    server: String? = null,
 ) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.engagement_settings_title), onBack = onBack)
+        KinTopBar(stringResource(R.string.engagement_settings_title), onBack = onBack, subtitle = server)
         PageColumn {
             if (engagement) when (val l = s.prefs) {
                 Load.Loading -> SkeletonList(2, 80.dp)
@@ -288,10 +290,10 @@ private fun PromptChooser(p: FeedPrompt, s: FeedEngagementState, onDismiss: () -
 }
 
 @Composable
-fun WeeklySummaryScreen(s: Load<WeeklySummary>, onRetry: () -> Unit, onBack: () -> Unit) {
+fun WeeklySummaryScreen(s: Load<WeeklySummary>, onRetry: () -> Unit, onBack: () -> Unit, server: String? = null) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.engagement_summary_title), onBack = onBack)
+        KinTopBar(stringResource(R.string.engagement_summary_title), onBack = onBack, subtitle = server)
         when (s) {
             Load.Loading -> SkeletonList(2, 100.dp)
             is Load.Error -> ErrorPanel(s.message, onRetry)
@@ -353,10 +355,10 @@ fun RecapScreen(s: Load<MonthlyRecap>, onRetry: () -> Unit, onBack: () -> Unit, 
 
 /** Personal milestones: private, optionally shown on your profile to your contacts. */
 @Composable
-fun MilestonesScreen(s: Load<List<Milestone>>, vm: MilestonesViewModel, onBack: () -> Unit) {
+fun MilestonesScreen(s: Load<List<Milestone>>, vm: MilestonesViewModel, onBack: () -> Unit, server: String? = null) {
     val c = Kin.colors
     Column(Modifier.fillMaxSize().background(c.paper)) {
-        KinTopBar(stringResource(R.string.engagement_milestones), onBack = onBack)
+        KinTopBar(stringResource(R.string.engagement_milestones), onBack = onBack, subtitle = server)
         when (s) {
             Load.Loading -> SkeletonList(3, 64.dp)
             is Load.Error -> ErrorPanel(s.message, { vm.load() })

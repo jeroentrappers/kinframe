@@ -36,6 +36,11 @@ data class PushMessage(
     val actions: List<String> = emptyList(),
     /** The sending server's base URL (README §6.3); empty from older servers. */
     val server: String = "",
+    /**
+     * The app's local account the push was routed to ([app.kinframe.family.AppGraph.routePush]); set on the phone, never
+     * in the payload. Notification buttons and taps act on that account's server.
+     */
+    val account: String = "",
 ) {
     /** The push key (`subscription_request`…), falling back to the type for servers that send only one. */
     val kind: String get() = key.ifBlank { type }
@@ -48,6 +53,22 @@ data class PushMessage(
             val actions = (o["actions"] as? kotlinx.serialization.json.JsonArray).orEmpty().mapNotNull { it.jsonPrimitive.contentOrNull }
             PushMessage(s("type"), s("title"), s("body"), ids, s("key"), s("tag"), actions, s("server"))
         }.getOrNull()
+
+        /**
+         * An FCM data message: the server flattens the payload into string fields (`type`, `key`, `title`, `body`,
+         * `tag`, `actions` comma-separated, `server`, and every id at the top level; server/internal/notify/fcm.go).
+         * [notificationTitle] and [notificationBody] are the FCM notification block's, for older servers.
+         */
+        fun fromData(data: Map<String, String>, notificationTitle: String? = null, notificationBody: String? = null): PushMessage = PushMessage(
+            type = data["type"].orEmpty(),
+            title = data["title"] ?: notificationTitle.orEmpty(),
+            body = data["body"] ?: notificationBody.orEmpty(),
+            ids = data.filterKeys { it.endsWith("_id") || it in SocialNotifications.EXTRA_ID_KEYS },
+            key = data["key"].orEmpty(),
+            tag = data["tag"].orEmpty(),
+            actions = SocialNotifications.parseActions(data["actions"]),
+            server = data["server"].orEmpty(),
+        )
     }
 }
 
@@ -185,9 +206,7 @@ class KinPushService : PushService() {
         // The server posts plain JSON today (no Web Push encryption), so the content is used whether or not it was decrypted.
         PushMessage.parse(message.content)?.let { msg ->
             // Several accounts: the payload's `server` picks the account, else this endpoint's account (README §6.3).
-            graph.routePush(msg, PushRegistrar.accountOf(instance))
-            Notifications.showPush(this, msg)
-            graph.onPush(msg)
+            graph.receivePush(this, msg, PushRegistrar.accountOf(instance))
         }
     }
 

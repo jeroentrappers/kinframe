@@ -148,20 +148,20 @@ fun LeavingSettingsSlot(graph: AppGraph, nav: Navigator) {
     }
     AccountsSection(rows,
         onAdd = { graph.addServer.value = AddServerRequest() },
+        // Several accounts: each server's own settings on its page.
+        onSettings = { id -> nav.push(Route.AccountSettings(id)) },
         onPrimary = { graph.accounts.setPrimary(it) },
         onSignOut = { id -> graph.accounts.byId(id)?.let { a -> scope.launch { graph.signOut(null, a) } } },
     )
     if (accounts.any { it.route()?.leaving != null }) {
         var open by androidx.compose.runtime.remember { mutableIntStateOf(0) }
         LaunchedEffect(version) { open = runCatching { graph.leaving.myKeepRequests().requests.count { it.isOpen } }.getOrDefault(0) }
+        // Memories are per server: with several accounts they are on each server's page.
+        val single = rows.size < 2
         LeavingSettingsSection(open,
-            onMemories = { nav.push(MemoriesRoute(accounts.firstOrNull { it.route()?.leaving != null }?.id)) },
+            onMemories = if (single) ({ nav.push(MemoriesRoute(accounts.firstOrNull { it.route()?.leaving != null }?.id)) }) else null,
             onKeepRequests = { nav.push(KeepRequestsRoute()) },
             onFormerPlaces = { nav.push(FormerPlacesRoute) })
-        // Memories are per server: one entry per other account with leaving.
-        accounts.drop(1).filter { it.route()?.leaving != null }.forEach { a ->
-            QuietButton(LocalResources.current.getString(R.string.leaving_memories_on, a.label), { nav.push(MemoriesRoute(a.id)) })
-        }
     }
 }
 

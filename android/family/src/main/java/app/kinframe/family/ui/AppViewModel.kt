@@ -186,10 +186,15 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
     }
 
     /** Deletes the account (`DELETE /v1/me`) and signs out locally: the tokens are void once the account is gone. */
-    fun deleteAccount(removeItems: Boolean, onError: (Int) -> Unit) {
-        val api = graph.api.value ?: return
-        // With leaving (README §5.21): `DELETE /v1/me {photos: take|leave}` on the primary account's server.
-        val leaving = graph.accounts.primary.value.route()?.leaving
+    /**
+     * Deletes the person's account on [account]'s server (default: the primary one) and signs out of it there; the
+     * other servers stay signed in (multi-server.md §2.1).
+     */
+    fun deleteAccount(removeItems: Boolean, account: app.kinframe.family.accounts.Account = graph.accounts.primary.value, onError: (Int) -> Unit) {
+        val route = account.route() ?: return
+        val api = route.kin
+        // With leaving (README §5.21): `DELETE /v1/me {photos: take|leave}` on that account's server.
+        val leaving = route.leaving
         viewModelScope.launch {
             try {
                 if (leaving != null) leaving.deleteAccount(app.kinframe.core.leaving.AccountDeletion(
@@ -200,8 +205,9 @@ class AppViewModel(private val graph: AppGraph) : ViewModel() {
                 onError(Problems.message(e))
                 return@launch
             }
-            graph.signOut(null)
-            profile.update { ProfileState() }
+            val wasPrimary = account.id == graph.accounts.primary.value.id
+            graph.signOut(null, account)
+            if (wasPrimary) profile.update { ProfileState() }
         }
     }
 

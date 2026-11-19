@@ -55,6 +55,7 @@ import app.kinframe.family.ui.SkeletonList
 import app.kinframe.family.ui.Thumb
 import app.kinframe.family.ui.ToggleChip
 import app.kinframe.family.util.Format
+import androidx.compose.ui.platform.LocalContext
 
 /** One server's frames and families in the Send tab ("Frames" and "Families" sections when both exist). */
 @OptIn(ExperimentalLayoutApi::class)
@@ -130,7 +131,7 @@ fun ComposeScreen(
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            stringResource(R.string.send_count, state.items.size, state.limits.maxItemsPerSend),
+                            stringResource(R.string.send_count, state.items.size, state.sendLimits.limits.maxItemsPerSend),
                             style = Kin.type.label, color = c.inkSoft, modifier = Modifier.weight(1f),
                         )
                         QuietButton(stringResource(R.string.send_clear), onClear)
@@ -142,7 +143,16 @@ fun ComposeScreen(
                     Text(stringResource(R.string.send_focal_hint), style = Kin.type.caption, color = c.inkFaint)
                 }
                 if (state.skipped > 0) Note(pluralStringResource(R.plurals.send_skipped, state.skipped, state.skipped), tone = NoteTone.Warn)
-                if (state.overLimit > 0) Note(stringResource(R.string.send_over_limit, state.limits.maxItemsPerSend, state.overLimit), tone = NoteTone.Warn)
+                if (state.overLimit > 0) Note(stringResource(R.string.send_over_limit, state.sendLimits.limits.maxItemsPerSend, state.overLimit), tone = NoteTone.Warn)
+                // Several servers: the strictest one's limit applies to the whole selection; say which server it is.
+                if (state.tooMany) Note(state.sendLimits.itemsServer?.let { stringResource(R.string.send_limit_items_server, it, state.sendLimits.limits.maxItemsPerSend) }
+                    ?: stringResource(R.string.send_limit_items, state.sendLimits.limits.maxItemsPerSend), tone = NoteTone.Danger)
+                if (state.issues > 0) state.sendLimits.let { l ->
+                    val tooLarge = state.items.any { state.issue(it) == ItemIssue.TooLarge }
+                    val tooLong = state.items.any { state.issue(it) == ItemIssue.TooLong }
+                    if (tooLarge && l.uploadServer != null) Note(stringResource(R.string.send_limit_upload_server, l.uploadServer, Format.bytes(LocalContext.current, l.limits.maxUploadBytes)), tone = NoteTone.Warn)
+                    if (tooLong && l.videoServer != null) Note(stringResource(R.string.send_limit_video_server, l.videoServer, Format.clock(l.limits.maxVideoSeconds * 1000L)), tone = NoteTone.Warn)
+                }
                 if (state.issues > 0) Note(pluralStringResource(R.plurals.send_issues, state.issues, state.issues), tone = NoteTone.Danger)
 
                 SectionTitle(stringResource(R.string.send_to))
@@ -194,7 +204,7 @@ private fun PickerHero(state: ComposerState, onPick: () -> Unit) {
         FrameArt(width = 150.dp)
         PrimaryButton(stringResource(R.string.send_choose), onPick, icon = KinIcons.Image, busy = state.adding)
         Text(
-            stringResource(R.string.send_choose_hint, state.limits.maxItemsPerSend), style = Kin.type.caption, color = c.inkSoft,
+            stringResource(R.string.send_choose_hint, state.sendLimits.limits.maxItemsPerSend), style = Kin.type.caption, color = c.inkSoft,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
         )
     }

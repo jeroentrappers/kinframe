@@ -637,14 +637,22 @@ fun GoogleImportDialog(state: GoogleImportState, flow: GoogleImportFlow) {
 /** An album or feed a shared link can sync into. */
 data class SyncChoice(val target: SourceTarget, val label: String)
 
-/** Albums of frames you manage the library of, and feeds you own or administer. */
-suspend fun syncChoices(api: KinApi, feeds: Boolean, feedLabel: (String) -> String, albumLabel: (String, String) -> String): List<SyncChoice> {
-    val frames: List<Frame> = runCatching { api.frames() }.getOrDefault(emptyList()).filter { it.can { p -> p.manageLibrary } }
+/**
+ * Albums of frames you manage the library of, and feeds you own or administer. Several servers (multi-server.md
+ * §2.2): a source runs on the server of the frame or family it fills, so only targets whose server syncs the link's
+ * provider are offered ([supports], by the frame's or family's id), each with its server label ([server]) when known.
+ */
+suspend fun syncChoices(
+    api: KinApi, feeds: Boolean, feedLabel: (String) -> String, albumLabel: (String, String) -> String,
+    supports: (String) -> Boolean = { true }, server: (String) -> String? = { null },
+): List<SyncChoice> {
+    fun named(label: String, id: String) = server(id)?.let { "$label ($it)" } ?: label
+    val frames: List<Frame> = runCatching { api.frames() }.getOrDefault(emptyList()).filter { it.can { p -> p.manageLibrary } && supports(it.id) }
     val albums = frames.flatMap { f ->
-        runCatching { api.albums(f.id) }.getOrDefault(emptyList()).map { a -> SyncChoice(SourceTarget.album(f.id, f.name, a.id, a.name), albumLabel(a.name, f.name)) }
+        runCatching { api.albums(f.id) }.getOrDefault(emptyList()).map { a -> SyncChoice(SourceTarget.album(f.id, f.name, a.id, a.name), named(albumLabel(a.name, f.name), f.id)) }
     }
-    val fs = if (!feeds) emptyList() else runCatching { api.feeds() }.getOrDefault(emptyList()).filter { it.isAdmin }
-        .map { SyncChoice(SourceTarget.feed(it.id, it.name), feedLabel(it.name)) }
+    val fs = if (!feeds) emptyList() else runCatching { api.feeds() }.getOrDefault(emptyList()).filter { it.isAdmin && supports(it.id) }
+        .map { SyncChoice(SourceTarget.feed(it.id, it.name), named(feedLabel(it.name), it.id)) }
     return albums + fs
 }
 

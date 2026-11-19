@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
                     intent.getStringExtra(LeavingNotifications.EXTRA_KEY)?.let { "leaving_key" to it },
                     intent.getStringExtra(LeavingNotifications.EXTRA_REQUEST_ID)?.let { "request_id" to it },
                 ).toMap(),
+                accountId = intent.getStringExtra(Notifications.EXTRA_ACCOUNT),
             )
         }
     }

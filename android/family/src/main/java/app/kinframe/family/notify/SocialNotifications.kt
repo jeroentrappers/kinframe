@@ -54,6 +54,8 @@ object SocialNotifications {
     const val ACTION_MARK_READ = "app.kinframe.family.action.MARK_READ"
     const val EXTRA_ACTION = "app.kinframe.family.social.ACTION"
     const val EXTRA_TAG = "app.kinframe.family.social.TAG"
+    /** The local account of the push a button belongs to ([PushMessage.account]). */
+    const val EXTRA_ACCOUNT = "app.kinframe.family.social.ACCOUNT"
     const val EXTRA_CONVERSATION = "app.kinframe.family.social.CONVERSATION"
     const val EXTRA_CONVERSATION_NAME = "app.kinframe.family.social.CONVERSATION_NAME"
     const val EXTRA_MESSAGE = "app.kinframe.family.social.MESSAGE"
@@ -196,6 +198,7 @@ object SocialNotifications {
         val title = msg.title.ifBlank { context.getString(titleOf(msg.kind)) }
         val intent = Notifications.openApp(context, tag.hashCode()) {
             putExtra(Notifications.EXTRA_TARGET, targetOf(msg))
+            msg.account.takeIf { it.isNotBlank() }?.let { putExtra(Notifications.EXTRA_ACCOUNT, it) }
             msg.ids.forEach { (k, v) -> if (k in EXTRA_ID_KEYS) putExtra(EXTRA_PREFIX + k, v) }
             msg.ids["post_id"]?.let { putExtra(Notifications.EXTRA_POST_ID, it) }
             msg.ids["feed_id"]?.let { putExtra(Notifications.EXTRA_FEED_ID, it) }
@@ -243,7 +246,10 @@ object SocialNotifications {
                     SocialPush.ACTION_FEWER_REMINDERS -> R.string.engagement_action_fewer
                     else -> return@forEach
                 }
-                val pi = broadcast(context, ACTION_REMINDER, ("$a$tag").hashCode()) { putExtra(EXTRA_ACTION, a); putExtra(EXTRA_TAG, tag) }
+                // The button changes the reminders on the server the push came from (its routed account).
+                val pi = broadcast(context, ACTION_REMINDER, ("$a$tag${msg.account}").hashCode()) {
+                    putExtra(EXTRA_ACTION, a); putExtra(EXTRA_TAG, tag); putExtra(EXTRA_ACCOUNT, msg.account)
+                }
                 b.addAction(0, context.getString(label), pi)
             }
         }
@@ -316,7 +322,8 @@ class SocialActionReceiver : BroadcastReceiver() {
                 when (intent.action) {
                     SocialNotifications.ACTION_REMINDER -> {
                         val action = intent.getStringExtra(SocialNotifications.EXTRA_ACTION).orEmpty()
-                        if (graph.social.reminderAction(action)) SocialNotifications.cancel(context, tag)
+                        val account = intent.getStringExtra(SocialNotifications.EXTRA_ACCOUNT)
+                        if (graph.social.reminderAction(action, account)) SocialNotifications.cancel(context, tag)
                     }
                     SocialNotifications.ACTION_REPLY -> {
                         val text = RemoteInput.getResultsFromIntent(intent)?.getCharSequence(SocialNotifications.KEY_REPLY)?.toString()?.trim().orEmpty()

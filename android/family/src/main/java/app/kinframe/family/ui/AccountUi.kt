@@ -23,9 +23,12 @@ import app.kinframe.family.accounts.AccountContext
  * primary account's (the routing clients send them there too).
  */
 @Composable
-fun rememberAccountContext(graph: AppGraph, key: String?, ready: Phase.Ready): AccountContext {
+fun rememberAccountContext(graph: AppGraph, key: String?, ready: Phase.Ready, accountId: String? = null): AccountContext {
     val version by graph.accounts.version.collectAsStateWithLifecycle()
-    val account = remember(key, version) { graph.accounts.forKey(key) }
+    // The index can learn the id's account after the screen opened (a push of an older server, a link): follow it.
+    val known by remember(key) { graph.accounts.accountIdOf(key) }.collectAsStateWithLifecycle(graph.accounts.index.get(key))
+    // A per-server settings screen names its account ([accountId]); everything else is found by its id.
+    val account = remember(key, accountId, version, known) { graph.accounts.byId(accountId) ?: graph.accounts.forKey(key) }
     val server by account.servers.current.collectAsStateWithLifecycle()
     val me by account.me.collectAsStateWithLifecycle()
     val primaryAccount by graph.accounts.primary.collectAsStateWithLifecycle()

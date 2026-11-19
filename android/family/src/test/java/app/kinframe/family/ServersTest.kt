@@ -4,28 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.core.content.edit
 import org.robolectric.RuntimeEnvironment
-import app.kinframe.core.api.Discovery
-import app.kinframe.core.api.KinJson
-import app.kinframe.family.accounts.AccountDeps
-import app.kinframe.family.accounts.AccountManager
-import app.kinframe.family.accounts.AccountStore
-import app.kinframe.family.accounts.AlreadySignedInException
-import app.kinframe.family.ui.send.Recipients
-import app.kinframe.family.ui.Load
-import app.kinframe.family.ui.send.ComposerState
-import app.kinframe.core.api.Permissions
-import app.kinframe.core.api.Frame
-import app.kinframe.family.accounts.ServerChips
-import app.kinframe.core.api.User
-import app.kinframe.family.data.MemorySecureStore
-import app.kinframe.family.data.ServerChoice
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import app.kinframe.family.data.SecureStore
-import app.kinframe.family.notify.PushMessage
-import app.kinframe.family.notify.PushRegistrar
-import app.kinframe.family.send.OutboxItem
-import app.kinframe.family.send.OutboxSend
-import app.kinframe.family.send.ServerSplit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +12,8 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import okhttp3.OkHttpClient
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -40,6 +21,57 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import app.kinframe.core.api.Album
+import app.kinframe.core.api.Discovery
+import app.kinframe.core.api.Feed
+import app.kinframe.core.api.Frame
+import app.kinframe.core.api.KinJson
+import app.kinframe.core.api.Limits
+import app.kinframe.core.api.Permissions
+import app.kinframe.core.api.User
+import app.kinframe.core.social.SocialPush
+import app.kinframe.core.social.TimelinePage
+import app.kinframe.core.social.WeeklySummary
+import app.kinframe.family.accounts.AccountDeps
+import app.kinframe.family.accounts.AccountManager
+import app.kinframe.family.accounts.AccountStore
+import app.kinframe.family.accounts.AlreadySignedInException
+import app.kinframe.family.accounts.ServerChips
+import app.kinframe.family.data.MemorySecureStore
+import app.kinframe.family.data.SecureStore
+import app.kinframe.family.data.ServerChoice
+import app.kinframe.family.notify.Notifications
+import app.kinframe.family.notify.PushMessage
+import app.kinframe.family.notify.PushRegistrar
+import app.kinframe.family.notify.SocialNotifications
+import app.kinframe.family.send.OutboxItem
+import app.kinframe.family.send.OutboxSend
+import app.kinframe.family.send.ServerSplit
+import app.kinframe.family.social.SocialGraph
+import app.kinframe.family.ui.BlockedPeopleRoute
+import app.kinframe.family.ui.Load
+import app.kinframe.family.ui.MilestonesRoute
+import app.kinframe.family.ui.Navigator
+import app.kinframe.family.ui.PostRoute
+import app.kinframe.family.ui.RemindersRoute
+import app.kinframe.family.ui.ReportsRoute
+import app.kinframe.family.ui.SocialFlags
+import app.kinframe.family.ui.SocialTargets
+import app.kinframe.family.ui.WeeklySummaryRoute
+import app.kinframe.family.ui.home.HomeSummary
+import app.kinframe.family.ui.home.HomeViewModel
+import app.kinframe.family.ui.isAccountScoped
+import app.kinframe.family.ui.openSocialTarget
+import app.kinframe.family.ui.send.ComposerState
+import app.kinframe.family.ui.send.DraftItem
+import app.kinframe.family.ui.send.ItemIssue
+import app.kinframe.family.ui.send.Recipients
+import app.kinframe.family.ui.send.ServerLimits
+import app.kinframe.family.ui.socialRouteAccount
+import app.kinframe.family.ui.sources.syncChoices
+import kotlinx.coroutines.flow.first
+import app.kinframe.family.send.MediaInfo
+import app.kinframe.core.api.MediaKind
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -235,6 +267,93 @@ class ServersTest {
         assertEquals(listOf("c", "b"), Recipients.familiesToPreselect(setOf("b", "c"), listOf("a", "c", "b")))
     }
 
+    /** Two signed-in accounts on two fake servers: MAIN on [a], a second one on [b]. Returns the manager and B's id. */
+    private fun twoServers(a: MockWebServer, b: MockWebServer, d: (Discovery) -> Discovery = { it }): Pair<AccountManager, String> {
+        val urlA = a.url("/").toString(); val urlB = b.url("/").toString()
+        seed(AccountStore.MAIN, urlA, d(disco("appmire", "s-a", urlA)))
+        val m0 = manager()
+        val draft = m0.newDraft()
+        draft.servers.choose(ServerChoice(urlB.toHttpUrl(), d(disco("Janssens", "s-b", urlB))))
+        m0.commit(draft)
+        seed(draft.id, urlB, d(disco("Janssens", "s-b", urlB)))
+        val m = manager()
+        assertTrue(m.several)
+        return m to draft.id
+    }
+
+    @Test
+    fun aRealisticFcmPayloadCarriesTheServerAndPicksItsAccount() {
+        // What server/internal/notify/fcm.go sends: every field a string, ids at the top level, actions comma-separated.
+        val data = mapOf(
+            "type" to "reminder_quiet", "key" to "reminder_quiet", "title" to "Oma's frame", "body" to "No new photos for two weeks",
+            "server" to "https://kinframe.janssens.be/", "tag" to "reminder_quiet:f1", "actions" to "snooze_month,fewer_reminders",
+            "badge" to "3", "frame_id" to "f1",
+        )
+        val msg = PushMessage.fromData(data)
+        assertEquals("https://kinframe.janssens.be/", msg.server)
+        assertEquals(mapOf("frame_id" to "f1"), msg.ids)
+        assertEquals(listOf("snooze_month", "fewer_reminders"), msg.actions)
+        assertEquals("reminder_quiet", msg.kind)
+        assertEquals("", msg.account)
+        // Older servers: the notification block's title and body.
+        assertEquals("T", PushMessage.fromData(mapOf("type" to "x"), "T", "B").title)
+
+        seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/"))
+        val m0 = manager()
+        val d = m0.newDraft()
+        d.servers.choose(ServerChoice("https://kinframe.janssens.be/".toHttpUrl(), disco("Janssens", "s-a", "https://kinframe.janssens.be/")))
+        m0.commit(d)
+        seed(d.id, "https://kinframe.janssens.be/", disco("Janssens", "s-a", "https://kinframe.janssens.be/"))
+        val m = manager()
+        // The index thinks the frame is the primary account's: the payload's `server` wins and corrects it.
+        m.index.put("f1", AccountStore.MAIN)
+        assertEquals(d.id, m.accountForPush(msg.server, msg.ids, null).id)
+        assertEquals(d.id, m.index.get("f1"))
+        // FCM has no instance: without `server` the index answers.
+        m.index.put("f2", AccountStore.MAIN)
+        assertEquals(AccountStore.MAIN, m.accountForPush("", mapOf("frame_id" to "f2"), null).id)
+    }
+
+    @Test
+    fun reminderNotificationsCarryTheirAccountToTheButtonsAndTheTap() {
+        org.robolectric.Shadows.shadowOf(app).grantPermissions(android.Manifest.permission.POST_NOTIFICATIONS)
+        SocialNotifications.createChannels(app)
+        val msg = PushMessage("reminder_streak", "Peeters", "Two photos to go", mapOf("feed_id" to "fd"), key = SocialPush.REMINDER_STREAK, account = "acc-b")
+        SocialNotifications.show(app, msg)
+        val nm = app.getSystemService(android.app.NotificationManager::class.java)
+        val n = org.robolectric.Shadows.shadowOf(nm).activeNotifications.single { it.tag == "reminder_streak:fd" }.notification
+        val button = org.robolectric.Shadows.shadowOf(n.actions.first().actionIntent).savedIntent
+        assertEquals("acc-b", button.getStringExtra(SocialNotifications.EXTRA_ACCOUNT))
+        val tap = org.robolectric.Shadows.shadowOf(n.contentIntent).savedIntent
+        assertEquals("acc-b", tap.getStringExtra(Notifications.EXTRA_ACCOUNT))
+    }
+
+    @Test
+    fun reminderButtonsChangeTheRemindersOnThePushesOwnServer() = kotlinx.coroutines.runBlocking {
+        val a = MockWebServer(); val b = MockWebServer()
+        a.start(); b.start()
+        try {
+            val (m, bId) = twoServers(a, b) { it.copy(engagement = true) }
+            b.enqueue(MockResponse.Builder().body("""{"level":"normal","snoozed_until":"2026-12-19T00:00:00Z"}""").build())
+            // UnifiedPush: B's endpoint got a push without `server`; its account is B.
+            val routed = m.accountForPush("", mapOf("frame_id" to "fx"), PushRegistrar.accountOf(bId))
+            assertEquals(bId, routed.id)
+            assertTrue(SocialGraph.reminderAction(m, SocialPush.ACTION_SNOOZE_MONTH, routed.id))
+            val req = b.takeRequest(5, java.util.concurrent.TimeUnit.SECONDS)!!
+            assertEquals("PATCH", req.method)
+            assertEquals("/v1/me/reminders", req.url.encodedPath)
+            assertTrue(req.body!!.utf8().contains("\"snooze_days\":30"))
+            assertEquals(0, a.requestCount)
+            // A notification from before the account was known: the primary account.
+            a.enqueue(MockResponse.Builder().body("""{"level":"fewer"}""").build())
+            assertTrue(SocialGraph.reminderAction(m, SocialPush.ACTION_FEWER_REMINDERS, null))
+            assertEquals("/v1/me/reminders", a.takeRequest(5, java.util.concurrent.TimeUnit.SECONDS)!!.url.encodedPath)
+            assertEquals(1, b.requestCount)
+        } finally {
+            a.close(); b.close()
+        }
+    }
+
     @Test
     fun aPushWithoutServerUsesWhatTheIndexKnowsAndNeverOverwritesIt() {
         seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/"))
@@ -253,5 +372,148 @@ class ServersTest {
         // With `server`: recorded for that account.
         assertEquals(d.id, m.accountForPush("https://kinframe.janssens.be/", mapOf("post_id" to "post-y"), null).id)
         assertEquals(d.id, m.index.get("post-y"))
+    }
+
+    private fun twoAccounts(): Pair<AccountManager, String> {
+        seed(AccountStore.MAIN, "https://kinframe.appmire.be/", disco("appmire", "s-b", "https://kinframe.appmire.be/").copy(engagement = true, chats = true))
+        val m0 = manager()
+        val d = m0.newDraft()
+        d.servers.choose(ServerChoice("https://kinframe.janssens.be/".toHttpUrl(), disco("Janssens", "s-a", "https://kinframe.janssens.be/")))
+        m0.commit(d)
+        seed(d.id, "https://kinframe.janssens.be/", disco("Janssens", "s-a", "https://kinframe.janssens.be/").copy(engagement = true, chats = true))
+        return manager() to d.id
+    }
+
+    @Test
+    fun aScreenOpenedBeforeItsAccountWasKnownFollowsTheIndex() = kotlinx.coroutines.runBlocking {
+        val (m, b) = twoAccounts()
+        // A tap on an older server's push: the post isn't known yet, so the primary account answers.
+        assertNull(m.accountIdOf("post-late").first())
+        assertEquals(AccountStore.MAIN, m.contextFor("post-late").accountId)
+        val before = m.learned.value
+        // The merged timeline then teaches the index that the post is B's.
+        m.index.put("post-late", b)
+        assertTrue(m.learned.value > before)
+        assertEquals(b, m.accountIdOf("post-late").first())
+        assertEquals(b, m.contextFor("post-late").accountId)
+        // Per-server settings name their account; unknown or null is the primary one.
+        assertEquals(b, m.contextOf(b).accountId)
+        assertEquals(AccountStore.MAIN, m.contextOf(null).accountId)
+        assertEquals(AccountStore.MAIN, m.contextOf("gone").accountId)
+        assertEquals("Janssens", m.labelIfSeveral(b))
+    }
+
+    @Test
+    fun perServerSettingsRoutesNameTheirAccount() {
+        assertTrue(isAccountScoped(RemindersRoute("b")))
+        assertTrue(isAccountScoped(ReportsRoute(null, "b")))
+        assertFalse(isAccountScoped(ReportsRoute("feed-1")))
+        assertFalse(isAccountScoped(PostRoute("p")))
+        assertEquals("b", socialRouteAccount(BlockedPeopleRoute("b")))
+        assertEquals("b", socialRouteAccount(WeeklySummaryRoute("2026-11-09", "b")))
+        assertEquals("b", socialRouteAccount(MilestonesRoute("b")))
+        // A family's reports are found by the family, not named.
+        assertNull(socialRouteAccount(ReportsRoute("feed-1", "b")))
+    }
+
+    @Test
+    fun aWeeklySummaryPushOpensTheSummaryOfItsOwnServer() = kotlinx.coroutines.runBlocking {
+        val (m, b) = twoAccounts()
+        val nav = Navigator()
+        val targets = SocialTargets(
+            tabs = SocialFlags(social = true, chats = true, engagement = true, voice = false, linkPreviews = false),
+            account = { m.contextFor(it) }, canSendTo = { true }, sendTo = { _, _ -> }, byAccount = { m.contextOf(it) },
+        )
+        val t = OpenTarget(SocialNotifications.TARGET_WEEKLY_SUMMARY, ids = mapOf("week_of" to "2026-11-09"), accountId = b)
+        assertTrue(openSocialTarget(t, nav, targets))
+        assertEquals(WeeklySummaryRoute("2026-11-09", b), nav.current)
+        // The operator's reports of the server that sent the push.
+        m.byId(b)!!.me.value = User(id = "me-b", displayName = "An", isOperator = true)
+        assertTrue(openSocialTarget(OpenTarget(SocialNotifications.TARGET_REPORTS, accountId = b), nav, targets))
+        assertEquals(ReportsRoute(null, b), nav.current)
+    }
+
+    @Test
+    fun homeShowsOneWeeklySummaryPerServerAndEachOpensItsOwn() {
+        val social = object : FakeSocial() {
+            override suspend fun timeline(before: String?, limit: Int, feedId: String?, circleId: String?, promptId: String?, frameId: String?) = TimelinePage()
+        }
+        val kin = object : FakeApi() {
+            override suspend fun frames() = emptyList<Frame>()
+            override suspend fun feeds() = emptyList<Feed>()
+        }
+        val weeks = mutableListOf<String>()
+        val vm = HomeViewModel(social, kin, { "me" }, kotlinx.coroutines.flow.emptyFlow(), engagement = true,
+            today = { java.time.LocalDate.parse("2026-11-19") },
+            summaries = { week ->
+                weeks += week
+                listOf(
+                    HomeSummary(WeeklySummary(week, seenCount = 3), "A"),
+                    HomeSummary(WeeklySummary(week, seenCount = 5), "B"),
+                    // Nothing seen: no card.
+                    HomeSummary(WeeklySummary(week, seenCount = 0), "C"),
+                )
+            })
+        assertEquals(listOf("2026-11-09"), weeks)
+        val cards = vm.state.value.summaries
+        assertEquals(listOf("A", "B"), cards.map { it.accountId })
+        vm.dismissSummary(cards[0])
+        assertEquals(listOf("B"), vm.state.value.summaries.map { it.accountId })
+    }
+
+    @Test
+    fun theStrictestChosenServersLimitsApplyAndNameTheServer() {
+        val fa = Frame(id = "fa", name = "Kitchen", permissions = Permissions(send = true))
+        val fb = Frame(id = "fb", name = "Oma", permissions = Permissions(send = true))
+        val base = Limits(maxItemsPerSend = 50, maxVideoSeconds = 300, maxUploadBytes = 1_000_000)
+        val strict = Limits(maxItemsPerSend = 2, maxVideoSeconds = 30, maxUploadBytes = 1_000_000)
+        val item = { id: String, size: Long, video: Long? ->
+            DraftItem(id, MediaInfo(uri = android.net.Uri.parse("content://x/$id"), name = "$id.jpg", mime = if (video != null) "video/mp4" else "image/jpeg", size = size,
+                kind = if (video != null) MediaKind.VIDEO else MediaKind.PHOTO, durationMs = video))
+        }
+        val s = ComposerState(
+            items = listOf(item("1", 10, null), item("2", 10, null), item("3", 10, 60_000)), frames = Load.Ready(listOf(fa, fb)), limits = base,
+            serverOf = mapOf("fa" to "appmire", "fb" to "Janssens"),
+            limitsOf = mapOf("fa" to ServerLimits("appmire", base), "fb" to ServerLimits("Janssens", strict)),
+        )
+        // Only appmire chosen: its limits.
+        val a = s.copy(selected = setOf("fa"))
+        assertEquals(50, a.sendLimits.limits.maxItemsPerSend)
+        assertFalse(a.tooMany)
+        assertTrue(a.canSend)
+        // Both: Janssens is stricter on items and video length, and is named; the upload limit is the same, so not named.
+        val both = s.copy(selected = setOf("fa", "fb"))
+        assertEquals(2, both.sendLimits.limits.maxItemsPerSend)
+        assertEquals("Janssens", both.sendLimits.itemsServer)
+        assertEquals("Janssens", both.sendLimits.videoServer)
+        assertNull(both.sendLimits.uploadServer)
+        assertTrue(both.tooMany)
+        assertEquals(ItemIssue.TooLong, both.issue(both.items[2]))
+        assertFalse(both.canSend)
+        // Nothing chosen yet: the primary account's limits.
+        assertEquals(50, s.sendLimits.limits.maxItemsPerSend)
+        assertNull(s.sendLimits.itemsServer)
+    }
+
+    @Test
+    fun syncThisAlbumOffersOnlyTargetsWhoseServerSyncsTheProvider() = kotlinx.coroutines.runBlocking {
+        val kin = object : FakeApi() {
+            override suspend fun frames() = listOf(
+                Frame(id = "fa", name = "Kitchen", permissions = Permissions(manageLibrary = true)),
+                Frame(id = "fb", name = "Oma", permissions = Permissions(manageLibrary = true)),
+            )
+            override suspend fun albums(frameId: String) = listOf(Album(id = "al-$frameId", name = "Summer"))
+            override suspend fun feeds() = listOf(
+                Feed(id = "da", name = "Peeters", role = "owner"),
+                Feed(id = "db", name = "Janssens", role = "owner"),
+            )
+        }
+        // Immich is on appmire only (fa, da); Janssens (fb, db) doesn't sync it.
+        val providers = mapOf("fa" to listOf("immich"), "da" to listOf("immich"), "fb" to listOf("icloud"), "db" to listOf("icloud"))
+        val servers = mapOf("fa" to "appmire", "da" to "appmire", "fb" to "Janssens", "db" to "Janssens")
+        val choices = syncChoices(kin, true, { it }, { a, f -> "$a · $f" },
+            supports = { id -> "immich" in providers[id].orEmpty() }, server = { servers[it] })
+        assertEquals(listOf("Summer · Kitchen (appmire)", "Peeters (appmire)"), choices.map { it.label })
+        assertEquals(listOf("fa", null), choices.map { it.target.frameId })
     }
 }

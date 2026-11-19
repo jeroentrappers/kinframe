@@ -160,6 +160,10 @@
         <item quantity="other">Pas de %1$d gemarkeerde items aan of verwijder ze om te versturen.</item>
     </plurals>
     <string name="send_over_limit">Je kunt tot %1$d tegelijk sturen. %2$d zijn weggelaten.</string>
+    <string name="send_limit_items">Je kunt tot %1$d tegelijk sturen. Verwijder er een paar om te versturen.</string>
+    <string name="send_limit_items_server">%1$s neemt tot %2$d tegelijk. Verwijder er een paar, of stuur apart naar %1$s.</string>
+    <string name="send_limit_upload_server">Te groot voor %1$s. De limiet daar is %2$s.</string>
+    <string name="send_limit_video_server">Te lang voor %1$s. Video’s mogen daar tot %2$s duren. Knip hem in om te versturen.</string>
     <plurals name="send_skipped">
         <item quantity="one">%1$d bestand is overgeslagen omdat het geen foto of video is.</item>
         <item quantity="other">%1$d bestanden zijn overgeslagen omdat het geen foto’s of video’s zijn.</item>

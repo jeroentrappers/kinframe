@@ -100,6 +100,8 @@ class AccountIndex(private val capacity: Int = 5000, var onChange: (() -> Unit)?
             is MessagePage -> collect(v.messages, out, depth + 1)
             is Person -> out += v.person.userId
             is Circle -> out += v.id
+            is app.kinframe.core.social.Report -> { out += v.id; out += v.postId; out += v.conversationId; out += v.feedId; out += v.author?.userId }
+            is app.kinframe.core.social.Block -> out += v.person.userId
             is app.kinframe.core.api.Album -> out += v.id
             is app.kinframe.core.api.PhotoSource -> { out += v.id; out += v.target.albumId; out += v.target.feedId; out += v.target.frameId }
             is app.kinframe.core.api.GoogleImport -> out += v.id

@@ -28,19 +28,8 @@ class FcmService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val data = message.data
-        val msg = PushMessage(
-            type = data["type"].orEmpty(),
-            title = data["title"] ?: message.notification?.title.orEmpty(),
-            body = data["body"] ?: message.notification?.body.orEmpty(),
-            ids = data.filterKeys { it.endsWith("_id") || it in SocialNotifications.EXTRA_ID_KEYS },
-            key = data["key"].orEmpty(),
-            tag = data["tag"].orEmpty(),
-            actions = SocialNotifications.parseActions(data["actions"]),
-            server = data["server"].orEmpty(),
-        )
-        (application as FamilyApp).graph.routePush(msg, null)
-        Notifications.showPush(this, msg)
-        (application as FamilyApp).graph.onPush(msg)
+        // One FCM token serves every account: the payload's `server` names the account (README §6.3).
+        val msg = PushMessage.fromData(message.data, message.notification?.title, message.notification?.body)
+        (application as FamilyApp).graph.receivePush(this, msg, null)
     }
 }
