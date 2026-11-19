@@ -61,6 +61,23 @@ class RoutingSocialApi(private val routes: Routes, primary: SocialApi) : SocialA
         return OnThisDay(days.firstOrNull()?.date.orEmpty(), days.flatMap { it.groups })
     }
 
+    /**
+     * Every account's weekly summary of [weekOf] (Home shows one card per server, each opening its own summary), by
+     * account id; servers without one that week (404) are left out. Throws only when every server failed.
+     */
+    suspend fun weeklySummaries(weekOf: String): List<Pair<String, WeeklySummary>> =
+        eachSocial({ it.discovery.engagement }) { _, a -> a.weeklySummary(weekOf) }.map { it.first.id to it.second }
+
+    /**
+     * The same client pinned to one account, for that server's own settings (reminders, blocked people, milestones,
+     * operator reports, the weekly summary): everything goes there, and the ids it answers are recorded for it, so a
+     * post or chat opened from those screens opens on that server.
+     */
+    fun forAccount(account: String): SocialApi = routes.byId(account)?.social?.let { RoutingSocialApi(routes.only(account), it) } ?: this
+
+    /** The operator's reports of the primary account (or the pinned one); their posts and chats are recorded for it. */
+    override suspend fun operatorReports(status: String): List<Report> = on(null) { operatorReports(status) }
+
     // ---- routed by id (generated from the SocialApi interface)
 
     override suspend fun post(postId: String): TimelinePost = on(postId) { post(postId) }

@@ -208,6 +208,47 @@ class RoutingTest {
     }
 
     @Test
+    fun perServerSettingsAndWeeklySummariesGoToTheirOwnServer() = runBlocking {
+        val callsA = mutableListOf<String>()
+        val callsB = mutableListOf<String>()
+        val sa = fake<SocialApi>(callsA) { n, _ ->
+            when (n) {
+                // No summary on A that week.
+                "weeklySummary" -> throw app.kinframe.core.api.ApiException(404, app.kinframe.core.api.Problem(status = 404))
+                "blocks" -> listOf(app.kinframe.core.social.Block(PersonRef("ua", "A")))
+                else -> null
+            }
+        }
+        val sb = fake<SocialApi>(callsB) { n, args ->
+            when (n) {
+                "weeklySummary" -> app.kinframe.core.social.WeeklySummary(weekOf = args[0] as String, seenCount = 4)
+                "blocks" -> listOf(app.kinframe.core.social.Block(PersonRef("ub", "B")))
+                "operatorReports" -> listOf(app.kinframe.core.social.Report(id = "rp", targetKind = "post", targetId = "pb", postId = "pb"))
+                "reminderPreferences" -> app.kinframe.core.social.ReminderPreferences(level = "fewer")
+                else -> null
+            }
+        }
+        val kin = fake<KinApi> { _, _ -> null }
+        val index = AccountIndex()
+        val eng = { n: String -> disco(n).copy(engagement = true) }
+        val routes = Routes({ listOf(R("A", kin, sa, eng("A")), R("B", kin, sb, eng("B"))) }, index)
+        val api = RoutingSocialApi(routes, sa)
+        // Home: one card per server that has a summary that week.
+        assertEquals(listOf("B" to 4), api.weeklySummaries("2026-11-09").map { it.first to it.second.seenCount })
+        // Settings of B: B only, and what it answers is B's.
+        val b = api.forAccount("B")
+        assertEquals("fewer", b.reminderPreferences().level)
+        assertEquals(listOf("ub"), b.blocks().map { it.person.userId })
+        assertEquals("rp", b.operatorReports().single().id)
+        assertEquals("B", index.get("pb"))
+        assertEquals("B", index.get("ub"))
+        assertTrue(callsA.none { it.startsWith("reminderPreferences") || it.startsWith("operatorReports") })
+        assertEquals(1, callsA.count { it.startsWith("weeklySummary") })
+        // Unknown account: the routing client itself.
+        assertTrue(api.forAccount("C") === api)
+    }
+
+    @Test
     fun photoRequestFeedIdsAreRead() {
         val r = KinJson.decodeFromString(PhotoRequest.serializer(), "{\"id\":\"r\",\"frame_id\":\"f\",\"state\":\"open\",\"feed_ids\":[\"a\",\"b\"]}")
         assertEquals(listOf("a", "b"), r.feedIds)
