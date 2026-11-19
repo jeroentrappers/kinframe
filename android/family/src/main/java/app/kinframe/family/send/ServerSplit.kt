@@ -35,8 +35,10 @@ object ServerSplit {
                 circleIds = send.circleIds.filter { (accountOf(it) ?: firstFeeds) == a },
                 // A weekly prompt belongs to one family's server.
                 promptId = send.promptId?.takeIf { p -> (accountOf(p) ?: firstFeeds) == a },
-                // Each server gets its own copy of the queue entry (upload state is per server).
-                items = if (i == 0) send.items else send.items.map { it.copy(id = newId(), uploadId = null, uploadUrl = null, uploadedBytes = 0) },
+                // Each server gets its own copy of the queue entry (upload state is per server); the preparation is
+                // shared (prepOf), so the media is prepared once.
+                items = if (i == 0) send.items else send.items.map { it.copy(id = newId(), uploadId = null, uploadUrl = null, uploadedBytes = 0, prepOf = it.id) },
+                group = send.id,
             )
         }
     }

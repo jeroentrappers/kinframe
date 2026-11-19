@@ -12,6 +12,7 @@ import app.kinframe.core.api.TusUploader
 import app.kinframe.core.api.UploadSource
 import app.kinframe.family.send.prep.PreparationFailedException
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.io.IOException
 
@@ -30,7 +31,7 @@ class SendRunner(
      * Client-side preparation (README §5.3). Every item goes through it before uploading; it throws
      * [PreparationFailedException] for a file that can neither be prepared nor go as it is.
      */
-    private val prepare: suspend (sendId: String, item: OutboxItem, onProgress: (Float) -> Unit) -> OutboxItem,
+    private val prepare: suspend (filesKey: String, item: OutboxItem, onProgress: (Float) -> Unit) -> OutboxItem,
     /** Family social: posts a chat message once its files are uploaded ([OutboxSend.chat]); returns the message id. */
     private val sendChat: (suspend (OutboxSend) -> String)? = null,
 ) {
@@ -55,10 +56,17 @@ class SendRunner(
                     store.updateItem(id, item.id) { it.resetPrep() }
                 }
                 if (item.prepState == null) {
-                    // Prepare before uploading; recorded so a retry doesn't do it again.
-                    store.reportProgress(OutboxProgress(id, index, items.size, 0, 0, preparing = true))
-                    val prepared = prepare(id, item) { f -> store.reportProgress(OutboxProgress(id, index, items.size, 0, 0, preparing = true, prepFraction = f)) }
+                    // Prepare before uploading; recorded so a retry doesn't do it again. The parts of a send split
+                    // across servers prepare each file once: whichever part gets there first, the others reuse it.
+                    val current = item
+                    val prepared = prepLock(send, current).withLock {
+                        sharedPrep(send, current)?.let { current.withPrepFrom(it) } ?: run {
+                            store.reportProgress(OutboxProgress(id, index, items.size, 0, 0, preparing = true))
+                            prepare(send.filesKey, current) { f -> store.reportProgress(OutboxProgress(id, index, items.size, 0, 0, preparing = true, prepFraction = f)) }
+                        }
+                    }
                     store.updateItem(id, item.id) { prepared }
+                    shareWithOtherParts(send, prepared)
                     item = prepared
                 }
                 val current = store.get(id)?.items.orEmpty()
@@ -86,7 +94,7 @@ class SendRunner(
                     idempotencyKey = ready.id,
                 ).id
             }
-            cleanup(ready)
+            cleanup(ready, store.sends.value.filter { it.id != id })
             store.remove(id)
             Outcome.Sent(createdId, ready.recipientNames)
         } catch (e: CancellationException) {
@@ -143,6 +151,29 @@ class SendRunner(
         }
     }
 
+    /** A preparation of [item] another part of the same split send already made (its files still there). */
+    private fun sharedPrep(send: OutboxSend, item: OutboxItem): OutboxItem? {
+        val group = send.group ?: return null
+        return store.sends.value.asSequence()
+            .filter { it.group == group && it.id != send.id }
+            .flatMap { it.items.asSequence() }
+            .firstOrNull { it.prepKey == item.prepKey && it.prepState != null && it.prepState != OutboxItem.PREP_ORIGINAL && !it.needsPrepAgain &&
+                (it.preparedPath == null || File(it.preparedPath).exists()) && (it.motion?.localPath == null || File(it.motion.localPath).exists()) }
+    }
+
+    /**
+     * Hands a preparation to the other parts of a split send that haven't prepared that file yet, so their queue
+     * entries hold its files (and a part that finishes first doesn't delete what the others still upload).
+     */
+    private fun shareWithOtherParts(send: OutboxSend, prepared: OutboxItem) {
+        val group = send.group ?: return
+        store.sends.value.filter { it.group == group && it.id != send.id }.forEach { other ->
+            other.items.filter { it.prepKey == prepared.prepKey && it.prepState == null }.forEach { i ->
+                store.updateItem(other.id, i.id) { it.withPrepFrom(prepared) }
+            }
+        }
+    }
+
     private fun retry(id: String): Outcome {
         store.update(id) { it.copy(state = OutboxState.QUEUED, error = "network") }
         return Outcome.Retry
@@ -157,11 +188,31 @@ class SendRunner(
         /** Outcome code: a file couldn't be prepared on the phone and was too large to send as it is. */
         const val PREPARE_FAILED = "prepare_failed"
 
-        /** Deletes the private copies of a finished or discarded send. */
-        fun cleanup(send: OutboxSend) {
-            val files = send.items.flatMap { listOfNotNull(it.localPath, it.preparedPath, it.motion?.localPath, it.motion?.preparedPath) }
+        /** One lock per prepared file of a split send, so two parts never prepare the same file at once. */
+        private val prepLocks = java.util.concurrent.ConcurrentHashMap<String, kotlinx.coroutines.sync.Mutex>()
+
+        private fun prepLock(send: OutboxSend, item: OutboxItem) =
+            prepLocks.getOrPut(send.filesKey + "/" + item.prepKey) { kotlinx.coroutines.sync.Mutex() }
+
+        private fun OutboxItem.files(): List<String> = listOfNotNull(localPath, preparedPath, motion?.localPath, motion?.preparedPath)
+
+        /**
+         * Deletes the private copies of a finished or discarded send, except files another queued send still uses
+         * ([others]: the other parts of a send split across servers share one copy and one preparation).
+         */
+        fun cleanup(send: OutboxSend, others: List<OutboxSend> = emptyList()) {
+            val keep = others.flatMap { o -> o.items.flatMap { it.files() } }.toSet()
+            val files = send.items.flatMap { it.files() }.filter { it !in keep }
             files.forEach { File(it).delete() }
-            files.firstOrNull()?.let { File(it).parentFile?.takeIf { d -> d.list().isNullOrEmpty() }?.delete() }
+            send.items.forEach { i -> prepLocks.remove(send.filesKey + "/" + i.prepKey) }
+            (files.firstOrNull() ?: send.items.firstNotNullOfOrNull { it.files().firstOrNull() })
+                ?.let { File(it).parentFile?.takeIf { d -> d.list().isNullOrEmpty() }?.delete() }
+        }
+
+        /** Content URIs of [send] no other queued send still reads (their persisted grants can be released). */
+        fun urisToRelease(send: OutboxSend, others: List<OutboxSend>): List<String> {
+            val used = others.flatMap { o -> o.items.filter { it.localPath == null }.map { it.uri } }.toSet()
+            return send.items.filter { it.localPath == null && it.uri !in used }.map { it.uri }
         }
 
         fun outboxDir(context: Context, sendId: String) = File(context.filesDir, "outbox/$sendId")

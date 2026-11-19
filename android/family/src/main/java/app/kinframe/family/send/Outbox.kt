@@ -62,7 +62,25 @@ data class OutboxItem(
     val live: Boolean = true,
     /** The clip of a live item, split out of the Motion Photo and uploaded on its own. */
     val motion: OutboxItem? = null,
+    /**
+     * A send split across servers (multi-server.md §2.2): the id of the item in the first part this one is a copy
+     * of. The parts share one preparation (the media is prepared once) and upload it to their own server.
+     */
+    val prepOf: String? = null,
 ) {
+    /** The key the parts of a split send share an item's preparation by. */
+    val prepKey: String get() = prepOf ?: id
+
+    /** This item with the preparation [other] (a part of the same split send) already made; upload state is its own. */
+    fun withPrepFrom(other: OutboxItem): OutboxItem = copy(
+        prepState = other.prepState, preparedPath = other.preparedPath, preparedSize = other.preparedSize, prepared = other.prepared,
+        preparedMime = other.preparedMime, preparedWidth = other.preparedWidth, preparedHeight = other.preparedHeight,
+        preparedDurationMs = other.preparedDurationMs, preparedTrimmed = other.preparedTrimmed, sha256 = other.sha256,
+        capturedAt = capturedAt ?: other.capturedAt,
+        motion = other.motion?.copy(uploadUrl = null, uploadedBytes = 0, uploadId = null),
+        uploadUrl = null, uploadedBytes = 0, uploadId = null,
+    )
+
     val tusState: TusState? get() = uploadUrl?.let { TusState(it, uploadedBytes) }
 
     /** What goes over the wire: the prepared master when there is one. */
@@ -157,7 +175,15 @@ data class OutboxSend(
     val promptId: String? = null,
     /** Set when this is a chat message with photos, videos or a voice recording instead of a send. */
     val chat: OutboxChat? = null,
+    /**
+     * The parts of a send split across servers share this (the first part's id): their media is prepared once, in
+     * that part's folder, and the files stay until the last part is done.
+     */
+    val group: String? = null,
 ) {
+    /** The folder this send's private copies and prepared files live in (shared by the parts of a split send). */
+    val filesKey: String get() = group ?: id
+
     /** Frames and feeds (or the chat), for "Sending to …". */
     val recipientNames: List<String> get() = frameNames + feedNames + listOfNotNull(chat?.conversationName)
 
