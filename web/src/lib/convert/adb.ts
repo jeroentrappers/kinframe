@@ -46,34 +46,76 @@ export async function connect(device: AdbDaemonWebUsbDevice): Promise<WebUsbFram
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/** Rejects after `ms`; `onLate` cleans up whatever the promise yields if it still arrives afterwards. */
+function withTimeout<T>(p: Promise<T>, ms: number, what: string, onLate?: (v: T) => void): Promise<T> {
+	return new Promise<T>((resolve, reject) => {
+		let late = false;
+		const t = setTimeout(() => {
+			late = true;
+			reject(new Error(`${what} took longer than ${Math.round(ms / 1000)} s`));
+		}, ms);
+		p.then(
+			(v) => {
+				clearTimeout(t);
+				if (late) onLate?.(v);
+				else resolve(v);
+			},
+			(e) => {
+				clearTimeout(t);
+				if (!late) reject(e);
+			}
+		);
+	});
+}
+
 /**
  * After a restart the frame drops off USB and comes back as a new device the browser already has permission for,
- * so no dialog is needed. Waits until it is back and has finished booting.
+ * so no dialog is needed. Waits until it is back and has finished booting. Every step has its own time limit: a
+ * USB connection or adb handshake that hangs while the frame is still starting is dropped and tried again, so the
+ * wait always ends (`log` says what it is doing).
  */
-export async function reconnect(serial: string, opts: { timeoutMs?: number; signal?: AbortSignal } = {}): Promise<WebUsbFrame> {
+export async function reconnect(
+	serial: string,
+	opts: { timeoutMs?: number; signal?: AbortSignal; log?: (line: string) => void } = {}
+): Promise<WebUsbFrame> {
 	const deadline = Date.now() + (opts.timeoutMs ?? 240_000);
+	const log = opts.log ?? (() => {});
 	await sleep(8000);
+	let seen = false;
+	let lastError = '';
 	while (Date.now() < deadline) {
 		if (opts.signal?.aborted) throw new Error('cancelled');
 		const device = (await manager().getDevices()).find((d) => d.serial === serial);
 		if (device) {
+			if (!seen) log('the frame is back on USB; connecting…');
+			seen = true;
+			let frame: WebUsbFrame | undefined;
 			try {
-				const frame = await connect(device);
+				frame = await withTimeout(connect(device), 20_000, 'connecting', (f) => void f.close());
 				for (let i = 0; i < 60 && Date.now() < deadline; i++) {
-					if ((await frame.shell('getprop sys.boot_completed')).trim() === '1') {
+					const done = await withTimeout(frame.shell('getprop sys.boot_completed'), 10_000, 'asking whether it has started');
+					if (done.trim() === '1') {
 						await sleep(4000); // let the home app come up
 						return frame;
 					}
+					if (i === 0) log('connected; waiting until Android has finished starting…');
 					await sleep(2000);
 				}
-				await frame.close();
-			} catch {
-				// adbd is still starting; try again
+			} catch (e) {
+				// adbd is still starting, or the connection hung; drop it and try again
+				const msg = e instanceof Error ? e.message : String(e);
+				if (msg !== lastError) log(`not yet (${msg}); trying again`);
+				lastError = msg;
 			}
+			await frame?.close();
 		}
 		await sleep(2000);
 	}
-	throw new Error('the frame did not come back within 4 minutes');
+	throw new Error(
+		seen
+			? 'the frame came back but did not answer within 4 minutes. Unplug the USB cable, plug it in again and start over: the steps already done are skipped or repeated safely.'
+			: 'the frame did not come back within 4 minutes. Check the USB cable, then start over.'
+	);
 }
 
 export class WebUsbFrame implements FrameShell {
@@ -140,13 +182,23 @@ export class WebUsbFrame implements FrameShell {
 		}
 	}
 
-	async reboot(): Promise<void> {
+	async reboot(cleanCommand?: string): Promise<'clean' | 'adb'> {
+		if (cleanCommand) {
+			// The command doesn't return before Android shuts down, so don't wait for it: wait for the frame to go.
+			const gone = this.adb.disconnected.then(() => true);
+			this.shell(cleanCommand).catch(() => {});
+			if (await Promise.race([gone, sleep(30_000).then(() => false)])) {
+				await this.close();
+				return 'clean';
+			}
+		}
 		try {
 			await this.adb.power.reboot();
 		} catch {
 			// the connection drops while the command is answered
 		}
 		await this.close();
+		return 'adb';
 	}
 
 	async close(): Promise<void> {

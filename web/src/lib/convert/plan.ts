@@ -186,6 +186,7 @@ export const COMMANDS = {
 	readable: 'su 0 chmod 644 {work}/{file}',
 	writeResource: 'su 0 dd if={work}/{file} of={resource} bs=1048576',
 	sync: 'su 0 sync',
+	cleanReboot: 'su 0 svc power reboot',
 	flushResource: 'su 0 blockdev --flushbufs {resource}',
 	removeFile: 'su 0 rm -f {work}/{file}',
 	remountRw: 'su 0 mount -o remount,rw {system} /system',
@@ -726,7 +727,11 @@ export type Action =
 	| { kind: 'verifyBootAnimation' }
 	/** Checks the root certificate on the frame is the one pushed (sha1sum). */
 	| { kind: 'verifyRootCert' }
-	| { kind: 'reboot' }
+	/**
+	 * Restarts the frame. With `clean` (root): Android's own restart (`svc power reboot`), which tells the apps first,
+	 * so kinframe saves its clean-shutdown marker; adb's reboot skips that and the frame reports a power loss.
+	 */
+	| { kind: 'reboot'; clean?: boolean }
 	| { kind: 'waitBoot' }
 	| { kind: 'checkHome'; expect: 'kinframe' | 'other' };
 
@@ -950,7 +955,7 @@ export function planConvert(id: Identification, opts: ConvertOptions): Step[] {
 	// Restart only once the package states are saved, then check they survived (the updaters must stay off).
 	const verify: Action[] = installed.length ? [{ kind: 'verifyDisabled', packages: [...installed], reapply: true }] : [];
 	if (extras.length) verify.push({ kind: 'verifyDisabled', packages: extras, reapply: true, warnOnly: true });
-	steps.push({ id: 'reboot', actions: [...settle(), { kind: 'reboot' }, { kind: 'waitBoot' }, ...verify] });
+	steps.push({ id: 'reboot', actions: [...settle(), { kind: 'reboot', clean: f.root }, { kind: 'waitBoot' }, ...verify] });
 	const language = opts.language && SAFE_ARG.test(opts.language) ? opts.language : '';
 	steps.push({
 		id: 'provision',
@@ -1005,7 +1010,7 @@ export function planRevert(id: Identification, opts: RevertOptions): Step[] {
 		});
 	}
 	steps.push({ id: 'cleanup', actions: [sh(fill('cleanup'), { optional: true }), ...(f.extrasState ? [sh(fill('removeState'), { optional: true })] : [])] });
-	steps.push({ id: 'reboot', actions: [...settle(), { kind: 'reboot' }, { kind: 'waitBoot' }, { kind: 'checkHome', expect: 'other' }] });
+	steps.push({ id: 'reboot', actions: [...settle(), { kind: 'reboot', clean: f.root }, { kind: 'waitBoot' }, { kind: 'checkHome', expect: 'other' }] });
 	return steps;
 }
 

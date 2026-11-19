@@ -96,9 +96,13 @@ class FakeFrame implements FrameShell {
 		if (out.size === 1) throw new Error(`no such directory ${remote}`);
 		return [...out.values()];
 	}
-	async reboot() {
+	/** The clean restart command of each restart (undefined: adb's reboot). */
+	rebootCommands: (string | undefined)[] = [];
+	async reboot(cleanCommand?: string): Promise<'clean' | 'adb'> {
 		this.reboots++;
+		this.rebootCommands.push(cleanCommand);
 		this.onReboot?.(this.enabled);
+		return cleanCommand ? 'clean' : 'adb';
 	}
 	/** What a restart does to the package states (a lost write: a package enabled again). */
 	onReboot?: (enabled: Record<string, boolean>) => void;
@@ -231,6 +235,8 @@ describe('runPlan', () => {
 		expect(frame.calls).toContain(`su 0 pm uninstall ${FRAME_PACKAGE}`);
 		expect(statuses.reboot).toBe('done');
 		expect(frame.reboots).toBe(1);
+		// Rooted: Android's own restart, so the apps hear about the shutdown.
+		expect(frame.rebootCommands).toEqual(['su 0 svc power reboot']);
 	});
 
 	it('warns when kinframe is not in front after converting', async () => {

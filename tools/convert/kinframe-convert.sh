@@ -99,6 +99,7 @@ CMD_readResource='su 0 dd if=$resource of=$work/$file bs=1048576'
 CMD_readable='su 0 chmod 644 $work/$file'
 CMD_writeResource='su 0 dd if=$work/$file of=$resource bs=1048576'
 CMD_sync='su 0 sync'
+CMD_cleanReboot='su 0 svc power reboot'
 CMD_flushResource='su 0 blockdev --flushbufs $resource'
 CMD_removeFile='su 0 rm -f $work/$file'
 CMD_remountRw='su 0 mount -o remount,rw $system /system'
@@ -517,6 +518,25 @@ push() {
 	fi
 	log "push $1 -> $2"
 	adb_ push "$1" "$2" >>"$LOG_FILE" 2>&1
+}
+
+# Restarts the frame. With root: Android's own restart (svc power reboot), which tells the apps first so kinframe
+# saves its clean-shutdown marker (adb reboot skips that and the frame then reports a power loss). Falls back to
+# adb reboot when the frame is still there after 30 seconds.
+restart_frame() {
+	if [ "$ROOT" = 1 ]; then
+		log "\$ $CMD_cleanReboot"
+		adb_ shell "$CMD_cleanReboot" >>"$LOG_FILE" 2>&1
+		_i=0
+		while [ $_i -lt 30 ] && [ "$(adb_ get-state 2>/dev/null)" = device ]; do
+			sleep 1
+			_i=$((_i + 1))
+		done
+		[ $_i -lt 30 ] && return 0
+		log "the frame did not restart by itself"
+	fi
+	log "\$ adb reboot"
+	adb_ reboot >>"$LOG_FILE" 2>&1
 }
 
 wait_boot() {
@@ -1356,8 +1376,7 @@ convert() {
 	if [ "$DRY_RUN" = 1 ]; then
 		say "  would run: adb reboot"
 	else
-		log "\$ adb reboot"
-		adb_ reboot >>"$LOG_FILE" 2>&1
+		restart_frame
 		wait_boot || fail "the frame did not come back within 3 minutes. If it shows kinframe, set it up on the screen."
 		# The updaters must stay off: com.adups.fota.sysoper can install firmware updates through recovery.
 		disabled_missing "$UPDATERS_INSTALLED"
@@ -1485,8 +1504,7 @@ revert() {
 		say "Dry run: nothing on the frame was changed. The log is in $LOG_FILE."
 		return
 	fi
-	log "\$ adb reboot"
-	adb_ reboot >>"$LOG_FILE" 2>&1
+	restart_frame
 	wait_boot || warn "the frame did not come back within 3 minutes"
 	rd "$(fill "$CMD_activities")"
 	contains "$OUT" "$FRAME_PACKAGE/" && warn "kinframe is still in front"

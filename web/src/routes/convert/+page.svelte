@@ -265,8 +265,8 @@
 					fetchBoot,
 					fetchRootCert,
 					restoreBoot: () => ({ resource: resourceBytes, bootanimation: animBytes }),
-					reconnect: async () => {
-						const next = await a.reconnect(current.serial);
+					reconnect: async (log) => {
+						const next = await a.reconnect(current.serial, { log });
 						frame = next;
 						return next;
 					}

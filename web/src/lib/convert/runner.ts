@@ -44,8 +44,12 @@ export interface FrameShell {
 	pull(remote: string): Promise<Uint8Array>;
 	/** Lists a directory (adb sync LIST): names with mode, size and mtime, `.` and `..` possibly included. */
 	list?(remote: string): Promise<RemoteEntry[]>;
-	/** Restarts the frame. The connection drops; `reconnect` returns a new one. */
-	reboot(): Promise<void>;
+	/**
+	 * Restarts the frame. The connection drops; `reconnect` returns a new one. With `cleanCommand` (a root shell
+	 * command such as `su 0 svc power reboot`) the frame restarts the Android way first; adb's reboot is the fallback
+	 * when it is still there after a while. Says which one restarted it.
+	 */
+	reboot(cleanCommand?: string): Promise<'clean' | 'adb'>;
 }
 
 /** A directory entry on the frame. `mode` holds the file type bits (S_IFDIR, S_IFREG, S_IFLNK) and permissions. */
@@ -80,7 +84,7 @@ export interface RunHooks {
 	/** The backed-up resource image and boot animation the person chose (revert). */
 	restoreBoot?(): { resource?: Uint8Array; bootanimation?: Uint8Array };
 	/** Waits for the frame to come back after a restart and returns the new connection. */
-	reconnect(): Promise<FrameShell>;
+	reconnect(log?: (line: string) => void): Promise<FrameShell>;
 }
 
 /** Where the start-up branding comes from (tools/brand/boot): its manifest, and its files by name. */
@@ -516,13 +520,16 @@ export async function runPlan(
 						await frame.push(a.remote, data);
 						break;
 					}
-					case 'reboot':
-						hooks.log('$ reboot');
-						await frame.reboot();
+					case 'reboot': {
+						const clean = a.clean ? fill('cleanReboot') : undefined;
+						hooks.log(`$ ${clean ?? 'reboot'}`);
+						const how = await frame.reboot(clean);
+						if (clean && how === 'adb') hooks.log('the frame did not restart by itself; $ reboot');
 						break;
+					}
 					case 'waitBoot':
 						hooks.log('waiting for the frame to restart…');
-						frame = await hooks.reconnect();
+						frame = await hooks.reconnect(hooks.log);
 						hooks.log('frame is back');
 						break;
 					case 'checkHome': {
