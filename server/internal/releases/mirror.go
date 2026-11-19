@@ -343,7 +343,7 @@ func (m *Mirror) syncGitHub(ctx context.Context) error {
 		return nil
 	}
 	base := strings.TrimRight(cmp.Or(m.APIBase, "https://api.github.com"), "/")
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/repos/"+m.Repo+"/releases?per_page=30", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, base+"/repos/"+m.Repo+"/releases?per_page=100", nil)
 	if err != nil {
 		return err
 	}
@@ -376,6 +376,15 @@ func (m *Mirror) syncGitHub(ctx context.Context) error {
 	var list []ghRelease
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 8<<20)).Decode(&list); err != nil {
 		return fmt.Errorf("GitHub releases: %w", err)
+	}
+	// Many betas can push the newest stable release off the first page; the stable channel needs it, so read on
+	// (a few pages at most) until a stable release shows up.
+	for page := 2; page <= 5 && len(list) == 100*(page-1) && !slices.ContainsFunc(list, func(r ghRelease) bool { return !r.Draft && !r.Prerelease }); page++ {
+		more, err := m.releasesPage(ctx, base, page)
+		if err != nil {
+			return err
+		}
+		list = append(list, more...)
 	}
 
 	var cands []candidate
@@ -595,4 +604,31 @@ func writeMeta(r Release) error {
 		return err
 	}
 	return os.Rename(tmp, r.Path+".json")
+}
+
+// releasesPage reads one more page of GitHub releases (no ETag: only the first page is cached by GitHub's ETag).
+func (m *Mirror) releasesPage(ctx context.Context, base string, page int) ([]ghRelease, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/repos/%s/releases?per_page=100&page=%d", base, m.Repo, page), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	req.Header.Set("User-Agent", "kinframe-server")
+	if m.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+m.Token)
+	}
+	resp, err := m.client().Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("GitHub releases page %d: HTTP %d", page, resp.StatusCode)
+	}
+	var list []ghRelease
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 8<<20)).Decode(&list); err != nil {
+		return nil, fmt.Errorf("GitHub releases page %d: %w", page, err)
+	}
+	return list, nil
 }

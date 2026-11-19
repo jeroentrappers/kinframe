@@ -50,7 +50,17 @@ func (f *fakeGitHub) serve(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
-		b, _ := json.Marshal(f.releases)
+		// Paged like GitHub: per_page (default 30) and page (from 1), newest first.
+		per, _ := strconv.Atoi(r.URL.Query().Get("per_page"))
+		if per <= 0 {
+			per = 30
+		}
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		if page <= 0 {
+			page = 1
+		}
+		lo, hi := min((page-1)*per, len(f.releases)), min(page*per, len(f.releases))
+		b, _ := json.Marshal(f.releases[lo:hi])
 		etag := fmt.Sprintf(`"%x"`, sha256.Sum256(b))
 		if r.Header.Get("If-None-Match") == etag {
 			w.WriteHeader(http.StatusNotModified)
@@ -282,5 +292,24 @@ func TestDropDirectory(t *testing.T) {
 	}
 	if got := fmt.Sprint(codes(m.All())); got != "[40099]" {
 		t.Fatalf("after removal %s", got)
+	}
+}
+
+// More betas than fit on one page of GitHub's list must not hide the newest stable release.
+func TestMirrorFindsStableBehindManyBetas(t *testing.T) {
+	gh := newFakeGitHub(t)
+	gh.add("v0.6.5", "0.6.5", 60599, false)
+	for i := 1; i <= 105; i++ {
+		gh.add(fmt.Sprintf("v0.7.0-beta.%d", i), fmt.Sprintf("0.7.0-beta.%d", i), 70000+i, true)
+	}
+	m := newMirror(t, gh, t.TempDir())
+	if err := m.Sync(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if r := m.Latest("stable", 0, 23, nil); r == nil || r.VersionCode != 60599 {
+		t.Fatalf("stable: %+v", r)
+	}
+	if r := m.Latest("beta", 0, 23, nil); r == nil || r.VersionCode != 70105 {
+		t.Fatalf("beta: %+v", r)
 	}
 }
