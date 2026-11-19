@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -18,8 +19,10 @@ type FederationConfig struct {
 	// Label is discovery `server_name`.
 	Label string
 
-	// Tests only (no environment variables): reach 127.0.0.1 over plain http and use short intervals.
+	// AllowLoopback lets other servers be reached on 127.0.0.1 (two local servers). Tests set it directly; for a
+	// local run KINFRAME_FEDERATION_DEV_LOOPBACK=1 sets it, refused unless KINFRAME_DEV_AUTH is on.
 	AllowLoopback bool
+	// Tests only (no environment variables): short intervals.
 	PingDelay     time.Duration // debounce of outgoing pings (default 10 s)
 	PollInterval  time.Duration // pull every follow at least this often (default 15 min)
 	Tick          time.Duration // the background loop's step (default 2 s)
@@ -49,6 +52,16 @@ func loadFederation(c *Config, env func(k, def string) string) error {
 		c.Federation.Allow = append(c.Federation.Allow, h)
 	}
 	c.Federation.Label = env("KINFRAME_SERVER_LABEL", "")
+	switch v := strings.ToLower(env("KINFRAME_FEDERATION_DEV_LOOPBACK", "")); v {
+	case "", "0", "off", "false", "no":
+	case "1", "on", "true", "yes":
+		if !c.DevAuth || c.Production() {
+			return errors.New("KINFRAME_FEDERATION_DEV_LOOPBACK is for local development only: it needs KINFRAME_DEV_AUTH=1 (and not KINFRAME_ENV=production)")
+		}
+		c.Federation.AllowLoopback = true
+	default:
+		return fmt.Errorf("KINFRAME_FEDERATION_DEV_LOOPBACK must be on or off, got %q", v)
+	}
 	return nil
 }
 
