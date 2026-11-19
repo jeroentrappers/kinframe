@@ -39,7 +39,9 @@
 	let feedFilter = $state<string | null>(null);
 	let feedSubs = $state<Subscription[]>([]);
 	let items = $state<Placement[]>([]);
-	let counts = $state<{ photos?: number; videos?: number; hidden?: number; trashed?: number }>({});
+	let counts = $state<{ photos?: number; videos?: number; hidden?: number; trashed?: number; taken_away?: number }>({});
+	// The trash tab counts photos taken away by their senders too (they wait there, README §5.21).
+	const trashCount = $derived((counts.trashed ?? 0) + (counts.taken_away ?? 0));
 	let cursor = $state<string | null>(null);
 	let loading = $state(true);
 	let loadingMore = $state(false);
@@ -645,7 +647,7 @@
 				{t('library.hidden')}{#if counts.hidden}<span class="count num">{counts.hidden}</span>{/if}
 			</button>
 			<button role="tab" aria-selected={view === 'trashed'} onclick={() => (view = 'trashed')}>
-				{t('library.trashTab')}{#if counts.trashed}<span class="count num">{counts.trashed}</span>{/if}
+				{t('library.trashTab')}{#if trashCount}<span class="count num">{trashCount}</span>{/if}
 			</button>
 		</div>
 		{#if view === 'visible' && (counts.photos != null || counts.videos != null)}
