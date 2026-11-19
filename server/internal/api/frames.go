@@ -162,12 +162,8 @@ func (s *Server) LeaveFrame(ctx context.Context, req gen.LeaveFrameRequestObject
 	if m.Role == "owner" {
 		return nil, problem.New(problem.OwnerCannotLeave, "")
 	}
-	removeItems := req.Body != nil && req.Body.RemoveMyItems != nil && *req.Body.RemoveMyItems
-	err = s.st.InTx(ctx, func(tx *store.Tx) error { return s.removeMember(ctx, tx, req.FrameId, m.UserID, removeItems) })
-	if err != nil {
-		return nil, err
-	}
-	return noContent(), nil
+	// Leaving (README §5.21): keep or take the photos (leaving.go).
+	return s.leaveFrame(ctx, m, req.Body)
 }
 
 func (s *Server) removeMember(ctx context.Context, tx *store.Tx, frameID, userID uuid.UUID, removeItems bool) error {

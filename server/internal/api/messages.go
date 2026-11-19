@@ -176,6 +176,7 @@ func (s *Server) messageView(ctx context.Context, d *msgData, id uuid.UUID, v ms
 			_ = json.Unmarshal(m.SystemData, &sm)
 		}
 		sm.Type = gen.SystemMessageType(*m.SystemType)
+		s.recapForViewer(ctx, v.ID, sm.Recap) // leaving: the monthly recap as rendered for the viewer
 		out.System = &sm
 	}
 	if m.DeletedAt != nil {

@@ -44,6 +44,9 @@ func (s *Server) ListPlacements(ctx context.Context, req gen.ListPlacementsReque
 		}
 		f.OnThisDay = *d
 	}
+	if err := s.libraryTakenAway(m, req.Params.TakingId, &f); err != nil { // leaving: visibility taken_away
+		return nil, err
+	}
 	rows, next, err := s.st.ListPlacements(ctx, f)
 	if err == store.ErrBadCursor {
 		return nil, problem.Validation("cursor", "format", "invalid cursor").WithStatus(http.StatusBadRequest)
@@ -59,10 +62,10 @@ func (s *Server) ListPlacements(ctx context.Context, req gen.ListPlacementsReque
 	for i := range rows {
 		out[i] = s.placementJSON(&rows[i])
 	}
-	return ok(map[string]any{
-		"placements": out, "next_cursor": next,
-		"counts": map[string]int{"photos": counts.Photos, "videos": counts.Videos, "hidden": counts.Hidden, "trashed": counts.Trashed},
-	}), nil
+	s.placementTakenAway(ctx, req.FrameId, out) // leaving
+	cm := map[string]int{"photos": counts.Photos, "videos": counts.Videos, "hidden": counts.Hidden, "trashed": counts.Trashed}
+	s.libraryTakenAwayCount(ctx, m, cm) // leaving: counts.taken_away
+	return ok(map[string]any{"placements": out, "next_cursor": next, "counts": cm}), nil
 }
 
 // canEditPlacement: the item's sender, the member who shared this placement
@@ -115,6 +118,13 @@ func (s *Server) UpdatePlacement(ctx context.Context, req gen.UpdatePlacementReq
 }
 
 func (s *Server) PurgePlacement(ctx context.Context, req gen.PurgePlacementRequestObject) (gen.PurgePlacementResponseObject, error) {
+	// Leaving: a taken-away placement waiting in the trash is deleted early.
+	if handled, err := s.purgeTakenAway(ctx, req.FrameId, req.PlacementId); handled || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		return noContent(), nil
+	}
 	if _, _, err := s.editablePlacement(ctx, req.FrameId, req.PlacementId); err != nil {
 		return nil, err
 	}

@@ -194,9 +194,9 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 			return nil, problem.New(problem.UpstreamUnavailable, "the sign-in account could not be deleted; try again later")
 		}
 	}
-	// Leaving (README §5.21): `photos: take|leave`, or the older `remove_items`. Until server-leaving builds the
-	// handover, `leave` keeps the photos where they are, as `remove_items=false` did.
+	// Leaving (README §5.21): `photos: take|leave`, or the older `remove_items` (leaving.go).
 	takePhotos := accountDeletionTakesPhotos(req)
+	del := s.newAccountDeletion(ctx, u, takePhotos)
 	var notifyFrames []uuid.UUID
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
 		if err := s.ownsNoFrames(ctx, tx, u.ID); err != nil {
@@ -206,26 +206,9 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 		if err != nil {
 			return err
 		}
-		if takePhotos {
-			if _, err := tx.RemovePlacements(ctx, `p.item_id IN (SELECT id FROM items WHERE sender_user_id = $1) OR p.shared_by_user_id = $1`, u.ID); err != nil {
-				return err
-			}
-			// ... and their posts leave every feed.
-			posts, err := s.st.LivePostIDs(ctx, tx, nil, &u.ID, nil)
-			if err != nil {
-				return err
-			}
-			var sweeps []uuid.UUID
-			for _, p := range posts {
-				_, subs, err := tx.RemovePostItems(ctx, p, nil, &u.ID)
-				if err != nil {
-					return err
-				}
-				sweeps = append(sweeps, subs...)
-			}
-			if err := enqueueSweeps(ctx, tx, sweeps); err != nil {
-				return err
-			}
+		// take: everything is taken away with the 30-day notice; leave: handed over to the owners.
+		if err := s.accountDeletionPhotos(ctx, tx, del); err != nil {
+			return err
 		}
 		if _, err := tx.Exec(ctx, `DELETE FROM feed_members WHERE user_id = $1`, u.ID); err != nil {
 			return err
@@ -257,6 +240,7 @@ func (s *Server) DeleteMe(ctx context.Context, req gen.DeleteMeRequestObject) (g
 	if u.AvatarKey != nil {
 		s.deleteBlob(ctx, *u.AvatarKey)
 	}
+	s.announceAccountDeletion(ctx, del)
 	return noContent(), nil
 }
 

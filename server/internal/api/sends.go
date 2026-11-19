@@ -651,10 +651,15 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 		return nil, err
 	}
 	audience := s.sendPostsAudience(ctx, req.SendId)
+	var purged []store.RestoredFrame // leaving: taken-away copies waiting in a trash
 	err := s.st.InTx(ctx, func(tx *store.Tx) error {
 		// Shared placements carry the original send too; matching the send's
 		// items as well keeps every copy covered (feed placements included).
 		if _, err := tx.RemovePlacements(ctx, `p.send_id = $1 OR p.item_id IN (SELECT item_id FROM send_items WHERE send_id = $1)`, req.SendId); err != nil {
+			return err
+		}
+		var err error
+		if purged, err = tx.PurgeTakenAwayOfSend(ctx, req.SendId); err != nil {
 			return err
 		}
 		// The send's posts leave every feed.
@@ -677,6 +682,7 @@ func (s *Server) Unsend(ctx context.Context, req gen.UnsendRequestObject) (gen.U
 	}
 	s.publishSendUpdates(ctx, map[uuid.UUID]uuid.UUID{req.SendId: me(ctx).ID}, "")
 	s.publishPostGone(ctx, audience)
+	s.publishUnsentTakenAway(ctx, purged)
 	return noContent(), nil
 }
 

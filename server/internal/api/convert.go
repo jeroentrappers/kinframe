@@ -175,6 +175,7 @@ func (s *Server) itemJSON(it *store.ItemRow) gen.Item {
 		out.CapturedAt = it.CapturedHint
 	}
 	out.Via = tgCredit(viaCredit(viaJSON(it.Via, it.ViaSourceID), it.ViaLabel, it.ViaEmailAddressID), it.ViaTelegramChatID)
+	out.FormerSenderName = it.FormerSenderName // leaving: handed over at account deletion
 	if it.Origin != nil {
 		out.ImportedFrom = ptr(gen.ItemOrigin(*it.Origin))
 		out.ImportedSenderName = it.OriginSenderName
