@@ -27,13 +27,6 @@ type reactionTarget struct {
 	author *uuid.UUID // who gets reaction_person
 }
 
-func (t *reactionTarget) postID() *uuid.UUID {
-	if t.post == nil {
-		return nil
-	}
-	return &t.post.ID
-}
-
 // resolveReactionTarget finds the target as viewer sees it (404 when they may not), and whether people may
 // react to it (422 for frame entries, system messages and tombstones).
 func (s *Server) resolveReactionTarget(ctx context.Context, viewer uuid.UUID, kind string, id uuid.UUID, postID *uuid.UUID, forSet bool) (*reactionTarget, error) {
