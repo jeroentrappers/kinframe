@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Encouragement to share (docs/spec/family-social.md §9, README §5.20): freshness, photo requests, reminders,
+     streaks, prompts, On this day, summaries, recaps, milestones. Keys follow the web catalog's `engagement.` keys. -->
+<resources>
+    <!-- Freshness -->
+    <string name="engagement_fresh_today">Fresh</string>
+    <string name="engagement_fresh_never">No photos yet</string>
+    <plurals name="engagement_fresh_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="engagement_fresh_days_quiet">
+        <item quantity="one">%1$d day quiet</item>
+        <item quantity="other">%1$d days quiet</item>
+    </plurals>
+    <plurals name="engagement_fresh_weeks_quiet">
+        <item quantity="one">%1$d week quiet</item>
+        <item quantity="other">%1$d weeks quiet</item>
+    </plurals>
+    <string name="engagement_last_shared_by">Last shared by %1$s, %2$s</string>
+    <string name="engagement_send_to">Send something to %1$s</string>
+    <string name="engagement_pick_photos">Pick photos</string>
+    <string name="engagement_pick_photos_hint">The photos you took lately are at the top of the picker. Nothing leaves your phone until you pick it.</string>
+    <string name="engagement_open_frame">Open the frame</string>
+
+    <!-- Photo requests -->
+    <string name="engagement_frame_would_like">%1$s would like new photos 💛</string>
+    <string name="engagement_request_open">%1$s asked for new photos %2$s.</string>
+    <string name="engagement_request_answered">%1$s answered with new photos.</string>
+    <string name="engagement_request_expired">Nobody answered the last request.</string>
+
+    <!-- Streak -->
+    <string name="engagement_streak_short">🔥 %1$d wk</string>
+    <plurals name="engagement_streak_weeks">
+        <item quantity="one">🔥 %1$d week</item>
+        <item quantity="other">🔥 %1$d weeks</item>
+    </plurals>
+    <string name="engagement_streak_new">New streak: share this week</string>
+    <plurals name="engagement_streak_week_progress">
+        <item quantity="one">%1$d of %2$d photo this week</item>
+        <item quantity="other">%1$d of %2$d photos this week</item>
+    </plurals>
+    <string name="engagement_streak_met">This week’s goal is reached</string>
+    <string name="engagement_streak_helpers">Who shared this week</string>
+    <string name="engagement_streak_best">Best: %1$d weeks</string>
+    <plurals name="engagement_freezes">
+        <item quantity="one">%1$d freeze for a missed week</item>
+        <item quantity="other">%1$d freezes for missed weeks</item>
+    </plurals>
+    <string name="engagement_streak_off">This family doesn’t keep a streak.</string>
+    <string name="engagement_streak_and_prompts">Streak and prompts</string>
+    <string name="engagement_family_title">%1$s: sharing together</string>
+
+    <!-- Prompts -->
+    <string name="engagement_prompts">Weekly prompts</string>
+    <string name="engagement_prompt_this_week">This week in %1$s</string>
+    <string name="engagement_prompt_current">This week</string>
+    <string name="engagement_prompt_answer">Answer with a photo</string>
+    <plurals name="engagement_prompt_answers">
+        <item quantity="one">%1$d answer so far</item>
+        <item quantity="other">%1$d answers so far</item>
+    </plurals>
+    <plurals name="engagement_answers_to">
+        <item quantity="one">%1$d answer to “%2$s”</item>
+        <item quantity="other">%1$d answers to “%2$s”</item>
+    </plurals>
+    <string name="engagement_answers_prompt">Answers “%1$s”</string>
+    <string name="engagement_prompt_change">Change this week’s prompt</string>
+    <string name="engagement_prompt_week_of">Week of %1$s</string>
+    <string name="engagement_prompt_skipped_week">No prompt this week</string>
+    <string name="engagement_prompt_choose">Pick a prompt</string>
+    <string name="engagement_prompt_own">Your own prompt</string>
+    <string name="engagement_prompt_own_placeholder">e.g. Your Sunday breakfast</string>
+    <string name="engagement_prompt_use_own">Use this one</string>
+    <string name="engagement_prompt_skip">Skip this week</string>
+    <string name="engagement_prompt_reset_button">Back to the usual</string>
+    <string name="engagement_prompt_set">Prompt set</string>
+    <string name="engagement_prompt_skipped">No prompt that week</string>
+    <string name="engagement_prompt_reset">Back to the server’s prompt</string>
+
+    <!-- Family settings -->
+    <string name="engagement_family_settings">Settings for the family</string>
+    <string name="engagement_setting_streak">Family streak</string>
+    <string name="engagement_setting_streak_hint">Count the weeks in a row the family reaches its goal together. Nobody is ranked.</string>
+    <plurals name="engagement_setting_goal">
+        <item quantity="one">Goal: %1$d photo a week</item>
+        <item quantity="other">Goal: %1$d photos a week</item>
+    </plurals>
+    <string name="engagement_setting_prompts">Weekly prompts</string>
+    <string name="engagement_setting_prompts_hint">A short theme on Monday, such as “Something you cooked”.</string>
+    <string name="engagement_setting_recap">Monthly recap</string>
+    <string name="engagement_setting_recap_hint">On the 1st, a card in the family chat with the month in photos.</string>
+    <plurals name="engagement_setting_quiet">
+        <item quantity="one">Gently remind someone when a frame has had no new photos for %1$d day</item>
+        <item quantity="other">Gently remind someone when a frame has had no new photos for %1$d days</item>
+    </plurals>
+    <string name="engagement_setting_timezone">Weeks run in %1$s time.</string>
+    <string name="engagement_setting_timezone_use">Use %1$s</string>
+
+    <!-- Home cards -->
+    <string name="engagement_on_this_day">On this day</string>
+    <plurals name="engagement_years_ago_in">
+        <item quantity="one">%1$d year ago in %2$s</item>
+        <item quantity="other">%1$d years ago in %2$s</item>
+    </plurals>
+    <string name="engagement_share_again">Share again</string>
+    <string name="engagement_share_again_none">These photos are someone else’s; share them in a chat instead.</string>
+    <string name="engagement_milestone_new">A milestone, just for you</string>
+    <string name="engagement_auto_reduced">You didn’t act on the last few reminders, so we’ll send fewer. Change it any time in Settings.</string>
+    <string name="engagement_reminder_settings">Reminder settings</string>
+
+    <!-- Weekly summary and recap -->
+    <string name="engagement_summary_title">Your week in photos</string>
+    <string name="engagement_summary_week">Week of %1$s</string>
+    <plurals name="engagement_summary_seen">
+        <item quantity="one">Your photos were seen %1$d time on %2$d frames.</item>
+        <item quantity="other">Your photos were seen %1$d times on %2$d frames.</item>
+    </plurals>
+    <plurals name="engagement_summary_loved">
+        <item quantity="one">The frames loved %1$d.</item>
+        <item quantity="other">The frames loved %1$d.</item>
+    </plurals>
+    <plurals name="engagement_summary_reactions">
+        <item quantity="one">%1$d reaction</item>
+        <item quantity="other">%1$d reactions</item>
+    </plurals>
+    <plurals name="engagement_summary_comments">
+        <item quantity="one">%1$d comment</item>
+        <item quantity="other">%1$d comments</item>
+    </plurals>
+    <string name="engagement_recap">Monthly recap</string>
+    <string name="engagement_recap_title">%1$s in photos</string>
+    <plurals name="engagement_recap_photos">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <plurals name="engagement_recap_videos">
+        <item quantity="one">%1$d video</item>
+        <item quantity="other">%1$d videos</item>
+    </plurals>
+    <plurals name="engagement_recap_sharers">
+        <item quantity="one">%1$d person shared</item>
+        <item quantity="other">%1$d people shared</item>
+    </plurals>
+    <string name="engagement_recap_most_loved">Most loved</string>
+    <string name="engagement_recap_freshest">Freshest frames</string>
+    <plurals name="engagement_recap_frame_days">
+        <item quantity="one">%1$s: new photos on %2$d day</item>
+        <item quantity="other">%1$s: new photos on %2$d days</item>
+    </plurals>
+    <string name="engagement_recap_new_members">New in the family</string>
+
+    <!-- Milestones -->
+    <string name="engagement_milestones">My milestones</string>
+    <string name="engagement_milestones_lede">Private to you, unless you choose to show one on your profile.</string>
+    <string name="engagement_milestones_none">Your first milestone comes with your first photo.</string>
+    <string name="engagement_milestone_show">Show on my profile</string>
+    <string name="engagement_milestone_show_hint">People you share a family or a frame with can see it.</string>
+    <string name="engagement_milestone_first_photo">Your first photo</string>
+    <string name="engagement_milestone_photos_10">10 photos shared</string>
+    <string name="engagement_milestone_photos_100">100 photos shared</string>
+    <string name="engagement_milestone_photos_1000">1000 photos shared</string>
+    <string name="engagement_milestone_first_video">Your first video</string>
+    <string name="engagement_milestone_year">A year of sharing</string>
+    <string name="engagement_milestone_loves_100">100 ❤ from the frames</string>
+    <string name="engagement_milestone_other">A milestone</string>
+
+    <!-- Settings: reminders -->
+    <string name="engagement_settings_title">Reminders and chats</string>
+    <string name="engagement_settings_lede">Gentle reminders to share, the weekly summary, the email digest, read receipts and blocked people.</string>
+    <string name="engagement_settings_open">Reminders and notifications</string>
+    <string name="engagement_reminders">Reminders</string>
+    <string name="engagement_reminders_lede">A few specific nudges, like “Opa’s frame has had no new photos for 9 days”. At most two a week, never at night.</string>
+    <string name="engagement_level_normal">Normal</string>
+    <string name="engagement_level_fewer">Fewer</string>
+    <string name="engagement_level_off">Off</string>
+    <string name="engagement_level_normal_hint">At most two reminders a week.</string>
+    <string name="engagement_level_fewer_hint">At most one a week, and no streak reminders.</string>
+    <string name="engagement_level_off_hint">No reminders. Frames asking for photos follow the switch below.</string>
+    <string name="engagement_snooze_month">Snooze for a month</string>
+    <string name="engagement_snoozed">Reminders snoozed for a month</string>
+    <string name="engagement_snoozed_until">Reminders are snoozed until %1$s.</string>
+    <string name="engagement_snooze_end">End the snooze</string>
+    <string name="engagement_snooze_ended">Reminders are back on</string>
+    <string name="engagement_frame_requests">When a frame asks for photos</string>
+    <string name="engagement_frame_requests_hint">“Oma would like new photos 💛”, sent from the frame itself.</string>
+    <string name="engagement_weekly_summary">Weekly summary</string>
+    <string name="engagement_weekly_summary_hint">On Sunday evening: how often your photos were seen and loved.</string>
+    <string name="engagement_birthday_reminders">Birthday reminders</string>
+    <string name="engagement_birthday_reminders_hint">Three days before a birthday in the family: send a photo with them?</string>
+    <string name="engagement_quiet_hours">Quiet hours</string>
+    <string name="engagement_quiet_hours_hint">No reminders in these hours; they wait until morning.</string>
+    <string name="engagement_quiet_from">From %1$s</string>
+    <string name="engagement_quiet_to">Until %1$s</string>
+    <string name="engagement_email_digest">Email digest</string>
+    <string name="engagement_email_digest_hint">Unread comments and messages by email, for when you don’t open the app.</string>
+    <string name="engagement_digest_off">Off</string>
+    <string name="engagement_digest_daily">Daily</string>
+    <string name="engagement_digest_weekly">Weekly</string>
+
+    <!-- Frame settings -->
+    <string name="engagement_frame_settings">Family on the frame</string>
+    <string name="engagement_frame_ask">“Ask for new photos” button</string>
+    <string name="engagement_frame_ask_hint">In the frame’s quick menu: one tap lets the family know, at most once a day.</string>
+    <string name="engagement_frame_prompt_cards">Weekly prompt cards</string>
+    <string name="engagement_frame_prompt_cards_hint">Show “This week: …” before the photos that answer a family’s prompt.</string>
+    <string name="engagement_frame_new_from">“New photos from …”</string>
+    <string name="engagement_frame_new_from_hint">When the frame wakes up after new photos arrived, it says who sent them.</string>
+    <string name="engagement_frame_settings_note">The frame needs a recent version of the kinframe app for these.</string>
+
+    <!-- Notifications -->
+    <!-- Android only: notification channel and the reminder buttons. -->
+    <string name="engagement_channel">Reminders</string>
+    <string name="engagement_channel_desc">Gentle reminders to share, frames asking for photos and the weekly summary.</string>
+    <string name="engagement_notif_reminder">A gentle reminder</string>
+    <string name="engagement_notif_frame_request">A frame would like new photos</string>
+    <string name="engagement_notif_summary">Your week in photos</string>
+    <string name="engagement_action_snooze">Snooze 1 month</string>
+    <string name="engagement_action_fewer">Fewer reminders</string>
+</resources>

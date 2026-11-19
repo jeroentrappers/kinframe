@@ -69,6 +69,8 @@ fun SettingsScreen(
     onPhotoSources: (() -> Unit)? = null,
     /** Settings → Telegram ("Link my Telegram"); null when the server has no Telegram bot. */
     telegram: (@Composable () -> Unit)? = null,
+    /** Family social: reminders, chats, blocked people; null without it. */
+    social: (@Composable () -> Unit)? = null,
     /** Names of the frames the person owns; they hand those over or remove them before deleting the account. */
     ownedFrames: List<String> = emptyList(),
     /** Deletes the account (removeItems: also what they sent); null hides the button. */
@@ -137,6 +139,7 @@ fun SettingsScreen(
         }
 
         telegram?.invoke()
+        social?.invoke()
 
         SectionTitle(stringResource(R.string.settings_server))
         Surface(Modifier.fillMaxWidth()) {

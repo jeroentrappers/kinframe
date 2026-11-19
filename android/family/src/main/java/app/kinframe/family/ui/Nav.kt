@@ -34,7 +34,7 @@ sealed interface Route {
     data class TelegramChats(val scope: app.kinframe.family.ui.channels.ChannelScope) : Route
     data class TelegramChat(val chatId: String) : Route
 
-    val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings
+    val isTab: Boolean get() = this == Frames || this == Send || this == History || this == Feeds || this == Settings || this is SocialTab
 }
 
 enum class FrameTab { Overview, Library, People, Feeds, Calendar, Settings }

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Family social (docs/spec/family-social.md): Home, threads, reactions, mentions, circles, the member role.
+     Keys follow the web catalog's `social.` keys; written alongside the web strings. -->
+<resources>
+    <string name="social_nav_home">Home</string>
+    <string name="social_home_title">Home</string>
+    <string name="social_share_photos">Share photos</string>
+    <string name="social_home_empty_title">Nothing shared yet</string>
+    <string name="social_home_empty_body">Photos posted in your families show up here, newest first, with everyone’s comments and the frames’ reactions.</string>
+    <string name="social_post_title">Post</string>
+    <string name="social_post_gone">This post isn’t available any more.</string>
+    <string name="social_to_frame">To %1$s</string>
+    <string name="social_family_circle">%1$s · %2$s</string>
+    <string name="social_via">via %1$s</string>
+    <string name="social_video">Video</string>
+    <string name="social_you">You</string>
+    <string name="social_former_member">Former member</string>
+    <string name="social_loading">Loading…</string>
+    <string name="social_frame_label">%1$s</string>
+    <string name="social_mentioned_you">Mentioned you</string>
+    <string name="social_this_photo">This photo</string>
+    <plurals name="social_seen_on_frames">
+        <item quantity="one">Seen on %1$d frame</item>
+        <item quantity="other">Seen on %1$d frames</item>
+    </plurals>
+    <plurals name="social_view_all_comments">
+        <item quantity="one">View %1$d comment</item>
+        <item quantity="other">View all %1$d comments</item>
+    </plurals>
+
+    <!-- Reactions -->
+    <string name="social_react">React</string>
+    <string name="social_who_reacted">Reactions</string>
+    <string name="social_reaction_love">Love</string>
+    <string name="social_reaction_laugh">Laugh</string>
+    <string name="social_reaction_wow">Wow</string>
+    <string name="social_reaction_sad">Sad</string>
+    <string name="social_reaction_thumbs_up">Thumbs up</string>
+    <string name="social_reaction_pray">Thank you</string>
+    <plurals name="social_reactions_count">
+        <item quantity="one">%1$d reaction</item>
+        <item quantity="other">%1$d reactions</item>
+    </plurals>
+    <plurals name="social_reactions_others">
+        <item quantity="one">%1$s and %2$d other</item>
+        <item quantity="other">%1$s and %2$d others</item>
+    </plurals>
+
+    <!-- Threads -->
+    <string name="social_add_comment">Add a comment…</string>
+    <string name="social_comment_placeholder">Write a comment… (@ to mention)</string>
+    <string name="social_send_comment">Send comment</string>
+    <string name="social_no_comments">No comments yet. Be the first to say something nice.</string>
+    <string name="social_comments_closed">Comments are turned off for this post.</string>
+    <string name="social_reply">Reply</string>
+    <string name="social_replying_to">Replying to %1$s</string>
+    <string name="social_editing_comment">Editing your comment</string>
+    <string name="social_edited">edited</string>
+    <string name="social_comment_tombstone">Comment deleted</string>
+    <string name="social_removed_by_admin">Removed by a family admin</string>
+    <string name="social_comment_remove">Remove comment</string>
+    <string name="social_comment_delete_title">Delete your comment?</string>
+    <string name="social_comment_delete_body">It disappears from the thread for everyone.</string>
+    <string name="social_comment_remove_title">Remove this comment?</string>
+    <string name="social_comment_remove_body">It and its replies disappear for everyone. The author sees that a family admin removed it.</string>
+    <string name="social_comment_deleted">Comment deleted</string>
+    <string name="social_comment_removed">Comment removed</string>
+    <string name="social_comment_too_long">That comment is too long.</string>
+    <string name="social_frame_reacted">%1$s reacted %2$s</string>
+    <string name="social_frame_replied">%1$s: %2$s</string>
+    <string name="social_thread_mute">Mute this post</string>
+    <string name="social_thread_unmute">Unmute this post</string>
+    <string name="social_thread_muted">You won’t get notifications for this post.</string>
+    <string name="social_thread_unmuted">Notifications for this post are back on.</string>
+    <string name="social_thread_close">Turn off comments</string>
+    <string name="social_thread_open">Turn on comments</string>
+    <string name="social_thread_closed_done">Comments turned off</string>
+    <string name="social_thread_opened_done">Comments turned on</string>
+    <string name="social_problem_comments_closed">Comments are turned off for this post.</string>
+    <string name="social_problem_not_ready">This server doesn’t have this yet.</string>
+
+    <!-- Notifications -->
+    <string name="social_channel">Comments and reactions</string>
+    <string name="social_channel_desc">Comments, replies, mentions and reactions on your photos.</string>
+    <string name="social_notif_comment">New comment</string>
+    <string name="social_notif_reply">New reply</string>
+    <string name="social_notif_mention">You were mentioned</string>
+    <string name="social_notif_reaction">New reaction</string>
+
+    <!-- Roles and family settings -->
+    <string name="social_role_member">Member</string>
+    <string name="social_role_member_hint">Members follow along: they read, comment, react and chat, but don’t post photos.</string>
+    <string name="social_member_cannot_post">You follow this family as a member: you can comment, react and chat, but not post photos.</string>
+    <string name="social_setting_see_reactions_hint">Every member sees how the frames reacted. People’s reactions are always visible.</string>
+    <string name="social_setting_see_receipts">Everyone sees where posts were seen</string>
+    <string name="social_setting_see_receipts_hint">Every member sees on which frames each post arrived and was seen. Otherwise only the poster and admins.</string>
+    <string name="social_setting_new_can_post">New members can post</string>
+    <string name="social_setting_new_can_post_hint">People who join become posters. Off: they join as members who comment and chat. Existing members keep their role.</string>
+    <string name="social_setting_circles">Members can create circles</string>
+    <string name="social_setting_circles_hint">Anyone in the family can start a circle. Off: only the owner and admins.</string>
+    <string name="social_family_chat">Family chat</string>
+    <string name="social_family_mute">Notifications from this family</string>
+    <string name="social_family_mute_hint">Muted parts still show up in the app; you just don’t get notifications.</string>
+    <string name="social_mute_none">Everything</string>
+    <string name="social_mute_posts">Mute posts</string>
+    <string name="social_mute_chat">Mute chat</string>
+    <string name="social_mute_all">Mute all</string>
+    <string name="social_family_muted">Notifications changed</string>
+    <string name="social_family_unmuted">You get all notifications from this family again.</string>
+
+    <!-- Circles -->
+    <string name="social_circles">Circles</string>
+    <plurals name="social_circles_count">
+        <item quantity="one">%1$d circle</item>
+        <item quantity="other">%1$d circles</item>
+    </plurals>
+    <string name="social_circles_title">Circles of %1$s</string>
+    <string name="social_circles_lede">Smaller groups inside the family, such as a household or the cousins. A circle has its own chat and you can share photos with just the circle.</string>
+    <string name="social_circles_empty_title">No circles yet</string>
+    <string name="social_circles_empty_body">Start one for a household or for the cousins: its own chat, and photos only they see.</string>
+    <string name="social_circle_new">New circle</string>
+    <string name="social_circle_name">Circle name</string>
+    <string name="social_circle_name_placeholder">e.g. The cousins</string>
+    <string name="social_circle_pick_members">Who’s in it</string>
+    <string name="social_circle_create">Create circle</string>
+    <string name="social_circle_created">%1$s created</string>
+    <string name="social_circle_not_in">Not in it</string>
+    <string name="social_circle_chat">Circle chat</string>
+    <string name="social_circle_frames">Frames</string>
+    <string name="social_circle_frames_hint">Photos shared with the circle go to the family’s frames that a circle member manages, plus the extra frames chosen here.</string>
+    <string name="social_circle_no_frames">No frame gets this circle’s photos yet.</string>
+    <string name="social_circle_extra_frames">Extra frames</string>
+    <string name="social_circle_members_added">Added to the circle</string>
+    <string name="social_circle_member_removed">Removed from the circle</string>
+    <string name="social_circle_leave">Leave circle</string>
+    <string name="social_circle_left">You left %1$s</string>
+    <string name="social_circle_delete">Delete circle</string>
+    <string name="social_circle_delete_title">Delete %1$s?</string>
+    <string name="social_circle_delete_body">Its photos are removed from every frame and its chat closes. This can’t be undone.</string>
+    <string name="social_circle_deleted">%1$s deleted</string>
+    <string name="social_audience_title">Share with in %1$s</string>
+    <string name="social_audience_whole">Whole family</string>
+
+    <!-- Frame settings -->
+    <string name="social_frame_show_comments">Show comments</string>
+    <string name="social_frame_show_comments_hint">When a photo with comments comes up, the newest comment shows at the bottom for a few seconds.</string>
+</resources>

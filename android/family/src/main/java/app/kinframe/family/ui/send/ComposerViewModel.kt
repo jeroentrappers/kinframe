@@ -64,6 +64,15 @@ data class ComposerState(
     /** Feeds you can post to (any role), when the server has feeds; shown in their own section next to frames. */
     val feeds: List<Feed> = emptyList(),
     val selectedFeeds: Set<String> = emptySet(),
+    // ---- family social (README §5.18, §5.20)
+    /** The caller's circles per feed: an audience inside that family ("Share with: whole family / The cousins"). */
+    val circles: Map<String, List<app.kinframe.core.social.Circle>> = emptyMap(),
+    /** Chosen circle per selected feed; absent = the whole family. */
+    val audience: Map<String, String> = emptyMap(),
+    /** This week's prompt per feed (families with prompts on). */
+    val prompts: Map<String, app.kinframe.core.social.FeedPrompt> = emptyMap(),
+    /** The prompt these photos answer (its feed must be selected). */
+    val answering: String? = null,
 ) {
     val sendableFrames: List<Frame> get() = (frames as? Load.Ready)?.value?.filter { it.can { p -> p.send } }.orEmpty()
 
@@ -112,6 +121,8 @@ class ComposerViewModel(
     private val now: () -> Long = { System.currentTimeMillis() },
     /** Discovery `feeds`: offer feeds as recipients. */
     private val feedsEnabled: () -> Boolean = { false },
+    /** Family social: circles as audience and weekly prompts; null without it. */
+    private val social: () -> app.kinframe.core.social.SocialApi? = { null },
 ) : ViewModel() {
     private val _state = MutableStateFlow(ComposerState(limits = limits()))
     val state: StateFlow<ComposerState> = _state.asStateFlow()
@@ -150,12 +161,32 @@ class ComposerViewModel(
     }
 
     private suspend fun loadFeeds(a: KinApi) {
-        val feeds = runCatching { a.feeds() }.getOrNull()?.sortedBy { it.name.lowercase() } ?: return
+        // `member` reads and comments but doesn't post photos (README §5.18): those families aren't offered.
+        val feeds = runCatching { a.feeds() }.getOrNull()?.filter { it.canPost }?.sortedBy { it.name.lowercase() } ?: return
+        social()?.let { sa -> viewModelScope.launch { loadSocial(sa, feeds) } }
         _state.update { s ->
             val pre = preselectFeed?.takeIf { id -> feeds.any { it.id == id } }
             s.copy(feeds = feeds, selectedFeeds = if (pre != null) setOf(pre) else Recipients.keep(s.selectedFeeds, feeds.map { it.id }))
         }
     }
+
+    private suspend fun loadSocial(sa: app.kinframe.core.social.SocialApi, feeds: List<Feed>) {
+        val circles = feeds.filter { it.circleCount > 0 }.associate { f ->
+            f.id to runCatching { sa.circles(f.id) }.getOrDefault(emptyList()).filter { it.isMember }
+        }.filterValues { it.isNotEmpty() }
+        val prompts = feeds.mapNotNull { f ->
+            runCatching { sa.feedPrompts(f.id) }.getOrNull()?.firstOrNull { it.status == app.kinframe.core.social.PromptStatus.CURRENT && it.title.isNotBlank() }?.let { f.id to it }
+        }.toMap()
+        _state.update { it.copy(circles = circles, prompts = prompts) }
+    }
+
+    /** "Share with": [circleId] null is the whole family. */
+    fun setAudience(feedId: String, circleId: String?) = _state.update { s ->
+        s.copy(audience = if (circleId == null) s.audience - feedId else s.audience + (feedId to circleId))
+    }
+
+    /** Tag these photos as an answer to a weekly prompt, or (null) not. */
+    fun answer(promptId: String?) = _state.update { it.copy(answering = promptId) }
 
     /** "Post to this feed" from a feed: the feed alone is selected. */
     fun preselectFeed(feedId: String) {
@@ -166,7 +197,12 @@ class ComposerViewModel(
     }
 
     fun toggleFeed(feedId: String) = _state.update { s ->
-        s.copy(selectedFeeds = if (feedId in s.selectedFeeds) s.selectedFeeds - feedId else s.selectedFeeds + feedId, error = null)
+        val on = feedId !in s.selectedFeeds
+        s.copy(
+            selectedFeeds = if (on) s.selectedFeeds + feedId else s.selectedFeeds - feedId, error = null,
+            audience = if (on) s.audience else s.audience - feedId,
+            answering = if (!on && s.prompts[feedId]?.id == s.answering) null else s.answering,
+        )
     }
 
     /** "Send to this frame" from a frame card or a fresh join. */
@@ -246,6 +282,8 @@ class ComposerViewModel(
         val outbox = OutboxSend(
             feedIds = feeds.map { it.id },
             feedNames = feeds.map { it.name },
+            circleIds = feeds.mapNotNull { s.audience[it.id] },
+            promptId = s.answering?.takeIf { p -> s.prompts.any { (fid, pr) -> pr.id == p && fid in s.selectedFeeds } },
             id = newId(),
             server = server(),
             frameIds = frames.map { it.id },
@@ -276,7 +314,7 @@ class ComposerViewModel(
             try {
                 enqueue(outbox)
                 preselectFeed = null
-                _state.update { it.copy(preparing = false, items = emptyList(), editing = null, skipped = 0, overLimit = 0) }
+                _state.update { it.copy(preparing = false, items = emptyList(), editing = null, skipped = 0, overLimit = 0, answering = null) }
                 _events.tryEmit(ComposerEvent.Queued(outbox.id))
             } catch (e: Exception) {
                 _state.update { it.copy(preparing = false, error = Problems.message(e)) }

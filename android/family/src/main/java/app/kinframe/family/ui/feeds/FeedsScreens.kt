@@ -152,6 +152,7 @@ fun FeedRoleBadge(role: String) {
     when (role) {
         FeedRole.OWNER -> Pill(stringResource(R.string.role_owner), c.accentSoft, c.onAccentSoft)
         FeedRole.ADMIN -> Pill(stringResource(R.string.role_admin), c.sageSoft, c.onSageSoft)
+        FeedRole.MEMBER -> Pill(stringResource(R.string.social_role_member), c.paperDeep, c.inkSoft)
         else -> Pill(stringResource(R.string.feed_role_poster), c.paperDeep, c.inkSoft)
     }
 }
@@ -312,6 +313,8 @@ class FeedActions(
     val addFromGoogle: (() -> Unit)? = null,
     /** "Photos by email and Telegram" in Settings (owner/admins; discovery `email_inbox` / `telegram`); null hides it. */
     val channels: (@Composable () -> Unit)? = null,
+    /** Family social (docs/spec/family-social.md); null when the server doesn't have it. */
+    val social: app.kinframe.family.ui.social.FeedSocialSlots? = null,
 )
 
 @Composable
@@ -320,7 +323,7 @@ fun FeedDetailScreen(state: FeedDetailState, tab: FeedTab, onTab: (FeedTab) -> U
     val feed = state.feedOrNull
     Column(Modifier.fillMaxSize().background(c.paper)) {
         KinTopBar(feed?.name.orEmpty(), onBack = onBack) {
-            if (feed != null) IconButton(a.post) { Icon(KinIcons.Send, stringResource(R.string.feed_post_to, feed.name), tint = c.accent) }
+            if (feed != null && feed.canPost) IconButton(a.post) { Icon(KinIcons.Send, stringResource(R.string.feed_post_to, feed.name), tint = c.accent) }
         }
         when (val f = state.feed) {
             Load.Loading -> SkeletonList(3, 140.dp)
@@ -390,8 +393,10 @@ fun FeedDetailScreen(state: FeedDetailState, tab: FeedTab, onTab: (FeedTab) -> U
 private fun PostsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
     val c = Kin.colors
     PageColumn(spacing = 12.dp) {
-        PrimaryButton(stringResource(R.string.feed_post_button), a.post, Modifier.fillMaxWidth(), icon = KinIcons.Send)
-        a.addFromGoogle?.let { SecondaryButton(stringResource(R.string.google_add), it, Modifier.fillMaxWidth(), icon = KinIcons.Image) }
+        if (feed.canPost) PrimaryButton(stringResource(R.string.feed_post_button), a.post, Modifier.fillMaxWidth(), icon = KinIcons.Send)
+        else Note(stringResource(R.string.social_member_cannot_post))
+        a.social?.header?.invoke()
+        if (feed.canPost) a.addFromGoogle?.let { SecondaryButton(stringResource(R.string.google_add), it, Modifier.fillMaxWidth(), icon = KinIcons.Image) }
         when (val p = state.posts) {
             Load.Loading -> SkeletonList(2, 160.dp)
             is Load.Error -> ErrorPanel(p.message, { a.vm.load() })
@@ -403,7 +408,7 @@ private fun PostsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
                 }
             }
         }
-        if (!feed.membersSeeReactions && !feed.isAdmin) Text(stringResource(R.string.feed_receipts_own_only), style = Kin.type.caption, color = c.inkFaint)
+        if (!feed.membersSeeReactions && !feed.isAdmin && a.social == null) Text(stringResource(R.string.feed_receipts_own_only), style = Kin.type.caption, color = c.inkFaint)
     }
 }
 
@@ -443,6 +448,7 @@ private fun PostCard(feed: Feed, post: FeedPost, a: FeedActions) {
             receiptExtras(r)?.let { Text(it, style = Kin.type.caption, color = c.inkFaint) }
         }
         post.reactions?.takeIf { it.isNotEmpty() }?.let { ReactionChips(it) }
+        a.social?.postFooter?.invoke(post)
     }
 }
 
@@ -505,7 +511,7 @@ private fun PostDialog(feed: Feed, post: FeedPost, state: FeedDetailState, a: Fe
                         }
                     }
                 }
-                if (post.receipts != null || FeedRules.canSeeReceipts(feed, post, a.me)) {
+                if (post.receipts != null || FeedRules.canSeeReceipts(feed, post, a.me, social = a.social != null)) {
                     SectionTitle(stringResource(R.string.feed_receipts_title))
                     when (val r = state.receipts) {
                         null, Load.Loading -> SkeletonList(1, 48.dp)
@@ -597,6 +603,7 @@ private fun PeopleTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
         }
         if (feed.canInvite) FeedInviteSection(feed, state, a)
         SectionTitle(stringResource(R.string.feed_you))
+        a.social?.you?.invoke()
         if (!feed.isOwner) QuietButton(stringResource(R.string.feed_leave), { leaving = true }, danger = true)
         else {
             Text(stringResource(R.string.feed_owner_hint), style = Kin.type.caption, color = c.inkSoft)
@@ -676,8 +683,13 @@ private fun FeedMemberDialog(feed: Feed, m: FeedMember, a: FeedActions, onDismis
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ToggleChip(stringResource(R.string.role_admin), role == FeedRole.ADMIN, { role = FeedRole.ADMIN })
                         ToggleChip(stringResource(R.string.feed_role_poster), role == FeedRole.POSTER, { role = FeedRole.POSTER })
+                        if (a.social != null) ToggleChip(stringResource(R.string.social_role_member), role == FeedRole.MEMBER, { role = FeedRole.MEMBER })
                     }
-                    Text(stringResource(if (role == FeedRole.ADMIN) R.string.feed_admin_hint else R.string.feed_poster_hint), style = Kin.type.caption, color = c.inkSoft)
+                    Text(stringResource(when (role) {
+                        FeedRole.ADMIN -> R.string.feed_admin_hint
+                        FeedRole.MEMBER -> R.string.social_role_member_hint
+                        else -> R.string.feed_poster_hint
+                    }), style = Kin.type.caption, color = c.inkSoft)
                     if (feed.isOwner) QuietButton(stringResource(R.string.people_make_owner), { transferring = true })
                     QuietButton(stringResource(R.string.people_remove), { removing = true }, danger = true)
                 }
@@ -909,7 +921,8 @@ private fun SettingsTab(feed: Feed, state: FeedDetailState, a: FeedActions) {
         SwitchRow(stringResource(R.string.feed_setting_invite_approval), feed.inviteRequiresApproval, { a.vm.setFlag("invite_requires_approval", it) },
             hint = stringResource(R.string.feed_setting_invite_approval_hint), enabled = !state.busy)
         SwitchRow(stringResource(R.string.feed_setting_see_reactions), feed.membersSeeReactions, { a.vm.setFlag("members_see_reactions", it) },
-            hint = stringResource(R.string.feed_setting_see_reactions_hint), enabled = !state.busy)
+            hint = stringResource(if (a.social != null) R.string.social_setting_see_reactions_hint else R.string.feed_setting_see_reactions_hint), enabled = !state.busy)
+        a.social?.settings?.invoke()
         SwitchRow(stringResource(R.string.feed_setting_posters_invite), feed.postersCanInvite, { a.vm.setFlag("posters_can_invite", it) },
             hint = stringResource(R.string.feed_setting_posters_invite_hint), enabled = !state.busy)
         if (a.birthdays != null) {

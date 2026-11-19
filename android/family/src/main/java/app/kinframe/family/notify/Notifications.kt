@@ -125,7 +125,7 @@ object Notifications {
                 ch(CHANNEL_PEOPLE, R.string.channel_people, R.string.channel_people_desc, NotificationManager.IMPORTANCE_DEFAULT),
                 ch(CHANNEL_FRAMES, R.string.channel_frames, R.string.channel_frames_desc, NotificationManager.IMPORTANCE_LOW),
                 ch(CHANNEL_SENDING, R.string.channel_sending, R.string.channel_sending_desc, NotificationManager.IMPORTANCE_LOW),
-            ),
+            ) + SocialNotifications.channels(context),
         )
     }
 
@@ -166,6 +166,11 @@ object Notifications {
 
     /** A push from the server: `{type, title, body, ids}` (README §6.3). */
     fun showPush(context: Context, msg: PushMessage) {
+        // Family social keys (README §6.3): tags, grouping per conversation, reminder buttons, reply.
+        if (SocialNotifications.handles(msg.kind)) {
+            val open = (context.applicationContext as? app.kinframe.family.FamilyApp)?.graph?.social?.openConversation
+            return SocialNotifications.show(context, msg, open)
+        }
         val channel = when (msg.kind) {
             "join_request", PUSH_SUBSCRIPTION_REQUEST, PUSH_FEED_JOIN_REQUEST, PUSH_FEED_MEMBERSHIP, PUSH_BIRTHDAY_SUGGESTION,
             PUSH_EMAIL_PENDING_SENDER, PUSH_EMAIL_PENDING_EXPIRING -> CHANNEL_PEOPLE
