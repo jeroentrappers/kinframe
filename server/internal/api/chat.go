@@ -223,7 +223,13 @@ func (s *Server) readOnly(ctx context.Context, userID uuid.UUID, c *store.Conver
 		if m.Deleted {
 			return true, nil
 		}
-		return s.st.HasBlocked(ctx, s.st.Q(), m.UserID, userID)
+		blocked, err := s.st.HasBlocked(ctx, s.st.Q(), m.UserID, userID)
+		if err != nil || blocked {
+			return blocked, err
+		}
+		// Leaving (README §5.21): two people who no longer share a family or frame can't message each other.
+		share, err := s.shareLiveScope(ctx, s.st.Q(), userID, m.UserID)
+		return !share, err
 	}
 	return true, nil // the other side left (account purged)
 }
@@ -290,6 +296,9 @@ func (s *Server) conversationsJSON(ctx context.Context, viewer *store.User, view
 			return nil, err
 		}
 		c.ReadOnly = ptr(ro)
+		if ro {
+			c.ReadOnlyReason = s.readOnlyReason(ctx, viewer.ID, &v.Conversation, ms) // leaving
+		}
 		receipts := receiptsShown(v.Kind, len(ms)) && viewer.ShowReadReceipts
 		c.ReadReceipts = ptr(receipts)
 		list := make([]gen.ConversationMember, len(ms))

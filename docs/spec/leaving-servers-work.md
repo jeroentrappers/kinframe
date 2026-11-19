@@ -53,7 +53,7 @@ it. The precedent is `family-social-work.md`; the same rules apply, restated her
 | Worker jobs | `RunJob` (`internal/api/feedjobs.go`) also tries `runLeavingJob`, `runFederationJob` | done; job kinds are `leaving.*`, `federation.*` |
 | Background loops | `internal/app/app.go` starts `RunLeaving`, `RunFederation` | done (they wait for shutdown until filled) |
 | Hand-written routes | `/federation/v1/subscriptions` (POST), `…/{subscriptionId}` (DELETE), `…/{subscriptionId}/changes` (GET), `…/{subscriptionId}/activity` (POST), `/federation/v1/ping` (POST): excluded in `gen/cfg.yaml`, mounted in `router.go` outside `/v1` (no user or device auth) | done; bodies in `federation_stubs.go` (`writeNotImplemented`) |
-| Account deletion choice | `DeleteMe` uses `accountDeletionTakesPhotos(req)` (`leaving_shared.go`): `photos`, else `remove_items`, else take | done; `leave` keeps photos in place until server-leaving builds the handover |
+| Account deletion choice | `DeleteMe` uses `accountDeletionTakesPhotos(req)` (`leaving_shared.go`): `photos`, else `remove_items`, else take | done; `leave` hands the photos over (server-leaving, `leaving_account.go`) |
 | Federation change log | triggers in 00037 on `feed_posts` (insert, `removed_at`), `feed_post_items` (`removed_at`), `feed_birthdays`, `comments` write `federation_changes` while a family has a live remote subscriber; circle posts never | done. Go code never writes post, item, birthday or comment rows of `federation_changes`; taking away and keep-request restores reach remote frames through them. |
 | Comment frame entries | `Comment.frame.server_name` added to the anonymous struct in `social.go` | done (field only) |
 | Test of the migrations | `internal/db/leaving_migrate_test.go` | done |
@@ -110,7 +110,8 @@ Stub file: `server/internal/api/leaving_stubs.go`. Own files: `internal/api/leav
   rendered per user, suggestions, the weekly summary), chats (`shareLiveScope`: `Conversation.read_only`,
   `read_only_reason: no_longer_contacts`, `sendMessage` → `403 cannot_message`), the change feed (taken-away =
   `placement.remove`, restored = `placement.upsert` with `backfill: true`).
-- **Tables (write)**: `takings`, `taking_items`, `keep_requests`, `keep_request_items`, `ownership_log`,
+- **Tables (write)**: `takings`, `taking_items`, `taking_deliveries` (00040: the family deliveries a taking cut, for
+  family-side restores), `keep_requests`, `keep_request_items`, `ownership_log`,
   `memory_hidden_people`, `memory_hidden_posts`; columns `placements.taken_away_at`, `taken_away_until`,
   `taken_away_by`, `taking_id` (and `removed_at` for takings and restores), `feed_posts.taking_id` (and
   `removed_at`/`removed_by` for takings), `feed_post_items.taking_id` (and `removed_at`), `items.former_sender_name`,

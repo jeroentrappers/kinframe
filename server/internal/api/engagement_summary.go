@@ -55,6 +55,7 @@ func (s *Server) GetOnThisDay(ctx context.Context, _ gen.GetOnThisDayRequestObje
 	if err != nil {
 		return nil, err
 	}
+	posts = s.filterMemoryPosts(ctx, u.ID, posts) // leaving: people and memories left out
 	type group struct {
 		year   int
 		feedID uuid.UUID
@@ -147,6 +148,9 @@ func (s *Server) computeWeeklySummary(ctx context.Context, userID uuid.UUID, mon
 				out.TopItem = &it
 			}
 		}
+	}
+	if err := s.filterWeeklySummary(ctx, userID, from, to, &out); err != nil { // leaving: people and memories left out
+		return nil, err
 	}
 	return &out, nil
 }
@@ -348,7 +352,7 @@ func (s *Server) GetFeedRecap(ctx context.Context, req gen.GetFeedRecapRequestOb
 	} else if err != nil {
 		return nil, err
 	}
-	return ok(b), nil
+	return ok(s.recapJSONForViewer(ctx, me(ctx).ID, req.FeedId, m, b)), nil // leaving: as rendered for the caller
 }
 
 // ---------------------------------------------------------------- personal milestones

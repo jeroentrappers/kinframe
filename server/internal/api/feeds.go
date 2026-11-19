@@ -510,11 +510,8 @@ func (s *Server) LeaveFeed(ctx context.Context, req gen.LeaveFeedRequestObject) 
 	if v.Role == "owner" {
 		return nil, problem.New(problem.OwnerCannotLeave, "")
 	}
-	removePosts := req.Body != nil && req.Body.RemoveMyPosts != nil && *req.Body.RemoveMyPosts
-	if err := s.removeFeedMember(ctx, req.FeedId, me(ctx).ID, removePosts); err != nil {
-		return nil, err
-	}
-	return noContent(), nil
+	// Leaving (README §5.21): keep or take the photos, comments, frames left with it (leaving.go).
+	return s.leaveFeed(ctx, v, req.Body)
 }
 
 // removeFeedMember ends a membership, optionally unsending the member's posts
